@@ -1,0 +1,62 @@
+/* ============================================================
+   TYPOGRAPHY — Scorekeeper
+   One cohesive family (IBM Plex) across three roles:
+   - Plex Sans Condensed → athletic stat/section headers (uppercase, tracked)
+   - Plex Sans           → UI + body
+   - Plex Mono           → numbers, the ledger/scorebook figures
+   ============================================================ */
+
+:root {
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --font-body:    "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Weights */
+  --w-regular: 400;
+  --w-medium:  500;
+  --w-semibold:600;
+  --w-bold:    700;
+
+  /* Type scale (px) — compact, second-screen mobile first */
+  --fs-display: 34px;   /* screen titles / big scores */
+  --fs-h1:      26px;
+  --fs-h2:      21px;
+  --fs-h3:      17px;
+  --fs-label:   13px;   /* condensed uppercase section labels */
+  --fs-body:    15px;
+  --fs-small:   13px;
+  --fs-caption: 11px;
+  --fs-num-xl:  40px;   /* revealed final score */
+  --fs-num-lg:  22px;
+  --fs-num-md:  16px;
+
+  /* Line heights */
+  --lh-tight:  1.05;
+  --lh-snug:   1.25;
+  --lh-body:   1.5;
+
+  /* Letter spacing */
+  --ls-label:  0.09em;   /* uppercase condensed labels */
+  --ls-caps:   0.05em;
+  --ls-num:    0.01em;
+
+  /* ---- Semantic text roles ---- */
+  --text-display-font: var(--font-display);
+  --text-num-font:     var(--font-mono);
+  --text-body-font:    var(--font-body);
+}
+
+/* Reusable type helpers */
+.t-label {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.t-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}

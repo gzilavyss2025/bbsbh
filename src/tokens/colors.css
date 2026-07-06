@@ -1,0 +1,67 @@
+/* ============================================================
+   COLORS — Scorekeeper (Baseball Scorebook Helper)
+   Palette rooted in a paper scorebook: warm manila paper,
+   navy ink, pencil graphite, infield clay, field green,
+   and a kraft-tape "sealed" amber used for spoiler covers.
+   ============================================================ */
+
+:root {
+  /* ---- Base neutrals: paper & ink ---- */
+  --paper-0:  #F6EFDC;   /* deepest manila — app canvas */
+  --paper-1:  #F3ECD8;   /* standard page */
+  --paper-2:  #FBF6E9;   /* raised card / cell fill */
+  --paper-3:  #FFFDF6;   /* brightest inset (revealed value) */
+
+  --ink-0:    #16222F;   /* darkest ink — headings */
+  --ink-1:    #1B2A3A;   /* primary ink — body text */
+  --ink-2:    #3C4A5A;   /* soft ink — secondary */
+  --graphite: #6B6558;   /* pencil — tertiary / captions */
+  --graphite-soft: #938C7C;
+  --rule:     #CBC1A7;   /* faded pencil grid rule */
+  --rule-soft:#DED6C0;   /* hairline rule */
+
+  /* ---- Brand accents ---- */
+  --field:    #2F6E4F;   /* outfield green — positive / on-base */
+  --field-deep:#255740;
+  --field-soft:#E3EDE2;
+  --clay:     #B4453A;   /* infield clay / seam red — outs, alerts */
+  --clay-deep:#8E332B;
+  --clay-soft:#F3E0DB;
+  --navy:     #1B2A3A;   /* ink doubles as brand primary */
+
+  /* ---- Sealed (spoiler cover) — kraft tape ---- */
+  --seal:      #B5824A;  /* kraft amber cover */
+  --seal-deep: #97673395;
+  --seal-hatch:#A9743C;  /* diagonal hatch line on covers */
+  --seal-ink:  #4A3418;  /* text/icon on a sealed cover */
+
+  /* ---- Highlight / marker ---- */
+  --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
+
+  /* ============================================================
+     SEMANTIC ALIASES
+     ============================================================ */
+  --bg-canvas:        var(--paper-0);
+  --bg-page:          var(--paper-1);
+  --surface-card:     var(--paper-2);
+  --surface-inset:    var(--paper-3);
+
+  --text-heading:     var(--ink-0);
+  --text-body:        var(--ink-1);
+  --text-muted:       var(--ink-2);
+  --text-caption:     var(--graphite);
+  --text-on-ink:      var(--paper-2);
+  --text-on-seal:     var(--seal-ink);
+
+  --border-rule:      var(--rule);
+  --border-hairline:  var(--rule-soft);
+
+  --accent-primary:   var(--navy);
+  --accent-positive:  var(--field);
+  --accent-negative:  var(--clay);
+
+  --seal-cover:       var(--seal);
+  --seal-cover-ink:   var(--seal-ink);
+
+  --focus-ring:       var(--field);
+}

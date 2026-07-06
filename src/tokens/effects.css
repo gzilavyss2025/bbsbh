@@ -1,0 +1,40 @@
+/* ============================================================
+   EFFECTS — Scorekeeper
+   Shadows read like paper on a desk. Cells look pressed into
+   the page. Sealed covers carry a kraft diagonal hatch.
+   ============================================================ */
+
+:root {
+  /* Elevation — soft, warm, low */
+  --shadow-card:   0 1px 2px rgba(22,34,47,0.08), 0 4px 12px rgba(22,34,47,0.06);
+  --shadow-raised: 0 2px 4px rgba(22,34,47,0.10), 0 8px 24px rgba(22,34,47,0.10);
+  --shadow-sticky: 0 -2px 10px rgba(22,34,47,0.08);
+
+  /* Pressed-into-paper inset (grid cells, revealed inset) */
+  --inset-cell: inset 0 1px 2px rgba(22,34,47,0.10);
+
+  /* Focus ring */
+  --ring: 0 0 0 3px rgba(47,110,79,0.35);
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:   120ms;
+  --dur-med:    220ms;
+  --dur-slow:   360ms;
+
+  /* Sealed cover — kraft tape look, reused via background */
+  --seal-texture: repeating-linear-gradient(
+      -45deg,
+      var(--seal) 0px, var(--seal) 6px,
+      var(--seal-hatch) 6px, var(--seal-hatch) 8px);
+}
+
+/* Faint scorebook grid-paper texture — apply to canvas backgrounds */
+.paper-grid {
+  background-color: var(--bg-page);
+  background-image:
+    linear-gradient(var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-soft) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

@@ -4,6 +4,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { PINNED_TEAM_ID } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
+import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 
 // Screen 1: pick a game. Today's MLB slate with the Brewers pinned to the top,
 // plus a search box that also queries MiLB by team name.
@@ -32,7 +33,10 @@ export function GameSelect({ onPick }) {
   return (
     <div className="screen">
       <header className="topbar">
-        <h1 className="topbar__title">Scorebook</h1>
+        <h1 className="topbar__title">
+          <DiamondGlyph size={22} bases={[false, true, false]} />
+          Scorebook
+        </h1>
         <div className="datenav">
           <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
             ‹

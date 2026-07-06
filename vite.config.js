@@ -14,8 +14,8 @@ export default defineConfig({
         short_name: 'Scorebook',
         description:
           'Spoiler-safe second-screen companion for scoring baseball games by hand.',
-        theme_color: '#0b1220',
-        background_color: '#0b1220',
+        theme_color: '#1B2A3A',
+        background_color: '#F6EFDC',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',

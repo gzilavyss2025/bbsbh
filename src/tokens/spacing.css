@@ -1,0 +1,40 @@
+/* ============================================================
+   SPACING & LAYOUT — Scorekeeper
+   4px base grid. The scorebook is a grid, so cells and gaps
+   snap to this scale.
+   ============================================================ */
+
+:root {
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii — boxy scorebook, small radii; capsules for pills */
+  --radius-xs:  3px;
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --radius-pill: 999px;
+
+  /* Cell sizing for the linescore grid */
+  --cell-size:  30px;   /* one inning box */
+  --cell-gap:   0px;    /* grid rules touch */
+
+  /* App frame */
+  --app-width:   390px;      /* iPhone-class second screen */
+  --app-gutter:  16px;
+  --tap-min:     44px;       /* min hit target */
+
+  /* Borders */
+  --bw-hair: 1px;
+  --bw-rule: 1.5px;
+  --bw-heavy: 2px;
+}

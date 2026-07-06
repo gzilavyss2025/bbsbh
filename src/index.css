@@ -1,20 +1,19 @@
-:root {
-  --bg: #0b1220;
-  --bg-elev: #121b2e;
-  --bg-elev2: #18233a;
-  --line: #24314d;
-  --text: #eaf0fb;
-  --text-dim: #9fb0cc;
-  --text-faint: #6b7c9c;
-  --accent: #4f8cff;
-  --accent-2: #6ee7b7;
-  --run: #ffb454;
-  --danger: #ff6b6b;
-  --radius: 14px;
-  --tap: 44px;
+/* ============================================================
+   Scorekeeper — Baseball Scorebook Helper
+   App styling built on the Scorekeeper Design System tokens.
+   Metaphor: paper on a desk. Warm manila canvas, cream cards,
+   navy ink, kraft-tape spoiler covers. All numbers are mono
+   tabular figures; structural labels are condensed uppercase.
+   ============================================================ */
+@import './tokens/fonts.css';
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/effects.css';
 
-  color-scheme: dark;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+:root {
+  color-scheme: light;
+  font-family: var(--font-body);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -30,9 +29,20 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  color: var(--text-body);
   overscroll-behavior-y: none;
+  /* Faint 24px scorebook rule + a soft warm highlight up top over manila. */
+  background-color: var(--bg-canvas);
+  background-image:
+    radial-gradient(
+      120% 60% at 50% -10%,
+      rgba(255, 253, 246, 0.7),
+      transparent 60%
+    ),
+    linear-gradient(var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-soft) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px, 24px 24px;
+  background-attachment: fixed, scroll, scroll;
 }
 
 .app {
@@ -40,9 +50,20 @@ body {
 }
 
 .screen {
-  max-width: 560px;
+  max-width: 440px;
   margin: 0 auto;
-  padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+  padding: 0 var(--app-gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+/* Shared mono-figure helper (scores, jerseys, counts). */
+.stat__v,
+.datenav__label,
+.lineup__jersey,
+.roster__jersey,
+.inningnav__chip {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
 }
 
 /* ---------------------------------------------------------------- top bar */
@@ -53,16 +74,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   padding: calc(12px + env(safe-area-inset-top)) 0 12px;
-  background: linear-gradient(var(--bg) 70%, transparent);
+  background: linear-gradient(
+    var(--bg-canvas) 62%,
+    color-mix(in srgb, var(--bg-canvas) 55%, transparent)
+  );
 }
 
 .topbar__title {
-  font-size: 20px;
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: var(--w-bold);
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-heading);
 }
 
 .topbar--game {
@@ -72,10 +102,11 @@ body {
 .topbar__back {
   background: none;
   border: none;
-  color: var(--accent);
+  color: var(--field);
   font-size: 15px;
+  font-weight: var(--w-semibold);
   padding: 8px 2px;
-  min-height: var(--tap);
+  min-height: var(--tap-min);
   cursor: pointer;
   flex: 0 0 auto;
 }
@@ -83,9 +114,12 @@ body {
 .topbar__match {
   flex: 1 1 auto;
   text-align: center;
+  font-family: var(--font-display);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-dim);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -102,66 +136,83 @@ body {
 }
 
 .datenav button {
-  min-width: var(--tap);
-  min-height: var(--tap);
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text);
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.datenav button:active {
+  transform: scale(0.94);
 }
 
 .datenav__label {
   min-width: 92px;
   text-align: center;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
 
 /* ---------------------------------------------------------------- search */
 .searchbar {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin-bottom: 14px;
 }
 
 .searchbar input {
   flex: 1;
-  min-height: var(--tap);
+  min-height: var(--tap-min);
   padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text);
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
   font-size: 16px; /* keeps iOS from zooming on focus */
+  box-shadow: var(--inset-cell);
 }
 
 .searchbar input::placeholder {
-  color: var(--text-faint);
+  color: var(--text-caption);
+}
+
+.searchbar input:focus-visible {
+  outline: none;
+  border-color: var(--field);
+  box-shadow: var(--ring);
 }
 
 .searchbar__clear {
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text-dim);
-  border-radius: 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  border-radius: var(--radius-md);
   padding: 0 14px;
-  min-height: var(--tap);
+  min-height: var(--tap-min);
   cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
 }
 
 /* ---------------------------------------------------------------- hints */
 .hint {
-  color: var(--text-dim);
+  color: var(--text-muted);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: var(--lh-body);
   padding: 12px 2px;
 }
 
 .hint--error {
-  color: var(--danger);
+  color: var(--clay);
 }
 
 /* ---------------------------------------------------------------- cards */
@@ -179,35 +230,42 @@ body {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 14px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text);
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
   cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.gamecard:active {
+  transform: translateY(1px);
 }
 
 .gamecard--pinned {
-  border-color: color-mix(in srgb, var(--run) 55%, var(--line));
+  border-color: color-mix(in srgb, var(--field) 45%, var(--border-rule));
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--run) 8%, var(--bg-elev)),
-    var(--bg-elev)
+    var(--field-soft),
+    var(--surface-card) 70%
   );
 }
 
 .gamecard__teams {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
 
 .gamecard__at {
-  color: var(--text-faint);
-  font-weight: 500;
+  color: var(--text-caption);
+  font-weight: var(--w-medium);
 }
 
 .gamecard__meta {
@@ -215,58 +273,76 @@ body {
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-caption);
 }
 
 .gamecard__level {
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: var(--bg-elev2);
-  border: 1px solid var(--line);
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .gamecard__pin {
-  color: var(--run);
+  color: var(--field);
 }
 
 .gamecard__status {
   margin-left: auto;
-  color: var(--text-faint);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
 
 /* ---------------------------------------------------------------- buttons */
 .btn {
-  min-height: var(--tap);
+  min-height: var(--tap-min);
   padding: 0 18px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text);
+  border-radius: var(--radius-sm);
+  border: var(--bw-rule) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: var(--w-semibold);
   cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 .btn--next {
   width: 100%;
   margin-top: 20px;
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #06122b;
-  font-weight: 800;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
 }
 
 .btn--ghost {
   background: transparent;
+  border-color: transparent;
 }
 
 .btn--danger {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: #2a0808;
-  font-weight: 800;
+  background: var(--clay);
+  border-color: var(--clay-deep);
+  color: #fff4f1;
+  font-weight: var(--w-bold);
 }
 
 /* ---------------------------------------------------------------- team info */
@@ -274,21 +350,26 @@ body {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: var(--space-3);
   margin: 4px 0 16px;
 }
 
 .teaminfo__name {
-  font-size: 22px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
+  color: var(--text-heading);
 }
 
 .teaminfo__side {
+  font-family: var(--font-display);
   font-size: 12px;
+  font-weight: var(--w-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-faint);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 .factgrid {
@@ -296,40 +377,44 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .fact {
-  background: var(--bg-elev);
+  background: var(--surface-card);
   padding: 10px 12px;
   margin: 0;
 }
 
 .fact__label {
+  font-family: var(--font-display);
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-faint);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 .fact__value {
   margin: 3px 0 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
 
 .fact__na {
-  color: var(--text-faint);
+  color: var(--graphite-soft);
 }
 
 .section__title {
-  font-size: 13px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-dim);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
   margin: 18px 0 8px;
 }
 
@@ -343,23 +428,28 @@ body {
 }
 
 .umps__list li {
-  background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  box-shadow: var(--shadow-card);
 }
 
 .umps__role {
+  font-family: var(--font-display);
   font-size: 11px;
-  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 .umps__name {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
 
 /* ---------------------------------------------------------------- lineup */
@@ -367,9 +457,11 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 
 .lineup__row,
@@ -377,10 +469,10 @@ body {
   display: grid;
   grid-template-columns: 24px 44px 1fr auto;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   padding: 10px 12px;
-  background: var(--bg-elev);
-  border-top: 1px solid var(--line);
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-size: 14px;
 }
 
@@ -390,20 +482,21 @@ body {
 
 .lineup__order,
 .roster__order {
-  color: var(--text-faint);
-  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-caption);
+  font-weight: var(--w-bold);
   text-align: center;
 }
 
 .lineup__jersey,
 .roster__jersey {
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
 }
 
 .lineup__name,
 .roster__name {
-  font-weight: 600;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -411,9 +504,12 @@ body {
 
 .lineup__pos,
 .roster__pos {
-  color: var(--accent-2);
+  font-family: var(--font-display);
+  color: var(--field);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
 }
 
 /* ---------------------------------------------------------------- innings */
@@ -421,34 +517,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 4px 0 10px;
 }
 
 .inningnav button {
-  min-height: var(--tap);
+  min-height: var(--tap-min);
   padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--w-semibold);
   cursor: pointer;
+  box-shadow: var(--shadow-card);
 }
 
 .inningnav button:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
+  box-shadow: none;
 }
 
 .inningnav__label {
+  font-family: var(--font-display);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
 }
 
 .inningnav__of {
-  color: var(--text-faint);
-  font-weight: 500;
+  color: var(--text-caption);
+  font-weight: var(--w-medium);
 }
 
 .inningnav__strip {
@@ -463,18 +566,20 @@ body {
   flex: 0 0 auto;
   min-width: 38px;
   min-height: 38px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  color: var(--text-dim);
-  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-weight: var(--w-bold);
   cursor: pointer;
+  box-shadow: var(--inset-cell);
 }
 
 .inningnav__chip.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #06122b;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
 }
 
 .inning {
@@ -484,82 +589,89 @@ body {
 }
 
 .half {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--bg-elev);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 
 .half__title {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   padding: 10px 14px;
+  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 700;
-  border-bottom: 1px solid var(--line);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .half__team {
+  font-family: var(--font-display);
   font-size: 11px;
-  font-weight: 500;
-  color: var(--text-faint);
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--ls-caps);
 }
 
 /* ---------------------------------------------------------------- sealbox */
+/* The signature spoiler cover: kraft tape hatch over the inning totals. */
 .sealbox.cover {
   width: 100%;
-  min-height: 116px;
+  min-height: 132px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 6px;
   border: none;
   cursor: pointer;
-  color: var(--text-dim);
-  background: repeating-linear-gradient(
-    -45deg,
-    #17223a,
-    #17223a 10px,
-    #141d31 10px,
-    #141d31 20px
-  );
+  color: var(--seal-ink);
+  background: var(--seal-texture);
 }
 
 .cover__lock {
-  font-size: 22px;
-  filter: grayscale(0.2);
+  font-size: 24px;
+  line-height: 1;
 }
 
 .cover__main {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: 0.01em;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  color: var(--seal-ink);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .cover__sub {
+  font-family: var(--font-body);
   font-size: 11.5px;
-  color: var(--text-faint);
+  font-weight: var(--w-medium);
+  color: var(--seal-ink);
+  opacity: 0.82;
 }
 
 .statgrid {
-  padding: 12px 14px 14px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  animation: reveal 180ms ease-out;
+  background: var(--surface-inset);
+  animation: reveal var(--dur-slow) var(--ease-out);
 }
 
 @keyframes reveal {
   from {
     opacity: 0;
-    transform: translateY(3px);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
@@ -570,30 +682,35 @@ body {
 .rhe {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .pitchgrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
   padding-top: 10px;
-  border-top: 1px dashed var(--line);
+  border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   text-align: center;
+  padding: 8px 4px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
 }
 
 .stat__v {
   font-size: 20px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
   line-height: 1;
+  color: var(--text-heading);
 }
 
 .stat--big .stat__v {
@@ -601,14 +718,15 @@ body {
 }
 
 .stat--run .stat__v {
-  color: var(--run);
+  color: var(--field-deep);
 }
 
 .stat__k {
+  font-family: var(--font-display);
   font-size: 10.5px;
-  color: var(--text-faint);
+  color: var(--text-caption);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--ls-caps);
 }
 
 .stat--small .stat__k {
@@ -624,9 +742,11 @@ body {
 /* ---------------------------------------------------------------- roster */
 .roster {
   margin-top: 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 
 .roster__toggle {
@@ -635,55 +755,60 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  background: var(--bg-elev);
+  background: var(--surface-card);
   border: none;
-  color: var(--text);
+  color: var(--text-heading);
+  font-family: var(--font-display);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
   cursor: pointer;
 }
 
 .roster__chevron {
-  color: var(--text-faint);
+  color: var(--text-caption);
 }
 
 .roster__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--line);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 /* ---------------------------------------------------------------- reveal all */
 .revealscore {
-  border: 1px solid color-mix(in srgb, var(--run) 60%, var(--line));
-  background: color-mix(in srgb, var(--run) 14%, var(--bg-elev));
-  color: var(--run);
-  border-radius: 999px;
-  padding: 8px 12px;
+  border: var(--bw-rule) solid var(--clay);
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
   min-height: 36px;
-  font-size: 12.5px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .revealscore--done {
-  color: var(--text-faint);
-  border-color: var(--line);
-  background: var(--bg-elev);
+  color: var(--text-caption);
+  border-color: var(--border-rule);
+  background: var(--surface-card);
 }
 
 .scrim {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(4, 8, 16, 0.66);
-  backdrop-filter: blur(2px);
+  background: rgba(22, 34, 47, 0.44);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: fade 150ms ease-out;
+  animation: fade var(--dur-med) var(--ease-out);
 }
 
 @keyframes fade {
@@ -697,13 +822,14 @@ body {
 
 .sheet {
   width: 100%;
-  max-width: 560px;
-  background: var(--bg-elev2);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border: 1px solid var(--line);
+  max-width: 440px;
+  background: var(--surface-card);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  border: var(--bw-hair) solid var(--border-rule);
+  box-shadow: var(--shadow-raised);
   padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
-  animation: slideup 200ms ease-out;
+  animation: slideup var(--dur-slow) var(--ease-out);
 }
 
 @keyframes slideup {
@@ -717,15 +843,19 @@ body {
 
 .sheet__title {
   margin: 0 0 8px;
-  font-size: 18px;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-heading);
 }
 
 .sheet__body {
   margin: 0 0 18px;
   font-size: 14px;
   line-height: 1.55;
-  color: var(--text-dim);
+  color: var(--text-muted);
 }
 
 .sheet__actions {
@@ -735,4 +865,18 @@ body {
 
 .sheet__actions .btn {
   flex: 1;
+}
+
+/* ---------------------------------------------------------------- motion */
+/* Reveal is the one expressive transition; honor reduced-motion by
+   cross-fading instead of sliding (per the design system). */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .statgrid {
+    animation: fade var(--dur-med) var(--ease-out);
+  }
 }
