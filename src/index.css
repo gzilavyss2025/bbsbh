@@ -174,6 +174,19 @@ body {
   color: var(--text-body);
 }
 
+/* The slate's date stepper sits on its own full-width row under the topbar so
+   it never crowds the title/Logos button on a narrow phone. */
+.datenav--row {
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.datenav--row .datenav__label {
+  flex: 1 1 auto;
+  max-width: 220px;
+}
+
 /* ---------------------------------------------------------------- search */
 .searchbar {
   display: flex;
@@ -267,12 +280,38 @@ body {
   );
 }
 
-.gamecard__teams {
+.gamecard__logos {
   display: flex;
   align-items: center;
+  gap: var(--space-3);
+}
+
+.gamecard__names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
-  font-size: 16px;
+}
+
+.gamecard__team {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.gamecard__loc {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.gamecard__mascot {
+  font-size: 17px;
   font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--text-heading);
 }
 
@@ -282,6 +321,12 @@ body {
   object-fit: contain;
   /* A small radius keeps club marks tidy against the cream card. */
   border-radius: var(--radius-xs);
+}
+
+/* Grayscale marks on the slate cards — pencil-sketch friendly, and it keeps a
+   busy row of club colors from competing with the seal amber. */
+.teamlogo--bw {
+  filter: grayscale(1) contrast(1.03);
 }
 
 .teamlogo--fallback {

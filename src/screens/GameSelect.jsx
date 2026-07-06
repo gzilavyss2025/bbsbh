@@ -45,17 +45,18 @@ export function GameSelect({ onPick, onShowLogos }) {
           >
             Logos
           </button>
-          <div className="datenav">
-            <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
-              ‹
-            </button>
-            <span className="datenav__label">{humanDate(dateStr)}</span>
-            <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
-              ›
-            </button>
-          </div>
         </div>
       </header>
+
+      <div className="datenav datenav--row">
+        <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
+          ‹
+        </button>
+        <span className="datenav__label">{humanDate(dateStr)}</span>
+        <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
+          ›
+        </button>
+      </div>
 
       <form
         className="searchbar"
