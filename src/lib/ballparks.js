@@ -5,12 +5,12 @@
 // scorekeeper's "out to CF" / "in from LF". There is no field to read, so this
 // is the one piece of static data the weather generator needs.
 //
-// A wrong direction gets copied onto paper as fact, so we only seed parks whose
-// orientation is well established in public sources, and we degrade gracefully:
-// any park not listed falls back to a plain compass bearing (see weather.js),
-// which is honest rather than guessed. Extend PARK_CF_BEARING with a verified
-// home-plate→center-field bearing (degrees clockwise from true north) to upgrade
-// a park from compass to field-relative.
+// A wrong direction gets copied onto paper as fact, so every bearing below comes
+// from published orientation data, not guesswork, and anything not listed (MiLB
+// parks, a newly renamed venue) degrades gracefully to a plain compass bearing
+// (see weather.js) rather than a fabricated field-relative call. All 30 current
+// MLB parks are covered; extend PARK_CF_BEARING_BY_NAME with a verified
+// home-plate→center-field bearing (degrees clockwise from true north) to add one.
 
 // Normalize a venue name to a stable lookup key: lowercase, strip accents and
 // any non-alphanumerics. So "Oriole Park at Camden Yards" → "orioleparkatcamdenyards".
@@ -23,20 +23,55 @@ function normalizeVenue(name) {
 }
 
 // Home-plate→center-field bearing (degrees, clockwise from true north = the
-// direction the batter faces). Cardinal-level values corroborated across
-// baseball-almanac / Hardball Times / Clem's Baseball orientation write-ups;
-// the wind classifier buckets at 45°, so cardinal precision is sufficient.
-// Keyed by normalized venue name (stable across sponsor renames of the club,
-// though not of the park itself — re-verify a key if a park is renamed).
+// direction the batter faces, which is exactly "which way center field points").
+// Covers all 30 current MLB parks. Values are compiled from published
+// orientation data — most numerically from The Shadium's per-park shade guides
+// (which state "center field points toward N°"), the rest converted from the
+// documented compass orientation (baseball-almanac / Hardball Times / Clem's
+// Baseball / shade guides). The wind classifier buckets at 45°, so these are
+// plenty precise; treat them as approximate to a compass point, not survey-grade.
 //
-// Deliberately small and conservative: only parks with a well-documented
-// orientation are listed. Everything else uses the compass fallback.
+// Keyed by normalized venue name (see normalizeVenue), which the live feed always
+// provides. Parks with more than one recent name carry a key for each. A fixed
+// dome (Tropicana Field) is intentionally absent: its roof never opens, so the
+// generator reports "Roof closed" and never prints a wind direction — no bearing
+// needed. Any park not listed still degrades gracefully to a plain compass wind.
+//
+// Tag key: [N] value stated in degrees by the source; [C] converted from a
+// documented compass direction; [~] best-effort where sources conflicted;
+// [roof] retractable/openable (bearing applies when the roof is open).
 const PARK_CF_BEARING_BY_NAME = {
-  wrigleyfield: 45, // NE — sun toward CF at first pitch, "further north than the rule"
-  fenwaypark: 45, // NE
-  orioleparkatcamdenyards: 45, // NE
-  dodgerstadium: 22, // NNE
-  yankeestadium: 67, // ENE — the most Rule-1.04-compliant park
+  angelstadium: 65, // ENE [N]
+  americanfamilyfield: 337, // NNW [C, roof]
+  buschstadium: 80, // ENE–E [C]
+  chasefield: 0, // N [C, roof]
+  citifield: 22, // NNE [C]
+  citizensbankpark: 0, // N [C]
+  comericapark: 150, // SSE — MLB's most southward park [C, ~]
+  coorsfield: 40, // NNE [N]
+  daikinpark: 20, // NNE [N, roof] — formerly Minute Maid Park
+  minutemaidpark: 20, // NNE [N, roof] — legacy name for Daikin Park
+  dodgerstadium: 22, // NNE [C]
+  fenwaypark: 45, // NE [C]
+  globelifefield: 67, // ENE [C, roof]
+  greatamericanballpark: 135, // SE, toward the Ohio River [C]
+  guaranteedratefield: 120, // ESE [N] — legacy name for Rate Field
+  ratefield: 120, // ESE [N]
+  kauffmanstadium: 45, // NE [C]
+  loandepotpark: 135, // SE [C, ~, roof]
+  nationalspark: 87, // E [N]
+  oraclepark: 87, // E [N]
+  orioleparkatcamdenyards: 45, // NE [C]
+  petcopark: 0, // N — batter faces due north [C]
+  pncpark: 25, // NNE [N]
+  progressivefield: 60, // NE [N]
+  rogerscentre: 15, // NNE [N, roof]
+  sutterhealthpark: 330, // NNW [N] — Athletics' Sacramento home
+  targetfield: 90, // E [C]
+  tmobilepark: 318, // NNW [N, roof]
+  truistpark: 45, // NE [N]
+  wrigleyfield: 45, // NE [C]
+  yankeestadium: 67, // ENE — the most Rule-1.04-compliant park [C]
 }
 
 // The park's CF bearing if we have a verified value, else null (→ compass
