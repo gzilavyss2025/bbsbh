@@ -122,9 +122,11 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
         </section>
       )}
 
-      <button className="btn btn--next" onClick={onNext}>
-        {nextLabel}
-      </button>
+      <div className="pagenav">
+        <button className="btn btn--next" onClick={onNext}>
+          {nextLabel}
+        </button>
+      </div>
     </div>
   )
 }

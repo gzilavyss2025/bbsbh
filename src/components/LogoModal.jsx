@@ -28,7 +28,6 @@ export function LogoModal({ teamId, name, onClose }) {
         </button>
         <TeamLogo teamId={teamId} name={name} size={240} bw className="logomodal__art" />
         <span className="logomodal__name">{name}</span>
-        <span className="logomodal__hint">Grayscale reference for sketching · tap to close</span>
       </div>
     </div>
   )

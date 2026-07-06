@@ -447,6 +447,11 @@ body {
 }
 
 /* ---------------------------------------------------------------- team info */
+/* Room at the bottom so the last section clears the fixed .pagenav bar. */
+.teaminfo {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
 .teaminfo__head {
   display: flex;
   align-items: center;
@@ -1277,13 +1282,6 @@ body {
   text-align: center;
 }
 
-.logomodal__hint {
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-}
-
 .logomodal__close {
   position: absolute;
   top: 8px;
@@ -1386,10 +1384,17 @@ body {
 }
 
 /* -------------------------------------------------------------- pitcher lines
-   Final lines for pitchers already out of the game, revealed by paging past
-   their outing (not by a seal — see api/pitchers.js). Wide, so it scrolls. */
+   Running lines for every pitcher who has appeared in innings already paged
+   past, both teams in one table (gated in api/pitchers.js — not sealed). Sized
+   to fit a phone with NO horizontal scroll: the Pitcher column absorbs the
+   slack and wraps; the numeric columns stay tight. */
 .pitchers {
   margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 4px;
 }
 
 .pitchers__title {
@@ -1401,59 +1406,97 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
 }
-.pitchers__sub {
-  font-weight: var(--w-medium);
-  color: var(--text-caption);
-}
-
-.pitchers__scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
 
 .pitchers__grid {
   border-collapse: collapse;
   width: 100%;
+  table-layout: fixed;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 .pitchers__grid th,
 .pitchers__grid td {
-  padding: 7px 8px;
+  padding: 6px 1px;
   text-align: center;
-  font-size: 12px;
+  font-size: 11.5px;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .pitchers__grid thead th {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: var(--w-semibold);
   text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
+  letter-spacing: 0.02em;
   color: var(--text-caption);
 }
 
-.pitchers__grid tbody tr:last-child th,
 .pitchers__grid tbody tr:last-child td {
   border-bottom: none;
 }
 
-.pitchers__name {
+/* Name column takes a fixed share and wraps rather than scrolling; the nine
+   numeric columns split the remainder evenly under table-layout: fixed. */
+.pitchers__pitcher {
+  width: 34%;
   text-align: left !important;
+  padding-left: 0 !important;
+  padding-right: 6px !important;
   font-family: var(--font-body);
-}
-.pitchers__lname {
   font-weight: var(--w-semibold);
   color: var(--text-heading);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* Team divider row inside the table. */
+.pitchers__teamrow th {
+  text-align: left;
+  padding: 10px 0 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.pitchers__grid tbody tr.pitchers__teamrow:first-child th {
+  padding-top: 0;
 }
 
 .pitchers__num {
+  font-family: var(--font-mono);
   font-weight: var(--w-bold);
   color: var(--accent-negative);
+}
+
+/* ------------------------------------------------------------- floating nav
+   Site-wide: the primary "advance" button rides a fixed bar pinned to the
+   bottom of the viewport so it's always in reach without scrolling. The bar
+   itself is click-through (a soft fade over the paper); only the button takes
+   taps. Screens that use it pad their bottom so nothing hides underneath. */
+.pagenav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding: 14px var(--app-gutter) calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    var(--bg-canvas) 55%,
+    color-mix(in srgb, var(--bg-canvas) 0%, transparent)
+  );
+  pointer-events: none;
+}
+
+.pagenav .btn {
+  pointer-events: auto;
+  width: 100%;
+  max-width: calc(440px - 2 * var(--app-gutter));
+  margin: 0;
+  box-shadow: var(--shadow-raised);
 }

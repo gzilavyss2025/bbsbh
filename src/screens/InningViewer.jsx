@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react'
 import {
   selectInningCount,
   selectBullpen,
@@ -154,8 +154,12 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
         />
       </div>
 
-      <PitcherTable title={rosters.away.name} rows={awayOut} />
-      <PitcherTable title={rosters.home.name} rows={homeOut} />
+      <PitchersSection
+        teams={[
+          { name: rosters.away.name, rows: awayOut },
+          { name: rosters.home.name, rows: homeOut },
+        ]}
+      />
 
       <RosterPanel title={rosters.away.name} roster={rosters.away} />
       <RosterPanel title={rosters.home.name} roster={rosters.home} />
@@ -295,57 +299,64 @@ function RollingLine({
   )
 }
 
-// Box lines for pitchers who have left the game, shown once you've paged past
-// their outing (gated in api/pitchers.js). Deliberately not sealed — see the
-// spoiler note there. Scrolls horizontally on a phone; the jersey number is
-// inked in clay red like a scorebook.
-function PitcherTable({ title, rows }) {
-  if (rows.length === 0) return null
+// Running pitching lines for every pitcher who has appeared in innings the user
+// has already paged past — both teams, in one table. A pitcher's line is his
+// cumulative total, and the gate (his last inning < the inning being viewed,
+// plus withholding whoever is still on the mound) keeps the current inning
+// unspoiled; see api/pitchers.js. Deliberately not sealed. Sized to fit a phone
+// with no horizontal scroll: the name column wraps, the stat columns stay tight,
+// and the jersey number is inked in clay red inline after the name.
+function PitchersSection({ teams }) {
+  const shown = teams.filter((t) => t.rows.length > 0)
+  if (shown.length === 0) return null
   return (
     <section className="pitchers">
-      <h3 className="pitchers__title">
-        {title} <span className="pitchers__sub">out of the game</span>
-      </h3>
-      <div className="pitchers__scroll">
-        <table className="pitchers__grid">
-          <thead>
-            <tr>
-              <th className="pitchers__name">Last</th>
-              <th className="pitchers__name">First</th>
-              <th>#</th>
-              <th>R/L</th>
-              <th>IP</th>
-              <th>P</th>
-              <th>BF</th>
-              <th>H</th>
-              <th>R</th>
-              <th>ER</th>
-              <th>BB</th>
-              <th>K</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((p) => (
-              <tr key={p.id}>
-                <td className="pitchers__name pitchers__lname">
-                  {p.last.toUpperCase()}
-                </td>
-                <td className="pitchers__name">{p.first}</td>
-                <td className="pitchers__num">{p.jersey || '—'}</td>
-                <td>{p.hand || '—'}</td>
-                <td>{p.ip}</td>
-                <td>{p.pitches}</td>
-                <td>{p.bf}</td>
-                <td>{p.h}</td>
-                <td>{p.r}</td>
-                <td>{p.er}</td>
-                <td>{p.bb}</td>
-                <td>{p.k}</td>
+      <h3 className="pitchers__title">Pitchers</h3>
+      <table className="pitchers__grid">
+        <thead>
+          <tr>
+            <th className="pitchers__pitcher">Pitcher</th>
+            <th>R/L</th>
+            <th>IP</th>
+            <th>P</th>
+            <th>BF</th>
+            <th>H</th>
+            <th>R</th>
+            <th>ER</th>
+            <th>BB</th>
+            <th>K</th>
+          </tr>
+        </thead>
+        <tbody>
+          {shown.map((t) => (
+            <Fragment key={t.name}>
+              <tr className="pitchers__teamrow">
+                <th colSpan={10}>{t.name}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              {t.rows.map((p) => (
+                <tr key={p.id}>
+                  <td className="pitchers__pitcher">
+                    {p.last.toUpperCase()}
+                    {p.first ? `, ${p.first}` : ''}
+                    {p.jersey ? (
+                      <span className="pitchers__num"> {p.jersey}</span>
+                    ) : null}
+                  </td>
+                  <td>{p.hand || '—'}</td>
+                  <td>{p.ip}</td>
+                  <td>{p.pitches}</td>
+                  <td>{p.bf}</td>
+                  <td>{p.h}</td>
+                  <td>{p.r}</td>
+                  <td>{p.er}</td>
+                  <td>{p.bb}</td>
+                  <td>{p.k}</td>
+                </tr>
+              ))}
+            </Fragment>
+          ))}
+        </tbody>
+      </table>
     </section>
   )
 }
