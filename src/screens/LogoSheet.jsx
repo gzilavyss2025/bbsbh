@@ -1,122 +1,102 @@
-import { useMemo } from 'react'
-import { fetchSchedule } from '../api/mlb.js'
+import { useState } from 'react'
+import { fetchTeams } from '../api/mlb.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import {
-  SEARCHABLE_SPORT_IDS,
-  SPORT_LABEL,
-  PINNED_TEAM_ID,
-} from '../lib/teams.js'
+import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { LogoModal } from '../components/LogoModal.jsx'
 
-// A printable reference sheet of the day's team logos, rendered in grayscale on
-// a light "paper" surface — built for tracing / hand-sketching in pencil, not
-// for scoring. It carries no scores, so it's spoiler-safe like the rest of the
-// app. Pulls every team playing that day across MLB + MiLB and de-dupes them.
-export function LogoSheet({ offset, onOffset, onBack }) {
-  const dateStr = useMemo(
-    () => toApiDate(addDays(new Date(), offset)),
-    [offset],
-  )
+// Level toggle order, same as the game selector.
+const LEVELS = [
+  { label: 'MLB', sportId: SPORT_IDS.MLB },
+  { label: 'AAA', sportId: SPORT_IDS.AAA },
+  { label: 'AA', sportId: SPORT_IDS.AA },
+  { label: 'A+', sportId: SPORT_IDS['A+'] },
+  { label: 'A', sportId: SPORT_IDS.A },
+]
 
-  const slate = useAsync(() => fetchTeamsForDate(dateStr), [dateStr])
-  const teams = slate.data ?? []
+// A browsable reference sheet of every club's logo at a level, independent of
+// any day's schedule. Tapping a tile opens the same sketch modal used
+// elsewhere in the app, with its 3-way variant picker. Carries no scores, so
+// it's spoiler-safe like the rest of the app.
+export function LogoSheet({ onBack }) {
+  const [sportId, setSportId] = useState(SPORT_IDS.MLB)
+  const [sketching, setSketching] = useState(null) // { id, name } | null
+
+  const teamsState = useAsync(() => fetchTeams(sportId), [sportId])
+  const teams = sortTeams(teamsState.data ?? [])
 
   return (
-    <div className="screen logosheet">
-      <header className="topbar logosheet__bar">
+    <div className="screen">
+      <header className="topbar">
         <button className="topbar__back" onClick={onBack}>
           ‹ Games
         </button>
         <h1 className="topbar__title">Logo sheet</h1>
-        <button
-          className="btn btn--ghost logosheet__print"
-          onClick={() => window.print()}
-        >
-          Print
-        </button>
       </header>
 
-      <div className="datenav logosheet__datenav">
-        <button onClick={() => onOffset(offset - 1)} aria-label="Previous day">
-          ‹
-        </button>
-        <span className="datenav__label">{humanDate(dateStr)}</span>
-        <button onClick={() => onOffset(offset + 1)} aria-label="Next day">
-          ›
-        </button>
+      <div className="levelnav" role="tablist" aria-label="Level">
+        {LEVELS.map((lvl) => (
+          <button
+            key={lvl.sportId}
+            type="button"
+            role="tab"
+            aria-selected={sportId === lvl.sportId}
+            className={`levelnav__btn ${sportId === lvl.sportId ? 'is-active' : ''}`}
+            onClick={() => setSportId(lvl.sportId)}
+          >
+            {lvl.label}
+          </button>
+        ))}
       </div>
 
-      <p className="logosheet__hint">
-        Grayscale references for pencil sketching — every club playing today,
-        MLB and MiLB. Tap Print for a paper copy.
-      </p>
-
-      {slate.loading && <p className="hint">Loading logos…</p>}
-      {slate.error && (
+      {teamsState.loading && <p className="hint">Loading logos…</p>}
+      {teamsState.error && (
         <p className="hint hint--error">
           Couldn’t load teams. Check your connection and try again.
         </p>
       )}
-      {!slate.loading && !slate.error && teams.length === 0 && (
-        <p className="hint">No games scheduled.</p>
+      {!teamsState.loading && !teamsState.error && teams.length === 0 && (
+        <p className="hint">No teams found.</p>
       )}
 
       <ul className="logogrid">
         {teams.map((t) => (
           <li key={t.id} className="logotile">
-            <TeamLogo
-              teamId={t.id}
-              name={t.name}
-              size={96}
-              className="logotile__img"
-            />
+            <button
+              type="button"
+              className="logotile__btn"
+              onClick={() => setSketching(t)}
+              aria-label={`Enlarge ${t.name} logo for sketching`}
+            >
+              <TeamLogo
+                teamId={t.id}
+                name={t.name}
+                size={96}
+                className="logotile__img"
+              />
+            </button>
             <span className="logotile__name">{t.name}</span>
-            {t.sportLabel && t.sportLabel !== 'MLB' && (
-              <span className="logotile__level">{t.sportLabel}</span>
-            )}
           </li>
         ))}
       </ul>
+
+      {sketching && (
+        <LogoModal
+          teamId={sketching.id}
+          name={sketching.name}
+          onClose={() => setSketching(null)}
+        />
+      )}
     </div>
   )
 }
 
-// Every unique team playing on a date, across MLB + MiLB. Individual level
-// queries are allowed to fail (MiLB endpoints are flakier) without sinking the
-// sheet.
-async function fetchTeamsForDate(dateStr) {
-  const results = await Promise.allSettled(
-    SEARCHABLE_SPORT_IDS.map((sportId) => fetchSchedule(dateStr, sportId)),
-  )
-  const games = results.flatMap((r) =>
-    r.status === 'fulfilled' ? r.value : [],
-  )
-
-  const byId = new Map()
-  for (const g of games) {
-    for (const side of [g.away, g.home]) {
-      if (side?.id && !byId.has(side.id)) {
-        byId.set(side.id, { id: side.id, name: side.name, sportId: g.sportId })
-      }
-    }
-  }
-
-  const levelRank = SEARCHABLE_SPORT_IDS.reduce((acc, id, i) => {
-    acc[id] = i
-    return acc
-  }, {})
-
-  return [...byId.values()]
-    .map((t) => ({ ...t, sportLabel: SPORT_LABEL[t.sportId] ?? '' }))
-    .sort((a, b) => {
-      // Pinned club first, then by level (MLB → A), then by name.
-      const pa = a.id === PINNED_TEAM_ID ? 0 : 1
-      const pb = b.id === PINNED_TEAM_ID ? 0 : 1
-      if (pa !== pb) return pa - pb
-      const la = levelRank[a.sportId] ?? 99
-      const lb = levelRank[b.sportId] ?? 99
-      if (la !== lb) return la - lb
-      return (a.name ?? '').localeCompare(b.name ?? '')
-    })
+// Pinned club first, then alphabetical.
+function sortTeams(teams) {
+  return [...teams].sort((a, b) => {
+    const pa = a.id === PINNED_TEAM_ID ? 0 : 1
+    const pb = b.id === PINNED_TEAM_ID ? 0 : 1
+    if (pa !== pb) return pa - pb
+    return (a.name ?? '').localeCompare(b.name ?? '')
+  })
 }

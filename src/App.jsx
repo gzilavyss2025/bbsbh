@@ -20,7 +20,6 @@ export default function App() {
   // The game object from the slate, carried into the game route so a same-session
   // open needs no resolve fetch. Cold loads / shared links resolve from the URL.
   const [seedGame, setSeedGame] = useState(null)
-  const [logoOffset, setLogoOffset] = useState(0)
 
   useEffect(() => {
     const onPop = () => setRoute(parseRoute(window.location.pathname))
@@ -48,11 +47,7 @@ export default function App() {
   if (route.name === 'logos') {
     return (
       <div className="app">
-        <LogoSheet
-          offset={logoOffset}
-          onOffset={setLogoOffset}
-          onBack={() => go('/')}
-        />
+        <LogoSheet onBack={() => go('/')} />
       </div>
     )
   }

@@ -62,6 +62,18 @@ export async function fetchSchedule(dateStr, sportId = 1) {
   return games.map((g) => normalizeGame(g, sportId))
 }
 
+// Every active club at a level, independent of any date's schedule — used by
+// the logo sheet's level browser so it can show a league's full set of marks
+// rather than just the teams playing today.
+export async function fetchTeams(sportId) {
+  const data = await getJson(`/api/v1/teams?sportId=${sportId}&activeStatus=Y`)
+  const teams = data.teams ?? []
+  return teams
+    .filter((t) => t.active)
+    .map((t) => ({ id: t.id, name: t.name, sportId }))
+    .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
+}
+
 // Resolve a deep-link (date + away/home abbreviation slug) back to a game by
 // scanning that date's slate across every level. Used on cold loads / shared
 // links, where we don't already hold the game object from the slate.
