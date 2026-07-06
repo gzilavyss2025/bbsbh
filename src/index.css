@@ -1764,6 +1764,14 @@ body {
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
+/* The revealed box score fills the page directly — drop SealBox's inset panel
+   (its pale fill + padding) so the individual cards sit on the paper on their
+   own, each lifted by its own drop shadow rather than boxed inside a backdrop. */
+.boxscore .statgrid {
+  padding: 0;
+  background: none;
+}
+
 .boxscore__head {
   display: flex;
   align-items: center;
@@ -1963,6 +1971,7 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--paper-1);
+  box-shadow: var(--shadow-card);
 }
 .bs__decision {
   display: inline-flex;
@@ -1990,6 +1999,7 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 .bs__infoDate {
   margin: 0 0 8px;
