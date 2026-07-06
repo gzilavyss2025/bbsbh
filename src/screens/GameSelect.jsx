@@ -8,7 +8,7 @@ import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 
 // Screen 1: pick a game. Today's MLB slate with the Brewers pinned to the top,
 // plus a search box that also queries MiLB by team name.
-export function GameSelect({ onPick }) {
+export function GameSelect({ onPick, onShowLogos }) {
   const [offset, setOffset] = useState(0) // days from today
   const [query, setQuery] = useState('')
   const [submitted, setSubmitted] = useState('')
@@ -37,14 +37,23 @@ export function GameSelect({ onPick }) {
           <DiamondGlyph size={22} bases={[false, true, false]} />
           Scorebook
         </h1>
-        <div className="datenav">
-          <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
-            ‹
+        <div className="topbar__right">
+          <button
+            type="button"
+            className="btn btn--ghost topbar__logos"
+            onClick={onShowLogos}
+          >
+            Logos
           </button>
-          <span className="datenav__label">{humanDate(dateStr)}</span>
-          <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
-            ›
-          </button>
+          <div className="datenav">
+            <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
+              ‹
+            </button>
+            <span className="datenav__label">{humanDate(dateStr)}</span>
+            <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
+              ›
+            </button>
+          </div>
         </div>
       </header>
 

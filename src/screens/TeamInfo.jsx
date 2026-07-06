@@ -5,6 +5,7 @@ import {
   selectOfficials,
   selectGameInfo,
 } from '../api/select.js'
+import { TeamLogo } from '../components/TeamLogo.jsx'
 
 // Away/home info + lineup page. Nothing here is score-revealing — lineups,
 // umpires, venue and weather are all spoiler-safe — so it renders openly.
@@ -17,7 +18,10 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
   return (
     <div className="teaminfo">
       <div className="teaminfo__head">
-        <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
+        <div className="teaminfo__title">
+          <TeamLogo teamId={meta.id} name={meta.name} size={34} />
+          <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
+        </div>
         <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
       </div>
 
