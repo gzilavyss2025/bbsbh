@@ -41,7 +41,13 @@ export function TeamInfo({
           label="Weather"
           value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}
         />
-        <Fact label="Box weather" value={info.weather} />
+        {/* Box weather is only the closed-roof interior reading — show it here
+            just as a fallback when the outdoor scorebook weather resolved to
+            nothing. When we have real weather, it's redundant (still in the box
+            score at the bottom of the game). */}
+        {!scorebookWeatherLoading && !scorebookWeather?.text && (
+          <Fact label="Box weather" value={info.weather} />
+        )}
         <Fact label="First pitch" value={info.firstPitch} />
         <Fact label="Attendance" value={info.attendance} />
       </dl>
