@@ -49,6 +49,25 @@ export const SPORT_LABEL = {
 // e.g. https://www.mlbstatic.com/team-logos/158.svg for the Brewers (158).
 const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
 
-export function teamLogoUrl(teamId) {
-  return teamId ? `${LOGO_BASE}/${teamId}.svg` : null
+// The same CDN serves three *distinct* marks per club — the cap logo, the full
+// primary logo, and the script wordmark — each keyed by the team id we already
+// carry, under a subfolder path. Verified live across MLB and MiLB (every level
+// returns real, different art, not the base logo echoed back). This gives the
+// sketcher more than one thing to draw for a team instead of the same roundel
+// every time. We use the `-on-light` treatment throughout since every surface
+// that renders a logo is the app's light "paper". There is NO alternate /
+// per-uniform / home-road mark on this CDN (those paths 404), so this is the
+// full set. `base` is the plain `{id}.svg` default that every existing caller
+// already uses.
+export const LOGO_VARIANTS = [
+  { key: 'primary', label: 'Primary', path: 'team-primary-on-light' },
+  { key: 'cap', label: 'Cap', path: 'team-cap-on-light' },
+  { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
+]
+
+export function teamLogoUrl(teamId, variant = 'base') {
+  if (!teamId) return null
+  if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
+  const v = LOGO_VARIANTS.find((x) => x.key === variant)
+  return v ? `${LOGO_BASE}/${v.path}/${teamId}.svg` : `${LOGO_BASE}/${teamId}.svg`
 }

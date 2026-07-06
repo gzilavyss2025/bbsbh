@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { LOGO_VARIANTS } from '../lib/teams.js'
 import { TeamLogo } from './TeamLogo.jsx'
 
 // A large grayscale team mark blown up for pencil-sketching, shown when the
@@ -6,7 +7,14 @@ import { TeamLogo } from './TeamLogo.jsx'
 // Sheet, just one club at a time and on demand. Carries no score, so it's
 // spoiler-safe like the rest of the team pages. Dismiss by tapping the backdrop,
 // the close button, or Escape.
+//
+// A club has three distinct marks on the CDN (primary / cap / wordmark, see
+// teams.js); the segmented control flips between them so the sketcher can pick a
+// different one instead of drawing the same roundel every time. Any mark a club
+// happens to lack degrades to the base logo via TeamLogo's own fallback.
 export function LogoModal({ teamId, name, onClose }) {
+  const [variant, setVariant] = useState('primary')
+
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -26,7 +34,28 @@ export function LogoModal({ teamId, name, onClose }) {
         >
           ✕
         </button>
-        <TeamLogo teamId={teamId} name={name} size={240} bw className="logomodal__art" />
+        <TeamLogo
+          teamId={teamId}
+          name={name}
+          size={240}
+          bw
+          variant={variant}
+          className="logomodal__art"
+        />
+        <div className="logomodal__variants" role="group" aria-label="Logo style">
+          {LOGO_VARIANTS.map((v) => (
+            <button
+              key={v.key}
+              className={`logomodal__variant ${
+                variant === v.key ? 'is-active' : ''
+              }`}
+              onClick={() => setVariant(v.key)}
+              aria-pressed={variant === v.key}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
         <span className="logomodal__name">{name}</span>
       </div>
     </div>

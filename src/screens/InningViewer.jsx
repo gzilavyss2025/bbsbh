@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -328,8 +328,9 @@ function RollingLine({
 // own header row. Lines are cumulative through the reveal mark (see
 // api/pitchers.js); nothing sealed is shown. Deliberately not behind a SealBox —
 // it mirrors the running line's reveal state. Sized to fit a phone with no
-// horizontal scroll: the name column wraps, the jersey number is inked in clay
-// red and right-aligned within its own slot in the Pitcher cell.
+// horizontal scroll: the caps-locked name auto-shrinks to one line (PitcherName)
+// while the numeric columns hold their size, and the jersey number is inked in
+// clay red and right-aligned within its own slot in the Pitcher cell.
 function PitchersSection({ teams }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
@@ -359,10 +360,7 @@ function PitchersSection({ teams }) {
                 <tr key={p.id}>
                   <td className="pitchers__pitcher">
                     <div className="pitchers__cell">
-                      <span className="pitchers__pname">
-                        {p.last}
-                        {p.first ? `, ${p.first}` : ''}
-                      </span>
+                      <PitcherName last={p.last} first={p.first} />
                       {p.jersey ? (
                         <span className="pitchers__num">{p.jersey}</span>
                       ) : null}
@@ -384,6 +382,44 @@ function PitchersSection({ teams }) {
         </div>
       ))}
     </section>
+  )
+}
+
+// A pitcher's name, always drawn in caps (see .pitchers__pname), auto-shrunk to
+// fit its column on one line so a long name never widens the table into a
+// horizontal scroll. Only the NAME shrinks — the numeric columns keep their
+// size. The name span is `flex: 1` so its box always fills the space the layout
+// gives it (stable clientWidth); we step the font down from the CSS max until
+// the rendered text (scrollWidth) fits, or we hit the floor. A ResizeObserver
+// re-fits when the column width changes (extra innings unlocking, rotation).
+const NAME_MAX_PX = 12
+const NAME_MIN_PX = 8
+function PitcherName({ last, first }) {
+  const ref = useRef(null)
+  const text = `${last}${first ? `, ${first}` : ''}`
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const fit = () => {
+      let size = NAME_MAX_PX
+      el.style.fontSize = `${size}px`
+      while (size > NAME_MIN_PX && el.scrollWidth > el.clientWidth) {
+        size -= 0.5
+        el.style.fontSize = `${size}px`
+      }
+    }
+    fit()
+    if (typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [text])
+
+  return (
+    <span className="pitchers__pname" ref={ref}>
+      {text}
+    </span>
   )
 }
 

@@ -1372,6 +1372,36 @@ body {
   text-align: center;
 }
 
+/* Segmented control to flip between a club's marks (primary / cap / wordmark). */
+.logomodal__variants {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.logomodal__variant {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logomodal__variant.is-active {
+  background: var(--surface-inset);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-card);
+}
+
 .logomodal__close {
   position: absolute;
   top: 8px;
@@ -1557,14 +1587,21 @@ body {
   gap: 6px;
 }
 
+/* Caps-locked and auto-shrunk to fit on one line (see PitcherName): `flex: 1`
+   keeps the box filling its share of the column so the measured width is stable,
+   and overflow is hidden so a mid-shrink frame never spills into a scroll. JS
+   drives font-size down from 12px; the value here is just the pre-script max. */
 .pitchers__pname {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: var(--w-semibold);
+  text-transform: uppercase;
   color: var(--text-heading);
   line-height: 1.2;
-  word-break: break-word;
-  min-width: 0;
 }
 
 .pitchers__num {
