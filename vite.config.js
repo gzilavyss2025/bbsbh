@@ -50,6 +50,13 @@ export default defineConfig({
             handler: 'NetworkOnly',
             method: 'GET',
           },
+          {
+            // Outdoor weather (see api/weather.js). Never cached so an "actual
+            // at first pitch" reading stays live, same as the score endpoints.
+            urlPattern: ({ url }) => url.hostname.endsWith('open-meteo.com'),
+            handler: 'NetworkOnly',
+            method: 'GET',
+          },
         ],
       },
     }),

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { fetchGameFeed, fetchManager } from '../api/mlb.js'
+import { generateScorebookWeather } from '../api/weather.js'
 import { selectTeamMeta, selectHasStarted } from '../api/select.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
@@ -33,6 +34,14 @@ export function GameView({ game, section, onSection, onHome }) {
     ])
     return { away, home }
   }, [feed])
+
+  // Outdoor scorebook weather string — from the park's lat/lon, not the
+  // box-score weather (which reports the interior of a closed roof). Fetched
+  // once alongside the feed and shared by the info pages and the box score.
+  const weather = useAsync(
+    () => (feed ? generateScorebookWeather(feed) : Promise.resolve(null)),
+    [feed],
+  )
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
@@ -74,6 +83,8 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="away"
           manager={managers.data?.away}
+          scorebookWeather={weather.data}
+          scorebookWeatherLoading={weather.loading}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
         />
@@ -83,6 +94,8 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="home"
           manager={managers.data?.home}
+          scorebookWeather={weather.data}
+          scorebookWeatherLoading={weather.loading}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
         />
@@ -103,6 +116,7 @@ export function GameView({ game, section, onSection, onHome }) {
         <BoxScore
           feed={feed}
           managers={managers.data}
+          scorebookWeather={weather.data}
           onInnings={() => onSection('top1')}
         />
       )}

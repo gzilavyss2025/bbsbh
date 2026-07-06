@@ -10,7 +10,7 @@ import { SealBox } from '../components/SealBox.jsx'
 // nothing score-revealing is in the DOM until the user taps to reveal, exactly
 // like every half-inning seal. This holds even for a deep link straight to the
 // box score, so the card's "Box score" shortcut can't spoil either.
-export function BoxScore({ feed, managers, onInnings }) {
+export function BoxScore({ feed, managers, scorebookWeather, onInnings }) {
   return (
     <div className="boxscore">
       <div className="boxscore__head">
@@ -25,7 +25,13 @@ export function BoxScore({ feed, managers, onInnings }) {
       <SealBox>
         {() => {
           const box = selectBoxscore(feed)
-          return <BoxScoreBody box={box} managers={managers} />
+          return (
+            <BoxScoreBody
+              box={box}
+              managers={managers}
+              scorebookWeather={scorebookWeather}
+            />
+          )
         }}
       </SealBox>
     </div>
@@ -37,7 +43,7 @@ export function BoxScore({ feed, managers, onInnings }) {
 // visiting team's crew and first pitch above its batting/pitching, the home
 // team's ballpark/weather/times above its own. The complete MLB-style game-info
 // text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ box, managers }) {
+function BoxScoreBody({ box, managers, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -55,8 +61,16 @@ function BoxScoreBody({ box, managers }) {
     { label: 'Home Team', value: box.home.teamName, wide: true },
     { label: 'Manager', value: managers?.home },
     { label: 'Ballpark', value: get('Venue'), wide: true },
+    // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
+    // value to copy onto paper. Falls back to the box-score weather when the
+    // generator has nothing (e.g. a MiLB park with no coordinates).
+    {
+      label: 'Scorebook Wx',
+      value: scorebookWeather?.text || get('Weather'),
+      wide: true,
+    },
     { label: 'Attendance', value: get('Att') },
-    { label: 'Weather', value: get('Weather') },
+    { label: 'Box weather', value: get('Weather') },
     { label: 'Time of Game', value: box.times.duration },
     { label: 'Game End', value: box.times.end },
   ]

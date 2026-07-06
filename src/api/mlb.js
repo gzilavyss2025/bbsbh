@@ -98,6 +98,23 @@ export async function fetchGameFeed(gamePk) {
   return getJson(`/api/v1.1/game/${gamePk}/feed/live`)
 }
 
+// A venue with its coordinates and field info hydrated. The live feed's
+// gameData.venue is usually enough (it carries location + fieldInfo), but on
+// leaner feeds those are absent, so the weather generator falls back to this
+// dedicated endpoint for the park's lat/lon and roofType. Degrades to null on
+// failure — the caller then shows no generated weather rather than crashing.
+export async function fetchVenue(venueId) {
+  if (!venueId) return null
+  try {
+    const data = await getJson(
+      `/api/v1/venues/${venueId}?hydrate=location,fieldInfo`,
+    )
+    return data.venues?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Managers — NOT in the live feed (its coaches array comes back empty), so we
 // hit the dedicated coaches endpoint and find the manager row. The job title

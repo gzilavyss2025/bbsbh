@@ -11,7 +11,15 @@ import {
 // Away/home info + lineup page. Nothing here is score-revealing — lineups,
 // umpires, venue and weather are all spoiler-safe — so it renders openly. The
 // team's logo lives in the game masthead (see GameView), not here.
-export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
+export function TeamInfo({
+  feed,
+  side,
+  manager,
+  scorebookWeather,
+  scorebookWeatherLoading,
+  onNext,
+  nextLabel,
+}) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const officials = useMemo(() => selectOfficials(feed), [feed])
@@ -29,7 +37,11 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
       <dl className="factgrid">
         <Fact label="Manager" value={manager} />
         <Fact label="Venue" value={info.venue} />
-        <Fact label="Weather" value={info.weather} />
+        <Fact
+          label="Scorebook wx"
+          value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}
+        />
+        <Fact label="Box weather" value={info.weather} />
         <Fact label="First pitch" value={info.firstPitch} />
         <Fact label="Attendance" value={info.attendance} />
       </dl>
