@@ -2041,12 +2041,6 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
-.bs__wp {
-  margin: 8px 0 0;
-  font-size: 11.5px;
-  color: var(--text-body);
-}
-
 /* Runs-by-inning cells read quietly; the R/H/E/LOB totals to their right are the
    summary, set off by a rule and a bolder R the way a printed line score is. */
 .bs__inn {

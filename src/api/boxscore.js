@@ -159,6 +159,43 @@ function scoreboardInnings(feed) {
   }))
 }
 
+// First-pitch and game-end clock times for the scorebook header. The feed gives
+// the actual first pitch ("3:06 PM.") and the elapsed time of game ("2:31."); we
+// derive the end by adding one to the other, and tag both with the venue's time
+// zone (EDT, PDT…) after the AM/PM the way the scorebook's time fields want.
+function cleanClock(value) {
+  const m = (value ?? '').match(/(\d{1,2}:\d{2})\s*(AM|PM)/i)
+  return m ? `${m[1]} ${m[2].toUpperCase()}` : ''
+}
+
+function addDuration(clock, dur) {
+  const c = clock.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  const d = (dur ?? '').match(/(\d{1,2}):(\d{2})/)
+  if (!c || !d) return ''
+  let h = Number(c[1]) % 12
+  if (/PM/i.test(c[3])) h += 12
+  const total =
+    (((h * 60 + Number(c[2]) + Number(d[1]) * 60 + Number(d[2])) % 1440) +
+      1440) %
+    1440
+  const hh = Math.floor(total / 60)
+  const mm = total % 60
+  const ap = hh >= 12 ? 'PM' : 'AM'
+  const h12 = hh % 12 === 0 ? 12 : hh % 12
+  return `${h12}:${String(mm).padStart(2, '0')} ${ap}`
+}
+
+function gameTimes(feed) {
+  const info = feed?.liveData?.boxscore?.info ?? []
+  const first = cleanClock(info.find((r) => r.label === 'First pitch')?.value)
+  const durRaw = info.find((r) => r.label === 'T')?.value ?? ''
+  const duration = (durRaw.match(/\d{1,2}:\d{2}/) ?? [''])[0]
+  const end = addDuration(first, duration)
+  const tz = feed?.gameData?.venue?.timeZone?.tz ?? ''
+  const withTz = (t) => (t && tz ? `${t} ${tz}` : t)
+  return { firstPitch: withTz(first), end: withTz(end), duration }
+}
+
 // The four umpire assignments (HP/1B/2B/3B) the scorebook lists in its header.
 // The feed carries them as one run-together "Umpires" info string
 // ("HP: Name. 1B: Name. 2B: Name. 3B: Name."); split it back into slots.
@@ -251,6 +288,7 @@ export function selectBoxscore(feed) {
     innings: scoreboardInnings(feed),
     decisions,
     umpires,
+    times: gameTimes(feed),
     gameInfo,
     dateLabel: dateRow?.label ?? '',
   }

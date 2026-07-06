@@ -32,65 +32,55 @@ export function BoxScore({ feed, managers, onInnings }) {
   )
 }
 
-// Ordered to fill a #22 scorebook page top-to-bottom: the line score first, then
-// a grid of labeled fill-in boxes for the header fields you copy over (date,
-// ballpark, umpires, managers, weather, attendance…), then the batting/pitching
-// detail and the pitchers of record. The complete MLB-style game-info text sits
-// at the very bottom so nothing is lost.
+// Ordered to fill a #22 scorebook page as you work down it: the line score, the
+// pitchers of record, then each team paired with its own header card — the
+// visiting team's crew and first pitch above its batting/pitching, the home
+// team's ballpark/weather/times above its own. The complete MLB-style game-info
+// text sits at the very bottom so nothing is lost.
 function BoxScoreBody({ box, managers }) {
+  const get = (label) =>
+    box.gameInfo.find((r) => r.label === label)?.value ?? ''
+  const u = box.umpires ?? {}
+
+  const awayFields = [
+    { label: 'Visiting Team', value: box.away.teamName, wide: true },
+    { label: 'Manager', value: managers?.away },
+    { label: 'HP Umpire', value: u.hp },
+    { label: '1B Umpire', value: u.first },
+    { label: '2B Umpire', value: u.second },
+    { label: '3B Umpire', value: u.third },
+    { label: 'First Pitch', value: box.times.firstPitch },
+  ]
+  const homeFields = [
+    { label: 'Home Team', value: box.home.teamName, wide: true },
+    { label: 'Manager', value: managers?.home },
+    { label: 'Ballpark', value: get('Venue'), wide: true },
+    { label: 'Attendance', value: get('Att') },
+    { label: 'Weather', value: get('Weather') },
+    { label: 'Time of Game', value: box.times.duration },
+    { label: 'Game End', value: box.times.end },
+  ]
+
   return (
     <div className="bs">
-      <Scoreboard
-        away={box.away}
-        home={box.home}
-        innings={box.innings}
-        wp={box.decisions.win}
-      />
-      <FillIn
-        dateLabel={box.dateLabel}
-        gameInfo={box.gameInfo}
-        umpires={box.umpires}
-        managers={managers}
-        away={box.away}
-        home={box.home}
-      />
-      <TeamBlock side={box.away} />
-      <TeamBlock side={box.home} />
+      <Scoreboard away={box.away} home={box.home} innings={box.innings} />
       <Decisions decisions={box.decisions} />
+      <InfoCard fields={awayFields} />
+      <TeamBlock side={box.away} />
+      <InfoCard fields={homeFields} />
+      <TeamBlock side={box.home} />
       <GameInfo rows={box.gameInfo} dateLabel={box.dateLabel} />
     </div>
   )
 }
 
-// The scorebook's header fields as labeled fill-in boxes — each a small caption
-// over the value, so you can read a box and copy it into the matching slot on
-// the sheet. Feed-derived fields (ballpark, weather, first pitch, T, attendance)
-// come from the game-info rows by label; umpires from the parsed slots; managers
-// from the separate coaches fetch. Anything the feed didn't post shows "—".
-function FillIn({ dateLabel, gameInfo, umpires, managers, away, home }) {
-  const get = (label) => gameInfo.find((r) => r.label === label)?.value ?? ''
-  const fields = [
-    { label: 'Date', value: dateLabel, wide: true },
-    { label: 'Ballpark', value: get('Venue'), wide: true },
-    { label: 'Weather', value: get('Weather') },
-    { label: 'Wind', value: get('Wind') },
-    { label: 'First Pitch', value: get('First pitch') },
-    { label: 'Time', value: get('T') },
-    { label: 'Attendance', value: get('Att') },
-    { label: `${away.abbreviation || 'Away'} Manager`, value: managers?.away },
-    { label: `${home.abbreviation || 'Home'} Manager`, value: managers?.home },
-  ]
-  const umps = umpires
-    ? [
-        { label: 'HP Umpire', value: umpires.hp },
-        { label: '1B Umpire', value: umpires.first },
-        { label: '2B Umpire', value: umpires.second },
-        { label: '3B Umpire', value: umpires.third },
-      ]
-    : []
+// A card of the scorebook's labeled fill-in boxes — each a small caption over
+// its value, so you read a box and copy it into the matching slot on the sheet.
+// Anything the feed didn't post shows "—".
+function InfoCard({ fields }) {
   return (
     <div className="bs__fill">
-      {[...fields, ...umps].map((f) => (
+      {fields.map((f) => (
         <div
           className={`bs__field${f.wide ? ' bs__field--wide' : ''}`}
           key={f.label}
@@ -233,11 +223,12 @@ function TeamBlock({ side }) {
 }
 
 // The scorebook's scoreboard strip: runs by inning (1…N, extras included)
-// followed by each team's final R/H/E/LOB and the winning pitcher — the tallies
-// you copy across the bottom of the #22 sheet once the game is final. It's the
-// one wide table here, so it keeps the horizontal-scroll fallback for a long
-// extra-inning line rather than cramping the totals.
-function Scoreboard({ away, home, innings, wp }) {
+// followed by each team's final R/H/E/LOB — the tallies you copy across the
+// bottom of the #22 sheet once the game is final. It's the one wide table here,
+// so it keeps the horizontal-scroll fallback for a long extra-inning line rather
+// than cramping the totals. (The winning pitcher lives in the decisions block
+// just below, not here.)
+function Scoreboard({ away, home, innings }) {
   const rows = [
     { side: away, cells: innings.map((i) => i.away) },
     { side: home, cells: innings.map((i) => i.home) },
@@ -280,11 +271,6 @@ function Scoreboard({ away, home, innings, wp }) {
           </tbody>
         </table>
       </div>
-      {wp && (
-        <p className="bs__wp">
-          <span className="bs__infoLabel">WP:</span> {wp}
-        </p>
-      )}
     </div>
   )
 }
