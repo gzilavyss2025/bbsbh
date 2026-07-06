@@ -93,6 +93,7 @@ export function GameView({ game, section, onSection, onHome }) {
           inning={inning}
           onInning={(n) => onSection(stepToSection(2, n))}
           onReload={feedState.reload}
+          loading={feedState.loading}
         />
       )}
     </div>

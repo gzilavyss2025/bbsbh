@@ -14,6 +14,7 @@ import {
 } from '../api/derive.js'
 import { computePitcherLines, halfIndex } from '../api/pitchers.js'
 import { SealBox } from '../components/SealBox.jsx'
+import { PlayByPlay } from '../components/PlayByPlay.jsx'
 
 // Inning-by-inning viewer. Each half-inning is a single SealBox: one tap reveals
 // that half's whole stat line at once (§7b). Navigating between innings remounts
@@ -25,7 +26,7 @@ import { SealBox } from '../components/SealBox.jsx'
 // are shown up front. Each inning past regulation unlocks one at a time, and only
 // once the prior inning has been revealed — so the navigator and boxscore never
 // hint that a game went to extras before the user gets there.
-export function InningViewer({ feed, started, inning, onInning, onReload }) {
+export function InningViewer({ feed, started, inning, onInning, onReload, loading }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -101,6 +102,21 @@ export function InningViewer({ feed, started, inning, onInning, onReload }) {
 
   return (
     <div className="innings">
+      <div className="innings__toolbar">
+        <button
+          type="button"
+          className="refreshbtn"
+          onClick={onReload}
+          disabled={loading}
+          aria-label="Refresh live game data"
+        >
+          <span className="refreshbtn__icon" aria-hidden="true">
+            ↻
+          </span>
+          {loading ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
+
       <RollingLine
         feed={feed}
         regulation={regulation}
@@ -232,6 +248,12 @@ function HalfInning({
                   small
                 />
               </div>
+              <PlayByPlay
+                feed={feed}
+                inning={inning}
+                half={half}
+                battingSide={battingSide}
+              />
             </>
           )
         }}

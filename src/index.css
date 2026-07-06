@@ -794,6 +794,47 @@ body {
 }
 
 /* ---------------------------------------------------------------- innings */
+.innings__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px;
+}
+
+.refreshbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.refreshbtn:active {
+  transform: scale(0.96);
+}
+
+.refreshbtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.refreshbtn__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
 .inningnav {
   display: flex;
   align-items: center;
@@ -1018,6 +1059,150 @@ body {
 .stat__unit {
   font-style: normal;
   opacity: 0.7;
+}
+
+/* --------------------------------------------------------------- play-by-play
+   Per-plate-appearance feed shown below the pitch-summary row once a half is
+   revealed (api/playbyplay.js — reveal-only, same rule as linescore.js). One
+   card per batter, first-at-bat first, with mound-visit / pitching-change
+   notes interleaved between cards. */
+.pbp {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) dashed var(--border-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pbp__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  border-bottom: var(--bw-hair) dashed var(--border-hairline);
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--text-caption);
+}
+
+.pbp__noteicon {
+  font-style: normal;
+  font-size: 13px;
+}
+
+.pbp__card {
+  position: relative;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+  padding: 8px 34px 8px 10px;
+}
+
+.pbp__outdot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 12px;
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+  border: var(--bw-rule) solid var(--clay);
+}
+
+.pbp__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.pbp__batter {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--text-heading);
+}
+
+.pbp__pos {
+  font-size: 10px;
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  text-transform: none;
+  color: var(--graphite-soft);
+  margin-left: 4px;
+}
+
+.pbp__rbi {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--field-deep);
+  background: var(--field-soft);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.pbp__pitchrow {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.pbp__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.4px solid var(--rule);
+  background: transparent;
+  flex: 0 0 auto;
+}
+
+.pbp__dot--called {
+  background: var(--ink-1);
+  border-color: var(--ink-1);
+}
+
+.pbp__dot--whiff {
+  background: var(--clay);
+  border-color: var(--clay);
+}
+
+.pbp__dot--foul {
+  background: var(--seal);
+  border-color: var(--seal-hatch);
+}
+
+.pbp__dot--inplay {
+  border-radius: 2px;
+  background: var(--ink-0);
+  border: none;
+}
+
+.pbp__desc {
+  font-size: 12px;
+  color: var(--text-body);
+}
+
+.pbp__klooking {
+  display: inline-block;
+  transform: scaleX(-1);
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
 }
 
 /* ---------------------------------------------------------------- roster */
