@@ -79,19 +79,16 @@ function ReadyStrip({ game }) {
   )
 }
 
-// A team's grayscale mark, framed in a uniform bordered square so the two logos
-// read at a consistent size and the '@' lands dead-center between them (the mark
-// is slightly overscaled so it just kisses the frame — cropped ever so slightly,
-// the way Caught Looking tiles its club marks). Sits in the top grid row.
+// A team's mark, framed in a uniform bordered square so the two logos read at a
+// consistent size and the '@' lands dead-center between them. The mark is
+// overscaled to bleed to the frame like a printed badge (the tile clips the
+// overflow), the way Caught Looking tiles its club marks. Full color here on the
+// slate — elsewhere (the in-game masthead, the logo sheet) the marks stay
+// grayscale. Sits in the top grid row.
 function TeamMark({ team, side }) {
   return (
     <div className={`gamecard__logobox gamecard__logobox--${side}`}>
-      <TeamLogo
-        teamId={team.id}
-        name={team.name}
-        size={56}
-        className="teamlogo--bw"
-      />
+      <TeamLogo teamId={team.id} name={team.name} size={56} />
     </div>
   )
 }

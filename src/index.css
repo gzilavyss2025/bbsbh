@@ -490,14 +490,14 @@ body {
    makes mismatched source logos read at one consistent size. */
 .gamecard__logobox {
   width: 100%;
-  max-width: 104px;
+  max-width: 108px;
   aspect-ratio: 1 / 1;
   justify-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 6px;
+  padding: 2px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--paper-1);
@@ -509,7 +509,9 @@ body {
   height: 100% !important;
   object-fit: contain;
   border-radius: 0;
-  transform: scale(1.08);
+  /* Scaled well past the frame so the mark bleeds to the edges like a printed
+     badge; the tile clips the overflow. */
+  transform: scale(1.32);
 }
 
 /* The monogram fallback already is a bordered tile — drop its own chrome so it
@@ -555,8 +557,8 @@ body {
   border-radius: var(--radius-xs);
 }
 
-/* Grayscale marks on the slate cards — pencil-sketch friendly, and it keeps a
-   busy row of club colors from competing with the seal amber. */
+/* Grayscale treatment for the in-game masthead and the printable logo sheet —
+   pencil-sketch friendly. (The slate cards render their marks in full color.) */
 .teamlogo--bw {
   filter: grayscale(1) contrast(1.03);
 }
@@ -906,10 +908,6 @@ body {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   font-size: 14px;
-}
-
-.opp__jersey {
-  color: var(--text-caption);
 }
 
 .opp__name {
