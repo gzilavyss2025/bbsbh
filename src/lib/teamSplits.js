@@ -14,17 +14,23 @@
 //   • Move the "|" to change where a name splits.
 //   • For a club with no city (the Athletics), leave the left side blank and
 //     start the line with "|":     | Athletics
-//   • Add a new line for any team that isn't listed yet (e.g. minor-league
-//     clubs) using the same "Location | Mascot" format.
+//   • A line that starts with "#" is a heading/comment and is ignored.
+//   • Add a new line for any team that isn't listed yet using the same
+//     "Location | Mascot" format.
 //
 // Any team NOT listed here falls back automatically to the split the MLB API
-// suggests, so you only need to add lines where that guess looks wrong.
+// suggests, so you only need to fix lines where the "|" is in the wrong spot.
 //
 // Spelling must match the team's full name as the API writes it: the full
 // name we match against is  Location + " " + Mascot.
+//
+// The minor-league lines below were generated from the MLB Stats API, so the
+// "|" is already placed at the API's own split. Adjust any you'd prefer split
+// differently (e.g. multi-word mascots).
 // -------------------------------------------------------------------------
 
 const TABLE = `
+# --- MLB ---
 Arizona | Diamondbacks
 Atlanta | Braves
 Baltimore | Orioles
@@ -55,6 +61,134 @@ Tampa Bay | Rays
 Texas | Rangers
 Toronto | Blue Jays
 Washington | Nationals
+
+# --- AAA ---
+Albuquerque | Isotopes
+Buffalo | Bisons
+Charlotte | Knights
+Columbus | Clippers
+Durham | Bulls
+El Paso | Chihuahuas
+Gwinnett | Stripers
+Indianapolis | Indians
+Iowa | Cubs
+Jacksonville | Jumbo Shrimp
+Las Vegas | Aviators
+Lehigh Valley | IronPigs
+Louisville | Bats
+Memphis | Redbirds
+Nashville | Sounds
+Norfolk | Tides
+Oklahoma City | Comets
+Omaha | Storm Chasers
+Reno | Aces
+Rochester | Red Wings
+Round Rock | Express
+Sacramento | River Cats
+Salt Lake | Bees
+Scranton/Wilkes-Barre | RailRiders
+St. Paul | Saints
+Sugar Land | Space Cowboys
+Syracuse | Mets
+Tacoma | Rainiers
+Toledo | Mud Hens
+Worcester | Red Sox
+
+# --- AA ---
+Akron | RubberDucks
+Altoona | Curve
+Amarillo | Sod Poodles
+Arkansas | Travelers
+Biloxi | Shuckers
+Binghamton | Rumble Ponies
+Birmingham | Barons
+Chattanooga | Lookouts
+Chesapeake | Baysox
+Columbus | Clingstones
+Corpus Christi | Hooks
+Erie | SeaWolves
+Frisco | RoughRiders
+Harrisburg | Senators
+Hartford | Yard Goats
+Knoxville | Smokies
+Midland | RockHounds
+Montgomery | Biscuits
+New Hampshire | Fisher Cats
+Northwest Arkansas | Naturals
+Pensacola | Blue Wahoos
+Portland | Sea Dogs
+Reading | Fightin Phils
+Richmond | Flying Squirrels
+Rocket City | Trash Pandas
+San Antonio | Missions
+Somerset | Patriots
+Springfield | Cardinals
+Tulsa | Drillers
+Wichita | Wind Surge
+
+# --- A+ ---
+Asheville | Tourists
+Beloit | Sky Carp
+Bowling Green | Hot Rods
+Brooklyn | Cyclones
+Cedar Rapids | Kernels
+Dayton | Dragons
+Eugene | Emeralds
+Everett | AquaSox
+Fort Wayne | TinCaps
+Frederick | Keys
+Great Lakes | Loons
+Greensboro | Grasshoppers
+Greenville | Drive
+Hillsboro | Hops
+Hub City | Spartanburgers
+Hudson Valley | Renegades
+Jersey Shore | BlueClaws
+Lake County | Captains
+Lansing | Lugnuts
+Peoria | Chiefs
+Quad Cities | River Bandits
+Rome | Emperors
+South Bend | Cubs
+Spokane | Indians
+Tri-City | Dust Devils
+Vancouver | Canadians
+West Michigan | Whitecaps
+Wilmington | Blue Rocks
+Winston-Salem | Dash
+Wisconsin | Timber Rattlers
+
+# --- A ---
+Augusta | GreenJackets
+Bradenton | Marauders
+Charleston | RiverDogs
+Clearwater | Threshers
+Columbia | Fireflies
+Daytona | Tortugas
+Delmarva | Shorebirds
+Dunedin | Blue Jays
+Fayetteville | Woodpeckers
+Fort Myers | Mighty Mussels
+Fredericksburg | Nationals
+Fresno | Grizzlies
+Hickory | Crawdads
+Hill City | Howlers
+Inland Empire | 66ers
+Jupiter | Hammerheads
+Kannapolis | Cannon Ballers
+Lake Elsinore | Storm
+Lakeland | Flying Tigers
+Myrtle Beach | Pelicans
+Ontario | Tower Buzzers
+Palm Beach | Cardinals
+Rancho Cucamonga | Quakes
+Salem | RidgeYaks
+San Jose | Giants
+St. Lucie | Mets
+Stockton | Ports
+Tampa | Tarpons
+Visalia | Rawhide
+Wilson | Warbirds
 `
 
 function normalize(s) {
@@ -63,8 +197,9 @@ function normalize(s) {
 
 // Parse the table once into a lookup keyed by normalized full name.
 const SPLITS = new Map()
-for (const line of TABLE.split('\n')) {
-  if (!line.trim()) continue
+for (const raw of TABLE.split('\n')) {
+  const line = raw.trim()
+  if (!line || line.startsWith('#')) continue // blank or heading
   const [loc = '', club = ''] = line.split('|')
   const location = loc.trim()
   const mascot = club.trim()
