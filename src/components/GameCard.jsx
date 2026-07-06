@@ -54,8 +54,8 @@ export function GameCard({ game, pinned, onSelect, onBoxScore }) {
 function ReadyStrip({ game }) {
   const r = game.readiness ?? {}
   const items = [
-    { ok: !!r.awayLineup, label: `${game.away.abbreviation || 'Away'} LU` },
-    { ok: !!r.homeLineup, label: `${game.home.abbreviation || 'Home'} LU` },
+    { ok: !!r.awayLineup, label: `${game.away.abbreviation || 'Away'} Lineup` },
+    { ok: !!r.homeLineup, label: `${game.home.abbreviation || 'Home'} Lineup` },
     { ok: !!r.umpires, label: 'Umps' },
     { ok: !!r.pitchers, label: 'SP' },
   ]
