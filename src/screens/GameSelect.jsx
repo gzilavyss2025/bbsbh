@@ -92,6 +92,12 @@ export function GameSelect({ onPick, onShowLogos }) {
               game={g}
               pinned={isPinned(g)}
               onSelect={() => onPick(g, dateStr)}
+              // A completed game on a past date gets a direct box-score jump.
+              onBoxScore={
+                offset < 0 && g.abstractState === 'Final'
+                  ? () => onPick(g, dateStr, 'boxscore')
+                  : null
+              }
             />
           </li>
         ))}

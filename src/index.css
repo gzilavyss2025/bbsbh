@@ -308,7 +308,6 @@ body {
 .gamecard {
   position: relative;
   width: 100%;
-  text-align: left;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -317,9 +316,44 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--text-body);
-  cursor: pointer;
   box-shadow: var(--shadow-card);
+}
+
+/* The card's main tap target: everything but the optional box-score shortcut. */
+.gamecard__open {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+/* A quiet secondary action under the card — jumps straight to the box score for
+   a completed game on a past date. */
+.gamecard__box {
+  align-self: stretch;
+  min-height: var(--tap-min);
+  margin-top: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.gamecard__box:active {
+  transform: translateY(1px);
 }
 
 /* In-progress badge, pinned to the card's top-right corner. */
@@ -349,7 +383,7 @@ body {
   background: currentColor;
 }
 
-.gamecard:active {
+.gamecard__open:active {
   transform: translateY(1px);
 }
 
@@ -1719,6 +1753,266 @@ body {
   font-weight: var(--w-bold);
   color: var(--accent-negative);
   text-align: right;
+}
+
+/* ------------------------------------------------------------- box score
+   The full, MLB.com-style final line, revealed as one sealed block. Dense mono
+   tables (batting + pitching per team) with the notes/decisions/game-info foot
+   underneath. The tables can outgrow a phone, so each rides its own horizontal
+   scroll rather than shrinking the numbers into illegibility. */
+.boxscore {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+.boxscore__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 4px 0 14px;
+}
+
+.boxscore__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2, 20px);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.bs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.bs__team {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 10px;
+}
+
+.bs__teamname {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.bs__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.bs__scroll + .bs__scroll {
+  margin-top: 14px;
+}
+
+.bs__grid {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.bs__grid--bat {
+  min-width: 320px;
+}
+.bs__grid--pit {
+  min-width: 380px;
+}
+
+.bs__grid th,
+.bs__grid td {
+  padding: 5px 6px;
+  text-align: center;
+  font-size: 11.5px;
+  white-space: nowrap;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.bs__grid thead th {
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-caption);
+}
+
+/* Player name column: wide, left-aligned; the numeric columns split the rest. */
+.bs__nameCol {
+  width: 46%;
+  text-align: left !important;
+  padding-left: 0 !important;
+}
+
+.bs__player {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.bs__pname {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Position(s) after the batter's name, and the pitcher's decision tag. */
+.bs__pos {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.bs__dec {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+}
+
+/* Substitute rows sit indented under their starter, like a printed box score. */
+.bs__sub .bs__nameCol {
+  padding-left: 14px !important;
+}
+
+/* Footnote marker ("a", "b"…) next to a sub and in the footnote list. */
+.bs__mark {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+.bs__avg {
+  color: var(--text-muted);
+}
+.bs__ps {
+  color: var(--text-muted);
+  font-size: 10.5px;
+}
+
+.bs__totals td {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  border-bottom: none;
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+
+/* Footnotes + BATTING/BASERUNNING/FIELDING note groups under each team. */
+.bs__footnotes {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bs__footnotes li {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--text-body);
+}
+.bs__footnotes .bs__mark {
+  margin-right: 5px;
+}
+
+.bs__notes {
+  margin-top: 10px;
+}
+.bs__notesTitle {
+  margin: 0 0 3px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__note {
+  margin: 2px 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+.bs__noteLabel {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* Pitchers of record. */
+.bs__decisions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+}
+.bs__decision {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.bs__decisionK {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__decisionV {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Game-info foot: WP, umpires, weather, T, Att… */
+.bs__info {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.bs__infoDate {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__infoRow {
+  margin: 3px 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+.bs__infoLabel {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-heading);
+}
+
+/* The link from the innings view to the full box score. */
+.boxscorelink {
+  width: 100%;
+  margin-top: var(--space-4);
 }
 
 /* ------------------------------------------------------------- floating nav

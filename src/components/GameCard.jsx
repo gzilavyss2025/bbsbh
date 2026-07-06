@@ -6,29 +6,40 @@ import { lookupSplit } from '../lib/teamSplits.js'
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
-export function GameCard({ game, pinned, onSelect }) {
+export function GameCard({ game, pinned, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
   const statusText = describeStatus(game)
   return (
-    <button
-      type="button"
-      className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`}
-      onClick={() => onSelect(game)}
-    >
+    <div className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`}>
       {live && <span className="gamecard__live">Live</span>}
-      <div className="gamecard__teams">
-        <TeamColumn team={game.away} />
-        <span className="gamecard__at" aria-hidden="true">@</span>
-        <TeamColumn team={game.home} />
-      </div>
-      <div className="gamecard__meta">
-        {game.sportLabel && game.sportLabel !== 'MLB' && (
-          <span className="gamecard__level">{game.sportLabel}</span>
-        )}
-        {pinned && <span className="gamecard__pin">★</span>}
-        {statusText && <span className="gamecard__status">{statusText}</span>}
-      </div>
-    </button>
+      <button
+        type="button"
+        className="gamecard__open"
+        onClick={() => onSelect(game)}
+      >
+        <div className="gamecard__teams">
+          <TeamColumn team={game.away} />
+          <span className="gamecard__at" aria-hidden="true">@</span>
+          <TeamColumn team={game.home} />
+        </div>
+        <div className="gamecard__meta">
+          {game.sportLabel && game.sportLabel !== 'MLB' && (
+            <span className="gamecard__level">{game.sportLabel}</span>
+          )}
+          {pinned && <span className="gamecard__pin">★</span>}
+          {statusText && <span className="gamecard__status">{statusText}</span>}
+        </div>
+      </button>
+      {onBoxScore && (
+        <button
+          type="button"
+          className="gamecard__box"
+          onClick={onBoxScore}
+        >
+          Box score ›
+        </button>
+      )}
+    </div>
   )
 }
 

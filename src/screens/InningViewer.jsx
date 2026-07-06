@@ -26,7 +26,7 @@ import { PlayByPlay } from '../components/PlayByPlay.jsx'
 // are shown up front. Each inning past regulation unlocks one at a time, and only
 // once the prior inning has been revealed — so the navigator and boxscore never
 // hint that a game went to extras before the user gets there.
-export function InningViewer({ feed, started, inning, onInning, onReload, loading }) {
+export function InningViewer({ feed, started, inning, onInning, onBoxScore, onReload, loading }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -195,6 +195,12 @@ export function InningViewer({ feed, started, inning, onInning, onReload, loadin
 
       <RosterPanel title={rosters.away.name} roster={rosters.away} />
       <RosterPanel title={rosters.home.name} roster={rosters.home} />
+
+      {onBoxScore && (
+        <button type="button" className="btn boxscorelink" onClick={onBoxScore}>
+          Full box score ›
+        </button>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { TeamInfo } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
+import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
@@ -92,9 +93,13 @@ export function GameView({ game, section, onSection, onHome }) {
           started={started}
           inning={inning}
           onInning={(n) => onSection(stepToSection(2, n))}
+          onBoxScore={() => onSection('boxscore')}
           onReload={feedState.reload}
           loading={feedState.loading}
         />
+      )}
+      {feed && step === 3 && (
+        <BoxScore feed={feed} onInnings={() => onSection('inning1')} />
       )}
     </div>
   )

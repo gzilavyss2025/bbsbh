@@ -32,13 +32,14 @@ export default function App() {
     setRoute(parseRoute(path))
   }
 
-  // Open a game picked from the slate: build its lineup1 URL and seed the object.
-  const openGame = (game, dateStr) => {
+  // Open a game picked from the slate at a given section (the away lineup by
+  // default; the card's "Box score" shortcut jumps straight to 'boxscore').
+  const openGame = (game, dateStr, section = 'lineup1') => {
     const path = gamePath(
       dateStr,
       game.away.abbreviation,
       game.home.abbreviation,
-      'lineup1',
+      section,
     )
     setSeedGame(game)
     go(path)

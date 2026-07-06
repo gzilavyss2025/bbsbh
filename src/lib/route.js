@@ -29,9 +29,11 @@ export function parseRoute(pathname) {
   return { name: 'home' }
 }
 
-// section string -> { step, inning }. step: 0 away info, 1 home info, 2 innings.
+// section string -> { step, inning }. step: 0 away info, 1 home info,
+// 2 innings, 3 box score.
 export function sectionToStep(section) {
   if (section === 'lineup2') return { step: 1, inning: 1 }
+  if (section === 'boxscore') return { step: 3, inning: 1 }
   const m = /^inning(\d+)$/.exec(section || '')
   if (m) return { step: 2, inning: Math.max(1, Number(m[1])) }
   return { step: 0, inning: 1 } // lineup1 / anything unknown
@@ -41,6 +43,7 @@ export function sectionToStep(section) {
 export function stepToSection(step, inning = 1) {
   if (step === 0) return 'lineup1'
   if (step === 1) return 'lineup2'
+  if (step === 3) return 'boxscore'
   return `inning${inning}`
 }
 
