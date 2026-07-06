@@ -54,6 +54,15 @@ export function GameView({ game, section, onSection, onHome }) {
           <DiamondGlyph size={20} bases={[false, true, false]} />
           <span className="sitebar__word">Scorebook</span>
         </button>
+        {feed && step !== 3 && (
+          <button
+            type="button"
+            className="sitebar__box"
+            onClick={() => onSection('boxscore')}
+          >
+            Box score ›
+          </button>
+        )}
       </div>
 
       <Masthead away={game.away} home={game.home} onSketch={setSketching} />
@@ -107,7 +116,6 @@ export function GameView({ game, section, onSection, onHome }) {
           inning={inning}
           half={half}
           onInning={(n, h) => onSection(stepToSection(2, n, h))}
-          onBoxScore={() => onSection('boxscore')}
           onReload={feedState.reload}
           loading={feedState.loading}
         />

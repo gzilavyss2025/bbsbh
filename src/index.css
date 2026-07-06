@@ -213,6 +213,28 @@ body {
   color: var(--text-heading);
 }
 
+/* Box-score shortcut, top-right of the site bar — reachable from any in-game
+   sub-page (lineups, innings) so the sealed full box score is always one tap
+   away without walking back through the sections. */
+.sitebar__box {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  min-height: var(--tap-min);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
 /* --------------------------------------------------------------- masthead
    The game's identity in-view: two grayscale marks — away @ home — sized like
    the logos on the lineup pages. Each is a button that opens the sketch modal. */
@@ -908,34 +930,6 @@ body {
 .inningnav__of {
   color: var(--text-caption);
   font-weight: var(--w-medium);
-}
-
-.inningnav__strip {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 2px 0 12px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.inningnav__chip {
-  flex: 0 0 auto;
-  min-width: 38px;
-  min-height: 38px;
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-muted);
-  font-weight: var(--w-bold);
-  cursor: pointer;
-  box-shadow: var(--inset-cell);
-}
-
-.inningnav__chip.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-  box-shadow: none;
 }
 
 .inning {
@@ -1645,8 +1639,35 @@ body {
   color: var(--accent-primary);
 }
 
-.rolling__pending {
+/* Each run cell is a tap target that jumps to that half-inning (the line score
+   is the navigator). The button fills the cell; the current half is inked like a
+   selected chip. */
+.rolling__grid td.rolling__cell {
+  padding: 0;
+}
+
+.rolling__pick {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.rolling__pick.rolling__pending {
   color: var(--graphite-soft);
+}
+
+.rolling__pick.is-active {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
 }
 
 .rolling__cap {
@@ -2103,12 +2124,6 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-heading);
   overflow-wrap: anywhere;
-}
-
-/* The link from the innings view to the full box score. */
-.boxscorelink {
-  width: 100%;
-  margin-top: var(--space-4);
 }
 
 /* ------------------------------------------------------------- floating nav

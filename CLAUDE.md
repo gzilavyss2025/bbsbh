@@ -82,11 +82,16 @@ isn't fully revealed — either would leak the current inning.
 **Extra innings never spoil.** `InningViewer` shows only `regulation` innings
 (`selectRegulationInnings` — 9, or 7 for short games) up front. Each inning past
 regulation unlocks one at a time via `unlocked`, and only once the prior inning's
-bottom is at/below `revealedThrough` — so the navigator, chip strip, and running
-line never hint a game went to extras before the user reveals their way there.
-The `RollingLine` boxscore holds only `regulation` columns, so once extras unlock
-it scrolls that window forward (dropping inning 1 when 10 appears, etc.) while
-R/H/E totals stay cumulative over every revealed inning. Never derive the visible
+bottom is at/below `revealedThrough` — so the navigator and running line never
+hint a game went to extras before the user reveals their way there. The
+`RollingLine` boxscore holds only `regulation` columns, so once extras unlock it
+scrolls that window forward (dropping inning 1 when 10 appears, etc.) while R/H/E
+totals stay cumulative over every revealed inning. `RollingLine` also *is* the
+half-inning navigator: every run cell is a button that jumps to that half (away
+row = tops, home row = bottoms), the current half inked as selected — so
+selecting a half reads like reading a line score, with no separate scrolling chip
+strip. The Back/Next controls above it cover the full unlocked range for the rare
+extras case where the visible window has scrolled a half off. Never derive the visible
 inning count from `selectInningCount` (the *actual* count) directly — that leaks
 the extras.
 

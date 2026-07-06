@@ -35,7 +35,7 @@ import { PlayByPlay } from '../components/PlayByPlay.jsx'
 // are shown up front. Each inning past regulation unlocks one at a time, and only
 // once the prior inning has been revealed — so the navigator and boxscore never
 // hint that a game went to extras before the user gets there.
-export function InningViewer({ feed, started, inning, half, onInning, onBoxScore, onReload, loading }) {
+export function InningViewer({ feed, started, inning, half, onInning, onReload, loading }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -115,12 +115,6 @@ export function InningViewer({ feed, started, inning, half, onInning, onBoxScore
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
-  // Keep the chip for the current half visible in the scrollable strip.
-  const activeChipRef = useRef(null)
-  useEffect(() => {
-    activeChipRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' })
-  }, [curIdx])
-
   // Every pitcher who has appeared in a revealed half-inning, with running lines
   // (see api/pitchers.js). Recomputed as the reveal mark advances.
   const pitcherLines = useMemo(
@@ -166,6 +160,8 @@ export function InningViewer({ feed, started, inning, half, onInning, onBoxScore
         revealedThrough={revealedThrough}
         awayAbbr={meta.away.abbreviation}
         homeAbbr={meta.home.abbreviation}
+        curIdx={curIdx}
+        onSelect={goTo}
       />
 
       <nav className="inningnav" aria-label="Half-inning navigator">
@@ -188,24 +184,6 @@ export function InningViewer({ feed, started, inning, half, onInning, onBoxScore
           Next ›
         </button>
       </nav>
-
-      <div className="inningnav__strip">
-        {Array.from({ length: maxIdx + 1 }, (_, idx) => {
-          const n = Math.floor(idx / 2) + 1
-          const h = idx % 2 === 0 ? 'top' : 'bottom'
-          return (
-            <button
-              key={idx}
-              ref={idx === curIdx ? activeChipRef : null}
-              className={`inningnav__chip ${idx === curIdx ? 'is-active' : ''}`}
-              onClick={() => goTo(idx)}
-              aria-label={`${h === 'top' ? 'Top' : 'Bottom'} of inning ${n}`}
-            >
-              {h === 'top' ? 'T' : 'B'}{n}
-            </button>
-          )
-        })}
-      </div>
 
       {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
       <div className="inning" key={`${effInning}-${effHalf}`}>
@@ -240,12 +218,6 @@ export function InningViewer({ feed, started, inning, half, onInning, onBoxScore
         roster={rosters.home}
         revealedThrough={revealedThrough}
       />
-
-      {onBoxScore && (
-        <button type="button" className="btn boxscorelink" onClick={onBoxScore}>
-          Full box score ›
-        </button>
-      )}
     </div>
   )
 }
@@ -319,6 +291,12 @@ function HalfInning({
 // a cell is read only when its half-index is at or below `revealedThrough`, so
 // nothing sealed is ever computed into the grid.
 //
+// It doubles as the half-inning navigator: every run cell is a button that jumps
+// to that half (away row = tops, home row = bottoms), with the current half
+// highlighted — so selecting a half reads like reading a line score, no separate
+// scrolling chip strip. The Back/Next nav above covers the full unlocked range in
+// the rare extra-innings case where the visible window has scrolled a half off.
+//
 // The grid can only hold `regulation` inning columns, so once extra innings
 // unlock it scrolls that window forward — dropping inning 1 when inning 10
 // appears, inning 2 for 11, and so on — while the R/H/E totals stay cumulative
@@ -330,6 +308,8 @@ function RollingLine({
   revealedThrough,
   awayAbbr,
   homeAbbr,
+  curIdx,
+  onSelect,
 }) {
   const firstCol = Math.max(1, unlocked - regulation + 1)
   const cols = []
@@ -376,9 +356,21 @@ function RollingLine({
                   <th className="rolling__team">{row.abbr}</th>
                   {cols.map((n) => {
                     const l = lineFor(n, row.half, row.side)
+                    const idx = halfIndex(n, row.half)
+                    const active = idx === curIdx
                     return (
-                      <td key={n} className={l ? '' : 'rolling__pending'}>
-                        {l ? l.runs : '·'}
+                      <td key={n} className="rolling__cell">
+                        <button
+                          type="button"
+                          className={`rolling__pick ${active ? 'is-active' : ''} ${
+                            l ? '' : 'rolling__pending'
+                          }`}
+                          aria-current={active ? 'true' : undefined}
+                          aria-label={`${row.half === 'top' ? 'Top' : 'Bottom'} of inning ${n}`}
+                          onClick={() => onSelect(idx)}
+                        >
+                          {l ? l.runs : '·'}
+                        </button>
                       </td>
                     )
                   })}
@@ -391,7 +383,7 @@ function RollingLine({
           </tbody>
         </table>
       </div>
-      <p className="rolling__cap">Fills in as you reveal each half.</p>
+      <p className="rolling__cap">Tap a half to open it; runs fill in as you reveal.</p>
     </section>
   )
 }
