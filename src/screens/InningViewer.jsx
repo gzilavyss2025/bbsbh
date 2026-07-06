@@ -1,5 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
-import { selectInningCount, selectLineup } from '../api/select.js'
+import {
+  selectInningCount,
+  selectBullpen,
+  selectBench,
+  selectTeamMeta,
+} from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import {
   computeDerivedByInning,
@@ -23,8 +28,21 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
     return derivedRef.current
   }
 
-  const awayRoster = useMemo(() => selectLineup(feed, 'away'), [feed])
-  const homeRoster = useMemo(() => selectLineup(feed, 'home'), [feed])
+  const rosters = useMemo(
+    () => ({
+      away: {
+        name: selectTeamMeta(feed, 'away').name || 'Away',
+        bullpen: selectBullpen(feed, 'away'),
+        bench: selectBench(feed, 'away'),
+      },
+      home: {
+        name: selectTeamMeta(feed, 'home').name || 'Home',
+        bullpen: selectBullpen(feed, 'home'),
+        bench: selectBench(feed, 'home'),
+      },
+    }),
+    [feed],
+  )
 
   if (!started) {
     return (
@@ -96,8 +114,8 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
         />
       </div>
 
-      <RosterPanel title="Away roster" players={awayRoster} />
-      <RosterPanel title="Home roster" players={homeRoster} />
+      <RosterPanel title={rosters.away.name} roster={rosters.away} />
+      <RosterPanel title={rosters.home.name} roster={rosters.home} />
     </div>
   )
 }
@@ -138,7 +156,11 @@ function HalfInning({
                 <Stat k="Pitches" v={d.pitches} />
                 <Stat k="Total pitches" v={rolling} unit="rolling" />
                 <Stat k="Whiffs" v={d.whiffs} />
-                <Stat k="1st-pitch strikes" v={d.firstPitchStrikes} small />
+                <Stat
+                  k="1st-pitch strikes"
+                  v={`${d.firstPitchStrikes}/${d.plateAppearances}`}
+                  small
+                />
               </div>
             </>
           )
@@ -164,10 +186,12 @@ function Stat({ k, v, unit, tone, big, small }) {
   )
 }
 
-// Persistent, collapsible roster reference. Spoiler-safe: it lists the batting
-// order for lookup while scoring and reveals nothing about outcomes.
-function RosterPanel({ title, players }) {
+// Persistent, collapsible roster reference. Spoiler-safe: it lists only the
+// players who have NOT yet entered the game — the bullpen (with handedness) and
+// the bench (with position) — for lookup while scoring. Reveals no outcomes.
+function RosterPanel({ title, roster }) {
   const [open, setOpen] = useState(false)
+  const empty = roster.bullpen.length === 0 && roster.bench.length === 0
   return (
     <section className="roster">
       <button className="roster__toggle" onClick={() => setOpen((o) => !o)}>
@@ -175,17 +199,47 @@ function RosterPanel({ title, players }) {
         <span className="roster__chevron">{open ? '▾' : '▸'}</span>
       </button>
       {open && (
-        <ol className="roster__list">
-          {players.length === 0 && <li className="hint">Not posted yet.</li>}
-          {players.map((p) => (
-            <li key={p.id} className="roster__row">
-              <span className="roster__order">{p.order}</span>
-              <span className="roster__jersey">{p.jersey ? `#${p.jersey}` : ''}</span>
-              <span className="roster__name">{p.name}</span>
-              <span className="roster__pos">{p.position}</span>
-            </li>
-          ))}
-        </ol>
+        <div className="roster__body">
+          {empty && <p className="hint">Not posted yet.</p>}
+
+          {roster.bullpen.length > 0 && (
+            <>
+              <h4 className="roster__group">Bullpen</h4>
+              <ul className="roster__list">
+                {roster.bullpen.map((p) => (
+                  <li key={p.id} className="roster__row">
+                    <span className="roster__jersey">
+                      {p.jersey ? `#${p.jersey}` : ''}
+                    </span>
+                    <span className="roster__name">
+                      {p.nameLastFirst.toUpperCase()}
+                    </span>
+                    <span className="roster__pos">{p.hand.toUpperCase()}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {roster.bench.length > 0 && (
+            <>
+              <h4 className="roster__group">Bench</h4>
+              <ul className="roster__list">
+                {roster.bench.map((p) => (
+                  <li key={p.id} className="roster__row">
+                    <span className="roster__jersey">
+                      {p.jersey ? `#${p.jersey}` : ''}
+                    </span>
+                    <span className="roster__name">
+                      {p.nameLastFirst.toUpperCase()}
+                    </span>
+                    <span className="roster__pos">{p.position}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       )}
     </section>
   )

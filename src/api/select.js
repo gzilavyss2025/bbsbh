@@ -8,6 +8,24 @@ function playerIndex(feed) {
   return feed?.gameData?.players ?? {}
 }
 
+// "LAST, FIRST" for a gameData player record. The API already provides
+// lastFirstName; fall back to fullName if it's absent (flakier MiLB feeds).
+function lastFirst(person) {
+  return person?.lastFirstName ?? person?.fullName ?? 'TBD'
+}
+
+// Just the surname (for the compact opposing-defense list). boxscoreName is the
+// club's own short form ("Gurriel Jr."); fall back to the pre-comma slice.
+function lastName(person) {
+  if (person?.boxscoreName) return person.boxscoreName
+  if (person?.lastFirstName) return person.lastFirstName.split(',')[0].trim()
+  return person?.fullName ?? ''
+}
+
+function otherSide(side) {
+  return side === 'away' ? 'home' : 'away'
+}
+
 // Resolve the batting order for one side into a printable lineup. battingOrder
 // is an array of player ids (as strings) in slot order. Cross-references
 // gameData.players for names and the team's boxscore players[] for jersey
@@ -29,6 +47,61 @@ export function selectLineup(feed, side /* 'away' | 'home' */) {
       order: i + 1,
       id,
       name: person.fullName ?? box.person?.fullName ?? 'TBD',
+      nameLastFirst: lastFirst(person.fullName ? person : box.person),
+      last: lastName(person.fullName ? person : box.person),
+      jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
+      position: box.position?.abbreviation ?? '',
+    }
+  })
+}
+
+// The opposing pitcher a given batting side faces = the OTHER team's probable
+// starter, with jersey and handedness. Spoiler-safe.
+export function selectOpposingPitcher(feed, battingSide) {
+  return selectTeamMeta(feed, otherSide(battingSide)).probablePitcher
+}
+
+// The opposing defensive alignment the batting side faces: the other team's
+// starters at their fielding positions. The DH is excluded (not on defense) and
+// so is the pitcher, who is listed separately as the opposing pitcher.
+export function selectOpposingDefense(feed, battingSide) {
+  return selectLineup(feed, otherSide(battingSide))
+    .filter((p) => p.position && p.position !== 'DH' && p.position !== 'P')
+    .map((p) => ({ id: p.id, last: p.last, position: p.position }))
+}
+
+// Relievers who have NOT yet entered the game (boxscore.bullpen shrinks as
+// pitchers are used). Name / number / handedness, matching the scorebook.
+export function selectBullpen(feed, side) {
+  const team = feed?.liveData?.boxscore?.teams?.[side]
+  if (!team) return []
+  const boxPlayers = team.players ?? {}
+  const players = playerIndex(feed)
+  return (team.bullpen ?? []).map((id) => {
+    const box = boxPlayers[`ID${id}`] ?? {}
+    const person = players[`ID${id}`] ?? {}
+    return {
+      id,
+      nameLastFirst: lastFirst(person.fullName ? person : box.person),
+      jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
+      hand: person.pitchHand?.description ?? '', // 'Left' | 'Right'
+    }
+  })
+}
+
+// Position players on the bench who have NOT yet entered the game.
+// Name / number / position.
+export function selectBench(feed, side) {
+  const team = feed?.liveData?.boxscore?.teams?.[side]
+  if (!team) return []
+  const boxPlayers = team.players ?? {}
+  const players = playerIndex(feed)
+  return (team.bench ?? []).map((id) => {
+    const box = boxPlayers[`ID${id}`] ?? {}
+    const person = players[`ID${id}`] ?? {}
+    return {
+      id,
+      nameLastFirst: lastFirst(person.fullName ? person : box.person),
       jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
       position: box.position?.abbreviation ?? '',
     }
@@ -49,6 +122,8 @@ export function selectTeamMeta(feed, side) {
     pitcher = {
       id: probable.id,
       name: probable.fullName ?? p.fullName ?? 'TBD',
+      nameLastFirst: lastFirst(p.fullName ? p : probable),
+      jersey: p.primaryNumber ?? '',
       hand: p.pitchHand?.code ?? '', // 'L' | 'R'
     }
   }
@@ -64,6 +139,13 @@ export function selectTeamMeta(feed, side) {
 
 // The four umpires. officialType is one of Home Plate / First Base /
 // Second Base / Third Base.
+const UMP_LABELS = {
+  'Home Plate': 'HP',
+  'First Base': '1B',
+  'Second Base': '2B',
+  'Third Base': '3B',
+}
+
 export function selectOfficials(feed) {
   const officials = feed?.liveData?.boxscore?.officials ?? []
   const order = ['Home Plate', 'First Base', 'Second Base', 'Third Base']
@@ -73,7 +155,7 @@ export function selectOfficials(feed) {
   }
   return order
     .filter((t) => byType[t])
-    .map((t) => ({ role: t, name: byType[t] }))
+    .map((t) => ({ role: UMP_LABELS[t] ?? t, name: byType[t] }))
 }
 
 // Venue / weather / attendance / first pitch. MLB populates these; MiLB may
