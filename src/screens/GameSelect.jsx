@@ -34,45 +34,50 @@ export function GameSelect({ onPick, onShowLogos }) {
 
   return (
     <div className="screen">
-      <header className="topbar">
-        <h1 className="topbar__title">
-          <DiamondGlyph size={22} bases={[false, true, false]} />
-          Scorebook
-        </h1>
-        <div className="topbar__right">
-          <button
-            type="button"
-            className="btn btn--ghost topbar__logos"
-            onClick={onShowLogos}
-          >
-            Logos
+      {/* One solid, sticky banner for all the slate controls (title, level tabs,
+          date). Pinned together on an opaque backdrop so the cards scroll
+          cleanly underneath instead of bleeding through a see-through header. */}
+      <div className="slatehead">
+        <header className="topbar">
+          <h1 className="topbar__title">
+            <DiamondGlyph size={22} bases={[false, true, false]} />
+            Scorebook
+          </h1>
+          <div className="topbar__right">
+            <button
+              type="button"
+              className="btn btn--ghost topbar__logos"
+              onClick={onShowLogos}
+            >
+              Logos
+            </button>
+          </div>
+        </header>
+
+        <div className="levelnav" role="tablist" aria-label="Level">
+          {LEVELS.map((lvl) => (
+            <button
+              key={lvl.sportId}
+              type="button"
+              role="tab"
+              aria-selected={sportId === lvl.sportId}
+              className={`levelnav__btn ${sportId === lvl.sportId ? 'is-active' : ''}`}
+              onClick={() => setSportId(lvl.sportId)}
+            >
+              {lvl.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="datenav datenav--row">
+          <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
+            ‹
+          </button>
+          <span className="datenav__label">{humanDate(dateStr)}</span>
+          <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
+            ›
           </button>
         </div>
-      </header>
-
-      <div className="levelnav" role="tablist" aria-label="Level">
-        {LEVELS.map((lvl) => (
-          <button
-            key={lvl.sportId}
-            type="button"
-            role="tab"
-            aria-selected={sportId === lvl.sportId}
-            className={`levelnav__btn ${sportId === lvl.sportId ? 'is-active' : ''}`}
-            onClick={() => setSportId(lvl.sportId)}
-          >
-            {lvl.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="datenav datenav--row">
-        <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
-          ‹
-        </button>
-        <span className="datenav__label">{humanDate(dateStr)}</span>
-        <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
-          ›
-        </button>
       </div>
 
       {loading && <p className="hint">Loading games…</p>}

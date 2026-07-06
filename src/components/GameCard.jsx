@@ -18,9 +18,11 @@ export function GameCard({ game, pinned, onSelect, onBoxScore }) {
         onClick={() => onSelect(game)}
       >
         <div className="gamecard__teams">
-          <TeamColumn team={game.away} />
+          <TeamMark team={game.away} side="away" />
           <span className="gamecard__at" aria-hidden="true">@</span>
-          <TeamColumn team={game.home} />
+          <TeamMark team={game.home} side="home" />
+          <TeamName team={game.away} side="away" />
+          <TeamName team={game.home} side="home" />
         </div>
         {game.abstractState !== 'Final' && (
           <ReadyStrip game={game} />
@@ -77,24 +79,34 @@ function ReadyStrip({ game }) {
   )
 }
 
-// One team column: a large grayscale logo above the name (location on the first
-// line, mascot on the second). Falls back to the full name when we can't
-// cleanly split off a location (some MiLB clubs).
-function TeamColumn({ team }) {
-  const { location, mascot } = splitName(team.name, team.teamName)
+// A team's grayscale mark, framed in a uniform bordered square so the two logos
+// read at a consistent size and the '@' lands dead-center between them (the mark
+// is slightly overscaled so it just kisses the frame — cropped ever so slightly,
+// the way Caught Looking tiles its club marks). Sits in the top grid row.
+function TeamMark({ team, side }) {
   return (
-    <div className="gamecard__team">
+    <div className={`gamecard__logobox gamecard__logobox--${side}`}>
       <TeamLogo
         teamId={team.id}
         name={team.name}
         size={56}
         className="teamlogo--bw"
       />
-      <span className="gamecard__name">
-        {location && <span className="gamecard__loc">{location}</span>}
-        <span className="gamecard__mascot">{mascot}</span>
-      </span>
     </div>
+  )
+}
+
+// The team's name under its mark (location on the first line, mascot on the
+// second). Falls back to the full name when we can't cleanly split off a
+// location (some MiLB clubs). Sits in the bottom grid row so names align
+// independently of the marks above them.
+function TeamName({ team, side }) {
+  const { location, mascot } = splitName(team.name, team.teamName)
+  return (
+    <span className={`gamecard__name gamecard__name--${side}`}>
+      {location && <span className="gamecard__loc">{location}</span>}
+      <span className="gamecard__mascot">{mascot}</span>
+    </span>
   )
 }
 
