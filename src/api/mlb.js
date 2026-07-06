@@ -88,7 +88,11 @@ export async function fetchGameFeed(gamePk) {
 
 // ---------------------------------------------------------------------------
 // Managers — NOT in the live feed (its coaches array comes back empty), so we
-// hit the dedicated coaches endpoint and find the row where job == 'Manager'.
+// hit the dedicated coaches endpoint and find the manager row. The job title
+// varies: a permanent skipper is 'Manager' (jobId 'MNGR'), but a fill-in is
+// 'Interim Manager' (jobId 'NTRM') — e.g. Don Mattingly for the 2026 Phillies.
+// So we match any job ending in "Manager", prefer a permanent one, and tag an
+// interim with "(interim)" so the label stays honest.
 // ---------------------------------------------------------------------------
 
 export async function fetchManager(teamId) {
@@ -96,8 +100,13 @@ export async function fetchManager(teamId) {
   try {
     const data = await getJson(`/api/v1/teams/${teamId}/coaches`)
     const roster = data.roster ?? []
-    const mgr = roster.find((r) => r.job === 'Manager')
-    return mgr?.person?.fullName ?? null
+    const managers = roster.filter((r) => /(^|\s)manager$/i.test(r.job ?? ''))
+    // Prefer the exact 'Manager' over an 'Interim Manager' if both appear.
+    const mgr =
+      managers.find((r) => r.job === 'Manager') ?? managers[0] ?? null
+    const name = mgr?.person?.fullName
+    if (!name) return null
+    return mgr.job === 'Manager' ? name : `${name} (interim)`
   } catch {
     // MiLB affiliates may not expose coaches; degrade gracefully.
     return null
