@@ -67,13 +67,25 @@ export function selectOpposingPitcher(feed, battingSide) {
   return selectTeamMeta(feed, otherSide(battingSide)).probablePitcher
 }
 
+// Fixed display order for the opposing-defense list, independent of batting
+// order — the scorebook always reads C through DH the same way.
+const DEFENSE_POSITION_ORDER = [
+  'C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH',
+]
+
 // The opposing defensive alignment the batting side faces: the other team's
-// starters at their fielding positions. The DH is excluded (not on defense) and
-// so is the pitcher, who is listed separately as the opposing pitcher.
+// starters at their fielding positions plus the DH, sorted into a rigid
+// C/1B/2B/SS/3B/LF/CF/RF/DH order every time. The pitcher is excluded — he's
+// listed separately as the opposing pitcher.
 export function selectOpposingDefense(feed, battingSide) {
   return selectLineup(feed, otherSide(battingSide))
-    .filter((p) => p.position && p.position !== 'DH' && p.position !== 'P')
+    .filter((p) => p.position && p.position !== 'P')
     .map((p) => ({ id: p.id, last: p.last, position: p.position }))
+    .sort(
+      (a, b) =>
+        DEFENSE_POSITION_ORDER.indexOf(a.position) -
+        DEFENSE_POSITION_ORDER.indexOf(b.position)
+    )
 }
 
 // Relievers who have NOT yet entered the game (boxscore.bullpen shrinks as
