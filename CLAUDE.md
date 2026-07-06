@@ -84,14 +84,20 @@ the extras.
 
 ## Architecture
 
-**No backend, no persistence.** Every device queries `https://statsapi.mlb.com`
-directly. Nothing is stored because every screen is spoiler-safe by construction.
+**No backend.** Every device queries `https://statsapi.mlb.com` directly. The
+one thing kept between sessions is each game's reveal high-water mark
+(`revealedThrough`), stored in `localStorage` under `bbsbh:reveal:{gamePk}` so
+returning to a game keeps your place. Only that half-index is stored, never a
+score — on return the app re-reveals up to the half you'd already reached, so
+the spoiler rule still holds. Nothing else is persisted.
 
 **Routing** is a tiny dependency-free layer over the History API
 (`src/lib/route.js` — deliberately *not* react-router). Three route shapes: `/`
 (slate), `/logos` (logo sheet), and `/{MMDDYYYY}/{matchup}/{section}` for a
 deep-linkable game section, where `matchup` is the away+home team abbreviations
-lowercased (`milaz`) and `section` is `lineup1` / `lineup2` / `inning{n}`.
+lowercased (`milaz`) and `section` is `lineup1` / `lineup2` / `inning{n}` /
+`boxscore` (the sealed full box score; also reachable straight from a past
+game's slate card).
 `src/App.jsx` parses `location.pathname` into a route, listens on `popstate`, and
 `pushState`s on navigation; the URL is the single source of truth for which game
 section shows. `GameRoute` resolves a route to a game object — instantly from the

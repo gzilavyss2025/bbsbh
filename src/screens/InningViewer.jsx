@@ -1,4 +1,11 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -63,11 +70,29 @@ export function InningViewer({ feed, started, inning, onInning, onBoxScore, onRe
   // uncovered. Revealing a later inning auto-reveals everything before it — the
   // running line and Pitchers section both read from this single mark, and any
   // half at or below it renders unsealed.
-  const [revealedThrough, setRevealedThrough] = useState(-1)
+  //
+  // The mark is persisted per game (keyed by gamePk) so leaving the innings view
+  // and returning — even in a new session — keeps your place instead of
+  // re-sealing everything you'd already uncovered. Only the mark is stored, never
+  // a score, so nothing score-revealing is written to disk: on return we simply
+  // re-reveal up to the half the user had already reached.
+  const storageKey = feed?.gamePk ? `${REVEAL_KEY}${feed.gamePk}` : null
+  const [revealedThrough, setRevealedThrough] = useState(() =>
+    readRevealMark(storageKey),
+  )
   const revealTo = useCallback((n, half) => {
     const idx = halfIndex(n, half)
     setRevealedThrough((prev) => (idx > prev ? idx : prev))
   }, [])
+
+  useEffect(() => {
+    if (!storageKey || revealedThrough < 0) return
+    try {
+      window.localStorage.setItem(storageKey, String(revealedThrough))
+    } catch {
+      // Private-mode / storage-disabled — degrade to in-session memory only.
+    }
+  }, [storageKey, revealedThrough])
 
   // How many innings are currently visible: regulation, plus one more for each
   // extra inning whose predecessor has already been fully revealed.
@@ -534,4 +559,18 @@ function ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd']
   const v = n % 100
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
+}
+
+// localStorage key prefix + reader for the per-game reveal high-water mark.
+const REVEAL_KEY = 'bbsbh:reveal:'
+function readRevealMark(storageKey) {
+  if (!storageKey) return -1
+  try {
+    const raw = window.localStorage.getItem(storageKey)
+    if (raw == null) return -1
+    const n = Number(raw)
+    return Number.isInteger(n) && n >= 0 ? n : -1
+  } catch {
+    return -1
+  }
 }
