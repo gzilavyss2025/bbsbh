@@ -228,18 +228,21 @@ export function selectBoxscore(feed) {
     win: decisionName(feed, d.winner),
     loss: decisionName(feed, d.loser),
     save: decisionName(feed, d.save),
+    // Season line shown in parens after the name: (W-L) for the win/loss,
+    // (saves) for the closer — the standard box-score decision format.
+    winRecord: recordStr(feed, d.winner?.id),
+    lossRecord: recordStr(feed, d.loser?.id),
+    saveRecord: savesStr(feed, d.save?.id),
   }
 
   const infoRows = feed?.liveData?.boxscore?.info ?? []
-  // Umpires are rendered as their own HP/1B/2B/3B slots (the scorebook header
-  // shape), so drop the combined "Umpires" row from the generic game-info foot
-  // to avoid showing them twice.
+  // Umpires are also broken into their own HP/1B/2B/3B fill-in boxes at the top,
+  // but the combined "Umpires" row stays in the full game-info foot so the text
+  // box score at the bottom is complete.
   const umpires = parseUmpires(
     infoRows.find((r) => r.label === 'Umpires')?.value,
   )
-  const gameInfo = infoRows.filter(
-    (r) => r.label && r.value && r.label !== 'Umpires',
-  )
+  const gameInfo = infoRows.filter((r) => r.label && r.value)
   const dateRow = infoRows.find((r) => r.label && r.value == null)
 
   return {
@@ -257,4 +260,26 @@ function decisionName(feed, person) {
   if (!person?.id) return ''
   const gd = feed?.gameData?.players?.[`ID${person.id}`]
   return shortName(gd ?? person)
+}
+
+// A decision pitcher's season pitching line — used for the "(W-L)" / "(SV)"
+// the box-score foot appends after each name. The pitcher sits on one team or
+// the other, so look in both.
+function pitcherSeason(feed, id) {
+  if (!id) return null
+  for (const side of ['away', 'home']) {
+    const bp = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]
+    if (bp) return bp.seasonStats?.pitching ?? null
+  }
+  return null
+}
+
+function recordStr(feed, id) {
+  const s = pitcherSeason(feed, id)
+  return s ? `${s.wins ?? 0}-${s.losses ?? 0}` : ''
+}
+
+function savesStr(feed, id) {
+  const s = pitcherSeason(feed, id)
+  return s ? String(s.saves ?? 0) : ''
 }

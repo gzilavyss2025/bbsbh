@@ -1962,11 +1962,12 @@ body {
   color: var(--text-heading);
 }
 
-/* Pitchers of record. */
+/* Pitchers of record — stacked one per line, like a printed box score's
+   decisions, each name trailing its (W-L) / (SV) season line. */
 .bs__decisions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
+  flex-direction: column;
+  gap: 5px;
   padding: 12px 14px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -1974,11 +1975,12 @@ body {
   box-shadow: var(--shadow-card);
 }
 .bs__decision {
-  display: inline-flex;
+  display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
 }
 .bs__decisionK {
+  min-width: 34px;
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: var(--w-bold);
@@ -2056,16 +2058,46 @@ body {
   color: var(--text-heading);
 }
 
-/* The four umpire slots on one line — a bold HP/1B/2B/3B tag before each name,
-   mirroring the scorebook header's umpire boxes. */
-.bs__ump {
-  display: inline-block;
-  margin-right: 12px;
+/* Fill-in header: the scorebook's little labeled boxes (date, ballpark, umpires,
+   managers, weather, attendance…) laid out as a grid so each reads as a caption
+   over its value, ready to copy into the matching slot on the paper sheet. */
+.bs__fill {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
-.bs__umpSlot {
-  font-family: var(--font-mono);
+.bs__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 5px 8px 6px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+}
+.bs__field--wide {
+  grid-column: 1 / -1;
+}
+.bs__fieldLabel {
+  font-family: var(--font-display);
+  font-size: 8.5px;
   font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+.bs__fieldValue {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
 }
 
 /* The link from the innings view to the full box score. */

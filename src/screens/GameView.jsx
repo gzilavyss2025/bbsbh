@@ -99,7 +99,11 @@ export function GameView({ game, section, onSection, onHome }) {
         />
       )}
       {feed && step === 3 && (
-        <BoxScore feed={feed} onInnings={() => onSection('inning1')} />
+        <BoxScore
+          feed={feed}
+          managers={managers.data}
+          onInnings={() => onSection('inning1')}
+        />
       )}
     </div>
   )

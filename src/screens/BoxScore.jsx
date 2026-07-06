@@ -10,7 +10,7 @@ import { SealBox } from '../components/SealBox.jsx'
 // nothing score-revealing is in the DOM until the user taps to reveal, exactly
 // like every half-inning seal. This holds even for a deep link straight to the
 // box score, so the card's "Box score" shortcut can't spoil either.
-export function BoxScore({ feed, onInnings }) {
+export function BoxScore({ feed, managers, onInnings }) {
   return (
     <div className="boxscore">
       <div className="boxscore__head">
@@ -25,30 +25,80 @@ export function BoxScore({ feed, onInnings }) {
       <SealBox>
         {() => {
           const box = selectBoxscore(feed)
-          return <BoxScoreBody box={box} />
+          return <BoxScoreBody box={box} managers={managers} />
         }}
       </SealBox>
     </div>
   )
 }
 
-function BoxScoreBody({ box }) {
+// Ordered to fill a #22 scorebook page top-to-bottom: the line score first, then
+// a grid of labeled fill-in boxes for the header fields you copy over (date,
+// ballpark, umpires, managers, weather, attendance…), then the batting/pitching
+// detail and the pitchers of record. The complete MLB-style game-info text sits
+// at the very bottom so nothing is lost.
+function BoxScoreBody({ box, managers }) {
   return (
     <div className="bs">
-      <TeamBlock side={box.away} />
-      <TeamBlock side={box.home} />
       <Scoreboard
         away={box.away}
         home={box.home}
         innings={box.innings}
         wp={box.decisions.win}
       />
-      <Decisions decisions={box.decisions} />
-      <GameInfo
-        rows={box.gameInfo}
-        umpires={box.umpires}
+      <FillIn
         dateLabel={box.dateLabel}
+        gameInfo={box.gameInfo}
+        umpires={box.umpires}
+        managers={managers}
+        away={box.away}
+        home={box.home}
       />
+      <TeamBlock side={box.away} />
+      <TeamBlock side={box.home} />
+      <Decisions decisions={box.decisions} />
+      <GameInfo rows={box.gameInfo} dateLabel={box.dateLabel} />
+    </div>
+  )
+}
+
+// The scorebook's header fields as labeled fill-in boxes — each a small caption
+// over the value, so you can read a box and copy it into the matching slot on
+// the sheet. Feed-derived fields (ballpark, weather, first pitch, T, attendance)
+// come from the game-info rows by label; umpires from the parsed slots; managers
+// from the separate coaches fetch. Anything the feed didn't post shows "—".
+function FillIn({ dateLabel, gameInfo, umpires, managers, away, home }) {
+  const get = (label) => gameInfo.find((r) => r.label === label)?.value ?? ''
+  const fields = [
+    { label: 'Date', value: dateLabel, wide: true },
+    { label: 'Ballpark', value: get('Venue'), wide: true },
+    { label: 'Weather', value: get('Weather') },
+    { label: 'Wind', value: get('Wind') },
+    { label: 'First Pitch', value: get('First pitch') },
+    { label: 'Time', value: get('T') },
+    { label: 'Attendance', value: get('Att') },
+    { label: `${away.abbreviation || 'Away'} Manager`, value: managers?.away },
+    { label: `${home.abbreviation || 'Home'} Manager`, value: managers?.home },
+  ]
+  const umps = umpires
+    ? [
+        { label: 'HP Umpire', value: umpires.hp },
+        { label: '1B Umpire', value: umpires.first },
+        { label: '2B Umpire', value: umpires.second },
+        { label: '3B Umpire', value: umpires.third },
+      ]
+    : []
+  return (
+    <div className="bs__fill">
+      {[...fields, ...umps].map((f) => (
+        <div
+          className={`bs__field${f.wide ? ' bs__field--wide' : ''}`}
+          key={f.label}
+        >
+          <span className="bs__fieldLabel">{f.label}</span>
+          <span className="bs__fieldValue">{f.value || '—'}</span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -239,11 +289,24 @@ function Scoreboard({ away, home, innings, wp }) {
   )
 }
 
+// Pitchers of record, stacked one per line. Each name carries its season line in
+// parens — (W-L) for the win and loss, (saves) for the save — the way a printed
+// box score writes the decisions.
 function Decisions({ decisions }) {
+  const withRec = (name, rec) => (rec ? `${name} (${rec})` : name)
   const parts = [
-    decisions.win && { k: 'Win', v: decisions.win },
-    decisions.loss && { k: 'Loss', v: decisions.loss },
-    decisions.save && { k: 'Save', v: decisions.save },
+    decisions.win && {
+      k: 'Win',
+      v: withRec(decisions.win, decisions.winRecord),
+    },
+    decisions.loss && {
+      k: 'Loss',
+      v: withRec(decisions.loss, decisions.lossRecord),
+    },
+    decisions.save && {
+      k: 'Save',
+      v: withRec(decisions.save, decisions.saveRecord),
+    },
   ].filter(Boolean)
   if (parts.length === 0) return null
   return (
@@ -258,32 +321,14 @@ function Decisions({ decisions }) {
   )
 }
 
-function GameInfo({ rows, umpires, dateLabel }) {
-  // The scorebook header has four umpire slots (HP/1B/2B/3B); list them first,
-  // then the remaining game-info the sheet asks for (weather, first pitch, T,
-  // Att, venue…), each already a label/value row that copies straight across.
-  const umpRows = umpires
-    ? [
-        { label: 'HP', value: umpires.hp },
-        { label: '1B', value: umpires.first },
-        { label: '2B', value: umpires.second },
-        { label: '3B', value: umpires.third },
-      ].filter((u) => u.value)
-    : []
-  if (rows.length === 0 && umpRows.length === 0 && !dateLabel) return null
+// The complete MLB-style game-info foot (WP/LP/SV detail, pitches-strikes,
+// umpires, weather, T, Att, venue…) kept verbatim at the bottom so the full text
+// box score is intact; the fill-in boxes up top are the transcription shortcut.
+function GameInfo({ rows, dateLabel }) {
+  if (rows.length === 0 && !dateLabel) return null
   return (
     <div className="bs__info">
       {dateLabel && <p className="bs__infoDate">{dateLabel}</p>}
-      {umpRows.length > 0 && (
-        <p className="bs__infoRow">
-          <span className="bs__infoLabel">Umpires</span>
-          {umpRows.map((u) => (
-            <span className="bs__ump" key={u.label}>
-              <span className="bs__umpSlot">{u.label}</span> {u.value}
-            </span>
-          ))}
-        </p>
-      )}
       {rows.map((r, i) => (
         <p className="bs__infoRow" key={i}>
           <span className="bs__infoLabel">{r.label}:</span> {r.value}
