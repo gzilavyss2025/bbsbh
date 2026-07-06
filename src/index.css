@@ -205,6 +205,28 @@ body {
   font-weight: 700;
 }
 
+/* ---------------------------------------------------------------- team logo */
+.teamlogo {
+  flex: 0 0 auto;
+  object-fit: contain;
+  /* Many club logos are dark; a hair of light backing keeps them legible on
+     this dark UI without boxing them in. */
+  border-radius: 6px;
+}
+
+.teamlogo--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elev2);
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+  font-weight: 800;
+  /* Scale the monogram down from the box so it never touches the edges. */
+  font-size: 0.62em;
+  line-height: 1;
+}
+
 .gamecard__at {
   color: var(--text-faint);
   font-weight: 500;
@@ -272,9 +294,17 @@ body {
 /* ---------------------------------------------------------------- team info */
 .teaminfo__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin: 4px 0 16px;
+}
+
+.teaminfo__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .teaminfo__name {

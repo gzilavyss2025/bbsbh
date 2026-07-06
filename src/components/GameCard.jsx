@@ -1,3 +1,5 @@
+import { TeamLogo } from './TeamLogo.jsx'
+
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
 export function GameCard({ game, pinned, onSelect }) {
@@ -9,8 +11,10 @@ export function GameCard({ game, pinned, onSelect }) {
       onClick={() => onSelect(game)}
     >
       <div className="gamecard__teams">
+        <TeamLogo teamId={game.away.id} name={game.away.name} size={22} />
         <span className="gamecard__team">{game.away.name}</span>
         <span className="gamecard__at">@</span>
+        <TeamLogo teamId={game.home.id} name={game.home.name} size={22} />
         <span className="gamecard__team">{game.home.name}</span>
       </div>
       <div className="gamecard__meta">
