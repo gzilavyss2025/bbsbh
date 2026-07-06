@@ -50,7 +50,7 @@ Milwaukee | Brewers
 Minnesota | Twins
 New York | Mets
 New York | Yankees
- | Athletics
+It's Just | Athletics
 Philadelphia | Phillies
 Pittsburgh | Pirates
 San Diego | Padres
@@ -195,8 +195,8 @@ function normalize(s) {
   return s.trim().replace(/\s+/g, ' ').toLowerCase()
 }
 
-// Parse the table once into a lookup keyed by normalized full name.
-const SPLITS = new Map()
+// Parse the table once. Each row becomes { location, mascot }.
+const rows = []
 for (const raw of TABLE.split('\n')) {
   const line = raw.trim()
   if (!line || line.startsWith('#')) continue // blank or heading
@@ -204,8 +204,31 @@ for (const raw of TABLE.split('\n')) {
   const location = loc.trim()
   const mascot = club.trim()
   if (!mascot) continue
+  rows.push({ location, mascot })
+}
+
+// Primary lookup: the reconstructed full name (Location + " " + Mascot) matched
+// against the API's team.name — e.g. "Milwaukee Brewers".
+const SPLITS = new Map()
+for (const { location, mascot } of rows) {
   const fullName = location ? `${location} ${mascot}` : mascot
   SPLITS.set(normalize(fullName), { location, mascot })
+}
+
+// Fallback lookup: the mascot alone, but only for mascots that are unique in
+// the table (so "Cubs"/"Cardinals"/"Mets" etc. stay disambiguated by full
+// name). This is what lets a row set a display location the API name doesn't
+// contain — e.g. "It's Just | Athletics", where team.name is just "Athletics".
+const mascotCounts = new Map()
+for (const { mascot } of rows) {
+  const k = normalize(mascot)
+  mascotCounts.set(k, (mascotCounts.get(k) ?? 0) + 1)
+}
+for (const { location, mascot } of rows) {
+  const k = normalize(mascot)
+  if (mascotCounts.get(k) === 1 && !SPLITS.has(k)) {
+    SPLITS.set(k, { location, mascot })
+  }
 }
 
 // Returns { location, mascot } for a team's full name, or null when the team
