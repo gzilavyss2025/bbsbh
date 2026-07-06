@@ -1814,24 +1814,23 @@ body {
   margin-top: 14px;
 }
 
+/* No min-width: the tables size to fit the phone's content column rather than
+   forcing a horizontal scroll. Tight cell padding + small tabular figures keep
+   even the pitching table (nine numeric columns) inside the column; the name
+   auto-balances and wraps if a surname is long. .bs__scroll stays only as a
+   fallback for pathologically wide values. */
 .bs__grid {
   border-collapse: collapse;
   width: 100%;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-.bs__grid--bat {
-  min-width: 320px;
-}
-.bs__grid--pit {
-  min-width: 380px;
-}
 
 .bs__grid th,
 .bs__grid td {
-  padding: 5px 6px;
+  padding: 5px 2px;
   text-align: center;
-  font-size: 11.5px;
+  font-size: 10.5px;
   white-space: nowrap;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
@@ -1844,24 +1843,30 @@ body {
   color: var(--text-caption);
 }
 
-/* Player name column: wide, left-aligned; the numeric columns split the rest. */
+/* Player name column: left-aligned; the numeric columns take what they need and
+   this column absorbs the rest. A modest width hint keeps the numbers roomy;
+   auto table layout lets a wide value borrow back from the name if needed. */
 .bs__nameCol {
-  width: 46%;
+  width: 34%;
   text-align: left !important;
   padding-left: 0 !important;
+  white-space: normal;
 }
 
 .bs__player {
   display: inline-flex;
   align-items: baseline;
-  gap: 5px;
+  flex-wrap: wrap;
+  gap: 3px 5px;
 }
 
 .bs__pname {
   font-family: var(--font-body);
+  font-size: 10.5px;
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
+  overflow-wrap: anywhere;
 }
 
 /* Position(s) after the batter's name, and the pitcher's decision tag. */
