@@ -1094,7 +1094,7 @@ body {
 
 .pbp__card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
@@ -1110,6 +1110,7 @@ body {
 .pbp__side {
   display: flex;
   align-items: center;
+  align-self: center;
   gap: 8px;
   flex: 0 0 auto;
 }
