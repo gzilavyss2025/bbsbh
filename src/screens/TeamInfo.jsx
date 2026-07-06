@@ -4,6 +4,8 @@ import {
   selectTeamMeta,
   selectOfficials,
   selectGameInfo,
+  selectOpposingPitcher,
+  selectOpposingDefense,
 } from '../api/select.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 
@@ -14,6 +16,8 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
+  const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
+  const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
 
   return (
     <div className="teaminfo">
@@ -27,16 +31,6 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
 
       <dl className="factgrid">
         <Fact label="Manager" value={manager} />
-        <Fact
-          label="Probable"
-          value={
-            meta.probablePitcher
-              ? `${meta.probablePitcher.name}${
-                  meta.probablePitcher.hand ? ` (${meta.probablePitcher.hand}HP)` : ''
-                }`
-              : null
-          }
-        />
         <Fact label="Venue" value={info.venue} />
         <Fact label="Weather" value={info.weather} />
         <Fact label="Wind" value={info.wind} />
@@ -70,13 +64,46 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
                 <span className="lineup__jersey">
                   {p.jersey ? `#${p.jersey}` : ''}
                 </span>
-                <span className="lineup__name">{p.name}</span>
+                <span className="lineup__name">
+                  {p.nameLastFirst.toUpperCase()}
+                </span>
                 <span className="lineup__pos">{p.position}</span>
               </li>
             ))}
           </ol>
         )}
       </section>
+
+      <section className="opp">
+        <h3 className="section__title">Opposing pitcher</h3>
+        {oppPitcher ? (
+          <div className="opp__pitcher">
+            <span className="opp__jersey">
+              {oppPitcher.jersey ? `#${oppPitcher.jersey}` : ''}
+            </span>
+            <span className="opp__name">
+              {oppPitcher.nameLastFirst.toUpperCase()}
+            </span>
+            <span className="opp__hand">{oppPitcher.hand}</span>
+          </div>
+        ) : (
+          <p className="hint">Not posted yet.</p>
+        )}
+      </section>
+
+      {oppDefense.length > 0 && (
+        <section className="opp">
+          <h3 className="section__title">Opposing defense</h3>
+          <ul className="opp__defense">
+            {oppDefense.map((p) => (
+              <li key={p.id} className="opp__defrow">
+                <span className="opp__defname">{p.last.toUpperCase()}</span>
+                <span className="opp__defpos">{p.position}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <button className="btn btn--next" onClick={onNext}>
         {nextLabel}
