@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // The core spoiler mechanism (see brief §7b — this behavior must not drift).
 //
@@ -11,10 +11,25 @@ import { useState } from 'react'
 // double-tap can't flash-and-rehide). Global reveal is driven via
 // `forceRevealed`. Re-sealing on inning navigation is handled by the parent
 // remounting this component with a fresh key.
-export function SealBox({ children, forceRevealed = false }) {
+// `onReveal` (optional) fires exactly once, the moment this box becomes
+// revealed — by tap or by the global flag. It runs after reveal, so anything it
+// reads (e.g. this half's linescore, to feed the running line) is still only
+// touched post-reveal, honoring the spoiler rule.
+export function SealBox({ children, forceRevealed = false, onReveal }) {
   const [revealed, setRevealed] = useState(false)
+  const shown = revealed || forceRevealed
 
-  if (!revealed && !forceRevealed) {
+  const onRevealRef = useRef(onReveal)
+  onRevealRef.current = onReveal
+  const fired = useRef(false)
+  useEffect(() => {
+    if (shown && !fired.current) {
+      fired.current = true
+      onRevealRef.current?.()
+    }
+  }, [shown])
+
+  if (!shown) {
     return (
       <button
         type="button"

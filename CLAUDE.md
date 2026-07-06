@@ -54,6 +54,20 @@ It is enforced structurally by two conventions:
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (see
 `vite.config.js`) so a stale, spoiler-revealing score is never served from cache.
 
+**The one documented exception** is the exited-pitcher table (`src/api/pitchers.js`,
+rendered by `PitcherTable` in `InningViewer.jsx`). A finished pitcher's line
+(IP/R/ER/H…) is score-revealing but is shown *without* a `SealBox`. Its gate is
+the inning navigator instead: a pitcher only appears once the user has paged past
+his outing (his last inning `<` the inning being viewed), and the pitcher still on
+the mound is withheld until the game is Final. This was a deliberate product call —
+by the time you advance past an outing you've already scored those innings by hand,
+and the current inning is never exposed. `pitchers.js` keeps the split honest:
+`computePitcherInnings` reads only who-pitched-when (spoiler-free), and the
+score-revealing stats are read *only* for pitchers that have already cleared the
+inning gate. Don't "fix" this by wrapping it in a `SealBox`. The running line at
+the top of the innings view (`RollingLine`) is *not* an exception: it only ever
+reads halves the user has already revealed (or the global-reveal path).
+
 ## Architecture
 
 **No backend, no router, no persistence.** Every device queries

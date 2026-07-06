@@ -9,16 +9,17 @@ import { teamLogoUrl } from '../lib/teams.js'
 //   • no id (or no CDN logo for a lower-level MiLB club) -> monogram fallback;
 //   • a load error at runtime -> the same monogram fallback.
 // This mirrors the app's rule that MiLB data is rendered defensively.
-export function TeamLogo({ teamId, name, size = 26, className = '' }) {
+export function TeamLogo({ teamId, name, size = 26, bw = false, className = '' }) {
   const [failed, setFailed] = useState(false)
   const url = teamLogoUrl(teamId)
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?'
   const style = { width: size, height: size }
+  const bwClass = bw ? 'teamlogo--bw' : ''
 
   if (!url || failed) {
     return (
       <span
-        className={`teamlogo teamlogo--fallback ${className}`}
+        className={`teamlogo teamlogo--fallback ${bwClass} ${className}`}
         style={style}
         aria-hidden="true"
       >
@@ -29,7 +30,7 @@ export function TeamLogo({ teamId, name, size = 26, className = '' }) {
 
   return (
     <img
-      className={`teamlogo ${className}`}
+      className={`teamlogo ${bwClass} ${className}`}
       style={style}
       src={url}
       alt=""

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   selectLineup,
   selectTeamMeta,
@@ -8,6 +8,7 @@ import {
   selectOpposingDefense,
 } from '../api/select.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { LogoModal } from '../components/LogoModal.jsx'
 
 // Away/home info + lineup page. Nothing here is score-revealing — lineups,
 // umpires, venue and weather are all spoiler-safe — so it renders openly.
@@ -18,16 +19,32 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
+  const [sketching, setSketching] = useState(false)
 
   return (
     <div className="teaminfo">
       <div className="teaminfo__head">
         <div className="teaminfo__title">
-          <TeamLogo teamId={meta.id} name={meta.name} size={34} />
+          <button
+            type="button"
+            className="teaminfo__logobtn"
+            onClick={() => setSketching(true)}
+            aria-label={`Enlarge ${meta.name || 'team'} logo for sketching`}
+          >
+            <TeamLogo teamId={meta.id} name={meta.name} size={34} bw />
+          </button>
           <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
         </div>
         <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
       </div>
+
+      {sketching && (
+        <LogoModal
+          teamId={meta.id}
+          name={meta.name || 'Team'}
+          onClose={() => setSketching(false)}
+        />
+      )}
 
       <dl className="factgrid">
         <Fact label="Manager" value={manager} />

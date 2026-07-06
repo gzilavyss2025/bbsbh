@@ -16,10 +16,16 @@ function lastFirst(person) {
 
 // Just the surname (for the compact opposing-defense list). boxscoreName is the
 // club's own short form ("Gurriel Jr."); fall back to the pre-comma slice.
+// When two players share a surname the club disambiguates with a trailing
+// initial ("Suárez, E") — drop it so the defense list reads plain "SUÁREZ",
+// while keeping real suffixes like "Jr." intact.
 function lastName(person) {
-  if (person?.boxscoreName) return person.boxscoreName
-  if (person?.lastFirstName) return person.lastFirstName.split(',')[0].trim()
-  return person?.fullName ?? ''
+  const raw = person?.boxscoreName
+    ? person.boxscoreName
+    : person?.lastFirstName
+      ? person.lastFirstName.split(',')[0].trim()
+      : person?.fullName ?? ''
+  return raw.replace(/,\s*[A-Z]\.?$/, '').trim()
 }
 
 function otherSide(side) {

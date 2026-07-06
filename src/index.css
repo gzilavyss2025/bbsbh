@@ -1223,3 +1223,237 @@ body {
     filter: grayscale(1) contrast(1.1);
   }
 }
+
+/* -------------------------------------------------------------- logo sketch
+   Tap a grayscale team mark on a team page to blow it up for pencil tracing.
+   Reuses the .scrim backdrop but centers its card instead of docking a sheet. */
+.teaminfo__logobtn {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  line-height: 0;
+}
+.teaminfo__logobtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.scrim--center {
+  align-items: center;
+}
+
+.logomodal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 32px);
+  max-width: 340px;
+  padding: 28px 20px 22px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  animation: slideup var(--dur-slow) var(--ease-out);
+}
+
+.logomodal__art {
+  width: 240px;
+  height: 240px;
+  max-width: 66vw;
+  max-height: 66vw;
+}
+
+.logomodal__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  text-align: center;
+}
+
+.logomodal__hint {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+
+.logomodal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-caption);
+  border-radius: var(--radius-pill);
+}
+
+/* --------------------------------------------------------------- running line
+   Top-of-innings box score that fills in as the user reveals each half. Narrow
+   mono digits in a scrolling grid so 9+ innings never force the page to scroll
+   horizontally. */
+.rolling {
+  margin-bottom: var(--space-4);
+}
+
+.rolling__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.rolling__grid {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.rolling__grid th,
+.rolling__grid td {
+  padding: 6px 0;
+  min-width: 24px;
+  text-align: center;
+  font-size: 13px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.rolling__grid thead th {
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+.rolling__grid tbody tr:last-child th,
+.rolling__grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rolling__team {
+  padding-left: 12px !important;
+  padding-right: 8px !important;
+  text-align: left !important;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  position: sticky;
+  left: 0;
+  background: var(--surface-card);
+}
+
+.rolling__corner {
+  position: sticky;
+  left: 0;
+  background: var(--surface-card);
+}
+
+.rolling__tot {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  background: var(--surface-inset);
+}
+.rolling__grid thead th.rolling__tot {
+  color: var(--accent-primary);
+}
+
+.rolling__pending {
+  color: var(--graphite-soft);
+}
+
+.rolling__cap {
+  margin: 6px 2px 0;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+
+/* -------------------------------------------------------------- pitcher lines
+   Final lines for pitchers already out of the game, revealed by paging past
+   their outing (not by a seal — see api/pitchers.js). Wide, so it scrolls. */
+.pitchers {
+  margin-top: var(--space-4);
+}
+
+.pitchers__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.pitchers__sub {
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
+}
+
+.pitchers__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.pitchers__grid {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pitchers__grid th,
+.pitchers__grid td {
+  padding: 7px 8px;
+  text-align: center;
+  font-size: 12px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.pitchers__grid thead th {
+  font-size: 10.5px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.pitchers__grid tbody tr:last-child th,
+.pitchers__grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pitchers__name {
+  text-align: left !important;
+  font-family: var(--font-body);
+}
+.pitchers__lname {
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
+.pitchers__num {
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+}
