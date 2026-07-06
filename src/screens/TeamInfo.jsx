@@ -38,7 +38,7 @@ export function TeamInfo({
         <Fact label="Manager" value={manager} />
         <Fact label="Venue" value={info.venue} />
         <Fact
-          label="Scorebook wx"
+          label="Weather"
           value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}
         />
         <Fact label="Box weather" value={info.weather} />

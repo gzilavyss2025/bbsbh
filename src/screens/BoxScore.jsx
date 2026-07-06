@@ -65,7 +65,7 @@ function BoxScoreBody({ box, managers, scorebookWeather }) {
     // value to copy onto paper. Falls back to the box-score weather when the
     // generator has nothing (e.g. a MiLB park with no coordinates).
     {
-      label: 'Scorebook Wx',
+      label: 'Weather',
       value: scorebookWeather?.text || get('Weather'),
       wide: true,
     },
