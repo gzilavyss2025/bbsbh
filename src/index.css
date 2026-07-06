@@ -539,6 +539,55 @@ body {
   color: var(--text-caption);
 }
 
+/* Scorebook-readiness chips: four tiny red/green flags under the matchup that
+   say whether the basics you'd pencil in pre-game (each team's lineup, the
+   umpires, both starters) are posted yet. Intentionally small (~9px) — a glance
+   cue, not a headline. Green ✓ = posted, red ✗ = not yet; the glyph carries the
+   state alongside color so it reads without relying on hue alone. */
+.gamecard__ready {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 10px;
+}
+
+.ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.ready__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  font-size: 8px;
+  line-height: 1;
+  color: var(--text-on-ink);
+}
+
+.ready--ok {
+  color: var(--field-deep);
+}
+.ready--ok .ready__mark {
+  background: var(--accent-positive);
+}
+
+.ready--no {
+  color: var(--clay-deep);
+}
+.ready--no .ready__mark {
+  background: var(--accent-negative);
+}
+
 /* ---------------------------------------------------------------- buttons */
 .btn {
   min-height: var(--tap-min);

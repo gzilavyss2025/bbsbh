@@ -22,6 +22,9 @@ export function GameCard({ game, pinned, onSelect, onBoxScore }) {
           <span className="gamecard__at" aria-hidden="true">@</span>
           <TeamColumn team={game.home} />
         </div>
+        {game.abstractState !== 'Final' && (
+          <ReadyStrip game={game} />
+        )}
         <div className="gamecard__meta">
           {game.sportLabel && game.sportLabel !== 'MLB' && (
             <span className="gamecard__level">{game.sportLabel}</span>
@@ -39,6 +42,37 @@ export function GameCard({ game, pinned, onSelect, onBoxScore }) {
           Box score ›
         </button>
       )}
+    </div>
+  )
+}
+
+// Scorebook-readiness strip: four tiny red/green chips under the matchup telling
+// you at a glance whether the basics you'd pencil in pre-game are posted yet —
+// each team's batting order, the umpire crew, and both starting pitchers. Green
+// (✓) = posted, red (✗) = not yet. Spoiler-free; none of these reveal a score.
+// The lineup chips carry the team abbreviation so it's clear which side is set.
+function ReadyStrip({ game }) {
+  const r = game.readiness ?? {}
+  const items = [
+    { ok: !!r.awayLineup, label: `${game.away.abbreviation || 'Away'} LU` },
+    { ok: !!r.homeLineup, label: `${game.home.abbreviation || 'Home'} LU` },
+    { ok: !!r.umpires, label: 'Umps' },
+    { ok: !!r.pitchers, label: 'SP' },
+  ]
+  return (
+    <div className="gamecard__ready" aria-label="Scorebook readiness">
+      {items.map((it) => (
+        <span
+          key={it.label}
+          className={`ready ${it.ok ? 'ready--ok' : 'ready--no'}`}
+          title={`${it.label}: ${it.ok ? 'posted' : 'not posted yet'}`}
+        >
+          <span className="ready__mark" aria-hidden="true">
+            {it.ok ? '✓' : '✗'}
+          </span>
+          {it.label}
+        </span>
+      ))}
     </div>
   )
 }
