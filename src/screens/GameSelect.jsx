@@ -1,34 +1,36 @@
 import { useMemo, useState } from 'react'
-import { fetchSchedule, searchGamesByTeam } from '../api/mlb.js'
+import { fetchSchedule } from '../api/mlb.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { PINNED_TEAM_ID } from '../lib/teams.js'
+import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 
-// Screen 1: pick a game. Today's MLB slate with the Brewers pinned to the top,
-// plus a search box that also queries MiLB by team name.
+// Level toggle order across the top of the slate. MLB is selected by default.
+const LEVELS = [
+  { label: 'MLB', sportId: SPORT_IDS.MLB },
+  { label: 'AAA', sportId: SPORT_IDS.AAA },
+  { label: 'AA', sportId: SPORT_IDS.AA },
+  { label: 'A+', sportId: SPORT_IDS['A+'] },
+  { label: 'A', sportId: SPORT_IDS.A },
+]
+
+// Screen 1: pick a game. A single level's slate for the chosen date, sorted
+// soonest → latest (Brewers pinned to the top), with a LIVE pill on any game in
+// progress. Level is toggled with the thin buttons up top; no more search box.
 export function GameSelect({ onPick, onShowLogos }) {
   const [offset, setOffset] = useState(0) // days from today
-  const [query, setQuery] = useState('')
-  const [submitted, setSubmitted] = useState('')
+  const [sportId, setSportId] = useState(SPORT_IDS.MLB)
 
   const dateStr = useMemo(
     () => toApiDate(addDays(new Date(), offset)),
     [offset],
   )
 
-  const slate = useAsync(() => fetchSchedule(dateStr, 1), [dateStr])
-  const search = useAsync(
-    () => (submitted ? searchGamesByTeam(dateStr, submitted) : Promise.resolve(null)),
-    [dateStr, submitted],
-  )
+  const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
+  const { loading, error, data } = slate
 
-  const showingSearch = Boolean(submitted)
-  const games = showingSearch ? search.data : slate.data
-  const { loading, error } = showingSearch ? search : slate
-
-  const sorted = useMemo(() => sortGames(games ?? []), [games])
+  const sorted = useMemo(() => sortGames(data ?? []), [data])
 
   return (
     <div className="screen">
@@ -48,6 +50,21 @@ export function GameSelect({ onPick, onShowLogos }) {
         </div>
       </header>
 
+      <div className="levelnav" role="tablist" aria-label="Level">
+        {LEVELS.map((lvl) => (
+          <button
+            key={lvl.sportId}
+            type="button"
+            role="tab"
+            aria-selected={sportId === lvl.sportId}
+            className={`levelnav__btn ${sportId === lvl.sportId ? 'is-active' : ''}`}
+            onClick={() => setSportId(lvl.sportId)}
+          >
+            {lvl.label}
+          </button>
+        ))}
+      </div>
+
       <div className="datenav datenav--row">
         <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
           ‹
@@ -58,34 +75,6 @@ export function GameSelect({ onPick, onShowLogos }) {
         </button>
       </div>
 
-      <form
-        className="searchbar"
-        onSubmit={(e) => {
-          e.preventDefault()
-          setSubmitted(query.trim())
-        }}
-      >
-        <input
-          type="search"
-          inputMode="search"
-          placeholder="Search team (MLB or MiLB)…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        {showingSearch && (
-          <button
-            type="button"
-            className="searchbar__clear"
-            onClick={() => {
-              setQuery('')
-              setSubmitted('')
-            }}
-          >
-            Clear
-          </button>
-        )}
-      </form>
-
       {loading && <p className="hint">Loading games…</p>}
       {error && (
         <p className="hint hint--error">
@@ -93,9 +82,7 @@ export function GameSelect({ onPick, onShowLogos }) {
         </p>
       )}
       {!loading && !error && sorted.length === 0 && (
-        <p className="hint">
-          {showingSearch ? 'No games found for that team.' : 'No games scheduled.'}
-        </p>
+        <p className="hint">No games scheduled.</p>
       )}
 
       <ul className="gamelist">
@@ -104,7 +91,7 @@ export function GameSelect({ onPick, onShowLogos }) {
             <GameCard
               game={g}
               pinned={isPinned(g)}
-              onSelect={() => onPick(g)}
+              onSelect={() => onPick(g, dateStr)}
             />
           </li>
         ))}
@@ -117,12 +104,12 @@ function isPinned(game) {
   return game.away.id === PINNED_TEAM_ID || game.home.id === PINNED_TEAM_ID
 }
 
-// Brewers games float to the top; everything else keeps schedule order.
+// Soonest → latest by first pitch; the pinned Brewers game floats to the top.
 function sortGames(games) {
   return [...games].sort((a, b) => {
     const pa = isPinned(a) ? 0 : 1
     const pb = isPinned(b) ? 0 : 1
     if (pa !== pb) return pa - pb
-    return 0
+    return new Date(a.gameDate) - new Date(b.gameDate)
   })
 }

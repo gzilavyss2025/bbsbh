@@ -7,6 +7,7 @@ import { lookupSplit } from '../lib/teamSplits.js'
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
 export function GameCard({ game, pinned, onSelect }) {
+  const live = game.abstractState === 'Live'
   const statusText = describeStatus(game)
   return (
     <button
@@ -14,6 +15,7 @@ export function GameCard({ game, pinned, onSelect }) {
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`}
       onClick={() => onSelect(game)}
     >
+      {live && <span className="gamecard__live">Live</span>}
       <div className="gamecard__teams">
         <TeamColumn team={game.away} />
         <span className="gamecard__at" aria-hidden="true">@</span>
@@ -24,7 +26,7 @@ export function GameCard({ game, pinned, onSelect }) {
           <span className="gamecard__level">{game.sportLabel}</span>
         )}
         {pinned && <span className="gamecard__pin">★</span>}
-        <span className="gamecard__status">{statusText}</span>
+        {statusText && <span className="gamecard__status">{statusText}</span>}
       </div>
     </button>
   )
@@ -69,7 +71,7 @@ function splitName(name = '', mascot = '') {
 function describeStatus(game) {
   const s = game.abstractState
   if (s === 'Final') return 'Final' // no score, just the state
-  if (s === 'Live') return 'In progress'
+  if (s === 'Live') return '' // the LIVE pill carries it; no redundant text
   // Pre-game: show the local start time.
   try {
     const t = new Date(game.gameDate)

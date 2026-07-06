@@ -2,18 +2,21 @@ import { useMemo, useState } from 'react'
 import { fetchGameFeed, fetchManager } from '../api/mlb.js'
 import { selectTeamMeta, selectHasStarted } from '../api/select.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { sectionToStep, stepToSection } from '../lib/route.js'
 import { TeamInfo } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
-import { RevealScoreButton } from '../components/RevealScoreButton.jsx'
+import { TeamLogo } from '../components/TeamLogo.jsx'
+import { LogoModal } from '../components/LogoModal.jsx'
+import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 
-const STEPS = ['away', 'home', 'innings']
-
-// Container for a selected game. Fetches the feed (and both managers) once,
-// then walks the user through away info → home info → inning viewer. Owns the
-// global "reveal everything" flag.
-export function GameView({ game, onBack }) {
-  const [step, setStep] = useState(0)
-  const [globalRevealed, setGlobalRevealed] = useState(false)
+// Container for a selected game. Fetches the feed (and both managers) once, then
+// shows the section named by the URL: away info → home info → inning viewer.
+// The chrome is two grayscale team marks (away @ home) that open the sketch
+// modal; a small site mark up top returns to the slate. Which section shows is
+// driven entirely by `section` / `onSection` so every step is a real URL.
+export function GameView({ game, section, onSection, onHome }) {
+  const { step, inning } = sectionToStep(section)
+  const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
 
   const feedState = useAsync(() => fetchGameFeed(game.gamePk), [game.gamePk])
   const feed = feedState.data
@@ -32,85 +35,92 @@ export function GameView({ game, onBack }) {
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
-  if (feedState.loading) {
-    return (
-      <Frame game={game} onBack={onBack}>
-        <p className="hint">Loading game…</p>
-      </Frame>
-    )
-  }
-  if (feedState.error || !feed) {
-    return (
-      <Frame game={game} onBack={onBack}>
-        <p className="hint hint--error">
-          Couldn’t load this game. Try again in a moment.
-        </p>
-        <button className="btn" onClick={feedState.reload}>
-          Retry
-        </button>
-      </Frame>
-    )
-  }
-
-  const currentStep = STEPS[step]
+  const sketchTeam = sketching ? game[sketching] : null
 
   return (
-    <Frame
-      game={game}
-      onBack={step === 0 ? onBack : () => setStep((s) => s - 1)}
-      backLabel={step === 0 ? 'Games' : 'Back'}
-      action={
-        currentStep === 'innings' ? (
-          <RevealScoreButton
-            revealed={globalRevealed}
-            onReveal={() => setGlobalRevealed(true)}
-          />
-        ) : null
-      }
-    >
-      {currentStep === 'away' && (
+    <div className="screen">
+      <div className="sitebar">
+        <button className="sitebar__home" onClick={onHome} aria-label="Back to games">
+          <DiamondGlyph size={20} bases={[false, true, false]} />
+          <span className="sitebar__word">Scorebook</span>
+        </button>
+      </div>
+
+      <Masthead away={game.away} home={game.home} onSketch={setSketching} />
+
+      {sketchTeam && (
+        <LogoModal
+          teamId={sketchTeam.id}
+          name={sketchTeam.name}
+          onClose={() => setSketching(null)}
+        />
+      )}
+
+      {feedState.loading && <p className="hint">Loading game…</p>}
+      {(feedState.error || (!feedState.loading && !feed)) && (
+        <>
+          <p className="hint hint--error">
+            Couldn’t load this game. Try again in a moment.
+          </p>
+          <button className="btn" onClick={feedState.reload}>
+            Retry
+          </button>
+        </>
+      )}
+
+      {feed && step === 0 && (
         <TeamInfo
           feed={feed}
           side="away"
           manager={managers.data?.away}
-          onNext={() => setStep(1)}
+          onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
         />
       )}
-      {currentStep === 'home' && (
+      {feed && step === 1 && (
         <TeamInfo
           feed={feed}
           side="home"
           manager={managers.data?.home}
-          onNext={() => setStep(2)}
+          onNext={() => onSection('inning1')}
           nextLabel="Innings ›"
         />
       )}
-      {currentStep === 'innings' && (
+      {feed && step === 2 && (
         <InningViewer
           feed={feed}
           started={started}
-          globalRevealed={globalRevealed}
+          inning={inning}
+          onInning={(n) => onSection(stepToSection(2, n))}
           onReload={feedState.reload}
         />
       )}
-    </Frame>
+    </div>
   )
 }
 
-function Frame({ game, onBack, backLabel = 'Back', action, children }) {
+// The game's masthead: two grayscale marks — away on the left, home on the
+// right, an @ between — sized like the logos on the lineup pages. Tapping a mark
+// opens it enlarged for pencil sketching.
+function Masthead({ away, home, onSketch }) {
   return (
-    <div className="screen">
-      <header className="topbar topbar--game">
-        <button className="topbar__back" onClick={onBack}>
-          ‹ {backLabel}
-        </button>
-        <span className="topbar__match">
-          {game.away.teamName} @ {game.home.teamName}
-        </span>
-        <span className="topbar__action">{action}</span>
-      </header>
-      {children}
+    <div className="masthead">
+      <MastheadLogo team={away} onSketch={() => onSketch('away')} />
+      <span className="masthead__at" aria-hidden="true">@</span>
+      <MastheadLogo team={home} onSketch={() => onSketch('home')} />
     </div>
+  )
+}
+
+function MastheadLogo({ team, onSketch }) {
+  return (
+    <button
+      type="button"
+      className="masthead__logo"
+      onClick={onSketch}
+      aria-label={`Enlarge ${team.name || 'team'} logo for sketching`}
+    >
+      <TeamLogo teamId={team.id} name={team.name} size={44} bw />
+    </button>
   )
 }

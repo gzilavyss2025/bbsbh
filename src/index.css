@@ -187,46 +187,104 @@ body {
   max-width: 220px;
 }
 
-/* ---------------------------------------------------------------- search */
-.searchbar {
+/* --------------------------------------------------------------- site bar
+   A slim row on every in-game page: the site mark, top-left, taps back to the
+   slate from wherever you are. Its own row so it never crowds the masthead. */
+.sitebar {
   display: flex;
-  gap: var(--space-2);
-  margin-bottom: 14px;
+  align-items: center;
+  padding: calc(10px + env(safe-area-inset-top)) 0 6px;
 }
 
-.searchbar input {
-  flex: 1;
+.sitebar__home {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 2px;
   min-height: var(--tap-min);
-  padding: 0 14px;
-  border-radius: var(--radius-md);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-body);
-  font-size: 16px; /* keeps iOS from zooming on focus */
-  box-shadow: var(--inset-cell);
-}
-
-.searchbar input::placeholder {
+  background: none;
+  border: none;
+  cursor: pointer;
   color: var(--text-caption);
 }
 
-.searchbar input:focus-visible {
-  outline: none;
-  border-color: var(--field);
-  box-shadow: var(--ring);
+.sitebar__word {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
 }
 
-.searchbar__clear {
+/* --------------------------------------------------------------- masthead
+   The game's identity in-view: two grayscale marks — away @ home — sized like
+   the logos on the lineup pages. Each is a button that opens the sketch modal. */
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 2px 0 16px;
+}
+
+.masthead__logo {
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 0;
+  border-radius: var(--radius-xs);
+}
+
+.masthead__logo:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.masthead__at {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
+}
+
+/* ---------------------------------------------------------- level toggle
+   Thin segmented control across the top of the slate: MLB / AAA / AA / A+ / A.
+   MLB is selected by default; the active pill inks navy like a scorebook tab. */
+.levelnav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.levelnav__btn {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--text-muted);
-  border-radius: var(--radius-md);
-  padding: 0 14px;
-  min-height: var(--tap-min);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   cursor: pointer;
-  font-family: var(--font-body);
-  font-weight: var(--w-semibold);
+  box-shadow: var(--inset-cell);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.levelnav__btn:active {
+  transform: scale(0.96);
+}
+
+.levelnav__btn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
 }
 
 /* ---------------------------------------------------------------- hints */
@@ -252,6 +310,7 @@ body {
 }
 
 .gamecard {
+  position: relative;
   width: 100%;
   text-align: left;
   display: flex;
@@ -265,6 +324,33 @@ body {
   cursor: pointer;
   box-shadow: var(--shadow-card);
   transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+/* In-progress badge, pinned to the card's top-right corner. */
+.gamecard__live {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--clay, #c0392b);
+  color: #fff4f1;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.gamecard__live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .gamecard:active {
@@ -516,6 +602,8 @@ body {
   font-size: 14px;
   font-weight: var(--w-semibold);
   color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 .fact__na {
@@ -563,6 +651,8 @@ body {
   font-size: 14px;
   font-weight: var(--w-semibold);
   color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 /* ---------------------------------------------------------------- lineup */

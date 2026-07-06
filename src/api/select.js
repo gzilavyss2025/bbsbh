@@ -178,16 +178,28 @@ export function selectGameInfo(feed) {
     if (row.label) infoByLabel[row.label] = (row.value ?? '').replace(/\.$/, '')
   }
 
+  const base =
+    weather.temp && weather.condition
+      ? `${weather.temp}°, ${weather.condition}`
+      : infoByLabel['Weather'] ?? ''
+  const wind = weather.wind ?? infoByLabel['Wind'] ?? ''
+  // Wind and weather are combined into one field; drop wind entirely when it's
+  // calm ("0 mph, None") or unreported so it never shows a meaningless "0 mph".
+  const windMeaningful = wind && !/^0\s*mph/i.test(wind) && !/^none/i.test(wind)
+
   return {
     venue,
-    weather:
-      weather.temp && weather.condition
-        ? `${weather.temp}°, ${weather.condition}`
-        : infoByLabel['Weather'] ?? '',
-    wind: weather.wind ?? infoByLabel['Wind'] ?? '',
+    weather: [base, windMeaningful ? wind : ''].filter(Boolean).join(' · '),
     attendance: infoByLabel['Att'] ?? '',
     firstPitch: infoByLabel['First pitch'] ?? '',
   }
+}
+
+// Regulation length of the game (7 for some MiLB / doubleheader games, else 9).
+// Spoiler-safe: it's a fixed structural number, never a score. Drives how many
+// inning columns the boxscore shows before extra innings unlock one at a time.
+export function selectRegulationInnings(feed) {
+  return feed?.liveData?.linescore?.scheduledInnings ?? 9
 }
 
 // Number of innings the linescore knows about (drives the inning navigator).

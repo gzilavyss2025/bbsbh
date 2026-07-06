@@ -3,6 +3,7 @@
 // live July 5 2026 Brewers @ D-backs game (gamePk 825061).
 
 import { SEARCHABLE_SPORT_IDS, SPORT_LABEL } from '../lib/teams.js'
+import { matchupSlug } from '../lib/route.js'
 
 const BASE = 'https://statsapi.mlb.com'
 
@@ -37,49 +38,44 @@ function normalizeGame(game, sportId) {
       id: away?.team?.id,
       name: away?.team?.name,
       teamName: away?.team?.teamName ?? away?.team?.name,
+      abbreviation: away?.team?.abbreviation ?? '',
     },
     home: {
       id: home?.team?.id,
       name: home?.team?.name,
       teamName: home?.team?.teamName ?? home?.team?.name,
+      abbreviation: home?.team?.abbreviation ?? '',
     },
   }
 }
 
-// Today's MLB slate (or any single sportId for a given date).
+// Today's MLB slate (or any single sportId for a given date). `hydrate=team`
+// pulls the full team object into each side so we get abbreviation + teamName
+// (the bare schedule row only carries id/name) — needed for the level cards and
+// the deep-link matchup slug.
 export async function fetchSchedule(dateStr, sportId = 1) {
   const data = await getJson(
-    `/api/v1/schedule?sportId=${sportId}&date=${dateStr}`,
+    `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=team`,
   )
   const dates = data.dates ?? []
   const games = dates.flatMap((d) => d.games ?? [])
   return games.map((g) => normalizeGame(g, sportId))
 }
 
-// Search a date's games across MLB + MiLB levels by team name. Used by the
-// game-selection search box. Runs the level queries in parallel and tolerates
-// individual level failures (MiLB endpoints are flakier).
-export async function searchGamesByTeam(dateStr, query) {
-  const q = query.trim().toLowerCase()
-  if (!q) return []
-
+// Resolve a deep-link (date + away/home abbreviation slug) back to a game by
+// scanning that date's slate across every level. Used on cold loads / shared
+// links, where we don't already hold the game object from the slate.
+export async function resolveGame(apiDate, matchup) {
   const results = await Promise.allSettled(
-    SEARCHABLE_SPORT_IDS.map((sportId) => fetchSchedule(dateStr, sportId)),
+    SEARCHABLE_SPORT_IDS.map((sportId) => fetchSchedule(apiDate, sportId)),
   )
-
-  const all = results.flatMap((r) =>
-    r.status === 'fulfilled' ? r.value : [],
+  const all = results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  const want = matchup.toLowerCase()
+  return (
+    all.find(
+      (g) => matchupSlug(g.away.abbreviation, g.home.abbreviation) === want,
+    ) ?? null
   )
-
-  return all.filter((g) => {
-    const names = [
-      g.away.name,
-      g.away.teamName,
-      g.home.name,
-      g.home.teamName,
-    ]
-    return names.some((n) => n?.toLowerCase().includes(q))
-  })
 }
 
 // ---------------------------------------------------------------------------

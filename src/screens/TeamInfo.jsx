@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   selectLineup,
   selectTeamMeta,
@@ -7,11 +7,10 @@ import {
   selectOpposingPitcher,
   selectOpposingDefense,
 } from '../api/select.js'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { LogoModal } from '../components/LogoModal.jsx'
 
 // Away/home info + lineup page. Nothing here is score-revealing — lineups,
-// umpires, venue and weather are all spoiler-safe — so it renders openly.
+// umpires, venue and weather are all spoiler-safe — so it renders openly. The
+// team's logo lives in the game masthead (see GameView), not here.
 export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
@@ -19,38 +18,18 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
-  const [sketching, setSketching] = useState(false)
 
   return (
     <div className="teaminfo">
       <div className="teaminfo__head">
-        <div className="teaminfo__title">
-          <button
-            type="button"
-            className="teaminfo__logobtn"
-            onClick={() => setSketching(true)}
-            aria-label={`Enlarge ${meta.name || 'team'} logo for sketching`}
-          >
-            <TeamLogo teamId={meta.id} name={meta.name} size={34} bw />
-          </button>
-          <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
-        </div>
+        <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
         <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
       </div>
-
-      {sketching && (
-        <LogoModal
-          teamId={meta.id}
-          name={meta.name || 'Team'}
-          onClose={() => setSketching(false)}
-        />
-      )}
 
       <dl className="factgrid">
         <Fact label="Manager" value={manager} />
         <Fact label="Venue" value={info.venue} />
         <Fact label="Weather" value={info.weather} />
-        <Fact label="Wind" value={info.wind} />
         <Fact label="First pitch" value={info.firstPitch} />
         <Fact label="Attendance" value={info.attendance} />
       </dl>
@@ -81,9 +60,7 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
                 <span className="lineup__name">
                   {p.nameLastFirst.toUpperCase()}
                 </span>
-                <span className="lineup__jersey">
-                  {p.jersey ? `#${p.jersey}` : ''}
-                </span>
+                <span className="lineup__jersey">{p.jersey || ''}</span>
                 <span className="lineup__pos">{p.position}</span>
               </li>
             ))}
@@ -98,9 +75,7 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
             <span className="opp__name">
               {oppPitcher.nameLastFirst.toUpperCase()}
             </span>
-            <span className="opp__jersey">
-              {oppPitcher.jersey ? `#${oppPitcher.jersey}` : ''}
-            </span>
+            <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>
           </div>
         ) : (

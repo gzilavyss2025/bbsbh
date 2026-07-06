@@ -84,7 +84,7 @@ export function LogoSheet({ offset, onOffset, onBack }) {
 
 // Every unique team playing on a date, across MLB + MiLB. Individual level
 // queries are allowed to fail (MiLB endpoints are flakier) without sinking the
-// sheet, mirroring searchGamesByTeam.
+// sheet.
 async function fetchTeamsForDate(dateStr) {
   const results = await Promise.allSettled(
     SEARCHABLE_SPORT_IDS.map((sportId) => fetchSchedule(dateStr, sportId)),

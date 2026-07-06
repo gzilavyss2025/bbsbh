@@ -48,8 +48,8 @@ It is enforced structurally by two conventions:
    and nothing puts it in the DOM beforehand. Reveal is one-directional (a stray
    double-tap can't flash-and-rehide). Re-sealing on inning navigation works by
    the parent remounting with `key={inning}` (see `InningViewer.jsx`), which
-   resets every `SealBox` to sealed. The global "Reveal score" flag
-   (`GameView` → `RevealScoreButton` → `forceRevealed`) is the one bypass.
+   resets every `SealBox` to sealed. There is no "reveal the whole game" bypass —
+   reveal is strictly per-half-inning, gated by `revealedThrough`.
 
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (see
 `vite.config.js`) so a stale, spoiler-revealing score is never served from cache.
@@ -71,24 +71,47 @@ revealed plays only (runs/earned-runs attributed via each play's
 separate inning-navigation gate or read the boxscore for a pitcher whose outing
 isn't fully revealed — either would leak the current inning.
 
+**Extra innings never spoil.** `InningViewer` shows only `regulation` innings
+(`selectRegulationInnings` — 9, or 7 for short games) up front. Each inning past
+regulation unlocks one at a time via `unlocked`, and only once the prior inning's
+bottom is at/below `revealedThrough` — so the navigator, chip strip, and running
+line never hint a game went to extras before the user reveals their way there.
+The `RollingLine` boxscore holds only `regulation` columns, so once extras unlock
+it scrolls that window forward (dropping inning 1 when 10 appears, etc.) while
+R/H/E totals stay cumulative over every revealed inning. Never derive the visible
+inning count from `selectInningCount` (the *actual* count) directly — that leaks
+the extras.
+
 ## Architecture
 
-**No backend, no router, no persistence.** Every device queries
-`https://statsapi.mlb.com` directly. Navigation is plain React `useState` in
-`src/App.jsx` (game-select ↔ game-view ↔ logo-sheet); `GameView` walks its own
-three steps (away info → home info → innings) with local state. Nothing is stored
-because every screen is spoiler-safe by construction.
+**No backend, no persistence.** Every device queries `https://statsapi.mlb.com`
+directly. Nothing is stored because every screen is spoiler-safe by construction.
+
+**Routing** is a tiny dependency-free layer over the History API
+(`src/lib/route.js` — deliberately *not* react-router). Three route shapes: `/`
+(slate), `/logos` (logo sheet), and `/{MMDDYYYY}/{matchup}/{section}` for a
+deep-linkable game section, where `matchup` is the away+home team abbreviations
+lowercased (`milaz`) and `section` is `lineup1` / `lineup2` / `inning{n}`.
+`src/App.jsx` parses `location.pathname` into a route, listens on `popstate`, and
+`pushState`s on navigation; the URL is the single source of truth for which game
+section shows. `GameRoute` resolves a route to a game object — instantly from the
+slate-provided seed, else via `resolveGame` (scans the date's slate across levels
+and matches the abbreviation slug) for cold loads / shared links. `vercel.json`
+rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 
 **Data layer** (`src/api/`):
-- `mlb.js` — thin fetch wrapper. Schedule/slate, cross-level team search, the
-  full game feed (`/api/v1.1/game/{gamePk}/feed/live`), and a **separate**
-  `/teams/{id}/coaches` call for managers (they are **not** in the live feed).
+- `mlb.js` — thin fetch wrapper. Schedule/slate (`hydrate=team` for the
+  abbreviation + teamName the bare row lacks), `resolveGame`, the full game feed
+  (`/api/v1.1/game/{gamePk}/feed/live`), and a **separate** `/teams/{id}/coaches`
+  call for managers (they are **not** in the live feed).
 - `select.js` — pure, spoiler-free selectors over the raw feed.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
 
-**Screens** (`src/screens/`): `GameSelect` → `TeamInfo` (×2, away then home) →
-`InningViewer`. `LogoSheet` is a standalone printable grayscale logo sheet for
-pencil-sketching, reached from the slate header.
+**Screens** (`src/screens/`): `GameSelect` (slate with the MLB/AAA/AA/A+/A level
+toggle) → `GameView` (owns the site-home bar + grayscale away@home masthead that
+opens the sketch modal) → `TeamInfo` (×2, away then home) → `InningViewer`.
+`LogoSheet` is a standalone printable grayscale logo sheet for pencil-sketching,
+reached from the slate header.
 
 **Fetching**: the `useAsync` hook (`src/hooks/useAsync.js`) runs a promise on
 mount/deps-change and exposes `{ loading, error, data, reload }`.
