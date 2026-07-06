@@ -2024,6 +2024,39 @@ body {
   color: var(--text-heading);
 }
 
+/* Throwing hand (R/L) column in the pitching table — a label, not a stat, so
+   it reads a touch lighter than the numbers around it. */
+.bs__hand {
+  color: var(--text-caption);
+}
+
+/* Scoreboard strip: the final R/H/E/LOB line + winning pitcher that fill the
+   foot of the #22 sheet. Reuses the box-score table styling in a compact card. */
+.bs__board {
+  padding: 10px 14px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.bs__wp {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--text-body);
+}
+
+/* The four umpire slots on one line — a bold HP/1B/2B/3B tag before each name,
+   mirroring the scorebook header's umpire boxes. */
+.bs__ump {
+  display: inline-block;
+  margin-right: 12px;
+}
+.bs__umpSlot {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
 /* The link from the innings view to the full box score. */
 .boxscorelink {
   width: 100%;

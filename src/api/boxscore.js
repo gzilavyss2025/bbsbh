@@ -102,16 +102,17 @@ function pitchingRows(feed, side, decisions) {
       id,
       name: shortName(gd),
       dec,
+      // Throwing hand (R/L) and batters faced (BF) are #22-scorebook columns the
+      // MLB.com box score omits; both come straight from the feed.
+      hand: gd.pitchHand?.code ?? '',
       ip: s.inningsPitched ?? '0.0',
+      pitches: s.numberOfPitches ?? s.pitchesThrown ?? 0,
+      bf: s.battersFaced ?? 0,
       h: s.hits ?? 0,
       r: s.runs ?? 0,
       er: s.earnedRuns ?? 0,
       bb: s.baseOnBalls ?? 0,
       so: s.strikeOuts ?? 0,
-      hr: s.homeRuns ?? 0,
-      pitches: s.numberOfPitches ?? s.pitchesThrown ?? 0,
-      strikes: s.strikes ?? 0,
-      era: box.seasonStats?.pitching?.era ?? '-.--',
     }
   })
 }
@@ -120,13 +121,44 @@ function pitchingTotals(feed, side) {
   const t = feed?.liveData?.boxscore?.teams?.[side]?.teamStats?.pitching ?? {}
   return {
     ip: t.inningsPitched ?? '0.0',
+    bf: t.battersFaced ?? 0,
     h: t.hits ?? 0,
     r: t.runs ?? 0,
     er: t.earnedRuns ?? 0,
     bb: t.baseOnBalls ?? 0,
     so: t.strikeOuts ?? 0,
-    hr: t.homeRuns ?? 0,
   }
+}
+
+// Final R/H/E/LOB for one side, the numbers that fill the #22 scorebook's
+// scoreboard strip. Pulled from the same linescore this module already gates
+// behind reveal.
+function teamLine(feed, side) {
+  const t = feed?.liveData?.linescore?.teams?.[side] ?? {}
+  return {
+    r: t.runs ?? 0,
+    h: t.hits ?? 0,
+    e: t.errors ?? 0,
+    lob: t.leftOnBase ?? 0,
+  }
+}
+
+// The four umpire assignments (HP/1B/2B/3B) the scorebook lists in its header.
+// The feed carries them as one run-together "Umpires" info string
+// ("HP: Name. 1B: Name. 2B: Name. 3B: Name."); split it back into slots.
+function parseUmpires(value) {
+  if (!value) return null
+  const grab = (key) => {
+    const m = value.match(new RegExp(`${key}:\\s*([^.]+)`))
+    return m ? m[1].trim() : ''
+  }
+  const u = {
+    hp: grab('HP'),
+    first: grab('1B'),
+    second: grab('2B'),
+    third: grab('3B'),
+  }
+  return u.hp || u.first || u.second || u.third ? u : null
 }
 
 // The BATTING / BASERUNNING / FIELDING note groups a printed box score carries
@@ -161,6 +193,7 @@ function oneSide(feed, side, decisions) {
     batTotals: battingTotals(feed, side),
     pitchers: pitchingRows(feed, side, decisions),
     pitchTotals: pitchingTotals(feed, side),
+    line: teamLine(feed, side),
     notes: teamNoteGroups(feed, side),
     footnotes: footnotes(feed, side),
   }
@@ -182,13 +215,22 @@ export function selectBoxscore(feed) {
   }
 
   const infoRows = feed?.liveData?.boxscore?.info ?? []
-  const gameInfo = infoRows.filter((r) => r.label && r.value)
+  // Umpires are rendered as their own HP/1B/2B/3B slots (the scorebook header
+  // shape), so drop the combined "Umpires" row from the generic game-info foot
+  // to avoid showing them twice.
+  const umpires = parseUmpires(
+    infoRows.find((r) => r.label === 'Umpires')?.value,
+  )
+  const gameInfo = infoRows.filter(
+    (r) => r.label && r.value && r.label !== 'Umpires',
+  )
   const dateRow = infoRows.find((r) => r.label && r.value == null)
 
   return {
     away: oneSide(feed, 'away', decisions),
     home: oneSide(feed, 'home', decisions),
     decisions,
+    umpires,
     gameInfo,
     dateLabel: dateRow?.label ?? '',
   }

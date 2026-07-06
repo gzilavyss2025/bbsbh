@@ -37,8 +37,13 @@ function BoxScoreBody({ box }) {
     <div className="bs">
       <TeamBlock side={box.away} />
       <TeamBlock side={box.home} />
+      <Scoreboard away={box.away} home={box.home} wp={box.decisions.win} />
       <Decisions decisions={box.decisions} />
-      <GameInfo rows={box.gameInfo} dateLabel={box.dateLabel} />
+      <GameInfo
+        rows={box.gameInfo}
+        umpires={box.umpires}
+        dateLabel={box.dateLabel}
+      />
     </div>
   )
 }
@@ -49,17 +54,16 @@ function TeamBlock({ side }) {
       <h3 className="bs__teamname">{side.teamName}</h3>
 
       <div className="bs__scroll">
+        {/* Columns follow the #22 scorebook's batter-totals order (AB·H·R·RBI),
+            not MLB.com's AB·R·H·RBI, so each row transcribes straight across. */}
         <table className="bs__grid bs__grid--bat">
           <thead>
             <tr>
               <th className="bs__nameCol">Batting</th>
               <th>AB</th>
-              <th>R</th>
               <th>H</th>
+              <th>R</th>
               <th>RBI</th>
-              <th>BB</th>
-              <th>SO</th>
-              <th>AVG</th>
             </tr>
           </thead>
           <tbody>
@@ -73,12 +77,9 @@ function TeamBlock({ side }) {
                   </span>
                 </td>
                 <td>{b.ab}</td>
-                <td>{b.r}</td>
                 <td>{b.h}</td>
+                <td>{b.r}</td>
                 <td>{b.rbi}</td>
-                <td>{b.bb}</td>
-                <td>{b.so}</td>
-                <td className="bs__avg">{b.avg}</td>
               </tr>
             ))}
           </tbody>
@@ -86,12 +87,9 @@ function TeamBlock({ side }) {
             <tr className="bs__totals">
               <td className="bs__nameCol">Totals</td>
               <td>{side.batTotals.ab}</td>
-              <td>{side.batTotals.r}</td>
               <td>{side.batTotals.h}</td>
+              <td>{side.batTotals.r}</td>
               <td>{side.batTotals.rbi}</td>
-              <td>{side.batTotals.bb}</td>
-              <td>{side.batTotals.so}</td>
-              <td className="bs__avg" />
             </tr>
           </tfoot>
         </table>
@@ -120,19 +118,22 @@ function TeamBlock({ side }) {
       ))}
 
       <div className="bs__scroll">
+        {/* Columns match the #22 scorebook's pitcher table: throwing hand, IP,
+            pitch count, batters faced, then H·R·ER·BB·K. (SO is the scorebook's
+            K; HR/ERA/strike-split aren't on the sheet, so they're dropped.) */}
         <table className="bs__grid bs__grid--pit">
           <thead>
             <tr>
               <th className="bs__nameCol">Pitching</th>
+              <th>R/L</th>
               <th>IP</th>
+              <th>P</th>
+              <th>BF</th>
               <th>H</th>
               <th>R</th>
               <th>ER</th>
               <th>BB</th>
-              <th>SO</th>
-              <th>HR</th>
-              <th>P-S</th>
-              <th>ERA</th>
+              <th>K</th>
             </tr>
           </thead>
           <tbody>
@@ -144,35 +145,77 @@ function TeamBlock({ side }) {
                     {p.dec && <span className="bs__dec">{p.dec}</span>}
                   </span>
                 </td>
+                <td className="bs__hand">{p.hand || '—'}</td>
                 <td>{p.ip}</td>
+                <td>{p.pitches}</td>
+                <td>{p.bf}</td>
                 <td>{p.h}</td>
                 <td>{p.r}</td>
                 <td>{p.er}</td>
                 <td>{p.bb}</td>
                 <td>{p.so}</td>
-                <td>{p.hr}</td>
-                <td className="bs__ps">{`${p.pitches}-${p.strikes}`}</td>
-                <td className="bs__avg">{p.era}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="bs__totals">
               <td className="bs__nameCol">Totals</td>
+              <td />
               <td>{side.pitchTotals.ip}</td>
+              <td />
+              <td>{side.pitchTotals.bf}</td>
               <td>{side.pitchTotals.h}</td>
               <td>{side.pitchTotals.r}</td>
               <td>{side.pitchTotals.er}</td>
               <td>{side.pitchTotals.bb}</td>
               <td>{side.pitchTotals.so}</td>
-              <td>{side.pitchTotals.hr}</td>
-              <td />
-              <td className="bs__avg" />
             </tr>
           </tfoot>
         </table>
       </div>
     </section>
+  )
+}
+
+// The scorebook's scoreboard strip: each team's final R/H/E/LOB and the winning
+// pitcher, the tallies you copy into the bottom of the #22 sheet once the game
+// is final.
+function Scoreboard({ away, home, wp }) {
+  const rows = [away, home]
+  return (
+    <div className="bs__board">
+      <table className="bs__grid bs__grid--board">
+        <thead>
+          <tr>
+            <th className="bs__nameCol">Final</th>
+            <th>R</th>
+            <th>H</th>
+            <th>E</th>
+            <th>LOB</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((side) => (
+            <tr key={side.teamName}>
+              <td className="bs__nameCol">
+                <span className="bs__pname">
+                  {side.abbreviation || side.teamName}
+                </span>
+              </td>
+              <td>{side.line.r}</td>
+              <td>{side.line.h}</td>
+              <td>{side.line.e}</td>
+              <td>{side.line.lob}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {wp && (
+        <p className="bs__wp">
+          <span className="bs__infoLabel">WP:</span> {wp}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -195,11 +238,32 @@ function Decisions({ decisions }) {
   )
 }
 
-function GameInfo({ rows, dateLabel }) {
-  if (rows.length === 0 && !dateLabel) return null
+function GameInfo({ rows, umpires, dateLabel }) {
+  // The scorebook header has four umpire slots (HP/1B/2B/3B); list them first,
+  // then the remaining game-info the sheet asks for (weather, first pitch, T,
+  // Att, venue…), each already a label/value row that copies straight across.
+  const umpRows = umpires
+    ? [
+        { label: 'HP', value: umpires.hp },
+        { label: '1B', value: umpires.first },
+        { label: '2B', value: umpires.second },
+        { label: '3B', value: umpires.third },
+      ].filter((u) => u.value)
+    : []
+  if (rows.length === 0 && umpRows.length === 0 && !dateLabel) return null
   return (
     <div className="bs__info">
       {dateLabel && <p className="bs__infoDate">{dateLabel}</p>}
+      {umpRows.length > 0 && (
+        <p className="bs__infoRow">
+          <span className="bs__infoLabel">Umpires</span>
+          {umpRows.map((u) => (
+            <span className="bs__ump" key={u.label}>
+              <span className="bs__umpSlot">{u.label}</span> {u.value}
+            </span>
+          ))}
+        </p>
+      )}
       {rows.map((r, i) => (
         <p className="bs__infoRow" key={i}>
           <span className="bs__infoLabel">{r.label}:</span> {r.value}
