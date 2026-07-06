@@ -39,32 +39,26 @@ function AtBatCard({ entry }) {
   const { batter, pitches, rbi, out, outNumber, hitText, basesAfter, hitLocation } = entry
   return (
     <div className="pbp__card">
-      {outNumber != null && (
-        <span className="pbp__outdot" aria-label={`Out ${outNumber} of the inning`}>
-          {outNumber}
-        </span>
-      )}
-      <div className="pbp__top">
-        <span className="pbp__batter">
-          {batter.last}
-          {batter.first ? `, ${batter.first}` : ''}
-          {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
-        </span>
-        {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
-      </div>
-      {pitches.length > 0 && (
-        <div className="pbp__pitchrow">
-          {pitches.map((code, i) => (
-            <span
-              key={i}
-              className={`pbp__dot pbp__dot--${pitchDotCategory(code)}`}
-              aria-hidden="true"
-            />
-          ))}
+      <div className="pbp__main">
+        <div className="pbp__top">
+          <span className="pbp__batter">
+            {batter.last}
+            {batter.first ? `, ${batter.first}` : ''}
+            {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
+          </span>
+          {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
         </div>
-      )}
-      <div className="pbp__bottom">
-        <PlayDiamond bases={basesAfter} hit={hitLocation} />
+        {pitches.length > 0 && (
+          <div className="pbp__pitchrow">
+            {pitches.map((code, i) => (
+              <span
+                key={i}
+                className={`pbp__dot pbp__dot--${pitchDotCategory(code)}`}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+        )}
         <div className="pbp__desc">
           {out ? (
             <>
@@ -84,6 +78,14 @@ function AtBatCard({ entry }) {
             hitText
           )}
         </div>
+      </div>
+      <div className="pbp__side">
+        {outNumber != null && (
+          <span className="pbp__outdot" aria-label={`Out ${outNumber} of the inning`}>
+            {outNumber}
+          </span>
+        )}
+        <PlayDiamond bases={basesAfter} hit={hitLocation} size={100} />
       </div>
     </div>
   )
