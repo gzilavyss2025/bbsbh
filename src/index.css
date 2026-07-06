@@ -280,22 +280,40 @@ body {
   );
 }
 
-.gamecard__logos {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.gamecard__names {
+.gamecard__teams {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  align-items: start;
 }
 
+/* Each team is a column: a large logo sitting directly above its name. The logo
+   fills the column width so it reads as a header for the name beneath it. */
 .gamecard__team {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gamecard__name {
+  display: flex;
+  flex-direction: column;
   line-height: 1.15;
+}
+
+/* Fill the column width (up to a cap) so the mark reads as a header above the
+   name. Overrides TeamLogo's inline pixel size, hence !important. */
+.gamecard__team .teamlogo {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 104px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.gamecard__team .teamlogo--fallback {
+  font-size: 44px;
 }
 
 .gamecard__loc {
@@ -342,11 +360,6 @@ body {
   /* Scale the monogram down from the box so it never touches the edges. */
   font-size: 0.62em;
   line-height: 1;
-}
-
-.gamecard__at {
-  color: var(--text-caption);
-  font-weight: var(--w-medium);
 }
 
 .gamecard__meta {
