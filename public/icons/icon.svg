@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16233d"/>
+      <stop offset="1" stop-color="#0b1220"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- baseball -->
+  <circle cx="256" cy="230" r="118" fill="#eaf0fb"/>
+  <path d="M198 150 q-40 80 0 160" fill="none" stroke="#ff6b6b" stroke-width="9" stroke-linecap="round"/>
+  <path d="M314 150 q40 80 0 160" fill="none" stroke="#ff6b6b" stroke-width="9" stroke-linecap="round"/>
+  <g stroke="#ff6b6b" stroke-width="6" stroke-linecap="round">
+    <path d="M188 170 l16 10 M184 200 l18 6 M184 230 l18 0 M184 260 l18 -6 M188 290 l16 -10"/>
+    <path d="M324 170 l-16 10 M328 200 l-18 6 M328 230 l-18 0 M328 260 l-18 -6 M324 290 l-16 -10"/>
+  </g>
+  <!-- sealed bar: the "spoiler-safe" motif -->
+  <rect x="120" y="384" width="272" height="56" rx="16" fill="#4f8cff"/>
+  <rect x="150" y="404" width="90" height="16" rx="8" fill="#0b1220" opacity="0.55"/>
+  <circle cx="352" cy="412" r="12" fill="#0b1220" opacity="0.55"/>
+</svg>
