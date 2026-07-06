@@ -60,6 +60,7 @@ body {
 .datenav__label,
 .lineup__jersey,
 .roster__jersey,
+.opp__jersey,
 .inningnav__chip {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -518,6 +519,11 @@ body {
   font-size: 14px;
 }
 
+/* Batting order: slot / name / jersey / position — jersey sits by the pos. */
+.lineup__row {
+  grid-template-columns: 24px 1fr auto auto;
+}
+
 .lineup__list li:first-child {
   border-top: none;
 }
@@ -530,9 +536,16 @@ body {
   text-align: center;
 }
 
-.lineup__jersey,
 .roster__jersey {
   color: var(--text-caption);
+}
+
+/* Jersey number sits between name and pos/hand, in seam red. */
+.lineup__jersey,
+.opp__jersey {
+  color: var(--clay);
+  font-weight: var(--w-bold);
+  text-align: right;
 }
 
 .lineup__name,
@@ -557,7 +570,7 @@ body {
 /* -------------------------------------------------- opposing pitcher/defense */
 .opp__pitcher {
   display: grid;
-  grid-template-columns: 44px 1fr auto;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: var(--space-2);
   padding: 10px 12px;

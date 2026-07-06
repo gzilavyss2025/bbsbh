@@ -61,11 +61,11 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
             {lineup.map((p) => (
               <li key={p.id} className="lineup__row">
                 <span className="lineup__order">{p.order}</span>
-                <span className="lineup__jersey">
-                  {p.jersey ? `#${p.jersey}` : ''}
-                </span>
                 <span className="lineup__name">
                   {p.nameLastFirst.toUpperCase()}
+                </span>
+                <span className="lineup__jersey">
+                  {p.jersey ? `#${p.jersey}` : ''}
                 </span>
                 <span className="lineup__pos">{p.position}</span>
               </li>
@@ -78,11 +78,11 @@ export function TeamInfo({ feed, side, manager, onNext, nextLabel }) {
         <h3 className="section__title">Opposing pitcher</h3>
         {oppPitcher ? (
           <div className="opp__pitcher">
-            <span className="opp__jersey">
-              {oppPitcher.jersey ? `#${oppPitcher.jersey}` : ''}
-            </span>
             <span className="opp__name">
               {oppPitcher.nameLastFirst.toUpperCase()}
+            </span>
+            <span className="opp__jersey">
+              {oppPitcher.jersey ? `#${oppPitcher.jersey}` : ''}
             </span>
             <span className="opp__hand">{oppPitcher.hand}</span>
           </div>
