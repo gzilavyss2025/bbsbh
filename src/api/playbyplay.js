@@ -61,7 +61,7 @@ function resolveBatter(feed, side, id) {
     id,
     fullName: (person.fullName ?? '').trim(),
     last: (person.lastName ?? person.boxscoreName ?? person.fullName ?? '').trim(),
-    first: (person.firstName ?? '').trim(),
+    first: (person.useName ?? person.firstName ?? '').trim(),
     pos: box.position?.abbreviation ?? '',
   }
 }

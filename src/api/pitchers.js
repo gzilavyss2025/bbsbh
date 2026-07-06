@@ -127,7 +127,7 @@ export function computePitcherLines(feed, revealedThrough) {
       out[side].push({
         id,
         last: (person.lastName ?? person.boxscoreName ?? person.fullName ?? '').trim(),
-        first: (person.firstName ?? '').trim(),
+        first: (person.useName ?? person.firstName ?? '').trim(),
         jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
         hand: person.pitchHand?.code ?? '', // 'L' | 'R'
         ...line,

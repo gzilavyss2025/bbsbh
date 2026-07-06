@@ -41,7 +41,6 @@ export function SealBox({ children, forceRevealed = false, onReveal }) {
           🔒
         </span>
         <span className="cover__main">Tap to reveal</span>
-        <span className="cover__sub">Covered so you don’t get spoiled</span>
       </button>
     )
   }
