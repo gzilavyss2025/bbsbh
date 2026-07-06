@@ -1384,17 +1384,18 @@ body {
 }
 
 /* -------------------------------------------------------------- pitcher lines
-   Running lines for every pitcher who has appeared in innings already paged
-   past, both teams in one table (gated in api/pitchers.js — not sealed). Sized
-   to fit a phone with NO horizontal scroll: the Pitcher column absorbs the
-   slack and wraps; the numeric columns stay tight. */
+   Running lines for every pitcher who has appeared in a revealed half-inning —
+   one block per team, each led by the team name and its own header row (gated
+   in api/pitchers.js — not sealed). Sized to fit a phone with NO horizontal
+   scroll: the Pitcher column absorbs the slack and wraps; the numeric columns
+   stay tight. */
 .pitchers {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 14px 4px;
+  padding: 12px 14px 8px;
 }
 
 .pitchers__title {
@@ -1405,6 +1406,20 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
+}
+
+/* Team name sits above that team's header row. */
+.pitchers__teamname {
+  margin: 14px 0 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.pitchers__team:first-of-type .pitchers__teamname {
+  margin-top: 2px;
 }
 
 .pitchers__grid {
@@ -1435,40 +1450,39 @@ body {
   border-bottom: none;
 }
 
-/* Name column takes a fixed share and wraps rather than scrolling; the nine
-   numeric columns split the remainder evenly under table-layout: fixed. */
+/* Name column takes a fixed share (the nine numeric columns split the remainder
+   evenly under table-layout: fixed). The cell stays a table-cell; an inner flex
+   row wraps the name on the left and pins the jersey number to the right. */
 .pitchers__pitcher {
-  width: 34%;
+  width: 36%;
   text-align: left !important;
   padding-left: 0 !important;
   padding-right: 6px !important;
+}
+
+.pitchers__cell {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pitchers__pname {
   font-family: var(--font-body);
+  font-size: 12px;
   font-weight: var(--w-semibold);
   color: var(--text-heading);
   line-height: 1.2;
   word-break: break-word;
-}
-
-/* Team divider row inside the table. */
-.pitchers__teamrow th {
-  text-align: left;
-  padding: 10px 0 4px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-}
-.pitchers__grid tbody tr.pitchers__teamrow:first-child th {
-  padding-top: 0;
+  min-width: 0;
 }
 
 .pitchers__num {
+  flex: 0 0 auto;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   color: var(--accent-negative);
+  text-align: right;
 }
 
 /* ------------------------------------------------------------- floating nav

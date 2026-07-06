@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import {
   selectInningCount,
   selectBullpen,
@@ -11,7 +11,7 @@ import {
   revealDerived,
   rollingPitches,
 } from '../api/derive.js'
-import { computePitcherInnings, selectExitedPitchers } from '../api/pitchers.js'
+import { computePitcherLines, halfIndex } from '../api/pitchers.js'
 import { SealBox } from '../components/SealBox.jsx'
 
 // Inning-by-inning viewer. Each half-inning is a single SealBox: one tap
@@ -50,24 +50,22 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
     [feed, meta],
   )
 
-  // Which pitchers threw in which innings — spoiler-free, drives the
-  // exited-pitcher tables' inning gate (see api/pitchers.js).
-  const pitcherInnings = useMemo(() => computePitcherInnings(feed), [feed])
+  // Reveal high-water mark: the furthest half-inning (by halfIndex) the user has
+  // uncovered. Revealing a later inning auto-reveals everything before it — the
+  // running line and Pitchers section both read from this single mark, and any
+  // half at or below it renders unsealed. Lives here (not in the per-inning
+  // panel, which remounts on navigation) so reveals persist as you move around.
+  const [revealedThrough, setRevealedThrough] = useState(-1)
+  const revealTo = useCallback((n, half) => {
+    const idx = halfIndex(n, half)
+    setRevealedThrough((prev) => (idx > prev ? idx : prev))
+  }, [])
 
-  // Running line accumulator: half-innings the user has revealed, keyed
-  // "n-top" / "n-bottom". Lives here (not in the per-inning panel, which
-  // remounts) so a revealed half stays in the line after you navigate away.
-  // Only revealed values are ever stored, so nothing sealed enters the DOM.
-  const [revealedLines, setRevealedLines] = useState({})
-  const recordLine = useCallback(
-    (n, half, side) => {
-      setRevealedLines((prev) => {
-        const k = `${n}-${half}`
-        if (prev[k]) return prev
-        return { ...prev, [k]: revealInning(feed, n, side) }
-      })
-    },
-    [feed],
+  // Every pitcher who has appeared in a revealed half-inning, with running lines
+  // (see api/pitchers.js). Recomputed as the reveal mark advances.
+  const pitcherLines = useMemo(
+    () => computePitcherLines(feed, globalRevealed ? Infinity : revealedThrough),
+    [feed, revealedThrough, globalRevealed],
   )
 
   if (!started) {
@@ -84,15 +82,12 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
     )
   }
 
-  const awayOut = selectExitedPitchers(feed, 'away', inning, pitcherInnings)
-  const homeOut = selectExitedPitchers(feed, 'home', inning, pitcherInnings)
-
   return (
     <div className="innings">
       <RollingLine
         feed={feed}
         inningCount={inningCount}
-        revealedLines={revealedLines}
+        revealedThrough={revealedThrough}
         globalRevealed={globalRevealed}
         awayAbbr={meta.away.abbreviation}
         homeAbbr={meta.home.abbreviation}
@@ -130,7 +125,7 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
         ))}
       </div>
 
-      {/* key={inning} → fresh mount → all SealBoxes reset to sealed. */}
+      {/* key={inning} → fresh mount; boxes at/under the reveal mark stay open. */}
       <div className="inning" key={inning}>
         <HalfInning
           feed={feed}
@@ -138,9 +133,9 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
           half="top"
           battingSide="away"
           label="Top"
-          globalRevealed={globalRevealed}
+          revealed={globalRevealed || halfIndex(inning, 'top') <= revealedThrough}
           getDerived={getDerived}
-          onRevealLine={recordLine}
+          onReveal={revealTo}
         />
         <HalfInning
           feed={feed}
@@ -148,16 +143,16 @@ export function InningViewer({ feed, started, globalRevealed, onReload }) {
           half="bottom"
           battingSide="home"
           label="Bottom"
-          globalRevealed={globalRevealed}
+          revealed={globalRevealed || halfIndex(inning, 'bottom') <= revealedThrough}
           getDerived={getDerived}
-          onRevealLine={recordLine}
+          onReveal={revealTo}
         />
       </div>
 
       <PitchersSection
         teams={[
-          { name: rosters.away.name, rows: awayOut },
-          { name: rosters.home.name, rows: homeOut },
+          { name: rosters.away.name, rows: pitcherLines.away },
+          { name: rosters.home.name, rows: pitcherLines.home },
         ]}
       />
 
@@ -173,9 +168,9 @@ function HalfInning({
   half,
   battingSide,
   label,
-  globalRevealed,
+  revealed,
   getDerived,
-  onRevealLine,
+  onReveal,
 }) {
   return (
     <section className="half">
@@ -187,8 +182,8 @@ function HalfInning({
       </h3>
 
       <SealBox
-        forceRevealed={globalRevealed}
-        onReveal={() => onRevealLine(inning, half, battingSide)}
+        forceRevealed={revealed}
+        onReveal={() => onReveal(inning, half)}
       >
         {() => {
           // Computed only on reveal.
@@ -224,13 +219,13 @@ function HalfInning({
 // The running line at the top of the innings view. It "builds as you reveal":
 // each half you uncover drops its runs into this grid; halves you haven't
 // revealed stay blank (·). The global "Reveal score" flag fills the whole grid
-// at once. It never reads a linescore value except along a reveal path — sealed
-// halves are read from `revealedLines` (already-revealed state), and the only
-// direct linescore reads happen when `globalRevealed` is set.
+// at once. It only reads a linescore value along a reveal path: a cell is read
+// only when its half-index is at or below `revealedThrough` (or global reveal is
+// on), so nothing sealed is ever computed into the grid.
 function RollingLine({
   feed,
   inningCount,
-  revealedLines,
+  revealedThrough,
   globalRevealed,
   awayAbbr,
   homeAbbr,
@@ -238,9 +233,9 @@ function RollingLine({
   const nums = Array.from({ length: inningCount }, (_, i) => i + 1)
 
   const lineFor = (n, half, side) =>
-    globalRevealed
+    globalRevealed || halfIndex(n, half) <= revealedThrough
       ? revealInning(feed, n, side)
-      : revealedLines[`${n}-${half}`] ?? null
+      : null
 
   const rows = [
     { abbr: awayAbbr || 'AWY', half: 'top', side: 'away' },
@@ -299,48 +294,50 @@ function RollingLine({
   )
 }
 
-// Running pitching lines for every pitcher who has appeared in innings the user
-// has already paged past — both teams, in one table. A pitcher's line is his
-// cumulative total, and the gate (his last inning < the inning being viewed,
-// plus withholding whoever is still on the mound) keeps the current inning
-// unspoiled; see api/pitchers.js. Deliberately not sealed. Sized to fit a phone
-// with no horizontal scroll: the name column wraps, the stat columns stay tight,
-// and the jersey number is inked in clay red inline after the name.
+// Running pitching lines for every pitcher who has appeared in a revealed
+// half-inning — a separate block per team, each led by the team name with its
+// own header row. Lines are cumulative through the reveal mark (see
+// api/pitchers.js); nothing sealed is shown. Deliberately not behind a SealBox —
+// it mirrors the running line's reveal state. Sized to fit a phone with no
+// horizontal scroll: the name column wraps, the jersey number is inked in clay
+// red and right-aligned within its own slot in the Pitcher cell.
 function PitchersSection({ teams }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
     <section className="pitchers">
       <h3 className="pitchers__title">Pitchers</h3>
-      <table className="pitchers__grid">
-        <thead>
-          <tr>
-            <th className="pitchers__pitcher">Pitcher</th>
-            <th>R/L</th>
-            <th>IP</th>
-            <th>P</th>
-            <th>BF</th>
-            <th>H</th>
-            <th>R</th>
-            <th>ER</th>
-            <th>BB</th>
-            <th>K</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shown.map((t) => (
-            <Fragment key={t.name}>
-              <tr className="pitchers__teamrow">
-                <th colSpan={10}>{t.name}</th>
+      {shown.map((t) => (
+        <div className="pitchers__team" key={t.name}>
+          <h4 className="pitchers__teamname">{t.name}</h4>
+          <table className="pitchers__grid">
+            <thead>
+              <tr>
+                <th className="pitchers__pitcher">Pitcher</th>
+                <th>R/L</th>
+                <th>IP</th>
+                <th>P</th>
+                <th>BF</th>
+                <th>H</th>
+                <th>R</th>
+                <th>ER</th>
+                <th>BB</th>
+                <th>K</th>
               </tr>
+            </thead>
+            <tbody>
               {t.rows.map((p) => (
                 <tr key={p.id}>
                   <td className="pitchers__pitcher">
-                    {p.last.toUpperCase()}
-                    {p.first ? `, ${p.first}` : ''}
-                    {p.jersey ? (
-                      <span className="pitchers__num"> {p.jersey}</span>
-                    ) : null}
+                    <div className="pitchers__cell">
+                      <span className="pitchers__pname">
+                        {p.last}
+                        {p.first ? `, ${p.first}` : ''}
+                      </span>
+                      {p.jersey ? (
+                        <span className="pitchers__num">{p.jersey}</span>
+                      ) : null}
+                    </div>
                   </td>
                   <td>{p.hand || '—'}</td>
                   <td>{p.ip}</td>
@@ -353,10 +350,10 @@ function PitchersSection({ teams }) {
                   <td>{p.k}</td>
                 </tr>
               ))}
-            </Fragment>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      ))}
     </section>
   )
 }
