@@ -26,3 +26,29 @@ export const SPORT_LABEL = {
   13: 'A+',
   14: 'A',
 }
+
+// ---------------------------------------------------------------------------
+// Team logos
+//
+// The same MLB platform that serves our data (statsapi.mlb.com) also hosts a
+// team-logo CDN, keyed by the exact team ids we already carry everywhere in
+// this app. Every club — MLB and MiLB alike — is drawn to one square viewBox,
+// so:
+//   • dimensions are identical across every team (no per-team sizing);
+//   • it's SVG, so it stays crisp at any render size AND doubles as a clean,
+//     scalable reference for sketching a team's logo by hand;
+//   • there's no new dependency, asset checkout, or license bundling — it's the
+//     same source of truth as the schedule and box score.
+//
+// Coverage of the lower MiLB levels isn't total, so this is treated as
+// decorative: callers must render it behind a graceful fallback (see
+// components/TeamLogo.jsx), consistent with the rest of the app's "degrade,
+// don't assume" handling of MiLB data.
+//
+// To pull a reference logo at any size for sketching, open the URL directly —
+// e.g. https://www.mlbstatic.com/team-logos/158.svg for the Brewers (158).
+const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
+
+export function teamLogoUrl(teamId) {
+  return teamId ? `${LOGO_BASE}/${teamId}.svg` : null
+}

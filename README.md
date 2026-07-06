@@ -37,6 +37,25 @@ npm run build      # production build → dist/
 npm run preview    # serve the built app
 ```
 
+### Team logos (and sketch references)
+
+Team logos come from MLB's own logo CDN, keyed by the same team ids the app
+already uses for schedule and box-score data — no bundled assets or extra
+dependency. Every club (MLB and MiLB) is drawn to one square SVG viewBox, so
+dimensions are identical everywhere and the art scales cleanly to any size.
+
+- Helper: `teamLogoUrl(teamId)` in `src/lib/teams.js`.
+- Rendering: `src/components/TeamLogo.jsx`, used in the game slate and each
+  team-info header. It falls back to a text monogram when a lower-level MiLB
+  club has no CDN logo, so a broken image never appears.
+- **Reference for hand-sketching:** open a logo directly at any size, e.g.
+  `https://www.mlbstatic.com/team-logos/158.svg` (158 = Brewers). Because it's
+  SVG it stays crisp zoomed in — handy when tracing or sketching by eye.
+- **Logo sheet screen** (`src/screens/LogoSheet.jsx`, reached via **Logos** in
+  the slate header): a printable, light-"paper" sheet of every club playing on
+  a chosen day, rendered in **grayscale** for pencil sketching. Tap **Print**
+  for a paper copy to set beside your scorebook. Spoiler-safe — no scores.
+
 App icons are generated from `public/icons/icon.svg`:
 
 ```bash
