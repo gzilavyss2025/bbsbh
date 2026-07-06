@@ -32,6 +32,50 @@ function otherSide(side) {
   return side === 'away' ? 'home' : 'away'
 }
 
+// A total order over half-innings: top of the 1st = 0, bottom = 1, top of the
+// 2nd = 2, … Lets a single number express "revealed through here". Structural,
+// never a score — safe to compute anywhere.
+export function halfIndex(inning, half /* 'top' | 'bottom' */) {
+  return (inning - 1) * 2 + (half === 'top' ? 0 : 1)
+}
+
+// First half-index (see halfIndex) at which each substitute entered the game:
+// pitchers from the first play they threw, position players from their
+// substitution announcement. Spoiler-free — this reads only inning numbers and
+// who took the field, never a score. Field paths verified against gamePk
+// 824902 (2026-07-05 NYM@ATL): a substitution playEvent carries the INCOMING
+// player in `player.id` and one of the eventTypes below ('defensive_switch' is
+// deliberately excluded — that's a player already in the game changing
+// positions, not an entry).
+const ENTRY_EVENT_TYPES = new Set([
+  'pitching_substitution',
+  'offensive_substitution',
+  'defensive_substitution',
+])
+const entryIndexCache = new WeakMap()
+function entryIndexById(feed) {
+  if (!feed || typeof feed !== 'object') return {}
+  const cached = entryIndexCache.get(feed)
+  if (cached) return cached
+
+  const entered = {}
+  const mark = (id, idx) => {
+    if (id != null && (entered[id] == null || idx < entered[id])) entered[id] = idx
+  }
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const inn = p?.about?.inning
+    const half = p?.about?.halfInning
+    if (!inn || !half) continue
+    const idx = halfIndex(inn, half)
+    mark(p?.matchup?.pitcher?.id, idx)
+    for (const ev of p.playEvents ?? []) {
+      if (ENTRY_EVENT_TYPES.has(ev?.details?.eventType)) mark(ev.player?.id, idx)
+    }
+  }
+  entryIndexCache.set(feed, entered)
+  return entered
+}
+
 // Resolve the batting order for one side into a printable lineup. battingOrder
 // is an array of player ids (as strings) in slot order. Cross-references
 // gameData.players for names and the team's boxscore players[] for jersey
@@ -88,42 +132,69 @@ export function selectOpposingDefense(feed, battingSide) {
     )
 }
 
-// Relievers who have NOT yet entered the game (boxscore.bullpen shrinks as
-// pitchers are used). Name / number / handedness, matching the scorebook.
+// The bullpen card as it stood at first pitch: relievers still available
+// (boxscore.bullpen, which shrinks as pitchers are used) PLUS relievers who
+// have since entered (boxscore.pitchers minus its first entry — the starter,
+// who was never in the bullpen). An entered pitcher carries `enteredIdx`, the
+// half-index at which he first pitched, so the caller can strike him through
+// once the reveal mark reaches his entry; until then he renders like any other
+// available arm. Sorted by name, matching the API's own bullpen ordering, so
+// rows don't jump around as pitchers enter. Name / number / handedness.
 export function selectBullpen(feed, side) {
   const team = feed?.liveData?.boxscore?.teams?.[side]
   if (!team) return []
   const boxPlayers = team.players ?? {}
   const players = playerIndex(feed)
-  return (team.bullpen ?? []).map((id) => {
-    const box = boxPlayers[`ID${id}`] ?? {}
-    const person = players[`ID${id}`] ?? {}
-    return {
-      id,
-      nameLastFirst: lastFirst(person.fullName ? person : box.person),
-      jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
-      hand: person.pitchHand?.description ?? '', // 'Left' | 'Right'
-    }
-  })
+  const entered = entryIndexById(feed)
+
+  const ids = [...new Set([...(team.bullpen ?? []), ...(team.pitchers ?? []).slice(1)])]
+  return ids
+    .map((id) => {
+      const box = boxPlayers[`ID${id}`] ?? {}
+      const person = players[`ID${id}`] ?? {}
+      return {
+        id,
+        nameLastFirst: lastFirst(person.fullName ? person : box.person),
+        jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
+        hand: person.pitchHand?.description ?? '', // 'Left' | 'Right'
+        enteredIdx: entered[id] ?? null,
+      }
+    })
+    .sort((a, b) => a.nameLastFirst.localeCompare(b.nameLastFirst))
 }
 
-// Position players on the bench who have NOT yet entered the game.
-// Name / number / position.
+// The bench card as it stood at first pitch: position players still available
+// (boxscore.bench, which shrinks as subs enter) PLUS those who have since
+// entered — recovered via each boxscore player's gameStatus.isSubstitute flag
+// (position players only; substitute pitchers belong to the bullpen card).
+// Entered players carry `enteredIdx` exactly as in selectBullpen. Sorted by
+// name for the same row-stability. Name / number / position.
 export function selectBench(feed, side) {
   const team = feed?.liveData?.boxscore?.teams?.[side]
   if (!team) return []
   const boxPlayers = team.players ?? {}
   const players = playerIndex(feed)
-  return (team.bench ?? []).map((id) => {
-    const box = boxPlayers[`ID${id}`] ?? {}
-    const person = players[`ID${id}`] ?? {}
-    return {
-      id,
-      nameLastFirst: lastFirst(person.fullName ? person : box.person),
-      jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
-      position: box.position?.abbreviation ?? '',
-    }
-  })
+  const entered = entryIndexById(feed)
+
+  const benchIds = team.bench ?? []
+  const subIds = Object.values(boxPlayers)
+    .filter((p) => p?.gameStatus?.isSubstitute && p.position?.abbreviation !== 'P')
+    .map((p) => p.person?.id)
+    .filter((id) => id != null && !benchIds.includes(id))
+
+  return [...benchIds, ...subIds]
+    .map((id) => {
+      const box = boxPlayers[`ID${id}`] ?? {}
+      const person = players[`ID${id}`] ?? {}
+      return {
+        id,
+        nameLastFirst: lastFirst(person.fullName ? person : box.person),
+        jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
+        position: box.position?.abbreviation ?? '',
+        enteredIdx: entered[id] ?? null,
+      }
+    })
+    .sort((a, b) => a.nameLastFirst.localeCompare(b.nameLastFirst))
 }
 
 // Team-level meta for a side: name, record, manager placeholder (manager is

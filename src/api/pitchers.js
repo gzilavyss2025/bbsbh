@@ -10,11 +10,7 @@
 // revealed uses his exact boxscore line; a still-active pitcher mid-outing uses
 // the partial computed from revealed plays only.
 
-// A total order over half-innings: top of the 1st = 0, bottom = 1, top of the
-// 2nd = 2, … Lets a single number express "revealed through here".
-export function halfIndex(inning, half /* 'top' | 'bottom' */) {
-  return (inning - 1) * 2 + (half === 'top' ? 0 : 1)
-}
+import { halfIndex } from './select.js'
 
 function outsToIp(outs) {
   return `${Math.floor(outs / 3)}.${outs % 3}`

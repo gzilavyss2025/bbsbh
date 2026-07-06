@@ -16,7 +16,7 @@ import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 // modal; a small site mark up top returns to the slate. Which section shows is
 // driven entirely by `section` / `onSection` so every step is a real URL.
 export function GameView({ game, section, onSection, onHome }) {
-  const { step, inning } = sectionToStep(section)
+  const { step, inning, half } = sectionToStep(section)
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
 
   const feedState = useAsync(() => fetchGameFeed(game.gamePk), [game.gamePk])
@@ -83,7 +83,7 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="home"
           manager={managers.data?.home}
-          onNext={() => onSection('inning1')}
+          onNext={() => onSection('top1')}
           nextLabel="Innings ›"
         />
       )}
@@ -92,7 +92,8 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           started={started}
           inning={inning}
-          onInning={(n) => onSection(stepToSection(2, n))}
+          half={half}
+          onInning={(n, h) => onSection(stepToSection(2, n, h))}
           onBoxScore={() => onSection('boxscore')}
           onReload={feedState.reload}
           loading={feedState.loading}
@@ -102,7 +103,7 @@ export function GameView({ game, section, onSection, onHome }) {
         <BoxScore
           feed={feed}
           managers={managers.data}
-          onInnings={() => onSection('inning1')}
+          onInnings={() => onSection('top1')}
         />
       )}
     </div>

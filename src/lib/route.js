@@ -10,8 +10,9 @@
 //
 // `matchup` is the away + home team abbreviations concatenated and lowercased
 // (MIL @ ARI -> 'milari'); `section` is 'lineup1' (away info), 'lineup2' (home
-// info), or 'inning{n}' (innings viewer focused on inning n). Example:
-//   /07052026/milari/inning3
+// info), 'boxscore', or 'top{n}' / 'bottom{n}' (innings viewer, one page per
+// half-inning). Legacy 'inning{n}' links still parse (as the top half).
+// Example: /07052026/milari/bottom3
 
 export function parseRoute(pathname) {
   const parts = pathname.split('/').filter(Boolean)
@@ -29,22 +30,24 @@ export function parseRoute(pathname) {
   return { name: 'home' }
 }
 
-// section string -> { step, inning }. step: 0 away info, 1 home info,
-// 2 innings, 3 box score.
+// section string -> { step, inning, half }. step: 0 away info, 1 home info,
+// 2 innings, 3 box score. `half` only matters for step 2.
 export function sectionToStep(section) {
-  if (section === 'lineup2') return { step: 1, inning: 1 }
-  if (section === 'boxscore') return { step: 3, inning: 1 }
-  const m = /^inning(\d+)$/.exec(section || '')
-  if (m) return { step: 2, inning: Math.max(1, Number(m[1])) }
-  return { step: 0, inning: 1 } // lineup1 / anything unknown
+  if (section === 'lineup2') return { step: 1, inning: 1, half: 'top' }
+  if (section === 'boxscore') return { step: 3, inning: 1, half: 'top' }
+  const m = /^(top|bottom)(\d+)$/.exec(section || '')
+  if (m) return { step: 2, inning: Math.max(1, Number(m[2])), half: m[1] }
+  const legacy = /^inning(\d+)$/.exec(section || '')
+  if (legacy) return { step: 2, inning: Math.max(1, Number(legacy[1])), half: 'top' }
+  return { step: 0, inning: 1, half: 'top' } // lineup1 / anything unknown
 }
 
-// step (+ inning for the innings viewer) -> section string.
-export function stepToSection(step, inning = 1) {
+// step (+ inning/half for the innings viewer) -> section string.
+export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 0) return 'lineup1'
   if (step === 1) return 'lineup2'
   if (step === 3) return 'boxscore'
-  return `inning${inning}`
+  return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
 }
 
 // URL date (MMDDYYYY) <-> API date (YYYY-MM-DD).

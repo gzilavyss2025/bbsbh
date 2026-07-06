@@ -1313,6 +1313,17 @@ body {
   margin: 10px 12px 4px;
 }
 
+/* A bullpen/bench player who has entered the game (within revealed innings) is
+   no longer eligible — struck through like a pencil line in the scorebook. */
+.roster__row.is-entered .roster__name,
+.roster__row.is-entered .roster__jersey,
+.roster__row.is-entered .roster__pos {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
 /* ---------------------------------------------------------------- reveal all */
 .revealscore {
   border: var(--bw-rule) solid var(--clay);

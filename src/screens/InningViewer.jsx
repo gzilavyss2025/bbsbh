@@ -12,6 +12,7 @@ import {
   selectBullpen,
   selectBench,
   selectTeamMeta,
+  halfIndex,
 } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import {
@@ -19,21 +20,22 @@ import {
   revealDerived,
   rollingPitches,
 } from '../api/derive.js'
-import { computePitcherLines, halfIndex } from '../api/pitchers.js'
+import { computePitcherLines } from '../api/pitchers.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
 
-// Inning-by-inning viewer. Each half-inning is a single SealBox: one tap reveals
-// that half's whole stat line at once (§7b). Navigating between innings remounts
-// the panel (key={inning}) so every box re-seals. Which inning shows is driven by
-// the URL (`inning` / `onInning`); the reveal high-water mark lives here so it
-// survives inning navigation.
+// Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
+// then the bottom of the 1st, …), a single SealBox whose one tap reveals that
+// half's whole stat line at once (§7b). Navigating between halves remounts the
+// panel (key on inning+half) so the box re-seals. Which half shows is driven by
+// the URL (`inning`/`half` / `onInning`); the reveal high-water mark lives here
+// so it survives navigation.
 //
 // Extra innings never spoil: only `regulation` innings (9, or 7 for short games)
 // are shown up front. Each inning past regulation unlocks one at a time, and only
 // once the prior inning has been revealed — so the navigator and boxscore never
 // hint that a game went to extras before the user gets there.
-export function InningViewer({ feed, started, inning, onInning, onBoxScore, onReload, loading }) {
+export function InningViewer({ feed, started, inning, half, onInning, onBoxScore, onReload, loading }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -102,7 +104,22 @@ export function InningViewer({ feed, started, inning, onInning, onBoxScore, onRe
     return u
   }, [regulation, actualCount, revealedThrough])
 
-  const effInning = Math.min(Math.max(1, inning || 1), unlocked)
+  // The page being shown, as a half-index clamped to what's unlocked. The last
+  // navigable page is the bottom of the last unlocked inning.
+  const maxIdx = halfIndex(unlocked, 'bottom')
+  const curIdx = Math.min(
+    Math.max(0, halfIndex(inning || 1, half === 'bottom' ? 'bottom' : 'top')),
+    maxIdx,
+  )
+  const effInning = Math.floor(curIdx / 2) + 1
+  const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
+  const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
+
+  // Keep the chip for the current half visible in the scrollable strip.
+  const activeChipRef = useRef(null)
+  useEffect(() => {
+    activeChipRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' })
+  }, [curIdx])
 
   // Every pitcher who has appeared in a revealed half-inning, with running lines
   // (see api/pitchers.js). Recomputed as the reveal mark advances.
@@ -151,61 +168,56 @@ export function InningViewer({ feed, started, inning, onInning, onBoxScore, onRe
         homeAbbr={meta.home.abbreviation}
       />
 
-      <nav className="inningnav" aria-label="Inning navigator">
+      <nav className="inningnav" aria-label="Half-inning navigator">
         <button
-          onClick={() => onInning(Math.max(1, effInning - 1))}
-          disabled={effInning === 1}
-          aria-label="Previous inning"
+          onClick={() => goTo(Math.max(0, curIdx - 1))}
+          disabled={curIdx === 0}
+          aria-label="Previous half-inning"
         >
           ‹ Back
         </button>
         <span className="inningnav__label">
-          Inning {effInning} <span className="inningnav__of">of {unlocked}</span>
+          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}{' '}
+          <span className="inningnav__of">of {unlocked}</span>
         </span>
         <button
-          onClick={() => onInning(Math.min(unlocked, effInning + 1))}
-          disabled={effInning === unlocked}
-          aria-label="Next inning"
+          onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+          disabled={curIdx === maxIdx}
+          aria-label="Next half-inning"
         >
           Next ›
         </button>
       </nav>
 
       <div className="inningnav__strip">
-        {Array.from({ length: unlocked }, (_, i) => i + 1).map((n) => (
-          <button
-            key={n}
-            className={`inningnav__chip ${n === effInning ? 'is-active' : ''}`}
-            onClick={() => onInning(n)}
-          >
-            {n}
-          </button>
-        ))}
+        {Array.from({ length: maxIdx + 1 }, (_, idx) => {
+          const n = Math.floor(idx / 2) + 1
+          const h = idx % 2 === 0 ? 'top' : 'bottom'
+          return (
+            <button
+              key={idx}
+              ref={idx === curIdx ? activeChipRef : null}
+              className={`inningnav__chip ${idx === curIdx ? 'is-active' : ''}`}
+              onClick={() => goTo(idx)}
+              aria-label={`${h === 'top' ? 'Top' : 'Bottom'} of inning ${n}`}
+            >
+              {h === 'top' ? 'T' : 'B'}{n}
+            </button>
+          )
+        })}
       </div>
 
-      {/* key={inning} → fresh mount; boxes at/under the reveal mark stay open. */}
-      <div className="inning" key={effInning}>
+      {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
+      <div className="inning" key={`${effInning}-${effHalf}`}>
         <HalfInning
           feed={feed}
           inning={effInning}
-          half="top"
-          battingSide="away"
-          label="Top"
-          battingAbbr={meta.away.abbreviation}
-          pitchingAbbr={meta.home.abbreviation}
-          revealed={halfIndex(effInning, 'top') <= revealedThrough}
-          getDerived={getDerived}
-          onReveal={revealTo}
-        />
-        <HalfInning
-          feed={feed}
-          inning={effInning}
-          half="bottom"
-          battingSide="home"
-          label="Bottom"
-          battingAbbr={meta.home.abbreviation}
-          pitchingAbbr={meta.away.abbreviation}
-          revealed={halfIndex(effInning, 'bottom') <= revealedThrough}
+          half={effHalf}
+          battingSide={effHalf === 'top' ? 'away' : 'home'}
+          label={effHalf === 'top' ? 'Top' : 'Bottom'}
+          battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
+          pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
+          revealed={curIdx <= revealedThrough}
           getDerived={getDerived}
           onReveal={revealTo}
         />
@@ -218,8 +230,16 @@ export function InningViewer({ feed, started, inning, onInning, onBoxScore, onRe
         ]}
       />
 
-      <RosterPanel title={rosters.away.name} roster={rosters.away} />
-      <RosterPanel title={rosters.home.name} roster={rosters.home} />
+      <RosterPanel
+        title={rosters.away.name}
+        roster={rosters.away}
+        revealedThrough={revealedThrough}
+      />
+      <RosterPanel
+        title={rosters.home.name}
+        roster={rosters.home}
+        revealedThrough={revealedThrough}
+      />
 
       {onBoxScore && (
         <button type="button" className="btn boxscorelink" onClick={onBoxScore}>
@@ -492,12 +512,17 @@ function Stat({ k, v, unit, tone, big, small }) {
   )
 }
 
-// Persistent roster reference, expanded by default. Spoiler-safe: it lists only
-// the players who have NOT yet entered the game — the bullpen (with handedness as
-// LHP/RHP) and the bench (with position) — for lookup while scoring.
-function RosterPanel({ title, roster }) {
+// Persistent roster reference, expanded by default: the bullpen (with
+// handedness as LHP/RHP) and the bench (with position) as they stood at first
+// pitch, for lookup while scoring. A player who has entered the game is struck
+// through — no longer eligible — but ONLY once his entry sits at or below the
+// reveal mark; a substitution the user hasn't revealed their way to yet renders
+// like any other available player, so the card never hints at a sealed inning.
+function RosterPanel({ title, roster, revealedThrough }) {
   const [open, setOpen] = useState(true)
   const empty = roster.bullpen.length === 0 && roster.bench.length === 0
+  const entered = (p) => p.enteredIdx != null && p.enteredIdx <= revealedThrough
+  const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
   return (
     <section className="roster">
       <button className="roster__toggle" onClick={() => setOpen((o) => !o)}>
@@ -513,7 +538,7 @@ function RosterPanel({ title, roster }) {
               <h4 className="roster__group">Bullpen</h4>
               <ul className="roster__list">
                 {roster.bullpen.map((p) => (
-                  <li key={p.id} className="roster__row">
+                  <li key={p.id} className={rowClass(p)}>
                     <span className="roster__name">
                       {p.nameLastFirst.toUpperCase()}
                     </span>
@@ -530,7 +555,7 @@ function RosterPanel({ title, roster }) {
               <h4 className="roster__group">Bench</h4>
               <ul className="roster__list">
                 {roster.bench.map((p) => (
-                  <li key={p.id} className="roster__row">
+                  <li key={p.id} className={rowClass(p)}>
                     <span className="roster__name">
                       {p.nameLastFirst.toUpperCase()}
                     </span>

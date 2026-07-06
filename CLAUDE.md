@@ -95,9 +95,10 @@ the spoiler rule still holds. Nothing else is persisted.
 (`src/lib/route.js` — deliberately *not* react-router). Three route shapes: `/`
 (slate), `/logos` (logo sheet), and `/{MMDDYYYY}/{matchup}/{section}` for a
 deep-linkable game section, where `matchup` is the away+home team abbreviations
-lowercased (`milaz`) and `section` is `lineup1` / `lineup2` / `inning{n}` /
-`boxscore` (the sealed full box score; also reachable straight from a past
-game's slate card).
+lowercased (`milaz`) and `section` is `lineup1` / `lineup2` / `top{n}` /
+`bottom{n}` (the innings viewer shows one half-inning per page; legacy
+`inning{n}` links still parse as the top half) / `boxscore` (the sealed full box
+score; also reachable straight from a past game's slate card).
 `src/App.jsx` parses `location.pathname` into a route, listens on `popstate`, and
 `pushState`s on navigation; the URL is the single source of truth for which game
 section shows. `GameRoute` resolves a route to a game object — instantly from the
