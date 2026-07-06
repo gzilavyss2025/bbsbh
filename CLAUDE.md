@@ -12,6 +12,14 @@ score-revealing number stays sealed until the user taps to reveal it. It is
 
 React 18 + Vite, phone-first (iPhone), installable PWA, **no backend**.
 
+## Development workflow
+
+The maintainer is the sole developer here and wants a fast, direct loop: **work
+on `main`, and commit and push after every change** — no feature branches, no
+pull requests, no waiting for approval to push. Land each self-contained change
+as its own commit with a clear message and push it straight to `origin/main`.
+(Still run `npm run lint` / `npm run build` before pushing so `main` stays green.)
+
 ## Commands
 
 ```bash
