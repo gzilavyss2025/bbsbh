@@ -37,7 +37,12 @@ function BoxScoreBody({ box }) {
     <div className="bs">
       <TeamBlock side={box.away} />
       <TeamBlock side={box.home} />
-      <Scoreboard away={box.away} home={box.home} wp={box.decisions.win} />
+      <Scoreboard
+        away={box.away}
+        home={box.home}
+        innings={box.innings}
+        wp={box.decisions.win}
+      />
       <Decisions decisions={box.decisions} />
       <GameInfo
         rows={box.gameInfo}
@@ -177,39 +182,54 @@ function TeamBlock({ side }) {
   )
 }
 
-// The scorebook's scoreboard strip: each team's final R/H/E/LOB and the winning
-// pitcher, the tallies you copy into the bottom of the #22 sheet once the game
-// is final.
-function Scoreboard({ away, home, wp }) {
-  const rows = [away, home]
+// The scorebook's scoreboard strip: runs by inning (1…N, extras included)
+// followed by each team's final R/H/E/LOB and the winning pitcher — the tallies
+// you copy across the bottom of the #22 sheet once the game is final. It's the
+// one wide table here, so it keeps the horizontal-scroll fallback for a long
+// extra-inning line rather than cramping the totals.
+function Scoreboard({ away, home, innings, wp }) {
+  const rows = [
+    { side: away, cells: innings.map((i) => i.away) },
+    { side: home, cells: innings.map((i) => i.home) },
+  ]
   return (
     <div className="bs__board">
-      <table className="bs__grid bs__grid--board">
-        <thead>
-          <tr>
-            <th className="bs__nameCol">Final</th>
-            <th>R</th>
-            <th>H</th>
-            <th>E</th>
-            <th>LOB</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((side) => (
-            <tr key={side.teamName}>
-              <td className="bs__nameCol">
-                <span className="bs__pname">
-                  {side.abbreviation || side.teamName}
-                </span>
-              </td>
-              <td>{side.line.r}</td>
-              <td>{side.line.h}</td>
-              <td>{side.line.e}</td>
-              <td>{side.line.lob}</td>
+      <div className="bs__scroll">
+        <table className="bs__grid bs__grid--board">
+          <thead>
+            <tr>
+              <th className="bs__nameCol">Final</th>
+              {innings.map((i) => (
+                <th key={i.num}>{i.num}</th>
+              ))}
+              <th className="bs__boardTot">R</th>
+              <th>H</th>
+              <th>E</th>
+              <th>LOB</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map(({ side, cells }) => (
+              <tr key={side.teamName}>
+                <td className="bs__nameCol">
+                  <span className="bs__pname">
+                    {side.abbreviation || side.teamName}
+                  </span>
+                </td>
+                {cells.map((v, i) => (
+                  <td key={innings[i].num} className="bs__inn">
+                    {v}
+                  </td>
+                ))}
+                <td className="bs__boardTot">{side.line.r}</td>
+                <td>{side.line.h}</td>
+                <td>{side.line.e}</td>
+                <td>{side.line.lob}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {wp && (
         <p className="bs__wp">
           <span className="bs__infoLabel">WP:</span> {wp}

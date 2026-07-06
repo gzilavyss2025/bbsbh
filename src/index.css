@@ -2045,6 +2045,17 @@ body {
   color: var(--text-body);
 }
 
+/* Runs-by-inning cells read quietly; the R/H/E/LOB totals to their right are the
+   summary, set off by a rule and a bolder R the way a printed line score is. */
+.bs__inn {
+  color: var(--text-body);
+}
+.bs__grid--board .bs__boardTot {
+  border-left: var(--bw-rule) solid var(--border-rule);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
 /* The four umpire slots on one line — a bold HP/1B/2B/3B tag before each name,
    mirroring the scorebook header's umpire boxes. */
 .bs__ump {

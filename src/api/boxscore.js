@@ -143,6 +143,22 @@ function teamLine(feed, side) {
   }
 }
 
+// Runs by inning for the scoreboard strip — one entry per inning played,
+// including extras (the full box score is a complete reveal, so there's no
+// extras-spoiler concern here the way there is in the innings navigator). A half
+// the team never batted (a won-at-home bottom of the last inning) carries no
+// runs number in the feed, so it shows 'X' the way a printed line score does.
+function scoreboardInnings(feed) {
+  const innings = feed?.liveData?.linescore?.innings ?? []
+  const runsOf = (half) =>
+    half && typeof half.runs === 'number' ? half.runs : 'X'
+  return innings.map((i) => ({
+    num: i.num,
+    away: runsOf(i.away),
+    home: runsOf(i.home),
+  }))
+}
+
 // The four umpire assignments (HP/1B/2B/3B) the scorebook lists in its header.
 // The feed carries them as one run-together "Umpires" info string
 // ("HP: Name. 1B: Name. 2B: Name. 3B: Name."); split it back into slots.
@@ -229,6 +245,7 @@ export function selectBoxscore(feed) {
   return {
     away: oneSide(feed, 'away', decisions),
     home: oneSide(feed, 'home', decisions),
+    innings: scoreboardInnings(feed),
     decisions,
     umpires,
     gameInfo,
