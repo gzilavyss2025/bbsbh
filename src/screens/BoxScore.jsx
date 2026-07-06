@@ -70,7 +70,6 @@ function BoxScoreBody({ box, managers, scorebookWeather }) {
       wide: true,
     },
     { label: 'Attendance', value: get('Att') },
-    { label: 'Box weather', value: get('Weather') },
     { label: 'Time of Game', value: box.times.duration },
     { label: 'Game End', value: box.times.end },
   ]
