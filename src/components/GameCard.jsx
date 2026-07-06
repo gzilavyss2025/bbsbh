@@ -1,4 +1,5 @@
 import { TeamLogo } from './TeamLogo.jsx'
+import { lookupSplit } from '../lib/teamSplits.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -15,6 +16,7 @@ export function GameCard({ game, pinned, onSelect }) {
     >
       <div className="gamecard__teams">
         <TeamColumn team={game.away} />
+        <span className="gamecard__at" aria-hidden="true">@</span>
         <TeamColumn team={game.home} />
       </div>
       <div className="gamecard__meta">
@@ -50,8 +52,12 @@ function TeamColumn({ team }) {
 }
 
 // "Milwaukee Brewers" + "Brewers" -> { location: 'Milwaukee', mascot: 'Brewers' }.
+// The hand-maintained table in teamSplits.js wins; otherwise fall back to the
+// API's teamName (mascot) and strip it off the end of the full name.
 function splitName(name = '', mascot = '') {
   const full = name.trim()
+  const manual = lookupSplit(full)
+  if (manual) return manual
   const club = (mascot || full).trim()
   if (club && full.toLowerCase().endsWith(club.toLowerCase())) {
     const location = full.slice(0, full.length - club.length).trim()

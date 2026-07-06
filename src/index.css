@@ -282,9 +282,16 @@ body {
 
 .gamecard__teams {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr auto 1fr;
   gap: var(--space-3);
-  align-items: start;
+  align-items: center;
+}
+
+.gamecard__at {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
 }
 
 /* Each team is a column: a large logo sitting directly above its name. The logo
