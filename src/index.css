@@ -536,12 +536,9 @@ body {
   text-align: center;
 }
 
-.roster__jersey {
-  color: var(--text-caption);
-}
-
 /* Jersey number sits between name and pos/hand, in seam red. */
 .lineup__jersey,
+.roster__jersey,
 .opp__jersey {
   color: var(--clay);
   font-weight: var(--w-bold);
@@ -905,9 +902,9 @@ body {
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
-/* Roster rows carry no batting-order slot — jersey / name / handedness|pos. */
+/* Roster rows carry no batting-order slot — name / jersey / handedness|pos. */
 .roster__row {
-  grid-template-columns: 44px 1fr auto;
+  grid-template-columns: 1fr auto auto;
 }
 
 .roster__body {

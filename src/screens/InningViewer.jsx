@@ -208,11 +208,11 @@ function RosterPanel({ title, roster }) {
               <ul className="roster__list">
                 {roster.bullpen.map((p) => (
                   <li key={p.id} className="roster__row">
-                    <span className="roster__jersey">
-                      {p.jersey ? `#${p.jersey}` : ''}
-                    </span>
                     <span className="roster__name">
                       {p.nameLastFirst.toUpperCase()}
+                    </span>
+                    <span className="roster__jersey">
+                      {p.jersey ? `#${p.jersey}` : ''}
                     </span>
                     <span className="roster__pos">{p.hand.toUpperCase()}</span>
                   </li>
@@ -227,11 +227,11 @@ function RosterPanel({ title, roster }) {
               <ul className="roster__list">
                 {roster.bench.map((p) => (
                   <li key={p.id} className="roster__row">
-                    <span className="roster__jersey">
-                      {p.jersey ? `#${p.jersey}` : ''}
-                    </span>
                     <span className="roster__name">
                       {p.nameLastFirst.toUpperCase()}
+                    </span>
+                    <span className="roster__jersey">
+                      {p.jersey ? `#${p.jersey}` : ''}
                     </span>
                     <span className="roster__pos">{p.position}</span>
                   </li>
