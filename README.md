@@ -51,6 +51,10 @@ dimensions are identical everywhere and the art scales cleanly to any size.
 - **Reference for hand-sketching:** open a logo directly at any size, e.g.
   `https://www.mlbstatic.com/team-logos/158.svg` (158 = Brewers). Because it's
   SVG it stays crisp zoomed in — handy when tracing or sketching by eye.
+- **Logo sheet screen** (`src/screens/LogoSheet.jsx`, reached via **Logos** in
+  the slate header): a printable, light-"paper" sheet of every club playing on
+  a chosen day, rendered in **grayscale** for pencil sketching. Tap **Print**
+  for a paper copy to set beside your scorebook. Spoiler-safe — no scores.
 
 App icons are generated from `public/icons/icon.svg`:
 

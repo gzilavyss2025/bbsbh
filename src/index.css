@@ -95,6 +95,18 @@ body {
   flex: 0 0 auto;
 }
 
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar__logos {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
 .datenav {
   display: flex;
   align-items: center;
@@ -765,4 +777,138 @@ body {
 
 .sheet__actions .btn {
   flex: 1;
+}
+
+/* ---------------------------------------------------------------- logo sheet
+   A light "paper" surface for pencil sketching — deliberately inverted from the
+   app's dark theme. Logos render in grayscale so they read as tonal references
+   rather than color art. */
+.logosheet {
+  --paper: #f7f7f4;
+  --paper-line: #d8d8d2;
+  --ink: #1a1a1a;
+  --ink-dim: #6b6b66;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  border-radius: 0;
+}
+
+.logosheet__bar {
+  background: linear-gradient(var(--paper) 70%, transparent);
+}
+
+.logosheet .topbar__title {
+  color: var(--ink);
+}
+
+.logosheet__bar .topbar__back,
+.logosheet__print {
+  color: var(--ink);
+}
+
+.logosheet__print {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  background: transparent;
+  border-color: var(--paper-line);
+  color: var(--ink);
+}
+
+.logosheet__datenav {
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.logosheet__datenav button {
+  background: #fff;
+  border-color: var(--paper-line);
+  color: var(--ink);
+}
+
+.logosheet__datenav .datenav__label {
+  color: var(--ink);
+}
+
+.logosheet__hint {
+  color: var(--ink-dim);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.logosheet .hint {
+  color: var(--ink-dim);
+}
+
+.logogrid {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.logotile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px 12px;
+  background: #fff;
+  border: 1px solid var(--paper-line);
+  border-radius: 12px;
+  text-align: center;
+}
+
+/* Grayscale + a touch of contrast turns color marks into clean tonal
+   references. The logo art keeps its own dimensions; the box just centers it. */
+.logotile__img {
+  filter: grayscale(1) contrast(1.05);
+  border-radius: 0;
+}
+
+/* Monogram fallback, restyled for the light sheet. */
+.logotile .teamlogo--fallback {
+  background: var(--paper);
+  border-color: var(--paper-line);
+  color: var(--ink-dim);
+}
+
+.logotile__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.logotile__level {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-dim);
+  border: 1px solid var(--paper-line);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+/* Printed sheet: force the light look, drop chrome, tile the logos on paper. */
+@media print {
+  .logosheet {
+    background: #fff;
+  }
+  .logosheet__bar,
+  .logosheet__datenav,
+  .logosheet__hint {
+    display: none;
+  }
+  .logotile {
+    border-color: #bbb;
+    break-inside: avoid;
+  }
+  .logotile__img {
+    filter: grayscale(1) contrast(1.1);
+  }
 }
