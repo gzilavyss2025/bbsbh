@@ -1193,6 +1193,20 @@ body {
   border: none;
 }
 
+.pbp__bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pbp__bottom .pbp__desc {
+  flex: 1;
+}
+
+.pbp__diamond {
+  flex: 0 0 auto;
+}
+
 .pbp__desc {
   font-size: 12px;
   color: var(--text-body);

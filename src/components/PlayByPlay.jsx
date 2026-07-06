@@ -1,4 +1,5 @@
 import { computeHalfInningFeed, pitchDotCategory } from '../api/playbyplay.js'
+import { PlayDiamond } from './PlayDiamond.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
 // appearance (pitch-dot sequence, scorebook-style out notation, RBI tag, and
@@ -35,7 +36,7 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, out, outNumber, hitText } = entry
+  const { batter, pitches, rbi, out, outNumber, hitText, basesAfter, hitLocation } = entry
   return (
     <div className="pbp__card">
       {outNumber != null && (
@@ -62,24 +63,27 @@ function AtBatCard({ entry }) {
           ))}
         </div>
       )}
-      <div className="pbp__desc">
-        {out ? (
-          <>
-            {out.label}
-            {out.calledLooking ? (
-              <>
-                {', '}
-                <span className="pbp__klooking" aria-label="strikeout looking">
-                  K
-                </span>
-              </>
-            ) : out.notation ? (
-              `, ${out.notation}`
-            ) : null}
-          </>
-        ) : (
-          hitText
-        )}
+      <div className="pbp__bottom">
+        <PlayDiamond bases={basesAfter} hit={hitLocation} />
+        <div className="pbp__desc">
+          {out ? (
+            <>
+              {out.label}
+              {out.calledLooking ? (
+                <>
+                  {', '}
+                  <span className="pbp__klooking" aria-label="strikeout looking">
+                    K
+                  </span>
+                </>
+              ) : out.notation ? (
+                `, ${out.notation}`
+              ) : null}
+            </>
+          ) : (
+            hitText
+          )}
+        </div>
       </div>
     </div>
   )

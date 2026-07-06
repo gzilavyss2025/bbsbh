@@ -23,6 +23,14 @@
 //    describe a baserunning event with no batting result for whoever is
 //    currently up — those don't get their own card, but their runners[] is
 //    still walked for out attribution.
+//  - Each play's `matchup.postOnFirst/Second/Third` is the base state after
+//    that specific play resolves, already folding in anything since the
+//    previous card (steals, pickoffs, wild pitches) — no separate bookkeeping
+//    needed, just read it off the play whose card is being built.
+//  - Hit coordinates (`playEvents[].hitData.coordinates`) are Statcast-only:
+//    present for MLB balls in play, absent for MiLB and for BB/K/HBP plate
+//    appearances. `hitLocation` is null in both cases and PlayDiamond omits
+//    the marker rather than guessing.
 
 const NON_PA_EVENT_TYPES = new Set([
   'stolen_base_2b', 'stolen_base_3b', 'stolen_base_home',
@@ -124,6 +132,28 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         .filter((e) => e.isPitch)
         .map((e) => e.details?.call?.code ?? e.details?.code)
 
+      // Base state after this play resolves, straight from the feed — already
+      // accounts for anything that happened since the last card (steals,
+      // pickoffs, wild pitches...), which don't get cards of their own.
+      const basesAfter = [
+        Boolean(play.matchup?.postOnFirst),
+        Boolean(play.matchup?.postOnSecond),
+        Boolean(play.matchup?.postOnThird),
+      ]
+
+      // Statcast hit coordinates, when the ball was put in play. MLB-only —
+      // MiLB feeds and no-contact plate appearances (BB/K/HBP) leave this
+      // null, and PlayDiamond just omits the marker in that case.
+      const inPlayEvent = (play.playEvents ?? []).find(
+        (e) =>
+          e.isPitch &&
+          INPLAY_CODES.has(e.details?.call?.code ?? e.details?.code) &&
+          e.hitData?.coordinates,
+      )
+      const hitLocation = inPlayEvent
+        ? { x: inPlayEvent.hitData.coordinates.coordX, y: inPlayEvent.hitData.coordinates.coordY }
+        : null
+
       const cardIndex = entries.length
       const card = {
         kind: 'atbat',
@@ -134,6 +164,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         hitText: null,
         out: null,
         outNumber: null,
+        basesAfter,
+        hitLocation,
       }
       entries.push(card)
       originIndex.set(batterId, cardIndex)
