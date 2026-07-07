@@ -2,6 +2,7 @@ import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
 import { managerLabel } from '../api/mlb.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
+import { PlayerLink } from '../components/PlayerLink.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -202,7 +203,7 @@ function TeamBlock({ side }) {
                 <td className="bs__nameCol">
                   <span className="bs__player">
                     {b.mark && <span className="bs__mark">{b.mark}</span>}
-                    <span className="bs__pname">{b.name}</span>
+                    <PlayerLink id={b.id} className="bs__pname">{b.name}</PlayerLink>
                     {b.position && <NumPos num={b.num} pos={b.position} />}
                   </span>
                 </td>
@@ -271,7 +272,7 @@ function TeamBlock({ side }) {
               <tr key={p.id}>
                 <td className="bs__nameCol">
                   <span className="bs__player">
-                    <span className="bs__pname">{p.name}</span>
+                    <PlayerLink id={p.id} className="bs__pname">{p.name}</PlayerLink>
                     {p.num !== '' && p.num != null && (
                       <span className="bs__pos">
                         <span className="bs__unum">{p.num}</span>
@@ -464,7 +465,7 @@ function ThreeStars({ stars }) {
             </span>
             <span className="bs__starWho">
               <span className="bs__starHead">
-                <span className="bs__starName">{s.name}</span>
+                <PlayerLink id={s.id} className="bs__starName">{s.name}</PlayerLink>
                 {(s.teamAbbr || s.pos) && (
                   <span className="bs__starMeta">
                     {[s.teamAbbr, s.pos].filter(Boolean).join(' · ')}

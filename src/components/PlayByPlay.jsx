@@ -1,5 +1,6 @@
 import { computeHalfInningFeed, pitchLadder } from '../api/playbyplay.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
+import { PlayerLink } from './PlayerLink.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
 // appearance (pitch-dot sequence, scorebook-style out notation, RBI tag, and
@@ -42,8 +43,10 @@ function AtBatCard({ entry }) {
       <div className="pbp__main">
         <div className="pbp__top">
           <span className="pbp__batter">
-            {batter.last}
-            {batter.first ? `, ${batter.first}` : ''}
+            <PlayerLink id={batter.id}>
+              {batter.last}
+              {batter.first ? `, ${batter.first}` : ''}
+            </PlayerLink>
             {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
           </span>
           {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}

@@ -6,6 +6,9 @@ import {
   useRef,
   useState,
 } from 'react'
+import { PlayerLink } from '../components/PlayerLink.jsx'
+import { useNav, useLinkScope } from '../lib/nav.js'
+import { playerPath } from '../lib/route.js'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -543,7 +546,7 @@ function PitchersSection({ teams }) {
                 <tr key={p.id}>
                   <td className="pitchers__pitcher">
                     <div className="pitchers__cell">
-                      <PitcherName last={p.last} first={p.first} />
+                      <PitcherName id={p.id} last={p.last} first={p.first} />
                       {p.jersey ? (
                         <span className="pitchers__num">{p.jersey}</span>
                       ) : null}
@@ -577,8 +580,10 @@ function PitchersSection({ teams }) {
 // re-fits when the column width changes (extra innings unlocking, rotation).
 const NAME_MAX_PX = 12
 const NAME_MIN_PX = 8
-function PitcherName({ last, first }) {
+function PitcherName({ id, last, first }) {
   const ref = useRef(null)
+  const navigate = useNav()
+  const { asOf, sportId } = useLinkScope()
   const text = `${last}${first ? `, ${first}` : ''}`
 
   useLayoutEffect(() => {
@@ -599,10 +604,25 @@ function PitcherName({ last, first }) {
     return () => ro.disconnect()
   }, [text])
 
+  // The clickable element IS the ref'd, auto-shrunk element (a plain span when
+  // there's no id) so the fit logic measures the same box either way and the
+  // table layout is unchanged.
+  if (!id) {
+    return (
+      <span className="pitchers__pname" ref={ref}>
+        {text}
+      </span>
+    )
+  }
   return (
-    <span className="pitchers__pname" ref={ref}>
+    <button
+      type="button"
+      ref={ref}
+      className="plink pitchers__pname"
+      onClick={() => navigate(playerPath(id, { d: asOf, s: sportId }))}
+    >
       {text}
-    </span>
+    </button>
   )
 }
 
@@ -693,9 +713,9 @@ function RosterPanel({ title, roster, revealedThrough }) {
               <ul className="roster__list">
                 {roster.bullpen.map((p) => (
                   <li key={p.id} className={rowClass(p)}>
-                    <span className="roster__name">
+                    <PlayerLink id={p.id} className="roster__name">
                       {p.nameLastFirst.toUpperCase()}
-                    </span>
+                    </PlayerLink>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>
                   </li>
@@ -710,9 +730,9 @@ function RosterPanel({ title, roster, revealedThrough }) {
               <ul className="roster__list">
                 {roster.bench.map((p) => (
                   <li key={p.id} className={rowClass(p)}>
-                    <span className="roster__name">
+                    <PlayerLink id={p.id} className="roster__name">
                       {p.nameLastFirst.toUpperCase()}
-                    </span>
+                    </PlayerLink>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{p.position}</span>
                   </li>

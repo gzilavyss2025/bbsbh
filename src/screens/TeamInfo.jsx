@@ -9,6 +9,7 @@ import {
 } from '../api/select.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { PlayerLink } from '../components/PlayerLink.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -194,9 +195,9 @@ function TeamSections({ feed, side, oppPitcherLine }) {
             {lineup.map((p) => (
               <li key={p.id} className="lineup__row">
                 <span className="lineup__order">{p.order}</span>
-                <span className="lineup__name">
+                <PlayerLink id={p.id} className="lineup__name">
                   {p.nameLastFirst.toUpperCase()}
-                </span>
+                </PlayerLink>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
                 <span className="lineup__pos">{p.position}</span>
               </li>
@@ -209,9 +210,9 @@ function TeamSections({ feed, side, oppPitcherLine }) {
         <h3 className="section__title">Opposing pitcher</h3>
         {oppPitcher ? (
           <div className="opp__pitcher">
-            <span className="opp__name">
+            <PlayerLink id={oppPitcher.id} className="opp__name">
               {oppPitcher.nameLastFirst.toUpperCase()}
-            </span>
+            </PlayerLink>
             <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>
             {/* Season line (aggregates only, never this game's) — the numbers

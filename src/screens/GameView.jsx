@@ -18,6 +18,7 @@ import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { BaseballMark } from '../components/BaseballMark.jsx'
+import { LinkScope } from '../lib/nav.jsx'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -46,6 +47,13 @@ export function GameView({ game, section, onSection, onHome }) {
     return { feed, uniforms }
   }, [game.gamePk])
   const feed = feedState.data?.feed
+
+  // The date a name-link inside this game should cut its stats off at: the
+  // game's official date. Falls back to the scheduled date before the feed
+  // lands. Feeds every PlayerLink/TeamLink below (via LinkScope) so a player
+  // page opened from a sealed game shows "entering today", never tonight's line.
+  const officialDate =
+    feed?.gameData?.datetime?.officialDate || (game.gameDate || '').slice(0, 10) || null
 
   // The condensed one-line uniform summary shown everywhere a uniform surfaces —
   // the lineup pages and the box score's fill-in card ("Away Alternate Navy
@@ -122,6 +130,7 @@ export function GameView({ game, section, onSection, onHome }) {
   const sketchTeam = sketching ? game[sketching] : null
 
   return (
+    <LinkScope asOf={officialDate} sportId={game.sportId}>
     <div className="screen">
       <div className="sitebar">
         <button className="sitebar__home" onClick={onHome} aria-label="Back to games">
@@ -279,6 +288,7 @@ export function GameView({ game, section, onSection, onHome }) {
         />
       )}
     </div>
+    </LinkScope>
   )
 }
 
