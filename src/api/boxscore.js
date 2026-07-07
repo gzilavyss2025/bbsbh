@@ -1,7 +1,9 @@
 // Full box-score selector — the complete, MLB.com-style final line for a game:
 // each team's batting order (starters with substitutes indented), the pitching
 // lines, the BATTING/BASERUNNING/FIELDING notes, per-team footnotes, the
-// game-info rows (WP, umpires, weather, T, Att…) and the W/L/S decisions.
+// info-block rows (WP, umpires, weather, T, Att…) — deduped against the
+// structured fields and split per-pitcher onto each team (see
+// splitGameNotes) — and the W/L/S decisions.
 //
 // SPOILER RULE — read before touching this. Every number here is
 // score-revealing, so this module is reveal-only exactly like linescore.js and
@@ -239,6 +241,123 @@ function parseUmpires(value) {
   return u.hp || u.first || u.second || u.third ? u : null
 }
 
+// Info-block rows already shown structured elsewhere in the box score (the
+// fill-in boxes' Umpires/Weather/Venue/Attendance/First-Pitch/duration
+// fields) — dropped from the shared foot rather than repeated verbatim.
+const DEDUPED_INFO_LABELS = new Set([
+  'Umpires',
+  'Weather',
+  'First pitch',
+  'T',
+  'Att',
+  'Venue',
+])
+
+// Rows shaped "Name stat; Name stat…" — one entry per pitcher.
+const STAT_SPLIT_LABELS = new Set([
+  'Pitches-strikes',
+  'Groundouts-flyouts',
+  'Batters faced',
+  'Inherited runners-scored',
+])
+
+// Rows shaped "Name (detail); Name (detail)…" or bare "Name; Name…" — no
+// trailing numeric stat, just a name and an optional parenthetical (an
+// outcome, a role, or a "by Pitcher" attribution).
+const NAME_SPLIT_LABELS = new Set([
+  'Balk',
+  'WP',
+  'IBB',
+  'HBP',
+  'ABS Challenge',
+  'Pitch timer violations',
+])
+
+// Every player in the game, keyed by the exact `boxscoreName` string the feed
+// also uses inside the info-block text (MLB disambiguates same-surname
+// players game-wide, e.g. "Contreras, Wm", so this lookup can't collide
+// across the two teams).
+function nameTeamMap(feed) {
+  const map = new Map()
+  const gdPlayers = feed?.gameData?.players ?? {}
+  for (const side of ['away', 'home']) {
+    const boxPlayers = feed?.liveData?.boxscore?.teams?.[side]?.players ?? {}
+    for (const key of Object.keys(boxPlayers)) {
+      const name = gdPlayers[key]?.boxscoreName
+      if (name) map.set(name, side)
+    }
+  }
+  return map
+}
+
+function splitEntries(value) {
+  return (value ?? '')
+    .split(';')
+    .map((s) => s.trim().replace(/\.\s*$/, '').trim())
+    .filter(Boolean)
+}
+
+// "Holmes, C 90-57" -> { name: 'Holmes, C', stat: '90-57' }
+function splitNameStat(entry) {
+  const m = entry.match(/^(.+?)\s+(\d[\d-]*)$/)
+  return m ? { name: m[1].trim(), stat: m[2] } : { name: entry, stat: '' }
+}
+
+// "Soto, J (by Soriano, G)" -> { name: 'Soto, J', detail: 'by Soriano, G' }
+function splitNameDetail(entry) {
+  const m = entry.match(/^(.+?)\s*\(([^)]*)\)$/)
+  return m ? { name: m[1].trim(), detail: m[2].trim() } : { name: entry, detail: '' }
+}
+
+// Splits the info block's per-pitcher/per-player rows onto the team of the
+// player named — the pitcher in a "(by X)" attribution (HBP, IBB), else the
+// leading name (Balk, WP, Pitches-strikes…). Anything that can't be matched
+// to a roster name is kept, under its original label, in `shared` rather than
+// dropped or guessed onto the wrong side.
+function splitGameNotes(feed) {
+  const info = feed?.liveData?.boxscore?.info ?? []
+  const teamOf = nameTeamMap(feed)
+  const bucket = { away: [], home: [], shared: [] }
+
+  for (const row of info) {
+    if (!row.label || row.value == null) continue
+    if (DEDUPED_INFO_LABELS.has(row.label)) continue
+
+    const isStat = STAT_SPLIT_LABELS.has(row.label)
+    if (!isStat && !NAME_SPLIT_LABELS.has(row.label)) {
+      bucket.shared.push(row)
+      continue
+    }
+
+    const bySide = { away: [], home: [], other: [] }
+    for (const entry of splitEntries(row.value)) {
+      let name, text, side
+      if (isStat) {
+        const parsed = splitNameStat(entry)
+        name = parsed.name
+        text = parsed.stat ? `${parsed.name} ${parsed.stat}` : parsed.name
+      } else {
+        const parsed = splitNameDetail(entry)
+        const byMatch = parsed.detail.match(/^by\s+(.+)$/i)
+        name = byMatch ? byMatch[1].trim() : parsed.name
+        text = parsed.detail ? `${parsed.name} (${parsed.detail})` : parsed.name
+      }
+      side = teamOf.get(name)
+      ;(bySide[side] ?? bySide.other).push(text)
+    }
+    for (const side of ['away', 'home']) {
+      if (bySide[side].length) {
+        bucket[side].push({ label: row.label, value: `${bySide[side].join('; ')}.` })
+      }
+    }
+    if (bySide.other.length) {
+      bucket.shared.push({ label: row.label, value: `${bySide.other.join('; ')}.` })
+    }
+  }
+
+  return bucket
+}
+
 // The BATTING / BASERUNNING / FIELDING note groups a printed box score carries
 // under each team (HR detail, 2-out RBI, SB, DP, Team LOB…).
 function teamNoteGroups(feed, side) {
@@ -259,7 +378,7 @@ function footnotes(feed, side) {
   )
 }
 
-function oneSide(feed, side, decisions) {
+function oneSide(feed, side, decisions, pitchNotes) {
   const meta =
     feed?.gameData?.teams?.[side] ??
     feed?.liveData?.boxscore?.teams?.[side]?.team ??
@@ -278,6 +397,9 @@ function oneSide(feed, side, decisions) {
     line: teamLine(feed, side),
     notes: teamNoteGroups(feed, side),
     footnotes: footnotes(feed, side),
+    // This team's half of the info block's per-pitcher rows (Pitches-strikes,
+    // Groundouts-flyouts, Batters faced, HBP, Balk, WP…) — see splitGameNotes.
+    pitchNotes,
   }
 }
 
@@ -310,15 +432,20 @@ export function selectBoxscore(feed) {
   )
   const gameInfo = infoRows.filter((r) => r.label && r.value)
   const dateRow = infoRows.find((r) => r.label && r.value == null)
+  const gameNotes = splitGameNotes(feed)
 
   return {
-    away: oneSide(feed, 'away', decisions),
-    home: oneSide(feed, 'home', decisions),
+    away: oneSide(feed, 'away', decisions, gameNotes.away),
+    home: oneSide(feed, 'home', decisions, gameNotes.home),
     innings: scoreboardInnings(feed),
     decisions,
     umpires,
     times: gameTimes(feed),
     gameInfo,
+    // The leftover info-block rows: whole-game fields with no team owner
+    // (Wind) plus any per-pitcher entry splitGameNotes couldn't match to a
+    // roster name — kept here, under their original label, so nothing is lost.
+    footNotes: gameNotes.shared,
     dateLabel: dateRow?.label ?? '',
   }
 }

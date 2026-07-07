@@ -159,7 +159,7 @@ function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }
           <TeamBlock side={box.home} feed={feed} sideKey="home" />
         </div>
       </div>
-      <GameInfo rows={box.gameInfo} dateLabel={box.dateLabel} />
+      <GameInfo rows={box.footNotes} dateLabel={box.dateLabel} />
     </div>
   )
 }
@@ -323,6 +323,17 @@ function TeamBlock({ side, feed, sideKey }) {
           </tfoot>
         </table>
       </div>
+
+      {side.pitchNotes.length > 0 && (
+        <div className="bs__notes">
+          <h4 className="bs__notesTitle">Pitching</h4>
+          {side.pitchNotes.map((r, i) => (
+            <p className="bs__note" key={i}>
+              <span className="bs__noteLabel">{r.label}:</span> {r.value}
+            </p>
+          ))}
+        </div>
+      )}
 
       <BoxDefense feed={feed} sideKey={sideKey} />
     </section>
@@ -506,9 +517,11 @@ function ThreeStars({ stars }) {
   )
 }
 
-// The complete MLB-style game-info foot (WP/LP/SV detail, pitches-strikes,
-// umpires, weather, T, Att, venue…) kept verbatim at the bottom so the full text
-// box score is intact; the fill-in boxes up top are the transcription shortcut.
+// What's left of the info block after selectBoxscore peels off the
+// structured fill-in-box fields (umpires, weather, venue, attendance, first
+// pitch, duration) and splits every per-pitcher row onto its own team's
+// TeamBlock (see `pitchNotes` there): whole-game fields with no team owner,
+// like Wind, plus any entry that couldn't be matched to a roster name.
 function GameInfo({ rows, dateLabel }) {
   if (rows.length === 0 && !dateLabel) return null
   return (
