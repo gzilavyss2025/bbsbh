@@ -1571,51 +1571,73 @@ body {
   min-width: 0;
 }
 
+/* The whole right-hand tally — pitch lanes + result code + diamond — framed
+   as one box, Numbers Game #22 style. */
 .pbp__side {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 6px;
   flex: 0 0 auto;
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-3);
+  padding: 5px;
 }
 
-/* Scorebook denotation stacked over the diamond: the code (1B / F8 / 6-3) and,
-   for an out, the graphite-shaded out-number box — Numbers Game #22 style. */
+/* Scorebook denotation stacked over the diamond: the result code (1B / F8 /
+   6-3) on top, then the base diamond. The out marker is a red circle overlaid
+   on the diamond's bottom-left corner. */
 .pbp__play {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
+  gap: 1px;
   flex: 0 0 auto;
-}
-
-.pbp__playhead {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 15px;
 }
 
 .pbp__code {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.02em;
   color: var(--ink-1);
 }
 
-.pbp__outbox {
-  display: inline-flex;
+/* Base hits inked green, reached-on-error red — the rest stay ink. */
+.pbp__code--hit {
+  color: var(--field-deep);
+}
+
+.pbp__code--error {
+  color: var(--clay-deep);
+}
+
+.pbp__outcircle {
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 15px;
-  height: 15px;
-  padding: 0 3px;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 10px;
-  color: var(--paper-2);
-  background: var(--graphite);
-  border-radius: 2px;
+  font-size: 12px;
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+  border: var(--bw-rule) solid var(--clay);
+}
+
+/* Advance notations penciled outside the bases (BB, GO, 2B…). */
+.pbp__advance {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 11px;
+  fill: var(--graphite);
 }
 
 .pbp__top {

@@ -23,14 +23,11 @@
 //    describe a baserunning event with no batting result for whoever is
 //    currently up — those don't get their own card, but their runners[] is
 //    still walked for out attribution.
-//  - Each play's `matchup.postOnFirst/Second/Third` is the base state after
-//    that specific play resolves, already folding in anything since the
-//    previous card (steals, pickoffs, wild pitches) — no separate bookkeeping
-//    needed, just read it off the play whose card is being built.
-//  - Hit coordinates (`playEvents[].hitData.coordinates`) are Statcast-only:
-//    present for MLB balls in play, absent for MiLB and for BB/K/HBP plate
-//    appearances. `hitLocation` is null in both cases and PlayDiamond omits
-//    the marker rather than guessing.
+//  - Each runner's `movement.end` ('1B'/'2B'/'3B'/'score'/null) is walked
+//    across the whole half to find how far each batter got as a baserunner
+//    (his card's diamond shades the bases he legged out, solid if he scored)
+//    and how he advanced each leg on a later play (BB/GO/2B…). An out on the
+//    bases (`movement.isOut`) doesn't advance him.
 
 import { personNameParts } from './select.js'
 
@@ -108,15 +105,6 @@ function trimLeadingName(description, fullName) {
   return description
 }
 
-// Scorebook shorthand for the BATTER's own out on their own plate appearance
-// — the terse fielding notation (K, 6-3, L7, F8…) shown as a badge alongside
-// the play's full prose description. The fielding chain describes how the
-// batted ball itself was fielded (fly/line/ground). Only ever called for that
-// case: a runner put out later, on a different play than their own PA, keeps
-// whatever their own card already says (they still walked, singled, etc.) —
-// see the out-attribution loop below, which attaches only the sequence number
-// in that case, not a replacement description.
-
 // How-reached codes keyed on the play's eventType, for a batter who was NOT
 // retired on his own plate appearance.
 const REACH_CODES = {
@@ -132,28 +120,50 @@ const REACH_CODES = {
   catcher_interf: 'CI',
 }
 
+const HIT_EVENTS = new Set(['single', 'double', 'triple', 'home_run'])
+
 // The Numbers Game #22-style scorebook denotation for a batter's own plate
 // appearance — shown above the per-play diamond. Either how he reached (1B,
-// 2B, HR, BB, E6, FC…) or how he was retired (K, F8, L7, 6-3…). A called
-// third strike returns { calledLooking: true } so the card can draw the
-// customary backwards K instead of a code string.
+// 2B, HR, BB, E6, FC…) or how he was retired (K, F8, L7, 6-3…). Returns a
+// `kind` ('hit' | 'error' | 'reach' | 'out') so the card can ink hits green
+// and errors red. A called third strike returns { calledLooking: true } so the
+// card can draw the customary backwards K instead of a code string.
 function scorebookCode(play, batterRunner) {
   const et = play.result?.eventType
-  if (REACH_CODES[et]) return { code: REACH_CODES[et] }
+  if (REACH_CODES[et]) return { code: REACH_CODES[et], codeKind: HIT_EVENTS.has(et) ? 'hit' : 'reach' }
 
   const desc = play.result?.description ?? ''
   const chain = (batterRunner?.credits ?? []).map((c) => c.position.code)
 
   if (et === 'field_error') {
     const errPos = (batterRunner?.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
-    return { code: `E${errPos?.position.code ?? ''}` }
+    return { code: `E${errPos?.position.code ?? ''}`, codeKind: 'error' }
   }
-  if (/strikes? out swinging/i.test(desc)) return { code: 'K' }
-  if (/called out on strikes/i.test(desc)) return { calledLooking: true }
-  if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}` }
-  if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}` }
-  if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}` }
-  return { code: chain.join('-') }
+  if (/strikes? out swinging/i.test(desc)) return { code: 'K', codeKind: 'out' }
+  if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
+  if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  return { code: chain.join('-'), codeKind: 'out' }
+}
+
+// Short code for how a runner ADVANCED to a base on a given play — written by
+// the base he moved up to, scorebook-style (BB forced him over, GO/FO moved
+// him up on an out, 1B/2B on the hit that drove him, SB stole, WP/PB/BK, etc).
+const ADVANCE_CODES = {
+  single: '1B', double: '2B', triple: '3B', home_run: 'HR',
+  walk: 'BB', intent_walk: 'IBB', hit_by_pitch: 'HBP',
+  sac_fly: 'SF', sac_bunt: 'SAC',
+  stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
+  wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
+  field_error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
+}
+
+function advanceCode(play) {
+  const et = play.result?.eventType
+  if (ADVANCE_CODES[et]) return ADVANCE_CODES[et]
+  if (/(flies|fly ball|pops|lines|line drive|sacrifice fly)/i.test(play.result?.description ?? '')) return 'FO'
+  return 'GO'
 }
 
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
@@ -232,25 +242,37 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   }
 
   // Advancement pass: follow each batter as a baserunner across every play of
-  // the half and record the furthest base he reached (and whether he scored),
-  // so his own card's diamond can shade the bases he legged out — filled solid
-  // when he came around to score. An out on the bases doesn't advance him; he
-  // keeps whatever base he'd already reached.
+  // the half. Record the furthest base he reached (and whether he scored), so
+  // his diamond can shade the bases he legged out — filled solid when he came
+  // around to score. Also record, per base, HOW he got there (BB, GO, 2B…),
+  // for the notations drawn along the base paths — but only for advancement on
+  // OTHER plays; the leg(s) he reached on his own PA are already labeled by the
+  // code above the diamond. An out on the bases doesn't advance him.
   const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
   const progress = new Map() // runnerId -> furthest base (1-3, or 4 for a run)
+  const legs = new Map() // runnerId -> { baseNum: advance code }
   for (const play of plays) {
+    const code = advanceCode(play)
+    const playBatter = play.matchup?.batter?.id
     for (const r of play.runners ?? []) {
       const rid = r.details?.runner?.id
       if (rid == null || r.movement?.isOut) continue
       const end = r.movement?.end
       const base = end === 'score' ? 4 : (BASE_NUM[end] ?? 0)
+      if (base === 0) continue
       if (base > (progress.get(rid) ?? 0)) progress.set(rid, base)
+      if (rid !== playBatter) {
+        const m = legs.get(rid) ?? {}
+        m[base] = code
+        legs.set(rid, m)
+      }
     }
   }
   for (const [rid, cardIndex] of originIndex) {
     const base = progress.get(rid) ?? 0
     entries[cardIndex].scored = base === 4
-    entries[cardIndex].reached = base === 4 ? 4 : base
+    entries[cardIndex].reached = base
+    entries[cardIndex].legNotations = legs.get(rid) ?? {}
   }
 
   return entries

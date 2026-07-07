@@ -36,7 +36,7 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, code, calledLooking, outNumber, desc, reached, scored } = entry
+  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, desc, reached, scored, legNotations } = entry
   return (
     <div className="pbp__card">
       <div className="pbp__main">
@@ -53,21 +53,19 @@ function AtBatCard({ entry }) {
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
         <div className="pbp__play">
-          <div className="pbp__playhead">
-            {calledLooking ? (
-              <span className="pbp__code pbp__klooking" aria-label="strikeout looking">
-                K
-              </span>
-            ) : (
-              code && <span className="pbp__code">{code}</span>
-            )}
-            {outNumber != null && (
-              <span className="pbp__outbox" aria-label={`Out ${outNumber} of the inning`}>
-                {outNumber}
-              </span>
-            )}
-          </div>
-          <PlayDiamond reached={reached} scored={scored} />
+          {calledLooking ? (
+            <span className="pbp__code pbp__klooking" aria-label="strikeout looking">
+              K
+            </span>
+          ) : (
+            code && <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
+          )}
+          <PlayDiamond reached={reached} scored={scored} legNotations={legNotations} />
+          {outNumber != null && (
+            <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
+              {outNumber}
+            </span>
+          )}
         </div>
       </div>
     </div>

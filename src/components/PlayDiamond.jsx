@@ -2,14 +2,15 @@
 // style: the batter's trip around the bases is penciled in as graphite-shaded
 // legs — one triangular wedge per base reached (home→1st, 1st→2nd, 2nd→3rd,
 // 3rd→home). A batter who came around to score fills all four wedges, so his
-// diamond reads as a solid shaded diamond; a batter left on second shows two
-// wedges; a batter retired shows an empty outline.
-const HOME = [50, 90]
-const R = 14
-const FIRST = [50 + R, 90 - R]
-const SECOND = [50, 90 - 2 * R]
-const THIRD = [50 - R, 90 - R]
-const CENTER = [50, 90 - R]
+// diamond reads as a solid shaded diamond; a batter retired shows an empty
+// outline. Each base he advanced to on a LATER play is annotated outside that
+// base with how he got there (BB, GO, 2B…). Centered in the viewBox with room
+// around it for those labels.
+const HOME = [50, 80]
+const FIRST = [80, 50]
+const SECOND = [50, 20]
+const THIRD = [20, 50]
+const CENTER = [50, 50]
 
 // The four base-path wedges, in running order. Wedge i is shaded once the
 // runner has reached base i+1.
@@ -20,7 +21,15 @@ const LEGS = [
   [THIRD, HOME, CENTER],
 ]
 
-export function PlayDiamond({ reached = 0, scored = false, size = 76 }) {
+// Where each base's advance notation sits, just outside that base.
+const LABELS = {
+  1: { x: 85, y: 53, anchor: 'start' },
+  2: { x: 50, y: 13, anchor: 'middle' },
+  3: { x: 15, y: 53, anchor: 'end' },
+  4: { x: 50, y: 96, anchor: 'middle' },
+}
+
+export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, size = 140 }) {
   const filled = scored ? 4 : reached
   return (
     <svg
@@ -40,6 +49,17 @@ export function PlayDiamond({ reached = 0, scored = false, size = 76 }) {
         strokeWidth={2}
         strokeLinejoin="round"
       />
+      {Object.entries(legNotations).map(([base, code]) => (
+        <text
+          key={base}
+          className="pbp__advance"
+          x={LABELS[base].x}
+          y={LABELS[base].y}
+          textAnchor={LABELS[base].anchor}
+        >
+          {code}
+        </text>
+      ))}
     </svg>
   )
 }
