@@ -315,6 +315,15 @@ export function PlayerPage({ id, asOf, sportId }) {
           {bio.team && (
             <TeamLink id={bio.team.id} className="player__herologo">
               <TeamLogo teamId={bio.team.id} name={bio.team.name} size={56} />
+              {bio.team.parentOrgId && (
+                <TeamLogo
+                  teamId={bio.team.parentOrgId}
+                  name={bio.team.parentOrgName}
+                  variant="wordmark"
+                  size={20}
+                  className="player__herologo-affiliate"
+                />
+              )}
             </TeamLink>
           )}
         </header>

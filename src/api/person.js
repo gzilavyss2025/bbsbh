@@ -127,8 +127,17 @@ export function personBio(person) {
     born: born || DASH,
     debut: person.mlbDebutDate ?? '',
     draft: draftInfo(person),
+    // `parentOrgId`/`parentOrgName` ride along on `currentTeam` for a MiLB
+    // club (verified live) — the parent MLB org that team is affiliated with.
+    // Absent for an MLB team, so this doubles as the "is this a MiLB player"
+    // signal the hero uses to show the affiliate mark.
     team: person.currentTeam
-      ? { id: person.currentTeam.id, name: person.currentTeam.name }
+      ? {
+          id: person.currentTeam.id,
+          name: person.currentTeam.name,
+          parentOrgId: person.currentTeam.parentOrgId ?? null,
+          parentOrgName: person.currentTeam.parentOrgName ?? '',
+        }
       : null,
   }
 }

@@ -3527,9 +3527,13 @@ body {
     margin-top: 10px;
     font-size: 16px;
   }
-  .player__herologo .teamlogo {
+  .player__herologo > .teamlogo {
     width: 96px !important;
     height: 96px !important;
+  }
+  .player__herologo-affiliate {
+    width: 30px !important;
+    height: 30px !important;
   }
 }
 
