@@ -10,6 +10,7 @@ import {
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
+import { TeamLink } from '../components/TeamLink.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -35,7 +36,11 @@ export function TeamInfo({
   return (
     <div className="teaminfo">
       <div className="teaminfo__head">
-        <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
+        <h2 className="teaminfo__name">
+          <TeamLink id={meta.id} className="teaminfo__namelink">
+            {(meta.name || 'Team').toUpperCase()}
+          </TeamLink>
+        </h2>
         <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
       </div>
 
@@ -125,7 +130,11 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine }) {
   return (
     <section className="teampanel">
       <div className="teaminfo__head">
-        <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
+        <h2 className="teaminfo__name">
+          <TeamLink id={meta.id} className="teaminfo__namelink">
+            {(meta.name || 'Team').toUpperCase()}
+          </TeamLink>
+        </h2>
         <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
       </div>
       <dl className="factgrid">

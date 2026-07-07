@@ -989,6 +989,9 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.lineup__name {
+  font-weight: var(--w-bold);
+}
 
 .lineup__pos,
 .roster__pos {
