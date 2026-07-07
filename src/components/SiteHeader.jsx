@@ -14,7 +14,7 @@ export function SiteHeader() {
         onClick={() => navigate('/')}
         aria-label="Back to games"
       >
-        <BaseballMark size={20} simplified />
+        <BaseballMark size={22} simplified />
         <span className="sitebar__word">Scorebook</span>
       </button>
     </div>

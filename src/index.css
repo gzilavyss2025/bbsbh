@@ -251,9 +251,9 @@ body {
 
 .sitebar__word {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 26px;
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-heading);
 }
