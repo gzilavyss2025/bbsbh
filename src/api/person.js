@@ -632,15 +632,19 @@ export function milbStatsView(splits, group) {
 }
 
 // ---------------------------------------------------------------------------
-// Career timeline — the horizontal team-by-team map shown above the "Path to
-// the Majors" card: one stop per club the player logged REAL time with,
-// earliest first, with the year(s) he spent there. "Real time" is a threshold
-// (10 games as a batter, 20 IP for a pitcher) applied per team-season, so a
-// cup of coffee or a rehab stint drops out — a team is a single level, so this
-// also decides the level example: Yelich's 2013 keeps AA (49 G) but not his 7 G
-// at A+ or 5 G in the complex league. Fed the player's full year-by-year splits
-// (MLB + every MiLB level); the tint per stop is resolved separately (the
-// caller fetches fetchTeamLogoTint), since this stays a pure shaper.
+// Career timeline — the team-by-team map shown above the "Path to the Majors"
+// card: one stop per club the player logged REAL time with, earliest first,
+// with the year(s) he spent there. "Real time" is a threshold (10 games as a
+// batter, 20 IP for a pitcher) applied per team-season, so a cup of coffee or a
+// pre-debut rehab stint drops out — a team is a single level, so this also
+// decides the level example: Yelich's 2013 keeps AA (49 G) but not his 7 G at
+// A+ or 5 G in the complex league. A post-debut MiLB season needs more (see
+// qualifies): it survives only when the minors were the primary home that year,
+// so a big leaguer's short rehab or option down doesn't append a misleading
+// season to his old farm club. Fed the player's full year-by-year splits (MLB +
+// every MiLB level) plus his debutYear; the tint per stop is resolved
+// separately (the caller fetches fetchTeamLogoTint), since this stays a pure
+// shaper.
 // ---------------------------------------------------------------------------
 
 // Consecutive seasons collapse to a range with a two-digit tail ("2018–21"),
@@ -657,25 +661,52 @@ function formatSeasonRuns(seasons) {
     .join(', ')
 }
 
-export function careerTimelineView(splits, group) {
+export function careerTimelineView(splits, group, debutYear) {
   // Sum the workload per team-season (a mid-season same-level trade can split
   // one club's year across rows; a team-less synthetic aggregate row carries no
-  // team.id and is skipped by the guard, so it can't double-count).
+  // team.id and is skipped by the guard, so it can't double-count). Also tally
+  // MLB workload per season so the post-debut rehab test below can compare.
   const byKey = new Map()
+  const mlbBySeason = new Map()
   for (const s of splits ?? []) {
     const season = Number(s.season)
     const teamId = s.team?.id
     const sportId = s.sport?.id
     if (!season || !teamId || !sportId) continue
+    const games = num(s.stat?.gamesPlayed)
+    const outs = ipToOuts(s.stat?.inningsPitched)
+    if (sportId === 1) {
+      const m = mlbBySeason.get(season) ?? { games: 0, outs: 0 }
+      m.games += games
+      m.outs += outs
+      mlbBySeason.set(season, m)
+    }
     const key = `${season}|${teamId}`
     if (!byKey.has(key)) {
       byKey.set(key, { season, teamId, sportId, teamName: s.team?.name ?? '', games: 0, outs: 0 })
     }
     const acc = byKey.get(key)
-    acc.games += num(s.stat?.gamesPlayed)
-    acc.outs += ipToOuts(s.stat?.inningsPitched)
+    acc.games += games
+    acc.outs += outs
   }
-  const qualifies = (a) => (group === 'pitching' ? a.outs >= 60 : a.games >= 10)
+  const work = (a) => (group === 'pitching' ? a.outs : a.games)
+  const minWork = group === 'pitching' ? 60 : 10
+  const qualifies = (a) => {
+    // Below the cup-of-coffee threshold (10 G / 20 IP) never counts as a stop.
+    if (work(a) < minWork) return false
+    // A MiLB stint AFTER the debut year is rehab-assignment noise (or a brief
+    // option down), NOT real team history — an established regular's stray AAA
+    // games would otherwise append a misleading season to his old farm club.
+    // Keep such a season only when the minors were his primary home that year
+    // (a genuine demotion — more MiLB than MLB work), so a 12-game AAA rehab by
+    // a 69-game MLB regular drops while a real send-down stays. The ascent
+    // (seasons up to and including the debut year) is always kept.
+    if (a.sportId !== 1 && debutYear && a.season > debutYear) {
+      const mlb = mlbBySeason.get(a.season)
+      if (mlb && work(a) <= work(mlb)) return false
+    }
+    return true
+  }
   const kept = [...byKey.values()].filter(qualifies)
   if (!kept.length) return null
 

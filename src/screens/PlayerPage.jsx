@@ -197,16 +197,18 @@ async function loadPlayer(id, asOf) {
   const milbStats = bio.debut ? milbStatsView(milbSplits, primaryGroup) : null
 
   // Career timeline (the team-logo strip above the card). Fed the player's
-  // FULL year-by-year — every MiLB level plus MLB — NOT the rehab-trimmed
-  // `milbSplits`: its own games/IP threshold already drops rehab stints and
-  // cups of coffee, and a genuine post-debut option-down season is real team
-  // history worth showing. For a pre-debut player the primary block's splits
-  // already span every level; a debuted player adds his separate MLB
-  // year-by-year to the multi-level MiLB fetch.
+  // FULL year-by-year — every MiLB level plus MLB, NOT the rehab-trimmed
+  // `milbSplits` — because a genuine post-debut option-down season is real team
+  // history worth showing; careerTimelineView does its own finer rehab filter
+  // (given debutYear, it keeps a post-debut MiLB season only when the minors
+  // were the primary home that year, so stray rehab games don't append a
+  // misleading season to an old farm club). For a pre-debut player the primary
+  // block's splits already span every level; a debuted player adds his separate
+  // MLB year-by-year to the multi-level MiLB fetch.
   const timelineSplits = bio.debut
     ? [...(primaryResult?.yearByYearSplits ?? []), ...(milbProgressionSplits ?? [])]
     : (primaryResult?.yearByYearSplits ?? [])
-  const timeline = careerTimelineView(timelineSplits, primaryGroup)
+  const timeline = careerTimelineView(timelineSplits, primaryGroup, debutYear)
   if (timeline) {
     await Promise.all(
       timeline.entries.map(async (e) => { e.tint = await fetchTeamLogoTint(e.teamId) }),
