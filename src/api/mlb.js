@@ -2,8 +2,9 @@
 // browser; there is no backend. Field paths here were verified against the
 // live July 5 2026 Brewers @ D-backs game (gamePk 825061).
 
-import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
+import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, MILB_LEVELS, teamLogoUrl } from '../lib/teams.js'
 import { matchupSlug } from '../lib/route.js'
+import { tintFromSvg } from '../lib/logoTint.js'
 
 const BASE = 'https://statsapi.mlb.com'
 
@@ -526,6 +527,36 @@ export async function fetchTeamAbbrevs(teamIds) {
   } catch {
     return {}
   }
+}
+
+// A soft background wash for a team, derived from its own logo colors so the
+// full-color mark reads cleanly on it with no border or drop shadow (see
+// lib/logoTint.js). The mlbstatic logo CDN serves its SVGs cross-origin, so we
+// read the actual fills out of the markup rather than keeping a per-club color
+// table — statsapi has no color field, and there are hundreds of MiLB clubs.
+// Tries the (clean, two-color) cap mark first, then the full primary. Memoized
+// per team id, since a career timeline re-requests the same clubs, and degrades
+// to null so a club whose logo is missing or colorless (a black/silver cap)
+// just gets a plain neutral cell.
+const logoTintCache = new Map()
+export function fetchTeamLogoTint(teamId) {
+  if (!teamId) return Promise.resolve(null)
+  if (logoTintCache.has(teamId)) return logoTintCache.get(teamId)
+  const p = (async () => {
+    for (const variant of ['cap', 'base']) {
+      try {
+        const res = await fetch(teamLogoUrl(teamId, variant))
+        if (!res.ok) continue
+        const tint = tintFromSvg(await res.text())
+        if (tint) return tint
+      } catch {
+        // try the next variant, else fall through to the neutral null below
+      }
+    }
+    return null
+  })()
+  logoTintCache.set(teamId, p)
+  return p
 }
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,29 @@
+import { TeamLogo } from './TeamLogo.jsx'
+
+// A horizontal career map, shown above the "Path to the Majors" card: one stop
+// per club the player logged real time with (see careerTimelineView's
+// threshold), earliest on the left. Each stop is the club's logo floated on a
+// soft wash of its OWN colors — so no border or drop shadow is needed to set
+// the mark off the page (see fetchTeamLogoTint) — with the year or years he
+// spent there beneath it. Scrolls sideways for a long career.
+export function CareerTimeline({ entries }) {
+  if (!entries?.length) return null
+  return (
+    <section className="careertl">
+      <h3 className="section__title"><span>Team history</span></h3>
+      <ol className="careertl__track">
+        {entries.map((e) => (
+          <li className="careertl__stop" key={`${e.teamId}-${e.minSeason}`}>
+            <span
+              className="careertl__badge"
+              style={e.tint ? { background: e.tint } : undefined}
+            >
+              <TeamLogo teamId={e.teamId} name={e.teamName} size={42} />
+            </span>
+            <span className="careertl__years">{e.yearText}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}

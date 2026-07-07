@@ -405,6 +405,46 @@ body {
   box-shadow: none;
 }
 
+/* ------------------------------------------------------------ team history
+   The horizontal career map above the "Path to the Majors" card: a scrolling
+   strip of stops, each the club's logo floated on a pale wash of its own
+   colors (set inline per team from the logo art — see fetchTeamLogoTint), with
+   the season(s) below. The wash is chosen to carry the mark on its own, so
+   there is deliberately NO border or drop shadow on the badge. */
+.careertl__track {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  list-style: none;
+  margin: 0;
+}
+
+.careertl__stop {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.careertl__badge {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+}
+
+.careertl__years {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
 /* --------------------------------------------------- level progression card
    "Path to the Majors" chevron strip on a pre-debut player's page: one rung
    per MiLB level plus a fixed, dashed MLB target, structurally mirroring the

@@ -6,6 +6,7 @@ import {
   fetchGamesByPk,
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
+  fetchTeamLogoTint,
   findFirstStart,
   findFirstStrikeoutBatter,
 } from '../api/mlb.js'
@@ -17,6 +18,7 @@ import {
   buildBlock,
   levelProgressionView,
   milbStatsView,
+  careerTimelineView,
   dropRehabStints,
   firstsFromGameLog,
   PITCHER_FIRSTS_DEFS,
@@ -33,6 +35,7 @@ import { Headshot } from '../components/Headshot.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
+import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
@@ -193,6 +196,23 @@ async function loadPlayer(id, asOf) {
   // his MiLB year-by-year as its primary table, so no duplicate).
   const milbStats = bio.debut ? milbStatsView(milbSplits, primaryGroup) : null
 
+  // Career timeline (the team-logo strip above the card). Fed the player's
+  // FULL year-by-year — every MiLB level plus MLB — NOT the rehab-trimmed
+  // `milbSplits`: its own games/IP threshold already drops rehab stints and
+  // cups of coffee, and a genuine post-debut option-down season is real team
+  // history worth showing. For a pre-debut player the primary block's splits
+  // already span every level; a debuted player adds his separate MLB
+  // year-by-year to the multi-level MiLB fetch.
+  const timelineSplits = bio.debut
+    ? [...(primaryResult?.yearByYearSplits ?? []), ...(milbProgressionSplits ?? [])]
+    : (primaryResult?.yearByYearSplits ?? [])
+  const timeline = careerTimelineView(timelineSplits, primaryGroup)
+  if (timeline) {
+    await Promise.all(
+      timeline.entries.map(async (e) => { e.tint = await fetchTeamLogoTint(e.teamId) }),
+    )
+  }
+
   // All-Star roster membership (MLB only), one roster lookup per distinct year
   // that appears in the year-by-year table plus the real current year. The
   // banner is a "how's he doing right now" badge, so it always checks the real
@@ -294,7 +314,7 @@ async function loadPlayer(id, asOf) {
 
   return {
     bio, blocks, season, asOf, sportId,
-    isAllStar, currentYear, firsts, progression, milbStats, prospectRank, orgProspectRank,
+    isAllStar, currentYear, firsts, progression, milbStats, timeline, prospectRank, orgProspectRank,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
@@ -403,6 +423,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             </TeamLink>
           )}
         </header>
+
+        {data.timeline && !bio.debut && <CareerTimeline entries={data.timeline.entries} />}
 
         {data.progression && !bio.debut && (
           <LevelProgressionCard levels={data.progression.levels} />
@@ -522,6 +544,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
           </section>
         ))}
+
+        {data.timeline && bio.debut && <CareerTimeline entries={data.timeline.entries} />}
 
         {data.progression && bio.debut && (
           <LevelProgressionCard

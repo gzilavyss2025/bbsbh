@@ -445,6 +445,11 @@ function levelSeasonStat(rows, group) {
 // debuted-mid-multi-level case), then AAA down to Rookie.
 const LEVEL_ORDER_DESC = [1, 11, 12, 13, 14, 16]
 
+// Career order, LOW level to high — Rookie ball up through MLB — so a career
+// timeline reads left-to-right as a climb, and a mid-season promotion within
+// one year sorts up the ladder.
+const CAREER_ORDER = [16, 14, 13, 12, 11, 1]
+
 export function yearByYearView(splits, group, currentStat, currentSeason, careerStat, currentSportId) {
   // Group into season -> sportId -> raw splits. A debuted player's splits
   // (fetched at a single sportId) always produce exactly one level per
@@ -624,6 +629,80 @@ export function milbStatsView(splits, group) {
       : ['G', 'HR', 'RBI', 'AVG', 'OPS']
   const total = yearByYearCells(aggregateSplits(splits, group) ?? {}, group)
   return { columns, rows, total }
+}
+
+// ---------------------------------------------------------------------------
+// Career timeline — the horizontal team-by-team map shown above the "Path to
+// the Majors" card: one stop per club the player logged REAL time with,
+// earliest first, with the year(s) he spent there. "Real time" is a threshold
+// (10 games as a batter, 20 IP for a pitcher) applied per team-season, so a
+// cup of coffee or a rehab stint drops out — a team is a single level, so this
+// also decides the level example: Yelich's 2013 keeps AA (49 G) but not his 7 G
+// at A+ or 5 G in the complex league. Fed the player's full year-by-year splits
+// (MLB + every MiLB level); the tint per stop is resolved separately (the
+// caller fetches fetchTeamLogoTint), since this stays a pure shaper.
+// ---------------------------------------------------------------------------
+
+// Consecutive seasons collapse to a range with a two-digit tail ("2018–21"),
+// gaps split into a comma list ("2018, 2020"). Input already sorted ascending.
+function formatSeasonRuns(seasons) {
+  const runs = []
+  for (const y of seasons) {
+    const last = runs[runs.length - 1]
+    if (last && y === last.end + 1) last.end = y
+    else runs.push({ start: y, end: y })
+  }
+  return runs
+    .map((r) => (r.start === r.end ? `${r.start}` : `${r.start}–${String(r.end).slice(2)}`))
+    .join(', ')
+}
+
+export function careerTimelineView(splits, group) {
+  // Sum the workload per team-season (a mid-season same-level trade can split
+  // one club's year across rows; a team-less synthetic aggregate row carries no
+  // team.id and is skipped by the guard, so it can't double-count).
+  const byKey = new Map()
+  for (const s of splits ?? []) {
+    const season = Number(s.season)
+    const teamId = s.team?.id
+    const sportId = s.sport?.id
+    if (!season || !teamId || !sportId) continue
+    const key = `${season}|${teamId}`
+    if (!byKey.has(key)) {
+      byKey.set(key, { season, teamId, sportId, teamName: s.team?.name ?? '', games: 0, outs: 0 })
+    }
+    const acc = byKey.get(key)
+    acc.games += num(s.stat?.gamesPlayed)
+    acc.outs += ipToOuts(s.stat?.inningsPitched)
+  }
+  const qualifies = (a) => (group === 'pitching' ? a.outs >= 60 : a.games >= 10)
+  const kept = [...byKey.values()].filter(qualifies)
+  if (!kept.length) return null
+
+  const byTeam = new Map()
+  for (const a of kept) {
+    if (!byTeam.has(a.teamId)) {
+      byTeam.set(a.teamId, { teamId: a.teamId, sportId: a.sportId, teamName: a.teamName, seasons: [] })
+    }
+    byTeam.get(a.teamId).seasons.push(a.season)
+  }
+  const entries = [...byTeam.values()].map((t) => {
+    const seasons = [...new Set(t.seasons)].sort((x, y) => x - y)
+    return {
+      teamId: t.teamId,
+      teamName: t.teamName,
+      sportId: t.sportId,
+      level: SPORT_LABEL[t.sportId] ?? '',
+      minSeason: seasons[0],
+      yearText: formatSeasonRuns(seasons),
+    }
+  })
+  entries.sort(
+    (a, b) =>
+      a.minSeason - b.minSeason ||
+      CAREER_ORDER.indexOf(a.sportId) - CAREER_ORDER.indexOf(b.sportId),
+  )
+  return { entries }
 }
 
 // ---------------------------------------------------------------------------
