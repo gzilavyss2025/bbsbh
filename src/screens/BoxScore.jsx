@@ -184,15 +184,15 @@ function TeamBlock({ side }) {
       <h3 className="bs__teamname">{side.teamName}</h3>
 
       <div className="bs__scroll">
-        {/* Columns follow the #22 scorebook's batter-totals order (AB·H·R·RBI),
-            not MLB.com's AB·R·H·RBI, so each row transcribes straight across. */}
+        {/* Columns follow the #22 scorebook's batter-totals order (AB·R·H·RBI),
+            matching MLB.com, so each row transcribes straight across. */}
         <table className="bs__grid bs__grid--bat">
           <thead>
             <tr>
               <th className="bs__nameCol">Batting</th>
               <th>AB</th>
-              <th>H</th>
               <th>R</th>
+              <th>H</th>
               <th>RBI</th>
             </tr>
           </thead>
@@ -207,8 +207,8 @@ function TeamBlock({ side }) {
                   </span>
                 </td>
                 <td>{b.ab}</td>
-                <td>{b.h}</td>
                 <td>{b.r}</td>
+                <td>{b.h}</td>
                 <td>{b.rbi}</td>
               </tr>
             ))}
@@ -217,8 +217,8 @@ function TeamBlock({ side }) {
             <tr className="bs__totals">
               <td className="bs__nameCol">Totals</td>
               <td>{side.batTotals.ab}</td>
-              <td>{side.batTotals.h}</td>
               <td>{side.batTotals.r}</td>
+              <td>{side.batTotals.h}</td>
               <td>{side.batTotals.rbi}</td>
             </tr>
           </tfoot>
