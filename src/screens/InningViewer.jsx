@@ -46,6 +46,7 @@ export function InningViewer({
   inning,
   half,
   onInning,
+  onBoxScore,
   onReload,
   loading,
   pitcherRoles,
@@ -137,7 +138,10 @@ export function InningViewer({
 
   // The next half within what's unlocked, for the floating advance button (§ the
   // lineup pages' btn--next, carried over to the innings view). Null at the last
-  // unlocked half — a half past the reveal mark isn't reachable yet, so no button.
+  // unlocked half — which is always the bottom of the furthest revealed inning
+  // (regulation or an unlocked extra). There the floating button becomes "View
+  // box score" instead of Next, so the bottom of the 9th never sprouts a "Next:
+  // Top 10th" that would leak the game going to extras before it's revealed.
   const nextIdx = curIdx < maxIdx ? curIdx + 1 : null
   const nextLabel =
     nextIdx == null
@@ -267,35 +271,39 @@ export function InningViewer({
         </aside>
       </div>
 
-      {/* Floating advance to the next half-inning — the same fixed blue bar the
-          lineup pages use to page forward. Only shown when a next half is
-          unlocked; at the furthest revealed half there's nowhere to go yet.
-          On narrow viewports it also carries a duplicate Refresh button
-          stacked above Next, so refreshing live data doesn't require
-          scrolling back up to the toolbar (hidden again on the wide layout,
-          where the top toolbar stays easily reachable). */}
-      {nextIdx != null && (
-        <div className="pagenav pagenav--innings">
-          <button
-            type="button"
-            className="refreshbtn refreshbtn--float"
-            onClick={onReload}
-            disabled={loading}
-            aria-label="Refresh live game data"
-          >
-            <span className="refreshbtn__icon" aria-hidden="true">
-              ↻
-            </span>
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </button>
-          <button
-            className="btn btn--next"
-            onClick={() => goTo(nextIdx)}
-          >
+      {/* Floating bar — the same fixed blue bar the lineup pages page forward
+          with. On narrow viewports it carries a duplicate Refresh stacked above
+          the primary action, so refreshing live data doesn't mean scrolling back
+          up to the toolbar (hidden again on the wide layout, where the top
+          toolbar stays reachable). The primary action advances to the next
+          half-inning when one is unlocked; at the bottom of the furthest
+          revealed inning it becomes "View box score" instead — so the bottom of
+          the 9th (or any extra) never shows a "Next: Top 10th" that would leak
+          the game going to extras. Revealing that bottom half unlocks the next
+          inning and the button flips back to Next. */}
+      <div className="pagenav pagenav--innings">
+        <button
+          type="button"
+          className="refreshbtn refreshbtn--float"
+          onClick={onReload}
+          disabled={loading}
+          aria-label="Refresh live game data"
+        >
+          <span className="refreshbtn__icon" aria-hidden="true">
+            ↻
+          </span>
+          {loading ? 'Refreshing…' : 'Refresh'}
+        </button>
+        {nextIdx != null ? (
+          <button className="btn btn--next" onClick={() => goTo(nextIdx)}>
             Next: {nextLabel} →
           </button>
-        </div>
-      )}
+        ) : (
+          <button className="btn btn--next" onClick={onBoxScore}>
+            View box score →
+          </button>
+        )}
+      </div>
     </div>
   )
 }

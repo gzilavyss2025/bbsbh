@@ -295,6 +295,7 @@ export function GameView({ game, section, onSection }) {
           inning={inning}
           half={half}
           onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
+          onBoxScore={() => onSection('boxscore')}
           onReload={feedState.reload}
           loading={feedState.loading}
           pitcherRoles={pitcherRoles.data}
