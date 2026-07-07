@@ -41,10 +41,16 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
 
   // Derived stats (pitches/whiffs/1st-pitch strikes) are parsed lazily and
   // cached: the map is only built the first time a box is actually revealed.
-  const derivedRef = useRef(null)
+  // The cache is keyed on the feed object, so a Refresh (which fetches a fresh
+  // feed) rebuilds it. Without this the map froze at whatever feed was present
+  // on first reveal and pitch/whiff stats went stale for the live inning — the
+  // play-by-play (read live from `feed`) would show a walk while PITCHES read 0.
+  const derivedRef = useRef({ feed: null, map: null })
   const getDerived = () => {
-    if (!derivedRef.current) derivedRef.current = computeDerivedByInning(feed)
-    return derivedRef.current
+    if (derivedRef.current.feed !== feed) {
+      derivedRef.current = { feed, map: computeDerivedByInning(feed) }
+    }
+    return derivedRef.current.map
   }
 
   const meta = useMemo(
