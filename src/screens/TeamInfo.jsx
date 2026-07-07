@@ -73,9 +73,10 @@ export function TeamInfo({
             ) : null
           }
         />
-        {/* Tonight's uniform (jersey · pants · cap) — spoiler-free, but the
-            assignment isn't posted until around first pitch, so pregame this
-            reads "—" until a Refresh picks it up. Never posted for MiLB. */}
+        {/* Tonight's uniform, synthesized to a tight summary ("Away Alternate
+            Navy Blue") — spoiler-free, but the assignment isn't posted until
+            around first pitch, so pregame this reads "—" until a Refresh picks
+            it up. Never posted for MiLB. */}
         <Fact label="Uniform" value={uniform} />
       </dl>
 

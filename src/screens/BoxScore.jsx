@@ -257,7 +257,11 @@ function TeamBlock({ side }) {
                 <td className="bs__nameCol">
                   <span className="bs__player">
                     <span className="bs__pname">{p.name}</span>
-                    <NumPos num={p.num} pos="P" />
+                    {p.num !== '' && p.num != null && (
+                      <span className="bs__pos">
+                        <span className="bs__unum">{p.num}</span>
+                      </span>
+                    )}
                     {p.dec && (
                       <span
                         className={`bs__dec bs__dec--${
@@ -360,9 +364,9 @@ function Scoreboard({ away, home, innings }) {
                   {i.num}
                 </th>
               ))}
-              <th className="bs__boardTot">R</th>
-              <th>H</th>
-              <th>E</th>
+              <th className="bs__boardFinal">R</th>
+              <th className="bs__boardFinal">H</th>
+              <th className="bs__boardFinal">E</th>
             </tr>
           </thead>
           <tbody>
@@ -384,9 +388,9 @@ function Scoreboard({ away, home, innings }) {
                     </td>
                   )
                 })}
-                <td className="bs__boardTot">{side.line.r}</td>
-                <td>{side.line.h}</td>
-                <td>{side.line.e}</td>
+                <td className="bs__boardFinal">{side.line.r}</td>
+                <td className="bs__boardFinal">{side.line.h}</td>
+                <td className="bs__boardFinal">{side.line.e}</td>
               </tr>
             ))}
           </tbody>

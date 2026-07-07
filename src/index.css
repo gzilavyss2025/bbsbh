@@ -2566,9 +2566,27 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
+/* Five equal columns (fixed layout), big enough to read across the room — the
+   abbreviation and the R/H/E/LOB figures are the headline of the page. The team
+   column shares the same width, so its abbreviation just sits with room to spare
+   on the left. */
+.bs__grid--totals {
+  table-layout: fixed;
+}
+.bs__grid--totals th,
+.bs__grid--totals td {
+  width: 20%;
+  padding: 8px 4px;
+  font-size: 24px;
+}
+.bs__grid--totals thead th {
+  font-size: 11px;
+}
 .bs__grid--totals .bs__nameCol {
-  width: 1%;
-  white-space: nowrap;
+  width: 20%;
+}
+.bs__grid--totals .bs__pname {
+  font-size: 22px;
 }
 .bs__grid--totals .bs__totCell {
   font-weight: var(--w-bold);
@@ -2609,12 +2627,18 @@ body {
   font-weight: var(--w-bold);
   color: var(--accent-negative);
 }
-/* R/H/E totals to the right, set off from the boxed innings by a rule, R bolder
-   the way a printed line score reads. */
-.bs__grid--board .bs__boardTot {
-  border-left: var(--bw-rule) solid var(--border-rule);
+/* R/H/E totals to the right — the same equal-width bordered boxes as the innings
+   so the whole line reads as one grid, but on a subtly darker fill and bold to
+   mark them as the final tallies rather than an inning. */
+.bs__grid--board .bs__boardFinal {
+  width: 22px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--paper-1);
   font-weight: var(--w-bold);
   color: var(--text-heading);
+}
+.bs__grid--board thead .bs__boardFinal {
+  color: var(--text-caption);
 }
 
 /* Fill-in header: the scorebook's little labeled boxes (date, ballpark, umpires,

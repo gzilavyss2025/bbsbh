@@ -5,7 +5,6 @@ import {
   fetchManager,
   fetchPitcherSeasonLine,
   fetchWinProbability,
-  uniformLine,
   uniformSummary,
 } from '../api/mlb.js'
 import { generateScorebookWeather } from '../api/weather.js'
@@ -42,20 +41,10 @@ export function GameView({ game, section, onSection, onHome }) {
   }, [game.gamePk])
   const feed = feedState.data?.feed
 
-  // Per-side printable uniform lines ('' until posted). The slate/route seed's
-  // teamName is the club nickname ("Brewers"), matching the redundant prefix
-  // on every asset label.
-  const uniformText = useMemo(() => {
-    const uniforms = feedState.data?.uniforms
-    return {
-      away: uniformLine(uniforms?.away, game.away.teamName),
-      home: uniformLine(uniforms?.home, game.home.teamName),
-    }
-  }, [feedState.data, game.away.teamName, game.home.teamName])
-
-  // The condensed one-line uniform summary for the box score's fill-in card
-  // ("Away Alternate Navy Blue"). The lineup pages keep the full jersey · pants ·
-  // cap line above; the box score wants the at-a-glance version.
+  // The condensed one-line uniform summary shown everywhere a uniform surfaces —
+  // the lineup pages and the box score's fill-in card ("Away Alternate Navy
+  // Blue"). '' until posted; the slate/route seed's teamName is the club
+  // nickname ("Brewers"), matching the redundant prefix on every asset label.
   const uniformBrief = useMemo(() => {
     const uniforms = feedState.data?.uniforms
     return {
@@ -195,7 +184,7 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="away"
           manager={managers.data?.away}
-          uniform={uniformText.away}
+          uniform={uniformBrief.away}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           // The away side FACES the home starter.
@@ -209,7 +198,7 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="home"
           manager={managers.data?.home}
-          uniform={uniformText.home}
+          uniform={uniformBrief.home}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}

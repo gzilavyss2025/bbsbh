@@ -15,6 +15,15 @@
 // can't drift apart.
 import { lastName as shortName } from './select.js'
 
+// "Cooper Pratt" — first name ahead of the shortened surname, for the three
+// stars where there's room for the full name (the compact tables stay
+// surname-only). Reuses shortName so suffixes/disambiguation stay consistent.
+function firstLast(person) {
+  const first = (person?.useName ?? person?.firstName ?? '').trim()
+  const last = shortName(person)
+  return first ? `${first} ${last}` : last
+}
+
 function positionLabel(boxPlayer) {
   const all = (boxPlayer.allPositions ?? [])
     .map((p) => p.abbreviation)
@@ -352,7 +361,7 @@ function starLine(feed, id) {
     const pitched = (pit.outs ?? 0) > 0
     return {
       id,
-      name: shortName(gd),
+      name: firstLast(gd),
       teamAbbr: feed?.gameData?.teams?.[side]?.abbreviation ?? '',
       pos: pitched ? 'P' : positionLabel(bp),
       stat: pitched ? pitchingStat(pit) : battingStat(bat),
