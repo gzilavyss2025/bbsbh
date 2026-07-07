@@ -570,6 +570,62 @@ export function levelProgressionView(splits, group, currentSportId) {
   return { levels: levels.slice(startIndex) }
 }
 
+// Rehab-assignment noise. Once a player has reached the majors, any later
+// minor-league stint is a rehab appointment (or a brief option down), not part
+// of his climb — an established MLB regular like Christian Yelich logging a
+// handful of AA at-bats years after his debut would otherwise light up a level
+// on the "Path to the Majors" card and add a stray row to the minor-league
+// table. Keep only MiLB seasons up to and including the debut year (the
+// ascent); drop everything after it. A pre-debut player has no debutYear, so
+// nothing is dropped.
+export function dropRehabStints(splits, debutYear) {
+  if (!debutYear) return splits ?? []
+  return (splits ?? []).filter((s) => Number(s.season) <= debutYear)
+}
+
+// ---------------------------------------------------------------------------
+// Minor-league stat table — a flat year-by-year of a DEBUTED player's climb
+// through the minors (a pre-debut player's primary block already carries his
+// MiLB year-by-year, so this is only rendered once he's reached the majors).
+// One row per (season, level) so the level is explicit on every row — unlike
+// the MLB year-by-year table, where every row is the majors. Newest season
+// first, higher level first within a season; a career total sums every stint.
+// ---------------------------------------------------------------------------
+
+export function milbStatsView(splits, group) {
+  const bySeasonLevel = new Map()
+  for (const s of splits ?? []) {
+    const yr = Number(s.season)
+    const sid = s.sport?.id
+    if (!yr || !sid) continue
+    const key = `${yr}-${sid}`
+    if (!bySeasonLevel.has(key)) bySeasonLevel.set(key, { year: yr, sportId: sid, rows: [] })
+    bySeasonLevel.get(key).rows.push(s)
+  }
+  if (!bySeasonLevel.size) return null
+  const entries = [...bySeasonLevel.values()].sort(
+    (a, b) =>
+      b.year - a.year ||
+      LEVEL_ORDER_DESC.indexOf(a.sportId) - LEVEL_ORDER_DESC.indexOf(b.sportId),
+  )
+  const rows = entries.map((e) => {
+    const stat = levelSeasonStat(e.rows, group)
+    return {
+      key: `${e.year}-${e.sportId}`,
+      year: e.year,
+      label: SPORT_LABEL[e.sportId] ?? '',
+      teamIds: [...new Set(e.rows.map((s) => s.team?.id).filter(Boolean))],
+      cells: yearByYearCells(stat ?? {}, group),
+    }
+  })
+  const columns =
+    group === 'pitching'
+      ? ['W–L', 'ERA', 'IP', 'K', 'WHIP']
+      : ['G', 'HR', 'RBI', 'AVG', 'OPS']
+  const total = yearByYearCells(aggregateSplits(splits, group) ?? {}, group)
+  return { columns, rows, total }
+}
+
 // ---------------------------------------------------------------------------
 // One stat block (a group's tiles + career + splits + logs). A normal player
 // has one block; a two-way player has two (batting then pitching).

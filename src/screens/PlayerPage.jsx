@@ -16,6 +16,8 @@ import {
   pitcherRole,
   buildBlock,
   levelProgressionView,
+  milbStatsView,
+  dropRehabStints,
   firstsFromGameLog,
   PITCHER_FIRSTS_DEFS,
   splitDisplayName,
@@ -173,13 +175,23 @@ async function loadPlayer(id, asOf) {
   // player's own yearByYearSplits is single-sportId. Either way
   // levelProgressionView degrades to null if no MiLB level was ever reached.
   const primaryResult = results.find((r) => r.group === primaryGroup) ?? results[0]
+  // Minor-league history, feeding both the "Path to the Majors" card and the
+  // minor-league stat table below it. A debuted player's own year-by-year
+  // fetch is single-sportId (MLB), so his MiLB climb comes from the separate
+  // multi-level fetch; a pre-debut player's block fetch is already multi-level.
+  // Either way, strip rehab-assignment noise (see dropRehabStints) so an
+  // established big leaguer's stray rehab innings don't relight a MiLB level.
+  const milbSplits = dropRehabStints(
+    bio.debut ? milbProgressionSplits : primaryResult?.yearByYearSplits,
+    debutYear,
+  )
   const progression = primaryResult
-    ? levelProgressionView(
-        bio.debut ? milbProgressionSplits : primaryResult.yearByYearSplits,
-        primaryResult.group,
-        sportId,
-      )
+    ? levelProgressionView(milbSplits, primaryResult.group, sportId)
     : null
+  // A dedicated minor-league year-by-year table, shown below the card once a
+  // player has reached the majors (a pre-debut player's block already carries
+  // his MiLB year-by-year as its primary table, so no duplicate).
+  const milbStats = bio.debut ? milbStatsView(milbSplits, primaryGroup) : null
 
   // All-Star roster membership (MLB only), one roster lookup per distinct year
   // that appears in the year-by-year table plus the real current year. The
@@ -202,24 +214,26 @@ async function loadPlayer(id, asOf) {
   const isAllStar = allStarByYear.get(currentYear)?.has(bio.id) ?? false
 
   // Team(s) played for each year-by-year row — a trade mid-season means more
-  // than one. One batched lookup for every team id across every row (those
-  // stat splits carry only a team id/name, never an abbreviation).
-  const yearByYearTeamIds = new Set()
+  // than one. One batched lookup for every team id across every row of every
+  // ledger (the block year-by-year tables plus the minor-league table); those
+  // stat splits carry only a team id/name, never an abbreviation.
+  const teamIdSet = new Set()
   for (const b of blocks) {
     for (const r of b.yearByYear?.rows ?? []) {
-      for (const id of r.teamIds) yearByYearTeamIds.add(id)
-      for (const lvl of r.levels ?? []) for (const tid of lvl.teamIds) yearByYearTeamIds.add(tid)
+      for (const id of r.teamIds) teamIdSet.add(id)
+      for (const lvl of r.levels ?? []) for (const tid of lvl.teamIds) teamIdSet.add(tid)
     }
   }
-  const teamAbbrevs = await fetchTeamAbbrevs([...yearByYearTeamIds])
+  for (const r of milbStats?.rows ?? []) for (const id of r.teamIds) teamIdSet.add(id)
+  const teamAbbrevs = await fetchTeamAbbrevs([...teamIdSet])
+  const abbrevs = (ids) => ids.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
   for (const b of blocks) {
     for (const r of b.yearByYear?.rows ?? []) {
-      r.team = r.teamIds.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
-      for (const lvl of r.levels ?? []) {
-        lvl.team = lvl.teamIds.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
-      }
+      r.team = abbrevs(r.teamIds)
+      for (const lvl of r.levels ?? []) lvl.team = abbrevs(lvl.teamIds)
     }
   }
+  for (const r of milbStats?.rows ?? []) r.team = abbrevs(r.teamIds)
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
 
@@ -280,7 +294,7 @@ async function loadPlayer(id, asOf) {
 
   return {
     bio, blocks, season, asOf, sportId,
-    isAllStar, currentYear, firsts, progression, prospectRank, orgProspectRank,
+    isAllStar, currentYear, firsts, progression, milbStats, prospectRank, orgProspectRank,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
@@ -514,6 +528,22 @@ export function PlayerPage({ id, asOf, sportId }) {
             levels={data.progression.levels}
             debutYear={Number(bio.debut.slice(0, 4))}
           />
+        )}
+
+        {data.milbStats && (
+          <section>
+            <SectionTitle title="Minor league stats" note="through his call-up" />
+            <Ledger
+              leftCols={3}
+              head={['Year', 'Lvl', 'Team', ...data.milbStats.columns]}
+              rows={data.milbStats.rows.map((r) => ({
+                key: r.key,
+                cells: [r.year, r.label, r.team || DASH, ...r.cells],
+              }))}
+              total={data.milbStats.total}
+              totalLabel="MiLB"
+            />
+          </section>
         )}
 
         {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (

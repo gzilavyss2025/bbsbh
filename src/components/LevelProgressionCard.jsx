@@ -14,8 +14,13 @@
 // Firsts, reading as "how he got here" instead of "how far he's got left."
 export function LevelProgressionCard({ levels, debutYear }) {
   if (!levels?.length) return null
+  // A debuted player's MLB rung is where he is now — it takes the blue
+  // "current" highlight, unless he's presently back at a lower level (a MiLB
+  // rung already carries isCurrent), so the chain always marks exactly where
+  // he stands. A pre-debut player's MLB rung is the unreached destination.
+  const someLevelCurrent = levels.some((l) => l.isCurrent)
   const mlbTarget = debutYear
-    ? { sportId: 1, label: 'MLB', reached: true, isCurrent: false, target: true, firstYear: debutYear, lastYear: debutYear }
+    ? { sportId: 1, label: 'MLB', reached: true, isCurrent: !someLevelCurrent, target: true, firstYear: debutYear, lastYear: debutYear }
     : { sportId: 1, label: 'MLB', reached: false, isCurrent: false, target: true }
   const steps = [...levels, mlbTarget]
   return (
