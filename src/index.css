@@ -29,9 +29,10 @@
    (1,0,1) beats any plain class selector, so nothing downstream can quietly
    undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
    guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
-   if you do. The ONE sanctioned exception is `.buzz__text` (Bluesky posts keep
-   their authors' original casing); it opts out with a `caps-exempt` marker the
-   guard recognizes — don't add a second without the same deliberate marker. */
+   if you do. The sanctioned exceptions are `.buzz__text` (Bluesky posts keep
+   their authors' original casing) and `.pbp__desc` (play-by-play descriptions
+   read as natural-case sentences); each opts out with a `caps-exempt` marker the
+   guard recognizes — don't add another without the same deliberate marker. */
 #root * {
   text-transform: uppercase;
 }
@@ -2028,11 +2029,10 @@ body {
   min-width: 0;
 }
 
-/* Player names lifted out of a prose description, uppercased to match the
-   scorebook's name style. */
-.pbp__name {
-  text-transform: uppercase;
-}
+/* Player names lifted out of a prose description. The description now reads as a
+   natural-case sentence (see the #root .pbp__desc override), so the names flow
+   inline with it rather than taking the scorebook's uppercase name style — the
+   span stays as a hook for that override. */
 
 .pbp__card {
   display: flex;
@@ -2232,15 +2232,28 @@ body {
 }
 
 .pbp__desc {
-  /* Sentence-like copy forced to all caps — use the high-legibility face at a
-     smaller size, with a touch of tracking and looser leading so it stays
-     readable. See --font-read in tokens/typography.css. */
+  /* Sentence-like play copy — the high-legibility serif at a smaller size, with
+     a touch of tracking and looser leading. Rendered in natural case (the caps
+     exception below) so it reads as a real sentence. See --font-read in
+     tokens/typography.css. */
   font-family: var(--font-read);
   font-size: 10.5px;
   font-weight: var(--w-semibold);
   letter-spacing: 0.015em;
   line-height: 1.4;
   color: var(--text-body);
+}
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
+   .buzz__text for the same pattern): play-by-play descriptions read as
+   natural-case sentences — MLB's templated prose, and the verbose replay-review
+   blurbs ("Challenged (pitch result), call on the field was confirmed: …")
+   especially, read badly forced to caps. `#root .pbp__desc` (1 id + 1 class)
+   outweighs the global `#root *` uppercase; the inline player names go natural
+   too so the sentence reads whole. */
+#root .pbp__desc,
+#root .pbp__desc .pbp__name {
+  text-transform: none; /* caps-exempt: play-by-play descriptions read as sentences */
 }
 
 .pbp__klooking {
