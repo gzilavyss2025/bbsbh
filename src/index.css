@@ -4463,6 +4463,7 @@ body {
   gap: 10px;
 }
 .thub-affiliate {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4473,6 +4474,20 @@ body {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   text-align: center;
+}
+.thub-affiliate__level {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
 }
 .thub-affiliate__name {
   font-size: 12.5px;

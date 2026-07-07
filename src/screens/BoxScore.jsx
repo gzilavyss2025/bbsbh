@@ -518,10 +518,10 @@ function ThreeStars({ stars }) {
 }
 
 // What's left of the info block after selectBoxscore peels off the
-// structured fill-in-box fields (umpires, weather, venue, attendance, first
-// pitch, duration) and splits every per-pitcher row onto its own team's
+// structured fill-in-box fields (umpires, weather+wind, venue, attendance,
+// first pitch, duration) and splits every per-pitcher row onto its own team's
 // TeamBlock (see `pitchNotes` there): whole-game fields with no team owner,
-// like Wind, plus any entry that couldn't be matched to a roster name.
+// plus any entry that couldn't be matched to a roster name.
 function GameInfo({ rows, dateLabel }) {
   if (rows.length === 0 && !dateLabel) return null
   return (

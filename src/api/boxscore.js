@@ -243,10 +243,13 @@ function parseUmpires(value) {
 
 // Info-block rows already shown structured elsewhere in the box score (the
 // fill-in boxes' Umpires/Weather/Venue/Attendance/First-Pitch/duration
-// fields) — dropped from the shared foot rather than repeated verbatim.
+// fields) — dropped from the shared foot rather than repeated verbatim. Wind
+// belongs here too: it's folded into the weather box we compute ourselves
+// (see src/api/weather.js), so the feed's raw Wind row is redundant.
 const DEDUPED_INFO_LABELS = new Set([
   'Umpires',
   'Weather',
+  'Wind',
   'First pitch',
   'T',
   'Att',
@@ -442,9 +445,9 @@ export function selectBoxscore(feed) {
     umpires,
     times: gameTimes(feed),
     gameInfo,
-    // The leftover info-block rows: whole-game fields with no team owner
-    // (Wind) plus any per-pitcher entry splitGameNotes couldn't match to a
-    // roster name — kept here, under their original label, so nothing is lost.
+    // The leftover info-block rows: whole-game fields with no team owner,
+    // plus any per-pitcher entry splitGameNotes couldn't match to a roster
+    // name — kept here, under their original label, so nothing is lost.
     footNotes: gameNotes.shared,
     dateLabel: dateRow?.label ?? '',
   }

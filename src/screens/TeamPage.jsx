@@ -346,6 +346,7 @@ export function TeamPage({ id, asOf, sportId }) {
             <div className="thub-affiliates">
               {affiliates.map((a) => (
                 <TeamLink key={a.id} id={a.id} className="thub-affiliate">
+                  <span className="thub-affiliate__level">{SPORT_LABEL[a.sportId] ?? DASH}</span>
                   <TeamLogo teamId={a.id} name={a.name} size={48} />
                   <span className="thub-affiliate__name">{a.name}</span>
                   <span className="thub-affiliate__loc">
@@ -371,7 +372,6 @@ export function TeamPage({ id, asOf, sportId }) {
                     <th className="lft">Player</th>
                     <th>Pos</th>
                     <th>Level</th>
-                    <th>Line</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -392,7 +392,6 @@ export function TeamPage({ id, asOf, sportId }) {
                             <TeamLogo teamId={p.affiliateTeamId} name={p.levelLabel} size={16} crop />
                           )}
                         </td>
-                        <td className="prospecttable__line">{p.statLine || DASH}</td>
                       </tr>
                     )
                   })}
