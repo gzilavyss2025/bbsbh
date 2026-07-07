@@ -32,6 +32,8 @@ export function TeamInfo({
   oppPitcherLine,
   onNext,
   nextLabel,
+  onReload,
+  loading,
 }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const officials = useMemo(() => selectOfficials(feed), [feed])
@@ -45,7 +47,10 @@ export function TeamInfo({
             {(meta.name || 'Team').toUpperCase()}
           </TeamLink>
         </h2>
-        <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
+        <div className="teaminfo__headright">
+          <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
+          <RefreshButton onReload={onReload} loading={loading} />
+        </div>
       </div>
 
       <dl className="factgrid">
@@ -88,12 +93,18 @@ export function LineupSpread({
   scorebookWeatherLoading,
   starterLines,
   onNext,
+  onReload,
+  loading,
 }) {
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
 
   return (
     <div className="teaminfo teaminfo--spread">
+      <div className="teaminfo__toolbar">
+        <RefreshButton onReload={onReload} loading={loading} />
+      </div>
+
       <dl className="factgrid factgrid--game">
         <GameFacts
           info={info}
@@ -371,6 +382,28 @@ function managerFact(manager) {
       ) : null}
       {manager.interim ? <span className="fact__note">interim</span> : null}
     </span>
+  )
+}
+
+// Same pill button/markup as the innings viewer's Refresh — reused here and
+// in the box score so every game page has one, not just the live innings.
+// `onReload` is undefined only for the (unused) case a caller skips it, so
+// this degrades to nothing rather than a dead button.
+export function RefreshButton({ onReload, loading }) {
+  if (!onReload) return null
+  return (
+    <button
+      type="button"
+      className="refreshbtn"
+      onClick={onReload}
+      disabled={loading}
+      aria-label="Refresh live game data"
+    >
+      <span className="refreshbtn__icon" aria-hidden="true">
+        ↻
+      </span>
+      {loading ? 'Refreshing…' : 'Refresh'}
+    </button>
   )
 }
 

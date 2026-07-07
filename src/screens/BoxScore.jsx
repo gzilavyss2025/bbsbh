@@ -6,6 +6,7 @@ import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { RefreshButton } from './TeamInfo.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -55,16 +56,21 @@ export function BoxScore({
   scorebookWeather,
   winProbability,
   onInnings,
+  onReload,
+  loading,
 }) {
   return (
     <div className="boxscore">
       <div className="boxscore__head">
         <h2 className="boxscore__title">Box score</h2>
-        {onInnings && (
-          <button type="button" className="btn btn--ghost" onClick={onInnings}>
-            ‹ Innings
-          </button>
-        )}
+        <div className="boxscore__headright">
+          <RefreshButton onReload={onReload} loading={loading} />
+          {onInnings && (
+            <button type="button" className="btn btn--ghost" onClick={onInnings}>
+              ‹ Innings
+            </button>
+          )}
+        </div>
       </div>
 
       <SealBox label="Tap to reveal the box score">

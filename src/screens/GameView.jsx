@@ -43,13 +43,19 @@ export function GameView({ game, section, onSection }) {
   // useAsync's reload keeps the last-good pair so a flaky refetch never blanks
   // an already-posted assignment. fetchGameUniforms resolves null on its own
   // failures, so it can't take the feed down with it.
-  const feedState = useAsync(async () => {
-    const [feed, uniforms] = await Promise.all([
-      fetchGameFeed(game.gamePk),
-      fetchGameUniforms(game.gamePk),
-    ])
-    return { feed, uniforms }
-  }, [game.gamePk])
+  const feedState = useAsync(
+    async () => {
+      const [feed, uniforms] = await Promise.all([
+        fetchGameFeed(game.gamePk),
+        fetchGameUniforms(game.gamePk),
+      ])
+      return { feed, uniforms }
+    },
+    [game.gamePk],
+    // Standalone/home-screen mode has no pull-to-refresh, so catch a
+    // score-critical feed back up as soon as the app is foregrounded again.
+    { refetchOnForeground: true },
+  )
   const feed = feedState.data?.feed
 
   // The date a name-link inside this game should cut its stats off at: the
@@ -259,6 +265,8 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           starterLines={starterLines.data}
           onNext={() => onSection('top1')}
+          onReload={feedState.reload}
+          loading={feedState.loading}
         />
       )}
       {feed && step === 0 && !wide && (
@@ -273,6 +281,8 @@ export function GameView({ game, section, onSection }) {
           oppPitcherLine={starterLines.data?.home}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
+          onReload={feedState.reload}
+          loading={feedState.loading}
         />
       )}
       {feed && step === 1 && !wide && (
@@ -286,6 +296,8 @@ export function GameView({ game, section, onSection }) {
           oppPitcherLine={starterLines.data?.away}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
+          onReload={feedState.reload}
+          loading={feedState.loading}
         />
       )}
       {feed && step === 2 && (
@@ -309,6 +321,8 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           winProbability={winProb.data}
           onInnings={() => onSection(lastInningSection.current)}
+          onReload={feedState.reload}
+          loading={feedState.loading}
         />
       )}
     </div>

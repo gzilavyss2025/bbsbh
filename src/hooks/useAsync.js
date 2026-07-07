@@ -3,7 +3,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // Minimal data-fetching hook: runs `fn` on mount / when `deps` change, tracks
 // loading + error, and exposes a `reload` for manual refresh (the live-game
 // Refresh button, error retries).
-export function useAsync(fn, deps = []) {
+//
+// `refetchOnForeground` additionally reruns `fn` when the tab/PWA becomes
+// visible again. Installed-to-home-screen Safari has no browser chrome, so
+// there's no pull-to-refresh and no reload button to fall back on — without
+// this, a score-critical fetch left running in the background would just sit
+// stale until the user finds the in-app Refresh button. Off by default: most
+// callers (managers, weather, season lines, …) are deliberately excluded from
+// re-fetching on a live-game Refresh already, and this would undo that.
+export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
   const [state, setState] = useState({
     loading: true,
     error: null,
@@ -52,6 +60,15 @@ export function useAsync(fn, deps = []) {
       runId.current++
     }
   }, [run])
+
+  useEffect(() => {
+    if (!refetchOnForeground) return
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') run()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [refetchOnForeground, run])
 
   return { ...state, reload: run }
 }

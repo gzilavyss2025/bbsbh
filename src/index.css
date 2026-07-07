@@ -1310,6 +1310,18 @@ body {
   margin: 4px 0 16px;
 }
 
+.teaminfo__headright {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.teaminfo__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px;
+}
+
 .teaminfo__title {
   display: flex;
   align-items: center;
@@ -2932,6 +2944,12 @@ body {
   justify-content: space-between;
   gap: var(--space-3);
   margin: 4px 0 14px;
+}
+
+.boxscore__headright {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .boxscore__title {
