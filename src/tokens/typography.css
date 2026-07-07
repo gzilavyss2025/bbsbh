@@ -5,17 +5,16 @@
    - Plex Sans           → UI + body
    - Plex Mono           → numbers, the ledger/scorebook figures
    Plus one outlier for legibility:
-   - Atkinson Hyperlegible → sentence-like copy that must read at small
-     sizes in all caps (play-by-play descriptions). Designed by the Braille
-     Institute for maximum small-size legibility with strongly distinct
-     letterforms (I/l/1, O/0), where our all-caps convention hurts most.
+   - Inter → sentence-like copy that must read at small sizes in all caps
+     (play-by-play descriptions). A neutral, tall-x-height UI face built for
+     small-size screen legibility, where our all-caps convention hurts most.
    ============================================================ */
 
 :root {
   --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
   --font-body:    "IBM Plex Sans", system-ui, sans-serif;
   --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
-  --font-read:    "Atkinson Hyperlegible", "IBM Plex Sans", system-ui, sans-serif;
+  --font-read:    "Inter", "IBM Plex Sans", system-ui, sans-serif;
 
   /* Weights */
   --w-regular: 400;
