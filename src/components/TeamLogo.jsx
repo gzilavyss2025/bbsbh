@@ -27,11 +27,27 @@ export function TeamLogo({
   useEffect(() => setStage('variant'), [teamId, variant])
 
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?'
-  const style = { width: size, height: size }
   const bwClass = bw ? 'teamlogo--bw' : ''
 
   const effectiveVariant = stage === 'variant' ? variant : 'base'
   const url = stage === 'monogram' ? null : teamLogoUrl(teamId, effectiveVariant)
+
+  // A wordmark's own SVG is wide-and-short (verified live across the league:
+  // ratios from ~1.75:1 up to ~7:1 width:height, never square), unlike every
+  // other variant here, which is drawn to a square viewBox. Forcing it into
+  // the same fixed square box the other variants use pads it top and bottom.
+  // So a wordmark gets its own wide box — `size` is still the height, but the
+  // width is sized to a generous fixed aspect ratio rather than a square, so
+  // `object-fit: contain` (below, in CSS) crops that padding away for every
+  // team at or under that ratio and only letterboxes the handful of outlier
+  // clubs whose wordmark runs wider still — a fixed box (vs. sizing width to
+  // each SVG's own intrinsic ratio) keeps this predictable and never lets an
+  // outlier's width overflow the layout around it.
+  const isWordmark = variant === 'wordmark'
+  const WORDMARK_ASPECT = 3.5
+  const style = isWordmark
+    ? { height: size, width: size * WORDMARK_ASPECT }
+    : { width: size, height: size }
 
   const onError = () => {
     // A non-base variant that fails drops to base; anything else is unrecoverable.
@@ -42,7 +58,7 @@ export function TeamLogo({
     return (
       <span
         className={`teamlogo teamlogo--fallback ${bwClass} ${className}`}
-        style={style}
+        style={{ width: size, height: size }}
         aria-hidden="true"
       >
         {monogram}
@@ -57,7 +73,7 @@ export function TeamLogo({
       style={style}
       src={url}
       alt=""
-      width={size}
+      width={isWordmark ? size * WORDMARK_ASPECT : size}
       height={size}
       loading="lazy"
       decoding="async"

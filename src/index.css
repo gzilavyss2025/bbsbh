@@ -3577,6 +3577,7 @@ body {
   }
   .player__herologo-affiliate {
     height: 32px !important;
+    width: 112px !important;
   }
 }
 
