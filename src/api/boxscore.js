@@ -44,6 +44,8 @@ function battingRows(feed, side) {
         slot: Math.floor(code / 100),
         isSub: code % 100 !== 0,
         name: shortName(gd),
+        // Uniform number, penciled in red before the position on the sheet.
+        num: p.jerseyNumber ?? gd.primaryNumber ?? '',
         position: positionLabel(p),
         // Footnote marker ("a", "b"…) tying a sub to the team.note list.
         mark: (b.note ?? '').replace(/[-\s]/g, '').trim(),
@@ -97,6 +99,7 @@ function pitchingRows(feed, side, decisions) {
     return {
       id,
       name: shortName(gd),
+      num: box.jerseyNumber ?? gd.primaryNumber ?? '',
       dec,
       // Throwing hand (R/L) and batters faced (BF) are #22-scorebook columns the
       // MLB.com box score omits; both come straight from the feed.
@@ -241,6 +244,9 @@ function oneSide(feed, side, decisions) {
     {}
   return {
     teamName: meta.name ?? meta.teamName ?? (side === 'away' ? 'Away' : 'Home'),
+    // The bare club nickname ("Brewers") for the line-score row header, where
+    // the full "Milwaukee Brewers" would crowd the innings.
+    clubName: meta.teamName ?? meta.clubName ?? '',
     abbreviation: meta.abbreviation ?? '',
     batters: battingRows(feed, side),
     batTotals: battingTotals(feed, side),

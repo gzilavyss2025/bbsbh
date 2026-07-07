@@ -250,6 +250,34 @@ export function uniformLine(assets, clubName) {
     .join(' · ')
 }
 
+// A tight, at-a-glance uniform summary — "Away Alternate Navy Blue",
+// "Home White", "Road Grey" — synthesized from the full asset list the way
+// weather.js boils a forecast down to a scorebook line. The JERSEY is the
+// identifying piece (pants and cap almost always follow the home/road default —
+// grey pants, plain cap on the road), so the summary leads with tonight's side
+// and the jersey's descriptor, dropping the redundant club name, the piece noun,
+// and any variant number. A standard Home/Road jersey already names the side, so
+// the prefix isn't doubled up ("Home White", not "Home Home White").
+export function uniformSummary(assets, side, clubName) {
+  if (!assets?.length) return ''
+  const jersey = assets.find((a) => a.piece === 'J') ?? assets[0]
+  let text = jersey.text
+  if (clubName && text.startsWith(`${clubName} `)) {
+    text = text.slice(clubName.length + 1)
+  }
+  text = text
+    .replace(/\s*\bJersey\b\s*/i, ' ') // drop the piece noun
+    .replace(/\bAlt\b/gi, 'Alternate') // expand the abbreviation
+    .replace(/\bAlternate\s+\d+\b/i, 'Alternate') // "Alternate 2" → "Alternate"
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!text) return ''
+  // A Home/Road/Away jersey self-identifies; anything else (an alternate, a
+  // City Connect) gets tonight's side stamped on the front.
+  if (/^(home|road|away)\b/i.test(text)) return text
+  return `${side === 'away' ? 'Away' : 'Home'} ${text}`
+}
+
 // A venue with its coordinates and field info hydrated. The live feed's
 // gameData.venue is usually enough (it carries location + fieldInfo), but on
 // leaner feeds those are absent, so the weather generator falls back to this

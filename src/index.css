@@ -2355,6 +2355,21 @@ body {
   font-weight: var(--w-bold);
   color: var(--accent-negative);
 }
+/* Decision tag by result: a win or save reads field-green, a loss seam-red. */
+.bs__dec--win {
+  color: var(--accent-positive);
+}
+.bs__dec--loss {
+  color: var(--accent-negative);
+}
+
+/* Uniform number — inked seam-red wherever it rides beside a name (the manager
+   fill-in, and the number|position tag on every batter and pitcher). Inherits
+   the surrounding font size so number and position sit at the same size. */
+.bs__unum {
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+}
 
 /* Substitute rows sit indented under their starter, like a printed box score. */
 .bs__sub .bs__nameCol {
@@ -2569,8 +2584,26 @@ body {
   color: var(--text-caption);
 }
 
-/* Scoreboard strip: the final R/H/E/LOB line + winning pitcher that fill the
-   foot of the #22 sheet. Reuses the box-score table styling in a compact card. */
+/* Final R/H/E/LOB card — the bottom-line tally lifted to the top of the page,
+   each club by abbreviation. Matches the other summary cards' frame. */
+.bs__totalsCard {
+  padding: 10px 14px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.bs__grid--totals .bs__nameCol {
+  width: 1%;
+  white-space: nowrap;
+}
+.bs__grid--totals .bs__totCell {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* Line score: the inning-by-inning runs card. Reuses the box-score table styling
+   in a compact frame. */
 .bs__board {
   padding: 10px 14px 12px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -2578,11 +2611,33 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
-/* Runs-by-inning cells read quietly; the R/H/E/LOB totals to their right are the
-   summary, set off by a rule and a bolder R the way a printed line score is. */
-.bs__inn {
+/* Club nickname hard against the innings — shrink-to-fit so there's no dead gap
+   between the name and inning 1, set in full-caps display like a printed score. */
+.bs__boardName {
+  width: 1%;
+  white-space: nowrap;
+  text-align: left !important;
+  padding: 5px 10px 5px 0 !important;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+/* Each half-inning a fixed, equal-width bordered box regardless of the digits in
+   it; a half that scored is inked bold seam-red. */
+.bs__boardInn {
+  width: 22px;
+  border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
 }
+.bs__boardInn--scored {
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+}
+/* R/H/E totals to the right, set off from the boxed innings by a rule, R bolder
+   the way a printed line score reads. */
 .bs__grid--board .bs__boardTot {
   border-left: var(--bw-rule) solid var(--border-rule);
   font-weight: var(--w-bold);
@@ -2627,6 +2682,7 @@ body {
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: var(--w-semibold);
+  text-transform: uppercase;
   color: var(--text-heading);
   overflow-wrap: anywhere;
 }

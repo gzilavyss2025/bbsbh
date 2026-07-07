@@ -4,11 +4,35 @@ import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
-// "MURPHY, PAT · 21" — matching how every staged name is penciled in.
+// "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
+// number is inked red like every uniform number on the box score.
 function managerValue(mgr) {
   const label = managerLabel(mgr)
   if (!label) return ''
-  return mgr.jersey ? `${label} · ${mgr.jersey}` : label
+  if (!mgr.jersey) return label
+  return (
+    <>
+      {label} · <span className="bs__unum">{mgr.jersey}</span>
+    </>
+  )
+}
+
+// A player's uniform number and position after his name — "21 | SS" — the
+// number inked red like every uniform number on the sheet, a pipe between it and
+// the position, both at the position's size. Falls back to just the position
+// when the feed didn't post a number.
+function NumPos({ num, pos }) {
+  return (
+    <span className="bs__pos">
+      {num !== '' && num != null && (
+        <>
+          <span className="bs__unum">{num}</span>
+          {' | '}
+        </>
+      )}
+      {pos}
+    </span>
+  )
 }
 
 // The full, MLB.com-style final box score for a game — batting orders (with
@@ -65,11 +89,11 @@ export function BoxScore({
   )
 }
 
-// Ordered to fill a #22 scorebook page as you work down it: the line score, the
-// pitchers of record, then each team paired with its own header card — the
-// visiting team's crew and first pitch above its batting/pitching, the home
-// team's ballpark/weather/times above its own. The complete MLB-style game-info
-// text sits at the very bottom so nothing is lost.
+// Ordered to fill a #22 scorebook page as you work down it: the final R/H/E/LOB
+// totals, the pitchers of record, the line score, then each team paired with its
+// own header card — the visiting team's crew and first pitch above its
+// batting/pitching, the home team's ballpark/weather/times above its own. The
+// complete MLB-style game-info text sits at the very bottom so nothing is lost.
 function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
@@ -90,7 +114,8 @@ function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
     { label: 'Home Team', value: box.home.teamName, wide: true },
     { label: 'Manager', value: managerValue(managers?.home) },
     { label: 'Uniform', value: uniforms?.home, wide: true },
-    { label: 'Ballpark', value: get('Venue'), wide: true },
+    // The feed appends a period to the venue name ("Busch Stadium.") — drop it.
+    { label: 'Ballpark', value: get('Venue').replace(/\.\s*$/, ''), wide: true },
     // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
     // value to copy onto paper. Falls back to the box-score weather when the
     // generator has nothing (e.g. a MiLB park with no coordinates).
@@ -106,8 +131,9 @@ function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
 
   return (
     <div className="bs">
-      <Scoreboard away={box.away} home={box.home} innings={box.innings} />
+      <LineTotals away={box.away} home={box.home} />
       <Decisions decisions={box.decisions} />
+      <Scoreboard away={box.away} home={box.home} innings={box.innings} />
       <ThreeStars stars={stars} />
       <InfoCard fields={awayFields} />
       <TeamBlock side={box.away} />
@@ -162,7 +188,7 @@ function TeamBlock({ side }) {
                   <span className="bs__player">
                     {b.mark && <span className="bs__mark">{b.mark}</span>}
                     <span className="bs__pname">{b.name}</span>
-                    {b.position && <span className="bs__pos">{b.position}</span>}
+                    {b.position && <NumPos num={b.num} pos={b.position} />}
                   </span>
                 </td>
                 <td>{b.ab}</td>
@@ -231,7 +257,16 @@ function TeamBlock({ side }) {
                 <td className="bs__nameCol">
                   <span className="bs__player">
                     <span className="bs__pname">{p.name}</span>
-                    {p.dec && <span className="bs__dec">{p.dec}</span>}
+                    <NumPos num={p.num} pos="P" />
+                    {p.dec && (
+                      <span
+                        className={`bs__dec bs__dec--${
+                          p.dec === 'L' ? 'loss' : 'win'
+                        }`}
+                      >
+                        {p.dec}
+                      </span>
+                    )}
                   </span>
                 </td>
                 <td className="bs__hand">{p.hand || '—'}</td>
@@ -266,12 +301,48 @@ function TeamBlock({ side }) {
   )
 }
 
-// The scorebook's scoreboard strip: runs by inning (1…N, extras included)
-// followed by each team's final R/H/E/LOB — the tallies you copy across the
-// bottom of the #22 sheet once the game is final. It's the one wide table here,
-// so it keeps the horizontal-scroll fallback for a long extra-inning line rather
-// than cramping the totals. (The winning pitcher lives in the decisions block
-// just below, not here.)
+// The final tally card — each club's R/H/E/LOB by abbreviation — lifted to the
+// top of the page as the first thing you copy onto the #22 sheet. The line score
+// below fills in the inning-by-inning story; this is the bottom-line summary.
+function LineTotals({ away, home }) {
+  return (
+    <div className="bs__totalsCard">
+      <table className="bs__grid bs__grid--totals">
+        <thead>
+          <tr>
+            <th className="bs__nameCol">Team</th>
+            <th>R</th>
+            <th>H</th>
+            <th>E</th>
+            <th>LOB</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[away, home].map((side) => (
+            <tr key={side.teamName}>
+              <td className="bs__nameCol">
+                <span className="bs__pname">
+                  {side.abbreviation || side.teamName}
+                </span>
+              </td>
+              <td className="bs__totCell">{side.line.r}</td>
+              <td>{side.line.h}</td>
+              <td>{side.line.e}</td>
+              <td>{side.line.lob}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// The scorebook's line score: runs by inning (1…N, extras included) then each
+// club's R/H/E, one row per team the way it reads across the bottom of the #22
+// sheet. Team names ride in full-caps nickname (BREWERS / CARDINALS) hard against
+// the innings — each half-inning a fixed, equal-width bordered box, and any half
+// that scored inked bold red. (LOB and the winning pitcher live elsewhere: the
+// totals card up top and the decisions block above.)
 function Scoreboard({ away, home, innings }) {
   const rows = [
     { side: away, cells: innings.map((i) => i.away) },
@@ -283,33 +354,39 @@ function Scoreboard({ away, home, innings }) {
         <table className="bs__grid bs__grid--board">
           <thead>
             <tr>
-              <th className="bs__nameCol">Final</th>
+              <th className="bs__boardName" />
               {innings.map((i) => (
-                <th key={i.num}>{i.num}</th>
+                <th key={i.num} className="bs__boardInn">
+                  {i.num}
+                </th>
               ))}
               <th className="bs__boardTot">R</th>
               <th>H</th>
               <th>E</th>
-              <th>LOB</th>
             </tr>
           </thead>
           <tbody>
             {rows.map(({ side, cells }) => (
               <tr key={side.teamName}>
-                <td className="bs__nameCol">
-                  <span className="bs__pname">
-                    {side.abbreviation || side.teamName}
-                  </span>
+                <td className="bs__boardName">
+                  {side.clubName || side.abbreviation || side.teamName}
                 </td>
-                {cells.map((v, i) => (
-                  <td key={innings[i].num} className="bs__inn">
-                    {v}
-                  </td>
-                ))}
+                {cells.map((v, i) => {
+                  const scored = typeof v === 'number' && v > 0
+                  return (
+                    <td
+                      key={innings[i].num}
+                      className={`bs__boardInn${
+                        scored ? ' bs__boardInn--scored' : ''
+                      }`}
+                    >
+                      {v}
+                    </td>
+                  )
+                })}
                 <td className="bs__boardTot">{side.line.r}</td>
                 <td>{side.line.h}</td>
                 <td>{side.line.e}</td>
-                <td>{side.line.lob}</td>
               </tr>
             ))}
           </tbody>

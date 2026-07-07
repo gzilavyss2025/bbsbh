@@ -6,6 +6,7 @@ import {
   fetchPitcherSeasonLine,
   fetchWinProbability,
   uniformLine,
+  uniformSummary,
 } from '../api/mlb.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
@@ -49,6 +50,17 @@ export function GameView({ game, section, onSection, onHome }) {
     return {
       away: uniformLine(uniforms?.away, game.away.teamName),
       home: uniformLine(uniforms?.home, game.home.teamName),
+    }
+  }, [feedState.data, game.away.teamName, game.home.teamName])
+
+  // The condensed one-line uniform summary for the box score's fill-in card
+  // ("Away Alternate Navy Blue"). The lineup pages keep the full jersey · pants ·
+  // cap line above; the box score wants the at-a-glance version.
+  const uniformBrief = useMemo(() => {
+    const uniforms = feedState.data?.uniforms
+    return {
+      away: uniformSummary(uniforms?.away, 'away', game.away.teamName),
+      home: uniformSummary(uniforms?.home, 'home', game.home.teamName),
     }
   }, [feedState.data, game.away.teamName, game.home.teamName])
 
@@ -220,7 +232,7 @@ export function GameView({ game, section, onSection, onHome }) {
         <BoxScore
           feed={feed}
           managers={managers.data}
-          uniforms={uniformText}
+          uniforms={uniformBrief}
           scorebookWeather={weather.data}
           winProbability={winProb.data}
           onInnings={() => onSection(lastInningSection.current)}
