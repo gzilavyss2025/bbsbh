@@ -49,7 +49,6 @@ export function GameFinder() {
 
   return (
     <div className="gamefinder">
-      <h3 className="footer__heading">Find a past matchup</h3>
       <div className="gamefinder__row">
         <TeamSearchBox placeholder="First team…" onPick={setTeamA} selected={teamA} />
         <span className="gamefinder__vs">vs</span>

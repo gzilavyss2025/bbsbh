@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AboutPage } from './screens/AboutPage.jsx'
 import { GameSelect } from './screens/GameSelect.jsx'
 import { GameView } from './screens/GameView.jsx'
 import { LogoSheet } from './screens/LogoSheet.jsx'
@@ -64,6 +65,8 @@ export default function App() {
   let content
   if (route.name === 'logos') {
     content = <LogoSheet onBack={() => go('/')} />
+  } else if (route.name === 'about') {
+    content = <AboutPage onBack={() => go('/')} />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {

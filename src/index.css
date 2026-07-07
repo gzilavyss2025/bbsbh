@@ -796,16 +796,6 @@ body {
   gap: var(--space-6);
 }
 
-.footer__heading {
-  margin: 0 0 var(--space-3);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-
 .sitefooter__search {
   display: flex;
   flex-direction: column;
@@ -1006,25 +996,76 @@ body {
   color: var(--text-caption);
 }
 
-/* --------------------------------------------------------------- legal */
-.sitefooter__links {
+/* --------------------------------------------------------------- actions
+   "Find a past matchup" (opens GameFinderModal) and "Logo sheet" — two real
+   buttons, harmonized so neither reads as more important than the other. */
+.sitefooter__actions {
   display: flex;
+  gap: var(--space-2);
 }
 
-.sitefooter__link {
+.sitefooter__action {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: var(--tap-min);
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--field-deep);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-rule) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
+  text-align: center;
   cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
 }
 
+.sitefooter__action:active {
+  transform: translateY(1px);
+  background: var(--field-soft);
+}
+
+.sitefooter__action:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* -------------------------------------------------- past-matchup sheet
+   GameFinderModal's dialog chrome; the finder itself is unstyled beyond
+   .gamefinder's own row/results rules above. */
+.gamefindersheet {
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.gamefindersheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.gamefindersheet__head .sheet__title {
+  margin: 0;
+}
+
+.gamefindersheet__close {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+/* --------------------------------------------------------------- legal */
 .sitefooter__legal {
   padding-bottom: var(--space-4);
   font-size: 12px;
@@ -1045,6 +1086,17 @@ body {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+.sitefooter__about {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 /* ---------------------------------------------------------------- team info */
@@ -3300,6 +3352,16 @@ body {
     gap: 12px;
   }
 
+  /* ---- slate footer: player/team search side by side instead of stacked;
+     the action buttons stay a compact row that doesn't stretch full-width. */
+  .sitefooter__search {
+    flex-direction: row;
+  }
+
+  .sitefooter__actions {
+    max-width: 360px;
+  }
+
   /* ---- game chrome: the section tabs keep a readable width too. */
   .stepnav {
     max-width: 640px;
@@ -3386,9 +3448,9 @@ body {
      headshot and both name lines scale up together instead of sitting at
      phone size in the middle of an otherwise-roomy page. */
   .player__hero {
-    grid-template-columns: 168px 1fr;
+    grid-template-columns: 168px 1fr auto;
     gap: var(--space-6);
-    padding-bottom: var(--space-5);
+    padding-bottom: var(--space-4);
   }
   .shot {
     width: 168px;
@@ -3398,18 +3460,22 @@ body {
     font-size: 64px;
   }
   .player__name-first {
-    font-size: 22px;
+    font-size: 26px;
   }
   .player__name-last {
-    font-size: 48px;
+    font-size: 56px;
   }
   .player__num {
-    font-size: 24px;
+    font-size: 28px;
     margin-left: 8px;
   }
   .player__meta {
-    margin-top: 12px;
-    font-size: 14px;
+    margin-top: 10px;
+    font-size: 16px;
+  }
+  .player__herologo .teamlogo {
+    width: 96px !important;
+    height: 96px !important;
   }
 }
 
@@ -3505,12 +3571,16 @@ body {
 /* ---- player hero ---- */
 .player__hero {
   display: grid;
-  grid-template-columns: 104px 1fr;
+  grid-template-columns: 104px 1fr auto;
   gap: var(--space-4);
   align-items: center;
   margin-top: 4px;
-  padding-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
   border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.player__herologo {
+  align-self: center;
+  flex: 0 0 auto;
 }
 .shot {
   display: block;
@@ -3552,13 +3622,13 @@ body {
 }
 .player__name-first {
   font-weight: var(--w-semibold);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.2;
   color: var(--text-caption);
 }
 .player__name-last {
   font-weight: var(--w-bold);
-  font-size: 27px;
+  font-size: 32px;
   line-height: 0.98;
 }
 .player__num {
@@ -3566,14 +3636,14 @@ body {
   font-variant-numeric: tabular-nums;
   color: var(--clay);
   font-weight: var(--w-bold);
-  font-size: 17px;
+  font-size: 19px;
   margin-left: 5px;
 }
 .player__meta {
-  margin: 8px 0 0;
-  font-size: 12.5px;
+  margin: 6px 0 0;
+  font-size: 14px;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 .player__pos {
