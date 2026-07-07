@@ -260,9 +260,25 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
 
       {/* Floating advance to the next half-inning — the same fixed blue bar the
           lineup pages use to page forward. Only shown when a next half is
-          unlocked; at the furthest revealed half there's nowhere to go yet. */}
+          unlocked; at the furthest revealed half there's nowhere to go yet.
+          On narrow viewports it also carries a duplicate Refresh button
+          stacked above Next, so refreshing live data doesn't require
+          scrolling back up to the toolbar (hidden again on the wide layout,
+          where the top toolbar stays easily reachable). */}
       {nextIdx != null && (
-        <div className="pagenav">
+        <div className="pagenav pagenav--innings">
+          <button
+            type="button"
+            className="refreshbtn refreshbtn--float"
+            onClick={onReload}
+            disabled={loading}
+            aria-label="Refresh live game data"
+          >
+            <span className="refreshbtn__icon" aria-hidden="true">
+              ↻
+            </span>
+            {loading ? 'Refreshing…' : 'Refresh'}
+          </button>
           <button
             className="btn btn--next"
             onClick={() => goTo(nextIdx)}

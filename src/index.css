@@ -3437,6 +3437,20 @@ body {
   box-shadow: var(--shadow-raised);
 }
 
+/* Innings view: on a phone the floating bar also carries a duplicate Refresh
+   button stacked above Next, so refreshing live data during a game doesn't
+   require scrolling back up to the toolbar. */
+.pagenav--innings {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.refreshbtn--float {
+  pointer-events: auto;
+  background: var(--bg-canvas);
+}
+
 /* ============================================================
    WIDE LAYOUT — tablet / desktop (min-width: 740px)
    Phone-first stays the default: below the breakpoint nothing
@@ -3526,7 +3540,13 @@ body {
 
   /* ---- innings: the half-inning reading pane on the left; the pitchers
      table and roster reference ride a sticky column on the right, so the
-     running lines stay in view while a long feed scrolls. */
+     running lines stay in view while a long feed scrolls. The floating
+     duplicate Refresh button is a phone-only convenience — at this width the
+     top toolbar is reachable enough that it'd just be visual clutter. */
+  .refreshbtn--float {
+    display: none;
+  }
+
   .innings__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
