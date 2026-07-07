@@ -532,7 +532,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                       </GameLink>
                       <span className="split__sub">
                         {f.batter ? (
-                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
+                          <PlayerLink id={f.batter.id}>{f.batter.fullName.toUpperCase()}</PlayerLink>
                         ) : (
                           f.oppAbbr
                         )}
