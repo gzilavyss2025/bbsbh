@@ -3,6 +3,7 @@ import { managerLabel } from '../api/mlb.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
+import { TeamLink } from '../components/TeamLink.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -182,7 +183,9 @@ function InfoCard({ fields }) {
 function TeamBlock({ side }) {
   return (
     <section className="bs__team">
-      <h3 className="bs__teamname">{side.teamName}</h3>
+      <h3 className="bs__teamname">
+        <TeamLink id={side.id}>{side.teamName}</TeamLink>
+      </h3>
 
       <div className="bs__scroll">
         {/* Columns follow the #22 scorebook's batter-totals order (AB·R·H·RBI),
