@@ -131,14 +131,29 @@ function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
 
   return (
     <div className="bs">
-      <LineTotals away={box.away} home={box.home} />
-      <Decisions decisions={box.decisions} />
-      <Scoreboard away={box.away} home={box.home} innings={box.innings} />
-      <ThreeStars stars={stars} />
-      <InfoCard fields={awayFields} />
-      <TeamBlock side={box.away} />
-      <InfoCard fields={homeFields} />
-      <TeamBlock side={box.home} />
+      {/* The duo/col wrappers are transparent on a phone (display: contents —
+          everything keeps stacking in this order on .bs's own gap) and become
+          two-up grids at the wide breakpoint: totals beside the decisions,
+          line score beside the stars, then each club's header card +
+          batting/pitching as its own column, away beside home. */}
+      <div className="bs__duo">
+        <LineTotals away={box.away} home={box.home} />
+        <Decisions decisions={box.decisions} />
+      </div>
+      <div className="bs__duo">
+        <Scoreboard away={box.away} home={box.home} innings={box.innings} />
+        <ThreeStars stars={stars} />
+      </div>
+      <div className="bs__duo">
+        <div className="bs__col">
+          <InfoCard fields={awayFields} />
+          <TeamBlock side={box.away} />
+        </div>
+        <div className="bs__col">
+          <InfoCard fields={homeFields} />
+          <TeamBlock side={box.home} />
+        </div>
+      </div>
       <GameInfo rows={box.gameInfo} dateLabel={box.dateLabel} />
     </div>
   )

@@ -28,11 +28,8 @@ export function TeamInfo({
   nextLabel,
 }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
-  const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
-  const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
-  const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
 
   return (
     <div className="teaminfo">
@@ -42,37 +39,12 @@ export function TeamInfo({
       </div>
 
       <dl className="factgrid">
-        <Fact label="Date" value={scorebookDate(info.officialDate)} />
-        <Fact label="Ballpark" value={info.venue} />
-        <Fact label="First pitch" value={info.firstPitch} />
-        <Fact
-          label="Weather"
-          value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}
+        <GameFacts
+          info={info}
+          scorebookWeather={scorebookWeather}
+          scorebookWeatherLoading={scorebookWeatherLoading}
         />
-        {/* Box weather is only the closed-roof interior reading — show it here
-            just as a fallback when the outdoor scorebook weather resolved to
-            nothing. When we have real weather, it's redundant (still in the box
-            score at the bottom of the game). */}
-        {!scorebookWeatherLoading && !scorebookWeather?.text && (
-          <Fact label="Box weather" value={info.weather} />
-        )}
-        <Fact label="Attendance" value={info.attendance} />
-        <Fact
-          label="Manager"
-          value={
-            manager ? (
-              <span className="fact__person">
-                {manager.lastFirst.toUpperCase()}
-                {manager.jersey ? (
-                  <span className="fact__jersey">{manager.jersey}</span>
-                ) : null}
-                {manager.interim ? (
-                  <span className="fact__note">interim</span>
-                ) : null}
-              </span>
-            ) : null
-          }
-        />
+        <Fact label="Manager" value={managerFact(manager)} />
         {/* Tonight's uniform, synthesized to a tight summary ("Away Alternate
             Navy Blue") — spoiler-free, but the assignment isn't posted until
             around first pitch, so pregame this reads "—" until a Refresh picks
@@ -80,20 +52,139 @@ export function TeamInfo({
         <Fact label="Uniform" value={uniform} />
       </dl>
 
-      {officials.length > 0 && (
-        <section className="umps">
-          <h3 className="section__title">Umpires</h3>
-          <ul className="umps__list">
-            {officials.map((o) => (
-              <li key={o.role}>
-                <span className="umps__role">{o.role}</span>
-                <span className="umps__name">{o.name}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <Umpires officials={officials} />
 
+      <TeamSections feed={feed} side={side} oppPitcherLine={oppPitcherLine} />
+
+      <div className="pagenav">
+        <button className="btn btn--next" onClick={onNext}>
+          {nextLabel}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Both lineup pages condensed onto one sheet — the wide-screen (tablet /
+// desktop) replacement for the two TeamInfo pages, swapped in by GameView at
+// the WIDE_QUERY breakpoint. The game-level facts and umpires render once up
+// top; each club then gets its own column of the team-specific sections
+// (manager/uniform, batting order, opposing pitcher, opposing defense).
+export function LineupSpread({
+  feed,
+  managers,
+  uniforms,
+  scorebookWeather,
+  scorebookWeatherLoading,
+  starterLines,
+  onNext,
+}) {
+  const officials = useMemo(() => selectOfficials(feed), [feed])
+  const info = useMemo(() => selectGameInfo(feed), [feed])
+
+  return (
+    <div className="teaminfo teaminfo--spread">
+      <dl className="factgrid factgrid--game">
+        <GameFacts
+          info={info}
+          scorebookWeather={scorebookWeather}
+          scorebookWeatherLoading={scorebookWeatherLoading}
+        />
+      </dl>
+
+      <Umpires officials={officials} />
+
+      <div className="teaminfo__duo">
+        {['away', 'home'].map((side) => (
+          <TeamPanel
+            key={side}
+            feed={feed}
+            side={side}
+            manager={managers?.[side]}
+            uniform={uniforms?.[side]}
+            // Each side FACES the other side's starter.
+            oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
+          />
+        ))}
+      </div>
+
+      <div className="pagenav">
+        <button className="btn btn--next" onClick={onNext}>
+          Innings ›
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// One club's column of the spread: name, its two team facts, then the same
+// lineup / opposing-pitcher / opposing-defense sections as the phone page.
+function TeamPanel({ feed, side, manager, uniform, oppPitcherLine }) {
+  const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  return (
+    <section className="teampanel">
+      <div className="teaminfo__head">
+        <h2 className="teaminfo__name">{meta.name || 'Team'}</h2>
+        <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
+      </div>
+      <dl className="factgrid">
+        <Fact label="Manager" value={managerFact(manager)} />
+        <Fact label="Uniform" value={uniform} />
+      </dl>
+      <TeamSections feed={feed} side={side} oppPitcherLine={oppPitcherLine} />
+    </section>
+  )
+}
+
+// The game-level fill-ins shared by both clubs, in the sheet's order.
+function GameFacts({ info, scorebookWeather, scorebookWeatherLoading }) {
+  return (
+    <>
+      <Fact label="Date" value={scorebookDate(info.officialDate)} />
+      <Fact label="Ballpark" value={info.venue} />
+      <Fact label="First pitch" value={info.firstPitch} />
+      <Fact
+        label="Weather"
+        value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}
+      />
+      {/* Box weather is only the closed-roof interior reading — show it here
+          just as a fallback when the outdoor scorebook weather resolved to
+          nothing. When we have real weather, it's redundant (still in the box
+          score at the bottom of the game). */}
+      {!scorebookWeatherLoading && !scorebookWeather?.text && (
+        <Fact label="Box weather" value={info.weather} />
+      )}
+      <Fact label="Attendance" value={info.attendance} />
+    </>
+  )
+}
+
+function Umpires({ officials }) {
+  if (officials.length === 0) return null
+  return (
+    <section className="umps">
+      <h3 className="section__title">Umpires</h3>
+      <ul className="umps__list">
+        {officials.map((o) => (
+          <li key={o.role}>
+            <span className="umps__role">{o.role}</span>
+            <span className="umps__name">{o.name}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+// The team-specific body shared by the phone page and the spread's panels:
+// batting order, the opposing starter, and the opposing defense diamond.
+function TeamSections({ feed, side, oppPitcherLine }) {
+  const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
+  const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
+  const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
+
+  return (
+    <>
       <section className="lineup">
         <h3 className="section__title">Batting order</h3>
         {lineup.length === 0 ? (
@@ -152,13 +243,22 @@ export function TeamInfo({
           <DefenseDiamond defense={oppDefense} />
         </section>
       )}
+    </>
+  )
+}
 
-      <div className="pagenav">
-        <button className="btn btn--next" onClick={onNext}>
-          {nextLabel}
-        </button>
-      </div>
-    </div>
+// The manager fill-in: surname-first name with the uniform number inked in
+// seam red, like every lineup row. Null (→ the Fact's "—") until resolved.
+function managerFact(manager) {
+  if (!manager) return null
+  return (
+    <span className="fact__person">
+      {manager.lastFirst.toUpperCase()}
+      {manager.jersey ? (
+        <span className="fact__jersey">{manager.jersey}</span>
+      ) : null}
+      {manager.interim ? <span className="fact__note">interim</span> : null}
+    </span>
   )
 }
 

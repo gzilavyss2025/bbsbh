@@ -180,70 +180,80 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
         </button>
       </div>
 
-      <RollingLine
-        feed={feed}
-        regulation={regulation}
-        unlocked={unlocked}
-        revealedThrough={revealedThrough}
-        awayAbbr={meta.away.abbreviation}
-        homeAbbr={meta.home.abbreviation}
-        curIdx={curIdx}
-        onSelect={goTo}
-      />
+      {/* On a phone these wrappers are inert divs and everything stacks in the
+          same order as ever; from the wide breakpoint up they become a grid —
+          the half-inning reading pane on the left, the pitchers table and
+          roster reference riding a sticky column on the right. */}
+      <div className="innings__grid">
+        <div className="innings__main">
+          <RollingLine
+            feed={feed}
+            regulation={regulation}
+            unlocked={unlocked}
+            revealedThrough={revealedThrough}
+            awayAbbr={meta.away.abbreviation}
+            homeAbbr={meta.home.abbreviation}
+            curIdx={curIdx}
+            onSelect={goTo}
+          />
 
-      <nav className="inningnav" aria-label="Half-inning navigator">
-        <button
-          onClick={() => goTo(Math.max(0, curIdx - 1))}
-          disabled={curIdx === 0}
-          aria-label="Previous half-inning"
-        >
-          ‹ Back
-        </button>
-        <span className="inningnav__label">
-          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
-        </span>
-        <button
-          onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
-          disabled={curIdx === maxIdx}
-          aria-label="Next half-inning"
-        >
-          Next ›
-        </button>
-      </nav>
+          <nav className="inningnav" aria-label="Half-inning navigator">
+            <button
+              onClick={() => goTo(Math.max(0, curIdx - 1))}
+              disabled={curIdx === 0}
+              aria-label="Previous half-inning"
+            >
+              ‹ Back
+            </button>
+            <span className="inningnav__label">
+              {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
+            </span>
+            <button
+              onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+              disabled={curIdx === maxIdx}
+              aria-label="Next half-inning"
+            >
+              Next ›
+            </button>
+          </nav>
 
-      {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
-      <div className="inning" key={`${effInning}-${effHalf}`}>
-        <HalfInning
-          feed={feed}
-          inning={effInning}
-          half={effHalf}
-          battingSide={effHalf === 'top' ? 'away' : 'home'}
-          label={effHalf === 'top' ? 'Top' : 'Bottom'}
-          battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
-          pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
-          revealed={curIdx <= revealedThrough}
-          getDerived={getDerived}
-          onReveal={revealTo}
-        />
+          {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
+          <div className="inning" key={`${effInning}-${effHalf}`}>
+            <HalfInning
+              feed={feed}
+              inning={effInning}
+              half={effHalf}
+              battingSide={effHalf === 'top' ? 'away' : 'home'}
+              label={effHalf === 'top' ? 'Top' : 'Bottom'}
+              battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
+              pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
+              revealed={curIdx <= revealedThrough}
+              getDerived={getDerived}
+              onReveal={revealTo}
+            />
+          </div>
+        </div>
+
+        <aside className="innings__side">
+          <PitchersSection
+            teams={[
+              { name: rosters.away.name, rows: pitcherLines.away },
+              { name: rosters.home.name, rows: pitcherLines.home },
+            ]}
+          />
+
+          <RosterPanel
+            title={rosters.away.name}
+            roster={rosters.away}
+            revealedThrough={revealedThrough}
+          />
+          <RosterPanel
+            title={rosters.home.name}
+            roster={rosters.home}
+            revealedThrough={revealedThrough}
+          />
+        </aside>
       </div>
-
-      <PitchersSection
-        teams={[
-          { name: rosters.away.name, rows: pitcherLines.away },
-          { name: rosters.home.name, rows: pitcherLines.home },
-        ]}
-      />
-
-      <RosterPanel
-        title={rosters.away.name}
-        roster={rosters.away}
-        revealedThrough={revealedThrough}
-      />
-      <RosterPanel
-        title={rosters.home.name}
-        roster={rosters.home}
-        revealedThrough={revealedThrough}
-      />
 
       {/* Floating advance to the next half-inning — the same fixed blue bar the
           lineup pages use to page forward. Only shown when a next half is

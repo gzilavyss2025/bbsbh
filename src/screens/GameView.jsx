@@ -10,8 +10,9 @@ import {
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
-import { TeamInfo } from './TeamInfo.jsx'
+import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -26,6 +27,11 @@ import { BaseballMark } from '../components/BaseballMark.jsx'
 export function GameView({ game, section, onSection, onHome }) {
   const { step, inning, half } = sectionToStep(section)
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
+  // Tablet/desktop: the two lineup pages condense into one two-column spread
+  // (LineupSpread) at the same breakpoint the CSS starts laying columns. The
+  // lineup1/lineup2 URLs both show the spread, so links stay portable between
+  // a phone and a desk.
+  const wide = useMediaQuery(WIDE_QUERY)
 
   // The uniform assignment rides the SAME fetch/reload as the feed: it's empty
   // until around first pitch, so each live Refresh must re-pull it, and
@@ -131,18 +137,52 @@ export function GameView({ game, section, onSection, onHome }) {
           scorebook pages instead of only marching forward. */}
       {feed && (
         <nav className="stepnav" aria-label="Game sections">
-          {[
-            { key: 0, label: game.away.abbreviation || 'Away', section: 'lineup1' },
-            { key: 1, label: game.home.abbreviation || 'Home', section: 'lineup2' },
-            { key: 2, label: 'Innings', section: lastInningSection.current },
-            { key: 3, label: 'Box', section: 'boxscore' },
-          ].map((s) => (
+          {(wide
+            ? // Wide screens show both lineups on one spread, so the two team
+              // tabs collapse into a single "Lineups" stop.
+              [
+                {
+                  key: 'lineups',
+                  label: 'Lineups',
+                  active: step === 0 || step === 1,
+                  section: 'lineup1',
+                },
+                {
+                  key: 'innings',
+                  label: 'Innings',
+                  active: step === 2,
+                  section: lastInningSection.current,
+                },
+                { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+              ]
+            : [
+                {
+                  key: 'away',
+                  label: game.away.abbreviation || 'Away',
+                  active: step === 0,
+                  section: 'lineup1',
+                },
+                {
+                  key: 'home',
+                  label: game.home.abbreviation || 'Home',
+                  active: step === 1,
+                  section: 'lineup2',
+                },
+                {
+                  key: 'innings',
+                  label: 'Innings',
+                  active: step === 2,
+                  section: lastInningSection.current,
+                },
+                { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+              ]
+          ).map((s) => (
             <button
               key={s.key}
               type="button"
-              className={`stepnav__btn ${step === s.key ? 'is-active' : ''}`}
-              aria-current={step === s.key ? 'page' : undefined}
-              onClick={() => step !== s.key && onSection(s.section)}
+              className={`stepnav__btn ${s.active ? 'is-active' : ''}`}
+              aria-current={s.active ? 'page' : undefined}
+              onClick={() => !s.active && onSection(s.section)}
             >
               {s.label}
             </button>
@@ -179,7 +219,18 @@ export function GameView({ game, section, onSection, onHome }) {
         </p>
       )}
 
-      {feed && step === 0 && (
+      {feed && (step === 0 || step === 1) && wide && (
+        <LineupSpread
+          feed={feed}
+          managers={managers.data}
+          uniforms={uniformBrief}
+          scorebookWeather={weather.data}
+          scorebookWeatherLoading={weather.loading}
+          starterLines={starterLines.data}
+          onNext={() => onSection('top1')}
+        />
+      )}
+      {feed && step === 0 && !wide && (
         <TeamInfo
           feed={feed}
           side="away"
@@ -193,7 +244,7 @@ export function GameView({ game, section, onSection, onHome }) {
           nextLabel="Home team ›"
         />
       )}
-      {feed && step === 1 && (
+      {feed && step === 1 && !wide && (
         <TeamInfo
           feed={feed}
           side="home"

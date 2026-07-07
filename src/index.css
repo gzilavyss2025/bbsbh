@@ -2843,3 +2843,123 @@ body {
   margin: 0;
   box-shadow: var(--shadow-raised);
 }
+
+/* ============================================================
+   WIDE LAYOUT — tablet / desktop (min-width: 740px)
+   Phone-first stays the default: below the breakpoint nothing
+   here applies and every screen is the single 440px column.
+   From iPad portrait up, screens widen to ~960px and split into
+   two columns. Keep the breakpoint in sync with WIDE_QUERY in
+   src/hooks/useMediaQuery.js — the JS gate that swaps the two
+   lineup pages for the combined LineupSpread.
+   ============================================================ */
+
+/* The box score's pairing wrappers are transparent by default — display:
+   contents lets their children keep stacking on .bs's own flex gap — and
+   only become real two-up grids inside the media query below. */
+.bs__duo,
+.bs__col {
+  display: contents;
+}
+
+@media (min-width: 740px) {
+  .screen {
+    max-width: 960px;
+  }
+
+  /* ---- slate: two game cards per row. The level tabs and date stepper hold
+     a phone-ish width, centered, instead of stretching across the sheet. */
+  .levelnav,
+  .datenav--row {
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  .gamelist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  /* ---- game chrome: the section tabs keep a readable width too. */
+  .stepnav {
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  /* ---- lineups spread (both staging pages on one sheet — LineupSpread).
+     Shared game facts run three-up; the umpire boxes flow to fit; the two
+     team panels sit side by side. */
+  .factgrid--game {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* A fact count that doesn't divide by three leaves a hole in the last row;
+     stretch the final fact across the remainder so the rule backing never
+     shows through an empty cell. (3n+2 → it starts in column 2; 3n+1 → it has
+     the row to itself.) */
+  .factgrid--game > .fact:nth-child(3n + 2):last-child {
+    grid-column: 2 / -1;
+  }
+  .factgrid--game > .fact:nth-child(3n + 1):last-child {
+    grid-column: 1 / -1;
+  }
+
+  .teaminfo--spread .umps__list {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .teaminfo__duo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    align-items: start;
+    margin-top: var(--space-2);
+  }
+
+  .teampanel {
+    min-width: 0;
+  }
+
+  /* ---- innings: the half-inning reading pane on the left; the pitchers
+     table and roster reference ride a sticky column on the right, so the
+     running lines stay in view while a long feed scrolls. */
+  .innings__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    align-items: start;
+  }
+
+  .innings__side {
+    position: sticky;
+    top: var(--space-3);
+  }
+
+  .innings__side > :first-child {
+    margin-top: 0;
+  }
+
+  /* ---- box score: totals beside the decisions, line score beside the three
+     stars, then each club's header card + batting/pitching as its own column
+     (away beside home). */
+  .bs__duo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  /* When a pairing's partner didn't render (no decisions mid-game, no WPA off
+     MLB), the survivor takes the full row instead of leaving a hole. */
+  .bs__duo > :only-child {
+    grid-column: 1 / -1;
+  }
+
+  .bs__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+}
