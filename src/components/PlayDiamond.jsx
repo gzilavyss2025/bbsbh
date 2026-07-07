@@ -1,40 +1,27 @@
-// Per-play field diagram for the play-by-play feed: a base-occupancy diamond
-// (same idea as DiamondGlyph, redrawn at inline-card scale with room above it
-// for the outfield) plus, when the ball was put in play, a dot marking roughly
-// where it was fielded. This is a stylized diagram, not a to-scale spray
-// chart — see hitToXY below.
+// Per-play base diamond for the play-by-play feed, drawn Numbers Game #22
+// style: the batter's trip around the bases is penciled in as graphite-shaded
+// legs — one triangular wedge per base reached (home→1st, 1st→2nd, 2nd→3rd,
+// 3rd→home). A batter who came around to score fills all four wedges, so his
+// diamond reads as a solid shaded diamond; a batter left on second shows two
+// wedges; a batter retired shows an empty outline.
 const HOME = [50, 90]
 const R = 14
 const FIRST = [50 + R, 90 - R]
 const SECOND = [50, 90 - 2 * R]
 const THIRD = [50 - R, 90 - R]
+const CENTER = [50, 90 - R]
 
-// The feed's hit coordinates are centered on x=125 (foul line to foul line)
-// with y counting down from ~205 at home plate to ~20 at a deep fence.
-// Calibrated against real plays (see api/playbyplay.js), not exact physics.
-function hitToXY({ x, y }) {
-  const nx = (x - 125) / 105
-  const ny = (205 - y) / 185
-  return [Math.min(96, Math.max(4, 50 + nx * 40)), Math.min(90, Math.max(8, 90 - ny * 78))]
-}
+// The four base-path wedges, in running order. Wedge i is shaded once the
+// runner has reached base i+1.
+const LEGS = [
+  [HOME, FIRST, CENTER],
+  [FIRST, SECOND, CENTER],
+  [SECOND, THIRD, CENTER],
+  [THIRD, HOME, CENTER],
+]
 
-function baseDot(x, y, on) {
-  return (
-    <rect
-      x={x - 5}
-      y={y - 5}
-      width={10}
-      height={10}
-      transform={`rotate(45 ${x} ${y})`}
-      fill={on ? 'var(--field)' : 'var(--paper-2)'}
-      stroke="var(--ink-1)"
-      strokeWidth={1.5}
-    />
-  )
-}
-
-export function PlayDiamond({ bases = [false, false, false], hit = null, size = 40 }) {
-  const hitXY = hit ? hitToXY(hit) : null
+export function PlayDiamond({ reached = 0, scored = false, size = 76 }) {
+  const filled = scored ? 4 : reached
   return (
     <svg
       className="pbp__diamond"
@@ -43,6 +30,9 @@ export function PlayDiamond({ bases = [false, false, false], hit = null, size = 
       viewBox="0 0 100 100"
       aria-hidden="true"
     >
+      {LEGS.slice(0, filled).map((pts, i) => (
+        <polygon key={i} points={pts.map((p) => p.join(',')).join(' ')} fill="var(--graphite)" />
+      ))}
       <polygon
         points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
         fill="none"
@@ -50,23 +40,6 @@ export function PlayDiamond({ bases = [false, false, false], hit = null, size = 
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      {baseDot(...FIRST, bases[0])}
-      {baseDot(...SECOND, bases[1])}
-      {baseDot(...THIRD, bases[2])}
-      {hitXY && (
-        <>
-          <line
-            x1={HOME[0]}
-            y1={HOME[1]}
-            x2={hitXY[0]}
-            y2={hitXY[1]}
-            stroke="var(--graphite)"
-            strokeWidth={1.5}
-            strokeDasharray="3 3"
-          />
-          <circle cx={hitXY[0]} cy={hitXY[1]} r={4} fill="var(--graphite)" />
-        </>
-      )}
     </svg>
   )
 }

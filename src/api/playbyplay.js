@@ -116,16 +116,44 @@ function trimLeadingName(description, fullName) {
 // whatever their own card already says (they still walked, singled, etc.) —
 // see the out-attribution loop below, which attaches only the sequence number
 // in that case, not a replacement description.
-function describeOut(play, runnerEntry) {
-  const desc = play.result?.description ?? ''
-  const chain = (runnerEntry.credits ?? []).map((c) => c.position.code)
 
-  if (/strikes? out swinging/i.test(desc)) return { notation: 'K' }
+// How-reached codes keyed on the play's eventType, for a batter who was NOT
+// retired on his own plate appearance.
+const REACH_CODES = {
+  single: '1B',
+  double: '2B',
+  triple: '3B',
+  home_run: 'HR',
+  walk: 'BB',
+  intent_walk: 'IBB',
+  hit_by_pitch: 'HBP',
+  fielders_choice: 'FC',
+  fielders_choice_out: 'FC',
+  catcher_interf: 'CI',
+}
+
+// The Numbers Game #22-style scorebook denotation for a batter's own plate
+// appearance — shown above the per-play diamond. Either how he reached (1B,
+// 2B, HR, BB, E6, FC…) or how he was retired (K, F8, L7, 6-3…). A called
+// third strike returns { calledLooking: true } so the card can draw the
+// customary backwards K instead of a code string.
+function scorebookCode(play, batterRunner) {
+  const et = play.result?.eventType
+  if (REACH_CODES[et]) return { code: REACH_CODES[et] }
+
+  const desc = play.result?.description ?? ''
+  const chain = (batterRunner?.credits ?? []).map((c) => c.position.code)
+
+  if (et === 'field_error') {
+    const errPos = (batterRunner?.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
+    return { code: `E${errPos?.position.code ?? ''}` }
+  }
+  if (/strikes? out swinging/i.test(desc)) return { code: 'K' }
   if (/called out on strikes/i.test(desc)) return { calledLooking: true }
-  if (/lines? (out|into)/i.test(desc)) return { notation: `L${chain[chain.length - 1] ?? ''}` }
-  if (/pops? (out|into)/i.test(desc)) return { notation: `F${chain[chain.length - 1] ?? ''}` }
-  if (/flies? (out|into)/i.test(desc)) return { notation: `F${chain[chain.length - 1] ?? ''}` }
-  return { notation: chain.join('-') }
+  if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}` }
+  if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}` }
+  if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}` }
+  return { code: chain.join('-') }
 }
 
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
@@ -159,26 +187,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         .filter((e) => e.isPitch)
         .map(pitchCallCode)
 
-      // Base state after this play resolves, straight from the feed — already
-      // accounts for anything that happened since the last card (steals,
-      // pickoffs, wild pitches...), which don't get cards of their own.
-      const basesAfter = [
-        Boolean(play.matchup?.postOnFirst),
-        Boolean(play.matchup?.postOnSecond),
-        Boolean(play.matchup?.postOnThird),
-      ]
-
-      // Statcast hit coordinates, when the ball was put in play. MLB-only —
-      // MiLB feeds and no-contact plate appearances (BB/K/HBP) leave this
-      // null, and PlayDiamond just omits the marker in that case.
-      const inPlayEvent = (play.playEvents ?? []).find(
-        (e) => e.isPitch && INPLAY_CODES.has(pitchCallCode(e)) && e.hitData?.coordinates,
-      )
-      const hitLocation = inPlayEvent
-        ? { x: inPlayEvent.hitData.coordinates.coordX, y: inPlayEvent.hitData.coordinates.coordY }
-        : null
-
       const cardIndex = entries.length
+      const batterRunner = runners.find((r) => r.details?.runner?.id === batterId)
       const card = {
         kind: 'atbat',
         batterId,
@@ -187,19 +197,21 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         rbi: play.result?.rbi ?? 0,
         // The full prose account of the play (batter name trimmed off the
         // front — it's already on the card). Shown for every plate
-        // appearance, out or not; outs also get a terse scorebook badge.
+        // appearance, out or not.
         desc: trimLeadingName(play.result?.description, batter.fullName),
-        out: null,
+        // Scorebook denotation drawn above the diamond (1B, F8, 6-3…).
+        ...scorebookCode(play, batterRunner),
         outNumber: null,
-        basesAfter,
-        hitLocation,
+        // Furthest base this batter reached / whether he scored — filled in
+        // by the advancement pass below, which follows him as a baserunner
+        // across the rest of the half.
+        reached: 0,
+        scored: false,
       }
       entries.push(card)
       originIndex.set(batterId, cardIndex)
 
-      const batterRunner = runners.find((r) => r.details?.runner?.id === batterId)
       if (batterRunner?.movement?.isOut) {
-        card.out = describeOut(play, batterRunner)
         card.outNumber = batterRunner.movement.outNumber
       }
     }
@@ -217,6 +229,28 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       if (origin == null) continue // no known origin card (e.g. a pinch-runner) — nothing to attach to
       entries[origin].outNumber = r.movement.outNumber
     }
+  }
+
+  // Advancement pass: follow each batter as a baserunner across every play of
+  // the half and record the furthest base he reached (and whether he scored),
+  // so his own card's diamond can shade the bases he legged out — filled solid
+  // when he came around to score. An out on the bases doesn't advance him; he
+  // keeps whatever base he'd already reached.
+  const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
+  const progress = new Map() // runnerId -> furthest base (1-3, or 4 for a run)
+  for (const play of plays) {
+    for (const r of play.runners ?? []) {
+      const rid = r.details?.runner?.id
+      if (rid == null || r.movement?.isOut) continue
+      const end = r.movement?.end
+      const base = end === 'score' ? 4 : (BASE_NUM[end] ?? 0)
+      if (base > (progress.get(rid) ?? 0)) progress.set(rid, base)
+    }
+  }
+  for (const [rid, cardIndex] of originIndex) {
+    const base = progress.get(rid) ?? 0
+    entries[cardIndex].scored = base === 4
+    entries[cardIndex].reached = base === 4 ? 4 : base
   }
 
   return entries

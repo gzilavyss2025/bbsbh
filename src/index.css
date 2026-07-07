@@ -1578,20 +1578,44 @@ body {
   flex: 0 0 auto;
 }
 
-.pbp__outdot {
+/* Scorebook denotation stacked over the diamond: the code (1B / F8 / 6-3) and,
+   for an out, the graphite-shaded out-number box — Numbers Game #22 style. */
+.pbp__play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+}
+
+.pbp__playhead {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  min-height: 15px;
+}
+
+.pbp__code {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   font-size: 12px;
-  color: var(--clay-deep);
-  background: var(--clay-soft);
-  border: var(--bw-rule) solid var(--clay);
+  letter-spacing: 0.02em;
+  color: var(--ink-1);
+}
+
+.pbp__outbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 10px;
+  color: var(--paper-2);
+  background: var(--graphite);
+  border-radius: 2px;
 }
 
 .pbp__top {
@@ -1704,15 +1728,6 @@ body {
 .pbp__desc {
   font-size: 12px;
   color: var(--text-body);
-}
-
-.pbp__notation {
-  font-family: var(--font-mono);
-  font-weight: var(--w-bold);
-  font-size: 11px;
-  color: var(--clay-deep);
-  margin-left: 6px;
-  white-space: nowrap;
 }
 
 .pbp__klooking {
