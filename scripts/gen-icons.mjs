@@ -14,7 +14,14 @@ import { dirname, join } from 'node:path'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const iconsDir = join(here, '..', 'public', 'icons')
-const svg = readFileSync(join(iconsDir, 'icon.svg'), 'utf8')
+// icon.svg has hard-coded width="512" height="512" attributes, which are the
+// SVG's *intrinsic* size and win over a CSS-sized container — so without
+// forcing it to fill (width/height:100%) it renders at 512x512 regardless of
+// the wrapping div, silently overflowing/cropping at every other target size.
+const svg = readFileSync(join(iconsDir, 'icon.svg'), 'utf8').replace(
+  '<svg ',
+  '<svg style="display:block;width:100%;height:100%" ',
+)
 
 // name -> { size, maskable }. Maskable icons get extra safe-area padding so
 // the important content survives Android's circular/rounded masking.
