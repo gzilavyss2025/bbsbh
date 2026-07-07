@@ -2930,10 +2930,13 @@ body {
 
 .buzz__text {
   margin: 0;
-  /* Social-post prose — read in the high-legibility serif like other prose. */
+  /* Social-post prose — the ONE place we deliberately break the all-caps
+     house rule: posts keep their authors' original casing (no
+     text-transform), set in plain regular-weight Newsreader so they read
+     as quoted voices rather than app chrome. */
   font-family: var(--font-read);
   font-size: 13px;
-  font-weight: var(--w-semibold);
+  font-weight: var(--w-regular);
   line-height: var(--lh-body);
   color: var(--text-body);
 }
