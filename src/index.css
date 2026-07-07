@@ -1558,12 +1558,12 @@ body {
 
 .pbp__card {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: stretch;
+  gap: 8px;
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   background: var(--paper-2);
-  padding: 8px 10px;
+  padding: 5px 6px;
 }
 
 .pbp__main {
@@ -1574,8 +1574,7 @@ body {
 .pbp__side {
   display: flex;
   align-items: center;
-  align-self: center;
-  gap: 8px;
+  gap: 6px;
   flex: 0 0 auto;
 }
 
@@ -1640,10 +1639,9 @@ body {
 .pbp__ladder {
   display: flex;
   align-items: stretch;
-  align-self: center;
+  align-self: stretch;
   flex: 0 0 auto;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: 2px;
+  border: var(--bw-hair) solid var(--seal-hatch);
   overflow: hidden;
 }
 
@@ -1651,16 +1649,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 18px;
+  width: 17px;
 }
 
 .pbp__laddercol--ball {
   background: var(--paper-3);
 }
 
+/* Kraft-tape brown strike lane, echoing the seal covers. */
 .pbp__laddercol--strike {
-  background: var(--ink-1);
-  border-left: var(--bw-hair) solid var(--border-rule);
+  background: var(--seal);
+  border-left: var(--bw-hair) solid var(--seal-hatch);
 }
 
 .pbp__ladderhead {
@@ -1672,13 +1671,12 @@ body {
   text-transform: uppercase;
   text-align: center;
   color: var(--text-caption);
-  border-bottom: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--seal-hatch);
   padding: 1px 0;
 }
 
 .pbp__laddercol--strike .pbp__ladderhead {
-  color: var(--paper-2);
-  border-bottom-color: var(--ink-2);
+  color: var(--seal-ink);
 }
 
 .pbp__cell {
@@ -1696,7 +1694,7 @@ body {
 }
 
 .pbp__laddercol--strike .pbp__cell {
-  color: var(--paper-2);
+  color: var(--seal-ink);
 }
 
 .pbp__diamond {
