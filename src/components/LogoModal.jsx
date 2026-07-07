@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { LOGO_VARIANTS } from '../lib/teams.js'
 import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLink } from './TeamLink.jsx'
 
 // A large grayscale team mark blown up for pencil-sketching, shown when the
 // user taps a logo on a team page. Same tonal treatment as the printable Logo
@@ -69,7 +70,9 @@ export function LogoModal({ teamId, name, onClose }) {
             </button>
           ))}
         </div>
-        <span className="logomodal__name">{name}</span>
+        <TeamLink id={teamId} className="logomodal__name">
+          {name}
+        </TeamLink>
       </div>
     </div>
   )
