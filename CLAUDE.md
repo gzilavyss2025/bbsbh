@@ -62,6 +62,17 @@ It is enforced structurally by two conventions:
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (see
 `vite.config.js`) so a stale, spoiler-revealing score is never served from cache.
 
+Two conventions guard the live-refresh + reveal seam (both have bitten before):
+- **Any manual (`useRef`) cache of a reveal-only derivation MUST key on the
+  `feed` object and rebuild when it changes.** `computeDerivedByInning` is cached
+  in `InningViewer` keyed on `feed`; caching it across feeds froze the live
+  inning's pitch/whiff stats after a Refresh.
+- **Per-inning `errors` is a *fielding* stat.** The MLB linescore stores a team's
+  per-inning `errors` under that team's node but for the half it *fields* (home
+  fields the top, away the bottom) — the opposite half from its `runs`/`hits`.
+  Read E from the fielding side and gate it on the fielding half, or you both
+  show the wrong number and leak a still-sealed half's errors.
+
 **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
 `PitchersSection` in `InningViewer.jsx`) shows the running line of every pitcher
 who has appeared, one block per team. A pitcher's line (IP/R/ER/H…) is

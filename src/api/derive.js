@@ -19,8 +19,9 @@ function key(inning, half) {
 }
 
 // Returns a map: "inning-half" -> { pitches, whiffs, firstPitchStrikes,
-// plateAppearances, lob }. `lob` here is derived and can be cross-checked
-// against the linescore's leftOnBase as a sanity check.
+// plateAppearances }. Computed fresh from the passed feed; the caller must
+// rebuild it when the feed changes (a live Refresh) rather than caching it
+// across feeds, or the live inning's stats go stale.
 export function computeDerivedByInning(feed) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const map = {}

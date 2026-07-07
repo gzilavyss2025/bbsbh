@@ -26,7 +26,12 @@ export function useAsync(fn, deps = []) {
         if (mounted.current) setState({ loading: false, error: null, data })
       })
       .catch((error) => {
-        if (mounted.current) setState({ loading: false, error, data: null })
+        // Keep the last-good data on failure (stale-while-revalidate). A
+        // transient refresh failure at a live game must not wipe an
+        // already-loaded feed — callers distinguish "have data + error" (show a
+        // non-blocking notice) from a true cold-load failure (data still null).
+        if (mounted.current)
+          setState((s) => ({ loading: false, error, data: s.data }))
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)

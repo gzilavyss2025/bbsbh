@@ -23,7 +23,10 @@ export function GameView({ game, section, onSection, onHome }) {
   const feedState = useAsync(() => fetchGameFeed(game.gamePk), [game.gamePk])
   const feed = feedState.data
 
-  // Managers need a separate endpoint per team.
+  // Managers need a separate endpoint per team. Keyed on gamePk, not the feed
+  // object — managers can't change mid-game, so a live Refresh (which mints a
+  // new feed object) shouldn't re-hit the coaches endpoint or risk blanking a
+  // resolved name on a transient failure.
   const managers = useAsync(async () => {
     if (!feed) return { away: null, home: null }
     const awayMeta = selectTeamMeta(feed, 'away')
@@ -33,14 +36,16 @@ export function GameView({ game, section, onSection, onHome }) {
       fetchManager(homeMeta.id),
     ])
     return { away, home }
-  }, [feed])
+  }, [game.gamePk, Boolean(feed)])
 
   // Outdoor scorebook weather string — from the park's lat/lon, not the
   // box-score weather (which reports the interior of a closed roof). Fetched
   // once alongside the feed and shared by the info pages and the box score.
   const weather = useAsync(
     () => (feed ? generateScorebookWeather(feed) : Promise.resolve(null)),
-    [feed],
+    // Keyed on gamePk (not the feed object) — first-pitch weather is fixed for
+    // the game, so a live Refresh shouldn't refetch Open-Meteo or risk blanking.
+    [game.gamePk, Boolean(feed)],
   )
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
@@ -75,8 +80,9 @@ export function GameView({ game, section, onSection, onHome }) {
         />
       )}
 
-      {feedState.loading && <p className="hint">Loading game…</p>}
-      {(feedState.error || (!feedState.loading && !feed)) && (
+      {feedState.loading && !feed && <p className="hint">Loading game…</p>}
+      {/* Cold-load failure (never got a feed): collapse to a retry card. */}
+      {!feed && feedState.error && (
         <>
           <p className="hint hint--error">
             Couldn’t load this game. Try again in a moment.
@@ -85,6 +91,14 @@ export function GameView({ game, section, onSection, onHome }) {
             Retry
           </button>
         </>
+      )}
+      {/* Refresh failure with a feed already in hand: keep the game on screen
+          (useAsync retains the last-good feed) and just flag the stale refresh
+          so one flaky request at a live game doesn't tear down the view. */}
+      {feed && feedState.error && (
+        <p className="hint hint--error">
+          Couldn’t refresh — showing the last update.
+        </p>
       )}
 
       {feed && step === 0 && (

@@ -255,8 +255,14 @@ function HalfInning({
         onReveal={() => onReveal(inning, half)}
       >
         {() => {
-          // Computed only on reveal.
+          // Computed only on reveal. R/H/LOB are the batting side's; E is a
+          // *fielding* stat, so it belongs to the side in the field this half
+          // (the opposite side). The MLB linescore stores a team's per-inning
+          // `errors` under that team's node but for the half it fields — reading
+          // E off the batting side would both be wrong AND leak the other half's
+          // errors (a still-sealed half) into this box.
           const line = revealInning(feed, inning, battingSide)
+          const fieldLine = revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')
           const d = revealDerived(getDerived(), inning, half)
           const rolling = rollingPitches(getDerived(), inning, half)
           return (
@@ -264,7 +270,7 @@ function HalfInning({
               <div className="rhe">
                 <Stat k="R" v={line?.runs ?? 0} tone="run" big />
                 <Stat k="H" v={line?.hits ?? 0} big />
-                <Stat k="E" v={line?.errors ?? 0} big />
+                <Stat k="E" v={fieldLine?.errors ?? 0} big />
                 <Stat k="LOB" v={line?.leftOnBase ?? 0} big />
               </div>
               <div className="pitchgrid">
@@ -330,11 +336,20 @@ function RollingLine({
   ]
 
   // Totals span every revealed inning (1..unlocked), not just the visible window.
-  const totals = (half, side) => {
+  // R/H are batting stats gated on the batting half; E is a *fielding* stat, so
+  // it accrues in — and is gated on — the opposite (fielding) half. Gating E on
+  // the batting half would leak the fielding half's errors before it's revealed.
+  const totals = (battingHalf, side) => {
+    const fieldingHalf = battingHalf === 'top' ? 'bottom' : 'top'
     let r = 0, h = 0, e = 0, any = false
     for (let n = 1; n <= unlocked; n++) {
-      const l = lineFor(n, half, side)
-      if (l) { any = true; r += l.runs; h += l.hits; e += l.errors }
+      if (halfIndex(n, battingHalf) <= revealedThrough) {
+        const l = revealInning(feed, n, side)
+        if (l) { any = true; r += l.runs; h += l.hits }
+      }
+      if (halfIndex(n, fieldingHalf) <= revealedThrough) {
+        e += revealInning(feed, n, side)?.errors ?? 0
+      }
     }
     return { r, h, e, any }
   }
