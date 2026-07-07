@@ -46,8 +46,10 @@ Find the gamePk in the app's feed URL, or from
    pitch (`gameData.datetime.dateTime`) and the last play's `about.endTime`.
    Pad −30 min (pregame buzz) / +45 min (postgame reaction).
 2. **Queries, precision-first** (see "Relevance" — this is the whole ballgame
-   on Bluesky). Both club nicknames AND'd, each starter's full quoted name, and
-   each club nickname alone (the last gated by a baseball-keyword filter).
+   on Bluesky). Both club nicknames AND'd; each starter's *and each WPA-hero's*
+   full quoted name; each club hashtag; and each club nickname / bare name (the
+   last two gated by a baseball-keyword filter). The WPA heroes and the club
+   term database are the two recall widenings — see below.
 3. **Rank client-side** over engagement:
    `score = likes + 3·reshares + 3·quotes + 2·replies`, then ×1.5 for
    storytelling text (mph readings, "first … since …", records, streaks,
@@ -67,10 +69,35 @@ worked (61 posts, every top-10 about the actual game):
 
 - **`"{away} {home}"` AND'd** ("Brewers Cardinals") — naming both clubs ≈ a
   game post. The workhorse; no gate needed.
-- **each starter's FULL quoted name** ("Dustin May") — specific enough to trust.
-- **each club nickname alone**, kept only if the text also carries a baseball
-  signal (`inning`, `mph`, `bullpen`, `walk-off`, a run total…). High recall for
-  single-team fan posts without the noise.
+- **each starter's + each WPA-hero's FULL quoted name** ("Dustin May") —
+  specific enough to trust.
+- **each club hashtag** ("#STLCards") — a tag ≈ game buzz; ungated.
+- **each club nickname / bare name**, kept only if the text also carries a
+  baseball signal (`inning`, `mph`, `bullpen`, `walk-off`, a run total…), or the
+  post also names the other club. High recall for single-team fan posts without
+  the noise.
+
+### Two recall widenings
+
+**WPA heroes.** The night's decisive players are the best extra search terms —
+the hero gets tagged by name even if he wasn't a probable starter. The script
+sums each player's win-probability added across every play from
+`/api/v1/game/{gamePk}/winProbability` (`homeTeamWinProbabilityAdded` per play; a
+batter earns his own team's swing, a pitcher the opposite — keyed on
+`about.isTopInning`) and adds the top 3 positive movers' full quoted names to the
+precise, ungated queries. Absent at most MiLB parks → degrades to just the
+starters. Reveal-heavy, but the whole script is a post-game helper.
+
+**Club term database** (`TEAM_TERMS` in the script). The shorthand fans type
+instead of the full teamName — `Cards`/`Redbirds`, `#STLCards`, and the official
+abbreviation (`STL`, pulled from the feed automatically). Two jobs: `nicks`/`tags`
+widen the search, and *every* alias widens the relevance gate so a post that only
+says "STL walk-off" still counts. Aliases are split **hard** (name, abbr, tag —
+specific) vs **soft** (nicks like `Crew`/`Cards` — common words that would pair
+with an incidental baseball term like "runs"/"era" to admit noise): a post
+survives the gate on a lone club only via a *hard* alias + baseball signal; a
+soft nick counts only when *both* clubs are named. The map holds only what can't
+be derived; hashtags are marketing slogans that churn — re-verify on a rebrand.
 
 Engagement counts on Bluesky baseball posts run small (single-digit likes), so
 ranking leans on relevance + storytelling more than raw virality — fine for
@@ -81,7 +108,14 @@ seeding a dozen notes.
 403 splash page. Unauthenticated `app.bsky.feed.searchPosts` still works there
 with `sort=top` + `since`/`until` + `cursor`. It rate-limits per IP, so the
 script paces requests and retries 403/429 with backoff, degrading gracefully
-(it keeps whatever pages returned).
+(it keeps whatever pages returned) — and the gated nickname/name queries run
+*last* so a mid-run rate-limit starves those, not the precise ones.
+
+**Hashtag gotcha:** a `#`-prefixed `q` (`#STLCards`) **400s** when combined with
+`since`/`until` — the date-windowed search rejects it (verified 2026-07-07). The
+`tag=` param combines fine but is ANDed with `q`, which then dominates. The fix:
+query the hashtag as its **bare token** (`STLCards`, no `#`) — it still matches
+the tag and combines with the window. That's what the `TEAM_TERMS` tags do.
 
 ## Reddit setup (one-time, free)
 

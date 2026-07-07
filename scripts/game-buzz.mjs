@@ -79,39 +79,157 @@ const end = lastPlayEnd ? new Date(lastPlayEnd) : new Date(start.getTime() + 4 *
 const windowStart = new Date(start.getTime() - 30 * 60e3)
 const windowEnd = new Date(end.getTime() + 45 * 60e3)
 
+// A thin per-team term database: the shorthand fans actually type instead of
+// the full teamName. Each team's official abbreviation (MIL/STL…) is added
+// automatically from the feed, so this holds only what can't be derived:
+//   • nicks — word nicknames ("Cards", "Stros", "Crew"). Apostrophe-plural
+//     forms only ("A's", never bare "As" — an English word); no nick that just
+//     repeats the teamName.
+//   • tags  — the club hashtag ("#STLCards"). These are marketing slogans that
+//     churn year to year — re-verify if a team rebrands.
+// Used two ways: nicks/tags widen the Bluesky search, and every alias
+// (name + abbr + nicks + tags) widens the relevance gate so a post that only
+// says "STL walk-off" still counts. Keep the MiLB-graceful spirit: an unmapped
+// team just falls back to its name + abbreviation.
+const TEAM_TERMS = {
+  Diamondbacks: { nicks: ['Dbacks', 'D-backs', 'Snakes'], tags: ['#Dbacks'] },
+  Braves: { nicks: ['Bravos'], tags: ['#ForTheA', '#BravesCountry'] },
+  Orioles: { nicks: ["O's", 'Birds'], tags: ['#Birdland'] },
+  'Red Sox': { nicks: ['BoSox'], tags: ['#DirtyWater'] },
+  Cubs: { nicks: ['Cubbies', 'Northsiders'], tags: ['#GoCubsGo'] },
+  'White Sox': { nicks: ['ChiSox'], tags: ['#WhiteSox'] },
+  Reds: { nicks: ['Redlegs'], tags: ['#ATOBTTR'] },
+  Guardians: { nicks: ['Guards'], tags: ['#ForTheLand'] },
+  Rockies: { nicks: ['Rox'], tags: ['#Rockies'] },
+  Tigers: { nicks: ['Tigs'], tags: ['#RepDetroit'] },
+  Astros: { nicks: ['Stros', "'Stros"], tags: ['#Astros'] },
+  Royals: { nicks: [], tags: ['#FountainsUp'] },
+  Angels: { nicks: ['Halos'], tags: ['#RepTheHalo'] },
+  Dodgers: { nicks: ['Dodgs'], tags: ['#LetsGoDodgers'] },
+  Marlins: { nicks: ['Fish'], tags: ['#MarlinsBeisbol'] },
+  Brewers: { nicks: ['Crew', 'Brew Crew'], tags: ['#ThisIsMyCrew'] },
+  Twins: { nicks: ['Twinkies'], tags: ['#MNTwins'] },
+  Mets: { nicks: ['Amazins'], tags: ['#LGM'] },
+  Yankees: { nicks: ['Yanks', 'Bombers'], tags: ['#RepBX'] },
+  Athletics: { nicks: ["A's"], tags: ['#Athletics'] },
+  Phillies: { nicks: ['Phils'], tags: ['#RingTheBell'] },
+  Pirates: { nicks: ['Bucs', 'Buccos'], tags: ['#LetsGoBucs'] },
+  Padres: { nicks: ['Pads', 'Friars'], tags: ['#ForTheFaithful'] },
+  Giants: { nicks: ['Gigantes'], tags: ['#SFGiants'] },
+  Mariners: { nicks: ["M's"], tags: ['#TridentsUp'] },
+  Cardinals: { nicks: ['Cards', 'Redbirds'], tags: ['#STLCards'] },
+  Rays: { nicks: [], tags: ['#RaysUp'] },
+  Rangers: { nicks: [], tags: ['#StraightUpTX'] },
+  'Blue Jays': { nicks: ['Jays'], tags: ['#BlueJays'] },
+  Nationals: { nicks: ['Nats'], tags: ['#NATITUDE'] },
+}
+
+// Resolve a feed team to its query/gate terms (abbreviation from the feed).
+function teamTerms(team) {
+  const t = TEAM_TERMS[team.teamName] || {}
+  return {
+    name: team.teamName,
+    abbr: team.abbreviation ? [team.abbreviation] : [],
+    nicks: t.nicks ?? [],
+    tags: t.tags ?? [],
+  }
+}
+const awayT = teamTerms(away)
+const homeT = teamTerms(home)
+
+// WPA top performers: the game's decisive players are the best extra search
+// terms (the hero of the night gets tagged by name even if he wasn't a
+// starter). Sum each player's win-probability added across every play — a
+// batter earns his own team's WP swing, a pitcher the opposite — and take the
+// biggest positive movers. Reveal-heavy data, but this whole script is a
+// post-game helper. Absent at most MiLB parks; degrade to just the starters.
+async function topPerformers() {
+  try {
+    const wp = await (await fetch(`${STATS}/api/v1/game/${gamePkArg}/winProbability`)).json()
+    if (!Array.isArray(wp)) return []
+    const acc = new Map()
+    const add = (p, v) => {
+      if (!p?.id) return
+      const e = acc.get(p.id) ?? { name: p.fullName, w: 0 }
+      e.w += v
+      acc.set(p.id, e)
+    }
+    for (const e of wp) {
+      const h = e.homeTeamWinProbabilityAdded
+      if (typeof h !== 'number') continue
+      const top = e.about?.isTopInning // away batting → away batter earns −h
+      add(e.matchup?.batter, top ? -h : h)
+      add(e.matchup?.pitcher, top ? h : -h)
+    }
+    return [...acc.values()]
+      .filter((x) => x.w > 0 && x.name)
+      .sort((a, b) => b.w - a.w)
+      .slice(0, 3)
+      .map((x) => x.name)
+  } catch {
+    return []
+  }
+}
+
 // Search queries, precision-first. Bluesky ANDs multi-word queries and its
 // baseball volume is low, so a bare nickname like "Brewers" — never mind a
 // starter surname that is also an English word ("May") — buries the game under
-// the day's viral firehose. Two precise shapes carry the load, one loose shape
-// is gated hard downstream:
+// the day's viral firehose. Precise shapes carry the load, loose shapes are
+// gated hard downstream:
 //   • both club nicknames AND'd ("Brewers Cardinals") — naming both ≈ a game
 //     post; this is the workhorse and needs no relevance gate.
-//   • each starter's FULL quoted name ("Chad Patrick") — specific enough to
-//     trust on its own.
-//   • each club nickname alone — high recall for single-team fan posts, but
-//     only kept if the text also carries a baseball signal (see BASEBALL).
+//   • each starter's + each WPA-hero's FULL quoted name ("Chad Patrick") —
+//     specific enough to trust on their own.
+//   • each club hashtag, queried as its bare token ("STLCards", no '#') — the
+//     token still matches the tag and, unlike a '#'-prefixed q, combines with
+//     the since/until window (Bluesky 400s on '#'+date). A tag ≈ game buzz;
+//     ungated.
+//   • each club nickname / bare name — recall for single-team fan posts, gated
+//     hard downstream. Ordered LAST so if the unauth AppView rate-limits mid-run
+//     it starves these, not the precise queries above.
 const starterNames = ['away', 'home']
   .map((s) => feed.gameData?.probablePitchers?.[s]?.fullName)
   .filter(Boolean)
+const preciseNames = [...new Set([...starterNames, ...(await topPerformers())])]
 const QUERIES = [
   { q: `${away.teamName} ${home.teamName}`, gate: false },
-  ...starterNames.map((n) => ({ q: `"${n}"`, gate: false })),
+  ...preciseNames.map((n) => ({ q: `"${n}"`, gate: false })),
+  ...[...awayT.tags, ...homeT.tags].map((t) => ({ q: t.replace(/^#/, ''), gate: false })),
   ...(EXTRA_QUERY ? [{ q: EXTRA_QUERY, gate: false }] : []),
+  ...[...awayT.nicks, ...homeT.nicks].map((q) => ({ q, gate: true })),
   { q: away.teamName, gate: true },
   { q: home.teamName, gate: true },
 ]
 
-// The relevance gate for loose (single-nickname) results: a lone club name is
-// only game buzz if the post also talks baseball. Both-club and starter-name
-// queries are precise by construction and skip this.
-const NICKS = [away.teamName, home.teamName].map((n) => n.toLowerCase())
+// The relevance gate for loose (nickname / bare-name) results. Each team gets
+// matchers over its aliases, whole-word / hashtag-aware so short codes ("STL")
+// don't hit inside other words ("hustle"). Aliases split HARD (name, abbr,
+// tag — specific) vs SOFT (nicks — "Crew", "Cards": common English words that
+// pair with an incidental baseball term like "runs"/"era" to admit noise). A
+// post survives only if it names BOTH clubs (by any alias — "Crew beat the
+// Cards" is clearly the game) OR names one club by a HARD alias AND talks
+// baseball. A lone soft nick, even next to a baseball word, is not enough.
 const BASEBALL =
   /\b(inning|pitch|strikeout|\bk'?s?\b|homer|home run|rbi|walk-?off|bullpen|no.?hitter|shutout|mph|\bera\b|lineup|dinger|grand slam|complete game|first pitch|bases loaded|scoreless|runs?\b)\b/i
+function teamMatchers(t) {
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // Prefix bans a preceding word char or '#' (keeps a nick from matching inside
+  // a hashtag); a tag alias carries its own '#'.
+  const rx = (arr) =>
+    arr.length ? new RegExp(`(?:^|[^\\w#])(?:${arr.map(esc).join('|')})(?=$|[^\\w])`, 'i') : null
+  return {
+    hard: rx([t.name, ...t.abbr, ...t.tags]),
+    any: rx([t.name, ...t.abbr, ...t.tags, ...t.nicks]),
+  }
+}
+const AW = teamMatchers(awayT)
+const HM = teamMatchers(homeT)
+const hit = (m, text) => (m ? m.test(text) : false)
 function relevant(text, gate) {
   if (!gate) return true
-  const t = text.toLowerCase()
-  const clubs = NICKS.filter((n) => t.includes(n)).length
-  return clubs >= 2 || (clubs >= 1 && BASEBALL.test(text))
+  const anyTeams = [AW.any, HM.any].filter((m) => hit(m, text)).length
+  const hardTeams = [AW.hard, HM.hard].filter((m) => hit(m, text)).length
+  return anyTeams >= 2 || (hardTeams >= 1 && BASEBALL.test(text))
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
