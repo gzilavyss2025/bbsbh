@@ -58,8 +58,9 @@ async function loadPlayer(id, asOf) {
     ? ['hitting', 'pitching']
     : [bio.isPitcher ? 'pitching' : 'hitting']
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
+  const currentYear = Number(isoToday().slice(0, 4))
 
-  const [blocks, debutSplits, allStarIds] = await Promise.all([
+  const [blocks, debutSplits] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
@@ -92,9 +93,27 @@ async function loadPlayer(id, asOf) {
           season: debutYear, sportId: 1,
         })
       : Promise.resolve([]),
-    // All-Star membership (MLB only) — drives the banner. Spoiler-safe.
-    sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
   ])
+
+  // All-Star roster membership (MLB only), one roster lookup per distinct year
+  // that appears in the year-by-year table plus the real current year. The
+  // banner is a "how's he doing right now" badge, so it always checks the real
+  // current year — never the (possibly past) season a game link is scoped to,
+  // so viewing an old game never shows a stale "20XX All-Star" banner. The
+  // year-by-year table instead marks every season the player actually made an
+  // All-Star team, however many that is. Spoiler-safe.
+  const yearByYearYears = new Set()
+  for (const b of blocks) for (const r of b.yearByYear?.rows ?? []) yearByYearYears.add(Number(r.year))
+  const allStarYears = sportId === 1 ? new Set([currentYear, ...yearByYearYears]) : new Set()
+  const allStarByYear = new Map(
+    await Promise.all([...allStarYears].map(async (yr) => [yr, await fetchAllStarRosterIds(yr)])),
+  )
+  for (const b of blocks) {
+    for (const r of b.yearByYear?.rows ?? []) {
+      r.allStar = allStarByYear.get(Number(r.year))?.has(bio.id) ?? false
+    }
+  }
+  const isAllStar = allStarByYear.get(currentYear)?.has(bio.id) ?? false
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
 
@@ -113,7 +132,7 @@ async function loadPlayer(id, asOf) {
 
   return {
     bio, blocks, season, asOf, sportId,
-    isAllStar: allStarIds.has(bio.id),
+    isAllStar, currentYear,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
@@ -156,7 +175,7 @@ export function PlayerPage({ id, asOf, sportId }) {
         {data.isAllStar && (
           <div className="allstar-banner" role="note">
             <span className="allstar-banner__star" aria-hidden="true">★</span>
-            <span className="allstar-banner__text">{data.season} All-Star</span>
+            <span className="allstar-banner__text">{data.currentYear} All-Star</span>
             <span className="allstar-banner__star" aria-hidden="true">★</span>
           </div>
         )}

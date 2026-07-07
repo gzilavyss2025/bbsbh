@@ -157,6 +157,9 @@ body {
   min-height: 40px;
   padding: 0 12px;
   font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }
 
 .datenav {
@@ -188,6 +191,8 @@ body {
   text-align: center;
   font-size: 14px;
   font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
   color: var(--text-body);
 }
 
@@ -403,6 +408,15 @@ body {
 
 .hint--error {
   color: var(--clay);
+}
+
+/* On the slate every bit of copy reads in scorebook all-caps — the shared hint
+   and button text (loading / no games / error / Retry) are uppercased here only,
+   leaving the same classes as-is on every other screen. */
+.screen--slate .hint,
+.screen--slate .btn {
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
 }
 
 /* ---------------------------------------------------------------- cards */

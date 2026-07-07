@@ -59,7 +59,7 @@ export function GameSelect({ onPick, onShowLogos }) {
   const uniformsReady = uniforms.data ?? {}
 
   return (
-    <div className="screen">
+    <div className="screen screen--slate">
       {/* One solid, sticky banner for all the slate controls (title, level tabs,
           date). Pinned together on an opaque backdrop so the cards scroll
           cleanly underneath instead of bleeding through a see-through header. */}
