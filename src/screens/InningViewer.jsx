@@ -123,6 +123,15 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
+  // The next half within what's unlocked, for the floating advance button (§ the
+  // lineup pages' btn--next, carried over to the innings view). Null at the last
+  // unlocked half — a half past the reveal mark isn't reachable yet, so no button.
+  const nextIdx = curIdx < maxIdx ? curIdx + 1 : null
+  const nextLabel =
+    nextIdx == null
+      ? null
+      : `${nextIdx % 2 === 0 ? 'Top' : 'Bottom'} ${ordinal(Math.floor(nextIdx / 2) + 1)}`
+
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
   // Back never revisits the bogus address. Without this the URL, the stepnav's
@@ -235,6 +244,20 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
         roster={rosters.home}
         revealedThrough={revealedThrough}
       />
+
+      {/* Floating advance to the next half-inning — the same fixed blue bar the
+          lineup pages use to page forward. Only shown when a next half is
+          unlocked; at the furthest revealed half there's nowhere to go yet. */}
+      {nextIdx != null && (
+        <div className="pagenav">
+          <button
+            className="btn btn--next"
+            onClick={() => goTo(nextIdx)}
+          >
+            Next: {nextLabel} →
+          </button>
+        </div>
+      )}
     </div>
   )
 }

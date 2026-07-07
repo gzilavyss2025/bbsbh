@@ -1176,6 +1176,11 @@ body {
 }
 
 /* ---------------------------------------------------------------- innings */
+/* Room at the bottom so the last roster panel clears the fixed .pagenav bar. */
+.innings {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
 .innings__toolbar {
   display: flex;
   justify-content: flex-end;
