@@ -328,14 +328,12 @@ export function yearByYearView(splits, group, currentStat, currentSeason) {
       // For the current season, prefer the date-cut aggregate so the row can't
       // move mid-game; older seasons are settled, so aggregate their stints.
       const stat = isCurrent && currentStat ? currentStat : aggregateSplits(entries, group)
-      const team =
-        entries.length === 1 ? entries[0].team?.abbreviation ?? '' : `${entries.length}TM`
       const st = stat ?? {}
       const cells =
         group === 'pitching'
           ? [`${num(st.wins)}–${num(st.losses)}`, st.era ?? DASH, st.inningsPitched ?? DASH, num(st.strikeOuts), st.whip ?? DASH]
           : [num(st.gamesPlayed), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
-      return { year: yr, team, isCurrent, cells }
+      return { year: yr, isCurrent, cells }
     })
   if (!rows.length) return null
   const columns =

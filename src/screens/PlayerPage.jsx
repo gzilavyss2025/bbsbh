@@ -258,14 +258,14 @@ function SplitCard({ label, side }) {
   )
 }
 
-function Ledger({ head, rows }) {
+function Ledger({ head, rows, leftCols = 2 }) {
   return (
     <div className="ledger-wrap">
       <table className="ledger">
         <thead>
           <tr>
             {head.map((h, i) => (
-              <th key={h} className={i < 2 ? 'lft' : ''}>{h}</th>
+              <th key={h} className={i < leftCols ? 'lft' : ''}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -273,7 +273,7 @@ function Ledger({ head, rows }) {
           {rows.map((r) => (
             <tr key={r.key} className={r.current ? 'is-current' : ''}>
               {r.cells.map((c, i) => (
-                <td key={i} className={i === 0 ? 'lft yr' : i === 1 ? 'lft opp' : ''}>{c}</td>
+                <td key={i} className={i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : ''}>{c}</td>
               ))}
             </tr>
           ))}
