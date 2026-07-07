@@ -60,11 +60,15 @@ export function apiDateToUrl(api) {
   return `${m}${d}${y}`
 }
 
-export function matchupSlug(awayAbbr, homeAbbr) {
-  return `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
+// Doubleheaders: both games share a date and matchup, so game 2 (and beyond)
+// carries a '-2' suffix ('milstl-2') to keep the two URLs distinct. Game 1
+// stays bare, so every pre-existing link still parses and resolves unchanged.
+export function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
+  const base = `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
+  return gameNumber > 1 ? `${base}-${gameNumber}` : base
 }
 
 // Build the path for a game section. `apiDate` is YYYY-MM-DD.
-export function gamePath(apiDate, awayAbbr, homeAbbr, section) {
-  return `/${apiDateToUrl(apiDate)}/${matchupSlug(awayAbbr, homeAbbr)}/${section}`
+export function gamePath(apiDate, awayAbbr, homeAbbr, section, gameNumber = 1) {
+  return `/${apiDateToUrl(apiDate)}/${matchupSlug(awayAbbr, homeAbbr, gameNumber)}/${section}`
 }

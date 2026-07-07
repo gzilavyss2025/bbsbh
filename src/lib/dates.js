@@ -24,3 +24,18 @@ export function humanDate(apiDate) {
     day: 'numeric',
   })
 }
+
+// "Fri, June 12, 2026" — the full date line the scorebook header wants, so it
+// can be copied straight onto the sheet. Same parse as humanDate; returns ''
+// for a missing/garbled date (thin MiLB feeds) so callers show the usual "—".
+export function scorebookDate(apiDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
+  const [y, m, d] = apiDate.split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return dt.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}

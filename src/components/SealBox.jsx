@@ -15,7 +15,14 @@ import { useEffect, useRef, useState } from 'react'
 // revealed — by tap or by the global flag. It runs after reveal, so anything it
 // reads (e.g. this half's linescore, to feed the running line) is still only
 // touched post-reveal, honoring the spoiler rule.
-export function SealBox({ children, forceRevealed = false, onReveal }) {
+// `label` names what the cover hides ("Tap to reveal the box score") — it is
+// the sealed button's accessible name, so keep it spoiler-free and specific.
+export function SealBox({
+  children,
+  forceRevealed = false,
+  onReveal,
+  label = 'Tap to reveal inning totals',
+}) {
   const [revealed, setRevealed] = useState(false)
   const shown = revealed || forceRevealed
 
@@ -29,13 +36,26 @@ export function SealBox({ children, forceRevealed = false, onReveal }) {
     }
   }, [shown])
 
+  // Keyboard/AT continuity: the tap unmounts the focused cover button, which
+  // would silently drop focus to <body>. Hand it to the revealed panel instead
+  // — but only on an actual tap, never on a forceRevealed mount (navigating
+  // between already-revealed halves must not yank focus to the panel).
+  const tapped = useRef(false)
+  const bodyRef = useRef(null)
+  useEffect(() => {
+    if (revealed && tapped.current) bodyRef.current?.focus()
+  }, [revealed])
+
   if (!shown) {
     return (
       <button
         type="button"
         className="sealbox cover"
-        onClick={() => setRevealed(true)}
-        aria-label="Tap to reveal inning totals"
+        onClick={() => {
+          tapped.current = true
+          setRevealed(true)
+        }}
+        aria-label={label}
       >
         <span className="cover__lock" aria-hidden="true">
           🔒
@@ -46,5 +66,9 @@ export function SealBox({ children, forceRevealed = false, onReveal }) {
   }
 
   // Value computed lazily, only now. Nothing above this line put it in the DOM.
-  return <div className="statgrid">{children()}</div>
+  return (
+    <div className="statgrid" ref={bodyRef} tabIndex={-1}>
+      {children()}
+    </div>
+  )
 }

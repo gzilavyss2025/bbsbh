@@ -1,7 +1,11 @@
-import { useMemo, useState } from 'react'
-import { fetchGameFeed, fetchManager } from '../api/mlb.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  fetchGameFeed,
+  fetchManager,
+  fetchPitcherSeasonLine,
+} from '../api/mlb.js'
 import { generateScorebookWeather } from '../api/weather.js'
-import { selectTeamMeta, selectHasStarted } from '../api/select.js'
+import { selectHasStarted } from '../api/select.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { TeamInfo } from './TeamInfo.jsx'
@@ -23,20 +27,20 @@ export function GameView({ game, section, onSection, onHome }) {
   const feedState = useAsync(() => fetchGameFeed(game.gamePk), [game.gamePk])
   const feed = feedState.data
 
-  // Managers need a separate endpoint per team. Keyed on gamePk, not the feed
-  // object — managers can't change mid-game, so a live Refresh (which mints a
-  // new feed object) shouldn't re-hit the coaches endpoint or risk blanking a
-  // resolved name on a transient failure.
+  // Managers need a separate endpoint per team. The coaches endpoint needs
+  // nothing from the feed — the game prop already carries both team ids — so
+  // this runs in parallel with the feed fetch instead of queuing behind the
+  // app's largest response. Keyed on the stable team ids, not the feed object:
+  // managers can't change mid-game, so a live Refresh (which mints a new feed
+  // object) never re-hits the coaches endpoint or risks blanking a resolved
+  // name on a transient failure.
   const managers = useAsync(async () => {
-    if (!feed) return { away: null, home: null }
-    const awayMeta = selectTeamMeta(feed, 'away')
-    const homeMeta = selectTeamMeta(feed, 'home')
     const [away, home] = await Promise.all([
-      fetchManager(awayMeta.id),
-      fetchManager(homeMeta.id),
+      fetchManager(game.away.id),
+      fetchManager(game.home.id),
     ])
     return { away, home }
-  }, [game.gamePk, Boolean(feed)])
+  }, [game.away.id, game.home.id])
 
   // Outdoor scorebook weather string — from the park's lat/lon, not the
   // box-score weather (which reports the interior of a closed roof). Fetched
@@ -48,7 +52,30 @@ export function GameView({ game, section, onSection, onHome }) {
     [game.gamePk, Boolean(feed)],
   )
 
+  // Each probable starter's season line (ERA/W-L/K), penciled next to the
+  // opposing-pitcher row while staging. Season aggregates only — never this
+  // game's line. Keyed on gamePk + Boolean(feed) like the weather: the
+  // probables come from the feed, but a live Refresh must not refetch.
+  const starterLines = useAsync(async () => {
+    if (!feed) return null
+    const season = feed.gameData?.game?.season
+    const probables = feed.gameData?.probablePitchers ?? {}
+    const [away, home] = await Promise.all([
+      fetchPitcherSeasonLine(probables.away?.id, season, game.sportId),
+      fetchPitcherSeasonLine(probables.home?.id, season, game.sportId),
+    ])
+    return { away, home }
+  }, [game.gamePk, Boolean(feed)])
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
+
+  // Where "Innings" returns to: the last half-inning page the user was on, so
+  // hopping out to a lineup or the box score and back doesn't lose your place
+  // mid-game. Structural only (a section name), never a score.
+  const lastInningSection = useRef('top1')
+  useEffect(() => {
+    if (step === 2) lastInningSection.current = stepToSection(2, inning, half)
+  }, [step, inning, half])
 
   const sketchTeam = sketching ? game[sketching] : null
 
@@ -59,18 +86,33 @@ export function GameView({ game, section, onSection, onHome }) {
           <DiamondGlyph size={20} bases={[false, true, false]} />
           <span className="sitebar__word">Scorebook</span>
         </button>
-        {feed && step !== 3 && (
-          <button
-            type="button"
-            className="sitebar__box"
-            onClick={() => onSection('boxscore')}
-          >
-            Box score ›
-          </button>
-        )}
       </div>
 
       <Masthead away={game.away} home={game.home} onSketch={setSketching} />
+
+      {/* Every game section, one tap away — the same four stops the "next"
+          buttons walk in order, so you can flip around the way you flip
+          scorebook pages instead of only marching forward. */}
+      {feed && (
+        <nav className="stepnav" aria-label="Game sections">
+          {[
+            { key: 0, label: game.away.abbreviation || 'Away', section: 'lineup1' },
+            { key: 1, label: game.home.abbreviation || 'Home', section: 'lineup2' },
+            { key: 2, label: 'Innings', section: lastInningSection.current },
+            { key: 3, label: 'Box', section: 'boxscore' },
+          ].map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              className={`stepnav__btn ${step === s.key ? 'is-active' : ''}`}
+              aria-current={step === s.key ? 'page' : undefined}
+              onClick={() => step !== s.key && onSection(s.section)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </nav>
+      )}
 
       {sketchTeam && (
         <LogoModal
@@ -96,7 +138,7 @@ export function GameView({ game, section, onSection, onHome }) {
           (useAsync retains the last-good feed) and just flag the stale refresh
           so one flaky request at a live game doesn't tear down the view. */}
       {feed && feedState.error && (
-        <p className="hint hint--error">
+        <p className="hint hint--error" role="status">
           Couldn’t refresh — showing the last update.
         </p>
       )}
@@ -108,6 +150,8 @@ export function GameView({ game, section, onSection, onHome }) {
           manager={managers.data?.away}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
+          // The away side FACES the home starter.
+          oppPitcherLine={starterLines.data?.home}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
         />
@@ -119,6 +163,7 @@ export function GameView({ game, section, onSection, onHome }) {
           manager={managers.data?.home}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
+          oppPitcherLine={starterLines.data?.away}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
         />
@@ -129,7 +174,7 @@ export function GameView({ game, section, onSection, onHome }) {
           started={started}
           inning={inning}
           half={half}
-          onInning={(n, h) => onSection(stepToSection(2, n, h))}
+          onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
           onReload={feedState.reload}
           loading={feedState.loading}
         />
@@ -139,7 +184,7 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           managers={managers.data}
           scorebookWeather={weather.data}
-          onInnings={() => onSection('top1')}
+          onInnings={() => onSection(lastInningSection.current)}
         />
       )}
     </div>

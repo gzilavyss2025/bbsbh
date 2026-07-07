@@ -21,6 +21,14 @@
   box-sizing: border-box;
 }
 
+/* Kills the 300ms double-tap-to-zoom gesture on controls so rapid seal taps
+   and inning hops never zoom — while pinch zoom stays available (the viewport
+   deliberately does not lock scaling). */
+button,
+a {
+  touch-action: manipulation;
+}
+
 html,
 body,
 #root {
@@ -210,6 +218,26 @@ body {
 .datenav--row .datenav__label {
   flex: 1 1 auto;
   max-width: 220px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* One-tap return to today once the date has been paged away from. */
+.datenav__today {
+  min-height: 24px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--field);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 /* --------------------------------------------------------------- site bar
@@ -287,6 +315,45 @@ body {
 .masthead__logo:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- step nav
+   The four stops of a game — away lineup, home lineup, innings, box score —
+   as a segmented row under the masthead, so every section is one tap from
+   any other (the bottom "next" button still walks them in scoring order). */
+.stepnav {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.stepnav__btn {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.stepnav__btn:active {
+  transform: scale(0.96);
+}
+
+.stepnav__btn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
 }
 
 .masthead__at {
@@ -782,6 +849,30 @@ body {
   color: var(--graphite-soft);
 }
 
+/* A person inside a fact box (the manager): surname-first name with the
+   uniform number inked in seam red, like every lineup row. */
+.fact__person {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fact__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--clay);
+  font-weight: var(--w-bold);
+}
+
+.fact__note {
+  font-size: 11px;
+  text-transform: lowercase;
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+
 .section__title {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -926,6 +1017,18 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
+/* The starter's season line, a second row spanning the pitcher card. */
+.opp__season {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: 12px;
+  color: var(--text-caption);
+  padding-top: 4px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+
 .opp__defense {
   list-style: none;
   margin: 0;
@@ -963,6 +1066,120 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
+}
+
+/* ----------------------------------------------------------- defense diamond
+   The sheet's bottom-left graphic: infield square on its point, surnames on
+   writing lines at their positions, the position number penciled beneath,
+   HOME/VISITOR DEFENSE ringed in the middle. Label spots share the SVG's
+   0–100 coordinate space (percent of the box). */
+.defdiamond {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 10px 8px;
+}
+
+.defdiamond__field {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.defdiamond__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.defdiamond__ring {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  pointer-events: none;
+}
+
+.defdiamond__ring em {
+  display: block;
+  font-style: normal;
+  font-weight: var(--w-medium);
+  color: var(--graphite-soft);
+}
+
+.defdiamond__spot {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  max-width: 112px;
+}
+
+/* The surname sits on its writing line, like penciling above the rule. */
+.defdiamond__name {
+  font-size: 11.5px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  border-bottom: var(--bw-hair) solid var(--rule);
+  padding: 0 4px 1px;
+  min-width: 58px;
+  max-width: 112px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.defdiamond__name--tbd {
+  color: var(--graphite-soft);
+}
+
+.defdiamond__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  color: var(--text-caption);
+}
+
+/* The DH bats but never takes the field — one line under the diamond. */
+.defdiamond__dh {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  font-size: 12px;
+}
+
+.defdiamond__dhpos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+
+.defdiamond__dhname {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.defdiamond__dhnote {
+  font-size: 10.5px;
+  color: var(--graphite-soft);
 }
 
 /* ---------------------------------------------------------------- innings */
@@ -1157,6 +1374,12 @@ body {
   gap: var(--space-2);
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+/* Statcast superlatives row (fastest pitch / hardest hit / longest ball):
+   up to three wider cells, only rendered when the feed carried tracking. */
+.pitchgrid--statcast {
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
 }
 
 .stat {

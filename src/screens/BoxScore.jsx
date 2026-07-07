@@ -1,5 +1,14 @@
 import { selectBoxscore } from '../api/boxscore.js'
+import { managerLabel } from '../api/mlb.js'
 import { SealBox } from '../components/SealBox.jsx'
+
+// Manager fill-in value, surname-first with the uniform number riding along —
+// "MURPHY, PAT · 21" — matching how every staged name is penciled in.
+function managerValue(mgr) {
+  const label = managerLabel(mgr)
+  if (!label) return ''
+  return mgr.jersey ? `${label} · ${mgr.jersey}` : label
+}
 
 // The full, MLB.com-style final box score for a game — batting orders (with
 // substitutes indented), pitching lines, the BATTING/BASERUNNING/FIELDING notes,
@@ -22,7 +31,7 @@ export function BoxScore({ feed, managers, scorebookWeather, onInnings }) {
         )}
       </div>
 
-      <SealBox>
+      <SealBox label="Tap to reveal the box score">
         {() => {
           const box = selectBoxscore(feed)
           return (
@@ -50,7 +59,7 @@ function BoxScoreBody({ box, managers, scorebookWeather }) {
 
   const awayFields = [
     { label: 'Visiting Team', value: box.away.teamName, wide: true },
-    { label: 'Manager', value: managers?.away },
+    { label: 'Manager', value: managerValue(managers?.away) },
     { label: 'HP Umpire', value: u.hp },
     { label: '1B Umpire', value: u.first },
     { label: '2B Umpire', value: u.second },
@@ -59,7 +68,7 @@ function BoxScoreBody({ box, managers, scorebookWeather }) {
   ]
   const homeFields = [
     { label: 'Home Team', value: box.home.teamName, wide: true },
-    { label: 'Manager', value: managers?.home },
+    { label: 'Manager', value: managerValue(managers?.home) },
     { label: 'Ballpark', value: get('Venue'), wide: true },
     // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
     // value to copy onto paper. Falls back to the box-score weather when the

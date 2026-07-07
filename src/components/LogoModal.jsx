@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LOGO_VARIANTS } from '../lib/teams.js'
 import { TeamLogo } from './TeamLogo.jsx'
 
@@ -21,6 +21,18 @@ export function LogoModal({ teamId, name, onClose }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  // Dialog focus contract: focus moves into the dialog on open (the close
+  // button — the first and safest control) and back to the trigger on close,
+  // so a keyboard/AT user isn't left focused on something under the scrim.
+  const closeRef = useRef(null)
+  useEffect(() => {
+    const trigger = document.activeElement
+    closeRef.current?.focus()
+    return () => {
+      if (trigger instanceof HTMLElement) trigger.focus()
+    }
+  }, [])
+
   return (
     <div
       className="scrim scrim--center"
@@ -28,6 +40,7 @@ export function LogoModal({ teamId, name, onClose }) {
     >
       <div className="logomodal" role="dialog" aria-modal="true" aria-label={`${name} logo`}>
         <button
+          ref={closeRef}
           className="logomodal__close"
           onClick={onClose}
           aria-label="Close"

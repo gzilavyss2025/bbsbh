@@ -33,7 +33,9 @@
   --seal:      #B5824A;  /* kraft amber cover */
   --seal-deep: #97673395;
   --seal-hatch:#A9743C;  /* diagonal hatch line on covers */
-  --seal-ink:  #4A3418;  /* text/icon on a sealed cover */
+  --seal-ink:  #1E1405;  /* text/icon on a sealed cover — dark enough to hold
+                            WCAG AA (≥4.5:1) against BOTH kraft stripes of
+                            --seal-texture (5.4:1 base, 4.5:1 hatch) */
 
   /* ---- Highlight / marker ---- */
   --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */

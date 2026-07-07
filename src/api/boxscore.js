@@ -9,15 +9,11 @@
 // render function. Never call it at render top-level or in a pre-reveal useMemo —
 // there must be no fetched-then-hidden box score sitting in the DOM.
 
-// Short surname for display. Prefer the club's own boxscoreName ("Gurriel Jr.",
-// "Pérez, W"); drop a trailing disambiguating initial ("Pérez, W" -> "Pérez")
-// but keep real suffixes. Falls back to the last token of the full name.
-function shortName(person) {
-  const raw =
-    person?.boxscoreName ??
-    (person?.fullName ? person.fullName.split(' ').slice(-1)[0] : '')
-  return raw.replace(/,\s*[A-Za-z]\.?$/, '').trim()
-}
+// Short surname for display — the one shared name-shortening rule (prefer the
+// club's boxscoreName, drop a trailing disambiguating initial, keep real
+// suffixes). Lives in select.js so this module and the spoiler-free selectors
+// can't drift apart.
+import { lastName as shortName } from './select.js'
 
 function positionLabel(boxPlayer) {
   const all = (boxPlayer.allPositions ?? [])
@@ -199,11 +195,15 @@ function gameTimes(feed) {
 // The four umpire assignments (HP/1B/2B/3B) the scorebook lists in its header.
 // The feed carries them as one run-together "Umpires" info string
 // ("HP: Name. 1B: Name. 2B: Name. 3B: Name."); split it back into slots.
+// Each name runs until the NEXT assignment label (or the end), not until the
+// first period — "Quinn Wolcott Jr." must not truncate at the "Jr." dot.
 function parseUmpires(value) {
   if (!value) return null
   const grab = (key) => {
-    const m = value.match(new RegExp(`${key}:\\s*([^.]+)`))
-    return m ? m[1].trim() : ''
+    const m = value.match(
+      new RegExp(`${key}:\\s*(.+?)\\s*(?=(?:HP|1B|2B|3B):|\\.?\\s*$)`),
+    )
+    return m ? m[1].replace(/\.$/, '').trim() : ''
   }
   const u = {
     hp: grab('HP'),

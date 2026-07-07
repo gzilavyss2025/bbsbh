@@ -35,6 +35,15 @@ function EventNote({ entry }) {
   )
 }
 
+// Spoken word for each pitch-dot category (see pitchDotCategory).
+const PITCH_WORDS = {
+  called: 'called strike',
+  whiff: 'whiff',
+  foul: 'foul',
+  inplay: 'in play',
+  ball: 'ball',
+}
+
 function AtBatCard({ entry }) {
   const { batter, pitches, rbi, out, outNumber, hitText, basesAfter, hitLocation } = entry
   return (
@@ -49,7 +58,15 @@ function AtBatCard({ entry }) {
           {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
         </div>
         {pitches.length > 0 && (
-          <div className="pbp__pitchrow">
+          // The dots are color-only, so the row itself carries the sequence as
+          // its accessible name ("ball, called strike, whiff…").
+          <div
+            className="pbp__pitchrow"
+            role="img"
+            aria-label={`Pitches: ${pitches
+              .map((code) => PITCH_WORDS[pitchDotCategory(code)])
+              .join(', ')}`}
+          >
             {pitches.map((code, i) => (
               <span
                 key={i}

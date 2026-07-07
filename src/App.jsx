@@ -9,6 +9,7 @@ import {
   gamePath,
   matchupSlug,
   urlDateToApi,
+  apiDateToUrl,
 } from './lib/route.js'
 
 // Top-level router over the History API (no react-router — see lib/route.js).
@@ -19,7 +20,9 @@ export default function App() {
   const [route, setRoute] = useState(() => parseRoute(window.location.pathname))
   // The game object from the slate, carried into the game route so a same-session
   // open needs no resolve fetch. Cold loads / shared links resolve from the URL.
-  const [seedGame, setSeedGame] = useState(null)
+  // Stored with its slate date — the seed is only valid for the exact date +
+  // matchup it was picked from (the same two clubs meet on many dates).
+  const [seed, setSeed] = useState(null) // { game, date: MMDDYYYY }
 
   useEffect(() => {
     const onPop = () => setRoute(parseRoute(window.location.pathname))
@@ -27,8 +30,11 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  const go = (path) => {
-    window.history.pushState({}, '', path)
+  // `replace` swaps the current history entry instead of pushing — used to
+  // normalize an out-of-range URL to the half actually shown, so Back doesn't
+  // walk through bogus addresses.
+  const go = (path, { replace = false } = {}) => {
+    window.history[replace ? 'replaceState' : 'pushState']({}, '', path)
     setRoute(parseRoute(path))
   }
 
@@ -40,8 +46,9 @@ export default function App() {
       game.away.abbreviation,
       game.home.abbreviation,
       section,
+      game.gameNumber,
     )
-    setSeedGame(game)
+    setSeed({ game, date: apiDateToUrl(dateStr) })
     go(path)
   }
 
@@ -54,18 +61,24 @@ export default function App() {
   }
 
   if (route.name === 'game') {
-    // Only reuse the seed when it actually matches the URL we're on.
+    // Only reuse the seed when it matches the URL exactly — date AND matchup.
+    // Matchup alone isn't identity: the same slug recurs across a whole series
+    // (and a doubleheader's game 2 differs only in its '-2' suffix).
     const seedMatches =
-      seedGame &&
-      matchupSlug(seedGame.away.abbreviation, seedGame.home.abbreviation) ===
-        route.matchup
+      seed &&
+      seed.date === route.date &&
+      matchupSlug(
+        seed.game.away.abbreviation,
+        seed.game.home.abbreviation,
+        seed.game.gameNumber,
+      ) === route.matchup
     return (
       <div className="app">
         <GameRoute
           route={route}
-          seed={seedMatches ? seedGame : null}
-          onSection={(section) =>
-            go(`/${route.date}/${route.matchup}/${section}`)
+          seed={seedMatches ? seed.game : null}
+          onSection={(section, opts) =>
+            go(`/${route.date}/${route.matchup}/${section}`, opts)
           }
           onHome={() => go('/')}
         />
@@ -97,7 +110,25 @@ function GameRoute({ route, seed, onSection, onHome }) {
       </div>
     )
   }
-  if (resolved.error || !resolved.data) {
+  // A network failure is not "no such game" — resolveGame throws when every
+  // level's schedule was unreachable, and that deserves a retry, not a shrug
+  // about the schedule.
+  if (resolved.error) {
+    return (
+      <div className="screen">
+        <p className="hint hint--error" role="status">
+          Couldn’t load the schedule. Check your connection and try again.
+        </p>
+        <button className="btn" onClick={resolved.reload}>
+          Retry
+        </button>
+        <button className="btn btn--ghost" onClick={onHome}>
+          Back to games
+        </button>
+      </div>
+    )
+  }
+  if (!resolved.data) {
     return (
       <div className="screen">
         <p className="hint hint--error">

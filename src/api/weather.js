@@ -188,12 +188,18 @@ export async function fetchOutdoorWeather({ lat, lon, whenISO } = {}) {
 
   let url
   if (daysAgo > 90) {
-    // Older than the forecast window — use the historical archive for that date.
+    // Older than the forecast window — use the historical archive. Request the
+    // UTC day of first pitch AND the next day: a night game in a US park sits
+    // late enough in UTC that rounding to the nearest hour (utcHourKey) can
+    // roll past midnight, and a single-day window would miss that row.
     const day = when.toISOString().slice(0, 10)
+    const nextDay = new Date(when.getTime() + 86_400_000)
+      .toISOString()
+      .slice(0, 10)
     url = `${OPEN_METEO_ARCHIVE}?${new URLSearchParams({
       ...base,
       start_date: day,
-      end_date: day,
+      end_date: nextDay,
     })}`
   } else {
     url = `${OPEN_METEO}?${new URLSearchParams({
@@ -216,25 +222,26 @@ export async function fetchOutdoorWeather({ lat, lon, whenISO } = {}) {
   return pickReading(data, whenISO ? when : null)
 }
 
-// Pull one normalized reading out of an Open-Meteo response: the hourly row for
-// first pitch when we have a time (falling back to `current` if that hour isn't
-// in the payload), or `current` for a live reading.
+// Pull one normalized reading out of an Open-Meteo response: the hourly row
+// for first pitch when we have a time, or `current` for a live reading. When a
+// first-pitch time was given, the hourly row is AUTHORITATIVE — a miss (a game
+// past the 16-day forecast horizon) returns null for the graceful dash rather
+// than silently substituting today's conditions for the game's forecast.
 function pickReading(data, when) {
   const hourly = data?.hourly
   const times = hourly?.time ?? []
 
-  if (when && times.length) {
+  if (when) {
     const i = times.indexOf(utcHourKey(when))
-    if (i !== -1) {
-      return {
-        tempF: hourly.temperature_2m?.[i],
-        code: hourly.weather_code?.[i],
-        cloudCover: hourly.cloud_cover?.[i],
-        windMph: hourly.wind_speed_10m?.[i],
-        windFromDeg: hourly.wind_direction_10m?.[i],
-        precip: hourly.precipitation?.[i],
-        isDay: hourly.is_day?.[i] === 1,
-      }
+    if (i === -1) return null
+    return {
+      tempF: hourly.temperature_2m?.[i],
+      code: hourly.weather_code?.[i],
+      cloudCover: hourly.cloud_cover?.[i],
+      windMph: hourly.wind_speed_10m?.[i],
+      windFromDeg: hourly.wind_direction_10m?.[i],
+      precip: hourly.precipitation?.[i],
+      isDay: hourly.is_day?.[i] === 1,
     }
   }
 

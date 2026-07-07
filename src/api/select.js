@@ -14,22 +14,54 @@ function lastFirst(person) {
   return person?.lastFirstName ?? person?.fullName ?? 'TBD'
 }
 
-// Just the surname (for the compact opposing-defense list). boxscoreName is the
-// club's own short form ("Gurriel Jr."); fall back to the pre-comma slice.
+// Just the surname (the opposing-defense diamond, the box score's compact
+// rows). boxscoreName is the club's own short form ("Gurriel Jr."); fall back
+// to the pre-comma slice of lastFirstName, then the last token of fullName.
 // When two players share a surname the club disambiguates with a trailing
-// initial ("Suárez, E") — drop it so the defense list reads plain "SUÁREZ",
-// while keeping real suffixes like "Jr." intact.
-function lastName(person) {
+// initial ("Suárez, E" / "Pérez, W") — drop it so the row reads plain
+// "SUÁREZ", while keeping real suffixes like "Jr." intact. Exported as the one
+// name-shortening rule; boxscore.js shares it rather than growing a twin.
+export function lastName(person) {
   const raw = person?.boxscoreName
     ? person.boxscoreName
     : person?.lastFirstName
       ? person.lastFirstName.split(',')[0].trim()
-      : person?.fullName ?? ''
-  return raw.replace(/,\s*[A-Z]\.?$/, '').trim()
+      : person?.fullName
+        ? person.fullName.split(' ').slice(-1)[0]
+        : ''
+  return raw.replace(/,\s*[A-Za-z]\.?$/, '').trim()
+}
+
+// The {last, first} display pair for a gameData player record — the form the
+// pitcher table and play-by-play cards print ("MISIOROWSKI, Jacob"). useName is
+// the player's preferred first name ("A.J.", "Duke"). Shared by pitchers.js and
+// playbyplay.js so the two card styles can't drift apart.
+export function personNameParts(person) {
+  return {
+    last: (person?.lastName ?? person?.boxscoreName ?? person?.fullName ?? '').trim(),
+    first: (person?.useName ?? person?.firstName ?? '').trim(),
+  }
 }
 
 function otherSide(side) {
   return side === 'away' ? 'home' : 'away'
+}
+
+// Whether a player is a pitcher BY TRADE (primary position, two-way players
+// included), not by what he happens to be doing in this game. Roster-card
+// membership must key on this: a bench catcher mopping up a blowout gets an
+// in-game box position of 'P', and classifying him by that would move him
+// from the Bench card to the Bullpen card the moment he enters — an
+// unmistakable hint of a sealed-inning blowout. Primary position is fixed at
+// first pitch, so membership never shifts on a sealed event; only the
+// reveal-gated strike-through changes. Falls back to the in-game box position
+// for thin MiLB feeds that omit primaryPosition.
+function isPitcherByTrade(person, box) {
+  const abbr =
+    person?.primaryPosition?.abbreviation ??
+    box?.position?.abbreviation ??
+    ''
+  return abbr === 'P' || abbr === 'TWP'
 }
 
 // A total order over half-innings: top of the 1st = 0, bottom = 1, top of the
@@ -76,17 +108,40 @@ function entryIndexById(feed) {
   return entered
 }
 
-// Resolve the batting order for one side into a printable lineup. battingOrder
-// is an array of player ids (as strings) in slot order. Cross-references
-// gameData.players for names and the team's boxscore players[] for jersey
-// number and position.
+// Resolve the batting order for one side into a printable lineup — the
+// STARTING nine, the names you stage onto the sheet before first pitch.
+//
+// team.battingOrder tracks each slot's CURRENT occupant, so once a
+// pinch-hitter enters it shows the sub (position "PH") instead of the starter
+// — late in a game the staged lineup would sprout PH rows and the defense
+// diamond would lose whole positions. Each boxscore player carries his own
+// `battingOrder` value instead: a starter's is an exact multiple of 100
+// (slot × 100), a sub in that slot is offset (801, 802…) — verified against
+// gamePk 823036 (2026-07-06 MIL@STL). Prefer the multiples; fall back to the
+// live array for thin MiLB feeds that don't post per-player slots.
+// Cross-references gameData.players for names and the team's boxscore
+// players[] for jersey number and position.
 export function selectLineup(feed, side /* 'away' | 'home' */) {
   const team = feed?.liveData?.boxscore?.teams?.[side]
   if (!team) return []
 
-  const order = team.battingOrder ?? []
   const boxPlayers = team.players ?? {}
   const players = playerIndex(feed)
+
+  const starters = []
+  for (const box of Object.values(boxPlayers)) {
+    const bo = Number(box?.battingOrder)
+    if (Number.isFinite(bo) && bo >= 100 && bo % 100 === 0) {
+      starters[bo / 100 - 1] = box.person?.id
+    }
+  }
+  // A sparse slot (feed posted some multiples but not all nine) means the
+  // convention isn't trustworthy here — fall back to the live array. filter()
+  // skips holes, so the count only matches when every slot resolved.
+  const complete =
+    starters.length >= 9 &&
+    starters.filter((id) => id != null).length === starters.length
+  const order = complete ? starters : team.battingOrder ?? []
 
   return order.map((rawId, i) => {
     const id = typeof rawId === 'string' ? Number(rawId) : rawId
@@ -147,7 +202,13 @@ export function selectBullpen(feed, side) {
   const players = playerIndex(feed)
   const entered = entryIndexById(feed)
 
-  const ids = [...new Set([...(team.bullpen ?? []), ...(team.pitchers ?? []).slice(1)])]
+  // team.pitchers includes ANYONE who has pitched — position players mopping
+  // up included — so filter entrants to pitchers by trade (see
+  // isPitcherByTrade) or the card's membership itself leaks a sealed blowout.
+  const enteredArms = (team.pitchers ?? [])
+    .slice(1)
+    .filter((id) => isPitcherByTrade(players[`ID${id}`], boxPlayers[`ID${id}`]))
+  const ids = [...new Set([...(team.bullpen ?? []), ...enteredArms])]
   return ids
     .map((id) => {
       const box = boxPlayers[`ID${id}`] ?? {}
@@ -176,9 +237,18 @@ export function selectBench(feed, side) {
   const players = playerIndex(feed)
   const entered = entryIndexById(feed)
 
+  // Recover entered subs by PRIMARY position, not the in-game box position: a
+  // bench player who ends up pitching still belongs on the Bench card (his
+  // box position flips to 'P'), and a pitcher who pinch-runs must not appear
+  // here — either misclassification shifts card membership on a sealed-inning
+  // event. See isPitcherByTrade.
   const benchIds = team.bench ?? []
   const subIds = Object.values(boxPlayers)
-    .filter((p) => p?.gameStatus?.isSubstitute && p.position?.abbreviation !== 'P')
+    .filter(
+      (p) =>
+        p?.gameStatus?.isSubstitute &&
+        !isPitcherByTrade(players[`ID${p.person?.id}`], p),
+    )
     .map((p) => p.person?.id)
     .filter((id) => id != null && !benchIds.includes(id))
 
@@ -190,7 +260,13 @@ export function selectBench(feed, side) {
         id,
         nameLastFirst: lastFirst(person.fullName ? person : box.person),
         jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
-        position: box.position?.abbreviation ?? '',
+        // Primary position, not the in-game one: an entered sub's box position
+        // reads 'PH'/'PR' (or 'P' for a mop-up cameo), which would flag his
+        // still-sealed entry the moment it happened. Primary is fixed pre-game.
+        position:
+          person.primaryPosition?.abbreviation ??
+          box.position?.abbreviation ??
+          '',
         enteredIdx: entered[id] ?? null,
       }
     })
@@ -275,6 +351,8 @@ export function selectGameInfo(feed) {
     weather: [base, windMeaningful ? wind : ''].filter(Boolean).join(' · '),
     attendance: infoByLabel['Att'] ?? '',
     firstPitch: infoByLabel['First pitch'] ?? '',
+    // YYYY-MM-DD in the park's sense — the scorebook's date line.
+    officialDate: gameData.datetime?.officialDate ?? '',
   }
 }
 

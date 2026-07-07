@@ -7,16 +7,22 @@ import {
   selectOpposingPitcher,
   selectOpposingDefense,
 } from '../api/select.js'
+import { scorebookDate } from '../lib/dates.js'
+import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 
-// Away/home info + lineup page. Nothing here is score-revealing — lineups,
-// umpires, venue and weather are all spoiler-safe — so it renders openly. The
-// team's logo lives in the game masthead (see GameView), not here.
+// Away/home info + lineup page — the staging page you copy the scorebook
+// header from, so facts run in the sheet's order (date, park, first pitch,
+// weather, attendance, manager, umpires) and every person outside the
+// opposing-defense diamond is penciled surname-first with a uniform number.
+// Nothing here is score-revealing, so it renders openly. The team's logo
+// lives in the game masthead (see GameView), not here.
 export function TeamInfo({
   feed,
   side,
   manager,
   scorebookWeather,
   scorebookWeatherLoading,
+  oppPitcherLine,
   onNext,
   nextLabel,
 }) {
@@ -35,8 +41,9 @@ export function TeamInfo({
       </div>
 
       <dl className="factgrid">
-        <Fact label="Manager" value={manager} />
-        <Fact label="Venue" value={info.venue} />
+        <Fact label="Date" value={scorebookDate(info.officialDate)} />
+        <Fact label="Ballpark" value={info.venue} />
+        <Fact label="First pitch" value={info.firstPitch} />
         <Fact
           label="Weather"
           value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}
@@ -48,8 +55,23 @@ export function TeamInfo({
         {!scorebookWeatherLoading && !scorebookWeather?.text && (
           <Fact label="Box weather" value={info.weather} />
         )}
-        <Fact label="First pitch" value={info.firstPitch} />
         <Fact label="Attendance" value={info.attendance} />
+        <Fact
+          label="Manager"
+          value={
+            manager ? (
+              <span className="fact__person">
+                {manager.lastFirst.toUpperCase()}
+                {manager.jersey ? (
+                  <span className="fact__jersey">{manager.jersey}</span>
+                ) : null}
+                {manager.interim ? (
+                  <span className="fact__note">interim</span>
+                ) : null}
+              </span>
+            ) : null
+          }
+        />
       </dl>
 
       {officials.length > 0 && (
@@ -95,6 +117,21 @@ export function TeamInfo({
             </span>
             <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>
+            {/* Season line (aggregates only, never this game's) — the numbers
+                you pencil next to the starter while staging. */}
+            {oppPitcherLine && (
+              <span className="opp__season">
+                {[
+                  oppPitcherLine.era && `${oppPitcherLine.era} ERA`,
+                  `${oppPitcherLine.wins}-${oppPitcherLine.losses}`,
+                  `${oppPitcherLine.strikeOuts} K`,
+                  oppPitcherLine.inningsPitched &&
+                    `${oppPitcherLine.inningsPitched} IP`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            )}
           </div>
         ) : (
           <p className="hint">Not posted yet.</p>
@@ -104,14 +141,12 @@ export function TeamInfo({
       {oppDefense.length > 0 && (
         <section className="opp">
           <h3 className="section__title">Opposing defense</h3>
-          <ul className="opp__defense">
-            {oppDefense.map((p) => (
-              <li key={p.id} className="opp__defrow">
-                <span className="opp__defname">{p.last.toUpperCase()}</span>
-                <span className="opp__defpos">{p.position}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Drawn like the sheet's bottom-left diamond: surnames on writing
+              lines at their positions. The defense belongs to the OTHER side. */}
+          <DefenseDiamond
+            defense={oppDefense}
+            side={side === 'away' ? 'home' : 'away'}
+          />
         </section>
       )}
 

@@ -32,7 +32,15 @@
 //    appearances. `hitLocation` is null in both cases and PlayDiamond omits
 //    the marker rather than guessing.
 
-const NON_PA_EVENT_TYPES = new Set([
+import { personNameParts } from './select.js'
+
+// Top-level plays that are baserunning events, not plate appearances: the
+// batter's at-bat continues (or restarts next inning) as its own later play.
+// Shared with derive.js and pitchers.js, whose PA / batters-faced counts must
+// skip these or an inning-ending caught stealing mid-count double-counts the
+// batter (both files still accumulate the play's PITCHES — those were
+// genuinely thrown and are not re-listed in the resumed at-bat).
+export const NON_PA_EVENT_TYPES = new Set([
   'stolen_base_2b', 'stolen_base_3b', 'stolen_base_home',
   'caught_stealing_2b', 'caught_stealing_3b', 'caught_stealing_home',
   'pickoff_1b', 'pickoff_2b', 'pickoff_3b',
@@ -40,9 +48,16 @@ const NON_PA_EVENT_TYPES = new Set([
   'wild_pitch', 'passed_ball', 'balk',
 ])
 
-const WHIFF_CODES = new Set(['S', 'W']) // swinging strike, swinging strike (blocked)
+// Swinging strike, swinging strike (blocked). Shared with derive.js.
+export const WHIFF_CODES = new Set(['S', 'W'])
 const FOUL_CODES = new Set(['F', 'L', 'T']) // foul, foul bunt, foul tip
 const INPLAY_CODES = new Set(['D', 'X', 'E']) // in play: no out / out(s) / run(s)
+
+// A pitch event's call code, wherever this feed variant put it. Shared with
+// derive.js so the two never drift on the feed shape.
+export function pitchCallCode(e) {
+  return e?.details?.call?.code ?? e?.details?.code
+}
 
 // Classifies one pitch call code into the five dots the card renders.
 // Unrecognized codes fall back to 'ball' rather than throwing.
@@ -60,8 +75,7 @@ function resolveBatter(feed, side, id) {
   return {
     id,
     fullName: (person.fullName ?? '').trim(),
-    last: (person.lastName ?? person.boxscoreName ?? person.fullName ?? '').trim(),
-    first: (person.useName ?? person.firstName ?? '').trim(),
+    ...personNameParts(person),
     pos: box.position?.abbreviation ?? '',
   }
 }
@@ -130,7 +144,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       const batter = resolveBatter(feed, battingSide, batterId)
       const pitches = (play.playEvents ?? [])
         .filter((e) => e.isPitch)
-        .map((e) => e.details?.call?.code ?? e.details?.code)
+        .map(pitchCallCode)
 
       // Base state after this play resolves, straight from the feed — already
       // accounts for anything that happened since the last card (steals,
@@ -145,10 +159,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       // MiLB feeds and no-contact plate appearances (BB/K/HBP) leave this
       // null, and PlayDiamond just omits the marker in that case.
       const inPlayEvent = (play.playEvents ?? []).find(
-        (e) =>
-          e.isPitch &&
-          INPLAY_CODES.has(e.details?.call?.code ?? e.details?.code) &&
-          e.hitData?.coordinates,
+        (e) => e.isPitch && INPLAY_CODES.has(pitchCallCode(e)) && e.hitData?.coordinates,
       )
       const hitLocation = inPlayEvent
         ? { x: inPlayEvent.hitData.coordinates.coordX, y: inPlayEvent.hitData.coordinates.coordY }

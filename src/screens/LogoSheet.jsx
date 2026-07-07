@@ -4,15 +4,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
-
-// Level toggle order, same as the game selector.
-const LEVELS = [
-  { label: 'MLB', sportId: SPORT_IDS.MLB },
-  { label: 'AAA', sportId: SPORT_IDS.AAA },
-  { label: 'AA', sportId: SPORT_IDS.AA },
-  { label: 'A+', sportId: SPORT_IDS['A+'] },
-  { label: 'A', sportId: SPORT_IDS.A },
-]
+import { LevelNav } from '../components/LevelNav.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used
@@ -34,26 +26,18 @@ export function LogoSheet({ onBack }) {
         <h1 className="topbar__title">Logo sheet</h1>
       </header>
 
-      <div className="levelnav" role="tablist" aria-label="Level">
-        {LEVELS.map((lvl) => (
-          <button
-            key={lvl.sportId}
-            type="button"
-            role="tab"
-            aria-selected={sportId === lvl.sportId}
-            className={`levelnav__btn ${sportId === lvl.sportId ? 'is-active' : ''}`}
-            onClick={() => setSportId(lvl.sportId)}
-          >
-            {lvl.label}
-          </button>
-        ))}
-      </div>
+      <LevelNav sportId={sportId} onChange={setSportId} />
 
       {teamsState.loading && <p className="hint">Loading logos…</p>}
       {teamsState.error && (
-        <p className="hint hint--error">
-          Couldn’t load teams. Check your connection and try again.
-        </p>
+        <>
+          <p className="hint hint--error" role="status">
+            Couldn’t load teams. Check your connection and try again.
+          </p>
+          <button className="btn" onClick={teamsState.reload}>
+            Retry
+          </button>
+        </>
       )}
       {!teamsState.loading && !teamsState.error && teams.length === 0 && (
         <p className="hint">No teams found.</p>

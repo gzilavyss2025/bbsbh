@@ -2,25 +2,38 @@ import { useMemo, useState } from 'react'
 import { fetchSchedule } from '../api/mlb.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
+import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
+import { LevelNav } from '../components/LevelNav.jsx'
 import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 
-// Level toggle order across the top of the slate. MLB is selected by default.
-const LEVELS = [
-  { label: 'MLB', sportId: SPORT_IDS.MLB },
-  { label: 'AAA', sportId: SPORT_IDS.AAA },
-  { label: 'AA', sportId: SPORT_IDS.AA },
-  { label: 'A+', sportId: SPORT_IDS['A+'] },
-  { label: 'A', sportId: SPORT_IDS.A },
-]
+// The chosen level survives leaving the slate (someone scoring an A+ affiliate
+// all season shouldn't reset to MLB every time they come back). The date
+// offset deliberately does NOT persist — "today" is the right place to start.
+const LEVEL_KEY = 'bbsbh:level'
+function readLevel() {
+  try {
+    const n = Number(window.localStorage.getItem(LEVEL_KEY))
+    return LEVELS.some((l) => l.sportId === n) ? n : SPORT_IDS.MLB
+  } catch {
+    return SPORT_IDS.MLB
+  }
+}
 
 // Screen 1: pick a game. A single level's slate for the chosen date, sorted
 // soonest → latest (Brewers pinned to the top), with a LIVE pill on any game in
 // progress. Level is toggled with the thin buttons up top; no more search box.
 export function GameSelect({ onPick, onShowLogos }) {
   const [offset, setOffset] = useState(0) // days from today
-  const [sportId, setSportId] = useState(SPORT_IDS.MLB)
+  const [sportId, setSportId] = useState(readLevel)
+  const pickLevel = (id) => {
+    setSportId(id)
+    try {
+      window.localStorage.setItem(LEVEL_KEY, String(id))
+    } catch {
+      // Private mode — level just won't stick between visits.
+    }
+  }
 
   const dateStr = useMemo(
     () => toApiDate(addDays(new Date(), offset)),
@@ -54,26 +67,26 @@ export function GameSelect({ onPick, onShowLogos }) {
           </div>
         </header>
 
-        <div className="levelnav" role="tablist" aria-label="Level">
-          {LEVELS.map((lvl) => (
-            <button
-              key={lvl.sportId}
-              type="button"
-              role="tab"
-              aria-selected={sportId === lvl.sportId}
-              className={`levelnav__btn ${sportId === lvl.sportId ? 'is-active' : ''}`}
-              onClick={() => setSportId(lvl.sportId)}
-            >
-              {lvl.label}
-            </button>
-          ))}
-        </div>
+        <LevelNav sportId={sportId} onChange={pickLevel} />
 
         <div className="datenav datenav--row">
           <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
             ‹
           </button>
-          <span className="datenav__label">{humanDate(dateStr)}</span>
+          <span className="datenav__label">
+            {humanDate(dateStr)}
+            {/* One tap back to today once you've paged away — no arrow-mashing
+                home from a date you browsed to. */}
+            {offset !== 0 && (
+              <button
+                type="button"
+                className="datenav__today"
+                onClick={() => setOffset(0)}
+              >
+                Today
+              </button>
+            )}
+          </span>
           <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
             ›
           </button>
@@ -82,9 +95,14 @@ export function GameSelect({ onPick, onShowLogos }) {
 
       {loading && <p className="hint">Loading games…</p>}
       {error && (
-        <p className="hint hint--error">
-          Couldn’t load games. Check your connection and try again.
-        </p>
+        <>
+          <p className="hint hint--error" role="status">
+            Couldn’t load games. Check your connection and try again.
+          </p>
+          <button className="btn" onClick={slate.reload}>
+            Retry
+          </button>
+        </>
       )}
       {!loading && !error && sorted.length === 0 && (
         <p className="hint">No games scheduled.</p>

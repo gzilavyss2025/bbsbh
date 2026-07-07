@@ -121,6 +121,16 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
+  // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
+  // past what's unlocked) to the half actually being shown, via replaceState so
+  // Back never revisits the bogus address. Without this the URL, the stepnav's
+  // remembered section, and any re-shared link all keep the phantom inning —
+  // and the page would silently jump forward as reveals raise the clamp.
+  const urlIdx = halfIndex(inning || 1, half === 'bottom' ? 'bottom' : 'top')
+  useEffect(() => {
+    if (urlIdx !== curIdx) onInning(effInning, effHalf, { replace: true })
+  }, [urlIdx, curIdx, effInning, effHalf]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Every pitcher who has appeared in a revealed half-inning, with running lines
   // (see api/pitchers.js). Recomputed as the reveal mark advances.
   const pitcherLines = useMemo(
@@ -135,8 +145,8 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
           This game hasn’t started yet. Lineups and info are on the previous
           pages; inning totals appear once first pitch is thrown.
         </p>
-        <button className="btn" onClick={onReload}>
-          Refresh
+        <button className="btn" onClick={onReload} disabled={loading}>
+          {loading ? 'Refreshing…' : 'Refresh'}
         </button>
       </div>
     )
@@ -283,6 +293,28 @@ function HalfInning({
                   small
                 />
               </div>
+              {/* Statcast superlatives for the half — the game-notes numbers
+                  (fastest pitch, hardest/longest ball). Tracking data is often
+                  absent at MiLB levels, so the row only renders when the feed
+                  actually carried it. Same reveal path as everything above. */}
+              {(d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
+                <div className="pitchgrid pitchgrid--statcast">
+                  {d.maxVelo != null && (
+                    <Stat
+                      k={d.maxVeloType || 'Fastest pitch'}
+                      v={`${d.maxVelo.toFixed(1)}`}
+                      unit="mph"
+                      small
+                    />
+                  )}
+                  {d.hardestHit != null && (
+                    <Stat k="Hardest hit" v={d.hardestHit.toFixed(1)} unit="mph" small />
+                  )}
+                  {d.longestHit != null && (
+                    <Stat k="Longest ball" v={Math.round(d.longestHit)} unit="ft" small />
+                  )}
+                </div>
+              )}
               <PlayByPlay
                 feed={feed}
                 inning={inning}
@@ -387,7 +419,15 @@ function RollingLine({
                             l ? '' : 'rolling__pending'
                           }`}
                           aria-current={active ? 'true' : undefined}
-                          aria-label={`${row.half === 'top' ? 'Top' : 'Bottom'} of inning ${n}`}
+                          // The label must carry the cell's value too — it
+                          // overrides the visible text in the accessible name,
+                          // and "Top of inning 3" alone hides both the runs
+                          // and the sealed/revealed distinction from a screen
+                          // reader. Revealed runs are only read here when the
+                          // half is already at/under the reveal mark.
+                          aria-label={`${row.half === 'top' ? 'Top' : 'Bottom'} of inning ${n}${
+                            l ? `, ${l.runs} run${l.runs === 1 ? '' : 's'}` : ', sealed'
+                          }`}
                           onClick={() => onSelect(idx)}
                         >
                           {l ? l.runs : '·'}
@@ -538,9 +578,15 @@ function RosterPanel({ title, roster, revealedThrough }) {
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
   return (
     <section className="roster">
-      <button className="roster__toggle" onClick={() => setOpen((o) => !o)}>
+      <button
+        className="roster__toggle"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
         <span>{title}</span>
-        <span className="roster__chevron">{open ? '▾' : '▸'}</span>
+        <span className="roster__chevron" aria-hidden="true">
+          {open ? '▾' : '▸'}
+        </span>
       </button>
       {open && (
         <div className="roster__body">

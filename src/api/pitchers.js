@@ -10,7 +10,8 @@
 // revealed uses his exact boxscore line; a still-active pitcher mid-outing uses
 // the partial computed from revealed plays only.
 
-import { halfIndex } from './select.js'
+import { halfIndex, personNameParts } from './select.js'
+import { NON_PA_EVENT_TYPES } from './playbyplay.js'
 
 function outsToIp(outs) {
   return `${Math.floor(outs / 3)}.${outs % 3}`
@@ -53,7 +54,15 @@ export function computePitcherLines(feed, revealedThrough) {
     const side = half === 'top' ? 'home' : 'away' // pitching side works this half
     const a = get(pid, side)
 
-    if (p.result?.type === 'atBat') a.bf += 1
+    // Batters faced: every play carries result.type 'atBat' — including
+    // baserunning-only plays (an inning-ending caught stealing mid-count),
+    // where the batter comes up again as his own later play. Skip those or a
+    // mid-outing partial BF over-counts and visibly drops when the exact
+    // boxscore line takes over at full reveal. Pitches on those plays still
+    // count (thrown for real, never re-listed); so do their outs and runs.
+    if (p.result?.type === 'atBat' && !NON_PA_EVENT_TYPES.has(p.result?.eventType)) {
+      a.bf += 1
+    }
     a.pitches += (p.playEvents ?? []).filter((e) => e.isPitch).length
 
     const ev = p.result?.eventType
@@ -122,8 +131,7 @@ export function computePitcherLines(feed, revealedThrough) {
 
       out[side].push({
         id,
-        last: (person.lastName ?? person.boxscoreName ?? person.fullName ?? '').trim(),
-        first: (person.useName ?? person.firstName ?? '').trim(),
+        ...personNameParts(person),
         jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
         hand: person.pitchHand?.code ?? '', // 'L' | 'R'
         ...line,

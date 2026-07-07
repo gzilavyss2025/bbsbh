@@ -19,6 +19,17 @@ export const SPORT_IDS = {
 // Every level we search across when the user types a team name.
 export const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
+// The level toggle, in display order — one definition for every screen that
+// offers the MLB/AAA/AA/A+/A switch (the slate, the logo sheet), so the two
+// can't drift.
+export const LEVELS = [
+  { label: 'MLB', sportId: SPORT_IDS.MLB },
+  { label: 'AAA', sportId: SPORT_IDS.AAA },
+  { label: 'AA', sportId: SPORT_IDS.AA },
+  { label: 'A+', sportId: SPORT_IDS['A+'] },
+  { label: 'A', sportId: SPORT_IDS.A },
+]
+
 export const SPORT_LABEL = {
   1: 'MLB',
   11: 'AAA',
