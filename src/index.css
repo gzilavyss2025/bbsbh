@@ -2769,6 +2769,14 @@ body {
   text-align: right;
 }
 
+/* A pitcher with an id renders as a .plink button, and .plink (declared later,
+   same specificity) resets text-transform to `inherit`, dropping the name back
+   to title case. Win it back with higher specificity, same fix as the box
+   score's .bs__player .bs__pname. */
+.pitchers__cell .plink.pitchers__pname {
+  text-transform: uppercase;
+}
+
 /* ------------------------------------------------------------- box score
    The full, MLB.com-style final line, revealed as one sealed block. Dense mono
    tables (batting + pitching per team) with the notes/decisions/game-info foot
