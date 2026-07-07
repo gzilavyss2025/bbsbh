@@ -6,6 +6,7 @@ import {
   fetchAllStarRosterIds,
   fetchAffiliates,
   fetchRosterIdsForTeams,
+  fetchTeamRosterIds,
 } from '../api/mlb.js'
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
@@ -82,14 +83,25 @@ async function loadTeam(id, asOf) {
     fetchTopProspects(),
   ])
 
-  // Each org prospect's CURRENT affiliate, resolved by live roster
-  // membership (not the scraped, sometimes-ambiguous level string) — a
-  // second small fan-out over just this org's own affiliates.
+  // Each org prospect's CURRENT level, resolved by live roster membership
+  // (not the scraped, sometimes-ambiguous level string, e.g. "ALL (2)") — a
+  // second small fan-out over this org's affiliates PLUS the MLB roster
+  // itself, so a prospect who's been called up resolves to MLB rather than
+  // his last MiLB stop. `fetchAffiliates` excludes the org's own MLB team, so
+  // it's added in here; on the org's own page `roster` already IS that MLB
+  // roster and needs no extra fetch.
   const affiliateRosterIds = affiliates.length
     ? await fetchRosterIdsForTeams(affiliates.map((a) => a.id))
     : {}
+  if (orgId) {
+    affiliateRosterIds[orgId] =
+      sportId === 1 ? roster.map((r) => r.person?.id).filter(Boolean) : await fetchTeamRosterIds(orgId)
+  }
   const affiliateByPlayer = prospectAffiliateMap(affiliateRosterIds)
   const affiliateById = new Map(affiliates.map((a) => [a.id, a]))
+  if (orgId) {
+    affiliateById.set(orgId, { id: orgId, sportId: 1, name: sportId === 1 ? team.name : team.parentOrgName })
+  }
   const prospects = orgId
     ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId).map((p) => {
         const affTeamId = affiliateByPlayer.get(p.playerId) ?? null
@@ -319,7 +331,7 @@ export function TeamPage({ id, asOf, sportId }) {
           <>
             <SectionTitle
               title="Prospects"
-              note={highlightTop100 ? 'org rank · Top 100 in bold' : 'org rank'}
+              note={highlightTop100 ? 'org rank · Top 100 highlighted' : 'org rank'}
             />
             <div className="ledger-wrap">
               <table className="ledger prospecttable">
@@ -335,20 +347,20 @@ export function TeamPage({ id, asOf, sportId }) {
                 <tbody>
                   {prospects.map((p) => {
                     const isTop = p.topRank != null
-                    const rowClass = highlightTop100 ? (isTop ? 'is-accent' : 'is-dull') : ''
+                    const rowClass = highlightTop100 && !isTop ? 'is-dull' : ''
                     return (
                       <tr key={p.playerId} className={rowClass}>
                         <td className="lft yr">{p.orgRank}</td>
                         <td className="lft opp">
-                          <PlayerLink id={p.playerId}>{p.name}</PlayerLink>
+                          <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
                           {isTop && <span className="prospecttable__top">#{p.topRank}</span>}
                         </td>
                         <td>{p.position || DASH}</td>
                         <td className="prospecttable__level">
+                          <span>{p.levelLabel || DASH}</span>
                           {p.affiliateTeamId && (
                             <TeamLogo teamId={p.affiliateTeamId} name={p.levelLabel} size={16} crop />
                           )}
-                          {p.levelLabel || DASH}
                         </td>
                         <td className="prospecttable__line">{p.statLine || DASH}</td>
                       </tr>
