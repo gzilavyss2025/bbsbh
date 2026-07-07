@@ -3440,6 +3440,10 @@ body {
 .standings tr.is-me .team {
   color: var(--field-deep);
 }
+.standings tr:not(.is-me) .team {
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
 
 /* ranked team stats */
 .tstats {
@@ -3537,6 +3541,13 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.thub-allstar {
+  color: var(--clay);
+  margin-left: 4px;
+  font-size: 12px;
 }
 .thub-pos {
   font-family: var(--font-display);

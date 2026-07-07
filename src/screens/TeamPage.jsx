@@ -3,6 +3,7 @@ import {
   fetchTeamRoster,
   fetchStandings,
   fetchLeagueTeamStats,
+  fetchAllStarRosterIds,
 } from '../api/mlb.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -29,6 +30,11 @@ function lastTen(rec) {
   const t = (rec.records?.splitRecords ?? []).find((s) => s.type === 'lastTen')
   return t ? `${t.wins}-${t.losses}` : DASH
 }
+function runDiff(rec) {
+  const d = rec.runDifferential
+  if (!Number.isFinite(d)) return DASH
+  return d > 0 ? `+${d}` : `${d}`
+}
 
 function statRank(rows, teamId, key, label, lowerBetter) {
   const mine = rows.find((r) => r.teamId === teamId)
@@ -44,12 +50,13 @@ async function loadTeam(id, asOf) {
   const season = Number((asOf || isoToday()).slice(0, 4))
   const standingsDate = asOf ? dayBefore(asOf) : null
 
-  const [roster, standings, league] = await Promise.all([
+  const [roster, standings, league, allStarIds] = await Promise.all([
     fetchTeamRoster(id, season),
     team.league?.id
       ? fetchStandings(team.league.id, season, standingsDate)
       : Promise.resolve([]),
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
+    sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
   ])
 
   const div = standings.find((r) => r.division?.id === team.division?.id)
@@ -60,7 +67,9 @@ async function loadTeam(id, asOf) {
     wins: t.wins,
     losses: t.losses,
     gb: t.gamesBack,
+    streak: t.streak?.streakCode ?? DASH,
     l10: lastTen(t),
+    diff: runDiff(t),
     isMe: t.team.id === id,
   }))
 
@@ -89,6 +98,7 @@ async function loadTeam(id, asOf) {
       name: firstLast(r.person),
       jersey: r.jerseyNumber ?? '',
       pos: r.position?.abbreviation ?? '',
+      allStar: allStarIds.has(r.person?.id),
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
 
@@ -99,6 +109,7 @@ async function loadTeam(id, asOf) {
       name: firstLast(r.person),
       jersey: r.jerseyNumber ?? '',
       role: rosterPitcherRole(r),
+      allStar: allStarIds.has(r.person?.id),
     }))
     .sort((a, b) => (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) || Number(a.jersey) - Number(b.jersey))
 
@@ -136,7 +147,7 @@ export function TeamPage({ id, asOf, sportId }) {
     )
   }
 
-  const { team, record, standings, batting, pitching, position, pitchers } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers } = data
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
@@ -165,13 +176,17 @@ export function TeamPage({ id, asOf, sportId }) {
             <div className="ledger-wrap">
               <table className="standings">
                 <thead>
-                  <tr><th className="team">Team</th><th>W</th><th>L</th><th>GB</th><th>L10</th></tr>
+                  <tr>
+                    <th className="team">Team</th>
+                    <th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th><th>RD</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {standings.map((s) => (
                     <tr key={s.id} className={s.isMe ? 'is-me' : ''}>
                       <td className="team"><TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}</td>
-                      <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td><td>{s.l10}</td>
+                      <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td>
+                      <td>{s.streak}</td><td>{s.l10}</td><td>{s.diff}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -186,17 +201,23 @@ export function TeamPage({ id, asOf, sportId }) {
         {position.length > 0 && (
           <>
             <SectionTitle title="Position players" />
-            <RosterList rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))} />
+            <RosterList
+              season={season}
+              rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))}
+            />
           </>
         )}
         {pitchers.length > 0 && (
           <>
             <SectionTitle title="Pitchers" note="role inferred" />
-            <RosterList rows={pitchers.map((p) => ({
-              ...p,
-              badge: p.role,
-              badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
-            }))} />
+            <RosterList
+              season={season}
+              rows={pitchers.map((p) => ({
+                ...p,
+                badge: p.role,
+                badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
+              }))}
+            />
           </>
         )}
       </div>
@@ -223,13 +244,18 @@ function TeamStats({ title, stats }) {
   )
 }
 
-function RosterList({ rows }) {
+function RosterList({ rows, season }) {
   return (
     <ul className="thub-roster">
       {rows.map((r) => (
         <li key={`${r.id}-${r.jersey}`} className="thub-row">
           <span className="thub-jersey">{r.jersey}</span>
-          <PlayerLink id={r.id} className="thub-name">{r.name}</PlayerLink>
+          <PlayerLink id={r.id} className="thub-name">
+            {r.name}
+            {r.allStar && (
+              <span className="thub-allstar" title={`${season} All Star`}>★</span>
+            )}
+          </PlayerLink>
           <span className={r.badgeClass}>{r.badge}</span>
           <span className="thub-chev">›</span>
         </li>

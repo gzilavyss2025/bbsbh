@@ -512,3 +512,31 @@ export async function fetchLeagueTeamStats(season) {
   const [hitting, pitching] = await Promise.all([one('hitting'), one('pitching')])
   return { hitting, pitching }
 }
+
+// Player ids selected to this season's All-Star Game. Roster membership isn't
+// score-revealing, so this is spoiler-safe to show year-round (unlike the
+// game itself, which stays sealed like any other). The team roster endpoints
+// for the All-Star squads (ids 159 AL / 160 NL) come back empty, so instead
+// look up the game via the schedule's gameType=A entry and read both teams'
+// player lists off its boxscore — populated as soon as rosters are announced,
+// well before the game is played. Degrades to an empty Set (works fine before
+// rosters are announced, after a season with no game, or off MLB).
+export async function fetchAllStarRosterIds(season) {
+  if (!season) return new Set()
+  try {
+    const sched = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=A`)
+    const gamePk = sched.dates?.[0]?.games?.[0]?.gamePk
+    if (!gamePk) return new Set()
+    const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
+    const teams = feed.liveData?.boxscore?.teams ?? {}
+    const ids = new Set()
+    for (const side of ['away', 'home']) {
+      for (const p of Object.values(teams[side]?.players ?? {})) {
+        if (p.person?.id) ids.add(p.person.id)
+      }
+    }
+    return ids
+  } catch {
+    return new Set()
+  }
+}
