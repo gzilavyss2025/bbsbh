@@ -19,6 +19,7 @@
   --graphite-soft: #938C7C;
   --rule:     #CBC1A7;   /* faded pencil grid rule */
   --rule-soft:#DED6C0;   /* hairline rule */
+  --rule-grid:#EDE6D1;   /* graph-paper grid lines — low-contrast, blends into --bg-canvas */
 
   /* ---- Brand accents ---- */
   --field:    #2F6E4F;   /* outfield green — positive / on-base */
