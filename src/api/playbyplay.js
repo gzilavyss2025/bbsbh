@@ -119,6 +119,44 @@ function trimLeadingName(description, fullName) {
   return description
 }
 
+// Every player in the game, name → id, longest name first so a longer name
+// wins over a shorter one it contains. Used to find player references inside
+// the templated prose descriptions / substitution notes.
+function buildNameIndex(feed) {
+  return Object.values(feed?.gameData?.players ?? {})
+    .map((p) => ({ name: (p.fullName ?? '').trim(), id: p.id }))
+    .filter((p) => p.name && p.id)
+    .sort((a, b) => b.name.length - a.name.length)
+}
+
+// Split a prose string into segments, tagging the spans that are player names
+// with their id: [{ text }, { text, id }, …]. Non-overlapping, earliest match
+// wins. Lets the card render those spans as uppercase / a deep link while the
+// surrounding words stay plain.
+function linkifyNames(text, index) {
+  if (!text) return [{ text: '' }]
+  const hits = []
+  for (const { name, id } of index) {
+    let from = 0
+    let at
+    while ((at = text.indexOf(name, from)) !== -1) {
+      hits.push({ start: at, end: at + name.length, id })
+      from = at + name.length
+    }
+  }
+  hits.sort((a, b) => a.start - b.start || b.end - a.end)
+  const segments = []
+  let pos = 0
+  for (const h of hits) {
+    if (h.start < pos) continue // overlaps an already-taken span
+    if (h.start > pos) segments.push({ text: text.slice(pos, h.start) })
+    segments.push({ text: text.slice(h.start, h.end), id: h.id })
+    pos = h.end
+  }
+  if (pos < text.length) segments.push({ text: text.slice(pos) })
+  return segments
+}
+
 // How-reached codes keyed on the play's eventType, for a batter who was NOT
 // retired on his own plate appearance.
 const REACH_CODES = {
@@ -215,13 +253,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
 
   const entries = []
   const originIndex = new Map() // batterId -> index of their own atbat card
+  const nameIndex = buildNameIndex(feed)
 
   for (const play of plays) {
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) continue
       const et = e.details?.eventType
       if (STOPPAGE_EVENTS.has(et)) {
-        entries.push({ kind: 'event', eventType: et, text: e.details.description })
+        const text = e.details.description
+        entries.push({ kind: 'event', eventType: et, text, segments: linkifyNames(text, nameIndex) })
       }
     }
 
@@ -244,9 +284,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         pitches,
         rbi: play.result?.rbi ?? 0,
         // The full prose account of the play (batter name trimmed off the
-        // front — it's already on the card). Shown for every plate
-        // appearance, out or not.
-        desc: trimLeadingName(play.result?.description, batter.fullName),
+        // front — it's already on the card), split so the other players named
+        // in it (fielders, a scoring runner) render as uppercase spans.
+        descSegments: linkifyNames(
+          trimLeadingName(play.result?.description, batter.fullName),
+          nameIndex,
+        ),
         // Scorebook denotation drawn above the diamond (1B, F8, 6-3…).
         ...scorebookCode(play, batterRunner),
         outNumber: null,

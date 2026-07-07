@@ -38,13 +38,23 @@ function EventNote({ entry }) {
       <span className="pbp__noteicon" aria-hidden="true">
         {EVENT_ICONS[entry.eventType] ?? '🔄'}
       </span>
-      {entry.text}
+      <span className="pbp__notetext">
+        {entry.segments.map((seg, i) =>
+          seg.id != null ? (
+            <PlayerLink key={i} id={seg.id}>
+              {seg.text}
+            </PlayerLink>
+          ) : (
+            seg.text
+          ),
+        )}
+      </span>
     </div>
   )
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, desc, reached, scored, legNotations } = entry
+  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations } = entry
   return (
     <div className="pbp__card">
       <div className="pbp__main">
@@ -58,7 +68,17 @@ function AtBatCard({ entry }) {
           </span>
           {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
         </div>
-        <div className="pbp__desc">{desc}</div>
+        <div className="pbp__desc">
+          {descSegments.map((seg, i) =>
+            seg.id != null ? (
+              <span key={i} className="pbp__name">
+                {seg.text}
+              </span>
+            ) : (
+              seg.text
+            ),
+          )}
+        </div>
       </div>
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
