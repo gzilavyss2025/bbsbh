@@ -747,23 +747,6 @@ function RosterPanel({ title, roster, revealedThrough }) {
         <div className="roster__body">
           {empty && <p className="hint">Not posted yet.</p>}
 
-          {roster.starters.length > 0 && (
-            <>
-              <h4 className="roster__group">Starters</h4>
-              <ul className="roster__list">
-                {roster.starters.map((p) => (
-                  <li key={p.id} className={rowClass(p)}>
-                    <PlayerLink id={p.id} className="roster__name">
-                      {p.nameLastFirst.toUpperCase()}
-                    </PlayerLink>
-                    <span className="roster__jersey">{p.jersey || ''}</span>
-                    <span className="roster__pos">{handAbbr(p.hand)}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-
           {roster.bullpen.length > 0 && (
             <>
               <h4 className="roster__group">Bullpen</h4>
@@ -792,6 +775,23 @@ function RosterPanel({ title, roster, revealedThrough }) {
                     </PlayerLink>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{p.position}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {roster.starters.length > 0 && (
+            <>
+              <h4 className="roster__group">Starters</h4>
+              <ul className="roster__list">
+                {roster.starters.map((p) => (
+                  <li key={p.id} className={rowClass(p)}>
+                    <PlayerLink id={p.id} className="roster__name">
+                      {p.nameLastFirst.toUpperCase()}
+                    </PlayerLink>
+                    <span className="roster__jersey">{p.jersey || ''}</span>
+                    <span className="roster__pos">{handAbbr(p.hand)}</span>
                   </li>
                 ))}
               </ul>

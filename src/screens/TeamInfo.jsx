@@ -278,11 +278,11 @@ function TeamSections({ feed, side, oppPitcherLine }) {
                   </ul>
                 </>
               )}
-              {roster.starters.length > 0 && (
+              {roster.bullpen.length > 0 && (
                 <>
-                  <h4 className="roster__group">Starters</h4>
+                  <h4 className="roster__group">Bullpen</h4>
                   <ul className="roster__list">
-                    {roster.starters.map((p) => (
+                    {roster.bullpen.map((p) => (
                       <li key={p.id} className="roster__row">
                         <PlayerLink id={p.id} className="roster__name">
                           {p.name.toUpperCase()}
@@ -294,11 +294,11 @@ function TeamSections({ feed, side, oppPitcherLine }) {
                   </ul>
                 </>
               )}
-              {roster.bullpen.length > 0 && (
+              {roster.starters.length > 0 && (
                 <>
-                  <h4 className="roster__group">Bullpen</h4>
+                  <h4 className="roster__group">Starters</h4>
                   <ul className="roster__list">
-                    {roster.bullpen.map((p) => (
+                    {roster.starters.map((p) => (
                       <li key={p.id} className="roster__row">
                         <PlayerLink id={p.id} className="roster__name">
                           {p.name.toUpperCase()}
