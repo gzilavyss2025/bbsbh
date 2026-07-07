@@ -25,6 +25,14 @@ const LABELS = {
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
+// Where a red "PR" sits when a pinch runner took over at a base — pinned just
+// above and outside that base, clear of the advance notations in LABELS.
+const PR_LABELS = {
+  1: { x: 84, y: 38, anchor: 'start' },
+  2: { x: 66, y: 16, anchor: 'start' },
+  3: { x: 16, y: 38, anchor: 'end' },
+}
+
 const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
 
 // Two endpoints of a short stroke perpendicular to segment a→b, centered at p.
@@ -40,7 +48,7 @@ function perpStroke(a, b, p, len = 6) {
   ]
 }
 
-export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, outAt = null, outCode = '', size = 108 }) {
+export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, outAt = null, outCode = '', prBase = null, size = 108 }) {
   const traveled = scored ? 4 : reached
 
   // Geometry for a baserunning out: the path is drawn to where he was safe,
@@ -148,6 +156,16 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, ou
           textAnchor={LABELS[outAt].anchor}
         >
           {outCode}
+        </text>
+      )}
+      {prBase != null && PR_LABELS[prBase] && (
+        <text
+          className="pbp__pr"
+          x={PR_LABELS[prBase].x}
+          y={PR_LABELS[prBase].y}
+          textAnchor={PR_LABELS[prBase].anchor}
+        >
+          PR
         </text>
       )}
     </svg>

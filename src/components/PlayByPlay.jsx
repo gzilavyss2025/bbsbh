@@ -54,17 +54,36 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations } = entry
+  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners } = entry
+  // A batter pinch-run for is crossed out on the card, with the pinch runner
+  // penciled in beneath at the PR spot; the diamond gets a red PR by the base he
+  // took over at (the last swap's base if a runner was himself pinch-run for).
+  const replaced = pinchRunners && pinchRunners.length > 0
+  const prBase = replaced ? pinchRunners[pinchRunners.length - 1].base : null
   return (
     <div className="pbp__card">
       <div className="pbp__main">
         <div className="pbp__top">
           <span className="pbp__batter">
-            <PlayerLink id={batter.id}>
-              {batter.last}
-              {batter.first ? `, ${batter.first}` : ''}
-            </PlayerLink>
-            {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
+            <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
+              <PlayerLink id={batter.id}>
+                {batter.last}
+                {batter.first ? `, ${batter.first}` : ''}
+              </PlayerLink>
+              {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
+            </span>
+            {pinchRunners?.map((pr, i) => (
+              <span
+                key={pr.id}
+                className={`pbp__batline ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
+              >
+                <PlayerLink id={pr.id}>
+                  {pr.last}
+                  {pr.first ? `, ${pr.first}` : ''}
+                </PlayerLink>
+                <span className="pbp__pos">PR</span>
+              </span>
+            ))}
           </span>
           {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
         </div>
@@ -96,6 +115,7 @@ function AtBatCard({ entry }) {
             legNotations={legNotations}
             outAt={outAt}
             outCode={outCode}
+            prBase={prBase}
           />
           {outNumber != null && (
             <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>

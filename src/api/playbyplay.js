@@ -255,6 +255,40 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   const originIndex = new Map() // batterId -> index of their own atbat card
   const nameIndex = buildNameIndex(feed)
 
+  // Pinch runners: an `offensive_substitution` whose incoming man is a Runner
+  // (position abbreviation 'PR') drops a fresh runner onto the base of a runner
+  // already aboard. He takes no plate appearance, so he owns no card — alias his
+  // id to the runner he replaced (chained, so a pinch runner FOR a pinch runner
+  // still resolves back to the batter whose card it is) so all of his later
+  // baserunning flows onto that card, and record the swap so the card can strike
+  // the replaced batter's name and pencil the pinch runner in (see PlayByPlay).
+  // Field paths (player.id incoming, replacedPlayer.id outgoing,
+  // position.abbreviation, numeric `base`) verified against gamePk 776137/776141.
+  const prAlias = new Map() // pinch-runner id -> replaced runner id
+  const prSubs = [] // { pinchId, replacedId, base }, in game order
+  for (const play of plays) {
+    for (const e of play.playEvents ?? []) {
+      if (e.details?.eventType !== 'offensive_substitution') continue
+      if (e.position?.abbreviation !== 'PR') continue
+      const pinchId = e.player?.id
+      const replacedId = e.replacedPlayer?.id
+      if (pinchId == null || replacedId == null) continue
+      prAlias.set(pinchId, replacedId)
+      prSubs.push({ pinchId, replacedId, base: e.base ?? null })
+    }
+  }
+  // Resolve a runner id to the card-owning batter, following pinch-runner swaps
+  // to their root (an id that never pinch-ran returns unchanged).
+  const rootRunner = (id) => {
+    let cur = id
+    const seen = new Set()
+    while (prAlias.has(cur) && !seen.has(cur)) {
+      seen.add(cur)
+      cur = prAlias.get(cur)
+    }
+    return cur
+  }
+
   for (const play of plays) {
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) continue
@@ -316,13 +350,27 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
     for (const r of runners) {
       const rid = r.details?.runner?.id
       if (rid == null || rid === batterId || !r.movement?.isOut) continue
-      const origin = originIndex.get(rid)
-      if (origin == null) continue // no known origin card (e.g. a pinch-runner) — nothing to attach to
+      // A pinch runner resolves back to the card of the batter he ran for.
+      const origin = originIndex.get(rootRunner(rid))
+      if (origin == null) continue // no known origin card — nothing to attach to
       entries[origin].outNumber = r.movement.outNumber
       // Where and how he was cut down, for the diamond's tick + out code.
       entries[origin].outAt = BASE_NUM[r.movement.outBase] ?? null
       entries[origin].outCode = runnerOutCode(play, r)
     }
+  }
+
+  // Hang each pinch-runner swap on the card of the batter it ultimately replaced
+  // (chains resolved to the root), so the card can strike that batter's name and
+  // list the pinch runner(s) who took over — with the base each entered at, for
+  // the diamond's red PR marker.
+  for (const sub of prSubs) {
+    const cardIndex = originIndex.get(rootRunner(sub.replacedId))
+    if (cardIndex == null) continue
+    const person = feed?.gameData?.players?.[`ID${sub.pinchId}`] ?? {}
+    const card = entries[cardIndex]
+    card.pinchRunners = card.pinchRunners ?? []
+    card.pinchRunners.push({ id: sub.pinchId, ...personNameParts(person), base: sub.base })
   }
 
   // Advancement pass: follow each batter as a baserunner across every play of
@@ -350,8 +398,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
     for (const r of play.runners ?? []) {
       const rid = r.details?.runner?.id
       if (rid == null || r.movement?.isOut) continue
+      // Credit a pinch runner's advance to the batter whose card he inherited.
+      const canon = rootRunner(rid)
       const base = BASE_NUM[r.movement?.end] ?? 0
-      if (base > (endBase.get(rid) ?? 0)) endBase.set(rid, base)
+      if (base > (endBase.get(canon) ?? 0)) endBase.set(canon, base)
     }
     for (const [rid, base] of endBase) {
       if (base > (progress.get(rid) ?? 0)) progress.set(rid, base)

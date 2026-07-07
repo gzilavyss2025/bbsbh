@@ -2166,6 +2166,15 @@ body {
   fill: var(--clay-deep);
 }
 
+/* Red "PR" penciled just above the base a pinch runner took over at. */
+.pbp__pr {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  fill: var(--clay-deep);
+}
+
 .pbp__top {
   display: flex;
   align-items: baseline;
@@ -2175,12 +2184,35 @@ body {
 }
 
 .pbp__batter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.01em;
   color: var(--text-heading);
+}
+
+/* One name line inside the batter cell — the batter, plus any pinch runner
+   penciled beneath him — keeping the name and its position tag on one line. */
+.pbp__batline {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+/* A batter (or earlier runner) lifted for a pinch runner: crossed out in
+   pencil, the same spent-row treatment the roster uses for a player who's
+   entered. Set on the .plink too — a <button> won't take an ancestor's
+   line-through. */
+.pbp__replaced,
+.pbp__replaced .plink {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
 }
 
 .pbp__pos {
