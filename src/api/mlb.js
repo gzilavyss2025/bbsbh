@@ -384,3 +384,131 @@ export async function fetchPitcherSeasonLine(personId, season, sportId = 1) {
     return null
   }
 }
+
+// ---------------------------------------------------------------------------
+// Player pages — bio + stats fetchers (see src/api/person.js for the pure
+// view-model shaping). Everything here is READ BY THE PLAYER PAGE ONLY, keyed
+// on the person id we already carry. It is *not* wired into any sealed game
+// surface: a name-link injects no score into the DOM, and the player page
+// fetches its own date-cut stats rather than reading the live feed. See
+// docs/data-enrichment.md for the per-endpoint spoiler notes.
+// ---------------------------------------------------------------------------
+
+// Full bio for one person. `hydrate=currentTeam,draft` folds in the current
+// club (whose sport.id tells us the level to query stats at) and the player's
+// draft record(s) in one request. Degrades to null (MiLB / bad id), so the
+// page can show a graceful "couldn't load".
+export async function fetchPerson(personId) {
+  if (!personId) return null
+  try {
+    const data = await getJson(
+      `/api/v1/people/${personId}?hydrate=currentTeam,draft`,
+    )
+    return data.people?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+// One stats bundle, parameterized by `type`
+// ('byDateRange' | 'career' | 'yearByYear' | 'statSplits' | 'gameLog') and
+// `group` ('hitting' | 'pitching'). Returns the RAW splits array — shaping and
+// (for byDateRange) de-duplication/aggregation live in person.js, since one
+// call can return multiple rows (stints, or the duplicate rows byDateRange
+// emits). MiLB routes via `sportId`, exactly like fetchPitcherSeasonLine.
+// Degrades to [] so a missing group (e.g. no MiLB splits) just drops its
+// section rather than taking the page down.
+export async function fetchPersonStats(
+  personId,
+  { type, group, season, startDate, endDate, sitCodes, sportId = 1 } = {},
+) {
+  if (!personId || !type || !group) return []
+  try {
+    const params = [`stats=${type}`, `group=${group}`]
+    if (season) params.push(`season=${season}`)
+    if (startDate) params.push(`startDate=${startDate}`)
+    if (endDate) params.push(`endDate=${endDate}`)
+    if (sitCodes) params.push(`sitCodes=${sitCodes}`)
+    if (sportId && sportId !== 1) params.push(`sportId=${sportId}`)
+    const data = await getJson(
+      `/api/v1/people/${personId}/stats?${params.join('&')}`,
+    )
+    return data.stats?.[0]?.splits ?? []
+  } catch {
+    return []
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Team pages — identity, roster, standings, ranked team stats.
+// ---------------------------------------------------------------------------
+
+// Basic team identity, incl. league + division ids (needed to pull the right
+// standings). Degrades to null.
+export async function fetchTeam(teamId) {
+  if (!teamId) return null
+  try {
+    const data = await getJson(`/api/v1/teams/${teamId}`)
+    return data.teams?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+// The active roster, with each player's season pitching line hydrated so the
+// team page can infer starter/reliever/closer (there is no role field in the
+// API). Position players simply carry no pitching stats. Degrades to [].
+export async function fetchTeamRoster(teamId, season) {
+  if (!teamId || !season) return []
+  try {
+    const data = await getJson(
+      `/api/v1/teams/${teamId}/roster?rosterType=active&hydrate=person(stats(type=season,group=pitching,season=${season}))`,
+    )
+    return data.roster ?? []
+  } catch {
+    return []
+  }
+}
+
+// Division standings AS OF a date. The `date` param is honored by the API
+// (verified: a June-1 query returns the June-1 record, not today's), which is
+// what makes this spoiler-safe — pass the day BEFORE the game being scored so
+// a team you haven't revealed never shows a record that folds tonight's result.
+// Returns the raw division records array; person.js/TeamPage pick the team's
+// own division. Degrades to [].
+export async function fetchStandings(leagueId, season, date) {
+  if (!leagueId || !season) return []
+  try {
+    const dateParam = date ? `&date=${date}` : ''
+    const data = await getJson(
+      `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}`,
+    )
+    return data.records ?? []
+  } catch {
+    return []
+  }
+}
+
+// Every MLB club's season hitting+pitching totals, so the team page can rank
+// one team league-wide (there's no per-team "rank" field). Ranking is computed
+// in person.js. Only meaningful at MLB (sportId 1); MiLB team-stat coverage is
+// thin, so callers gate on level and this degrades to []. Returns
+// { hitting: [{teamId, stat}], pitching: [...] }.
+export async function fetchLeagueTeamStats(season) {
+  if (!season) return { hitting: [], pitching: [] }
+  const one = async (group) => {
+    try {
+      const data = await getJson(
+        `/api/v1/teams/stats?season=${season}&sportIds=1&group=${group}&stats=season`,
+      )
+      return (data.stats?.[0]?.splits ?? []).map((s) => ({
+        teamId: s.team?.id,
+        stat: s.stat,
+      }))
+    } catch {
+      return []
+    }
+  }
+  const [hitting, pitching] = await Promise.all([one('hitting'), one('pitching')])
+  return { hitting, pitching }
+}
