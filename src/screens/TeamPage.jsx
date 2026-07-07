@@ -9,6 +9,7 @@ import {
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -37,6 +38,11 @@ function runDiff(rec) {
   const d = rec.runDifferential
   if (!Number.isFinite(d)) return DASH
   return d > 0 ? `+${d}` : `${d}`
+}
+function runDiffTone(rec) {
+  const d = rec.runDifferential
+  if (!Number.isFinite(d) || d === 0) return ''
+  return d > 0 ? 'is-positive' : 'is-negative'
 }
 
 function statRank(rows, teamId, key, label, lowerBetter) {
@@ -82,6 +88,7 @@ async function loadTeam(id, asOf) {
     streak: t.streak?.streakCode ?? DASH,
     l10: lastTen(t),
     diff: runDiff(t),
+    diffTone: runDiffTone(t),
     isMe: t.team.id === id,
   }))
 
@@ -141,6 +148,7 @@ async function loadTeam(id, asOf) {
 export function TeamPage({ id, asOf, sportId }) {
   const teamId = Number(id)
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
+  useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
 
   if (loading && !data) {
@@ -210,9 +218,14 @@ export function TeamPage({ id, asOf, sportId }) {
                 <tbody>
                   {standings.map((s) => (
                     <tr key={s.id} className={s.isMe ? 'is-me' : ''}>
-                      <td className="team"><TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}</td>
+                      <td className="team">
+                        <TeamLink id={s.isMe ? null : s.id}>
+                          <TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}
+                        </TeamLink>
+                      </td>
                       <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td>
-                      <td>{s.streak}</td><td>{s.l10}</td><td>{s.diff}</td>
+                      <td>{s.streak}</td><td>{s.l10}</td>
+                      <td className={s.diffTone}>{s.diff}</td>
                     </tr>
                   ))}
                 </tbody>

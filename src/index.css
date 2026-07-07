@@ -697,6 +697,21 @@ body {
   filter: grayscale(1) contrast(1.03);
 }
 
+/* Small "vibe" crop treatment — see TeamLogo.jsx's `crop` prop. A clipped
+   square with the mark zoomed past its own SVG padding, edge to edge. */
+.teamlogo-crop {
+  display: inline-flex;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+}
+.teamlogo--crop {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.6);
+}
+
 .teamlogo--fallback {
   display: inline-flex;
   align-items: center;
@@ -4081,20 +4096,29 @@ body {
 }
 .standings .team {
   text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 7px;
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
+.standings .team,
+.standings .team .plink {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
 .standings tr.is-me td {
   background: rgba(47, 110, 79, 0.1);
 }
 .standings tr.is-me .team {
   color: var(--field-deep);
+}
+.standings td.is-positive {
+  color: var(--accent-positive);
+}
+.standings td.is-negative {
+  color: var(--accent-negative);
 }
 
 /* ranked team stats */
