@@ -89,6 +89,19 @@ export function draftInfo(person) {
   }
 }
 
+// First name / surname for the two-line hero treatment. A plain split on the
+// first space handles suffixes and multi-word surnames correctly without
+// needing the API's separate firstName/lastName fields ("Vladimir Guerrero
+// Jr." -> "Vladimir" / "Guerrero Jr.", "Elly De La Cruz" -> "Elly" / "De La
+// Cruz"). A one-word name (rare) renders with no first-name line.
+export function splitDisplayName(fullName) {
+  const s = (fullName || '').trim()
+  if (!s) return { first: '', last: '' }
+  const i = s.indexOf(' ')
+  if (i === -1) return { first: '', last: s }
+  return { first: s.slice(0, i), last: s.slice(i + 1) }
+}
+
 export function personBio(person) {
   if (!person) return null
   const born = [person.birthCity, person.birthStateProvince ?? person.birthCountry]

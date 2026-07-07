@@ -13,6 +13,7 @@ import {
   pitcherRole,
   buildBlock,
   firstsFromGameLog,
+  splitDisplayName,
 } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -221,6 +222,7 @@ export function PlayerPage({ id, asOf, sportId }) {
     ? bio.throws ? `Throws ${bio.throws}` : ''
     : [bio.bats && `Bats ${bio.bats}`, bio.throws && `Throws ${bio.throws}`].filter(Boolean).join(' / ')
   const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
+  const { first: firstName, last: lastName } = splitDisplayName(bio.fullName)
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
@@ -238,8 +240,11 @@ export function PlayerPage({ id, asOf, sportId }) {
           <Headshot personId={bio.id} name={bio.fullName} />
           <div className="player__ident">
             <h1 className="player__name">
-              {bio.fullName}
-              {bio.number && <span className="player__num">#{bio.number}</span>}
+              {firstName && <span className="player__name-first">{firstName}</span>}
+              <span className="player__name-last">
+                {lastName}
+                {bio.number && <span className="player__num">#{bio.number}</span>}
+              </span>
             </h1>
             <p className="player__meta">
               {heroPos && <span className="player__pos">{heroPos}</span>}
