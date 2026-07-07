@@ -444,7 +444,10 @@ body {
   color: var(--text-on-ink);
 }
 
-.levelprog__step.is-target {
+/* Dashed only while still unreached — the ahead-of-you destination marker. A
+   debuted player's MLB rung is reached, so it drops the dash and reads as
+   just another solid link in the same arrow chain as the MiLB rungs. */
+.levelprog__step.is-target.is-unreached {
   border-style: dashed;
 }
 
