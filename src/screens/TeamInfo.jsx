@@ -148,10 +148,7 @@ export function TeamInfo({
           <h3 className="section__title">Opposing defense</h3>
           {/* Drawn like the sheet's bottom-left diamond: surnames on writing
               lines at their positions. The defense belongs to the OTHER side. */}
-          <DefenseDiamond
-            defense={oppDefense}
-            side={side === 'away' ? 'home' : 'away'}
-          />
+          <DefenseDiamond defense={oppDefense} />
         </section>
       )}
 

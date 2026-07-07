@@ -1075,7 +1075,7 @@ body {
 
 .defdiamond__field {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 2;
   max-width: 340px;
   margin: 0 auto;
 }
@@ -1085,28 +1085,6 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.defdiamond__ring {
-  position: absolute;
-  left: 50%;
-  top: 60%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-  pointer-events: none;
-}
-
-.defdiamond__ring em {
-  display: block;
-  font-style: normal;
-  font-weight: var(--w-medium);
-  color: var(--graphite-soft);
 }
 
 .defdiamond__spot {

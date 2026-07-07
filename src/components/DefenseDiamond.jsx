@@ -1,7 +1,7 @@
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:
 // the infield square rotated onto its point, each fielder's surname on a
 // writing line at his position with the small position number beneath, and
-// the "HOME DEFENSE" / "VISITOR DEFENSE" ring in the middle. Fielders only —
+// a small pencil ring for the pitcher's mound at its center. Fielders only —
 // the pitcher has his own table and the DH bats but never takes the field,
 // so he rides a small line under the diamond instead.
 //
@@ -27,7 +27,7 @@ const SPOTS = {
   C: { x: 50, y: 92 },
 }
 
-export function DefenseDiamond({ defense, side /* side OF THE DEFENSE: 'away' | 'home' */ }) {
+export function DefenseDiamond({ defense }) {
   const fielders = defense.filter((p) => SPOTS[p.position])
   const dh = defense.find((p) => p.position === 'DH')
   if (fielders.length === 0) return null
@@ -38,8 +38,9 @@ export function DefenseDiamond({ defense, side /* side OF THE DEFENSE: 'away' | 
   return (
     <div className="defdiamond">
       <div className="defdiamond__field">
-        {/* Infield square + center ring, in pencil rule. viewBox matches the
-            percent grid so the label spots and the drawing share coordinates. */}
+        {/* Infield square + a small mound ring, in pencil rule. viewBox matches
+            the percent grid so the label spots and the drawing share
+            coordinates. */}
         <svg
           className="defdiamond__lines"
           viewBox="0 0 100 100"
@@ -57,18 +58,13 @@ export function DefenseDiamond({ defense, side /* side OF THE DEFENSE: 'away' | 
           <circle
             cx="50"
             cy="60"
-            r="13"
-            fill="var(--surface-card)"
+            r="4.5"
+            fill="none"
             stroke="var(--rule)"
             strokeWidth="0.8"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
-
-        <span className="defdiamond__ring" aria-hidden="true">
-          {side === 'home' ? 'Home' : 'Visitor'}
-          <em>defense</em>
-        </span>
 
         {Object.entries(SPOTS).map(([pos, spot]) => (
           <DefenseSpot key={pos} pos={pos} player={byPos[pos]} spot={spot} />
