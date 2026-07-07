@@ -20,6 +20,7 @@ import {
   splitDisplayName,
 } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
@@ -249,6 +250,7 @@ async function loadPlayer(id, asOf) {
 
 export function PlayerPage({ id, asOf, sportId }) {
   const { loading, error, data } = useAsync(() => loadPlayer(id, asOf), [id, asOf])
+  useDocumentTitle(data?.bio?.fullName || null)
 
   const back = () => window.history.back()
 

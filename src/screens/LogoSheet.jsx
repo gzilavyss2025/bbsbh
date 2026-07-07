@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { fetchTeams } from '../api/mlb.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
@@ -11,6 +12,7 @@ import { LevelNav } from '../components/LevelNav.jsx'
 // elsewhere in the app, with its 3-way variant picker. Carries no scores, so
 // it's spoiler-safe like the rest of the app.
 export function LogoSheet({ onBack }) {
+  useDocumentTitle('Logo Sheet')
   const [sportId, setSportId] = useState(SPORT_IDS.MLB)
   const [sketching, setSketching] = useState(null) // { id, name } | null
 

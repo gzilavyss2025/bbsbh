@@ -1,6 +1,9 @@
+import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+
 // Placeholder for now — just the standard screen shell with a back button.
 // Content to come.
 export function AboutPage({ onBack }) {
+  useDocumentTitle('About')
   return (
     <div className="screen">
       <header className="topbar">

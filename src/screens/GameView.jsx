@@ -10,6 +10,7 @@ import {
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
@@ -27,6 +28,7 @@ import { LinkScope } from '../lib/nav.jsx'
 // driven entirely by `section` / `onSection` so every step is a real URL.
 export function GameView({ game, section, onSection, onHome }) {
   const { step, inning, half } = sectionToStep(section)
+  useDocumentTitle(gameTitle(game, step, inning, half))
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
   // Tablet/desktop: the two lineup pages condense into one two-column spread
   // (LineupSpread) at the same breakpoint the CSS starts laying columns. The
@@ -303,6 +305,25 @@ function Masthead({ away, home, onSketch }) {
       <MastheadLogo team={home} onSketch={() => onSketch('home')} />
     </div>
   )
+}
+
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
+}
+
+// Spoiler-safe tab title: team abbreviations plus a structural section label
+// (lineup side, half-inning, box score) — the same information the URL's
+// `section` already exposes, never anything score-revealing.
+function gameTitle(game, step, inning, half) {
+  const away = game.away.abbreviation || game.away.teamName || 'Away'
+  const home = game.home.abbreviation || game.home.teamName || 'Home'
+  const matchup = `${away} @ ${home}`
+  if (step === 0) return `${matchup} · ${away} Lineup`
+  if (step === 1) return `${matchup} · ${home} Lineup`
+  if (step === 3) return `${matchup} · Box Score`
+  return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
 }
 
 function MastheadLogo({ team, onSketch }) {

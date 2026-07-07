@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { fetchSchedule, fetchScheduleUniforms } from '../api/mlb.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
@@ -25,6 +26,7 @@ function readLevel() {
 // soonest → latest (Brewers pinned to the top), with a LIVE pill on any game in
 // progress. Level is toggled with the thin buttons up top; no more search box.
 export function GameSelect({ onPick, onShowLogos }) {
+  useDocumentTitle(null)
   const [offset, setOffset] = useState(0) // days from today
   const [sportId, setSportId] = useState(readLevel)
   const pickLevel = (id) => {
