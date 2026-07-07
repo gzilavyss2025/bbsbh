@@ -4139,7 +4139,7 @@ body {
   letter-spacing: var(--ls-caps);
 }
 .standings .team,
-.standings .team .plink {
+.standings .team > * {
   display: flex;
   align-items: center;
   gap: 7px;

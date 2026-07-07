@@ -142,6 +142,10 @@ async function loadTeam(id, asOf) {
         statRank(league.hitting, id, 'avg', 'AVG', false),
         statRank(league.hitting, id, 'ops', 'OPS', false),
         statRank(league.hitting, id, 'stolenBases', 'Stolen bases', false),
+        statRank(league.hitting, id, 'hits', 'Hits', false),
+        statRank(league.hitting, id, 'groundIntoDoublePlay', 'GIDP', true),
+        statRank(league.hitting, id, 'atBatsPerHomeRun', 'AB/HR', true),
+        statRank(league.hitting, id, 'babip', 'BABIP', false),
       ]
     : null
   const pitching = league.pitching.length
@@ -150,6 +154,15 @@ async function loadTeam(id, asOf) {
         statRank(league.pitching, id, 'whip', 'WHIP', true),
         statRank(league.pitching, id, 'strikeOuts', 'Strikeouts', false),
         statRank(league.pitching, id, 'saves', 'Saves', false),
+        statRank(league.pitching, id, 'shutouts', 'Shutouts', false),
+        statRank(league.pitching, id, 'completeGames', 'Complete games', false),
+        statRank(league.pitching, id, 'avg', 'AVG against', true),
+        statRank(league.pitching, id, 'strikeoutsPer9Inn', 'SO/9', false),
+        statRank(league.pitching, id, 'walksPer9Inn', 'BB/9', true),
+        statRank(league.pitching, id, 'strikeoutWalkRatio', 'K/BB', false),
+        statRank(league.pitching, id, 'groundIntoDoublePlay', 'GDP', false),
+        statRank(league.pitching, id, 'wildPitches', 'WP', true),
+        statRank(league.pitching, id, 'pitchesPerInning', 'P/IP', true),
       ]
     : null
 
