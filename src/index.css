@@ -30,9 +30,10 @@
    undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
    guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
    if you do. The sanctioned exceptions are `.buzz__text` (Bluesky posts keep
-   their authors' original casing) and `.pbp__desc` (play-by-play descriptions
-   read as natural-case sentences); each opts out with a `caps-exempt` marker the
-   guard recognizes — don't add another without the same deliberate marker. */
+   their authors' original casing) and the play-by-play copy — `.pbp__desc`
+   descriptions and `.pbp__note` event notes — which read as natural-case
+   sentences; each opts out with a `caps-exempt` marker the guard recognizes —
+   don't add another without the same deliberate marker. */
 #root * {
   text-transform: uppercase;
 }
@@ -2009,11 +2010,11 @@ body {
   border-top: var(--bw-hair) dashed var(--border-hairline);
   border-bottom: var(--bw-hair) dashed var(--border-hairline);
   /* Sentence-like event notes (mound visits, pitching changes) — same prose
-     treatment as .pbp__desc: the high-legibility serif reads better in caps. */
+     treatment as .pbp__desc: the high-legibility serif in natural case (the
+     caps exception is the #root rule below). */
   font-family: var(--font-read);
   font-size: 12px;
   font-weight: var(--w-semibold);
-  text-transform: uppercase;
   letter-spacing: 0.015em;
   color: var(--text-caption);
 }
@@ -2238,22 +2239,26 @@ body {
      tokens/typography.css. */
   font-family: var(--font-read);
   font-size: 10.5px;
-  font-weight: var(--w-semibold);
+  font-weight: var(--w-regular);
   letter-spacing: 0.015em;
   line-height: 1.4;
   color: var(--text-body);
 }
 
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
-   .buzz__text for the same pattern): play-by-play descriptions read as
-   natural-case sentences — MLB's templated prose, and the verbose replay-review
-   blurbs ("Challenged (pitch result), call on the field was confirmed: …")
-   especially, read badly forced to caps. `#root .pbp__desc` (1 id + 1 class)
-   outweighs the global `#root *` uppercase; the inline player names go natural
-   too so the sentence reads whole. */
+   .buzz__text for the same pattern): play-by-play copy reads as natural-case
+   sentences — the play descriptions (MLB's templated prose, and the verbose
+   replay-review blurbs like "Challenged (pitch result), call on the field was
+   confirmed: …" especially, read badly forced to caps) and the interleaved
+   event notes (mound visits, pitching changes). The `#root`-scoped selectors
+   (1 id + 1 class) outweigh the global `#root *` uppercase; the inline player
+   names — `.pbp__name` spans in descriptions, `.plink` deep-links in notes — go
+   natural too so each sentence reads whole. */
 #root .pbp__desc,
-#root .pbp__desc .pbp__name {
-  text-transform: none; /* caps-exempt: play-by-play descriptions read as sentences */
+#root .pbp__desc .pbp__name,
+#root .pbp__note,
+#root .pbp__note .plink {
+  text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
 }
 
 .pbp__klooking {
