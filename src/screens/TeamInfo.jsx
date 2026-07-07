@@ -9,7 +9,7 @@ import {
   lastFirst,
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/mlb.js'
-import { POS_ORDER } from '../api/person.js'
+import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
@@ -191,10 +191,14 @@ function Umpires({ officials }) {
 }
 
 // Groups a full active roster (from fetchTeamRoster) into the same
-// batters/pitchers split the team page uses, for the pregame fallback when
-// the starting lineup isn't posted yet. Roster entries come from the plain
-// /roster endpoint, not the live feed, so names degrade to fullName (no
-// lastFirstName on that thinner person object).
+// batters/starters/bullpen split the team page uses, for the pregame
+// fallback when the starting lineup isn't posted yet. Roster entries come
+// from the plain /roster endpoint, not the live feed, so names degrade to
+// fullName (no lastFirstName on that thinner person object). Starters won't
+// enter once the game's underway, so they're split from the bullpen using
+// the same season-stats role inference the team page badges pitchers with
+// (rosterPitcherRole — gamesStarted ratio / saves); a pitcher with no
+// resolved role (no starts on record yet) defaults into the bullpen list.
 function rosterFallbackGroups(roster) {
   const rows = (roster ?? []).map((r) => ({
     id: r.person?.id,
@@ -202,14 +206,18 @@ function rosterFallbackGroups(roster) {
     jersey: r.jerseyNumber ?? '',
     pos: r.position?.abbreviation ?? '',
     isPitcher: r.position?.type === 'Pitcher',
+    role: r.position?.type === 'Pitcher' ? rosterPitcherRole(r) : null,
   }))
   const batters = rows
     .filter((r) => !r.isPitcher)
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
-  const pitchers = rows
-    .filter((r) => r.isPitcher)
+  const starters = rows
+    .filter((r) => r.role === 'SP')
     .sort((a, b) => a.name.localeCompare(b.name))
-  return { batters, pitchers }
+  const bullpen = rows
+    .filter((r) => r.isPitcher && r.role !== 'SP')
+    .sort((a, b) => a.name.localeCompare(b.name))
+  return { batters, starters, bullpen }
 }
 
 // The team-specific body shared by the phone page and the spread's panels:
@@ -250,7 +258,7 @@ function TeamSections({ feed, side, oppPitcherLine }) {
               </li>
             ))}
           </ol>
-        ) : roster.batters.length > 0 || roster.pitchers.length > 0 ? (
+        ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
           <>
             <p className="hint">Lineup not posted yet — full roster:</p>
             <div className="roster">
@@ -270,11 +278,27 @@ function TeamSections({ feed, side, oppPitcherLine }) {
                   </ul>
                 </>
               )}
-              {roster.pitchers.length > 0 && (
+              {roster.starters.length > 0 && (
                 <>
-                  <h4 className="roster__group">Pitchers</h4>
+                  <h4 className="roster__group">Starters</h4>
                   <ul className="roster__list">
-                    {roster.pitchers.map((p) => (
+                    {roster.starters.map((p) => (
+                      <li key={p.id} className="roster__row">
+                        <PlayerLink id={p.id} className="roster__name">
+                          {p.name.toUpperCase()}
+                        </PlayerLink>
+                        <span className="roster__jersey">{p.jersey}</span>
+                        <span className="roster__pos">{p.pos}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {roster.bullpen.length > 0 && (
+                <>
+                  <h4 className="roster__group">Bullpen</h4>
+                  <ul className="roster__list">
+                    {roster.bullpen.map((p) => (
                       <li key={p.id} className="roster__row">
                         <PlayerLink id={p.id} className="roster__name">
                           {p.name.toUpperCase()}

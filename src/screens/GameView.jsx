@@ -4,11 +4,13 @@ import {
   fetchGameUniforms,
   fetchManager,
   fetchPitcherSeasonLine,
+  fetchTeamRoster,
   fetchWinProbability,
   uniformSummary,
 } from '../api/mlb.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
+import { rosterPitcherRole } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
@@ -118,6 +120,29 @@ export function GameView({ game, section, onSection }) {
     () => (feed ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed)],
   )
+
+  // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
+  // gamesStarted-ratio/saves heuristic the team page badges pitchers with
+  // (see rosterPitcherRole). The live feed carries no season stats, so this is
+  // its own fetch; it powers the innings roster panel's Starters/Bullpen
+  // split (see InningViewer). Keyed on team ids + Boolean(feed), like
+  // managers: role doesn't change mid-game, so a live Refresh won't refetch.
+  const pitcherRoles = useAsync(async () => {
+    if (!feed) return null
+    const season = feed.gameData?.game?.season
+    if (!season) return null
+    const [awayRoster, homeRoster] = await Promise.all([
+      fetchTeamRoster(game.away.id, season),
+      fetchTeamRoster(game.home.id, season),
+    ])
+    const roles = {}
+    for (const r of [...awayRoster, ...homeRoster]) {
+      if (r.position?.type === 'Pitcher' && r.person?.id) {
+        roles[r.person.id] = rosterPitcherRole(r)
+      }
+    }
+    return roles
+  }, [game.away.id, game.home.id, Boolean(feed)])
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
@@ -272,6 +297,7 @@ export function GameView({ game, section, onSection }) {
           onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
           onReload={feedState.reload}
           loading={feedState.loading}
+          pitcherRoles={pitcherRoles.data}
         />
       )}
       {feed && step === 3 && (

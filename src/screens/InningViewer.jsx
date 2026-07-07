@@ -40,7 +40,16 @@ import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 // are shown up front. Each inning past regulation unlocks one at a time, and only
 // once the prior inning has been revealed — so the navigator and boxscore never
 // hint that a game went to extras before the user gets there.
-export function InningViewer({ feed, started, inning, half, onInning, onReload, loading }) {
+export function InningViewer({
+  feed,
+  started,
+  inning,
+  half,
+  onInning,
+  onReload,
+  loading,
+  pitcherRoles,
+}) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -67,16 +76,16 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
     () => ({
       away: {
         name: meta.away.name || 'Away',
-        bullpen: selectBullpen(feed, 'away'),
+        ...splitBullpen(selectBullpen(feed, 'away'), pitcherRoles),
         bench: selectBench(feed, 'away'),
       },
       home: {
         name: meta.home.name || 'Home',
-        bullpen: selectBullpen(feed, 'home'),
+        ...splitBullpen(selectBullpen(feed, 'home'), pitcherRoles),
         bench: selectBench(feed, 'home'),
       },
     }),
-    [feed, meta],
+    [feed, meta, pitcherRoles],
   )
 
   // Reveal high-water mark: the furthest half-inning (by halfIndex) the user has
@@ -696,15 +705,30 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingAbbr }) {
   )
 }
 
-// Persistent roster reference, collapsed by default: the bullpen (with
-// handedness as LHP/RHP) and the bench (with position) as they stood at first
-// pitch, for lookup while scoring. A player who has entered the game is struck
-// through — no longer eligible — but ONLY once his entry sits at or below the
-// reveal mark; a substitution the user hasn't revealed their way to yet renders
-// like any other available player, so the card never hints at a sealed inning.
+// Splits selectBullpen's card into rotation starters (won't enter once the
+// game's underway — see the module docstring) and the actual bullpen, using
+// the same season-stats role inference the team page badges pitchers with
+// (rosterPitcherRole: gamesStarted ratio / saves — see person.js). A pitcher
+// with no resolved role (the roles fetch hasn't landed yet, or a rookie with
+// no starts on record) defaults into the bullpen list rather than being ruled
+// out as unavailable.
+function splitBullpen(bullpen, roles) {
+  const starters = bullpen.filter((p) => roles?.[p.id] === 'SP')
+  const relief = bullpen.filter((p) => roles?.[p.id] !== 'SP')
+  return { starters, bullpen: relief }
+}
+
+// Persistent roster reference, collapsed by default: starters (who won't
+// enter once the rotation's set), the bullpen (with handedness as LHP/RHP),
+// and the bench (with position) as they stood at first pitch, for lookup
+// while scoring. A player who has entered the game is struck through — no
+// longer eligible — but ONLY once his entry sits at or below the reveal mark;
+// a substitution the user hasn't revealed their way to yet renders like any
+// other available player, so the card never hints at a sealed inning.
 function RosterPanel({ title, roster, revealedThrough }) {
   const [open, setOpen] = useState(false)
-  const empty = roster.bullpen.length === 0 && roster.bench.length === 0
+  const empty =
+    roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
   const entered = (p) => p.enteredIdx != null && p.enteredIdx <= revealedThrough
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
   return (
@@ -722,6 +746,23 @@ function RosterPanel({ title, roster, revealedThrough }) {
       {open && (
         <div className="roster__body">
           {empty && <p className="hint">Not posted yet.</p>}
+
+          {roster.starters.length > 0 && (
+            <>
+              <h4 className="roster__group">Starters</h4>
+              <ul className="roster__list">
+                {roster.starters.map((p) => (
+                  <li key={p.id} className={rowClass(p)}>
+                    <PlayerLink id={p.id} className="roster__name">
+                      {p.nameLastFirst.toUpperCase()}
+                    </PlayerLink>
+                    <span className="roster__jersey">{p.jersey || ''}</span>
+                    <span className="roster__pos">{handAbbr(p.hand)}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           {roster.bullpen.length > 0 && (
             <>
