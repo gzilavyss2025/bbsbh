@@ -102,7 +102,18 @@ async function loadPlayer(id, asOf) {
   const person = await fetchPerson(id)
   if (!person) return null
   const bio = personBio(person)
-  const sportId = personSportId(person)
+  // Where he's playing RIGHT NOW (a big leaguer's is MLB; a demoted or
+  // now-a-lifer minor leaguer's is his current MiLB level).
+  const liveSportId = personSportId(person)
+  // Where his career-shaped sections are pinned. A player who has reached the
+  // majors gets the major-league treatment even while he's currently in the
+  // minors (Ben Gamel — a longtime big leaguer now at AAA): his year-by-year
+  // table, career total and team-history timeline stay on MLB (sportId 1) so
+  // his major-league body of work fills the prominent slots, exactly where a
+  // current big leaguer's would — you shouldn't have to guess he ever debuted.
+  // (The current-season tiles, game log and splits below still follow
+  // `liveSportId`, so the page also shows what he's doing right now.)
+  const careerSportId = bio.debut ? 1 : liveSportId
   const season = Number((asOf || isoToday()).slice(0, 4))
   const endDate = asOf ? dayBefore(asOf) : isoToday()
   const cutoff = asOf || null
@@ -123,29 +134,35 @@ async function loadPlayer(id, asOf) {
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
           await Promise.all([
-            fetchPersonStats(id, { type: 'byDateRange', group, season, startDate, endDate, sportId }),
-            fetchPersonStats(id, { type: 'career', group, sportId }),
-            fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId }),
-            fetchPersonStats(id, { type: 'gameLog', group, season, sportId }),
-            // A pre-debut MiLB player's year-by-year table nests every level
-            // he's played (see yearByYearView / levelProgressionView below);
-            // a debuted player keeps today's single-sportId fetch, untouched.
+            // Current-activity sections track his LIVE level...
+            fetchPersonStats(id, { type: 'byDateRange', group, season, startDate, endDate, sportId: liveSportId }),
+            // ...but the career total and the year-by-year table are pinned to
+            // `careerSportId` (MLB for anyone who's debuted), so a now-in-the-
+            // minors big leaguer's major-league résumé fills the primary block.
+            fetchPersonStats(id, { type: 'career', group, sportId: careerSportId }),
+            fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId: liveSportId }),
+            fetchPersonStats(id, { type: 'gameLog', group, season, sportId: liveSportId }),
+            // A pre-debut MiLB player's year-by-year table nests every level he's
+            // played (see yearByYearView / levelProgressionView below); a debuted
+            // player's is his MLB seasons (careerSportId), regardless of where he
+            // suits up today.
             bio.debut
-              ? fetchPersonStats(id, { type: 'yearByYear', group, sportId })
+              ? fetchPersonStats(id, { type: 'yearByYear', group, sportId: careerSportId })
               : fetchMilbYearByYear(id, group),
             group === 'pitching'
-              ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId })
+              ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId: liveSportId })
               : Promise.resolve([]),
           ])
         const seasonStat = aggregateSplits(seasonSplits, group)
         const tileStat = await resolveCurrentSeasonStat({
-          id, group, season, startDate, endDate, sportId,
+          id, group, season, startDate, endDate, sportId: liveSportId,
           hasDebuted: Boolean(bio.debut), levelStat: seasonStat,
         })
         const role = group === 'pitching' ? pitcherRole(tileStat) : null
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
-          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season, sportId, tileStat,
+          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season,
+          sportId: careerSportId, tileStat,
         })
         return { group, yearByYearSplits, block }
       }),
@@ -190,7 +207,7 @@ async function loadPlayer(id, asOf) {
     debutYear,
   )
   const progression = primaryResult
-    ? levelProgressionView(milbSplits, primaryResult.group, sportId)
+    ? levelProgressionView(milbSplits, primaryResult.group, liveSportId)
     : null
   // A dedicated minor-league year-by-year table, shown below the card once a
   // player has reached the majors (a pre-debut player's block already carries
@@ -243,7 +260,7 @@ async function loadPlayer(id, asOf) {
   // All-Star team, however many that is. Spoiler-safe.
   const yearByYearYears = new Set()
   for (const b of blocks) for (const r of b.yearByYear?.rows ?? []) yearByYearYears.add(Number(r.year))
-  const allStarYears = sportId === 1 ? new Set([currentYear, ...yearByYearYears]) : new Set()
+  const allStarYears = careerSportId === 1 ? new Set([currentYear, ...yearByYearYears]) : new Set()
   const allStarByYear = new Map(
     await Promise.all([...allStarYears].map(async (yr) => [yr, await fetchAllStarRosterIds(yr)])),
   )
@@ -334,7 +351,7 @@ async function loadPlayer(id, asOf) {
   }
 
   return {
-    bio, blocks, season, asOf, sportId,
+    bio, blocks, season, asOf, sportId: liveSportId,
     isAllStar, currentYear, firsts, progression, milbStats, timeline, prospectRank, orgProspectRank,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
