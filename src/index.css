@@ -2609,6 +2609,37 @@ body {
   padding-left: 14px !important;
 }
 
+/* Batting table only: the surname reads bold, and the number|position tag is
+   pushed hard to the right edge of the name cell so it sits in its own gutter
+   ("CONTRERAS        24 | C"). Fixed layout gives every stat column an equal,
+   uniform width the way a printed box score aligns AB/R/H/RBI. */
+.bs__grid--bat {
+  table-layout: fixed;
+}
+.bs__grid--bat .bs__nameCol {
+  width: 50%;
+}
+.bs__grid--bat thead th:not(.bs__nameCol),
+.bs__grid--bat tbody td:not(.bs__nameCol),
+.bs__grid--bat tfoot td:not(.bs__nameCol) {
+  width: 12.5%;
+}
+.bs__grid--bat .bs__player {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: baseline;
+}
+.bs__grid--bat .bs__pname {
+  min-width: 0;
+  font-weight: var(--w-bold);
+}
+.bs__grid--bat .bs__pos {
+  margin-left: auto;
+  padding-left: 6px;
+  white-space: nowrap;
+}
+
 /* Footnote marker ("a", "b"…) next to a sub and in the footnote list. */
 .bs__mark {
   font-family: var(--font-mono);
@@ -3390,11 +3421,18 @@ body {
   color: var(--text-muted);
   font-family: var(--font-body);
 }
-.ledger tr.is-current td {
+.ledger tr.is-current td,
+.ledger tr.is-allstar td {
   background: rgba(233, 195, 63, 0.16);
 }
-.ledger tr.is-current .yr {
+.ledger tr.is-current .yr,
+.ledger tr.is-allstar .yr {
   color: var(--clay-deep);
+}
+.ledger__allstar {
+  color: var(--clay);
+  margin-left: 3px;
+  font-size: 11px;
 }
 /* Career total — the ledger footer, set off with a heavier rule + a tinted row
    so it reads as the sum of everything above it. */
