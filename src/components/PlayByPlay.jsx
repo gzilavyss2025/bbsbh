@@ -25,11 +25,18 @@ export function PlayByPlay({ feed, inning, half, battingSide }) {
   )
 }
 
+const EVENT_ICONS = {
+  mound_visit: '⏱',
+  pitching_substitution: '🔄',
+  defensive_substitution: '🧤',
+  defensive_switch: '🧤',
+}
+
 function EventNote({ entry }) {
   return (
     <div className="pbp__note">
       <span className="pbp__noteicon" aria-hidden="true">
-        {entry.eventType === 'mound_visit' ? '⏱' : '🔄'}
+        {EVENT_ICONS[entry.eventType] ?? '🔄'}
       </span>
       {entry.text}
     </div>

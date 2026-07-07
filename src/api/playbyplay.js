@@ -45,6 +45,20 @@ export const NON_PA_EVENT_TYPES = new Set([
   'wild_pitch', 'passed_ball', 'balk',
 ])
 
+// Non-pitch playEvents that get their own interstitial note in the feed: mound
+// visits, pitching changes, and the fielding-side moves (a fresh defender, or a
+// player who stays in the game at a new position — 'X remains in the game as
+// the right fielder'). These live INSIDE a play's playEvents, at the start of
+// whichever plate appearance follows the stoppage, so they're already gated to
+// the half being revealed. Offensive subs are skipped — a pinch-hitter shows up
+// as his own batting row, a pinch-runner as the baserunner he becomes.
+const STOPPAGE_EVENTS = new Set([
+  'mound_visit',
+  'pitching_substitution',
+  'defensive_substitution',
+  'defensive_switch',
+])
+
 // Swinging strike, swinging strike (blocked). Shared with derive.js.
 export const WHIFF_CODES = new Set(['S', 'W'])
 const FOUL_CODES = new Set(['F', 'L', 'T']) // foul, foul bunt, foul tip
@@ -206,7 +220,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) continue
       const et = e.details?.eventType
-      if (et === 'mound_visit' || et === 'pitching_substitution') {
+      if (STOPPAGE_EVENTS.has(et)) {
         entries.push({ kind: 'event', eventType: et, text: e.details.description })
       }
     }

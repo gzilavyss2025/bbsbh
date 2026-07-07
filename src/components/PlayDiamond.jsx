@@ -14,11 +14,14 @@ const THIRD = [20, 50]
 // 4 = home again (a run scored).
 const BASES = [HOME, FIRST, SECOND, THIRD, HOME]
 
-// Where each base's notation sits, just outside that base.
+// Where each base's notation sits, just outside that base. Third base hugs the
+// diamond's left edge (x=20); its label is anchored to END right against it so
+// a two-char code with a superscript slot ("2B⁵") grows leftward into the
+// margin instead of off the viewBox / into the strike lane.
 const LABELS = {
   1: { x: 85, y: 53, anchor: 'start' },
   2: { x: 50, y: 13, anchor: 'middle' },
-  3: { x: 15, y: 53, anchor: 'end' },
+  3: { x: 19, y: 53, anchor: 'end' },
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
@@ -67,25 +70,38 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, ou
       viewBox="0 0 100 100"
       aria-hidden="true"
     >
-      <polygon
-        points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
-        fill="none"
-        stroke="var(--rule)"
-        strokeWidth={1.5}
-        strokeLinejoin="round"
-      />
-      {Array.from({ length: traveled }).map((_, i) => (
-        <line
-          key={i}
-          x1={BASES[i][0]}
-          y1={BASES[i][1]}
-          x2={BASES[i + 1][0]}
-          y2={BASES[i + 1][1]}
+      {scored ? (
+        // A run: the whole diamond penciled solid.
+        <polygon
+          points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
+          fill="var(--graphite)"
           stroke="var(--graphite)"
-          strokeWidth={3}
-          strokeLinecap="round"
+          strokeWidth={2}
+          strokeLinejoin="round"
         />
-      ))}
+      ) : (
+        <>
+          <polygon
+            points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
+            fill="none"
+            stroke="var(--rule)"
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+          />
+          {Array.from({ length: traveled }).map((_, i) => (
+            <line
+              key={i}
+              x1={BASES[i][0]}
+              y1={BASES[i][1]}
+              x2={BASES[i + 1][0]}
+              y2={BASES[i + 1][1]}
+              stroke="var(--graphite)"
+              strokeWidth={3}
+              strokeLinecap="round"
+            />
+          ))}
+        </>
+      )}
       {outHalf && (
         <line
           x1={outHalf[0][0]}
