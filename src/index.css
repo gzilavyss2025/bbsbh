@@ -2224,6 +2224,7 @@ body {
      readable. See --font-read in tokens/typography.css. */
   font-family: var(--font-read);
   font-size: 10.5px;
+  font-weight: 600;
   letter-spacing: 0.015em;
   line-height: 1.4;
   color: var(--text-body);
@@ -4205,15 +4206,18 @@ body {
   background: var(--paper-2);
   cursor: pointer;
 }
+/* Home games get the scorebook's kraft-tape tone (see --seal) rather than
+   the opponent's own color — same "paper" vocabulary as the seal covers,
+   just solid instead of hatched. */
 .tcal__game--home {
+  background: var(--seal);
   border-color: transparent;
 }
-/* A light ring around the logo's own small box (not the cell button behind
-   it), so the mark stays legible against any team color underneath —
-   most helpful for a home cell whose fill clashes with the opponent's own
-   colors. */
+/* A faint ring around the logo's own small box (not the cell button behind
+   it), so the mark stays legible against the kraft fill without competing
+   with it. */
 .tcal__game .teamlogo {
-  border: var(--bw-rule) solid var(--text-on-ink);
+  border: var(--bw-rule) solid color-mix(in srgb, var(--text-on-ink) 55%, transparent);
   border-radius: var(--radius-xs);
 }
 .tcal__gm {

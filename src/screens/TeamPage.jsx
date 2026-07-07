@@ -13,7 +13,7 @@ import {
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../api/prospects.js'
-import { SPORT_LABEL, teamPrimaryColor } from '../lib/teams.js'
+import { SPORT_LABEL } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -278,7 +278,6 @@ export function TeamPage({ id, asOf, sportId }) {
             <SectionTitle title="Schedule" />
             <ScheduleCalendar
               key={`${team.id}-${asOf ?? ''}`}
-              primaryColor={teamPrimaryColor(team.id)}
               games={schedule}
               refDate={asOf || isoToday()}
             />
@@ -419,7 +418,7 @@ const DOW_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 // (lineup1) manages its own sealing from there. `refDate` seeds which month
 // opens first (the game this page was opened from, or today for a bare
 // visit) — the calendar itself can page anywhere from there.
-function ScheduleCalendar({ primaryColor, games, refDate }) {
+function ScheduleCalendar({ games, refDate }) {
   const [cursor, setCursor] = useState(() => ({
     year: Number(refDate.slice(0, 4)),
     month: Number(refDate.slice(5, 7)) - 1,
@@ -483,7 +482,6 @@ function ScheduleCalendar({ primaryColor, games, refDate }) {
                   key={g.gamePk}
                   type="button"
                   className={`tcal__game${g.isHome ? ' tcal__game--home' : ''}`}
-                  style={g.isHome && primaryColor ? { background: primaryColor } : undefined}
                   onClick={() => openGame(g)}
                   title={`${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}`}
                 >
