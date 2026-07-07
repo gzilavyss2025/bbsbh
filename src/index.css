@@ -3723,13 +3723,13 @@ body {
   font-size: 11px;
   letter-spacing: var(--ls-caps);
 }
-/* Every other bit of copy on the player page is forced uppercase (the "scorebook
-   all-caps" convention); the team-hub note keeps its original sentence case. */
+/* All copy on these pages is forced uppercase (the "scorebook all-caps"
+   convention — see the ALL-CAPS INVARIANT in this file's header). */
 .player .section__title em {
   text-transform: uppercase;
 }
 .team-hub .section__title em {
-  text-transform: none;
+  text-transform: uppercase;
 }
 
 /* ---- player hero ---- */
@@ -4201,6 +4201,17 @@ body {
 }
 .tcal__game--home {
   border-color: transparent;
+}
+/* A thin light rim traced around the logo's own silhouette (not the cell
+   box) via stacked drop-shadows, so the mark reads against any team color
+   underneath it — most helpful for a home cell whose fill clashes with the
+   opponent's own colors. */
+.tcal__game .teamlogo {
+  filter:
+    drop-shadow(0.75px 0 0 var(--text-on-ink))
+    drop-shadow(-0.75px 0 0 var(--text-on-ink))
+    drop-shadow(0 0.75px 0 var(--text-on-ink))
+    drop-shadow(0 -0.75px 0 var(--text-on-ink));
 }
 .tcal__gm {
   position: absolute;
