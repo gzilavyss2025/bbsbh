@@ -545,7 +545,7 @@ export function PlayerPage({ id, asOf, sportId }) {
           </section>
         )}
 
-        <p className="hint player__caveat">
+        <p className="hint hint--prose player__caveat">
           {asOf
             ? 'Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row and the splits are full-season figures.'
             : 'Current-season figures (no game context).'}

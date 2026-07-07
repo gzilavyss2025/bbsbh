@@ -33,7 +33,7 @@ function GameBuzzList({ feed }) {
   }
   if (!data || data.length === 0) {
     return (
-      <p className="hint">
+      <p className="hint hint--prose">
         No buzz found for this game&apos;s window — thin at minor-league parks and for
         games older than a week or so.
       </p>

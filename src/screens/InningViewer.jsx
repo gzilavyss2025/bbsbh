@@ -155,7 +155,7 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
   if (!started) {
     return (
       <div className="innings">
-        <p className="hint">
+        <p className="hint hint--prose">
           This game hasn’t started yet. Lineups and info are on the previous
           pages; inning totals appear once first pitch is thrown.
         </p>

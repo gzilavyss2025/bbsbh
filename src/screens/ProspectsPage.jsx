@@ -84,7 +84,7 @@ export function ProspectsPage() {
       {error && <p className="hint hint--error">Couldn’t load prospect rankings. Try again.</p>}
 
       {data && players.length === 0 && (
-        <p className="hint">Prospect rankings aren’t available right now — check back later.</p>
+        <p className="hint hint--prose">Prospect rankings aren’t available right now — check back later.</p>
       )}
 
       {players.length > 0 && (
