@@ -20,7 +20,7 @@ function managerValue(mgr) {
 // nothing score-revealing is in the DOM until the user taps to reveal, exactly
 // like every half-inning seal. This holds even for a deep link straight to the
 // box score, so the card's "Box score" shortcut can't spoil either.
-export function BoxScore({ feed, managers, scorebookWeather, onInnings }) {
+export function BoxScore({ feed, managers, uniforms, scorebookWeather, onInnings }) {
   return (
     <div className="boxscore">
       <div className="boxscore__head">
@@ -39,6 +39,7 @@ export function BoxScore({ feed, managers, scorebookWeather, onInnings }) {
             <BoxScoreBody
               box={box}
               managers={managers}
+              uniforms={uniforms}
               scorebookWeather={scorebookWeather}
             />
           )
@@ -58,7 +59,7 @@ export function BoxScore({ feed, managers, scorebookWeather, onInnings }) {
 // visiting team's crew and first pitch above its batting/pitching, the home
 // team's ballpark/weather/times above its own. The complete MLB-style game-info
 // text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ box, managers, scorebookWeather }) {
+function BoxScoreBody({ box, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -66,6 +67,8 @@ function BoxScoreBody({ box, managers, scorebookWeather }) {
   const awayFields = [
     { label: 'Visiting Team', value: box.away.teamName, wide: true },
     { label: 'Manager', value: managerValue(managers?.away) },
+    // What they wore (jersey · pants · cap) — spoiler-free, posted ~game time.
+    { label: 'Uniform', value: uniforms?.away, wide: true },
     { label: 'HP Umpire', value: u.hp },
     { label: '1B Umpire', value: u.first },
     { label: '2B Umpire', value: u.second },
@@ -75,6 +78,7 @@ function BoxScoreBody({ box, managers, scorebookWeather }) {
   const homeFields = [
     { label: 'Home Team', value: box.home.teamName, wide: true },
     { label: 'Manager', value: managerValue(managers?.home) },
+    { label: 'Uniform', value: uniforms?.home, wide: true },
     { label: 'Ballpark', value: get('Venue'), wide: true },
     // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
     // value to copy onto paper. Falls back to the box-score weather when the

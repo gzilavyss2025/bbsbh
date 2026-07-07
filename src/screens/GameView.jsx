@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchGameFeed,
+  fetchGameUniforms,
   fetchManager,
   fetchPitcherSeasonLine,
+  uniformLine,
 } from '../api/mlb.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
@@ -24,8 +26,30 @@ export function GameView({ game, section, onSection, onHome }) {
   const { step, inning, half } = sectionToStep(section)
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
 
-  const feedState = useAsync(() => fetchGameFeed(game.gamePk), [game.gamePk])
-  const feed = feedState.data
+  // The uniform assignment rides the SAME fetch/reload as the feed: it's empty
+  // until around first pitch, so each live Refresh must re-pull it, and
+  // useAsync's reload keeps the last-good pair so a flaky refetch never blanks
+  // an already-posted assignment. fetchGameUniforms resolves null on its own
+  // failures, so it can't take the feed down with it.
+  const feedState = useAsync(async () => {
+    const [feed, uniforms] = await Promise.all([
+      fetchGameFeed(game.gamePk),
+      fetchGameUniforms(game.gamePk),
+    ])
+    return { feed, uniforms }
+  }, [game.gamePk])
+  const feed = feedState.data?.feed
+
+  // Per-side printable uniform lines ('' until posted). The slate/route seed's
+  // teamName is the club nickname ("Brewers"), matching the redundant prefix
+  // on every asset label.
+  const uniformText = useMemo(() => {
+    const uniforms = feedState.data?.uniforms
+    return {
+      away: uniformLine(uniforms?.away, game.away.teamName),
+      home: uniformLine(uniforms?.home, game.home.teamName),
+    }
+  }, [feedState.data, game.away.teamName, game.home.teamName])
 
   // Managers need a separate endpoint per team. The coaches endpoint needs
   // nothing from the feed — the game prop already carries both team ids — so
@@ -148,6 +172,7 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="away"
           manager={managers.data?.away}
+          uniform={uniformText.away}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           // The away side FACES the home starter.
@@ -161,6 +186,7 @@ export function GameView({ game, section, onSection, onHome }) {
           feed={feed}
           side="home"
           manager={managers.data?.home}
+          uniform={uniformText.home}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}
@@ -183,6 +209,7 @@ export function GameView({ game, section, onSection, onHome }) {
         <BoxScore
           feed={feed}
           managers={managers.data}
+          uniforms={uniformText}
           scorebookWeather={weather.data}
           onInnings={() => onSection(lastInningSection.current)}
         />

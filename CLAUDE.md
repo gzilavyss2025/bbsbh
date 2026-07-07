@@ -147,8 +147,11 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 **Data layer** (`src/api/`):
 - `mlb.js` — thin fetch wrapper. Schedule/slate (`hydrate=team` for the
   abbreviation + teamName the bare row lacks), `resolveGame`, the full game feed
-  (`/api/v1.1/game/{gamePk}/feed/live`), and a **separate** `/teams/{id}/coaches`
-  call for managers (they are **not** in the live feed).
+  (`/api/v1.1/game/{gamePk}/feed/live`), a **separate** `/teams/{id}/coaches`
+  call for managers (they are **not** in the live feed), and
+  `/api/v1/uniforms/game` for what each club is wearing (also not in the feed;
+  spoiler-free but empty until ~first pitch, so it rides the feed's
+  fetch/reload in `GameView` and renders on the lineup pages + box score).
 - `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
   returns the STARTING nine, from each boxscore player's own `battingOrder`
   value (a starter's is an exact multiple of 100; a sub's is offset 801/802…) —

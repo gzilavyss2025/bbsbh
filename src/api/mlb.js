@@ -143,6 +143,62 @@ export async function fetchGameFeed(gamePk) {
   return getJson(`/api/v1.1/game/${gamePk}/feed/live`)
 }
 
+// The uniforms each club is actually wearing tonight, from the dedicated
+// /api/v1/uniforms/game endpoint — the live feed carries zero uniform data
+// (see docs/uniforms-and-logos.md for the verified findings). Spoiler-FREE:
+// the assignment reveals nothing about the score and never changes once
+// posted. It IS empty until around first pitch, and MiLB games return
+// nothing, so this degrades to null and callers show the usual "—".
+// Assets sort jersey → pants → cap so the composed line always reads top-down.
+const UNIFORM_PIECE_ORDER = { J: 0, P: 1, C: 2 }
+
+export async function fetchGameUniforms(gamePk) {
+  if (!gamePk) return null
+  try {
+    const data = await getJson(`/api/v1/uniforms/game?gamePks=${gamePk}`)
+    const game = data.uniforms?.[0]
+    const normalize = (side) => {
+      const assets = (side?.uniformAssets ?? [])
+        .map((a) => ({
+          text: a.uniformAssetText ?? '',
+          piece: a.uniformAssetType?.uniformAssetTypeCode ?? '',
+        }))
+        .filter((a) => a.text)
+        .sort(
+          (a, b) =>
+            (UNIFORM_PIECE_ORDER[a.piece] ?? 9) -
+            (UNIFORM_PIECE_ORDER[b.piece] ?? 9),
+        )
+      return assets.length > 0 ? assets : null
+    }
+    const away = normalize(game?.away)
+    const home = normalize(game?.home)
+    if (!away && !home) return null
+    return { away, home }
+  } catch {
+    // Not posted yet / MiLB / endpoint hiccup — the uniform row just shows "—".
+    return null
+  }
+}
+
+// One printable uniform line — "Alt 2 Navy Blue jersey · Road Grey pants ·
+// Alt Yellow Front hat". Asset labels arrive as "<Club> <desc> <Piece>"
+// ("Brewers Alt 2 Navy Blue Jersey"); the club name is redundant next to a
+// team header, so it's stripped, and the trailing piece word is lowercased so
+// the descriptor reads as the name and the piece as a plain noun.
+export function uniformLine(assets, clubName) {
+  if (!assets?.length) return ''
+  return assets
+    .map((a) => {
+      let text = a.text
+      if (clubName && text.startsWith(`${clubName} `)) {
+        text = text.slice(clubName.length + 1)
+      }
+      return text.replace(/\s(Jersey|Pants|Hat)$/, (m) => m.toLowerCase())
+    })
+    .join(' · ')
+}
+
 // A venue with its coordinates and field info hydrated. The live feed's
 // gameData.venue is usually enough (it carries location + fieldInfo), but on
 // leaner feeds those are absent, so the weather generator falls back to this
