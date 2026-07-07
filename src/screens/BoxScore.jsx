@@ -1,9 +1,11 @@
 import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
 import { managerLabel } from '../api/mlb.js'
+import { revealDefense } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -73,6 +75,7 @@ export function BoxScore({
           const stars = computeThreeStars(winProbability, feed)
           return (
             <BoxScoreBody
+              feed={feed}
               box={box}
               stars={stars}
               managers={managers}
@@ -96,7 +99,7 @@ export function BoxScore({
 // own header card — the visiting team's crew and first pitch above its
 // batting/pitching, the home team's ballpark/weather/times above its own. The
 // complete MLB-style game-info text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
+function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -149,11 +152,11 @@ function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
       <div className="bs__duo">
         <div className="bs__col">
           <InfoCard fields={awayFields} />
-          <TeamBlock side={box.away} />
+          <TeamBlock side={box.away} feed={feed} sideKey="away" />
         </div>
         <div className="bs__col">
           <InfoCard fields={homeFields} />
-          <TeamBlock side={box.home} />
+          <TeamBlock side={box.home} feed={feed} sideKey="home" />
         </div>
       </div>
       <GameInfo rows={box.gameInfo} dateLabel={box.dateLabel} />
@@ -180,7 +183,7 @@ function InfoCard({ fields }) {
   )
 }
 
-function TeamBlock({ side }) {
+function TeamBlock({ side, feed, sideKey }) {
   return (
     <section className="bs__team">
       <h3 className="bs__teamname">
@@ -320,6 +323,25 @@ function TeamBlock({ side }) {
           </tfoot>
         </table>
       </div>
+
+      <BoxDefense feed={feed} sideKey={sideKey} />
+    </section>
+  )
+}
+
+// The team's complete defensive alignment for the game — the same scorebook
+// diamond as the innings view (api/defense.js), but with every substitution
+// through the game's final play folded in (or, for a game still in progress
+// when this box score is viewed, every substitution made so far). Safe to
+// compute here: the whole box score is already behind its own SealBox, so
+// there's nothing left to spoil by walking the full play-by-play.
+function BoxDefense({ feed, sideKey }) {
+  const defense = revealDefense(feed, sideKey, Infinity, 'bottom')
+  if (defense.length === 0) return null
+  return (
+    <section className="halfdefense">
+      <h4 className="halfdefense__title">Defense</h4>
+      <DefenseDiamond defense={defense} />
     </section>
   )
 }

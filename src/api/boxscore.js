@@ -16,12 +16,25 @@
 import { lastName as shortName } from './select.js'
 
 // "Cooper Pratt" — first name ahead of the shortened surname, for the three
-// stars where there's room for the full name (the compact tables stay
-// surname-only). Reuses shortName so suffixes/disambiguation stay consistent.
+// stars' full-name style (the batting/pitching tables use the LAST, First
+// order instead — see lastFirst below). Reuses shortName so
+// suffixes/disambiguation stay consistent.
 function firstLast(person) {
   const first = (person?.useName ?? person?.firstName ?? '').trim()
   const last = shortName(person)
   return first ? `${first} ${last}` : last
+}
+
+// "Contreras, William" — the shortened surname followed by the first name,
+// matching the LAST, First convention the pitcher table and play-by-play
+// cards use elsewhere (select.js's personNameParts covers those; the box
+// score needs shortName's disambiguation-stripping instead, so it builds the
+// pair itself). Falls back to just the surname when the feed has no first
+// name (thin MiLB records).
+function lastFirst(person) {
+  const first = (person?.useName ?? person?.firstName ?? '').trim()
+  const last = shortName(person)
+  return first ? `${last}, ${first}` : last
 }
 
 function positionLabel(boxPlayer) {
@@ -52,7 +65,7 @@ function battingRows(feed, side) {
         code,
         slot: Math.floor(code / 100),
         isSub: code % 100 !== 0,
-        name: shortName(gd),
+        name: lastFirst(gd),
         // Uniform number, penciled in red before the position on the sheet.
         num: p.jerseyNumber ?? gd.primaryNumber ?? '',
         position: positionLabel(p),
@@ -107,7 +120,7 @@ function pitchingRows(feed, side, decisions) {
     else if (id === decisions.saveId) dec = 'S'
     return {
       id,
-      name: shortName(gd),
+      name: lastFirst(gd),
       num: box.jerseyNumber ?? gd.primaryNumber ?? '',
       dec,
       // Throwing hand (R/L) and batters faced (BF) are #22-scorebook columns the
@@ -399,7 +412,7 @@ function battingStat(b) {
 function decisionName(feed, person) {
   if (!person?.id) return ''
   const gd = feed?.gameData?.players?.[`ID${person.id}`]
-  return shortName(gd ?? person)
+  return lastFirst(gd ?? person)
 }
 
 // A decision pitcher's season pitching line — used for the "(W-L)" / "(SV)"
