@@ -21,6 +21,19 @@
   box-sizing: border-box;
 }
 
+/* === ALL-CAPS INVARIANT ===
+   Every page renders uppercase — including live API values, which arrive
+   mixed-case from statsapi (e.g. "Jackson Chourio"). This one rule is the
+   single source of truth; the per-component `text-transform: uppercase`
+   rules elsewhere are now redundant with it. Its `#root *` specificity
+   (1,0,1) beats any plain class selector, so nothing downstream can quietly
+   undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
+   guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
+   if you do. */
+#root * {
+  text-transform: uppercase;
+}
+
 /* Kills the 300ms double-tap-to-zoom gesture on controls so rapid seal taps
    and inning hops never zoom — while pinch zoom stays available (the viewport
    deliberately does not lock scaling). */
@@ -1317,7 +1330,6 @@ body {
 
 .fact__note {
   font-size: 11px;
-  text-transform: lowercase;
   color: var(--text-caption);
   font-weight: var(--w-regular);
 }
@@ -2121,7 +2133,6 @@ body {
   font-size: 10px;
   font-family: var(--font-body);
   font-weight: var(--w-regular);
-  text-transform: none;
   color: var(--graphite-soft);
   margin-left: 4px;
 }
@@ -4107,6 +4118,107 @@ body {
   font-style: normal;
   color: var(--graphite-soft);
   font-size: 11px;
+}
+
+/* team-hub schedule calendar */
+.tcal {
+  margin: 4px 0 2px;
+}
+.tcal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: 8px;
+}
+.tcal__navbtn {
+  min-height: 32px;
+  min-width: 32px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: 16px;
+  font-weight: var(--w-bold);
+  line-height: 1;
+  cursor: pointer;
+}
+.tcal__month {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.tcal__dow,
+.tcal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.tcal__dow {
+  margin-bottom: 3px;
+}
+.tcal__dow span {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.tcal__cell {
+  min-height: 44px;
+  padding: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.tcal__cell--blank {
+  background: transparent;
+  border-color: transparent;
+}
+.tcal__daynum {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-caption);
+}
+.tcal__game {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--paper-2);
+  cursor: pointer;
+}
+.tcal__game--home {
+  border-color: transparent;
+}
+.tcal__gm {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
 }
 
 /* standings */

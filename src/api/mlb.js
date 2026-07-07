@@ -831,3 +831,43 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
     return []
   }
 }
+
+// One team's full regular-season schedule, for the team page's monthly
+// calendar card. Dates/opponents/home-away are spoiler-free (same rationale as
+// fetchHeadToHead above), but the raw schedule row also carries each side's
+// score/isWinner/leagueRecord — those ARE score-revealing, so they are
+// deliberately never copied into the returned shape below. `hydrate=team` gets
+// real abbreviations instead of the teamAbbr() name-derived fallback. Regular
+// season only ('R'), like fetchHeadToHead. Degrades to [].
+export async function fetchTeamSchedule(teamId, season, sportId = 1) {
+  if (!teamId || !season) return []
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team`,
+    )
+    const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
+    const byPk = new Map()
+    for (const g of games) {
+      const away = g.teams?.away?.team
+      const home = g.teams?.home?.team
+      if (!away?.id || !home?.id) continue
+      const isHome = home.id === teamId
+      const opponent = isHome ? away : home
+      byPk.set(g.gamePk, {
+        gamePk: g.gamePk,
+        apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+        gameNumber: g.gameNumber ?? 1,
+        doubleHeader: g.doubleHeader ?? 'N',
+        isHome,
+        away: { abbreviation: teamAbbr(away) },
+        home: { abbreviation: teamAbbr(home) },
+        opponent: { id: opponent.id, name: opponent.name, abbreviation: teamAbbr(opponent) },
+      })
+    }
+    return [...byPk.values()].sort(
+      (x, y) => new Date(x.apiDate) - new Date(y.apiDate) || x.gameNumber - y.gameNumber,
+    )
+  } catch {
+    return []
+  }
+}

@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -7,14 +8,17 @@ import {
   fetchAffiliates,
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
+  fetchTeamSchedule,
 } from '../api/mlb.js'
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../api/prospects.js'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, teamPrimaryColor } from '../lib/teams.js'
+import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
+import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -69,19 +73,21 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot] = await Promise.all([
-    fetchTeamRoster(id, season),
-    team.league?.id
-      ? fetchStandings(team.league.id, season, standingsDate)
-      : Promise.resolve([]),
-    sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
-    sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
-    sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
-    // The affiliate tree is keyed off the ORG id (not `id`), so an
-    // affiliate's own page gets the same tree its MLB parent would.
-    orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
-    fetchTopProspects(),
-  ])
+  const [roster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
+    await Promise.all([
+      fetchTeamRoster(id, season),
+      team.league?.id
+        ? fetchStandings(team.league.id, season, standingsDate)
+        : Promise.resolve([]),
+      sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
+      sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
+      sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
+      // The affiliate tree is keyed off the ORG id (not `id`), so an
+      // affiliate's own page gets the same tree its MLB parent would.
+      orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
+      fetchTopProspects(),
+      fetchTeamSchedule(id, season, sportId),
+    ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
   // (not the scraped, sometimes-ambiguous level string, e.g. "ALL (2)") — a
@@ -197,7 +203,7 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers,
-    affiliates, prospects,
+    affiliates, prospects, schedule,
   }
 }
 
@@ -228,7 +234,7 @@ export function TeamPage({ id, asOf, sportId }) {
     )
   }
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, affiliates, prospects } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, affiliates, prospects, schedule } = data
   // An affiliate's own page shows the same org-wide list as its MLB parent,
   // so it accentuates the rows that are also on the overall Top 100 and
   // dulls the rest — the parent's own page shows the list plainly.
@@ -266,6 +272,18 @@ export function TeamPage({ id, asOf, sportId }) {
             )}
           </div>
         </header>
+
+        {schedule.length > 0 && (
+          <>
+            <SectionTitle title="Schedule" />
+            <ScheduleCalendar
+              key={`${team.id}-${asOf ?? ''}`}
+              primaryColor={teamPrimaryColor(team.id)}
+              games={schedule}
+              refDate={asOf || isoToday()}
+            />
+          </>
+        )}
 
         {standings.length > 0 && (
           <>
@@ -386,6 +404,98 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
       </div>
     </LinkScope>
+  )
+}
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+const DOW_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+
+// Monthly schedule grid for the team page. `games` is spoiler-free (dates,
+// opponents, home/away — see fetchTeamSchedule), so every game renders
+// regardless of whether it's already been played; only the destination page
+// (lineup1) manages its own sealing from there. `refDate` seeds which month
+// opens first (the game this page was opened from, or today for a bare
+// visit) — the calendar itself can page anywhere from there.
+function ScheduleCalendar({ primaryColor, games, refDate }) {
+  const [cursor, setCursor] = useState(() => ({
+    year: Number(refDate.slice(0, 4)),
+    month: Number(refDate.slice(5, 7)) - 1,
+  }))
+  const navigate = useNav()
+
+  const byDate = useMemo(() => {
+    const m = new Map()
+    for (const g of games) {
+      if (!m.has(g.apiDate)) m.set(g.apiDate, [])
+      m.get(g.apiDate).push(g)
+    }
+    for (const list of m.values()) list.sort((a, b) => a.gameNumber - b.gameNumber)
+    return m
+  }, [games])
+
+  const startDow = new Date(Date.UTC(cursor.year, cursor.month, 1)).getUTCDay()
+  const daysInMonth = new Date(Date.UTC(cursor.year, cursor.month + 1, 0)).getUTCDate()
+  const cells = [
+    ...Array.from({ length: startDow }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ]
+
+  const goMonth = (delta) => {
+    setCursor((c) => {
+      const total = c.year * 12 + c.month + delta
+      return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 }
+    })
+  }
+
+  const openGame = (g) => {
+    navigate(gamePath(g.apiDate, g.away.abbreviation, g.home.abbreviation, 'lineup1', g.gameNumber))
+  }
+
+  return (
+    <div className="tcal">
+      <div className="tcal__nav">
+        <button type="button" className="tcal__navbtn" onClick={() => goMonth(-1)} aria-label="Previous month">
+          ‹
+        </button>
+        <span className="tcal__month">{MONTH_NAMES[cursor.month]} {cursor.year}</span>
+        <button type="button" className="tcal__navbtn" onClick={() => goMonth(1)} aria-label="Next month">
+          ›
+        </button>
+      </div>
+      <div className="tcal__dow">
+        {DOW_LABELS.map((d, i) => (
+          <span key={i}>{d}</span>
+        ))}
+      </div>
+      <div className="tcal__grid">
+        {cells.map((d, i) => {
+          if (d == null) return <div key={`b${i}`} className="tcal__cell tcal__cell--blank" />
+          const iso = `${cursor.year}-${String(cursor.month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+          const dayGames = byDate.get(iso) ?? []
+          return (
+            <div key={iso} className="tcal__cell">
+              <span className="tcal__daynum">{d}</span>
+              {dayGames.map((g) => (
+                <button
+                  key={g.gamePk}
+                  type="button"
+                  className={`tcal__game${g.isHome ? ' tcal__game--home' : ''}`}
+                  style={g.isHome && primaryColor ? { background: primaryColor } : undefined}
+                  onClick={() => openGame(g)}
+                  title={`${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}`}
+                >
+                  <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={16} crop />
+                  {g.doubleHeader !== 'N' && <span className="tcal__gm">{g.gameNumber}</span>}
+                </button>
+              ))}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
