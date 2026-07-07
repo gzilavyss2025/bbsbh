@@ -434,6 +434,10 @@ body {
   box-shadow: none;
 }
 
+.levelprog__step.is-current .levelprog__detail {
+  color: var(--text-on-ink);
+}
+
 .levelprog__step.is-target {
   border-style: dashed;
 }
@@ -744,6 +748,28 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+/* "N Prospects on this roster" chip — same pill as level/dh, plus a small
+   league mark since it's not tied to either club's own logo. */
+.gamecard__prospects {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gamecard__prospects-logo {
+  width: 12px;
+  height: 12px;
+  display: block;
 }
 
 .gamecard__status {
@@ -3550,8 +3576,7 @@ body {
     height: 96px !important;
   }
   .player__herologo-affiliate {
-    width: 30px !important;
-    height: 30px !important;
+    height: 32px !important;
   }
 }
 

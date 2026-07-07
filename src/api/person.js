@@ -542,7 +542,10 @@ export function levelProgressionView(splits, group, currentSportId) {
       reached: rows.length > 0,
       firstYear: years.length ? Math.min(...years) : null,
       lastYear: years.length ? Math.max(...years) : null,
-      games: num(stat?.gamesPlayed),
+      stat:
+        group === 'pitching'
+          ? `${stat?.inningsPitched ?? DASH} IP`
+          : `${num(stat?.atBats)} AB`,
       isCurrent: sportId === currentSportId,
     }
   })

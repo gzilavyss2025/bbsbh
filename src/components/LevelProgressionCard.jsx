@@ -1,8 +1,9 @@
 // "Path to the Majors" — a chevron strip showing every MiLB level a pre-debut
 // player has climbed (from wherever his career started — levels below that
 // are dropped, not dimmed, since he's never going back), when he reached it
-// (a year range, for a level spanning multiple seasons), and career games
-// there, with the current level highlighted and levels still ahead dimmed.
+// (a year range, for a level spanning multiple seasons), and his career
+// workload there (at-bats for a position player, innings pitched for a
+// pitcher), with the current level highlighted and levels still ahead dimmed.
 // Each rung is shaped as a chevron pointing at the next one, so the right-hand
 // edge of the strip literally arrows toward MLB; the final MLB rung is the
 // destination, so it gets a flat trailing edge instead of another point.
@@ -31,7 +32,7 @@ export function LevelProgressionCard({ levels }) {
             {lvl.reached && (
               <span className="levelprog__detail">
                 {lvl.firstYear}
-                {lvl.lastYear > lvl.firstYear ? `–${lvl.lastYear}` : ''} · {lvl.games}G
+                {lvl.lastYear > lvl.firstYear ? `–${lvl.lastYear}` : ''} · {lvl.stat}
               </span>
             )}
           </div>
