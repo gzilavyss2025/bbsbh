@@ -4208,16 +4208,13 @@ body {
 .tcal__game--home {
   border-color: transparent;
 }
-/* A thin light rim traced around the logo's own silhouette (not the cell
-   box) via stacked drop-shadows, so the mark reads against any team color
-   underneath it — most helpful for a home cell whose fill clashes with the
-   opponent's own colors. */
+/* A light ring around the logo's own small box (not the cell button behind
+   it), so the mark stays legible against any team color underneath —
+   most helpful for a home cell whose fill clashes with the opponent's own
+   colors. */
 .tcal__game .teamlogo {
-  filter:
-    drop-shadow(0.75px 0 0 var(--text-on-ink))
-    drop-shadow(-0.75px 0 0 var(--text-on-ink))
-    drop-shadow(0 0.75px 0 var(--text-on-ink))
-    drop-shadow(0 -0.75px 0 var(--text-on-ink));
+  border: var(--bw-rule) solid var(--text-on-ink);
+  border-radius: var(--radius-xs);
 }
 .tcal__gm {
   position: absolute;
