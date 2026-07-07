@@ -185,7 +185,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         batter,
         pitches,
         rbi: play.result?.rbi ?? 0,
-        hitText: null,
+        // The full prose account of the play (batter name trimmed off the
+        // front — it's already on the card). Shown for every plate
+        // appearance, out or not; outs also get a terse scorebook badge.
+        desc: trimLeadingName(play.result?.description, batter.fullName),
         out: null,
         outNumber: null,
         basesAfter,
@@ -198,8 +201,6 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       if (batterRunner?.movement?.isOut) {
         card.out = describeOut(play, batterRunner)
         card.outNumber = batterRunner.movement.outNumber
-      } else {
-        card.hitText = trimLeadingName(play.result?.description, batter.fullName)
       }
     }
 

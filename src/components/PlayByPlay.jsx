@@ -1,4 +1,5 @@
-import { computeHalfInningFeed, pitchDotCategory } from '../api/playbyplay.js'
+import { Fragment } from 'react'
+import { computeHalfInningFeed, pitchLadder } from '../api/playbyplay.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
@@ -35,17 +36,8 @@ function EventNote({ entry }) {
   )
 }
 
-// Spoken word for each pitch-dot category (see pitchDotCategory).
-const PITCH_WORDS = {
-  called: 'called strike',
-  whiff: 'whiff',
-  foul: 'foul',
-  inplay: 'in play',
-  ball: 'ball',
-}
-
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, out, outNumber, hitText, basesAfter, hitLocation } = entry
+  const { batter, pitches, rbi, out, outNumber, desc, basesAfter, hitLocation } = entry
   return (
     <div className="pbp__card">
       <div className="pbp__main">
@@ -57,42 +49,13 @@ function AtBatCard({ entry }) {
           </span>
           {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
         </div>
-        {pitches.length > 0 && (
-          // The dots are color-only, so the row itself carries the sequence as
-          // its accessible name ("ball, called strike, whiff…").
-          <div
-            className="pbp__pitchrow"
-            role="img"
-            aria-label={`Pitches: ${pitches
-              .map((code) => PITCH_WORDS[pitchDotCategory(code)])
-              .join(', ')}`}
-          >
-            {pitches.map((code, i) => (
-              <span
-                key={i}
-                className={`pbp__dot pbp__dot--${pitchDotCategory(code)}`}
-                aria-hidden="true"
-              />
-            ))}
-          </div>
-        )}
         <div className="pbp__desc">
-          {out ? (
-            <>
-              {out.label}
-              {out.calledLooking ? (
-                <>
-                  {', '}
-                  <span className="pbp__klooking" aria-label="strikeout looking">
-                    K
-                  </span>
-                </>
-              ) : out.notation ? (
-                `, ${out.notation}`
-              ) : null}
-            </>
-          ) : (
-            hitText
+          {desc}
+          {out?.notation && <span className="pbp__notation">{out.notation}</span>}
+          {out?.calledLooking && (
+            <span className="pbp__notation pbp__klooking" aria-label="strikeout looking">
+              K
+            </span>
           )}
         </div>
       </div>
@@ -102,8 +65,37 @@ function AtBatCard({ entry }) {
             {outNumber}
           </span>
         )}
+        <PitchLadder pitches={pitches} />
         <PlayDiamond bases={basesAfter} hit={hitLocation} size={100} />
       </div>
+    </div>
+  )
+}
+
+// Two stacked columns of the at-bat's pitch sequence: each pitch on its own
+// row, its 1-based number sitting in the cream "ball" column or the dark
+// "strike" column (a ball put in play shows as X). One side of every row is
+// blank, so the numbers step down the two columns in the order thrown.
+function PitchLadder({ pitches }) {
+  const ladder = pitchLadder(pitches)
+  if (ladder.length === 0) return null
+  const label = ladder
+    .map((p) => (p.side === 'ball' ? `ball ${p.label}` : p.label === 'X' ? 'in play' : `strike ${p.label}`))
+    .join(', ')
+  return (
+    <div className="pbp__ladder" role="img" aria-label={`Pitch sequence: ${label}`}>
+      <span className="pbp__ladderhead">B</span>
+      <span className="pbp__ladderhead">S</span>
+      {ladder.map((p, i) => (
+        <Fragment key={i}>
+          <span className={`pbp__cell pbp__cell--ball${p.side === 'ball' ? ' is-filled' : ''}`}>
+            {p.side === 'ball' ? p.label : ''}
+          </span>
+          <span className={`pbp__cell pbp__cell--strike${p.side === 'strike' ? ' is-filled' : ''}`}>
+            {p.side === 'strike' ? p.label : ''}
+          </span>
+        </Fragment>
+      ))}
     </div>
   )
 }

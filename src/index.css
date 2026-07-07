@@ -1633,41 +1633,48 @@ body {
   white-space: nowrap;
 }
 
-.pbp__pitchrow {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
-}
-
-.pbp__dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 1.4px solid var(--rule);
-  background: transparent;
+/* Two-column pitch ladder beside the diamond: cream "ball" column, dark
+   "strike" column, one pitch per row (see PitchLadder in PlayByPlay.jsx). */
+.pbp__ladder {
+  display: grid;
+  grid-template-columns: 18px 18px;
+  gap: 2px;
+  align-self: center;
   flex: 0 0 auto;
 }
 
-.pbp__dot--called {
-  background: var(--ink-1);
-  border-color: var(--ink-1);
+.pbp__ladderhead {
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-caption);
+  margin-bottom: 1px;
 }
 
-.pbp__dot--whiff {
-  background: var(--clay);
-  border-color: var(--clay);
-}
-
-.pbp__dot--foul {
-  background: var(--seal);
-  border-color: var(--seal-hatch);
-}
-
-.pbp__dot--inplay {
+.pbp__cell {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 10px;
   border-radius: 2px;
-  background: var(--ink-0);
-  border: none;
+}
+
+.pbp__cell--ball.is-filled {
+  background: var(--paper-3);
+  color: var(--ink-1);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+
+.pbp__cell--strike.is-filled {
+  background: var(--ink-1);
+  color: var(--paper-2);
+  border: var(--bw-hair) solid var(--ink-1);
 }
 
 .pbp__diamond {
@@ -1679,11 +1686,18 @@ body {
   color: var(--text-body);
 }
 
+.pbp__notation {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 11px;
+  color: var(--clay-deep);
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
 .pbp__klooking {
   display: inline-block;
   transform: scaleX(-1);
-  font-family: var(--font-mono);
-  font-weight: var(--w-bold);
 }
 
 /* ---------------------------------------------------------------- roster */
