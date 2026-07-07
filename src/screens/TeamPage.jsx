@@ -485,7 +485,7 @@ function ScheduleCalendar({ games, refDate }) {
                   onClick={() => openGame(g)}
                   title={`${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}`}
                 >
-                  <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={19} />
+                  <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={21} />
                   {g.doubleHeader !== 'N' && <span className="tcal__gm">{g.gameNumber}</span>}
                 </button>
               ))}
