@@ -40,6 +40,11 @@ node scripts/game-buzz.mjs <gamePk>
                    # thread when REDDIT_CLIENT_ID/SECRET are set. Deliberately a
                    # terminal script, NOT part of the app (game-night posts are
                    # spoilers). Source scoping/queries: docs/game-buzz.md
+node scripts/gen-war.mjs
+                   # regenerate public/data/war.json (season WAR per player,
+                   # from FanGraphs' leaderboard API) — normally you don't run
+                   # this by hand, it's on a nightly cron; see
+                   # .github/workflows/update-war.yml and docs/data-enrichment.md §5
 ```
 
 There is no test suite. Verify changes by running `npm run dev` and exercising the
@@ -188,6 +193,18 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
   empty until ~game time), plus the full inventory of what logo art the
   mlbstatic CDNs do and don't serve (no alternate/City Connect marks exist).
   Read it before touching uniforms or logo variants.
+- `war.js` — season WAR per player, read from a static same-origin
+  `public/data/war.json`. That file is **not** fetched live: FanGraphs'
+  leaderboard API is CORS-open but bulk-only (~1MB for the whole league) and
+  unofficial, so `scripts/gen-war.mjs` fetches + trims it to `{personId: war}`
+  and a nightly GitHub Action (`.github/workflows/update-war.yml`) commits the
+  refreshed file to `main`, which Vercel then auto-deploys — no server, no
+  runtime dependency on FanGraphs. Keyed by MLB Stats API `personId`
+  (FanGraphs' own `xMLBAMID` field is that same id, so no name-matching).
+  `TeamPage.jsx`'s roster sections are the only consumer so far; this
+  build-time-fetch pattern (bulk/unofficial source → nightly script → static
+  JSON → same-origin read) is meant to be reused for the next source shaped
+  like this — see `docs/data-enrichment.md` §5.
 
 **Screens** (`src/screens/`): `GameSelect` (slate with the MLB/AAA/AA/A+/A level
 toggle) → `GameView` (owns the site-home bar + grayscale away@home masthead that

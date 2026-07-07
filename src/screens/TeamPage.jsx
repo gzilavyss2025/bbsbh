@@ -5,6 +5,7 @@ import {
   fetchLeagueTeamStats,
   fetchAllStarRosterIds,
 } from '../api/mlb.js'
+import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -50,14 +51,21 @@ async function loadTeam(id, asOf) {
   const season = Number((asOf || isoToday()).slice(0, 4))
   const standingsDate = asOf ? dayBefore(asOf) : null
 
-  const [roster, standings, league, allStarIds] = await Promise.all([
+  const [roster, standings, league, allStarIds, warData] = await Promise.all([
     fetchTeamRoster(id, season),
     team.league?.id
       ? fetchStandings(team.league.id, season, standingsDate)
       : Promise.resolve([]),
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
     sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
+    sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
   ])
+  // WAR data is a single current-season file (see src/api/war.js); only trust
+  // it when its season matches the team page's — otherwise (a historical
+  // `asOf` team page, or MiLB with no WAR source) every badge shows DASH
+  // rather than mislabeling a stale/wrong-season figure as current.
+  const warBat = warData.season === season ? warData.bat : {}
+  const warPit = warData.season === season ? warData.pit : {}
 
   const div = standings.find((r) => r.division?.id === team.division?.id)
   const myRec = div?.teamRecords?.find((t) => t.team.id === id)
@@ -99,6 +107,7 @@ async function loadTeam(id, asOf) {
       jersey: r.jerseyNumber ?? '',
       pos: r.position?.abbreviation ?? '',
       allStar: allStarIds.has(r.person?.id),
+      war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
 
@@ -110,6 +119,7 @@ async function loadTeam(id, asOf) {
       jersey: r.jerseyNumber ?? '',
       role: rosterPitcherRole(r),
       allStar: allStarIds.has(r.person?.id),
+      war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
     }))
     .sort((a, b) => (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) || Number(a.jersey) - Number(b.jersey))
 
@@ -200,7 +210,7 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {position.length > 0 && (
           <>
-            <SectionTitle title="Position players" />
+            <SectionTitle title="Position players" note={sportId === 1 ? 'season WAR' : ''} />
             <RosterList
               season={season}
               rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))}
@@ -209,7 +219,7 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
         {pitchers.length > 0 && (
           <>
-            <SectionTitle title="Pitchers" note="role inferred" />
+            <SectionTitle title="Pitchers" note={sportId === 1 ? 'role inferred · season WAR' : 'role inferred'} />
             <RosterList
               season={season}
               rows={pitchers.map((p) => ({
@@ -256,6 +266,14 @@ function RosterList({ rows, season }) {
               <span className="thub-allstar" title={`${season} All Star`}>★</span>
             )}
           </PlayerLink>
+          {r.war !== undefined && (
+            <span
+              className={`rankchip${r.war == null ? '' : r.war >= 3 ? ' rankchip--good' : r.war < 0 ? ' rankchip--bad' : ''}`}
+              title="Season WAR (FanGraphs)"
+            >
+              {r.war == null ? DASH : r.war.toFixed(1)}
+            </span>
+          )}
           <span className={r.badgeClass}>{r.badge}</span>
           <span className="thub-chev">›</span>
         </li>

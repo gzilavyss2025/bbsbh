@@ -3635,6 +3635,16 @@ body {
 .player__herologo {
   align-self: center;
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+/* The affiliate mark — the parent MLB org's wordmark, drawn small below a
+   MiLB player's own team logo, like a jersey's affiliation patch. Only
+   rendered when `bio.team.parentOrgId` is present (see PlayerPage.jsx). */
+.player__herologo-affiliate {
+  opacity: 0.75;
 }
 .shot {
   display: block;
@@ -4097,7 +4107,7 @@ body {
 }
 .thub-row {
   display: grid;
-  grid-template-columns: 40px 1fr auto auto;
+  grid-template-columns: 40px 1fr auto auto auto;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;

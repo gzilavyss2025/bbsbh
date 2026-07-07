@@ -1,0 +1,29 @@
+name: Update WAR data
+
+# Nightly refresh of public/data/war.json from FanGraphs (see scripts/gen-war.mjs).
+# Pushing to main triggers Vercel's normal auto-deploy, so the site picks up
+# fresh WAR the next morning with no other moving parts.
+on:
+  schedule:
+    - cron: '0 9 * * *' # ~4-5am US Eastern, after overnight leaderboard updates
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-war:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/gen-war.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/war.json
+          git diff --cached --quiet || git commit -m "Update WAR data"
+          git push
