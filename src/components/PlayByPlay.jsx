@@ -1,4 +1,3 @@
-import { Fragment } from 'react'
 import { computeHalfInningFeed, pitchLadder } from '../api/playbyplay.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 
@@ -72,30 +71,37 @@ function AtBatCard({ entry }) {
   )
 }
 
-// Two stacked columns of the at-bat's pitch sequence: each pitch on its own
-// row, its 1-based number sitting in the cream "ball" column or the dark
-// "strike" column (a ball put in play shows as X). One side of every row is
-// blank, so the numbers step down the two columns in the order thrown.
+// Numbers Game #22-style ball/strike lanes beside the diamond: two thin
+// vertical columns — a light "ball" lane and a shaded "strike" lane (strikes,
+// fouls, and balls in play, the last shown as X). Each lane lists its pitches'
+// 1-based numbers stacked from the TOP independently, so a strike on the 4th
+// pitch sits at the top of the strike lane even if the first three were balls.
 function PitchLadder({ pitches }) {
   const ladder = pitchLadder(pitches)
   if (ladder.length === 0) return null
+  const balls = ladder.filter((p) => p.side === 'ball')
+  const strikes = ladder.filter((p) => p.side === 'strike')
   const label = ladder
     .map((p) => (p.side === 'ball' ? `ball ${p.label}` : p.label === 'X' ? 'in play' : `strike ${p.label}`))
     .join(', ')
   return (
     <div className="pbp__ladder" role="img" aria-label={`Pitch sequence: ${label}`}>
-      <span className="pbp__ladderhead">B</span>
-      <span className="pbp__ladderhead">S</span>
-      {ladder.map((p, i) => (
-        <Fragment key={i}>
-          <span className={`pbp__cell pbp__cell--ball${p.side === 'ball' ? ' is-filled' : ''}`}>
-            {p.side === 'ball' ? p.label : ''}
+      <div className="pbp__laddercol pbp__laddercol--ball">
+        <span className="pbp__ladderhead">B</span>
+        {balls.map((p, i) => (
+          <span key={i} className="pbp__cell">
+            {p.label}
           </span>
-          <span className={`pbp__cell pbp__cell--strike${p.side === 'strike' ? ' is-filled' : ''}`}>
-            {p.side === 'strike' ? p.label : ''}
+        ))}
+      </div>
+      <div className="pbp__laddercol pbp__laddercol--strike">
+        <span className="pbp__ladderhead">S</span>
+        {strikes.map((p, i) => (
+          <span key={i} className="pbp__cell">
+            {p.label}
           </span>
-        </Fragment>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

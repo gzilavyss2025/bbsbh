@@ -1633,17 +1633,38 @@ body {
   white-space: nowrap;
 }
 
-/* Two-column pitch ladder beside the diamond: cream "ball" column, dark
-   "strike" column, one pitch per row (see PitchLadder in PlayByPlay.jsx). */
+/* Numbers Game #22-style ball/strike lanes beside the diamond: two adjacent
+   thin columns — a light "ball" lane and a shaded "strike" lane — stretched
+   to a common height, each listing its pitch numbers stacked from the top
+   (see PitchLadder in PlayByPlay.jsx). */
 .pbp__ladder {
-  display: grid;
-  grid-template-columns: 18px 18px;
-  gap: 2px;
+  display: flex;
+  align-items: stretch;
   align-self: center;
   flex: 0 0 auto;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pbp__laddercol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 18px;
+}
+
+.pbp__laddercol--ball {
+  background: var(--paper-3);
+}
+
+.pbp__laddercol--strike {
+  background: var(--ink-1);
+  border-left: var(--bw-hair) solid var(--border-rule);
 }
 
 .pbp__ladderhead {
+  align-self: stretch;
   font-family: var(--font-display);
   font-size: 8px;
   font-weight: var(--w-bold);
@@ -1651,30 +1672,31 @@ body {
   text-transform: uppercase;
   text-align: center;
   color: var(--text-caption);
-  margin-bottom: 1px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  padding: 1px 0;
+}
+
+.pbp__laddercol--strike .pbp__ladderhead {
+  color: var(--paper-2);
+  border-bottom-color: var(--ink-2);
 }
 
 .pbp__cell {
-  height: 16px;
+  height: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   font-size: 10px;
-  border-radius: 2px;
 }
 
-.pbp__cell--ball.is-filled {
-  background: var(--paper-3);
+.pbp__laddercol--ball .pbp__cell {
   color: var(--ink-1);
-  border: var(--bw-hair) solid var(--border-rule);
 }
 
-.pbp__cell--strike.is-filled {
-  background: var(--ink-1);
+.pbp__laddercol--strike .pbp__cell {
   color: var(--paper-2);
-  border: var(--bw-hair) solid var(--ink-1);
 }
 
 .pbp__diamond {
