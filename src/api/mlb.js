@@ -439,6 +439,37 @@ export async function fetchPersonStats(
   }
 }
 
+// Resolve a set of gamePks to the bits a boxscore deep-link needs — official
+// date, both clubs' abbreviations, and the doubleheader game number — in ONE
+// batched schedule request (the endpoint takes a comma-separated gamePks list).
+// Used by the player page to point the MLB-debut fact and each game-log row at
+// that game's (sealed) box score via the normal /{date}/{matchup}/boxscore
+// route, so no gamePk-based route is needed. Degrades to {} so a row that can't
+// be resolved just renders as plain, un-linked text.
+export async function fetchGamesByPk(gamePks) {
+  const list = [...new Set((gamePks ?? []).filter(Boolean))]
+  if (!list.length) return {}
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?gamePks=${list.join(',')}&hydrate=team`,
+    )
+    const out = {}
+    for (const d of data.dates ?? []) {
+      for (const g of d.games ?? []) {
+        out[g.gamePk] = {
+          apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+          awayAbbr: teamAbbr(g.teams?.away?.team),
+          homeAbbr: teamAbbr(g.teams?.home?.team),
+          gameNumber: g.gameNumber ?? 1,
+        }
+      }
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Team pages — identity, roster, standings, ranked team stats.
 // ---------------------------------------------------------------------------

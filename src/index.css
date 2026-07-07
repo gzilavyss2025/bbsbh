@@ -1558,6 +1558,18 @@ body {
   font-size: 13px;
 }
 
+/* The note's text as one wrapping flex item (so its player deep-links flow
+   inline beside the icon instead of each becoming its own flex child). */
+.pbp__notetext {
+  min-width: 0;
+}
+
+/* Player names lifted out of a prose description, uppercased to match the
+   scorebook's name style. */
+.pbp__name {
+  text-transform: uppercase;
+}
+
 .pbp__card {
   display: flex;
   align-items: stretch;
@@ -3204,7 +3216,7 @@ body {
 .player__pos {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  color: var(--field);
+  color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
@@ -3308,6 +3320,13 @@ body {
 .ledger-wrap {
   overflow-x: auto;
 }
+/* The table's own drop shadow is clipped by the wrap's overflow (needed for the
+   horizontal scroll), so the card shadow lives on the wrap itself — where it
+   renders outside the box and matches the page's other cards. */
+.player .ledger-wrap {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
 .ledger,
 .standings {
   width: 100%;
@@ -3356,6 +3375,100 @@ body {
 }
 .ledger tr.is-current .yr {
   color: var(--clay-deep);
+}
+/* Career total — the ledger footer, set off with a heavier rule + a tinted row
+   so it reads as the sum of everything above it. */
+.ledger tfoot td {
+  border-top: var(--bw-rule) solid var(--border-rule);
+  background: var(--bg-page);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.ledger tfoot .yr {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 10.5px;
+  color: var(--text-caption);
+}
+
+/* ---- pitch arsenal: unique pitch types + average velocity ---- */
+.arsenal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+  gap: 6px;
+}
+.pitch {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  padding: 9px 8px 8px;
+  text-align: center;
+}
+.pitch__name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: 10px;
+  color: var(--text-caption);
+  line-height: 1.2;
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pitch__velo {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  margin-top: 4px;
+}
+.pitch__unit {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: 9px;
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+  margin-left: 3px;
+}
+.pitch__usage {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* ---- 2026 All-Star banner — blue tape across the top of the card ---- */
+.allstar-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+  box-shadow: var(--shadow-card);
+}
+.allstar-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 15px;
+  color: #fff;
+}
+.allstar-banner__star {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
 }
 
 /* ============================================================

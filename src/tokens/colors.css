@@ -28,6 +28,8 @@
   --clay-deep:#8E332B;
   --clay-soft:#F3E0DB;
   --navy:     #1B2A3A;   /* ink doubles as brand primary */
+  --allstar-blue:      #1D4E8F;  /* All-Star banner — brighter than paper navy */
+  --allstar-blue-deep: #163A6B;
 
   /* ---- Sealed (spoiler cover) — kraft tape ---- */
   --seal:      #B5824A;  /* kraft amber cover */

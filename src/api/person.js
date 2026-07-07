@@ -285,7 +285,7 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
     .map((s) => {
       const st = s.stat ?? {}
       const md = (s.date || '').slice(5).replace('-', '/').replace(/^0/, '')
-      const base = { date: md, home: s.isHome, opp: oppLabel(s.opponent) }
+      const base = { date: md, home: s.isHome, opp: oppLabel(s.opponent), gamePk: s.game?.gamePk ?? null }
       if (group === 'pitching') {
         return {
           ...base,
@@ -306,11 +306,44 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
 }
 
 // ---------------------------------------------------------------------------
-// Year-by-year — prior seasons as-is; current season uses the "entering today"
-// aggregate (not yearByYear's live one), marked with * by the UI.
+// Pitch arsenal — the unique pitch types a pitcher throws and their average
+// velocity, from stats=pitchArsenal, ordered by usage. Statcast-derived, so
+// absent at parks without pitch tracking (most AA/High-A, some Single-A) —
+// degrades to null and the UI hides the section, per "degrade, don't assume".
 // ---------------------------------------------------------------------------
 
-export function yearByYearView(splits, group, currentStat, currentSeason) {
+export function arsenalView(splits) {
+  const rows = (splits ?? [])
+    .map((s) => s.stat)
+    .filter((st) => st?.type?.code)
+    .map((st) => {
+      const velo = Number(st.averageSpeed)
+      const usage = Number(st.percentage)
+      return {
+        code: st.type.code,
+        name: st.type.description || st.type.code,
+        velo: Number.isFinite(velo) && velo > 0 ? velo : null,
+        usage: Number.isFinite(usage) ? usage : null,
+      }
+    })
+    .sort((a, b) => (b.usage ?? 0) - (a.usage ?? 0))
+  return rows.length ? rows : null
+}
+
+// ---------------------------------------------------------------------------
+// Year-by-year — prior seasons as-is; current season uses the "entering today"
+// aggregate (not yearByYear's live one), marked with * by the UI. Newest season
+// first, capped by a career total row (careerStat) rendered in the same columns.
+// ---------------------------------------------------------------------------
+
+// One season / career row's cells, in the group's year-by-year columns.
+function yearByYearCells(st, group) {
+  return group === 'pitching'
+    ? [`${num(st.wins)}–${num(st.losses)}`, st.era ?? DASH, st.inningsPitched ?? DASH, num(st.strikeOuts), st.whip ?? DASH]
+    : [num(st.gamesPlayed), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
+}
+
+export function yearByYearView(splits, group, currentStat, currentSeason, careerStat) {
   // Combine multi-team seasons into one row per year (sum), keeping it a clean
   // one-line-per-season ledger.
   const byYear = new Map()
@@ -322,25 +355,21 @@ export function yearByYearView(splits, group, currentStat, currentSeason) {
   }
   const cur = String(currentSeason ?? '')
   const rows = [...byYear.entries()]
-    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .sort((a, b) => (a[0] < b[0] ? 1 : -1)) // most recent season first
     .map(([yr, entries]) => {
       const isCurrent = yr === cur
       // For the current season, prefer the date-cut aggregate so the row can't
       // move mid-game; older seasons are settled, so aggregate their stints.
       const stat = isCurrent && currentStat ? currentStat : aggregateSplits(entries, group)
-      const st = stat ?? {}
-      const cells =
-        group === 'pitching'
-          ? [`${num(st.wins)}–${num(st.losses)}`, st.era ?? DASH, st.inningsPitched ?? DASH, num(st.strikeOuts), st.whip ?? DASH]
-          : [num(st.gamesPlayed), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
-      return { year: yr, isCurrent, cells }
+      return { year: yr, isCurrent, cells: yearByYearCells(stat ?? {}, group) }
     })
   if (!rows.length) return null
   const columns =
     group === 'pitching'
       ? ['W–L', 'ERA', 'IP', 'K', 'WHIP']
       : ['G', 'HR', 'RBI', 'AVG', 'OPS']
-  return { columns, rows }
+  const total = careerStat ? yearByYearCells(careerStat, group) : null
+  return { columns, rows, total }
 }
 
 // ---------------------------------------------------------------------------
@@ -348,7 +377,7 @@ export function yearByYearView(splits, group, currentStat, currentSeason) {
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, cutoff, currentSeason }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason }) {
   const season = aggregateSplits(seasonSplits, group)
   const career = aggregateSplits(careerSplits, group)
   return {
@@ -356,11 +385,12 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     role,
     title: group === 'pitching' ? 'Pitching' : 'Batting',
     tiles: group === 'pitching' ? pitcherTiles(season, role) : hitterTiles(season),
-    careerLine: careerLine(career, group),
+    arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits),
     splitsLabel: group === 'pitching' ? 'opp. batter' : '',
     gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8),
-    yearByYear: yearByYearView(yearByYearSplits, group, season, currentSeason),
+    // The career total folds into the year-by-year ledger's footer row.
+    yearByYear: yearByYearView(yearByYearSplits, group, season, currentSeason, career),
   }
 }
 

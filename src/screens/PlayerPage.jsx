@@ -1,4 +1,9 @@
-import { fetchPerson, fetchPersonStats } from '../api/mlb.js'
+import {
+  fetchPerson,
+  fetchPersonStats,
+  fetchGamesByPk,
+  fetchAllStarRosterIds,
+} from '../api/mlb.js'
 import {
   personBio,
   personSportId,
@@ -8,6 +13,8 @@ import {
 } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { LinkScope } from '../lib/nav.jsx'
+import { useNav } from '../lib/nav.js'
+import { gamePath } from '../lib/route.js'
 import { Headshot } from '../components/Headshot.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 
@@ -50,30 +57,65 @@ async function loadPlayer(id, asOf) {
   const groups = bio.twoWay
     ? ['hitting', 'pitching']
     : [bio.isPitcher ? 'pitching' : 'hitting']
+  const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
 
-  const blocks = await Promise.all(
-    groups.map(async (group) => {
-      const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits] =
-        await Promise.all([
-          fetchPersonStats(id, {
-            type: 'byDateRange', group, season,
-            startDate: `${season}-01-01`, endDate, sportId,
-          }),
-          fetchPersonStats(id, { type: 'career', group, sportId }),
-          fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId }),
-          fetchPersonStats(id, { type: 'gameLog', group, season, sportId }),
-          fetchPersonStats(id, { type: 'yearByYear', group, sportId }),
-        ])
-      const seasonStat = aggregateSplits(seasonSplits, group)
-      const role = group === 'pitching' ? pitcherRole(seasonStat) : null
-      return buildBlock({
-        group, role, seasonSplits, careerSplits, lrSplits,
-        gameLogSplits, yearByYearSplits, cutoff, currentSeason: season,
-      })
-    }),
-  )
+  const [blocks, debutSplits, allStarIds] = await Promise.all([
+    Promise.all(
+      groups.map(async (group) => {
+        const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
+          await Promise.all([
+            fetchPersonStats(id, {
+              type: 'byDateRange', group, season,
+              startDate: `${season}-01-01`, endDate, sportId,
+            }),
+            fetchPersonStats(id, { type: 'career', group, sportId }),
+            fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId }),
+            fetchPersonStats(id, { type: 'gameLog', group, season, sportId }),
+            fetchPersonStats(id, { type: 'yearByYear', group, sportId }),
+            group === 'pitching'
+              ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId })
+              : Promise.resolve([]),
+          ])
+        const seasonStat = aggregateSplits(seasonSplits, group)
+        const role = group === 'pitching' ? pitcherRole(seasonStat) : null
+        return buildBlock({
+          group, role, seasonSplits, careerSplits, lrSplits,
+          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season,
+        })
+      }),
+    ),
+    // The MLB debut is always sportId 1; its box-score game is the first row of
+    // that season's game log (the split whose date is the debut date).
+    bio.debut && debutYear
+      ? fetchPersonStats(id, {
+          type: 'gameLog', group: bio.isPitcher ? 'pitching' : 'hitting',
+          season: debutYear, sportId: 1,
+        })
+      : Promise.resolve([]),
+    // All-Star membership (MLB only) — drives the banner. Spoiler-safe.
+    sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
+  ])
 
-  return { bio, blocks, season, asOf, sportId }
+  const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
+
+  // Point the debut fact and every game-log row at that game's (sealed) box
+  // score, via the normal date/matchup/boxscore route (one batched schedule
+  // lookup resolves all the abbreviations the slug needs).
+  const pks = new Set()
+  for (const b of blocks) for (const r of b.gameLog?.rows ?? []) if (r.gamePk) pks.add(r.gamePk)
+  if (debutGamePk) pks.add(debutGamePk)
+  const byPk = await fetchGamesByPk([...pks])
+  const boxPath = (pk) => {
+    const g = byPk[pk]
+    return g ? gamePath(g.apiDate, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber) : null
+  }
+  for (const b of blocks) for (const r of b.gameLog?.rows ?? []) r.boxscorePath = boxPath(r.gamePk)
+
+  return {
+    bio, blocks, season, asOf, sportId,
+    isAllStar: allStarIds.has(bio.id),
+    debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
+  }
 }
 
 export function PlayerPage({ id, asOf, sportId }) {
@@ -111,6 +153,13 @@ export function PlayerPage({ id, asOf, sportId }) {
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen player">
+        {data.isAllStar && (
+          <div className="allstar-banner" role="note">
+            <span className="allstar-banner__star" aria-hidden="true">★</span>
+            <span className="allstar-banner__text">{data.season} All-Star</span>
+            <span className="allstar-banner__star" aria-hidden="true">★</span>
+          </div>
+        )}
         <BackBtn onClick={back} />
 
         <header className="player__hero">
@@ -136,7 +185,16 @@ export function PlayerPage({ id, asOf, sportId }) {
           <Fact label="Ht / Wt" value={bio.heightWeight} />
           <Fact label="Age" value={bio.age} mono />
           <Fact label="Born" value={bio.born} />
-          <Fact label="MLB Debut" value={debutLabel(bio.debut) || DASH} />
+          <Fact
+            label="MLB Debut"
+            value={
+              bio.debut
+                ? data.debutBoxscorePath
+                  ? <GameLink path={data.debutBoxscorePath}>{debutLabel(bio.debut)}</GameLink>
+                  : debutLabel(bio.debut)
+                : DASH
+            }
+          />
           <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
           <Fact label="Draft" value={draftLabel(bio.draft)} />
         </div>
@@ -145,7 +203,7 @@ export function PlayerPage({ id, asOf, sportId }) {
           <section key={block.group}>
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
-            <SectionTitle title={`Season ${data.season}`} note={
+            <SectionTitle title="Current season" note={
               block.group === 'pitching' && block.role ? `${roleWord(block.role)} · ${enteringLabel}` : enteringLabel
             } />
             <div className="player__statgrid">
@@ -157,10 +215,24 @@ export function PlayerPage({ id, asOf, sportId }) {
               ))}
             </div>
 
-            {block.careerLine && (
+            {block.arsenal && (
               <>
-                <SectionTitle title="Career" />
-                <p className="player__career">{block.careerLine}</p>
+                <SectionTitle title="Pitches" note="avg velo" />
+                <div className="arsenal">
+                  {block.arsenal.map((p) => (
+                    <div key={p.code} className="pitch">
+                      <div className="pitch__name">{p.name}</div>
+                      <div className="pitch__velo">
+                        {p.velo != null
+                          ? <>{p.velo.toFixed(1)}<span className="pitch__unit">mph</span></>
+                          : DASH}
+                      </div>
+                      {p.usage != null && (
+                        <div className="pitch__usage">{Math.round(p.usage * 100)}%</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </>
             )}
 
@@ -171,7 +243,14 @@ export function PlayerPage({ id, asOf, sportId }) {
                   head={['Date', 'Opp', ...block.gameLog.columns]}
                   rows={block.gameLog.rows.map((r) => ({
                     key: r.date,
-                    cells: [r.date, `${r.home ? 'vs' : '@'} ${r.opp}`, ...r.cells],
+                    cells: [
+                      r.date,
+                      <>
+                        {r.home ? 'vs' : '@'}{' '}
+                        <GameLink path={r.boxscorePath}>{r.opp.toUpperCase()}</GameLink>
+                      </>,
+                      ...r.cells,
+                    ],
                   }))}
                 />
               </>
@@ -188,6 +267,8 @@ export function PlayerPage({ id, asOf, sportId }) {
                     current: r.isCurrent,
                     cells: [`${r.year}${r.isCurrent ? '*' : ''}`, ...r.cells],
                   }))}
+                  total={block.yearByYear.total}
+                  totalLabel="Career"
                 />
               </>
             )}
@@ -216,6 +297,25 @@ export function PlayerPage({ id, asOf, sportId }) {
 
 function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
+}
+
+// A plain, spoiler-safe link to a game's (sealed) box score — the game-log
+// opponent and the MLB-debut fact. Mirrors PlayerLink/TeamLink: no underline at
+// rest, renders plain children when no path could be resolved.
+function GameLink({ path, className = '', children }) {
+  const navigate = useNav()
+  if (!path) {
+    return <span className={className}>{children}</span>
+  }
+  return (
+    <button
+      type="button"
+      className={`plink ${className}`}
+      onClick={() => navigate(path)}
+    >
+      {children}
+    </button>
+  )
 }
 
 function BackBtn({ onClick }) {
@@ -258,7 +358,8 @@ function SplitCard({ label, side }) {
   )
 }
 
-function Ledger({ head, rows, leftCols = 2 }) {
+function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '' }) {
+  const cellClass = (i) => (i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : '')
   return (
     <div className="ledger-wrap">
       <table className="ledger">
@@ -273,11 +374,20 @@ function Ledger({ head, rows, leftCols = 2 }) {
           {rows.map((r) => (
             <tr key={r.key} className={r.current ? 'is-current' : ''}>
               {r.cells.map((c, i) => (
-                <td key={i} className={i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : ''}>{c}</td>
+                <td key={i} className={cellClass(i)}>{c}</td>
               ))}
             </tr>
           ))}
         </tbody>
+        {total && (
+          <tfoot>
+            <tr className="is-total">
+              {[totalLabel, ...total].map((c, i) => (
+                <td key={i} className={cellClass(i)}>{c}</td>
+              ))}
+            </tr>
+          </tfoot>
+        )}
       </table>
     </div>
   )
