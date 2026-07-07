@@ -2161,6 +2161,106 @@ body {
   color: var(--text-heading);
 }
 
+/* ---------------------------------------------------------------- game buzz */
+/* The night's Bluesky posts — a second, independently sealed card under the box
+   score, to crib storytelling numbers into the paper's GAME NOTES box. */
+.buzz {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.buzz__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+.buzz__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.buzz__note {
+  font-size: 11px;
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+/* Restore padding the boxscore's statgrid reset strips off (see .boxscore
+   .statgrid); higher specificity so it wins wherever it sits in the file. */
+.boxscore .buzz .statgrid {
+  padding: var(--space-3);
+  background: none;
+}
+
+.buzz__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.buzz__post {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.buzz__post:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.buzz__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: 3px;
+}
+
+.buzz__handle {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 12.5px;
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.buzz__time,
+.buzz__eng {
+  font-size: 11px;
+  color: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+.buzz__eng {
+  margin-left: auto;
+}
+
+.buzz__text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+.buzz__state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .bs {
   display: flex;
   flex-direction: column;

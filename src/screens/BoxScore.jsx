@@ -1,6 +1,7 @@
 import { selectBoxscore } from '../api/boxscore.js'
 import { managerLabel } from '../api/mlb.js'
 import { SealBox } from '../components/SealBox.jsx'
+import { GameBuzzCard } from '../components/GameBuzz.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in.
@@ -43,6 +44,11 @@ export function BoxScore({ feed, managers, scorebookWeather, onInnings }) {
           )
         }}
       </SealBox>
+
+      {/* A second, independent seal: the night's Bluesky buzz to seed GAME
+          NOTES. Separately sealed because it too reveals the score, and its
+          fetch is deferred until its own tap. */}
+      <GameBuzzCard feed={feed} />
     </div>
   )
 }
