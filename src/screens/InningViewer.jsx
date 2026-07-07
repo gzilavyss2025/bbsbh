@@ -21,8 +21,10 @@ import {
   rollingPitches,
 } from '../api/derive.js'
 import { computePitcherLines } from '../api/pitchers.js'
+import { revealDefense } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
+import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
 // then the bottom of the 1st, …), a single SealBox whose one tap reveals that
@@ -189,8 +191,7 @@ export function InningViewer({ feed, started, inning, half, onInning, onReload, 
           ‹ Back
         </button>
         <span className="inningnav__label">
-          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}{' '}
-          <span className="inningnav__of">of {unlocked}</span>
+          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
         </span>
         <button
           onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
@@ -256,6 +257,7 @@ function HalfInning({
         {label} {ordinal(inning)}
         <span className="half__team">
           {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
+          <span className="half__dot" aria-hidden="true">•</span>{' '}
           {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
         </span>
       </h3>
@@ -293,33 +295,55 @@ function HalfInning({
                   small
                 />
               </div>
-              {/* Statcast superlatives for the half — the game-notes numbers
-                  (fastest pitch, hardest/longest ball). Tracking data is often
-                  absent at MiLB levels, so the row only renders when the feed
-                  actually carried it. Same reveal path as everything above. */}
-              {(d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
-                <div className="pitchgrid pitchgrid--statcast">
-                  {d.maxVelo != null && (
-                    <Stat
-                      k={d.maxVeloType || 'Fastest pitch'}
-                      v={`${d.maxVelo.toFixed(1)}`}
-                      unit="mph"
-                      small
-                    />
-                  )}
-                  {d.hardestHit != null && (
-                    <Stat k="Hardest hit" v={d.hardestHit.toFixed(1)} unit="mph" small />
-                  )}
-                  {d.longestHit != null && (
-                    <Stat k="Longest ball" v={Math.round(d.longestHit)} unit="ft" small />
-                  )}
-                </div>
-              )}
               <PlayByPlay
                 feed={feed}
                 inning={inning}
                 half={half}
                 battingSide={battingSide}
+              />
+              {/* Statcast superlatives for the half — the game-notes numbers
+                  (fastest pitch, hardest/longest ball), sat below the feed.
+                  Tracking data is often absent at MiLB levels, so the row only
+                  renders when the feed carried it. Same reveal path as above. */}
+              {(d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
+                <div className="statcast">
+                  {d.maxVelo != null && (
+                    <StatcastCard
+                      label="Fastest pitch"
+                      value={d.maxVelo.toFixed(1)}
+                      unit="MPH"
+                      who={d.maxVeloPlayer}
+                      detail={d.maxVeloType}
+                    />
+                  )}
+                  {d.hardestHit != null && (
+                    <StatcastCard
+                      label="Hardest hit"
+                      value={d.hardestHit.toFixed(1)}
+                      unit="MPH"
+                      who={d.hardestHitPlayer}
+                    />
+                  )}
+                  {d.longestHit != null && (
+                    <StatcastCard
+                      label="Longest ball"
+                      value={Math.round(d.longestHit)}
+                      unit="FT"
+                      who={d.longestHitPlayer}
+                    />
+                  )}
+                </div>
+              )}
+              {/* The defense on the field this half, built up from the starting
+                  nine plus every substitution revealed so far (api/defense.js —
+                  reveal-only). A defensive change is spoiler-adjacent, so it's
+                  computed here inside the seal, gated to this half. */}
+              <DefenseSection
+                feed={feed}
+                inning={inning}
+                half={half}
+                fieldingSide={battingSide === 'away' ? 'home' : 'away'}
+                fieldingAbbr={pitchingAbbr}
               />
             </>
           )
@@ -417,7 +441,7 @@ function RollingLine({
                           type="button"
                           className={`rolling__pick ${active ? 'is-active' : ''} ${
                             l ? '' : 'rolling__pending'
-                          }`}
+                          } ${l && l.runs > 0 ? 'rolling__runs' : ''}`}
                           aria-current={active ? 'true' : undefined}
                           // The label must carry the cell's value too — it
                           // overrides the visible text in the accessible name,
@@ -565,14 +589,52 @@ function Stat({ k, v, unit, tone, big, small }) {
   )
 }
 
-// Persistent roster reference, expanded by default: the bullpen (with
+// One Statcast superlative below the feed: the measure up top (FASTEST PITCH),
+// the value with its unit trailing in a smaller face (95.2 MPH), then who did
+// it beneath — a pitcher's card also names the pitch type (MAY (SINKER)).
+function StatcastCard({ label, value, unit, who, detail }) {
+  return (
+    <div className="statcast__card">
+      <span className="statcast__label">{label}</span>
+      <span className="statcast__value">
+        {value}
+        <em className="statcast__unit"> {unit}</em>
+      </span>
+      {who && (
+        <span className="statcast__who">
+          {who.toUpperCase()}
+          {detail ? ` (${detail.toUpperCase()})` : ''}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// The fielding team's live defensive alignment for this half, drawn as the
+// scorebook diamond and captioned with the fielding side. Reveal-only
+// (revealDefense) — rendered here, inside the seal, so a defensive change never
+// leaks before the user reveals its inning.
+function DefenseSection({ feed, inning, half, fieldingSide, fieldingAbbr }) {
+  const defense = revealDefense(feed, fieldingSide, inning, half)
+  if (defense.length === 0) return null
+  return (
+    <section className="halfdefense">
+      <h4 className="halfdefense__title">
+        {fieldingAbbr ? `${fieldingAbbr} ` : ''}defense
+      </h4>
+      <DefenseDiamond defense={defense} />
+    </section>
+  )
+}
+
+// Persistent roster reference, collapsed by default: the bullpen (with
 // handedness as LHP/RHP) and the bench (with position) as they stood at first
 // pitch, for lookup while scoring. A player who has entered the game is struck
 // through — no longer eligible — but ONLY once his entry sits at or below the
 // reveal mark; a substitution the user hasn't revealed their way to yet renders
 // like any other available player, so the card never hints at a sealed inning.
 function RosterPanel({ title, roster, revealedThrough }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const empty = roster.bullpen.length === 0 && roster.bench.length === 0
   const entered = (p) => p.enteredIdx != null && p.enteredIdx <= revealedThrough
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`

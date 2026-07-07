@@ -1116,6 +1116,21 @@ body {
   color: var(--graphite-soft);
 }
 
+/* A fielder who's been replaced: struck through in pencil, the reliever penciled
+   on his own writing line above (the stack renders newest-on-top). */
+.defdiamond__name--out {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+/* The inning a substitute took the field, in parens beside his name. */
+.defdiamond__enter {
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+}
+
 .defdiamond__num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -1145,6 +1160,13 @@ body {
 .defdiamond__dhname {
   font-weight: var(--w-semibold);
   color: var(--text-body);
+}
+
+/* The DH's substitution stack shares the diamond's writing-line names. */
+.defdiamond__dhstack {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
 /* ---------------------------------------------------------------- innings */
@@ -1269,6 +1291,11 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
+.half__dot {
+  color: var(--accent-primary);
+  font-weight: var(--w-bold);
+}
+
 /* ---------------------------------------------------------------- sealbox */
 /* The signature spoiler cover: kraft tape hatch over the inning totals. */
 .sealbox.cover {
@@ -1341,10 +1368,83 @@ body {
   border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
-/* Statcast superlatives row (fastest pitch / hardest hit / longest ball):
-   up to three wider cells, only rendered when the feed carried tracking. */
-.pitchgrid--statcast {
+/* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
+   below the play-by-play feed. Each card reads top-to-bottom: the measure, the
+   value with its unit trailing small, then who did it. Only rendered when the
+   feed carried tracking data. */
+.statcast {
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+.statcast__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 10px 6px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+
+.statcast__label {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.statcast__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  line-height: 1;
+  color: var(--text-heading);
+}
+
+.statcast__unit {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  opacity: 0.7;
+}
+
+.statcast__who {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  line-height: 1.2;
+}
+
+/* The fielding team's live alignment for the half, below the feed — the lineup
+   page's defense diamond, now building up substitutions as innings are revealed
+   (reveal-only, see api/defense.js). */
+.halfdefense {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+.halfdefense__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
 }
 
 .stat {
@@ -1904,6 +2004,13 @@ body {
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
+/* Rule every inning off into its own bordered box — a fixed-width cell no
+   matter how big the frame, so a 10-run inning reads the same width as a 0. */
+.rolling__grid th + th,
+.rolling__grid td + td {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+
 .rolling__grid thead th {
   font-size: 11px;
   font-weight: var(--w-semibold);
@@ -1966,6 +2073,14 @@ body {
 
 .rolling__pick.rolling__pending {
   color: var(--graphite-soft);
+}
+
+/* A frame that scored: inked bold and seam-red, the way a scorer's eye jumps
+   to the runs. Placed before is-active so the selected half still wins (the
+   crossing white-on-navy ink). */
+.rolling__pick.rolling__runs {
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
 }
 
 .rolling__pick.is-active {

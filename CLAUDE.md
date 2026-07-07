@@ -50,13 +50,16 @@ there is no fetched-then-hidden node to leak.
 It is enforced structurally by two conventions:
 
 1. **Score-revealing selectors are isolated in their own modules** and are
-   "reveal-only": `src/api/linescore.js` (per-inning R/H/E/LOB, full-game totals)
-   and `src/api/derive.js` (pitches/whiffs/first-pitch strikes computed from
-   play-by-play). These must only be *called from inside* a `SealBox`'s reveal
-   render function. Never call them at render top-level or in a `useMemo` that
-   runs before reveal. Contrast `src/api/select.js`, which holds only
-   spoiler-**free** selectors (lineups, umpires, venue, rosters) and touches no
-   runs/hits/errors.
+   "reveal-only": `src/api/linescore.js` (per-inning R/H/E/LOB, full-game totals),
+   `src/api/derive.js` (pitches/whiffs/first-pitch strikes + Statcast
+   superlatives computed from play-by-play), and `src/api/defense.js`
+   (`revealDefense` — the fielding team's live alignment: starting nine plus
+   every defensive sub/switch *through a given half*; the sub timing is
+   spoiler-adjacent, so it's gated to the half being revealed). These must only
+   be *called from inside* a `SealBox`'s reveal render function. Never call them
+   at render top-level or in a `useMemo` that runs before reveal. Contrast
+   `src/api/select.js`, which holds only spoiler-**free** selectors (lineups,
+   umpires, venue, rosters) and touches no runs/hits/errors.
 
 2. **`src/components/SealBox.jsx`** takes `children` as a *render function*,
    invoked only in the revealed branch — so the sealed value is computed lazily
