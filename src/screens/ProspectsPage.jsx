@@ -1,4 +1,6 @@
-import { fetchTopProspects } from '../api/prospects.js'
+import { fetchAffiliates, fetchRosterIdsForTeams } from '../api/mlb.js'
+import { fetchTopProspects, prospectAffiliateMap } from '../api/prospects.js'
+import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -17,6 +19,48 @@ function generatedLabel(iso) {
   return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
 }
 
+// Resolves each ranked player's CURRENT level by live roster membership,
+// same approach TeamPage.jsx's org-wide prospect table uses (see
+// orgProspectsForTeam/prospectAffiliateMap in api/prospects.js) — the
+// scraped `levelRaw` string is sometimes ambiguous (e.g. "ALL (2)" for a
+// player who's played at multiple levels this season) or stale (a recent
+// call-up). `p.teamId` in the snapshot is each player's MLB parent org, so
+// this fans out an affiliate-tree + roster lookup per distinct org, then
+// flips every org's rosters (its MLB roster plus every full-season
+// affiliate) into one global playerId -> team map.
+async function resolveCurrentLevels(players) {
+  const season = new Date().getFullYear()
+  const orgIds = [...new Set(players.map((p) => p.teamId).filter(Boolean))]
+  const affiliatesByOrg = await Promise.all(orgIds.map((id) => fetchAffiliates(id, season)))
+
+  const teamById = new Map()
+  const rosterTeamIds = new Set()
+  orgIds.forEach((orgId, i) => {
+    teamById.set(orgId, { id: orgId, sportId: 1 })
+    rosterTeamIds.add(orgId)
+    for (const aff of affiliatesByOrg[i]) {
+      teamById.set(aff.id, aff)
+      rosterTeamIds.add(aff.id)
+    }
+  })
+
+  const rosterIds = await fetchRosterIdsForTeams([...rosterTeamIds])
+  const teamByPlayer = prospectAffiliateMap(rosterIds)
+
+  return players.map((p) => {
+    const resolvedTeamId = teamByPlayer.get(p.playerId) ?? null
+    const resolvedTeam = resolvedTeamId ? teamById.get(resolvedTeamId) : null
+    return { ...p, levelLabel: resolvedTeam ? SPORT_LABEL[resolvedTeam.sportId] ?? p.levelRaw : p.levelRaw }
+  })
+}
+
+async function loadProspects() {
+  const snapshot = await fetchTopProspects()
+  const players = snapshot.players ?? []
+  if (!players.length) return snapshot
+  return { ...snapshot, players: await resolveCurrentLevels(players) }
+}
+
 // A standalone replica of MLB Pipeline's Top 100 Prospects list, ranked in
 // source order (batters and pitchers interleaved, same as the source),
 // linking every row straight into this app's own player/team pages. Data is
@@ -26,7 +70,7 @@ function generatedLabel(iso) {
 // the scrape).
 export function ProspectsPage({ onBack }) {
   useDocumentTitle('Top 100 Prospects')
-  const { loading, error, data } = useAsync(() => fetchTopProspects(), [])
+  const { loading, error, data } = useAsync(() => loadProspects(), [])
   const players = data?.players ?? []
 
   return (
@@ -58,10 +102,10 @@ export function ProspectsPage({ onBack }) {
               key: p.playerId,
               cells: [
                 p.rank,
-                <PlayerLink key="player" id={p.playerId}>{p.name}</PlayerLink>,
+                <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
                 p.position || DASH,
                 p.number || DASH,
-                p.levelRaw || DASH,
+                p.levelLabel || DASH,
                 <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo">
                   <TeamLogo teamId={p.teamId} name={p.team} size={20} />
                 </TeamLink>,
