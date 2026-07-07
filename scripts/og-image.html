@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<!--
+  Source art for the social/link-preview image (Open Graph + Twitter card).
+  Rendered to public/og-image.png at 1200×630 by scripts/gen-og-image.mjs.
+  Direction "C" — kraft tape on manila paper. Palette lifted verbatim from
+  src/tokens/colors.css; the ball is the BaseballMark glyph (simplified
+  variant, same as public/icons/icon.svg). Edit here, then re-run the script.
+-->
+<style>
+  :root {
+    --navy: #1b2a3a;
+    --cream: #fbf6e9;
+    --paper: #f6efdc;
+    --clay: #b4453a;
+    --seal: #b5824a;
+    --seal-hatch: #a9743c;
+    --seal-ink: #1e1405;
+    --graphite: #6b6558;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; }
+  body {
+    font-family: "Helvetica Neue", Arial, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+  .og {
+    width: 1200px; height: 630px; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; gap: 56px;
+    padding: 0 104px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 74px, rgba(180,69,58,.05) 74px 75px),
+      var(--paper);
+    color: var(--navy);
+  }
+  /* inner keyline, like a scorebook page border */
+  .og::after {
+    content: ""; position: absolute; inset: 26px;
+    border: 4px solid rgba(27,42,58,.14); border-radius: 22px; pointer-events: none;
+  }
+  .ball { width: 300px; height: 300px; flex: none; display: block; }
+  .ball svg { display: block; width: 100%; height: 100%; }
+  .txt { display: flex; flex-direction: column; gap: 20px; z-index: 1; }
+  .kick {
+    font-size: 30px; letter-spacing: .24em; text-transform: uppercase;
+    color: var(--clay); font-weight: 700;
+  }
+  .word {
+    font-size: 100px; font-weight: 800; letter-spacing: -.02em; line-height: .95;
+    color: var(--navy);
+  }
+  .sub { font-size: 36px; color: var(--graphite); max-width: 470px; line-height: 1.3; }
+  /* kraft-tape strip, stamped across the top-right corner */
+  .tape {
+    position: absolute; top: 58px; right: -72px; transform: rotate(9deg);
+    background:
+      repeating-linear-gradient(-45deg, var(--seal) 0 24px, var(--seal-hatch) 24px 48px);
+    color: var(--seal-ink); font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; font-size: 30px; padding: 16px 92px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.2);
+  }
+</style>
+</head>
+<body>
+  <div class="og">
+    <span class="tape">Spoiler-safe</span>
+    <span class="ball">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="44" fill="#FBF6E9" stroke="#1B2A3A" stroke-width="7"/>
+        <path d="M33.6,27.44 Q57.36,60 33.6,92.56" fill="none" stroke="#B4453A" stroke-width="5" stroke-linecap="round"/>
+        <path d="M86.4,27.44 Q62.64,60 86.4,92.56" fill="none" stroke="#B4453A" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="txt">
+      <span class="kick">Baseball Scorebook Helper</span>
+      <span class="word">Scorebook</span>
+      <span class="sub">Score the game by hand. Every number stays sealed until you tap.</span>
+    </span>
+  </div>
+</body>
+</html>

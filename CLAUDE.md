@@ -29,6 +29,10 @@ npm run build      # production build → dist/
 npm run preview    # serve the built app
 npm run lint       # eslint .
 node scripts/gen-icons.mjs   # regenerate PWA PNG icons from public/icons/icon.svg
+node scripts/gen-og-image.mjs
+                   # regenerate public/og-image.png (1200×630 link-preview /
+                   # Open Graph card) from scripts/og-image.html. The og:*
+                   # tags in index.html point at it; URLs there are absolute.
 node scripts/game-buzz.mjs <gamePk>
                    # post-game: top social posts from the game's time window,
                    # ranked by engagement, to seed handwritten GAME NOTES. FREE
