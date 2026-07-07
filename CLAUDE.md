@@ -168,6 +168,12 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
   enrichment endpoints (statsapi season/matchup/standings stats, Baseball
   Savant `/gf` with xBA/barrels/bat speed) with per-endpoint spoiler risk. Read
   it before wiring any new data source.
+- `docs/uniforms-and-logos.md` — verified (July 2026) findings on statsapi's
+  `/api/v1/uniforms/team` (per-team catalog of jersey/pants/cap options) and
+  `/api/v1/uniforms/game` (what each team actually wore — spoiler-free, but
+  empty until ~game time), plus the full inventory of what logo art the
+  mlbstatic CDNs do and don't serve (no alternate/City Connect marks exist).
+  Read it before touching uniforms or logo variants.
 
 **Screens** (`src/screens/`): `GameSelect` (slate with the MLB/AAA/AA/A+/A level
 toggle) → `GameView` (owns the site-home bar + grayscale away@home masthead that
