@@ -81,22 +81,14 @@ body {
    rule + soft shadow, so the game cards slide cleanly underneath instead of
    ghosting through a transparent header. Full-bleed to the screen edges (the
    negative gutter margins) so nothing peeks alongside it while scrolling. */
+/* The slate controls (title, level tabs, date) scroll away with the cards —
+   deliberately NOT sticky, so a long slate reads as one continuous sheet
+   rather than pinning the tabs over the games. */
 .slatehead {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   margin: 0 calc(-1 * var(--app-gutter));
   padding: 0 var(--app-gutter) 8px;
   background: var(--bg-canvas);
   border-bottom: var(--bw-hair) solid var(--border-rule);
-  box-shadow: 0 6px 14px -10px rgba(22, 34, 47, 0.35);
-}
-
-@supports (backdrop-filter: blur(8px)) {
-  .slatehead {
-    background: color-mix(in srgb, var(--bg-canvas) 88%, transparent);
-    backdrop-filter: blur(8px);
-  }
 }
 
 /* ---------------------------------------------------------------- top bar */
@@ -2464,6 +2456,80 @@ body {
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
+}
+
+/* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
+   marks descending 3→1; each name over its game line in smaller mono type. Card
+   matches the decisions block above it. */
+.bs__stars {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+}
+.bs__starsTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__starList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.bs__star {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+/* Fixed to the three-star width so all three names left-align regardless of
+   how many marks the row carries. */
+.bs__starMarks {
+  flex: none;
+  min-width: 44px;
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: 1px;
+  color: var(--seal);
+}
+.bs__starWho {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.bs__starHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bs__starName {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.bs__starMeta {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__starStat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* Game-info foot: WP, umpires, weather, T, Att… */

@@ -294,6 +294,92 @@ export function selectBoxscore(feed) {
   }
 }
 
+// THREE STARS — the game's three most valuable players by win-probability added,
+// the hockey-style nod under the pitchers of record. Reveal-only, SAME rule as
+// selectBoxscore: only ever call this inside the SealBox's reveal render. WPA is
+// NOT in the feed — it comes from the separate /winProbability endpoint — so the
+// per-play array is passed in; absent at most MiLB parks, so a null/empty array
+// returns [] and the card hides.
+//
+// A play's WPA (`homeTeamWinProbabilityAdded`, in percentage points) is credited
+// to the two players in the box: the BATTER earns his own team's win-prob swing,
+// the PITCHER the opposite. Which team bats is `about.isTopInning` (away bats the
+// top). Sum per player, take the three biggest movers, and attach each one's
+// game line (pitching if he recorded an out, otherwise batting).
+export function computeThreeStars(winProb, feed) {
+  if (!Array.isArray(winProb) || winProb.length === 0) return []
+  const wpa = new Map()
+  const add = (person, v) => {
+    if (!person?.id) return
+    const e = wpa.get(person.id) ?? { id: person.id, w: 0 }
+    e.w += v
+    wpa.set(person.id, e)
+  }
+  for (const e of winProb) {
+    const h = e.homeTeamWinProbabilityAdded
+    if (typeof h !== 'number') continue
+    const top = e.about?.isTopInning
+    add(e.matchup?.batter, top ? -h : h) // away (top) batter earns −h
+    add(e.matchup?.pitcher, top ? h : -h)
+  }
+  return [...wpa.values()]
+    .sort((a, b) => b.w - a.w)
+    .slice(0, 3)
+    .map((e, i) => {
+      const line = starLine(feed, e.id)
+      // stars: 3 for the top mover, 2 for the second, 1 for the third.
+      return line ? { ...line, stars: 3 - i } : null
+    })
+    .filter(Boolean)
+}
+
+// A star's identity + one-line game stat, found by scanning both boxscores (the
+// player sits on one side or the other). Pitching line if he recorded an out,
+// else his batting line.
+function starLine(feed, id) {
+  for (const side of ['away', 'home']) {
+    const bp = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]
+    if (!bp) continue
+    const gd = feed?.gameData?.players?.[`ID${id}`] ?? bp.person ?? {}
+    const pit = bp.stats?.pitching ?? {}
+    const bat = bp.stats?.batting ?? {}
+    const pitched = (pit.outs ?? 0) > 0
+    return {
+      id,
+      name: shortName(gd),
+      teamAbbr: feed?.gameData?.teams?.[side]?.abbreviation ?? '',
+      pos: pitched ? 'P' : positionLabel(bp),
+      stat: pitched ? pitchingStat(pit) : battingStat(bat),
+    }
+  }
+  return null
+}
+
+// "6.0 IP, 3 H, 1 ER, 7 K" — the pitcher's story in the order a line score reads.
+function pitchingStat(s) {
+  return [
+    `${s.inningsPitched ?? '0.0'} IP`,
+    `${s.hits ?? 0} H`,
+    `${s.earnedRuns ?? 0} ER`,
+    `${s.strikeOuts ?? 0} K`,
+  ].join(', ')
+}
+
+// "2-4, HR, 3 RBI, 2 R" — hits-for-at-bats, then extra-base hits, RBI, runs,
+// steals; each count only shown when it happened (a count >1 prefixes the tag).
+function battingStat(b) {
+  const n = (count, tag) =>
+    count > 0 ? `${count > 1 ? `${count} ` : ''}${tag}` : ''
+  const parts = [`${b.hits ?? 0}-${b.atBats ?? 0}`]
+  for (const p of [n(b.homeRuns, 'HR'), n(b.triples, '3B'), n(b.doubles, '2B')]) {
+    if (p) parts.push(p)
+  }
+  if (b.rbi > 0) parts.push(`${b.rbi} RBI`)
+  if (b.runs > 0) parts.push(`${b.runs} R`)
+  if (b.stolenBases > 0) parts.push(`${b.stolenBases} SB`)
+  return parts.join(', ')
+}
+
 function decisionName(feed, person) {
   if (!person?.id) return ''
   const gd = feed?.gameData?.players?.[`ID${person.id}`]

@@ -60,6 +60,16 @@ function normalizeGame(game, sportId) {
       teamName: home?.team?.teamName ?? home?.team?.name,
       abbreviation: teamAbbr(home?.team),
     },
+    // Venue timezone (from hydrate=venue(timezone)) so the card can print the
+    // start time in the PARK's local clock, not the viewer's — a Dodgers home
+    // game reads "7:10 PDT" for everyone. `tz` is the abbreviation to append;
+    // `tzId` is the IANA zone Intl formats in. Both degrade to '' on lean feeds
+    // (the card then falls back to the viewer's local time, unlabeled).
+    venue: {
+      id: game.venue?.id,
+      tz: game.venue?.timeZone?.tz ?? '',
+      tzId: game.venue?.timeZone?.id ?? '',
+    },
     // Scorebook-readiness flags (spoiler-free — none of these reveal a score),
     // hydrated onto the slate so a card can show at a glance whether the basics
     // you'd pencil in pre-game are posted yet. All degrade to `false` when the
@@ -83,7 +93,7 @@ function normalizeGame(game, sportId) {
 export async function fetchSchedule(
   dateStr,
   sportId = 1,
-  hydrate = 'team,lineups,officials,probablePitcher',
+  hydrate = 'team,venue(timezone),lineups,officials,probablePitcher',
 ) {
   const data = await getJson(
     `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=${hydrate}`,
@@ -143,6 +153,21 @@ export async function fetchGameFeed(gamePk) {
   return getJson(`/api/v1.1/game/${gamePk}/feed/live`)
 }
 
+// Per-play win probability — the ONLY source of WPA, which is absent from the
+// live feed (verified: /feed/live carries no homeTeamWinProbabilityAdded). Used
+// solely to rank the box score's three stars, so it's fetched lazily with that
+// view and resolves null on failure — many MiLB parks don't compute it, and it
+// must never take the game view down. Score-revealing (like the feed itself), so
+// the caller only turns it into DOM inside the box score's seal.
+export async function fetchWinProbability(gamePk) {
+  try {
+    const data = await getJson(`/api/v1/game/${gamePk}/winProbability`)
+    return Array.isArray(data) ? data : null
+  } catch {
+    return null
+  }
+}
+
 // The uniforms each club is actually wearing tonight, from the dedicated
 // /api/v1/uniforms/game endpoint — the live feed carries zero uniform data
 // (see docs/uniforms-and-logos.md for the verified findings). Spoiler-FREE:
@@ -178,6 +203,32 @@ export async function fetchGameUniforms(gamePk) {
   } catch {
     // Not posted yet / MiLB / endpoint hiccup — the uniform row just shows "—".
     return null
+  }
+}
+
+// Slate-wide uniform readiness: given the day's gamePks, return a map
+// gamePk -> boolean of whether BOTH clubs' uniforms are posted yet. The
+// /uniforms/game endpoint takes a comma-separated gamePks list, so the whole
+// slate resolves in ONE request rather than one per card. Spoiler-free (a
+// uniform assignment reveals no score) and, like the per-game fetch, empty
+// until ~first pitch and absent for MiLB — so a missing/errored game just maps
+// to `false` (the card's uniform chip stays red until the assignment lands).
+export async function fetchScheduleUniforms(gamePks) {
+  const list = (gamePks ?? []).filter(Boolean)
+  if (list.length === 0) return {}
+  try {
+    const data = await getJson(
+      `/api/v1/uniforms/game?gamePks=${list.join(',')}`,
+    )
+    const posted = (side) =>
+      (side?.uniformAssets ?? []).some((a) => a.uniformAssetText)
+    const out = {}
+    for (const u of data.uniforms ?? []) {
+      out[u.gamePk] = posted(u.away) && posted(u.home)
+    }
+    return out
+  } catch {
+    return {}
   }
 }
 

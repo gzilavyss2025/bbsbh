@@ -4,6 +4,7 @@ import {
   fetchGameUniforms,
   fetchManager,
   fetchPitcherSeasonLine,
+  fetchWinProbability,
   uniformLine,
 } from '../api/mlb.js'
 import { generateScorebookWeather } from '../api/weather.js'
@@ -90,6 +91,16 @@ export function GameView({ game, section, onSection, onHome }) {
     ])
     return { away, home }
   }, [game.gamePk, Boolean(feed)])
+
+  // Per-play win probability, the sole source of WPA for the box score's three
+  // stars (the feed carries none). Only the box-score view uses it, so it's
+  // fetched lazily once the feed exists and keyed on gamePk + Boolean(feed) like
+  // the season lines — a live Refresh won't re-pull it, matching how the box
+  // score is really a post-game read. Resolves null off-MLB, hiding the card.
+  const winProb = useAsync(
+    () => (feed ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
+    [game.gamePk, Boolean(feed)],
+  )
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
@@ -211,6 +222,7 @@ export function GameView({ game, section, onSection, onHome }) {
           managers={managers.data}
           uniforms={uniformText}
           scorebookWeather={weather.data}
+          winProbability={winProb.data}
           onInnings={() => onSection(lastInningSection.current)}
         />
       )}

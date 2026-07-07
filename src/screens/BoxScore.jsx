@@ -1,4 +1,4 @@
-import { selectBoxscore } from '../api/boxscore.js'
+import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
 import { managerLabel } from '../api/mlb.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
@@ -20,7 +20,14 @@ function managerValue(mgr) {
 // nothing score-revealing is in the DOM until the user taps to reveal, exactly
 // like every half-inning seal. This holds even for a deep link straight to the
 // box score, so the card's "Box score" shortcut can't spoil either.
-export function BoxScore({ feed, managers, uniforms, scorebookWeather, onInnings }) {
+export function BoxScore({
+  feed,
+  managers,
+  uniforms,
+  scorebookWeather,
+  winProbability,
+  onInnings,
+}) {
   return (
     <div className="boxscore">
       <div className="boxscore__head">
@@ -35,9 +42,13 @@ export function BoxScore({ feed, managers, uniforms, scorebookWeather, onInnings
       <SealBox label="Tap to reveal the box score">
         {() => {
           const box = selectBoxscore(feed)
+          // Computed here, inside the reveal render, so WPA never reaches the DOM
+          // before the tap — same gate as the box score itself.
+          const stars = computeThreeStars(winProbability, feed)
           return (
             <BoxScoreBody
               box={box}
+              stars={stars}
               managers={managers}
               uniforms={uniforms}
               scorebookWeather={scorebookWeather}
@@ -59,7 +70,7 @@ export function BoxScore({ feed, managers, uniforms, scorebookWeather, onInnings
 // visiting team's crew and first pitch above its batting/pitching, the home
 // team's ballpark/weather/times above its own. The complete MLB-style game-info
 // text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ box, managers, uniforms, scorebookWeather }) {
+function BoxScoreBody({ box, stars, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -97,6 +108,7 @@ function BoxScoreBody({ box, managers, uniforms, scorebookWeather }) {
     <div className="bs">
       <Scoreboard away={box.away} home={box.home} innings={box.innings} />
       <Decisions decisions={box.decisions} />
+      <ThreeStars stars={stars} />
       <InfoCard fields={awayFields} />
       <TeamBlock side={box.away} />
       <InfoCard fields={homeFields} />
@@ -335,6 +347,39 @@ function Decisions({ decisions }) {
           <span className="bs__decisionV">{p.v}</span>
         </span>
       ))}
+    </div>
+  )
+}
+
+// The three stars of the game — the hockey-tradition nod, ranked by
+// win-probability added (see computeThreeStars). Three filled stars for the top
+// mover, two for the second, one for the third; each name carries its game line
+// in smaller type. Hidden entirely when WPA isn't available (most MiLB parks).
+function ThreeStars({ stars }) {
+  if (!stars || stars.length === 0) return null
+  return (
+    <div className="bs__stars">
+      <h3 className="bs__starsTitle">Three stars</h3>
+      <ol className="bs__starList">
+        {stars.map((s) => (
+          <li className="bs__star" key={s.id}>
+            <span className="bs__starMarks" aria-label={`${s.stars} star`}>
+              {'★'.repeat(s.stars)}
+            </span>
+            <span className="bs__starWho">
+              <span className="bs__starHead">
+                <span className="bs__starName">{s.name}</span>
+                {(s.teamAbbr || s.pos) && (
+                  <span className="bs__starMeta">
+                    {[s.teamAbbr, s.pos].filter(Boolean).join(' · ')}
+                  </span>
+                )}
+              </span>
+              <span className="bs__starStat">{s.stat}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
     </div>
   )
 }
