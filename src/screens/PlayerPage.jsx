@@ -35,7 +35,7 @@ function monthDay(iso) {
 }
 function debutLabel(iso) {
   const [y, m, d] = (iso || '').split('-')
-  return y ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
+  return y ? `${MONTHS[Number(m) - 1].toUpperCase()} ${Number(d)}, ${y}` : ''
 }
 function draftLabel(draft) {
   if (!draft || !draft.year) return DASH
@@ -217,22 +217,19 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             {block.arsenal && (
               <>
-                <SectionTitle title="Pitches" note="avg velo" />
-                <div className="arsenal">
-                  {block.arsenal.map((p) => (
-                    <div key={p.code} className="pitch">
-                      <div className="pitch__name">{p.name}</div>
-                      <div className="pitch__velo">
-                        {p.velo != null
-                          ? <>{p.velo.toFixed(1)}<span className="pitch__unit">mph</span></>
-                          : DASH}
-                      </div>
-                      {p.usage != null && (
-                        <div className="pitch__usage">{Math.round(p.usage * 100)}%</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <SectionTitle title="Pitches" />
+                <Ledger
+                  leftCols={1}
+                  head={['Pitch', 'Velo', 'Usage']}
+                  rows={block.arsenal.map((p) => ({
+                    key: p.code,
+                    cells: [
+                      p.name,
+                      p.velo != null ? <>{p.velo.toFixed(1)} <span className="pitch__unit">mph</span></> : DASH,
+                      p.usage != null ? `${Math.round(p.usage * 100)}%` : DASH,
+                    ],
+                  }))}
+                />
               </>
             )}
 

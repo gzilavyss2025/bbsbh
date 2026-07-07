@@ -3398,39 +3398,6 @@ body {
 }
 
 /* ---- pitch arsenal: unique pitch types + average velocity ---- */
-.arsenal {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
-  gap: 6px;
-}
-.pitch {
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
-  padding: 9px 8px 8px;
-  text-align: center;
-}
-.pitch__name {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-size: 10px;
-  color: var(--text-caption);
-  line-height: 1.2;
-  min-height: 2.4em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.pitch__velo {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 17px;
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  margin-top: 4px;
-}
 .pitch__unit {
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -3439,13 +3406,6 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-muted);
   margin-left: 3px;
-}
-.pitch__usage {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 1px;
 }
 
 /* ---- 2026 All-Star banner — blue tape across the top of the card ---- */
