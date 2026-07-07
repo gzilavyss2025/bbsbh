@@ -13,7 +13,7 @@ import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
-import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
+import { BaseballMark } from '../components/BaseballMark.jsx'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -83,7 +83,7 @@ export function GameView({ game, section, onSection, onHome }) {
     <div className="screen">
       <div className="sitebar">
         <button className="sitebar__home" onClick={onHome} aria-label="Back to games">
-          <DiamondGlyph size={20} bases={[false, true, false]} />
+          <BaseballMark size={20} simplified />
           <span className="sitebar__word">Scorebook</span>
         </button>
       </div>

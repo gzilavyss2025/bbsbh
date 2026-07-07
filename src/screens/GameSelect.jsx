@@ -5,7 +5,7 @@ import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
-import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
+import { BaseballMark } from '../components/BaseballMark.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
@@ -53,7 +53,7 @@ export function GameSelect({ onPick, onShowLogos }) {
       <div className="slatehead">
         <header className="topbar">
           <h1 className="topbar__title">
-            <DiamondGlyph size={22} bases={[false, true, false]} />
+            <BaseballMark size={22} simplified />
             Scorebook
           </h1>
           <div className="topbar__right">
