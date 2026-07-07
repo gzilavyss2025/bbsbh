@@ -559,6 +559,38 @@ export async function fetchTeamRoster(teamId, season) {
   }
 }
 
+// A club's full affiliate tree in one request, via the dedicated
+// /teams/affiliates endpoint (a plain team hydrate doesn't carry this).
+// `hydrate=venue(location)` folds in each affiliate's ballpark city/state
+// alongside its own team id (which already drives the logo CDN), so the team
+// page's affiliates section needs no per-team follow-up fetch. Filtered to
+// the four full-season farm levels (AAA/AA/A+/A, sportIds 11/12/13/14) — the
+// endpoint also returns complex-league/DSL/alternate-site/"Prospects" entries
+// that aren't proper affiliate clubs the rest of the app tracks (see
+// MILB_LEVELS). Sorted highest level first. Degrades to [].
+const AFFILIATE_SPORT_IDS = [11, 12, 13, 14]
+export async function fetchAffiliates(teamId, season) {
+  if (!teamId || !season) return []
+  try {
+    const data = await getJson(
+      `/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}&hydrate=venue(location)`,
+    )
+    const teams = data.teams ?? []
+    return teams
+      .filter((t) => t.id !== teamId && AFFILIATE_SPORT_IDS.includes(t.sport?.id))
+      .map((t) => ({
+        id: t.id,
+        name: t.name,
+        sportId: t.sport?.id,
+        city: t.venue?.location?.city || t.locationName || '',
+        state: t.venue?.location?.stateAbbrev || t.venue?.location?.state || '',
+      }))
+      .sort((a, b) => AFFILIATE_SPORT_IDS.indexOf(a.sportId) - AFFILIATE_SPORT_IDS.indexOf(b.sportId))
+  } catch {
+    return []
+  }
+}
+
 // Division standings AS OF a date. The `date` param is honored by the API
 // (verified: a June-1 query returns the June-1 record, not today's), which is
 // what makes this spoiler-safe — pass the day BEFORE the game being scored so

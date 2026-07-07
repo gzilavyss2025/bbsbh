@@ -4,12 +4,14 @@ import {
   fetchStandings,
   fetchLeagueTeamStats,
   fetchAllStarRosterIds,
+  fetchAffiliates,
 } from '../api/mlb.js'
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 
 const DASH = '—'
@@ -51,7 +53,7 @@ async function loadTeam(id, asOf) {
   const season = Number((asOf || isoToday()).slice(0, 4))
   const standingsDate = asOf ? dayBefore(asOf) : null
 
-  const [roster, standings, league, allStarIds, warData] = await Promise.all([
+  const [roster, standings, league, allStarIds, warData, affiliates] = await Promise.all([
     fetchTeamRoster(id, season),
     team.league?.id
       ? fetchStandings(team.league.id, season, standingsDate)
@@ -59,6 +61,8 @@ async function loadTeam(id, asOf) {
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
     sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
     sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
+    // Affiliate tree only makes sense from the MLB parent looking down.
+    sportId === 1 ? fetchAffiliates(id, season) : Promise.resolve([]),
   ])
   // WAR data is a single current-season file (see src/api/war.js); only trust
   // it when its season matches the team page's — otherwise (a historical
@@ -130,6 +134,7 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers,
+    affiliates,
   }
 }
 
@@ -157,7 +162,7 @@ export function TeamPage({ id, asOf, sportId }) {
     )
   }
 
-  const { team, season, record, standings, batting, pitching, position, pitchers } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, affiliates } = data
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
@@ -239,6 +244,23 @@ export function TeamPage({ id, asOf, sportId }) {
                 badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
               }))}
             />
+          </>
+        )}
+
+        {affiliates.length > 0 && (
+          <>
+            <SectionTitle title="Affiliates" />
+            <div className="thub-affiliates">
+              {affiliates.map((a) => (
+                <TeamLink key={a.id} id={a.id} className="thub-affiliate">
+                  <TeamLogo teamId={a.id} name={a.name} size={48} />
+                  <span className="thub-affiliate__name">{a.name}</span>
+                  <span className="thub-affiliate__loc">
+                    {a.city}{a.state ? `, ${a.state}` : ''}
+                  </span>
+                </TeamLink>
+              ))}
+            </div>
           </>
         )}
       </div>
