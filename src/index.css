@@ -383,6 +383,60 @@ body {
   box-shadow: none;
 }
 
+/* --------------------------------------------------- level progression card
+   "Path to the Majors" chevron strip on a pre-debut player's page: one rung
+   per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
+   .levelnav toggle above. */
+.levelprog__arrow {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.levelprog__step {
+  flex: 1 1 0;
+  min-width: 54px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  text-align: center;
+  box-shadow: var(--inset-cell);
+}
+
+.levelprog__step.is-unreached {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.levelprog__step.is-current {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+
+.levelprog__step.is-target {
+  border-style: dashed;
+}
+
+.levelprog__label {
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+}
+
+.levelprog__detail {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 /* ---------------------------------------------------------------- hints */
 .hint {
   color: var(--text-muted);
@@ -3818,6 +3872,18 @@ body {
   color: var(--clay);
   margin-left: 3px;
   font-size: 11px;
+}
+/* Per-level sub-row under a season that spanned more than one MiLB level —
+   muted and indented so the combined row above it still reads as the year's
+   headline number. */
+.ledger tr.ledger__subrow td {
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+.ledger tr.ledger__subrow .opp {
+  padding-left: 20px;
+  font-style: italic;
 }
 /* Career total — the ledger footer, set off with a heavier rule + a tinted row
    so it reads as the sum of everything above it. */

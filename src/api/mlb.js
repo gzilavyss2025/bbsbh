@@ -2,7 +2,7 @@
 // browser; there is no backend. Field paths here were verified against the
 // live July 5 2026 Brewers @ D-backs game (gamePk 825061).
 
-import { SEARCHABLE_SPORT_IDS, SPORT_LABEL } from '../lib/teams.js'
+import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
 import { matchupSlug } from '../lib/route.js'
 
 const BASE = 'https://statsapi.mlb.com'
@@ -438,6 +438,21 @@ export async function fetchPersonStats(
   } catch {
     return []
   }
+}
+
+// Every yearByYear split for a person across every MiLB level. The live API
+// accepts exactly one sportId per request (a comma-list silently returns no
+// stats), so this fans out in parallel across MILB_LEVELS — the same
+// SEARCHABLE_SPORT_IDS idiom resolveGame already uses. Degrades per level (an
+// unplayed level just contributes no splits); raw splits only, tagged with
+// their own sport.id — dedup and shaping happen in person.js.
+export async function fetchMilbYearByYear(personId, group) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) =>
+      fetchPersonStats(personId, { type: 'yearByYear', group, sportId: lvl.sportId }),
+    ),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
 }
 
 // Resolve a set of gamePks to the bits a boxscore deep-link needs — official

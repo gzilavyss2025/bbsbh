@@ -1,6 +1,8 @@
+import { Fragment } from 'react'
 import {
   fetchPerson,
   fetchPersonStats,
+  fetchMilbYearByYear,
   fetchGamesByPk,
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
@@ -12,6 +14,7 @@ import {
   aggregateSplits,
   pitcherRole,
   buildBlock,
+  levelProgressionView,
   firstsFromGameLog,
   splitDisplayName,
 } from '../api/person.js'
@@ -21,6 +24,8 @@ import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { Headshot } from '../components/Headshot.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
+import { TeamLogo } from '../components/TeamLogo.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -68,7 +73,7 @@ async function loadPlayer(id, asOf) {
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
   const currentYear = Number(isoToday().slice(0, 4))
 
-  const [blocks, debutSplits] = await Promise.all([
+  const [results, debutSplits] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
@@ -80,17 +85,23 @@ async function loadPlayer(id, asOf) {
             fetchPersonStats(id, { type: 'career', group, sportId }),
             fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId }),
             fetchPersonStats(id, { type: 'gameLog', group, season, sportId }),
-            fetchPersonStats(id, { type: 'yearByYear', group, sportId }),
+            // A pre-debut MiLB player's year-by-year table nests every level
+            // he's played (see yearByYearView / levelProgressionView below);
+            // a debuted player keeps today's single-sportId fetch, untouched.
+            bio.debut
+              ? fetchPersonStats(id, { type: 'yearByYear', group, sportId })
+              : fetchMilbYearByYear(id, group),
             group === 'pitching'
               ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId })
               : Promise.resolve([]),
           ])
         const seasonStat = aggregateSplits(seasonSplits, group)
         const role = group === 'pitching' ? pitcherRole(seasonStat) : null
-        return buildBlock({
+        const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
-          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season,
+          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season, sportId,
         })
+        return { group, yearByYearSplits, block }
       }),
     ),
     // The MLB debut is always sportId 1; its box-score game is the first row of
@@ -102,6 +113,18 @@ async function loadPlayer(id, asOf) {
         })
       : Promise.resolve([]),
   ])
+  const blocks = results.map((r) => r.block)
+
+  // "Path to the Majors" card — pre-debut players only, from the multi-level
+  // yearByYear splits already fetched above (no extra request). Uses the
+  // page's primary stat group (hitting for a two-way player: the more common
+  // progression story, and the one whose gamesPlayed reads naturally as
+  // "games at that level").
+  const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
+  const primaryResult = results.find((r) => r.group === primaryGroup) ?? results[0]
+  const progression = !bio.debut && primaryResult
+    ? levelProgressionView(primaryResult.yearByYearSplits, primaryResult.group, sportId)
+    : null
 
   // All-Star roster membership (MLB only), one roster lookup per distinct year
   // that appears in the year-by-year table plus the real current year. The
@@ -127,11 +150,19 @@ async function loadPlayer(id, asOf) {
   // than one. One batched lookup for every team id across every row (those
   // stat splits carry only a team id/name, never an abbreviation).
   const yearByYearTeamIds = new Set()
-  for (const b of blocks) for (const r of b.yearByYear?.rows ?? []) for (const id of r.teamIds) yearByYearTeamIds.add(id)
+  for (const b of blocks) {
+    for (const r of b.yearByYear?.rows ?? []) {
+      for (const id of r.teamIds) yearByYearTeamIds.add(id)
+      for (const lvl of r.levels ?? []) for (const tid of lvl.teamIds) yearByYearTeamIds.add(tid)
+    }
+  }
   const teamAbbrevs = await fetchTeamAbbrevs([...yearByYearTeamIds])
   for (const b of blocks) {
     for (const r of b.yearByYear?.rows ?? []) {
       r.team = r.teamIds.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
+      for (const lvl of r.levels ?? []) {
+        lvl.team = lvl.teamIds.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
+      }
     }
   }
 
@@ -186,7 +217,7 @@ async function loadPlayer(id, asOf) {
 
   return {
     bio, blocks, season, asOf, sportId,
-    isAllStar, currentYear, firsts,
+    isAllStar, currentYear, firsts, progression,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
@@ -256,7 +287,14 @@ export function PlayerPage({ id, asOf, sportId }) {
               )}
             </p>
           </div>
+          {bio.team && (
+            <TeamLink id={bio.team.id} className="player__herologo">
+              <TeamLogo teamId={bio.team.id} name={bio.team.name} size={56} />
+            </TeamLink>
+          )}
         </header>
+
+        {data.progression && <LevelProgressionCard levels={data.progression.levels} />}
 
         <div className="factgrid">
           <Fact label="Ht / Wt" value={bio.heightWeight} />
@@ -349,6 +387,11 @@ export function PlayerPage({ id, asOf, sportId }) {
                       r.team || DASH,
                       ...r.cells,
                     ],
+                    subRows: r.levels?.map((l) => ({
+                      key: `${r.year}-${l.sportId}`,
+                      label: `${l.label}${l.team ? ' · ' + l.team : ''}`,
+                      cells: l.cells,
+                    })) ?? null,
                   }))}
                   total={block.yearByYear.total}
                   totalLabel="Career"
@@ -478,11 +521,22 @@ function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '' }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.key} className={r.allStar ? 'is-allstar' : ''}>
-              {r.cells.map((c, i) => (
-                <td key={i} className={cellClass(i)}>{c}</td>
+            <Fragment key={r.key}>
+              <tr className={r.allStar ? 'is-allstar' : ''}>
+                {r.cells.map((c, i) => (
+                  <td key={i} className={cellClass(i)}>{c}</td>
+                ))}
+              </tr>
+              {r.subRows?.map((sr) => (
+                <tr key={sr.key} className="ledger__subrow">
+                  <td className="lft yr" />
+                  <td className="lft opp">{sr.label}</td>
+                  {sr.cells.map((c, i) => (
+                    <td key={i}>{c}</td>
+                  ))}
+                </tr>
               ))}
-            </tr>
+            </Fragment>
           ))}
         </tbody>
         {total && (

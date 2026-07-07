@@ -9,6 +9,8 @@
 // figures that can't be date-cut by the API — the current-season row and the
 // vs-L/R splits — are labeled as such by the UI, not frozen.
 
+import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
+
 const DASH = '—'
 
 function num(x) {
@@ -403,37 +405,135 @@ function yearByYearCells(st, group) {
     : [num(st.gamesPlayed), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
 }
 
-export function yearByYearView(splits, group, currentStat, currentSeason, careerStat) {
-  // Combine multi-team seasons into one row per year (sum), keeping it a clean
-  // one-line-per-season ledger.
-  const byYear = new Map()
+// A season's yearByYear splits at one level can include a synthetic,
+// team-less aggregate row alongside the per-team rows when a same-level trade
+// happened mid-season (verified live: Soto's 2022 trade returned Nationals +
+// Padres + a third team-less row equal to their sum). Summing every row
+// double-counts that season, so: prefer summing the per-team rows, and only
+// fall back to the lone aggregate row when no team-tagged row exists.
+function levelSeasonStat(rows, group) {
+  const teamRows = (rows ?? []).filter((s) => s.team?.id)
+  return aggregateSplits(teamRows.length ? teamRows : rows, group)
+}
+
+// Display order for a season's per-level sub-rows: MLB first (for the rare
+// debuted-mid-multi-level case), then AAA down to Rookie.
+const LEVEL_ORDER_DESC = [1, 11, 12, 13, 14, 16]
+
+export function yearByYearView(splits, group, currentStat, currentSeason, careerStat, currentSportId) {
+  // Group into season -> sportId -> raw splits. A debuted player's splits
+  // (fetched at a single sportId) always produce exactly one level per
+  // season, so the nesting below is a no-op for that case; a pre-debut
+  // player's multi-level fetch can produce more than one.
+  const bySeasonLevel = new Map()
+  const allSportIds = new Set()
   for (const s of splits ?? []) {
     const yr = String(s.season ?? '')
-    if (!yr) continue
-    if (!byYear.has(yr)) byYear.set(yr, [])
-    byYear.get(yr).push({ stat: s.stat, team: s.team })
+    const sid = s.sport?.id
+    if (!yr || !sid) continue
+    allSportIds.add(sid)
+    if (!bySeasonLevel.has(yr)) bySeasonLevel.set(yr, new Map())
+    const byLevel = bySeasonLevel.get(yr)
+    if (!byLevel.has(sid)) byLevel.set(sid, [])
+    byLevel.get(sid).push(s)
   }
   const cur = String(currentSeason ?? '')
-  const rows = [...byYear.entries()]
+  const allLevelStats = []
+  const rows = [...bySeasonLevel.entries()]
     .sort((a, b) => (a[0] < b[0] ? 1 : -1)) // most recent season first
-    .map(([yr, entries]) => {
+    .map(([yr, byLevel]) => {
       const isCurrent = yr === cur
-      // For the current season, prefer the date-cut aggregate so the row can't
-      // move mid-game; older seasons are settled, so aggregate their stints.
-      const stat = isCurrent && currentStat ? currentStat : aggregateSplits(entries, group)
-      // Every team the player appeared for that year, in order — a mid-season
-      // trade means more than one. Ids only; the caller resolves abbreviations
-      // (these splits carry team id/name, never an abbreviation) in one batch.
-      const teamIds = [...new Set(entries.map((e) => e.team?.id).filter(Boolean))]
-      return { year: yr, isCurrent, teamIds, cells: yearByYearCells(stat ?? {}, group) }
+      // For the current season at the current level, prefer the date-cut
+      // aggregate so the row can't move mid-game; other levels/seasons are
+      // settled, so aggregate their stints (deduped per levelSeasonStat).
+      if (isCurrent && currentStat && !byLevel.has(currentSportId)) {
+        byLevel.set(currentSportId, [])
+      }
+      const levelStats = [...byLevel.entries()]
+        .map(([sid, rows]) => {
+          const stat =
+            isCurrent && sid === currentSportId && currentStat
+              ? currentStat
+              : levelSeasonStat(rows, group)
+          // Every team at that level that year, in order — a mid-season
+          // same-level trade means more than one. Ids only; the caller
+          // resolves abbreviations in one batch.
+          const teamIds = [...new Set(rows.map((s) => s.team?.id).filter(Boolean))]
+          return { sportId: sid, stat, teamIds }
+        })
+        .sort((a, b) => LEVEL_ORDER_DESC.indexOf(a.sportId) - LEVEL_ORDER_DESC.indexOf(b.sportId))
+      allLevelStats.push(...levelStats)
+      const multiLevel = levelStats.length > 1
+      const combinedStat = multiLevel
+        ? aggregateSplits(levelStats.map((l) => ({ stat: l.stat })), group)
+        : levelStats[0]?.stat
+      return {
+        year: yr,
+        isCurrent,
+        teamIds: [...new Set(levelStats.flatMap((l) => l.teamIds))],
+        cells: yearByYearCells(combinedStat ?? {}, group),
+        // Per-level sub-rows only when the player played more than one level
+        // that year — a single-level season (every debuted player, always)
+        // renders exactly as it did before this nesting was added.
+        levels: multiLevel
+          ? levelStats.map((l) => ({
+              sportId: l.sportId,
+              label: SPORT_LABEL[l.sportId] ?? '',
+              teamIds: l.teamIds,
+              cells: yearByYearCells(l.stat ?? {}, group),
+            }))
+          : null,
+      }
     })
   if (!rows.length) return null
   const columns =
     group === 'pitching'
       ? ['W–L', 'ERA', 'IP', 'K', 'WHIP']
       : ['G', 'HR', 'RBI', 'AVG', 'OPS']
-  const total = careerStat ? yearByYearCells(careerStat, group) : null
+  // A career spanning more than one level (only reachable via the pre-debut
+  // multi-level fetch) has no single "type=career" call to lean on — sum
+  // every season+level's already-deduped stat line instead, so "Career" reads
+  // as the whole MiLB career rather than just the current level. A
+  // single-level career (every debuted player, and a MiLB player who has
+  // only ever played one level) keeps using the API's own career total.
+  const total =
+    allSportIds.size > 1
+      ? yearByYearCells(aggregateSplits(allLevelStats.map((l) => ({ stat: l.stat })), group) ?? {}, group)
+      : careerStat
+        ? yearByYearCells(careerStat, group)
+        : null
   return { columns, rows, total }
+}
+
+// ---------------------------------------------------------------------------
+// Level progression — for a pre-debut MiLB player, one row per level (always
+// all five, so an unreached rung still renders dimmed to complete the "climb
+// to MLB" narrative) built from the same multi-level yearByYear splits
+// already fetched for the nested ledger above — no extra request.
+// ---------------------------------------------------------------------------
+
+export function levelProgressionView(splits, group, currentSportId) {
+  const byLevel = new Map()
+  for (const s of splits ?? []) {
+    const sid = s.sport?.id
+    if (!sid) continue
+    if (!byLevel.has(sid)) byLevel.set(sid, [])
+    byLevel.get(sid).push(s)
+  }
+  const levels = MILB_LEVELS.map(({ sportId, label }) => {
+    const rows = byLevel.get(sportId) ?? []
+    const stat = levelSeasonStat(rows, group)
+    const years = rows.map((s) => Number(s.season)).filter(Boolean)
+    return {
+      sportId,
+      label,
+      reached: rows.length > 0,
+      firstYear: years.length ? Math.min(...years) : null,
+      games: num(stat?.gamesPlayed),
+      isCurrent: sportId === currentSportId,
+    }
+  })
+  return levels.some((l) => l.reached) ? { levels } : null
 }
 
 // ---------------------------------------------------------------------------
@@ -441,7 +541,7 @@ export function yearByYearView(splits, group, currentStat, currentSeason, career
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason, sportId }) {
   const season = aggregateSplits(seasonSplits, group)
   const career = aggregateSplits(careerSplits, group)
   return {
@@ -454,7 +554,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     splitsLabel: group === 'pitching' ? 'opp. batter' : '',
     gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8),
     // The career total folds into the year-by-year ledger's footer row.
-    yearByYear: yearByYearView(yearByYearSplits, group, season, currentSeason, career),
+    yearByYear: yearByYearView(yearByYearSplits, group, season, currentSeason, career, sportId),
   }
 }
 

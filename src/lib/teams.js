@@ -14,6 +14,9 @@ export const SPORT_IDS = {
   AA: 12,
   'A+': 13,
   A: 14,
+  // Rookie level — covers every complex/rookie league (ACL/FCL/DSL/VSL),
+  // disambiguated only by league.name on a split, not a separate sportId.
+  ROK: 16,
 }
 
 // Every level we search across when the user types a team name.
@@ -36,7 +39,19 @@ export const SPORT_LABEL = {
   12: 'AA',
   13: 'A+',
   14: 'A',
+  16: 'ROK',
 }
+
+// MiLB-only, ordered LOW-to-HIGH — drives the player page's level-progression
+// card (the climb toward MLB), the opposite direction from LEVELS above
+// (which is MLB-first, for the slate/logo-sheet level switcher).
+export const MILB_LEVELS = [
+  { label: 'ROK', sportId: SPORT_IDS.ROK },
+  { label: 'A', sportId: SPORT_IDS.A },
+  { label: 'A+', sportId: SPORT_IDS['A+'] },
+  { label: 'AA', sportId: SPORT_IDS.AA },
+  { label: 'AAA', sportId: SPORT_IDS.AAA },
+]
 
 // ---------------------------------------------------------------------------
 // Team logos
