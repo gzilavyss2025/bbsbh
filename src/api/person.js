@@ -632,19 +632,21 @@ export function milbStatsView(splits, group) {
 }
 
 // ---------------------------------------------------------------------------
-// Career timeline — the team-by-team map shown above the "Path to the Majors"
-// card: one stop per club the player logged REAL time with, earliest first,
-// with the year(s) he spent there. "Real time" is a threshold (10 games as a
-// batter, 20 IP for a pitcher) applied per team-season, so a cup of coffee or a
-// pre-debut rehab stint drops out — a team is a single level, so this also
-// decides the level example: Yelich's 2013 keeps AA (49 G) but not his 7 G at
-// A+ or 5 G in the complex league. A post-debut MiLB season needs more (see
-// qualifies): it survives only when the minors were the primary home that year,
-// so a big leaguer's short rehab or option down doesn't append a misleading
-// season to his old farm club. Fed the player's full year-by-year splits (MLB +
-// every MiLB level) plus his debutYear; the tint per stop is resolved
-// separately (the caller fetches fetchTeamLogoTint), since this stays a pure
-// shaper.
+// Career timeline — the chronological team-by-team map shown above the "Path to
+// the Majors" card: one stop per CONTINUOUS stint with a club the player logged
+// REAL time with, earliest first, with the year(s) that stint spanned. A club
+// left and later rejoined gets a fresh stop each visit (see the stint fold
+// below), so the run reads in true career order. "Real time" is a threshold (10
+// games as a batter, 20 IP for a pitcher) applied per team-season, so a cup of
+// coffee or a pre-debut rehab stint drops out — a team is a single level, so
+// this also decides the level example: Yelich's 2013 keeps AA (49 G) but not
+// his 7 G at A+ or 5 G in the complex league. A post-debut MiLB season needs
+// more (see qualifies): it survives only when the minors were the primary home
+// that year, so a big leaguer's short rehab or option down doesn't append a
+// misleading season to his old farm club. Fed the player's full year-by-year
+// splits (MLB + every MiLB level) plus his debutYear; each stop's tint and
+// hover label (its parent org, for a farm club) are resolved separately by the
+// caller, since this stays a pure shaper.
 // ---------------------------------------------------------------------------
 
 // Consecutive seasons collapse to a range with a two-digit tail ("2018–21"),
@@ -710,14 +712,25 @@ export function careerTimelineView(splits, group, debutYear) {
   const kept = [...byKey.values()].filter(qualifies)
   if (!kept.length) return null
 
-  const byTeam = new Map()
+  // Walk the qualifying team-seasons in chronological order — earliest year
+  // first, and within a year lower level first so a same-year climb reads
+  // bottom-up — and fold each run of consecutive same-club seasons into ONE
+  // stint. A club the player leaves and later rejoins (Gary Sánchez's Brewers
+  // in 2024, then again in 2026 after a year with Baltimore) yields a separate
+  // stint each time, so its logo repeats in its own chronological slot rather
+  // than collapsing the two visits into one badge.
+  kept.sort(
+    (a, b) =>
+      a.season - b.season ||
+      CAREER_ORDER.indexOf(a.sportId) - CAREER_ORDER.indexOf(b.sportId),
+  )
+  const stints = []
   for (const a of kept) {
-    if (!byTeam.has(a.teamId)) {
-      byTeam.set(a.teamId, { teamId: a.teamId, sportId: a.sportId, teamName: a.teamName, seasons: [] })
-    }
-    byTeam.get(a.teamId).seasons.push(a.season)
+    const open = stints[stints.length - 1]
+    if (open && open.teamId === a.teamId) open.seasons.push(a.season)
+    else stints.push({ teamId: a.teamId, sportId: a.sportId, teamName: a.teamName, seasons: [a.season] })
   }
-  const entries = [...byTeam.values()].map((t) => {
+  const entries = stints.map((t) => {
     const seasons = [...new Set(t.seasons)].sort((x, y) => x - y)
     return {
       teamId: t.teamId,
@@ -728,11 +741,6 @@ export function careerTimelineView(splits, group, debutYear) {
       yearText: formatSeasonRuns(seasons),
     }
   })
-  entries.sort(
-    (a, b) =>
-      a.minSeason - b.minSeason ||
-      CAREER_ORDER.indexOf(a.sportId) - CAREER_ORDER.indexOf(b.sportId),
-  )
   return { entries }
 }
 

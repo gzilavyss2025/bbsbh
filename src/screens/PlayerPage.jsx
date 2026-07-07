@@ -7,6 +7,7 @@ import {
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
   fetchTeamLogoTint,
+  fetchTeam,
   findFirstStart,
   findFirstStrikeoutBatter,
 } from '../api/mlb.js'
@@ -210,9 +211,27 @@ async function loadPlayer(id, asOf) {
     : (primaryResult?.yearByYearSplits ?? [])
   const timeline = careerTimelineView(timelineSplits, primaryGroup, debutYear)
   if (timeline) {
+    // Resolve each stop's logo tint and hover label. Entries can repeat a club
+    // (a return stint), so resolve each DISTINCT team once. The label names the
+    // club; a farm club adds its parent org in parens ("Nashville Sounds
+    // (Milwaukee Brewers)") — one extra team lookup per MiLB club, skipped for
+    // MLB stops whose own name is already the whole label.
+    const byTeam = new Map()
+    for (const e of timeline.entries) {
+      if (!byTeam.has(e.teamId)) byTeam.set(e.teamId, { sportId: e.sportId })
+    }
     await Promise.all(
-      timeline.entries.map(async (e) => { e.tint = await fetchTeamLogoTint(e.teamId) }),
+      [...byTeam.entries()].map(async ([teamId, meta]) => {
+        meta.tint = await fetchTeamLogoTint(teamId)
+        meta.parentOrgName =
+          meta.sportId === 1 ? '' : (await fetchTeam(teamId))?.parentOrgName ?? ''
+      }),
     )
+    for (const e of timeline.entries) {
+      const meta = byTeam.get(e.teamId)
+      e.tint = meta.tint
+      e.title = meta.parentOrgName ? `${e.teamName} (${meta.parentOrgName})` : e.teamName
+    }
   }
 
   // All-Star roster membership (MLB only), one roster lookup per distinct year

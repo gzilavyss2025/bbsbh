@@ -13,7 +13,7 @@ export function CareerTimeline({ entries }) {
       <h3 className="section__title"><span>Team history</span></h3>
       <ol className="careertl__track">
         {entries.map((e) => (
-          <li className="careertl__stop" key={`${e.teamId}-${e.minSeason}`}>
+          <li className="careertl__stop" key={`${e.teamId}-${e.minSeason}`} title={e.title}>
             <span
               className="careertl__badge"
               style={e.tint ? { background: e.tint } : undefined}

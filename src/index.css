@@ -418,7 +418,10 @@ body {
   flex-wrap: wrap;
   gap: var(--space-2);
   list-style: none;
+  /* Zero BOTH margin and the <ol>'s default padding-inline-start so the strip
+     sits flush against the left edge — no browser list indent. */
   margin: 0;
+  padding: 0;
 }
 
 .careertl__stop {
