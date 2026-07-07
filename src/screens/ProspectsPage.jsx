@@ -68,7 +68,7 @@ async function loadProspects() {
 // — so this degrades to a friendly empty state rather than an error when the
 // snapshot hasn't been generated yet (or the source page's structure broke
 // the scrape).
-export function ProspectsPage({ onBack }) {
+export function ProspectsPage() {
   useDocumentTitle('Top 100 Prospects')
   const { loading, error, data } = useAsync(() => loadProspects(), [])
   const players = data?.players ?? []
@@ -77,9 +77,6 @@ export function ProspectsPage({ onBack }) {
     <div className="screen">
       <SiteHeader />
       <header className="topbar">
-        <button className="topbar__back" onClick={onBack}>
-          ‹ Games
-        </button>
         <h1 className="topbar__title">Top 100 Prospects</h1>
       </header>
 
@@ -92,19 +89,15 @@ export function ProspectsPage({ onBack }) {
 
       {players.length > 0 && (
         <>
-          {data.generatedAt && (
-            <p className="hint">Rankings as of {generatedLabel(data.generatedAt)}.</p>
-          )}
           <Ledger
             leftCols={2}
-            head={['Rk', 'Player', 'Pos', '#', 'Level', 'Team', 'Line']}
+            head={['Rk', 'Player', 'Pos', 'Level', 'Team', 'Line']}
             rows={players.map((p) => ({
               key: p.playerId,
               cells: [
                 p.rank,
                 <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
                 p.position || DASH,
-                p.number || DASH,
                 p.levelLabel || DASH,
                 <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo">
                   <TeamLogo teamId={p.teamId} name={p.team} size={20} />
@@ -113,6 +106,9 @@ export function ProspectsPage({ onBack }) {
               ],
             }))}
           />
+          {data.generatedAt && (
+            <p className="hint prospects__caption">Rankings as of {generatedLabel(data.generatedAt)}.</p>
+          )}
         </>
       )}
     </div>

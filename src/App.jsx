@@ -69,7 +69,7 @@ export default function App() {
   } else if (route.name === 'about') {
     content = <AboutPage onBack={() => go('/')} />
   } else if (route.name === 'prospects') {
-    content = <ProspectsPage onBack={() => go('/')} />
+    content = <ProspectsPage />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {

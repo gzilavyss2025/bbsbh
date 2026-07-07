@@ -4362,3 +4362,10 @@ body {
 .prospecttable tr.is-dull {
   opacity: 0.45;
 }
+
+/* Standalone Top 100 page's "Rankings as of…" note, read after the table
+   in scorebook all-caps, matching the app's other captions. */
+.prospects__caption {
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
