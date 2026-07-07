@@ -4213,13 +4213,6 @@ body {
   background: var(--seal);
   border-color: transparent;
 }
-/* A faint ring around the logo's own small box (not the cell button behind
-   it), so the mark stays legible against the kraft fill without competing
-   with it. */
-.tcal__game .teamlogo {
-  border: var(--bw-rule) solid color-mix(in srgb, var(--text-on-ink) 55%, transparent);
-  border-radius: var(--radius-xs);
-}
 .tcal__gm {
   position: absolute;
   top: -5px;
