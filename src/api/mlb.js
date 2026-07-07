@@ -685,6 +685,28 @@ export async function findFirstStart(personId, splitsAscending) {
   return null
 }
 
+// The batter a pitcher recorded his first career strikeout against — not
+// carried by gameLog (a per-game aggregate), so this re-fetches that one
+// already-concluded game's feed and scans its plays for the earliest
+// strikeout charged to the pitcher. Mirrors findFirstStart's per-game feed
+// lookup; degrades to null on an unreadable feed or no match.
+export async function findFirstStrikeoutBatter(personId, gamePk) {
+  if (!gamePk) return null
+  try {
+    const feed = await fetchGameFeed(gamePk)
+    const plays = feed?.liveData?.plays?.allPlays ?? []
+    for (const play of plays) {
+      if (play.matchup?.pitcher?.id !== personId) continue
+      const ev = play.result?.eventType
+      if (ev !== 'strikeout' && ev !== 'strikeout_double_play') continue
+      return play.matchup?.batter ?? null // { id, fullName }
+    }
+  } catch {
+    // Unreadable game feed — no batter to show.
+  }
+  return null
+}
+
 // Player ids selected to this season's All-Star Game. Roster membership isn't
 // score-revealing, so this is spoiler-safe to show year-round (unlike the
 // game itself, which stays sealed like any other). The team roster endpoints

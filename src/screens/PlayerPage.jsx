@@ -7,6 +7,7 @@ import {
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
   findFirstStart,
+  findFirstStrikeoutBatter,
 } from '../api/mlb.js'
 import {
   personBio,
@@ -16,6 +17,7 @@ import {
   buildBlock,
   levelProgressionView,
   firstsFromGameLog,
+  PITCHER_FIRSTS_DEFS,
   splitDisplayName,
 } from '../api/person.js'
 import { fetchTopProspects, prospectRankById, orgProspectRankById } from '../api/prospects.js'
@@ -27,6 +29,7 @@ import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { Headshot } from '../components/Headshot.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { PlayerLink } from '../components/PlayerLink.jsx'
 import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
@@ -54,6 +57,9 @@ function debutLabel(iso) {
 // Reads as the story of a rookie season: first taking the field, then each
 // milestone at the plate in the order it's likeliest to arrive.
 const FIRSTS_ORDER = ['start', 'hit', 'xbh', 'hr', 'run', 'so']
+// Pitching counterpart: first taking the mound, then each way an outing can
+// go, ending with the first punch-out.
+const PITCHER_FIRSTS_ORDER = ['appearance', 'start', 'win', 'loss', 'save', 'so']
 
 function draftLabel(draft) {
   if (!draft || !draft.year) return DASH
@@ -217,14 +223,22 @@ async function loadPlayer(id, asOf) {
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
 
-  // Firsts — five hitting milestones read off the debut year's game log
-  // (already fetched above for the debut deep-link), plus the first game the
-  // player STARTED, which needs each candidate game's own boxscore (see
+  // Firsts — milestones read off the debut year's game log (already fetched
+  // above for the debut deep-link). Hitters get five plate milestones plus the
+  // first game STARTED, which needs each candidate game's own boxscore (see
   // findFirstStart) since no gameLog field distinguishes a start from a sub
-  // appearance. Hitting only: `debutSplits` above is only ever a 'hitting' log
-  // for a position player or a two-way player, never a pure pitcher.
+  // appearance. Pitchers get the pitching counterpart (PITCHER_FIRSTS_DEFS) —
+  // every field but the strikeout victim is a direct gameLog stat, so only
+  // that one needs an extra per-game feed lookup (findFirstStrikeoutBatter).
+  // `debutSplits` above is fetched in whichever group matches `bio.isPitcher`.
   let firsts = null
-  if (!bio.isPitcher && bio.debut) {
+  if (bio.isPitcher && bio.debut) {
+    const { events } = firstsFromGameLog(debutSplits, cutoff, PITCHER_FIRSTS_DEFS)
+    if (events.so) {
+      events.so.batter = await findFirstStrikeoutBatter(bio.id, events.so.gamePk)
+    }
+    firsts = events
+  } else if (!bio.isPitcher && bio.debut) {
     const { events, rowsAscending } = firstsFromGameLog(debutSplits, cutoff)
     const startSplit = await findFirstStart(bio.id, rowsAscending)
     events.start = startSplit
@@ -502,11 +516,11 @@ export function PlayerPage({ id, asOf, sportId }) {
           />
         )}
 
-        {data.firsts && FIRSTS_ORDER.some((key) => data.firsts[key]) && (
+        {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
           <section>
             <SectionTitle title="Firsts" />
             <div className="player__splits">
-              {FIRSTS_ORDER.map((key) => {
+              {(bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).map((key) => {
                 const f = data.firsts[key]
                 if (!f) return null
                 return (
@@ -516,7 +530,13 @@ export function PlayerPage({ id, asOf, sportId }) {
                       <GameLink path={f.path} className="split__v">
                         {debutLabel(f.date)}
                       </GameLink>
-                      <span className="split__sub">{f.oppAbbr}</span>
+                      <span className="split__sub">
+                        {f.batter ? (
+                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
+                        ) : (
+                          f.oppAbbr
+                        )}
+                      </span>
                     </div>
                   </div>
                 )

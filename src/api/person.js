@@ -336,13 +336,15 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
 }
 
 // ---------------------------------------------------------------------------
-// Firsts — first career instances of five hitting milestones, read off the
-// debut season's game log (a sixth, "first start", needs the game's own
-// boxscore rather than a gameLog field — see mlb.js's findFirstStart). Scoped
-// to the debut year only: that's the data this page already fetches for the
-// debut-game deep link, so no extra request is needed, and it covers every
-// player who sees meaningful debut-year playing time. Cutoff-filtered exactly
-// like gameLogView — a still-active debut season could otherwise reveal a
+// Firsts — first career instances of a handful of milestones, read off the
+// debut season's game log (a hitter's "first start" needs the game's own
+// boxscore rather than a gameLog field — see mlb.js's findFirstStart; a
+// pitcher's first strikeout needs the game's own play-by-play for the batter
+// faced — see mlb.js's findFirstStrikeoutBatter). Scoped to the debut year
+// only: that's the data this page already fetches for the debut-game deep
+// link, so no extra request is needed, and it covers every player who sees
+// meaningful debut-year playing time. Cutoff-filtered exactly like
+// gameLogView — a still-active debut season could otherwise reveal a
 // not-yet-revealed game's date and outcome.
 // ---------------------------------------------------------------------------
 
@@ -358,16 +360,30 @@ const FIRSTS_DEFS = [
   { key: 'so', label: 'First Strikeout', test: (st) => num(st.strikeOuts) > 0 },
 ]
 
-// Returns { events, rowsAscending }: `events` maps each FIRSTS_DEFS key to the
+// Pitching counterpart. Every field but the strikeout victim is a direct
+// gameLog stat (verified live: pitching gameLog rows carry gamesStarted,
+// wins, losses, saves per game), unlike the hitter "first start" case.
+// `appearance` matches unconditionally, so it always resolves to the
+// earliest row — the debut game itself.
+export const PITCHER_FIRSTS_DEFS = [
+  { key: 'appearance', label: 'First Appearance', test: () => true },
+  { key: 'start', label: 'First Start', test: (st) => num(st.gamesStarted) > 0 },
+  { key: 'win', label: 'First Win', test: (st) => num(st.wins) > 0 },
+  { key: 'loss', label: 'First Loss', test: (st) => num(st.losses) > 0 },
+  { key: 'save', label: 'First Save', test: (st) => num(st.saves) > 0 },
+  { key: 'so', label: 'First Strikeout', test: (st) => num(st.strikeOuts) > 0 },
+]
+
+// Returns { events, rowsAscending }: `events` maps each def's key to the
 // earliest qualifying split (or null), `rowsAscending` is the full cutoff-safe
-// debut-year log oldest-first — the caller reuses it to also search for the
-// first start.
-export function firstsFromGameLog(splits, cutoff) {
+// debut-year log oldest-first — callers reuse it to also search for the first
+// start (hitters) or the first strikeout's batter (pitchers).
+export function firstsFromGameLog(splits, cutoff, defs = FIRSTS_DEFS) {
   const rowsAscending = (splits ?? [])
     .filter((s) => s.date && (!cutoff || s.date < cutoff) && s.game?.gamePk)
     .sort((a, b) => (a.date < b.date ? -1 : 1))
   const events = {}
-  for (const def of FIRSTS_DEFS) {
+  for (const def of defs) {
     const found = rowsAscending.find((s) => def.test(s.stat ?? {}))
     events[def.key] = found
       ? { label: def.label, date: found.date, gamePk: found.game.gamePk, isHome: found.isHome }
