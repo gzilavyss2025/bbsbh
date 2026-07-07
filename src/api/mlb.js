@@ -397,13 +397,19 @@ export async function fetchPitcherSeasonLine(personId, season, sportId = 1) {
 
 // Full bio for one person. `hydrate=currentTeam,draft` folds in the current
 // club (whose sport.id tells us the level to query stats at) and the player's
-// draft record(s) in one request. Degrades to null (MiLB / bad id), so the
-// page can show a graceful "couldn't load".
+// draft record(s) in one request. The bare `currentTeam` hydration field
+// never carries `sport` on its own (verified live) — `personSportId` would
+// then silently fall back to MLB (1) for every MiLB player, which is why the
+// `team` hydration field has to ride along too: paired with `currentTeam` it's
+// the one that makes the API merge `sport`/`league`/`division` into the
+// `currentTeam` object (the standalone `team` field itself comes back empty).
+// Degrades to null (MiLB / bad id), so the page can show a graceful "couldn't
+// load".
 export async function fetchPerson(personId) {
   if (!personId) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}?hydrate=currentTeam,draft`,
+      `/api/v1/people/${personId}?hydrate=currentTeam,team,draft`,
     )
     return data.people?.[0] ?? null
   } catch {
@@ -450,6 +456,22 @@ export async function fetchMilbYearByYear(personId, group) {
   const results = await Promise.allSettled(
     MILB_LEVELS.map((lvl) =>
       fetchPersonStats(personId, { type: 'yearByYear', group, sportId: lvl.sportId }),
+    ),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
+// Same fan-out as fetchMilbYearByYear, but for a date-cut "current season"
+// window instead of full prior years — lets the caller combine a player's
+// stints across every MiLB level he's appeared at THIS season (e.g. a
+// mid-season promotion from AA to AAA), the same way fetchMilbYearByYear
+// already combines full completed seasons. Degrades per level.
+export async function fetchMilbByDateRange(personId, group, season, startDate, endDate) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) =>
+      fetchPersonStats(personId, {
+        type: 'byDateRange', group, season, startDate, endDate, sportId: lvl.sportId,
+      }),
     ),
   )
   return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))

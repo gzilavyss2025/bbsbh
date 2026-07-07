@@ -3,6 +3,7 @@ import {
   fetchPerson,
   fetchPersonStats,
   fetchMilbYearByYear,
+  fetchMilbByDateRange,
   fetchGamesByPk,
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
@@ -56,6 +57,28 @@ function draftLabel(draft) {
   return `${draft.year} · Rd ${draft.round}${draft.overall ? ` #${draft.overall}` : ''}`
 }
 
+// The "Current season" tiles' stat line. `levelStat` (already fetched at the
+// player's current team's level) covers the common cases as-is: an active MLB
+// player, or a MiLB player who's spent the whole year at one level. Two cases
+// need extra fetches: a player who has debuted before but shows no MLB games
+// this season (a rehab assignment or a full-season option down, `sportId` !=
+// 1) should still prefer his MLB line if he's actually appeared there this
+// year; and a player with no MLB action at all this season should get his
+// stints at every MiLB level combined, not just the level he's at right now
+// (e.g. a mid-season AA -> AAA promotion).
+async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate, sportId, hasDebuted, levelStat }) {
+  if (sportId === 1) return levelStat
+  if (hasDebuted) {
+    const mlbSplits = await fetchPersonStats(id, {
+      type: 'byDateRange', group, season, startDate, endDate, sportId: 1,
+    })
+    const mlbStat = aggregateSplits(mlbSplits, group)
+    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return mlbStat
+  }
+  const milbSplits = await fetchMilbByDateRange(id, group, season, startDate, endDate)
+  return aggregateSplits(milbSplits, group)
+}
+
 // Assemble the full player view — bio + one stat block (two for a two-way
 // player). Stats are cut off at the day BEFORE the game date ("entering today")
 // when reached from a game (`asOf` set); a bare link defaults to current stats.
@@ -72,16 +95,14 @@ async function loadPlayer(id, asOf) {
     : [bio.isPitcher ? 'pitching' : 'hitting']
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
   const currentYear = Number(isoToday().slice(0, 4))
+  const startDate = `${season}-01-01`
 
   const [results, debutSplits] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
           await Promise.all([
-            fetchPersonStats(id, {
-              type: 'byDateRange', group, season,
-              startDate: `${season}-01-01`, endDate, sportId,
-            }),
+            fetchPersonStats(id, { type: 'byDateRange', group, season, startDate, endDate, sportId }),
             fetchPersonStats(id, { type: 'career', group, sportId }),
             fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId }),
             fetchPersonStats(id, { type: 'gameLog', group, season, sportId }),
@@ -96,10 +117,14 @@ async function loadPlayer(id, asOf) {
               : Promise.resolve([]),
           ])
         const seasonStat = aggregateSplits(seasonSplits, group)
-        const role = group === 'pitching' ? pitcherRole(seasonStat) : null
+        const tileStat = await resolveCurrentSeasonStat({
+          id, group, season, startDate, endDate, sportId,
+          hasDebuted: Boolean(bio.debut), levelStat: seasonStat,
+        })
+        const role = group === 'pitching' ? pitcherRole(tileStat) : null
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
-          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season, sportId,
+          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season, sportId, tileStat,
         })
         return { group, yearByYearSplits, block }
       }),

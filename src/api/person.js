@@ -541,14 +541,23 @@ export function levelProgressionView(splits, group, currentSportId) {
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason, sportId }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason, sportId, tileStat }) {
+  // The level-scoped, cutoff-safe stat at the player's CURRENT team's level —
+  // feeds yearByYearView, which substitutes it in for just that one level's
+  // row (see levelSeasonStat there); a combined multi-level figure would
+  // double-count against that function's own per-level splits. The "Current
+  // season" tiles instead use `tileStat` (see loadPlayer in PlayerPage.jsx),
+  // which resolves to this same level for an active MLB/single-level player
+  // but combines every MiLB level played this year when the player hasn't
+  // appeared in the majors this season.
   const season = aggregateSplits(seasonSplits, group)
   const career = aggregateSplits(careerSplits, group)
+  const tile = tileStat ?? season
   return {
     group,
     role,
     title: group === 'pitching' ? 'Pitching' : 'Batting',
-    tiles: group === 'pitching' ? pitcherTiles(season, role) : hitterTiles(season),
+    tiles: group === 'pitching' ? pitcherTiles(tile, role) : hitterTiles(tile),
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits),
     splitsLabel: group === 'pitching' ? 'opp. batter' : '',
