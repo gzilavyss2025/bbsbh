@@ -29,11 +29,13 @@ npm run build      # production build → dist/
 npm run preview    # serve the built app
 npm run lint       # eslint .
 node scripts/gen-icons.mjs   # regenerate PWA PNG icons from public/icons/icon.svg
-X_BEARER_TOKEN=... node scripts/game-buzz.mjs <gamePk>
-                   # post-game: top X posts from the game's time window, ranked
-                   # by engagement, to seed handwritten GAME NOTES. Deliberately
-                   # a terminal script, NOT part of the app (spoilers + secret
-                   # token). Scoping/costs/alternatives: docs/x-game-buzz.md
+node scripts/game-buzz.mjs <gamePk>
+                   # post-game: top social posts from the game's time window,
+                   # ranked by engagement, to seed handwritten GAME NOTES. FREE
+                   # sources — Bluesky (no auth) always, plus the Reddit game
+                   # thread when REDDIT_CLIENT_ID/SECRET are set. Deliberately a
+                   # terminal script, NOT part of the app (game-night posts are
+                   # spoilers). Source scoping/queries: docs/game-buzz.md
 ```
 
 There is no test suite. Verify changes by running `npm run dev` and exercising the
