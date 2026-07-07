@@ -29,6 +29,11 @@ npm run build      # production build → dist/
 npm run preview    # serve the built app
 npm run lint       # eslint .
 node scripts/gen-icons.mjs   # regenerate PWA PNG icons from public/icons/icon.svg
+X_BEARER_TOKEN=... node scripts/game-buzz.mjs <gamePk>
+                   # post-game: top X posts from the game's time window, ranked
+                   # by engagement, to seed handwritten GAME NOTES. Deliberately
+                   # a terminal script, NOT part of the app (spoilers + secret
+                   # token). Scoping/costs/alternatives: docs/x-game-buzz.md
 ```
 
 There is no test suite. Verify changes by running `npm run dev` and exercising the
@@ -62,7 +67,13 @@ It is enforced structurally by two conventions:
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (see
 `vite.config.js`) so a stale, spoiler-revealing score is never served from cache.
 
-Two conventions guard the live-refresh + reveal seam (both have bitten before):
+Three conventions guard the live-refresh + reveal seam (all have bitten before):
+- **Roster-card membership and position labels key on PRIMARY position, never
+  the in-game box position.** A bench catcher mopping up a sealed blowout gets a
+  box position of 'P' (subs get 'PH'/'PR'); classifying or labeling by that
+  moves/renames his roster row the moment the sealed substitution happens — a
+  spoiler through the card's shape. See `isPitcherByTrade` in `select.js`. Only
+  the reveal-gated strike-through may change with game events.
 - **Any manual (`useRef`) cache of a reveal-only derivation MUST key on the
   `feed` object and rebuild when it changes.** `computeDerivedByInning` is cached
   in `InningViewer` keyed on `feed`; caching it across feeds froze the live
@@ -119,7 +130,8 @@ the spoiler rule still holds. Nothing else is persisted.
 (`src/lib/route.js` — deliberately *not* react-router). Three route shapes: `/`
 (slate), `/logos` (logo sheet), and `/{MMDDYYYY}/{matchup}/{section}` for a
 deep-linkable game section, where `matchup` is the away+home team abbreviations
-lowercased (`milaz`) and `section` is `lineup1` / `lineup2` / `top{n}` /
+lowercased (`milaz`; game 2 of a doubleheader appends `-2`, game 1 stays bare so
+old links keep working) and `section` is `lineup1` / `lineup2` / `top{n}` /
 `bottom{n}` (the innings viewer shows one half-inning per page; legacy
 `inning{n}` links still parse as the top half) / `boxscore` (the sealed full box
 score; also reachable straight from a past game's slate card).
@@ -135,8 +147,25 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
   abbreviation + teamName the bare row lacks), `resolveGame`, the full game feed
   (`/api/v1.1/game/{gamePk}/feed/live`), and a **separate** `/teams/{id}/coaches`
   call for managers (they are **not** in the live feed).
-- `select.js` — pure, spoiler-free selectors over the raw feed.
+- `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
+  returns the STARTING nine, from each boxscore player's own `battingOrder`
+  value (a starter's is an exact multiple of 100; a sub's is offset 801/802…) —
+  never `team.battingOrder`, which mutates to the current slot occupants and
+  would sprout PH rows on the staging pages late in a game. It also feeds
+  `DefenseDiamond` (the scorebook-style opposing-defense drawing on the lineup
+  pages).
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
+  `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
+  hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
+  at most MiLB parks, so every field is null-guarded and the UI hides the row.
+  Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
+  `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
+  top-level plays are NOT plate appearances for PA/BF counts, but their pitches
+  DO count.
+- `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open
+  enrichment endpoints (statsapi season/matchup/standings stats, Baseball
+  Savant `/gf` with xBA/barrels/bat speed) with per-endpoint spoiler risk. Read
+  it before wiring any new data source.
 
 **Screens** (`src/screens/`): `GameSelect` (slate with the MLB/AAA/AA/A+/A level
 toggle) → `GameView` (owns the site-home bar + grayscale away@home masthead that
@@ -145,7 +174,11 @@ opens the sketch modal) → `TeamInfo` (×2, away then home) → `InningViewer`.
 reached from the slate header.
 
 **Fetching**: the `useAsync` hook (`src/hooks/useAsync.js`) runs a promise on
-mount/deps-change and exposes `{ loading, error, data, reload }`.
+mount/deps-change and exposes `{ loading, error, data, reload }`. Two seams it
+guards: a per-run token discards out-of-order completions (a slow request left
+in flight across a deps change must not clobber newer data), and a deps change
+resets `data` to null while `reload` (same deps) keeps the last-good data —
+stale-while-revalidate for the live-game Refresh, never across games/dates.
 
 ## Conventions to follow
 
