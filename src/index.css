@@ -3966,6 +3966,18 @@ body {
   padding-bottom: var(--space-4);
   border-bottom: var(--bw-rule) solid var(--border-rule);
 }
+.team-hub__logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+/* The affiliate mark — a MiLB team's parent MLB org wordmark, drawn small
+   below its own logo, like a jersey's affiliation patch. Only rendered when
+   `team.parentOrgId` is present (see TeamPage.jsx). */
+.team-hub__logo-affiliate {
+  opacity: 0.75;
+}
 .team-hub__id h1 {
   margin: 0;
   font-family: var(--font-display);

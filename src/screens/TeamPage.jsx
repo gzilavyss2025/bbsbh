@@ -165,7 +165,18 @@ export function TeamPage({ id, asOf, sportId }) {
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
-          <TeamLogo teamId={team.id} name={team.name} size={64} />
+          <div className="team-hub__logo">
+            <TeamLogo teamId={team.id} name={team.name} size={64} />
+            {team.parentOrgId && (
+              <TeamLogo
+                teamId={team.parentOrgId}
+                name={team.parentOrgName}
+                variant="wordmark"
+                size={22}
+                className="team-hub__logo-affiliate"
+              />
+            )}
+          </div>
           <div>
             <h1>{team.name}</h1>
             {record && (
