@@ -109,13 +109,14 @@ export async function fetchSchedule(
 
 // Every active club at a level, independent of any date's schedule — used by
 // the logo sheet's level browser so it can show a league's full set of marks
-// rather than just the teams playing today.
+// rather than just the teams playing today, and by the footer's team
+// directory (see fetchTeamDirectory) for cross-level name search.
 export async function fetchTeams(sportId) {
   const data = await getJson(`/api/v1/teams?sportId=${sportId}&activeStatus=Y`)
   const teams = data.teams ?? []
   return teams
     .filter((t) => t.active)
-    .map((t) => ({ id: t.id, name: t.name, sportId }))
+    .map((t) => ({ id: t.id, name: t.name, sportId, abbreviation: teamAbbr(t) }))
     .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
 }
 
@@ -615,5 +616,102 @@ export async function fetchAllStarRosterIds(season) {
     return ids
   } catch {
     return new Set()
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Site-wide search — the footer's player/team/matchup lookups. All
+// spoiler-free: search surfaces identity and schedule only, never a score.
+// ---------------------------------------------------------------------------
+
+// Name search across every person the Stats API knows (current and retired
+// alike — the endpoint doesn't distinguish). Matches on either name part as a
+// prefix ("jud" -> Judge, Jud Fabian). Active players sort first, since a
+// footer search is almost always for someone playing right now; capped at
+// `limit` so a common surname doesn't flood the dropdown. Degrades to [] so a
+// flaky request just shows "no results" rather than an error state.
+export async function searchPeople(query, limit = 8) {
+  const q = (query ?? '').trim()
+  if (q.length < 2) return []
+  try {
+    const data = await getJson(
+      `/api/v1/people/search?names=${encodeURIComponent(q)}&hydrate=currentTeam`,
+    )
+    return (data.people ?? [])
+      .map((p) => ({
+        id: p.id,
+        name: p.fullName ?? '',
+        active: !!p.active,
+        pos: p.primaryPosition?.abbreviation ?? '',
+        team: p.currentTeam?.name ?? '',
+      }))
+      .sort((a, b) => Number(b.active) - Number(a.active))
+      .slice(0, limit)
+  } catch {
+    return []
+  }
+}
+
+// Every active club across every searchable level, fetched once and cached
+// for the session. The /teams endpoint has no search param and (verified)
+// ignores a comma-joined sportIds list, so a cross-level directory needs one
+// request per level up front — the same SEARCHABLE_SPORT_IDS fan-out
+// resolveGame already does — rather than a fresh multi-request round trip on
+// every keystroke. Degrades to whatever levels succeeded; only truly empty if
+// every level failed.
+let teamDirectoryPromise = null
+export function fetchTeamDirectory() {
+  if (!teamDirectoryPromise) {
+    teamDirectoryPromise = Promise.allSettled(
+      SEARCHABLE_SPORT_IDS.map((sportId) => fetchTeams(sportId)),
+    ).then((results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])))
+  }
+  return teamDirectoryPromise
+}
+
+// Pure client-side filter over a fetchTeamDirectory() list — substring match
+// on the full team name, case-insensitive ("brew" -> Brewers).
+export function searchTeams(directory, query, limit = 8) {
+  const q = (query ?? '').trim().toLowerCase()
+  if (!q) return []
+  return (directory ?? [])
+    .filter((t) => (t.name ?? '').toLowerCase().includes(q))
+    .slice(0, limit)
+}
+
+// Every regular-season meeting between two clubs in one season, for the
+// footer's "find a past matchup" search. The schedule endpoint has no
+// two-team filter, so this pulls team A's full-season schedule and keeps only
+// games against team B's id. Regular season only ('R') — postseason/spring
+// meetings between two arbitrary clubs are rare, and this is a convenience
+// lookup, not an exhaustive archive. Sorted soonest -> latest so a
+// doubleheader's two games stay in order. Degrades to [].
+export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
+  if (!teamAId || !teamBId || !season) return []
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R`,
+    )
+    const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
+    // A suspended/resumed game can be listed under both its original and
+    // resume dates, so dedupe by gamePk before building the list.
+    const byPk = new Map()
+    for (const g of games) {
+      const a = g.teams?.away?.team?.id
+      const h = g.teams?.home?.team?.id
+      if ((a === teamAId && h === teamBId) || (a === teamBId && h === teamAId)) {
+        byPk.set(g.gamePk, {
+          gamePk: g.gamePk,
+          apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+          gameNumber: g.gameNumber ?? 1,
+          awayId: a,
+          homeId: h,
+          final: g.status?.abstractGameState === 'Final',
+        })
+      }
+    }
+    return [...byPk.values()].sort((x, y) => new Date(x.apiDate) - new Date(y.apiDate))
+  } catch {
+    return []
   }
 }

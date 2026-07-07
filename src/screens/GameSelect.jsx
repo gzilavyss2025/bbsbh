@@ -6,6 +6,7 @@ import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { BaseballMark } from '../components/BaseballMark.jsx'
+import { SiteFooter } from '../components/SiteFooter.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
@@ -69,15 +70,6 @@ export function GameSelect({ onPick, onShowLogos }) {
             <BaseballMark size={22} simplified />
             Scorebook
           </h1>
-          <div className="topbar__right">
-            <button
-              type="button"
-              className="btn btn--ghost topbar__logos"
-              onClick={onShowLogos}
-            >
-              Logos
-            </button>
-          </div>
         </header>
 
         <LevelNav sportId={sportId} onChange={pickLevel} />
@@ -139,6 +131,8 @@ export function GameSelect({ onPick, onShowLogos }) {
           </li>
         ))}
       </ul>
+
+      <SiteFooter onShowLogos={onShowLogos} />
     </div>
   )
 }

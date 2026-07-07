@@ -147,21 +147,6 @@ body {
   flex: 0 0 auto;
 }
 
-.topbar__right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.topbar__logos {
-  min-height: 40px;
-  padding: 0 12px;
-  font-size: 13px;
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-
 .datenav {
   display: flex;
   align-items: center;
@@ -796,6 +781,270 @@ body {
   border-color: var(--clay-deep);
   color: #fff4f1;
   font-weight: var(--w-bold);
+}
+
+/* ------------------------------------------------------------- site footer
+   Bottom-of-slate block: search boxes, the past-matchup finder, the logo
+   sheet link, and the standard small print. Set off from the game list with
+   a full-bleed rule, same trick the slatehead banner uses up top. */
+.sitefooter {
+  margin: var(--space-8) calc(-1 * var(--app-gutter)) 0;
+  padding: var(--space-6) var(--app-gutter) 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.footer__heading {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.sitefooter__search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* --------------------------------------------------------------- searchbox */
+.searchbox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.searchbox__label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.searchbox__input {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 15px;
+  width: 100%;
+}
+
+.searchbox__input::placeholder {
+  color: var(--graphite-soft);
+}
+
+.searchbox__input:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.searchbox__results {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-raised);
+}
+
+.searchbox__item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.searchbox__item:active {
+  background: var(--field-soft);
+}
+
+.searchbox__name {
+  font-size: 14px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.searchbox__sub {
+  font-size: 12px;
+  color: var(--text-caption);
+}
+
+.searchbox__hint {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.searchbox__chosen {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--field-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 14px;
+  font-weight: var(--w-semibold);
+  color: var(--field-deep);
+}
+
+.searchbox__clear {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--field-deep);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------- gamefinder */
+.gamefinder__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.gamefinder__vs {
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.gamefinder__season {
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gamefinder__season label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.gamefinder__season select {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.gamefinder__results {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gamefinder__result {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.gamefinder__result:active {
+  background: var(--field-soft);
+}
+
+.gamefinder__arrow {
+  color: var(--text-caption);
+}
+
+/* --------------------------------------------------------------- legal */
+.sitefooter__links {
+  display: flex;
+}
+
+.sitefooter__link {
+  min-height: var(--tap-min);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--field-deep);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sitefooter__legal {
+  padding-bottom: var(--space-4);
+  font-size: 12px;
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+.sitefooter__legal p {
+  margin: 0 0 6px;
+}
+
+.sitefooter__brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
 
 /* ---------------------------------------------------------------- team info */
@@ -3132,6 +3381,36 @@ body {
     gap: var(--space-4);
     min-width: 0;
   }
+
+  /* ---- player hero: a wide sheet has room to let the name lead, so the
+     headshot and both name lines scale up together instead of sitting at
+     phone size in the middle of an otherwise-roomy page. */
+  .player__hero {
+    grid-template-columns: 168px 1fr;
+    gap: var(--space-6);
+    padding-bottom: var(--space-5);
+  }
+  .shot {
+    width: 168px;
+    height: 252px;
+  }
+  .shot--fallback {
+    font-size: 64px;
+  }
+  .player__name-first {
+    font-size: 22px;
+  }
+  .player__name-last {
+    font-size: 48px;
+  }
+  .player__num {
+    font-size: 24px;
+    margin-left: 8px;
+  }
+  .player__meta {
+    margin-top: 12px;
+    font-size: 14px;
+  }
 }
 
 /* ============================================================
@@ -3193,6 +3472,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Every hint/caveat on the player page (loading, error, not-found, the
+   season-cutoff footnote) reads scorebook all-caps like the rest of the page. */
+.player .hint {
+  text-transform: uppercase;
+}
+
 /* Section titles on these pages carry an optional right-aligned note. */
 .player .section__title,
 .team-hub .section__title {
@@ -3207,6 +3492,13 @@ body {
   color: var(--graphite-soft);
   font-size: 11px;
   letter-spacing: var(--ls-caps);
+}
+/* Every other bit of copy on the player page is forced uppercase (the "scorebook
+   all-caps" convention); the team-hub note keeps its original sentence case. */
+.player .section__title em {
+  text-transform: uppercase;
+}
+.team-hub .section__title em {
   text-transform: none;
 }
 
@@ -3251,13 +3543,23 @@ body {
 }
 .player__name {
   margin: 0;
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-display);
   text-transform: uppercase;
-  font-weight: var(--w-bold);
-  font-size: 23px;
-  line-height: 1.03;
   color: var(--text-heading);
   letter-spacing: 0.01em;
+}
+.player__name-first {
+  font-weight: var(--w-semibold);
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--text-caption);
+}
+.player__name-last {
+  font-weight: var(--w-bold);
+  font-size: 27px;
+  line-height: 0.98;
 }
 .player__num {
   font-family: var(--font-mono);
@@ -3272,6 +3574,7 @@ body {
   font-size: 12.5px;
   color: var(--text-muted);
   line-height: 1.5;
+  text-transform: uppercase;
 }
 .player__pos {
   font-family: var(--font-display);
@@ -3386,6 +3689,11 @@ body {
 .player .ledger-wrap {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
+}
+/* Row copy ("vs"/"@" before the opponent) is written lowercase in JS; force it
+   uppercase here rather than littering the markup with literal caps. */
+.player .ledger td {
+  text-transform: uppercase;
 }
 .ledger,
 .standings {
