@@ -449,6 +449,13 @@ body {
   white-space: nowrap;
 }
 
+/* The level (MLB / AAA / … / ROK) sits directly under the year in the SAME mono
+   figure, nudged up against the flex gap so year + level read as one tight
+   two-line caption rather than three evenly spaced items. */
+.careertl__level {
+  margin-top: -2px;
+}
+
 /* --------------------------------------------------- level progression card
    "Path to the Majors" chevron strip on a pre-debut player's page: one rung
    per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
