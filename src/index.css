@@ -386,22 +386,40 @@ body {
 /* --------------------------------------------------- level progression card
    "Path to the Majors" chevron strip on a pre-debut player's page: one rung
    per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
-   .levelnav toggle above. */
+   .levelnav toggle above. Each rung is clipped into an arrow — flat on the
+   left, pointed on the right — and pulled over its neighbor with a negative
+   margin so the point of one rung nests into the notch of the next, reading
+   as a single arrow chain "stepping" toward MLB. Later rungs sit later in
+   the DOM, so they naturally paint over the tip poking in from the left;
+   no z-index needed. The final (MLB) rung drops the point since it's the
+   destination, not another step to climb. */
 .levelprog__arrow {
   display: flex;
-  gap: 4px;
   overflow-x: auto;
+  padding-right: 12px;
 }
 
 .levelprog__step {
   flex: 1 1 0;
-  min-width: 54px;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
+  min-width: 60px;
+  padding: 6px 16px 6px 22px;
+  margin-left: -12px;
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   text-align: center;
   box-shadow: var(--inset-cell);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+}
+
+.levelprog__step:first-child {
+  margin-left: 0;
+  padding-left: 10px;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+}
+
+.levelprog__step:last-child {
+  padding-right: 10px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
 }
 
 .levelprog__step.is-unreached {
@@ -4043,16 +4061,14 @@ body {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
 }
 .standings tr.is-me td {
   background: rgba(47, 110, 79, 0.1);
 }
 .standings tr.is-me .team {
   color: var(--field-deep);
-}
-.standings tr:not(.is-me) .team {
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
 }
 
 /* ranked team stats */
@@ -4108,6 +4124,29 @@ body {
   background: var(--clay-soft);
   color: var(--clay-deep);
   border-color: transparent;
+}
+
+/* Top-100-prospect badge — a neutral pill (not a performance judgment, so it
+   doesn't borrow rankchip's good/bad tone pair), MLB logo + rank number. */
+.prospectpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.prospectpill__logo {
+  width: 12px;
+  height: 12px;
+  display: block;
 }
 
 /* team-hub roster (own classes — the .roster panel is a different component) */
@@ -4191,4 +4230,37 @@ body {
 .rolechip--cl {
   background: var(--clay-soft);
   color: var(--clay-deep);
+}
+
+/* MLB team page's farm-system section — one card per full-season affiliate
+   (AAA/AA/A+/A), each a plain link to that club's own team page. */
+.thub-affiliates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+.thub-affiliate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+.thub-affiliate__name {
+  font-size: 12.5px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  line-height: 1.25;
+}
+.thub-affiliate__loc {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 10.5px;
+  color: var(--text-caption);
 }

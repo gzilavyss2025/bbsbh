@@ -515,10 +515,13 @@ export function yearByYearView(splits, group, currentStat, currentSeason, career
 }
 
 // ---------------------------------------------------------------------------
-// Level progression — for a pre-debut MiLB player, one row per level (always
-// all five, so an unreached rung still renders dimmed to complete the "climb
-// to MLB" narrative) built from the same multi-level yearByYear splits
-// already fetched for the nested ledger above — no extra request.
+// Level progression — for a pre-debut MiLB player, one row per level from
+// wherever his career actually started up through AAA (a rung above his
+// current level still renders dimmed, to complete the "climb to MLB"
+// narrative — but rungs below his starting level are dropped outright: a
+// player who debuted at A, say, is never going back to Rookie ball) built
+// from the same multi-level yearByYear splits already fetched for the nested
+// ledger above — no extra request.
 // ---------------------------------------------------------------------------
 
 export function levelProgressionView(splits, group, currentSportId) {
@@ -538,11 +541,14 @@ export function levelProgressionView(splits, group, currentSportId) {
       label,
       reached: rows.length > 0,
       firstYear: years.length ? Math.min(...years) : null,
+      lastYear: years.length ? Math.max(...years) : null,
       games: num(stat?.gamesPlayed),
       isCurrent: sportId === currentSportId,
     }
   })
-  return levels.some((l) => l.reached) ? { levels } : null
+  const startIndex = levels.findIndex((l) => l.reached)
+  if (startIndex === -1) return null
+  return { levels: levels.slice(startIndex) }
 }
 
 // ---------------------------------------------------------------------------

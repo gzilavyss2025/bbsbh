@@ -1,7 +1,13 @@
 // "Path to the Majors" — a chevron strip showing every MiLB level a pre-debut
-// player has climbed, when he first reached it, and career games there, with
-// the current level highlighted and unreached levels dimmed. Never rendered
-// for a debuted player (see PlayerPage.jsx's `data.progression` gate).
+// player has climbed (from wherever his career started — levels below that
+// are dropped, not dimmed, since he's never going back), when he reached it
+// (a year range, for a level spanning multiple seasons), and career games
+// there, with the current level highlighted and levels still ahead dimmed.
+// Each rung is shaped as a chevron pointing at the next one, so the right-hand
+// edge of the strip literally arrows toward MLB; the final MLB rung is the
+// destination, so it gets a flat trailing edge instead of another point.
+// Never rendered for a debuted player (see PlayerPage.jsx's `data.progression`
+// gate).
 const MLB_TARGET = { sportId: 1, label: 'MLB', reached: false, isCurrent: false, target: true }
 
 export function LevelProgressionCard({ levels }) {
@@ -23,7 +29,10 @@ export function LevelProgressionCard({ levels }) {
           >
             <span className="levelprog__label">{lvl.label}</span>
             {lvl.reached && (
-              <span className="levelprog__detail">{lvl.firstYear} · {lvl.games}G</span>
+              <span className="levelprog__detail">
+                {lvl.firstYear}
+                {lvl.lastYear > lvl.firstYear ? `–${lvl.lastYear}` : ''} · {lvl.games}G
+              </span>
             )}
           </div>
         ))}
