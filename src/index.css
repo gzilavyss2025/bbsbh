@@ -492,6 +492,14 @@ body {
   color: var(--clay);
 }
 
+/* Full-sentence status/caveat copy (not the short "Loading…"/"Retry" hints
+   that share .hint) — the high-legibility serif reads better as all-caps prose. */
+.hint--prose {
+  font-family: var(--font-read);
+  font-weight: var(--w-semibold);
+  letter-spacing: 0.015em;
+}
+
 /* On the slate every bit of copy reads in scorebook all-caps — the shared hint
    and button text (loading / no games / error / Retry) are uppercased here only,
    leaving the same classes as-is on every other screen. */
@@ -1997,10 +2005,13 @@ body {
   padding: 6px 2px;
   border-top: var(--bw-hair) dashed var(--border-hairline);
   border-bottom: var(--bw-hair) dashed var(--border-hairline);
-  font-size: 13px;
-  font-weight: var(--w-medium);
+  /* Sentence-like event notes (mound visits, pitching changes) — same prose
+     treatment as .pbp__desc: the high-legibility serif reads better in caps. */
+  font-family: var(--font-read);
+  font-size: 12px;
+  font-weight: var(--w-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.015em;
   color: var(--text-caption);
 }
 
@@ -2224,7 +2235,7 @@ body {
      readable. See --font-read in tokens/typography.css. */
   font-family: var(--font-read);
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: var(--w-semibold);
   letter-spacing: 0.015em;
   line-height: 1.4;
   color: var(--text-body);
@@ -2919,7 +2930,10 @@ body {
 
 .buzz__text {
   margin: 0;
-  font-size: 13.5px;
+  /* Social-post prose — read in the high-legibility serif like other prose. */
+  font-family: var(--font-read);
+  font-size: 13px;
+  font-weight: var(--w-semibold);
   line-height: var(--lh-body);
   color: var(--text-body);
 }
@@ -4210,7 +4224,7 @@ body {
    the opponent's own color — same "paper" vocabulary as the seal covers,
    just solid instead of hatched. */
 .tcal__game--home {
-  background: var(--seal);
+  background: color-mix(in srgb, var(--seal) 80%, transparent);
   border-color: transparent;
 }
 .tcal__gm {
