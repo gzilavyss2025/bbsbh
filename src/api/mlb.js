@@ -559,6 +559,31 @@ export async function fetchTeamRoster(teamId, season) {
   }
 }
 
+// Just the active roster's person ids — no stat hydration — for the slate's
+// "N prospects on this roster" badge, which only needs to know who's on the
+// roster, not their stats. Lighter than fetchTeamRoster. Degrades to [].
+export async function fetchTeamRosterIds(teamId) {
+  if (!teamId) return []
+  try {
+    const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=active`)
+    return (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
+  } catch {
+    return []
+  }
+}
+
+// Fan out fetchTeamRosterIds across every team on the current slate — same
+// Promise.allSettled "degrade per item" idiom as fetchTeamDirectory /
+// fetchMilbYearByYear, since there's no batched multi-team roster endpoint.
+export async function fetchRosterIdsForTeams(teamIds) {
+  const results = await Promise.allSettled(teamIds.map((id) => fetchTeamRosterIds(id)))
+  const out = {}
+  teamIds.forEach((id, i) => {
+    out[id] = results[i].status === 'fulfilled' ? results[i].value : []
+  })
+  return out
+}
+
 // A club's full affiliate tree in one request, via the dedicated
 // /teams/affiliates endpoint (a plain team hydrate doesn't carry this).
 // `hydrate=venue(location)` folds in each affiliate's ballpark city/state

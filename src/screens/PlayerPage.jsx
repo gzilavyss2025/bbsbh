@@ -1,4 +1,3 @@
-import { Fragment } from 'react'
 import {
   fetchPerson,
   fetchPersonStats,
@@ -19,6 +18,8 @@ import {
   firstsFromGameLog,
   splitDisplayName,
 } from '../api/person.js'
+import { fetchTopProspects, prospectRankById, orgProspectRankById } from '../api/prospects.js'
+import { leagueLogoUrl } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -28,6 +29,8 @@ import { Headshot } from '../components/Headshot.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { Ledger } from '../components/Ledger.jsx'
+import { SiteHeader } from '../components/SiteHeader.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -98,7 +101,7 @@ async function loadPlayer(id, asOf) {
   const currentYear = Number(isoToday().slice(0, 4))
   const startDate = `${season}-01-01`
 
-  const [results, debutSplits] = await Promise.all([
+  const [results, debutSplits, prospects] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
@@ -138,8 +141,15 @@ async function loadPlayer(id, asOf) {
           season: debutYear, sportId: 1,
         })
       : Promise.resolve([]),
+    // Session-memoized after the first call anywhere in the app — cheap even
+    // though every player page asks for it.
+    fetchTopProspects(),
   ])
   const blocks = results.map((r) => r.block)
+  const prospectRank = prospectRankById(prospects.players, bio.id)
+  // The player's rank on his own org's farm-system list — shown as a second
+  // pill for anyone who's on their org's list but not the overall Top 100.
+  const orgProspectRank = orgProspectRankById(prospects.orgProspects, bio.id)
 
   // "Path to the Majors" card — pre-debut players only, from the multi-level
   // yearByYear splits already fetched above (no extra request). Uses the
@@ -243,7 +253,7 @@ async function loadPlayer(id, asOf) {
 
   return {
     bio, blocks, season, asOf, sportId,
-    isAllStar, currentYear, firsts, progression,
+    isAllStar, currentYear, firsts, progression, prospectRank, orgProspectRank,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
@@ -257,6 +267,7 @@ export function PlayerPage({ id, asOf, sportId }) {
   if (loading && !data) {
     return (
       <div className="screen player">
+        <SiteHeader />
         <BackBtn onClick={back} />
         <p className="hint">Loading player…</p>
       </div>
@@ -265,6 +276,7 @@ export function PlayerPage({ id, asOf, sportId }) {
   if (!data) {
     return (
       <div className="screen player">
+        <SiteHeader />
         <BackBtn onClick={back} />
         <p className="hint hint--error">
           {error ? 'Couldn’t load this player. Try again.' : 'Player not found.'}
@@ -292,6 +304,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="allstar-banner__star" aria-hidden="true">★</span>
           </div>
         )}
+        <SiteHeader />
         <BackBtn onClick={back} />
 
         <header className="player__hero">
@@ -310,6 +323,26 @@ export function PlayerPage({ id, asOf, sportId }) {
               {bio.team && (
                 <> <span className="sep">·</span>{' '}
                   <TeamLink id={bio.team.id} className="player__team">{bio.team.name}</TeamLink>
+                </>
+              )}
+              {data.prospectRank && (
+                <> <span className="sep">·</span>{' '}
+                  <span className="prospectpill">
+                    <img src={leagueLogoUrl()} alt="" className="prospectpill__logo" />
+                    #{data.prospectRank} PROSPECT
+                  </span>
+                </>
+              )}
+              {data.orgProspectRank && (
+                <> <span className="sep">·</span>{' '}
+                  <span className="prospectpill">
+                    <TeamLogo
+                      teamId={bio.team?.parentOrgId ?? bio.team?.id}
+                      name={bio.team?.parentOrgName ?? bio.team?.name}
+                      size={12}
+                    />
+                    #{data.orgProspectRank} PROSPECT
+                  </span>
                 </>
               )}
             </p>
@@ -539,52 +572,6 @@ function SplitCard({ label, side }) {
         <span className="split__v">{side.avg}</span>
         <span className="split__sub">{side.ops} OPS</span>
       </div>
-    </div>
-  )
-}
-
-function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '' }) {
-  const cellClass = (i) => (i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : '')
-  return (
-    <div className="ledger-wrap">
-      <table className="ledger">
-        <thead>
-          <tr>
-            {head.map((h, i) => (
-              <th key={h} className={i < leftCols ? 'lft' : ''}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <Fragment key={r.key}>
-              <tr className={r.allStar ? 'is-allstar' : ''}>
-                {r.cells.map((c, i) => (
-                  <td key={i} className={cellClass(i)}>{c}</td>
-                ))}
-              </tr>
-              {r.subRows?.map((sr) => (
-                <tr key={sr.key} className="ledger__subrow">
-                  <td className="lft yr" />
-                  <td className="lft opp">{sr.label}</td>
-                  {sr.cells.map((c, i) => (
-                    <td key={i}>{c}</td>
-                  ))}
-                </tr>
-              ))}
-            </Fragment>
-          ))}
-        </tbody>
-        {total && (
-          <tfoot>
-            <tr className="is-total">
-              {[totalLabel, ...Array(leftCols - 1).fill(''), ...total].map((c, i) => (
-                <td key={i} className={cellClass(i)}>{c}</td>
-              ))}
-            </tr>
-          </tfoot>
-        )}
-      </table>
     </div>
   )
 }

@@ -100,6 +100,12 @@ body {
   padding: calc(10px + env(safe-area-inset-top)) 0 10px;
 }
 
+/* A SiteHeader's .sitebar already clears the notch, so a topbar right below
+   it shouldn't stack a second safe-area inset on top of it. */
+.sitebar + .topbar {
+  padding-top: 10px;
+}
+
 .topbar__title {
   display: flex;
   align-items: center;
@@ -4313,4 +4319,41 @@ body {
   letter-spacing: var(--ls-caps);
   font-size: 10.5px;
   color: var(--text-caption);
+}
+
+/* Team-page prospect table — an org's farm-system leaderboard. On an
+   affiliate's own page (highlightTop100), rows also on the overall Top 100
+   read bold/full-strength (.is-accent) and everyone else dulls (.is-dull);
+   the MLB parent's own page leaves every row plain. */
+.prospecttable .lft.opp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prospecttable__top {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+  border-radius: var(--radius-pill);
+  padding: 1px 5px;
+}
+.prospecttable__level {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.prospecttable__line {
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.prospecttable tr.is-accent .lft.opp {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.prospecttable tr.is-dull {
+  opacity: 0.45;
 }

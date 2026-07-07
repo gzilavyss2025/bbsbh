@@ -5,15 +5,19 @@ import {
   fetchLeagueTeamStats,
   fetchAllStarRosterIds,
   fetchAffiliates,
+  fetchRosterIdsForTeams,
 } from '../api/mlb.js'
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast } from '../api/person.js'
+import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../api/prospects.js'
+import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
+import { SiteHeader } from '../components/SiteHeader.jsx'
 
 const DASH = '—'
 const POS_ORDER = { C: 1, '1B': 2, '2B': 3, SS: 3.5, '3B': 4, LF: 6, CF: 7, RF: 8, OF: 6.5, DH: 9 }
@@ -58,8 +62,14 @@ async function loadTeam(id, asOf) {
   const sportId = team.sport?.id ?? 1
   const season = Number((asOf || isoToday()).slice(0, 4))
   const standingsDate = asOf ? dayBefore(asOf) : null
+  // The MLB parent's own id — same value whether this page IS the parent or
+  // one of its affiliates (team.parentOrgId rides along on a MiLB team's
+  // /teams response). Every prospect belongs to the org, not to one specific
+  // affiliate, so both the parent's page and every affiliate's page show the
+  // same org-wide leaderboard (see the Prospects section below).
+  const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, standings, league, allStarIds, warData, affiliates] = await Promise.all([
+  const [roster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot] = await Promise.all([
     fetchTeamRoster(id, season),
     team.league?.id
       ? fetchStandings(team.league.id, season, standingsDate)
@@ -67,9 +77,31 @@ async function loadTeam(id, asOf) {
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
     sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
     sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
-    // Affiliate tree only makes sense from the MLB parent looking down.
-    sportId === 1 ? fetchAffiliates(id, season) : Promise.resolve([]),
+    // The affiliate tree is keyed off the ORG id (not `id`), so an
+    // affiliate's own page gets the same tree its MLB parent would.
+    orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
+    fetchTopProspects(),
   ])
+
+  // Each org prospect's CURRENT affiliate, resolved by live roster
+  // membership (not the scraped, sometimes-ambiguous level string) — a
+  // second small fan-out over just this org's own affiliates.
+  const affiliateRosterIds = affiliates.length
+    ? await fetchRosterIdsForTeams(affiliates.map((a) => a.id))
+    : {}
+  const affiliateByPlayer = prospectAffiliateMap(affiliateRosterIds)
+  const affiliateById = new Map(affiliates.map((a) => [a.id, a]))
+  const prospects = orgId
+    ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId).map((p) => {
+        const affTeamId = affiliateByPlayer.get(p.playerId) ?? null
+        const aff = affTeamId ? affiliateById.get(affTeamId) : null
+        return {
+          ...p,
+          affiliateTeamId: aff ? aff.id : null,
+          levelLabel: aff ? SPORT_LABEL[aff.sportId] ?? p.levelRaw : p.levelRaw,
+        }
+      })
+    : []
   // WAR data is a single current-season file (see src/api/war.js); only trust
   // it when its season matches the team page's — otherwise (a historical
   // `asOf` team page, or MiLB with no WAR source) every badge shows DASH
@@ -141,7 +173,7 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers,
-    affiliates,
+    affiliates, prospects,
   }
 }
 
@@ -154,6 +186,7 @@ export function TeamPage({ id, asOf, sportId }) {
   if (loading && !data) {
     return (
       <div className="screen team-hub">
+        <SiteHeader />
         <BackBtn onClick={back} />
         <p className="hint">Loading team…</p>
       </div>
@@ -162,6 +195,7 @@ export function TeamPage({ id, asOf, sportId }) {
   if (!data) {
     return (
       <div className="screen team-hub">
+        <SiteHeader />
         <BackBtn onClick={back} />
         <p className="hint hint--error">
           {error ? 'Couldn’t load this team. Try again.' : 'Team not found.'}
@@ -170,11 +204,16 @@ export function TeamPage({ id, asOf, sportId }) {
     )
   }
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, affiliates } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, affiliates, prospects } = data
+  // An affiliate's own page shows the same org-wide list as its MLB parent,
+  // so it accentuates the rows that are also on the overall Top 100 and
+  // dulls the rest — the parent's own page shows the list plainly.
+  const highlightTop100 = sportId !== 1
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen team-hub">
+        <SiteHeader />
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
@@ -273,6 +312,51 @@ export function TeamPage({ id, asOf, sportId }) {
                   </span>
                 </TeamLink>
               ))}
+            </div>
+          </>
+        )}
+
+        {prospects.length > 0 && (
+          <>
+            <SectionTitle
+              title="Prospects"
+              note={highlightTop100 ? 'org rank · Top 100 in bold' : 'org rank'}
+            />
+            <div className="ledger-wrap">
+              <table className="ledger prospecttable">
+                <thead>
+                  <tr>
+                    <th className="lft">Rk</th>
+                    <th className="lft">Player</th>
+                    <th>Pos</th>
+                    <th>Level</th>
+                    <th>Line</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prospects.map((p) => {
+                    const isTop = p.topRank != null
+                    const rowClass = highlightTop100 ? (isTop ? 'is-accent' : 'is-dull') : ''
+                    return (
+                      <tr key={p.playerId} className={rowClass}>
+                        <td className="lft yr">{p.orgRank}</td>
+                        <td className="lft opp">
+                          <PlayerLink id={p.playerId}>{p.name}</PlayerLink>
+                          {isTop && <span className="prospecttable__top">#{p.topRank}</span>}
+                        </td>
+                        <td>{p.position || DASH}</td>
+                        <td className="prospecttable__level">
+                          {p.affiliateTeamId && (
+                            <TeamLogo teamId={p.affiliateTeamId} name={p.levelLabel} size={16} crop />
+                          )}
+                          {p.levelLabel || DASH}
+                        </td>
+                        <td className="prospecttable__line">{p.statLine || DASH}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </>
         )}

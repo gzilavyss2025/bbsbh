@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { fetchSchedule, fetchScheduleUniforms } from '../api/mlb.js'
+import { fetchSchedule, fetchScheduleUniforms, fetchRosterIdsForTeams } from '../api/mlb.js'
+import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
@@ -60,6 +61,28 @@ export function GameSelect({ onPick, onShowLogos }) {
     [pkKey],
   )
   const uniformsReady = uniforms.data ?? {}
+
+  // "N prospects on this roster" badge — MiLB games only (the slate's level
+  // toggle is single-select, so gating this fetch on sportId covers every
+  // card on screen at once). Rosters are fetched per team on the current
+  // slate; the prospects snapshot is session-memoized after its first call
+  // anywhere in the app.
+  const prospects = useAsync(() => fetchTopProspects(), [])
+  const teamIdsKey = useMemo(
+    () => [...new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))].join(','),
+    [sorted],
+  )
+  const rosterIds = useAsync(
+    () =>
+      sportId === SPORT_IDS.MLB
+        ? Promise.resolve({})
+        : fetchRosterIdsForTeams(teamIdsKey ? teamIdsKey.split(',').map(Number) : []),
+    [teamIdsKey, sportId],
+  )
+  const prospectCounts = useMemo(() => {
+    const ids = new Set((prospects.data?.players ?? []).map((p) => p.playerId))
+    return countProspectsByTeam(rosterIds.data ?? {}, ids)
+  }, [rosterIds.data, prospects.data])
 
   return (
     <div className="screen screen--slate">
@@ -122,6 +145,7 @@ export function GameSelect({ onPick, onShowLogos }) {
               game={g}
               pinned={isPinned(g)}
               uniformsReady={!!uniformsReady[g.gamePk]}
+              prospectCount={(prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)}
               onSelect={() => onPick(g, dateStr)}
               // A completed game on a past date gets a direct box-score jump.
               onBoxScore={

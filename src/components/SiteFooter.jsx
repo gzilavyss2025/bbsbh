@@ -34,6 +34,13 @@ export function SiteFooter({ onShowLogos }) {
         <button type="button" className="sitefooter__action" onClick={onShowLogos}>
           Logo sheet
         </button>
+        <button
+          type="button"
+          className="sitefooter__action"
+          onClick={() => navigate('/prospects')}
+        >
+          Top Prospects
+        </button>
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}

@@ -1,0 +1,51 @@
+name: Update top prospects snapshot
+
+# Weekly refresh of public/data/top-prospects.json (see docs/top-prospects.md
+# and scripts/fetch-top-prospects.mjs). This app has no backend and the
+# source page (www.mlb.com) can't be fetched from the browser (no CORS
+# headers), so the scrape has to run off-device on a schedule and commit its
+# output — the app just reads the resulting static file at runtime. The
+# commit this workflow makes rides the existing Vercel auto-deploy on push
+# to main; no separate publish step.
+#
+# Requires repo Settings -> Actions -> General -> Workflow permissions set to
+# "Read and write permissions", or the push step below will 403.
+
+on:
+  schedule:
+    # Mon 10:00 UTC ~= 6:00 AM ET (drifts an hour across DST — acceptable
+    # for a weekly rankings refresh).
+    - cron: '0 10 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-top-prospects
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch top prospects
+        run: node scripts/fetch-top-prospects.mjs
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- public/data/top-prospects.json; then
+            echo "No change in top-prospects.json — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/top-prospects.json
+          git commit -m "chore: refresh top prospects snapshot"
+          git push

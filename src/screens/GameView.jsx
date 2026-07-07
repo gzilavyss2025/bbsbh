@@ -18,7 +18,7 @@ import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
-import { BaseballMark } from '../components/BaseballMark.jsx'
+import { SiteHeader } from '../components/SiteHeader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
@@ -26,7 +26,7 @@ import { LinkScope } from '../lib/nav.jsx'
 // The chrome is two grayscale team marks (away @ home) that open the sketch
 // modal; a small site mark up top returns to the slate. Which section shows is
 // driven entirely by `section` / `onSection` so every step is a real URL.
-export function GameView({ game, section, onSection, onHome }) {
+export function GameView({ game, section, onSection }) {
   const { step, inning, half } = sectionToStep(section)
   useDocumentTitle(gameTitle(game, step, inning, half))
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
@@ -134,12 +134,7 @@ export function GameView({ game, section, onSection, onHome }) {
   return (
     <LinkScope asOf={officialDate} sportId={game.sportId}>
     <div className="screen">
-      <div className="sitebar">
-        <button className="sitebar__home" onClick={onHome} aria-label="Back to games">
-          <BaseballMark size={20} simplified />
-          <span className="sitebar__word">Scorebook</span>
-        </button>
-      </div>
+      <SiteHeader />
 
       <Masthead away={game.away} home={game.home} onSketch={setSketching} />
 

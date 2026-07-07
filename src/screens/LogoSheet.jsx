@@ -6,6 +6,7 @@ import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
+import { SiteHeader } from '../components/SiteHeader.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used
@@ -21,6 +22,7 @@ export function LogoSheet({ onBack }) {
 
   return (
     <div className="screen">
+      <SiteHeader />
       <header className="topbar">
         <button className="topbar__back" onClick={onBack}>
           ‹ Games

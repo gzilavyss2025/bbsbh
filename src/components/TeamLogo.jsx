@@ -19,6 +19,7 @@ export function TeamLogo({
   bw = false,
   variant = 'base',
   className = '',
+  crop = false,
 }) {
   // 'stage' tracks how far down the fallback chain we are for the current
   // (teamId, variant). Reset whenever either changes so a re-picked mark starts
@@ -66,11 +67,11 @@ export function TeamLogo({
     )
   }
 
-  return (
+  const img = (
     <img
       key={url}
-      className={`teamlogo ${bwClass} ${className}`}
-      style={style}
+      className={`teamlogo ${crop ? 'teamlogo--crop' : ''} ${bwClass} ${crop ? '' : className}`}
+      style={crop ? undefined : style}
       src={url}
       alt=""
       width={isWordmark ? size * WORDMARK_ASPECT : size}
@@ -81,4 +82,23 @@ export function TeamLogo({
       aria-hidden="true"
     />
   )
+
+  // `crop` is a small "vibe" treatment (the affiliate-level chip on a
+  // prospect table row, not meant for precise club identification): most
+  // team-logo SVGs carry internal padding within their viewBox, so a plain
+  // object-fit: contain leaves visible whitespace at this size. Wrapping in
+  // a clipped square box and zooming the image past its own padding fills
+  // the box edge-to-edge instead.
+  if (crop) {
+    return (
+      <span
+        className={`teamlogo-crop ${className}`}
+        style={{ width: size, height: size }}
+      >
+        {img}
+      </span>
+    )
+  }
+
+  return img
 }

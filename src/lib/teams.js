@@ -98,6 +98,14 @@ export function teamLogoUrl(teamId, variant = 'base') {
   return v ? `${LOGO_BASE}/${v.path}/${teamId}.svg` : `${LOGO_BASE}/${teamId}.svg`
 }
 
+// The same CDN also serves a plain MLB league mark (the silhouetted-batter
+// logo) under team id 1 in the "league" subfolder — verified live, a
+// real logo, not the base logo echoed back. Used for the prospect-rank
+// badges, which aren't tied to any one club.
+export function leagueLogoUrl() {
+  return `${LOGO_BASE}/league-on-light/1.svg`
+}
+
 // ---------------------------------------------------------------------------
 // Player headshots
 //

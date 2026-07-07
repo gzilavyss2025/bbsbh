@@ -1,12 +1,13 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { lookupSplit } from '../lib/teamSplits.js'
+import { leagueLogoUrl } from '../lib/teams.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
-export function GameCard({ game, pinned, uniformsReady, onSelect, onBoxScore }) {
+export function GameCard({ game, pinned, uniformsReady, prospectCount = 0, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
   const dhLabel = doubleHeaderLabel(game)
   return (
@@ -32,6 +33,12 @@ export function GameCard({ game, pinned, uniformsReady, onSelect, onBoxScore }) 
             <span className="gamecard__level">{game.sportLabel}</span>
           )}
           {dhLabel && <span className="gamecard__dh">{dhLabel}</span>}
+          {prospectCount > 0 && (
+            <span className="gamecard__prospects">
+              <img src={leagueLogoUrl()} alt="" className="gamecard__prospects-logo" />
+              {prospectCount} Prospect{prospectCount === 1 ? '' : 's'}
+            </span>
+          )}
           {pinned && <span className="gamecard__pin">★</span>}
           <StatusText game={game} />
         </div>

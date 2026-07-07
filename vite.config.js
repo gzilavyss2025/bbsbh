@@ -42,7 +42,7 @@ export default defineConfig({
       workbox: {
         // Offline app shell. API responses are network-first so we never
         // serve a stale (and possibly spoiler-revealing) score from cache.
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json}'],
         navigateFallback: '/index.html',
         runtimeCaching: [
           {

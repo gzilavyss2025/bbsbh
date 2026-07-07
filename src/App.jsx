@@ -4,6 +4,7 @@ import { GameSelect } from './screens/GameSelect.jsx'
 import { GameView } from './screens/GameView.jsx'
 import { LogoSheet } from './screens/LogoSheet.jsx'
 import { PlayerPage } from './screens/PlayerPage.jsx'
+import { ProspectsPage } from './screens/ProspectsPage.jsx'
 import { TeamPage } from './screens/TeamPage.jsx'
 import { resolveGame } from './api/mlb.js'
 import { useAsync } from './hooks/useAsync.js'
@@ -67,6 +68,8 @@ export default function App() {
     content = <LogoSheet onBack={() => go('/')} />
   } else if (route.name === 'about') {
     content = <AboutPage onBack={() => go('/')} />
+  } else if (route.name === 'prospects') {
+    content = <ProspectsPage onBack={() => go('/')} />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {
@@ -159,7 +162,6 @@ function GameRoute({ route, seed, onSection, onHome }) {
       game={resolved.data}
       section={route.section}
       onSection={onSection}
-      onHome={onHome}
     />
   )
 }
