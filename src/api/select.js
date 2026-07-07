@@ -20,18 +20,23 @@ export function lastFirst(person) {
 // rows). boxscoreName is the club's own short form ("Gurriel Jr."); fall back
 // to the pre-comma slice of lastFirstName, then the last token of fullName.
 // When two players share a surname the club disambiguates with a trailing
-// initial ("Suárez, E" / "Pérez, W") — drop it so the row reads plain
-// "SUÁREZ", while keeping real suffixes like "Jr." intact. Exported as the one
-// name-shortening rule; boxscore.js shares it rather than growing a twin.
+// token after a comma — usually one initial ("Suárez, E" / "Pérez, W"), but
+// sometimes a short name fragment when initials alone don't disambiguate
+// ("Contreras, Wm" for William vs. "Contreras, Wn" for Willson) — so drop
+// everything from the first comma on, not just a single trailing letter, to
+// leave a plain "SUÁREZ" / "CONTRERAS". Real suffixes like "Jr." never carry
+// a comma in boxscoreName (it's "Guerrero Jr.", not "Guerrero, Jr."), so this
+// can't clip one. Exported as the one name-shortening rule; boxscore.js
+// shares it rather than growing a twin.
 export function lastName(person) {
   const raw = person?.boxscoreName
     ? person.boxscoreName
     : person?.lastFirstName
-      ? person.lastFirstName.split(',')[0].trim()
+      ? person.lastFirstName
       : person?.fullName
         ? person.fullName.split(' ').slice(-1)[0]
         : ''
-  return raw.replace(/,\s*[A-Za-z]\.?$/, '').trim()
+  return raw.split(',')[0].trim()
 }
 
 // The {last, first} display pair for a gameData player record — the form the
