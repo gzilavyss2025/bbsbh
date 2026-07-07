@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { fetchSchedule } from '../api/mlb.js'
+import { fetchSchedule, fetchScheduleUniforms } from '../api/mlb.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
@@ -44,6 +44,19 @@ export function GameSelect({ onPick, onShowLogos }) {
   const { loading, error, data } = slate
 
   const sorted = useMemo(() => sortGames(data ?? []), [data])
+
+  // What each club is wearing isn't in the schedule payload, so it rides a
+  // separate one-shot request keyed on the slate's gamePks (posted ~first
+  // pitch, so it re-fetches as the games go live via the same reload seam).
+  const pkKey = useMemo(
+    () => sorted.map((g) => g.gamePk).join(','),
+    [sorted],
+  )
+  const uniforms = useAsync(
+    () => fetchScheduleUniforms(pkKey ? pkKey.split(',') : []),
+    [pkKey],
+  )
+  const uniformsReady = uniforms.data ?? {}
 
   return (
     <div className="screen">
@@ -114,6 +127,7 @@ export function GameSelect({ onPick, onShowLogos }) {
             <GameCard
               game={g}
               pinned={isPinned(g)}
+              uniformsReady={!!uniformsReady[g.gamePk]}
               onSelect={() => onPick(g, dateStr)}
               // A completed game on a past date gets a direct box-score jump.
               onBoxScore={

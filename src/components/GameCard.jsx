@@ -6,7 +6,7 @@ import { lookupSplit } from '../lib/teamSplits.js'
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
-export function GameCard({ game, pinned, onSelect, onBoxScore }) {
+export function GameCard({ game, pinned, uniformsReady, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
   const statusText = describeStatus(game)
   return (
@@ -25,7 +25,7 @@ export function GameCard({ game, pinned, onSelect, onBoxScore }) {
           <TeamName team={game.home} side="home" />
         </div>
         {game.abstractState !== 'Final' && (
-          <ReadyStrip game={game} />
+          <ReadyStrip game={game} uniformsReady={uniformsReady} />
         )}
         <div className="gamecard__meta">
           {game.sportLabel && game.sportLabel !== 'MLB' && (
@@ -50,16 +50,19 @@ export function GameCard({ game, pinned, onSelect, onBoxScore }) {
 
 // Scorebook-readiness strip: four tiny red/green chips under the matchup telling
 // you at a glance whether the basics you'd pencil in pre-game are posted yet —
-// each team's batting order, the umpire crew, and both starting pitchers. Green
-// (✓) = posted, red (✗) = not yet. Spoiler-free; none of these reveal a score.
-// The lineup chips carry the team abbreviation so it's clear which side is set.
-function ReadyStrip({ game }) {
+// each team's batting order, the umpire crew, both starting pitchers, and
+// whether each club's uniforms have been posted. Green (✓) = posted, red (✗) =
+// not yet. Spoiler-free; none of these reveal a score. The lineup chips carry
+// the team abbreviation so it's clear which side is set. (Uniforms land latest —
+// around first pitch — so that chip stays red longest.)
+function ReadyStrip({ game, uniformsReady }) {
   const r = game.readiness ?? {}
   const items = [
     { ok: !!r.awayLineup, label: `${game.away.abbreviation || 'Away'} Lineup` },
     { ok: !!r.homeLineup, label: `${game.home.abbreviation || 'Home'} Lineup` },
     { ok: !!r.umpires, label: 'Umps' },
     { ok: !!r.pitchers, label: 'SP' },
+    { ok: !!uniformsReady, label: 'Unis' },
   ]
   return (
     <div className="gamecard__ready" aria-label="Scorebook readiness">
@@ -126,13 +129,19 @@ function describeStatus(game) {
   const s = game.abstractState
   if (s === 'Final') return 'Final' // no score, just the state
   if (s === 'Live') return '' // the LIVE pill carries it; no redundant text
-  // Pre-game: show the local start time.
+  // Pre-game: show first pitch in the PARK's local clock, with its timezone
+  // abbreviation appended ("7:10 PDT"), so a west-coast game doesn't read in
+  // the viewer's zone. Fall back to the viewer's local time (unlabeled) when
+  // the feed carries no venue timezone (lean MiLB rows).
   try {
     const t = new Date(game.gameDate)
-    return t.toLocaleTimeString(undefined, {
+    const { tz, tzId } = game.venue ?? {}
+    const time = t.toLocaleTimeString(undefined, {
       hour: 'numeric',
       minute: '2-digit',
+      ...(tzId ? { timeZone: tzId } : {}),
     })
+    return tz ? `${time} ${tz}` : time
   } catch {
     return game.detailedState ?? 'Scheduled'
   }
