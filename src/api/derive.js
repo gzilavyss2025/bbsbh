@@ -40,8 +40,11 @@ export function computeDerivedByInning(feed) {
       // (common at MiLB levels); callers hide the stat rather than show 0.
       maxVelo: null, // fastest pitch, mph
       maxVeloType: '', // its pitch type ("Four-Seam Fastball")
+      maxVeloPlayer: '', // the pitcher who threw it
       hardestHit: null, // top exit velocity, mph
+      hardestHitPlayer: '', // the batter who hit it
       longestHit: null, // longest tracked batted ball, ft
+      longestHitPlayer: '', // the batter who hit it
     })
 
   for (const play of plays) {
@@ -72,14 +75,17 @@ export function computeDerivedByInning(feed) {
       if (typeof velo === 'number' && velo > (b.maxVelo ?? -Infinity)) {
         b.maxVelo = velo
         b.maxVeloType = e.details?.type?.description ?? ''
+        b.maxVeloPlayer = play.matchup?.pitcher?.fullName ?? ''
       }
       const ev = e.hitData?.launchSpeed
       if (typeof ev === 'number' && ev > (b.hardestHit ?? -Infinity)) {
         b.hardestHit = ev
+        b.hardestHitPlayer = play.matchup?.batter?.fullName ?? ''
       }
       const dist = e.hitData?.totalDistance
       if (typeof dist === 'number' && dist > (b.longestHit ?? -Infinity)) {
         b.longestHit = dist
+        b.longestHitPlayer = play.matchup?.batter?.fullName ?? ''
       }
     }
 
@@ -108,8 +114,11 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
       plateAppearances: 0,
       maxVelo: null,
       maxVeloType: '',
+      maxVeloPlayer: '',
       hardestHit: null,
+      hardestHitPlayer: '',
       longestHit: null,
+      longestHitPlayer: '',
     }
   )
 }

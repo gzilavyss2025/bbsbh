@@ -2337,9 +2337,13 @@ body {
 }
 
 /* Uniform number — inked seam-red wherever it rides beside a name (the manager
-   fill-in, and the number|position tag on every batter and pitcher). Inherits
-   the surrounding font size so number and position sit at the same size. */
+   fill-in, and the number|position tag on every batter and pitcher). Mono
+   tabular figures like the lineup pages' jersey number, at the surrounding font
+   size so number and position sit level. */
 .bs__unum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
   color: var(--accent-negative);
   font-weight: var(--w-bold);
 }
@@ -2641,46 +2645,46 @@ body {
   color: var(--text-caption);
 }
 
-/* Fill-in header: the scorebook's little labeled boxes (date, ballpark, umpires,
-   managers, weather, attendance…) laid out as a grid so each reads as a caption
-   over its value, ready to copy into the matching slot on the paper sheet. */
+/* Fill-in header: the scorebook's labeled boxes (date, ballpark, umpires,
+   managers, weather, attendance…) — styled to match the lineup pages' fact grid,
+   a seamless two-column grid with hairline dividers (the 1px gap reveals the rule
+   beneath) rather than a strip of separately-bordered boxes. Wide fields span the
+   full row. */
 .bs__fill {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-  padding: 12px 14px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-rule);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  background: var(--surface-card);
+  overflow: hidden;
   box-shadow: var(--shadow-card);
 }
 .bs__field {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-  padding: 5px 8px 6px;
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  background: var(--paper-1);
+  padding: 10px 12px;
+  background: var(--surface-card);
 }
 .bs__field--wide {
   grid-column: 1 / -1;
 }
 .bs__fieldLabel {
   font-family: var(--font-display);
-  font-size: 8.5px;
-  font-weight: var(--w-bold);
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
 .bs__fieldValue {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: var(--w-semibold);
   text-transform: uppercase;
-  color: var(--text-heading);
+  letter-spacing: 0.01em;
+  color: var(--text-body);
   overflow-wrap: anywhere;
 }
 

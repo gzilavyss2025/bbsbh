@@ -5,8 +5,12 @@
 // the pitcher has his own table and the DH bats but never takes the field,
 // so he rides a small line under the diamond instead.
 //
-// Spoiler-free: this is the same lineup data as the batting order, just
-// arranged spatially.
+// Two input shapes, one drawing:
+//  • Lineup page (spoiler-free starting nine): each item is { position, last }.
+//  • Innings page (reveal-gated live alignment, see api/defense.js): each item
+//    is { position, entries: [{ last, inning, replaced }, …] } — a scorebook
+//    substitution stack. A replaced player is struck through with the reliever
+//    penciled above him and the inning he took the field in parentheses.
 
 // Scorer's position numbers, the same digits penciled under each name.
 const POSITION_NUMBER = {
@@ -29,13 +33,21 @@ const SPOTS = {
   C: { x: 50, y: 79 },
 }
 
-export function DefenseDiamond({ defense }) {
-  const fielders = defense.filter((p) => SPOTS[p.position])
-  const dh = defense.find((p) => p.position === 'DH')
-  if (fielders.length === 0) return null
-
+// Normalize either input shape to a { position -> [{ last, inning, replaced }] }
+// stack. The simple lineup form becomes a single, un-struck entry.
+function toStacks(defense) {
   const byPos = {}
-  for (const p of fielders) byPos[p.position] = p
+  for (const item of defense) {
+    if (!item?.position) continue
+    byPos[item.position] = item.entries ?? [{ last: item.last, inning: null, replaced: false }]
+  }
+  return byPos
+}
+
+export function DefenseDiamond({ defense }) {
+  const byPos = toStacks(defense)
+  const hasFielder = Object.keys(SPOTS).some((pos) => byPos[pos])
+  if (!hasFielder) return null
 
   return (
     <div className="defdiamond">
@@ -72,34 +84,67 @@ export function DefenseDiamond({ defense }) {
         </svg>
 
         {Object.entries(SPOTS).map(([pos, spot]) => (
-          <DefenseSpot key={pos} pos={pos} player={byPos[pos]} spot={spot} />
+          <DefenseSpot key={pos} pos={pos} stack={byPos[pos]} spot={spot} />
         ))}
       </div>
 
-      {dh && (
+      {byPos.DH && (
         <p className="defdiamond__dh">
           <span className="defdiamond__dhpos">DH</span>
-          <span className="defdiamond__dhname">{dh.last.toUpperCase()}</span>
+          <span className="defdiamond__dhstack">
+            {byPos.DH.map((e, i) => (
+              <DefenseName key={i} entry={e} />
+            ))}
+          </span>
         </p>
       )}
     </div>
   )
 }
 
-// One fielder: surname on its writing line, position number penciled below.
-// An unposted spot keeps its line + number so the sheet's shape never changes.
-function DefenseSpot({ pos, player, spot }) {
+// One fielder's spot: the substitution stack (reliever above, replaced starter
+// struck through below), then the position number. An unposted spot keeps its
+// line + number so the sheet's shape never changes.
+function DefenseSpot({ pos, stack, spot }) {
   return (
     <span
       className="defdiamond__spot"
       style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
     >
-      <span className={`defdiamond__name ${player ? '' : 'defdiamond__name--tbd'}`}>
-        {player ? player.last.toUpperCase() : '—'}
-      </span>
+      {stack ? (
+        // Newest name on top (the scorebook pencils the sub above the crossed-out
+        // starter), so render the chain in reverse.
+        stack
+          .slice()
+          .reverse()
+          .map((e, i) => <DefenseName key={i} entry={e} />)
+      ) : (
+        <span className="defdiamond__name defdiamond__name--tbd">—</span>
+      )}
       <span className="defdiamond__num" aria-label={pos}>
         {POSITION_NUMBER[pos]}
       </span>
     </span>
   )
+}
+
+// A single surname on its writing line. A replaced player is struck through; a
+// player who entered mid-game carries the inning he took the field.
+function DefenseName({ entry }) {
+  return (
+    <span
+      className={`defdiamond__name ${entry.replaced ? 'defdiamond__name--out' : ''}`}
+    >
+      {entry.last.toUpperCase()}
+      {entry.inning != null && (
+        <span className="defdiamond__enter"> ({ordinal(entry.inning)})</span>
+      )}
+    </span>
+  )
+}
+
+function ordinal(n) {
+  const s = ['TH', 'ST', 'ND', 'RD']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
