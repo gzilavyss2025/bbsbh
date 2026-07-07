@@ -661,12 +661,33 @@ body {
   color: var(--field);
 }
 
+/* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
+   so a twin bill's two rows are told apart without a second glance. */
+.gamecard__dh {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .gamecard__status {
   margin-left: auto;
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+/* Park-local start time trailing the viewer's local time, dialed down so the
+   viewer's clock stays the headline. */
+.gamecard__status-park {
+  font-size: 0.82em;
+  color: var(--text-muted);
 }
 
 /* Scorebook-readiness chips: four tiny red/green flags under the matchup that

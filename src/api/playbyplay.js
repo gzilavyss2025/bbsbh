@@ -69,6 +69,20 @@ export function pitchDotCategory(code) {
   return 'ball'
 }
 
+// The two-column pitch ladder (see PlayByPlay.jsx) sorts each pitch into a
+// ball column or a strike column, keeping its 1-based place in the at-bat.
+// Anything that isn't a plain ball is a strike for column purposes (called,
+// swinging, foul), and a ball put in play shows as an 'X' rather than a
+// number. Returns { side: 'ball' | 'strike', label } per pitch, in order.
+export function pitchLadder(codes) {
+  return codes.map((code, i) => {
+    const cat = pitchDotCategory(code)
+    if (cat === 'ball') return { side: 'ball', label: String(i + 1) }
+    if (cat === 'inplay') return { side: 'strike', label: 'X' }
+    return { side: 'strike', label: String(i + 1) }
+  })
+}
+
 function resolveBatter(feed, side, id) {
   const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
   const box = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`] ?? {}
@@ -94,25 +108,24 @@ function trimLeadingName(description, fullName) {
   return description
 }
 
-// Builds the scorebook-style out description for the BATTER's own out on
-// their own plate appearance — the fielding chain describes how the batted
-// ball itself was fielded (fly/line/ground). Only ever called for that case:
-// a runner put out later, on a different play than their own PA, keeps
+// Scorebook shorthand for the BATTER's own out on their own plate appearance
+// — the terse fielding notation (K, 6-3, L7, F8…) shown as a badge alongside
+// the play's full prose description. The fielding chain describes how the
+// batted ball itself was fielded (fly/line/ground). Only ever called for that
+// case: a runner put out later, on a different play than their own PA, keeps
 // whatever their own card already says (they still walked, singled, etc.) —
-// see the out-attribution loop below, which attaches only the sequence
-// number in that case, not a replacement description.
+// see the out-attribution loop below, which attaches only the sequence number
+// in that case, not a replacement description.
 function describeOut(play, runnerEntry) {
   const desc = play.result?.description ?? ''
   const chain = (runnerEntry.credits ?? []).map((c) => c.position.code)
 
-  if (/strikes? out swinging/i.test(desc)) return { label: 'Strikeout', notation: 'K' }
-  if (/called out on strikes/i.test(desc)) return { label: 'Strikeout', calledLooking: true }
-  if (/sacrifice fly|sac fly/i.test(desc)) return { label: 'Sac fly', notation: chain.join('-') }
-  if (/sacrifice bunt|sac bunt/i.test(desc)) return { label: 'Sac bunt', notation: chain.join('-') }
-  if (/lines? (out|into)/i.test(desc)) return { label: 'Lineout', notation: `L${chain[chain.length - 1] ?? ''}` }
-  if (/pops? (out|into)/i.test(desc)) return { label: 'Pop out', notation: `F${chain[chain.length - 1] ?? ''}` }
-  if (/flies? (out|into)/i.test(desc)) return { label: 'Flyout', notation: `F${chain[chain.length - 1] ?? ''}` }
-  return { label: /bunt/i.test(desc) ? 'Bunt groundout' : 'Groundout', notation: chain.join('-') }
+  if (/strikes? out swinging/i.test(desc)) return { notation: 'K' }
+  if (/called out on strikes/i.test(desc)) return { calledLooking: true }
+  if (/lines? (out|into)/i.test(desc)) return { notation: `L${chain[chain.length - 1] ?? ''}` }
+  if (/pops? (out|into)/i.test(desc)) return { notation: `F${chain[chain.length - 1] ?? ''}` }
+  if (/flies? (out|into)/i.test(desc)) return { notation: `F${chain[chain.length - 1] ?? ''}` }
+  return { notation: chain.join('-') }
 }
 
 // Ordered feed for one half-inning: plate-appearance cards interleaved with

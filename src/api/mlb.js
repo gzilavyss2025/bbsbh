@@ -44,6 +44,10 @@ function normalizeGame(game, sportId) {
     // 1 except for the second game of a doubleheader (2) — disambiguates the
     // matchup slug, since both games share a date and team pair.
     gameNumber: game.gameNumber ?? 1,
+    // 'N' = single game; 'Y'/'S' = part of a doubleheader (regular or split).
+    // Lets a card label itself "Game 1 / Game 2" (gameNumber alone can't tell a
+    // lone game from game 1 of a twin bill — both carry gameNumber 1).
+    doubleHeader: game.doubleHeader ?? 'N',
     // Status codes: 'S'/'P' pre-game, 'I' in-progress, 'F'/'O' final.
     statusCode: game.status?.statusCode,
     detailedState: game.status?.detailedState,

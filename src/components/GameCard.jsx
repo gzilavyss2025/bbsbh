@@ -8,7 +8,7 @@ import { lookupSplit } from '../lib/teamSplits.js'
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
 export function GameCard({ game, pinned, uniformsReady, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
-  const statusText = describeStatus(game)
+  const dhLabel = doubleHeaderLabel(game)
   return (
     <div className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`}>
       {live && <span className="gamecard__live">Live</span>}
@@ -31,8 +31,9 @@ export function GameCard({ game, pinned, uniformsReady, onSelect, onBoxScore }) 
           {game.sportLabel && game.sportLabel !== 'MLB' && (
             <span className="gamecard__level">{game.sportLabel}</span>
           )}
+          {dhLabel && <span className="gamecard__dh">{dhLabel}</span>}
           {pinned && <span className="gamecard__pin">★</span>}
-          {statusText && <span className="gamecard__status">{statusText}</span>}
+          <StatusText game={game} />
         </div>
       </button>
       {onBoxScore && (
@@ -125,24 +126,52 @@ function splitName(name = '', mascot = '') {
   return { location: '', mascot: full }
 }
 
-function describeStatus(game) {
+// "Game 1" / "Game 2" for a card that's part of a doubleheader (regular or
+// split), so the two same-matchup rows on the slate are told apart at a glance.
+// A lone game (doubleHeader 'N') gets nothing.
+function doubleHeaderLabel(game) {
+  if (!game.doubleHeader || game.doubleHeader === 'N') return null
+  return `Game ${game.gameNumber ?? 1}`
+}
+
+// Pre-game start time. Primary read is the VIEWER's local clock (where they're
+// watching), with the park's local time — labeled with its zone ("10:10 PDT")
+// — trailing in smaller parentheses so a west-coast game still shows when it
+// starts on-site. The parenthetical is dropped when the feed carries no venue
+// timezone (lean MiLB rows) or when the two clocks read the same (viewer is in
+// the park's zone) — no redundant "(7:10 CDT)".
+function StatusText({ game }) {
   const s = game.abstractState
-  if (s === 'Final') return 'Final' // no score, just the state
-  if (s === 'Live') return '' // the LIVE pill carries it; no redundant text
-  // Pre-game: show first pitch in the PARK's local clock, with its timezone
-  // abbreviation appended ("7:10 PDT"), so a west-coast game doesn't read in
-  // the viewer's zone. Fall back to the viewer's local time (unlabeled) when
-  // the feed carries no venue timezone (lean MiLB rows).
+  if (s === 'Final') return <span className="gamecard__status">Final</span>
+  if (s === 'Live') return null // the LIVE pill carries it; no redundant text
+  let local
+  let park = null
   try {
     const t = new Date(game.gameDate)
     const { tz, tzId } = game.venue ?? {}
-    const time = t.toLocaleTimeString(undefined, {
+    local = t.toLocaleTimeString(undefined, {
       hour: 'numeric',
       minute: '2-digit',
-      ...(tzId ? { timeZone: tzId } : {}),
     })
-    return tz ? `${time} ${tz}` : time
+    if (tzId) {
+      const parkTime = t.toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: tzId,
+      })
+      if (parkTime !== local) park = tz ? `${parkTime} ${tz}` : parkTime
+    }
   } catch {
-    return game.detailedState ?? 'Scheduled'
+    return (
+      <span className="gamecard__status">
+        {game.detailedState ?? 'Scheduled'}
+      </span>
+    )
   }
+  return (
+    <span className="gamecard__status">
+      {local}
+      {park && <span className="gamecard__status-park"> ({park})</span>}
+    </span>
+  )
 }
