@@ -622,3 +622,8 @@ export function rosterPitcherRole(rosterEntry) {
 export function firstLast(person) {
   return person?.fullName ?? person?.useName ?? ''
 }
+
+// Roster sort order by position abbreviation — catcher through DH, the
+// scorebook's usual reading order. Shared by the team page's roster cards and
+// the pregame lineup page's full-roster fallback (see TeamInfo.jsx).
+export const POS_ORDER = { C: 1, '1B': 2, '2B': 3, SS: 3.5, '3B': 4, LF: 6, CF: 7, RF: 8, OF: 6.5, DH: 9 }

@@ -134,7 +134,7 @@ function statLineFor(entry) {
 // the scraped sportAbbrev string, display-only (the app resolves a player's
 // actual current affiliate by cross-referencing live rosters, not this
 // string — see prospectAffiliateMap in src/api/prospects.js).
-function slim(entry, rankKey) {
+function slim(entry, rankKey, jerseyNumbers = null) {
   return {
     [rankKey]: entry.rank,
     playerId: entry.playerId,
@@ -145,6 +145,7 @@ function slim(entry, rankKey) {
     levelRaw: entry.sportAbbrev ?? '',
     statLine: statLineFor(entry),
     age: entry.age ?? null,
+    ...(jerseyNumbers ? { number: jerseyNumbers.get(entry.playerId) ?? null } : {}),
   }
 }
 
@@ -157,6 +158,23 @@ async function fetchList(url) {
   return extractRawEntries(html)
 }
 
+// Jersey numbers aren't part of the scraped Pipeline data at all — pulled
+// separately from the documented statsapi.mlb.com (the same public API the
+// rest of the app uses), one batched request for every Top 100 playerId.
+// Many MiLB prospects simply have no assigned number yet — degrades to no
+// entry for that id, same as every other MiLB gap in this app.
+async function fetchJerseyNumbers(playerIds) {
+  if (!playerIds.length) return new Map()
+  try {
+    const res = await fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${playerIds.join(',')}`)
+    if (!res.ok) return new Map()
+    const data = await res.json()
+    return new Map((data.people ?? []).map((p) => [p.id, p.primaryNumber ?? null]))
+  } catch {
+    return new Map()
+  }
+}
+
 async function main() {
   const [top100Raw, orgRaw] = await Promise.all([
     fetchList(TOP100_URL),
@@ -165,8 +183,10 @@ async function main() {
   assertTop100Shape(top100Raw)
   assertOrgShape(orgRaw)
 
-  const players = dedupeByPlayer(top100Raw)
-    .map((e) => slim(e, 'rank'))
+  const top100Deduped = dedupeByPlayer(top100Raw)
+  const jerseyNumbers = await fetchJerseyNumbers(top100Deduped.map((e) => e.playerId))
+  const players = top100Deduped
+    .map((e) => slim(e, 'rank', jerseyNumbers))
     .sort((a, b) => a.rank - b.rank)
   const top100Ids = new Map(players.map((p) => [p.playerId, p.rank]))
 

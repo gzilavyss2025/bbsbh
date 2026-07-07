@@ -8,7 +8,7 @@ import {
   fetchRosterIdsForTeams,
 } from '../api/mlb.js'
 import { fetchWarData } from '../api/war.js'
-import { rankTeam, ordinal, rosterPitcherRole, firstLast } from '../api/person.js'
+import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../api/prospects.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -20,7 +20,6 @@ import { PlayerLink } from '../components/PlayerLink.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 
 const DASH = '—'
-const POS_ORDER = { C: 1, '1B': 2, '2B': 3, SS: 3.5, '3B': 4, LF: 6, CF: 7, RF: 8, OF: 6.5, DH: 9 }
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
 
 function isoToday() {

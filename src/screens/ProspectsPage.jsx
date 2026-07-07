@@ -3,10 +3,12 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const DASH = '—'
 
 function generatedLabel(iso) {
   if (!iso) return ''
@@ -51,15 +53,19 @@ export function ProspectsPage({ onBack }) {
           )}
           <Ledger
             leftCols={2}
-            head={['Rk', 'Player', 'Team', 'Pos', 'Line']}
+            head={['Rk', 'Player', 'Pos', '#', 'Level', 'Team', 'Line']}
             rows={players.map((p) => ({
               key: p.playerId,
               cells: [
                 p.rank,
                 <PlayerLink key="player" id={p.playerId}>{p.name}</PlayerLink>,
-                <TeamLink key="team" id={p.teamId}>{(p.team || '').toUpperCase()}</TeamLink>,
-                p.position,
-                p.statLine,
+                p.position || DASH,
+                p.number || DASH,
+                p.levelRaw || DASH,
+                <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo">
+                  <TeamLogo teamId={p.teamId} name={p.team} size={20} />
+                </TeamLink>,
+                p.statLine || DASH,
               ],
             }))}
           />

@@ -100,8 +100,13 @@ async function loadPlayer(id, asOf) {
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
   const currentYear = Number(isoToday().slice(0, 4))
   const startDate = `${season}-01-01`
+  // "Path to the Majors" always tells the minor-league story in the page's
+  // primary stat group (hitting for a two-way player: the more common
+  // progression story, and the one whose gamesPlayed reads naturally as
+  // "games at that level").
+  const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
 
-  const [results, debutSplits, prospects] = await Promise.all([
+  const [results, debutSplits, prospects, milbProgressionSplits] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
@@ -144,6 +149,11 @@ async function loadPlayer(id, asOf) {
     // Session-memoized after the first call anywhere in the app — cheap even
     // though every player page asks for it.
     fetchTopProspects(),
+    // A debuted player's own yearByYearSplits fetch above is single-sportId
+    // (see the comment on that fetch) so it can't feed the progression card —
+    // fetch the multi-level MiLB history separately, just for the primary
+    // group, so the card can still show his climb through the minors.
+    bio.debut ? fetchMilbYearByYear(id, primaryGroup) : Promise.resolve(null),
   ])
   const blocks = results.map((r) => r.block)
   const prospectRank = prospectRankById(prospects.players, bio.id)
@@ -151,15 +161,18 @@ async function loadPlayer(id, asOf) {
   // pill for anyone who's on their org's list but not the overall Top 100.
   const orgProspectRank = orgProspectRankById(prospects.orgProspects, bio.id)
 
-  // "Path to the Majors" card — pre-debut players only, from the multi-level
-  // yearByYear splits already fetched above (no extra request). Uses the
-  // page's primary stat group (hitting for a two-way player: the more common
-  // progression story, and the one whose gamesPlayed reads naturally as
-  // "games at that level").
-  const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
+  // "Path to the Majors" card. Pre-debut, the multi-level yearByYear splits
+  // already fetched above cover it (no extra request); debuted, it's built
+  // from the milbProgressionSplits fetched separately above, since that
+  // player's own yearByYearSplits is single-sportId. Either way
+  // levelProgressionView degrades to null if no MiLB level was ever reached.
   const primaryResult = results.find((r) => r.group === primaryGroup) ?? results[0]
-  const progression = !bio.debut && primaryResult
-    ? levelProgressionView(primaryResult.yearByYearSplits, primaryResult.group, sportId)
+  const progression = primaryResult
+    ? levelProgressionView(
+        bio.debut ? milbProgressionSplits : primaryResult.yearByYearSplits,
+        primaryResult.group,
+        sportId,
+      )
     : null
 
   // All-Star roster membership (MLB only), one roster lookup per distinct year
@@ -363,7 +376,9 @@ export function PlayerPage({ id, asOf, sportId }) {
           )}
         </header>
 
-        {data.progression && <LevelProgressionCard levels={data.progression.levels} />}
+        {data.progression && !bio.debut && (
+          <LevelProgressionCard levels={data.progression.levels} />
+        )}
 
         <div className="factgrid">
           <Fact label="Ht / Wt" value={bio.heightWeight} />
@@ -479,6 +494,13 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
           </section>
         ))}
+
+        {data.progression && bio.debut && (
+          <LevelProgressionCard
+            levels={data.progression.levels}
+            debutYear={Number(bio.debut.slice(0, 4))}
+          />
+        )}
 
         {data.firsts && FIRSTS_ORDER.some((key) => data.firsts[key]) && (
           <section>

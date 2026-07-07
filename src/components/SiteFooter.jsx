@@ -39,7 +39,7 @@ export function SiteFooter({ onShowLogos }) {
           className="sitefooter__action"
           onClick={() => navigate('/prospects')}
         >
-          Top Prospects
+          Top MLB Prospects
         </button>
       </div>
 

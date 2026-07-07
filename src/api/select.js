@@ -9,8 +9,10 @@ function playerIndex(feed) {
 }
 
 // "LAST, FIRST" for a gameData player record. The API already provides
-// lastFirstName; fall back to fullName if it's absent (flakier MiLB feeds).
-function lastFirst(person) {
+// lastFirstName; fall back to fullName if it's absent (flakier MiLB feeds, or
+// the plain /roster endpoint's thinner person object — see TeamInfo.jsx's
+// full-roster fallback).
+export function lastFirst(person) {
   return person?.lastFirstName ?? person?.fullName ?? 'TBD'
 }
 

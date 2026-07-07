@@ -6,7 +6,11 @@ import {
   selectGameInfo,
   selectOpposingPitcher,
   selectOpposingDefense,
+  lastFirst,
 } from '../api/select.js'
+import { fetchTeamRoster } from '../api/mlb.js'
+import { POS_ORDER } from '../api/person.js'
+import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -186,20 +190,54 @@ function Umpires({ officials }) {
   )
 }
 
+// Groups a full active roster (from fetchTeamRoster) into the same
+// batters/pitchers split the team page uses, for the pregame fallback when
+// the starting lineup isn't posted yet. Roster entries come from the plain
+// /roster endpoint, not the live feed, so names degrade to fullName (no
+// lastFirstName on that thinner person object).
+function rosterFallbackGroups(roster) {
+  const rows = (roster ?? []).map((r) => ({
+    id: r.person?.id,
+    name: lastFirst(r.person),
+    jersey: r.jerseyNumber ?? '',
+    pos: r.position?.abbreviation ?? '',
+    isPitcher: r.position?.type === 'Pitcher',
+  }))
+  const batters = rows
+    .filter((r) => !r.isPitcher)
+    .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
+  const pitchers = rows
+    .filter((r) => r.isPitcher)
+    .sort((a, b) => a.name.localeCompare(b.name))
+  return { batters, pitchers }
+}
+
 // The team-specific body shared by the phone page and the spread's panels:
 // batting order, the opposing starter, and the opposing defense diamond.
 function TeamSections({ feed, side, oppPitcherLine }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
+  const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  const season = feed?.gameData?.game?.season
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
+
+  // Lineups don't post until close to first pitch. Until then, stage the
+  // team's full active roster (batters + pitchers) in the same spot rather
+  // than a dead-end "not posted" line — there's still something to copy onto
+  // the sheet. Only fetched while actually needed (skipped once the real
+  // lineup posts).
+  const needsRoster = lineup.length === 0
+  const { data: rawRoster } = useAsync(
+    () => (needsRoster && meta.id && season ? fetchTeamRoster(meta.id, season) : Promise.resolve([])),
+    [needsRoster, meta.id, season],
+  )
+  const roster = useMemo(() => rosterFallbackGroups(rawRoster), [rawRoster])
 
   return (
     <>
       <section className="lineup">
         <h3 className="section__title">Batting order</h3>
-        {lineup.length === 0 ? (
-          <p className="hint">Lineup not posted yet.</p>
-        ) : (
+        {lineup.length > 0 ? (
           <ol className="lineup__list">
             {lineup.map((p) => (
               <li key={p.id} className="lineup__row">
@@ -212,6 +250,46 @@ function TeamSections({ feed, side, oppPitcherLine }) {
               </li>
             ))}
           </ol>
+        ) : roster.batters.length > 0 || roster.pitchers.length > 0 ? (
+          <>
+            <p className="hint">Lineup not posted yet — full roster:</p>
+            <div className="roster">
+              {roster.batters.length > 0 && (
+                <>
+                  <h4 className="roster__group">Batters</h4>
+                  <ul className="roster__list">
+                    {roster.batters.map((p) => (
+                      <li key={p.id} className="roster__row">
+                        <PlayerLink id={p.id} className="roster__name">
+                          {p.name.toUpperCase()}
+                        </PlayerLink>
+                        <span className="roster__jersey">{p.jersey}</span>
+                        <span className="roster__pos">{p.pos}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {roster.pitchers.length > 0 && (
+                <>
+                  <h4 className="roster__group">Pitchers</h4>
+                  <ul className="roster__list">
+                    {roster.pitchers.map((p) => (
+                      <li key={p.id} className="roster__row">
+                        <PlayerLink id={p.id} className="roster__name">
+                          {p.name.toUpperCase()}
+                        </PlayerLink>
+                        <span className="roster__jersey">{p.jersey}</span>
+                        <span className="roster__pos">{p.pos}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="hint">Lineup not posted yet.</p>
         )}
       </section>
 
