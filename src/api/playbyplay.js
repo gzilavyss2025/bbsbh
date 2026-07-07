@@ -166,6 +166,30 @@ function advanceCode(play) {
   return 'GO'
 }
 
+const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3, '4B': 4, score: 4 }
+
+// The lineup slot (1-9) a player bats in, from his boxscore battingOrder —
+// starters are exact multiples of 100 (500 → 5), subs are offset (503 → 5).
+// Used to credit which hitter drove a runner over.
+function battingSlot(feed, side, id) {
+  const order = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]?.battingOrder
+  const n = parseInt(order, 10)
+  return Number.isFinite(n) ? Math.floor(n / 100) : null
+}
+
+// How a runner (not the batter) was retired on the bases, for the notation by
+// the base where his path is capped: CS caught stealing, PK pickoff, else the
+// fielding chain that put him out (6-4, 4-6…).
+function runnerOutCode(play, runnerEntry) {
+  const et = play.result?.eventType ?? ''
+  if (et.startsWith('caught_stealing')) return 'CS'
+  if (et.startsWith('pickoff')) return 'PK'
+  const chain = (runnerEntry.credits ?? [])
+    .filter((c) => /putout|assist/.test(c.credit ?? ''))
+    .map((c) => c.position.code)
+  return chain.join('-') || 'OUT'
+}
+
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
 // mound-visit / pitching-change notes, first-at-bat first. `battingSide` is
 // 'away' | 'home' (top bats away, bottom bats home — same convention as the
@@ -238,6 +262,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       const origin = originIndex.get(rid)
       if (origin == null) continue // no known origin card (e.g. a pinch-runner) — nothing to attach to
       entries[origin].outNumber = r.movement.outNumber
+      // Where and how he was cut down, for the diamond's tick + out code.
+      entries[origin].outAt = BASE_NUM[r.movement.outBase] ?? null
+      entries[origin].outCode = runnerOutCode(play, r)
     }
   }
 
@@ -245,25 +272,35 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   // the half. Record the furthest base he reached (and whether he scored), so
   // his diamond can shade the bases he legged out — filled solid when he came
   // around to score. Also record, per base, HOW he got there (BB, GO, 2B…),
-  // for the notations drawn along the base paths — but only for advancement on
-  // OTHER plays; the leg(s) he reached on his own PA are already labeled by the
-  // code above the diamond. An out on the bases doesn't advance him.
-  const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
+  // for the notations drawn along the base paths — with the lineup slot of the
+  // hitter who drove him over — but only for advancement on OTHER plays; the
+  // leg(s) he reached on his own PA are already labeled by the code above the
+  // diamond. Only a plate appearance credits a hitter; steals/wild pitches
+  // advance a runner on their own, so those carry no slot. An out on the bases
+  // doesn't advance him.
   const progress = new Map() // runnerId -> furthest base (1-3, or 4 for a run)
-  const legs = new Map() // runnerId -> { baseNum: advance code }
+  const legs = new Map() // runnerId -> { baseNum: { code, slot } }
   for (const play of plays) {
     const code = advanceCode(play)
     const playBatter = play.matchup?.batter?.id
+    const slot = playBatter != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
+      ? battingSlot(feed, battingSide, playBatter)
+      : null
+    // The feed can split one runner's multi-base move on a single play into
+    // separate legs (2nd→3rd, 3rd→home). Keep only the furthest destination
+    // per runner per play, so a two-base advance is labeled once, at its end.
+    const endBase = new Map() // runnerId -> furthest base reached on THIS play
     for (const r of play.runners ?? []) {
       const rid = r.details?.runner?.id
       if (rid == null || r.movement?.isOut) continue
-      const end = r.movement?.end
-      const base = end === 'score' ? 4 : (BASE_NUM[end] ?? 0)
-      if (base === 0) continue
+      const base = BASE_NUM[r.movement?.end] ?? 0
+      if (base > (endBase.get(rid) ?? 0)) endBase.set(rid, base)
+    }
+    for (const [rid, base] of endBase) {
       if (base > (progress.get(rid) ?? 0)) progress.set(rid, base)
       if (rid !== playBatter) {
         const m = legs.get(rid) ?? {}
-        m[base] = code
+        m[base] = { code, slot }
         legs.set(rid, m)
       }
     }

@@ -6,6 +6,8 @@
 // Route shapes:
 //   '/'                                 -> { name: 'home' }
 //   '/logos'                            -> { name: 'logos' }
+//   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
+//   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/{MMDDYYYY}/{matchup}/{section}'   -> { name: 'game', date, matchup, section }
 //
 // `matchup` is the away + home team abbreviations concatenated and lowercased
@@ -13,11 +15,26 @@
 // info), 'boxscore', or 'top{n}' / 'bottom{n}' (innings viewer, one page per
 // half-inning). Legacy 'inning{n}' links still parse (as the top half).
 // Example: /07052026/milari/bottom3
+//
+// Player/team pages are game-independent (resolvable by id on a cold link), but
+// carry an optional query so a link opened FROM a sealed game stays spoiler-
+// safe: `?d={officialDate}` cuts stats off at the day before that game, and
+// `?s={sportId}` hints the level. Both are omitted on a bare shared link (which
+// has no game to spoil, so it defaults to current stats). Accepts a URL that
+// may include a `?query`.
 
-export function parseRoute(pathname) {
-  const parts = pathname.split('/').filter(Boolean)
+export function parseRoute(url) {
+  const [path, query = ''] = (url || '').split('?')
+  const parts = path.split('/').filter(Boolean)
+  const q = new URLSearchParams(query)
+  const asOf = q.get('d') || null
+  const sportId = q.get('s') ? Number(q.get('s')) : null
   if (parts.length === 0) return { name: 'home' }
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
+  if (parts.length === 2 && parts[0] === 'player')
+    return { name: 'player', id: parts[1], asOf, sportId }
+  if (parts.length === 2 && parts[0] === 'team')
+    return { name: 'team', id: parts[1], asOf, sportId }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
     return {
@@ -71,4 +88,22 @@ export function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
 // Build the path for a game section. `apiDate` is YYYY-MM-DD.
 export function gamePath(apiDate, awayAbbr, homeAbbr, section, gameNumber = 1) {
   return `/${apiDateToUrl(apiDate)}/${matchupSlug(awayAbbr, homeAbbr, gameNumber)}/${section}`
+}
+
+// Build a player / team page path, carrying the spoiler-safe cutoff hints when
+// linked from a game: `d` = the game's officialDate (YYYY-MM-DD), `s` = sportId.
+// Both optional — a bare link (no game context) omits them and shows current
+// stats.
+function linkQuery({ d, s } = {}) {
+  const q = new URLSearchParams()
+  if (d) q.set('d', d)
+  if (s) q.set('s', String(s))
+  const qs = q.toString()
+  return qs ? `?${qs}` : ''
+}
+export function playerPath(id, opts = {}) {
+  return `/player/${id}${linkQuery(opts)}`
+}
+export function teamPath(id, opts = {}) {
+  return `/team/${id}${linkQuery(opts)}`
 }

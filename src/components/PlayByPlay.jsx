@@ -36,7 +36,7 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, desc, reached, scored, legNotations } = entry
+  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, desc, reached, scored, legNotations } = entry
   return (
     <div className="pbp__card">
       <div className="pbp__main">
@@ -60,7 +60,13 @@ function AtBatCard({ entry }) {
           ) : (
             code && <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
           )}
-          <PlayDiamond reached={reached} scored={scored} legNotations={legNotations} />
+          <PlayDiamond
+            reached={reached}
+            scored={scored}
+            legNotations={legNotations}
+            outAt={outAt}
+            outCode={outCode}
+          />
           {outNumber != null && (
             <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
               {outNumber}

@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { GameSelect } from './screens/GameSelect.jsx'
 import { GameView } from './screens/GameView.jsx'
 import { LogoSheet } from './screens/LogoSheet.jsx'
+import { PlayerPage } from './screens/PlayerPage.jsx'
+import { TeamPage } from './screens/TeamPage.jsx'
 import { resolveGame } from './api/mlb.js'
 import { useAsync } from './hooks/useAsync.js'
+import { NavProvider } from './lib/nav.jsx'
 import {
   parseRoute,
   gamePath,
@@ -12,12 +15,18 @@ import {
   apiDateToUrl,
 } from './lib/route.js'
 
+// The current URL, path + query — player/team links carry a `?d=&s=` spoiler
+// cutoff, so the query is part of route identity, not just the path.
+function currentUrl() {
+  return window.location.pathname + window.location.search
+}
+
 // Top-level router over the History API (no react-router — see lib/route.js).
 // Three shapes: the slate ('/'), the printable logo sheet ('/logos'), and a
 // deep-linkable game section ('/{date}/{matchup}/{section}'). Every section of
 // every game is a real, shareable URL; the back button walks the steps.
 export default function App() {
-  const [route, setRoute] = useState(() => parseRoute(window.location.pathname))
+  const [route, setRoute] = useState(() => parseRoute(currentUrl()))
   // The game object from the slate, carried into the game route so a same-session
   // open needs no resolve fetch. Cold loads / shared links resolve from the URL.
   // Stored with its slate date — the seed is only valid for the exact date +
@@ -25,7 +34,7 @@ export default function App() {
   const [seed, setSeed] = useState(null) // { game, date: MMDDYYYY }
 
   useEffect(() => {
-    const onPop = () => setRoute(parseRoute(window.location.pathname))
+    const onPop = () => setRoute(parseRoute(currentUrl()))
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
@@ -52,15 +61,14 @@ export default function App() {
     go(path)
   }
 
+  let content
   if (route.name === 'logos') {
-    return (
-      <div className="app">
-        <LogoSheet onBack={() => go('/')} />
-      </div>
-    )
-  }
-
-  if (route.name === 'game') {
+    content = <LogoSheet onBack={() => go('/')} />
+  } else if (route.name === 'player') {
+    content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team') {
+    content = <TeamPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'game') {
     // Only reuse the seed when it matches the URL exactly — date AND matchup.
     // Matchup alone isn't identity: the same slug recurs across a whole series
     // (and a doubleheader's game 2 differs only in its '-2' suffix).
@@ -72,24 +80,26 @@ export default function App() {
         seed.game.home.abbreviation,
         seed.game.gameNumber,
       ) === route.matchup
-    return (
-      <div className="app">
-        <GameRoute
-          route={route}
-          seed={seedMatches ? seed.game : null}
-          onSection={(section, opts) =>
-            go(`/${route.date}/${route.matchup}/${section}`, opts)
-          }
-          onHome={() => go('/')}
-        />
-      </div>
+    content = (
+      <GameRoute
+        route={route}
+        seed={seedMatches ? seed.game : null}
+        onSection={(section, opts) =>
+          go(`/${route.date}/${route.matchup}/${section}`, opts)
+        }
+        onHome={() => go('/')}
+      />
     )
+  } else {
+    content = <GameSelect onPick={openGame} onShowLogos={() => go('/logos')} />
   }
 
+  // NavProvider hands every deep PlayerLink/TeamLink the History-API `go` so a
+  // name anywhere can navigate without threading a prop through the tree.
   return (
-    <div className="app">
-      <GameSelect onPick={openGame} onShowLogos={() => go('/logos')} />
-    </div>
+    <NavProvider navigate={go}>
+      <div className="app">{content}</div>
+    </NavProvider>
   )
 }
 

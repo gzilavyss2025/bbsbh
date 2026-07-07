@@ -1,27 +1,20 @@
-// Per-play base diamond for the play-by-play feed, drawn Numbers Game #22
-// style: the batter's trip around the bases is penciled in as graphite-shaded
-// legs — one triangular wedge per base reached (home→1st, 1st→2nd, 2nd→3rd,
-// 3rd→home). A batter who came around to score fills all four wedges, so his
-// diamond reads as a solid shaded diamond; a batter retired shows an empty
-// outline. Each base he advanced to on a LATER play is annotated outside that
-// base with how he got there (BB, GO, 2B…). Centered in the viewBox with room
-// around it for those labels.
+// Per-play base diamond for the play-by-play feed, drawn the way a scorer pens
+// it: the diamond sits in a faint gray by default, and the bases the batter
+// actually legged out are traced over in a darker pencil gray — one edge per
+// base reached (home→1st, 1st→2nd…), all four when he came around to score.
+// Each base he advanced to on a LATER play is annotated outside that base with
+// how he got there and which lineup spot drove him (GO⁵, 1B³…). A runner
+// thrown out on the bases gets his path capped with a short perpendicular
+// stroke and the out type (CS, 4-6…) by that base.
 const HOME = [50, 80]
 const FIRST = [80, 50]
 const SECOND = [50, 20]
 const THIRD = [20, 50]
-const CENTER = [50, 50]
+// Indexed by base number: 0 = home (start), 1/2/3 = first/second/third,
+// 4 = home again (a run scored).
+const BASES = [HOME, FIRST, SECOND, THIRD, HOME]
 
-// The four base-path wedges, in running order. Wedge i is shaded once the
-// runner has reached base i+1.
-const LEGS = [
-  [HOME, FIRST, CENTER],
-  [FIRST, SECOND, CENTER],
-  [SECOND, THIRD, CENTER],
-  [THIRD, HOME, CENTER],
-]
-
-// Where each base's advance notation sits, just outside that base.
+// Where each base's notation sits, just outside that base.
 const LABELS = {
   1: { x: 85, y: 53, anchor: 'start' },
   2: { x: 50, y: 13, anchor: 'middle' },
@@ -29,8 +22,43 @@ const LABELS = {
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
-export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, size = 108 }) {
-  const filled = scored ? 4 : reached
+const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+
+// Two endpoints of a short stroke perpendicular to segment a→b, centered at p.
+function perpStroke(a, b, p, len = 6) {
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const n = Math.hypot(dx, dy) || 1
+  const ux = -dy / n
+  const uy = dx / n
+  return [
+    [p[0] - ux * len, p[1] - uy * len],
+    [p[0] + ux * len, p[1] + uy * len],
+  ]
+}
+
+export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, outAt = null, outCode = '', size = 108 }) {
+  const traveled = scored ? 4 : reached
+
+  // Geometry for a baserunning out: the path is drawn to where he was safe,
+  // then a half-leg toward the base he was retired at (or nothing, if he was
+  // doubled off the base he stood on), capped by the perpendicular stroke.
+  let outHalf = null
+  let outTick = null
+  if (outAt != null) {
+    if (outAt > reached) {
+      const a = BASES[reached]
+      const b = BASES[outAt]
+      const m = mid(a, b)
+      outHalf = [a, m]
+      outTick = perpStroke(a, b, m)
+    } else {
+      const a = BASES[Math.max(0, outAt - 1)]
+      const b = BASES[outAt]
+      outTick = perpStroke(a, b, b)
+    }
+  }
+
   return (
     <svg
       className="pbp__diamond"
@@ -39,17 +67,48 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, si
       viewBox="0 0 100 100"
       aria-hidden="true"
     >
-      {LEGS.slice(0, filled).map((pts, i) => (
-        <polygon key={i} points={pts.map((p) => p.join(',')).join(' ')} fill="var(--graphite)" />
-      ))}
       <polygon
         points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
         fill="none"
-        stroke="var(--ink-1)"
-        strokeWidth={2}
+        stroke="var(--rule)"
+        strokeWidth={1.5}
         strokeLinejoin="round"
       />
-      {Object.entries(legNotations).map(([base, code]) => (
+      {Array.from({ length: traveled }).map((_, i) => (
+        <line
+          key={i}
+          x1={BASES[i][0]}
+          y1={BASES[i][1]}
+          x2={BASES[i + 1][0]}
+          y2={BASES[i + 1][1]}
+          stroke="var(--graphite)"
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+      ))}
+      {outHalf && (
+        <line
+          x1={outHalf[0][0]}
+          y1={outHalf[0][1]}
+          x2={outHalf[1][0]}
+          y2={outHalf[1][1]}
+          stroke="var(--graphite)"
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+      )}
+      {outTick && (
+        <line
+          x1={outTick[0][0]}
+          y1={outTick[0][1]}
+          x2={outTick[1][0]}
+          y2={outTick[1][1]}
+          stroke="var(--clay)"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+        />
+      )}
+      {Object.entries(legNotations).map(([base, n]) => (
         <text
           key={base}
           className="pbp__advance"
@@ -57,9 +116,24 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, si
           y={LABELS[base].y}
           textAnchor={LABELS[base].anchor}
         >
-          {code}
+          {n.code}
+          {n.slot != null && (
+            <tspan className="pbp__advslot" dy={-3}>
+              {n.slot}
+            </tspan>
+          )}
         </text>
       ))}
+      {outAt != null && outCode && (
+        <text
+          className="pbp__advance pbp__advance--out"
+          x={LABELS[outAt].x}
+          y={LABELS[outAt].y}
+          textAnchor={LABELS[outAt].anchor}
+        >
+          {outCode}
+        </text>
+      )}
     </svg>
   )
 }
