@@ -2219,7 +2219,13 @@ body {
 }
 
 .pbp__desc {
-  font-size: 12px;
+  /* Sentence-like copy forced to all caps — use the high-legibility face at a
+     smaller size, with a touch of tracking and looser leading so it stays
+     readable. See --font-read in tokens/typography.css. */
+  font-family: var(--font-read);
+  font-size: 10.5px;
+  letter-spacing: 0.015em;
+  line-height: 1.4;
   color: var(--text-body);
 }
 
