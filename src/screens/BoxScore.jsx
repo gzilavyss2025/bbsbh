@@ -122,7 +122,7 @@ function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }
     // The feed appends a period to the venue name ("Busch Stadium.") — drop it.
     // Ballpark + Attendance pair on one row; Time of Game + Game End on another.
     { label: 'Ballpark', value: get('Venue').replace(/\.\s*$/, '') },
-    { label: 'Attendance', value: get('Att') },
+    { label: 'Attendance', value: get('Att').replace(/\.\s*$/, '') },
     // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
     // value to copy onto paper. Falls back to the box-score weather when the
     // generator has nothing (e.g. a MiLB park with no coordinates).
@@ -139,16 +139,19 @@ function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }
     <div className="bs">
       {/* The duo/col wrappers are transparent on a phone (display: contents —
           everything keeps stacking in this order on .bs's own gap) and become
-          two-up grids at the wide breakpoint: totals beside the decisions,
-          line score beside the stars, then each club's header card +
-          batting/pitching as its own column, away beside home. */}
+          two-up grids at the wide breakpoint: the left column runs totals
+          above the decisions, the right column runs the three stars above
+          the line score, then each club's header card + batting/pitching as
+          its own column, away beside home. */}
       <div className="bs__duo">
-        <LineTotals away={box.away} home={box.home} />
-        <Decisions decisions={box.decisions} />
-      </div>
-      <div className="bs__duo">
-        <Scoreboard away={box.away} home={box.home} innings={box.innings} />
-        <ThreeStars stars={stars} />
+        <div className="bs__col">
+          <LineTotals away={box.away} home={box.home} />
+          <Decisions decisions={box.decisions} />
+        </div>
+        <div className="bs__col">
+          <ThreeStars stars={stars} />
+          <Scoreboard away={box.away} home={box.home} innings={box.innings} />
+        </div>
       </div>
       <div className="bs__duo">
         <div className="bs__col">

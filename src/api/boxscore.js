@@ -208,6 +208,14 @@ function addDuration(clock, dur) {
   return `${h12}:${String(mm).padStart(2, '0')} ${ap}`
 }
 
+// "2:38" -> "2 HRS 38 MINS" — the scorebook fill-in box spells out the units
+// rather than using the feed's bare clock-style reading.
+function spellDuration(duration) {
+  const m = duration.match(/^(\d{1,2}):(\d{2})$/)
+  if (!m) return duration
+  return `${Number(m[1])} HRS ${Number(m[2])} MINS`
+}
+
 function gameTimes(feed) {
   const info = feed?.liveData?.boxscore?.info ?? []
   const first = cleanClock(info.find((r) => r.label === 'First pitch')?.value)
@@ -216,7 +224,11 @@ function gameTimes(feed) {
   const end = addDuration(first, duration)
   const tz = feed?.gameData?.venue?.timeZone?.tz ?? ''
   const withTz = (t) => (t && tz ? `${t} ${tz}` : t)
-  return { firstPitch: withTz(first), end: withTz(end), duration }
+  return {
+    firstPitch: withTz(first),
+    end: withTz(end),
+    duration: duration ? spellDuration(duration) : '',
+  }
 }
 
 // The four umpire assignments (HP/1B/2B/3B) the scorebook lists in its header.
