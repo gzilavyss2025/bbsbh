@@ -129,11 +129,15 @@ function DefenseSpot({ pos, stack, spot }) {
 }
 
 // A single surname on its writing line. A replaced player is struck through; a
-// player who entered mid-game carries the inning he took the field.
+// player who entered mid-game carries the inning he took the field and, while
+// he's the standing occupant, his surname is inked seam-red like the inning tag.
 function DefenseName({ entry }) {
+  const entered = entry.inning != null && !entry.replaced
   return (
     <span
-      className={`defdiamond__name ${entry.replaced ? 'defdiamond__name--out' : ''}`}
+      className={`defdiamond__name ${entry.replaced ? 'defdiamond__name--out' : ''} ${
+        entered ? 'defdiamond__name--in' : ''
+      }`}
     >
       {entry.last.toUpperCase()}
       {entry.inning != null && (

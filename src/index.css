@@ -1125,6 +1125,12 @@ body {
   text-decoration-thickness: 1.5px;
 }
 
+/* A substitute currently on the field: his surname inked seam-red to match the
+   inning tag, marking him as the new man at the spot. */
+.defdiamond__name--in {
+  color: var(--accent-negative);
+}
+
 /* The inning a substitute took the field, in parens beside his name. */
 .defdiamond__enter {
   color: var(--accent-negative);
