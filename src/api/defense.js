@@ -26,6 +26,18 @@ export function revealDefense(feed, fieldingSide, throughInning, throughHalf) {
   const players = feed?.gameData?.players ?? {}
   const nameOf = (id) => lastName(players[`ID${id}`] ?? {}) || '—'
 
+  // Substitutions are matched to positions by abbreviation, but both teams field
+  // the same eight spots — so a sub must be attributed to the team that made it,
+  // or the other club's move bleeds into this diamond (a Brewers switch showing
+  // up at the Cardinals' 3B). Gate on the fielding team's own roster: only a
+  // player on this side can take one of its positions.
+  const box = feed?.liveData?.boxscore?.teams?.[fieldingSide]
+  const teamIds = new Set(
+    Object.values(box?.players ?? {})
+      .map((p) => p?.person?.id)
+      .filter((id) => id != null),
+  )
+
   // Starting occupant per position (fielders + DH).
   const start = {}
   for (const p of lineup) {
@@ -53,6 +65,7 @@ export function revealDefense(feed, fieldingSide, throughInning, throughHalf) {
       const pos = ev.position?.abbreviation
       const id = ev.player?.id
       if (!FIELD_POSITIONS.has(pos) || id == null || byPos[pos] === id) continue
+      if (!teamIds.has(id)) continue // a sub the OTHER team made — not this defense
       ;(changes[pos] ??= []).push({ last: nameOf(id), inning: inn })
       byPos[pos] = id
     }
