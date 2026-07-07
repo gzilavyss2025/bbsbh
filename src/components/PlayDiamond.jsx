@@ -29,7 +29,7 @@ const LABELS = {
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
-export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, size = 140 }) {
+export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, size = 108 }) {
   const filled = scored ? 4 : reached
   return (
     <svg

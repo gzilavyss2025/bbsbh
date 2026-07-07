@@ -1571,17 +1571,13 @@ body {
   min-width: 0;
 }
 
-/* The whole right-hand tally — pitch lanes + result code + diamond — framed
-   as one box, Numbers Game #22 style. */
+/* The right-hand tally — pitch lanes + result code + diamond. Sits directly on
+   the card (no inner frame) so it doesn't read as a card-within-a-card. */
 .pbp__side {
   display: flex;
   align-items: stretch;
   gap: 6px;
   flex: 0 0 auto;
-  border: var(--bw-rule) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--paper-3);
-  padding: 5px;
 }
 
 /* Scorebook denotation stacked over the diamond: the result code (1B / F8 /
@@ -1618,18 +1614,18 @@ body {
   position: absolute;
   left: 0;
   bottom: 6px;
-  width: 22px;
-  height: 22px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--clay-deep);
   background: var(--clay-soft);
-  border: var(--bw-rule) solid var(--clay);
+  border: 2px solid var(--clay);
 }
 
 /* Advance notations penciled outside the bases (BB, GO, 2B…). */
