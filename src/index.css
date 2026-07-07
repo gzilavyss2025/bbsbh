@@ -2569,6 +2569,16 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* The batter/pitcher name is a .plink button, and .plink (declared later, same
+   specificity) resets text-transform and font to `inherit` — which drops the
+   surname back to the cell's title-case, normal-weight context. Win it back
+   with a higher-specificity rule so every box-score surname reads bold all-caps
+   in both the batting and pitching tables. */
+.bs__player .bs__pname {
+  text-transform: uppercase;
+  font-weight: var(--w-bold);
+}
+
 /* Position(s) after the batter's name, and the pitcher's decision tag. */
 .bs__pos {
   font-family: var(--font-display);
@@ -2632,7 +2642,6 @@ body {
 }
 .bs__grid--bat .bs__pname {
   min-width: 0;
-  font-weight: var(--w-bold);
 }
 .bs__grid--bat .bs__pos {
   margin-left: auto;
