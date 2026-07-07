@@ -55,12 +55,18 @@ export function isTwoWay(person) {
 // changes the season tiles (closer leads with SV); the roster chip shows all
 // three. Heuristic, since the API has no role field: mostly-starts => SP; else
 // a real save count => CL; otherwise RP (incl. swing arms like Chad Patrick,
-// who by design fall here and get the W-L-led tile set).
+// who by design fall here and get the W-L-led tile set). Returns null when the
+// season stat has no games yet (e.g. the "entering today" cutoff lands before
+// a rookie's first appearance) rather than guessing RP — a starter making his
+// MLB debut has zero starts logged the moment before that first game, and
+// defaulting to RP there mislabeled him as a reliever; the UI falls back to
+// the primary-position abbreviation ('P') instead.
 export function pitcherRole(stat) {
-  if (!stat) return 'RP'
+  if (!stat) return null
   const g = num(stat.gamesPitched ?? stat.gamesPlayed)
+  if (g === 0) return null
   const gs = num(stat.gamesStarted)
-  if (g > 0 && gs / g >= 0.5) return 'SP'
+  if (gs / g >= 0.5) return 'SP'
   if (num(stat.saves) >= 8) return 'CL'
   return 'RP'
 }
@@ -303,6 +309,47 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
       ? ['IP', 'H', 'ER', 'K', 'BB']
       : ['AB', 'H', 'HR', 'RBI', 'BB']
   return { columns, rows }
+}
+
+// ---------------------------------------------------------------------------
+// Firsts — first career instances of five hitting milestones, read off the
+// debut season's game log (a sixth, "first start", needs the game's own
+// boxscore rather than a gameLog field — see mlb.js's findFirstStart). Scoped
+// to the debut year only: that's the data this page already fetches for the
+// debut-game deep link, so no extra request is needed, and it covers every
+// player who sees meaningful debut-year playing time. Cutoff-filtered exactly
+// like gameLogView — a still-active debut season could otherwise reveal a
+// not-yet-revealed game's date and outcome.
+// ---------------------------------------------------------------------------
+
+const FIRSTS_DEFS = [
+  { key: 'hit', label: 'First Hit', test: (st) => num(st.hits) > 0 },
+  {
+    key: 'xbh',
+    label: 'First Extra-Base Hit',
+    test: (st) => num(st.doubles) + num(st.triples) + num(st.homeRuns) > 0,
+  },
+  { key: 'hr', label: 'First Home Run', test: (st) => num(st.homeRuns) > 0 },
+  { key: 'run', label: 'First Run Scored', test: (st) => num(st.runs) > 0 },
+  { key: 'so', label: 'First Strikeout', test: (st) => num(st.strikeOuts) > 0 },
+]
+
+// Returns { events, rowsAscending }: `events` maps each FIRSTS_DEFS key to the
+// earliest qualifying split (or null), `rowsAscending` is the full cutoff-safe
+// debut-year log oldest-first — the caller reuses it to also search for the
+// first start.
+export function firstsFromGameLog(splits, cutoff) {
+  const rowsAscending = (splits ?? [])
+    .filter((s) => s.date && (!cutoff || s.date < cutoff) && s.game?.gamePk)
+    .sort((a, b) => (a.date < b.date ? -1 : 1))
+  const events = {}
+  for (const def of FIRSTS_DEFS) {
+    const found = rowsAscending.find((s) => def.test(s.stat ?? {}))
+    events[def.key] = found
+      ? { label: def.label, date: found.date, gamePk: found.game.gamePk, isHome: found.isHome }
+      : null
+  }
+  return { events, rowsAscending }
 }
 
 // ---------------------------------------------------------------------------

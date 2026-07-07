@@ -3,6 +3,7 @@ import {
   fetchPersonStats,
   fetchGamesByPk,
   fetchAllStarRosterIds,
+  findFirstStart,
 } from '../api/mlb.js'
 import {
   personBio,
@@ -10,6 +11,7 @@ import {
   aggregateSplits,
   pitcherRole,
   buildBlock,
+  firstsFromGameLog,
 } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -37,6 +39,10 @@ function debutLabel(iso) {
   const [y, m, d] = (iso || '').split('-')
   return y ? `${MONTHS[Number(m) - 1].toUpperCase()} ${Number(d)}, ${y}` : ''
 }
+// Reads as the story of a rookie season: first taking the field, then each
+// milestone at the plate in the order it's likeliest to arrive.
+const FIRSTS_ORDER = ['start', 'hit', 'xbh', 'hr', 'run', 'so']
+
 function draftLabel(draft) {
   if (!draft || !draft.year) return DASH
   if (!draft.round) return String(draft.year)
@@ -117,22 +123,56 @@ async function loadPlayer(id, asOf) {
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
 
+  // Firsts — five hitting milestones read off the debut year's game log
+  // (already fetched above for the debut deep-link), plus the first game the
+  // player STARTED, which needs each candidate game's own boxscore (see
+  // findFirstStart) since no gameLog field distinguishes a start from a sub
+  // appearance. Hitting only: `debutSplits` above is only ever a 'hitting' log
+  // for a position player or a two-way player, never a pure pitcher.
+  let firsts = null
+  if (!bio.isPitcher && bio.debut) {
+    const { events, rowsAscending } = firstsFromGameLog(debutSplits, cutoff)
+    const startSplit = await findFirstStart(bio.id, rowsAscending)
+    events.start = startSplit
+      ? {
+          label: 'First Start',
+          date: startSplit.date,
+          gamePk: startSplit.game.gamePk,
+          isHome: startSplit.isHome,
+        }
+      : null
+    firsts = events
+  }
+
   // Point the debut fact and every game-log row at that game's (sealed) box
   // score, via the normal date/matchup/boxscore route (one batched schedule
   // lookup resolves all the abbreviations the slug needs).
   const pks = new Set()
   for (const b of blocks) for (const r of b.gameLog?.rows ?? []) if (r.gamePk) pks.add(r.gamePk)
   if (debutGamePk) pks.add(debutGamePk)
+  if (firsts) for (const f of Object.values(firsts)) if (f?.gamePk) pks.add(f.gamePk)
   const byPk = await fetchGamesByPk([...pks])
   const boxPath = (pk) => {
     const g = byPk[pk]
     return g ? gamePath(g.apiDate, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber) : null
   }
   for (const b of blocks) for (const r of b.gameLog?.rows ?? []) r.boxscorePath = boxPath(r.gamePk)
+  if (firsts) {
+    for (const key of Object.keys(firsts)) {
+      const f = firsts[key]
+      if (!f) continue
+      const g = byPk[f.gamePk]
+      firsts[key] = {
+        ...f,
+        path: boxPath(f.gamePk),
+        oppAbbr: g ? (f.isHome ? g.awayAbbr : g.homeAbbr) : '',
+      }
+    }
+  }
 
   return {
     bio, blocks, season, asOf, sportId,
-    isAllStar, currentYear,
+    isAllStar, currentYear, firsts,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
@@ -243,7 +283,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                   rows={block.arsenal.map((p) => ({
                     key: p.code,
                     cells: [
-                      p.name,
+                      p.name.toUpperCase(),
                       p.velo != null ? <>{p.velo.toFixed(1)} <span className="pitch__unit">mph</span></> : DASH,
                       p.usage != null ? `${Math.round(p.usage * 100)}%` : DASH,
                     ],
@@ -281,7 +321,16 @@ export function PlayerPage({ id, asOf, sportId }) {
                   rows={block.yearByYear.rows.map((r) => ({
                     key: r.year,
                     current: r.isCurrent,
-                    cells: [`${r.year}${r.isCurrent ? '*' : ''}`, ...r.cells],
+                    allStar: r.allStar,
+                    cells: [
+                      <>
+                        {r.year}{r.isCurrent ? '*' : ''}
+                        {r.allStar && (
+                          <span className="ledger__allstar" title="All Star">★</span>
+                        )}
+                      </>,
+                      ...r.cells,
+                    ],
                   }))}
                   total={block.yearByYear.total}
                   totalLabel="Career"
@@ -300,6 +349,29 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
           </section>
         ))}
+
+        {data.firsts && FIRSTS_ORDER.some((key) => data.firsts[key]) && (
+          <section>
+            <SectionTitle title="Firsts" />
+            <div className="player__splits">
+              {FIRSTS_ORDER.map((key) => {
+                const f = data.firsts[key]
+                if (!f) return null
+                return (
+                  <div className="split" key={key}>
+                    <div className="split__k">{f.label}</div>
+                    <div className="split__row">
+                      <GameLink path={f.path} className="split__v">
+                        {debutLabel(f.date)}
+                      </GameLink>
+                      <span className="split__sub">{f.oppAbbr}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         <p className="hint player__caveat">
           {asOf
@@ -388,7 +460,10 @@ function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '' }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.key} className={r.current ? 'is-current' : ''}>
+            <tr
+              key={r.key}
+              className={[r.current && 'is-current', r.allStar && 'is-allstar'].filter(Boolean).join(' ')}
+            >
               {r.cells.map((c, i) => (
                 <td key={i} className={cellClass(i)}>{c}</td>
               ))}

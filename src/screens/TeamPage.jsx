@@ -214,7 +214,7 @@ export function TeamPage({ id, asOf, sportId }) {
               season={season}
               rows={pitchers.map((p) => ({
                 ...p,
-                badge: p.role,
+                badge: p.role ?? DASH,
                 badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
               }))}
             />

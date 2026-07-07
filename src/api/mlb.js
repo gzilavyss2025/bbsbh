@@ -544,6 +544,32 @@ export async function fetchLeagueTeamStats(season) {
   return { hitting, pitching }
 }
 
+// The earliest (chronologically first) split in an ascending-sorted debut-year
+// game log where the person's OWN boxscore entry shows a starter's batting
+// order — a multiple of 100, the same convention selectLineup uses in
+// select.js (a sub's is offset 801/802…). No gameLog field distinguishes a
+// start from a sub appearance, so this is the only way to find it; it walks
+// oldest-first and stops at the first match, which for the vast majority of
+// players is the very first game checked (their debut). Degrades to null on a
+// game whose feed can't be read or is offline (keeps scanning the rest).
+export async function findFirstStart(personId, splitsAscending) {
+  const key = `ID${personId}`
+  for (const s of splitsAscending ?? []) {
+    const gamePk = s.game?.gamePk
+    if (!gamePk) continue
+    try {
+      const feed = await fetchGameFeed(gamePk)
+      const teams = feed?.liveData?.boxscore?.teams ?? {}
+      const box = teams.away?.players?.[key] ?? teams.home?.players?.[key]
+      const bo = Number(box?.battingOrder)
+      if (Number.isFinite(bo) && bo >= 100 && bo % 100 === 0) return s
+    } catch {
+      // Unreadable game feed — skip it and keep scanning.
+    }
+  }
+  return null
+}
+
 // Player ids selected to this season's All-Star Game. Roster membership isn't
 // score-revealing, so this is spoiler-safe to show year-round (unlike the
 // game itself, which stays sealed like any other). The team roster endpoints
