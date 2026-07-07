@@ -470,6 +470,26 @@ export async function fetchGamesByPk(gamePks) {
   }
 }
 
+// Team abbreviations for a set of ids, one batched request — used to label a
+// player's year-by-year row(s) with the club(s) they played for that season
+// (those stat splits carry only a team id/name, never an abbreviation). The
+// plural `teamIds` filter param is silently ignored by this endpoint (it
+// returns every team, MLB and MiLB alike); the singular `teamId` is the one
+// that actually filters, and it does accept a comma-separated list. Degrades
+// to {} on failure/empty input, so an unresolved team just shows no label.
+export async function fetchTeamAbbrevs(teamIds) {
+  const list = [...new Set((teamIds ?? []).filter(Boolean))]
+  if (!list.length) return {}
+  try {
+    const data = await getJson(`/api/v1/teams?teamId=${list.join(',')}`)
+    const out = {}
+    for (const t of data.teams ?? []) out[t.id] = teamAbbr(t)
+    return out
+  } catch {
+    return {}
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Team pages — identity, roster, standings, ranked team stats.
 // ---------------------------------------------------------------------------

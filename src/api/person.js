@@ -408,7 +408,11 @@ export function yearByYearView(splits, group, currentStat, currentSeason, career
       // For the current season, prefer the date-cut aggregate so the row can't
       // move mid-game; older seasons are settled, so aggregate their stints.
       const stat = isCurrent && currentStat ? currentStat : aggregateSplits(entries, group)
-      return { year: yr, isCurrent, cells: yearByYearCells(stat ?? {}, group) }
+      // Every team the player appeared for that year, in order — a mid-season
+      // trade means more than one. Ids only; the caller resolves abbreviations
+      // (these splits carry team id/name, never an abbreviation) in one batch.
+      const teamIds = [...new Set(entries.map((e) => e.team?.id).filter(Boolean))]
+      return { year: yr, isCurrent, teamIds, cells: yearByYearCells(stat ?? {}, group) }
     })
   if (!rows.length) return null
   const columns =

@@ -3,6 +3,7 @@ import {
   fetchPersonStats,
   fetchGamesByPk,
   fetchAllStarRosterIds,
+  fetchTeamAbbrevs,
   findFirstStart,
 } from '../api/mlb.js'
 import {
@@ -120,6 +121,18 @@ async function loadPlayer(id, asOf) {
     }
   }
   const isAllStar = allStarByYear.get(currentYear)?.has(bio.id) ?? false
+
+  // Team(s) played for each year-by-year row — a trade mid-season means more
+  // than one. One batched lookup for every team id across every row (those
+  // stat splits carry only a team id/name, never an abbreviation).
+  const yearByYearTeamIds = new Set()
+  for (const b of blocks) for (const r of b.yearByYear?.rows ?? []) for (const id of r.teamIds) yearByYearTeamIds.add(id)
+  const teamAbbrevs = await fetchTeamAbbrevs([...yearByYearTeamIds])
+  for (const b of blocks) {
+    for (const r of b.yearByYear?.rows ?? []) {
+      r.team = r.teamIds.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
+    }
+  }
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
 
@@ -316,19 +329,19 @@ export function PlayerPage({ id, asOf, sportId }) {
               <>
                 <SectionTitle title="Year by year" />
                 <Ledger
-                  leftCols={1}
-                  head={['Year', ...block.yearByYear.columns]}
+                  leftCols={2}
+                  head={['Year', 'Team', ...block.yearByYear.columns]}
                   rows={block.yearByYear.rows.map((r) => ({
                     key: r.year,
-                    current: r.isCurrent,
                     allStar: r.allStar,
                     cells: [
                       <>
-                        {r.year}{r.isCurrent ? '*' : ''}
+                        {r.year}
                         {r.allStar && (
                           <span className="ledger__allstar" title="All Star">★</span>
                         )}
                       </>,
+                      r.team || DASH,
                       ...r.cells,
                     ],
                   }))}
@@ -460,10 +473,7 @@ function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '' }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr
-              key={r.key}
-              className={[r.current && 'is-current', r.allStar && 'is-allstar'].filter(Boolean).join(' ')}
-            >
+            <tr key={r.key} className={r.allStar ? 'is-allstar' : ''}>
               {r.cells.map((c, i) => (
                 <td key={i} className={cellClass(i)}>{c}</td>
               ))}
@@ -473,7 +483,7 @@ function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '' }) {
         {total && (
           <tfoot>
             <tr className="is-total">
-              {[totalLabel, ...total].map((c, i) => (
+              {[totalLabel, ...Array(leftCols - 1).fill(''), ...total].map((c, i) => (
                 <td key={i} className={cellClass(i)}>{c}</td>
               ))}
             </tr>

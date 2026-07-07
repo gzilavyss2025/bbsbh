@@ -3430,11 +3430,9 @@ body {
   color: var(--text-muted);
   font-family: var(--font-body);
 }
-.ledger tr.is-current td,
 .ledger tr.is-allstar td {
   background: rgba(233, 195, 63, 0.16);
 }
-.ledger tr.is-current .yr,
 .ledger tr.is-allstar .yr {
   color: var(--clay-deep);
 }
