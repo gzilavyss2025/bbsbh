@@ -29,7 +29,9 @@
    (1,0,1) beats any plain class selector, so nothing downstream can quietly
    undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
    guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
-   if you do. */
+   if you do. The ONE sanctioned exception is `.buzz__text` (Bluesky posts keep
+   their authors' original casing); it opts out with a `caps-exempt` marker the
+   guard recognizes — don't add a second without the same deliberate marker. */
 #root * {
   text-transform: uppercase;
 }
@@ -2931,14 +2933,45 @@ body {
 .buzz__text {
   margin: 0;
   /* Social-post prose — the ONE place we deliberately break the all-caps
-     house rule: posts keep their authors' original casing (no
-     text-transform), set in plain regular-weight Newsreader so they read
-     as quoted voices rather than app chrome. */
+     house rule: posts keep their authors' original casing, set in plain
+     regular-weight Newsreader so they read as quoted voices rather than app
+     chrome. The casing opt-out itself is the #root-scoped rule below (a plain
+     class can't outweigh the global `#root *` uppercase). */
   font-family: var(--font-read);
   font-size: 13px;
   font-weight: var(--w-regular);
   line-height: var(--lh-body);
   color: var(--text-body);
+}
+
+/* The sanctioned exception to the ALL-CAPS INVARIANT. `#root .buzz__text`
+   (1 id + 1 class) outweighs the global `#root *` uppercase so the posts render
+   in their authors' own casing. The `caps-exempt` marker tells the check-caps
+   guard this `none` is deliberate — the only one allowed in the codebase. */
+#root .buzz__text {
+  text-transform: none; /* caps-exempt: Bluesky posts keep their original casing */
+}
+
+/* Loading placeholder for the buzz fetch — a neutral "Loading…" that softly
+   pulses so it reads as working, not stalled. */
+.buzz__loading {
+  animation: buzzpulse 1.3s var(--ease-out) infinite;
+}
+
+@keyframes buzzpulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buzz__loading {
+    animation: none;
+  }
 }
 
 .buzz__state {

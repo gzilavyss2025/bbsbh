@@ -17,6 +17,11 @@ const SRC = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'src');
 // text-transform values that would defeat the global uppercase.
 const BANNED = /text-transform\s*:\s*(none|lowercase|capitalize)\b/gi;
 
+// A line may opt out ONLY with an explicit, greppable marker comment. Today the
+// sole sanctioned exception is `.buzz__text` (Bluesky posts keep their authors'
+// original casing) — see the ALL-CAPS INVARIANT block in src/index.css.
+const EXEMPT = /caps-exempt\b/i;
+
 function cssFiles(dir) {
   const out = [];
   for (const entry of readdirSync(dir)) {
@@ -35,10 +40,14 @@ function stripComments(src) {
 
 const violations = [];
 for (const file of cssFiles(SRC)) {
-  const lines = stripComments(readFileSync(file, 'utf8')).split('\n');
+  const raw = readFileSync(file, 'utf8').split('\n');
+  // Scan comment-stripped lines so prose mentioning these values isn't flagged,
+  // but read the exemption marker off the raw line (stripComments blanks it).
+  const lines = stripComments(raw.join('\n')).split('\n');
   lines.forEach((line, i) => {
     if (BANNED.test(line)) {
       BANNED.lastIndex = 0; // reset stateful global regex
+      if (EXEMPT.test(raw[i])) return; // deliberate, marked opt-out
       violations.push({ file, line: i + 1, text: line.trim() });
     }
   });

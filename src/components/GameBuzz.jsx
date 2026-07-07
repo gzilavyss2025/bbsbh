@@ -20,7 +20,7 @@ function clockTime(iso) {
 function GameBuzzList({ feed }) {
   const { loading, error, data, reload } = useAsync(() => fetchGameBuzz(feed), [feed])
 
-  if (loading) return <p className="hint">Pulling the night&apos;s buzz…</p>
+  if (loading) return <p className="hint buzz__loading">Loading…</p>
   if (error) {
     return (
       <div className="buzz__state">
