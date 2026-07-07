@@ -106,21 +106,23 @@ function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }
 
   const awayFields = [
     { label: 'Visiting Team', value: box.away.teamName, wide: true },
-    { label: 'Manager', value: managerValue(managers?.away) },
+    { label: 'Manager', value: managerValue(managers?.away), wide: true },
     // What they wore (jersey · pants · cap) — spoiler-free, posted ~game time.
     { label: 'Uniform', value: uniforms?.away, wide: true },
     { label: 'HP Umpire', value: u.hp },
     { label: '1B Umpire', value: u.first },
     { label: '2B Umpire', value: u.second },
     { label: '3B Umpire', value: u.third },
-    { label: 'First Pitch', value: box.times.firstPitch },
+    { label: 'First Pitch', value: box.times.firstPitch, wide: true },
   ]
   const homeFields = [
     { label: 'Home Team', value: box.home.teamName, wide: true },
-    { label: 'Manager', value: managerValue(managers?.home) },
+    { label: 'Manager', value: managerValue(managers?.home), wide: true },
     { label: 'Uniform', value: uniforms?.home, wide: true },
     // The feed appends a period to the venue name ("Busch Stadium.") — drop it.
-    { label: 'Ballpark', value: get('Venue').replace(/\.\s*$/, ''), wide: true },
+    // Ballpark + Attendance pair on one row; Time of Game + Game End on another.
+    { label: 'Ballpark', value: get('Venue').replace(/\.\s*$/, '') },
+    { label: 'Attendance', value: get('Att') },
     // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
     // value to copy onto paper. Falls back to the box-score weather when the
     // generator has nothing (e.g. a MiLB park with no coordinates).
@@ -129,7 +131,6 @@ function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }
       value: scorebookWeather?.text || get('Weather'),
       wide: true,
     },
-    { label: 'Attendance', value: get('Att') },
     { label: 'Time of Game', value: box.times.duration },
     { label: 'Game End', value: box.times.end },
   ]
