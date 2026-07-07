@@ -28,7 +28,7 @@ export function PlayByPlay({ feed, inning, half, battingSide }) {
 const EVENT_ICONS = {
   mound_visit: '⏱',
   pitching_substitution: '🔄',
-  defensive_substitution: '🧤',
+  defensive_substitution: '👥',
   defensive_switch: '🧤',
 }
 
