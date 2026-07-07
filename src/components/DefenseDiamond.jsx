@@ -15,16 +15,18 @@ const POSITION_NUMBER = {
 
 // Where each label sits, in percent of the diamond box. Mirrors the sheet:
 // outfield arc up top, middle infield off the upper edges, corners off the
-// lower edges, catcher under home plate.
+// lower edges, catcher over home plate. Catcher rides high enough that its
+// position number stays clear of the DH line below the field — the surname
+// overlapping the diamond graphic is fine.
 const SPOTS = {
-  LF: { x: 18, y: 8 },
-  CF: { x: 50, y: 2 },
-  RF: { x: 82, y: 8 },
-  SS: { x: 25, y: 36 },
-  '2B': { x: 75, y: 36 },
-  '3B': { x: 14, y: 72 },
-  '1B': { x: 86, y: 72 },
-  C: { x: 50, y: 92 },
+  LF: { x: 17, y: 10 },
+  CF: { x: 50, y: 3 },
+  RF: { x: 83, y: 10 },
+  SS: { x: 29, y: 33 },
+  '2B': { x: 71, y: 33 },
+  '3B': { x: 13, y: 57 },
+  '1B': { x: 87, y: 57 },
+  C: { x: 50, y: 79 },
 }
 
 export function DefenseDiamond({ defense }) {
@@ -38,9 +40,11 @@ export function DefenseDiamond({ defense }) {
   return (
     <div className="defdiamond">
       <div className="defdiamond__field">
-        {/* Infield square + a small mound ring, in pencil rule. viewBox matches
-            the percent grid so the label spots and the drawing share
-            coordinates. */}
+        {/* Infield square + a small mound ring, in pencil rule. The box is 4:3,
+            and the SVG stretches to fill it, so viewBox y-units compress to 75%
+            of x — the polygon is drawn taller than wide (and the mound ring is
+            an ellipse) so both READ as a true square-on-point diamond and a
+            round mound, like a real infield. */}
         <svg
           className="defdiamond__lines"
           viewBox="0 0 100 100"
@@ -48,17 +52,18 @@ export function DefenseDiamond({ defense }) {
           aria-hidden="true"
         >
           <polygon
-            points="50,88 82,60 50,32 18,60"
+            points="50,89 76,54 50,19 24,54"
             fill="none"
             stroke="var(--rule)"
             strokeWidth="0.8"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
           />
-          <circle
+          <ellipse
             cx="50"
-            cy="60"
-            r="4.5"
+            cy="54"
+            rx="3.4"
+            ry="4.5"
             fill="none"
             stroke="var(--rule)"
             strokeWidth="0.8"
@@ -75,7 +80,6 @@ export function DefenseDiamond({ defense }) {
         <p className="defdiamond__dh">
           <span className="defdiamond__dhpos">DH</span>
           <span className="defdiamond__dhname">{dh.last.toUpperCase()}</span>
-          <span className="defdiamond__dhnote">bats, never fields</span>
         </p>
       )}
     </div>

@@ -1075,7 +1075,7 @@ body {
 
 .defdiamond__field {
   position: relative;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 4 / 3;
   max-width: 340px;
   margin: 0 auto;
 }
@@ -1145,11 +1145,6 @@ body {
 .defdiamond__dhname {
   font-weight: var(--w-semibold);
   color: var(--text-body);
-}
-
-.defdiamond__dhnote {
-  font-size: 10.5px;
-  color: var(--graphite-soft);
 }
 
 /* ---------------------------------------------------------------- innings */
