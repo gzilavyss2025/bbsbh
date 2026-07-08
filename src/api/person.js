@@ -824,6 +824,101 @@ export function careerTimelineView(splits, group, debutYear) {
 }
 
 // ---------------------------------------------------------------------------
+// Transaction timeline — the career roster-move ledger at the foot of the
+// player page. The raw /transactions feed is verbose and duplicative (a single
+// IL stint emits 3-4 near-identical "Status Change" rows; the #42/#21
+// ceremonial number swaps repeat every April and September), so this CURATES it
+// down to the moves that tell a career story and drops the administrative noise:
+//
+//   • KEEP by type (TXN_TYPES whitelist): trades, signings (FA / int'l /
+//     amateur), the draft & Rule 5, contract selections & purchases, recalls &
+//     options, waivers & claims, DFAs & releases, retirements, suspensions.
+//   • KEEP an "Assigned" (ASG) row ONLY when it moves the player BETWEEN two
+//     clubs (both fromTeam + toTeam) and isn't a rehab — that isolates genuine
+//     affiliate-to-affiliate promotions/demotions (a prospect's climb up the
+//     farm) while dropping rehab stints, spring-training invites, and All-Star /
+//     winter-ball / national-team call-ups (which all lack a fromTeam).
+//   • DROP everything else: Status Change (IL / roster / paternity), number
+//     changes, arbitration filings, and the rest.
+//
+// Then dedupe exact repeats (same type + date + teams) and sort oldest-first,
+// so the strip reads forward as a career narrative like the Team history and
+// "Path to the Majors" cards above it. Degrades to null when nothing survives.
+// ---------------------------------------------------------------------------
+
+// typeCode -> { label (short chip text), tone }. `tone` drives the chip/node
+// color: 'add' a club gained him, 'out' a club lost him, 'move' a lateral or
+// administrative move. ASG (an affiliate transfer) is handled separately below.
+const TXN_TYPES = {
+  TR:  { label: 'Trade',        tone: 'move' },
+  SFA: { label: 'Signed',       tone: 'add' },
+  SGN: { label: 'Signed',       tone: 'add' },
+  IFA: { label: 'Signed',       tone: 'add' },
+  DR:  { label: 'Drafted',      tone: 'add' },
+  R5:  { label: 'Rule 5',       tone: 'add' },
+  R5M: { label: 'Rule 5',       tone: 'add' },
+  SE:  { label: 'Selected',     tone: 'add' },
+  CU:  { label: 'Recalled',     tone: 'add' },
+  PUR: { label: 'Purchased',    tone: 'add' },
+  CP:  { label: 'Purchased',    tone: 'add' },
+  CLW: { label: 'Claimed',      tone: 'add' },
+  ACQ: { label: 'Acquired',     tone: 'add' },
+  OBT: { label: 'Acquired',     tone: 'add' },
+  AWD: { label: 'Awarded',      tone: 'add' },
+  OPT: { label: 'Optioned',     tone: 'out' },
+  OUT: { label: 'Outrighted',   tone: 'out' },
+  DES: { label: 'DFA',          tone: 'out' },
+  WA:  { label: 'Waived',       tone: 'out' },
+  REL: { label: 'Released',     tone: 'out' },
+  URL: { label: 'Released',     tone: 'out' },
+  DFA: { label: 'Free Agent',   tone: 'out' },
+  RET: { label: 'Retired',      tone: 'out' },
+  SU:  { label: 'Suspended',    tone: 'move' },
+  NC:  { label: 'New Contract', tone: 'move' },
+}
+
+export function transactionTimelineView(transactions) {
+  const rows = []
+  const seen = new Set()
+  for (const t of transactions ?? []) {
+    const code = t.typeCode
+    const fromId = t.fromTeam?.id ?? null
+    const toId = t.toTeam?.id ?? null
+    const desc = t.description || ''
+    let type = TXN_TYPES[code]
+    if (code === 'ASG') {
+      // Real affiliate-to-affiliate move only — both clubs present, not rehab.
+      if (!fromId || !toId || /rehab/i.test(desc)) continue
+      type = { label: 'Assigned', tone: 'move' }
+    }
+    if (!type) continue
+    const date = t.effectiveDate || t.date
+    if (!date) continue
+    const sig = `${code}|${date}|${fromId ?? ''}|${toId ?? ''}`
+    if (seen.has(sig)) continue
+    seen.add(sig)
+    rows.push({
+      date,
+      year: Number(date.slice(0, 4)),
+      code,
+      label: type.label,
+      tone: type.tone,
+      description: desc,
+      // The club to anchor the row's logo: the destination the move put him at,
+      // else the club he left (a release/DFA carries only a toTeam = old club).
+      club: toId
+        ? { id: toId, name: t.toTeam.name }
+        : fromId
+          ? { id: fromId, name: t.fromTeam.name }
+          : null,
+    })
+  }
+  if (!rows.length) return null
+  rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+  return { rows }
+}
+
+// ---------------------------------------------------------------------------
 // One stat block (a group's tiles + career + splits + logs). A normal player
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------

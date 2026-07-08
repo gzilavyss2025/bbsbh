@@ -11,6 +11,7 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
+import { TransactionTimeline } from '../components/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
@@ -272,6 +273,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             </div>
           </section>
         )}
+
+        {data.transactions && <TransactionTimeline rows={data.transactions.rows} />}
 
         <p className="hint hint--prose player__caveat">
           {asOf

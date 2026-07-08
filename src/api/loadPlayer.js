@@ -20,6 +20,7 @@ import {
   fetchStarterRelieverStints,
   fetchMilbFieldingSeason,
   fetchMilbStarterRelieverSeason,
+  fetchTransactions,
 } from './person-fetch.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
@@ -32,6 +33,7 @@ import {
   levelProgressionView,
   careerTimelineView,
   dropRehabStints,
+  transactionTimelineView,
   positionPlayerPastNote,
   fieldingView,
   starterRelieverView,
@@ -134,7 +136,7 @@ export async function loadPlayer(id, asOf) {
   // "games at that level").
   const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
 
-  const [results, debutSplits, prospects, convHittingMilb] = await Promise.all([
+  const [results, debutSplits, prospects, convHittingMilb, txns] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, mlbYbySplits, milbYbySplits, arsenalSplits] =
@@ -190,7 +192,12 @@ export async function loadPlayer(id, asOf) {
     bio.debut && bio.isPitcher && !bio.twoWay
       ? fetchMilbYearByYear(id, 'hitting')
       : Promise.resolve(null),
+    // Career roster-move history — capped at the same "entering today" cutoff
+    // the stats use, so a game-scoped view never shows a move dated after the
+    // game being scored. Curated + shaped by transactionTimelineView.
+    fetchTransactions(id, endDate),
   ])
+  const transactions = transactionTimelineView(txns)
   const blocks = results.map((r) => r.block)
   const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)
@@ -430,7 +437,7 @@ export async function loadPlayer(id, asOf) {
   return {
     bio, blocks, season, asOf, sportId: liveSportId,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
-    conversionNote, positionInnings,
+    conversionNote, positionInnings, transactions,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }

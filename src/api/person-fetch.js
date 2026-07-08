@@ -282,6 +282,30 @@ export async function findFirstStrikeoutBatter(personId, gamePk) {
   return null
 }
 
+// Full career roster-move history for one person — trades, signings, the draft,
+// call-ups/options, waivers, releases, DFAs, and (for a prospect) every
+// affiliate-to-affiliate assignment up the farm system. The `/transactions`
+// endpoint is player-scoped by a date WINDOW rather than "all history", so bind
+// it wide-open on the low end and cap the high end at `endDate` — the caller
+// passes the same "entering today" cutoff the stats use, so the timeline never
+// surfaces a move that hadn't happened yet as of the game being scored.
+// Roster moves carry no score (see docs/data-enrichment.md), so this is
+// spoiler-free like the rest of the player page. Returns the RAW rows (shaping
+// + curation live in person.js's transactionTimelineView); degrades to [] on
+// failure or off-MLB. MiLB moves come back without needing a sportId (verified).
+export async function fetchTransactions(personId, endDate) {
+  if (!personId) return []
+  try {
+    const end = endDate || new Date().toISOString().slice(0, 10)
+    const data = await getJson(
+      `/api/v1/transactions?playerId=${personId}&startDate=1900-01-01&endDate=${end}`,
+    )
+    return data.transactions ?? []
+  } catch {
+    return []
+  }
+}
+
 // Player ids selected to this season's All-Star Game. Roster membership isn't
 // score-revealing, so this is spoiler-safe to show year-round (unlike the
 // game itself, which stays sealed like any other). The team roster endpoints

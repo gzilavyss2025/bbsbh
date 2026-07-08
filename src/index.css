@@ -503,6 +503,136 @@ body {
   margin-top: -2px;
 }
 
+/* ------------------------------------------------------- transaction timeline
+   The career roster-move ledger at the foot of the player page (see
+   TransactionTimeline.jsx). A vertical graphite rail runs down a fixed gutter;
+   each move hangs a tone-colored node off it — field green when a club gained
+   him, clay when one lost him, neutral for a lateral move — with the date
+   penciled in the left column and a chip + club mark + description to the right.
+   A year label sits centered on the rail wherever the year turns over, its
+   paper background breaking the line into eras. */
+.txntl {
+  margin-top: var(--space-6);
+}
+.txntl__track {
+  position: relative;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+/* The rail — a faded pencil line down the gutter between the date column and
+   the content. Inset top/bottom so it starts and ends at the first/last node. */
+.txntl__track::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 64px;
+  width: var(--bw-rule);
+  background: var(--border-rule);
+}
+.txntl__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 18px;
+  padding: 7px 0;
+}
+/* The node, centered on the rail (left 64px). A canvas-colored ring masks the
+   rail behind it so the dot reads as sitting on the line. */
+.txntl__item::before {
+  content: '';
+  position: absolute;
+  left: 60px;
+  top: 12px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-canvas);
+  background: var(--graphite);
+}
+.txntl__item--add::before { background: var(--accent-positive); }
+.txntl__item--out::before { background: var(--accent-negative); }
+.txntl__item--move::before { background: var(--graphite); }
+
+.txntl__date {
+  grid-column: 1;
+  align-self: start;
+  padding-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: right;
+  white-space: nowrap;
+}
+.txntl__main {
+  grid-column: 2;
+  min-width: 0;
+}
+.txntl__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.txntl__chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--graphite);
+}
+.txntl__chip--add {
+  color: var(--field-deep);
+  border-color: var(--field);
+  background: var(--field-soft);
+}
+.txntl__chip--out {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+  background: var(--clay-soft);
+}
+.txntl__chip--move {
+  color: var(--text-muted);
+  background: var(--bg-page);
+}
+.txntl__club {
+  display: inline-flex;
+  align-items: center;
+}
+.txntl__desc {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+}
+/* Year marker — a mono label centered on the rail, its paper background
+   breaking the line so the year reads as an era divider. */
+.txntl__yr {
+  position: relative;
+  height: 22px;
+  margin-top: 6px;
+}
+.txntl__yr span {
+  position: absolute;
+  left: 64px;
+  transform: translateX(-50%);
+  top: 2px;
+  padding: 1px 6px;
+  background: var(--bg-canvas);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+}
+
 /* --------------------------------------------------- level progression card
    "Path to the Majors" chevron strip on a pre-debut player's page: one rung
    per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
