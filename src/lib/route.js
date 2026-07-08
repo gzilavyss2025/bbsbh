@@ -8,6 +8,7 @@
 //   '/logos'                            -> { name: 'logos' }
 //   '/about'                            -> { name: 'about' }
 //   '/prospects'                        -> { name: 'prospects' }
+//   '/standings'                        -> { name: 'standings' }
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/{MMDDYYYY}/{matchup}/{section}'   -> { name: 'game', date, matchup, section }
@@ -35,6 +36,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
   if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
+  if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')

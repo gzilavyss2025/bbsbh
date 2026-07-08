@@ -648,22 +648,46 @@ export async function fetchAffiliates(teamId, season) {
 }
 
 // Division standings AS OF a date. The `date` param is honored by the API
-// (verified: a June-1 query returns the June-1 record, not today's), which is
-// what makes this spoiler-safe — pass the day BEFORE the game being scored so
-// a team you haven't revealed never shows a record that folds tonight's result.
+// (verified: a June-1 query returns the June-1 record, not today's, and it
+// folds in games THROUGH the end of that day), which is what makes this
+// spoiler-safe — pass the day BEFORE the game being scored so a team you
+// haven't revealed never shows a record that folds tonight's result. Optional
+// `hydrate` ('division' fills in the division name/abbrev the per-team records
+// omit — the standings page needs it; TeamPage doesn't and passes none).
 // Returns the raw division records array; person.js/TeamPage pick the team's
 // own division. Degrades to [].
-export async function fetchStandings(leagueId, season, date) {
+export async function fetchStandings(leagueId, season, date, hydrate) {
   if (!leagueId || !season) return []
   try {
     const dateParam = date ? `&date=${date}` : ''
+    const hydrateParam = hydrate ? `&hydrate=${hydrate}` : ''
     const data = await getJson(
-      `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}`,
+      `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}${hydrateParam}`,
     )
     return data.records ?? []
   } catch {
     return []
   }
+}
+
+// Both leagues' division standings AS OF a date, in one flat records array for
+// the standings page. The /standings endpoint takes exactly one leagueId, so
+// this fans out over the AL (103) and NL (104) in parallel — the same
+// degrade-per-item idiom as resolveGame. `hydrate=division` carries the
+// division name each record is grouped under (see api/standings.js for the
+// shaping). Same `date` semantics + spoiler stance as fetchStandings: the
+// standings page defaults `date` to yesterday ("entering today") so a slate the
+// user is mid-scoring never leaks. Degrades per league (a failed league just
+// contributes no records).
+const STANDINGS_LEAGUE_IDS = [103, 104]
+export async function fetchLeagueStandings(season, date) {
+  if (!season) return []
+  const results = await Promise.allSettled(
+    STANDINGS_LEAGUE_IDS.map((leagueId) =>
+      fetchStandings(leagueId, season, date, 'division'),
+    ),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
 }
 
 // Every MLB club's season hitting+pitching totals, so the team page can rank

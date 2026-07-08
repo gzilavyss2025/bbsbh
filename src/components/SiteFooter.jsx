@@ -37,6 +37,13 @@ export function SiteFooter({ onShowLogos }) {
         <button
           type="button"
           className="sitefooter__action"
+          onClick={() => navigate('/standings')}
+        >
+          Standings
+        </button>
+        <button
+          type="button"
+          className="sitefooter__action"
           onClick={() => navigate('/prospects')}
         >
           Top MLB Prospects

@@ -5,6 +5,7 @@ import { GameView } from './screens/GameView.jsx'
 import { LogoSheet } from './screens/LogoSheet.jsx'
 import { PlayerPage } from './screens/PlayerPage.jsx'
 import { ProspectsPage } from './screens/ProspectsPage.jsx'
+import { StandingsPage } from './screens/StandingsPage.jsx'
 import { TeamPage } from './screens/TeamPage.jsx'
 import { resolveGame } from './api/mlb.js'
 import { useAsync } from './hooks/useAsync.js'
@@ -70,6 +71,8 @@ export default function App() {
     content = <AboutPage onBack={() => go('/')} />
   } else if (route.name === 'prospects') {
     content = <ProspectsPage />
+  } else if (route.name === 'standings') {
+    content = <StandingsPage />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {

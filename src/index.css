@@ -4560,6 +4560,149 @@ body {
   color: var(--accent-negative);
 }
 
+/* ---- Standings page ------------------------------------------------------ */
+
+/* Date controls: the "entering today / as of …" readout, the historical
+   quick-jumps, and the kraft-amber opt-in to reveal today's live standings. */
+.standings-ctrl {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.standings-ctrl__asof {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.standings-ctrl__mode {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  color: var(--text-heading);
+}
+.standings-ctrl__detail {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-caption);
+}
+.standings-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.standings-jump {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+.standings-jump:active {
+  transform: scale(0.96);
+}
+.standings-jump.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+/* Reveal-today reads as a seal cover you peel — same kraft amber as SealBox. */
+.standings-reveal {
+  align-self: flex-start;
+  min-height: var(--tap-min);
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--seal-deep);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.standings-reveal:active {
+  transform: scale(0.98);
+}
+.standings-reveal.is-on {
+  background: var(--surface-card);
+  border-color: var(--border-rule);
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+}
+/* Keep the last-good standings on screen, dimmed, while a new date loads. */
+.standings-body.is-refreshing {
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+
+.lgstand {
+  margin-bottom: 22px;
+}
+.lgstand__league {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 15px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  margin: 0 0 10px;
+  padding-bottom: 5px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.lgstand__div {
+  margin-bottom: 14px;
+}
+.lgstand__divname {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  margin: 0 0 6px;
+}
+
+/* The full standings table carries 11 numeric columns, so it scrolls inside
+   .ledger-wrap on a phone — pin the team column so a name stays put while the
+   splits/runs scroll past it. Tighter cells than the team-page's compact
+   standings keep the scroll short. */
+.standings--full th,
+.standings--full td {
+  padding: 6px 6px;
+  font-size: 12px;
+}
+.standings--full th.team,
+.standings--full td.team {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-card);
+  min-width: 116px;
+}
+.standings--full thead th.team {
+  z-index: 2;
+  background: var(--bg-page);
+}
+/* Solid (not the translucent row tint) so scrolled cells can't bleed through
+   the pinned column. */
+.standings--full tr.is-me td.team {
+  background: var(--field-soft);
+}
+
 /* ranked team stats */
 .tstats {
   display: grid;
