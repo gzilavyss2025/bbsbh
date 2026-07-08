@@ -40,6 +40,15 @@ node scripts/game-buzz.mjs <gamePk>
                    # thread when REDDIT_CLIENT_ID/SECRET are set. Deliberately a
                    # terminal script, NOT part of the app (game-night posts are
                    # spoilers). Source scoping/queries: docs/game-buzz.md
+node scripts/gen-milb-history.mjs
+                   # regenerate public/data/milb-history.json (per-season parent-org
+                   # + club-name history for every AAA/AA/A+/A affiliate). Sweeps
+                   # statsapi's season-scoped team snapshots for 2005+ (where its
+                   # affiliate data is clean) and merges a small hand-verified
+                   # seed (scripts/milb-history-seed.json) for pre-2005 eras. Run
+                   # by hand — NOT on a cron (affiliate history is near-immutable);
+                   # re-run to fold in a new season. Edit the SEED, never the
+                   # output. See the generator header for the 2005-floor rationale.
 node scripts/gen-war.mjs
                    # regenerate public/data/war.json (season WAR per player,
                    # from FanGraphs' leaderboard API) — normally you don't run
@@ -207,14 +216,20 @@ notes the gamePk field paths were verified against):
   JSON → same-origin read) is meant to be reused for the next source shaped
   like this — see `docs/data-enrichment.md` §5.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, read from a
-  static same-origin `public/data/milb-history.json`. Unlike `war.js`/
-  `affiliates.json`/`teams.json`, this file is **hand-curated, not
-  script-generated** — there's no live source for "what org was this farm
-  club affiliated with in 2011," so a human researches it once and types in a
-  year range. It exists to fix a specific illusion: a MiLB affiliate's PARENT
-  org can be reassigned (most sweepingly in the 2021 MiLB reorganization)
-  independent of the player ever changing organizations, so a naive "current
-  parent org" lookup mislabels an old stint as if the player had been traded.
+  static same-origin `public/data/milb-history.json`. Like `war.js`, that file
+  is **script-generated** (`scripts/gen-milb-history.mjs`) but, unlike WAR,
+  **not on a cron** — affiliate history is near-immutable, so it's a hand-run
+  regenerate. The generator derives 2005+ eras from statsapi's own
+  season-scoped team snapshots (`/teams?sportId={11-14}&season={Y}` reports each
+  club's parent + name AS OF that season) and merges a small hand-verified seed
+  (`scripts/milb-history-seed.json`) for pre-2005 eras — because statsapi's own
+  affiliate data is unreliable before ~2005 (it mislabels e.g. the Sky Sox as a
+  Cleveland club through 2003 when they were the Rockies' from 1993). **Edit the
+  seed, never the output.** It exists to fix a specific illusion: a MiLB
+  affiliate's PARENT org can be reassigned (most sweepingly in the 2021 MiLB
+  reorganization) independent of the player ever changing organizations, so a
+  naive "current parent org" lookup mislabels an old stint as if the player had
+  been traded.
   `historicalParentOrg(teamId, year)` is wired into the career timeline
   (`loadPlayer.js`) as a preferred-when-covered override ahead of the
   existing live `fetchTeam()` lookup; deliberately thin (see the JSON's own
