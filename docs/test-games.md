@@ -19,8 +19,10 @@ Pinch runners, defensive substitutions where players moved back to a
 position they'd started the game at, a position player pitching, and replay
 challenges. This is the game that originally surfaced the
 `isPitcherByTrade`/`allPositions` starting-position bug documented in
-CLAUDE.md — good for `revealDefense`/`revealBattingOrder`/pitcher-line
-regressions.
+CLAUDE.md — good for `defenseEntering`/`lineupEntering`/pitcher-line
+regressions. Its subs are almost all announced between innings (pre-pitch),
+with a couple of in-inning ones (the top-6 PH, top-7 PR), so it exercises both
+the "shown entering the half" and "held back until you reveal in" paths.
 
 ## Triple play
 

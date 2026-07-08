@@ -1,29 +1,56 @@
-// Reveal-only: the batting side's live lineup card for a half-inning — the
-// nine batting-order slots, each showing its starter plus every pinch-hitter/
-// pinch-runner or double-switch sub who has taken that slot through the
-// completion of the half being revealed. A lineup change is spoiler-adjacent
-// exactly like a defensive change (api/defense.js) — a pinch-hitter mid-inning
-// can telegraph a game situation — so this must ONLY be called from inside a
-// SealBox's reveal render function, with the half being revealed as the
-// `through` cutoff. Never call it at render top-level.
+// The batting side's lineup card as it stands ENTERING a half-inning — the nine
+// batting-order slots, each showing its starter plus every pinch-hitter/
+// pinch-runner or double-switch sub who took that slot before the half's first
+// pitch (a change made *during* the half stays sealed until the user reveals
+// their way into it). Each occupant carries his jersey number and fielding
+// position for a scorebook-ready row.
 //
-// Unlike defense.js, a player's batting SLOT never needs reconstructing from
-// event replay: every boxscore player's own `battingOrder` value already
-// encodes it directly as `slot * 100 + sequence` (a starter is an exact
-// multiple of 100; the Nth sub in that slot is `slot*100 + N`) — so grouping
-// by slot and sorting by the raw value gives the true chronological chain
-// with no risk of the starting-position ambiguity that api/select.js's
-// selectLineup had to fix (see its `position` comment).
+// Like api/defense.js's defenseEntering, this is spoiler-adjacent by substitution
+// *timing* (a pinch-hitter telegraphs a game situation), so it shares the same
+// caller-gating contract as selectPrePitchChanges: a caller rendering it outside
+// a SealBox must restrict it to the half that is the user's own next one to
+// reveal (halfIndex <= revealedThrough + 1). See forEachEventBeforeFirstPitch.
+//
+// A player's batting SLOT never needs reconstructing from event replay: every
+// boxscore player's own `battingOrder` value already encodes it directly as
+// `slot * 100 + sequence` (a starter is an exact multiple of 100; the Nth sub in
+// that slot is `slot*100 + N`) — so grouping by slot and sorting by the raw
+// value gives the true chronological chain. Only the *timing* (which members are
+// in the game yet, entering this half) comes from event replay, via
+// entrantsBeforeFirstPitch; the fielding position comes from defenseEntering.
 
-import { lastName, halfIndex, entryIndexById } from './select.js'
+import { lastName, entryIndexById, entrantsBeforeFirstPitch } from './select.js'
+import { defenseEntering } from './defense.js'
 
-export function revealBattingOrder(feed, battingSide, throughInning, throughHalf) {
+export function lineupEntering(feed, battingSide, throughInning, throughHalf) {
   const team = feed?.liveData?.boxscore?.teams?.[battingSide]
   const boxPlayers = team?.players ?? {}
   const players = feed?.gameData?.players ?? {}
   const nameOf = (id) => lastName(players[`ID${id}`] ?? {}) || '—'
   const entered = entryIndexById(feed)
-  const cutoff = halfIndex(throughInning, throughHalf)
+
+  // Who's in the game as this half begins: starters (no entry event) always,
+  // plus every sub whose entry landed before the half's first pitch. A sub who
+  // enters mid-half (or in a later, still-sealed half) is left off.
+  const entrantsBefore = entrantsBeforeFirstPitch(feed, throughInning, throughHalf)
+  const inGame = (id, entryIdx) => entryIdx == null || entrantsBefore.has(id)
+
+  // Fielding position per player entering this half, inverted from the side's
+  // defensive alignment — the last (un-replaced) occupant of each spot. Covers
+  // the eight fielders + DH; anyone else (a batting pitcher, or a sub not yet
+  // assigned a spot) falls back to his own starting/primary position.
+  const posById = {}
+  for (const spot of defenseEntering(feed, battingSide, throughInning, throughHalf)) {
+    const cur = spot.entries[spot.entries.length - 1]
+    if (cur?.id != null) posById[cur.id] = spot.position
+  }
+  const jerseyOf = (id) =>
+    boxPlayers[`ID${id}`]?.jerseyNumber ?? players[`ID${id}`]?.primaryNumber ?? ''
+  const posOf = (id) =>
+    posById[id] ??
+    boxPlayers[`ID${id}`]?.allPositions?.[0]?.abbreviation ??
+    boxPlayers[`ID${id}`]?.position?.abbreviation ??
+    ''
 
   const bySlot = {} // slot (1-9) -> [{ id, bo }]
   for (const p of Object.values(boxPlayers)) {
@@ -40,8 +67,14 @@ export function revealBattingOrder(feed, battingSide, throughInning, throughHalf
     const chain = []
     for (const m of members) {
       const idx = entered[m.id] ?? null // null for the starter, who has no entry event
-      if (idx != null && idx > cutoff) continue // not revealed yet — stop the chain here
-      chain.push({ last: nameOf(m.id), inning: idx != null ? Math.floor(idx / 2) + 1 : null })
+      if (!inGame(m.id, idx)) continue // not in the game yet, entering this half
+      chain.push({
+        id: m.id,
+        last: nameOf(m.id),
+        jersey: jerseyOf(m.id),
+        position: posOf(m.id),
+        inning: idx != null ? Math.floor(idx / 2) + 1 : null,
+      })
     }
     if (chain.length === 0) continue
     slots.push({

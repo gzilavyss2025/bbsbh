@@ -77,13 +77,19 @@ Enforced structurally by two conventions:
 1. **Reveal-only modules**, callable only from inside a `SealBox`'s reveal
    render function — never at render top-level or in an eager `useMemo`
    (ADR-0001): `src/api/linescore.js` (per-inning R/H/E/LOB, full-game
-   totals), `src/api/derive.js` (pitches/whiffs/first-pitch strikes + Statcast
-   superlatives), `src/api/defense.js` (`revealDefense`), and
-   `src/api/battingorder.js` (`revealBattingOrder`). Contrast
-   `src/api/select.js`, spoiler-**free** (lineups, umpires, venue, rosters,
-   `selectPrePitchChanges`) — its one deliberate exception is
-   `selectPrePitchChanges`, rendered above the seal but only for the half the
-   user is about to reveal next (ADR-0003).
+   totals) and `src/api/derive.js` (pitches/whiffs/first-pitch strikes +
+   Statcast superlatives). Contrast `src/api/select.js`, spoiler-**free**
+   (lineups, umpires, venue, rosters). In between sit **caller-gated pre-pitch
+   selectors**, spoiler-free only when restricted to the half the user has
+   reached (`halfIndex <= revealedThrough + 1`): `selectPrePitchChanges`
+   (`select.js`), rendered above the seal (ADR-0003), and `defenseEntering`
+   (`src/api/defense.js`) + `lineupEntering` (`src/api/battingorder.js`) — the
+   defense diamond and both teams' lineup cards (each name with jersey +
+   position) **as they stand entering a half** (subs through that half's first
+   pitch only, none made during it), rendered *outside* the seal as the
+   pre-scoring reference and gated to `revealed || isNextToReveal` (ADR-0010).
+   The box score draws the whole-game alignment via
+   `defenseEntering(…, Infinity, 'bottom')` inside its own seal.
 
 2. **`src/components/SealBox.jsx`** takes `children` as a render function,
    invoked only once revealed; reveal is one-directional, and re-sealing on

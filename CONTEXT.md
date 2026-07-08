@@ -28,12 +28,20 @@ placed in the DOM ahead of time.
 
 **Reveal-only module**:
 A module whose exports compute score-revealing values (runs, hits, errors,
-pitch/whiff counts, live defensive alignment, live batting-order subs).
-Callable only from inside a SealBox's reveal render path.
+pitch/whiff counts). Callable only from inside a SealBox's reveal render path.
+_Modules_: `linescore.js`, `derive.js`.
 
 **Spoiler-free selector**:
 A selector safe to call and render before reveal — lineups, umpires, venue,
 rosters, pre-pitch changes. Touches no runs/hits/errors.
+
+**Entering-the-half selector**:
+A selector giving the defense or the lineup as it stands *entering* a half —
+the starting nine plus every sub/switch/pitching change made before that
+half's first pitch, and none made during it (`defenseEntering`,
+`lineupEntering`). Not score-revealing, but substitution timing is
+spoiler-adjacent, so — like a pre-pitch change — a caller may only render it
+for a half the user has reached (`halfIndex <= revealedThrough + 1`).
 
 **revealedThrough**:
 The high-water mark of how far a user has revealed a given game — the

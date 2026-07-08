@@ -4,7 +4,7 @@ A boxscore player's `position` field reflects his current/final position,
 which silently drifts over the course of a game — verified against gamePk
 823035 (2026-07-07 MIL@STL g2), where a starter's `box.position` read out his
 *third* position of the night and collided with, erasing, another starter
-from `revealDefense`'s starting-lineup seed. Reading `box.position` for
+from `defenseEntering`'s starting-lineup seed. Reading `box.position` for
 roster classification would move or rename a bench catcher's roster row the
 moment he mopped up a sealed blowout (his box position would read 'P'; subs
 read 'PH'/'PR') — a spoiler through the card's shape alone, without ever

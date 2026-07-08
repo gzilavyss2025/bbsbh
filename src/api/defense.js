@@ -1,13 +1,17 @@
-// Reveal-only: the fielding team's live defensive alignment for a half-inning,
-// built up from the starting nine plus every defensive substitution/switch made
-// through the completion of that half. A defensive change is spoiler-adjacent —
-// a flurry of replacements telegraphs a sealed blowout — so, exactly like
-// linescore.js / derive.js, this must ONLY be called from inside a SealBox's
-// reveal render function, with the half being revealed as the `through` cutoff.
-// Never call it at render top-level: passing a future inning would leak
-// substitutions the user hasn't uncovered yet.
+// The fielding team's defensive alignment as it stands ENTERING a half-inning —
+// the starting nine plus every defensive substitution/switch made before that
+// half's first pitch (so a change made *during* the half is not shown until the
+// user reveals their way into it). It is not, on its own, a score-revealing
+// value, but substitution *timing* is spoiler-adjacent — a flurry of pre-half
+// replacements telegraphs a sealed blowout — so this carries the same
+// caller-gating contract as api/select.js's selectPrePitchChanges: a caller
+// rendering it OUTSIDE a SealBox must restrict it to the half that is the
+// user's own next one to reveal (halfIndex <= revealedThrough + 1). See
+// forEachEventBeforeFirstPitch in select.js. InningViewer renders it under that
+// gate; BoxScore renders the whole-game alignment (throughInning = Infinity)
+// inside the box score's own seal.
 
-import { selectLineup, lastName, halfIndex } from './select.js'
+import { selectLineup, lastName, forEachEventBeforeFirstPitch } from './select.js'
 
 // The eight positions that stand in the diamond (the pitcher has his own table;
 // the DH bats but never fields, so he rides a line beneath the field).
@@ -16,12 +20,13 @@ const FIELD_POSITIONS = new Set(['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF'])
 const DISPLAY_ORDER = ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH']
 
 // Returns one entry per occupied position, in DISPLAY_ORDER:
-//   { position, entries: [{ last, inning, replaced }, …] }
+//   { position, entries: [{ id, last, inning, replaced }, …] }
 // entries run oldest→newest: the starter first (inning null), then each player
-// who took the spot, tagged with the inning he entered. Every entry but the
-// last carries replaced:true so the caller can strike it through, scorebook
-// style — the surviving occupant is the final, un-struck name.
-export function revealDefense(feed, fieldingSide, throughInning, throughHalf) {
+// who took the spot before this half began, tagged with the inning he entered.
+// Every entry but the last carries replaced:true so the caller can strike it
+// through, scorebook style — the surviving occupant is the final, un-struck
+// name. Pass Infinity/'bottom' as through* to get the whole-game alignment.
+export function defenseEntering(feed, fieldingSide, throughInning, throughHalf) {
   const lineup = selectLineup(feed, fieldingSide)
   const players = feed?.gameData?.players ?? {}
   const nameOf = (id) => lastName(players[`ID${id}`] ?? {}) || '—'
@@ -46,35 +51,28 @@ export function revealDefense(feed, fieldingSide, throughInning, throughHalf) {
     }
   }
 
-  // Replay defensive moves in order, gated to the half being revealed. Each
-  // move where a NEW player takes a fielding spot appends to that spot's chain;
-  // byPos tracks the current occupant so a no-op (same player) is ignored.
-  const cutoff = halfIndex(throughInning, throughHalf)
-  const changes = {} // pos -> [{ last, inning }]
+  // Replay defensive moves in order, up to (but not into) this half — each move
+  // where a NEW player takes a fielding spot appends to that spot's chain; byPos
+  // tracks the current occupant so a no-op (same player) is ignored.
+  const changes = {} // pos -> [{ id, last, inning }]
   const byPos = {}
   for (const pos of Object.keys(start)) byPos[pos] = start[pos].id
 
-  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
-    const inn = play?.about?.inning
-    const half = play?.about?.halfInning
-    if (!inn || !half) continue
-    if (halfIndex(inn, half) > cutoff) break // allPlays is chronological
-    for (const ev of play.playEvents ?? []) {
-      const et = ev?.details?.eventType
-      if (et !== 'defensive_substitution' && et !== 'defensive_switch') continue
-      const pos = ev.position?.abbreviation
-      const id = ev.player?.id
-      if (!FIELD_POSITIONS.has(pos) || id == null || byPos[pos] === id) continue
-      if (!teamIds.has(id)) continue // a sub the OTHER team made — not this defense
-      ;(changes[pos] ??= []).push({ last: nameOf(id), inning: inn })
-      byPos[pos] = id
-    }
-  }
+  forEachEventBeforeFirstPitch(feed, throughInning, throughHalf, (ev, play) => {
+    const et = ev?.details?.eventType
+    if (et !== 'defensive_substitution' && et !== 'defensive_switch') return
+    const pos = ev.position?.abbreviation
+    const id = ev.player?.id
+    if (!FIELD_POSITIONS.has(pos) || id == null || byPos[pos] === id) return
+    if (!teamIds.has(id)) return // a sub the OTHER team made — not this defense
+    ;(changes[pos] ??= []).push({ id, last: nameOf(id), inning: play?.about?.inning })
+    byPos[pos] = id
+  })
 
   return DISPLAY_ORDER.filter((pos) => start[pos] || changes[pos]).map((pos) => {
     const chain = []
-    if (start[pos]) chain.push({ last: start[pos].last, inning: null })
-    for (const c of changes[pos] ?? []) chain.push({ last: c.last, inning: c.inning })
+    if (start[pos]) chain.push({ id: start[pos].id, last: start[pos].last, inning: null })
+    for (const c of changes[pos] ?? []) chain.push({ id: c.id, last: c.last, inning: c.inning })
     return {
       position: pos,
       entries: chain.map((e, i) => ({ ...e, replaced: i < chain.length - 1 })),

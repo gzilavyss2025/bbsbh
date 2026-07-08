@@ -115,6 +115,52 @@ export function entryIndexById(feed) {
   return entered
 }
 
+// Walk every playEvent that occurred strictly before the first pitch of
+// (inning, half), in chronological order, invoking fn(ev, play) for each.
+// It stops the moment it reaches that half's first pitch, so the events it
+// yields are exactly the game's state *entering* the half: all of every prior
+// half's events, plus this half's own pre-pitch events (subs/switches
+// announced before the leadoff pitch — see selectPrePitchChanges), and nothing
+// from the half's actual at-bats. Pass Infinity as the inning to walk the
+// whole game (the box score's final-alignment case).
+//
+// Spoiler note: like selectPrePitchChanges this reads only eventType /
+// position / player ids / inning numbers, never a score — but substitution
+// *timing* is spoiler-adjacent, so a caller rendering the result OUTSIDE a
+// SealBox must gate it to the half that is the user's own next one to reveal
+// (halfIndex <= revealedThrough + 1). The "entering the half" selectors built
+// on this (api/defense.js's defenseEntering, api/battingorder.js's
+// lineupEntering) carry that same contract.
+export function forEachEventBeforeFirstPitch(feed, inning, half, fn) {
+  const cutoff = halfIndex(inning, half)
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const inn = play?.about?.inning
+    const ha = play?.about?.halfInning
+    if (!inn || !ha) continue
+    const idx = halfIndex(inn, ha)
+    if (idx > cutoff) return // allPlays is chronological
+    const atTarget = idx === cutoff
+    for (const ev of play.playEvents ?? []) {
+      if (atTarget && ev.isPitch) return // reached the half's first pitch
+      fn(ev, play)
+    }
+  }
+}
+
+// The set of player ids who have ENTERED the game — as a pitching change,
+// pinch-hitter/runner, or defensive substitution — strictly before the first
+// pitch of (inning, half). That's everyone in the game as the half begins who
+// wasn't a starter. Same spoiler gating as forEachEventBeforeFirstPitch.
+export function entrantsBeforeFirstPitch(feed, inning, half) {
+  const ids = new Set()
+  forEachEventBeforeFirstPitch(feed, inning, half, (ev) => {
+    if (ENTRY_EVENT_TYPES.has(ev?.details?.eventType) && ev.player?.id != null) {
+      ids.add(ev.player.id)
+    }
+  })
+  return ids
+}
+
 // Resolve the batting order for one side into a printable lineup — the
 // STARTING nine, the names you stage onto the sheet before first pitch.
 //

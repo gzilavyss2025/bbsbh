@@ -1,6 +1,6 @@
 import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
 import { managerLabel } from '../api/mlb.js'
-import { revealDefense } from '../api/defense.js'
+import { defenseEntering } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -353,11 +353,12 @@ function TeamBlock({ side, feed, sideKey }) {
 // The team's complete defensive alignment for the game — the same scorebook
 // diamond as the innings view (api/defense.js), but with every substitution
 // through the game's final play folded in (or, for a game still in progress
-// when this box score is viewed, every substitution made so far). Safe to
-// compute here: the whole box score is already behind its own SealBox, so
-// there's nothing left to spoil by walking the full play-by-play.
+// when this box score is viewed, every substitution made so far). The Infinity
+// "through" cutoff means "entering a half that never comes" — i.e. the whole
+// game. Safe to compute here: the whole box score is already behind its own
+// SealBox, so there's nothing left to spoil by walking the full play-by-play.
 function BoxDefense({ feed, sideKey }) {
-  const defense = revealDefense(feed, sideKey, Infinity, 'bottom')
+  const defense = defenseEntering(feed, sideKey, Infinity, 'bottom')
   if (defense.length === 0) return null
   return (
     <section className="halfdefense">

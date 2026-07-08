@@ -2020,10 +2020,12 @@ body {
   color: var(--text-body);
 }
 
-/* The batting side's lineup card for the half, below the feed — the nine
-   batting-order slots, building up subs as innings are revealed (reveal-only,
-   see api/battingorder.js). Shares the defense diamond's writing-line name
-   styling (struck-through/seam-red-in/enter-tag) under its own class names. */
+/* Both teams' lineup cards for the half, rendered outside the seal as the
+   scorebook reference you copy onto the sheet before scoring (see
+   api/battingorder.js's lineupEntering — the lineup as it stands ENTERING the
+   half). Shares the defense diamond's writing-line name styling
+   (struck-through/seam-red-in/enter-tag) under its own class names, and trails
+   each name with a jersey number and fielding position. */
 .lineupcard {
   margin-top: 12px;
   padding-top: 12px;
@@ -2036,6 +2038,24 @@ body {
   font-size: 11px;
   font-weight: var(--w-bold);
   color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+/* Away over home, each a self-contained nine-slot list. Stacked so a long name
+   with its number/position never has to wrap in a cramped column on a phone. */
+.lineupcard__teams {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lineupteam__name {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
@@ -2092,7 +2112,30 @@ body {
   color: var(--accent-negative);
 }
 
+/* Jersey number (clay, like the roster cards) and fielding position (field
+   green, display caps) trailing each name; the entered-inning tag stays
+   seam-red as on the defense diamond. */
+.lineupcard__jersey {
+  margin-left: 5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--clay);
+}
+
+.lineupcard__pos {
+  margin-left: 5px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--field);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
 .lineupcard__enter {
+  margin-left: 5px;
   color: var(--accent-negative);
   font-weight: var(--w-bold);
 }
