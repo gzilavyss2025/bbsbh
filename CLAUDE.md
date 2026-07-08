@@ -269,3 +269,21 @@ stale-while-revalidate for the live-game Refresh, never across games/dates.
   (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.) rather than raw
   hex. Numbers render as mono tabular figures; structural labels are condensed
   uppercase.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as local markdown files under `.scratch/<feature-slug>/`; no
+external PR surface (solo project, no GitHub Issues). See
+`docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`,
+`ready-for-human`, `wontfix`) used as-is. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See
+`docs/agents/domain.md`.
