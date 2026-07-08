@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { loadPlayer } from '../api/loadPlayer.js'
+import { loadPlayer, loadPositionScope } from '../api/loadPlayer.js'
 import { splitDisplayName } from '../api/person.js'
 import { leagueLogoUrl, SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -13,6 +13,7 @@ import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
+import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
@@ -230,6 +231,10 @@ export function PlayerPage({ id, asOf, sportId }) {
           </section>
         ))}
 
+        {data.positionInnings && (
+          <PositionInningsCard pi={data.positionInnings} playerId={bio.id} />
+        )}
+
         {data.timeline && bio.debut && <CareerTimeline entries={data.timeline.entries} />}
 
         {data.progression && bio.debut && (
@@ -366,6 +371,36 @@ function CareerRegister({ register }) {
       />
       {footnote && <p className="hint reg-footnote">{footnote}</p>}
     </>
+  )
+}
+
+// Owns the position-innings scope toggle: the season scope arrives eager in
+// `pi.initial`; the MLB/MiLB career scopes lazy-load once (then cache) on first
+// toggle. The presentational diamond/boxes live in PositionInnings.
+function PositionInningsCard({ pi, playerId }) {
+  const [scope, setScope] = useState(pi.defaultScope)
+  const [cache, setCache] = useState({ [pi.defaultScope]: pi.initial })
+  const [loading, setLoading] = useState(false)
+
+  const onScope = async (next) => {
+    setScope(next)
+    if (cache[next]) return
+    setLoading(true)
+    const res = await loadPositionScope(playerId, next, pi)
+    setCache((c) => ({ ...c, [next]: res }))
+    setLoading(false)
+  }
+
+  const active = cache[scope]
+  return (
+    <PositionInnings
+      options={pi.options}
+      scope={scope}
+      onScope={onScope}
+      loading={loading && !active}
+      fielding={active?.fielding ?? null}
+      pitching={active?.pitching ?? null}
+    />
   )
 }
 

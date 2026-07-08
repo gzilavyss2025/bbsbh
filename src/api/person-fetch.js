@@ -92,6 +92,73 @@ export async function fetchMilbByDateRange(personId, group, season, startDate, e
   return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
 }
 
+// ---------------------------------------------------------------------------
+// Position innings — fielding innings per position (the "where he's played"
+// diamond) and starter-vs-reliever IP. Both are aggregates, not tonight's line,
+// so — like the vs-L/R splits — they're spoiler-free and NOT date-cut: a
+// season scope is the whole season, a career scope the whole career. `season`
+// omitted => career.
+// ---------------------------------------------------------------------------
+
+// Fielding innings by position for one level. `stats=season` (with `season`) or
+// `stats=career` (without) both break down per position and carry the position
+// abbreviation (unlike byDateRange, which drops it). Degrades to [].
+export async function fetchFielding(personId, { season, sportId = 1 } = {}) {
+  if (!personId) return []
+  const params = season
+    ? ['stats=season', 'group=fielding', `season=${season}`]
+    : ['stats=career', 'group=fielding']
+  if (sportId && sportId !== 1) params.push(`sportId=${sportId}`)
+  try {
+    const data = await getJson(`/api/v1/people/${personId}/stats?${params.join('&')}`)
+    return (data.stats?.[0]?.splits ?? []).map((s) => ({ ...s, sport: s.sport ?? { id: sportId } }))
+  } catch {
+    return []
+  }
+}
+
+// Career fielding across every MiLB level, fanned out like fetchMilbYearByYear —
+// one request per level (the API takes a single sportId). The shaper sums a
+// position's innings across the levels. Degrades per level.
+export async function fetchMilbFielding(personId) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) => fetchFielding(personId, { sportId: lvl.sportId })),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
+// Innings pitched as a starter vs. reliever for one (season, level). statSplits
+// is season-scoped; a mid-season trade WITHIN the level emits per-team rows plus
+// a team-less synthetic aggregate (verified: Rich Hill 2021 SP = NYM + TB + a
+// team-less sum of the two), so the shaper dedupes per code like levelSeasonStat.
+export async function fetchStarterReliever(personId, { season, sportId = 1 } = {}) {
+  if (!personId) return []
+  const params = ['stats=statSplits', 'group=pitching', 'sitCodes=sp,rp']
+  if (season) params.push(`season=${season}`)
+  if (sportId && sportId !== 1) params.push(`sportId=${sportId}`)
+  try {
+    const data = await getJson(`/api/v1/people/${personId}/stats?${params.join('&')}`)
+    return data.stats?.[0]?.splits ?? []
+  } catch {
+    return []
+  }
+}
+
+// Career SP/RP: fan out one statSplits call per (season, sportId) stint the
+// player pitched (statSplits has no career mode — the no-season call returns
+// only the current year), tagging each result with its stint so the shaper can
+// dedupe WITHIN a stint before summing ACROSS stints. Parallel + lazy (only run
+// when the user toggles to a career scope).
+export async function fetchStarterRelieverStints(personId, stints) {
+  const results = await Promise.allSettled(
+    (stints ?? []).map((st) => fetchStarterReliever(personId, st)),
+  )
+  return results.map((r, i) => ({
+    stint: stints[i],
+    splits: r.status === 'fulfilled' ? r.value : [],
+  }))
+}
+
 // Team abbreviations for a set of ids, one batched request — used to label a
 // player's year-by-year row(s) with the club(s) they played for that season
 // (those stat splits carry only a team id/name, never an abbreviation). The

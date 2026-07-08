@@ -14,6 +14,10 @@ import {
   fetchTeamLogoTint,
   findFirstStart,
   findFirstStrikeoutBatter,
+  fetchFielding,
+  fetchMilbFielding,
+  fetchStarterReliever,
+  fetchStarterRelieverStints,
 } from './person-fetch.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
@@ -27,6 +31,10 @@ import {
   careerTimelineView,
   dropRehabStints,
   positionPlayerPastNote,
+  fieldingView,
+  starterRelieverView,
+  starterRelieverCareer,
+  pitchingStints,
   firstsFromGameLog,
   PITCHER_FIRSTS_DEFS,
 } from './person.js'
@@ -62,6 +70,30 @@ async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate,
   }
   const milbSplits = await fetchMilbByDateRange(id, group, season, startDate, endDate)
   return aggregateSplits(milbSplits, group)
+}
+
+// Fetch the position-innings data for one CAREER scope ('mlb' | 'milb') — the
+// 'season' scope is already eager in loadPlayer's positionInnings.initial. Lazy:
+// PlayerPage calls this only when the user toggles into a career scope. Fielding
+// is one call for MLB / a per-level fan-out for MiLB; SP/RP fans out one call
+// per (season, level) stint the pitcher appeared in.
+export async function loadPositionScope(id, scope, { showFielding, showPitching, pitchStints }) {
+  const isMilb = scope === 'milb'
+  const [fieldSplits, stintSplits] = await Promise.all([
+    showFielding
+      ? isMilb ? fetchMilbFielding(id) : fetchFielding(id, { sportId: 1 })
+      : Promise.resolve([]),
+    showPitching
+      ? fetchStarterRelieverStints(
+          id,
+          (pitchStints ?? []).filter((s) => (isMilb ? s.sportId !== 1 : s.sportId === 1)),
+        )
+      : Promise.resolve([]),
+  ])
+  return {
+    fielding: showFielding ? fieldingView(fieldSplits) : null,
+    pitching: showPitching ? starterRelieverCareer(stintSplits) : null,
+  }
 }
 
 // Assemble the full player view — bio + one stat block (two for a two-way
@@ -209,6 +241,47 @@ export async function loadPlayer(id, asOf) {
     }
   }
 
+  // Position innings — the fielding diamond (position players) or the
+  // starter/reliever IP pair (pitchers + two-way). Season scope is eager; the
+  // MLB/MiLB career scopes lazy-load on toggle (see loadPositionScope). A
+  // player with no current-season data (a retired/FA vet like Rich Hill)
+  // defaults to his first career scope, eagerly loaded so the card isn't empty.
+  const showFielding = !bio.isPitcher && !bio.twoWay
+  const showPitching = bio.isPitcher || bio.twoWay
+  let positionInnings = null
+  if (showFielding || showPitching) {
+    const pitchResult = results.find((r) => r.group === 'pitching')
+    const pitchStints = showPitching
+      ? pitchingStints([...(pitchResult?.mlbYbySplits ?? []), ...(pitchResult?.milbYbySplits ?? [])])
+      : []
+    const hasMilb = showFielding
+      ? (primaryResult?.milbYbySplits?.length ?? 0) > 0
+      : pitchStints.some((s) => s.sportId !== 1)
+    const scopeArgs = { showFielding, showPitching, pitchStints }
+    const [fieldSeasonSplits, srSeasonSplits] = await Promise.all([
+      showFielding ? fetchFielding(id, { season, sportId: liveSportId }) : Promise.resolve([]),
+      showPitching ? fetchStarterReliever(id, { season, sportId: liveSportId }) : Promise.resolve([]),
+    ])
+    const seasonScope = {
+      fielding: showFielding ? fieldingView(fieldSeasonSplits) : null,
+      pitching: showPitching ? starterRelieverView(srSeasonSplits) : null,
+    }
+    const seasonHasData = Boolean(seasonScope.fielding || seasonScope.pitching)
+    const options = []
+    if (seasonHasData) options.push({ key: 'season', label: 'Season' })
+    if (bio.debut) options.push({ key: 'mlb', label: 'MLB career' })
+    if (hasMilb) options.push({ key: 'milb', label: 'MiLB career' })
+    const defaultScope = seasonHasData ? 'season' : options[0]?.key ?? null
+    const initial = defaultScope === 'season'
+      ? seasonScope
+      : defaultScope
+        ? await loadPositionScope(id, defaultScope, scopeArgs)
+        : null
+    if (options.length && initial && (initial.fielding || initial.pitching)) {
+      positionInnings = { options, defaultScope, initial, ...scopeArgs }
+    }
+  }
+
   // All-Star roster membership (MLB only), one roster lookup per distinct year
   // that appears in the year-by-year table plus the real current year. The
   // banner is a "how's he doing right now" badge, so it always checks the real
@@ -317,7 +390,7 @@ export async function loadPlayer(id, asOf) {
   return {
     bio, blocks, season, asOf, sportId: liveSportId,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
-    conversionNote,
+    conversionNote, positionInnings,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }

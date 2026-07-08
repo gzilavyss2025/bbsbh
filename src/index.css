@@ -4523,7 +4523,6 @@ body {
 .reg-climb__note {
   font-family: var(--font-body);
   font-style: italic;
-  text-transform: none;
   color: var(--graphite-soft);
 }
 /* Split totals — the MLB footer inked, the MiLB footer penciled, so neither
@@ -4544,6 +4543,184 @@ body {
   font-size: 12px;
   font-style: italic;
   color: var(--graphite);
+}
+
+/* ---------------------------------------------------------------- posinn
+   "Innings by position" — career/season workload by fielding spot, drawn on
+   a small diamond that echoes .defdiamond's SPOTS layout, plus a starter/
+   reliever IP pair for pitchers. Purely presentational: PositionInnings.jsx
+   owns no state. */
+
+.posinn__scope {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.posinn__scopebtn {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--inset-cell);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.posinn__scopebtn:active {
+  transform: scale(0.96);
+}
+.posinn__scopebtn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+.posinn__scopebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.posinn__loading {
+  padding: 24px 0;
+  text-align: center;
+  color: var(--graphite-soft);
+  font-family: var(--font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+
+.posinn__diamond {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 10px 8px;
+}
+
+.posinn__field {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.posinn__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.posinn__spot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.posinn__spot--mound {
+  z-index: 1;
+}
+
+.posinn__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 40px;
+  padding: 3px 5px;
+  border-radius: var(--radius-xs);
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+}
+
+.posinn__box--played {
+  background: var(--clay-soft);
+  border-color: var(--accent-negative);
+}
+
+.posinn__box--empty {
+  background: var(--bg-page);
+  border-color: var(--border-hairline);
+  opacity: 0.7;
+}
+
+.posinn__pos {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.posinn__box--played .posinn__pos {
+  color: var(--clay-deep);
+}
+
+.posinn__innings {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.posinn__box--played .posinn__innings {
+  color: var(--clay-deep);
+}
+
+.posinn__box--empty .posinn__innings {
+  color: var(--graphite-soft);
+}
+
+/* The DH bats but never takes the field — one line under the diamond,
+   mirroring .defdiamond__dh. */
+.posinn__dh {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  font-size: 12px;
+}
+
+.posinn__dhpos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.posinn__dhvalue {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
+}
+
+/* Starter/reliever IP — two .stat tiles side by side. */
+.posinn__pitchgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.posinn__pitchbox .stat__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- pitch arsenal: unique pitch types + average velocity ---- */
