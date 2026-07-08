@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { loadPlayer } from '../api/loadPlayer.js'
 import { splitDisplayName } from '../api/person.js'
-import { leagueLogoUrl } from '../lib/teams.js'
+import { leagueLogoUrl, SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -56,6 +57,10 @@ export function PlayerPage({ id, asOf, sportId }) {
     ? bio.throws ? `Throws ${bio.throws}` : ''
     : [bio.bats && `Bats ${bio.bats}`, bio.throws && `Throws ${bio.throws}`].filter(Boolean).join(' / ')
   const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
+  // A debuted player currently in the minors (a demotion or an aging lifer's
+  // last stop) has current-season tiles at his MiLB level — label it so a .310
+  // AAA line isn't mistaken for a major-league one.
+  const liveLevel = bio.debut && data.sportId !== 1 ? SPORT_LABEL[data.sportId] ?? '' : ''
   const { first: firstName, last: lastName } = splitDisplayName(bio.fullName)
 
   return (
@@ -151,12 +156,18 @@ export function PlayerPage({ id, asOf, sportId }) {
           <Fact label="Draft" value={draftLabel(bio.draft)} />
         </div>
 
+        {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
+
         {blocks.map((block) => (
           <section key={block.group}>
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
             <SectionTitle title="Current season" note={
-              block.group === 'pitching' && block.role ? `${roleWord(block.role)} · ${enteringLabel}` : enteringLabel
+              [
+                liveLevel,
+                block.group === 'pitching' && block.role ? roleWord(block.role) : null,
+                enteringLabel,
+              ].filter(Boolean).join(' · ')
             } />
             <div className="player__statgrid">
               {block.tiles.map((t) => (
@@ -205,36 +216,7 @@ export function PlayerPage({ id, asOf, sportId }) {
               </>
             )}
 
-            {block.yearByYear && (
-              <>
-                <SectionTitle title="Year by year" />
-                <Ledger
-                  leftCols={2}
-                  head={['Year', 'Team', ...block.yearByYear.columns]}
-                  rows={block.yearByYear.rows.map((r) => ({
-                    key: r.year,
-                    allStar: r.allStar,
-                    cells: [
-                      <>
-                        {r.year}
-                        {r.allStar && (
-                          <span className="ledger__allstar" title="All Star">★</span>
-                        )}
-                      </>,
-                      r.team || DASH,
-                      ...r.cells,
-                    ],
-                    subRows: r.levels?.map((l) => ({
-                      key: `${r.year}-${l.sportId}`,
-                      label: `${l.label}${l.team ? ' · ' + l.team : ''}`,
-                      cells: l.cells,
-                    })) ?? null,
-                  }))}
-                  total={block.yearByYear.total}
-                  totalLabel="Career"
-                />
-              </>
-            )}
+            {block.register && <CareerRegister register={block.register} />}
 
             {block.splits && (
               <>
@@ -255,22 +237,6 @@ export function PlayerPage({ id, asOf, sportId }) {
             levels={data.progression.levels}
             debutYear={Number(bio.debut.slice(0, 4))}
           />
-        )}
-
-        {data.milbStats && (
-          <section>
-            <SectionTitle title="Minor league stats" note="through his call-up" />
-            <Ledger
-              leftCols={3}
-              head={['Year', 'Lvl', 'Team', ...data.milbStats.columns]}
-              rows={data.milbStats.rows.map((r) => ({
-                key: r.key,
-                cells: [r.year, r.label, r.team || DASH, ...r.cells],
-              }))}
-              total={data.milbStats.total}
-              totalLabel="MiLB"
-            />
-          </section>
         )}
 
         {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
@@ -332,6 +298,74 @@ function GameLink({ path, className = '', children }) {
     >
       {children}
     </button>
+  )
+}
+
+// The unified MLB + MiLB career table (see api/person.js careerRegisterView).
+// MLB rows are inked, MiLB rows penciled with a level pill; a debuted player's
+// pre-debut climb folds into one tappable row that expands to its seasons; the
+// footer carries separate MLB and MiLB totals, and small post-debut stints ride
+// a neutral caption beneath.
+function CareerRegister({ register }) {
+  const [climbOpen, setClimbOpen] = useState(false)
+  const { columns, rows, climb, totals, footnote } = register
+
+  const ledgerRows = rows.map((r) => ({
+    key: r.key,
+    className: r.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
+    allStar: r.allStar,
+    cells: [
+      <>
+        {r.year}
+        {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
+        {r.pill && <span className="reg-pill">{r.pill}</span>}
+      </>,
+      r.team || DASH,
+      ...r.cells,
+    ],
+  }))
+
+  if (climb) {
+    ledgerRows.push({
+      key: 'climb',
+      className: 'reg-milb reg-climb',
+      onClick: () => setClimbOpen((v) => !v),
+      cells: [
+        <span className="reg-climb__yr" key="yr">
+          <span className="reg-climb__caret" aria-hidden="true">{climbOpen ? '▾' : '▸'}</span>
+          {climb.yearText}
+        </span>,
+        <span className="reg-climb__note" key="note">
+          Minors · {climb.subSeasons.length} {climb.subSeasons.length === 1 ? 'season' : 'seasons'}
+        </span>,
+        ...climb.cells,
+      ],
+      subRows: climbOpen
+        ? climb.subSeasons.map((s) => ({
+            key: s.key,
+            className: 'reg-milb',
+            label: `${s.year} · ${s.level}${s.team ? ' · ' + s.team : ''}`,
+            cells: s.cells,
+          }))
+        : null,
+    })
+  }
+
+  return (
+    <>
+      <SectionTitle title="Career" />
+      <Ledger
+        leftCols={2}
+        head={['Year', 'Team', ...columns]}
+        rows={ledgerRows}
+        totals={totals.map((t) => ({
+          label: t.label,
+          cells: t.cells,
+          className: t.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
+        }))}
+      />
+      {footnote && <p className="hint reg-footnote">{footnote}</p>}
+    </>
   )
 }
 

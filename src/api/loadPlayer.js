@@ -24,9 +24,9 @@ import {
   pitcherRole,
   buildBlock,
   levelProgressionView,
-  milbStatsView,
   careerTimelineView,
   dropRehabStints,
+  positionPlayerPastNote,
   firstsFromGameLog,
   PITCHER_FIRSTS_DEFS,
 } from './person.js'
@@ -98,26 +98,26 @@ export async function loadPlayer(id, asOf) {
   // "games at that level").
   const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
 
-  const [results, debutSplits, prospects, milbProgressionSplits] = await Promise.all([
+  const [results, debutSplits, prospects, convHittingMilb] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
-        const [seasonSplits, careerSplits, lrSplits, gameLogSplits, yearByYearSplits, arsenalSplits] =
+        const [seasonSplits, careerSplits, lrSplits, gameLogSplits, mlbYbySplits, milbYbySplits, arsenalSplits] =
           await Promise.all([
             // Current-activity sections track his LIVE level...
             fetchPersonStats(id, { type: 'byDateRange', group, season, startDate, endDate, sportId: liveSportId }),
-            // ...but the career total and the year-by-year table are pinned to
-            // `careerSportId` (MLB for anyone who's debuted), so a now-in-the-
-            // minors big leaguer's major-league résumé fills the primary block.
+            // ...but the career total is pinned to `careerSportId` (MLB for
+            // anyone who's debuted), so a now-in-the-minors big leaguer's
+            // major-league résumé foots the register's MLB total.
             fetchPersonStats(id, { type: 'career', group, sportId: careerSportId }),
             fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId: liveSportId }),
             fetchPersonStats(id, { type: 'gameLog', group, season, sportId: liveSportId }),
-            // A pre-debut MiLB player's year-by-year table nests every level he's
-            // played (see yearByYearView / levelProgressionView below); a debuted
-            // player's is his MLB seasons (careerSportId), regardless of where he
-            // suits up today.
+            // The unified career register merges the MLB year-by-year (debuted
+            // players only — pre-debut players have no MLB line) with the
+            // multi-level MiLB history below. See careerRegisterView.
             bio.debut
-              ? fetchPersonStats(id, { type: 'yearByYear', group, sportId: careerSportId })
-              : fetchMilbYearByYear(id, group),
+              ? fetchPersonStats(id, { type: 'yearByYear', group, sportId: 1 })
+              : Promise.resolve([]),
+            fetchMilbYearByYear(id, group),
             group === 'pitching'
               ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId: liveSportId })
               : Promise.resolve([]),
@@ -130,10 +130,10 @@ export async function loadPlayer(id, asOf) {
         const role = group === 'pitching' ? pitcherRole(tileStat) : null
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
-          gameLogSplits, yearByYearSplits, arsenalSplits, cutoff, currentSeason: season,
-          sportId: careerSportId, tileStat,
+          gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
+          currentSeason: season, currentSportId: liveSportId, debutYear, tileStat,
         })
-        return { group, yearByYearSplits, block }
+        return { group, mlbYbySplits, milbYbySplits, block }
       }),
     ),
     // The MLB debut is always sportId 1; its box-score game is the first row of
@@ -147,54 +147,43 @@ export async function loadPlayer(id, asOf) {
     // Session-memoized after the first call anywhere in the app — cheap even
     // though every player page asks for it.
     fetchTopProspects(),
-    // A debuted player's own yearByYearSplits fetch above is single-sportId
-    // (see the comment on that fetch) so it can't feed the progression card —
-    // fetch the multi-level MiLB history separately, just for the primary
-    // group, so the card can still show his climb through the minors.
-    bio.debut ? fetchMilbYearByYear(id, primaryGroup) : Promise.resolve(null),
+    // Conversion check: a debuted pitcher's minor-league HITTING history reveals
+    // a position-player past his pitching-only register can't show (Kenley
+    // Jansen caught four years before he ever pitched). Only single-group
+    // pitchers need it — a two-way player already fetches both groups' MiLB.
+    bio.debut && bio.isPitcher && !bio.twoWay
+      ? fetchMilbYearByYear(id, 'hitting')
+      : Promise.resolve(null),
   ])
   const blocks = results.map((r) => r.block)
+  const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)
   // The player's rank on his own org's farm-system list — shown as a second
   // pill for anyone who's on their org's list but not the overall Top 100.
   const orgProspectRank = orgProspectRankById(prospects.orgProspects, bio.id)
 
-  // "Path to the Majors" card. Pre-debut, the multi-level yearByYear splits
-  // already fetched above cover it (no extra request); debuted, it's built
-  // from the milbProgressionSplits fetched separately above, since that
-  // player's own yearByYearSplits is single-sportId. Either way
-  // levelProgressionView degrades to null if no MiLB level was ever reached.
+  // "Path to the Majors" card, built from the primary group's multi-level MiLB
+  // history (already fetched per block above — no extra request). Strip
+  // rehab-assignment noise (see dropRehabStints) so an established big leaguer's
+  // stray rehab innings don't relight a MiLB level. Degrades to null if no MiLB
+  // level was ever reached (an int'l signing / NPB veteran who went straight to
+  // the majors).
   const primaryResult = results.find((r) => r.group === primaryGroup) ?? results[0]
-  // Minor-league history, feeding both the "Path to the Majors" card and the
-  // minor-league stat table below it. A debuted player's own year-by-year
-  // fetch is single-sportId (MLB), so his MiLB climb comes from the separate
-  // multi-level fetch; a pre-debut player's block fetch is already multi-level.
-  // Either way, strip rehab-assignment noise (see dropRehabStints) so an
-  // established big leaguer's stray rehab innings don't relight a MiLB level.
-  const milbSplits = dropRehabStints(
-    bio.debut ? milbProgressionSplits : primaryResult?.yearByYearSplits,
-    debutYear,
-  )
+  const milbSplits = dropRehabStints(primaryResult?.milbYbySplits, debutYear)
   const progression = primaryResult
     ? levelProgressionView(milbSplits, primaryResult.group, liveSportId)
     : null
-  // A dedicated minor-league year-by-year table, shown below the card once a
-  // player has reached the majors (a pre-debut player's block already carries
-  // his MiLB year-by-year as its primary table, so no duplicate).
-  const milbStats = bio.debut ? milbStatsView(milbSplits, primaryGroup) : null
 
-  // Career timeline (the team-logo strip above the card). Fed the player's
-  // FULL year-by-year — every MiLB level plus MLB, NOT the rehab-trimmed
+  // Career timeline (the team-logo strip above the card). Fed the player's FULL
+  // year-by-year — every MiLB level plus MLB, NOT the rehab-trimmed
   // `milbSplits` — because a genuine post-debut option-down season is real team
   // history worth showing; careerTimelineView does its own finer rehab filter
-  // (given debutYear, it keeps a post-debut MiLB season only when the minors
-  // were the primary home that year, so stray rehab games don't append a
-  // misleading season to an old farm club). For a pre-debut player the primary
-  // block's splits already span every level; a debuted player adds his separate
-  // MLB year-by-year to the multi-level MiLB fetch.
-  const timelineSplits = bio.debut
-    ? [...(primaryResult?.yearByYearSplits ?? []), ...(milbProgressionSplits ?? [])]
-    : (primaryResult?.yearByYearSplits ?? [])
+  // (keeping a post-debut MiLB stint only when it clears the rehab cap, the same
+  // test the register uses, so the two agree).
+  const timelineSplits = [
+    ...(primaryResult?.mlbYbySplits ?? []),
+    ...(primaryResult?.milbYbySplits ?? []),
+  ]
   const timeline = careerTimelineView(timelineSplits, primaryGroup, debutYear)
   if (timeline) {
     // Resolve each stop's logo tint and hover label. Entries can repeat a club
@@ -227,15 +216,17 @@ export async function loadPlayer(id, asOf) {
   // so viewing an old game never shows a stale "20XX All-Star" banner. The
   // year-by-year table instead marks every season the player actually made an
   // All-Star team, however many that is. Spoiler-safe.
-  const yearByYearYears = new Set()
-  for (const b of blocks) for (const r of b.yearByYear?.rows ?? []) yearByYearYears.add(Number(r.year))
-  const allStarYears = careerSportId === 1 ? new Set([currentYear, ...yearByYearYears]) : new Set()
+  const registerYears = new Set()
+  for (const b of blocks) {
+    for (const r of b.register?.rows ?? []) if (r.tier === 'mlb') registerYears.add(Number(r.year))
+  }
+  const allStarYears = careerSportId === 1 ? new Set([currentYear, ...registerYears]) : new Set()
   const allStarByYear = new Map(
     await Promise.all([...allStarYears].map(async (yr) => [yr, await fetchAllStarRosterIds(yr)])),
   )
   for (const b of blocks) {
-    for (const r of b.yearByYear?.rows ?? []) {
-      r.allStar = allStarByYear.get(Number(r.year))?.has(bio.id) ?? false
+    for (const r of b.register?.rows ?? []) {
+      if (r.tier === 'mlb') r.allStar = allStarByYear.get(Number(r.year))?.has(bio.id) ?? false
     }
   }
   const isAllStar = allStarByYear.get(currentYear)?.has(bio.id) ?? false
@@ -246,21 +237,25 @@ export async function loadPlayer(id, asOf) {
   // stat splits carry only a team id/name, never an abbreviation.
   const teamIdSet = new Set()
   for (const b of blocks) {
-    for (const r of b.yearByYear?.rows ?? []) {
-      for (const id of r.teamIds) teamIdSet.add(id)
-      for (const lvl of r.levels ?? []) for (const tid of lvl.teamIds) teamIdSet.add(tid)
+    const reg = b.register
+    if (!reg) continue
+    for (const r of reg.rows) for (const id of r.teamIds) teamIdSet.add(id)
+    if (reg.climb) {
+      for (const id of reg.climb.teamIds) teamIdSet.add(id)
+      for (const s of reg.climb.subSeasons) for (const id of s.teamIds) teamIdSet.add(id)
     }
   }
-  for (const r of milbStats?.rows ?? []) for (const id of r.teamIds) teamIdSet.add(id)
   const teamAbbrevs = await fetchTeamAbbrevs([...teamIdSet])
   const abbrevs = (ids) => ids.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
   for (const b of blocks) {
-    for (const r of b.yearByYear?.rows ?? []) {
-      r.team = abbrevs(r.teamIds)
-      for (const lvl of r.levels ?? []) lvl.team = abbrevs(lvl.teamIds)
+    const reg = b.register
+    if (!reg) continue
+    for (const r of reg.rows) r.team = abbrevs(r.teamIds)
+    if (reg.climb) {
+      reg.climb.team = abbrevs(reg.climb.teamIds)
+      for (const s of reg.climb.subSeasons) s.team = abbrevs(s.teamIds)
     }
   }
-  for (const r of milbStats?.rows ?? []) r.team = abbrevs(r.teamIds)
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null
 
@@ -321,7 +316,8 @@ export async function loadPlayer(id, asOf) {
 
   return {
     bio, blocks, season, asOf, sportId: liveSportId,
-    isAllStar, currentYear, firsts, progression, milbStats, timeline, prospectRank, orgProspectRank,
+    isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
+    conversionNote,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }
