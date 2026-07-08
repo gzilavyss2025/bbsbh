@@ -65,101 +65,54 @@ one-off checks.
 
 This is the whole point of the app. **Do not let it drift.** The rule: a
 score-revealing value must never exist in the DOM until the user reveals it —
-there is no fetched-then-hidden node to leak.
+there is no fetched-then-hidden node to leak. `CONTEXT.md` defines the
+vocabulary this section relies on (Seal, SealBox, reveal-only module,
+spoiler-free selector, revealedThrough, half-inning, regulation/extra
+innings, Pitchers table, primary position); `docs/adr/` records *why* each
+enforcement mechanism is shaped the way it is — read the linked ADR before
+"simplifying" any of these.
 
-It is enforced structurally by two conventions:
+Enforced structurally by two conventions:
 
-1. **Score-revealing selectors are isolated in their own modules** and are
-   "reveal-only": `src/api/linescore.js` (per-inning R/H/E/LOB, full-game totals),
-   `src/api/derive.js` (pitches/whiffs/first-pitch strikes + Statcast
-   superlatives computed from play-by-play), `src/api/defense.js`
-   (`revealDefense` — the fielding team's live alignment: starting nine plus
-   every defensive sub/switch *through a given half*; the sub timing is
-   spoiler-adjacent, so it's gated to the half being revealed), and
-   `src/api/battingorder.js` (`revealBattingOrder` — the batting side's lineup
-   card: starting nine plus every pinch-hitter/pinch-runner/double-switch sub
-   *through a given half*, keyed by batting-order slot rather than fielding
-   position). These must only be *called from inside* a `SealBox`'s reveal
-   render function. Never call them at render top-level or in a `useMemo` that
-   runs before reveal. Contrast `src/api/select.js`, which holds only
-   spoiler-**free** selectors (lineups, umpires, venue, rosters,
-   `selectPrePitchChanges`) and touches no runs/hits/errors.
-   `selectPrePitchChanges` is the one deliberate exception to "reveal-only
-   modules only render inside a SealBox": subs/pitching changes/pinch-hitters
-   logged before a half's own first pitch are the same thing a broadcast
-   announces before the half starts, so `InningViewer` renders them above the
-   seal — but only for the half that is the user's own next one to reveal
-   (`halfIndex === revealedThrough + 1`); a half further out stays fully sealed.
+1. **Reveal-only modules**, callable only from inside a `SealBox`'s reveal
+   render function — never at render top-level or in an eager `useMemo`
+   (ADR-0001): `src/api/linescore.js` (per-inning R/H/E/LOB, full-game
+   totals), `src/api/derive.js` (pitches/whiffs/first-pitch strikes + Statcast
+   superlatives), `src/api/defense.js` (`revealDefense`), and
+   `src/api/battingorder.js` (`revealBattingOrder`). Contrast
+   `src/api/select.js`, spoiler-**free** (lineups, umpires, venue, rosters,
+   `selectPrePitchChanges`) — its one deliberate exception is
+   `selectPrePitchChanges`, rendered above the seal but only for the half the
+   user is about to reveal next (ADR-0003).
 
-2. **`src/components/SealBox.jsx`** takes `children` as a *render function*,
-   invoked only in the revealed branch — so the sealed value is computed lazily
-   and nothing puts it in the DOM beforehand. Reveal is one-directional (a stray
-   double-tap can't flash-and-rehide). Re-sealing on inning navigation works by
-   the parent remounting with `key={inning}` (see `InningViewer.jsx`), which
-   resets every `SealBox` to sealed. There is no "reveal the whole game" bypass —
-   reveal is strictly per-half-inning, gated by `revealedThrough`.
+2. **`src/components/SealBox.jsx`** takes `children` as a render function,
+   invoked only once revealed; reveal is one-directional, and re-sealing on
+   inning navigation works by the parent remounting with `key={inning}` (see
+   `InningViewer.jsx`) (ADR-0002).
 
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (see
-`vite.config.js`) so a stale, spoiler-revealing score is never served from cache.
+`vite.config.js`) so a stale, spoiler-revealing score is never served from
+cache (ADR-0004).
 
-Four conventions guard the live-refresh + reveal seam (all have bitten before):
-- **Roster-card membership and position labels key on PRIMARY position, never
-  the in-game box position.** A bench catcher mopping up a sealed blowout gets a
-  box position of 'P' (subs get 'PH'/'PR'); classifying or labeling by that
-  moves/renames his roster row the moment the sealed substitution happens — a
-  spoiler through the card's shape. See `isPitcherByTrade` in `select.js`. Only
-  the reveal-gated strike-through may change with game events.
-- **Any manual (`useRef`) cache of a reveal-only derivation MUST key on the
-  `feed` object and rebuild when it changes.** `computeDerivedByInning` is cached
-  in `InningViewer` keyed on `feed`; caching it across feeds froze the live
-  inning's pitch/whiff stats after a Refresh.
-- **Per-inning `errors` is a *fielding* stat.** The MLB linescore stores a team's
-  per-inning `errors` under that team's node but for the half it *fields* (home
-  fields the top, away the bottom) — the opposite half from its `runs`/`hits`.
-  Read E from the fielding side and gate it on the fielding half, or you both
-  show the wrong number and leak a still-sealed half's errors.
-- **A boxscore player's `position` field is his CURRENT/final position, not
-  where he started.** For a starter who changed fielding positions mid-game,
-  `box.position` silently drifts as the game goes on — verified against
-  gamePk 823035 (2026-07-07 MIL@STL g2), where a starter's `box.position` read
-  out his *third* position of the night, colliding with and erasing another
-  starter from `revealDefense`'s starting-lineup seed. `box.allPositions[]`
-  lists a player's positions in the order he actually played them, so its
-  first entry is the true starting spot; `selectLineup` uses that, falling
-  back to `box.position` only for thin MiLB feeds that omit `allPositions`.
+Three implementation gotchas have each caused a real spoiler-safety bug
+before — now recorded as ADRs so a future refactor doesn't quietly
+reintroduce them: roster-card membership/position labels (ADR-0005),
+per-inning `errors` being a *fielding* stat (ADR-0006), and manual
+(`useRef`) caches of reveal-only derivations needing to key on the `feed`
+object (ADR-0007).
 
-**The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
-`PitchersSection` in `InningViewer.jsx`) shows the running line of every pitcher
-who has appeared, one block per team. A pitcher's line (IP/R/ER/H…) is
-score-revealing, so although it is *not* wrapped in a `SealBox` it is gated by the
-same reveal high-water mark as the seals: `InningViewer` keeps `revealedThrough`
-(a `halfIndex` — the furthest half-inning uncovered; revealing a later inning
-auto-reveals everything before it), and `computePitcherLines` accumulates stats
-*only* from plays at or below that mark. So the table only ever shows innings the
-user has already revealed. A pitcher whose whole outing is revealed uses his exact
-boxscore line; a still-active pitcher mid-outing uses a partial computed from
-revealed plays only (runs/earned-runs attributed via each play's
-`responsiblePitcher`, so inherited runners are charged correctly). The same
-`revealedThrough` mark drives `RollingLine` and each half-inning's `SealBox`
-(`forceRevealed` when its `halfIndex` is at/below the mark). Don't reintroduce a
-separate inning-navigation gate or read the boxscore for a pitcher whose outing
-isn't fully revealed — either would leak the current inning.
+**The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`,
+rendered by `PitchersSection` in `InningViewer.jsx`) is gated by the same
+`revealedThrough` high-water mark as the seals rather than wrapped in a
+`SealBox` — see ADR-0009.
 
-**Extra innings never spoil.** `InningViewer` shows only `regulation` innings
-(`selectRegulationInnings` — 9, or 7 for short games) up front. Each inning past
-regulation unlocks one at a time via `unlocked`, and only once the prior inning's
-bottom is at/below `revealedThrough` — so the navigator and running line never
-hint a game went to extras before the user reveals their way there. The
-`RollingLine` boxscore holds only `regulation` columns, so once extras unlock it
-scrolls that window forward (dropping inning 1 when 10 appears, etc.) while R/H/E
-totals stay cumulative over every revealed inning. `RollingLine` also *is* the
-half-inning navigator: every run cell is a button that jumps to that half (away
-row = tops, home row = bottoms), the current half inked as selected — so
-selecting a half reads like reading a line score, with no separate scrolling chip
-strip. The Back/Next controls above it cover the full unlocked range for the rare
-extras case where the visible window has scrolled a half off. Never derive the visible
-inning count from `selectInningCount` (the *actual* count) directly — that leaks
-the extras.
+**Extra innings never spoil** — `InningViewer` and `RollingLine` show only
+`regulation` innings up front, unlocking extras one at a time as
+`revealedThrough` advances — see ADR-0008. `RollingLine`'s run cells double
+as the half-inning navigator (away row = tops, home row = bottoms, current
+half inked as selected); its Back/Next controls above cover the full
+unlocked range for the rare case where the visible window has scrolled a
+half off.
 
 ## Architecture
 

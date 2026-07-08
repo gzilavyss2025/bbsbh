@@ -1,0 +1,82 @@
+# bbsbh
+
+A spoiler-safe second-screen companion for scoring baseball by hand: it shows
+live game data pulled from the MLB Stats API, but keeps every score-revealing
+fact hidden until the user deliberately reveals it, one half-inning at a time.
+
+## Language
+
+### Spoiler mechanism
+
+**Spoiler rule**:
+The core invariant: a score-revealing value must never exist in the DOM until
+the user has revealed it — there is no fetched-then-hidden node to leak.
+
+**Seal**:
+The hidden state of a score-revealing value before the user has revealed it.
+_Avoid_: hidden, locked
+
+**Reveal**:
+The user's deliberate action of un-sealing one half-inning's score-revealing
+data. One-directional — there is no action that re-seals a half once revealed.
+_Avoid_: unlock, show
+
+**SealBox**:
+The component that renders a seal. Holds its revealable content as a render
+function invoked only once revealed, so the sealed value is never computed or
+placed in the DOM ahead of time.
+
+**Reveal-only module**:
+A module whose exports compute score-revealing values (runs, hits, errors,
+pitch/whiff counts, live defensive alignment, live batting-order subs).
+Callable only from inside a SealBox's reveal render path.
+
+**Spoiler-free selector**:
+A selector safe to call and render before reveal — lineups, umpires, venue,
+rosters, pre-pitch changes. Touches no runs/hits/errors.
+
+**revealedThrough**:
+The high-water mark of how far a user has revealed a given game — the
+furthest half-inning uncovered. Revealing a later half auto-reveals everything
+before it.
+_Avoid_: reveal state, progress
+
+**Pre-pitch change**:
+A substitution, pitching change, or pinch-hitter logged before a
+half-inning's own first pitch — the same information a broadcast would
+announce before the half starts.
+
+### Game structure
+
+**Half-inning**:
+The atomic unit of reveal granularity — a top or bottom of one inning.
+_Avoid_: side, frame
+
+**Regulation innings**:
+The fixed set of innings (9, or 7 for a shortened game) shown to the user up
+front, regardless of how long the actual game ran.
+
+**Extra innings**:
+Innings beyond regulation. They unlock one at a time as the user reveals
+their way there, so the interface never hints a game went to extras in
+advance.
+
+**RollingLine**:
+The boxscore-style component that doubles as the half-inning navigator —
+every run cell is a button that jumps to that half, with cumulative R/H/E
+over every revealed inning.
+
+**Pitchers table**:
+The running line (IP/R/ER/H…) for every pitcher who has appeared, one block
+per team. Gated by revealedThrough rather than sealed as a unit, so an active
+pitcher's line reflects only revealed innings.
+
+**Starting nine**:
+A team's starting lineup, identified by a player's own batting-order slot
+being an exact multiple of 100.
+_Avoid_: lineup (ambiguous with the printed lineup-card screen)
+
+**Primary position**:
+A player's true starting fielding position, independent of any position he's
+moved to since. Determines roster-card membership and position labels.
+_Avoid_: box position, current position
