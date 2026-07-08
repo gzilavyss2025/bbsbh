@@ -225,8 +225,24 @@ export async function fetchLeagueStandings(season, date) {
 // in person.js. Only meaningful at MLB (sportId 1); MiLB team-stat coverage is
 // thin, so callers gate on level and this degrades to []. Returns
 // { hitting: [{teamId, stat}], pitching: [...] }.
+//
+// The payload doesn't depend on which team you're viewing, so it's cached
+// in-memory per season for the session (standings-style data — updates
+// roughly daily as games complete, not worth refetching on every team-page
+// visit). A failed group isn't cached, so the next call retries it instead of
+// pinning the degraded [] for the rest of the session.
+const LEAGUE_TEAM_STATS_TTL_MS = 60 * 60 * 1000
+let leagueTeamStatsCache = null // { season, ts, data }
+
 export async function fetchLeagueTeamStats(season) {
   if (!season) return { hitting: [], pitching: [] }
+  if (
+    leagueTeamStatsCache?.season === season &&
+    Date.now() - leagueTeamStatsCache.ts < LEAGUE_TEAM_STATS_TTL_MS
+  ) {
+    return leagueTeamStatsCache.data
+  }
+  let ok = true
   const one = async (group) => {
     try {
       const data = await getJson(
@@ -237,9 +253,12 @@ export async function fetchLeagueTeamStats(season) {
         stat: s.stat,
       }))
     } catch {
+      ok = false
       return []
     }
   }
   const [hitting, pitching] = await Promise.all([one('hitting'), one('pitching')])
-  return { hitting, pitching }
+  const result = { hitting, pitching }
+  if (ok) leagueTeamStatsCache = { season, ts: Date.now(), data: result }
+  return result
 }
