@@ -159,6 +159,26 @@ export async function fetchStarterRelieverStints(personId, stints) {
   }))
 }
 
+// Current-season fielding across every MiLB level — the season-scope counterpart
+// to fetchMilbFielding, for a player who is currently in the minors and may have
+// moved levels mid-season (e.g. a prospect promoted AA -> AAA). The shaper
+// combines the levels (an MLB player's season stays a single sportId-1 call,
+// matching how resolveCurrentSeasonStat scopes the tiles). Degrades per level.
+export async function fetchMilbFieldingSeason(personId, season) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) => fetchFielding(personId, { season, sportId: lvl.sportId })),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
+// SP/RP for the current season across every MiLB level (same promotion case).
+export async function fetchMilbStarterRelieverSeason(personId, season) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) => fetchStarterReliever(personId, { season, sportId: lvl.sportId })),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
 // Team abbreviations for a set of ids, one batched request — used to label a
 // player's year-by-year row(s) with the club(s) they played for that season
 // (those stat splits carry only a team id/name, never an abbreviation). The

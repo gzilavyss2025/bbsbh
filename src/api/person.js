@@ -272,30 +272,6 @@ export function pitcherTiles(stat, role) {
 }
 
 // ---------------------------------------------------------------------------
-// Career line — one compact mono row
-// ---------------------------------------------------------------------------
-
-export function careerLine(stat, group) {
-  if (!stat) return ''
-  if (group === 'pitching') {
-    return [
-      `${stat.era ?? DASH} ERA`,
-      `${num(stat.wins)}–${num(stat.losses)}`,
-      `${stat.inningsPitched ?? DASH} IP`,
-      `${num(stat.strikeOuts)} K`,
-      `${stat.whip ?? DASH} WHIP`,
-    ].join('  ·  ')
-  }
-  return [
-    `${stat.avg ?? DASH}/${stat.obp ?? DASH}/${stat.slg ?? DASH}`,
-    `${num(stat.homeRuns)} HR`,
-    `${num(stat.rbi)} RBI`,
-    `${num(stat.hits)} H`,
-    `${num(stat.gamesPlayed)} G`,
-  ].join('  ·  ')
-}
-
-// ---------------------------------------------------------------------------
 // vs-L/R splits (full season — the UI labels them so, not "entering today")
 // ---------------------------------------------------------------------------
 
@@ -440,12 +416,11 @@ export function arsenalView(splits) {
 }
 
 // ---------------------------------------------------------------------------
-// Year-by-year — prior seasons as-is; current season uses the "entering today"
-// aggregate (not yearByYear's live one), marked with * by the UI. Newest season
-// first, capped by a career total row (careerStat) rendered in the same columns.
+// Career register support — the shared per-row cells and the season/level
+// aggregation the register builds on (see careerRegisterView below).
 // ---------------------------------------------------------------------------
 
-// One season / career row's cells, in the group's year-by-year columns.
+// One season / career / level row's cells, in the group's register columns.
 function yearByYearCells(st, group) {
   return group === 'pitching'
     ? [`${num(st.wins)}–${num(st.losses)}`, st.era ?? DASH, st.inningsPitched ?? DASH, num(st.strikeOuts), st.whip ?? DASH]
@@ -866,21 +841,35 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
 // The eight defensive spots plus the mound, in the diamond's render order.
 const FIELD_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'P']
 
-// Sum fielding innings per position across raw fielding splits (a career scope
-// fans out across levels, so a position recurs and must be summed via outs). The
-// DH carries no defensive innings (verified: innings 0.0), so it rides a
-// games-only line beneath the diamond instead of a spot on it.
+// Sum fielding innings per position across raw fielding splits. A mid-season
+// trade emits per-team rows PLUS a team-less synthetic sum for a position
+// (verified: Jazz Chisholm's 2024 CF = a team-less 829.1 alongside 815.1 MIA +
+// 14.0 NYY), so per position prefer the team-tagged rows and drop the synthetic
+// — the same guard levelSeasonStat uses. A career / multi-level fan-out carries
+// only team-less rows (one per level), so those still sum across levels. DH
+// carries no defensive innings (verified: innings 0.0), so it rides a games-only
+// line beneath the diamond instead of a spot on it.
 export function fieldingView(splits) {
-  const outsByPos = new Map()
-  let dhGames = 0
+  const byPos = new Map()
   for (const s of splits ?? []) {
     const pos = s.position?.abbreviation
     if (!pos) continue
+    if (!byPos.has(pos)) byPos.set(pos, [])
+    byPos.get(pos).push(s)
+  }
+  const preferTeamRows = (rows) => {
+    const teamRows = rows.filter((r) => r.team?.id)
+    return teamRows.length ? teamRows : rows
+  }
+  const outsByPos = new Map()
+  let dhGames = 0
+  for (const [pos, rows] of byPos) {
+    const use = preferTeamRows(rows)
     if (pos === 'DH') {
-      dhGames += num(s.stat?.gamesPlayed)
+      dhGames = use.reduce((t, r) => t + num(r.stat?.gamesPlayed), 0)
       continue
     }
-    outsByPos.set(pos, (outsByPos.get(pos) ?? 0) + ipToOuts(s.stat?.innings))
+    outsByPos.set(pos, use.reduce((t, r) => t + ipToOuts(r.stat?.innings), 0))
   }
   const positions = FIELD_POSITIONS.filter((pos) => outsByPos.has(pos)).map((pos) => {
     const outs = outsByPos.get(pos)

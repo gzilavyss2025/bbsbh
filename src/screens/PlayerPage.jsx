@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { loadPlayer, loadPositionScope } from '../api/loadPlayer.js'
 import { splitDisplayName } from '../api/person.js'
 import { leagueLogoUrl, SPORT_LABEL } from '../lib/teams.js'
@@ -380,24 +380,28 @@ function CareerRegister({ register }) {
 function PositionInningsCard({ pi, playerId }) {
   const [scope, setScope] = useState(pi.defaultScope)
   const [cache, setCache] = useState({ [pi.defaultScope]: pi.initial })
-  const [loading, setLoading] = useState(false)
+  const inFlight = useRef(new Set())
 
-  const onScope = async (next) => {
+  const onScope = (next) => {
     setScope(next)
-    if (cache[next]) return
-    setLoading(true)
-    const res = await loadPositionScope(playerId, next, pi)
-    setCache((c) => ({ ...c, [next]: res }))
-    setLoading(false)
+    if (cache[next] || inFlight.current.has(next)) return
+    inFlight.current.add(next)
+    loadPositionScope(playerId, next, pi).then((res) => {
+      inFlight.current.delete(next)
+      setCache((c) => ({ ...c, [next]: res }))
+    })
   }
 
+  // A scope with no cached data yet is mid-fetch — derive loading from that
+  // (rather than a flag) so switching between two uncached scopes never flashes
+  // an empty body for whichever one is showing.
   const active = cache[scope]
   return (
     <PositionInnings
       options={pi.options}
       scope={scope}
       onScope={onScope}
-      loading={loading && !active}
+      loading={!active}
       fielding={active?.fielding ?? null}
       pitching={active?.pitching ?? null}
     />

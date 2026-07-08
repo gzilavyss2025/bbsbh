@@ -18,6 +18,8 @@ import {
   fetchMilbFielding,
   fetchStarterReliever,
   fetchStarterRelieverStints,
+  fetchMilbFieldingSeason,
+  fetchMilbStarterRelieverSeason,
 } from './person-fetch.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
@@ -258,9 +260,19 @@ export async function loadPlayer(id, asOf) {
       ? (primaryResult?.milbYbySplits?.length ?? 0) > 0
       : pitchStints.some((s) => s.sportId !== 1)
     const scopeArgs = { showFielding, showPitching, pitchStints }
+    // Season scope: an MLB player is a single sportId-1 call (his season is his
+    // major-league season — earlier MiLB rehab lives in the career scopes,
+    // matching how resolveCurrentSeasonStat scopes the tiles). A player
+    // currently in the minors fans out every MiLB level, so a mid-season
+    // promotion (AA -> AAA) isn't undercounted.
+    const inMajors = liveSportId === 1
     const [fieldSeasonSplits, srSeasonSplits] = await Promise.all([
-      showFielding ? fetchFielding(id, { season, sportId: liveSportId }) : Promise.resolve([]),
-      showPitching ? fetchStarterReliever(id, { season, sportId: liveSportId }) : Promise.resolve([]),
+      showFielding
+        ? inMajors ? fetchFielding(id, { season, sportId: 1 }) : fetchMilbFieldingSeason(id, season)
+        : Promise.resolve([]),
+      showPitching
+        ? inMajors ? fetchStarterReliever(id, { season, sportId: 1 }) : fetchMilbStarterRelieverSeason(id, season)
+        : Promise.resolve([]),
     ])
     const seasonScope = {
       fielding: showFielding ? fieldingView(fieldSeasonSplits) : null,
