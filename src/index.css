@@ -1830,7 +1830,8 @@ body {
    instead of fighting the row's fixed jersey/position columns for width. */
 .lineup__namewrap,
 .roster__namewrap,
-.opp__namewrap {
+.opp__namewrap,
+.thub-namewrap {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -5164,7 +5165,7 @@ body {
    ============================================================ */
 .team-hub__id {
   display: grid;
-  grid-template-columns: 64px 1fr;
+  grid-template-columns: 64px 1fr auto;
   gap: var(--space-4);
   align-items: center;
   margin-top: 4px;
@@ -5177,11 +5178,32 @@ body {
   align-items: center;
   gap: 6px;
 }
-/* The affiliate mark — a MiLB team's parent MLB org wordmark, drawn small
-   below its own logo, like a jersey's affiliation patch. Only rendered when
-   `team.parentOrgId` is present (see TeamPage.jsx). */
-.team-hub__logo-affiliate {
-  opacity: 0.75;
+/* The parent MLB club's primary mark, drawn right-aligned at 70% of the
+   affiliate's own logo — only on a MiLB team page (see TeamPage.jsx). Links
+   through to that club's page. */
+.team-hub__parent {
+  display: flex;
+  align-items: center;
+  opacity: 0.9;
+}
+/* Team name + its level pill (AAA/AA/… — MiLB pages only) on one baseline. */
+.team-hub__namerow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.team-hub__level {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
 }
 .team-hub__id h1 {
   margin: 0;
@@ -5759,9 +5781,8 @@ body {
   color: var(--text-caption);
 }
 
-/* Team-page prospect table — an org's farm-system leaderboard. On an
-   affiliate's own page (highlightTop100), rows NOT also on the overall Top
-   100 fade (.is-dull); the MLB parent's own page leaves every row plain. */
+/* Team-page prospect table — an org's farm-system leaderboard, shown only on
+   the parent MLB club's own page (affiliate pages badge their rosters instead). */
 .prospecttable .lft.opp {
   display: flex;
   align-items: center;
@@ -5793,9 +5814,6 @@ body {
 .prospecttable__line {
   font-size: 11.5px;
   white-space: nowrap;
-}
-.prospecttable tr.is-dull {
-  opacity: 0.45;
 }
 
 /* Standalone Top 100 page's "Rankings as of…" note, read after the table

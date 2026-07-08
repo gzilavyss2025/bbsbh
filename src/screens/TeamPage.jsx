@@ -12,7 +12,7 @@ import { fetchAllStarRosterIds } from '../api/person-fetch.js'
 import { fetchTeamSchedule } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
-import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../api/prospects.js'
+import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -22,6 +22,7 @@ import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
+import { ProspectPill } from '../components/ProspectPill.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
@@ -183,6 +184,7 @@ async function loadTeam(id, asOf) {
       pos: r.position?.abbreviation ?? '',
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
+      prospect: prospectBadge(prospectsSnapshot, r.person?.id),
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
 
@@ -195,6 +197,7 @@ async function loadTeam(id, asOf) {
       role: rosterPitcherRole(r),
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
+      prospect: prospectBadge(prospectsSnapshot, r.person?.id),
     }))
     .sort((a, b) => (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) || Number(a.jersey) - Number(b.jersey))
 
@@ -219,10 +222,15 @@ export function TeamPage({ id, asOf, sportId }) {
   if (gate) return gate
 
   const { team, season, record, standings, batting, pitching, position, pitchers, affiliates, prospects, schedule } = data
-  // An affiliate's own page shows the same org-wide list as its MLB parent,
-  // so it accentuates the rows that are also on the overall Top 100 and
-  // dulls the rest — the parent's own page shows the list plainly.
-  const highlightTop100 = sportId !== 1
+  const isMilb = (team.sport?.id ?? 1) !== 1
+  // On a MiLB affiliate page, lead the Affiliates section with a card for the
+  // parent MLB club (which fetchAffiliates deliberately omits from the farm
+  // tree). Location is unavailable from the static team record, so the card
+  // degrades to just the mark + name — see the conditional loc line below.
+  const affiliateCards =
+    isMilb && team.parentOrgId
+      ? [{ id: team.parentOrgId, sportId: 1, name: team.parentOrgName, city: '', state: '' }, ...affiliates]
+      : affiliates
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
@@ -233,18 +241,14 @@ export function TeamPage({ id, asOf, sportId }) {
         <header className="team-hub__id">
           <div className="team-hub__logo">
             <TeamLogo teamId={team.id} name={team.name} size={64} />
-            {team.parentOrgId && (
-              <TeamLogo
-                teamId={team.parentOrgId}
-                name={team.parentOrgName}
-                variant="wordmark"
-                size={22}
-                className="team-hub__logo-affiliate"
-              />
-            )}
           </div>
           <div>
-            <h1>{team.name}</h1>
+            <div className="team-hub__namerow">
+              <h1>{team.name}</h1>
+              {isMilb && (
+                <span className="team-hub__level">{SPORT_LABEL[team.sport?.id] ?? DASH}</span>
+              )}
+            </div>
             {record && (
               <p className="team-hub__rec">
                 <span className="mono">{record.wins}–{record.losses}</span>
@@ -255,6 +259,11 @@ export function TeamPage({ id, asOf, sportId }) {
               </p>
             )}
           </div>
+          {isMilb && team.parentOrgId && (
+            <TeamLink id={team.parentOrgId} className="team-hub__parent">
+              <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={45} />
+            </TeamLink>
+          )}
         </header>
 
         {schedule.length > 0 && (
@@ -306,6 +315,7 @@ export function TeamPage({ id, asOf, sportId }) {
             <SectionTitle title="Position players" note={sportId === 1 ? 'season WAR' : ''} />
             <RosterList
               season={season}
+              showProspect={isMilb}
               rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))}
             />
           </>
@@ -315,6 +325,7 @@ export function TeamPage({ id, asOf, sportId }) {
             <SectionTitle title="Pitchers" note={sportId === 1 ? 'role inferred · season WAR' : 'role inferred'} />
             <RosterList
               season={season}
+              showProspect={isMilb}
               rows={pitchers.map((p) => ({
                 ...p,
                 badge: p.role ?? DASH,
@@ -324,30 +335,29 @@ export function TeamPage({ id, asOf, sportId }) {
           </>
         )}
 
-        {affiliates.length > 0 && (
+        {affiliateCards.length > 0 && (
           <>
             <SectionTitle title="Affiliates" />
             <div className="thub-affiliates">
-              {affiliates.map((a) => (
+              {affiliateCards.map((a) => (
                 <TeamLink key={a.id} id={a.id} className="thub-affiliate">
                   <span className="thub-affiliate__level">{SPORT_LABEL[a.sportId] ?? DASH}</span>
                   <TeamLogo teamId={a.id} name={a.name} size={48} />
                   <span className="thub-affiliate__name">{a.name}</span>
-                  <span className="thub-affiliate__loc">
-                    {a.city}{a.state ? `, ${a.state}` : ''}
-                  </span>
+                  {a.city && (
+                    <span className="thub-affiliate__loc">
+                      {a.city}{a.state ? `, ${a.state}` : ''}
+                    </span>
+                  )}
                 </TeamLink>
               ))}
             </div>
           </>
         )}
 
-        {prospects.length > 0 && (
+        {!isMilb && prospects.length > 0 && (
           <>
-            <SectionTitle
-              title="Prospects"
-              note={highlightTop100 ? 'org rank · Top 100 highlighted' : 'org rank'}
-            />
+            <SectionTitle title="Prospects" note="org rank" />
             <div className="ledger-wrap">
               <table className="ledger prospecttable">
                 <thead>
@@ -361,9 +371,8 @@ export function TeamPage({ id, asOf, sportId }) {
                 <tbody>
                   {prospects.map((p) => {
                     const isTop = p.topRank != null
-                    const rowClass = highlightTop100 && !isTop ? 'is-dull' : ''
                     return (
-                      <tr key={p.playerId} className={rowClass}>
+                      <tr key={p.playerId}>
                         <td className="lft yr">{p.orgRank}</td>
                         <td className="lft opp">
                           <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
@@ -499,18 +508,21 @@ function TeamStats({ title, stats }) {
   )
 }
 
-function RosterList({ rows, season }) {
+function RosterList({ rows, season, showProspect }) {
   return (
     <ul className="thub-roster">
       {rows.map((r) => (
         <li key={`${r.id}-${r.jersey}`} className="thub-row">
           <span className="thub-jersey">{r.jersey}</span>
-          <PlayerLink id={r.id} className="thub-name">
-            {r.name}
-            {r.allStar && (
-              <span className="thub-allstar" title={`${season} All Star`}>★</span>
-            )}
-          </PlayerLink>
+          <span className="thub-namewrap">
+            <PlayerLink id={r.id} className="thub-name">
+              {r.name}
+              {r.allStar && (
+                <span className="thub-allstar" title={`${season} All Star`}>★</span>
+              )}
+            </PlayerLink>
+            {showProspect && <ProspectPill {...r.prospect} />}
+          </span>
           {r.war !== undefined && (
             <span
               className={`rankchip${r.war == null ? '' : r.war >= 3 ? ' rankchip--good' : r.war < 0 ? ' rankchip--bad' : ''}`}
