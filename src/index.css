@@ -2859,6 +2859,18 @@ body {
   background: var(--surface-card);
 }
 
+/* Same border-collapse + sticky paint drift the standings team column has (see
+   `.standings--full td.team`): these pinned first-column cells repaint their
+   solid background over the collapsed row rule, so its bottom hairline lands a
+   pixel adrift from the scrolling number columns. Drop the overpainted collapsed
+   border and redraw the rule as an inset shadow that paints with the sticky
+   layer. The last body row carries no bottom rule (see below), so skip it. */
+.rolling__corner,
+.rolling__grid tbody tr:not(:last-child) .rolling__team {
+  border-bottom-color: transparent;
+  box-shadow: inset 0 calc(-1 * var(--bw-hair)) 0 0 var(--border-hairline);
+}
+
 .rolling__tot {
   font-weight: var(--w-bold);
   color: var(--text-heading);
