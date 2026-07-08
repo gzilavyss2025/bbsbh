@@ -7,11 +7,14 @@ import { TeamLogo } from './TeamLogo.jsx'
 // page (see fetchTeamLogoTint) — with the year(s) he spent there beneath it and
 // that club's level (MLB / AAA / … / ROK) below that. Stops wrap onto multiple
 // rows for a long career rather than scrolling.
-export function CareerTimeline({ entries }) {
+// Reused by the MiLB team page as an "Affiliation history" strip (each stop an
+// MLB parent org rather than a player's club) — hence the `title` prop; the
+// visual treatment is identical by request.
+export function CareerTimeline({ entries, title = 'Team history' }) {
   if (!entries?.length) return null
   return (
     <section className="careertl">
-      <h3 className="section__title"><span>Team history</span></h3>
+      <h3 className="section__title"><span>{title}</span></h3>
       <ol className="careertl__track">
         {entries.map((e) => (
           <li className="careertl__stop" key={`${e.teamId}-${e.minSeason}`} title={e.title}>

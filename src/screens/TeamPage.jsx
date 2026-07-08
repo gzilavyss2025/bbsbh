@@ -11,6 +11,8 @@ import {
 import { fetchAllStarRosterIds } from '../api/person-fetch.js'
 import { fetchTeamSchedule } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
+import { parentOrgHistory } from '../api/milbHistory.js'
+import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { SPORT_LABEL } from '../lib/teams.js'
@@ -20,6 +22,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
@@ -129,6 +132,29 @@ async function loadTeam(id, asOf) {
   const warBat = warData.season === season ? warData.bat : {}
   const warPit = warData.season === season ? warData.pit : {}
 
+  // Affiliation history — the ordered MLB parent orgs this farm club has belonged
+  // to over time (MiLB pages only; an MLB team has no parent). Shaped exactly
+  // like the player page's career "Team history" stops so it can reuse that same
+  // component: each stop is the org's logo on a wash of its own colors, with the
+  // season span beneath. Empty for a club that never switched orgs (not in the
+  // history file) — the strip then hides. See api/milbHistory.js.
+  const affiliationHistory =
+    sportId === 1
+      ? []
+      : await Promise.all(
+          (await parentOrgHistory(id)).map(async (era) => {
+            const [start, end] = era.years
+            return {
+              teamId: era.parentOrgId,
+              teamName: era.parentOrgName,
+              minSeason: start,
+              yearText: start === end ? `${start}` : `${start}–${String(end).slice(2)}`,
+              tint: await fetchTeamLogoTint(era.parentOrgId),
+              title: `${era.parentOrgName} · ${start}–${end}${era.note ? ` (${era.note})` : ''}`,
+            }
+          }),
+        )
+
   const div = standings.find((r) => r.division?.id === team.division?.id)
   const myRec = div?.teamRecords?.find((t) => t.team.id === id)
   const standingsRows = (div?.teamRecords ?? []).map((t) => ({
@@ -208,7 +234,7 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers,
-    affiliates, prospects, schedule,
+    affiliationHistory, affiliates, prospects, schedule,
   }
 }
 
@@ -221,7 +247,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, affiliates, prospects, schedule } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, affiliationHistory, affiliates, prospects, schedule } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // On a MiLB affiliate page, lead the Affiliates section with a card for the
   // parent MLB club (which fetchAffiliates deliberately omits from the farm
@@ -333,6 +359,10 @@ export function TeamPage({ id, asOf, sportId }) {
               }))}
             />
           </>
+        )}
+
+        {isMilb && affiliationHistory.length > 0 && (
+          <CareerTimeline entries={affiliationHistory} title="Affiliation history" />
         )}
 
         {affiliateCards.length > 0 && (

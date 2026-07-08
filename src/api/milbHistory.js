@@ -51,6 +51,17 @@ export async function historicalParentOrg(teamId, year) {
   return era ? { id: era.parentOrgId, name: era.parentOrgName } : null
 }
 
+// The club's full parent-org history — the ordered [startYear, endYear] eras of
+// which MLB org this affiliate belonged to over time (earliest first), or [] for
+// a club with no recorded changes (its live current-season parent is the whole
+// story). Feeds the team page's "Affiliation history" strip; a club that never
+// switched orgs simply isn't in the file and yields [], so the strip hides.
+export async function parentOrgHistory(teamId) {
+  if (!teamId) return []
+  const data = await fetchMilbHistory()
+  return data.clubs?.[String(teamId)]?.parentHistory ?? []
+}
+
 // The club's own name/city at a given year, if this same statsapi team id has
 // since been renamed or relocated (a genuine mascot/city change, distinct from
 // an affiliate-reassignment-only case) — else null. Not yet wired into any
