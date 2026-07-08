@@ -173,15 +173,28 @@ export async function fetchAffiliates(teamId, season) {
 // omit — the standings page needs it; TeamPage doesn't and passes none).
 // Returns the raw division records array; person.js/TeamPage pick the team's
 // own division. Degrades to [].
+//
+// A dated response never changes once fetched (it's a fact about a day that's
+// already over), so it's cached in-memory for the session, keyed on the full
+// query tuple — same session-cache idiom as war.js/fetchTeamDirectory. Only a
+// falsy `date` (StandingsPage's opt-in "Live" view, today's still-moving
+// standings) skips the cache: that response can change all evening, so it's
+// always fetched fresh. Failures aren't cached, so a flaky request gets
+// retried on the next call instead of sticking as [].
+const standingsCache = new Map()
 export async function fetchStandings(leagueId, season, date, hydrate) {
   if (!leagueId || !season) return []
+  const cacheKey = date ? `${leagueId}:${season}:${date}:${hydrate ?? ''}` : null
+  if (cacheKey && standingsCache.has(cacheKey)) return standingsCache.get(cacheKey)
   try {
     const dateParam = date ? `&date=${date}` : ''
     const hydrateParam = hydrate ? `&hydrate=${hydrate}` : ''
     const data = await getJson(
       `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}${hydrateParam}`,
     )
-    return data.records ?? []
+    const records = data.records ?? []
+    if (cacheKey) standingsCache.set(cacheKey, records)
+    return records
   } catch {
     return []
   }
