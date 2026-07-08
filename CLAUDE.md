@@ -45,10 +45,21 @@ node scripts/gen-war.mjs
                    # from FanGraphs' leaderboard API) — normally you don't run
                    # this by hand, it's on a nightly cron; see
                    # .github/workflows/update-war.yml and docs/data-enrichment.md §5
+npm run e2e        # playwright test — verification harness, not a CI suite (see below)
 ```
 
-There is no test suite. Verify changes by running `npm run dev` and exercising the
-game-select → team-info → innings flow against a live or recent game.
+There is no CI-enforced test suite. Verify changes by running `npm run dev` (or
+`npm run e2e`, which boots the dev server itself) and exercising the game-select →
+team-info → innings flow against a live or recent game. `playwright.config.js` pins
+the dev server to a fixed port (`5173`, `strictPort` in `vite.config.js`) and
+auto-starts/reuses it, so a verification pass never needs a separate manual
+start/poll/kill cycle. `docs/test-games.md` has a pack of real, verified gamePks
+with rare in-game events (triple play, immaculate inning, position player pitching,
+suspended/resumed game, etc.) for exercising edge cases without hunting for a live
+game each session — check there before going looking for a new one.
+`.claude/skills/run.md` documents this loop end to end. `e2e/smoke.spec.js` is the
+one long-lived example spec; write and delete throwaway specs alongside it for
+one-off checks.
 
 ## The spoiler rule — the core invariant
 

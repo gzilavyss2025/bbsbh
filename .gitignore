@@ -10,6 +10,12 @@ dist-ssr
 # vite / pwa generated
 dev-dist
 
+# playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+
 # logs
 npm-debug.log*
 yarn-debug.log*
