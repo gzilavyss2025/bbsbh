@@ -37,16 +37,31 @@ export async function fetchTeam(teamId) {
   }
 }
 
+// Session cache for fetchTeamRoster, keyed by `${teamId}:${season}`. Heavier
+// (full roster + hydrated season pitching stats) and fresher-sensitive than
+// the bare fetchTeamRosterIds call below — pitching lines drift daily — so
+// this gets a shorter TTL: long enough that a same-session TeamPage visit
+// followed shortly by that team's GameView load (or vice versa) reuses the
+// fetch, short enough that stats don't go stale for long within a single
+// evening of scoring. A failed fetch is never cached.
+const TEAM_ROSTER_CACHE_TTL_MS = 15 * 60 * 1000
+const teamRosterCache = new Map()
+
 // The active roster, with each player's season pitching line hydrated so the
 // team page can infer starter/reliever/closer (there is no role field in the
 // API). Position players simply carry no pitching stats. Degrades to [].
 export async function fetchTeamRoster(teamId, season) {
   if (!teamId || !season) return []
+  const key = `${teamId}:${season}`
+  const cached = teamRosterCache.get(key)
+  if (cached && Date.now() - cached.ts < TEAM_ROSTER_CACHE_TTL_MS) return cached.data
   try {
     const data = await getJson(
       `/api/v1/teams/${teamId}/roster?rosterType=active&hydrate=person(stats(type=season,group=pitching,season=${season}))`,
     )
-    return data.roster ?? []
+    const roster = data.roster ?? []
+    teamRosterCache.set(key, { ts: Date.now(), data: roster })
+    return roster
   } catch {
     return []
   }
