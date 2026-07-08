@@ -1,4 +1,4 @@
-import { BaseballMark } from './BaseballMark.jsx'
+import { ScorebookMark } from './ScorebookMark.jsx'
 import { useNav } from '../lib/nav.js'
 
 // The small "Scorebook" brand mark + wordmark shown atop every screen (except
@@ -14,7 +14,7 @@ export function SiteHeader() {
         onClick={() => navigate('/')}
         aria-label="Back to games"
       >
-        <BaseballMark size={22} simplified />
+        <ScorebookMark size={22} simplified />
         <span className="sitebar__word">Scorebook</span>
       </button>
     </div>

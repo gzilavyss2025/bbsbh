@@ -7,7 +7,7 @@ import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
-import { BaseballMark } from '../components/BaseballMark.jsx'
+import { ScorebookMark } from '../components/ScorebookMark.jsx'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
@@ -92,7 +92,7 @@ export function GameSelect({ onPick, onShowLogos }) {
       <div className="slatehead">
         <header className="topbar">
           <h1 className="topbar__title">
-            <BaseballMark size={22} simplified />
+            <ScorebookMark size={22} simplified />
             Scorebook
           </h1>
         </header>

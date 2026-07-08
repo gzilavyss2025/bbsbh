@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { PlayerSearchBox } from './PlayerSearchBox.jsx'
 import { TeamSearchBox } from './TeamSearchBox.jsx'
 import { GameFinderModal } from './GameFinderModal.jsx'
-import { BaseballMark } from './BaseballMark.jsx'
+import { ScorebookMark } from './ScorebookMark.jsx'
 import { useNav } from '../lib/nav.js'
 
 const YEAR = new Date().getFullYear()
@@ -47,7 +47,7 @@ export function SiteFooter({ onShowLogos }) {
 
       <div className="sitefooter__legal">
         <p className="sitefooter__brand">
-          <BaseballMark size={14} simplified />
+          <ScorebookMark size={14} simplified />
           Scorebook Helper
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
