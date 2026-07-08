@@ -75,6 +75,14 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="allstar-banner__star" aria-hidden="true">★</span>
           </div>
         )}
+        {data.onRehab && (
+          <div className="rehab-banner" role="note">
+            <span className="rehab-banner__mark" aria-hidden="true">✚</span>
+            <span className="rehab-banner__text">
+              Rehab Assignment{data.rehab?.name ? ` · ${data.rehab.name}` : ''}
+            </span>
+          </div>
+        )}
         <SiteHeader />
         <BackBtn onClick={back} />
 
@@ -200,15 +208,16 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             {block.gameLog && (
               <>
-                <SectionTitle title="Game log" note={`last ${block.gameLog.rows.length} · entering today`} />
+                <SectionTitle title="Game log" note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : 'entering today'}`} />
                 <ul className="gamelog">
                   {block.gameLog.rows.map((r) => (
-                    <li className="gamelog__row" key={r.date}>
+                    <li className="gamelog__row" key={r.gamePk ?? r.date}>
                       <div className="gamelog__meta">
                         <span className="gamelog__date">{r.date}</span>
                         <span className="gamelog__opp">
                           {r.home ? 'vs' : '@'}{' '}
                           <GameLink path={r.boxscorePath}>{r.opp.toUpperCase()}</GameLink>
+                          {r.level && <span className="gamelog__level">{r.level}</span>}
                         </span>
                       </div>
                       <div className="gamelog__line">{r.line}</div>
@@ -323,9 +332,18 @@ function GameLink({ path, className = '', children }) {
 // pre-debut climb folds into one tappable row that expands to its seasons; the
 // footer carries separate MLB and MiLB totals, and small post-debut stints ride
 // a neutral caption beneath.
+// The secondary pitching columns that drop out on a phone (see the Ledger's
+// hideNarrow + the col-narrow-hide media query) — the essentials (G, W–L/SV,
+// ERA, IP, WHIP) stay; GS, K and BB return once there's room.
+const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
+
 function CareerRegister({ register }) {
   const [climbOpen, setClimbOpen] = useState(false)
   const { columns, rows, climb, totals, footnote } = register
+  // +2 for the leading Year + Team columns this table prepends to the stat cells.
+  const hideNarrow = columns
+    .map((c, i) => (NARROW_HIDE_COLS.has(c) ? i + 2 : -1))
+    .filter((i) => i >= 0)
 
   const ledgerRows = rows.map((r) => ({
     key: r.key,
@@ -375,6 +393,7 @@ function CareerRegister({ register }) {
         leftCols={2}
         head={['Year', 'Team', ...columns]}
         rows={ledgerRows}
+        hideNarrow={hideNarrow}
         totals={totals.map((t) => ({
           label: t.label,
           cells: t.cells,

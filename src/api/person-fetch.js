@@ -92,6 +92,23 @@ export async function fetchMilbByDateRange(personId, group, season, startDate, e
   return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
 }
 
+// Game-log rows across every MiLB level, fanned out one request per level (the
+// API takes a single sportId) and tagged with the level's sportId so the shaper
+// can label each row — statsapi's gameLog splits don't carry `sport` on their
+// own. Used only for a rehabbing big leaguer's combined MLB + MiLB log; the MLB
+// side is a plain single-sportId gameLog call the caller makes alongside this.
+// Degrades per level.
+export async function fetchMilbGameLog(personId, group, season) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) =>
+      fetchPersonStats(personId, { type: 'gameLog', group, season, sportId: lvl.sportId }).then((splits) =>
+        splits.map((s) => ({ ...s, sport: s.sport ?? { id: lvl.sportId } })),
+      ),
+    ),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
 // ---------------------------------------------------------------------------
 // Position innings — fielding innings per position (the "where he's played"
 // diamond) and starter-vs-reliever IP. Both are aggregates, not tonight's line,

@@ -22,6 +22,7 @@ import {
   fetchStarterRelieverStints,
   fetchMilbFieldingSeason,
   fetchMilbStarterRelieverSeason,
+  fetchMilbGameLog,
   fetchTransactions,
   fetchPlayerAwards,
   fetchTradeCohort,
@@ -38,6 +39,7 @@ import {
   levelProgressionView,
   careerTimelineView,
   dropRehabStints,
+  detectRehabAssignment,
   transactionTimelineView,
   tradeKey,
   positionPlayerPastNote,
@@ -112,28 +114,44 @@ export async function loadPositionScope(id, scope, { showFielding, showPitching,
 // player). Stats are cut off at the day BEFORE the game date ("entering today")
 // when reached from a game (`asOf` set); a bare link defaults to current stats.
 export async function loadPlayer(id, asOf) {
-  const person = await fetchPerson(id)
+  // The spoiler cutoff for every date-bound fetch — "entering today" for a
+  // game-scoped view, else the live current day. Computed up front because the
+  // transaction feed (fetched in parallel with the bio, to detect a live rehab
+  // assignment before the stat blocks are built) is capped by it too.
+  const endDate = asOf ? dayBefore(asOf) : isoToday()
+  const [person, txns] = await Promise.all([
+    fetchPerson(id),
+    fetchTransactions(id, endDate),
+  ])
   if (!person) return null
   const bio = personBio(person)
+  const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
   // Where he's playing RIGHT NOW (a big leaguer's is MLB; a demoted or
   // now-a-lifer minor leaguer's is his current MiLB level).
   const liveSportId = personSportId(person)
+  // A big leaguer currently on a minor-league REHAB assignment is a major
+  // leaguer passing through the minors, not a demotion — so his current-activity
+  // sections (season tiles, splits, game log, the register's current-season row)
+  // are pinned to MLB even though his live club is a MiLB affiliate. The game log
+  // becomes a combined MLB + rehab log (see below). Null for everyone else.
+  const rehab = detectRehabAssignment(txns, debutYear)
+  const onRehab = Boolean(rehab)
+  const currentActivitySportId = onRehab ? 1 : liveSportId
   // Where his career-shaped sections are pinned. A player who has reached the
   // majors gets the major-league treatment even while he's currently in the
   // minors (Ben Gamel — a longtime big leaguer now at AAA): his year-by-year
   // table, career total and team-history timeline stay on MLB (sportId 1) so
   // his major-league body of work fills the prominent slots, exactly where a
   // current big leaguer's would — you shouldn't have to guess he ever debuted.
-  // (The current-season tiles, game log and splits below still follow
-  // `liveSportId`, so the page also shows what he's doing right now.)
+  // (The current-season tiles, game log and splits below follow
+  // `currentActivitySportId` — his live level, or MLB when he's on a rehab
+  // assignment — so the page also shows what he's doing right now.)
   const careerSportId = bio.debut ? 1 : liveSportId
   const season = Number((asOf || isoToday()).slice(0, 4))
-  const endDate = asOf ? dayBefore(asOf) : isoToday()
   const cutoff = asOf || null
   const groups = bio.twoWay
     ? ['hitting', 'pitching']
     : [bio.isPitcher ? 'pitching' : 'hitting']
-  const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
   const currentYear = Number(isoToday().slice(0, 4))
   const startDate = `${season}-01-01`
   // "Path to the Majors" always tells the minor-league story in the page's
@@ -142,19 +160,32 @@ export async function loadPlayer(id, asOf) {
   // "games at that level").
   const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
 
-  const [results, debutSplits, prospects, convHittingMilb, txns] = await Promise.all([
+  const [results, debutSplits, prospects, convHittingMilb] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
+        // A rehabbing big leaguer's game log combines his MLB games with his
+        // rehab (MiLB) games into one date-sorted log, each row level-tagged;
+        // everyone else's is a single-level log at his current-activity level.
+        const gameLogPromise = onRehab
+          ? Promise.all([
+              fetchPersonStats(id, { type: 'gameLog', group, season, sportId: 1 }),
+              fetchMilbGameLog(id, group, season),
+            ]).then(([mlb, milb]) => [
+              ...mlb.map((s) => ({ ...s, sport: s.sport ?? { id: 1 } })),
+              ...milb,
+            ])
+          : fetchPersonStats(id, { type: 'gameLog', group, season, sportId: currentActivitySportId })
         const [seasonSplits, careerSplits, lrSplits, gameLogSplits, mlbYbySplits, milbYbySplits, arsenalSplits] =
           await Promise.all([
-            // Current-activity sections track his LIVE level...
-            fetchPersonStats(id, { type: 'byDateRange', group, season, startDate, endDate, sportId: liveSportId }),
+            // Current-activity sections track his current-activity level (his
+            // live level, or MLB while he's on a rehab assignment)...
+            fetchPersonStats(id, { type: 'byDateRange', group, season, startDate, endDate, sportId: currentActivitySportId }),
             // ...but the career total is pinned to `careerSportId` (MLB for
             // anyone who's debuted), so a now-in-the-minors big leaguer's
             // major-league résumé foots the register's MLB total.
             fetchPersonStats(id, { type: 'career', group, sportId: careerSportId }),
-            fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId: liveSportId }),
-            fetchPersonStats(id, { type: 'gameLog', group, season, sportId: liveSportId }),
+            fetchPersonStats(id, { type: 'statSplits', group, sitCodes: 'vl,vr', season, sportId: currentActivitySportId }),
+            gameLogPromise,
             // The unified career register merges the MLB year-by-year (debuted
             // players only — pre-debut players have no MLB line) with the
             // multi-level MiLB history below. See careerRegisterView.
@@ -163,19 +194,20 @@ export async function loadPlayer(id, asOf) {
               : Promise.resolve([]),
             fetchMilbYearByYear(id, group),
             group === 'pitching'
-              ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId: liveSportId })
+              ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId: currentActivitySportId })
               : Promise.resolve([]),
           ])
         const seasonStat = aggregateSplits(seasonSplits, group)
         const tileStat = await resolveCurrentSeasonStat({
-          id, group, season, startDate, endDate, sportId: liveSportId,
+          id, group, season, startDate, endDate, sportId: currentActivitySportId,
           hasDebuted: Boolean(bio.debut), levelStat: seasonStat,
         })
         const role = group === 'pitching' ? pitcherRole(tileStat) : null
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
           gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
-          currentSeason: season, currentSportId: liveSportId, debutYear, tileStat,
+          currentSeason: season, currentSportId: currentActivitySportId, debutYear, tileStat,
+          logTagLevel: onRehab,
         })
         return { group, mlbYbySplits, milbYbySplits, block }
       }),
@@ -198,10 +230,6 @@ export async function loadPlayer(id, asOf) {
     bio.debut && bio.isPitcher && !bio.twoWay
       ? fetchMilbYearByYear(id, 'hitting')
       : Promise.resolve(null),
-    // Career roster-move history — capped at the same "entering today" cutoff
-    // the stats use, so a game-scoped view never shows a move dated after the
-    // game being scored. Curated + shaped by transactionTimelineView.
-    fetchTransactions(id, endDate),
   ])
   // Transaction timeline enrichment — everything the raw player-scoped feed
   // can't give on its own: each affiliate club's level (for CALLED UP / SENT
@@ -345,7 +373,7 @@ export async function loadPlayer(id, asOf) {
     // matching how resolveCurrentSeasonStat scopes the tiles). A player
     // currently in the minors fans out every MiLB level, so a mid-season
     // promotion (AA -> AAA) isn't undercounted.
-    const inMajors = liveSportId === 1
+    const inMajors = currentActivitySportId === 1
     const [fieldSeasonSplits, srSeasonSplits] = await Promise.all([
       showFielding
         ? inMajors ? fetchFielding(id, { season, sportId: 1 }) : fetchMilbFieldingSeason(id, season)
@@ -516,7 +544,8 @@ export async function loadPlayer(id, asOf) {
   }
 
   return {
-    bio, blocks, season, asOf, sportId: liveSportId,
+    bio, blocks, season, asOf, sportId: currentActivitySportId,
+    onRehab, rehab,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     conversionNote, positionInnings, transactions,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,

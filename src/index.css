@@ -4779,6 +4779,20 @@ body {
   color: var(--text-muted);
   white-space: nowrap;
 }
+/* Level pill on a combined MLB + rehab game log (see gameLogView's tagLevel) —
+   tells apart a rehabbing big leaguer's MLB rows from his MiLB rehab rows. */
+.gamelog__level {
+  margin-left: 5px;
+  padding: 1px 4px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  vertical-align: middle;
+}
 .gamelog__line {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -4934,6 +4948,14 @@ body {
    reads as a blended cross-level career line. */
 .ledger tfoot tr.reg-milb td {
   color: var(--graphite);
+}
+/* The career register's secondary columns (a pitcher's GS, K, BB) fold away on
+   a phone so the essentials stay legible; they return at the 740px "wide"
+   breakpoint. The Ledger tags those cells with col-narrow-hide (see hideNarrow). */
+@media (max-width: 739.98px) {
+  .ledger .col-narrow-hide {
+    display: none;
+  }
 }
 /* Neutral caption for the small post-debut stints kept out of the ledger, plus
    the "converted to pitcher" note that sits above the stat blocks. */
@@ -5156,6 +5178,33 @@ body {
 }
 .allstar-banner__star {
   color: #fff;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ---- rehab-assignment banner — kraft-amber tape, the "on hold / passing
+   through the minors" counterpart to the celebratory blue All-Star tape ---- */
+.rehab-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--seal) 0%, #8f6636 100%);
+  box-shadow: var(--shadow-card);
+}
+.rehab-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 13.5px;
+  color: var(--seal-ink);
+}
+.rehab-banner__mark {
+  color: var(--seal-ink);
   font-size: 14px;
   line-height: 1;
 }

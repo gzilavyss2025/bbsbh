@@ -8,9 +8,14 @@ import { Fragment } from 'react'
 // `subRows` (each `{ key, label, cells, className? }`) render as extra muted,
 // indented rows right after their parent. A footer is either a single `total`
 // (+`totalLabel`) or, for split footers like the register's MLB/MiLB totals, a
-// `totals` array of `{ label, cells, className? }`.
-export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '', totals = null }) {
-  const cellClass = (i) => (i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : '')
+// `totals` array of `{ label, cells, className? }`. `hideNarrow` is a set of
+// whole-row column indices (matching `head`) that collapse on a phone via CSS —
+// the secondary stat columns the career register sheds on a small screen.
+export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '', totals = null, hideNarrow = [] }) {
+  const hide = new Set(hideNarrow)
+  const narrow = (i) => (hide.has(i) ? 'col-narrow-hide' : '')
+  const cellClass = (i) =>
+    [i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : '', narrow(i)].filter(Boolean).join(' ')
   const footRows = totals ?? (total ? [{ label: totalLabel, cells: total }] : [])
   return (
     <div className="ledger-wrap">
@@ -18,7 +23,7 @@ export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = ''
         <thead>
           <tr>
             {head.map((h, i) => (
-              <th key={h} className={i < leftCols ? 'lft' : ''}>{h}</th>
+              <th key={h} className={[i < leftCols ? 'lft' : '', narrow(i)].filter(Boolean).join(' ')}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -40,7 +45,7 @@ export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = ''
                   <td className="lft yr" />
                   <td className="lft opp">{sr.label}</td>
                   {sr.cells.map((c, i) => (
-                    <td key={i}>{c}</td>
+                    <td key={i} className={narrow(i + leftCols)}>{c}</td>
                   ))}
                 </tr>
               ))}

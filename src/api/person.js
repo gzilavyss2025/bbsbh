@@ -373,7 +373,7 @@ function pitcherLine(st) {
 // it. `cutoff` null (context-free cold link) shows the most recent games. Each
 // row carries a single broadcast-style stat `line` (see hitterLine/pitcherLine)
 // rather than a grid of columns.
-export function gameLogView(splits, group, cutoff, limit = 8) {
+export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false } = {}) {
   const rows = (splits ?? [])
     .filter((s) => s.date && (!cutoff || s.date < cutoff))
     .sort((a, b) => (a.date < b.date ? 1 : -1))
@@ -386,6 +386,10 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
         home: s.isHome,
         opp: oppLabel(s.opponent),
         gamePk: s.game?.gamePk ?? null,
+        // A per-row level pill only when the log mixes levels (a rehabbing big
+        // leaguer's combined MLB + MiLB log); a single-level log leaves it blank
+        // so every row isn't stamped with a redundant "MLB".
+        level: tagLevel ? SPORT_LABEL[s.sport?.id] ?? '' : '',
         line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
       }
     })
@@ -506,11 +510,26 @@ export function arsenalView(splits) {
 // aggregation the register builds on (see careerRegisterView below).
 // ---------------------------------------------------------------------------
 
-// One season / career / level row's cells, in the group's register columns.
-function yearByYearCells(st, group) {
-  return group === 'pitching'
-    ? [`${num(st.wins)}–${num(st.losses)}`, st.era ?? DASH, st.inningsPitched ?? DASH, num(st.strikeOuts), st.whip ?? DASH]
-    : [num(st.gamesPlayed), num(st.atBats), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
+// One season / career / level row's cells, in the group's register columns. A
+// pitching row leads its counting stats with G/GS, then the role stat (SV for a
+// closer, W–L otherwise — mirroring the season tiles), and closes with the rate
+// pair K/BB and WHIP. The narrower secondary columns (GS, K, BB) drop out on a
+// phone (see CareerRegister's hideNarrow), so the essentials stay legible there.
+function yearByYearCells(st, group, role) {
+  if (group === 'pitching') {
+    const lead = role === 'CL' ? num(st.saves) : `${num(st.wins)}–${num(st.losses)}`
+    return [
+      num(st.gamesPlayed),
+      num(st.gamesStarted),
+      lead,
+      st.era ?? DASH,
+      st.inningsPitched ?? DASH,
+      num(st.strikeOuts),
+      num(st.baseOnBalls),
+      st.whip ?? DASH,
+    ]
+  }
+  return [num(st.gamesPlayed), num(st.atBats), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
 }
 
 // A season's yearByYear splits at one level can include a synthetic,
@@ -576,7 +595,7 @@ function stintCaption(stints, group, shown = 3) {
   return text
 }
 
-export function careerRegisterView({ mlbSplits, milbSplits, group, debutYear, currentStat, currentSeason, currentSportId, careerStat }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSeason, currentSportId, careerStat }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -644,7 +663,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, debutYear, cu
     sportId: st.sid,
     pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
     teamIds: st.teamIds,
-    cells: yearByYearCells(st.stat ?? {}, group),
+    cells: yearByYearCells(st.stat ?? {}, group, role),
   }))
 
   // The collapsed climb (debuted players only): one aggregate row plus the
@@ -659,13 +678,13 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, debutYear, cu
       key: 'climb',
       yearText: minY === maxY ? `${minY}` : `${minY}–${String(maxY).slice(2)}`,
       teamIds: [...new Set(climbing.flatMap((s) => s.teamIds))],
-      cells: yearByYearCells(climbStat ?? {}, group),
+      cells: yearByYearCells(climbStat ?? {}, group, role),
       subSeasons: [...climbing].sort(bySeasonOrder).map((s) => ({
         key: `${s.year}-${s.sid}`,
         year: String(s.year),
         level: SPORT_LABEL[s.sid] ?? '',
         teamIds: s.teamIds,
-        cells: yearByYearCells(s.stat ?? {}, group),
+        cells: yearByYearCells(s.stat ?? {}, group, role),
       })),
     }
   }
@@ -679,19 +698,19 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, debutYear, cu
     totals.push({
       label: 'MLB',
       tier: 'mlb',
-      cells: yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group),
+      cells: yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group, role),
     })
   }
   if (milbVisible.length) {
     totals.push({
       label: 'MiLB',
       tier: 'milb',
-      cells: yearByYearCells(aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group),
+      cells: yearByYearCells(aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group, role),
     })
   }
 
   const columns = group === 'pitching'
-    ? ['W–L', 'ERA', 'IP', 'K', 'WHIP']
+    ? ['G', 'GS', role === 'CL' ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
     : ['G', 'AB', 'HR', 'RBI', 'AVG', 'OPS']
   return { columns, rows, climb, totals, footnote: stintCaption(foot, group) }
 }
@@ -1132,11 +1151,45 @@ export function transactionTimelineView(
 }
 
 // ---------------------------------------------------------------------------
+// Rehab assignment — whether the player is CURRENTLY on a minor-league rehab
+// stint, inferred from the same roster-move feed the timeline uses. A rehab
+// starts with an "Assigned" (ASG) row whose description says "rehab" (verified
+// live: "sent RHP Coleman Crow on a rehab assignment to Nashville Sounds") and
+// ends when he returns to the majors — a recall, an activation off the MLB
+// injured list, a real option down, or any non-rehab reassignment. So: find the
+// most recent rehab ASG, and treat it as active only when no such closing move
+// is dated after it. The feed is already capped at the spoiler cutoff, so a
+// game-scoped view reflects his status AS OF that game (a big leaguer only, so
+// it's gated on debutYear). Returns the rehab club { id, name } or null — the
+// caller shows a banner and pins his current-activity sections to MLB, since a
+// rehabber is a major leaguer passing through the minors, not a demotion.
+// ---------------------------------------------------------------------------
+export function detectRehabAssignment(transactions, debutYear) {
+  if (!debutYear) return null
+  const dateOf = (t) => t.effectiveDate || t.date || ''
+  const isRehab = (t) => t.typeCode === 'ASG' && /rehab/i.test(t.description || '')
+  const rehabs = (transactions ?? []).filter((t) => isRehab(t) && dateOf(t))
+  if (!rehabs.length) return null
+  const latest = rehabs.reduce((a, b) => (dateOf(a) >= dateOf(b) ? a : b))
+  const start = dateOf(latest)
+  const ends = (transactions ?? []).some((t) => {
+    if (dateOf(t) <= start) return false
+    const c = t.typeCode
+    if (c === 'CU' || c === 'OPT' || c === 'SE' || c === 'REL' || c === 'RET') return true
+    if (c === 'ASG' && !isRehab(t)) return true
+    return c === 'SC' && /activat/i.test(t.description || '') && /injured list/i.test(t.description || '')
+  })
+  if (ends) return null
+  const club = latest.toTeam
+  return club?.id ? { id: club.id, name: club.name || '' } : null
+}
+
+// ---------------------------------------------------------------------------
 // One stat block (a group's tiles + career + splits + logs). A normal player
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, logTagLevel = false }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles AND stands in for the register's current-season
   // row (see careerRegisterView), so that row can't move mid-game. `tileStat`
@@ -1154,12 +1207,12 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits, group),
     splitsLabel: group === 'pitching' ? 'opp. batter' : '',
-    gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8),
+    gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8, { tagLevel: logTagLevel }),
     // The unified MLB + MiLB career table. `career` (the API's MLB career line
     // for a debuted player) foots the MLB total; the current-season row uses
     // the date-cut `tile` so it can't move mid-game.
     register: careerRegisterView({
-      mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, debutYear,
+      mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
       currentStat: tile, currentSeason, currentSportId, careerStat: career,
     }),
   }
