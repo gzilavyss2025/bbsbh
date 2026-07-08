@@ -225,13 +225,13 @@ export function PlayerPage({ id, asOf, sportId }) {
                 <SectionTitle title="Season splits" note={block.splitsLabel} />
                 <Ledger
                   leftCols={1}
-                  head={['Split', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                  head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
                   rows={[
                     { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
                     { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
                   ].map(({ key, label, side }) => ({
                     key,
-                    cells: [label, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
+                    cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
                   }))}
                 />
               </>

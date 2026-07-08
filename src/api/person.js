@@ -285,12 +285,13 @@ export function pitcherTiles(stat, role) {
 // only righties, say) has no stat and renders as all dashes.
 function splitSide(stat, group) {
   if (!stat) {
-    return { slash: DASH, hr: DASH, rbi: DASH, xbh: DASH, soPct: DASH, bbPct: DASH }
+    return { count: DASH, slash: DASH, hr: DASH, rbi: DASH, xbh: DASH, soPct: DASH, bbPct: DASH }
   }
   const pa = group === 'pitching' ? num(stat.battersFaced) : num(stat.plateAppearances)
   const pct = (x) => (pa ? `${Math.round((num(x) / pa) * 100)}%` : DASH)
   const slash = [stat.avg, stat.obp, stat.ops].map((v) => v ?? DASH).join('/')
   return {
+    count: group === 'pitching' ? num(stat.battersFaced) : num(stat.atBats),
     slash,
     hr: num(stat.homeRuns),
     rbi: num(stat.rbi),
@@ -509,7 +510,7 @@ export function arsenalView(splits) {
 function yearByYearCells(st, group) {
   return group === 'pitching'
     ? [`${num(st.wins)}–${num(st.losses)}`, st.era ?? DASH, st.inningsPitched ?? DASH, num(st.strikeOuts), st.whip ?? DASH]
-    : [num(st.gamesPlayed), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
+    : [num(st.gamesPlayed), num(st.atBats), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
 }
 
 // A season's yearByYear splits at one level can include a synthetic,
@@ -691,7 +692,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, debutYear, cu
 
   const columns = group === 'pitching'
     ? ['W–L', 'ERA', 'IP', 'K', 'WHIP']
-    : ['G', 'HR', 'RBI', 'AVG', 'OPS']
+    : ['G', 'AB', 'HR', 'RBI', 'AVG', 'OPS']
   return { columns, rows, climb, totals, footnote: stintCaption(foot, group) }
 }
 
