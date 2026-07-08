@@ -784,8 +784,10 @@ export function dropRehabStints(splits, debutYear) {
 // REAL time with, earliest first, with the year(s) that stint spanned. A club
 // left and later rejoined gets a fresh stop each visit (see the stint fold
 // below), so the run reads in true career order. "Real time" is a threshold (10
-// games as a batter, 20 IP for a pitcher) applied per team-season, so a cup of
-// coffee or a pre-debut rehab stint drops out — a team is a single level, so
+// games as a batter, 20 IP for a pitcher) applied per team-season to MINOR-
+// league stints only — any MLB appearance always counts (even one AB / a third
+// of an inning) — so a MiLB cup of coffee or a pre-debut rehab stint drops out
+// but no big-league club ever does. A team is a single level, so
 // this also decides the level example: Yelich's 2013 keeps AA (49 G) but not
 // his 7 G at A+ or 5 G in the complex league. A post-debut MiLB season needs
 // more (see qualifies): it survives only when the minors were the primary home
@@ -835,7 +837,14 @@ export function careerTimelineView(splits, group, debutYear) {
   const minWork = group === 'pitching' ? 60 : 10
   const capWork = group === 'pitching' ? REHAB_CAP.outs : REHAB_CAP.games
   const qualifies = (a) => {
-    // Below the cup-of-coffee threshold (10 G / 20 IP) never counts as a stop.
+    // Any MLB action at all is real team history — even a single AB or a third
+    // of an inning puts that club on the map. The cup-of-coffee floor and the
+    // rehab test below apply to the MINORS only; a well-traveled reliever's
+    // sub-20-IP major-league stints must never be filtered (that left JP
+    // Feyereisen with only the Rays — his one 20+ IP club — of the several MLB
+    // teams he pitched for).
+    if (a.sportId === 1) return a.games >= 1 || a.outs >= 1
+    // Below the cup-of-coffee threshold (10 G / 20 IP) a MiLB stint never counts.
     if (work(a) < minWork) return false
     // A MiLB stint AFTER the debut year is rehab-assignment noise (or a brief
     // option down), NOT real team history — an established regular's stray AAA
@@ -844,7 +853,7 @@ export function careerTimelineView(splits, group, debutYear) {
     // or demotion) — the SAME absolute test the career register uses, so the
     // timeline and the table always agree on which post-debut stints are real.
     // The ascent (seasons up to and including the debut year) is always kept.
-    if (a.sportId !== 1 && debutYear && a.season > debutYear && work(a) < capWork) return false
+    if (debutYear && a.season > debutYear && work(a) < capWork) return false
     return true
   }
   const kept = [...byKey.values()].filter(qualifies)
@@ -1098,6 +1107,8 @@ export function transactionTimelineView(
     const short = MAJOR_AWARDS[a.id]
     if (!short || !a.date) continue
     const isAllStar = a.id === 'ALAS' || a.id === 'NLAS'
+    // A roster/team honor is one you're "named to"; a trophy is one you "win".
+    const named = a.id === 'MLBAFIRST' || a.id === 'MLBSECOND'
     push({
       sig: `AWD|${a.id}|${a.season}`,
       code: 'AWD',
@@ -1106,7 +1117,9 @@ export function transactionTimelineView(
       tone: 'award',
       description: isAllStar
         ? `Selected to the ${a.season} MLB All-Star Game.`
-        : `Won the ${a.season} ${a.name}.`,
+        : named
+          ? `Named to the ${a.season} ${a.name}.`
+          : `Won the ${a.season} ${a.name}.`,
       links: null,
       club: a.team?.id ? { id: a.team.id, name: a.team.teamName || a.team.name || '' } : null,
     })
