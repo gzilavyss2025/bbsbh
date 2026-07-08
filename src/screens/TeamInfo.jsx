@@ -10,11 +10,13 @@ import {
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
+import { prospectRankById } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { ProspectPill } from '../components/ProspectPill.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -30,6 +32,7 @@ export function TeamInfo({
   scorebookWeather,
   scorebookWeatherLoading,
   oppPitcherLine,
+  prospectPlayers,
   onNext,
   nextLabel,
   onReload,
@@ -69,7 +72,12 @@ export function TeamInfo({
 
       <Umpires officials={officials} />
 
-      <TeamSections feed={feed} side={side} oppPitcherLine={oppPitcherLine} />
+      <TeamSections
+        feed={feed}
+        side={side}
+        oppPitcherLine={oppPitcherLine}
+        prospectPlayers={prospectPlayers}
+      />
 
       <div className="pagenav">
         <button className="btn btn--next" onClick={onNext}>
@@ -92,6 +100,7 @@ export function LineupSpread({
   scorebookWeather,
   scorebookWeatherLoading,
   starterLines,
+  prospectPlayers,
   onNext,
   onReload,
   loading,
@@ -125,6 +134,7 @@ export function LineupSpread({
             uniform={uniforms?.[side]}
             // Each side FACES the other side's starter.
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
+            prospectPlayers={prospectPlayers}
           />
         ))}
       </div>
@@ -140,7 +150,7 @@ export function LineupSpread({
 
 // One club's column of the spread: name, its two team facts, then the same
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
-function TeamPanel({ feed, side, manager, uniform, oppPitcherLine }) {
+function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectPlayers }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   return (
     <section className="teampanel">
@@ -156,7 +166,12 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine }) {
         <Fact label="Manager" value={managerFact(manager)} />
         <Fact label="Uniform" value={uniform} />
       </dl>
-      <TeamSections feed={feed} side={side} oppPitcherLine={oppPitcherLine} />
+      <TeamSections
+        feed={feed}
+        side={side}
+        oppPitcherLine={oppPitcherLine}
+        prospectPlayers={prospectPlayers}
+      />
     </section>
   )
 }
@@ -233,7 +248,7 @@ function rosterFallbackGroups(roster) {
 
 // The team-specific body shared by the phone page and the spread's panels:
 // batting order, the opposing starter, and the opposing defense diamond.
-function TeamSections({ feed, side, oppPitcherLine }) {
+function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const season = feed?.gameData?.game?.season
@@ -261,9 +276,12 @@ function TeamSections({ feed, side, oppPitcherLine }) {
             {lineup.map((p) => (
               <li key={p.id} className="lineup__row">
                 <span className="lineup__order">{p.order}</span>
-                <PlayerLink id={p.id} className="lineup__name">
-                  {p.nameLastFirst.toUpperCase()}
-                </PlayerLink>
+                <span className="lineup__namewrap">
+                  <PlayerLink id={p.id} className="lineup__name">
+                    {p.nameLastFirst.toUpperCase()}
+                  </PlayerLink>
+                  <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                </span>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
                 <span className="lineup__pos">{p.position}</span>
               </li>
@@ -279,9 +297,12 @@ function TeamSections({ feed, side, oppPitcherLine }) {
                   <ul className="roster__list">
                     {roster.batters.map((p) => (
                       <li key={p.id} className="roster__row">
-                        <PlayerLink id={p.id} className="roster__name">
-                          {p.name.toUpperCase()}
-                        </PlayerLink>
+                        <span className="roster__namewrap">
+                          <PlayerLink id={p.id} className="roster__name">
+                            {p.name.toUpperCase()}
+                          </PlayerLink>
+                          <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                        </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
                       </li>
@@ -295,9 +316,12 @@ function TeamSections({ feed, side, oppPitcherLine }) {
                   <ul className="roster__list">
                     {roster.bullpen.map((p) => (
                       <li key={p.id} className="roster__row">
-                        <PlayerLink id={p.id} className="roster__name">
-                          {p.name.toUpperCase()}
-                        </PlayerLink>
+                        <span className="roster__namewrap">
+                          <PlayerLink id={p.id} className="roster__name">
+                            {p.name.toUpperCase()}
+                          </PlayerLink>
+                          <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                        </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
                       </li>
@@ -311,9 +335,12 @@ function TeamSections({ feed, side, oppPitcherLine }) {
                   <ul className="roster__list">
                     {roster.starters.map((p) => (
                       <li key={p.id} className="roster__row">
-                        <PlayerLink id={p.id} className="roster__name">
-                          {p.name.toUpperCase()}
-                        </PlayerLink>
+                        <span className="roster__namewrap">
+                          <PlayerLink id={p.id} className="roster__name">
+                            {p.name.toUpperCase()}
+                          </PlayerLink>
+                          <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                        </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
                       </li>
@@ -332,9 +359,12 @@ function TeamSections({ feed, side, oppPitcherLine }) {
         <h3 className="section__title">Opposing pitcher</h3>
         {oppPitcher ? (
           <div className="opp__pitcher">
-            <PlayerLink id={oppPitcher.id} className="opp__name">
-              {oppPitcher.nameLastFirst.toUpperCase()}
-            </PlayerLink>
+            <span className="opp__namewrap">
+              <PlayerLink id={oppPitcher.id} className="opp__name">
+                {oppPitcher.nameLastFirst.toUpperCase()}
+              </PlayerLink>
+              <ProspectPill rank={prospectRankById(prospectPlayers, oppPitcher.id)} />
+            </span>
             <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>
             {/* Season line (aggregates only, never this game's) — the numbers

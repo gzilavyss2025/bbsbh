@@ -16,9 +16,11 @@ import { revealDerived, rollingPitches } from '../api/derive.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
+import { prospectRankById } from '../api/prospects.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { ProspectPill } from '../components/ProspectPill.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
@@ -42,6 +44,7 @@ export function InningViewer({
   onReload,
   loading,
   pitcherRoles,
+  prospectPlayers,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -200,6 +203,7 @@ export function InningViewer({
               isNextToReveal={curIdx === revealedThrough + 1}
               getDerived={getDerived}
               onReveal={revealTo}
+              prospectPlayers={prospectPlayers}
             />
           </div>
         </div>
@@ -216,11 +220,13 @@ export function InningViewer({
             title={rosters.away.name}
             roster={rosters.away}
             revealedThrough={revealedThrough}
+            prospectPlayers={prospectPlayers}
           />
           <RosterPanel
             title={rosters.home.name}
             roster={rosters.home}
             revealedThrough={revealedThrough}
+            prospectPlayers={prospectPlayers}
           />
         </aside>
       </div>
@@ -276,6 +282,7 @@ function HalfInning({
   isNextToReveal,
   getDerived,
   onReveal,
+  prospectPlayers,
 }) {
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see LineupSection/DefenseSection). Positioned by reveal state:
@@ -291,6 +298,7 @@ function HalfInning({
         half={half}
         awayName={awayName}
         homeName={homeName}
+        prospectPlayers={prospectPlayers}
       />
       <DefenseSection
         feed={feed}
@@ -723,7 +731,7 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingName }) {
 // position, subs (pinch-hitter/runner/double-switch) folded in through first
 // pitch only (lineupEntering). Rendered outside the seal under the caller's
 // reveal gate: it's the reference you copy onto the sheet before scoring.
-function LineupSection({ feed, inning, half, awayName, homeName }) {
+function LineupSection({ feed, inning, half, awayName, homeName, prospectPlayers }) {
   const away = lineupEntering(feed, 'away', inning, half)
   const home = lineupEntering(feed, 'home', inning, half)
   if (away.length === 0 && home.length === 0) return null
@@ -731,8 +739,8 @@ function LineupSection({ feed, inning, half, awayName, homeName }) {
     <section className="lineupcard">
       <h4 className="lineupcard__title">Lineups</h4>
       <div className="lineupcard__teams">
-        <LineupTeam name={awayName || 'Away'} slots={away} />
-        <LineupTeam name={homeName || 'Home'} slots={home} />
+        <LineupTeam name={awayName || 'Away'} slots={away} prospectPlayers={prospectPlayers} />
+        <LineupTeam name={homeName || 'Home'} slots={home} prospectPlayers={prospectPlayers} />
       </div>
     </section>
   )
@@ -743,7 +751,7 @@ function LineupSection({ feed, inning, half, awayName, homeName }) {
 // occupant's jersey number │ fielding position right-aligned on a shared column.
 // An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
 // than shown as a bare header.
-function LineupTeam({ name, slots }) {
+function LineupTeam({ name, slots, prospectPlayers }) {
   if (slots.length === 0) return null
   return (
     <div className="lineupteam">
@@ -758,6 +766,7 @@ function LineupTeam({ name, slots }) {
                 {s.entries.map((e, i) => (
                   <LineupName key={i} entry={e} />
                 ))}
+                <ProspectPill rank={prospectRankById(prospectPlayers, cur.id)} />
               </span>
               <span className="lineupcard__meta">
                 {cur.jersey ? (
@@ -823,7 +832,7 @@ function splitBullpen(bullpen, roles) {
 // longer eligible — but ONLY once his entry sits at or below the reveal mark;
 // a substitution the user hasn't revealed their way to yet renders like any
 // other available player, so the card never hints at a sealed inning.
-function RosterPanel({ title, roster, revealedThrough }) {
+function RosterPanel({ title, roster, revealedThrough, prospectPlayers }) {
   const [open, setOpen] = useState(false)
   const empty =
     roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
@@ -851,9 +860,12 @@ function RosterPanel({ title, roster, revealedThrough }) {
               <ul className="roster__list">
                 {roster.bullpen.map((p) => (
                   <li key={p.id} className={rowClass(p)}>
-                    <PlayerLink id={p.id} className="roster__name">
-                      {p.nameLastFirst.toUpperCase()}
-                    </PlayerLink>
+                    <span className="roster__namewrap">
+                      <PlayerLink id={p.id} className="roster__name">
+                        {p.nameLastFirst.toUpperCase()}
+                      </PlayerLink>
+                      <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                    </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>
                   </li>
@@ -868,9 +880,12 @@ function RosterPanel({ title, roster, revealedThrough }) {
               <ul className="roster__list">
                 {roster.bench.map((p) => (
                   <li key={p.id} className={rowClass(p)}>
-                    <PlayerLink id={p.id} className="roster__name">
-                      {p.nameLastFirst.toUpperCase()}
-                    </PlayerLink>
+                    <span className="roster__namewrap">
+                      <PlayerLink id={p.id} className="roster__name">
+                        {p.nameLastFirst.toUpperCase()}
+                      </PlayerLink>
+                      <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                    </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{p.position}</span>
                   </li>
@@ -885,9 +900,12 @@ function RosterPanel({ title, roster, revealedThrough }) {
               <ul className="roster__list">
                 {roster.starters.map((p) => (
                   <li key={p.id} className={rowClass(p)}>
-                    <PlayerLink id={p.id} className="roster__name">
-                      {p.nameLastFirst.toUpperCase()}
-                    </PlayerLink>
+                    <span className="roster__namewrap">
+                      <PlayerLink id={p.id} className="roster__name">
+                        {p.nameLastFirst.toUpperCase()}
+                      </PlayerLink>
+                      <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                    </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>
                   </li>

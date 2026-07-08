@@ -10,11 +10,13 @@ import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'
+import { fetchTopProspects } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useAsyncOnFeed } from '../hooks/useAsyncOnFeed.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
+import { SPORT_IDS } from '../lib/teams.js'
 import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
@@ -149,6 +151,15 @@ export function GameView({ game, section, onSection }) {
     [game.away.id, game.home.id],
   )
 
+  // Top-100-prospect badges for the lineup/roster surfaces (see
+  // ProspectPill) — the app-wide snapshot, session-memoized so this costs
+  // nothing beyond the first call anywhere in the app. Gated to MiLB: the
+  // rare still-ranked MLB call-up isn't worth the extra badge noise on the
+  // majors' pages.
+  const prospects = useAsync(() => fetchTopProspects(), [])
+  const prospectPlayers =
+    game.sportId === SPORT_IDS.MLB ? null : prospects.data?.players ?? null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   // Where "Innings" returns to: the last half-inning page the user was on, so
@@ -263,6 +274,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           starterLines={starterLines.data}
+          prospectPlayers={prospectPlayers}
           onNext={() => onSection('top1')}
           onReload={feedState.reload}
           loading={feedState.loading}
@@ -278,6 +290,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           // The away side FACES the home starter.
           oppPitcherLine={starterLines.data?.home}
+          prospectPlayers={prospectPlayers}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
           onReload={feedState.reload}
@@ -293,6 +306,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}
+          prospectPlayers={prospectPlayers}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
           onReload={feedState.reload}
@@ -310,6 +324,7 @@ export function GameView({ game, section, onSection }) {
           onReload={feedState.reload}
           loading={feedState.loading}
           pitcherRoles={pitcherRoles.data}
+          prospectPlayers={prospectPlayers}
         />
       )}
       {feed && step === 3 && (

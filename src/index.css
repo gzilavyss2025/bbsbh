@@ -1563,6 +1563,19 @@ body {
   font-weight: var(--w-bold);
 }
 
+/* Wraps a name + its optional ProspectPill as one grid cell: the name still
+   truncates on one line, but a pill that doesn't fit drops to its own line
+   instead of fighting the row's fixed jersey/position columns for width. */
+.lineup__namewrap,
+.roster__namewrap,
+.opp__namewrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
 .lineup__pos,
 .roster__pos {
   font-family: var(--font-display);
