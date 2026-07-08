@@ -357,6 +357,9 @@ export function selectTeamMeta(feed, side) {
     id: box.id ?? gdTeam.id,
     name: gdTeam.name ?? box.name ?? '',
     teamName: gdTeam.teamName ?? box.teamName ?? '',
+    // The spelled-out nickname ("Diamondbacks"), distinct from teamName, which
+    // can be a marketing short form ("D-backs"). Falls back to teamName/name.
+    clubName: gdTeam.clubName ?? box.clubName ?? gdTeam.teamName ?? gdTeam.name ?? '',
     abbreviation: gdTeam.abbreviation ?? box.abbreviation ?? '',
     probablePitcher: pitcher,
   }

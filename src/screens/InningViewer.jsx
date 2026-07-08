@@ -194,8 +194,8 @@ export function InningViewer({
               label={effHalf === 'top' ? 'Top' : 'Bottom'}
               battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
               pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
-              awayAbbr={meta.away.abbreviation}
-              homeAbbr={meta.home.abbreviation}
+              awayName={meta.away.clubName}
+              homeName={meta.home.clubName}
               revealed={curIdx <= revealedThrough}
               isNextToReveal={curIdx === revealedThrough + 1}
               getDerived={getDerived}
@@ -270,13 +270,38 @@ function HalfInning({
   label,
   battingAbbr,
   pitchingAbbr,
-  awayAbbr,
-  homeAbbr,
+  awayName,
+  homeName,
   revealed,
   isNextToReveal,
   getDerived,
   onReveal,
 }) {
+  // The lineups + defense as they stand ENTERING this half — the pre-scoring
+  // reference (see LineupSection/DefenseSection). Positioned by reveal state:
+  // ABOVE the seal while the half is still sealed (stage the sheet before
+  // tapping), then BELOW the play-by-play once revealed (out of the way of the
+  // results). Only for a half the user has reached; a half further out stays
+  // fully sealed — its "entering" state would leak the intervening subs.
+  const enteringCards = (
+    <>
+      <LineupSection
+        feed={feed}
+        inning={inning}
+        half={half}
+        awayName={awayName}
+        homeName={homeName}
+      />
+      <DefenseSection
+        feed={feed}
+        inning={inning}
+        half={half}
+        fieldingSide={battingSide === 'away' ? 'home' : 'away'}
+        fieldingAbbr={pitchingAbbr}
+      />
+    </>
+  )
+
   return (
     <section className="half">
       <h3 className="half__title">
@@ -288,14 +313,15 @@ function HalfInning({
         </span>
       </h3>
 
-      {/* Pre-pitch subs/pitching changes for the half the user is about to
-          reveal — spoiler-free (see selectPrePitchChanges), shown ahead of the
-          seal so it can go straight into the scorebook margin before tapping
-          to reveal the rest of the half. Only for the immediate next half:
-          the same information for a half further out is what defense.js's
-          "flurry of subs" risk is about. */}
+      {/* Reached but still sealed: the lineups/defense sit ABOVE the seal, with
+          the pre-pitch change list, so the scorer stages the half before
+          tapping to reveal the results. See selectPrePitchChanges for why the
+          pre-pitch list is spoiler-free, and only for the immediate next half. */}
       {!revealed && isNextToReveal && (
-        <PrePitchChanges feed={feed} inning={inning} half={half} />
+        <>
+          <PrePitchChanges feed={feed} inning={inning} half={half} />
+          {enteringCards}
+        </>
       )}
 
       <SealBox
@@ -375,32 +401,8 @@ function HalfInning({
         }}
       </SealBox>
 
-      {/* The lineups and defense as they stand ENTERING this half — the
-          scorebook reference you set up before scoring the half, so they sit
-          OUTSIDE the seal (no tap needed) and show only the state at first
-          pitch: every sub/switch/pitching change announced before the half,
-          none of the changes made during it. That pre-pitch state is
-          spoiler-free the same way selectPrePitchChanges is, but only for a
-          half the user has already reached — so this is gated to the half at or
-          just past the reveal mark. A half further out stays fully sealed. */}
-      {(revealed || isNextToReveal) && (
-        <>
-          <LineupSection
-            feed={feed}
-            inning={inning}
-            half={half}
-            awayAbbr={awayAbbr}
-            homeAbbr={homeAbbr}
-          />
-          <DefenseSection
-            feed={feed}
-            inning={inning}
-            half={half}
-            fieldingSide={battingSide === 'away' ? 'home' : 'away'}
-            fieldingAbbr={pitchingAbbr}
-          />
-        </>
-      )}
+      {/* Revealed: the same cards drop BELOW the play-by-play (see enteringCards). */}
+      {revealed && enteringCards}
     </section>
   )
 }
@@ -721,7 +723,7 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingAbbr }) {
 // position, subs (pinch-hitter/runner/double-switch) folded in through first
 // pitch only (lineupEntering). Rendered outside the seal under the caller's
 // reveal gate: it's the reference you copy onto the sheet before scoring.
-function LineupSection({ feed, inning, half, awayAbbr, homeAbbr }) {
+function LineupSection({ feed, inning, half, awayName, homeName }) {
   const away = lineupEntering(feed, 'away', inning, half)
   const home = lineupEntering(feed, 'home', inning, half)
   if (away.length === 0 && home.length === 0) return null
@@ -729,41 +731,59 @@ function LineupSection({ feed, inning, half, awayAbbr, homeAbbr }) {
     <section className="lineupcard">
       <h4 className="lineupcard__title">Lineups</h4>
       <div className="lineupcard__teams">
-        <LineupTeam abbr={awayAbbr || 'Away'} slots={away} />
-        <LineupTeam abbr={homeAbbr || 'Home'} slots={home} />
+        <LineupTeam name={awayName || 'Away'} slots={away} />
+        <LineupTeam name={homeName || 'Home'} slots={home} />
       </div>
     </section>
   )
 }
 
-// One team's lineup column: the abbreviation, then a numbered list of its nine
-// batting slots. An empty side (a thin MiLB feed that never posted a lineup) is
-// dropped rather than shown as a bare header.
-function LineupTeam({ abbr, slots }) {
+// One team's lineup column: the club name spelled out, then a numbered list of
+// its nine batting slots. Each row reads name(s) on the left and the standing
+// occupant's jersey number │ fielding position right-aligned on a shared column.
+// An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
+// than shown as a bare header.
+function LineupTeam({ name, slots }) {
   if (slots.length === 0) return null
   return (
     <div className="lineupteam">
-      <h5 className="lineupteam__name">{abbr}</h5>
+      <h5 className="lineupteam__name">{name}</h5>
       <ol className="lineupcard__list">
-        {slots.map((s) => (
-          <li className="lineupcard__row" key={s.slot}>
-            <span className="lineupcard__slot">{s.slot}</span>
-            <span className="lineupcard__stack">
-              {s.entries.map((e, i) => (
-                <LineupName key={i} entry={e} />
-              ))}
-            </span>
-          </li>
-        ))}
+        {slots.map((s) => {
+          const cur = s.entries[s.entries.length - 1] // standing occupant
+          return (
+            <li className="lineupcard__row" key={s.slot}>
+              <span className="lineupcard__slot">{s.slot}</span>
+              <span className="lineupcard__names">
+                {s.entries.map((e, i) => (
+                  <LineupName key={i} entry={e} />
+                ))}
+              </span>
+              <span className="lineupcard__meta">
+                {cur.jersey ? (
+                  <span className="lineupcard__jersey">#{cur.jersey}</span>
+                ) : null}
+                {cur.jersey && cur.position ? (
+                  <span className="lineupcard__bar" aria-hidden="true">
+                    |
+                  </span>
+                ) : null}
+                {cur.position ? (
+                  <span className="lineupcard__pos">{cur.position}</span>
+                ) : null}
+              </span>
+            </li>
+          )
+        })}
       </ol>
     </div>
   )
 }
 
 // One batting-order slot's name stack — struck through when replaced, tagged
-// with the inning he entered while he's the standing occupant, and carrying his
-// jersey number and fielding position. Mirrors DefenseDiamond's DefenseName
-// styling for the same { last, inning, replaced } shape.
+// with the inning he entered while he's the standing occupant. Jersey/position
+// are pulled up to the row's right-aligned meta column, so this renders name +
+// enter-tag only. Mirrors DefenseDiamond's DefenseName styling.
 function LineupName({ entry }) {
   const entered = entry.inning != null && !entry.replaced
   return (
@@ -773,8 +793,6 @@ function LineupName({ entry }) {
       }`}
     >
       {entry.last.toUpperCase()}
-      {entry.jersey ? <span className="lineupcard__jersey">#{entry.jersey}</span> : null}
-      {entry.position ? <span className="lineupcard__pos">{entry.position}</span> : null}
       {entry.inning != null && (
         <span className="lineupcard__enter">({ordinal(entry.inning)})</span>
       )}

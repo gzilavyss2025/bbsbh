@@ -22,8 +22,15 @@ Both compute their result by walking play events only up to the target half's
 first pitch (`forEachEventBeforeFirstPitch`, `select.js`) — so a sub made mid-half
 is not reconstructed until the user reveals into it. `lineupEntering` also
 carries each occupant's jersey number and fielding position (inverted from
-`defenseEntering`), and the page shows **both** teams' lineups, not just the
-batting side's.
+`defenseEntering`), and the page shows **both** teams' lineups (headed by the
+spelled-out club name, `selectTeamMeta`'s `clubName` — "Diamondbacks", not "AZ"
+or the "D-backs" short form), each row's standing occupant reading name │
+number │ position, not just the batting side's.
+
+The cards are positioned by reveal state: **above** the seal while the half is
+still sealed (you stage the sheet before tapping), then **below** the
+play-by-play once revealed (out of the way of the results). Either way they
+stay outside the seal — the position just follows the reading flow.
 
 The caller-gating contract is identical to ADR-0003's: `InningViewer` renders
 the cards only when the half is at or one past the reveal mark

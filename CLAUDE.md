@@ -87,8 +87,9 @@ Enforced structurally by two conventions:
    defense diamond and both teams' lineup cards (each name with jersey +
    position) **as they stand entering a half** (subs through that half's first
    pitch only, none made during it), rendered *outside* the seal as the
-   pre-scoring reference and gated to `revealed || isNextToReveal` (ADR-0010).
-   The box score draws the whole-game alignment via
+   pre-scoring reference (above it while sealed, below the play-by-play once
+   revealed) and gated to `revealed || isNextToReveal` (ADR-0010). The box
+   score draws the whole-game alignment via
    `defenseEntering(…, Infinity, 'bottom')` inside its own seal.
 
 2. **`src/components/SealBox.jsx`** takes `children` as a render function,
