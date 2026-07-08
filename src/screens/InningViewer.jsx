@@ -297,7 +297,7 @@ function HalfInning({
         inning={inning}
         half={half}
         fieldingSide={battingSide === 'away' ? 'home' : 'away'}
-        fieldingAbbr={pitchingAbbr}
+        fieldingName={battingSide === 'away' ? homeName : awayName}
       />
     </>
   )
@@ -705,13 +705,13 @@ function PrePitchChanges({ feed, inning, half }) {
 // scorebook diamond and captioned with the fielding side. Shows the state at
 // first pitch (defenseEntering) — a change made during the half stays sealed —
 // so it's safe outside the seal under the caller's reveal gate.
-function DefenseSection({ feed, inning, half, fieldingSide, fieldingAbbr }) {
+function DefenseSection({ feed, inning, half, fieldingSide, fieldingName }) {
   const defense = defenseEntering(feed, fieldingSide, inning, half)
   if (defense.length === 0) return null
   return (
     <section className="halfdefense">
       <h4 className="halfdefense__title">
-        {fieldingAbbr ? `${fieldingAbbr} ` : ''}defense
+        {fieldingName ? `${fieldingName} ` : ''}defense
       </h4>
       <DefenseDiamond defense={defense} />
     </section>
@@ -747,7 +747,7 @@ function LineupTeam({ name, slots }) {
   if (slots.length === 0) return null
   return (
     <div className="lineupteam">
-      <h5 className="lineupteam__name">{name}</h5>
+      <h5 className="lineupteam__name">{name} Lineup</h5>
       <ol className="lineupcard__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
@@ -792,7 +792,10 @@ function LineupName({ entry }) {
         entered ? 'lineupcard__name--in' : ''
       }`}
     >
-      {entry.last.toUpperCase()}
+      <PlayerLink id={entry.id}>
+        {entry.last.toUpperCase()}
+        {entry.first ? `, ${entry.first}` : ''}
+      </PlayerLink>
       {entry.inning != null && (
         <span className="lineupcard__enter">({ordinal(entry.inning)})</span>
       )}

@@ -19,7 +19,7 @@
 // in the game yet, entering this half) comes from event replay, via
 // entrantsBeforeFirstPitch; the fielding position comes from defenseEntering.
 
-import { lastName, entryIndexById, entrantsBeforeFirstPitch } from './select.js'
+import { lastName, personNameParts, entryIndexById, entrantsBeforeFirstPitch } from './select.js'
 import { defenseEntering } from './defense.js'
 
 export function lineupEntering(feed, battingSide, throughInning, throughHalf) {
@@ -27,6 +27,7 @@ export function lineupEntering(feed, battingSide, throughInning, throughHalf) {
   const boxPlayers = team?.players ?? {}
   const players = feed?.gameData?.players ?? {}
   const nameOf = (id) => lastName(players[`ID${id}`] ?? {}) || '—'
+  const firstNameOf = (id) => personNameParts(players[`ID${id}`] ?? {}).first
   const entered = entryIndexById(feed)
 
   // Who's in the game as this half begins: starters (no entry event) always,
@@ -71,6 +72,7 @@ export function lineupEntering(feed, battingSide, throughInning, throughHalf) {
       chain.push({
         id: m.id,
         last: nameOf(m.id),
+        first: firstNameOf(m.id),
         jersey: jerseyOf(m.id),
         position: posOf(m.id),
         inning: idx != null ? Math.floor(idx / 2) + 1 : null,
