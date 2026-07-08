@@ -11,14 +11,25 @@ import { fetchTeams } from './schedule.js'
 // footer search is almost always for someone playing right now; capped at
 // `limit` so a common surname doesn't flood the dropdown. Degrades to [] so a
 // flaky request just shows "no results" rather than an error state.
+//
+// Cached in-memory per normalized query for the session — retyping/backspacing
+// to a query already searched this visit (e.g. "jud" -> "judg" -> "jud") reuses
+// the result instead of refetching. No TTL: a person's id/name/position/team
+// is effectively static within a session. Capped at MAX_SEARCH_CACHE entries,
+// evicting the oldest, so a long session's search box doesn't grow unbounded.
+const searchPeopleCache = new Map()
+const MAX_SEARCH_CACHE = 200
+
 export async function searchPeople(query, limit = 8) {
   const q = (query ?? '').trim()
   if (q.length < 2) return []
+  const key = q.toLowerCase()
+  if (searchPeopleCache.has(key)) return searchPeopleCache.get(key)
   try {
     const data = await getJson(
       `/api/v1/people/search?names=${encodeURIComponent(q)}&hydrate=currentTeam`,
     )
-    return (data.people ?? [])
+    const result = (data.people ?? [])
       .map((p) => ({
         id: p.id,
         name: p.fullName ?? '',
@@ -28,6 +39,11 @@ export async function searchPeople(query, limit = 8) {
       }))
       .sort((a, b) => Number(b.active) - Number(a.active))
       .slice(0, limit)
+    if (searchPeopleCache.size >= MAX_SEARCH_CACHE) {
+      searchPeopleCache.delete(searchPeopleCache.keys().next().value)
+    }
+    searchPeopleCache.set(key, result)
+    return result
   } catch {
     return []
   }
