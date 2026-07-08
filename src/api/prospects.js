@@ -34,6 +34,23 @@ export function orgProspectRankById(orgProspects, playerId) {
   return row ? row.orgRank : null
 }
 
+// Everything a ProspectPill needs for one player, resolved from a single
+// fetchTopProspects() snapshot with no extra fetching: the overall Top 100
+// rank when he's ranked there, else his own org's farm-system rank (1-30)
+// plus that org's team id for the pill's logo — no affiliate-roster
+// resolution needed (unlike orgProspectsForTeam's table), since the
+// snapshot's own teamId field already IS the player's parent org. Both
+// rank fields are null when he's unranked anywhere.
+export function prospectBadge(snapshot, playerId) {
+  const orgRow = (snapshot?.orgProspects ?? []).find((p) => p.playerId === playerId)
+  return {
+    rank: prospectRankById(snapshot?.players, playerId),
+    orgRank: orgRow?.orgRank ?? null,
+    orgTeamId: orgRow?.teamId ?? null,
+    orgTeamName: orgRow?.team ?? null,
+  }
+}
+
 // Pure — no fetching. rosterIdsByTeam: { [teamId]: number[] } (person ids on
 // a team's active roster); prospectPlayerIds: Set<number> (every ranked
 // player's id). Used by the MiLB game-card badge.

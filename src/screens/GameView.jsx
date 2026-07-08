@@ -151,14 +151,13 @@ export function GameView({ game, section, onSection }) {
     [game.away.id, game.home.id],
   )
 
-  // Top-100-prospect badges for the lineup/roster surfaces (see
-  // ProspectPill) — the app-wide snapshot, session-memoized so this costs
-  // nothing beyond the first call anywhere in the app. Gated to MiLB: the
-  // rare still-ranked MLB call-up isn't worth the extra badge noise on the
-  // majors' pages.
+  // Prospect badges for the lineup/roster surfaces (see ProspectPill /
+  // prospectBadge) — the app-wide Top 100 + org-farm-system snapshot,
+  // session-memoized so this costs nothing beyond the first call anywhere in
+  // the app. Gated to MiLB: the rare still-ranked MLB call-up isn't worth the
+  // extra badge noise on the majors' pages.
   const prospects = useAsync(() => fetchTopProspects(), [])
-  const prospectPlayers =
-    game.sportId === SPORT_IDS.MLB ? null : prospects.data?.players ?? null
+  const prospectsData = game.sportId === SPORT_IDS.MLB ? null : prospects.data ?? null
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
@@ -274,7 +273,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           starterLines={starterLines.data}
-          prospectPlayers={prospectPlayers}
+          prospectsData={prospectsData}
           onNext={() => onSection('top1')}
           onReload={feedState.reload}
           loading={feedState.loading}
@@ -290,7 +289,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           // The away side FACES the home starter.
           oppPitcherLine={starterLines.data?.home}
-          prospectPlayers={prospectPlayers}
+          prospectsData={prospectsData}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
           onReload={feedState.reload}
@@ -306,7 +305,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}
-          prospectPlayers={prospectPlayers}
+          prospectsData={prospectsData}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
           onReload={feedState.reload}
@@ -324,7 +323,7 @@ export function GameView({ game, section, onSection }) {
           onReload={feedState.reload}
           loading={feedState.loading}
           pitcherRoles={pitcherRoles.data}
-          prospectPlayers={prospectPlayers}
+          prospectsData={prospectsData}
         />
       )}
       {feed && step === 3 && (

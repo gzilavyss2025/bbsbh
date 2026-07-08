@@ -16,7 +16,7 @@ import { revealDerived, rollingPitches } from '../api/derive.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
-import { prospectRankById } from '../api/prospects.js'
+import { prospectBadge } from '../api/prospects.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
@@ -44,7 +44,7 @@ export function InningViewer({
   onReload,
   loading,
   pitcherRoles,
-  prospectPlayers,
+  prospectsData,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -203,7 +203,7 @@ export function InningViewer({
               isNextToReveal={curIdx === revealedThrough + 1}
               getDerived={getDerived}
               onReveal={revealTo}
-              prospectPlayers={prospectPlayers}
+              prospectsData={prospectsData}
             />
           </div>
         </div>
@@ -220,13 +220,13 @@ export function InningViewer({
             title={rosters.away.name}
             roster={rosters.away}
             revealedThrough={revealedThrough}
-            prospectPlayers={prospectPlayers}
+            prospectsData={prospectsData}
           />
           <RosterPanel
             title={rosters.home.name}
             roster={rosters.home}
             revealedThrough={revealedThrough}
-            prospectPlayers={prospectPlayers}
+            prospectsData={prospectsData}
           />
         </aside>
       </div>
@@ -282,7 +282,7 @@ function HalfInning({
   isNextToReveal,
   getDerived,
   onReveal,
-  prospectPlayers,
+  prospectsData,
 }) {
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see LineupSection/DefenseSection). Positioned by reveal state:
@@ -298,7 +298,7 @@ function HalfInning({
         half={half}
         awayName={awayName}
         homeName={homeName}
-        prospectPlayers={prospectPlayers}
+        prospectsData={prospectsData}
       />
       <DefenseSection
         feed={feed}
@@ -731,7 +731,7 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingName }) {
 // position, subs (pinch-hitter/runner/double-switch) folded in through first
 // pitch only (lineupEntering). Rendered outside the seal under the caller's
 // reveal gate: it's the reference you copy onto the sheet before scoring.
-function LineupSection({ feed, inning, half, awayName, homeName, prospectPlayers }) {
+function LineupSection({ feed, inning, half, awayName, homeName, prospectsData }) {
   const away = lineupEntering(feed, 'away', inning, half)
   const home = lineupEntering(feed, 'home', inning, half)
   if (away.length === 0 && home.length === 0) return null
@@ -739,8 +739,8 @@ function LineupSection({ feed, inning, half, awayName, homeName, prospectPlayers
     <section className="lineupcard">
       <h4 className="lineupcard__title">Lineups</h4>
       <div className="lineupcard__teams">
-        <LineupTeam name={awayName || 'Away'} slots={away} prospectPlayers={prospectPlayers} />
-        <LineupTeam name={homeName || 'Home'} slots={home} prospectPlayers={prospectPlayers} />
+        <LineupTeam name={awayName || 'Away'} slots={away} prospectsData={prospectsData} />
+        <LineupTeam name={homeName || 'Home'} slots={home} prospectsData={prospectsData} />
       </div>
     </section>
   )
@@ -751,7 +751,7 @@ function LineupSection({ feed, inning, half, awayName, homeName, prospectPlayers
 // occupant's jersey number │ fielding position right-aligned on a shared column.
 // An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
 // than shown as a bare header.
-function LineupTeam({ name, slots, prospectPlayers }) {
+function LineupTeam({ name, slots, prospectsData }) {
   if (slots.length === 0) return null
   return (
     <div className="lineupteam">
@@ -766,7 +766,7 @@ function LineupTeam({ name, slots, prospectPlayers }) {
                 {s.entries.map((e, i) => (
                   <LineupName key={i} entry={e} />
                 ))}
-                <ProspectPill rank={prospectRankById(prospectPlayers, cur.id)} />
+                <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
               </span>
               <span className="lineupcard__meta">
                 {cur.jersey ? (
@@ -832,7 +832,7 @@ function splitBullpen(bullpen, roles) {
 // longer eligible — but ONLY once his entry sits at or below the reveal mark;
 // a substitution the user hasn't revealed their way to yet renders like any
 // other available player, so the card never hints at a sealed inning.
-function RosterPanel({ title, roster, revealedThrough, prospectPlayers }) {
+function RosterPanel({ title, roster, revealedThrough, prospectsData }) {
   const [open, setOpen] = useState(false)
   const empty =
     roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
@@ -864,7 +864,7 @@ function RosterPanel({ title, roster, revealedThrough, prospectPlayers }) {
                       <PlayerLink id={p.id} className="roster__name">
                         {p.nameLastFirst.toUpperCase()}
                       </PlayerLink>
-                      <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                      <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                     </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>
@@ -884,7 +884,7 @@ function RosterPanel({ title, roster, revealedThrough, prospectPlayers }) {
                       <PlayerLink id={p.id} className="roster__name">
                         {p.nameLastFirst.toUpperCase()}
                       </PlayerLink>
-                      <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                      <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                     </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{p.position}</span>
@@ -904,7 +904,7 @@ function RosterPanel({ title, roster, revealedThrough, prospectPlayers }) {
                       <PlayerLink id={p.id} className="roster__name">
                         {p.nameLastFirst.toUpperCase()}
                       </PlayerLink>
-                      <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                      <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                     </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>

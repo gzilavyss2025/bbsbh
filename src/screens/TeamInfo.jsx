@@ -10,7 +10,7 @@ import {
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
-import { prospectRankById } from '../api/prospects.js'
+import { prospectBadge } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
@@ -32,7 +32,7 @@ export function TeamInfo({
   scorebookWeather,
   scorebookWeatherLoading,
   oppPitcherLine,
-  prospectPlayers,
+  prospectsData,
   onNext,
   nextLabel,
   onReload,
@@ -76,7 +76,7 @@ export function TeamInfo({
         feed={feed}
         side={side}
         oppPitcherLine={oppPitcherLine}
-        prospectPlayers={prospectPlayers}
+        prospectsData={prospectsData}
       />
 
       <div className="pagenav">
@@ -100,7 +100,7 @@ export function LineupSpread({
   scorebookWeather,
   scorebookWeatherLoading,
   starterLines,
-  prospectPlayers,
+  prospectsData,
   onNext,
   onReload,
   loading,
@@ -134,7 +134,7 @@ export function LineupSpread({
             uniform={uniforms?.[side]}
             // Each side FACES the other side's starter.
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
-            prospectPlayers={prospectPlayers}
+            prospectsData={prospectsData}
           />
         ))}
       </div>
@@ -150,7 +150,7 @@ export function LineupSpread({
 
 // One club's column of the spread: name, its two team facts, then the same
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
-function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectPlayers }) {
+function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   return (
     <section className="teampanel">
@@ -170,7 +170,7 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectPlaye
         feed={feed}
         side={side}
         oppPitcherLine={oppPitcherLine}
-        prospectPlayers={prospectPlayers}
+        prospectsData={prospectsData}
       />
     </section>
   )
@@ -248,7 +248,7 @@ function rosterFallbackGroups(roster) {
 
 // The team-specific body shared by the phone page and the spread's panels:
 // batting order, the opposing starter, and the opposing defense diamond.
-function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
+function TeamSections({ feed, side, oppPitcherLine, prospectsData }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const season = feed?.gameData?.game?.season
@@ -280,7 +280,7 @@ function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
                   <PlayerLink id={p.id} className="lineup__name">
                     {p.nameLastFirst.toUpperCase()}
                   </PlayerLink>
-                  <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                  <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                 </span>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
                 <span className="lineup__pos">{p.position}</span>
@@ -301,7 +301,7 @@ function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
                           <PlayerLink id={p.id} className="roster__name">
                             {p.name.toUpperCase()}
                           </PlayerLink>
-                          <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                          <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
@@ -320,7 +320,7 @@ function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
                           <PlayerLink id={p.id} className="roster__name">
                             {p.name.toUpperCase()}
                           </PlayerLink>
-                          <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                          <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
@@ -339,7 +339,7 @@ function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
                           <PlayerLink id={p.id} className="roster__name">
                             {p.name.toUpperCase()}
                           </PlayerLink>
-                          <ProspectPill rank={prospectRankById(prospectPlayers, p.id)} />
+                          <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
@@ -363,7 +363,7 @@ function TeamSections({ feed, side, oppPitcherLine, prospectPlayers }) {
               <PlayerLink id={oppPitcher.id} className="opp__name">
                 {oppPitcher.nameLastFirst.toUpperCase()}
               </PlayerLink>
-              <ProspectPill rank={prospectRankById(prospectPlayers, oppPitcher.id)} />
+              <ProspectPill {...prospectBadge(prospectsData, oppPitcher.id)} />
             </span>
             <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>

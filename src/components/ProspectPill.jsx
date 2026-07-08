@@ -1,18 +1,29 @@
 import { leagueLogoUrl } from '../lib/teams.js'
+import { TeamLogo } from './TeamLogo.jsx'
 
-// A neutral "Top 100 prospect" pill (not a performance judgment) for a game's
-// own pages (lineups, rosters) — the MLB Pipeline mark plus overall rank.
-// Game pages only carry the app-wide Top 100 snapshot (see
-// src/api/prospects.js), not the org-farm-system tree TeamPage.jsx resolves
-// for its own roster, so this only ever shows the overall rank. Renders
-// nothing when the player isn't ranked, so callers can splice it in
-// unconditionally.
-export function ProspectPill({ rank }) {
-  if (!rank) return null
-  return (
-    <span className="prospectpill">
-      <img src={leagueLogoUrl()} alt="" className="prospectpill__logo" />
-      #{rank} PROSPECT
-    </span>
-  )
+// A neutral "prospect" pill (not a performance judgment) for a game's own
+// pages (lineups, rosters): the MLB Pipeline mark + overall rank when the
+// player is in the national Top 100, else his own org's logo + his rank on
+// that org's farm-system leaderboard (1-30). Renders nothing when neither is
+// set, so callers can splice it in unconditionally — see prospectBadge
+// (src/api/prospects.js) for how these props get resolved from the app's
+// Top-100 snapshot.
+export function ProspectPill({ rank, orgRank, orgTeamId, orgTeamName }) {
+  if (rank) {
+    return (
+      <span className="prospectpill">
+        <img src={leagueLogoUrl()} alt="" className="prospectpill__logo" />
+        #{rank} PROSPECT
+      </span>
+    )
+  }
+  if (orgRank) {
+    return (
+      <span className="prospectpill">
+        <TeamLogo teamId={orgTeamId} name={orgTeamName} size={12} />
+        #{orgRank} PROSPECT
+      </span>
+    )
+  }
+  return null
 }
