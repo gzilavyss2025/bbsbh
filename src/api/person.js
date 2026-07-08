@@ -346,7 +346,7 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
 // not-yet-revealed game's date and outcome.
 // ---------------------------------------------------------------------------
 
-const FIRSTS_DEFS = [
+export const FIRSTS_DEFS = [
   { key: 'hit', label: 'First Hit', test: (st) => num(st.hits) > 0 },
   {
     key: 'xbh',
@@ -388,6 +388,32 @@ export function firstsFromGameLog(splits, cutoff, defs = FIRSTS_DEFS) {
       : null
   }
   return { events, rowsAscending }
+}
+
+// The debut season's game log alone misses any milestone a player first reached
+// in a LATER season — a late-September cameo debut (Bethancourt: one 2013 game,
+// only a strikeout) gets his first hit/HR/run seasons later. So use the
+// per-season year-by-year splits to find the earliest SEASON each milestone
+// occurred; the caller then fetches just those seasons' game logs to pin the
+// exact game. A milestone the player never reached (a reliever's save, a slap
+// hitter's home run) maps to null and costs no fetch. Capped at `throughYear`
+// (the as-of / current season) so a scoped past view never reaches past it;
+// the same-season game-log date filter in firstsFromGameLog still trims within
+// the boundary season. Same monotonic `stat > 0` tests as the game-log defs, so
+// a season aggregate that passes is exactly a season where the milestone
+// happened. Returns the sorted, de-duplicated set of seasons to fetch.
+export function firstMilestoneSeasons(ybySplits, defs, throughYear) {
+  const seasons = new Set()
+  for (const def of defs) {
+    let earliest = null
+    for (const s of ybySplits ?? []) {
+      const yr = Number(s.season)
+      if (!Number.isFinite(yr) || (throughYear && yr > throughYear)) continue
+      if (def.test(s.stat ?? {}) && (earliest === null || yr < earliest)) earliest = yr
+    }
+    if (earliest !== null) seasons.add(earliest)
+  }
+  return [...seasons].sort((a, b) => a - b)
 }
 
 // ---------------------------------------------------------------------------
