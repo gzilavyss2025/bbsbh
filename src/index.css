@@ -4676,15 +4676,23 @@ body {
   margin: 0 0 6px;
 }
 
-/* The full standings table carries 11 numeric columns, so it scrolls inside
-   .ledger-wrap on a phone — pin the team column so a name stays put while the
-   splits/runs scroll past it. Tighter cells than the team-page's compact
-   standings keep the scroll short. */
+/* Progressive disclosure. The content column is capped at 440px until the
+   app's 740px wide layout kicks in, so on a phone the full 11-number table
+   would overflow — instead the phone shows the essentials (W/L/Pct/GB + run
+   differential, the one compact "advanced" stat) with NO horizontal scroll,
+   and the wide layout reveals the rest (home/away splits, runs for/against,
+   streak, last-ten). `.st-ext` columns are hidden below the breakpoint. */
 .standings--full th,
 .standings--full td {
   padding: 6px 6px;
   font-size: 12px;
 }
+.standings--full .st-ext {
+  display: none;
+}
+/* Team column pinned as a safety net: the phone set fits without scroll, but a
+   large accessibility font (or a very long club name) can still force overflow,
+   and a stuck team name keeps the row readable when it does. */
 .standings--full th.team,
 .standings--full td.team {
   position: sticky;
@@ -4701,6 +4709,23 @@ body {
    the pinned column. */
 .standings--full tr.is-me td.team {
   background: var(--field-soft);
+}
+
+@media (min-width: 740px) {
+  /* Wide layout has room for the whole table — cap the page a touch narrower
+     than the 960px slate width so a 12-column standings grid stays legible
+     rather than stretching into sparse cells, and let the extra columns show. */
+  .screen.standings-screen {
+    max-width: 760px;
+  }
+  .standings--full .st-ext {
+    display: table-cell;
+  }
+  .standings--full th,
+  .standings--full td {
+    padding: 8px 9px;
+    font-size: 13px;
+  }
 }
 
 /* ranked team stats */

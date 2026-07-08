@@ -108,7 +108,7 @@ export function StandingsPage() {
   const refreshing = loading && leagues.length > 0
 
   return (
-    <div className="screen">
+    <div className="screen standings-screen">
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">Standings</h1>
@@ -186,13 +186,13 @@ export function StandingsPage() {
                         <th>L</th>
                         <th>Pct</th>
                         <th>GB</th>
-                        <th>Home</th>
-                        <th>Away</th>
-                        <th>RS</th>
-                        <th>RA</th>
+                        <th className="st-ext">Home</th>
+                        <th className="st-ext">Away</th>
+                        <th className="st-ext">RS</th>
+                        <th className="st-ext">RA</th>
                         <th>Diff</th>
-                        <th>Strk</th>
-                        <th>L10</th>
+                        <th className="st-ext">Strk</th>
+                        <th className="st-ext">L10</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -208,13 +208,13 @@ export function StandingsPage() {
                           <td>{t.l}</td>
                           <td>{t.pct}</td>
                           <td>{t.gb}</td>
-                          <td>{t.home}</td>
-                          <td>{t.away}</td>
-                          <td>{t.rs}</td>
-                          <td>{t.ra}</td>
+                          <td className="st-ext">{t.home}</td>
+                          <td className="st-ext">{t.away}</td>
+                          <td className="st-ext">{t.rs}</td>
+                          <td className="st-ext">{t.ra}</td>
                           <td className={t.diffTone}>{t.diff}</td>
-                          <td>{t.streak}</td>
-                          <td>{t.l10}</td>
+                          <td className="st-ext">{t.streak}</td>
+                          <td className="st-ext">{t.l10}</td>
                         </tr>
                       ))}
                     </tbody>
