@@ -3,14 +3,14 @@ import {
   fetchPersonStats,
   fetchMilbYearByYear,
   fetchMilbByDateRange,
-  fetchGamesByPk,
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
   fetchTeamLogoTint,
-  fetchTeam,
   findFirstStart,
   findFirstStrikeoutBatter,
-} from '../api/mlb.js'
+} from '../api/person-fetch.js'
+import { fetchGamesByPk } from '../api/schedule.js'
+import { fetchTeam } from '../api/team.js'
 import {
   personBio,
   personSportId,

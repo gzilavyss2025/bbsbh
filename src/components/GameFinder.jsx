@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchHeadToHead } from '../api/mlb.js'
+import { fetchHeadToHead } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'

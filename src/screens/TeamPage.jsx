@@ -4,12 +4,12 @@ import {
   fetchTeamRoster,
   fetchStandings,
   fetchLeagueTeamStats,
-  fetchAllStarRosterIds,
   fetchAffiliates,
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
-  fetchTeamSchedule,
-} from '../api/mlb.js'
+} from '../api/team.js'
+import { fetchAllStarRosterIds } from '../api/person-fetch.js'
+import { fetchTeamSchedule } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../api/prospects.js'

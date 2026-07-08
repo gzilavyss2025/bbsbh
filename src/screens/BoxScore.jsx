@@ -1,5 +1,5 @@
 import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
-import { managerLabel } from '../api/mlb.js'
+import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'

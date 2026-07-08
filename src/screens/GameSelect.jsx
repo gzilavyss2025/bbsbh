@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
-import { fetchSchedule, fetchScheduleUniforms, fetchRosterIdsForTeams } from '../api/mlb.js'
+import { fetchSchedule } from '../api/schedule.js'
+import { fetchScheduleUniforms } from '../api/uniforms.js'
+import { fetchRosterIdsForTeams } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchGameFeed,
-  fetchGameUniforms,
   fetchManager,
   fetchPitcherSeasonLine,
-  fetchTeamRoster,
   fetchWinProbability,
-  uniformSummary,
-} from '../api/mlb.js'
+} from '../api/game.js'
+import { fetchGameUniforms, uniformSummary } from '../api/uniforms.js'
+import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'

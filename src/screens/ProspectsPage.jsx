@@ -1,4 +1,4 @@
-import { fetchAffiliates, fetchRosterIdsForTeams } from '../api/mlb.js'
+import { fetchAffiliates, fetchRosterIdsForTeams } from '../api/team.js'
 import { fetchTopProspects, prospectAffiliateMap } from '../api/prospects.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { fetchLeagueStandings } from '../api/mlb.js'
+import { fetchLeagueStandings } from '../api/team.js'
 import { shapeStandings } from '../api/standings.js'
 import { PINNED_TEAM_ID } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'

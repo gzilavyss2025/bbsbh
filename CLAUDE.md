@@ -145,18 +145,29 @@ slate-provided seed, else via `resolveGame` (scans the date's slate across level
 and matches the abbreviation slug) for cold loads / shared links. `vercel.json`
 rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 
-**Data layer** (`src/api/`):
-- `mlb.js` — thin fetch wrapper. Schedule/slate (`hydrate=team` for the
-  abbreviation + teamName the bare row lacks), `resolveGame`, the full game feed
-  (`/api/v1.1/game/{gamePk}/feed/live`), a **separate** `/teams/{id}/coaches`
-  call for managers (they are **not** in the live feed),
-  `/api/v1/uniforms/game` for what each club is wearing (also not in the feed;
-  spoiler-free but empty until ~first pitch, so it rides the feed's
-  fetch/reload in `GameView` and renders on the lineup pages + box score), and
-  a **separate** `/api/v1/game/{gamePk}/winProbability` call for per-play WPA —
-  the sole source of the box score's three stars (the feed carries no WPA). It's
-  score-revealing, so `GameView` fetches it lazily and the DOM only gets it
-  inside the box-score seal; it's null-guarded (absent at most MiLB parks).
+**Data layer** (`src/api/`) — fetch wrappers around the public MLB Stats API,
+split by topic (all share `statsapi.js`'s `getJson`; a shared header there
+notes the gamePk field paths were verified against):
+- `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
+- `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
+  teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
+  `fetchHeadToHead`, `fetchTeamSchedule`.
+- `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
+  the live feed; spoiler-free but empty until ~first pitch, so it rides the
+  feed's fetch/reload in `GameView` and renders on the lineup pages + box
+  score).
+- `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
+  **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
+  live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call
+  for per-play WPA — the sole source of the box score's three stars (the feed
+  carries no WPA). It's score-revealing, so `GameView` fetches it lazily and
+  the DOM only gets it inside the box-score seal; it's null-guarded (absent at
+  most MiLB parks).
+- `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
+  (see `person.js` below for the pure shaping). Read by the player page only —
+  never wired into a sealed game surface.
+- `team.js` — team identity, roster, affiliates, standings, ranked team stats.
+- `search.js` — the footer's player/team directory search.
 - `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
   returns the STARTING nine, from each boxscore player's own `battingOrder`
   value (a starter's is an exact multiple of 100; a sub's is offset 801/802…) —
@@ -219,8 +230,9 @@ stale-while-revalidate for the live-game Refresh, never across games/dates.
   scores, and the logo CDN (`teamLogoUrl` in `teams.js`). The Brewers (id 158)
   are pinned to the top of the slate (`PINNED_TEAM_ID`).
 - **Verify feed field paths against a live game.** The MLB feed shape is
-  undocumented; `mlb.js` notes paths were checked against a specific gamePk. When
-  reading a new field, confirm it against a real response, don't guess.
+  undocumented; `api/statsapi.js` notes paths were checked against a specific
+  gamePk. When reading a new field, confirm it against a real response, don't
+  guess.
 - **Styling is a token-based design system.** All CSS lives in `src/index.css`
   which imports `src/tokens/*.css` (colors, typography, spacing, effects, fonts).
   The visual metaphor is a paper scorebook: manila paper, navy ink, pencil

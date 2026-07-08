@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchTeams } from '../api/mlb.js'
+import { fetchTeams } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'

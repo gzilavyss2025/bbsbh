@@ -4,7 +4,7 @@
 // *), so we read the actual fills out of the markup rather than guessing or
 // maintaining a per-club color table — statsapi carries no color field, and
 // there are hundreds of MiLB clubs. Pure string/number math; the fetching lives
-// in api/mlb.js (fetchTeamLogoTint).
+// in api/person-fetch.js (fetchTeamLogoTint).
 
 // Every hex fill in the SVG, normalized to 6-digit lowercase. Handles both
 // `fill="#rgb"` / `fill="#rrggbb"` attributes and `fill:#…` inside a style="".

@@ -8,7 +8,7 @@ import {
   selectOpposingDefense,
   lastFirst,
 } from '../api/select.js'
-import { fetchTeamRoster } from '../api/mlb.js'
+import { fetchTeamRoster } from '../api/team.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'

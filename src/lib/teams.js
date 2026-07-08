@@ -22,6 +22,17 @@ export const SPORT_IDS = {
 // Every level we search across when the user types a team name.
 export const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
+// A team's slug-safe abbreviation, derived from a schedule/roster payload's
+// own team object. Some hydrations omit `abbreviation` (thin MiLB rows,
+// hydration outages); an empty one would build a broken/ambiguous matchup
+// slug or stat-split label, so fall back to the first letters of the name.
+export function teamAbbr(team) {
+  return (
+    team?.abbreviation ||
+    (team?.teamName || team?.name || '').replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase()
+  )
+}
+
 // The level toggle, in display order — one definition for every screen that
 // offers the MLB/AAA/AA/A+/A switch (the slate, the logo sheet), so the two
 // can't drift.

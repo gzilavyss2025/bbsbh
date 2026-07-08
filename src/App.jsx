@@ -7,7 +7,7 @@ import { PlayerPage } from './screens/PlayerPage.jsx'
 import { ProspectsPage } from './screens/ProspectsPage.jsx'
 import { StandingsPage } from './screens/StandingsPage.jsx'
 import { TeamPage } from './screens/TeamPage.jsx'
-import { resolveGame } from './api/mlb.js'
+import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import {

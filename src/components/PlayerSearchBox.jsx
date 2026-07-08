@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { searchPeople } from '../api/mlb.js'
+import { searchPeople } from '../api/search.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js'
 import { useNav } from '../lib/nav.js'

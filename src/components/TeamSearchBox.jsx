@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchTeamDirectory, searchTeams } from '../api/mlb.js'
+import { fetchTeamDirectory, searchTeams } from '../api/search.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
