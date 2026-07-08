@@ -3662,15 +3662,23 @@ body {
   align-items: center;
   gap: 8px;
 }
-.topperf__shot {
+/* iPhone-width default: a smaller headshot than the tablet/desktop size below
+   (which restores 32px in the min-width: 740px block) — the row already
+   carries a team logo + two lines of text, so a big portrait crowds it on a
+   narrow screen. */
+/* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
+   this reliably outranks the base .shot's own width/height/font-size, which
+   otherwise wins by source order alone (same 0-1-0 specificity, declared
+   later in the file). */
+.shot.topperf__shot {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.topperf__shot.shot--fallback {
-  font-size: 16px;
+.shot.topperf__shot.shot--fallback {
+  font-size: 8px;
 }
 .topperf__logo {
   flex: none;
@@ -3705,6 +3713,11 @@ body {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
+}
+.topperf__score {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10px;
 }
 .topperf__loading {
   animation: buzzpulse 1.3s var(--ease-out) infinite;
@@ -3963,6 +3976,25 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  /* ---- Top Performers box: full-size headshots (restoring the smaller
+     iPhone-width default above), and batters/pitchers side by side instead of
+     stacked — there's room for two columns once the sheet is this wide. */
+  .shot.topperf__shot {
+    width: 32px;
+    height: 32px;
+  }
+  .shot.topperf__shot.shot--fallback {
+    font-size: 16px;
+  }
+  .topperf__sections {
+    flex-direction: row;
+    gap: 24px;
+  }
+  .topperf__section {
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   /* ---- slate footer: player/team search side by side instead of stacked;

@@ -1,6 +1,7 @@
 import { computeTopPerformers } from '../api/topPerformers.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { leagueLogoUrl } from '../lib/teams.js'
+import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { SealBox } from './SealBox.jsx'
 import { Headshot } from './Headshot.jsx'
@@ -34,6 +35,23 @@ function ProspectPill({ entry }) {
   return null
 }
 
+// The game a performance came from, as a plain score line ("MIL 10, STL 2")
+// linking to that game's (already-sealed) box score — not a PlayerLink/
+// TeamLink, so it navigates directly rather than through LinkScope.
+function GameScoreLink({ game }) {
+  const navigate = useNav()
+  if (!game) return null
+  return (
+    <button
+      type="button"
+      className="plink topperf__score"
+      onClick={() => navigate(game.boxScorePath)}
+    >
+      {game.awayAbbr} {game.awayScore}, {game.homeAbbr} {game.homeScore}
+    </button>
+  )
+}
+
 function PerformerRow({ entry }) {
   return (
     <li className="topperf__row">
@@ -53,6 +71,7 @@ function PerformerRow({ entry }) {
           <ProspectPill entry={entry} />
         </div>
         <div className="topperf__stat">{entry.stat}</div>
+        <GameScoreLink game={entry.game} />
       </div>
     </li>
   )
@@ -62,8 +81,8 @@ function PerformerRow({ entry }) {
 // never before.
 function TopPerformersPanel({ games, prospects, dateStr, sportId }) {
   const { loading, error, data, reload } = useAsync(
-    () => computeTopPerformers({ games, prospects }),
-    [games, prospects],
+    () => computeTopPerformers({ games, prospects, dateStr }),
+    [games, prospects, dateStr],
   )
 
   if (loading) {

@@ -23,6 +23,7 @@ import {
   pitchingStat,
 } from './boxscore.js'
 import { prospectRankById, orgProspectRankById } from './prospects.js'
+import { gamePath } from '../lib/route.js'
 
 async function fetchGameBoxscore(gamePk) {
   try {
@@ -51,7 +52,11 @@ function accumulateGame(winProb, battingWpa, pitchingWpa) {
   }
 }
 
-function resolveEntry(boxscore, id, role) {
+// `ctx` is { boxscore, game }, `game` being this entry's slate-list row
+// (carries the away/home abbreviations + gameNumber the boxscore response
+// itself doesn't need to repeat) — used to build the score + box-score link.
+function resolveEntry(ctx, id, role, dateStr) {
+  const { boxscore, game } = ctx
   const found = findBoxscorePlayer(boxscore, id)
   if (!found) return null
   const { side, player: bp } = found
@@ -67,33 +72,53 @@ function resolveEntry(boxscore, id, role) {
     parentOrgId: bp.parentTeamId ?? team?.id ?? null,
     position: positionLabel(bp),
     stat: role === 'pitching' ? pitchingStat(stats) : battingStat(stats),
+    // The game this performance came from — shown under the stat line, linking
+    // to that game's (already-sealed) box score. Team run totals sit on each
+    // side's teamStats.batting (the same field selectBoxscore's battingTotals
+    // reads for the full box score's line), live or final either way.
+    game: {
+      boxScorePath: gamePath(
+        dateStr,
+        game.away.abbreviation,
+        game.home.abbreviation,
+        'boxscore',
+        game.gameNumber,
+      ),
+      awayAbbr: game.away.abbreviation,
+      homeAbbr: game.home.abbreviation,
+      awayScore: boxscore.teams.away?.teamStats?.batting?.runs ?? 0,
+      homeScore: boxscore.teams.home?.teamStats?.batting?.runs ?? 0,
+    },
   }
 }
 
-function topN(map, boxscoreById, role, n = 5) {
+function topN(map, ctxById, role, dateStr, n = 5) {
   return [...map.values()]
     .sort((a, b) => b.w - a.w)
     .slice(0, n)
     .map((e) => {
-      const boxscore = boxscoreById.get(e.id)
-      return boxscore ? resolveEntry(boxscore, e.id, role) : null
+      const ctx = ctxById.get(e.id)
+      return ctx ? resolveEntry(ctx, e.id, role, dateStr) : null
     })
     .filter(Boolean)
 }
 
-// `games`: eligible (non-Preview) games on the current slate, each `{ gamePk }`.
-// `prospects`: the app-wide snapshot from fetchTopProspects() (session-memoized
-// upstream, so passing it in here avoids a second fetch). One game's failure —
-// bad gamePk, an MiLB park with no WPA — just drops that game.
-export async function computeTopPerformers({ games, prospects }) {
+// `games`: eligible (non-Preview) games on the current slate (the normalized
+// schedule rows GameSelect already has, each with `gamePk`/`away`/`home`/
+// `gameNumber`). `prospects`: the app-wide snapshot from fetchTopProspects()
+// (session-memoized upstream, so passing it in here avoids a second fetch).
+// `dateStr`: the slate's queried date (YYYY-MM-DD), for building each entry's
+// box-score link. One game's failure — bad gamePk, an MiLB park with no WPA —
+// just drops that game.
+export async function computeTopPerformers({ games, prospects, dateStr }) {
   const perGame = await Promise.all(
-    (games ?? []).map(async ({ gamePk }) => {
+    (games ?? []).map(async (game) => {
       const [boxscore, winProb] = await Promise.all([
-        fetchGameBoxscore(gamePk),
-        fetchWinProbability(gamePk),
+        fetchGameBoxscore(game.gamePk),
+        fetchWinProbability(game.gamePk),
       ])
       if (!boxscore || !Array.isArray(winProb) || winProb.length === 0) return null
-      return { boxscore, winProb }
+      return { boxscore, winProb, game }
     }),
   )
 
@@ -102,14 +127,15 @@ export async function computeTopPerformers({ games, prospects }) {
   // Which game resolves a given player's identity/stat line. A player who
   // appears in two games the same day (a doubleheader) resolves to the later
   // game — an acceptable simplification for a leaderboard, not a full-day line.
-  const boxscoreById = new Map()
+  const ctxById = new Map()
 
-  for (const game of perGame) {
-    if (!game) continue
-    accumulateGame(game.winProb, battingWpa, pitchingWpa)
-    for (const e of game.winProb) {
-      if (e.matchup?.batter?.id) boxscoreById.set(e.matchup.batter.id, game.boxscore)
-      if (e.matchup?.pitcher?.id) boxscoreById.set(e.matchup.pitcher.id, game.boxscore)
+  for (const g of perGame) {
+    if (!g) continue
+    accumulateGame(g.winProb, battingWpa, pitchingWpa)
+    const ctx = { boxscore: g.boxscore, game: g.game }
+    for (const e of g.winProb) {
+      if (e.matchup?.batter?.id) ctxById.set(e.matchup.batter.id, ctx)
+      if (e.matchup?.pitcher?.id) ctxById.set(e.matchup.pitcher.id, ctx)
     }
   }
 
@@ -120,7 +146,7 @@ export async function computeTopPerformers({ games, prospects }) {
   })
 
   return {
-    batters: topN(battingWpa, boxscoreById, 'batting').map(attachProspect),
-    pitchers: topN(pitchingWpa, boxscoreById, 'pitching').map(attachProspect),
+    batters: topN(battingWpa, ctxById, 'batting', dateStr).map(attachProspect),
+    pitchers: topN(pitchingWpa, ctxById, 'pitching', dateStr).map(attachProspect),
   }
 }
