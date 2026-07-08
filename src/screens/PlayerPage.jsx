@@ -40,6 +40,8 @@ import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { BackBtn } from '../components/BackBtn.jsx'
+import { AsyncGate } from '../components/AsyncGate.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -363,26 +365,8 @@ export function PlayerPage({ id, asOf, sportId }) {
 
   const back = () => window.history.back()
 
-  if (loading && !data) {
-    return (
-      <div className="screen player">
-        <SiteHeader />
-        <BackBtn onClick={back} />
-        <p className="hint">Loading player…</p>
-      </div>
-    )
-  }
-  if (!data) {
-    return (
-      <div className="screen player">
-        <SiteHeader />
-        <BackBtn onClick={back} />
-        <p className="hint hint--error">
-          {error ? 'Couldn’t load this player. Try again.' : 'Player not found.'}
-        </p>
-      </div>
-    )
-  }
+  const gate = AsyncGate({ loading, error, data, screenClass: 'player', noun: 'player', onBack: back })
+  if (gate) return gate
 
   const { bio, blocks } = data
   const pitchBlock = blocks.find((b) => b.group === 'pitching')
@@ -666,14 +650,6 @@ function GameLink({ path, className = '', children }) {
       onClick={() => navigate(path)}
     >
       {children}
-    </button>
-  )
-}
-
-function BackBtn({ onClick }) {
-  return (
-    <button type="button" className="backbtn" onClick={onClick}>
-      ‹ back
     </button>
   )
 }

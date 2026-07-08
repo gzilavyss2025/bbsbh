@@ -23,6 +23,8 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { BackBtn } from '../components/BackBtn.jsx'
+import { AsyncGate } from '../components/AsyncGate.jsx'
 
 const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
@@ -213,26 +215,8 @@ export function TeamPage({ id, asOf, sportId }) {
   useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
 
-  if (loading && !data) {
-    return (
-      <div className="screen team-hub">
-        <SiteHeader />
-        <BackBtn onClick={back} />
-        <p className="hint">Loading team…</p>
-      </div>
-    )
-  }
-  if (!data) {
-    return (
-      <div className="screen team-hub">
-        <SiteHeader />
-        <BackBtn onClick={back} />
-        <p className="hint hint--error">
-          {error ? 'Couldn’t load this team. Try again.' : 'Team not found.'}
-        </p>
-      </div>
-    )
-  }
+  const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
+  if (gate) return gate
 
   const { team, season, record, standings, batting, pitching, position, pitchers, affiliates, prospects, schedule } = data
   // An affiliate's own page shows the same org-wide list as its MLB parent,
@@ -552,10 +536,3 @@ function SectionTitle({ title, note }) {
   )
 }
 
-function BackBtn({ onClick }) {
-  return (
-    <button type="button" className="backbtn" onClick={onClick}>
-      ‹ back
-    </button>
-  )
-}

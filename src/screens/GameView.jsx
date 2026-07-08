@@ -11,6 +11,7 @@ import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useAsyncOnFeed } from '../hooks/useAsyncOnFeed.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
@@ -94,60 +95,59 @@ export function GameView({ game, section, onSection }) {
   // Outdoor scorebook weather string — from the park's lat/lon, not the
   // box-score weather (which reports the interior of a closed roof). Fetched
   // once alongside the feed and shared by the info pages and the box score.
-  const weather = useAsync(
-    () => (feed ? generateScorebookWeather(feed) : Promise.resolve(null)),
-    // Keyed on gamePk (not the feed object) — first-pitch weather is fixed for
-    // the game, so a live Refresh shouldn't refetch Open-Meteo or risk blanking.
-    [game.gamePk, Boolean(feed)],
-  )
+  // First-pitch weather is fixed for the game, so it's keyed on gamePk, not
+  // the feed object — see useAsyncOnFeed.
+  const weather = useAsyncOnFeed(feed, generateScorebookWeather, [game.gamePk])
 
   // Each probable starter's season line (ERA/W-L/K), penciled next to the
   // opposing-pitcher row while staging. Season aggregates only — never this
-  // game's line. Keyed on gamePk + Boolean(feed) like the weather: the
-  // probables come from the feed, but a live Refresh must not refetch.
-  const starterLines = useAsync(async () => {
-    if (!feed) return null
-    const season = feed.gameData?.game?.season
-    const probables = feed.gameData?.probablePitchers ?? {}
-    const [away, home] = await Promise.all([
-      fetchPitcherSeasonLine(probables.away?.id, season, game.sportId),
-      fetchPitcherSeasonLine(probables.home?.id, season, game.sportId),
-    ])
-    return { away, home }
-  }, [game.gamePk, Boolean(feed)])
+  // game's line.
+  const starterLines = useAsyncOnFeed(
+    feed,
+    async (f) => {
+      const season = f.gameData?.game?.season
+      const probables = f.gameData?.probablePitchers ?? {}
+      const [away, home] = await Promise.all([
+        fetchPitcherSeasonLine(probables.away?.id, season, game.sportId),
+        fetchPitcherSeasonLine(probables.home?.id, season, game.sportId),
+      ])
+      return { away, home }
+    },
+    [game.gamePk],
+  )
 
   // Per-play win probability, the sole source of WPA for the box score's three
   // stars (the feed carries none). Only the box-score view uses it, so it's
-  // fetched lazily once the feed exists and keyed on gamePk + Boolean(feed) like
-  // the season lines — a live Refresh won't re-pull it, matching how the box
-  // score is really a post-game read. Resolves null off-MLB, hiding the card.
-  const winProb = useAsync(
-    () => (feed ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
-    [game.gamePk, Boolean(feed)],
-  )
+  // fetched lazily once the feed exists — a live Refresh won't re-pull it,
+  // matching how the box score is really a post-game read. Resolves null
+  // off-MLB, hiding the card.
+  const winProb = useAsyncOnFeed(feed, () => fetchWinProbability(game.gamePk), [game.gamePk])
 
   // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
   // gamesStarted-ratio/saves heuristic the team page badges pitchers with
   // (see rosterPitcherRole). The live feed carries no season stats, so this is
   // its own fetch; it powers the innings roster panel's Starters/Bullpen
-  // split (see InningViewer). Keyed on team ids + Boolean(feed), like
-  // managers: role doesn't change mid-game, so a live Refresh won't refetch.
-  const pitcherRoles = useAsync(async () => {
-    if (!feed) return null
-    const season = feed.gameData?.game?.season
-    if (!season) return null
-    const [awayRoster, homeRoster] = await Promise.all([
-      fetchTeamRoster(game.away.id, season),
-      fetchTeamRoster(game.home.id, season),
-    ])
-    const roles = {}
-    for (const r of [...awayRoster, ...homeRoster]) {
-      if (r.position?.type === 'Pitcher' && r.person?.id) {
-        roles[r.person.id] = rosterPitcherRole(r)
+  // split (see InningViewer). Keyed on team ids, like managers: role doesn't
+  // change mid-game.
+  const pitcherRoles = useAsyncOnFeed(
+    feed,
+    async (f) => {
+      const season = f.gameData?.game?.season
+      if (!season) return null
+      const [awayRoster, homeRoster] = await Promise.all([
+        fetchTeamRoster(game.away.id, season),
+        fetchTeamRoster(game.home.id, season),
+      ])
+      const roles = {}
+      for (const r of [...awayRoster, ...homeRoster]) {
+        if (r.position?.type === 'Pitcher' && r.person?.id) {
+          roles[r.person.id] = rosterPitcherRole(r)
+        }
       }
-    }
-    return roles
-  }, [game.away.id, game.home.id, Boolean(feed)])
+      return roles
+    },
+    [game.away.id, game.home.id],
+  )
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
