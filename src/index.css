@@ -5871,3 +5871,15 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
+
+/* Rehab-assignments page — the affiliate a player is rehabbing at: logo +
+   club name + level pill, kept on one line and right-aligned in its cell. */
+.rehabtable__club {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.rehabtable__clubname {
+  font-family: var(--font-body);
+}

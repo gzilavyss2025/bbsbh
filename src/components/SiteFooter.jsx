@@ -48,6 +48,13 @@ export function SiteFooter({ onShowLogos }) {
         >
           Top MLB Prospects
         </button>
+        <button
+          type="button"
+          className="sitefooter__action"
+          onClick={() => navigate('/rehab')}
+        >
+          Rehab assignments
+        </button>
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}

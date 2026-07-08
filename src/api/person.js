@@ -1164,24 +1164,82 @@ export function transactionTimelineView(
 // caller shows a banner and pins his current-activity sections to MLB, since a
 // rehabber is a major leaguer passing through the minors, not a demotion.
 // ---------------------------------------------------------------------------
+// The move types that CLOSE OUT a rehab stint — a return to the majors (recall,
+// contract selection), a real option down, a release/retirement, any non-rehab
+// reassignment, or an activation off the injured list. Shared by the single-
+// player detector and the league-wide selector so the two agree on when a rehab
+// is over.
+const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET'])
+function txnDate(t) {
+  return t.effectiveDate || t.date || ''
+}
+function isRehabTxn(t) {
+  return t.typeCode === 'ASG' && /rehab/i.test(t.description || '')
+}
+function isRehabEndingTxn(t) {
+  const c = t.typeCode
+  if (REHAB_END_CODES.has(c)) return true
+  if (c === 'ASG' && !isRehabTxn(t)) return true
+  return c === 'SC' && /activat/i.test(t.description || '') && /injured list/i.test(t.description || '')
+}
+
 export function detectRehabAssignment(transactions, debutYear) {
   if (!debutYear) return null
-  const dateOf = (t) => t.effectiveDate || t.date || ''
-  const isRehab = (t) => t.typeCode === 'ASG' && /rehab/i.test(t.description || '')
-  const rehabs = (transactions ?? []).filter((t) => isRehab(t) && dateOf(t))
+  const rehabs = (transactions ?? []).filter((t) => isRehabTxn(t) && txnDate(t))
   if (!rehabs.length) return null
-  const latest = rehabs.reduce((a, b) => (dateOf(a) >= dateOf(b) ? a : b))
-  const start = dateOf(latest)
-  const ends = (transactions ?? []).some((t) => {
-    if (dateOf(t) <= start) return false
-    const c = t.typeCode
-    if (c === 'CU' || c === 'OPT' || c === 'SE' || c === 'REL' || c === 'RET') return true
-    if (c === 'ASG' && !isRehab(t)) return true
-    return c === 'SC' && /activat/i.test(t.description || '') && /injured list/i.test(t.description || '')
-  })
+  const latest = rehabs.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
+  const start = txnDate(latest)
+  const ends = (transactions ?? []).some((t) => txnDate(t) > start && isRehabEndingTxn(t))
   if (ends) return null
   const club = latest.toTeam
   return club?.id ? { id: club.id, name: club.name || '' } : null
+}
+
+// The league-wide counterpart, for the standalone rehab-assignments page: from a
+// flat transaction window across every club, the players CURRENTLY on a
+// MAJOR-league rehab assignment — a big leaguer sent to a minor-league affiliate
+// to rehab, whose stint hasn't been closed out. Groups the feed by player, takes
+// each player's live rehab run (the rehab ASGs dated after his most recent
+// rehab-ending move), and keeps it only when at least one leg began at an MLB
+// club (`mlbTeamIds`, the 30 MLB club ids) — so a purely minor-league rehab (an
+// AA player dropping to the complex to rehab) is excluded, matching the player
+// page's debuted-only banner. One row per player, newest stint first. Pure —
+// the caller layers on positions and the club's level. `since` is when the
+// current stint began (its earliest rehab leg in the window).
+export function selectActiveRehabAssignments(transactions, mlbTeamIds) {
+  const mlb = mlbTeamIds instanceof Set ? mlbTeamIds : new Set(mlbTeamIds ?? [])
+  const byPlayer = new Map()
+  for (const t of transactions ?? []) {
+    const pid = t.person?.id
+    if (!pid || !txnDate(t)) continue
+    if (!byPlayer.has(pid)) byPlayer.set(pid, [])
+    byPlayer.get(pid).push(t)
+  }
+  const rows = []
+  for (const [pid, ts] of byPlayer) {
+    const lastEnd = ts.filter(isRehabEndingTxn).reduce((m, t) => (txnDate(t) > m ? txnDate(t) : m), '')
+    const run = ts.filter((t) => isRehabTxn(t) && txnDate(t) > lastEnd)
+    if (!run.length) continue
+    const mlbLeg = run.find((t) => mlb.has(t.fromTeam?.id))
+    if (!mlbLeg) continue
+    const latest = run.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
+    const since = run.reduce((m, t) => (!m || txnDate(t) < m ? txnDate(t) : m), '')
+    const club = latest.toTeam
+    if (!club?.id) continue
+    rows.push({
+      playerId: pid,
+      playerName: latest.person?.fullName || '',
+      orgId: mlbLeg.fromTeam?.id ?? null,
+      orgName: mlbLeg.fromTeam?.name || '',
+      clubId: club.id,
+      clubName: club.name || '',
+      since,
+    })
+  }
+  rows.sort((a, b) =>
+    a.since < b.since ? 1 : a.since > b.since ? -1 : a.playerName.localeCompare(b.playerName),
+  )
+  return rows
 }
 
 // ---------------------------------------------------------------------------
