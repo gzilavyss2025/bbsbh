@@ -26,6 +26,7 @@ import {
 } from '../api/derive.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { revealDefense } from '../api/defense.js'
+import { revealBattingOrder } from '../api/battingorder.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
@@ -416,6 +417,18 @@ function HalfInning({
                   )}
                 </div>
               )}
+              {/* The batting side's lineup card, built up from the starting nine
+                  plus every pinch-hitter/pinch-runner or double-switch sub
+                  revealed so far (api/battingorder.js — reveal-only). Same
+                  spoiler-adjacency as the defense below, so it's computed here
+                  inside the seal, gated to this half. */}
+              <BattingOrderSection
+                feed={feed}
+                inning={inning}
+                half={half}
+                battingSide={battingSide}
+                battingAbbr={battingAbbr}
+              />
               {/* The defense on the field this half, built up from the starting
                   nine plus every substitution revealed so far (api/defense.js —
                   reveal-only). A defensive change is spoiler-adjacent, so it's
@@ -743,6 +756,54 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingAbbr }) {
       </h4>
       <DefenseDiamond defense={defense} />
     </section>
+  )
+}
+
+// The batting side's lineup card for this half — the nine batting-order slots,
+// each showing its starter and any pinch-hitter/pinch-runner/double-switch sub
+// revealed so far. Reveal-only (revealBattingOrder) — rendered here, inside
+// the seal, same as DefenseSection above.
+function BattingOrderSection({ feed, inning, half, battingSide, battingAbbr }) {
+  const slots = revealBattingOrder(feed, battingSide, inning, half)
+  if (slots.length === 0) return null
+  return (
+    <section className="lineupcard">
+      <h4 className="lineupcard__title">
+        {battingAbbr ? `${battingAbbr} ` : ''}lineup
+      </h4>
+      <ol className="lineupcard__list">
+        {slots.map((s) => (
+          <li className="lineupcard__row" key={s.slot}>
+            <span className="lineupcard__slot">{s.slot}</span>
+            <span className="lineupcard__stack">
+              {s.entries.map((e, i) => (
+                <LineupName key={i} entry={e} />
+              ))}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+// One batting-order slot's name stack — struck through when replaced, tagged
+// with the inning he entered while he's the standing occupant. Mirrors
+// DefenseDiamond's DefenseName styling for the same { last, inning, replaced }
+// shape.
+function LineupName({ entry }) {
+  const entered = entry.inning != null && !entry.replaced
+  return (
+    <span
+      className={`lineupcard__name ${entry.replaced ? 'lineupcard__name--out' : ''} ${
+        entered ? 'lineupcard__name--in' : ''
+      }`}
+    >
+      {entry.last.toUpperCase()}
+      {entry.inning != null && (
+        <span className="lineupcard__enter"> ({ordinal(entry.inning)})</span>
+      )}
+    </span>
   )
 }
 

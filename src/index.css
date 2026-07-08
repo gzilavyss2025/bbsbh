@@ -2020,6 +2020,83 @@ body {
   color: var(--text-body);
 }
 
+/* The batting side's lineup card for the half, below the feed — the nine
+   batting-order slots, building up subs as innings are revealed (reveal-only,
+   see api/battingorder.js). Shares the defense diamond's writing-line name
+   styling (struck-through/seam-red-in/enter-tag) under its own class names. */
+.lineupcard {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+.lineupcard__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.lineupcard__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lineupcard__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lineupcard__slot {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-caption);
+  min-width: 12px;
+  text-align: right;
+}
+
+.lineupcard__stack {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lineupcard__name {
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* A batter who's been replaced: struck through in pencil, same as the defense
+   diamond's --out name. */
+.lineupcard__name--out {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+/* The standing occupant of a slot that's seen a sub: inked seam-red, same as
+   the defense diamond's --in name. */
+.lineupcard__name--in {
+  color: var(--accent-negative);
+}
+
+.lineupcard__enter {
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+}
+
 /* The fielding team's live alignment for the half, below the feed — the lineup
    page's defense diamond, now building up substitutions as innings are revealed
    (reveal-only, see api/defense.js). */

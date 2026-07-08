@@ -61,14 +61,24 @@ It is enforced structurally by two conventions:
 1. **Score-revealing selectors are isolated in their own modules** and are
    "reveal-only": `src/api/linescore.js` (per-inning R/H/E/LOB, full-game totals),
    `src/api/derive.js` (pitches/whiffs/first-pitch strikes + Statcast
-   superlatives computed from play-by-play), and `src/api/defense.js`
+   superlatives computed from play-by-play), `src/api/defense.js`
    (`revealDefense` — the fielding team's live alignment: starting nine plus
    every defensive sub/switch *through a given half*; the sub timing is
-   spoiler-adjacent, so it's gated to the half being revealed). These must only
-   be *called from inside* a `SealBox`'s reveal render function. Never call them
-   at render top-level or in a `useMemo` that runs before reveal. Contrast
-   `src/api/select.js`, which holds only spoiler-**free** selectors (lineups,
-   umpires, venue, rosters) and touches no runs/hits/errors.
+   spoiler-adjacent, so it's gated to the half being revealed), and
+   `src/api/battingorder.js` (`revealBattingOrder` — the batting side's lineup
+   card: starting nine plus every pinch-hitter/pinch-runner/double-switch sub
+   *through a given half*, keyed by batting-order slot rather than fielding
+   position). These must only be *called from inside* a `SealBox`'s reveal
+   render function. Never call them at render top-level or in a `useMemo` that
+   runs before reveal. Contrast `src/api/select.js`, which holds only
+   spoiler-**free** selectors (lineups, umpires, venue, rosters,
+   `selectPrePitchChanges`) and touches no runs/hits/errors.
+   `selectPrePitchChanges` is the one deliberate exception to "reveal-only
+   modules only render inside a SealBox": subs/pitching changes/pinch-hitters
+   logged before a half's own first pitch are the same thing a broadcast
+   announces before the half starts, so `InningViewer` renders them above the
+   seal — but only for the half that is the user's own next one to reveal
+   (`halfIndex === revealedThrough + 1`); a half further out stays fully sealed.
 
 2. **`src/components/SealBox.jsx`** takes `children` as a *render function*,
    invoked only in the revealed branch — so the sealed value is computed lazily
@@ -81,7 +91,7 @@ It is enforced structurally by two conventions:
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (see
 `vite.config.js`) so a stale, spoiler-revealing score is never served from cache.
 
-Three conventions guard the live-refresh + reveal seam (all have bitten before):
+Four conventions guard the live-refresh + reveal seam (all have bitten before):
 - **Roster-card membership and position labels key on PRIMARY position, never
   the in-game box position.** A bench catcher mopping up a sealed blowout gets a
   box position of 'P' (subs get 'PH'/'PR'); classifying or labeling by that
@@ -97,6 +107,15 @@ Three conventions guard the live-refresh + reveal seam (all have bitten before):
   fields the top, away the bottom) — the opposite half from its `runs`/`hits`.
   Read E from the fielding side and gate it on the fielding half, or you both
   show the wrong number and leak a still-sealed half's errors.
+- **A boxscore player's `position` field is his CURRENT/final position, not
+  where he started.** For a starter who changed fielding positions mid-game,
+  `box.position` silently drifts as the game goes on — verified against
+  gamePk 823035 (2026-07-07 MIL@STL g2), where a starter's `box.position` read
+  out his *third* position of the night, colliding with and erasing another
+  starter from `revealDefense`'s starting-lineup seed. `box.allPositions[]`
+  lists a player's positions in the order he actually played them, so its
+  first entry is the true starting spot; `selectLineup` uses that, falling
+  back to `box.position` only for thin MiLB feeds that omit `allPositions`.
 
 **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
 `PitchersSection` in `InningViewer.jsx`) shows the running line of every pitcher
