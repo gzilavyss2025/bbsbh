@@ -4710,6 +4710,16 @@ body {
 .standings--full tr.is-me td.team {
   background: var(--field-soft);
 }
+/* `border-collapse: collapse` + `position: sticky` don't cooperate: the
+   collapsed top hairline belongs to the table grid, but the sticky team cell is
+   promoted to its own paint layer that repaints its solid background over that
+   shared border — leaving the column's top rule a pixel adrift from its
+   neighbors. Drop the (overpainted) collapsed border on these cells and redraw
+   the same hairline as an inset shadow that paints with the sticky layer. */
+.standings--full td.team {
+  border-top-color: transparent;
+  box-shadow: inset 0 var(--bw-hair) 0 0 var(--border-hairline);
+}
 
 @media (min-width: 740px) {
   /* Wide layout has room for the whole table — cap the page a touch narrower
