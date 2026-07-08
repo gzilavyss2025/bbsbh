@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { useNav, useLinkScope } from '../lib/nav.js'
 import { playerPath } from '../lib/route.js'
@@ -19,17 +12,14 @@ import {
   halfIndex,
 } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
-import {
-  computeDerivedByInning,
-  revealDerived,
-  rollingPitches,
-} from '../api/derive.js'
+import { revealDerived, rollingPitches } from '../api/derive.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { useRevealProgress } from '../hooks/useRevealProgress.js'
 
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
 // then the bottom of the 1st, …), a single SealBox whose one tap reveals that
@@ -56,19 +46,14 @@ export function InningViewer({
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
-  // Derived stats (pitches/whiffs/1st-pitch strikes) are parsed lazily and
-  // cached: the map is only built the first time a box is actually revealed.
-  // The cache is keyed on the feed object, so a Refresh (which fetches a fresh
-  // feed) rebuilds it. Without this the map froze at whatever feed was present
-  // on first reveal and pitch/whiff stats went stale for the live inning — the
-  // play-by-play (read live from `feed`) would show a walk while PITCHES read 0.
-  const derivedRef = useRef({ feed: null, map: null })
-  const getDerived = () => {
-    if (derivedRef.current.feed !== feed) {
-      derivedRef.current = { feed, map: computeDerivedByInning(feed) }
-    }
-    return derivedRef.current.map
-  }
+  // Reveal high-water mark, extras-unlock state, and the feed-keyed derived
+  // cache — see useRevealProgress. The running line and Pitchers section both
+  // read from `revealedThrough`; any half at or below it renders unsealed.
+  const { revealedThrough, revealTo, unlocked, getDerived } = useRevealProgress(
+    feed,
+    regulation,
+    actualCount,
+  )
 
   const meta = useMemo(
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
@@ -90,42 +75,6 @@ export function InningViewer({
     }),
     [feed, meta, pitcherRoles],
   )
-
-  // Reveal high-water mark: the furthest half-inning (by halfIndex) the user has
-  // uncovered. Revealing a later inning auto-reveals everything before it — the
-  // running line and Pitchers section both read from this single mark, and any
-  // half at or below it renders unsealed.
-  //
-  // The mark is persisted per game (keyed by gamePk) so leaving the innings view
-  // and returning — even in a new session — keeps your place instead of
-  // re-sealing everything you'd already uncovered. Only the mark is stored, never
-  // a score, so nothing score-revealing is written to disk: on return we simply
-  // re-reveal up to the half the user had already reached.
-  const storageKey = feed?.gamePk ? `${REVEAL_KEY}${feed.gamePk}` : null
-  const [revealedThrough, setRevealedThrough] = useState(() =>
-    readRevealMark(storageKey),
-  )
-  const revealTo = useCallback((n, half) => {
-    const idx = halfIndex(n, half)
-    setRevealedThrough((prev) => (idx > prev ? idx : prev))
-  }, [])
-
-  useEffect(() => {
-    if (!storageKey || revealedThrough < 0) return
-    try {
-      window.localStorage.setItem(storageKey, String(revealedThrough))
-    } catch {
-      // Private-mode / storage-disabled — degrade to in-session memory only.
-    }
-  }, [storageKey, revealedThrough])
-
-  // How many innings are currently visible: regulation, plus one more for each
-  // extra inning whose predecessor has already been fully revealed.
-  const unlocked = useMemo(() => {
-    let u = regulation
-    while (u < actualCount && revealedThrough >= halfIndex(u, 'bottom')) u++
-    return u
-  }, [regulation, actualCount, revealedThrough])
 
   // The page being shown, as a half-index clamped to what's unlocked. The last
   // navigable page is the bottom of the last unlocked inning.
@@ -943,18 +892,4 @@ function ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd']
   const v = n % 100
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
-}
-
-// localStorage key prefix + reader for the per-game reveal high-water mark.
-const REVEAL_KEY = 'bbsbh:reveal:'
-function readRevealMark(storageKey) {
-  if (!storageKey) return -1
-  try {
-    const raw = window.localStorage.getItem(storageKey)
-    if (raw == null) return -1
-    const n = Number(raw)
-    return Number.isInteger(n) && n >= 0 ? n : -1
-  } catch {
-    return -1
-  }
 }
