@@ -5,6 +5,7 @@
 import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { matchupSlug } from '../lib/route.js'
 import { getJson } from './statsapi.js'
+import { fetchStaticTeams } from './teams-static.js'
 
 // Normalize a raw schedule game into the shape our cards need.
 function normalizeGame(game, sportId) {
@@ -85,7 +86,17 @@ export async function fetchSchedule(
 // the logo sheet's level browser so it can show a league's full set of marks
 // rather than just the teams playing today, and by the footer's team
 // directory (see search.js's fetchTeamDirectory) for cross-level name search.
+// Team identity barely ever changes mid-season, so this reads the static
+// weekly snapshot (see teams-static.js) first and only falls back to the live
+// endpoint if that file is missing, unparseable, or lacks this sportId.
 export async function fetchTeams(sportId) {
+  const staticTeams = await fetchStaticTeams()
+  const bucket = staticTeams?.bySportId?.[sportId]
+  if (bucket) {
+    return bucket
+      .map((t) => ({ id: t.id, name: t.name, sportId, abbreviation: teamAbbr(t) }))
+      .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
+  }
   const data = await getJson(`/api/v1/teams?sportId=${sportId}&activeStatus=Y`)
   const teams = data.teams ?? []
   return teams

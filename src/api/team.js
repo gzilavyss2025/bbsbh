@@ -1,11 +1,34 @@
 // Team pages — identity, roster, standings, ranked team stats.
 
 import { getJson } from './statsapi.js'
+import { fetchStaticTeams } from './teams-static.js'
 
 // Basic team identity, incl. league + division ids (needed to pull the right
-// standings). Degrades to null.
+// standings). Team identity barely ever changes mid-season, so this looks the
+// id up across every level in the static weekly snapshot (see
+// teams-static.js) first — synthesizing the same shape TeamPage's loadTeam()
+// reads (name, sport.id, league.id/name, division.id/name, parentOrgId/Name)
+// — and only falls back to the live endpoint if the id isn't found there
+// (e.g. a team too new for a stale static file). Degrades to null.
 export async function fetchTeam(teamId) {
   if (!teamId) return null
+  const staticTeams = await fetchStaticTeams()
+  for (const [sportId, bucket] of Object.entries(staticTeams?.bySportId ?? {})) {
+    const t = bucket.find((x) => x.id === teamId)
+    if (t) {
+      return {
+        id: t.id,
+        name: t.name,
+        teamName: t.teamName,
+        abbreviation: t.abbreviation,
+        sport: { id: Number(sportId) },
+        league: { id: t.leagueId, name: t.leagueName },
+        division: { id: t.divisionId, name: t.divisionName },
+        parentOrgId: t.parentOrgId,
+        parentOrgName: t.parentOrgName,
+      }
+    }
+  }
   try {
     const data = await getJson(`/api/v1/teams/${teamId}`)
     return data.teams?.[0] ?? null
@@ -54,8 +77,18 @@ export async function fetchRosterIdsForTeams(teamIds) {
   return out
 }
 
-// A club's full affiliate tree in one request, via the dedicated
-// /teams/affiliates endpoint (a plain team hydrate doesn't carry this).
+// A club's full affiliate tree, read first from a static same-origin file
+// (public/data/affiliates.json), falling back to the live dedicated
+// /teams/affiliates endpoint (a plain team hydrate doesn't carry this) when
+// the static file is missing, stale for the requested season, or doesn't
+// cover the org. That file is regenerated weekly by scripts/gen-affiliates.mjs
+// (see .github/workflows/update-affiliates.yml) from the SAME endpoint this
+// fallback calls, shaped identically — an org's farm system changes at most
+// once a year (the offseason PDC realignment), so it's safe to read the
+// season snapshot rather than fetching live on every team-page visit AND
+// every org fanned out across the Prospects page. The season check guards the
+// one time this actually matters: a stale file spanning an offseason
+// realignment boundary must not silently serve last year's tree.
 // `hydrate=venue(location)` folds in each affiliate's ballpark city/state
 // alongside its own team id (which already drives the logo CDN), so the team
 // page's affiliates section needs no per-team follow-up fetch. Filtered to
@@ -64,8 +97,24 @@ export async function fetchRosterIdsForTeams(teamIds) {
 // that aren't proper affiliate clubs the rest of the app tracks (see
 // MILB_LEVELS). Sorted highest level first. Degrades to [].
 const AFFILIATE_SPORT_IDS = [11, 12, 13, 14]
+let cachedAffiliates = null
+async function fetchStaticAffiliates() {
+  if (cachedAffiliates) return cachedAffiliates
+  try {
+    const res = await fetch('/data/affiliates.json')
+    if (!res.ok) throw new Error(`affiliates.json ${res.status}`)
+    cachedAffiliates = await res.json()
+  } catch {
+    cachedAffiliates = { season: null, byOrgId: {} }
+  }
+  return cachedAffiliates
+}
 export async function fetchAffiliates(teamId, season) {
   if (!teamId || !season) return []
+  const staticData = await fetchStaticAffiliates()
+  if (staticData.season === season && staticData.byOrgId?.[teamId]) {
+    return staticData.byOrgId[teamId]
+  }
   try {
     const data = await getJson(
       `/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}&hydrate=venue(location)`,
