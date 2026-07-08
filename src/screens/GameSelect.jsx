@@ -11,6 +11,7 @@ import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
 import { SiteFooter } from '../components/SiteFooter.jsx'
+import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
@@ -50,6 +51,14 @@ export function GameSelect({ onPick, onShowLogos }) {
   const { loading, error, data } = slate
 
   const sorted = useMemo(() => sortGames(data ?? []), [data])
+
+  // Games with a Top Performers box to reveal — any that have started, on
+  // today or a past date. A future date, or today before first pitch, has
+  // nothing yet, so the box doesn't render at all (see below).
+  const eligibleGames = useMemo(
+    () => sorted.filter((g) => g.abstractState !== 'Preview'),
+    [sorted],
+  )
 
   // What each club is wearing isn't in the schedule payload, so it rides a
   // separate one-shot request keyed on the slate's gamePks (posted ~first
@@ -123,6 +132,15 @@ export function GameSelect({ onPick, onShowLogos }) {
             ›
           </button>
         </div>
+
+        {offset <= 0 && eligibleGames.length > 0 && (
+          <TopPerformersBox
+            dateStr={dateStr}
+            sportId={sportId}
+            games={eligibleGames}
+            prospectsData={prospects.data}
+          />
+        )}
       </div>
 
       {loading && <p className="hint">Loading games…</p>}

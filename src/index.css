@@ -3628,6 +3628,98 @@ body {
   color: var(--text-muted);
 }
 
+/* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
+   (src/components/TopPerformersBox.jsx). Sits in .slatehead, sealed like any
+   other spoiler content; row layout mirrors .bs__star* (headshot + logo added
+   ahead of the name/stat column). */
+.topperfbox {
+  margin-top: 10px;
+}
+.topperf__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.topperf__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.topperf__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.topperf__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topperf__shot {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.topperf__shot.shot--fallback {
+  font-size: 16px;
+}
+.topperf__logo {
+  flex: none;
+}
+.topperf__who {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.topperf__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.topperf__name {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.topperf__pos {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.topperf__stat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.topperf__loading {
+  animation: buzzpulse 1.3s var(--ease-out) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .topperf__loading {
+    animation: none;
+  }
+}
+.topperf__state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 /* Game-info foot: WP, umpires, weather, T, Att… */
 .bs__info {
   padding: 12px 14px;

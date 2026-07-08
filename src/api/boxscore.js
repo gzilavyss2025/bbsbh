@@ -39,7 +39,7 @@ function lastFirst(person) {
   return first ? `${last}, ${first}` : last
 }
 
-function positionLabel(boxPlayer) {
+export function positionLabel(boxPlayer) {
   const all = (boxPlayer.allPositions ?? [])
     .map((p) => p.abbreviation)
     .filter(Boolean)
@@ -504,30 +504,39 @@ export function computeThreeStars(winProb, feed) {
     .filter(Boolean)
 }
 
-// A star's identity + one-line game stat, found by scanning both boxscores (the
-// player sits on one side or the other). Pitching line if he recorded an out,
-// else his batting line.
-function starLine(feed, id) {
+// Finds a player's boxscore entry by scanning both sides (the player sits on
+// one team or the other) — shared by starLine here and by topPerformers.js,
+// which calls this same lookup against the standalone /boxscore endpoint's
+// response (same teams.{away,home}.players[...] shape as feed.liveData.boxscore).
+export function findBoxscorePlayer(boxscore, id) {
   for (const side of ['away', 'home']) {
-    const bp = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]
-    if (!bp) continue
-    const gd = feed?.gameData?.players?.[`ID${id}`] ?? bp.person ?? {}
-    const pit = bp.stats?.pitching ?? {}
-    const bat = bp.stats?.batting ?? {}
-    const pitched = (pit.outs ?? 0) > 0
-    return {
-      id,
-      name: firstLast(gd),
-      teamAbbr: feed?.gameData?.teams?.[side]?.abbreviation ?? '',
-      pos: pitched ? 'P' : positionLabel(bp),
-      stat: pitched ? pitchingStat(pit) : battingStat(bat),
-    }
+    const player = boxscore?.teams?.[side]?.players?.[`ID${id}`]
+    if (player) return { side, player }
   }
   return null
 }
 
+// A star's identity + one-line game stat, found by scanning both boxscores.
+// Pitching line if he recorded an out, else his batting line.
+function starLine(feed, id) {
+  const found = findBoxscorePlayer(feed?.liveData?.boxscore, id)
+  if (!found) return null
+  const { side, player: bp } = found
+  const gd = feed?.gameData?.players?.[`ID${id}`] ?? bp.person ?? {}
+  const pit = bp.stats?.pitching ?? {}
+  const bat = bp.stats?.batting ?? {}
+  const pitched = (pit.outs ?? 0) > 0
+  return {
+    id,
+    name: firstLast(gd),
+    teamAbbr: feed?.gameData?.teams?.[side]?.abbreviation ?? '',
+    pos: pitched ? 'P' : positionLabel(bp),
+    stat: pitched ? pitchingStat(pit) : battingStat(bat),
+  }
+}
+
 // "6.0 IP, 3 H, 1 ER, 7 K" — the pitcher's story in the order a line score reads.
-function pitchingStat(s) {
+export function pitchingStat(s) {
   return [
     `${s.inningsPitched ?? '0.0'} IP`,
     `${s.hits ?? 0} H`,
@@ -538,7 +547,7 @@ function pitchingStat(s) {
 
 // "2-4, HR, 3 RBI, 2 R" — hits-for-at-bats, then extra-base hits, RBI, runs,
 // steals; each count only shown when it happened (a count >1 prefixes the tag).
-function battingStat(b) {
+export function battingStat(b) {
   const n = (count, tag) =>
     count > 0 ? `${count > 1 ? `${count} ` : ''}${tag}` : ''
   const parts = [`${b.hits ?? 0}-${b.atBats ?? 0}`]
