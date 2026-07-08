@@ -43,6 +43,11 @@
   /* ---- Highlight / marker ---- */
   --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
 
+  /* ---- Award (medal amber) — honors on the transaction timeline ---- */
+  --award-ink:  #8A5A1E;  /* medal-amber text on an award chip */
+  --award-line: #C79A3E;  /* medal-amber border / timeline node */
+  --award-soft: #F6EBCF;  /* soft medal-amber chip fill */
+
   /* ============================================================
      SEMANTIC ALIASES
      ============================================================ */

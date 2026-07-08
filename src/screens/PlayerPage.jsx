@@ -201,20 +201,20 @@ export function PlayerPage({ id, asOf, sportId }) {
             {block.gameLog && (
               <>
                 <SectionTitle title="Game log" note={`last ${block.gameLog.rows.length} · entering today`} />
-                <Ledger
-                  head={['Date', 'Opp', ...block.gameLog.columns]}
-                  rows={block.gameLog.rows.map((r) => ({
-                    key: r.date,
-                    cells: [
-                      r.date,
-                      <>
-                        {r.home ? 'vs' : '@'}{' '}
-                        <GameLink path={r.boxscorePath}>{r.opp.toUpperCase()}</GameLink>
-                      </>,
-                      ...r.cells,
-                    ],
-                  }))}
-                />
+                <ul className="gamelog">
+                  {block.gameLog.rows.map((r) => (
+                    <li className="gamelog__row" key={r.date}>
+                      <div className="gamelog__meta">
+                        <span className="gamelog__date">{r.date}</span>
+                        <span className="gamelog__opp">
+                          {r.home ? 'vs' : '@'}{' '}
+                          <GameLink path={r.boxscorePath}>{r.opp.toUpperCase()}</GameLink>
+                        </span>
+                      </div>
+                      <div className="gamelog__line">{r.line}</div>
+                    </li>
+                  ))}
+                </ul>
               </>
             )}
 
@@ -223,10 +223,17 @@ export function PlayerPage({ id, asOf, sportId }) {
             {block.splits && (
               <>
                 <SectionTitle title="Season splits" note={block.splitsLabel} />
-                <div className="player__splits">
-                  <SplitCard label={block.group === 'pitching' ? 'vs LHB' : 'vs LHP'} side={block.splits.left} />
-                  <SplitCard label={block.group === 'pitching' ? 'vs RHB' : 'vs RHP'} side={block.splits.right} />
-                </div>
+                <Ledger
+                  leftCols={1}
+                  head={['Split', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                  rows={[
+                    { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
+                    { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
+                  ].map(({ key, label, side }) => ({
+                    key,
+                    cells: [label, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
+                  }))}
+                />
               </>
             )}
           </section>
@@ -262,6 +269,8 @@ export function PlayerPage({ id, asOf, sportId }) {
                       <span className="split__sub">
                         {f.batter ? (
                           <PlayerLink id={f.batter.id}>{f.batter.fullName.toUpperCase()}</PlayerLink>
+                        ) : f.pitcher ? (
+                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName.toUpperCase()}</PlayerLink>
                         ) : (
                           f.oppAbbr
                         )}
@@ -431,14 +440,3 @@ function Fact({ label, value, mono = false }) {
   )
 }
 
-function SplitCard({ label, side }) {
-  return (
-    <div className="split">
-      <div className="split__k">{label}</div>
-      <div className="split__row">
-        <span className="split__v">{side.avg}</span>
-        <span className="split__sub">{side.ops} OPS</span>
-      </div>
-    </div>
-  )
-}

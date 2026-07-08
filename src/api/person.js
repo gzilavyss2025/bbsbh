@@ -107,6 +107,8 @@ export function draftInfo(person) {
     year: year ?? signed?.year ?? '',
     round: signed?.pickRound ?? '',
     overall: signed?.pickNumber ?? '',
+    teamId: signed?.team?.id ?? null,
+    teamName: signed?.team?.name ?? '',
   }
 }
 
@@ -275,7 +277,30 @@ export function pitcherTiles(stat, role) {
 // vs-L/R splits (full season — the UI labels them so, not "entering today")
 // ---------------------------------------------------------------------------
 
-export function splitsView(lrSplits) {
+// One side (vs L or vs R) as a full stat line: the AVG/OBP/OPS slash plus HR,
+// RBI, XBH, and the strikeout/walk RATES. The rates need a plate-appearance
+// denominator, which the API names differently by group — `plateAppearances`
+// on a hitter's line, `battersFaced` on a pitcher's opponent line (verified
+// live) — so the group picks the field. A side the player never saw (faced
+// only righties, say) has no stat and renders as all dashes.
+function splitSide(stat, group) {
+  if (!stat) {
+    return { slash: DASH, hr: DASH, rbi: DASH, xbh: DASH, soPct: DASH, bbPct: DASH }
+  }
+  const pa = group === 'pitching' ? num(stat.battersFaced) : num(stat.plateAppearances)
+  const pct = (x) => (pa ? `${Math.round((num(x) / pa) * 100)}%` : DASH)
+  const slash = [stat.avg, stat.obp, stat.ops].map((v) => v ?? DASH).join('/')
+  return {
+    slash,
+    hr: num(stat.homeRuns),
+    rbi: num(stat.rbi),
+    xbh: num(stat.doubles) + num(stat.triples) + num(stat.homeRuns),
+    soPct: pct(stat.strikeOuts),
+    bbPct: pct(stat.baseOnBalls),
+  }
+}
+
+export function splitsView(lrSplits, group) {
   const byCode = {}
   for (const s of lrSplits ?? []) {
     const code = s.split?.code
@@ -284,9 +309,7 @@ export function splitsView(lrSplits) {
   const l = byCode.vl
   const r = byCode.vr
   if (!l && !r) return null
-  const side = (stat) =>
-    stat ? { avg: stat.avg ?? DASH, ops: stat.ops ?? DASH } : { avg: DASH, ops: DASH }
-  return { left: side(l), right: side(r) }
+  return { left: splitSide(l, group), right: splitSide(r, group) }
 }
 
 // ---------------------------------------------------------------------------
@@ -301,10 +324,54 @@ function oppLabel(opponent) {
   return opponent?.teamName || name.split(/\s+/).slice(-1)[0]
 }
 
+// A count-tagged token for a stat line — "HR" for one, "2 HR" for several, ''
+// for none — so a line reads like a broadcast chyron ("2B, HR, 2 RBI, K").
+function tag(n, label) {
+  const v = num(n)
+  if (!v) return null
+  return v === 1 ? label : `${v} ${label}`
+}
+
+// A hitter's one-game line, TV-lower-third style: "2-4, 2B, HR, 2 RBI, K"
+// (hits-for-atBats, then extra-base hits, then RBI / walks / steals / strikeouts,
+// each shown only when it happened).
+function hitterLine(st) {
+  const parts = [`${num(st.hits)}-${num(st.atBats)}`]
+  for (const t of [
+    tag(st.doubles, '2B'),
+    tag(st.triples, '3B'),
+    tag(st.homeRuns, 'HR'),
+    tag(st.rbi, 'RBI'),
+    tag(st.baseOnBalls, 'BB'),
+    tag(st.stolenBases, 'SB'),
+    tag(st.strikeOuts, 'K'),
+  ]) {
+    if (t) parts.push(t)
+  }
+  return parts.join(', ')
+}
+
+// A pitcher's one-game line: "GS, 6.0 IP, 2 H, 1 R, 1 ER, 4 BB, 6 K" (leads
+// with GS when he started; the counting stats always show, zeros included, the
+// way a box-score pitching line reads).
+function pitcherLine(st) {
+  const parts = []
+  if (num(st.gamesStarted) > 0) parts.push('GS')
+  parts.push(`${st.inningsPitched ?? DASH} IP`)
+  parts.push(`${num(st.hits)} H`)
+  parts.push(`${num(st.runs)} R`)
+  parts.push(`${num(st.earnedRuns)} ER`)
+  parts.push(`${num(st.baseOnBalls)} BB`)
+  parts.push(`${num(st.strikeOuts)} K`)
+  return parts.join(', ')
+}
+
 // Rows are filtered to games BEFORE `cutoff` (YYYY-MM-DD) — the day the game
 // being scored starts — then shown newest first. That cutoff is the whole
 // spoiler defense: the log can never surface tonight's line or anything after
-// it. `cutoff` null (context-free cold link) shows the most recent games.
+// it. `cutoff` null (context-free cold link) shows the most recent games. Each
+// row carries a single broadcast-style stat `line` (see hitterLine/pitcherLine)
+// rather than a grid of columns.
 export function gameLogView(splits, group, cutoff, limit = 8) {
   const rows = (splits ?? [])
     .filter((s) => s.date && (!cutoff || s.date < cutoff))
@@ -313,24 +380,16 @@ export function gameLogView(splits, group, cutoff, limit = 8) {
     .map((s) => {
       const st = s.stat ?? {}
       const md = (s.date || '').slice(5).replace('-', '/').replace(/^0/, '')
-      const base = { date: md, home: s.isHome, opp: oppLabel(s.opponent), gamePk: s.game?.gamePk ?? null }
-      if (group === 'pitching') {
-        return {
-          ...base,
-          cells: [st.inningsPitched ?? DASH, num(st.hits), num(st.earnedRuns), num(st.strikeOuts), num(st.baseOnBalls)],
-        }
-      }
       return {
-        ...base,
-        cells: [num(st.atBats), num(st.hits), num(st.homeRuns), num(st.rbi), num(st.baseOnBalls)],
+        date: md,
+        home: s.isHome,
+        opp: oppLabel(s.opponent),
+        gamePk: s.game?.gamePk ?? null,
+        line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
       }
     })
   if (!rows.length) return null
-  const columns =
-    group === 'pitching'
-      ? ['IP', 'H', 'ER', 'K', 'BB']
-      : ['AB', 'H', 'HR', 'RBI', 'BB']
-  return { columns, rows }
+  return { rows }
 }
 
 // ---------------------------------------------------------------------------
@@ -841,9 +900,11 @@ export function careerTimelineView(splits, group, debutYear) {
 //   • DROP everything else: Status Change (IL / roster / paternity), number
 //     changes, arbitration filings, and the rest.
 //
-// Then dedupe exact repeats (same type + date + teams) and sort oldest-first,
-// so the strip reads forward as a career narrative like the Team history and
-// "Path to the Majors" cards above it. Degrades to null when nothing survives.
+// Then dedupe exact repeats (same type + date + teams) and sort NEWEST-first,
+// so the strip reads top-to-bottom as most-recent to least-recent. Synthetic
+// award and draft rows (which aren't in the raw feed) are merged in by the
+// caller-supplied enrichment before the sort. Degrades to null when nothing
+// survives.
 // ---------------------------------------------------------------------------
 
 // typeCode -> { label (short chip text), tone }. `tone` drives the chip/node
@@ -877,33 +938,137 @@ const TXN_TYPES = {
   NC:  { label: 'New Contract', tone: 'move' },
 }
 
-export function transactionTimelineView(transactions) {
+// Competition level rank, high number = higher level, so an ASG that moves a
+// prospect between affiliates reads as a promotion (CALLED UP) or demotion
+// (SENT DOWN) by comparing the two clubs' ranks. Unknown sportIds (complex
+// leagues, alternate sites) have no rank, so their move stays a plain "Assigned".
+const LEVEL_RANK = { 1: 6, 11: 5, 12: 4, 13: 3, 14: 2, 16: 1 }
+
+// The awards worth a timeline row — the majors only, keyed by the stable award
+// `id` (league-prefixed AL*/NL* pairs), mapped to the short chip label. Every
+// other award the feed carries (Player of the Week/Month, MiLB honors, Futures
+// Game, etc.) is noise and dropped by falling outside this allowlist. All-Star
+// selections (ALAS/NLAS) live here too — the awards feed carries them with the
+// game's own date, so they need no separate roster lookup. Verified live.
+const MAJOR_AWARDS = {
+  ALMVP: 'MVP', NLMVP: 'MVP',
+  ALCY: 'Cy Young', NLCY: 'Cy Young',
+  ALROY: 'Rookie of the Year', NLROY: 'Rookie of the Year',
+  ALSS: 'Silver Slugger', NLSS: 'Silver Slugger',
+  ALGG: 'Gold Glove', NLGG: 'Gold Glove',
+  ALPG: 'Platinum Glove', NLPG: 'Platinum Glove',
+  ALREL: 'Reliever of the Year', NLREL: 'Reliever of the Year',
+  ALAS: 'All-Star', NLAS: 'All-Star',
+  ALCPOY: 'Comeback Player', NLCPOY: 'Comeback Player',
+  ALHAA: 'Hank Aaron Award', NLHAA: 'Hank Aaron Award',
+  MLBRC: 'Roberto Clemente Award',
+  MLBAFIRST: 'All-MLB First Team', MLBSECOND: 'All-MLB Second Team',
+}
+
+// MLB Draft first-round (Day 1) dates — the API carries no draft date anywhere
+// (verified: neither the person `drafts` hydrate nor /draft/{year} has one), so
+// a draft record is pinned to a small hand-kept table. Approximate by design
+// (the user only wants "the day of that year's first round"); years outside the
+// table fall back by era — the draft sat in early June through 2020, then moved
+// to All-Star week in July from 2021 on.
+const DRAFT_DATES = {
+  2012: '06-04', 2013: '06-06', 2014: '06-05', 2015: '06-08', 2016: '06-09',
+  2017: '06-12', 2018: '06-04', 2019: '06-03', 2020: '06-10', 2021: '07-11',
+  2022: '07-17', 2023: '07-09', 2024: '07-14', 2025: '07-13', 2026: '07-12',
+}
+function draftDate(year) {
+  const md = DRAFT_DATES[year] ?? (year >= 2021 ? '07-14' : '06-06')
+  return `${year}-${md}`
+}
+
+// A trade's identity, independent of which player's feed it came from: the day
+// plus the unordered club pair. Both the queried player's TR row and every
+// other player's row in the same swap hash to this, so the caller can attach
+// the cohort of other players to the right trade.
+export function tradeKey(date, aId, bId) {
+  const [lo, hi] = [aId, bId].sort((x, y) => x - y)
+  return `${date}|${lo ?? ''}|${hi ?? ''}`
+}
+
+// Rebuild an "Assigned" description with each club's level tagged after its
+// name — "SS Cooper Pratt assigned to Nashville Sounds (AAA) from Biloxi
+// Shuckers (AA)." — reusing the feed's own "{POS} {Name} assigned to …" prefix
+// so the player descriptor stays exact. Falls back to the raw description if
+// the prefix can't be parsed.
+function assignedDescription(t, fromLevel, toLevel) {
+  const desc = t.description || ''
+  const prefix = desc.match(/^(.*?)\s+assigned to\s+/i)?.[1]
+  const toName = t.toTeam?.name || ''
+  const fromName = t.fromTeam?.name || ''
+  if (!prefix || !toName || !fromName) return desc
+  const withLevel = (name, lvl) => (lvl ? `${name} (${lvl})` : name)
+  return `${prefix} assigned to ${withLevel(toName, toLevel)} from ${withLevel(fromName, fromLevel)}.`
+}
+
+// Curate + shape the career roster-move ledger. `transactions` is the raw
+// player-scoped feed; the rest is async-resolved enrichment the caller gathers
+// (see loadPlayer): `levelByTeamId` maps a club id to its sportId (for the
+// CALLED UP / SENT DOWN direction and the level tags), `tradeOthers` maps a
+// tradeKey to the other players in that swap (for the in-description links),
+// `awards` is the raw awards feed, and `draft` is the shaped draft record. Rows
+// dated after `endDate` (the spoiler cutoff) are dropped. Newest first.
+export function transactionTimelineView(
+  transactions,
+  { selfId, levelByTeamId = new Map(), tradeOthers = new Map(), awards = [], draft = null, endDate = null } = {},
+) {
   const rows = []
   const seen = new Set()
+  const push = (row) => {
+    if (endDate && row.date > endDate) return
+    const sig = row.sig ?? `${row.code}|${row.date}`
+    if (seen.has(sig)) return
+    seen.add(sig)
+    delete row.sig
+    rows.push({ ...row, year: Number(row.date.slice(0, 4)) })
+  }
+
   for (const t of transactions ?? []) {
     const code = t.typeCode
     const fromId = t.fromTeam?.id ?? null
     const toId = t.toTeam?.id ?? null
     const desc = t.description || ''
-    let type = TXN_TYPES[code]
+    const date = t.effectiveDate || t.date
+    if (!date) continue
+    let label
+    let tone
+    let description = desc
+    let links = null
     if (code === 'ASG') {
       // Real affiliate-to-affiliate move only — both clubs present, not rehab.
       if (!fromId || !toId || /rehab/i.test(desc)) continue
-      type = { label: 'Assigned', tone: 'move' }
+      const fromLvl = levelByTeamId.get(fromId)
+      const toLvl = levelByTeamId.get(toId)
+      const fRank = LEVEL_RANK[fromLvl]
+      const tRank = LEVEL_RANK[toLvl]
+      if (fRank && tRank && tRank > fRank) { label = 'Called Up'; tone = 'add' }
+      else if (fRank && tRank && tRank < fRank) { label = 'Sent Down'; tone = 'out' }
+      else { label = 'Assigned'; tone = 'move' }
+      description = assignedDescription(t, SPORT_LABEL[fromLvl], SPORT_LABEL[toLvl])
+    } else {
+      const type = TXN_TYPES[code]
+      if (!type) continue
+      label = type.label
+      tone = type.tone
+      if (code === 'TR') {
+        // Linkify the other players in this swap — resolved by tradeKey from a
+        // team+date lookup (the player-scoped feed names them only as free text).
+        const others = tradeOthers.get(tradeKey(date, fromId, toId)) ?? []
+        links = others.filter((p) => p.id !== selfId)
+      }
     }
-    if (!type) continue
-    const date = t.effectiveDate || t.date
-    if (!date) continue
-    const sig = `${code}|${date}|${fromId ?? ''}|${toId ?? ''}`
-    if (seen.has(sig)) continue
-    seen.add(sig)
-    rows.push({
+    push({
+      sig: `${code}|${date}|${fromId ?? ''}|${toId ?? ''}`,
       date,
-      year: Number(date.slice(0, 4)),
       code,
-      label: type.label,
-      tone: type.tone,
-      description: desc,
+      label,
+      tone,
+      description,
+      links,
       // The club to anchor the row's logo: the destination the move put him at,
       // else the club he left (a release/DFA carries only a toTeam = old club).
       club: toId
@@ -913,8 +1078,42 @@ export function transactionTimelineView(transactions) {
           : null,
     })
   }
+
+  // Draft — a synthetic row on that year's first-round date, alongside (not
+  // instead of) the signing the raw feed already carries.
+  if (draft && draft.year && draft.round && draft.overall) {
+    push({
+      code: 'DRAFT',
+      date: draftDate(Number(draft.year)),
+      label: 'Drafted',
+      tone: 'add',
+      description: `Drafted by the ${draft.teamName || 'club'} in Round ${draft.round} (#${draft.overall} overall).`,
+      links: null,
+      club: draft.teamId ? { id: draft.teamId, name: draft.teamName } : null,
+    })
+  }
+
+  // Awards — one synthetic row per major award, on its announcement/game date.
+  for (const a of awards ?? []) {
+    const short = MAJOR_AWARDS[a.id]
+    if (!short || !a.date) continue
+    const isAllStar = a.id === 'ALAS' || a.id === 'NLAS'
+    push({
+      sig: `AWD|${a.id}|${a.season}`,
+      code: 'AWD',
+      date: a.date,
+      label: short,
+      tone: 'award',
+      description: isAllStar
+        ? `Selected to the ${a.season} MLB All-Star Game.`
+        : `Won the ${a.season} ${a.name}.`,
+      links: null,
+      club: a.team?.id ? { id: a.team.id, name: a.team.teamName || a.team.name || '' } : null,
+    })
+  }
+
   if (!rows.length) return null
-  rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+  rows.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
   return { rows }
 }
 
@@ -939,7 +1138,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     title: group === 'pitching' ? 'Pitching' : 'Batting',
     tiles: group === 'pitching' ? pitcherTiles(tile, role) : hitterTiles(tile),
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
-    splits: splitsView(lrSplits),
+    splits: splitsView(lrSplits, group),
     splitsLabel: group === 'pitching' ? 'opp. batter' : '',
     gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8),
     // The unified MLB + MiLB career table. `career` (the API's MLB career line

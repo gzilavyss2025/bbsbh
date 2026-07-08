@@ -14,6 +14,8 @@ import {
   fetchTeamLogoTint,
   findFirstStart,
   findFirstStrikeoutBatter,
+  findFirstPitcherFaced,
+  MILESTONE_EVENTS,
   fetchFielding,
   fetchMilbFielding,
   fetchStarterReliever,
@@ -21,6 +23,8 @@ import {
   fetchMilbFieldingSeason,
   fetchMilbStarterRelieverSeason,
   fetchTransactions,
+  fetchPlayerAwards,
+  fetchTradeCohort,
 } from './person-fetch.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
@@ -35,6 +39,7 @@ import {
   careerTimelineView,
   dropRehabStints,
   transactionTimelineView,
+  tradeKey,
   positionPlayerPastNote,
   fieldingView,
   starterRelieverView,
@@ -198,7 +203,59 @@ export async function loadPlayer(id, asOf) {
     // game being scored. Curated + shaped by transactionTimelineView.
     fetchTransactions(id, endDate),
   ])
-  const transactions = transactionTimelineView(txns)
+  // Transaction timeline enrichment — everything the raw player-scoped feed
+  // can't give on its own: each affiliate club's level (for CALLED UP / SENT
+  // DOWN + the level tags), the other players in each trade (named only as free
+  // text on the player's own row), the player's major awards, and his draft
+  // record. Gathered here, then shaped by transactionTimelineView. Awards are
+  // MLB-only; only fetch them for a debuted player (a pure prospect has none in
+  // the majors-award allowlist).
+  const asgTeamIds = new Set()
+  const trades = []
+  for (const t of txns) {
+    if (
+      t.typeCode === 'ASG' && t.fromTeam?.id && t.toTeam?.id &&
+      !/rehab/i.test(t.description || '')
+    ) {
+      asgTeamIds.add(t.fromTeam.id)
+      asgTeamIds.add(t.toTeam.id)
+    }
+    if (t.typeCode === 'TR' && t.fromTeam?.id && t.toTeam?.id) trades.push(t)
+  }
+  const [levelPairs, awards, cohorts] = await Promise.all([
+    // Level per affiliate id, from the static team snapshot (reliable at the
+    // standard levels, unlike the live teams endpoint's default-season sportId).
+    Promise.all([...asgTeamIds].map(async (tid) => [tid, (await fetchTeam(tid))?.sport?.id ?? null])),
+    bio.debut ? fetchPlayerAwards(id) : Promise.resolve([]),
+    // One team+date lookup per trade returns every player in that swap.
+    Promise.all(
+      trades.map(async (t) => {
+        const date = t.date || t.effectiveDate
+        const rows = await fetchTradeCohort(t.fromTeam.id, date)
+        const pair = new Set([t.fromTeam.id, t.toTeam.id])
+        const others = rows
+          .filter((r) => r.typeCode === 'TR' && pair.has(r.fromTeam?.id) && pair.has(r.toTeam?.id))
+          .map((r) => r.person)
+          .filter((p) => p?.id && p.id !== bio.id)
+        return [tradeKey(t.effectiveDate || t.date, t.fromTeam.id, t.toTeam.id), others]
+      }),
+    ),
+  ])
+  const levelByTeamId = new Map(levelPairs.filter(([, sid]) => sid != null))
+  const tradeOthers = new Map()
+  for (const [key, others] of cohorts) {
+    const list = tradeOthers.get(key) ?? []
+    for (const p of others) if (!list.some((x) => x.id === p.id)) list.push(p)
+    tradeOthers.set(key, list)
+  }
+  const transactions = transactionTimelineView(txns, {
+    selfId: bio.id,
+    levelByTeamId,
+    tradeOthers,
+    awards,
+    draft: bio.draft,
+    endDate,
+  })
   const blocks = results.map((r) => r.block)
   const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)
@@ -418,6 +475,16 @@ export async function loadPlayer(id, asOf) {
             isHome: startSplit.isHome,
           }
         : null
+      // The opposing pitcher a batter got each plate milestone off of — read
+      // from that milestone game's play-by-play (see findFirstPitcherFaced), so
+      // the "Firsts" card can name (and link to) who he did it against.
+      await Promise.all(
+        ['hit', 'xbh', 'hr', 'so'].map(async (key) => {
+          const f = events[key]
+          if (!f?.gamePk) return
+          f.pitcher = await findFirstPitcherFaced(bio.id, f.gamePk, MILESTONE_EVENTS[key])
+        }),
+      )
       firsts = events
     }
   }

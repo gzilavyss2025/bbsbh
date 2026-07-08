@@ -282,6 +282,71 @@ export async function findFirstStrikeoutBatter(personId, gamePk) {
   return null
 }
 
+// The `result.eventType` strings that count as each hitter milestone (verified
+// live against the game feed). A hit is any of the four; XBH drops the single;
+// HR is just the homer; a strikeout is either flavor.
+export const MILESTONE_EVENTS = {
+  hit: new Set(['single', 'double', 'triple', 'home_run']),
+  xbh: new Set(['double', 'triple', 'home_run']),
+  hr: new Set(['home_run']),
+  so: new Set(['strikeout', 'strikeout_double_play']),
+}
+
+// The opposing PITCHER a hitter faced on the play of a given milestone — the
+// batter's counterpart to findFirstStrikeoutBatter. gameLog gives the game; this
+// re-fetches that concluded game's feed and returns the pitcher off the earliest
+// play where this batter did the thing (allPlays is chronological). `events` is
+// one of MILESTONE_EVENTS. Degrades to null on an unreadable feed or no match.
+export async function findFirstPitcherFaced(personId, gamePk, events) {
+  if (!gamePk || !events) return null
+  try {
+    const feed = await fetchGameFeed(gamePk)
+    const plays = feed?.liveData?.plays?.allPlays ?? []
+    for (const play of plays) {
+      if (play.matchup?.batter?.id !== personId) continue
+      if (!events.has(play.result?.eventType)) continue
+      return play.matchup?.pitcher ?? null // { id, fullName }
+    }
+  } catch {
+    // Unreadable game feed — no pitcher to show.
+  }
+  return null
+}
+
+// Every award a person has won (MVP, Cy Young, Silver Slugger, All-Star, …).
+// Each object carries `id` (a stable AL*/NL* code), `name`, `season`, a real
+// `date`, and (usually) `team` — the timeline filters to the majors and pins a
+// row per award to its date (see transactionTimelineView). Roster/award data
+// carries no score, so it's spoiler-free like the rest of the page. Degrades to
+// [] off MLB / on failure.
+export async function fetchPlayerAwards(personId) {
+  if (!personId) return []
+  try {
+    const data = await getJson(`/api/v1/people/${personId}/awards`)
+    return data.awards ?? []
+  } catch {
+    return []
+  }
+}
+
+// Every player moved in a trade — read by querying one of the two clubs' moves
+// on the trade's own date (the player-scoped feed names the OTHER players only
+// in free text, but a team+date query returns each of them as its own row with
+// a real person id and direction). The caller keys these by tradeKey to attach
+// the cohort to the matching swap. Returns the RAW transaction rows; degrades
+// to [] on failure.
+export async function fetchTradeCohort(teamId, date) {
+  if (!teamId || !date) return []
+  try {
+    const data = await getJson(
+      `/api/v1/transactions?teamId=${teamId}&startDate=${date}&endDate=${date}`,
+    )
+    return data.transactions ?? []
+  } catch {
+    return []
+  }
+}
+
 // Full career roster-move history for one person — trades, signings, the draft,
 // call-ups/options, waivers, releases, DFAs, and (for a prospect) every
 // affiliate-to-affiliate assignment up the farm system. The `/transactions`
