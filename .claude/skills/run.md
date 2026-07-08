@@ -44,6 +44,14 @@ long-lived example (slate loads, a pinned game's lineup and box score render).
 This is a verification harness, not a CI-enforced regression suite — see
 CLAUDE.md's "no test suite" note, which is still true in spirit.
 
+`e2e/invariants/` is the one deliberate exception: permanent specs that guard
+the spoiler-reveal mechanism itself (DOM-absence pre-reveal, the
+`revealedThrough` mark advancing/persisting/not-over-revealing, extra innings
+staying locked). These are viewport-independent, so `playwright.config.js`
+`testIgnore`s that folder on the `ipad`/`desktop` projects — mobile only. Add
+to this folder only for the reveal mechanism itself, not feature-specific
+rendering; those stay as throwaway specs.
+
 ## Manual path (only if Playwright MCP tools are what's available)
 
 ```bash

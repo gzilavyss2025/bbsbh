@@ -24,10 +24,22 @@ export default defineConfig({
   // has a wider layout (see the `min-width: 740px` rule in index.css) that
   // iPad/desktop sizes exercise. `npm run e2e` runs a spec against all
   // three; pass `--project=mobile` (etc.) to check just one.
+  //
+  // e2e/invariants/** tests the spoiler-reveal mechanism itself, which is
+  // viewport-independent — ipad/desktop skip it so tripling those specs
+  // doesn't just triple runtime for no coverage gain.
   projects: [
     { name: 'mobile', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
-    { name: 'ipad', use: { ...devices['iPad (gen 7)'], browserName: 'chromium' } },
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], browserName: 'chromium' } },
+    {
+      name: 'ipad',
+      use: { ...devices['iPad (gen 7)'], browserName: 'chromium' },
+      testIgnore: /invariants[\\/]/,
+    },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], browserName: 'chromium' },
+      testIgnore: /invariants[\\/]/,
+    },
   ],
   webServer: {
     command: 'npm run dev',
