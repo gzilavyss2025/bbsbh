@@ -52,14 +52,28 @@ export async function fetchTeamRoster(teamId, season) {
   }
 }
 
+// Session cache for fetchTeamRosterIds, keyed by teamId. Active rosters only
+// churn on transactions (call-ups/trades/IL moves) — a few times a week per
+// team, not intraday — so a 30-minute TTL is long enough to spare a refetch
+// on every slate re-render within a session, while staying short enough that
+// a "roughly how many prospects" badge never goes stale for long. A failed
+// fetch is never cached, so a transient network blip doesn't stick around
+// for the full TTL.
+const ROSTER_IDS_CACHE_TTL_MS = 30 * 60 * 1000
+const rosterIdsCache = new Map()
+
 // Just the active roster's person ids — no stat hydration — for the slate's
 // "N prospects on this roster" badge, which only needs to know who's on the
 // roster, not their stats. Lighter than fetchTeamRoster. Degrades to [].
 export async function fetchTeamRosterIds(teamId) {
   if (!teamId) return []
+  const cached = rosterIdsCache.get(teamId)
+  if (cached && Date.now() - cached.ts < ROSTER_IDS_CACHE_TTL_MS) return cached.data
   try {
     const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=active`)
-    return (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
+    const ids = (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
+    rosterIdsCache.set(teamId, { ts: Date.now(), data: ids })
+    return ids
   } catch {
     return []
   }
