@@ -24,7 +24,16 @@ For a one-off check, write a small spec under `e2e/` (or reuse/extend
 ```bash
 npx playwright test e2e/smoke.spec.js        # single file
 npx playwright test -g "innings viewer"       # by test name
+npx playwright test --project=mobile          # one breakpoint only
 ```
+
+Three projects — `mobile` (iPhone 13), `ipad` (iPad gen 7), `desktop`
+(1280×720) — all forced onto Chromium regardless of the device preset's
+default engine (only Chromium's binary is cached here). Running with no
+`--project` flag runs every spec against all three, which is the default for
+`npm run e2e`; scope to one project when the check doesn't care about
+layout/breakpoint (`min-width: 740px` in `index.css` is the one responsive
+rule in the app — mobile is below it, ipad/desktop are above it).
 
 Use `page.screenshot()` sparingly — prefer assertions (`expect(locator)...`)
 over eyeballing screenshots; they're cheaper and don't need a human/model to

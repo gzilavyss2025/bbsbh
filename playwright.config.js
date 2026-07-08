@@ -14,14 +14,21 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
-    // iPhone viewport/touch to match the real phone-first layout, but forced
-    // onto Chromium (not the iPhone 13 preset's default WebKit) since only
-    // Chromium's binary is pre-cached here — avoids a WebKit download just to
-    // run a quick verification pass.
-    ...devices['iPhone 13'],
+    // Forced onto Chromium everywhere (not each device preset's default
+    // engine, e.g. iPhone 13 -> WebKit) since only Chromium's binary is
+    // pre-cached here — avoids a browser download just to run a quick
+    // verification pass.
     browserName: 'chromium',
   },
-  projects: [{ name: 'chromium' }],
+  // Three breakpoints: phone-first is the primary target, but the app also
+  // has a wider layout (see the `min-width: 740px` rule in index.css) that
+  // iPad/desktop sizes exercise. `npm run e2e` runs a spec against all
+  // three; pass `--project=mobile` (etc.) to check just one.
+  projects: [
+    { name: 'mobile', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
+    { name: 'ipad', use: { ...devices['iPad (gen 7)'], browserName: 'chromium' } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], browserName: 'chromium' } },
+  ],
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',
