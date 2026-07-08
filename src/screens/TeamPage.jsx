@@ -29,6 +29,10 @@ import { ProspectPill } from '../components/ProspectPill.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
+import { SectionTitle } from '../components/SectionTitle.jsx'
+import { TeamLeaders } from '../components/TeamLeaders.jsx'
+import { normalizeRosterToPool, FEATURED_CATEGORIES } from '../api/teamLeaders.js'
+import { teamLeadersPath } from '../lib/route.js'
 
 const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
@@ -227,6 +231,11 @@ async function loadTeam(id, asOf) {
     }))
     .sort((a, b) => (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) || Number(a.jersey) - Number(b.jersey))
 
+  // Per-player leaderboard pool — the roster is already hydrated with each
+  // player's season hitting+pitching split (see fetchTeamRoster), so this is a
+  // pure reshape, no extra fetch. Powers the Team Leaders section below.
+  const leaderPool = normalizeRosterToPool(roster, team)
+
   return {
     team, season, sportId,
     record: myRec
@@ -234,12 +243,13 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers,
-    affiliationHistory, affiliates, prospects, schedule,
+    affiliationHistory, affiliates, prospects, schedule, leaderPool,
   }
 }
 
 export function TeamPage({ id, asOf, sportId }) {
   const teamId = Number(id)
+  const navigate = useNav()
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
   useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
@@ -247,7 +257,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, affiliationHistory, affiliates, prospects, schedule } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, affiliationHistory, affiliates, prospects, schedule, leaderPool } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // On a MiLB affiliate page, lead the Affiliates section with a card for the
   // parent MLB club (which fetchAffiliates deliberately omits from the farm
@@ -335,6 +345,12 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {batting && <TeamStats title="Team batting" stats={batting} />}
         {pitching && <TeamStats title="Team pitching" stats={pitching} />}
+
+        <TeamLeaders
+          pool={leaderPool}
+          categories={FEATURED_CATEGORIES}
+          onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
+        />
 
         {position.length > 0 && (
           <>
@@ -569,12 +585,4 @@ function RosterList({ rows, season, showProspect }) {
   )
 }
 
-function SectionTitle({ title, note }) {
-  return (
-    <h3 className="section__title">
-      <span>{title}</span>
-      {note && <em>{note}</em>}
-    </h3>
-  )
-}
 

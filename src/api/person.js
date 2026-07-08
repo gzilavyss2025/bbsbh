@@ -1406,9 +1406,13 @@ export function rankTeam(leagueStats, teamId, key, lowerBetter = false) {
 }
 
 // The pitcher role chip label for a roster row, from hydrated season pitching.
+// Select the pitching split by group name rather than by index: fetchTeamRoster
+// now hydrates BOTH hitting and pitching, so stats[0] is no longer guaranteed to
+// be the pitching split (a two-way arm carries a hitting split too).
 export function rosterPitcherRole(rosterEntry) {
-  const stat = rosterEntry?.person?.stats?.[0]?.splits?.[0]?.stat
-  return pitcherRole(stat)
+  const stats = rosterEntry?.person?.stats ?? []
+  const pit = stats.find((s) => s.group?.displayName === 'pitching') ?? stats[0]
+  return pitcherRole(pit?.splits?.[0]?.stat)
 }
 
 // "First Last" (natural title case) — the team page shows names this way, unlike

@@ -47,9 +47,13 @@ export async function fetchTeam(teamId) {
 const TEAM_ROSTER_CACHE_TTL_MS = 15 * 60 * 1000
 const teamRosterCache = new Map()
 
-// The active roster, with each player's season pitching line hydrated so the
-// team page can infer starter/reliever/closer (there is no role field in the
-// API). Position players simply carry no pitching stats. Degrades to [].
+// The active roster, with each player's season hitting AND pitching lines
+// hydrated: pitching so the team page can infer starter/reliever/closer (there
+// is no role field in the API), hitting+pitching so the Team Leaders section can
+// rank individual players by any season stat (see api/teamLeaders.js). Both
+// groups arrive in one request; the API returns only the split(s) a given player
+// has, so a position player carries just a hitting split and a pitcher just a
+// pitching one (a two-way player carries both). Degrades to [].
 export async function fetchTeamRoster(teamId, season) {
   if (!teamId || !season) return []
   const key = `${teamId}:${season}`
@@ -57,7 +61,7 @@ export async function fetchTeamRoster(teamId, season) {
   if (cached && Date.now() - cached.ts < TEAM_ROSTER_CACHE_TTL_MS) return cached.data
   try {
     const data = await getJson(
-      `/api/v1/teams/${teamId}/roster?rosterType=active&hydrate=person(stats(type=season,group=pitching,season=${season}))`,
+      `/api/v1/teams/${teamId}/roster?rosterType=active&hydrate=person(stats(type=season,group=[hitting,pitching],season=${season}))`,
     )
     const roster = data.roster ?? []
     teamRosterCache.set(key, { ts: Date.now(), data: roster })

@@ -4052,6 +4052,167 @@ body {
   gap: var(--space-3);
 }
 
+/* ---------------------------------------------------------------------------
+   TEAM LEADERS — per-category season leaderboards on the team page + the
+   dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
+   slate's Top Performers row; the parallel `.tlead__*` classes keep that
+   spoiler-gated component's own `.topperf__*` rules untouched.
+   --------------------------------------------------------------------------- */
+.tlead {
+  margin-top: 4px;
+}
+/* A "See all ›" link that rides in the section header's right slot. */
+.tlead__seeall {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+}
+/* Responsive card grid — one column on a phone, filling out as width allows. */
+.tlead__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 560px) {
+  .tlead__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.tlead__cat {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+.tlead__cat-title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Featured leader row — headshot + name/stat stack. */
+.tlead__featured {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
+   outranks the base .shot sizing, same reason as .topperf__shot. */
+.shot.tlead__shot {
+  flex: none;
+  width: auto;
+  height: 52px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.tlead__shot.shot--fallback {
+  font-size: 20px;
+}
+.tlead__logo {
+  flex: none;
+}
+.tlead__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.tlead__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* Compound to beat .plink's `font: inherit`, same as .topperf__name. */
+.tlead__head .tlead__name {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.tlead__pos {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.tlead__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.tlead__statval {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.tlead__statlabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Chasers (ranks 2–N) — plain rows: rank, name, value. */
+.tlead__rest {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tlead__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.tlead__rank {
+  flex: none;
+  width: 14px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-caption);
+  text-align: right;
+}
+.tlead__row .tlead__rowname {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tlead__rowval {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* Game-info foot: WP, umpires, weather, T, Att… */
 .bs__info {
   padding: 12px 14px;

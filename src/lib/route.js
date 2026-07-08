@@ -12,6 +12,7 @@
 //   '/standings'                        -> { name: 'standings' }
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
+//   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/{MMDDYYYY}/{matchup}/{section}'   -> { name: 'game', date, matchup, section }
 //
 // `matchup` is the away + home team abbreviations concatenated and lowercased
@@ -43,6 +44,10 @@ export function parseRoute(url) {
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: parts[1], asOf, sportId }
+  // Must come BEFORE the generic 3-segment game branch below, which would
+  // otherwise swallow /team/{id}/leaders as a game (date='team').
+  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'leaders')
+    return { name: 'team-leaders', id: parts[1], asOf, sportId }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
     return {
@@ -114,4 +119,7 @@ export function playerPath(id, opts = {}) {
 }
 export function teamPath(id, opts = {}) {
   return `/team/${id}${linkQuery(opts)}`
+}
+export function teamLeadersPath(id, opts = {}) {
+  return `/team/${id}/leaders${linkQuery(opts)}`
 }
