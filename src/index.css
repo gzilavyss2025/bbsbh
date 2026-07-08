@@ -4081,13 +4081,17 @@ body {
   }
 
   /* ---- slate footer: player/team search side by side instead of stacked;
-     the action buttons stay a compact row that doesn't stretch full-width. */
+     the action buttons stay a compact row that doesn't stretch full-width.
+     480px (not the original 360px) is sized for all four stops — Find a past
+     matchup / Logo sheet / Standings / Top MLB Prospects — after the last two
+     were added; 360px let "Standings" and "Top MLB Prospects" overflow their
+     boxes on tablet/desktop. */
   .sitefooter__search {
     flex-direction: row;
   }
 
   .sitefooter__actions {
-    max-width: 360px;
+    max-width: 480px;
   }
 
   /* ---- game chrome: the section tabs keep a readable width too. */
