@@ -10,6 +10,7 @@ import { TeamPage } from './screens/TeamPage.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
+import { Loader } from './components/Loader.jsx'
 import {
   parseRoute,
   gamePath,
@@ -125,7 +126,7 @@ function GameRoute({ route, seed, onSection, onHome }) {
   if (resolved.loading) {
     return (
       <div className="screen">
-        <p className="hint">Loading game…</p>
+        <Loader />
       </div>
     )
   }

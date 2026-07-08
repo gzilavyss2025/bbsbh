@@ -23,6 +23,7 @@ import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { Loader } from '../components/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
@@ -244,7 +245,7 @@ export function GameView({ game, section, onSection }) {
         />
       )}
 
-      {feedState.loading && !feed && <p className="hint">Loading game…</p>}
+      {feedState.loading && !feed && <Loader />}
       {/* Cold-load failure (never got a feed): collapse to a retry card. */}
       {!feed && feedState.error && (
         <>

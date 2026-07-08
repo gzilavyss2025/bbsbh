@@ -1,5 +1,6 @@
 import { SiteHeader } from './SiteHeader.jsx'
 import { BackBtn } from './BackBtn.jsx'
+import { Loader } from './Loader.jsx'
 
 // The cold-load loading/error/not-found screen shared by PlayerPage and
 // TeamPage: while there's no data yet, show "Loading {noun}…"; if the fetch
@@ -12,7 +13,7 @@ export function AsyncGate({ loading, error, data, screenClass, noun, onBack }) {
       <div className={`screen ${screenClass}`}>
         <SiteHeader />
         <BackBtn onClick={onBack} />
-        <p className="hint">Loading {noun}…</p>
+        <Loader />
       </div>
     )
   }

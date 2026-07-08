@@ -7,6 +7,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { Loader } from '../components/Loader.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // MLB seasons open in late March / early April; an earlier month-first button
@@ -162,7 +163,7 @@ export function StandingsPage() {
         )}
       </div>
 
-      {loading && leagues.length === 0 && <p className="hint">Loading standings…</p>}
+      {loading && leagues.length === 0 && <Loader />}
       {error && leagues.length === 0 && (
         <p className="hint hint--error">Couldn’t load standings. Try again.</p>
       )}

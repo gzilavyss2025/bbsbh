@@ -8,6 +8,7 @@ import { SealBox } from './SealBox.jsx'
 import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { Loader } from './Loader.jsx'
 
 // The slate's hidden "kraft box": the day's top 5 batters and top 5 pitchers
 // by win-probability added, across every in-progress/final game at the
@@ -87,7 +88,12 @@ function TopPerformersPanel({ games, prospects, dateStr, sportId }) {
   )
 
   if (loading) {
-    return <p className="hint topperf__loading">Crunching win probability across this day&apos;s games…</p>
+    return (
+      <Loader
+        size="inline"
+        message="Crunching win probability across this day’s games…"
+      />
+    )
   }
   if (error) {
     return (

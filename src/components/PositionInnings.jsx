@@ -1,3 +1,5 @@
+import { Loader } from './Loader.jsx'
+
 // Career/season workload by fielding position, drawn on a small diamond that
 // echoes DefenseDiamond's SPOTS layout (see components/DefenseDiamond.jsx) —
 // but here every position is always shown (a scorebook "innings log" rather
@@ -70,7 +72,7 @@ export function PositionInnings({ options, scope, onScope, loading, fielding, pi
       )}
 
       {loading ? (
-        <p className="posinn__loading" aria-live="polite">Loading…</p>
+        <Loader size="inline" className="posinn__loading" />
       ) : (
         <>
           {fielding && (

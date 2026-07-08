@@ -8,6 +8,7 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { Loader } from '../components/Loader.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -80,7 +81,7 @@ export function ProspectsPage() {
         <h1 className="topbar__title">Top 100 Prospects</h1>
       </header>
 
-      {loading && !data && <p className="hint">Loading prospect rankings…</p>}
+      {loading && !data && <Loader />}
       {error && <p className="hint hint--error">Couldn’t load prospect rankings. Try again.</p>}
 
       {data && players.length === 0 && (

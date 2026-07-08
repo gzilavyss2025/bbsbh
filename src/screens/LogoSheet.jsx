@@ -7,6 +7,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { Loader } from '../components/Loader.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used
@@ -32,7 +33,7 @@ export function LogoSheet({ onBack }) {
 
       <LevelNav sportId={sportId} onChange={setSportId} />
 
-      {teamsState.loading && <p className="hint">Loading logos…</p>}
+      {teamsState.loading && <Loader />}
       {teamsState.error && (
         <>
           <p className="hint hint--error" role="status">

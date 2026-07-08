@@ -13,6 +13,7 @@ import { ScorebookMark } from '../components/ScorebookMark.jsx'
 import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
+import { Loader } from '../components/Loader.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
@@ -151,7 +152,7 @@ export function GameSelect({ onPick, onShowLogos }) {
         )}
       </div>
 
-      {loading && <p className="hint">Loading games…</p>}
+      {loading && <Loader />}
       {error && (
         <>
           <p className="hint hint--error" role="status">

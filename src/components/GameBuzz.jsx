@@ -1,6 +1,7 @@
 import { fetchGameBuzz } from '../api/buzz.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { SealBox } from './SealBox.jsx'
+import { Loader } from './Loader.jsx'
 
 // GAME NOTES buzz: the night's best Bluesky posts about this game, to crib the
 // storytelling numbers onto paper. Score-revealing (post text states the
@@ -20,7 +21,7 @@ function clockTime(iso) {
 function GameBuzzList({ feed }) {
   const { loading, error, data, reload } = useAsync(() => fetchGameBuzz(feed), [feed])
 
-  if (loading) return <p className="hint buzz__loading">Loading…</p>
+  if (loading) return <Loader size="inline" />
   if (error) {
     return (
       <div className="buzz__state">
