@@ -1986,6 +1986,40 @@ body {
   line-height: 1.2;
 }
 
+/* Pre-pitch subs/pitching changes for the half about to be revealed, shown
+   above the seal (see api/select.js's selectPrePitchChanges). Kept visually
+   distinct from the sealed content below it: a plain rule and caption, no
+   seal texture, since it isn't gated by the tap. */
+.prepitch {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: var(--bw-hair) dashed var(--border-rule);
+}
+
+.prepitch__title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.prepitch__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prepitch__item {
+  font-size: 13px;
+  color: var(--text-body);
+}
+
 /* The fielding team's live alignment for the half, below the feed — the lineup
    page's defense diamond, now building up substitutions as innings are revealed
    (reveal-only, see api/defense.js). */

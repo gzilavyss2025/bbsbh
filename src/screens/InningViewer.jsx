@@ -15,6 +15,7 @@ import {
   selectBullpen,
   selectBench,
   selectTeamMeta,
+  selectPrePitchChanges,
   halfIndex,
 } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
@@ -244,6 +245,7 @@ export function InningViewer({
               battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
               pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
               revealed={curIdx <= revealedThrough}
+              isNextToReveal={curIdx === revealedThrough + 1}
               getDerived={getDerived}
               onReveal={revealTo}
             />
@@ -317,6 +319,7 @@ function HalfInning({
   battingAbbr,
   pitchingAbbr,
   revealed,
+  isNextToReveal,
   getDerived,
   onReveal,
 }) {
@@ -330,6 +333,16 @@ function HalfInning({
           {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
         </span>
       </h3>
+
+      {/* Pre-pitch subs/pitching changes for the half the user is about to
+          reveal — spoiler-free (see selectPrePitchChanges), shown ahead of the
+          seal so it can go straight into the scorebook margin before tapping
+          to reveal the rest of the half. Only for the immediate next half:
+          the same information for a half further out is what defense.js's
+          "flurry of subs" risk is about. */}
+      {!revealed && isNextToReveal && (
+        <PrePitchChanges feed={feed} inning={inning} half={half} />
+      )}
 
       <SealBox
         forceRevealed={revealed}
@@ -692,6 +705,26 @@ function StatcastCard({ label, value, unit, who, detail }) {
           {detail ? ` (${detail.toUpperCase()})` : ''}
         </span>
       )}
+    </div>
+  )
+}
+
+// Subs/pitching changes announced before this half's first pitch — rendered
+// above the SealBox (not inside it), gated by the caller to the half the user
+// is about to reveal. See selectPrePitchChanges for why this is spoiler-free.
+function PrePitchChanges({ feed, inning, half }) {
+  const changes = selectPrePitchChanges(feed, inning, half)
+  if (changes.length === 0) return null
+  return (
+    <div className="prepitch">
+      <h4 className="prepitch__title">Before this half</h4>
+      <ul className="prepitch__list">
+        {changes.map((c, i) => (
+          <li className="prepitch__item" key={i}>
+            {c.text}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

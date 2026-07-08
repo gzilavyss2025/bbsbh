@@ -370,6 +370,42 @@ export function selectGameInfo(feed) {
   }
 }
 
+// Defensive subs, defensive switches, and pitching changes announced before a
+// half's own first pitch — the same thing a broadcast tells you before the
+// half starts, so it carries no more spoiler risk than the starting lineup.
+// Spoiler-free: reads only eventType/description off each playEvent, never an
+// event's awayScore/homeScore (present on every event, deliberately unread
+// here). Verified against gamePk 823035 (2026-07-07 MIL@STL g2): a half's
+// pre-pitch cluster of subs all land as leading, non-pitch playEvents on that
+// half's FIRST play, immediately before its first isPitch:true event — so a
+// single scan that stops at the half's first pitch is sufficient; it never
+// needs to look past it into the half's actual at-bats.
+//
+// The caller must gate WHEN this is shown: it's meant only for the half that
+// is the user's own next one to reveal (halfIndex(inning, half) ===
+// revealedThrough + 1). For a half further out, this is exactly the "flurry
+// of substitutions telegraphs a still-sealed blowout" risk api/defense.js
+// guards against — this selector itself has no opinion on reveal state, it
+// just reads one half's pre-pitch events.
+const PRE_PITCH_EVENT_TYPES = new Set([
+  'defensive_substitution',
+  'defensive_switch',
+  'pitching_substitution',
+])
+export function selectPrePitchChanges(feed, inning, half) {
+  const changes = []
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    if (play?.about?.inning !== inning || play?.about?.halfInning !== half) continue
+    for (const ev of play.playEvents ?? []) {
+      if (ev.isPitch) return changes
+      if (PRE_PITCH_EVENT_TYPES.has(ev.details?.eventType)) {
+        changes.push({ eventType: ev.details.eventType, text: ev.details.description })
+      }
+    }
+  }
+  return changes
+}
+
 // Regulation length of the game (7 for some MiLB / doubleheader games, else 9).
 // Spoiler-safe: it's a fixed structural number, never a score. Drives how many
 // inning columns the boxscore shows before extra innings unlock one at a time.
