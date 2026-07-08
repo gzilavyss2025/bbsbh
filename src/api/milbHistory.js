@@ -1,0 +1,66 @@
+// Historical MiLB affiliate/franchise data — corrects the "parent org" a
+// career/transaction-timeline stop shows for a PAST season, so a long-tenured
+// player's farm-system stint doesn't look like a trade when only the
+// affiliate's OWN parent org was reassigned years later (the 2021 MiLB
+// reorganization is the biggest single cause, but plenty of pre-2021 PDC
+// swaps do this too). Read from a static same-origin file
+// (public/data/milb-history.json), the same fetch+cache shape war.js and
+// teams-static.js use — EXCEPT this one is hand-maintained: there's no
+// nightly generator, because affiliate history takes a human reading a
+// primary source and typing in a year range, not a script. See that file's
+// own `_hint`/`caveats` fields for the research method and known gaps, and
+// docs/milb-historical-logos.md for the companion logo-asset manifest.
+//
+// Deliberately thin (see the JSON's `scope` field) — a (teamId, year) with no
+// recorded era just returns null, meaning "no override," and the caller falls
+// back to its existing live/current-season lookup exactly as it did before
+// this module existed. That makes wiring this in strictly additive: it can
+// only make a resolution MORE correct, never less.
+
+let cached = null
+
+export async function fetchMilbHistory() {
+  if (cached) return cached
+  try {
+    const res = await fetch('/data/milb-history.json')
+    if (!res.ok) throw new Error(`milb-history.json ${res.status}`)
+    cached = await res.json()
+  } catch {
+    cached = { clubs: {} }
+  }
+  return cached
+}
+
+// The era (if any) in `list` whose [startYear, endYear] span contains `year`.
+function eraForYear(list, year) {
+  return (list ?? []).find((e) => year >= e.years[0] && year <= e.years[1]) ?? null
+}
+
+// The parent org (id + name) a MiLB club was ACTUALLY affiliated with in a
+// given year, per this file's researched eras — or null when that (teamId,
+// year) isn't covered, meaning "no override, use the live/current lookup."
+// `year` should be the season the stint actually happened in (e.g. a
+// career-timeline stop's `minSeason`), never the current date — passing
+// today's year is exactly the bug this module exists to avoid.
+export async function historicalParentOrg(teamId, year) {
+  if (!teamId || !year) return null
+  const data = await fetchMilbHistory()
+  const club = data.clubs?.[String(teamId)]
+  const era = eraForYear(club?.parentHistory, year)
+  return era ? { id: era.parentOrgId, name: era.parentOrgName } : null
+}
+
+// The club's own name/city at a given year, if this same statsapi team id has
+// since been renamed or relocated (a genuine mascot/city change, distinct from
+// an affiliate-reassignment-only case) — else null. Not yet wired into any
+// screen (no historical logo art exists yet — see docs/milb-historical-logos.md);
+// exposed so a future pass can show e.g. "Huntsville Stars" instead of
+// "Rocket City Trash Pandas" on a pre-2015 career-timeline stop, once the art
+// is in place. `year` should be the stint's own season, same rule as above.
+export async function historicalClubName(teamId, year) {
+  if (!teamId || !year) return null
+  const data = await fetchMilbHistory()
+  const club = data.clubs?.[String(teamId)]
+  const era = eraForYear(club?.nameHistory, year)
+  return era ? { name: era.name, city: era.city ?? '', logo: era.logo ?? null } : null
+}

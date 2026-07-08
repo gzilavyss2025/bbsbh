@@ -206,6 +206,24 @@ notes the gamePk field paths were verified against):
   build-time-fetch pattern (bulk/unofficial source → nightly script → static
   JSON → same-origin read) is meant to be reused for the next source shaped
   like this — see `docs/data-enrichment.md` §5.
+- `milbHistory.js` — historical MiLB affiliate/franchise data, read from a
+  static same-origin `public/data/milb-history.json`. Unlike `war.js`/
+  `affiliates.json`/`teams.json`, this file is **hand-curated, not
+  script-generated** — there's no live source for "what org was this farm
+  club affiliated with in 2011," so a human researches it once and types in a
+  year range. It exists to fix a specific illusion: a MiLB affiliate's PARENT
+  org can be reassigned (most sweepingly in the 2021 MiLB reorganization)
+  independent of the player ever changing organizations, so a naive "current
+  parent org" lookup mislabels an old stint as if the player had been traded.
+  `historicalParentOrg(teamId, year)` is wired into the career timeline
+  (`loadPlayer.js`) as a preferred-when-covered override ahead of the
+  existing live `fetchTeam()` lookup; deliberately thin (see the JSON's own
+  `scope` note), so most (team, year) pairs still fall through to that live
+  lookup unchanged. A parallel `historicalClubName()` covers genuine
+  franchise renames/relocations (e.g. Huntsville Stars → Rocket City Trash
+  Pandas) but isn't wired into any screen yet — no historical logo art exists
+  to show alongside a renamed club's badge; see
+  `docs/milb-historical-logos.md` for the asset manifest and integration plan.
 
 **Screens** (`src/screens/`): `GameSelect` (slate with the MLB/AAA/AA/A+/A level
 toggle) → `GameView` (owns the site-home bar + grayscale away@home masthead that

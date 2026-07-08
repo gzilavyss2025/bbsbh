@@ -1,0 +1,91 @@
+{
+  "_hint": "Hand-curated, NOT auto-generated (no nightly script/cron — unlike affiliates.json/teams.json/war.json in this folder). Update this file directly when you research a new club. See src/api/milbHistory.js for the reader and docs/milb-historical-logos.md for the companion logo-asset manifest.",
+  "verifiedAt": "2026-07-08",
+  "method": "Every parentHistory era below was confirmed directly against statsapi's own season-scoped endpoint, GET https://statsapi.mlb.com/api/v1/teams/{id}?season={year}&sportId={n} (which returns that team's OWN parentOrgId/parentOrgName as of that season) — cross-checked against Wikipedia for the year boundaries. This is the ground truth this file exists to preserve, because the app's live lookups (src/api/team.js, teams-static.js) only ever fetch the CURRENT season and would otherwise mislabel a past stint with today's affiliation.",
+  "scope": "Deliberately thin: only the clubs relevant to Milwaukee Brewers affiliate history (the app's pinned org) plus the two clubs named in the original bug report (Myrtle Beach Pelicans/Freeman, Huntsville Stars/Rocket City). This is NOT a comprehensive history of all ~120 current or ~160 pre-2021 affiliates — most clubs' full histories are unresearched here. A (teamId, year) pair with no matching era below simply falls through to the live current-season lookup, unchanged from today's behavior (safe by construction: this file can only make a resolution MORE correct, never less).",
+  "caveats": [
+    "statsapi team ids sometimes track a persistent CITY/BRAND slot rather than a literal relocated roster. Example: id 510 ('San Antonio Missions') was Double-A/San Diego Padres through 2018 and became Triple-A/Milwaukee Brewers for 2019-2020 under the SAME id — while the Triple-A club that actually physically relocated INTO San Antonio that year (the Colorado Springs Sky Sox, its own id 551) was left permanently inactive, and the outgoing Double-A Missions' own players/ownership relocated OUT to Amarillo under a brand-new id (5368, first-year-of-play 2018/2019) rather than taking id 510 with them. Press narratives about 'which team physically moved where' do not always match statsapi's id bookkeeping — verify with the season-scoped endpoint above before trusting a Wikipedia 'relocated to' claim at the id level.",
+    "Similarly: id 559 (today's Los Angeles Angels affiliate, Rocket City Trash Pandas) was the Milwaukee Brewers' Double-A Huntsville Stars affiliate through 2014, then had NO team attached 2015-2019, before resurfacing in 2020 as the Angels' Rocket City Trash Pandas — so the popular 'Huntsville Stars name returns to the area as the Rocket City Trash Pandas' framing IS correct at the statsapi id level. Most press instead frames the Trash Pandas as a continuation of the Mobile BayBears (a SEPARATE, now-inactive id, 417, whose ownership group did physically relocate the club/PDC slot to Madison, AL in 2020). Both claims are independently true of different real-world entities (an ownership/franchise-agreement lineage vs. a statsapi database id lineage); this file follows the statsapi id, since that is what every stat split in this app is already keyed on.",
+    "Year ranges below are the SEASON the club was affiliated with that org, inclusive both ends, per statsapi's own per-season snapshot. A mid-season affiliate switch (rare) would not be captured precisely by this year-granularity model.",
+    "Uncertain items are flagged inline with an `uncertain` note; treat those specific boundaries as approximate pending a human double-check."
+  ],
+  "clubs": {
+    "559": {
+      "currentName": "Rocket City Trash Pandas",
+      "sportId": 12,
+      "note": "See caveats above re: id lineage vs. the Mobile BayBears press narrative.",
+      "nameHistory": [
+        { "name": "Huntsville Stars", "city": "Huntsville, AL", "league": "Southern League", "years": [1985, 2014], "logo": "huntsville-stars.png" }
+      ],
+      "parentHistory": [
+        { "years": [1999, 2014], "parentOrgId": 158, "parentOrgName": "Milwaukee Brewers" }
+      ]
+    },
+    "417": {
+      "currentName": "Mobile BayBears",
+      "sportId": 12,
+      "note": "statsapi marks this id inactive since the 2019-2020 relocation to Madison, AL (which took a DIFFERENT id, 559 — see caveats). Kept here so a player's pre-2020 Mobile stint still resolves the org he was actually with, not whatever the (now-defunct) id would show as current.",
+      "parentHistory": [
+        { "years": [1997, 2015], "parentOrgId": 109, "parentOrgName": "Arizona Diamondbacks", "uncertain": "End year approximate — verified Diamondbacks as of 2010/2013/2015 and Angels as of 2017; the exact transition year (2016?) is not pinned." },
+        { "years": [2017, 2019], "parentOrgId": 108, "parentOrgName": "Los Angeles Angels" }
+      ]
+    },
+    "551": {
+      "currentName": "Colorado Springs Sky Sox",
+      "sportId": 11,
+      "note": "statsapi marks this id inactive since the 2019 relocation to San Antonio (which reused a DIFFERENT id, 510 — see caveats).",
+      "parentHistory": [
+        { "years": [1988, 1992], "parentOrgId": 114, "parentOrgName": "Cleveland Indians" },
+        { "years": [1993, 2014], "parentOrgId": 115, "parentOrgName": "Colorado Rockies" },
+        { "years": [2015, 2018], "parentOrgId": 158, "parentOrgName": "Milwaukee Brewers" }
+      ]
+    },
+    "510": {
+      "currentName": "San Antonio Missions",
+      "sportId": 12,
+      "parentHistory": [
+        { "years": [2019, 2020], "parentOrgId": 158, "parentOrgName": "Milwaukee Brewers", "sportId": 11, "note": "Triple-A for these two seasons only (the former Colorado Springs Sky Sox slot, id 551, moved in); Double-A in every other season on record, including today." }
+      ]
+    },
+    "556": {
+      "currentName": "Nashville Sounds",
+      "sportId": 11,
+      "parentHistory": [
+        { "years": [1978, 1979], "parentOrgId": 113, "parentOrgName": "Cincinnati Reds" },
+        { "years": [1980, 1984], "parentOrgId": 147, "parentOrgName": "New York Yankees" },
+        { "years": [1985, 1986], "parentOrgId": 116, "parentOrgName": "Detroit Tigers" },
+        { "years": [1987, 1992], "parentOrgId": 113, "parentOrgName": "Cincinnati Reds" },
+        { "years": [1993, 1997], "parentOrgId": 145, "parentOrgName": "Chicago White Sox" },
+        { "years": [1998, 2004], "parentOrgId": 134, "parentOrgName": "Pittsburgh Pirates" },
+        { "years": [2005, 2014], "parentOrgId": 158, "parentOrgName": "Milwaukee Brewers" },
+        { "years": [2015, 2018], "parentOrgId": 133, "parentOrgName": "Oakland Athletics" },
+        { "years": [2019, 2020], "parentOrgId": 140, "parentOrgName": "Texas Rangers" }
+      ]
+    },
+    "484": {
+      "currentName": "Indianapolis Indians",
+      "sportId": 11,
+      "note": "Only the Brewers window is researched here; this club's other eras (pre-2000, 2005-present under Pittsburgh) are not covered.",
+      "parentHistory": [
+        { "years": [2000, 2004], "parentOrgId": 158, "parentOrgName": "Milwaukee Brewers" }
+      ]
+    },
+    "521": {
+      "currentName": "Myrtle Beach Pelicans",
+      "sportId": 14,
+      "note": "The Freddie Freeman example from the original bug report: his 2009 A+ stint here was under the Braves, not the club's current parent (the Cubs, since 2015).",
+      "parentHistory": [
+        { "years": [1999, 2010], "parentOrgId": 144, "parentOrgName": "Atlanta Braves" },
+        { "years": [2011, 2014], "parentOrgId": 140, "parentOrgName": "Texas Rangers" }
+      ]
+    },
+    "538": {
+      "currentName": "Hartford Yard Goats",
+      "sportId": 12,
+      "note": "A pure relocation/rename with NO parent-org change — the Colorado Rockies affiliation carried straight through the 2016 move, so this club has no parentHistory entries, only a nameHistory one.",
+      "nameHistory": [
+        { "name": "New Britain Rock Cats", "city": "New Britain, CT", "league": "Eastern League", "years": [1997, 2015], "logo": "new-britain-rock-cats.png", "uncertain": "Start year approximate — 'Rock Cats' name confirmed adopted 1997; the same New Britain club played earlier still (from 1983) as the New Britain Red Sox, not included here as that era is unverified and out of scope." }
+      ]
+    }
+  }
+}

@@ -24,6 +24,7 @@ import {
 } from './person-fetch.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
+import { historicalParentOrg } from './milbHistory.js'
 import {
   personBio,
   personSportId,
@@ -229,27 +230,40 @@ export async function loadPlayer(id, asOf) {
   ]
   const timeline = careerTimelineView(timelineSplits, primaryGroup, debutYear)
   if (timeline) {
-    // Resolve each stop's logo tint and hover label. Entries can repeat a club
-    // (a return stint), so resolve each DISTINCT team once. The label names the
-    // club; a farm club adds its parent org in parens ("Nashville Sounds
-    // (Milwaukee Brewers)") — one extra team lookup per MiLB club, skipped for
-    // MLB stops whose own name is already the whole label.
+    // Resolve each stop's logo tint (per DISTINCT team — the tint doesn't
+    // depend on when the player was there) and hover label (per STOP, not per
+    // team: an affiliate can be reassigned to a different parent org between
+    // two separate stints at the same club, and the label must reflect the
+    // org that stint actually belonged to). The label names the club; a farm
+    // club adds its parent org in parens ("Nashville Sounds (Milwaukee
+    // Brewers)"), skipped for MLB stops whose own name is already the whole
+    // label.
     const byTeam = new Map()
     for (const e of timeline.entries) {
-      if (!byTeam.has(e.teamId)) byTeam.set(e.teamId, { sportId: e.sportId })
+      if (!byTeam.has(e.teamId)) byTeam.set(e.teamId, {})
     }
     await Promise.all(
       [...byTeam.entries()].map(async ([teamId, meta]) => {
         meta.tint = await fetchTeamLogoTint(teamId)
-        meta.parentOrgName =
-          meta.sportId === 1 ? '' : (await fetchTeam(teamId))?.parentOrgName ?? ''
       }),
     )
-    for (const e of timeline.entries) {
-      const meta = byTeam.get(e.teamId)
-      e.tint = meta.tint
-      e.title = meta.parentOrgName ? `${e.teamName} (${meta.parentOrgName})` : e.teamName
-    }
+    await Promise.all(
+      timeline.entries.map(async (e) => {
+        e.tint = byTeam.get(e.teamId).tint
+        if (e.sportId === 1) {
+          e.title = e.teamName
+          return
+        }
+        // A hand-curated historical override wins when this club/year is
+        // covered (see api/milbHistory.js) — it's the only way to know the
+        // org a since-reassigned affiliate belonged to AT THE TIME rather
+        // than today; otherwise fall back to the live/current parent org,
+        // same as before this override existed.
+        const hist = await historicalParentOrg(e.teamId, e.minSeason)
+        const parentOrgName = hist?.name ?? (await fetchTeam(e.teamId))?.parentOrgName ?? ''
+        e.title = parentOrgName ? `${e.teamName} (${parentOrgName})` : e.teamName
+      }),
+    )
   }
 
   // Position innings — the fielding diamond (position players) or the
