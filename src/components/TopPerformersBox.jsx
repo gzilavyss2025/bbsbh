@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { computeTopPerformers } from '../api/topPerformers.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { leagueLogoUrl } from '../lib/teams.js'
@@ -139,11 +140,20 @@ function TopPerformersPanel({ games, prospects, dateStr, sportId }) {
 // `prospectsData`: the app-wide snapshot (fetchTopProspects(), already fetched
 // by GameSelect) — passed down rather than re-fetched.
 export function TopPerformersBox({ dateStr, sportId, games, prospectsData }) {
+  // The "TOP PERFORMERS" banner rides above the seal so the day's leaderboard
+  // announces itself while still sealed, then steps aside the moment it's
+  // revealed (the revealed panel carries its own Top Batters/Top Pitchers
+  // headings). Reset when the date/level changes, since that reseals the box.
+  const [revealed, setRevealed] = useState(false)
+  useEffect(() => setRevealed(false), [dateStr, sportId])
+
   return (
     <div className="topperfbox">
+      {!revealed && <h2 className="topperf__banner">Top Performers</h2>}
       <SealBox
         key={`${dateStr}-${sportId}`}
         label="Tap to reveal today's top performers"
+        onReveal={() => setRevealed(true)}
       >
         {() => (
           <TopPerformersPanel

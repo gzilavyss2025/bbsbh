@@ -1,17 +1,17 @@
 import { ScorebookMark } from './ScorebookMark.jsx'
-import { useNav } from '../lib/nav.js'
+import { goHome } from '../lib/home.js'
 
 // The small "Scorebook" brand mark + wordmark shown atop every screen (except
-// the slate, which is already home) — tapping it always returns to '/'. Not
-// sticky; each screen still owns whatever page-specific header sits below it.
+// the slate, which is already home) — tapping it returns to '/' with a full
+// reload (see lib/home.js). Not sticky; each screen still owns whatever
+// page-specific header sits below it.
 export function SiteHeader() {
-  const navigate = useNav()
   return (
     <div className="sitebar">
       <button
         type="button"
         className="sitebar__home"
-        onClick={() => navigate('/')}
+        onClick={goHome}
         aria-label="Back to games"
       >
         <ScorebookMark size={22} simplified />

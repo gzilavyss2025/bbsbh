@@ -135,6 +135,43 @@ body {
   color: var(--text-heading);
 }
 
+/* Slate header: the Scorebook mark taps home, and the level toggle rides on the
+   same row to its right rather than on its own line below. The title shrinks so
+   all five level buttons fit beside it on a narrow phone. */
+.topbar--slate {
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.topbar__home {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.topbar--slate .topbar__title {
+  font-size: 18px;
+  gap: 6px;
+}
+
+/* Condensed to fit beside the title: content-width (not full-bleed), tighter
+   gaps, and smaller pill buttons than the standalone level toggle. */
+.topbar--slate .levelnav {
+  flex: 0 1 auto;
+  gap: 4px;
+  margin: 0;
+  min-width: 0;
+}
+
+.topbar--slate .levelnav__btn {
+  min-height: 30px;
+  padding: 0 6px;
+  font-size: 11px;
+}
+
 .topbar--game {
   gap: 6px;
 }
@@ -210,34 +247,44 @@ body {
   gap: 8px;
 }
 
-/* Inside the sticky banner the rows are spaced by its own padding, so the date
-   stepper drops its trailing margin. */
-.slatehead .levelnav {
-  margin-bottom: 10px;
-}
+/* The level toggle now shares the topbar row (see .topbar--slate), so the date
+   stepper sits just below it with a small gap and no trailing margin. */
 .slatehead .datenav--row {
+  margin-top: 4px;
   margin-bottom: 0;
+}
+
+/* The slate's date stepper is a compact control, not a primary tap target —
+   smaller arrows and label than the base .datenav so it reads as a quiet
+   header row rather than dominating it. */
+.datenav--row button {
+  min-width: 32px;
+  min-height: 32px;
+  font-size: 15px;
 }
 
 .datenav--row .datenav__label {
   flex: 1 1 auto;
   max-width: 220px;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 12px;
 }
 
-/* One-tap return to today once the date has been paged away from. */
+/* One-tap return to today once the date has been paged away from. Kept small —
+   a quiet secondary chip beside the date, not a button competing with it. */
 .datenav__today {
-  min-height: 24px;
-  padding: 2px 10px;
+  min-height: 20px;
+  padding: 1px 7px;
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--field);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 9px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -3635,6 +3682,24 @@ body {
 .topperfbox {
   margin-top: 10px;
 }
+/* Announces the leaderboard while it's still sealed; removed from the DOM the
+   moment it's revealed (the panel then shows its own Top Batters/Pitchers
+   headings). */
+.topperf__banner {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+/* Revealed leaderboard sits straight on the manila sheet — no inset panel fill
+   boxing it in (the base .statgrid paints one). */
+.topperfbox .statgrid {
+  background: transparent;
+  padding: 12px 0 0;
+}
 .topperf__sections {
   display: flex;
   flex-direction: column;
@@ -3662,23 +3727,24 @@ body {
   align-items: center;
   gap: 8px;
 }
-/* iPhone-width default: a smaller headshot than the tablet/desktop size below
-   (which restores 32px in the min-width: 740px block) — the row already
-   carries a team logo + two lines of text, so a big portrait crowds it on a
-   narrow screen. */
+/* Keep the headshot at its native 2:3 portrait rather than cropping it to a
+   square — the frame stretches to the height of the row's text block and its
+   width follows the aspect ratio, so the portrait reads at full size without
+   truncating the top/bottom. */
 /* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
    this reliably outranks the base .shot's own width/height/font-size, which
    otherwise wins by source order alone (same 0-1-0 specificity, declared
    later in the file). */
 .shot.topperf__shot {
   flex: none;
-  width: 16px;
-  height: 16px;
+  width: auto;
+  height: 52px; /* ≈ the row's stacked text lines (name + stat + score) */
+  aspect-ratio: 2 / 3;
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .shot.topperf__shot.shot--fallback {
-  font-size: 8px;
+  font-size: 20px;
 }
 .topperf__logo {
   flex: none;
@@ -3695,8 +3761,14 @@ body {
   flex-wrap: wrap;
   gap: 6px;
 }
-.topperf__name {
+/* Type cascades big → small down the row: the name leads, the line of what they
+   did sits under it, and the game score / position / prospect rank are the
+   quiet footnotes. The name and score are PlayerLink/score <button>s carrying
+   `.plink`, whose `font: inherit` (declared later in the file) would otherwise
+   reset these sizes — so both are written as compound selectors to outrank it. */
+.topperf__head .topperf__name {
   font-family: var(--font-body);
+  font-size: 15px;
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
@@ -3711,13 +3783,14 @@ body {
 }
 .topperf__stat {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
 }
-.topperf__score {
+.topperf__who .topperf__score {
   align-self: flex-start;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
+  color: var(--text-muted);
 }
 .topperf__loading {
   animation: buzzpulse 1.3s var(--ease-out) infinite;
@@ -3964,9 +4037,10 @@ body {
     max-width: 960px;
   }
 
-  /* ---- slate: two game cards per row. The level tabs and date stepper hold
-     a phone-ish width, centered, instead of stretching across the sheet. */
-  .levelnav,
+  /* ---- slate: two game cards per row. The date stepper holds a phone-ish
+     width, centered, instead of stretching across the sheet. (The level toggle
+     now rides in the topbar row beside the title, so it's no longer centered
+     here.) */
   .datenav--row {
     max-width: 560px;
     margin-inline: auto;
@@ -3978,13 +4052,9 @@ body {
     gap: 12px;
   }
 
-  /* ---- Top Performers box: full-size headshots (restoring the smaller
-     iPhone-width default above), and batters/pitchers side by side instead of
-     stacked — there's room for two columns once the sheet is this wide. */
-  .shot.topperf__shot {
-    width: 32px;
-    height: 32px;
-  }
+  /* ---- Top Performers box: batters/pitchers side by side instead of stacked —
+     there's room for two columns once the sheet is this wide. The headshots keep
+     the portrait-matched-to-text sizing from the base rule above. */
   .shot.topperf__shot.shot--fallback {
     font-size: 16px;
   }

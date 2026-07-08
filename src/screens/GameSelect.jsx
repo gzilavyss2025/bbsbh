@@ -10,6 +10,7 @@ import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
+import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 
@@ -101,14 +102,21 @@ export function GameSelect({ onPick, onShowLogos }) {
           date). Pinned together on an opaque backdrop so the cards scroll
           cleanly underneath instead of bleeding through a see-through header. */}
       <div className="slatehead">
-        <header className="topbar">
-          <h1 className="topbar__title">
-            <ScorebookMark size={22} simplified />
+        {/* Title + level toggle share one row: the Scorebook mark taps home
+            (a full reload — see lib/home.js) on the left, the condensed
+            MLB/AAA/… buttons ride to its right. */}
+        <header className="topbar topbar--slate">
+          <button
+            type="button"
+            className="topbar__title topbar__home"
+            onClick={goHome}
+            aria-label="Reload games"
+          >
+            <ScorebookMark size={20} simplified />
             Scorebook
-          </h1>
+          </button>
+          <LevelNav sportId={sportId} onChange={pickLevel} />
         </header>
-
-        <LevelNav sportId={sportId} onChange={pickLevel} />
 
         <div className="datenav datenav--row">
           <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
