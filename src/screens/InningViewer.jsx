@@ -327,7 +327,12 @@ function HalfInning({
           pre-pitch list is spoiler-free, and only for the immediate next half. */}
       {!revealed && isNextToReveal && (
         <>
-          <PrePitchChanges feed={feed} inning={inning} half={half} />
+          <PrePitchChanges
+            feed={feed}
+            inning={inning}
+            half={half}
+            pitchingName={battingSide === 'away' ? homeName : awayName}
+          />
           {enteringCards}
         </>
       )}
@@ -692,16 +697,28 @@ function StatcastCard({ label, value, unit, who, detail }) {
 // Subs/pitching changes announced before this half's first pitch — rendered
 // above the SealBox (not inside it), gated by the caller to the half the user
 // is about to reveal. See selectPrePitchChanges for why this is spoiler-free.
-function PrePitchChanges({ feed, inning, half }) {
+function PrePitchChanges({ feed, inning, half, pitchingName }) {
   const changes = selectPrePitchChanges(feed, inning, half)
   if (changes.length === 0) return null
   return (
     <div className="prepitch">
-      <h4 className="prepitch__title">Before this half</h4>
       <ul className="prepitch__list">
         {changes.map((c, i) => (
           <li className="prepitch__item" key={i}>
-            {c.text}
+            {c.eventType === 'pitching_substitution' && c.pitcher ? (
+              <span className="prepitch__pitching">
+                <span className="prepitch__now">
+                  Now pitching{pitchingName ? ` for the ${pitchingName}` : ''}:
+                </span>{' '}
+                <span className="prepitch__pitcher">
+                  {c.pitcher.name}
+                  {c.pitcher.jersey ? ` ${c.pitcher.jersey}` : ''}
+                  {c.pitcher.hand ? ` | ${c.pitcher.hand}HP` : ''}
+                </span>
+              </span>
+            ) : (
+              c.text
+            )}
           </li>
         ))}
       </ul>
@@ -737,7 +754,6 @@ function LineupSection({ feed, inning, half, awayName, homeName, prospectsData }
   if (away.length === 0 && home.length === 0) return null
   return (
     <section className="lineupcard">
-      <h4 className="lineupcard__title">Lineups</h4>
       <div className="lineupcard__teams">
         <LineupTeam name={awayName || 'Away'} slots={away} prospectsData={prospectsData} />
         <LineupTeam name={homeName || 'Home'} slots={home} prospectsData={prospectsData} />

@@ -445,16 +445,44 @@ const PRE_PITCH_EVENT_TYPES = new Set([
 ])
 export function selectPrePitchChanges(feed, inning, half) {
   const changes = []
+  const players = playerIndex(feed)
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     if (play?.about?.inning !== inning || play?.about?.halfInning !== half) continue
     for (const ev of play.playEvents ?? []) {
       if (ev.isPitch) return changes
-      if (PRE_PITCH_EVENT_TYPES.has(ev.details?.eventType)) {
-        changes.push({ eventType: ev.details.eventType, text: ev.details.description })
+      const type = ev.details?.eventType
+      if (!PRE_PITCH_EVENT_TYPES.has(type)) continue
+      // A pitching change becomes a "now pitching" announcement (jersey + hand
+      // resolved from the incoming pitcher's record) rather than the raw
+      // "Pitching Change: X replaces Y" description; other subs keep their text.
+      if (type === 'pitching_substitution' && ev.player?.id != null) {
+        const person = players[`ID${ev.player.id}`] ?? {}
+        changes.push({
+          eventType: type,
+          pitcher: {
+            name: lastFirst(person),
+            jersey: boxscoreJersey(feed, ev.player.id) || person.primaryNumber || '',
+            hand: person.pitchHand?.code ?? '', // 'L' | 'R'
+          },
+        })
+      } else {
+        changes.push({ eventType: type, text: ev.details.description })
       }
     }
   }
   return changes
+}
+
+// The game jersey number for a player id, checked across both boxscore sides
+// (the incoming pitcher's side isn't known here). Falls back to '' so callers
+// can drop to gameData's primaryNumber.
+function boxscoreJersey(feed, id) {
+  const teams = feed?.liveData?.boxscore?.teams ?? {}
+  for (const side of ['away', 'home']) {
+    const num = teams[side]?.players?.[`ID${id}`]?.jerseyNumber
+    if (num) return num
+  }
+  return ''
 }
 
 // Regulation length of the game (7 for some MiLB / doubleheader games, else 9).

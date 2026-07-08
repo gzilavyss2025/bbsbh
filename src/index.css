@@ -2318,27 +2318,38 @@ body {
   border-bottom: var(--bw-hair) dashed var(--border-rule);
 }
 
-.prepitch__title {
-  margin: 0 0 6px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-bold);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-}
-
 .prepitch__list {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .prepitch__item {
+  padding: 4px 8px;
   font-size: 13px;
+  color: var(--text-body);
+}
+
+/* "Now pitching for the Giants: BIVENS, SPENCER 76 | RHP" — a scorebook
+   announcement line, condensed uppercase to match the lineup-team headers. */
+.prepitch__pitching {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.prepitch__now {
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+.prepitch__pitcher {
+  font-weight: var(--w-bold);
   color: var(--text-body);
 }
 
@@ -2353,17 +2364,6 @@ body {
   margin-top: 12px;
   padding-top: 12px;
   border-top: var(--bw-hair) dashed var(--border-rule);
-}
-
-.lineupcard__title {
-  margin: 0 0 10px;
-  padding: 4px 8px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-bold);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
 }
 
 /* Away over home, each a self-contained nine-slot list. Stacked so a long name
