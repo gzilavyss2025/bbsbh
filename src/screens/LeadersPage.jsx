@@ -1,5 +1,6 @@
 import { fetchTeam } from '../api/team.js'
 import { loadLeaderPool, LEADER_SCOPES, scopeMeta, isMilbScope, isMultiLevelScope } from '../api/leaders.js'
+import { fetchMinorsLeaders } from '../api/minorsLeaders.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { ALL_CATEGORIES } from '../api/teamLeaders.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -27,6 +28,12 @@ function isoToday() {
 // pass qualifier='leader-relative' so a small-sample rate line can't top a list.
 async function loadLeaders(scope, orgId, asOf) {
   const season = Number((asOf || isoToday()).slice(0, 4))
+  // The all-minors board is served pre-ranked from a static file (too heavy to
+  // rank live — see api/minorsLeaders.js); every other scope ranks a live pool.
+  if (scope === 'minors') {
+    const [{ leaders }, snapshot] = await Promise.all([fetchMinorsLeaders(), fetchTopProspects()])
+    return { precomputed: leaders, snapshot, org: null }
+  }
   const [pool, snapshot, org] = await Promise.all([
     loadLeaderPool(scope, orgId, season),
     isMilbScope(scope) ? fetchTopProspects() : Promise.resolve(null),
@@ -74,8 +81,9 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'screen', noun: 'leaders', onBack: back })
   if (gate) return gate
 
-  const { pool, snapshot } = data
+  const { pool, snapshot, precomputed } = data
   const isOrg = scope === 'org'
+  const hasLeaders = precomputed ? Object.keys(precomputed).length > 0 : pool.length > 0
 
   return (
     <LinkScope asOf={asOf} sportId={sportId ?? null}>
@@ -98,13 +106,14 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
 
         <ScopeNav scope={scope} asOf={asOf} sportId={sportId} navigate={navigate} />
 
-        {pool.length === 0 ? (
+        {!hasLeaders ? (
           <p className="hint hint--prose">
             No leaders to show here yet — season stats aren’t posted for this scope.
           </p>
         ) : (
           <TeamLeaders
             pool={pool}
+            precomputed={precomputed}
             categories={ALL_CATEGORIES}
             limit={10}
             title="Leaders"

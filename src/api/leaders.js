@@ -15,7 +15,7 @@
 import { fetchStaticTeams } from './teams-static.js'
 import { fetchTeamRoster } from './team.js'
 import { normalizeRosterToPool } from './teamLeaders.js'
-import { fetchLevelSeasonStats, fetchTeamSeasonStats, combineToPool } from './statsLevels.js'
+import { fetchTeamSeasonStats, combineToPool } from './statsLevels.js'
 import { SPORT_IDS } from '../lib/teams.js'
 
 // The league/level scopes, in the order the switcher shows them. Each resolves
@@ -84,9 +84,12 @@ export async function resolveScopeTeams(scope, orgId) {
 
 // Assemble the PoolPlayer[] for a scope. Two shapes:
 //
-// - The combining scopes ('minors', 'org') sum a player's season across levels
-//   into one row (see statsLevels.js) — the all-minors board fans out per level,
-//   the org board per affiliate club.
+// - The 'org' scope sums a player's season across the club's affiliates into one
+//   row (see statsLevels.js), so a prospect who's been promoted mid-season ranks
+//   on his A+ + AA total rather than whichever single stop he's currently
+//   rostered at. (The league-wide all-minors 'minors' board is the same idea but
+//   far heavier, so it's precomputed to a static file and read separately — see
+//   api/minorsLeaders.js — not produced here.)
 // - Every other scope (a single team level, or MLB/AL/NL) fans out
 //   fetchTeamRoster over its clubs and concats one row per (player, club). Each
 //   club is fetched at its OWN level (`sportId`) so a MiLB club's players are
@@ -95,7 +98,6 @@ export async function resolveScopeTeams(scope, orgId) {
 //   and via the '40Man' roster so an injured leader still counts (see
 //   fetchTeamRoster).
 export async function loadLeaderPool(scope, orgId, season) {
-  if (scope === 'minors') return loadCombinedMinorsPool(season)
   if (scope === 'org') return loadOrgCombinedPool(orgId, season)
 
   const teams = await resolveScopeTeams(scope, orgId)
@@ -113,24 +115,7 @@ export async function loadLeaderPool(scope, orgId, season) {
   })
 }
 
-const settledFlat = (results) =>
-  results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-
-// All-minors combined pool: every full-season farm level's season lines (hitting
-// + pitching), summed per player across levels. Deliberately heavy (eight full-
-// level fetches) — it's an opt-in board that surfaces something you don't
-// normally see, a farmhand's TOTAL line across the levels he's climbed this year.
-async function loadCombinedMinorsPool(season) {
-  const [hit, pit] = await Promise.all([
-    Promise.allSettled(ORG_SPORT_IDS.map((sid) => fetchLevelSeasonStats(sid, 'hitting', season))),
-    Promise.allSettled(ORG_SPORT_IDS.map((sid) => fetchLevelSeasonStats(sid, 'pitching', season))),
-  ])
-  return combineToPool(settledFlat(hit), settledFlat(pit))
-}
-
-// One org's combined pool: its affiliates' season lines summed per player, so a
-// prospect who's been promoted mid-season ranks on his A+ + AA total rather than
-// whichever single stop he's currently rostered at.
+// One org's combined pool: its affiliates' season lines summed per player.
 async function loadOrgCombinedPool(orgId, season) {
   const teams = await resolveScopeTeams('org', orgId)
   if (teams.length === 0) return []
@@ -138,5 +123,6 @@ async function loadOrgCombinedPool(orgId, season) {
     Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'hitting', season))),
     Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'pitching', season))),
   ])
+  const settledFlat = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
   return combineToPool(settledFlat(hit), settledFlat(pit))
 }

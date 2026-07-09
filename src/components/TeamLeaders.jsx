@@ -107,7 +107,11 @@ function LeaderCategory({ category, entries, showTeamLogo, showLevel, prospectSn
 // (org scope, a multi-level pool). `prospectSnapshot`: fetchTopProspects() result
 // to add prospect pills (any MiLB scope). `qualifier`: playing-time bar mode for
 // rate categories, forwarded to computeLeaders ('leader-relative' for the large
-// pools; see api/teamLeaders.js).
+// pools; see api/teamLeaders.js). `precomputed`: a { categoryKey: entries[] } map
+// of ALREADY-RANKED rows (computeLeaders' output shape) — passed instead of
+// `pool` when the ranking was baked at build time (the static all-minors board,
+// too heavy to rank live; see api/minorsLeaders.js). When set, pool/qualifier are
+// unused and entries are just sliced to `limit`.
 export function TeamLeaders({
   pool,
   categories,
@@ -118,15 +122,21 @@ export function TeamLeaders({
   showLevel = false,
   prospectSnapshot = null,
   qualifier = 'roster',
+  precomputed = null,
 }) {
   const ranked = useMemo(
     () =>
       categories
-        .map((category) => ({ category, entries: computeLeaders(pool, category, { limit, qualifier }) }))
+        .map((category) => ({
+          category,
+          entries: precomputed
+            ? (precomputed[category.key] ?? []).slice(0, limit)
+            : computeLeaders(pool, category, { limit, qualifier }),
+        }))
         // A category with no qualifying players (thin MiLB data) is hidden
         // rather than rendered empty.
         .filter((r) => r.entries.length > 0),
-    [pool, categories, limit, qualifier],
+    [pool, categories, limit, qualifier, precomputed],
   )
 
   if (ranked.length === 0) return null

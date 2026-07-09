@@ -1,0 +1,32 @@
+name: Update minor-league leaders
+
+# Daily refresh of public/data/minors-leaders.json — the combined all-minors
+# leaderboard (see scripts/gen-minors-leaders.mjs). Pushing to main triggers
+# Vercel's normal auto-deploy, so the MiLB leaders board picks up fresh, pre-
+# ranked numbers each morning with no runtime dependency on the eight full-level
+# stat pulls the script does. Offset from the WAR (09:00) and rehab (09:30) jobs
+# so the nightly commits don't race to push.
+on:
+  schedule:
+    - cron: '0 10 * * *' # ~6am US Eastern, after overnight stat updates settle
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-minors-leaders:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/gen-minors-leaders.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/minors-leaders.json
+          git diff --cached --quiet || git commit -m "Update minor-league leaders"
+          git push

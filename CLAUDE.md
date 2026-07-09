@@ -69,6 +69,21 @@ node scripts/gen-rehab.mjs
                    # OWN copy of the transaction-scan logic (it's self-contained,
                    # like the other gen-*.mjs scripts) — the app just reads the
                    # static file via src/api/rehab.js.
+node scripts/gen-minors-leaders.mjs
+                   # regenerate public/data/minors-leaders.json (the combined
+                   # ALL-MINORS leaderboard — every farmhand's season totals SUMMED
+                   # across the levels he's climbed, so a two-level slugger ranks on
+                   # his combined line). Same build-time-fetch pattern as gen-war.mjs
+                   # (daily cron; see .github/workflows/update-minors-leaders.yml),
+                   # driven by COST: it's a league-wide, four-level board (eight full-
+                   # level stat pulls, ~4,700 players) — too heavy to combine on a
+                   # page load. Stores PRE-RANKED top rows per category (not the
+                   # ~2.4MB raw pool) so the committed file stays ~150KB and the
+                   # leader-relative qualifier's floor is baked in. UNLIKE the other
+                   # gen-*.mjs it is NOT self-contained: it imports the app's own
+                   # combineToPool (statsLevels.js) + computeLeaders (teamLeaders.js),
+                   # the same code the live 'org' board uses, to stay in lockstep.
+                   # App reads it via src/api/minorsLeaders.js.
 npm run e2e        # playwright test — verification harness, not a CI suite (see below)
 ```
 
@@ -241,6 +256,27 @@ notes the gamePk field paths were verified against):
   and this module just reads the shaped result. The transaction-scan half mirrors
   `person.js`'s single-player `detectRehabAssignment`; the script keeps its own
   self-contained copy (like the other `gen-*.mjs`).
+- `leaders.js` / `teamLeaders.js` / `statsLevels.js` — the leader boards. Ranking
+  is pool-agnostic: `teamLeaders.js` holds the category descriptors +
+  `computeLeaders`, which ranks any normalized `PoolPlayer[]`; `leaders.js`
+  produces the pool for a scope (a team level or MLB/AL/NL via `fetchTeamRoster`
+  fan-out; an `org` via `statsLevels.js`). `statsLevels.js` reads the roster-
+  INDEPENDENT season-stats endpoint and SUMS a player's lines across levels into
+  one combined row (recomputing rate stats from summed components) — what lets a
+  promoted farmhand rank on his A+ + AA total. Rosters miss him (he's off the
+  club he's left); the stats endpoint doesn't.
+- `minorsLeaders.js` — the combined ALL-MINORS leaderboard, read from a static
+  same-origin `public/data/minors-leaders.json`. The THIRD use of `war.js`'s
+  build-time-fetch pattern, cost-driven like `rehab.js`: a league-wide four-level
+  board is eight full-level stat pulls (~4,700 players to combine), too heavy for
+  a page load, so `scripts/gen-minors-leaders.mjs` precomputes it on a daily cron
+  (`.github/workflows/update-minors-leaders.yml`). It stores PRE-RANKED top rows
+  per category (via the app's own `combineToPool` + `computeLeaders`, so it can't
+  drift from the live `org` board) rather than the raw pool — keeps the committed
+  file ~150KB and bakes in the leader-relative qualifier's playing-time floor,
+  which the app couldn't reproduce from a trimmed pool. `LeadersPage` reads it for
+  the `minors` scope and hands the rows straight to `TeamLeaders`'s `precomputed`
+  path.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, read from a
   static same-origin `public/data/milb-history.json`. Like `war.js`, that file
   is **script-generated** (`scripts/gen-milb-history.mjs`) but, unlike WAR,
