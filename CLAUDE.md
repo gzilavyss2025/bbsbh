@@ -109,6 +109,20 @@ node scripts/gen-former-teammates.mjs
                    # days' MLB slate only (MiLB never shows the card), skips
                    # Rookie ball, and reuses person.js's REHAB_CAP idea to drop a
                    # veteran's rehab cameo. App reads it via src/api/formerTeammates.js.
+node scripts/gen-vs-team-splits.mjs
+                   # regenerate public/data/vs-team-splits.json (for every player
+                   # on an MLB active roster, his CAREER regular-season line vs
+                   # each opposing club plus the LAST meeting's stat line — the
+                   # player page's SPLITS VS TEAM card). Same build-time-fetch
+                   # pattern as gen-former-teammates.mjs (daily cron; see
+                   # .github/workflows/update-vs-team-splits.yml), driven by COST:
+                   # the API's vs-team split types carry no game granularity, so
+                   # getting both the career totals AND the last-game line means
+                   # sweeping each player's whole MLB game log season by season —
+                   # dozens of calls per veteran, too heavy for a page load. Self-
+                   # contained like gen-rehab.mjs; MLB only. The file is large
+                   # (~3MB) so it's kept OUT of the PWA precache and fetched at
+                   # runtime (see vite.config.js). App reads it via src/api/vsTeamSplits.js.
 npm run e2e        # playwright test — verification harness, not a CI suite (see below)
 ```
 
@@ -301,6 +315,22 @@ notes the gamePk field paths were verified against):
   and this module just reads the shaped result. The transaction-scan half mirrors
   `person.js`'s single-player `detectRehabAssignment`; the script keeps its own
   self-contained copy (like the other `gen-*.mjs`).
+- `vsTeamSplits.js` — the player page's SPLITS VS TEAM card data (career
+  regular-season line vs each opposing club + the last meeting's stat line, per
+  MLB active-roster player), read from a static same-origin
+  `public/data/vs-team-splits.json`. Same build-time-fetch pattern as `war.js` /
+  `former-teammates.js`, cost-driven: the API's vs-team split types carry no game
+  granularity, so getting both the career totals AND the last-game line means
+  sweeping each player's whole MLB game log season by season (one request per
+  season) — too heavy for a page load, so `scripts/gen-vs-team-splits.mjs`
+  precomputes it on a daily cron (`.github/workflows/update-vs-team-splits.yml`).
+  Threaded into the player page via `loadPlayer.js` (`vsTeamSplitsFor`), which
+  pre-selects the player's club's next scheduled opponent. The player page is a
+  spoiler-FREE surface (open game logs / season splits), so the career totals
+  belong here like the "Season splits" card; the one score-revealing element —
+  the last-game line — is gated against the page's `asOf` cutoff in
+  `SplitsVsTeam.jsx`, exactly as the game log is. The file is large (~3MB) so it's
+  kept OUT of the PWA precache and fetched at runtime (see `vite.config.js`).
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — the leader boards. Ranking
   is pool-agnostic: `teamLeaders.js` holds the category descriptors +
   `computeLeaders`, which ranks any normalized `PoolPlayer[]`; `leaders.js`
