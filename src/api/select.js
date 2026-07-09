@@ -345,11 +345,11 @@ export function selectOfficials(feed) {
   const order = ['Home Plate', 'First Base', 'Second Base', 'Third Base']
   const byType = {}
   for (const o of officials) {
-    if (o.officialType) byType[o.officialType] = o.official?.fullName
+    if (o.officialType) byType[o.officialType] = o.official
   }
   return order
     .filter((t) => byType[t])
-    .map((t) => ({ role: UMP_LABELS[t] ?? t, name: byType[t] }))
+    .map((t) => ({ role: UMP_LABELS[t] ?? t, name: byType[t]?.fullName, id: byType[t]?.id ?? null }))
 }
 
 // Venue / weather / attendance / first pitch. MLB populates these; MiLB may

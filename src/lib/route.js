@@ -12,6 +12,7 @@
 //   '/standings'                        -> { name: 'standings' }
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
+//   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
@@ -50,6 +51,10 @@ export function parseRoute(url) {
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: parts[1], asOf, sportId }
+  // Umpires carry no spoiler-cutoff hint: assignments/dates are never
+  // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
+  if (parts.length === 2 && parts[0] === 'umpire')
+    return { name: 'umpire', id: parts[1] }
   if (parts.length === 1 && parts[0] === 'leaders')
     return { name: 'leaders', scope: 'mlb', asOf, sportId }
   if (parts.length === 2 && parts[0] === 'leaders')
@@ -132,6 +137,9 @@ export function playerPath(id, opts = {}) {
 }
 export function teamPath(id, opts = {}) {
   return `/team/${id}${linkQuery(opts)}`
+}
+export function umpirePath(id) {
+  return `/umpire/${id}`
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

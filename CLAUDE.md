@@ -79,6 +79,17 @@ node scripts/gen-rehab.mjs
                    # OWN copy of the transaction-scan logic (it's self-contained,
                    # like the other gen-*.mjs scripts) — the app just reads the
                    # static file via src/api/rehab.js.
+node scripts/gen-umpires.mjs
+                   # regenerate public/data/umpires.json (every MLB umpire's
+                   # season game log, indexed by umpire id, for the umpire
+                   # detail page reached by tapping a name in the Umpires card).
+                   # Same build-time-fetch pattern as gen-war.mjs, driven by
+                   # COST: there's no "games by umpire" endpoint, so building
+                   # this means a full-season schedule scan (one call — see
+                   # .github/workflows/update-umpires.yml) then re-indexing
+                   # thousands of (game, official) rows by umpire id — too much
+                   # to redo on every umpire-page visit. MLB-only, like war.js.
+                   # App reads it via src/api/umpires.js.
 node scripts/gen-minors-leaders.mjs
                    # regenerate public/data/minors-leaders.json (the combined
                    # ALL-MINORS leaderboard — every farmhand's season totals SUMMED
@@ -315,6 +326,19 @@ notes the gamePk field paths were verified against):
   and this module just reads the shaped result. The transaction-scan half mirrors
   `person.js`'s single-player `detectRehabAssignment`; the script keeps its own
   self-contained copy (like the other `gen-*.mjs`).
+- `umpires.js` — the umpire detail page's data (every game an umpire has worked
+  this season + which base, most recent first), read from a static same-origin
+  `public/data/umpires.json`, keyed by umpire personId. Cost-driven like
+  `rehab.js`: there's no "games by umpire" endpoint, so building the index means
+  a full-season schedule scan (`scripts/gen-umpires.mjs`, one call —
+  `/api/v1/schedule?...&hydrate=officials,team` returns every game's officials
+  in one shot) then re-indexing thousands of rows by umpire id — too much to
+  redo on every visit, so a daily cron (`.github/workflows/update-umpires.yml`)
+  precomputes it. MLB-only, like `war.js`. Wired up via `selectOfficials`
+  (`select.js`) now threading each official's `id` through to the Umpires card
+  (`TeamInfo.jsx`), which renders each name as an `UmpireLink` to `/umpire/{id}`
+  (`route.js`); the page itself needs no `SealBox` — umpire assignments and game
+  dates carry no score, same as the rest of the roster-move surfaces.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card data (career
   regular-season line vs each opposing club + the last meeting's stat line, per
   MLB active-roster player), read from a static same-origin

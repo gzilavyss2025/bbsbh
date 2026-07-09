@@ -18,6 +18,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
+import { UmpireLink } from '../components/UmpireLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
@@ -253,7 +254,9 @@ function Umpires({ officials }) {
         {officials.map((o) => (
           <li key={o.role}>
             <span className="umps__role">{o.role}</span>
-            <span className="umps__name">{o.name}</span>
+            <UmpireLink id={o.id} className="umps__name">
+              {o.name}
+            </UmpireLink>
           </li>
         ))}
       </ul>
