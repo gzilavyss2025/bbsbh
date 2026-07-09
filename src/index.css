@@ -1682,6 +1682,20 @@ body {
   margin-top: var(--space-4);
 }
 
+/* Extra edge padding on the picker strip so even the alphabetical extremes
+   (first/last club) can scroll all the way to center — without it, the
+   native scrollLeft clamps at the content edge and an edge pick (e.g. the
+   Diamondbacks or the Nationals) stops short of the middle instead of
+   landing there like every interior club does. 50% of the tray's own
+   rendered width, minus half a logo button (46px: the 36px TeamLogo plus
+   .vsteam__team's 5px padding on each side) — same centering math as the
+   scrollTo effect in FavoriteTeamModal.jsx, just resolved by CSS instead of
+   a one-off JS measurement so it stays correct across viewport widths. */
+.favteamsheet .vsteam__strip {
+  padding-left: calc(50% - 23px);
+  padding-right: calc(50% - 23px);
+}
+
 /* --------------------------------------------------------------- legal */
 .sitefooter__legal {
   padding-bottom: var(--space-4);
@@ -6134,6 +6148,14 @@ body {
   overflow: hidden;
 }
 .vsteam__strip {
+  /* Makes the strip its own children's offsetParent, so a centering effect's
+     `btn.offsetLeft` (SplitsVsTeam.jsx, FavoriteTeamModal.jsx) is measured
+     relative to the strip itself rather than skipping past it — a static
+     element isn't an offsetParent — to whatever positioned ancestor happens
+     to sit further up (e.g. a modal's `position: fixed` scrim), which throws
+     the centering math off by that ancestor's own offset. No visual change:
+     `relative` with no top/left/etc. doesn't move anything. */
+  position: relative;
   display: flex;
   gap: 6px;
   overflow-x: auto;
