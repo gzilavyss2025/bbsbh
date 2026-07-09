@@ -75,24 +75,31 @@ export function SplitsVsTeam({ vsTeam, season, asOf }) {
         {sel && <em>career{sel.abbr ? ` vs ${sel.abbr}` : ''}</em>}
       </h3>
 
-      <div className="vsteam__strip" role="tablist" aria-label="Opponent" ref={stripRef}>
-        {teams.map((t) => {
-          const active = t.id === selId
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              title={t.name}
-              ref={active ? activeRef : null}
-              className={`vsteam__team${active ? ' is-active' : ''}${t.has ? '' : ' is-empty'}`}
-              onClick={() => setSelId(t.id)}
-            >
-              <TeamLogo teamId={t.id} name={t.name} size={36} />
-            </button>
-          )
-        })}
+      {/* The opponent picker sits in its own inset "tray" (background + border)
+          so it reads as an interactive control distinct from the page, and the
+          scroller fades at its left/right edges to signal there's more to swipe
+          to (a mask gradient — the simplest cross-browser scroll affordance;
+          see the fade-edge pattern in css-tricks / shadcn scroll-fade). */}
+      <div className="vsteam__tray">
+        <div className="vsteam__strip" role="tablist" aria-label="Opponent" ref={stripRef}>
+          {teams.map((t) => {
+            const active = t.id === selId
+            return (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                title={t.name}
+                ref={active ? activeRef : null}
+                className={`vsteam__team${active ? ' is-active' : ''}${t.has ? '' : ' is-empty'}`}
+                onClick={() => setSelId(t.id)}
+              >
+                <TeamLogo teamId={t.id} name={t.name} size={36} />
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {cells ? (
@@ -111,13 +118,18 @@ export function SplitsVsTeam({ vsTeam, season, asOf }) {
       )}
 
       {last && (
-        <p className="vsteam__last">
-          <span className="vsteam__last-meta">
-            {gameDate(last.date, season)} {last.home ? 'vs' : '@'}{last.opp}
-          </span>
-          <span className="vsteam__last-sep">|</span>
-          <span className="vsteam__last-line">{last.line}</span>
-        </p>
+        <div className="vsteam__last">
+          <div className="vsteam__last-label">
+            Last game{sel?.abbr ? ` vs ${sel.abbr}` : ''}
+          </div>
+          <p className="vsteam__last-row">
+            <span className="vsteam__last-meta">
+              {gameDate(last.date, season)} {last.home ? `vs ${last.opp}` : `@${last.opp}`}
+            </span>
+            <span className="vsteam__last-sep">|</span>
+            <span className="vsteam__last-line">{last.line}</span>
+          </p>
+        </div>
       )}
     </section>
   )
