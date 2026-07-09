@@ -16,7 +16,7 @@
 // rows/tiles fall back to a dash, consistent with the rest of the app.
 //
 // START_SEASON is the earliest year pulled. Bumping it further back is just a
-// bigger file (each season is ~2,200 players across bat+pit); 2015 covers the
+// bigger file (each season is ~2,200 players across bat+pit); 2010 covers the
 // bulk of any current player's MLB career, and pre-START seasons on a veteran's
 // register simply show a dash in the WAR column (graceful, same as MiLB).
 // Run by hand: node scripts/gen-war-history.mjs
@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url'
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war-history.json')
 
-const START_SEASON = 2015
+const START_SEASON = 2010
 // Only COMPLETED seasons belong here; the live season is war.json's job. Before
 // a season ends its WAR is still moving, so stop at the year before the current.
 const LAST_SEASON = new Date().getFullYear() - 1

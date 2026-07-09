@@ -60,7 +60,7 @@ node scripts/gen-war.mjs
                    # .github/workflows/update-war.yml and docs/data-enrichment.md §5
 node scripts/gen-war-history.mjs
                    # regenerate public/data/war-history.json (season WAR per
-                   # player for COMPLETED seasons, 2015+ — the multi-year
+                   # player for COMPLETED seasons, 2010+ — the multi-year
                    # companion to war.json above, same FanGraphs source/join).
                    # Run by hand, NOT on a cron (a finished season's WAR is
                    # immutable) — like gen-milb-history.mjs; re-run once a year
