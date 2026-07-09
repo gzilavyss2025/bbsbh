@@ -391,13 +391,17 @@ function CareerRegister({ register }) {
       key: 'climb',
       className: 'reg-milb reg-climb',
       onClick: () => setClimbOpen((v) => !v),
+      // The year range and "Minors · N seasons" note ride ONE cell spanning the
+      // Year+Team columns (leadColSpan), so the long note can't stretch either
+      // data column and open a gap beside the short team abbreviations.
+      leadColSpan: 2,
       cells: [
         <span className="reg-climb__yr" key="yr">
           <span className="reg-climb__caret" aria-hidden="true">{climbOpen ? '▾' : '▸'}</span>
           {climb.yearText}
-        </span>,
-        <span className="reg-climb__note" key="note">
-          Minors · {climb.subSeasons.length} {climb.subSeasons.length === 1 ? 'season' : 'seasons'}
+          <span className="reg-climb__note">
+            Minors · {climb.subSeasons.length} {climb.subSeasons.length === 1 ? 'season' : 'seasons'}
+          </span>
         </span>,
         ...climb.cells,
       ],
