@@ -13,7 +13,13 @@
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
+//   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
+//   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
+//   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
 //   '/{MMDDYYYY}/{matchup}/{section}'   -> { name: 'game', date, matchup, section }
+//
+// Leader-page `scope` is one of mlb/al/nl (league), aaa/aa/aplus/a (level), or
+// 'org' with an orgId (a club's whole farm system). See api/leaders.js.
 //
 // `matchup` is the away + home team abbreviations concatenated and lowercased
 // (MIL @ ARI -> 'milari'); `section` is 'lineup1' (away info), 'lineup2' (home
@@ -44,8 +50,15 @@ export function parseRoute(url) {
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: parts[1], asOf, sportId }
-  // Must come BEFORE the generic 3-segment game branch below, which would
-  // otherwise swallow /team/{id}/leaders as a game (date='team').
+  if (parts.length === 1 && parts[0] === 'leaders')
+    return { name: 'leaders', scope: 'mlb', asOf, sportId }
+  if (parts.length === 2 && parts[0] === 'leaders')
+    return { name: 'leaders', scope: parts[1].toLowerCase(), asOf, sportId }
+  // Both 3-segment 'leaders'/'team' branches must come BEFORE the generic
+  // 3-segment game branch below, which would otherwise swallow them as a game
+  // (date='leaders'/'team').
+  if (parts.length === 3 && parts[0] === 'leaders' && parts[1] === 'org')
+    return { name: 'leaders', scope: 'org', orgId: Number(parts[2]), asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'leaders')
     return { name: 'team-leaders', id: parts[1], asOf, sportId }
   if (parts.length === 3) {
@@ -122,4 +135,12 @@ export function teamPath(id, opts = {}) {
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`
+}
+// The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
+// every other league/level scope carries its key. Org leaders take a club id.
+export function leadersPath(scope = 'mlb', opts = {}) {
+  return `${scope === 'mlb' ? '/leaders' : `/leaders/${scope}`}${linkQuery(opts)}`
+}
+export function orgLeadersPath(orgId, opts = {}) {
+  return `/leaders/org/${orgId}${linkQuery(opts)}`
 }

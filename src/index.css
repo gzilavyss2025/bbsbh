@@ -4384,6 +4384,79 @@ body {
   color: var(--text-muted);
 }
 
+/* Leader badges (broader league/level/org pools only) — the featured card
+   stacks them under the name; the chaser rows tuck them just left of the value
+   (the flex:1 name keeps the value pinned right). */
+.tlead__badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tlead__badges:empty {
+  display: none;
+}
+.tlead__level {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+}
+/* On a chaser row the pill/level sit small and inline before the value. */
+.tlead__row .prospectpill {
+  flex: none;
+  font-size: 9.5px;
+  padding: 1px 6px;
+}
+
+/* Org-wide leaders link on the team page — a standalone affordance under the
+   team's own leaders cross-section (styled like .tlead__seeall). */
+.tlead__orglink {
+  display: inline-block;
+  margin-top: 12px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+}
+
+/* Leaders page (league/level/org). Reuses the .levelnav toggle look for its
+   scope switcher, just centered + allowed to wrap onto a second line on a
+   phone (seven scopes vs. the slate's five). */
+.leaders__scope {
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+.leaders__head {
+  margin-bottom: 12px;
+}
+.leaders__org {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.leaders__sub {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
 /* Game-info foot: WP, umpires, weather, T, Att… */
 .bs__info {
   padding: 12px 14px;

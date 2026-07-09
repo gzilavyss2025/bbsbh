@@ -32,7 +32,7 @@ import { AsyncGate } from '../components/AsyncGate.jsx'
 import { SectionTitle } from '../components/SectionTitle.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { normalizeRosterToPool, FEATURED_CATEGORIES } from '../api/teamLeaders.js'
-import { teamLeadersPath } from '../lib/route.js'
+import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
 
 const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
@@ -351,6 +351,24 @@ export function TeamPage({ id, asOf, sportId }) {
           categories={FEATURED_CATEGORIES}
           onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
         />
+
+        {/* Org-wide leaders across the club's whole farm system — the MLB club
+            uses its own id, a MiLB affiliate its parent org's. Keys off the
+            team's real level (isMilb), not the sportId prop, which is null on a
+            bare /team/{id} link (it only carries a game's spoiler cutoff). */}
+        {(!isMilb || team.parentOrgId) && (
+          <button
+            type="button"
+            className="tlead__orglink"
+            onClick={() =>
+              navigate(
+                orgLeadersPath(isMilb ? team.parentOrgId : teamId, { d: asOf, s: sportId }),
+              )
+            }
+          >
+            Organization leaders ›
+          </button>
+        )}
 
         {position.length > 0 && (
           <>

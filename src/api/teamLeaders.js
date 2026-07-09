@@ -15,9 +15,13 @@
 // the Phase 3 note at the bottom).
 //
 // PoolPlayer shape (the swappable boundary):
-//   { id, name, teamId, teamAbbr, position,
+//   { id, name, teamId, teamAbbr, position, sportId,
 //     hitting: <season hitting stat obj | null>,
 //     pitching: <season pitching stat obj | null> }
+//
+// `sportId` (the club's level: 1 MLB, 11 AAA, …) rides along so a multi-level
+// pool — an org's whole farm system — can badge each leader with his level;
+// null / ignored for a single-level pool.
 
 import { firstLast } from './person.js'
 
@@ -160,6 +164,7 @@ export function normalizeRosterToPool(roster, team) {
       name: firstLast(r.person),
       teamId: team?.id ?? null,
       teamAbbr: team?.abbreviation ?? '',
+      sportId: team?.sport?.id ?? null,
       position: r.position?.abbreviation ?? '',
       hitting: splitFor(r.person, 'hitting'),
       pitching: splitFor(r.person, 'pitching'),
@@ -174,15 +179,31 @@ function playingTime(stat, group) {
     : ipToOuts(stat.inningsPitched)
 }
 
-// Roster-relative qualification: keep the players in the top ~60% of the pool by
-// playing time FOR THAT GROUP. Applied only to `qualified` categories, so a
-// 2-for-3 call-up can't top the AVG list while a genuine counting-stat leader is
-// never filtered out. Scales cleanly to a larger pool (a league's 60% is bigger).
+// Qualification for `qualified` (rate + "fewest") categories — two modes, since
+// what makes a fair playing-time bar differs by pool size:
+//
+// - 'roster' (default): keep the top ~60% of the pool by playing time FOR THAT
+//   GROUP. Right for a single 26-man roster — a 2-for-3 call-up can't top the
+//   AVG list, while a genuine counting-stat leader is never filtered out.
+//
+// - 'leader-relative': keep everyone with at least 60% of the pool LEADER's
+//   playing time for that group. On a ~1000-player league/level pool the
+//   roster-relative "top 60%" still reaches down to part-timers (600 players),
+//   so a 40-PA hot streak could top AVG; a leader-relative floor tracks a real
+//   qualification bar and self-scales through the season (early-season the
+//   leader's PA is small, so the floor is too).
+//
+// Either way, unqualified counting stats (HR, SO, …) skip this entirely.
 const QUAL_FRACTION = 0.6
-function eligiblePlayers(pool, category) {
+function eligiblePlayers(pool, category, qualifier = 'roster') {
   const group = category.group
   const withSplit = pool.filter((p) => p[group])
   if (!category.qualified || withSplit.length === 0) return withSplit
+  if (qualifier === 'leader-relative') {
+    const maxTime = Math.max(...withSplit.map((p) => playingTime(p[group], group)))
+    const floor = QUAL_FRACTION * maxTime
+    return withSplit.filter((p) => playingTime(p[group], group) >= floor)
+  }
   const ranked = [...withSplit].sort(
     (a, b) => playingTime(b[group], group) - playingTime(a[group], group),
   )
@@ -191,10 +212,13 @@ function eligiblePlayers(pool, category) {
 }
 
 // Top-N leaders for one category. Pure: reads only the pool + descriptor.
-// Returns [{ rank, id, name, teamId, teamAbbr, position, value, display }].
-export function computeLeaders(pool, category, { limit = 5 } = {}) {
+// Returns [{ rank, id, name, teamId, teamAbbr, sportId, position, value, display }].
+// `qualifier` selects the playing-time bar for rate categories (see
+// eligiblePlayers) — 'roster' for a single team, 'leader-relative' for a
+// league/level/org pool.
+export function computeLeaders(pool, category, { limit = 5, qualifier = 'roster' } = {}) {
   const group = category.group
-  return eligiblePlayers(pool, category)
+  return eligiblePlayers(pool, category, qualifier)
     .map((p) => ({ p, v: category.value(p[group]), tb: playingTime(p[group], group) }))
     .filter((r) => r.v != null && Number.isFinite(r.v))
     // For "most-of-a-good-thing" categories, a 0 means the player never did
@@ -215,15 +239,17 @@ export function computeLeaders(pool, category, { limit = 5 } = {}) {
       name: r.p.name,
       teamId: r.p.teamId,
       teamAbbr: r.p.teamAbbr,
+      sportId: r.p.sportId ?? null,
       position: r.p.position,
       value: r.v,
       display: category.format(r.v),
     }))
 }
 
-// Phase 3 (not built): a future league/level pool producer
-// (`normalizeLeaguePool({ scope, season })`, fed by the batch
-// /people?personIds=...&hydrate=stats(group=[hitting,pitching],type=[season])
-// endpoint, `&sportId=11..14` for MiLB) would emit the SAME PoolPlayer[] shape,
-// so computeLeaders + the descriptors + the render components stay untouched — a
-// scope selector swaps only the producer feeding the pool.
+// Phase 3 (built — see api/leaders.js): league/level/org pool producers emit the
+// SAME PoolPlayer[] shape, so computeLeaders + the descriptors + the render
+// components stay untouched — a scope selector swaps only the producer feeding
+// the pool. Rather than the batch /people endpoint sketched here, leaders.js
+// reuses fetchTeamRoster (already hydrated + cached) fanned out over a scope's
+// clubs, resolved from the static teams file (no new endpoint), and passes
+// `qualifier: 'leader-relative'` for the larger pools.
