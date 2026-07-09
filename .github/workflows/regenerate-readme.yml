@@ -1,0 +1,109 @@
+name: Regenerate README
+
+# Once a day, have Claude Code re-read the codebase and rewrite README.md so the
+# user-facing feature list never drifts from what the app actually does. Pushing
+# to main triggers Vercel's normal auto-deploy (though the README isn't shipped
+# in the bundle — this just keeps the GitHub repo page honest).
+#
+# Guard: this runs ONLY if something that could affect the README actually
+# changed in the last 24h. The repo's other daily crons (WAR, rehab, teams,
+# prospects, affiliates) commit generated data every morning, and this job
+# commits the README itself — none of that should trigger a rewrite. So the
+# check below looks for commits that touched anything OTHER than public/data/**
+# and README.md. No such commit → skip, and no Claude API call is made.
+#
+# Offset from the data crons (WAR 09:00, rehab 09:30) so the commits don't race.
+on:
+  schedule:
+    - cron: '0 10 * * *' # ~6am US Eastern
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Regenerate even with no code changes in the last 24h'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-readme
+  cancel-in-progress: false
+
+jobs:
+  regenerate-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so the 24h change check can see it
+
+      - name: Decide whether to regenerate
+        id: check
+        run: |
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            echo "Forced via workflow_dispatch."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Commits in the last 24h touching something other than generated data
+          # or the README itself. Data-only cron commits and the README's own
+          # auto-commit are excluded, so they can't trigger a rewrite.
+          changed=$(git log --since='24 hours ago' --format=%H -- \
+            ':(exclude)public/data' ':(exclude)README.md' | head -n1)
+          if [ -z "$changed" ]; then
+            echo "No code changes in the last 24h — skipping README regeneration."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Code changed in the last 24h — regenerating README."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Regenerate README with Claude Code
+        if: steps.check.outputs.should_run == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Rewrite README.md in this repo so it faithfully reflects what the app
+            does today.
+
+            This is bbsbh ("Scorebook Helper"), a spoiler-safe, read-only
+            second-screen PWA for scoring baseball by hand. README.md is written
+            for END USERS (not developers) in a warm, plain, second-person voice.
+            Read the current README.md first and preserve that voice, structure,
+            and its section headings wherever they still fit. This is NOT a
+            developer changelog and NOT the CLAUDE.md dev guide — keep it about
+            what a person using the app sees and can do.
+
+            To learn the current feature set, read the source — especially:
+              - src/App.jsx and src/lib/route.js (every screen/route that exists)
+              - src/screens/*.jsx (each user-facing screen)
+              - src/components/SiteFooter.jsx (the site-wide navigation)
+            Describe features in user terms, not implementation terms.
+
+            THE SPOILER RULE IS THE POINT OF THE APP — keep it central: a
+            score-revealing value is never in the page until the user taps to
+            reveal it, everything re-seals on navigation, and even tab titles and
+            game cards stay score-free. See CLAUDE.md's "spoiler rule" section
+            for the exact invariant, but do not copy dev jargon into the README.
+
+            Make only the edits needed to match reality: add features that now
+            exist, remove any the app no longer has, and correct anything stale.
+            Do NOT churn wording for its own sake or restructure a section that is
+            already accurate — a minimal, faithful diff is the goal. If the README
+            is already accurate, make no change at all. Edit README.md in place;
+            do not create new files or commit anything (a later step handles the
+            commit).
+          claude_args: |
+            --allowedTools Read,Edit,Write,Glob,Grep
+            --max-turns 40
+
+      - name: Commit if changed
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || git commit -m "Regenerate README from the current codebase"
+          git push
