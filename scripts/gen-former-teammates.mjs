@@ -137,12 +137,18 @@ async function fetchMatchups() {
 }
 
 // --- rosters ------------------------------------------------------------------
-// A club's active-roster personIds — who's actually available to appear in a
-// game (a former teammate not on the active roster can't show up in the card).
+// A club's active-roster entries — who's actually available to appear in a
+// game (a former teammate not on the active roster can't show up in the card)
+// — plus each player's roster position (for the card's position badge; the
+// active-roster endpoint already returns it, so this is free). Every pitcher
+// comes back as the plain "P" abbreviation at this endpoint (no SP/RP split),
+// which is exactly the "P." the card wants.
 async function fetchActiveRoster(teamId) {
   try {
     const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=active`)
-    return (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
+    return (data.roster ?? [])
+      .filter((r) => r.person?.id)
+      .map((r) => ({ id: r.person.id, pos: r.position?.abbreviation ?? '' }))
   } catch {
     return []
   }
@@ -294,7 +300,7 @@ const REUNION_BONUS = 40
 // display, plus a `score` (see stintScore/starBonus/REUNION_BONUS above) —
 // computed per RAW (team, season) stint, not the display-collapsed club, since
 // two stints on the same club in different years shouldn't average together.
-function connectionsFor(awayIds, homeIds, careers, names, peakWar, awayId, homeId) {
+function connectionsFor(awayIds, homeIds, careers, names, positions, peakWar, awayId, homeId) {
   const currentYear = new Date().getUTCFullYear()
   const rows = []
   for (const aId of awayIds) {
@@ -334,8 +340,8 @@ function connectionsFor(awayIds, homeIds, careers, names, peakWar, awayId, homeI
       const score = Math.round((best.score + 0.25 * corroboration + star + reunion) * 10) / 10
 
       rows.push({
-        a: { id: aId, name: names.get(aId) ?? '' },
-        b: { id: hId, name: names.get(hId) ?? '' },
+        a: { id: aId, name: names.get(aId) ?? '', pos: positions.get(aId) ?? '' },
+        b: { id: hId, name: names.get(hId) ?? '', pos: positions.get(hId) ?? '' },
         score,
         shared: [...shared.entries()]
           .map(([teamId, v]) => ({
@@ -386,7 +392,12 @@ const { pairs, teamIds } = await fetchMatchups()
 // matchups over a series but its roster is fetched once).
 const rosterEntries = await mapConcurrent(teamIds, 8, (id) => fetchActiveRoster(id))
 const rosterByTeam = new Map()
-teamIds.forEach((id, i) => rosterByTeam.set(id, rosterEntries[i] ?? []))
+const positionByPlayer = new Map()
+teamIds.forEach((id, i) => {
+  const entries = rosterEntries[i] ?? []
+  rosterByTeam.set(id, entries.map((e) => e.id))
+  for (const e of entries) positionByPlayer.set(e.id, e.pos)
+})
 
 // Every player who could appear, computed once (a player on a club that plays
 // multiple series is not recomputed).
@@ -407,6 +418,7 @@ for (const { awayId, homeId } of pairs) {
     rosterByTeam.get(homeId) ?? [],
     careers,
     names,
+    positionByPlayer,
     peakWar,
     awayId,
     homeId,

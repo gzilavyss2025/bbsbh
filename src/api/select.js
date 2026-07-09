@@ -419,6 +419,8 @@ export function selectGameInfo(feed) {
     firstPitch: infoByLabel['First pitch'] ?? '',
     // YYYY-MM-DD in the park's sense — the scorebook's date line.
     officialDate: gameData.datetime?.officialDate ?? '',
+    // 'day' | 'night' | '' — lets a card say "starting today" vs "tonight".
+    dayNight: gameData.datetime?.dayNight ?? '',
   }
 }
 

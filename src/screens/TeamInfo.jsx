@@ -156,7 +156,7 @@ export function LineupSpread({
         ))}
       </div>
 
-      <FormerTeammates pairs={teammatePairs} startingIds={startingIds} />
+      <FormerTeammates pairs={teammatePairs} startingIds={startingIds} dayNight={info.dayNight} />
 
       <div className="pagenav">
         <button className="btn btn--next" onClick={onNext}>
@@ -313,6 +313,7 @@ function TeamSections({
     showTeammates,
     feed,
   ])
+  const dayNight = feed?.gameData?.datetime?.dayNight ?? ''
 
   // Lineups don't post until close to first pitch. Until then, stage the
   // team's full active roster (batters + pitchers) in the same spot rather
@@ -459,7 +460,9 @@ function TeamSections({
         </section>
       )}
 
-      {showTeammates && <FormerTeammates pairs={teammatePairs} startingIds={startingIds} />}
+      {showTeammates && (
+        <FormerTeammates pairs={teammatePairs} startingIds={startingIds} dayNight={dayNight} />
+      )}
     </>
   )
 }
@@ -505,7 +508,7 @@ function connectionCaption(level, teamName, seasons) {
 // order-independent and deduped (see formerTeammatePairs), so this same
 // component reads correctly whether it's one club's page or the shared,
 // full-width copy on the spread layout.
-function FormerTeammates({ pairs, startingIds }) {
+function FormerTeammates({ pairs, startingIds, dayNight }) {
   const [showAll, setShowAll] = useState(false)
   const cards = useMemo(() => {
     const grouped = groupTeammateCards(pairs).map((c) => ({
@@ -520,6 +523,7 @@ function FormerTeammates({ pairs, startingIds }) {
   if (cards.length === 0) return null
   const shown = showAll ? cards : cards.slice(0, TEAMMATES_SHOWN)
   const hidden = cards.length - shown.length
+  const startingLabel = dayNight === 'day' ? 'Starting today' : 'Starting tonight'
   return (
     <section className="teammates">
       <h3 className="section__title">Former teammates</h3>
@@ -530,11 +534,11 @@ function FormerTeammates({ pairs, startingIds }) {
               key={`g-${c.anchor.id}-${c.club.teamId}`}
               className="teammatecard teammatecard--group"
             >
-              {c.tonight && <span className="teammatecard__badge">Starting tonight</span>}
+              {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
               <div className="teammatecard__group">
-                <TeammateHalf id={c.anchor.id} name={c.anchor.name} />
+                <TeammateHalf id={c.anchor.id} name={c.anchor.name} pos={c.anchor.pos} />
                 {c.mates.slice(0, GROUP_MATES_SHOWN).map((m) => (
-                  <TeammateHalf key={m.id} id={m.id} name={m.name} />
+                  <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} />
                 ))}
                 {c.mates.length > GROUP_MATES_SHOWN && (
                   <span className="teammatecard__groupmore">
@@ -552,8 +556,8 @@ function FormerTeammates({ pairs, startingIds }) {
             </li>
           ) : (
             <li key={`${c.a.id}-${c.b.id}`} className="teammatecard">
-              {c.tonight && <span className="teammatecard__badge">Starting tonight</span>}
-              <TeammateHalf id={c.a.id} name={c.a.name} />
+              {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
+              <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} />
               <div className="teammatecard__mid">
                 <div className="teammatecard__logos">
                   {c.clubs.slice(0, 2).map((club) => (
@@ -562,7 +566,7 @@ function FormerTeammates({ pairs, startingIds }) {
                 </div>
                 <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
               </div>
-              <TeammateHalf id={c.b.id} name={c.b.name} />
+              <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} />
               <span className="teammatecard__caption">
                 {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
               </span>
@@ -579,13 +583,23 @@ function FormerTeammates({ pairs, startingIds }) {
   )
 }
 
+// A pitcher's roster position is already the plain "P" abbreviation (no
+// SP/RP split) at the source, but normalize defensively anyway — the badge
+// should never show anything longer than that for a pitcher.
+const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
+
 // One player's headshot over his two-line name (first name small, surname
-// big) — the same treatment as the player page's hero, shrunk to fit a card.
-function TeammateHalf({ id, name }) {
+// big) — the same treatment as the player page's hero, shrunk to fit a card —
+// with his roster position as a small badge floating on the headshot's
+// bottom-left corner.
+function TeammateHalf({ id, name, pos }) {
   const { first, last } = splitDisplayName(name)
   return (
     <PlayerLink id={id} className="teammatecard__half">
-      <Headshot personId={id} name={name} className="teammatecard__shot" />
+      <span className="teammatecard__shotwrap">
+        <Headshot personId={id} name={name} className="teammatecard__shot" />
+        {pos && <span className="teammatecard__posbadge">{posLabel(pos)}</span>}
+      </span>
       <span className="teammatecard__name">
         {first && <span className="teammatecard__name-first">{first.toUpperCase()}</span>}
         <span className="teammatecard__name-last">{last.toUpperCase()}</span>
