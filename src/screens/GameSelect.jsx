@@ -7,7 +7,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
+import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
@@ -31,8 +31,9 @@ function readLevel() {
 }
 
 // Screen 1: pick a game. A single level's slate for the chosen date, sorted
-// soonest → latest (Brewers pinned to the top), with a LIVE pill on any game in
-// progress. Level is toggled with the thin buttons up top; no more search box.
+// soonest → latest (the favorite team pinned to the top), with a LIVE pill on
+// any game in progress. Level is toggled with the thin buttons up top; no
+// more search box.
 export function GameSelect({ onPick, onShowLogos }) {
   useDocumentTitle(null)
   const [offset, setOffset] = useState(0) // days from today
@@ -56,7 +57,10 @@ export function GameSelect({ onPick, onShowLogos }) {
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
 
-  const sorted = useMemo(() => sortGames(data ?? []), [data])
+  const sorted = useMemo(
+    () => sortGames(data ?? [], favoriteTeamId),
+    [data, favoriteTeamId],
+  )
 
   // Games with a Top Performers box to reveal — any that have started, on
   // today or a past date. A future date, or today before first pitch, has
@@ -170,7 +174,7 @@ export function GameSelect({ onPick, onShowLogos }) {
           <li key={`${g.sportId}-${g.gamePk}`}>
             <GameCard
               game={g}
-              pinned={isPinned(g)}
+              pinned={isPinned(g, favoriteTeamId)}
               uniformsReady={!!uniformsReady[g.gamePk]}
               prospectCount={(prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)}
               onSelect={() => onPick(g, dateStr)}
@@ -203,15 +207,15 @@ export function GameSelect({ onPick, onShowLogos }) {
   )
 }
 
-function isPinned(game) {
-  return game.away.id === PINNED_TEAM_ID || game.home.id === PINNED_TEAM_ID
+function isPinned(game, favoriteTeamId) {
+  return game.away.id === favoriteTeamId || game.home.id === favoriteTeamId
 }
 
-// Soonest → latest by first pitch; the pinned Brewers game floats to the top.
-function sortGames(games) {
+// Soonest → latest by first pitch; the favorite team's game floats to the top.
+function sortGames(games, favoriteTeamId) {
   return [...games].sort((a, b) => {
-    const pa = isPinned(a) ? 0 : 1
-    const pb = isPinned(b) ? 0 : 1
+    const pa = isPinned(a, favoriteTeamId) ? 0 : 1
+    const pb = isPinned(b, favoriteTeamId) ? 0 : 1
     if (pa !== pb) return pa - pb
     return new Date(a.gameDate) - new Date(b.gameDate)
   })

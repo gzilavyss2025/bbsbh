@@ -38,6 +38,23 @@ export function FavoriteTeamModal({ favoriteTeamId, intro = false, onSave, onClo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selId])
 
+  // Keep the selected club centered in the strip, same behavior as the
+  // player page's Splits vs Team picker (SplitsVsTeam.jsx): scroll the
+  // strip's own scrollLeft (not scrollIntoView, which would also scroll the
+  // page/modal) so the pick is centered both on open — the Brewers default
+  // sits mid-alphabet — and after every subsequent tap.
+  const stripRef = useRef(null)
+  const activeRef = useRef(null)
+  useEffect(() => {
+    const strip = stripRef.current
+    const btn = activeRef.current
+    if (!strip || !btn) return
+    strip.scrollTo({
+      left: btn.offsetLeft - strip.clientWidth / 2 + btn.clientWidth / 2,
+      behavior: 'smooth',
+    })
+  }, [selId, teams.length])
+
   // Dialog focus contract, same as GameFinderModal/LogoModal: focus moves to
   // the close button on open and back to the trigger on close.
   const closeRef = useRef(null)
@@ -51,17 +68,17 @@ export function FavoriteTeamModal({ favoriteTeamId, intro = false, onSave, onClo
 
   return (
     <div
-      className="scrim"
+      className="scrim scrim--center"
       onClick={(e) => e.target.classList.contains('scrim') && commitClose()}
     >
       <div
-        className="sheet favteamsheet"
+        className="favteamsheet"
         role="dialog"
         aria-modal="true"
         aria-label="Favorite team"
       >
         <div className="favteamsheet__head">
-          <h2 className="sheet__title">
+          <h2 className={`sheet__title${intro ? ' favteamsheet__title--intro' : ''}`}>
             {intro ? 'Welcome to Scorebook Helper' : 'Favorite team'}
           </h2>
           <button
@@ -92,7 +109,12 @@ export function FavoriteTeamModal({ favoriteTeamId, intro = false, onSave, onClo
         </p>
 
         <div className="vsteam__tray">
-          <div className="vsteam__strip" role="tablist" aria-label="Favorite team">
+          <div
+            className="vsteam__strip"
+            role="tablist"
+            aria-label="Favorite team"
+            ref={stripRef}
+          >
             {teams.map((t) => {
               const active = t.id === selId
               return (
@@ -102,6 +124,7 @@ export function FavoriteTeamModal({ favoriteTeamId, intro = false, onSave, onClo
                   role="tab"
                   aria-selected={active}
                   title={t.name}
+                  ref={active ? activeRef : null}
                   className={`vsteam__team${active ? ' is-active' : ''}`}
                   onClick={() => pick(t.id)}
                 >
