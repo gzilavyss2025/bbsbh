@@ -25,6 +25,17 @@ const LABELS = {
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
+// The out code can now run to ~6 characters ("CS 2-4", "PK 3-1"), which would
+// push off the viewBox from the advance LABELS above — 1st grows right off the
+// edge, 3rd grows left off it. These anchor the out code to grow INWARD instead
+// so a full "tag chain" stays in bounds at every base (2nd/home already centered).
+const OUT_LABELS = {
+  1: { x: 99, y: 45, anchor: 'end' },
+  2: { x: 50, y: 13, anchor: 'middle' },
+  3: { x: 1, y: 45, anchor: 'start' },
+  4: { x: 50, y: 96, anchor: 'middle' },
+}
+
 // Where a red "PR" sits when a pinch runner took over at a base — pinned just
 // above and outside that base, clear of the advance notations in LABELS.
 const PR_LABELS = {
@@ -151,9 +162,9 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, ou
       {outAt != null && outCode && (
         <text
           className="pbp__advance pbp__advance--out"
-          x={LABELS[outAt].x}
-          y={LABELS[outAt].y}
-          textAnchor={LABELS[outAt].anchor}
+          x={OUT_LABELS[outAt].x}
+          y={OUT_LABELS[outAt].y}
+          textAnchor={OUT_LABELS[outAt].anchor}
         >
           {outCode}
         </text>

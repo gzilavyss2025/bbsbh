@@ -2686,9 +2686,12 @@ body {
   fill: var(--ink-2);
 }
 
-/* How a runner was cut down on the bases, inked red by the capped path. */
+/* How a runner was cut down on the bases, inked red by the capped path. A
+   touch smaller than the advance code since it now carries a tag + chain
+   ("CS 2-4", "PK 3-1") rather than a bare "CS". */
 .pbp__advance--out {
   fill: var(--clay-deep);
+  font-size: 8px;
 }
 
 /* Red "PR" penciled just above the base a pinch runner took over at. */
@@ -2853,9 +2856,26 @@ body {
    natural too so each sentence reads whole. */
 #root .pbp__desc,
 #root .pbp__desc .pbp__name,
+#root .pbp__subnote,
+#root .pbp__subnote .pbp__name,
 #root .pbp__note,
 #root .pbp__note .plink {
   text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
+}
+
+/* Secondary prose beneath a batter's own description: a baserunning event
+   (steal, caught stealing, wild pitch…) that happened during his plate
+   appearance. Quieter than .pbp__desc, marked off with a short left rule. */
+.pbp__subnote {
+  margin-top: 4px;
+  padding-left: 7px;
+  border-left: 2px solid var(--border-rule);
+  font-family: var(--font-read);
+  font-size: 10px;
+  font-weight: var(--w-regular);
+  letter-spacing: 0.015em;
+  line-height: 1.35;
+  color: var(--text-caption);
 }
 
 .pbp__klooking {

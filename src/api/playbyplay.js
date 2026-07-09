@@ -230,16 +230,25 @@ function battingSlot(feed, side, id) {
 }
 
 // How a runner (not the batter) was retired on the bases, for the notation by
-// the base where his path is capped: CS caught stealing, PK pickoff, else the
-// fielding chain that put him out (6-4, 4-6…).
+// the base where his path is capped: "CS 2-4" caught stealing, "PK 3-6" pickoff,
+// else the bare fielding chain that put him out (6-4, 4-6…).
+//
+// The kind of out is read from the RUNNER's own event, not `play.result` — a
+// caught stealing / pickoff shows up as a runners[] entry INSIDE whatever
+// batter's plate appearance it happened during, so the play's own result is
+// that batter's (a strikeout, a groundout), not the baserunning out. (For a
+// rare top-level CS/PK play with no batter, fall back to the play result.)
 function runnerOutCode(play, runnerEntry) {
-  const et = play.result?.eventType ?? ''
-  if (et.startsWith('caught_stealing')) return 'CS'
-  if (et.startsWith('pickoff')) return 'PK'
+  const et = runnerEntry.details?.eventType ?? play.result?.eventType ?? ''
   const chain = (runnerEntry.credits ?? [])
     .filter((c) => /putout|assist/.test(c.credit ?? ''))
     .map((c) => c.position.code)
-  return chain.join('-') || 'OUT'
+    .join('-')
+  let tag = ''
+  if (et.startsWith('caught_stealing')) tag = 'CS'
+  else if (et.startsWith('pickoff')) tag = 'PK' // includes pickoff_caught_stealing
+  if (tag) return chain ? `${tag} ${chain}` : tag
+  return chain || 'OUT'
 }
 
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
@@ -290,12 +299,22 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   }
 
   for (const play of plays) {
+    // Non-pitch playEvents split two ways: STOPPAGE_EVENTS (mound visits,
+    // subs) are their own interstitial notes; baserunning events (caught
+    // stealing, pickoffs, steals, wild pitches, passed balls, balks) carry the
+    // prose account of a play that has no batting result of its own — collect
+    // them to hang on the card of the plate appearance they happened during
+    // (they live inside that PA's playEvents), so the feed explains the out /
+    // advance instead of leaving a bare mark on the diamond.
+    const baserunningNotes = []
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) continue
       const et = e.details?.eventType
       if (STOPPAGE_EVENTS.has(et)) {
         const text = e.details.description
         entries.push({ kind: 'event', eventType: et, text, segments: linkifyNames(text, nameIndex) })
+      } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {
+        baserunningNotes.push({ eventType: et, segments: linkifyNames(e.details.description, nameIndex) })
       }
     }
 
@@ -326,6 +345,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         ),
         // Scorebook denotation drawn above the diamond (1B, F8, 6-3…).
         ...scorebookCode(play, batterRunner),
+        // Prose for any baserunning event (a steal, a caught stealing, a wild
+        // pitch…) that occurred during this plate appearance.
+        baserunningNotes,
         outNumber: null,
         // Furthest base this batter reached / whether he scored — filled in
         // by the advancement pass below, which follows him as a baserunner
@@ -338,6 +360,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
 
       if (batterRunner?.movement?.isOut) {
         card.outNumber = batterRunner.movement.outNumber
+      }
+    } else {
+      // A top-level baserunning play with no plate appearance of its own (an
+      // inning-ending caught stealing, whose batter's count resumes next
+      // inning) has no card to hang its prose on — emit it as its own note so
+      // the account isn't lost.
+      for (const n of baserunningNotes) {
+        entries.push({ kind: 'event', eventType: n.eventType, segments: n.segments })
       }
     }
 

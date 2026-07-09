@@ -30,6 +30,33 @@ const EVENT_ICONS = {
   pitching_substitution: '🔄',
   defensive_substitution: '👥',
   defensive_switch: '🧤',
+  // Baserunning events — used when one has no plate appearance to hang on and
+  // renders as its own note (see computeHalfInningFeed's non-PA fallback).
+  stolen_base_2b: '🏃', stolen_base_3b: '🏃', stolen_base_home: '🏃',
+  caught_stealing_2b: '🏃', caught_stealing_3b: '🏃', caught_stealing_home: '🏃',
+  pickoff_1b: '🏃', pickoff_2b: '🏃', pickoff_3b: '🏃',
+  pickoff_caught_stealing_2b: '🏃', pickoff_caught_stealing_3b: '🏃', pickoff_caught_stealing_home: '🏃',
+  wild_pitch: '⚾', passed_ball: '⚾', balk: '⚠️',
+}
+
+// The play-by-play prose for a baserunning event (steal, caught stealing, wild
+// pitch…), rendered as a secondary line beneath the batter's own description on
+// the card of the plate appearance it happened during. Names linkify the same
+// way the main description does.
+function BaserunningNote({ segments }) {
+  return (
+    <div className="pbp__subnote">
+      {segments.map((seg, i) =>
+        seg.id != null ? (
+          <span key={i} className="pbp__name">
+            {seg.text}
+          </span>
+        ) : (
+          seg.text
+        ),
+      )}
+    </div>
+  )
 }
 
 function EventNote({ entry }) {
@@ -54,7 +81,7 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners } = entry
+  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
   // A batter pinch-run for is crossed out on the card, with the pinch runner
   // penciled in beneath at the PR spot; the diamond gets a red PR by the base he
   // took over at (the last swap's base if a runner was himself pinch-run for).
@@ -98,6 +125,9 @@ function AtBatCard({ entry }) {
             ),
           )}
         </div>
+        {baserunningNotes?.map((note, i) => (
+          <BaserunningNote key={i} segments={note.segments} />
+        ))}
       </div>
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
