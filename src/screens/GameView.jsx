@@ -11,12 +11,13 @@ import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
+import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useAsyncOnFeed } from '../hooks/useAsyncOnFeed.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
-import { sectionToStep, stepToSection } from '../lib/route.js'
+import { sectionToStep, stepToSection, apiDateToUrl } from '../lib/route.js'
 import { SPORT_IDS } from '../lib/teams.js'
 import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
@@ -160,6 +161,23 @@ export function GameView({ game, section, onSection }) {
   // extra badge noise on the majors' pages.
   const prospects = useAsync(() => fetchTopProspects(), [])
   const prospectsData = game.sportId === SPORT_IDS.MLB ? null : prospects.data ?? null
+
+  // Season-context call-outs for the play-by-play — the leader / streak /
+  // situational-record notes, precomputed nightly to a static per-date file (see
+  // api/callouts.js). Spoiler-free season aggregates (no seal), same eager tier
+  // as prospect badges. MLB-only: the file only covers the majors, so a MiLB
+  // gamePk simply resolves to no bundle. Keyed on gamePk, like the other
+  // feed-derived static fetches — a live Refresh never re-pulls it.
+  const callouts = useAsyncOnFeed(
+    feed,
+    async (f) => {
+      if (game.sportId !== SPORT_IDS.MLB) return null
+      const api = f.gameData?.datetime?.officialDate
+      return api ? fetchCallouts(apiDateToUrl(api)) : null
+    },
+    [game.gamePk],
+  )
+  const gameCallouts = calloutsForGame(callouts.data, game.gamePk)
 
   // Former-teammate ties between the two clubs, for the FORMER TEAMMATES card on
   // the lineup pages. The whole precomputed file is a single cached same-origin
@@ -338,6 +356,7 @@ export function GameView({ game, section, onSection }) {
           pitcherRoles={pitcherRoles.data}
           winProbability={winProb.data}
           prospectsData={prospectsData}
+          callouts={gameCallouts}
         />
       )}
       {feed && step === 3 && (

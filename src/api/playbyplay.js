@@ -286,6 +286,38 @@ function runnerOutCode(play, runnerEntry) {
   return chain || 'OUT'
 }
 
+// The play that scored the GAME's first run, for the "scoring first" call-out —
+// the earliest play (by feed order) whose cumulative score first goes above 0.
+// `result.awayScore`/`homeScore` are the running totals AFTER the play (verified
+// against a live game). Returns { atBatIndex, side } where side ('away' | 'home')
+// is the team that scored (the batting side of that half), or null before any
+// run. Reveal-only, like the rest of this module — reads scoring state.
+export function firstRunPlay(feed) {
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const r = p.result ?? {}
+    if ((r.awayScore ?? 0) + (r.homeScore ?? 0) > 0) {
+      return {
+        atBatIndex: p.about?.atBatIndex ?? null,
+        side: p.about?.halfInning === 'bottom' ? 'home' : 'away',
+      }
+    }
+  }
+  return null
+}
+
+// atBatIndex of each batter's FIRST plate appearance in the whole game, so a
+// "coming into today" note (a streak) can render once — on his first card —
+// rather than every inning he bats. Reveal-only, like the rest of this module.
+export function firstPAIndexByBatter(feed) {
+  const first = new Map()
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const bid = p.matchup?.batter?.id
+    if (bid == null || NON_PA_EVENT_TYPES.has(p.result?.eventType)) continue
+    if (!first.has(bid)) first.set(bid, p.about?.atBatIndex ?? null)
+  }
+  return first
+}
+
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
 // mound-visit / pitching-change notes, first-at-bat first. `battingSide` is
 // 'away' | 'home' (top bats away, bottom bats home — same convention as the
@@ -349,7 +381,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         const text = e.details.description
         entries.push({ kind: 'event', eventType: et, text, segments: linkifyNames(text, nameIndex) })
       } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {
-        baserunningNotes.push({ eventType: et, segments: linkifyNames(e.details.description, nameIndex) })
+        // `e.player.id` on a baserunning playEvent is the runner it's about (the
+        // stealer / picked-off man) — verified against a live steal — so a
+        // leader call-out on a steal can key on the RUNNER, not the batter.
+        baserunningNotes.push({
+          eventType: et,
+          runnerId: e.player?.id ?? null,
+          segments: linkifyNames(e.details.description, nameIndex),
+        })
       }
     }
 
@@ -397,6 +436,13 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       const card = {
         kind: 'atbat',
         batterId,
+        // The play's own identity + result event, for the leader/scoring-first
+        // call-outs (see api/callouts.js): the batter's PA result eventType
+        // (home_run, walk, strikeout…) drives which leader note can fire, and
+        // atBatIndex lets the caller mark the play that scored the game's first
+        // run. Spoiler-free to READ here — this whole module is reveal-only.
+        atBatIndex: play.about?.atBatIndex ?? null,
+        eventType: play.result?.eventType ?? null,
         batter,
         pitcher,
         pitches,

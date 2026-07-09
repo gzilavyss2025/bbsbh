@@ -2139,6 +2139,30 @@ body {
   margin: 0 0 8px;
 }
 
+/* Extra-innings team-record banner (see ExtrasBanner) — a slim, kraft-tinted
+   strip above the reading pane on any extra-inning page, reading each club's
+   season W-L in extras. Condensed uppercase like the app's other labels. */
+.innings__extras {
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border: var(--bw-hair) solid var(--seal-deep);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: 1.4;
+  color: var(--text-body);
+}
+.innings__extras-icon {
+  margin-right: 4px;
+}
+.innings__extras-team {
+  white-space: nowrap;
+  color: var(--seal-deep);
+}
+
 .refreshbtn {
   display: inline-flex;
   align-items: center;
@@ -3004,7 +3028,8 @@ body {
 #root .pbp__subnote,
 #root .pbp__subnote .pbp__name,
 #root .pbp__note,
-#root .pbp__note .plink {
+#root .pbp__note .plink,
+#root .pbp__callout {
   text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
 }
 
@@ -3026,6 +3051,32 @@ body {
 .pbp__klooking {
   display: inline-block;
   transform: scaleX(-1);
+}
+
+/* Season-context call-out beneath a play: a leader / streak / situational-record
+   fun fact (see api/callout-notes.js). Reads as a sentence (caps-exempt below),
+   set off a touch louder than a baserunning subnote with the kraft-amber seal
+   accent and a small star, so a "leads the club in walks" note catches the eye
+   without shouting. */
+.pbp__callout {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-left: 2px solid var(--seal-deep);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface-inset);
+  font-family: var(--font-read);
+  font-size: 10px;
+  font-weight: var(--w-medium);
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: var(--text-body);
+}
+.pbp__calloutmark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: 10px;
 }
 
 /* ---------------------------------------------------------------- roster */
