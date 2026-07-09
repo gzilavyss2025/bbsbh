@@ -211,23 +211,12 @@ function AtBatCard({ entry, calloutCtx }) {
     </div>
       {/* Desktop/iPad: the pitch zone + sequence ride in the at-bat's right
           column (hidden on a phone, which uses the icon button + modal above).
-          Collapses away entirely at parks with no pitch tracking. */}
+          Just the pitches and their plot — the batter/pitcher matchup is
+          already named in the card to the left. Collapses away entirely at
+          parks with no pitch tracking. */}
       {hasZone && (
         <div className="pbp__zonecell">
-          <div className="pbp__zonemeta">
-            <h4 className="pbp__zonename">
-              {batter.last}
-              {batter.first ? `, ${batter.first}` : ''}
-              {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
-            </h4>
-            {entry.pitcher && (
-              <div className="pbp__zonevs">
-                vs {entry.pitcher.last} · {pitchDetails.length} pitch
-                {pitchDetails.length === 1 ? '' : 'es'}
-              </div>
-            )}
-            <PitchList pitchDetails={pitchDetails} />
-          </div>
+          <PitchList pitchDetails={pitchDetails} />
           <StrikeZone pitchDetails={pitchDetails} className="strikezone--inline" />
         </div>
       )}

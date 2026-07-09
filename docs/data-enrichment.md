@@ -71,6 +71,8 @@ The fix, first used for season WAR (`scripts/gen-war.mjs`):
 
 This generalizes past WAR: any season-aggregate stat that's CORS-open-but-bulk-only (more FanGraphs leaderboard columns, a Savant season leaderboard CSV, etc.) is a good candidate for the same treatment — new `scripts/gen-*.mjs` + a cron step appended to (or a new job alongside) `update-war.yml` + a small `src/api/*.js` reader. Keep the written JSON trimmed to only the fields actually consumed; that's what keeps this fast (the WAR file is ~25KB vs. the ~1MB raw leaderboard).
 
+The same pattern also absorbs **cost-driven** precomputes, where the source is statsapi itself but the derivation is too many calls for a page load: `rehab.json`, `minors-leaders.json`, and `former-teammates.json` all use it. `scripts/gen-former-teammates.mjs` is the heaviest — for each upcoming MLB matchup it reduces both clubs' rosters to per-player `(teamId, season)` career sets (a `yearByYear` pull per MiLB level per player, hundreds of calls) so the lineup page's FORMER TEAMMATES card can look up cross-team overlaps from one same-origin read (`src/api/formerTeammates.js`). It's scoped to the next few days' MLB slate (MiLB never shows the card) and reuses `person.js`'s `REHAB_CAP` idea to keep a veteran's rehab cameo from false-matching a level's prospects.
+
 ## Recommendations mapped to app structure
 
 1. **Reveal-time Statcast facts (task #6)**: derive max EV / hardest hit / top pitch velo / longest HR entirely from the existing feed's `pitchData`/`hitData` inside `src/api/derive.js` (reveal-only) — no new fetch, works at MLB + AAA + FSL, degrades to absent elsewhere. Optionally layer Savant `/gf` for xBA/barrel/batSpeed as a second reveal-only fetch that fails soft.

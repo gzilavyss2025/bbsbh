@@ -94,6 +94,21 @@ node scripts/gen-minors-leaders.mjs
                    # combineToPool (statsLevels.js) + computeLeaders (teamLeaders.js),
                    # the same code the live 'org' board uses, to stay in lockstep.
                    # App reads it via src/api/minorsLeaders.js.
+node scripts/gen-former-teammates.mjs
+                   # regenerate public/data/former-teammates.json (for each
+                   # upcoming MLB matchup, the pairs of players on the two
+                   # OPPOSING clubs who were once teammates — majors or minors —
+                   # the lineup page's FORMER TEAMMATES card). Same build-time-
+                   # fetch pattern as gen-war.mjs (daily cron; see
+                   # .github/workflows/update-former-teammates.yml), driven by
+                   # COST: two opposing players are teammates iff their careers
+                   # share a (teamId, season) pair, and reducing a career to that
+                   # set is a year-by-year pull PER MiLB level per player —
+                   # hundreds of calls per matchup, too heavy for a page load.
+                   # Self-contained like gen-rehab.mjs; scopes to the next few
+                   # days' MLB slate only (MiLB never shows the card), skips
+                   # Rookie ball, and reuses person.js's REHAB_CAP idea to drop a
+                   # veteran's rehab cameo. App reads it via src/api/formerTeammates.js.
 npm run e2e        # playwright test — verification harness, not a CI suite (see below)
 ```
 
@@ -178,6 +193,18 @@ one thing kept between sessions is each game's reveal high-water mark
 returning to a game keeps your place. Only that half-index is stored, never a
 score — on return the app re-reveals up to the half you'd already reached, so
 the spoiler rule still holds. Nothing else is persisted.
+
+**The one exception — link previews (`api/`).** Dynamic Open Graph / Twitter
+cards for shared deep links are the sole thing that can't be done statically
+(crawlers don't run our JS, and the player/game space is unbounded), so they
+live in a thin Vercel edge layer: `api/og.js` renders the 1200×630 card image
+(`@vercel/og`), `api/preview.js` serves `index.html` with the route's `og:*`
+tags swapped into the `<!-- OG:BEGIN…OG:END -->` block, and `api/_lib/cards.js`
+resolves a route to the card's strings (the only server-side statsapi calls in
+the app). `vercel.json` rewrites the deep-link paths there. It's crawler-only:
+the SPA still fetches all game data client-side, no feature depends on it, it
+fails safe to the static default card, and it never renders/fetches a
+score-revealing value — see ADR-0012.
 
 **Routing** is a tiny dependency-free layer over the History API
 (`src/lib/route.js` — deliberately *not* react-router). Three route shapes: `/`

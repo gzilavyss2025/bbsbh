@@ -12,6 +12,7 @@ import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
+import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useAsyncOnFeed } from '../hooks/useAsyncOnFeed.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -178,6 +179,14 @@ export function GameView({ game, section, onSection }) {
   )
   const gameCallouts = calloutsForGame(callouts.data, game.gamePk)
 
+  // Former-teammate ties between the two clubs, for the FORMER TEAMMATES card on
+  // the lineup pages. The whole precomputed file is a single cached same-origin
+  // read (see formerTeammates.js), and it only carries MLB matchups, so this is
+  // gated to MLB games — a MiLB game just passes null and the card never shows.
+  const teammates = useAsync(() => loadFormerTeammates(), [])
+  const formerTeammatesData =
+    game.sportId === SPORT_IDS.MLB ? teammates.data ?? null : null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   // Where "Innings" returns to: the last half-inning page the user was on, so
@@ -293,6 +302,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           starterLines={starterLines.data}
           prospectsData={prospectsData}
+          formerTeammatesData={formerTeammatesData}
           onNext={() => onSection('top1')}
           onReload={feedState.reload}
           loading={feedState.loading}
@@ -309,6 +319,7 @@ export function GameView({ game, section, onSection }) {
           // The away side FACES the home starter.
           oppPitcherLine={starterLines.data?.home}
           prospectsData={prospectsData}
+          formerTeammatesData={formerTeammatesData}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
           onReload={feedState.reload}
@@ -325,6 +336,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}
           prospectsData={prospectsData}
+          formerTeammatesData={formerTeammatesData}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
           onReload={feedState.reload}
@@ -404,7 +416,7 @@ function MastheadLogo({ team, onSketch }) {
       onClick={onSketch}
       aria-label={`Enlarge ${team.name || 'team'} logo for sketching`}
     >
-      <TeamLogo teamId={team.id} name={team.name} size={44} bw />
+      <TeamLogo teamId={team.id} name={team.name} size={44} />
     </button>
   )
 }
