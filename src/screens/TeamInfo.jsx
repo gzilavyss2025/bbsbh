@@ -527,50 +527,18 @@ function FormerTeammates({ pairs, startingIds, dayNight }) {
   return (
     <section className="teammates">
       <h3 className="section__title">Former teammates</h3>
+      {/* A CSS multi-column "waterfall" rather than a grid: a big reunion card
+          can run much taller than a plain pair card, and a grid stretches
+          every OTHER card in that row to match — the exact mess this avoids.
+          Each card just flows into whichever column has room next, like a
+          Pinterest/Twitter card wall, so one tall card never drags its
+          row-mates' height with it. */}
       <ul className="teammates__grid">
         {shown.map((c) =>
           c.kind === 'group' ? (
-            <li
-              key={`g-${c.anchor.id}-${c.club.teamId}`}
-              className="teammatecard teammatecard--group"
-            >
-              {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
-              <div className="teammatecard__group">
-                <TeammateHalf id={c.anchor.id} name={c.anchor.name} pos={c.anchor.pos} />
-                {c.mates.slice(0, GROUP_MATES_SHOWN).map((m) => (
-                  <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} />
-                ))}
-                {c.mates.length > GROUP_MATES_SHOWN && (
-                  <span className="teammatecard__groupmore">
-                    +{c.mates.length - GROUP_MATES_SHOWN}
-                  </span>
-                )}
-              </div>
-              <div className="teammatecard__mid">
-                <TeamLogo teamId={c.club.teamId} name={c.club.teamName} size={32} />
-                <span className="teammatecard__years">{seasonRange(c.seasons)}</span>
-              </div>
-              <span className="teammatecard__caption">
-                {connectionCaption(c.club.level, c.club.teamName, c.seasons)}
-              </span>
-            </li>
+            <GroupCard key={`g-${c.anchor.id}-${c.club.teamId}`} card={c} startingLabel={startingLabel} />
           ) : (
-            <li key={`${c.a.id}-${c.b.id}`} className="teammatecard">
-              {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
-              <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} />
-              <div className="teammatecard__mid">
-                <div className="teammatecard__logos">
-                  {c.clubs.slice(0, 2).map((club) => (
-                    <TeamLogo key={club.teamId} teamId={club.teamId} name={club.teamName} size={28} />
-                  ))}
-                </div>
-                <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
-              </div>
-              <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} />
-              <span className="teammatecard__caption">
-                {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
-              </span>
-            </li>
+            <PairCard key={`${c.a.id}-${c.b.id}`} card={c} startingLabel={startingLabel} />
           ),
         )}
       </ul>
@@ -580,6 +548,64 @@ function FormerTeammates({ pairs, startingIds, dayNight }) {
         </button>
       )}
     </section>
+  )
+}
+
+// A plain 1-vs-1 former-teammate card.
+function PairCard({ card: c, startingLabel }) {
+  return (
+    <li className="teammatecard">
+      {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
+      <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} />
+      <div className="teammatecard__mid">
+        <div className="teammatecard__logos">
+          {c.clubs.slice(0, 2).map((club) => (
+            <TeamLogo key={club.teamId} teamId={club.teamId} name={club.teamName} size={28} />
+          ))}
+        </div>
+        <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
+      </div>
+      <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} />
+      <span className="teammatecard__caption">
+        {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
+      </span>
+    </li>
+  )
+}
+
+// A hub-and-spokes reunion card. Starts capped to GROUP_MATES_SHOWN spokes
+// with a "+N more teammates" button (a big reunion — see groupTeammateCards —
+// can run well past a dozen) that reveals the rest of the headshots in place.
+function GroupCard({ card: c, startingLabel }) {
+  const [expanded, setExpanded] = useState(false)
+  const shownMates = expanded ? c.mates : c.mates.slice(0, GROUP_MATES_SHOWN)
+  const moreCount = c.mates.length - shownMates.length
+  return (
+    <li className="teammatecard teammatecard--group">
+      {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
+      <div className="teammatecard__group">
+        <TeammateHalf id={c.anchor.id} name={c.anchor.name} pos={c.anchor.pos} />
+        {shownMates.map((m) => (
+          <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} />
+        ))}
+      </div>
+      <div className="teammatecard__mid">
+        <TeamLogo teamId={c.club.teamId} name={c.club.teamName} size={32} />
+        <span className="teammatecard__years">{seasonRange(c.seasons)}</span>
+      </div>
+      <span className="teammatecard__caption">
+        {connectionCaption(c.club.level, c.club.teamName, c.seasons)}
+      </span>
+      {moreCount > 0 && (
+        <button
+          type="button"
+          className="teammatecard__groupmore"
+          onClick={() => setExpanded(true)}
+        >
+          +{moreCount} more {moreCount === 1 ? 'teammate' : 'teammates'}
+        </button>
+      )}
+    </li>
   )
 }
 
