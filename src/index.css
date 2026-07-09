@@ -3431,6 +3431,15 @@ body {
 .strikezone--modal {
   width: 224px;
 }
+/* When the batter's-box silhouette is shown, the viewBox grows by BATTER_W —
+   scale the rendered width by the same ratio so the plate/dots stay the same
+   size instead of shrinking to fit the wider canvas. */
+.strikezone--withbatter {
+  width: 138px;
+}
+.strikezone--modal.strikezone--withbatter {
+  width: 262px;
+}
 
 .strikezone__frame {
   fill: none;
@@ -3471,6 +3480,18 @@ body {
 }
 .strikezone__num--ball { fill: var(--ink-1); }
 .strikezone__num--inplay { fill: var(--pd-inplay); }
+
+/* The batter's-box silhouette (see BatterSilhouette in StrikeZone.jsx) — a
+   plain pencil-line figure, drawn no heavier than the home-plate outline it
+   stands beside. The diagram grows a bit wider to fit it (.strikezone--
+   withbatter below) rather than shrinking the pitch plot to make room. */
+.strikezone__battersil {
+  stroke: var(--graphite-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
 
 /* Numbered pitch-by-pitch list beside the diagram. */
 .pitchlist {
@@ -5630,11 +5651,13 @@ body {
   }
 
   /* Play-by-play pairs each card with its strike zone: the card on the left,
-     the zone + pitch list on the right, one grid row per at-bat. The phone
-     icon button is redundant here, so it's hidden. */
+     the zone + pitch list on the right, one grid row per at-bat. The pitch-
+     location pane gets the larger share of the row — the batter's-box
+     silhouette (see StrikeZone.jsx) widens it beyond a plain 50/50 split. The
+     phone icon button is redundant here, so it's hidden. */
   .pbp__atbat {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
     gap: 0 var(--space-4);
     align-items: stretch;
   }
@@ -5653,12 +5676,15 @@ body {
   .pbp__zonecell .pitchlist {
     flex: 1;
     min-width: 0;
-    align-self: center;
+    align-self: flex-start;
   }
   .strikezone--inline {
     width: 142px;
     flex: 0 0 auto;
     margin-top: -6px;
+  }
+  .strikezone--inline.strikezone--withbatter {
+    width: 166px;
   }
 
   /* ---- box score: totals beside the decisions, line score beside the three

@@ -26,6 +26,11 @@ const sx = (px) => PAD + ((px - DOM_X[0]) / (DOM_X[1] - DOM_X[0])) * (W - 2 * PA
 // SVG y grows downward, so height flips: the top of the zone maps to a small y.
 const sy = (pz) => PAD + ((DOM_Z[1] - pz) / (DOM_Z[1] - DOM_Z[0])) * (H - 2 * PAD)
 
+// Extra strip added to one side of the diagram for the batter's-box
+// silhouette (see BatterSilhouette below) — added to the viewBox, not carved
+// out of it, so the plate/pitch-dot plot keeps its usual scale.
+const BATTER_W = 32
+
 function median(xs) {
   const s = [...xs].sort((a, b) => a - b)
   const m = s.length >> 1
@@ -39,7 +44,34 @@ const plottable = (p) =>
   typeof p.szTop === 'number' &&
   typeof p.szBottom === 'number'
 
-export function StrikeZone({ pitchDetails, className = '' }) {
+// The batter's-box silhouette: a plain stick figure with a bat raised,
+// drawn canonically facing right (as if standing in a strip to the LEFT of
+// the plate) and mirrored for the opposite box. Which side is which is
+// decided by the caller (see the batSide handling in StrikeZone below).
+function BatterSilhouette({ x, mirror }) {
+  const cx = BATTER_W / 2
+  return (
+    <g
+      className="strikezone__batter"
+      transform={mirror ? `translate(${x + BATTER_W}, 0) scale(-1, 1)` : `translate(${x}, 0)`}
+    >
+      <circle className="strikezone__battersil" cx={cx} cy={80} r={10} />
+      <path
+        className="strikezone__battersil"
+        fill="none"
+        d={`M${cx},92 L${cx},150 M${cx - 9},224 L${cx},150 L${cx + 9},224 M${cx},100 L${cx + 14},55`}
+      />
+    </g>
+  )
+}
+
+// A batter stands in the box on the side of the plate closer to the base he
+// runs out of the box toward: right-handed batters box on the third-base
+// side, left-handed on the first-base side. In this catcher's-eye view (px
+// positive = first-base side, matching the plate-crossing coordinates
+// plotted below), that puts an 'R' batter's box to the left of the plate and
+// an 'L' batter's box to the right.
+export function StrikeZone({ pitchDetails, batSide, className = '' }) {
   const shown = (pitchDetails ?? []).filter(plottable)
   if (shown.length === 0) return null
 
@@ -57,41 +89,53 @@ export function StrikeZone({ pitchDetails, className = '' }) {
   const cx = (zx + zr) / 2
   const half = zw / 2
 
+  // The silhouette is extra canvas, not carved out of the existing plot, so
+  // the plate and pitch dots keep their usual scale — the whole zone plot
+  // just shifts over to make room when the batter's box sits to its left.
+  const showBatter = batSide === 'L' || batSide === 'R'
+  const zoneOffsetX = batSide === 'R' ? BATTER_W : 0
+  const totalW = showBatter ? W + BATTER_W : W
+
   return (
     <svg
-      className={`strikezone ${className}`}
-      viewBox={`0 0 ${W} ${H}`}
+      className={`strikezone ${className}${showBatter ? ' strikezone--withbatter' : ''}`}
+      viewBox={`0 0 ${totalW} ${H}`}
       role="img"
-      aria-label={`Strike zone: ${shown.length} pitch${shown.length === 1 ? '' : 'es'} plotted`}
+      aria-label={`Strike zone: ${shown.length} pitch${shown.length === 1 ? '' : 'es'} plotted${
+        showBatter ? `, ${batSide === 'L' ? 'left' : 'right'}-handed batter's box shown` : ''
+      }`}
     >
-      <rect className="strikezone__frame" x={zx} y={zyT} width={zw} height={zh} />
-      <line className="strikezone__third" x1={zx + zw / 3} y1={zyT} x2={zx + zw / 3} y2={zyB} />
-      <line className="strikezone__third" x1={zx + (2 * zw) / 3} y1={zyT} x2={zx + (2 * zw) / 3} y2={zyB} />
-      <line className="strikezone__third" x1={zx} y1={zyT + zh / 3} x2={zr} y2={zyT + zh / 3} />
-      <line className="strikezone__third" x1={zx} y1={zyT + (2 * zh) / 3} x2={zr} y2={zyT + (2 * zh) / 3} />
-      <polygon
-        className="strikezone__plate"
-        points={`${cx - half},${py - 8} ${cx + half},${py - 8} ${cx + half},${py - 2} ${cx},${py + 6} ${cx - half},${py - 2}`}
-      />
-      {shown.map((p) => {
-        const x = sx(p.px)
-        const y = sy(p.pz)
-        return (
-          <g key={p.no}>
-            <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5}>
-              <title>
-                Pitch {p.no}
-                {p.mph != null ? `: ${p.mph} MPH` : ''}
-                {p.type ? ` ${p.type}` : ''}
-                {p.callDesc ? `, ${p.callDesc}` : ''}
-              </title>
-            </circle>
-            <text className={`strikezone__num strikezone__num--${p.cat}`} x={x} y={y + 0.3}>
-              {p.no}
-            </text>
-          </g>
-        )
-      })}
+      <g transform={`translate(${zoneOffsetX}, 0)`}>
+        <rect className="strikezone__frame" x={zx} y={zyT} width={zw} height={zh} />
+        <line className="strikezone__third" x1={zx + zw / 3} y1={zyT} x2={zx + zw / 3} y2={zyB} />
+        <line className="strikezone__third" x1={zx + (2 * zw) / 3} y1={zyT} x2={zx + (2 * zw) / 3} y2={zyB} />
+        <line className="strikezone__third" x1={zx} y1={zyT + zh / 3} x2={zr} y2={zyT + zh / 3} />
+        <line className="strikezone__third" x1={zx} y1={zyT + (2 * zh) / 3} x2={zr} y2={zyT + (2 * zh) / 3} />
+        <polygon
+          className="strikezone__plate"
+          points={`${cx - half},${py - 8} ${cx + half},${py - 8} ${cx + half},${py - 2} ${cx},${py + 6} ${cx - half},${py - 2}`}
+        />
+        {shown.map((p) => {
+          const x = sx(p.px)
+          const y = sy(p.pz)
+          return (
+            <g key={p.no}>
+              <circle className={`strikezone__dot strikezone__dot--${p.cat}`} cx={x} cy={y} r={8.5}>
+                <title>
+                  Pitch {p.no}
+                  {p.mph != null ? `: ${p.mph} MPH` : ''}
+                  {p.type ? ` ${p.type}` : ''}
+                  {p.callDesc ? `, ${p.callDesc}` : ''}
+                </title>
+              </circle>
+              <text className={`strikezone__num strikezone__num--${p.cat}`} x={x} y={y + 0.3}>
+                {p.no}
+              </text>
+            </g>
+          )
+        })}
+      </g>
+      {showBatter && <BatterSilhouette x={batSide === 'R' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />}
     </svg>
   )
 }
@@ -109,7 +153,7 @@ export function PitchList({ pitchDetails }) {
           <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
           <span className="pitchlist__type">{p.type || '—'}</span>
           <span className="pitchlist__meta">
-            {p.mph != null ? `${p.mph} ` : ''}
+            {p.mph != null ? `${p.mph} MPH, ` : ''}
             {p.callDesc}
           </span>
         </li>
@@ -137,7 +181,7 @@ export function StrikeZoneLegend() {
 // (backdrop tap / close button / Escape) and the same focus hand-off. All the
 // content it shows is reveal-only pitch detail already in the revealed card, so
 // the modal carries nothing the seal hasn't released.
-export function StrikeZoneModal({ pitchDetails, batter, pitcher, onClose }) {
+export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -171,7 +215,7 @@ export function StrikeZoneModal({ pitchDetails, batter, pitcher, onClose }) {
           </button>
         </div>
         <div className="szmodal__body">
-          <StrikeZone pitchDetails={pitchDetails} className="strikezone--modal" />
+          <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
           <PitchList pitchDetails={pitchDetails} />
         </div>
         <StrikeZoneLegend />

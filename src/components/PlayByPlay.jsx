@@ -103,7 +103,7 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry, calloutCtx }) {
-  const { batter, pitches, pitchDetails, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
+  const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const calloutNotes = buildCallouts(entry, calloutCtx)
   // The pitch-zone diagram only exists where the park tracked plate locations
@@ -206,12 +206,13 @@ function AtBatCard({ entry, calloutCtx }) {
       {hasZone && (
         <div className="pbp__zonecell">
           <PitchList pitchDetails={pitchDetails} />
-          <StrikeZone pitchDetails={pitchDetails} className="strikezone--inline" />
+          <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--inline" />
         </div>
       )}
       {zoneOpen && hasZone && (
         <StrikeZoneModal
           pitchDetails={pitchDetails}
+          batSide={batSide}
           batter={batter}
           pitcher={entry.pitcher?.last}
           onClose={() => setZoneOpen(false)}
