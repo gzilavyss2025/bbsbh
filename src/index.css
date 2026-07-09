@@ -344,12 +344,13 @@ body {
 }
 
 /* --------------------------------------------------------------- masthead
-   The game's identity in-view: two grayscale marks — away @ home — sized like
-   the logos on the lineup pages. Each is a button that opens the sketch modal. */
+   The game's identity in-view: two full-color marks — away @ home — sized
+   like the logos on the lineup pages, right-aligned in the page header. Each
+   is a button that opens the sketch modal. */
 .masthead {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 20px;
   margin: 2px 0 16px;
 }
@@ -1084,8 +1085,8 @@ body {
   border-radius: var(--radius-xs);
 }
 
-/* Grayscale treatment for the in-game masthead and the printable logo sheet —
-   pencil-sketch friendly. (The slate cards render their marks in full color.) */
+/* Grayscale treatment for the enlarged sketch-modal view — pencil-sketch
+   friendly. (The slate cards and masthead render their marks in full color.) */
 .teamlogo--bw {
   filter: grayscale(1) contrast(1.03);
 }
@@ -2454,25 +2455,33 @@ body {
   display: none;
 }
 
-/* Wide-layout-only pieces, hidden on a phone (the phone shows the stat box
-   inline in the half, and the lineups/defense inline via .half__entering). */
-.innings__statbox--desk,
+/* Wide-layout-only pieces, hidden on a phone (the lineups/defense render
+   inline instead, via .half__entering). */
 .innings__ref-defense,
 .innings__ref-lineups {
   display: none;
 }
 
-/* The sealed placeholder shown in the desktop stat-box slot before the current
-   half is revealed, so the top-right corner isn't just empty. */
+/* The R/H/E/LOB + pitch-stat card, row 2 beside the win-probability chart —
+   rounded, bordered, and shadowed like every other card in the view. */
+.statbox {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* The sealed placeholder shown in the stat-box slot before the current half is
+   revealed, so row 2 isn't left with an empty gap. */
 .statbox--sealed {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 96px;
   padding: 14px;
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
+  border-style: dashed;
 }
 .statbox__hint {
   max-width: 20ch;
@@ -2483,6 +2492,18 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   text-align: center;
+}
+
+/* Row 2: the stat card beside the win-probability chart — stacked on a phone,
+   side by side from the wide breakpoint up (see media query below). */
+.innings__row2 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.innings__row2 > .winprob {
+  margin-bottom: 0;
 }
 
 .lineupcard {
@@ -3703,14 +3724,6 @@ body {
   background: var(--accent-primary);
   color: var(--text-on-ink);
   font-weight: var(--w-bold);
-}
-
-.rolling__cap {
-  margin: 6px 2px 0;
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
 }
 
 /* ----------------------------------------------------------- win probability
@@ -5125,50 +5138,38 @@ body {
     display: none;
   }
 
-  /* Header row: the half navigator on the left, the R/H/E + pitch-stat box
-     pinned top-right. The nav keeps its own width; the stat box takes what it
-     needs on the right. */
-  .innings__head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-4);
-    margin-bottom: var(--space-3);
-  }
-  .innings__head .inningnav {
-    flex: 1 1 auto;
-    margin: 4px 0 0;
-  }
-  .innings__statbox--desk {
-    display: block;
-    flex: 0 0 auto;
-    width: clamp(300px, 40%, 360px);
+  /* The half navigator: same measure as the LINEUPS / INNINGS / BOX step
+     buttons above it, so the two rows read as one column of chrome. */
+  .inningnav {
+    max-width: 640px;
+    margin-inline: auto;
   }
 
-  /* The grid is a re-ordering flex column: running line, win-prob, the
-     reference band (pitchers + defense | lineups), then the reading pane, then
-     rosters. Source order matches the phone stack; `order` lifts the reference
-     band above the play-by-play here. */
+  /* The grid is a plain flex column — source order already matches the row
+     layout (linescore, stat card + win-prob, play-by-play, reference band,
+     rosters), so no reordering is needed here. */
   .innings__grid {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
-  .innings__grid > .rolling { order: 1; }
-  .innings__grid > .winprob { order: 2; }
-  .innings__grid > .innings__ref { order: 3; }
-  .innings__grid > .inning { order: 4; }
-  .innings__grid > .innings__rosters { order: 5; }
+
+  /* Row 2: the stat card and win-probability chart side by side. */
+  .innings__row2 {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .innings__row2 > .statbox,
+  .innings__row2 > .winprob {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 
   /* Reference band: pitchers + fielding defense on the left, both lineups on
      the right. The inline entering copy staged around the seal is hidden here
      (see InningViewer / ADR-0010); the -defense / -lineups blocks — hidden on a
      phone — carry it instead. */
   .half__entering {
-    display: none;
-  }
-  /* The inline stat box is the phone presentation; the header copy takes over. */
-  .half__statbox {
     display: none;
   }
   .innings__ref {
@@ -5227,33 +5228,21 @@ body {
   .pbp__zonecell {
     display: flex;
     gap: 14px;
-    align-items: center;
+    align-items: flex-start;
     border: var(--bw-hair) solid var(--border-hairline);
     border-radius: var(--radius-sm);
     background: var(--paper-2);
-    padding: 8px 10px;
+    padding: 6px 10px;
   }
-  .pbp__zonemeta {
+  .pbp__zonecell .pitchlist {
     flex: 1;
     min-width: 0;
-  }
-  .pbp__zonename {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: var(--w-bold);
-    font-size: 13px;
-    text-transform: uppercase;
-    color: var(--text-heading);
-  }
-  .pbp__zonevs {
-    font-family: var(--font-read);
-    font-size: 11px;
-    color: var(--text-muted);
-    margin: 2px 0 6px;
+    align-self: center;
   }
   .strikezone--inline {
     width: 142px;
     flex: 0 0 auto;
+    margin-top: -6px;
   }
 
   /* ---- box score: totals beside the decisions, line score beside the three
