@@ -1975,6 +1975,7 @@ body {
 }
 
 .teammatecard {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: start;
@@ -1984,6 +1985,59 @@ body {
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
+}
+
+/* 3+ players who all crossed paths on the SAME club at once (see
+   groupTeammateCards) — every headshot pools on one side, the one shared
+   club/years on the other, rather than repeating a card per opponent. */
+.teammatecard--group {
+  grid-template-columns: 1fr auto;
+}
+
+.teammatecard__group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 10px;
+}
+
+.teammatecard__groupmore {
+  align-self: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+/* A pair/group both starting tonight — the connection is about to play out
+   for real on the user's own scoresheet, the highest-value fact this card can
+   surface (see TONIGHT_BOOST). */
+.teammatecard__badge {
+  grid-column: 1 / -1;
+  order: -1;
+  margin: -2px -2px 2px;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-positive);
+  color: var(--surface-card);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* The one-line story under a card ("MLB teammates, Marlins '19-'21") — a
+   footer row spanning the full card regardless of the 2- or 3-column grid
+   above it. */
+.teammatecard__caption {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: 10px;
+  color: var(--text-caption);
+  text-align: center;
 }
 
 .teammatecard__half {

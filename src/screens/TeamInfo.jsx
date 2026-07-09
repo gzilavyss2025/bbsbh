@@ -11,7 +11,7 @@ import {
 import { fetchTeamRoster } from '../api/team.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
-import { formerTeammatePairs } from '../api/formerTeammates.js'
+import { formerTeammatePairs, groupTeammateCards } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
@@ -123,6 +123,7 @@ export function LineupSpread({
     () => formerTeammatePairs(formerTeammatesData, awayMeta.id, homeMeta.id),
     [formerTeammatesData, awayMeta.id, homeMeta.id],
   )
+  const startingIds = useMemo(() => startingIdsFor(feed), [feed])
 
   return (
     <div className="teaminfo teaminfo--spread">
@@ -155,7 +156,7 @@ export function LineupSpread({
         ))}
       </div>
 
-      <FormerTeammates pairs={teammatePairs} />
+      <FormerTeammates pairs={teammatePairs} startingIds={startingIds} />
 
       <div className="pagenav">
         <button className="btn btn--next" onClick={onNext}>
@@ -267,6 +268,18 @@ function rosterFallbackGroups(roster) {
   return { batters, starters, bullpen }
 }
 
+// The ids of every player in TONIGHT's starting lineups, both clubs — used to
+// pin/badge a former-teammate pair who are about to face each other for real,
+// pitch by pitch, on the user's own scoresheet (see FormerTeammates). Lineups
+// are spoiler-free pregame, so this is safe outside any seal.
+function startingIdsFor(feed) {
+  const ids = new Set()
+  for (const side of ['away', 'home']) {
+    for (const p of selectLineup(feed, side)) ids.add(p.id)
+  }
+  return ids
+}
+
 // The team-specific body shared by the phone page and the spread's panels:
 // batting order, the opposing starter, and the opposing defense diamond.
 function TeamSections({
@@ -296,6 +309,10 @@ function TeamSections({
     () => (showTeammates ? formerTeammatePairs(formerTeammatesData, meta.id, oppMeta.id) : []),
     [showTeammates, formerTeammatesData, meta.id, oppMeta.id],
   )
+  const startingIds = useMemo(() => (showTeammates ? startingIdsFor(feed) : null), [
+    showTeammates,
+    feed,
+  ])
 
   // Lineups don't post until close to first pitch. Until then, stage the
   // team's full active roster (batters + pitchers) in the same spot rather
@@ -442,7 +459,7 @@ function TeamSections({
         </section>
       )}
 
-      {showTeammates && <FormerTeammates pairs={teammatePairs} />}
+      {showTeammates && <FormerTeammates pairs={teammatePairs} startingIds={startingIds} />}
     </>
   )
 }
@@ -451,37 +468,107 @@ function TeamSections({
 // that have swapped a lot of players) can run to dozens of cards — and let a
 // button reveal the rest rather than dumping them all in the page's height.
 const TEAMMATES_SHOWN = 5
+// Cap the headshots inside one GROUP card (a big reunion can run to a dozen+
+// spokes) so the tile stays a glance, not a scroll of its own.
+const GROUP_MATES_SHOWN = 6
+
+// Pins a pair/group whose players are BOTH in tonight's starting lineups above
+// everything else, ranked score included — the connection is about to play
+// out for real, pitch by pitch, on the user's own scoresheet, which is a
+// better fact than anything the static score can express.
+const TONIGHT_BOOST = 1000
+
+function isCardTonight(card, startingIds) {
+  if (!startingIds) return false
+  if (card.kind === 'group') {
+    return startingIds.has(card.anchor.id) && card.mates.some((m) => startingIds.has(m.id))
+  }
+  return startingIds.has(card.a.id) && startingIds.has(card.b.id)
+}
+
+// "MLB teammates, Marlins ’19–’21" — the one-line story under a card. The
+// global ALL-CAPS rule (see index.css) renders it uppercase; write it in
+// natural case here.
+function connectionCaption(level, teamName, seasons) {
+  const label = level === 'MLB' ? 'MLB teammates' : `${level} teammates`
+  return `${label}, ${teamName} ${seasonRange(seasons)}`
+}
 
 // One card per pair of players — one from each club — who were once
-// teammates, tiling 2–3 to a row depending on width. Spoiler-free (rosters +
-// team-season history carry no score), rendered openly like the
+// teammates, tiling 2–3 to a row depending on width, ranked by how
+// interesting the connection is (see formerTeammatePairs' `score`). A real
+// hub-and-spokes reunion (several of tonight's players who all crossed paths
+// on one notable club) collapses into a single GROUP card instead of one
+// repetitive pair card per opponent (see groupTeammateCards). Spoiler-free
+// (rosters + team-season history carry no score), rendered openly like the
 // opposing-pitcher line. Hidden when there are no ties. `pairs` is already
 // order-independent and deduped (see formerTeammatePairs), so this same
 // component reads correctly whether it's one club's page or the shared,
 // full-width copy on the spread layout.
-function FormerTeammates({ pairs }) {
+function FormerTeammates({ pairs, startingIds }) {
   const [showAll, setShowAll] = useState(false)
-  if (!pairs || pairs.length === 0) return null
-  const shown = showAll ? pairs : pairs.slice(0, TEAMMATES_SHOWN)
-  const hidden = pairs.length - shown.length
+  const cards = useMemo(() => {
+    const grouped = groupTeammateCards(pairs).map((c) => ({
+      ...c,
+      tonight: isCardTonight(c, startingIds),
+    }))
+    return grouped.sort(
+      (x, y) =>
+        y.score + (y.tonight ? TONIGHT_BOOST : 0) - (x.score + (x.tonight ? TONIGHT_BOOST : 0)),
+    )
+  }, [pairs, startingIds])
+  if (cards.length === 0) return null
+  const shown = showAll ? cards : cards.slice(0, TEAMMATES_SHOWN)
+  const hidden = cards.length - shown.length
   return (
     <section className="teammates">
       <h3 className="section__title">Former teammates</h3>
       <ul className="teammates__grid">
-        {shown.map((p) => (
-          <li key={`${p.a.id}-${p.b.id}`} className="teammatecard">
-            <TeammateHalf id={p.a.id} name={p.a.name} />
-            <div className="teammatecard__mid">
-              <div className="teammatecard__logos">
-                {p.clubs.slice(0, 2).map((c) => (
-                  <TeamLogo key={c.teamId} teamId={c.teamId} name={c.teamName} size={28} />
+        {shown.map((c) =>
+          c.kind === 'group' ? (
+            <li
+              key={`g-${c.anchor.id}-${c.club.teamId}`}
+              className="teammatecard teammatecard--group"
+            >
+              {c.tonight && <span className="teammatecard__badge">Starting tonight</span>}
+              <div className="teammatecard__group">
+                <TeammateHalf id={c.anchor.id} name={c.anchor.name} />
+                {c.mates.slice(0, GROUP_MATES_SHOWN).map((m) => (
+                  <TeammateHalf key={m.id} id={m.id} name={m.name} />
                 ))}
+                {c.mates.length > GROUP_MATES_SHOWN && (
+                  <span className="teammatecard__groupmore">
+                    +{c.mates.length - GROUP_MATES_SHOWN}
+                  </span>
+                )}
               </div>
-              <span className="teammatecard__years">{clubsYears(p.clubs)}</span>
-            </div>
-            <TeammateHalf id={p.b.id} name={p.b.name} />
-          </li>
-        ))}
+              <div className="teammatecard__mid">
+                <TeamLogo teamId={c.club.teamId} name={c.club.teamName} size={32} />
+                <span className="teammatecard__years">{seasonRange(c.seasons)}</span>
+              </div>
+              <span className="teammatecard__caption">
+                {connectionCaption(c.club.level, c.club.teamName, c.seasons)}
+              </span>
+            </li>
+          ) : (
+            <li key={`${c.a.id}-${c.b.id}`} className="teammatecard">
+              {c.tonight && <span className="teammatecard__badge">Starting tonight</span>}
+              <TeammateHalf id={c.a.id} name={c.a.name} />
+              <div className="teammatecard__mid">
+                <div className="teammatecard__logos">
+                  {c.clubs.slice(0, 2).map((club) => (
+                    <TeamLogo key={club.teamId} teamId={club.teamId} name={club.teamName} size={28} />
+                  ))}
+                </div>
+                <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
+              </div>
+              <TeammateHalf id={c.b.id} name={c.b.name} />
+              <span className="teammatecard__caption">
+                {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
+              </span>
+            </li>
+          ),
+        )}
       </ul>
       {hidden > 0 && (
         <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>

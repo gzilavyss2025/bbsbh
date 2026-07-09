@@ -25,8 +25,20 @@
 //   - A veteran's brief rehab stint would false-match him to a level's prospects,
 //     so a POST-DEBUT minor-league season below REHAB_CAP is dropped (the same
 //     absolute cap person.js uses to tell a demotion from rehab noise).
+//
+// Each row also carries a `score` — how INTERESTING the connection is, not just
+// whether one exists. A well-traveled veteran can share a (team, season) with
+// dozens of tonight's players; without a score every one of those is an equally
+// weighted card, and the fun ones (an MLB reunion, two current stars) drown in
+// a pile of ships-in-the-night MiLB cameos. Scored on the single BEST shared
+// stint (level × recency × games-overlap confidence), with a heavily discounted
+// bonus for corroborating stints and a bonus for each player's own peak
+// single-season WAR (recognizability, not the shared season's WAR — the point
+// is "these two players", not "this stint was good"). See stintScore/starBonus
+// below; src/api/formerTeammates.js reads `score` to rank and to gate the
+// hub-and-spokes grouping (groupTeammateCards).
 // Run by hand: node scripts/gen-former-teammates.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -157,11 +169,13 @@ async function fetchYearByYear(personId, group, sportId) {
 }
 
 // A player's career reduced to a Set of "teamId|season" strings, plus a
-// club-label lookup (teamId -> { name, level }) for the shared-team caption.
-// Union of hitting + pitching, MLB + AAA/AA/A+/A. The synthetic team-less
-// aggregate split a mid-season trade produces has no team.id and is skipped, so
-// BOTH real clubs of a trade are kept. Post-debut minor-league seasons below
-// REHAB_CAP are dropped (rehab/shuttle noise).
+// club-label lookup (teamId -> { name, level }) for the shared-team caption
+// and a games-played lookup ("teamId|season" -> gamesPlayed) for the
+// overlap-confidence term in stintScore (see below). Union of hitting +
+// pitching, MLB + AAA/AA/A+/A. The synthetic team-less aggregate split a
+// mid-season trade produces has no team.id and is skipped, so BOTH real clubs
+// of a trade are kept. Post-debut minor-league seasons below REHAB_CAP are
+// dropped (rehab/shuttle noise).
 async function buildPairSet(personId) {
   const debutYear = await fetchDebutYear(personId)
   const groups = ['hitting', 'pitching']
@@ -176,6 +190,7 @@ async function buildPairSet(personId) {
 
   const pairs = new Set()
   const clubs = new Map() // teamId -> { name, level }
+  const games = new Map() // "teamId|season" -> gamesPlayed (max across hit/pitch groups)
   results.forEach((res, i) => {
     if (res.status !== 'fulfilled') return
     const { group, sportId } = requests[i]
@@ -187,7 +202,10 @@ async function buildPairSet(personId) {
       if (sportId !== 1 && debutYear && season > debutYear && !meetsStintCap(s.stat, group)) {
         continue
       }
-      pairs.add(`${teamId}|${season}`)
+      const key = `${teamId}|${season}`
+      pairs.add(key)
+      const gp = num(s.stat?.gamesPlayed)
+      if (!games.has(key) || gp > games.get(key)) games.set(key, gp)
       if (!clubs.has(teamId)) {
         clubs.set(teamId, {
           name: s.team?.name ?? '',
@@ -196,13 +214,88 @@ async function buildPairSet(personId) {
       }
     }
   })
-  return { pairs, clubs }
+  return { pairs, clubs, games }
 }
+
+// --- peak WAR (star power) -----------------------------------------------------
+// Each player's best single MLB season WAR, read straight from the two static
+// files the war.js build-time pipeline already produces (public/data/war.json
+// for the live season, war-history.json for completed ones back to 2010) — no
+// extra fetch, since both are already committed by the time this runs. Peak,
+// not career total or shared-season WAR: the point is "how recognizable is
+// this player", which a peak captures better than a stint's own (often zero,
+// if they crossed paths in the low minors) WAR. MiLB-only careers get 0 — no
+// signal, not a penalty (see starBonus, which only adds).
+async function loadPeakWar() {
+  const peak = new Map()
+  const bump = (id, val) => {
+    const n = Number(val)
+    if (!Number.isFinite(n)) return
+    const cur = peak.get(id)
+    if (cur === undefined || n > cur) peak.set(id, n)
+  }
+  try {
+    const w = JSON.parse(await readFile(join(here, '..', 'public', 'data', 'war.json'), 'utf8'))
+    for (const [id, val] of Object.entries(w.bat ?? {})) bump(id, val)
+    for (const [id, val] of Object.entries(w.pit ?? {})) bump(id, val)
+  } catch {
+    /* war.json not built yet — peak WAR degrades to 0, starBonus just adds nothing */
+  }
+  try {
+    const wh = JSON.parse(
+      await readFile(join(here, '..', 'public', 'data', 'war-history.json'), 'utf8'),
+    )
+    for (const season of wh.seasons ?? []) {
+      for (const [id, val] of Object.entries(wh.bat?.[season] ?? {})) bump(id, val)
+      for (const [id, val] of Object.entries(wh.pit?.[season] ?? {})) bump(id, val)
+    }
+  } catch {
+    /* ditto */
+  }
+  return peak
+}
+
+// --- connection scoring ---------------------------------------------------------
+// How interesting is ONE shared (team, season) stint. Level is the dominant
+// term (an MLB shared season should outrank any pile of shared minor-league
+// stints) — recency and games-overlap are multiplicative tie-breakers, not
+// separate additive credit, so a 15-year-old MLB stint can still edge out a
+// last-year A-ball cameo. `overlap` is the cheap hedge against a July call-up
+// meeting an August trade: with only "same team same season" to go on, the
+// smaller of the two games-played counts for that stint is a fair proxy for
+// whether they were actually around at the same time.
+const LEVEL_WEIGHT = { MLB: 100, AAA: 40, AA: 25, 'A+': 15, A: 8 }
+function stintScore(level, season, gamesA, gamesB, currentYear) {
+  const weight = LEVEL_WEIGHT[level] ?? 0
+  const yearsAgo = Math.max(0, currentYear - season)
+  const recency = 0.4 + 0.6 * 0.9 ** yearsAgo
+  const seasonLength = level === 'MLB' ? 162 : 130
+  const overlap = Math.min(1, Math.max(0.2, Math.min(gamesA, gamesB) / seasonLength))
+  return weight * recency * overlap
+}
+
+// Star power lifts a pair even when the shared stint itself was quiet (two
+// future regulars crossing paths in A-ball) — sqrt dampens so one MVP-caliber
+// peak doesn't swamp the level term, and the 10-WAR clamp keeps an outlier
+// season from distorting the curve further.
+function starBonus(peakA, peakB) {
+  const term = (w) => 7 * Math.sqrt(Math.max(0, Math.min(10, w)))
+  return term(peakA) + term(peakB)
+}
+
+// The "he used to be one of ours" bonus: their most recent/best shared stint
+// was on one of TONIGHT's two clubs, within the last two seasons — a real
+// reunion, not just any old shared history.
+const REUNION_BONUS = 40
 
 // --- connections --------------------------------------------------------------
 // Every (away player, home player) pair whose careers share ≥1 (team, season),
-// with the shared clubs collapsed to { teamId, teamName, level, seasons[] }.
-function connectionsFor(awayIds, homeIds, careers, names) {
+// with the shared clubs collapsed to { teamId, teamName, level, seasons[] } for
+// display, plus a `score` (see stintScore/starBonus/REUNION_BONUS above) —
+// computed per RAW (team, season) stint, not the display-collapsed club, since
+// two stints on the same club in different years shouldn't average together.
+function connectionsFor(awayIds, homeIds, careers, names, peakWar, awayId, homeId) {
+  const currentYear = new Date().getUTCFullYear()
   const rows = []
   for (const aId of awayIds) {
     const a = careers.get(aId)
@@ -210,21 +303,40 @@ function connectionsFor(awayIds, homeIds, careers, names) {
     for (const hId of homeIds) {
       const h = careers.get(hId)
       if (!h || h.pairs.size === 0) continue
-      const shared = new Map() // teamId -> { teamName, level, seasons:Set }
+      const shared = new Map() // teamId -> { teamName, level, seasons:Set } (display)
+      const stints = [] // { teamId, season, level, score } (scoring)
       for (const key of a.pairs) {
         if (!h.pairs.has(key)) continue
         const [teamIdStr, seasonStr] = key.split('|')
         const teamId = Number(teamIdStr)
+        const season = Number(seasonStr)
         const club = a.clubs.get(teamId) ?? h.clubs.get(teamId) ?? { name: '', level: '' }
         if (!shared.has(teamId)) {
           shared.set(teamId, { teamName: club.name, level: club.level, seasons: new Set() })
         }
-        shared.get(teamId).seasons.add(Number(seasonStr))
+        shared.get(teamId).seasons.add(season)
+        stints.push({
+          teamId,
+          season,
+          score: stintScore(club.level, season, a.games.get(key) ?? 0, h.games.get(key) ?? 0, currentYear),
+        })
       }
       if (shared.size === 0) continue
+
+      stints.sort((x, y) => y.score - x.score)
+      const best = stints[0]
+      const corroboration = stints.slice(1).reduce((sum, s) => sum + s.score, 0)
+      const star = starBonus(peakWar.get(String(aId)) ?? 0, peakWar.get(String(hId)) ?? 0)
+      const reunion =
+        best.season >= currentYear - 1 && (best.teamId === awayId || best.teamId === homeId)
+          ? REUNION_BONUS
+          : 0
+      const score = Math.round((best.score + 0.25 * corroboration + star + reunion) * 10) / 10
+
       rows.push({
         a: { id: aId, name: names.get(aId) ?? '' },
         b: { id: hId, name: names.get(hId) ?? '' },
+        score,
         shared: [...shared.entries()]
           .map(([teamId, v]) => ({
             teamId,
@@ -241,7 +353,7 @@ function connectionsFor(awayIds, homeIds, careers, names) {
       })
     }
   }
-  return rows
+  return rows.sort((x, y) => y.score - x.score)
 }
 
 const LEVEL_ORDER = { MLB: 5, AAA: 4, AA: 3, 'A+': 2, A: 1 }
@@ -286,6 +398,7 @@ allPlayerIds.forEach((id, i) => {
 })
 
 const names = await fetchNames(allPlayerIds)
+const peakWar = await loadPeakWar()
 
 const matchups = {}
 for (const { awayId, homeId } of pairs) {
@@ -294,6 +407,9 @@ for (const { awayId, homeId } of pairs) {
     rosterByTeam.get(homeId) ?? [],
     careers,
     names,
+    peakWar,
+    awayId,
+    homeId,
   )
   if (rows.length === 0) continue
   // Sorted "low-high" key so either lineup page finds the same entry; teamA/teamB
