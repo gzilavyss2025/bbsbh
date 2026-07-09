@@ -193,96 +193,133 @@ export function InningViewer({
       {/* The half-inning heading + Back/Next: full-width above both columns on
           the wide layout, and above the running line on a phone (moved up out of
           the reading pane so it stays put as the feed scrolls). */}
-      <nav className="inningnav" aria-label="Half-inning navigator">
-        <button
-          onClick={() => goTo(Math.max(0, curIdx - 1))}
-          disabled={curIdx === 0}
-          aria-label="Previous half-inning"
-        >
-          ‹ Back
-        </button>
-        <span className="inningnav__label">
-          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
-        </span>
-        <button
-          onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
-          disabled={curIdx === maxIdx}
-          aria-label="Next half-inning"
-        >
-          Next ›
-        </button>
-      </nav>
+      {/* Header: the half navigator, with the R/H/E + pitch-stat box pinned
+          top-right from the wide breakpoint up (hidden on a phone, where the
+          box rides inline in the half — see StatBox / HalfInning). */}
+      <div className="innings__head">
+        <nav className="inningnav" aria-label="Half-inning navigator">
+          <button
+            onClick={() => goTo(Math.max(0, curIdx - 1))}
+            disabled={curIdx === 0}
+            aria-label="Previous half-inning"
+          >
+            ‹ Back
+          </button>
+          <span className="inningnav__label">
+            {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
+          </span>
+          <button
+            onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+            disabled={curIdx === maxIdx}
+            aria-label="Next half-inning"
+          >
+            Next ›
+          </button>
+        </nav>
+        <StatBox
+          className="innings__statbox--desk"
+          placeholder
+          feed={feed}
+          inning={effInning}
+          half={effHalf}
+          battingSide={effHalf === 'top' ? 'away' : 'home'}
+          getDerived={getDerived}
+          revealed={curIdx <= revealedThrough}
+        />
+      </div>
 
+      {/* On a phone this is an inert block and everything stacks in source order
+          (running line, win-prob, the half inline, then the reference band's
+          Pitchers, then rosters). From the wide breakpoint up it becomes a flex
+          column that re-orders: the running line + win-prob span full width, the
+          reference band (pitchers + defense | lineups) rises above the reading
+          pane, and the play-by-play pairs each card with its strike zone. */}
       <div className="innings__grid">
-        <div className="innings__main">
-          <RollingLine
+        <RollingLine
+          feed={feed}
+          regulation={regulation}
+          unlocked={unlocked}
+          revealedThrough={revealedThrough}
+          awayAbbr={meta.away.abbreviation}
+          homeAbbr={meta.home.abbreviation}
+          awayName={meta.away.clubName}
+          homeName={meta.home.clubName}
+          curIdx={curIdx}
+          onSelect={goTo}
+        />
+
+        <WinProbChart
+          points={winProbPoints}
+          awayAbbr={meta.away.abbreviation}
+          homeAbbr={meta.home.abbreviation}
+          partial
+        />
+
+        {/* Source order is the phone stack: the half sits here (pitchers &
+            reference below it, rosters last). On the wide layout `order` lifts
+            the reference band above the reading pane (see .innings__grid). key
+            on inning+half → fresh mount; a box at/under the reveal mark stays
+            open. */}
+        <div className="inning" key={`${effInning}-${effHalf}`} ref={resultsRef} tabIndex={-1}>
+          <HalfInning
             feed={feed}
-            regulation={regulation}
-            unlocked={unlocked}
-            revealedThrough={revealedThrough}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            curIdx={curIdx}
-            onSelect={goTo}
+            inning={effInning}
+            half={effHalf}
+            battingSide={effHalf === 'top' ? 'away' : 'home'}
+            label={effHalf === 'top' ? 'Top' : 'Bottom'}
+            battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
+            pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
+            awayName={meta.away.clubName}
+            homeName={meta.home.clubName}
+            revealed={curIdx <= revealedThrough}
+            isNextToReveal={curIdx === revealedThrough + 1}
+            getDerived={getDerived}
+            onReveal={revealTo}
+            prospectsData={prospectsData}
           />
-
-          <WinProbChart
-            points={winProbPoints}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            partial
-          />
-
-          {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
-          <div className="inning" key={`${effInning}-${effHalf}`} ref={resultsRef} tabIndex={-1}>
-            <HalfInning
-              feed={feed}
-              inning={effInning}
-              half={effHalf}
-              battingSide={effHalf === 'top' ? 'away' : 'home'}
-              label={effHalf === 'top' ? 'Top' : 'Bottom'}
-              battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
-              pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
-              awayName={meta.away.clubName}
-              homeName={meta.home.clubName}
-              revealed={curIdx <= revealedThrough}
-              isNextToReveal={curIdx === revealedThrough + 1}
-              getDerived={getDerived}
-              onReveal={revealTo}
-              prospectsData={prospectsData}
-            />
-          </div>
         </div>
 
-        <aside className="innings__side">
-          <PitchersSection
-            teams={[
-              { name: rosters.away.name, rows: pitcherLines.away },
-              { name: rosters.home.name, rows: pitcherLines.home },
-            ]}
-          />
-
-          {/* Lineups & Defense reference — its own right-column card on the wide
-              layout (below Pitchers, above the rosters). On a phone this is
-              hidden (.innings__reference) and the same reference renders inline
-              in the half-inning, staged around the seal (see HalfInning). Gated
-              to a half the user has reached — revealed, or the immediate
-              next-to-reveal — the same spoiler gate as the inline copy. */}
+        {/* Reference band. On the wide layout: pitchers + the fielding defense
+            on the left, both lineups on the right. On a phone only Pitchers
+            shows here — the lineups & defense render inline in the half instead
+            (the -lineups / -defense blocks are hidden <740; the inline copies,
+            .half__entering, are hidden ≥740). Gated to a reached half. */}
+        <div className="innings__ref">
+          <div className="innings__ref-left">
+            <PitchersSection
+              teams={[
+                { name: rosters.away.name, rows: pitcherLines.away },
+                { name: rosters.home.name, rows: pitcherLines.home },
+              ]}
+            />
+            {curIdx <= revealedThrough + 1 && (
+              <div className="innings__ref-defense">
+                <DefenseSection
+                  feed={feed}
+                  inning={effInning}
+                  half={effHalf}
+                  fieldingSide={effHalf === 'top' ? 'home' : 'away'}
+                  fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
+                />
+              </div>
+            )}
+          </div>
           {curIdx <= revealedThrough + 1 && (
-            <section className="innings__reference">
-              <h3 className="innings__reference-title">Lineups &amp; Defense</h3>
-              <EnteringReference
+            <div className="innings__ref-lineups">
+              <h3 className="innings__reference-title">Lineups</h3>
+              <LineupSection
                 feed={feed}
                 inning={effInning}
                 half={effHalf}
-                battingSide={effHalf === 'top' ? 'away' : 'home'}
                 awayName={meta.away.clubName}
                 homeName={meta.home.clubName}
                 prospectsData={prospectsData}
               />
-            </section>
+            </div>
           )}
+        </div>
 
+        <div className="innings__rosters">
           <RosterPanel
             title={rosters.away.name}
             roster={rosters.away}
@@ -295,7 +332,7 @@ export function InningViewer({
             revealedThrough={revealedThrough}
             prospectsData={prospectsData}
           />
-        </aside>
+        </div>
       </div>
 
       {/* Floating bar — the same fixed blue bar the lineup pages page forward
@@ -340,6 +377,58 @@ export function InningViewer({
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+// The R/H/E/LOB + pitch-stat summary for the current half, its own coverless
+// seal driven by the same reveal flag as the rest of the half (nothing computed
+// until revealed — the spoiler guard is unchanged). Rendered twice: a mobile
+// copy inline in the half flow (hidden ≥740) and a desktop copy pinned top-right
+// in the innings header (hidden <740). Both read identical reveal-only values;
+// duplicating is harmless (idempotent) and lets each live in its own layout
+// region without splitting the seal across the DOM tree.
+function StatBox({ feed, inning, half, battingSide, getDerived, revealed, className = '', placeholder = false }) {
+  if (!revealed && placeholder) {
+    return (
+      <div className={`statbox statbox--sealed ${className}`} aria-hidden="true">
+        <span className="statbox__hint">Totals seal until you reveal this half</span>
+      </div>
+    )
+  }
+  return (
+    <div className={`statbox ${className}`} key={`${inning}-${half}`}>
+      <SealBox forceRevealed={revealed} coverless>
+        {() => {
+          // R/H/LOB are the batting side's; E is a *fielding* stat, so it
+          // belongs to the side in the field this half (ADR-0006). Same read as
+          // the pre-split seal.
+          const line = revealInning(feed, inning, battingSide)
+          const fieldLine = revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')
+          const d = revealDerived(getDerived(), inning, half)
+          const rolling = rollingPitches(getDerived(), inning, half)
+          return (
+            <>
+              <div className="rhe">
+                <Stat k="R" v={line?.runs ?? 0} tone="run" big />
+                <Stat k="H" v={line?.hits ?? 0} big />
+                <Stat k="E" v={fieldLine?.errors ?? 0} big />
+                <Stat k="LOB" v={line?.leftOnBase ?? 0} big />
+              </div>
+              <div className="pitchgrid">
+                <Stat k="Pitches" v={d.pitches} />
+                <Stat k="Total pitches" v={rolling} unit="rolling" />
+                <Stat k="Whiffs" v={d.whiffs} />
+                <Stat
+                  k="1st-pitch strikes"
+                  v={`${d.firstPitchStrikes}/${d.plateAppearances}`}
+                  small
+                />
+              </div>
+            </>
+          )
+        }}
+      </SealBox>
     </div>
   )
 }
@@ -409,40 +498,30 @@ function HalfInning({
         </>
       )}
 
+      {/* The stat box inline for phones (hidden ≥740, where the header copy
+          takes over). Sits above the play-by-play, so the mobile reveal order
+          is unchanged: R/H/E → pitch stats → play-by-play. */}
+      <StatBox
+        className="half__statbox"
+        feed={feed}
+        inning={inning}
+        half={half}
+        battingSide={battingSide}
+        getDerived={getDerived}
+        revealed={revealed}
+      />
+
       <SealBox
         forceRevealed={revealed}
         onReveal={() => onReveal(inning, half)}
         coverless
       >
         {() => {
-          // Computed only on reveal. R/H/LOB are the batting side's; E is a
-          // *fielding* stat, so it belongs to the side in the field this half
-          // (the opposite side). The MLB linescore stores a team's per-inning
-          // `errors` under that team's node but for the half it fields — reading
-          // E off the batting side would both be wrong AND leak the other half's
-          // errors (a still-sealed half) into this box.
-          const line = revealInning(feed, inning, battingSide)
-          const fieldLine = revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')
+          // Computed only on reveal (the play-by-play + Statcast half of the
+          // former single seal; the R/H/E summary is StatBox above).
           const d = revealDerived(getDerived(), inning, half)
-          const rolling = rollingPitches(getDerived(), inning, half)
           return (
             <>
-              <div className="rhe">
-                <Stat k="R" v={line?.runs ?? 0} tone="run" big />
-                <Stat k="H" v={line?.hits ?? 0} big />
-                <Stat k="E" v={fieldLine?.errors ?? 0} big />
-                <Stat k="LOB" v={line?.leftOnBase ?? 0} big />
-              </div>
-              <div className="pitchgrid">
-                <Stat k="Pitches" v={d.pitches} />
-                <Stat k="Total pitches" v={rolling} unit="rolling" />
-                <Stat k="Whiffs" v={d.whiffs} />
-                <Stat
-                  k="1st-pitch strikes"
-                  v={`${d.firstPitchStrikes}/${d.plateAppearances}`}
-                  small
-                />
-              </div>
               <PlayByPlay
                 feed={feed}
                 inning={inning}
@@ -516,6 +595,8 @@ function RollingLine({
   revealedThrough,
   awayAbbr,
   homeAbbr,
+  awayName,
+  homeName,
   curIdx,
   onSelect,
 }) {
@@ -526,9 +607,11 @@ function RollingLine({
   const lineFor = (n, half, side) =>
     halfIndex(n, half) <= revealedThrough ? revealInning(feed, n, side) : null
 
+  // Team label: the mascot/club name ("BREWERS", "WHITE SOX"), falling back to
+  // the abbreviation for a thin MiLB feed that never posted a clubName.
   const rows = [
-    { abbr: awayAbbr || 'AWY', half: 'top', side: 'away' },
-    { abbr: homeAbbr || 'HOM', half: 'bottom', side: 'home' },
+    { abbr: (awayName || awayAbbr || 'AWY').toUpperCase(), half: 'top', side: 'away' },
+    { abbr: (homeName || homeAbbr || 'HOM').toUpperCase(), half: 'bottom', side: 'home' },
   ]
 
   // Totals span every revealed inning (1..unlocked), not just the visible window.

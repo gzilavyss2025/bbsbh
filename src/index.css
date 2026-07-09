@@ -2400,6 +2400,37 @@ body {
   display: none;
 }
 
+/* Wide-layout-only pieces, hidden on a phone (the phone shows the stat box
+   inline in the half, and the lineups/defense inline via .half__entering). */
+.innings__statbox--desk,
+.innings__ref-defense,
+.innings__ref-lineups {
+  display: none;
+}
+
+/* The sealed placeholder shown in the desktop stat-box slot before the current
+   half is revealed, so the top-right corner isn't just empty. */
+.statbox--sealed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  padding: 14px;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.statbox__hint {
+  max-width: 20ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  text-align: center;
+}
+
 .lineupcard {
   margin-top: 12px;
   padding-top: 12px;
@@ -5034,53 +5065,76 @@ body {
     min-width: 0;
   }
 
-  /* ---- innings: the half-inning reading pane on the left; the pitchers
-     table and roster reference ride a sticky column on the right, so the
-     running lines stay in view while a long feed scrolls. The floating
-     duplicate Refresh button is a phone-only convenience — at this width the
-     top toolbar is reachable enough that it'd just be visual clutter. */
+  /* ---- innings, wide layout. The floating duplicate Refresh button is a
+     phone-only convenience — at this width the top toolbar is reachable. */
   .refreshbtn--float {
     display: none;
   }
 
-  /* The half-inning heading + Back/Next spans both columns above the grid. */
-  .inningnav {
+  /* Header row: the half navigator on the left, the R/H/E + pitch-stat box
+     pinned top-right. The nav keeps its own width; the stat box takes what it
+     needs on the right. */
+  .innings__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
     margin-bottom: var(--space-3);
   }
+  .innings__head .inningnav {
+    flex: 1 1 auto;
+    margin: 4px 0 0;
+  }
+  .innings__statbox--desk {
+    display: block;
+    flex: 0 0 auto;
+    width: clamp(300px, 40%, 360px);
+  }
 
+  /* The grid is a re-ordering flex column: running line, win-prob, the
+     reference band (pitchers + defense | lineups), then the reading pane, then
+     rosters. Source order matches the phone stack; `order` lifts the reference
+     band above the play-by-play here. */
   .innings__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .innings__grid > .rolling { order: 1; }
+  .innings__grid > .winprob { order: 2; }
+  .innings__grid > .innings__ref { order: 3; }
+  .innings__grid > .inning { order: 4; }
+  .innings__grid > .innings__rosters { order: 5; }
+
+  /* Reference band: pitchers + fielding defense on the left, both lineups on
+     the right. The inline entering copy staged around the seal is hidden here
+     (see InningViewer / ADR-0010); the -defense / -lineups blocks — hidden on a
+     phone — carry it instead. */
+  .half__entering {
+    display: none;
+  }
+  /* The inline stat box is the phone presentation; the header copy takes over. */
+  .half__statbox {
+    display: none;
+  }
+  .innings__ref {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0 var(--space-6);
     align-items: start;
   }
-
-  .innings__side {
-    position: sticky;
-    top: var(--space-3);
-  }
-
-  .innings__side > :first-child {
-    margin-top: 0;
-  }
-
-  /* Lineups & Defense move out of the reading pane into their own right-column
-     card (below Pitchers, above the rosters); the inline copy staged around the
-     seal is hidden here (see InningViewer / ADR-0010). */
-  .half__entering {
-    display: none;
-  }
-
-  .innings__reference {
+  .innings__ref-defense {
     display: block;
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
+  }
+  .innings__ref-lineups {
+    display: block;
     border: var(--bw-hair) solid var(--border-rule);
     border-radius: var(--radius-md);
     background: var(--surface-card);
     box-shadow: var(--shadow-card);
     padding: 12px 14px;
   }
-
   .innings__reference-title {
     margin: 0;
     font-family: var(--font-display);
@@ -5090,13 +5144,62 @@ body {
     letter-spacing: var(--ls-label);
     color: var(--text-heading);
   }
-
-  /* The lineup card leads the reference body; drop its own dashed divider so it
-     sits flush under the card title (the defense block keeps its divider). */
-  .innings__reference .lineupcard {
+  .innings__ref-lineups .lineupcard {
     margin-top: 8px;
     padding-top: 0;
     border-top: none;
+  }
+
+  /* Rosters sit two-up beneath the reading pane. */
+  .innings__rosters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    align-items: start;
+  }
+
+  /* Play-by-play pairs each card with its strike zone: the card on the left,
+     the zone + pitch list on the right, one grid row per at-bat. The phone
+     icon button is redundant here, so it's hidden. */
+  .pbp__atbat {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 var(--space-4);
+    align-items: stretch;
+  }
+  .pbp__zonebtn {
+    display: none;
+  }
+  .pbp__zonecell {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    border: var(--bw-hair) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+    padding: 8px 10px;
+  }
+  .pbp__zonemeta {
+    flex: 1;
+    min-width: 0;
+  }
+  .pbp__zonename {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--w-bold);
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--text-heading);
+  }
+  .pbp__zonevs {
+    font-family: var(--font-read);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 2px 0 6px;
+  }
+  .strikezone--inline {
+    width: 142px;
+    flex: 0 0 auto;
   }
 
   /* ---- box score: totals beside the decisions, line score beside the three
