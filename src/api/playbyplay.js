@@ -191,8 +191,15 @@ function scorebookCode(play, batterRunner) {
     const errPos = (batterRunner?.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
     return { code: `E${errPos?.position.code ?? ''}`, codeKind: 'error' }
   }
-  if (/strikes? out swinging/i.test(desc)) return { code: 'K', codeKind: 'out' }
-  if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
+  // Every strikeout is a K — swinging, on a foul tip, on a foul bunt, a checked
+  // swing — keyed off the eventType, not one description phrasing (a foul-tip K
+  // reads "strikes out on a foul tip", not "…swinging", and used to fall through
+  // to the catcher's putout "2"). The customary backwards "looking" K is drawn
+  // only for a called third strike.
+  if (et === 'strikeout' || et === 'strikeout_double_play') {
+    if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
+    return { code: 'K', codeKind: 'out' }
+  }
   if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
