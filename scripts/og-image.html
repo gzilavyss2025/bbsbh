@@ -63,6 +63,14 @@
     text-transform: uppercase; font-size: 30px; padding: 16px 92px;
     box-shadow: 0 12px 30px rgba(0,0,0,.2);
   }
+  /* call-to-action pill — the image needs its own "click here" cue, since
+     scrapers/platforms judge the image in isolation from the page text. */
+  .cta {
+    display: inline-flex; align-items: center; gap: 14px; align-self: flex-start;
+    background: var(--navy); color: var(--cream); border-radius: 999px;
+    padding: 16px 34px; font-size: 30px; font-weight: 800; letter-spacing: .01em;
+  }
+  .cta .arrow { color: var(--seal); font-weight: 800; }
 </style>
 </head>
 <body>
@@ -83,6 +91,7 @@
       <span class="kick">Baseball Scorebook Helper</span>
       <span class="word">Scorebook</span>
       <span class="sub">Score the game by hand. Every number stays sealed until you tap.</span>
+      <span class="cta">Score along free <span class="arrow">&rarr;</span></span>
     </span>
   </div>
 </body>

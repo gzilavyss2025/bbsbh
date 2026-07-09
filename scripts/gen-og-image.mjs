@@ -28,14 +28,28 @@ const H = 630
 
 const browser = await chromium.launch()
 try {
-  // deviceScaleFactor: 2 → shoot at 2400×1200 for crisp text, but the file
-  // declares 1200×630 so scrapers read the intended OG dimensions.
+  // Shoot at deviceScaleFactor 2 (2400×1260) for crisp text, then downsample
+  // to the declared 1200×630 in a second pass — most platforms (and
+  // opengraph.xyz) expect the og:image file itself to BE 1200×630, not just
+  // claim to be via og:image:width/height while actually shipping 2400×1260.
   const page = await browser.newPage({
     viewport: { width: W, height: H },
     deviceScaleFactor: 2,
   })
   await page.goto(pathToFileURL(src).href, { waitUntil: 'networkidle' })
-  await page.screenshot({ path: out, clip: { x: 0, y: 0, width: W, height: H } })
+  const hiRes = await page.screenshot({ clip: { x: 0, y: 0, width: W, height: H } })
+  await page.close()
+
+  const resizePage = await browser.newPage({
+    viewport: { width: W, height: H },
+    deviceScaleFactor: 1,
+  })
+  const b64 = hiRes.toString('base64')
+  await resizePage.setContent(
+    `<style>*{margin:0}img{display:block;width:${W}px;height:${H}px}</style>` +
+      `<img src="data:image/png;base64,${b64}">`,
+  )
+  await resizePage.screenshot({ path: out })
   console.log('wrote', out)
 } finally {
   await browser.close()
