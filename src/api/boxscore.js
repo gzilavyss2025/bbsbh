@@ -465,6 +465,53 @@ export function selectBoxscore(feed) {
   }
 }
 
+// PLAY OF THE GAME — the single most memorable play, distinct from the three
+// stars below (which rank PLAYERS by cumulative WPA over the whole game; this
+// ranks one PLAY). Reveal-only, same rule as computeThreeStars: WPA
+// and captivatingIndex both come from the /winProbability endpoint, so only
+// ever call this inside the SealBox's reveal render.
+//
+// MLB's own (undocumented) `about.captivatingIndex` already tracks how
+// memorable a play reads to a human — unlike raw WPA, it isn't blind to plays
+// like a bases-loaded slam that don't swing the game's win probability much
+// because the team was already heavily favored. Prefer it, tie-broken by
+// |WPA|; when it's absent or zero for every play (most MiLB parks, and
+// apparently some MLB games), fall back to the play with the single biggest
+// |WPA| swing.
+export function computePlayOfTheGame(winProb) {
+  if (!Array.isArray(winProb) || winProb.length === 0) return null
+  const withCaptivating = winProb.filter(
+    (e) => typeof e.about?.captivatingIndex === 'number' && e.about.captivatingIndex > 0,
+  )
+  const pool = withCaptivating.length > 0 ? withCaptivating : winProb
+  const rank = (e) => {
+    const h = typeof e.homeTeamWinProbabilityAdded === 'number' ? e.homeTeamWinProbabilityAdded : 0
+    return {
+      captivating: e.about?.captivatingIndex ?? 0,
+      absWpa: Math.abs(h),
+    }
+  }
+  let best = null
+  let bestRank = null
+  for (const e of pool) {
+    const r = rank(e)
+    if (
+      !bestRank ||
+      r.captivating > bestRank.captivating ||
+      (r.captivating === bestRank.captivating && r.absWpa > bestRank.absWpa)
+    ) {
+      best = e
+      bestRank = r
+    }
+  }
+  if (!best) return null
+  return {
+    desc: best.result?.description ?? '',
+    inning: best.about?.inning ?? null,
+    half: best.about?.isTopInning ? 'top' : 'bottom',
+  }
+}
+
 // THREE STARS — the game's three most valuable players by win-probability added,
 // the hockey-style nod under the pitchers of record. Reveal-only, SAME rule as
 // selectBoxscore: only ever call this inside the SealBox's reveal render. WPA is

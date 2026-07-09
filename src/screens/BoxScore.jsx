@@ -1,4 +1,4 @@
-import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
+import { selectBoxscore, computeThreeStars, computePlayOfTheGame } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
@@ -82,12 +82,14 @@ export function BoxScore({
           // path never reach the DOM before the tap — same gate as the box
           // score itself.
           const stars = computeThreeStars(winProbability, feed)
+          const potg = computePlayOfTheGame(winProbability)
           const winProbPoints = selectWinProbPath(winProbability)
           return (
             <BoxScoreBody
               feed={feed}
               box={box}
               stars={stars}
+              potg={potg}
               winProbPoints={winProbPoints}
               managers={managers}
               uniforms={uniforms}
@@ -110,7 +112,7 @@ export function BoxScore({
 // own header card — the visiting team's crew and first pitch above its
 // batting/pitching, the home team's ballpark/weather/times above its own. The
 // complete MLB-style game-info text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, winProbPoints, managers, uniforms, scorebookWeather }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -160,6 +162,7 @@ function BoxScoreBody({ feed, box, stars, winProbPoints, managers, uniforms, sco
           <Decisions decisions={box.decisions} />
         </div>
         <div className="bs__col">
+          <PlayOfTheGame play={potg} />
           <ThreeStars stars={stars} />
           <Scoreboard away={box.away} home={box.home} innings={box.innings} />
         </div>
@@ -504,6 +507,31 @@ function Decisions({ decisions }) {
           <span className="bs__decisionV">{p.v}</span>
         </span>
       ))}
+    </div>
+  )
+}
+
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
+}
+
+// The night's single most memorable moment (see computePlayOfTheGame) — the
+// play itself, not a player, so it sits above the three stars. Hidden entirely
+// when WPA isn't available (most MiLB parks).
+function PlayOfTheGame({ play }) {
+  if (!play || !play.desc) return null
+  const halfLabel = play.half === 'top' ? 'Top' : 'Bottom'
+  return (
+    <div className="bs__potg">
+      <h3 className="bs__potgTitle">Play of the game</h3>
+      <p className="bs__potgDesc">{play.desc}</p>
+      {play.inning != null && (
+        <span className="bs__potgWhen">
+          {halfLabel} {ordinal(play.inning)}
+        </span>
+      )}
     </div>
   )
 }
