@@ -173,13 +173,13 @@ export function useGameData(game) {
     [game.gamePk],
   )
 
-  // Former-teammate ties between the two clubs, for the FORMER TEAMMATES card on
-  // the lineup pages. The whole precomputed file is a single cached same-origin
-  // read (see formerTeammates.js), and it only carries MLB matchups, so this is
-  // gated to MLB games — a MiLB game just passes null and the card never shows.
+  // Former-teammate ties (or, when a matchup has none, the ORG TIES fallback —
+  // see orgTiesFor) between the two clubs, for the lineup pages' card. The
+  // whole precomputed file is a single cached same-origin read (see
+  // formerTeammates.js); it now covers MiLB matchups too, so this isn't gated
+  // to MLB games — a matchup outside the build's window just yields no card.
   const teammates = useAsync(() => loadFormerTeammates(), [])
-  const formerTeammatesData =
-    game.sportId === SPORT_IDS.MLB ? teammates.data ?? null : null
+  const formerTeammatesData = teammates.data ?? null
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 

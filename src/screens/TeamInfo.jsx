@@ -12,7 +12,7 @@ import { fetchTeamRoster } from '../api/team.js'
 import { teamTintColor } from '../lib/teams.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
-import { formerTeammatePairs, groupTeammateCards } from '../api/formerTeammates.js'
+import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
@@ -132,6 +132,12 @@ export function LineupSpread({
     () => formerTeammatePairs(formerTeammatesData, awayMeta.id, homeMeta.id),
     [formerTeammatesData, awayMeta.id, homeMeta.id],
   )
+  // The ORG TIES fallback — only ever populated when teammatePairs above came
+  // up empty for this matchup (see orgTiesFor / scripts/gen-former-teammates.mjs).
+  const orgTies = useMemo(
+    () => orgTiesFor(formerTeammatesData, awayMeta.id, homeMeta.id),
+    [formerTeammatesData, awayMeta.id, homeMeta.id],
+  )
   const startingIds = useMemo(() => startingIdsFor(feed), [feed])
 
   return (
@@ -173,6 +179,7 @@ export function LineupSpread({
         awayTeamId={awayMeta.id}
         homeTeamId={homeMeta.id}
       />
+      <OrgTies ties={orgTies} />
 
       <div className="pagenav">
         <button className="btn btn--next" onClick={onNext}>
@@ -335,6 +342,12 @@ function TeamSections({
     () => (showTeammates ? formerTeammatePairs(formerTeammatesData, meta.id, oppMeta.id) : []),
     [showTeammates, formerTeammatesData, meta.id, oppMeta.id],
   )
+  // See LineupSpread's orgTies — same fallback, only populated when
+  // teammatePairs comes up empty for this matchup.
+  const orgTies = useMemo(
+    () => (showTeammates ? orgTiesFor(formerTeammatesData, meta.id, oppMeta.id) : []),
+    [showTeammates, formerTeammatesData, meta.id, oppMeta.id],
+  )
   const startingIds = useMemo(() => (showTeammates ? startingIdsFor(feed) : null), [
     showTeammates,
     feed,
@@ -495,6 +508,7 @@ function TeamSections({
           homeTeamId={side === 'away' ? oppMeta.id : meta.id}
         />
       )}
+      {showTeammates && <OrgTies ties={orgTies} />}
     </>
   )
 }
@@ -666,6 +680,51 @@ function GroupCard({ card: c, startingLabel, sideTeamId }) {
         </button>
       )}
     </li>
+  )
+}
+
+// "Milwaukee Brewers system — Biloxi Shuckers, AA ’19" — the one-line story
+// under an org-tie card. Unlike connectionCaption (two players, one shared
+// club) this is one player and the OPPONENT's org, so it leads with the org
+// rather than a level label.
+function orgTieCaption(t) {
+  return `${t.orgName || 'Opponent'} system — ${t.teamName}, ${t.level} ${seasonRange(t.seasons)}`
+}
+
+// The ORG TIES fallback for a matchup with no literal former-teammate pairs
+// (see orgTiesFor) — "this player has a history in the org tonight's opponent
+// belongs to," even without ever sharing a roster with anyone playing
+// tonight. Reuses the group card's single-column-of-headshots + shared-club
+// layout (teammatecard--group) since it's the same shape (N headshots, one
+// club to point at) with N pinned at 1. Hidden when there are no ties — which
+// is the common case, since the generator only falls back to this when the
+// real Former Teammates card came up empty.
+function OrgTies({ ties }) {
+  if (!ties || ties.length === 0) return null
+  return (
+    <section className="teammates">
+      <h3 className="section__title">Org ties</h3>
+      <p className="hint">No shared roster tonight — but these players have history in the other side&rsquo;s organization.</p>
+      <ul className="teammates__grid">
+        {ties.map((t) => (
+          <li key={`${t.player.id}-${t.orgId}`} className="teammatecard teammatecard--group">
+            <div className="teammatecard__group">
+              <TeammateHalf
+                id={t.player.id}
+                name={t.player.name}
+                pos={t.player.pos}
+                tint={teamTintColor(t.rosterTeamId)}
+              />
+            </div>
+            <div className="teammatecard__mid">
+              <TeamLogo teamId={t.orgId} name={t.orgName} size={32} />
+              <span className="teammatecard__years">{seasonRange(t.seasons)}</span>
+            </div>
+            <span className="teammatecard__caption">{orgTieCaption(t)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
