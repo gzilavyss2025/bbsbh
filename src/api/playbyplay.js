@@ -238,13 +238,26 @@ function battingSlot(feed, side, id) {
 
 // How a runner (not the batter) was retired on the bases, for the notation by
 // the base where his path is capped: "CS 2-4" caught stealing, "PK 3-6" pickoff,
-// else the bare fielding chain that put him out (6-4, 4-6…).
+// "FC 4-6" forced/fielder's-choice (a runner erased on a force out, fielder's
+// choice, or the front end of a ground-ball double play — the batter put the ball
+// in play and the defense chose this runner), else the bare fielding chain (6-4,
+// 4-6…).
 //
 // The kind of out is read from the RUNNER's own event, not `play.result` — a
 // caught stealing / pickoff shows up as a runners[] entry INSIDE whatever
 // batter's plate appearance it happened during, so the play's own result is
 // that batter's (a strikeout, a groundout), not the baserunning out. (For a
 // rare top-level CS/PK play with no batter, fall back to the play result.)
+// Runner-event types where the batter put the ball in play and the defense
+// elected to retire this runner — a bare force out, a true fielder's choice, or
+// the lead runner erased on a ground-ball double play. All get the "FC" tag.
+const FORCED_OUT_EVENTS = new Set([
+  'force_out',
+  'fielders_choice',
+  'fielders_choice_out',
+  'grounded_into_double_play',
+])
+
 function runnerOutCode(play, runnerEntry) {
   const et = runnerEntry.details?.eventType ?? play.result?.eventType ?? ''
   const chain = (runnerEntry.credits ?? [])
@@ -254,6 +267,7 @@ function runnerOutCode(play, runnerEntry) {
   let tag = ''
   if (et.startsWith('caught_stealing')) tag = 'CS'
   else if (et.startsWith('pickoff')) tag = 'PK' // includes pickoff_caught_stealing
+  else if (FORCED_OUT_EVENTS.has(et)) tag = 'FC'
   if (tag) return chain ? `${tag} ${chain}` : tag
   return chain || 'OUT'
 }
