@@ -139,3 +139,64 @@ export function headshotUrl(personId, width = 213) {
   if (!personId) return null
   return `${HEADSHOT_BASE}/d_people:generic:headshot:silo:current.png/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
+
+// ---------------------------------------------------------------------------
+// Team colors
+//
+// One brand color per MLB club, hand-picked (not sourced from the API —
+// statsapi carries no color field) for whichever of a club's usual colors is
+// LEAST likely to be mistaken for another club's — favoring a distinctive
+// accent (gold, orange, teal…) over yet another navy whenever a club has one,
+// since roughly half the league's primary color is some shade of navy/blue.
+// Decorative only: used to tint a headshot's background so a mixed group of
+// players reads at a glance as "these are Team A, those are Team B" (see the
+// Former Teammates group card in TeamInfo.jsx) — a rough visual grouping, not
+// a guarantee every possible matchup gets two clearly distinct hues (a run of
+// same-division rivals can still share a color family). MLB clubs only — the
+// Former Teammates card never shows for a MiLB game, so MiLB team ids have no
+// entry and callers must degrade (see teamTintColor).
+const TEAM_COLORS = {
+  108: '#BA0021', // Angels
+  109: '#A71930', // Diamondbacks
+  110: '#DF4601', // Orioles
+  111: '#BD3039', // Red Sox
+  112: '#0E3386', // Cubs
+  113: '#C6011F', // Reds
+  114: '#E31937', // Guardians (red accent, not their navy)
+  115: '#333366', // Rockies
+  116: '#0C2340', // Tigers
+  117: '#EB6E1F', // Astros (orange accent, not their navy)
+  118: '#BD9B60', // Royals (gold accent, not their blue)
+  119: '#005A9C', // Dodgers
+  120: '#AB0003', // Nationals
+  121: '#002D72', // Mets
+  133: '#EFB21E', // Athletics (gold accent, not their dark green)
+  134: '#FDB827', // Pirates
+  135: '#2F241D', // Padres
+  136: '#005C5C', // Mariners (Northwest green accent, not their navy)
+  137: '#FD5A1E', // Giants
+  138: '#C41E3A', // Cardinals
+  139: '#F5D130', // Rays (yellow accent, not their navy)
+  140: '#C0111F', // Rangers (red accent, not their navy)
+  141: '#E8291C', // Blue Jays (red accent, not their blue)
+  142: '#D31145', // Twins (red accent, not their navy)
+  143: '#E81828', // Phillies
+  144: '#CE1141', // Braves
+  145: '#27251F', // White Sox
+  146: '#00A3E0', // Marlins
+  147: '#003087', // Yankees
+  158: '#FFC52F', // Brewers (gold accent, not their navy)
+}
+
+// `hex` -> `rgba(r, g, b, alpha)` so a team color can sit as a soft tint
+// behind a headshot rather than a solid brand-colored block. Returns null for
+// an unmapped (MiLB) team id — callers should skip the tint entirely rather
+// than render a wrong/generic color.
+export function teamTintColor(teamId, alpha = 0.22) {
+  const hex = TEAM_COLORS[teamId]
+  if (!hex) return null
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}

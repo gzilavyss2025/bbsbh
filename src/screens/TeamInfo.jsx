@@ -9,6 +9,7 @@ import {
   lastFirst,
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
+import { teamTintColor } from '../lib/teams.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { formerTeammatePairs, groupTeammateCards } from '../api/formerTeammates.js'
@@ -156,7 +157,13 @@ export function LineupSpread({
         ))}
       </div>
 
-      <FormerTeammates pairs={teammatePairs} startingIds={startingIds} dayNight={info.dayNight} />
+      <FormerTeammates
+        pairs={teammatePairs}
+        startingIds={startingIds}
+        dayNight={info.dayNight}
+        awayTeamId={awayMeta.id}
+        homeTeamId={homeMeta.id}
+      />
 
       <div className="pagenav">
         <button className="btn btn--next" onClick={onNext}>
@@ -461,7 +468,13 @@ function TeamSections({
       )}
 
       {showTeammates && (
-        <FormerTeammates pairs={teammatePairs} startingIds={startingIds} dayNight={dayNight} />
+        <FormerTeammates
+          pairs={teammatePairs}
+          startingIds={startingIds}
+          dayNight={dayNight}
+          awayTeamId={side === 'away' ? meta.id : oppMeta.id}
+          homeTeamId={side === 'away' ? oppMeta.id : meta.id}
+        />
       )}
     </>
   )
@@ -508,7 +521,7 @@ function connectionCaption(level, teamName, seasons) {
 // order-independent and deduped (see formerTeammatePairs), so this same
 // component reads correctly whether it's one club's page or the shared,
 // full-width copy on the spread layout.
-function FormerTeammates({ pairs, startingIds, dayNight }) {
+function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId }) {
   const [showAll, setShowAll] = useState(false)
   const cards = useMemo(() => {
     const grouped = groupTeammateCards(pairs).map((c) => ({
@@ -520,6 +533,16 @@ function FormerTeammates({ pairs, startingIds, dayNight }) {
         y.score + (y.tonight ? TONIGHT_BOOST : 0) - (x.score + (x.tonight ? TONIGHT_BOOST : 0)),
     )
   }, [pairs, startingIds])
+  // `pairs` always runs (away player, home player) — see formerTeammatePairs'
+  // header — so any id that ever shows up as an `a` belongs to the away club
+  // and any `b` to the home club, regardless of which side's page is asking.
+  // Only a GROUP card's headshot wall uses this (see GroupCard): the tint is
+  // there to make a big multi-player reunion legible as "these are Team A,
+  // those are Team B" at a glance, which a plain 1-vs-1 pair card doesn't need.
+  const sideTeamId = useMemo(() => {
+    const awayIds = new Set(pairs.map((p) => p.a.id))
+    return (id) => (awayIds.has(id) ? awayTeamId : homeTeamId)
+  }, [pairs, awayTeamId, homeTeamId])
   if (cards.length === 0) return null
   const shown = showAll ? cards : cards.slice(0, TEAMMATES_SHOWN)
   const hidden = cards.length - shown.length
@@ -536,7 +559,12 @@ function FormerTeammates({ pairs, startingIds, dayNight }) {
       <ul className="teammates__grid">
         {shown.map((c) =>
           c.kind === 'group' ? (
-            <GroupCard key={`g-${c.anchor.id}-${c.club.teamId}`} card={c} startingLabel={startingLabel} />
+            <GroupCard
+              key={`g-${c.anchor.id}-${c.club.teamId}`}
+              card={c}
+              startingLabel={startingLabel}
+              sideTeamId={sideTeamId}
+            />
           ) : (
             <PairCard key={`${c.a.id}-${c.b.id}`} card={c} startingLabel={startingLabel} />
           ),
@@ -576,17 +604,26 @@ function PairCard({ card: c, startingLabel }) {
 // A hub-and-spokes reunion card. Starts capped to GROUP_MATES_SHOWN spokes
 // with a "+N more teammates" button (a big reunion — see groupTeammateCards —
 // can run well past a dozen) that reveals the rest of the headshots in place.
-function GroupCard({ card: c, startingLabel }) {
+function GroupCard({ card: c, startingLabel, sideTeamId }) {
   const [expanded, setExpanded] = useState(false)
   const shownMates = expanded ? c.mates : c.mates.slice(0, GROUP_MATES_SHOWN)
   const moreCount = c.mates.length - shownMates.length
   return (
     <li className="teammatecard teammatecard--group">
       {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
+      {/* A reunion this size is the one place a wall of headshots needs a
+          hint of WHOSE roster each face is on tonight — so, unlike every
+          other headshot in the app, each one gets a soft tint of its
+          player's current club color instead of sitting transparent. */}
       <div className="teammatecard__group">
-        <TeammateHalf id={c.anchor.id} name={c.anchor.name} pos={c.anchor.pos} />
+        <TeammateHalf
+          id={c.anchor.id}
+          name={c.anchor.name}
+          pos={c.anchor.pos}
+          tint={teamTintColor(sideTeamId(c.anchor.id))}
+        />
         {shownMates.map((m) => (
-          <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} />
+          <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} tint={teamTintColor(sideTeamId(m.id))} />
         ))}
       </div>
       <div className="teammatecard__mid">
@@ -618,11 +655,11 @@ const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 // big) — the same treatment as the player page's hero, shrunk to fit a card —
 // with his roster position as a small badge floating on the headshot's
 // bottom-left corner.
-function TeammateHalf({ id, name, pos }) {
+function TeammateHalf({ id, name, pos, tint }) {
   const { first, last } = splitDisplayName(name)
   return (
     <PlayerLink id={id} className="teammatecard__half">
-      <span className="teammatecard__shotwrap">
+      <span className="teammatecard__shotwrap" style={tint ? { backgroundColor: tint } : undefined}>
         <Headshot personId={id} name={name} className="teammatecard__shot" />
         {pos && <span className="teammatecard__posbadge">{posLabel(pos)}</span>}
       </span>

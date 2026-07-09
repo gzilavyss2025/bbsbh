@@ -2000,11 +2000,21 @@ body {
   grid-template-columns: 1fr auto;
 }
 
+/* A fixed-track grid rather than flex-wrap: flex-wrap + centering left a
+   ragged number of headshots per row (a centered short last row reads as
+   uneven next to the full rows above it) — a big reunion (see
+   GROUP_MATES_SHOWN) is exactly the case with enough headshots for that to
+   show. auto-fill locks every row, including the wrapped ones, to the same
+   column count for the card's actual width, left-aligned like the rows above. */
 .teammatecard__group {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 64px);
+  justify-content: start;
+  gap: 10px;
+}
+
+.teammatecard__group .teammatecard__half {
+  width: 64px;
 }
 
 /* Clicking this reveals the rest of the group's headshots in place — see
@@ -2071,6 +2081,7 @@ body {
 .teammatecard__shotwrap {
   position: relative;
   display: block;
+  border-radius: var(--radius-md);
 }
 
 .shot.teammatecard__shot {
