@@ -68,8 +68,28 @@ function FeaturedLeader({ entry, category, showTeamLogo, showLevel, prospectSnap
   )
 }
 
+// Competition ("1224") ranking with tie flags, keyed off the numeric `value`
+// each entry already carries — so ties surface identically on the live and the
+// precomputed (all-minors) boards without regenerating the static JSON. For each
+// entry: its rank is the 1-based position of the FIRST entry sharing its value,
+// and `tie` is true when 2+ entries share that value (the displayed rank then
+// gets a "T" prefix — a three-way tie at the top reads "T1", "T1", "T1", and the
+// next player is rank 4). Exact numeric equality only (two ".302"s that differ at
+// the 4th decimal are NOT a tie; equal values tie regardless of formatting).
+function displayRanks(entries) {
+  return entries.map((e, i) => {
+    let first = i
+    while (first > 0 && entries[first - 1].value === e.value) first -= 1
+    let last = i
+    while (last < entries.length - 1 && entries[last + 1].value === e.value) last += 1
+    const tie = last > first
+    return { rank: first + 1, tie, text: `${tie ? 'T' : ''}${first + 1}` }
+  })
+}
+
 function LeaderCategory({ category, entries, showTeamLogo, showLevel, prospectSnapshot }) {
   const [leader, ...rest] = entries
+  const ranks = displayRanks(entries)
   return (
     <section className="tlead__cat">
       <h4 className="tlead__cat-title">{category.label}</h4>
@@ -82,9 +102,9 @@ function LeaderCategory({ category, entries, showTeamLogo, showLevel, prospectSn
       />
       {rest.length > 0 && (
         <ol className="tlead__rest">
-          {rest.map((e) => (
+          {rest.map((e, i) => (
             <li key={e.id} className="tlead__row">
-              <span className="tlead__rank">{e.rank}</span>
+              <span className="tlead__rank">{ranks[i + 1].text}</span>
               <PlayerLink id={e.id} className="tlead__rowname">
                 {e.name}
               </PlayerLink>
