@@ -58,6 +58,16 @@ node scripts/gen-war.mjs
                    # from FanGraphs' leaderboard API) — normally you don't run
                    # this by hand, it's on a nightly cron; see
                    # .github/workflows/update-war.yml and docs/data-enrichment.md §5
+node scripts/gen-war-history.mjs
+                   # regenerate public/data/war-history.json (season WAR per
+                   # player for COMPLETED seasons, 2015+ — the multi-year
+                   # companion to war.json above, same FanGraphs source/join).
+                   # Run by hand, NOT on a cron (a finished season's WAR is
+                   # immutable) — like gen-milb-history.mjs; re-run once a year
+                   # to fold in the season that just ended. The player page's
+                   # career-register WAR column + season-tile WAR read the UNION
+                   # of this file (past seasons) and war.json (the live season)
+                   # via src/api/war.js (fetchWarHistory + warByYearFor).
 node scripts/gen-rehab.mjs
                    # regenerate public/data/rehab.json (the league-wide Rehab
                    # Assignments list). Same build-time-fetch pattern as
@@ -241,10 +251,18 @@ notes the gamePk field paths were verified against):
   refreshed file to `main`, which Vercel then auto-deploys — no server, no
   runtime dependency on FanGraphs. Keyed by MLB Stats API `personId`
   (FanGraphs' own `xMLBAMID` field is that same id, so no name-matching).
-  `TeamPage.jsx`'s roster sections are the only consumer so far; this
+  `TeamPage.jsx`'s roster sections and the player page consume it; this
   build-time-fetch pattern (bulk/unofficial source → nightly script → static
   JSON → same-origin read) is meant to be reused for the next source shaped
-  like this — see `docs/data-enrichment.md` §5.
+  like this — see `docs/data-enrichment.md` §5. A companion
+  `public/data/war-history.json` (same shape but keyed by season, generated
+  hand-run by `scripts/gen-war-history.mjs` — completed-season WAR is
+  immutable, so no cron) covers past seasons; `fetchWarHistory` +
+  `warByYearFor(personId, group, current, history)` union the two into a
+  player's `{season: war}` map (live season from war.json wins its own year),
+  which `loadPlayer.js` threads into the player page's season-tile WAR and the
+  career register's WAR column. WAR is MLB-only at the source, so MiLB
+  rows/tiles fall back to a dash.
 - `rehab.js` — the Rehab Assignments page's data, read from a static same-origin
   `public/data/rehab.json`. The SECOND use of `war.js`'s build-time-fetch pattern,
   but here the driver is *cost*, not an unofficial source: the list starts from a
