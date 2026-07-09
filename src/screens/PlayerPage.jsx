@@ -15,6 +15,7 @@ import { TransactionTimeline } from '../components/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
+import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
@@ -212,6 +213,15 @@ export function PlayerPage({ id, asOf, sportId }) {
                 <StatGrid tiles={lvl.tiles} />
               </div>
             ))}
+
+            {/* Career splits vs the club this player's team is next facing (a
+                finger-scrollable strip to pick a different opponent). Rendered in
+                the primary stat block only — between "Current season" and the
+                Pitches table (pitchers) / Game log (hitters), per the card's
+                spec. */}
+            {data.vsTeam && block.group === data.vsTeam.group && (
+              <SplitsVsTeam vsTeam={data.vsTeam} season={data.season} asOf={asOf} />
+            )}
 
             {block.arsenal && (
               <>

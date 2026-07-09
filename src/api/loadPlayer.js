@@ -30,6 +30,7 @@ import {
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
+import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { historicalParentOrg } from './milbHistory.js'
 import {
   personBio,
@@ -130,11 +131,16 @@ export async function loadPlayer(id, asOf) {
   // (nightly current season + hand-run history), session-cached, so this is
   // free after the first player page. Built into a per-group { season: war } map
   // below and threaded into each block's tiles + career-register column.
-  const [person, txns, warCurrent, warHistory] = await Promise.all([
+  // Career-vs-club splits (the SPLITS VS TEAM card) ride along here too — one
+  // more same-origin static file (nightly), session-cached, so this is free
+  // after the first player page. MLB-only at the source; null for a player not
+  // on an MLB active roster, and the card then simply doesn't render.
+  const [person, txns, warCurrent, warHistory, vsTeamData] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
     fetchWarHistory(),
+    fetchVsTeamSplits(),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -564,6 +570,7 @@ export async function loadPlayer(id, asOf) {
     onIL, il,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     conversionNote, positionInnings, transactions,
+    vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
 }

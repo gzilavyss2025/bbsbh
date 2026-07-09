@@ -1,0 +1,33 @@
+name: Update vs-team splits
+
+# Daily refresh of public/data/vs-team-splits.json from the MLB Stats API (see
+# scripts/gen-vs-team-splits.mjs). Pushing to main triggers Vercel's normal
+# auto-deploy, so the player page's SPLITS VS TEAM card picks up each active-
+# roster player's fresh career-vs-club lines and last-meeting stat line every
+# morning with no runtime dependency on the hundreds of per-player game-log calls
+# the script runs. Offset from the other nightly jobs (war 09:00, rehab 09:30,
+# minors-leaders 10:00, former-teammates 10:30) so the commits don't race to push.
+on:
+  schedule:
+    - cron: '0 11 * * *' # ~7am US Eastern, after overnight roster moves settle
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-vs-team-splits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/gen-vs-team-splits.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/vs-team-splits.json
+          git diff --cached --quiet || git commit -m "Update vs-team splits"
+          git push
