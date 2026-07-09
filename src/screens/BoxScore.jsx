@@ -1,11 +1,13 @@
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
 import { computeGameSuperlatives } from '../api/derive.js'
+import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { StatcastCard } from '../components/StatcastCard.jsx'
+import { CalloutNote } from '../components/CalloutNote.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -60,6 +62,7 @@ export function BoxScore({
   uniforms,
   scorebookWeather,
   winProbability,
+  callouts,
   onInnings,
   onReload,
   loading,
@@ -88,6 +91,11 @@ export function BoxScore({
           const potg = computePlayOfTheGame(winProbability, feed)
           const winProbPoints = selectWinProbPath(winProbability)
           const insights = computeGameSuperlatives(feed)
+          // Every leader/streak/situational-record note that fired somewhere
+          // in the game (see api/callout-notes.js) — the same notes the
+          // innings view shows one at a time on the play they belong to,
+          // rolled up here into the Insights card.
+          const calloutNotes = computeGameCalloutNotes(feed, callouts)
           return (
             <BoxScoreBody
               feed={feed}
@@ -96,6 +104,7 @@ export function BoxScore({
               potg={potg}
               winProbPoints={winProbPoints}
               insights={insights}
+              calloutNotes={calloutNotes}
               managers={managers}
               uniforms={uniforms}
               scorebookWeather={scorebookWeather}
@@ -117,7 +126,7 @@ export function BoxScore({
 // own header card — the visiting team's crew and first pitch above its
 // batting/pitching, the home team's ballpark/weather/times above its own. The
 // complete MLB-style game-info text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, managers, uniforms, scorebookWeather }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, calloutNotes, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -176,7 +185,7 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, manager
           <Decisions decisions={box.decisions} />
         </div>
         <div className="bs__col">
-          <PlayOfTheGame play={potg} />
+          <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
           <ThreeStars stars={stars} />
           <Scoreboard away={box.away} home={box.home} innings={box.innings} />
         </div>
@@ -195,7 +204,7 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, manager
       {/* Last thing in the sealed box score, so it lands directly above the
           separately-sealed GameBuzzCard below — the catch-all for whatever
           the game turned up as notable, ahead of the crowd's own reaction. */}
-      <InsightsCard insights={insights} />
+      <InsightsCard insights={insights} calloutNotes={calloutNotes} />
     </div>
   )
 }
@@ -205,40 +214,55 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, manager
 // ball, the longest ball, whoever owns each. Hidden entirely when the feed
 // carried no tracking data (most MiLB parks), same graceful-degrade as the
 // per-half Statcast row in the innings view.
-function InsightsCard({ insights }) {
-  if (!insights) return null
-  const { maxVelo, maxVeloType, maxVeloPlayer, hardestHit, hardestHitPlayer, longestHit, longestHitPlayer } = insights
-  if (maxVelo == null && hardestHit == null && longestHit == null) return null
+function InsightsCard({ insights, calloutNotes }) {
+  const { maxVelo, maxVeloType, maxVeloPlayer, hardestHit, hardestHitPlayer, longestHit, longestHitPlayer } =
+    insights ?? {}
+  const hasStatcast = maxVelo != null || hardestHit != null || longestHit != null
+  const hasNotes = calloutNotes && calloutNotes.length > 0
+  if (!hasStatcast && !hasNotes) return null
   return (
     <section className="bs__insights">
       <h3 className="bs__insightsTitle">Insights</h3>
-      <div className="statcast">
-        {maxVelo != null && (
-          <StatcastCard
-            label="Fastest pitch"
-            value={maxVelo.toFixed(1)}
-            unit="MPH"
-            who={maxVeloPlayer}
-            detail={maxVeloType}
-          />
-        )}
-        {hardestHit != null && (
-          <StatcastCard
-            label="Hardest hit"
-            value={hardestHit.toFixed(1)}
-            unit="MPH"
-            who={hardestHitPlayer}
-          />
-        )}
-        {longestHit != null && (
-          <StatcastCard
-            label="Longest ball"
-            value={Math.round(longestHit)}
-            unit="FT"
-            who={longestHitPlayer}
-          />
-        )}
-      </div>
+      {hasStatcast && (
+        <div className="statcast">
+          {maxVelo != null && (
+            <StatcastCard
+              label="Fastest pitch"
+              value={maxVelo.toFixed(1)}
+              unit="MPH"
+              who={maxVeloPlayer}
+              detail={maxVeloType}
+            />
+          )}
+          {hardestHit != null && (
+            <StatcastCard
+              label="Hardest hit"
+              value={hardestHit.toFixed(1)}
+              unit="MPH"
+              who={hardestHitPlayer}
+            />
+          )}
+          {longestHit != null && (
+            <StatcastCard
+              label="Longest ball"
+              value={Math.round(longestHit)}
+              unit="FT"
+              who={longestHitPlayer}
+            />
+          )}
+        </div>
+      )}
+      {/* Every leader/streak/situational-record note that fired somewhere in
+          the game (see computeGameCalloutNotes) — the same notes shown one at
+          a time on the play they belong to in the innings view, rolled up
+          here as tonight's full set. */}
+      {hasNotes && (
+        <div className={`bs__insightNotes${hasStatcast ? ' bs__insightNotes--divided' : ''}`}>
+          {calloutNotes.map((text, i) => (
+            <CalloutNote key={i} text={text} />
+          ))}
+        </div>
+      )}
     </section>
   )
 }
@@ -573,9 +597,10 @@ function ordinal(n) {
 // The night's single most memorable moment (see computePlayOfTheGame) — the
 // play itself, not a player, so it sits above the three stars. Hidden entirely
 // when WPA isn't available (most MiLB parks).
-function PlayOfTheGame({ play }) {
+function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
   if (!play || !play.desc) return null
   const halfLabel = play.half === 'top' ? 'Top' : 'Bottom'
+  const hasScore = play.awayScore != null && play.homeScore != null
   return (
     <div className="bs__potg">
       <h3 className="bs__potgTitle">Play of the game</h3>
@@ -592,6 +617,16 @@ function PlayOfTheGame({ play }) {
             </span>
           )}
           {play.desc}
+          {/* The score right after this play, so the moment reads with its
+              consequence attached — bold, and (unlike the narrative above it)
+              not run through title case: team abbreviations stay shouting
+              like the rest of the sheet. */}
+          {hasScore && (
+            <span className="bs__potgScore">
+              {' '}
+              {awayAbbr} {play.awayScore}, {homeAbbr} {play.homeScore}
+            </span>
+          )}
         </p>
       </div>
     </div>

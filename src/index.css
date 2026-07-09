@@ -4671,6 +4671,12 @@ body {
   font-size: 13px;
   line-height: 1.4;
   color: var(--text-heading);
+  /* Approved exception to the ALL-CAPS INVARIANT, scoped to this one
+     narrative: title case reads better for a play-of-the-game sentence than
+     shouting it. The nested .bs__potgWhen inning tag and .bs__potgScore below
+     aren't affected — #root * still matches them directly and wins over this
+     rule's inherited value. */
+  text-transform: capitalize; /* caps-exempt: approved title case for the box score's play-of-the-game narrative only */
 }
 /* The inning it happened in, inline ahead of the description — same font as
    the description, tinted the scorebook's kraft-tape amber so it reads as a
@@ -4680,11 +4686,22 @@ body {
   font-weight: var(--w-semibold);
   color: var(--award-ink);
 }
+/* The score right after the play, appended to the narrative — bold, and
+   explicitly re-uppercased so the team abbreviations don't inherit the
+   narrative's title case (redundant today since #root * already wins here,
+   but explicit in case that specificity relationship ever changes). */
+.bs__potgScore {
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
 
-/* Insights — the box score's catch-all "what stood out tonight" card (see
-   computeGameSuperlatives): whole-game Statcast superlatives, reusing the same
-   .statcast card grid as the innings view's per-half row. Sits last inside the
-   sealed box score, directly above the separately-sealed GameBuzzCard. */
+/* Insights — the box score's catch-all "what stood out tonight" card: whole-
+   game Statcast superlatives (see computeGameSuperlatives, reusing the same
+   .statcast card grid as the innings view's per-half row) plus every season
+   leader/streak/situational-record call-out that fired somewhere in the game
+   (see computeGameCalloutNotes — the same .pbp__callout notes shown one at a
+   time in the innings view, rolled up here). Sits last inside the sealed box
+   score, directly above the separately-sealed GameBuzzCard. */
 .bs__insights {
   padding: 12px 14px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -4709,6 +4726,21 @@ body {
   margin-top: 8px;
   padding-top: 0;
   border-top: none;
+}
+
+/* The call-out notes list. Each note is a .pbp__callout (same star-marked
+   strip as the innings view), stacked with a little breathing room; when
+   Statcast cards sit above it, a dashed rule (matching .statcast's own)
+   separates the two sections instead of them running together. */
+.bs__insightNotes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bs__insightNotes--divided {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber

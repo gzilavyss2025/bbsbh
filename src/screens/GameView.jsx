@@ -381,6 +381,7 @@ export function GameView({ game, section, onSection }) {
           uniforms={uniformBrief}
           scorebookWeather={weather.data}
           winProbability={winProb.data}
+          callouts={gameCallouts}
           onInnings={() => onSection(lastInningSection.current)}
           onReload={feedState.reload}
           loading={feedState.loading}
