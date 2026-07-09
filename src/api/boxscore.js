@@ -318,10 +318,19 @@ function splitNameStat(entry) {
   return m ? { name: m[1].trim(), stat: m[2] } : { name: entry, stat: '' }
 }
 
-// "Soto, J (by Soriano, G)" -> { name: 'Soto, J', detail: 'by Soriano, G' }
+// "Soto, J (by Soriano, G)" -> { name: 'Soto, J', count: '', detail: 'by Soriano, G' }
+// "Jackson, A 4 (Ball-Confirmed, …)" -> { name: 'Jackson, A', count: '4', detail: '…' } —
+// an ABS Challenge row tallies a repeat challenger as "Name N (result; result…)"; the
+// count must be split off before matching, or a player who challenged more than once
+// fails the roster-name lookup below and falls into the unattributed `shared` bucket
+// instead of his own team's (regardless of which side he's on — this isn't a
+// home/away-specific bug, just any name this pattern applies to). Kept separate from
+// `name` so the caller can still show the count in the rendered text.
 function splitNameDetail(entry) {
-  const m = entry.match(/^(.+?)\s*\(([^)]*)\)$/)
-  return m ? { name: m[1].trim(), detail: m[2].trim() } : { name: entry, detail: '' }
+  const m = entry.match(/^(.+?)(?:\s+(\d+))?\s*\(([^)]*)\)$/)
+  return m
+    ? { name: m[1].trim(), count: m[2] ?? '', detail: m[3].trim() }
+    : { name: entry, count: '', detail: '' }
 }
 
 // Splits the info block's per-pitcher/per-player rows onto the team of the
@@ -355,7 +364,8 @@ function splitGameNotes(feed) {
         const parsed = splitNameDetail(entry)
         const byMatch = parsed.detail.match(/^by\s+(.+)$/i)
         name = byMatch ? byMatch[1].trim() : parsed.name
-        text = parsed.detail ? `${parsed.name} (${parsed.detail})` : parsed.name
+        const nameWithCount = parsed.count ? `${parsed.name} ${parsed.count}` : parsed.name
+        text = parsed.detail ? `${nameWithCount} (${parsed.detail})` : nameWithCount
       }
       side = teamOf.get(name)
       ;(bySide[side] ?? bySide.other).push(text)
