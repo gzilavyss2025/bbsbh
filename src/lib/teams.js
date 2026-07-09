@@ -122,16 +122,20 @@ export function leagueLogoUrl() {
 //
 // The same mlbstatic CDN that serves team logos also serves per-player
 // headshots, keyed by the person id we already carry everywhere (the same id
-// that drives /people/{id}). Verified live: returns a color head-and-shoulders
-// portrait (2:3, ~240×360). The `d_people:generic:headshot` transform baked
-// into the path means the CDN itself serves a generic silhouette for an id it
-// has no photo for — so this degrades one more step than logos do (a true
-// network/404 still drops to the monogram in components/Headshot.jsx). MiLB
-// coverage is partial, hence the same "decorative, render behind a fallback"
-// rule as logos.
+// that drives /people/{id}). Verified live: returns a 1:1 transparent "silo"
+// cutout (426×426 at w_426, palette PNG + tRNS), the subject already framed
+// consistently — head crown ~3.3% from the top, shoulders bleeding off the
+// bottom — so a plain CSS top-center cover crop (see .shot img) reframes it to
+// 3:4 with no per-image work. The `d_people:generic:headshot:silo` transform
+// baked into the path means the CDN itself serves a transparent silhouette PNG
+// for an id it has no photo for (verified: the plain silo URL 404s for an
+// unknown id, this default returns 200 image/png) — so this degrades one more
+// step than logos do (a true network/404 still drops to the monogram in
+// components/Headshot.jsx). MiLB coverage is partial, hence the same
+// "decorative, render behind a fallback" rule as logos.
 const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 
 export function headshotUrl(personId, width = 213) {
   if (!personId) return null
-  return `${HEADSHOT_BASE}/d_people:generic:headshot:67:current.png/w_${width},q_auto:best/v1/people/${personId}/headshot/67/current`
+  return `${HEADSHOT_BASE}/d_people:generic:headshot:silo:current.png/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
