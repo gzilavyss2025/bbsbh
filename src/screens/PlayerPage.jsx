@@ -354,18 +354,16 @@ function GameLink({ path, className = '', children }) {
 }
 
 // The unified MLB + MiLB career table (see api/person.js careerRegisterView).
-// MLB rows are inked, MiLB rows penciled with a level pill; a debuted player's
-// pre-debut climb folds into one tappable row that expands to its seasons; the
-// footer carries separate MLB and MiLB totals, and small post-debut stints ride
-// a neutral caption beneath.
+// MLB rows are inked, MiLB rows penciled with a level pill beside the team —
+// every season the player climbed is its own row; the footer carries separate
+// MLB and MiLB totals, and small post-debut stints ride a neutral caption beneath.
 // The secondary pitching columns that drop out on a phone (see the Ledger's
 // hideNarrow + the col-narrow-hide media query) — the essentials (G, W–L/SV,
 // ERA, IP, WHIP) stay; GS, K and BB return once there's room.
 const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
 
 function CareerRegister({ register }) {
-  const [climbOpen, setClimbOpen] = useState(false)
-  const { columns, rows, climb, totals, footnote } = register
+  const { columns, rows, totals, footnote } = register
   // +2 for the leading Year + Team columns this table prepends to the stat cells.
   const hideNarrow = columns
     .map((c, i) => (NARROW_HIDE_COLS.has(c) ? i + 2 : -1))
@@ -379,42 +377,16 @@ function CareerRegister({ register }) {
       <>
         {r.year}
         {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
+      </>,
+      // The MiLB level badge rides the team, not the year — the level is a fact
+      // about where he played, and it reads cleanly beside the short abbrevs.
+      <>
+        {r.team || DASH}
         {r.pill && <span className="reg-pill">{r.pill}</span>}
       </>,
-      r.team || DASH,
       ...r.cells,
     ],
   }))
-
-  if (climb) {
-    ledgerRows.push({
-      key: 'climb',
-      className: 'reg-milb reg-climb',
-      onClick: () => setClimbOpen((v) => !v),
-      // The year range and "Minors · N seasons" note ride ONE cell spanning the
-      // Year+Team columns (leadColSpan), so the long note can't stretch either
-      // data column and open a gap beside the short team abbreviations.
-      leadColSpan: 2,
-      cells: [
-        <span className="reg-climb__yr" key="yr">
-          <span className="reg-climb__caret" aria-hidden="true">{climbOpen ? '▾' : '▸'}</span>
-          {climb.yearText}
-          <span className="reg-climb__note">
-            Minors · {climb.subSeasons.length} {climb.subSeasons.length === 1 ? 'season' : 'seasons'}
-          </span>
-        </span>,
-        ...climb.cells,
-      ],
-      subRows: climbOpen
-        ? climb.subSeasons.map((s) => ({
-            key: s.key,
-            className: 'reg-milb',
-            label: `${s.year} · ${s.level}${s.team ? ' · ' + s.team : ''}`,
-            cells: s.cells,
-          }))
-        : null,
-    })
-  }
 
   return (
     <>

@@ -456,10 +456,6 @@ export async function loadPlayer(id, asOf) {
     const reg = b.register
     if (!reg) continue
     for (const r of reg.rows) for (const id of r.teamIds) teamIdSet.add(id)
-    if (reg.climb) {
-      for (const id of reg.climb.teamIds) teamIdSet.add(id)
-      for (const s of reg.climb.subSeasons) for (const id of s.teamIds) teamIdSet.add(id)
-    }
   }
   const teamAbbrevs = await fetchTeamAbbrevs([...teamIdSet])
   const abbrevs = (ids) => ids.map((tid) => teamAbbrevs[tid]).filter(Boolean).join('/')
@@ -467,10 +463,6 @@ export async function loadPlayer(id, asOf) {
     const reg = b.register
     if (!reg) continue
     for (const r of reg.rows) r.team = abbrevs(r.teamIds)
-    if (reg.climb) {
-      reg.climb.team = abbrevs(reg.climb.teamIds)
-      for (const s of reg.climb.subSeasons) s.team = abbrevs(s.teamIds)
-    }
   }
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null

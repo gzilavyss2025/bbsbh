@@ -576,13 +576,12 @@ const CAREER_ORDER = [16, 14, 13, 12, 11, 1]
 // MLB year-by-year and minor-league tables). One row per (season, level),
 // newest season first, MLB rows inked and MiLB rows penciled with a level pill.
 //
-// A DEBUTED player's pre-debut minor-league seasons (and the debut year's own
-// pre-call-up stint) fold into ONE collapsed "climb" row — his backstory —
-// while a post-debut minor-league stint is a real row only when it clears the
-// rehab cap (meetsStintCap); a smaller stint drops to a neutral caption so a
-// handful of rehab at-bats doesn't clutter the ledger. A PRE-DEBUT player has
-// no debut to fold toward, so every level is a real row (his whole career),
-// with a MiLB-only total and no caption.
+// Every minor-league season in a player's ascent (pre-debut seasons and the
+// debut year's own pre-call-up stint) is its own real row, penciled and
+// level-badged next to the team — the climb reads season by season rather than
+// folding into a single collapsed summary. Only a SMALL post-debut minor-league
+// stint (below the rehab cap, meetsStintCap) drops to a neutral caption, so a
+// handful of rehab at-bats doesn't clutter the ledger.
 //
 // Totals never blend levels: a separate MLB and MiLB footer, each footing only
 // the rows shown (captioned stints stay out of both the rows AND the totals, so
@@ -655,20 +654,18 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   if (!stints.length) return null
 
   // Classify. MLB is always a full row. A minor-league stint in the ascent
-  // (pre-debut, or the debut year itself) folds into the climb; a post-debut
-  // stint is a full row only when it clears the rehab cap, else a caption.
+  // (pre-debut, or the debut year itself) is a full row too — every level the
+  // player climbed reads as its own line, level-badged next to the team. Only a
+  // SMALL post-debut stint (below the rehab cap) drops to a neutral caption, so
+  // a handful of rehab at-bats doesn't clutter the ledger.
   const real = []
-  const climbing = []
   const foot = []
   for (const st of stints) {
     if (st.tier === 'mlb') { real.push(st); continue }
-    if (!debutYear || st.year <= debutYear) { climbing.push(st); continue }
+    if (!debutYear || st.year <= debutYear) { real.push(st); continue }
     if (meetsStintCap(st.stat, group)) real.push(st)
     else foot.push(st)
   }
-  // A pre-debut player has no debut to fold toward: his climb IS his career, so
-  // every level stays a full row and nothing is captioned.
-  if (!debutYear) { real.push(...climbing); climbing.length = 0 }
 
   const bySeasonOrder = (a, b) => b.year - a.year || LEVEL_ORDER_DESC.indexOf(a.sid) - LEVEL_ORDER_DESC.indexOf(b.sid)
   real.sort(bySeasonOrder)
@@ -694,35 +691,11 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     cells: withWar(yearByYearCells(st.stat ?? {}, group, role), warCell(st)),
   }))
 
-  // The collapsed climb (debuted players only): one aggregate row plus the
-  // per-season sub-rows it expands to, oldest folded away as backstory.
-  let climb = null
-  if (climbing.length) {
-    const climbStat = aggregateSplits(climbing.map((s) => ({ stat: s.stat })), group)
-    const years = climbing.map((s) => s.year)
-    const minY = Math.min(...years)
-    const maxY = Math.max(...years)
-    climb = {
-      key: 'climb',
-      yearText: minY === maxY ? `${minY}` : `${minY}–${String(maxY).slice(2)}`,
-      teamIds: [...new Set(climbing.flatMap((s) => s.teamIds))],
-      // The climb is all MiLB — WAR is a dash (kept only for column alignment).
-      cells: withWar(yearByYearCells(climbStat ?? {}, group, role), DASH),
-      subSeasons: [...climbing].sort(bySeasonOrder).map((s) => ({
-        key: `${s.year}-${s.sid}`,
-        year: String(s.year),
-        level: SPORT_LABEL[s.sid] ?? '',
-        teamIds: s.teamIds,
-        cells: withWar(yearByYearCells(s.stat ?? {}, group, role), DASH),
-      })),
-    }
-  }
-
   // Split totals — never blend levels. MLB uses the API career line when we have
-  // it; MiLB sums the rows actually shown (climb + real demotions).
+  // it; MiLB sums the rows actually shown (every ascent/demotion row above).
   const totals = []
   const mlbStints = real.filter((s) => s.tier === 'mlb')
-  const milbVisible = [...real.filter((s) => s.tier === 'milb'), ...climbing]
+  const milbVisible = real.filter((s) => s.tier === 'milb')
   if (mlbStints.length) {
     // Career WAR = sum of the shown MLB years' WAR (one row per season, so no
     // double-count). Only the seasons the history/live files cover contribute;
@@ -749,7 +722,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     ? ['G', 'GS', role === 'CL' ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
     : ['G', 'AB', 'AVG', 'HR', 'RBI']
   const columns = showWar ? [...baseColumns, 'WAR'] : baseColumns
-  return { columns, rows, climb, totals, footnote: stintCaption(foot, group) }
+  return { columns, rows, totals, footnote: stintCaption(foot, group) }
 }
 
 // A one-line "converted to pitcher" note for a debuted pitcher who has a real

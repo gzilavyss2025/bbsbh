@@ -5350,22 +5350,6 @@ body {
   margin-left: 3px;
   font-size: 11px;
 }
-/* Per-level sub-row under a season that spanned more than one MiLB level —
-   muted and indented so the combined row above it still reads as the year's
-   headline number. */
-.ledger tr.ledger__subrow td {
-  background: var(--bg-page);
-  color: var(--text-muted);
-  font-size: 11.5px;
-}
-.ledger tr.ledger__subrow .opp {
-  padding-left: 20px;
-  font-style: italic;
-  /* The "year · level · club" caption spans the leading label columns; let it
-     wrap so a long line ("2015 · ROK · A-MRN") doesn't stretch the table into a
-     horizontal scroll when the climb is expanded. */
-  white-space: normal;
-}
 /* Career total — the ledger footer, set off with a heavier rule + a tinted row
    so it reads as the sum of everything above it. */
 .ledger tfoot td {
@@ -5395,7 +5379,7 @@ body {
   color: var(--graphite);
   font-weight: var(--w-semibold);
 }
-/* The level tag riding each MiLB row's year. MLB rows carry none — ink IS the
+/* The level tag riding each MiLB row's team. MLB rows carry none — ink IS the
    majors by default, so tagging every one would just be dead repetition. */
 .reg-pill {
   margin-left: 5px;
@@ -5408,32 +5392,6 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--graphite);
   vertical-align: middle;
-}
-/* The collapsed pre-debut climb — one tappable pencil row folding the minors
-   into the player's backstory; a tap expands it to its per-season sub-rows. */
-.ledger tr.is-toggle {
-  cursor: pointer;
-}
-.ledger tr.reg-climb td {
-  background: var(--bg-page);
-}
-.reg-climb__caret {
-  color: var(--graphite-soft);
-  margin-right: 5px;
-  font-size: 10px;
-}
-.reg-climb__note {
-  margin-left: 8px;
-  font-family: var(--font-body);
-  font-style: italic;
-  color: var(--graphite-soft);
-}
-/* The climb summary spans the Year+Team columns (leadColSpan). Let it wrap so
-   its long "Minors · N seasons" note can't stretch that merged cell — and the
-   columns behind it — past the short team abbreviations on every other row,
-   which had opened a gaping gap and forced a horizontal scroll on a phone. */
-.ledger tr.reg-climb .yr {
-  white-space: normal;
 }
 /* Split totals — the MLB footer inked, the MiLB footer penciled, so neither
    reads as a blended cross-level career line. */
