@@ -78,10 +78,18 @@ export function StandingsPage() {
   const jumps = useMemo(() => buildJumps(today), [today])
 
   // Selected date key: 'entering' (default, through yesterday), 'live' (opt-in,
-  // includes today), or a jump key ('30d' / 'm5' …).
+  // includes today), 'step' (the bottom day-stepper is driving), or a jump key
+  // ('30d' / 'm5' …).
   const [selKey, setSelKey] = useState('entering')
+  // Explicit date the bottom Back/Forward stepper has scrubbed to. Only
+  // meaningful while selKey === 'step'; cleared whenever another control picks
+  // a date so the two mechanisms never fight over which date is authoritative.
+  const [stepDate, setStepDate] = useState(null)
 
   const view = useMemo(() => {
+    if (selKey === 'step' && stepDate) {
+      return { date: stepDate, mode: 'As of', detail: labelDate(stepDate) }
+    }
     if (selKey === 'live') {
       return { date: null, mode: 'Live', detail: 'Today’s games included' }
     }
@@ -91,7 +99,22 @@ export function StandingsPage() {
     const jump = jumps.find((j) => j.key === selKey)
     if (jump) return { date: jump.date, mode: 'As of', detail: labelDate(jump.date) }
     return { date: yesterday, mode: 'Entering today', detail: `Through ${labelDate(yesterday)}` }
-  }, [selKey, yesterday, jumps])
+  }, [selKey, stepDate, yesterday, jumps])
+
+  // Step one day backward/forward from whatever date is currently shown.
+  // Forward is capped at yesterday — the day-stepper never leaks into today's
+  // live games; that's still the separate, explicit "Reveal" opt-in above.
+  function stepDay(delta) {
+    const base = view.date ?? yesterday
+    const next = shiftDays(base, delta)
+    setStepDate(next > yesterday ? yesterday : next)
+    setSelKey('step')
+  }
+
+  function pick(key) {
+    setStepDate(null)
+    setSelKey(key)
+  }
 
   const { loading, error, data } = useAsync(
     () => fetchLeagueStandings(season, view.date),
@@ -126,7 +149,7 @@ export function StandingsPage() {
             type="button"
             aria-pressed={selKey === 'entering'}
             className={`standings-jump ${selKey === 'entering' ? 'is-active' : ''}`}
-            onClick={() => setSelKey('entering')}
+            onClick={() => pick('entering')}
           >
             Entering today
           </button>
@@ -136,7 +159,7 @@ export function StandingsPage() {
               type="button"
               aria-pressed={selKey === j.key}
               className={`standings-jump ${selKey === j.key ? 'is-active' : ''}`}
-              onClick={() => setSelKey(j.key)}
+              onClick={() => pick(j.key)}
             >
               {j.label}
             </button>
@@ -147,7 +170,7 @@ export function StandingsPage() {
           <button
             type="button"
             className="standings-reveal"
-            onClick={() => setSelKey('live')}
+            onClick={() => pick('live')}
           >
             Reveal today’s live standings
           </button>
@@ -156,7 +179,7 @@ export function StandingsPage() {
           <button
             type="button"
             className="standings-reveal is-on"
-            onClick={() => setSelKey('entering')}
+            onClick={() => pick('entering')}
           >
             Live — today included · reseal
           </button>
@@ -226,6 +249,27 @@ export function StandingsPage() {
           </section>
         ))}
       </div>
+
+      <nav className="standings-daynav" aria-label="Standings date stepper">
+        <button
+          type="button"
+          onClick={() => stepDay(-1)}
+          aria-label="Previous day's standings"
+        >
+          ‹ Back
+        </button>
+        <span className="standings-daynav__label">
+          {view.date ? labelDate(view.date) : 'Today'}
+        </span>
+        <button
+          type="button"
+          onClick={() => stepDay(1)}
+          disabled={selKey === 'live' || view.date === yesterday}
+          aria-label="Next day's standings"
+        >
+          Forward ›
+        </button>
+      </nav>
     </div>
   )
 }
