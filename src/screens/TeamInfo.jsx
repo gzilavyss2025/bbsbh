@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   selectLineup,
   selectTeamMeta,
@@ -447,11 +447,10 @@ function TeamSections({
   )
 }
 
-// Cap the grid so a heavy shared history (two rosters that have swapped a lot
-// of players) doesn't run off the page; the rest collapse into a "+N more"
-// footer. A multiple of 3 so the last row of the widest (3-up) tiling doesn't
-// look truncated.
-const TEAMMATES_SHOWN = 9
+// Show only the first handful up front — a heavy shared history (two rosters
+// that have swapped a lot of players) can run to dozens of cards — and let a
+// button reveal the rest rather than dumping them all in the page's height.
+const TEAMMATES_SHOWN = 5
 
 // One card per pair of players — one from each club — who were once
 // teammates, tiling 2–3 to a row depending on width. Spoiler-free (rosters +
@@ -461,8 +460,9 @@ const TEAMMATES_SHOWN = 9
 // component reads correctly whether it's one club's page or the shared,
 // full-width copy on the spread layout.
 function FormerTeammates({ pairs }) {
+  const [showAll, setShowAll] = useState(false)
   if (!pairs || pairs.length === 0) return null
-  const shown = pairs.slice(0, TEAMMATES_SHOWN)
+  const shown = showAll ? pairs : pairs.slice(0, TEAMMATES_SHOWN)
   const hidden = pairs.length - shown.length
   return (
     <section className="teammates">
@@ -484,9 +484,9 @@ function FormerTeammates({ pairs }) {
         ))}
       </ul>
       {hidden > 0 && (
-        <p className="teammates__more">
-          +{hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
-        </p>
+        <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
+          Show {hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
+        </button>
       )}
     </section>
   )

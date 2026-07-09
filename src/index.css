@@ -2054,9 +2054,22 @@ body {
 }
 
 .teammates__more {
-  margin: 6px 2px 0;
-  font-size: 12px;
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
   color: var(--text-caption);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.teammates__more:hover {
+  color: var(--text-body);
 }
 
 /* ----------------------------------------------------------- defense diamond
