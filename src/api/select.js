@@ -355,6 +355,9 @@ export function selectTeamMeta(feed, side) {
 
   return {
     id: box.id ?? gdTeam.id,
+    // The club's level (1 MLB, 11 AAA, …) — lets a roster fetch hydrate the
+    // right level's season stats (see fetchTeamRoster); null at parks that omit it.
+    sportId: gdTeam.sport?.id ?? box.sport?.id ?? null,
     name: gdTeam.name ?? box.name ?? '',
     teamName: gdTeam.teamName ?? box.teamName ?? '',
     // The spelled-out nickname ("Diamondbacks"), distinct from teamName, which

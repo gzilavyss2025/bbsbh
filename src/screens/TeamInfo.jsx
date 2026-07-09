@@ -262,8 +262,11 @@ function TeamSections({ feed, side, oppPitcherLine, prospectsData }) {
   // lineup posts).
   const needsRoster = lineup.length === 0
   const { data: rawRoster } = useAsync(
-    () => (needsRoster && meta.id && season ? fetchTeamRoster(meta.id, season) : Promise.resolve([])),
-    [needsRoster, meta.id, season],
+    () =>
+      needsRoster && meta.id && season
+        ? fetchTeamRoster(meta.id, season, { sportId: meta.sportId ?? 1 })
+        : Promise.resolve([]),
+    [needsRoster, meta.id, meta.sportId, season],
   )
   const roster = useMemo(() => rosterFallbackGroups(rawRoster), [rawRoster])
 

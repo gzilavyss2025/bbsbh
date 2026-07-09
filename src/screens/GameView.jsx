@@ -138,8 +138,8 @@ export function GameView({ game, section, onSection }) {
       const season = f.gameData?.game?.season
       if (!season) return null
       const [awayRoster, homeRoster] = await Promise.all([
-        fetchTeamRoster(game.away.id, season),
-        fetchTeamRoster(game.home.id, season),
+        fetchTeamRoster(game.away.id, season, { sportId: game.sportId }),
+        fetchTeamRoster(game.home.id, season, { sportId: game.sportId }),
       ])
       const roles = {}
       for (const r of [...awayRoster, ...homeRoster]) {

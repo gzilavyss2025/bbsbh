@@ -72,10 +72,17 @@ export async function resolveScopeTeams(scope, orgId) {
 // Assemble the PoolPlayer[] for a scope: fan out fetchTeamRoster over every club
 // (each response already hydrated with season hitting+pitching), normalize each
 // with the club's identity + level stamped on, and concat. Degrades per team.
+//
+// Each club is fetched at its OWN level (`sportId`) so a MiLB club's players are
+// ranked on their AAA/AA/A+/A line rather than an empty MLB one (without this a
+// level's leaders collapse to just the handful who've also logged MLB time), and
+// via the '40Man' roster so an injured leader still counts (see fetchTeamRoster).
 export async function loadLeaderPool(scope, orgId, season) {
   const teams = await resolveScopeTeams(scope, orgId)
   if (teams.length === 0) return []
-  const results = await Promise.allSettled(teams.map((t) => fetchTeamRoster(t.id, season)))
+  const results = await Promise.allSettled(
+    teams.map((t) => fetchTeamRoster(t.id, season, { sportId: t.sportId, rosterType: '40Man' })),
+  )
   return teams.flatMap((t, i) => {
     const roster = results[i].status === 'fulfilled' ? results[i].value : []
     return normalizeRosterToPool(roster, {

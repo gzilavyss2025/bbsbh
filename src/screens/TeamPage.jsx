@@ -86,9 +86,14 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, ilRoster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
+  const [roster, leaderRoster, ilRoster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
     await Promise.all([
-      fetchTeamRoster(id, season),
+      fetchTeamRoster(id, season, { sportId }),
+      // A second, IL-inclusive roster (40-man) scoped to the club's level — the
+      // leaderboard pool, so an injured leader still ranks and a MiLB club's
+      // players are ranked on their own level's line (see fetchTeamRoster). The
+      // plain active `roster` above still drives the roster-listing sections.
+      fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
       fetchTeamIL(id, season),
       team.league?.id
         ? fetchStandings(team.league.id, season, standingsDate)
@@ -256,10 +261,11 @@ async function loadTeam(id, asOf) {
       (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
     )
 
-  // Per-player leaderboard pool — the roster is already hydrated with each
-  // player's season hitting+pitching split (see fetchTeamRoster), so this is a
-  // pure reshape, no extra fetch. Powers the Team Leaders section below.
-  const leaderPool = normalizeRosterToPool(roster, team)
+  // Per-player leaderboard pool — the IL-inclusive 40-man roster is already
+  // hydrated with each player's season hitting+pitching split (see
+  // fetchTeamRoster), so this is a pure reshape, no extra fetch. Powers the Team
+  // Leaders section below.
+  const leaderPool = normalizeRosterToPool(leaderRoster, team)
 
   return {
     team, season, sportId,

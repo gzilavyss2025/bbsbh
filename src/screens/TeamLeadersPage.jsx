@@ -25,7 +25,12 @@ async function loadTeamLeaders(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const season = Number((asOf || isoToday()).slice(0, 4))
-  const roster = await fetchTeamRoster(id, season)
+  // Level-scoped stats + the 40-man (IL-inclusive) roster so a MiLB club's
+  // leaders aren't limited to MLB call-ups and an injured leader still counts.
+  const roster = await fetchTeamRoster(id, season, {
+    sportId: team.sport?.id ?? 1,
+    rosterType: '40Man',
+  })
   return {
     team,
     sportId: team.sport?.id ?? 1,

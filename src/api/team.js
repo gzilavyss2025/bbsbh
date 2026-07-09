@@ -2,6 +2,7 @@
 
 import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
+import { SPORT_IDS } from '../lib/teams.js'
 
 // Basic team identity, incl. league + division ids (needed to pull the right
 // standings). Team identity barely ever changes mid-season, so this looks the
@@ -47,21 +48,35 @@ export async function fetchTeam(teamId) {
 const TEAM_ROSTER_CACHE_TTL_MS = 15 * 60 * 1000
 const teamRosterCache = new Map()
 
-// The active roster, with each player's season hitting AND pitching lines
+// A team's roster, with each player's season hitting AND pitching lines
 // hydrated: pitching so the team page can infer starter/reliever/closer (there
 // is no role field in the API), hitting+pitching so the Team Leaders section can
 // rank individual players by any season stat (see api/teamLeaders.js). Both
 // groups arrive in one request; the API returns only the split(s) a given player
 // has, so a position player carries just a hitting split and a pitcher just a
 // pitching one (a two-way player carries both). Degrades to [].
-export async function fetchTeamRoster(teamId, season) {
+//
+// Two options steer WHO and WHICH stats come back:
+//   - `sportId`: the club's LEVEL — WITHOUT it the season-stats hydrate defaults
+//     to MLB (sportId 1), so a AAA/AA/A+/A club's players get their (usually
+//     empty) MLB line and a MiLB-only player drops out of every leaderboard. Pass
+//     the club's own sportId so minor leaguers are ranked on their level's stats.
+//   - `rosterType`: 'active' (the default — who's on the field now, for the roster
+//     staging pages) or '40Man' to also fold in the Injured List. Leaders pools
+//     use '40Man' so an injured player still counts (e.g. a team's SB leader who's
+//     on the IL); '40Man' is a superset of the active roster at every level.
+export async function fetchTeamRoster(
+  teamId,
+  season,
+  { sportId = SPORT_IDS.MLB, rosterType = 'active' } = {},
+) {
   if (!teamId || !season) return []
-  const key = `${teamId}:${season}`
+  const key = `${teamId}:${season}:${sportId}:${rosterType}`
   const cached = teamRosterCache.get(key)
   if (cached && Date.now() - cached.ts < TEAM_ROSTER_CACHE_TTL_MS) return cached.data
   try {
     const data = await getJson(
-      `/api/v1/teams/${teamId}/roster?rosterType=active&hydrate=person(stats(type=season,group=[hitting,pitching],season=${season}))`,
+      `/api/v1/teams/${teamId}/roster?rosterType=${rosterType}&hydrate=person(stats(type=season,group=[hitting,pitching],sportId=${sportId},season=${season}))`,
     )
     const roster = data.roster ?? []
     teamRosterCache.set(key, { ts: Date.now(), data: roster })
