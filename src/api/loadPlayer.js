@@ -29,6 +29,7 @@ import {
 } from './person-fetch.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
+import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { historicalParentOrg } from './milbHistory.js'
 import {
   personBio,
@@ -125,9 +126,15 @@ export async function loadPlayer(id, asOf) {
   // transaction feed (fetched in parallel with the bio, to detect a live rehab
   // assignment before the stat blocks are built) is capped by it too.
   const endDate = asOf ? dayBefore(asOf) : isoToday()
-  const [person, txns] = await Promise.all([
+  // WAR (FanGraphs, MLB-only) rides along here — two same-origin static files
+  // (nightly current season + hand-run history), session-cached, so this is
+  // free after the first player page. Built into a per-group { season: war } map
+  // below and threaded into each block's tiles + career-register column.
+  const [person, txns, warCurrent, warHistory] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
+    fetchWarData(),
+    fetchWarHistory(),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -223,6 +230,7 @@ export async function loadPlayer(id, asOf) {
           gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
           currentSeason: season, currentSportId: tileSportId, debutYear, tileStat,
           logTagLevel: onRehab,
+          warByYear: warByYearFor(id, group, warCurrent, warHistory),
         })
         return { group, mlbYbySplits, milbYbySplits, block }
       }),

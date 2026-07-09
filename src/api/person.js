@@ -246,21 +246,29 @@ function tile(k, v, tone) {
   return { k, v: v === undefined || v === null || v === '' ? DASH : String(v), tone }
 }
 
-// Batter: AVG · HR · RBI · SO · SB.
-export function hitterTiles(stat) {
+// WAR (season, FanGraphs) for the tile — MLB-only, so it's null on a MiLB tile
+// and renders as a dash. A number formats to one decimal ("4.2", "-0.3").
+function warTile(war) {
+  return tile('WAR', war == null ? null : war.toFixed(1))
+}
+
+// Batter: AVG · HR · RBI · SO · WAR. WAR takes SB's slot (the least essential of
+// the old five) so the row stays five-across on a phone.
+export function hitterTiles(stat, war) {
   if (!stat) return []
   return [
     tile('AVG', stat.avg),
     tile('HR', stat.homeRuns, 'run'),
     tile('RBI', stat.rbi),
     tile('SO', stat.strikeOuts),
-    tile('SB', stat.stolenBases),
+    warTile(war),
   ]
 }
 
-// Pitcher: closer => SV·IP·ERA·K·BB; everyone else (SP + swing/RP) =>
-// W-L·IP·ERA·K·BB. The trailing four are shared; only the lead tile differs.
-export function pitcherTiles(stat, role) {
+// Pitcher: closer => SV·IP·ERA·K·WAR; everyone else (SP + swing/RP) =>
+// W-L·IP·ERA·K·WAR. Only the lead tile differs. WAR takes BB's slot to keep the
+// row five-across.
+export function pitcherTiles(stat, role, war) {
   if (!stat) return []
   const lead =
     role === 'CL'
@@ -271,7 +279,7 @@ export function pitcherTiles(stat, role) {
     tile('IP', stat.inningsPitched),
     tile('ERA', stat.era),
     tile('K', stat.strikeOuts, 'run'),
-    tile('BB', stat.baseOnBalls),
+    warTile(war),
   ]
 }
 
@@ -597,7 +605,7 @@ function stintCaption(stints, group, shown = 3) {
   return text
 }
 
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSeason, currentSportId, careerStat }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSeason, currentSportId, careerStat, warByYear = {} }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -657,6 +665,15 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   real.sort(bySeasonOrder)
   foot.sort(bySeasonOrder)
 
+  // Season WAR (FanGraphs) is MLB-only and lives outside the stat line, so it's
+  // appended as a trailing column rather than folded into yearByYearCells. Only
+  // worth a column when the player has an MLB row to carry a value — a pure
+  // prospect's all-MiLB register would otherwise gain a dead all-dashes column.
+  const showWar = real.some((s) => s.tier === 'mlb')
+  const warCell = (st) =>
+    st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
+  const withWar = (cells, war) => (showWar ? [...cells, war] : cells)
+
   const rows = real.map((st) => ({
     key: `${st.year}-${st.sid}`,
     year: String(st.year),
@@ -665,7 +682,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     sportId: st.sid,
     pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
     teamIds: st.teamIds,
-    cells: yearByYearCells(st.stat ?? {}, group, role),
+    cells: withWar(yearByYearCells(st.stat ?? {}, group, role), warCell(st)),
   }))
 
   // The collapsed climb (debuted players only): one aggregate row plus the
@@ -680,13 +697,14 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
       key: 'climb',
       yearText: minY === maxY ? `${minY}` : `${minY}–${String(maxY).slice(2)}`,
       teamIds: [...new Set(climbing.flatMap((s) => s.teamIds))],
-      cells: yearByYearCells(climbStat ?? {}, group, role),
+      // The climb is all MiLB — WAR is a dash (kept only for column alignment).
+      cells: withWar(yearByYearCells(climbStat ?? {}, group, role), DASH),
       subSeasons: [...climbing].sort(bySeasonOrder).map((s) => ({
         key: `${s.year}-${s.sid}`,
         year: String(s.year),
         level: SPORT_LABEL[s.sid] ?? '',
         teamIds: s.teamIds,
-        cells: yearByYearCells(s.stat ?? {}, group, role),
+        cells: withWar(yearByYearCells(s.stat ?? {}, group, role), DASH),
       })),
     }
   }
@@ -697,23 +715,31 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   const mlbStints = real.filter((s) => s.tier === 'mlb')
   const milbVisible = [...real.filter((s) => s.tier === 'milb'), ...climbing]
   if (mlbStints.length) {
+    // Career WAR = sum of the shown MLB years' WAR (one row per season, so no
+    // double-count). Only the seasons the history/live files cover contribute;
+    // pre-coverage years quietly add nothing (matches their dash rows).
+    const warYears = mlbStints.map((s) => warByYear[s.year]).filter((w) => w != null)
+    const warTotal = warYears.length
+      ? (Math.round(warYears.reduce((a, b) => a + b, 0) * 10) / 10).toFixed(1)
+      : DASH
     totals.push({
       label: 'MLB',
       tier: 'mlb',
-      cells: yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group, role),
+      cells: withWar(yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group, role), warTotal),
     })
   }
   if (milbVisible.length) {
     totals.push({
       label: 'MiLB',
       tier: 'milb',
-      cells: yearByYearCells(aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group, role),
+      cells: withWar(yearByYearCells(aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group, role), DASH),
     })
   }
 
-  const columns = group === 'pitching'
+  const baseColumns = group === 'pitching'
     ? ['G', 'GS', role === 'CL' ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
     : ['G', 'AB', 'HR', 'RBI', 'AVG', 'OPS']
+  const columns = showWar ? [...baseColumns, 'WAR'] : baseColumns
   return { columns, rows, climb, totals, footnote: stintCaption(foot, group) }
 }
 
@@ -1324,7 +1350,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, logTagLevel = false }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, logTagLevel = false, warByYear = {} }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles AND stands in for the register's current-season
   // row (see careerRegisterView), so that row can't move mid-game. `tileStat`
@@ -1334,11 +1360,15 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
   const season = aggregateSplits(seasonSplits, group)
   const career = aggregateSplits(careerSplits, group)
   const tile = tileStat ?? season
+  // Season WAR for the tile is MLB-only: use it only when the tiles' level is
+  // MLB (an up-and-down big leaguer's tiles resolve to MLB even while his live
+  // club is a MiLB affiliate), else the tile shows a dash.
+  const tileWar = currentSportId === 1 ? warByYear[currentSeason] ?? null : null
   return {
     group,
     role,
     title: group === 'pitching' ? 'Pitching' : 'Batting',
-    tiles: group === 'pitching' ? pitcherTiles(tile, role) : hitterTiles(tile),
+    tiles: group === 'pitching' ? pitcherTiles(tile, role, tileWar) : hitterTiles(tile, tileWar),
     // The level the "Current season" tiles belong to (MLB for an up-and-down big
     // leaguer even while his live club is a MiLB affiliate) — the label uses it,
     // and it's the level the promoted other-level tiles below skip.
@@ -1358,7 +1388,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     // the date-cut `tile` so it can't move mid-game.
     register: careerRegisterView({
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
-      currentStat: tile, currentSeason, currentSportId, careerStat: career,
+      currentStat: tile, currentSeason, currentSportId, careerStat: career, warByYear,
     }),
   }
 }
