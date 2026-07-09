@@ -17,6 +17,7 @@ import { Ledger } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 
@@ -89,6 +90,7 @@ export function PlayerPage({ id, asOf, sportId }) {
           </div>
         )}
         <SiteHeader />
+        <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
         <header className="player__hero">

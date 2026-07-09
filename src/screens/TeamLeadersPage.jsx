@@ -7,6 +7,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
@@ -51,6 +52,7 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen team-hub">
         <SiteHeader />
+        <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">

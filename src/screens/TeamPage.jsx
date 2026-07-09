@@ -28,6 +28,7 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { SectionTitle } from '../components/SectionTitle.jsx'
@@ -299,6 +300,7 @@ export function TeamPage({ id, asOf, sportId }) {
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen team-hub">
         <SiteHeader />
+        <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">

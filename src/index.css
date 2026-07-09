@@ -6787,6 +6787,45 @@ body {
   line-height: 1;
 }
 
+/* ---- as-of banner — neutral graphite strip (not a status tape like the
+   banners above) flagging that this page's link carried a spoiler-safe date
+   cutoff (see lib/route.js `?d=&s=`). "Go live" drops the cutoff without
+   hand-editing the URL. ---- */
+.asof-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  border: var(--bw-hair) dashed var(--rule);
+}
+.asof-banner__text {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.asof-banner__btn {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.asof-banner__btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
 /* ============================================================
    TEAM HUB
    ============================================================ */

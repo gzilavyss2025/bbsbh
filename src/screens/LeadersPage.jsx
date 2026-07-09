@@ -10,6 +10,7 @@ import { LinkScope } from '../lib/nav.jsx'
 import { leadersPath } from '../lib/route.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
+import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
@@ -89,6 +90,7 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
     <LinkScope asOf={asOf} sportId={sportId ?? null}>
       <div className="screen">
         <SiteHeader />
+        <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
         <header className="topbar leaders__head">
