@@ -179,6 +179,18 @@ returning to a game keeps your place. Only that half-index is stored, never a
 score — on return the app re-reveals up to the half you'd already reached, so
 the spoiler rule still holds. Nothing else is persisted.
 
+**The one exception — link previews (`api/`).** Dynamic Open Graph / Twitter
+cards for shared deep links are the sole thing that can't be done statically
+(crawlers don't run our JS, and the player/game space is unbounded), so they
+live in a thin Vercel edge layer: `api/og.js` renders the 1200×630 card image
+(`@vercel/og`), `api/preview.js` serves `index.html` with the route's `og:*`
+tags swapped into the `<!-- OG:BEGIN…OG:END -->` block, and `api/_lib/cards.js`
+resolves a route to the card's strings (the only server-side statsapi calls in
+the app). `vercel.json` rewrites the deep-link paths there. It's crawler-only:
+the SPA still fetches all game data client-side, no feature depends on it, it
+fails safe to the static default card, and it never renders/fetches a
+score-revealing value — see ADR-0012.
+
 **Routing** is a tiny dependency-free layer over the History API
 (`src/lib/route.js` — deliberately *not* react-router). Three route shapes: `/`
 (slate), `/logos` (logo sheet), and `/{MMDDYYYY}/{matchup}/{section}` for a

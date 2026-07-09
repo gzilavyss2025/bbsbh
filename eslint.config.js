@@ -61,4 +61,21 @@ export default [
       globals: { ...globals.node },
     },
   },
+
+  // Edge functions — the crawler-only link-preview layer (api/og.js,
+  // api/preview.js, api/_lib/). Web-platform runtime (fetch/Request/Response/
+  // URL/btoa), no JSX, no React. Not part of the SPA bundle.
+  {
+    files: ['api/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: 'module',
+      globals: { ...globals.browser },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }],
+    },
+  },
 ]
