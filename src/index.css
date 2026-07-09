@@ -1607,12 +1607,23 @@ body {
   border-radius: var(--radius-pill);
 }
 
-/* -------------------------------------------------- favorite-team sheet
-   FavoriteTeamModal's dialog chrome; the picker itself reuses the Splits vs
-   Team card's vsteam__tray/strip rules above. */
+/* -------------------------------------------------- favorite-team modal
+   FavoriteTeamModal's dialog chrome — a centered card (like .logomodal, via
+   .scrim--center) rather than a docked bottom sheet, so it reads as a
+   deliberate "stop and choose" moment rather than a quick in-flow picker. The
+   team picker itself reuses the Splits vs Team card's vsteam__tray/strip
+   rules above. */
 .favteamsheet {
+  width: calc(100% - 32px);
+  max-width: 440px;
   max-height: 82vh;
   overflow-y: auto;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  animation: slideup var(--dur-slow) var(--ease-out);
 }
 
 .favteamsheet__head {
@@ -1625,6 +1636,19 @@ body {
 
 .favteamsheet__head .sheet__title {
   margin: 0;
+}
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
+   .pbp__desc for the same pattern): the welcome modal's explainer copy —
+   headline and pitch — is what a visitor reads first, so it's set in the
+   reading serif at natural title case instead of shouted display uppercase,
+   like a magazine intro rather than app chrome. The `#root`-scoped selectors
+   (1 id + 1 class) are what actually outweigh the global `#root *` uppercase —
+   a plain class alone can't (see the ALL-CAPS INVARIANT block comment). */
+#root .favteamsheet__title--intro,
+#root .favteamsheet__pitch {
+  font-family: var(--font-read);
+  text-transform: capitalize; /* caps-exempt: approved title case for the welcome-modal headline + pitch only */
 }
 
 .favteamsheet__close {
