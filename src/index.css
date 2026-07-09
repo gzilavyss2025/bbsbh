@@ -1641,14 +1641,15 @@ body {
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
    .pbp__desc for the same pattern): the welcome modal's explainer copy —
    headline and pitch — is what a visitor reads first, so it's set in the
-   reading serif at natural title case instead of shouted display uppercase,
-   like a magazine intro rather than app chrome. The `#root`-scoped selectors
-   (1 id + 1 class) are what actually outweigh the global `#root *` uppercase —
-   a plain class alone can't (see the ALL-CAPS INVARIANT block comment). */
+   reading serif at natural sentence case instead of shouted display
+   uppercase, like a magazine intro rather than app chrome. The `#root`-scoped
+   selectors (1 id + 1 class) are what actually outweigh the global `#root *`
+   uppercase — a plain class alone can't (see the ALL-CAPS INVARIANT block
+   comment). */
 #root .favteamsheet__title--intro,
 #root .favteamsheet__pitch {
   font-family: var(--font-read);
-  text-transform: capitalize; /* caps-exempt: approved title case for the welcome-modal headline + pitch only */
+  text-transform: none; /* caps-exempt: welcome-modal headline + pitch read as natural sentences */
 }
 
 .favteamsheet__close {
@@ -1679,6 +1680,20 @@ body {
 
 .favteamsheet__actions {
   margin-top: var(--space-4);
+}
+
+/* Extra edge padding on the picker strip so even the alphabetical extremes
+   (first/last club) can scroll all the way to center — without it, the
+   native scrollLeft clamps at the content edge and an edge pick (e.g. the
+   Diamondbacks or the Nationals) stops short of the middle instead of
+   landing there like every interior club does. 50% of the tray's own
+   rendered width, minus half a logo button (46px: the 36px TeamLogo plus
+   .vsteam__team's 5px padding on each side) — same centering math as the
+   scrollTo effect in FavoriteTeamModal.jsx, just resolved by CSS instead of
+   a one-off JS measurement so it stays correct across viewport widths. */
+.favteamsheet .vsteam__strip {
+  padding-left: calc(50% - 23px);
+  padding-right: calc(50% - 23px);
 }
 
 /* --------------------------------------------------------------- legal */
@@ -6159,6 +6174,14 @@ body {
   overflow: hidden;
 }
 .vsteam__strip {
+  /* Makes the strip its own children's offsetParent, so a centering effect's
+     `btn.offsetLeft` (SplitsVsTeam.jsx, FavoriteTeamModal.jsx) is measured
+     relative to the strip itself rather than skipping past it — a static
+     element isn't an offsetParent — to whatever positioned ancestor happens
+     to sit further up (e.g. a modal's `position: fixed` scrim), which throws
+     the centering math off by that ancestor's own offset. No visual change:
+     `relative` with no top/left/etc. doesn't move anything. */
+  position: relative;
   display: flex;
   gap: 6px;
   overflow-x: auto;
