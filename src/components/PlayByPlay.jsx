@@ -8,6 +8,7 @@ import {
 } from '../api/playbyplay.js'
 import { buildCallouts } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
+import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
 
@@ -42,18 +43,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, callouts }) {
           />
         ),
       )}
-    </div>
-  )
-}
-
-// A season-context call-out line beneath the play description — the leader /
-// streak / situational-record notes (see api/callout-notes.js). Season
-// aggregates only, so it leaks nothing shown alongside an already-revealed play.
-function CalloutNote({ text }) {
-  return (
-    <div className="pbp__callout">
-      <span className="pbp__calloutmark" aria-hidden="true">★</span>
-      {text}
     </div>
   )
 }

@@ -518,6 +518,11 @@ export function computePlayOfTheGame(winProb, feed) {
     half: best.about?.isTopInning ? 'top' : 'bottom',
     batterId,
     batterName: batterGd ? firstLast(batterGd) : '',
+    // The running score right after this play — the box score's Play of the
+    // Game card appends it as "MIL 5, STL 3" so the moment reads with its
+    // consequence attached, not just the bare description.
+    awayScore: typeof best.result?.awayScore === 'number' ? best.result.awayScore : null,
+    homeScore: typeof best.result?.homeScore === 'number' ? best.result.homeScore : null,
   }
 }
 

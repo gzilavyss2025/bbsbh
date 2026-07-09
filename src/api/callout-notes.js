@@ -6,6 +6,9 @@
 // and PlayByPlay.jsx stays a view. Empty when there's no bundle (MiLB /
 // un-generated game), so the card renders exactly as before.
 
+import { firstRunPlay, firstPAIndexByBatter, NON_PA_EVENT_TYPES } from './playbyplay.js'
+import { personNameParts } from './select.js'
+
 // Which season leader category each PA result eventType can trigger, and how the
 // note reads. Marquee set only — mirrors gen-callouts.mjs HIT_KEYS.
 const HIT_TRIGGERS = {
@@ -87,4 +90,45 @@ export function buildCallouts(entry, { bundle, firstRun, firstPA, battingSide } 
   }
 
   return notes
+}
+
+// Every call-out that actually fired somewhere in the game, deduped in
+// first-seen order — the box score's Insights card roll-up of the same notes
+// that appear piecemeal on individual at-bat cards in the innings view (see
+// buildCallouts above). Walks the raw feed directly rather than routing
+// through computeHalfInningFeed (one call per half, with its pitch-detail and
+// baserunning-advancement passes) since none of that is needed here — just
+// each play's own result, batter, pitcher, and any baserunning event it
+// carries. REVEAL-ONLY: the whole game is already behind the box score's
+// SealBox by the time this is called, same rule as computeGameSuperlatives.
+export function computeGameCalloutNotes(feed, bundle) {
+  if (!bundle) return []
+  const firstRun = firstRunPlay(feed)
+  const firstPA = firstPAIndexByBatter(feed)
+  const seen = new Set()
+  const ordered = []
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const battingSide = play.about?.halfInning === 'top' ? 'away' : 'home'
+    const pitcherId = play.matchup?.pitcher?.id
+    const pitcher =
+      pitcherId != null
+        ? { id: pitcherId, ...personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {}) }
+        : null
+    const baserunningNotes = (play.playEvents ?? [])
+      .filter((e) => !e.isPitch && NON_PA_EVENT_TYPES.has(e.details?.eventType))
+      .map((e) => ({ eventType: e.details.eventType, runnerId: e.player?.id ?? null }))
+    const entry = {
+      eventType: play.result?.eventType ?? null,
+      batterId: play.matchup?.batter?.id,
+      atBatIndex: play.about?.atBatIndex ?? null,
+      pitcher,
+      baserunningNotes,
+    }
+    for (const note of buildCallouts(entry, { bundle, firstRun, firstPA, battingSide })) {
+      if (seen.has(note)) continue
+      seen.add(note)
+      ordered.push(note)
+    }
+  }
+  return ordered
 }
