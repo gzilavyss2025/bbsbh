@@ -102,6 +102,29 @@ export function InningViewer({
       ? null
       : `${nextIdx % 2 === 0 ? 'Top' : 'Bottom'} ${ordinal(Math.floor(nextIdx / 2) + 1)}`
 
+  // Whether the half being shown is still sealed. When it is, the fixed bottom
+  // bar's primary action becomes "Reveal {this half}" (in thumb reach, so you
+  // never scroll down past the staging lineups to find the kraft cover); once
+  // revealed it flips back to the Next / View-box-score advance. Revealing from
+  // the bar then scrolls the freshly-uncovered results into view, since the
+  // layout flips the results up above where the button sits.
+  const currentSealed = curIdx > revealedThrough
+  const curHalfLabel = `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`
+  const resultsRef = useRef(null)
+  const scrollPendingRef = useRef(false)
+  const revealCurrent = () => {
+    scrollPendingRef.current = true
+    revealTo(effInning, effHalf)
+  }
+  useEffect(() => {
+    if (!scrollPendingRef.current) return
+    scrollPendingRef.current = false
+    const el = resultsRef.current
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    el.focus?.({ preventScroll: true }) // AT parity: land on the results, not <body>
+  }, [revealedThrough])
+
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
   // Back never revisits the bogus address. Without this the URL, the stepnav's
@@ -188,7 +211,7 @@ export function InningViewer({
           </nav>
 
           {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
-          <div className="inning" key={`${effInning}-${effHalf}`}>
+          <div className="inning" key={`${effInning}-${effHalf}`} ref={resultsRef} tabIndex={-1}>
             <HalfInning
               feed={feed}
               inning={effInning}
@@ -254,7 +277,16 @@ export function InningViewer({
           </span>
           {loading ? 'Refreshing…' : 'Refresh'}
         </button>
-        {nextIdx != null ? (
+        {currentSealed ? (
+          <button
+            type="button"
+            className="btn btn--reveal"
+            onClick={revealCurrent}
+            aria-label={`Reveal ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
+          >
+            <span className="btn__lock" aria-hidden="true">🔒</span> Reveal {curHalfLabel}
+          </button>
+        ) : nextIdx != null ? (
           <button className="btn btn--next" onClick={() => goTo(nextIdx)}>
             Next: {nextLabel} →
           </button>
