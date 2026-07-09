@@ -12,6 +12,7 @@ import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { TeamLogo } from '../components/TeamLogo.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { RefreshButton } from './TeamInfo.jsx'
 
@@ -255,15 +256,43 @@ function InsightsCard({ insights, calloutNotes }) {
       {/* Every leader/streak/situational-record note that fired somewhere in
           the game (see computeGameCalloutNotes) — the same notes shown one at
           a time on the play they belong to in the innings view, rolled up
-          here as tonight's full set. */}
+          here as tonight's full set, each carrying its own player headshot or
+          team logo(s) so it's clear at a glance who it's about. */}
       {hasNotes && (
-        <div className={`bs__insightNotes${hasStatcast ? ' bs__insightNotes--divided' : ''}`}>
-          {calloutNotes.map((text, i) => (
-            <CalloutNote key={i} text={text} />
+        <div className={`bs__noteGrid${hasStatcast ? ' bs__noteGrid--divided' : ''}`}>
+          {calloutNotes.map((note, i) => (
+            <InsightNoteCard key={i} note={note} />
           ))}
         </div>
       )}
     </section>
+  )
+}
+
+// One call-out note as its own card: the player's headshot (or, for a note
+// about a club rather than a person — a situational team record — that
+// club's logo, both logos when it pits two clubs against each other) beside
+// his name and the note text.
+function InsightNoteCard({ note }) {
+  return (
+    <div className="bs__noteCard">
+      <span className="bs__noteAvatar">
+        {note.personId != null ? (
+          <Headshot personId={note.personId} name={note.personName} className="bs__noteShot" />
+        ) : (
+          <span className="bs__noteLogos">
+            <TeamLogo teamId={note.teamId} name={note.teamName} size={26} />
+            {note.oppTeamId != null && (
+              <TeamLogo teamId={note.oppTeamId} name={note.oppTeamName} size={26} />
+            )}
+          </span>
+        )}
+      </span>
+      <span className="bs__noteBody">
+        {note.personName && <span className="bs__noteWho">{note.personName}</span>}
+        <CalloutNote text={note.text} />
+      </span>
+    </div>
   )
 }
 

@@ -4786,19 +4786,75 @@ body {
   border-top: none;
 }
 
-/* The call-out notes list. Each note is a .pbp__callout (same star-marked
-   strip as the innings view), stacked with a little breathing room; when
-   Statcast cards sit above it, a dashed rule (matching .statcast's own)
-   separates the two sections instead of them running together. */
-.bs__insightNotes {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* The call-out notes grid — one card per note (see InsightNoteCard), each
+   wide enough for a full sentence beside its avatar, wrapping to fit however
+   many fired tonight. When Statcast cards sit above it, a dashed rule
+   (matching .statcast's own) separates the two sections instead of them
+   running together. */
+.bs__noteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
 }
-.bs__insightNotes--divided {
+.bs__noteGrid--divided {
   margin-top: 10px;
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+/* One call-out note card: a headshot (or team logo(s), for a note about a
+   club rather than a person) beside the player's name and the note itself
+   (a .pbp__callout, same star-marked strip as the innings view). Same card
+   chrome as .statcast__card so it reads as a sibling of the Statcast tiles
+   above it, but laid out as a row — there's a full sentence to fit, not just
+   a number. */
+.bs__noteCard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.bs__noteAvatar {
+  flex: none;
+}
+.shot.bs__noteShot {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.shot.bs__noteShot.shot--fallback {
+  font-size: 16px;
+}
+.bs__noteLogos {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.bs__noteBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.bs__noteWho {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* The note text rides inside this card rather than the innings feed, so it
+   doesn't need the star-strip's own background/border treatment. */
+.bs__noteBody .pbp__callout {
+  padding: 0;
+  border-left: none;
+  background: none;
 }
 
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
