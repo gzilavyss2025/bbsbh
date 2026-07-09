@@ -6,7 +6,7 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -38,12 +38,14 @@ export function RehabPage() {
         <h1 className="topbar__title">Rehab Assignments</h1>
       </header>
 
-      {loading && !data && <Loader />}
-      {error && <p className="hint hint--error">Couldn’t load rehab assignments. Try again.</p>}
-
-      {data && players.length === 0 && (
-        <p className="hint hint--prose">No players are on a rehab assignment right now.</p>
-      )}
+      <AsyncStatus
+        loading={loading}
+        error={error}
+        hasData={players.length > 0}
+        errorMessage="Couldn’t load rehab assignments. Try again."
+        emptyMessage="No players are on a rehab assignment right now."
+        emptyProse
+      />
 
       {players.length > 0 && (
         <>

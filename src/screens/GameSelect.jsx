@@ -15,7 +15,7 @@ import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
@@ -156,20 +156,14 @@ export function GameSelect({ onPick, onShowLogos }) {
         )}
       </div>
 
-      {loading && <Loader />}
-      {error && (
-        <>
-          <p className="hint hint--error" role="status">
-            Couldn’t load games. Check your connection and try again.
-          </p>
-          <button className="btn" onClick={slate.reload}>
-            Retry
-          </button>
-        </>
-      )}
-      {!loading && !error && sorted.length === 0 && (
-        <p className="hint">No games scheduled.</p>
-      )}
+      <AsyncStatus
+        loading={loading}
+        error={error}
+        hasData={sorted.length > 0}
+        errorMessage="Couldn’t load games. Check your connection and try again."
+        onRetry={slate.reload}
+        emptyMessage="No games scheduled."
+      />
 
       <ul className="gamelist">
         {sorted.map((g) => (

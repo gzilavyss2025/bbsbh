@@ -9,7 +9,7 @@ import { BoxScore } from './BoxScore.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
@@ -131,26 +131,18 @@ export function GameView({ game, section, onSection }) {
         />
       )}
 
-      {feedState.loading && !feed && <Loader />}
-      {/* Cold-load failure (never got a feed): collapse to a retry card. */}
-      {!feed && feedState.error && (
-        <>
-          <p className="hint hint--error">
-            Couldn’t load this game. Try again in a moment.
-          </p>
-          <button className="btn" onClick={feedState.reload}>
-            Retry
-          </button>
-        </>
-      )}
-      {/* Refresh failure with a feed already in hand: keep the game on screen
-          (useAsync retains the last-good feed) and just flag the stale refresh
-          so one flaky request at a live game doesn't tear down the view. */}
-      {feed && feedState.error && (
-        <p className="hint hint--error" role="status">
-          Couldn’t refresh — showing the last update.
-        </p>
-      )}
+      {/* Cold-load failure (never got a feed) collapses to a retry card; a
+          refresh failure with a feed already in hand (useAsync retains the
+          last-good feed) instead flags a non-blocking stale-refresh notice so
+          one flaky request at a live game doesn't tear down the view. */}
+      <AsyncStatus
+        loading={feedState.loading}
+        error={feedState.error}
+        hasData={Boolean(feed)}
+        errorMessage="Couldn’t load this game. Try again in a moment."
+        onRetry={feedState.reload}
+        staleErrorMessage="Couldn’t refresh — showing the last update."
+      />
 
       {feed && (step === 0 || step === 1) && wide && (
         <LineupSpread

@@ -7,7 +7,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // MLB seasons open in late March / early April; an earlier month-first button
@@ -186,13 +186,14 @@ export function StandingsPage() {
         )}
       </div>
 
-      {loading && leagues.length === 0 && <Loader />}
-      {error && leagues.length === 0 && (
-        <p className="hint hint--error">Couldn’t load standings. Try again.</p>
-      )}
-      {!loading && !error && leagues.length === 0 && (
-        <p className="hint hint--prose">No standings available for this date.</p>
-      )}
+      <AsyncStatus
+        loading={loading}
+        error={error}
+        hasData={leagues.length > 0}
+        errorMessage="Couldn’t load standings. Try again."
+        emptyMessage="No standings available for this date."
+        emptyProse
+      />
 
       <div className={refreshing ? 'standings-body is-refreshing' : 'standings-body'}>
         {leagues.map((lg) => (

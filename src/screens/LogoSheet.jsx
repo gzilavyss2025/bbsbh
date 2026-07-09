@@ -7,7 +7,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used
@@ -33,20 +33,14 @@ export function LogoSheet({ onBack }) {
 
       <LevelNav sportId={sportId} onChange={setSportId} />
 
-      {teamsState.loading && <Loader />}
-      {teamsState.error && (
-        <>
-          <p className="hint hint--error" role="status">
-            Couldn’t load teams. Check your connection and try again.
-          </p>
-          <button className="btn" onClick={teamsState.reload}>
-            Retry
-          </button>
-        </>
-      )}
-      {!teamsState.loading && !teamsState.error && teams.length === 0 && (
-        <p className="hint">No teams found.</p>
-      )}
+      <AsyncStatus
+        loading={teamsState.loading}
+        error={teamsState.error}
+        hasData={teams.length > 0}
+        errorMessage="Couldn’t load teams. Check your connection and try again."
+        onRetry={teamsState.reload}
+        emptyMessage="No teams found."
+      />
 
       <ul className="logogrid">
         {teams.map((t) => (

@@ -8,7 +8,7 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -81,12 +81,14 @@ export function ProspectsPage() {
         <h1 className="topbar__title">Top 100 Prospects</h1>
       </header>
 
-      {loading && !data && <Loader />}
-      {error && <p className="hint hint--error">Couldn’t load prospect rankings. Try again.</p>}
-
-      {data && players.length === 0 && (
-        <p className="hint hint--prose">Prospect rankings aren’t available right now — check back later.</p>
-      )}
+      <AsyncStatus
+        loading={loading}
+        error={error}
+        hasData={players.length > 0}
+        errorMessage="Couldn’t load prospect rankings. Try again."
+        emptyMessage="Prospect rankings aren’t available right now — check back later."
+        emptyProse
+      />
 
       {players.length > 0 && (
         <>
