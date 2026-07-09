@@ -3,15 +3,21 @@
 // half's first pitch (so a change made *during* the half is not shown until the
 // user reveals their way into it). It is not, on its own, a score-revealing
 // value, but substitution *timing* is spoiler-adjacent — a flurry of pre-half
-// replacements telegraphs a sealed blowout — so this carries the same
-// caller-gating contract as api/select.js's selectPrePitchChanges: a caller
-// rendering it OUTSIDE a SealBox must restrict it to the half that is the
-// user's own next one to reveal (halfIndex <= revealedThrough + 1). See
-// forEachEventBeforeFirstPitch in select.js. InningViewer renders it under that
-// gate; BoxScore renders the whole-game alignment (throughInning = Infinity)
-// inside the box score's own seal.
+// replacements telegraphs a sealed blowout — so defenseEntering enforces its
+// own spoiler-safety gate: it takes `revealedThrough` and returns null for a
+// half further out than the user's own next one to reveal (see
+// safeToShowEntering in api/enteringHalf.js), rather than trusting the caller
+// to check first. InningViewer just passes revealedThrough straight through;
+// BoxScore renders the whole-game alignment (throughInning = Infinity) inside
+// the box score's own seal, where revealedThrough is irrelevant (defaults to
+// Infinity — see enteringHalf.js).
 
-import { selectLineup, lastName, forEachEventBeforeFirstPitch } from './select.js'
+import { selectLineup } from './select.js'
+import {
+  forEachEventBeforeFirstPitch,
+  enteringLastName,
+  safeToShowEntering,
+} from './enteringHalf.js'
 
 // The eight positions that stand in the diamond (the pitcher has his own table;
 // the DH bats but never fields, so he rides a line beneath the field).
@@ -26,10 +32,17 @@ const DISPLAY_ORDER = ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH']
 // Every entry but the last carries replaced:true so the caller can strike it
 // through, scorebook style — the surviving occupant is the final, un-struck
 // name. Pass Infinity/'bottom' as through* to get the whole-game alignment.
-export function defenseEntering(feed, fieldingSide, throughInning, throughHalf) {
+//
+// `revealedThrough` (a half-index; see halfIndex) is the caller's reveal
+// high-water mark — required to render this outside a SealBox. Returns null
+// when (throughInning, throughHalf) is further out than the half the user is
+// due to reveal next; defaults to Infinity for callers already inside their
+// own seal (BoxScore's whole-game read), which always passes the gate.
+export function defenseEntering(feed, fieldingSide, throughInning, throughHalf, revealedThrough = Infinity) {
+  if (!safeToShowEntering(revealedThrough, throughInning, throughHalf)) return null
+
   const lineup = selectLineup(feed, fieldingSide)
-  const players = feed?.gameData?.players ?? {}
-  const nameOf = (id) => lastName(players[`ID${id}`] ?? {}) || '—'
+  const nameOf = (id) => enteringLastName(feed, id)
 
   // Substitutions are matched to positions by abbreviation, but both teams field
   // the same eight spots — so a sub must be attributed to the team that made it,

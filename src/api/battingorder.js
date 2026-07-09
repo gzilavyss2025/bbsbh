@@ -6,10 +6,11 @@
 // position for a scorebook-ready row.
 //
 // Like api/defense.js's defenseEntering, this is spoiler-adjacent by substitution
-// *timing* (a pinch-hitter telegraphs a game situation), so it shares the same
-// caller-gating contract as selectPrePitchChanges: a caller rendering it outside
-// a SealBox must restrict it to the half that is the user's own next one to
-// reveal (halfIndex <= revealedThrough + 1). See forEachEventBeforeFirstPitch.
+// *timing* (a pinch-hitter telegraphs a game situation), so lineupEntering
+// enforces its own spoiler-safety gate rather than trusting the caller: it
+// takes `revealedThrough` and returns null for a half further out than the
+// user's own next one to reveal (see safeToShowEntering in
+// api/enteringHalf.js).
 //
 // A player's batting SLOT never needs reconstructing from event replay: every
 // boxscore player's own `battingOrder` value already encodes it directly as
@@ -19,15 +20,23 @@
 // in the game yet, entering this half) comes from event replay, via
 // entrantsBeforeFirstPitch; the fielding position comes from defenseEntering.
 
-import { lastName, personNameParts, entryIndexById, entrantsBeforeFirstPitch } from './select.js'
+import { entryIndexById } from './select.js'
+import {
+  enteringLastName,
+  enteringFirstName,
+  entrantsBeforeFirstPitch,
+  safeToShowEntering,
+} from './enteringHalf.js'
 import { defenseEntering } from './defense.js'
 
-export function lineupEntering(feed, battingSide, throughInning, throughHalf) {
+export function lineupEntering(feed, battingSide, throughInning, throughHalf, revealedThrough = Infinity) {
+  if (!safeToShowEntering(revealedThrough, throughInning, throughHalf)) return null
+
   const team = feed?.liveData?.boxscore?.teams?.[battingSide]
   const boxPlayers = team?.players ?? {}
   const players = feed?.gameData?.players ?? {}
-  const nameOf = (id) => lastName(players[`ID${id}`] ?? {}) || '—'
-  const firstNameOf = (id) => personNameParts(players[`ID${id}`] ?? {}).first
+  const nameOf = (id) => enteringLastName(feed, id)
+  const firstNameOf = (id) => enteringFirstName(feed, id)
   const entered = entryIndexById(feed)
 
   // Who's in the game as this half begins: starters (no entry event) always,
@@ -39,9 +48,12 @@ export function lineupEntering(feed, battingSide, throughInning, throughHalf) {
   // Fielding position per player entering this half, inverted from the side's
   // defensive alignment — the last (un-replaced) occupant of each spot. Covers
   // the eight fielders + DH; anyone else (a batting pitcher, or a sub not yet
-  // assigned a spot) falls back to his own starting/primary position.
+  // assigned a spot) falls back to his own starting/primary position. The
+  // gate above already passed, so this nested defenseEntering call is safe
+  // regardless of whether revealedThrough is threaded through it too — but it
+  // is, for defense in depth.
   const posById = {}
-  for (const spot of defenseEntering(feed, battingSide, throughInning, throughHalf)) {
+  for (const spot of defenseEntering(feed, battingSide, throughInning, throughHalf, revealedThrough) ?? []) {
     const cur = spot.entries[spot.entries.length - 1]
     if (cur?.id != null) posById[cur.id] = spot.position
   }

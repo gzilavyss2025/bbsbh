@@ -17,6 +17,7 @@ import { selectWinProbPath } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
+import { safeToShowEntering } from '../api/enteringHalf.js'
 import { prospectBadge } from '../api/prospects.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
@@ -280,6 +281,7 @@ export function InningViewer({
             homeName={meta.home.clubName}
             revealed={curIdx <= revealedThrough}
             isNextToReveal={curIdx === revealedThrough + 1}
+            revealedThrough={revealedThrough}
             getDerived={getDerived}
             onReveal={revealTo}
             prospectsData={prospectsData}
@@ -291,7 +293,11 @@ export function InningViewer({
             on the left, both lineups on the right. On a phone only Pitchers
             shows here — the lineups & defense render inline in the half instead
             (the -lineups / -defense blocks are hidden <740; the inline copies,
-            .half__entering, are hidden ≥740). Gated to a reached half. */}
+            .half__entering, are hidden ≥740). Gated to a reached half — the
+            gate itself now lives in defenseEntering/lineupEntering (passed
+            revealedThrough below), not re-derived here; this outer check only
+            decides whether to print the wrapper/title around them, so a
+            further-out half doesn't leave a title-only empty card. */}
         <div className="innings__ref">
           <div className="innings__ref-left">
             <PitchersSection
@@ -300,7 +306,7 @@ export function InningViewer({
                 { name: rosters.home.name, rows: pitcherLines.home },
               ]}
             />
-            {curIdx <= revealedThrough + 1 && (
+            {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">
                 <DefenseSection
                   feed={feed}
@@ -308,11 +314,12 @@ export function InningViewer({
                   half={effHalf}
                   fieldingSide={effHalf === 'top' ? 'home' : 'away'}
                   fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
+                  revealedThrough={revealedThrough}
                 />
               </div>
             )}
           </div>
-          {curIdx <= revealedThrough + 1 && (
+          {safeToShowEntering(revealedThrough, effInning, effHalf) && (
             <div className="innings__ref-lineups">
               <h3 className="innings__reference-title">Lineups</h3>
               <LineupSection
@@ -322,6 +329,7 @@ export function InningViewer({
                 awayName={meta.away.clubName}
                 homeName={meta.home.clubName}
                 prospectsData={prospectsData}
+                revealedThrough={revealedThrough}
               />
             </div>
           )}
@@ -477,6 +485,7 @@ function HalfInning({
   homeName,
   revealed,
   isNextToReveal,
+  revealedThrough,
   getDerived,
   onReveal,
   prospectsData,
@@ -487,13 +496,18 @@ function HalfInning({
   // state: ABOVE the seal while the half is still sealed (stage the sheet before
   // tapping), then BELOW the play-by-play once revealed (out of the way of the
   // results). Only for a half the user has reached; a half further out stays
-  // fully sealed — its "entering" state would leak the intervening subs. On the
-  // wide layout this inline copy is hidden (.half__entering) and the same
-  // reference rides its own card in the right column instead.
+  // fully sealed — its "entering" state would leak the intervening subs, and
+  // defenseEntering/lineupEntering (called inside EnteringReference, given
+  // revealedThrough below) enforce that themselves now rather than relying
+  // solely on the !revealed && isNextToReveal / revealed checks below, which
+  // remain only to choose ABOVE vs BELOW the seal. On the wide layout this
+  // inline copy is hidden (.half__entering) and the same reference rides its
+  // own card in the right column instead.
   const enteringCards = (
     <div className="half__entering">
       <EnteringReference
         feed={feed}
+        revealedThrough={revealedThrough}
         inning={inning}
         half={half}
         battingSide={battingSide}
@@ -887,11 +901,13 @@ function PrePitchChanges({ feed, inning, half, pitchingName }) {
 
 // The fielding team's defensive alignment ENTERING this half, drawn as the
 // scorebook diamond and captioned with the fielding side. Shows the state at
-// first pitch (defenseEntering) — a change made during the half stays sealed —
-// so it's safe outside the seal under the caller's reveal gate.
-function DefenseSection({ feed, inning, half, fieldingSide, fieldingName }) {
-  const defense = defenseEntering(feed, fieldingSide, inning, half)
-  if (defense.length === 0) return null
+// first pitch (defenseEntering) — a change made during the half stays sealed.
+// defenseEntering itself enforces the reveal gate given revealedThrough (see
+// api/enteringHalf.js's safeToShowEntering), returning null past it, so this
+// is safe to call outside the seal regardless of caller diligence.
+function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, revealedThrough }) {
+  const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
+  if (!defense || defense.length === 0) return null
   return (
     <section className="halfdefense">
       <h4 className="halfdefense__title">
@@ -906,8 +922,9 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingName }) {
 // side's alignment as they stand ENTERING it (subs through first pitch only).
 // Factored out because two layouts render it — inline in the half-inning on a
 // phone (staged around the seal), and as a right-column card on the wide layout.
-// Spoiler-free under the caller's reveal gate (ADR-0010).
-function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, prospectsData }) {
+// Spoiler-free: revealedThrough is threaded straight into defenseEntering/
+// lineupEntering below, which enforce the gate themselves (ADR-0010).
+function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, prospectsData, revealedThrough }) {
   return (
     <>
       <LineupSection
@@ -917,6 +934,7 @@ function EnteringReference({ feed, inning, half, battingSide, awayName, homeName
         awayName={awayName}
         homeName={homeName}
         prospectsData={prospectsData}
+        revealedThrough={revealedThrough}
       />
       <DefenseSection
         feed={feed}
@@ -924,6 +942,7 @@ function EnteringReference({ feed, inning, half, battingSide, awayName, homeName
         half={half}
         fieldingSide={battingSide === 'away' ? 'home' : 'away'}
         fieldingName={battingSide === 'away' ? homeName : awayName}
+        revealedThrough={revealedThrough}
       />
     </>
   )
@@ -932,17 +951,19 @@ function EnteringReference({ feed, inning, half, battingSide, awayName, homeName
 // Both teams' lineup cards as they stand ENTERING this half — the nine
 // batting-order slots per side, each name with its jersey number and fielding
 // position, subs (pinch-hitter/runner/double-switch) folded in through first
-// pitch only (lineupEntering). Rendered outside the seal under the caller's
-// reveal gate: it's the reference you copy onto the sheet before scoring.
-function LineupSection({ feed, inning, half, awayName, homeName, prospectsData }) {
-  const away = lineupEntering(feed, 'away', inning, half)
-  const home = lineupEntering(feed, 'home', inning, half)
-  if (away.length === 0 && home.length === 0) return null
+// pitch only (lineupEntering). Rendered outside the seal: lineupEntering
+// itself enforces the reveal gate given revealedThrough, same as
+// DefenseSection above — it's the reference you copy onto the sheet before
+// scoring.
+function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, revealedThrough }) {
+  const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
+  const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
+  if ((!away || away.length === 0) && (!home || home.length === 0)) return null
   return (
     <section className="lineupcard">
       <div className="lineupcard__teams">
-        <LineupTeam name={awayName || 'Away'} slots={away} prospectsData={prospectsData} />
-        <LineupTeam name={homeName || 'Home'} slots={home} prospectsData={prospectsData} />
+        <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} />
+        <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} />
       </div>
     </section>
   )
