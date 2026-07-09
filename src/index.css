@@ -5034,9 +5034,11 @@ body {
   height: 139px;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  box-shadow: var(--inset-cell);
+  /* Transparent fill so the silo cutout floats on whatever card/page sits
+     behind it, and a faint hairline (not the full rule) so the frame barely
+     whispers around the floating cutout. */
+  background: transparent;
+  border: var(--bw-hair) solid var(--border-hairline);
   flex: 0 0 auto;
 }
 .shot img {
@@ -5056,6 +5058,10 @@ body {
   font-weight: var(--w-bold);
   font-size: 40px;
   color: var(--graphite-soft);
+  /* No cutout art here — restore the filled inset chip the transparent base
+     rule drops, so the empty-state monogram still reads as a mounted card. */
+  background: var(--surface-inset);
+  box-shadow: var(--inset-cell);
 }
 .player__name {
   margin: 0;
