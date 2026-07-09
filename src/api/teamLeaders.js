@@ -9,10 +9,10 @@
 //
 // The module is deliberately POOL-AGNOSTIC: every ranking/formatting function
 // reads only a normalized `PoolPlayer` array and a category descriptor, never
-// how that pool was assembled. Today the pool is one team's roster
-// (`normalizeRosterToPool`); the same `computeLeaders` + descriptors are meant to
-// later rank a whole league/level by swapping in a different pool producer (see
-// the Phase 3 note at the bottom).
+// how that pool was assembled. The pool producers themselves (one team, a
+// league/level, or a whole org) live in api/statsLevels.js /
+// api/leaders.js — see loadCombinedPoolForTeams and the Phase 3 note at the
+// bottom.
 //
 // PoolPlayer shape (the swappable boundary):
 //   { id, name, teamId, teamAbbr, position, sportId,
@@ -22,8 +22,6 @@
 // `sportId` (the club's level: 1 MLB, 11 AAA, …) rides along so a multi-level
 // pool — an org's whole farm system — can badge each leader with his level;
 // null / ignored for a single-level pool.
-
-import { firstLast } from './person.js'
 
 const DASH = '—'
 
@@ -144,33 +142,6 @@ export const FEATURED_CATEGORIES = FEATURED_KEYS.map((k) =>
 // Pool producers + ranking
 // ---------------------------------------------------------------------------
 
-// The season stat split for a group, selected BY GROUP NAME (fetchTeamRoster
-// hydrates both hitting and pitching, so index-0 is not reliably one group).
-function splitFor(person, group) {
-  return (
-    (person?.stats ?? []).find((s) => s.group?.displayName === group)?.splits?.[0]
-      ?.stat ?? null
-  )
-}
-
-// One team's active roster → PoolPlayer[]. `team` stamps the club identity onto
-// every player (all the same here; the field earns its keep once the pool spans
-// multiple teams — see Phase 3).
-export function normalizeRosterToPool(roster, team) {
-  return (roster ?? [])
-    .filter((r) => r.person?.id)
-    .map((r) => ({
-      id: r.person.id,
-      name: firstLast(r.person),
-      teamId: team?.id ?? null,
-      teamAbbr: team?.abbreviation ?? '',
-      sportId: team?.sport?.id ?? null,
-      position: r.position?.abbreviation ?? '',
-      hitting: splitFor(r.person, 'hitting'),
-      pitching: splitFor(r.person, 'pitching'),
-    }))
-}
-
 // Playing time in a group's natural unit — PA for hitters, outs for pitchers.
 // Used for both the roster-relative qualifier and the tie-break.
 function playingTime(stat, group) {
@@ -252,7 +223,8 @@ export function computeLeaders(pool, category, { limit = 5, qualifier = 'roster'
 // Phase 3 (built — see api/leaders.js): league/level/org pool producers emit the
 // SAME PoolPlayer[] shape, so computeLeaders + the descriptors + the render
 // components stay untouched — a scope selector swaps only the producer feeding
-// the pool. Rather than the batch /people endpoint sketched here, leaders.js
-// reuses fetchTeamRoster (already hydrated + cached) fanned out over a scope's
-// clubs, resolved from the static teams file (no new endpoint), and passes
-// `qualifier: 'leader-relative'` for the larger pools.
+// the pool. leaders.js resolves a scope to its clubs from the static teams file
+// (no new endpoint), then reads each club's roster-independent season stats
+// (loadCombinedPoolForTeams, api/statsLevels.js) so a traded-away or promoted-
+// off player still ranks, and passes `qualifier: 'leader-relative'` for the
+// larger pools.

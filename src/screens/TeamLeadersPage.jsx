@@ -1,5 +1,6 @@
-import { fetchTeam, fetchTeamRoster } from '../api/team.js'
-import { normalizeRosterToPool, ALL_CATEGORIES } from '../api/teamLeaders.js'
+import { fetchTeam } from '../api/team.js'
+import { ALL_CATEGORIES } from '../api/teamLeaders.js'
+import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -19,22 +20,18 @@ function isoToday() {
 // The full per-category leaderboard for a team, on its own page (the team page
 // shows only a featured cross-section and links here via "See all ›"). Reuses
 // the same TeamLeaders component + descriptors, just with the full ALL_CATEGORIES
-// list and a deeper per-category limit. The roster is already hydrated with each
-// player's season hitting+pitching split, so this is one team + one roster fetch.
+// list and a deeper per-category limit. The pool comes from the club's season
+// stats (roster-independent), not its current roster, so a player traded away,
+// released, or promoted off the club still ranks — scoped to only the stats he
+// accumulated while there (see loadCombinedPoolForTeams).
 async function loadTeamLeaders(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const season = Number((asOf || isoToday()).slice(0, 4))
-  // Level-scoped stats + the 40-man (IL-inclusive) roster so a MiLB club's
-  // leaders aren't limited to MLB call-ups and an injured leader still counts.
-  const roster = await fetchTeamRoster(id, season, {
-    sportId: team.sport?.id ?? 1,
-    rosterType: '40Man',
-  })
   return {
     team,
     sportId: team.sport?.id ?? 1,
-    pool: normalizeRosterToPool(roster, team),
+    pool: await loadCombinedPoolForTeams([{ id }], season),
   }
 }
 

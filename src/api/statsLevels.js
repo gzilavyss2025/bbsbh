@@ -57,6 +57,27 @@ export async function fetchTeamSeasonStats(teamId, group, season) {
   }
 }
 
+// The PoolPlayer[] for a set of clubs, built from each club's roster-
+// INDEPENDENT season stats rather than its current roster — so a player who's
+// since been traded, released, optioned out, or promoted off one of these
+// clubs still ranks, scoped to only the stats he accumulated while there (the
+// teamId-scoped stats split never includes a line from any other club). One
+// team's split is a no-op "sum" through sumHitting/sumPitching; combineToPool
+// earns its keep here by folding in a same-team, two-stint player (released
+// and re-signed) without double-counting. Used for every roster-membership
+// leaderboard pool — team, league/level, and org (see leaders.js) — so a
+// traded-away Rengifo or a promoted-out-of-A Fischer still shows up, credited
+// only for his time on the club being viewed.
+export async function loadCombinedPoolForTeams(teams, season) {
+  if (!teams.length) return []
+  const [hit, pit] = await Promise.all([
+    Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'hitting', season))),
+    Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'pitching', season))),
+  ])
+  const settledFlat = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  return combineToPool(settledFlat(hit), settledFlat(pit))
+}
+
 const num = (x) => {
   const n = Number(x)
   return Number.isFinite(n) ? n : 0
