@@ -1957,6 +1957,60 @@ body {
   text-transform: uppercase;
 }
 
+/* ---------------------------------------------------------- former teammates
+   Opponents who once shared a (club, season) with someone on this side —
+   cross-team history only. Same bordered card as the opposing lists; each row
+   is the opposing player over a soft caption of the mates + shared club(s). */
+.teammates__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.teammates__row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: 14px;
+}
+
+.teammates__list li:first-child {
+  border-top: none;
+}
+
+.teammates__namewrap {
+  min-width: 0;
+}
+
+.teammates__name {
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+/* The mates + shared-club caption, one graphite line under the opponent. */
+.teammates__detail {
+  font-size: 12px;
+  color: var(--text-caption);
+}
+
+.teammates__clubs {
+  display: block;
+  color: var(--field);
+}
+
+.teammates__more {
+  margin: 6px 2px 0;
+  font-size: 12px;
+  color: var(--text-caption);
+}
+
 /* ----------------------------------------------------------- defense diamond
    The sheet's bottom-left graphic: infield square on its point, surnames on
    writing lines at their positions, the position number penciled beneath,

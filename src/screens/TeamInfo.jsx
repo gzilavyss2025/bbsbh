@@ -11,6 +11,7 @@ import {
 import { fetchTeamRoster } from '../api/team.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
+import { formerTeammateGroups } from '../api/formerTeammates.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
@@ -33,6 +34,7 @@ export function TeamInfo({
   scorebookWeatherLoading,
   oppPitcherLine,
   prospectsData,
+  formerTeammatesData,
   onNext,
   nextLabel,
   onReload,
@@ -77,6 +79,7 @@ export function TeamInfo({
         side={side}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
+        formerTeammatesData={formerTeammatesData}
       />
 
       <div className="pagenav">
@@ -101,6 +104,7 @@ export function LineupSpread({
   scorebookWeatherLoading,
   starterLines,
   prospectsData,
+  formerTeammatesData,
   onNext,
   onReload,
   loading,
@@ -135,6 +139,7 @@ export function LineupSpread({
             // Each side FACES the other side's starter.
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
             prospectsData={prospectsData}
+            formerTeammatesData={formerTeammatesData}
           />
         ))}
       </div>
@@ -150,7 +155,15 @@ export function LineupSpread({
 
 // One club's column of the spread: name, its two team facts, then the same
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
-function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData }) {
+function TeamPanel({
+  feed,
+  side,
+  manager,
+  uniform,
+  oppPitcherLine,
+  prospectsData,
+  formerTeammatesData,
+}) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   return (
     <section className="teampanel">
@@ -171,6 +184,7 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
         side={side}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
+        formerTeammatesData={formerTeammatesData}
       />
     </section>
   )
@@ -248,12 +262,25 @@ function rosterFallbackGroups(roster) {
 
 // The team-specific body shared by the phone page and the spread's panels:
 // batting order, the opposing starter, and the opposing defense diamond.
-function TeamSections({ feed, side, oppPitcherLine, prospectsData }) {
+function TeamSections({ feed, side, oppPitcherLine, prospectsData, formerTeammatesData }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  const oppMeta = useMemo(
+    () => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'),
+    [feed, side],
+  )
   const season = feed?.gameData?.game?.season
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
+
+  // Opposing players who were once teammates of someone on THIS club — grouped
+  // by the opposing player (a recently-traded man ties to many of his old
+  // mates), oriented so each row reads from our side. Empty for MiLB games /
+  // matchups outside the nightly build, which hides the card.
+  const teammateGroups = useMemo(
+    () => formerTeammateGroups(formerTeammatesData, meta.id, oppMeta.id),
+    [formerTeammatesData, meta.id, oppMeta.id],
+  )
 
   // Lineups don't post until close to first pitch. Until then, stage the
   // team's full active roster (batters + pitchers) in the same spot rather
@@ -399,8 +426,91 @@ function TeamSections({ feed, side, oppPitcherLine, prospectsData }) {
           <DefenseDiamond defense={oppDefense} />
         </section>
       )}
+
+      <FormerTeammates groups={teammateGroups} />
     </>
   )
+}
+
+// Cap the card so a heavy trade history (a whole traded-away roster) doesn't run
+// off the page; the rest collapse into a "+N more" footer.
+const TEAMMATES_SHOWN = 8
+// How many of MY players to name inline before summarizing as a count — keeps a
+// recently-traded opponent (teammate of half our club) to one readable line.
+const MATES_INLINE = 4
+
+// Opposing players who used to be teammates of someone on this club, with the
+// shared club(s) softly labeled ("both played for the 2021 Biloxi Shuckers") —
+// the point being CROSS-team history, so only opponents appear. Spoiler-free
+// (rosters + team-season history carry no score), rendered openly like the
+// opposing-pitcher line. Hidden when there are no ties.
+function FormerTeammates({ groups }) {
+  if (!groups || groups.length === 0) return null
+  const shown = groups.slice(0, TEAMMATES_SHOWN)
+  const hidden = groups.length - shown.length
+  return (
+    <section className="teammates">
+      <h3 className="section__title">Former teammates</h3>
+      <ul className="teammates__list">
+        {shown.map((g) => (
+          <li key={g.opp.id} className="teammates__row">
+            <span className="teammates__namewrap">
+              <PlayerLink id={g.opp.id} className="teammates__name">
+                {g.opp.name.toUpperCase()}
+              </PlayerLink>
+            </span>
+            <span className="teammates__detail">
+              {matesLabel(g.mates)}
+              <span className="teammates__clubs">{clubsLabel(g.clubs)}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {hidden > 0 && (
+        <p className="teammates__more">
+          +{hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
+        </p>
+      )}
+    </section>
+  )
+}
+
+// "with SURNAME, SURNAME" — or "with N teammates" once the list would run long
+// (the recently-traded case). Surnames only, so the row stays scannable.
+function matesLabel(mates) {
+  const surnames = mates.map((m) => surnameOf(m.name))
+  if (surnames.length <= MATES_INLINE) {
+    return `with ${surnames.join(', ')}`
+  }
+  return `with ${surnames.length} teammates`
+}
+
+// "Nashville Sounds (AAA) ’22–’23 · Biloxi Shuckers (AA) ’21" — the soft label,
+// deliberately vague on simultaneity (a shared roster-year, not proof both were
+// there the same day). Only the top two clubs, to keep the caption to a line.
+function clubsLabel(clubs) {
+  return clubs
+    .slice(0, 2)
+    .map((c) => {
+      const yrs = seasonRange(c.seasons)
+      const lvl = c.level ? ` (${c.level})` : ''
+      return `${c.teamName}${lvl} ${yrs}`
+    })
+    .join(' · ')
+}
+
+function surnameOf(name) {
+  const parts = String(name || '').trim().split(/\s+/)
+  return parts.length > 1 ? parts.slice(1).join(' ') : name || ''
+}
+
+// [2022, 2023] -> "’22–’23"; [2021] -> "’21". Non-contiguous years still read as
+// a min–max span (good enough for a caption).
+function seasonRange(seasons) {
+  const ys = [...(seasons ?? [])].sort((a, b) => a - b)
+  if (ys.length === 0) return ''
+  const yy = (y) => `’${String(y).slice(-2)}`
+  return ys.length === 1 ? yy(ys[0]) : `${yy(ys[0])}–${yy(ys[ys.length - 1])}`
 }
 
 // The manager fill-in: surname-first name with the uniform number inked in
