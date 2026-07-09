@@ -107,19 +107,20 @@ node scripts/gen-minors-leaders.mjs
                    # App reads it via src/api/minorsLeaders.js.
 node scripts/gen-former-teammates.mjs
                    # regenerate public/data/former-teammates.json (for each
-                   # upcoming MLB matchup, the pairs of players on the two
-                   # OPPOSING clubs who were once teammates — majors or minors —
-                   # the lineup page's FORMER TEAMMATES card). Same build-time-
-                   # fetch pattern as gen-war.mjs (daily cron; see
+                   # upcoming matchup — MLB and MiLB (AAA/AA/A+/A) alike — the
+                   # pairs of players on the two OPPOSING clubs who were once
+                   # teammates — majors or minors — the lineup page's FORMER
+                   # TEAMMATES card). Same build-time-fetch pattern as
+                   # gen-war.mjs (daily cron; see
                    # .github/workflows/update-former-teammates.yml), driven by
                    # COST: two opposing players are teammates iff their careers
                    # share a (teamId, season) pair, and reducing a career to that
                    # set is a year-by-year pull PER MiLB level per player —
                    # hundreds of calls per matchup, too heavy for a page load.
                    # Self-contained like gen-rehab.mjs; scopes to the next few
-                   # days' MLB slate only (MiLB never shows the card), skips
-                   # Rookie ball, and reuses person.js's REHAB_CAP idea to drop a
-                   # veteran's rehab cameo. App reads it via src/api/formerTeammates.js.
+                   # days' slate, skips Rookie/complex ball (sportId 16), and
+                   # reuses person.js's REHAB_CAP idea to drop a veteran's rehab
+                   # cameo. App reads it via src/api/formerTeammates.js.
 node scripts/gen-vs-team-splits.mjs
                    # regenerate public/data/vs-team-splits.json (for every player
                    # on an MLB active roster, his CAREER regular-season line vs
