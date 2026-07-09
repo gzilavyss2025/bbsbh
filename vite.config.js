@@ -55,8 +55,10 @@ export default defineConfig({
         // (~3 MB — a career-vs-club line for every active-roster player) and
         // refreshed nightly, so it's kept OUT of the app-shell precache to keep
         // the PWA install lean; it's fetched on demand and runtime-cached
-        // instead (see the NetworkFirst rule below).
-        globIgnores: ['**/data/vs-team-splits.json'],
+        // instead (see the NetworkFirst rule below). Same treatment for
+        // umpires.json — it grows across the season (every game × 4 officials)
+        // and is only ever read from the umpire detail page.
+        globIgnores: ['**/data/vs-team-splits.json', '**/data/umpires.json'],
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
@@ -66,6 +68,13 @@ export default defineConfig({
             // no live score (career + past-game data only), so this is
             // spoiler-safe — unlike the score feeds below.
             urlPattern: ({ url }) => url.pathname === '/data/vs-team-splits.json',
+            handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // The on-demand umpire-season dataset, same rationale as the
+            // SPLITS VS TEAM rule above.
+            urlPattern: ({ url }) => url.pathname === '/data/umpires.json',
             handler: 'NetworkFirst',
             method: 'GET',
           },

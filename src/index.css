@@ -7610,3 +7610,91 @@ body {
   text-transform: uppercase;
   color: var(--text-caption);
 }
+
+/* ---------------------------------------------------------------- umpire page */
+.umpage__head {
+  margin: 6px 0 14px;
+}
+.umpage__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--text-heading);
+}
+.umpage__sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-caption);
+}
+
+.umpage__filter {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.umpage__filterbtn {
+  flex: 1;
+  padding: 9px 10px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+.umpage__filterbtn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--paper-0);
+}
+.umpage__filterbtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.umpage__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.umpage__row {
+  display: grid;
+  grid-template-columns: 40px 64px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.umpage__list li:first-child.umpage__row {
+  border-top: none;
+}
+.umpage__role {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.umpage__date {
+  font-size: 13px;
+  color: var(--text-caption);
+}
+.umpage__matchup {
+  justify-self: start;
+  font-size: 14px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+}
