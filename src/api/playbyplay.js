@@ -447,6 +447,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         pitcher,
         pitches,
         pitchDetails,
+        // The side this PA was actually batted from ('L'/'R') — read off the
+        // play's own matchup rather than the player's default batSide, since a
+        // switch hitter's real side varies by at-bat. Feeds the pitch-zone
+        // panel's batter-box silhouette; spoiler-free (bio fact, not a result).
+        batSide: play.matchup?.batSide?.code ?? '',
         rbi: play.result?.rbi ?? 0,
         // The full prose account of the play (batter name trimmed off the
         // front — it's already on the card), split so the other players named
