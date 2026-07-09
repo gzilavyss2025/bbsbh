@@ -1,5 +1,5 @@
-// Regenerates public/data/former-teammates.json — for every upcoming MLB
-// matchup, the pairs of players on the two OPPOSING clubs who were once
+// Regenerates public/data/former-teammates.json — for every upcoming matchup
+// (MLB or MiLB), the pairs of players on the two OPPOSING clubs who were once
 // teammates (majors or minors), already shaped for the lineup page's FORMER
 // TEAMMATES card (src/api/formerTeammates.js just reads this file).
 //
@@ -15,9 +15,12 @@
 // read. Mirrors scripts/gen-rehab.mjs's build-time-fetch pattern (see
 // docs/data-enrichment.md §5).
 //
-// Scoped deliberately: MLB games only (the card never shows for MiLB), and only
-// the rosters of clubs actually scheduled to play each other in a short window
-// — not the whole league.
+// Covers every scheduled matchup — MLB and MiLB (AAA/AA/A+/A) alike — for the
+// rosters of clubs actually scheduled to play each other in a short window, not
+// the whole league. Extending past MLB-only widens the player pool a lot (every
+// MiLB game each night, not just the majors' slate), so this is the costliest
+// part of the run; the per-player career fetch is still deduped across every
+// matchup a club appears in.
 //
 // Two accuracy guards, both mirroring src/api/person.js:
 //   - Rookie/complex ball (sportId 16) is skipped: its huge, churny short-season
@@ -37,6 +40,21 @@
 // is "these two players", not "this stint was good"). See stintScore/starBonus
 // below; src/api/formerTeammates.js reads `score` to rank and to gate the
 // hub-and-spokes grouping (groupTeammateCards).
+//
+// ORG TIES fallback: most matchups have zero literal shared-teammate pairs, but
+// still have a story — "Tellez came up through the Brewers, and Nashville is a
+// Brewers affiliate" — even though he never played WITH anyone on tonight's
+// Nashville roster. When a matchup's `rows` comes up empty, the generator falls
+// back to a one-sided check: does any player's own career pass through the
+// OPPOSING club's current parent org? A stint's org is resolved as of the
+// season it happened in via public/data/milb-history.json's researched eras
+// (mirroring src/api/milbHistory.js's historicalParentOrg — the 2021 MiLB
+// reorg means a naive "current org" lookup misattributes older stints), falling
+// back to a live current-team lookup when that file doesn't cover the
+// (team, season). See computeOrgTies/resolveCurrentOrg/historicalParentOrgAt
+// below; the client (src/api/formerTeammates.js) just reads whichever of
+// `rows`/`orgTies` the matchup's `kind` says is populated — never both, so the
+// UI never has to choose between two card types for the same matchup.
 // Run by hand: node scripts/gen-former-teammates.mjs
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -54,6 +72,9 @@ const WINDOW_DAYS = 2
 // deliberately excluded (see header). A copy of src/lib/teams.js's list; this
 // script is self-contained, like gen-rehab.mjs / gen-war.mjs.
 const MILB_SPORT_IDS = [11, 12, 13, 14]
+// Sport ids whose schedules get swept for matchups — MLB plus every MiLB full-
+// season level (see header: this is what extends the card past MLB-only).
+const MATCHUP_SPORT_IDS = [1, ...MILB_SPORT_IDS]
 const SPORT_LABEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
 
 const isoDay = (offset = 0) => {
@@ -103,33 +124,36 @@ async function mapConcurrent(items, limit, mapper) {
   return out
 }
 
-// --- schedule: the MLB matchups to precompute ---------------------------------
-// Every scheduled MLB game across the window, as unique (away, home) team-id
-// pairs plus the union of clubs involved. Regular season isn't forced — spring
-// and postseason games get the card too.
+// --- schedule: the matchups to precompute --------------------------------------
+// Every scheduled game across the window, MLB and MiLB alike (see
+// MATCHUP_SPORT_IDS), as unique (away, home) team-id pairs plus the union of
+// clubs involved. Regular season isn't forced — spring and postseason games get
+// the card too.
 async function fetchMatchups() {
   const pairs = new Map() // "awayId-homeId" -> { awayId, homeId, awayName, homeName }
   const teams = new Map() // teamId -> teamName
   for (let d = 0; d <= WINDOW_DAYS; d++) {
-    let data
-    try {
-      data = await getJson(`/api/v1/schedule?sportId=1&date=${isoDay(d)}&hydrate=team`)
-    } catch {
-      continue
-    }
-    for (const date of data.dates ?? []) {
-      for (const g of date.games ?? []) {
-        const a = g.teams?.away?.team
-        const h = g.teams?.home?.team
-        if (!a?.id || !h?.id) continue
-        pairs.set(`${a.id}-${h.id}`, {
-          awayId: a.id,
-          homeId: h.id,
-          awayName: a.name ?? '',
-          homeName: h.name ?? '',
-        })
-        teams.set(a.id, a.name ?? '')
-        teams.set(h.id, h.name ?? '')
+    for (const sportId of MATCHUP_SPORT_IDS) {
+      let data
+      try {
+        data = await getJson(`/api/v1/schedule?sportId=${sportId}&date=${isoDay(d)}&hydrate=team`)
+      } catch {
+        continue
+      }
+      for (const date of data.dates ?? []) {
+        for (const g of date.games ?? []) {
+          const a = g.teams?.away?.team
+          const h = g.teams?.home?.team
+          if (!a?.id || !h?.id) continue
+          pairs.set(`${a.id}-${h.id}`, {
+            awayId: a.id,
+            homeId: h.id,
+            awayName: a.name ?? '',
+            homeName: h.name ?? '',
+          })
+          teams.set(a.id, a.name ?? '')
+          teams.set(h.id, h.name ?? '')
+        }
       }
     }
   }
@@ -216,6 +240,7 @@ async function buildPairSet(personId) {
         clubs.set(teamId, {
           name: s.team?.name ?? '',
           level: SPORT_LABEL[s.sport?.id ?? sportId] ?? '',
+          sportId: s.sport?.id ?? sportId,
         })
       }
     }
@@ -259,6 +284,138 @@ async function loadPeakWar() {
     /* ditto */
   }
   return peak
+}
+
+// --- org ties (fallback when a matchup has zero literal teammate pairs) --------
+// Season-accurate parent-org history, read straight from the static file
+// src/api/milbHistory.js also reads (public/data/milb-history.json) — loaded
+// once, synchronously reused here instead of that module's fetch()-based
+// reader, since this script runs in Node against the file on disk. Mirrors
+// eraForYear/historicalParentOrg there; keep the two in sync if that shape
+// ever changes.
+async function loadMilbHistory() {
+  try {
+    return JSON.parse(
+      await readFile(join(here, '..', 'public', 'data', 'milb-history.json'), 'utf8'),
+    )
+  } catch {
+    return { clubs: {} }
+  }
+}
+
+function historicalParentOrgAt(milbHistory, teamId, season) {
+  const club = milbHistory.clubs?.[String(teamId)]
+  const era = (club?.parentHistory ?? []).find((e) => season >= e.years[0] && season <= e.years[1])
+  return era ? { id: era.parentOrgId, name: era.parentOrgName } : null
+}
+
+// A club's CURRENT parent org — itself for an MLB club, its affiliate parent
+// for a MiLB one — via the live team endpoint, cached per teamId since the
+// same club recurs across many matchups/stints in one run.
+async function resolveCurrentOrg(teamId, cache) {
+  if (cache.has(teamId)) return cache.get(teamId)
+  let org = { id: teamId, name: '' }
+  try {
+    const data = await getJson(`/api/v1/teams/${teamId}`)
+    const t = data.teams?.[0]
+    org =
+      t?.sport?.id === 1
+        ? { id: t.id, name: t.name ?? '' }
+        : t?.parentOrgId
+          ? { id: t.parentOrgId, name: t.parentOrgName ?? '' }
+          : { id: teamId, name: t?.name ?? '' }
+  } catch {
+    /* leave the teamId-as-its-own-org fallback */
+  }
+  cache.set(teamId, org)
+  return org
+}
+
+// The org a career stint belonged to AS OF that stint's own season — the
+// season-accurate history file first (handles a since-reassigned MiLB
+// affiliate, e.g. the 2021 reorg), falling back to the live current-team
+// lookup for a (team, season) the file doesn't cover. An MLB stint's "org" is
+// simply the MLB club itself.
+async function resolveStintOrg(teamId, season, sportId, milbHistory, orgCache) {
+  if (sportId === 1) return { id: teamId }
+  return historicalParentOrgAt(milbHistory, teamId, season) ?? resolveCurrentOrg(teamId, orgCache)
+}
+
+// How interesting a single-player org tie is — same level/recency shape as
+// stintScore, minus the games-overlap term (there's no second player's
+// availability to hedge against here), plus the same star-power bonus.
+function orgTieScore(level, season, peakWar, currentYear) {
+  const weight = LEVEL_WEIGHT[level] ?? 0
+  const yearsAgo = Math.max(0, currentYear - season)
+  const recency = 0.4 + 0.6 * 0.9 ** yearsAgo
+  return weight * recency + 7 * Math.sqrt(Math.max(0, Math.min(10, peakWar)))
+}
+
+// Cap on how many org-tie cards one roster contributes to a matchup — this is
+// a fallback note, not the main event, so it stays to a handful of the most
+// notable ties rather than paging through a whole roster.
+const ORG_TIES_PER_SIDE = 4
+
+// For each player on `rosterIds`, the single BEST career stint (if any) whose
+// season-accurate org matches `oppOrg` — i.e. "this player has a history in
+// the org tonight's opponent belongs to," even though he never shared a roster
+// with anyone playing tonight. Skips a stint on the player's own roster team
+// (that'd be the trivial "he plays for himself" case, not a tie to the
+// OPPONENT). Returns rows sorted by score, capped to ORG_TIES_PER_SIDE.
+async function orgTiesForRoster(rosterIds, rosterTeamId, oppOrg, careers, names, positions, peakWar, milbHistory, orgCache, currentYear) {
+  const rows = []
+  for (const playerId of rosterIds) {
+    const career = careers.get(playerId)
+    if (!career || career.pairs.size === 0) continue
+    let best = null
+    for (const key of career.pairs) {
+      const [teamIdStr, seasonStr] = key.split('|')
+      const teamId = Number(teamIdStr)
+      if (teamId === rosterTeamId) continue
+      const season = Number(seasonStr)
+      const club = career.clubs.get(teamId)
+      if (!club) continue
+      const org = await resolveStintOrg(teamId, season, club.sportId, milbHistory, orgCache)
+      if (!org || org.id !== oppOrg.id) continue
+      const score = orgTieScore(club.level, season, peakWar.get(String(playerId)) ?? 0, currentYear)
+      if (!best || score > best.score) {
+        best = { teamId, teamName: club.name, level: club.level, season, score }
+      }
+    }
+    if (best) {
+      rows.push({
+        player: { id: playerId, name: names.get(playerId) ?? '', pos: positions.get(playerId) ?? '' },
+        rosterTeamId,
+        orgId: oppOrg.id,
+        orgName: oppOrg.name,
+        teamName: best.teamName,
+        level: best.level,
+        seasons: [best.season],
+        score: Math.round(best.score * 10) / 10,
+      })
+    }
+  }
+  return rows.sort((x, y) => y.score - x.score).slice(0, ORG_TIES_PER_SIDE)
+}
+
+// Both rosters' org ties for a matchup, one-sided each way (away players
+// checked against the home club's org, home players against the away club's)
+// — only called once a matchup's literal `rows` comes up empty (see main
+// loop). Returns [] (no fallback card either) when the two clubs share the
+// same current org (e.g. two affiliates of the same system in an exhibition)
+// since every farmhand would trivially "tie" to his own system.
+async function computeOrgTies(awayIds, homeIds, awayTeamId, homeTeamId, careers, names, positions, peakWar, milbHistory, orgCache) {
+  const currentYear = new Date().getUTCFullYear()
+  const [awayOrg, homeOrg] = await Promise.all([
+    resolveCurrentOrg(awayTeamId, orgCache),
+    resolveCurrentOrg(homeTeamId, orgCache),
+  ])
+  if (!awayOrg || !homeOrg || awayOrg.id === homeOrg.id) return []
+  const [awayTies, homeTies] = await Promise.all([
+    orgTiesForRoster(awayIds, awayTeamId, homeOrg, careers, names, positions, peakWar, milbHistory, orgCache, currentYear),
+    orgTiesForRoster(homeIds, homeTeamId, awayOrg, careers, names, positions, peakWar, milbHistory, orgCache, currentYear),
+  ])
+  return [...awayTies, ...homeTies].sort((x, y) => y.score - x.score)
 }
 
 // --- connection scoring ---------------------------------------------------------
@@ -410,12 +567,17 @@ allPlayerIds.forEach((id, i) => {
 
 const names = await fetchNames(allPlayerIds)
 const peakWar = await loadPeakWar()
+const milbHistory = await loadMilbHistory()
+const orgCache = new Map() // teamId -> {id, name} — shared across every matchup/stint this run
 
 const matchups = {}
+let orgTieMatchups = 0
 for (const { awayId, homeId } of pairs) {
+  const awayRoster = rosterByTeam.get(awayId) ?? []
+  const homeRoster = rosterByTeam.get(homeId) ?? []
   const rows = connectionsFor(
-    rosterByTeam.get(awayId) ?? [],
-    rosterByTeam.get(homeId) ?? [],
+    awayRoster,
+    homeRoster,
     careers,
     names,
     positionByPlayer,
@@ -423,18 +585,39 @@ for (const { awayId, homeId } of pairs) {
     awayId,
     homeId,
   )
-  if (rows.length === 0) continue
   // Sorted "low-high" key so either lineup page finds the same entry; teamA/teamB
-  // record which club each row's `a`/`b` player is on so the reader can orient
-  // the connection to whichever side it's rendering. (`a` is the away player,
-  // `b` the home player — see connectionsFor.)
+  // record which club each row's `a`/`b` player is on (or, for an org-ties
+  // fallback, which roster each tie's player is on) so the reader can orient
+  // the card to whichever side it's rendering. (`a` is the away player, `b` the
+  // home player — see connectionsFor.)
   const key = awayId < homeId ? `${awayId}-${homeId}` : `${homeId}-${awayId}`
-  matchups[key] = { teamA: awayId, teamB: homeId, rows }
+  if (rows.length > 0) {
+    matchups[key] = { teamA: awayId, teamB: homeId, kind: 'teammates', rows }
+    continue
+  }
+  // No literal shared-teammate pairs — fall back to org ties (see header).
+  const orgTies = await computeOrgTies(
+    awayRoster,
+    homeRoster,
+    awayId,
+    homeId,
+    careers,
+    names,
+    positionByPlayer,
+    peakWar,
+    milbHistory,
+    orgCache,
+  )
+  if (orgTies.length === 0) continue
+  orgTieMatchups++
+  matchups[key] = { teamA: awayId, teamB: homeId, kind: 'orgties', orgTies }
 }
 
 await mkdir(dirname(out), { recursive: true })
 await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), matchups }))
-const total = Object.values(matchups).reduce((n, m) => n + m.rows.length, 0)
+const teammateMatchups = Object.keys(matchups).length - orgTieMatchups
+const total = Object.values(matchups).reduce((n, m) => n + (m.rows?.length ?? 0), 0)
 console.log(
-  `wrote ${out} (${Object.keys(matchups).length} matchups, ${total} connections, ${allPlayerIds.length} players)`,
+  `wrote ${out} (${teammateMatchups} teammate matchups / ${total} connections, ` +
+    `${orgTieMatchups} org-tie matchups, ${allPlayerIds.length} players)`,
 )
