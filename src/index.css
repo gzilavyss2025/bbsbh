@@ -6304,6 +6304,21 @@ body {
   color: var(--clay-deep);
 }
 
+/* Injured-List day-count badge on the Team page's IL section — clay/seam-red
+   tinted so an IL tag reads as a negative status, distinct from the neutral
+   green position chips and inferred-role chips. */
+.ilchip {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+}
+
 /* MLB team page's farm-system section — one card per full-season affiliate
    (AAA/AA/A+/A), each a plain link to that club's own team page. */
 .thub-affiliates {

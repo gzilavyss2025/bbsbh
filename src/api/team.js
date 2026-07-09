@@ -71,6 +71,30 @@ export async function fetchTeamRoster(teamId, season) {
   }
 }
 
+// The club's Injured List, drawn from the 40-man roster view. rosterType=40Man is
+// the right scope: for an MLB club it returns exactly that club's 10/15/60-day IL
+// (status codes D10/D15/D60) WITHOUT the whole farm system's injuries that
+// `fullRoster` drags in (org-wide D7/D60/ILF); for a MiLB affiliate it resolves to
+// the affiliate's own roster (7-/60-day, full-season). No stat hydrate — the IL
+// section shows only name + position + which IL. Each entry carries a
+// status:{ code, description }; the caller filters to the IL codes and derives the
+// badge from `code`. Degrades to [] (a club with no posted IL just hides the section).
+const teamIlCache = new Map()
+export async function fetchTeamIL(teamId, season) {
+  if (!teamId || !season) return []
+  const key = `${teamId}:${season}`
+  const cached = teamIlCache.get(key)
+  if (cached && Date.now() - cached.ts < TEAM_ROSTER_CACHE_TTL_MS) return cached.data
+  try {
+    const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=40Man&season=${season}`)
+    const roster = data.roster ?? []
+    teamIlCache.set(key, { ts: Date.now(), data: roster })
+    return roster
+  } catch {
+    return []
+  }
+}
+
 // Session cache for fetchTeamRosterIds, keyed by teamId. Active rosters only
 // churn on transactions (call-ups/trades/IL moves) — a few times a week per
 // team, not intraday — so a 30-minute TTL is long enough to spare a refetch

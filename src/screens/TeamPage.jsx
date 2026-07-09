@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
+  fetchTeamIL,
   fetchStandings,
   fetchLeagueTeamStats,
   fetchAffiliates,
@@ -36,6 +37,8 @@ import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
 
 const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
+// Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
+const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10)
@@ -83,9 +86,10 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
+  const [roster, ilRoster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
     await Promise.all([
       fetchTeamRoster(id, season),
+      fetchTeamIL(id, season),
       team.league?.id
         ? fetchStandings(team.league.id, season, standingsDate)
         : Promise.resolve([]),
@@ -231,6 +235,27 @@ async function loadTeam(id, asOf) {
     }))
     .sort((a, b) => (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) || Number(a.jersey) - Number(b.jersey))
 
+  // Injured List — every injured player on the club's 40-man view in one combined
+  // list, each tagged with which IL (10/15/60-day; MiLB shows 7/60/full-season).
+  // Filter to IL status codes (D<n> or ILF) and derive the badge from the code.
+  // Spoiler-free — roster membership reveals nothing about the score. Degrades to
+  // an empty list when no IL is posted (the section then hides).
+  const injured = ilRoster
+    .filter((r) => /^D\d+$/.test(r.status?.code ?? '') || r.status?.code === 'ILF')
+    .map((r) => {
+      const code = r.status?.code ?? ''
+      return {
+        id: r.person?.id,
+        name: firstLast(r.person),
+        jersey: r.jerseyNumber ?? '',
+        pos: r.position?.abbreviation ?? '',
+        ilLabel: code.match(/^D(\d+)$/)?.[1] ?? (code === 'ILF' ? 'IL' : DASH),
+      }
+    })
+    .sort(
+      (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
+    )
+
   // Per-player leaderboard pool — the roster is already hydrated with each
   // player's season hitting+pitching split (see fetchTeamRoster), so this is a
   // pure reshape, no extra fetch. Powers the Team Leaders section below.
@@ -242,7 +267,7 @@ async function loadTeam(id, asOf) {
       ? { wins: myRec.wins, losses: myRec.losses, rank: myRec.divisionRank, div: team.division?.name }
       : null,
     standings: standingsRows,
-    batting, pitching, position, pitchers,
+    batting, pitching, position, pitchers, injured,
     affiliationHistory, affiliates, prospects, schedule, leaderPool,
   }
 }
@@ -257,7 +282,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, affiliationHistory, affiliates, prospects, schedule, leaderPool } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, injured, affiliationHistory, affiliates, prospects, schedule, leaderPool } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // On a MiLB affiliate page, lead the Affiliates section with a card for the
   // parent MLB club (which fetchAffiliates deliberately omits from the farm
@@ -391,6 +416,17 @@ export function TeamPage({ id, asOf, sportId }) {
                 badge: p.role ?? DASH,
                 badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
               }))}
+            />
+          </>
+        )}
+
+        {injured.length > 0 && (
+          <>
+            <SectionTitle title="Injured List" />
+            <RosterList
+              season={season}
+              showProspect={false}
+              rows={injured.map((p) => ({ ...p, badge: p.ilLabel, badgeClass: 'ilchip', war: undefined }))}
             />
           </>
         )}
