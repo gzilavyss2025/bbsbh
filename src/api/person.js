@@ -5,9 +5,11 @@
 //
 // Spoiler note: these builders NEVER touch the live game feed. The player page
 // fetches its own stats cut off at the day before the game date ("entering
-// today"), so nothing here can leak the game being scored. The two full-season
-// figures that can't be date-cut by the API — the current-season row and the
-// vs-L/R splits — are labeled as such by the UI, not frozen.
+// today"), so nothing here can leak the game being scored. The full-season
+// figures that can't be date-cut by the API — the current-season register row,
+// the vs-L/R splits, and the promoted other-level tiles (see
+// otherLevelSeasonBlocks) — are labeled as such by the UI, not frozen; each is
+// a stat at a level OTHER than the game being scored, never that game's own line.
 
 import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
 
@@ -1243,6 +1245,60 @@ export function detectInjuredList(transactions) {
 // logic above) and src/api/rehab.js.
 
 // ---------------------------------------------------------------------------
+// Promoted other-level tiles — the current season's line at each level the
+// player appeared at this year OTHER than his current-activity level: the AAA
+// half of an up-and-down big leaguer (Rowdy Tellez — Braves + Gwinnett), or the
+// MLB half of a player currently optioned down. Surfaced as their own tile row
+// (see PlayerPage) right beside the main "Current season" tiles, so a split
+// season shows BOTH levels prominently instead of leaving one buried in the
+// career register's "Also:" footnote.
+//
+// Rules — deliberately the SAME ones the career register already applies, so the
+// promoted tiles and the register rows never disagree on which stints are real:
+//   • the current-activity level is skipped — its line already leads the main
+//     "Current season" tiles;
+//   • MLB action is always real team history, so an MLB stint always promotes;
+//   • a MiLB stint promotes only when it clears the rehab cap (meetsStintCap) —
+//     the same absolute test the register uses to tell a genuine option-down
+//     from rehab/shuttle noise, so a handful of rehab at-bats never lights up a
+//     promoted tile row.
+// Full-season figures (like the register rows they mirror — NOT the date-cut
+// "entering today" the main tiles use), highest level first. Null when the
+// player stayed at one level all year (the common case).
+// ---------------------------------------------------------------------------
+
+export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSeason, currentSportId }) {
+  const cur = Number(currentSeason)
+  const byLevel = new Map()
+  for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
+    if (Number(s.season) !== cur) continue
+    const sid = s.sport?.id
+    if (!sid || sid === currentSportId) continue
+    if (!byLevel.has(sid)) byLevel.set(sid, [])
+    byLevel.get(sid).push(s)
+  }
+  if (!byLevel.size) return null
+  const order = (sid) => {
+    const i = LEVEL_ORDER_DESC.indexOf(sid)
+    return i < 0 ? LEVEL_ORDER_DESC.length : i
+  }
+  const out = []
+  for (const sid of [...byLevel.keys()].sort((a, b) => order(a) - order(b))) {
+    const stat = levelSeasonStat(byLevel.get(sid), group)
+    if (!stat) continue
+    if (sid !== 1 && !meetsStintCap(stat, group)) continue
+    const role = group === 'pitching' ? pitcherRole(stat) : null
+    out.push({
+      sportId: sid,
+      level: SPORT_LABEL[sid] ?? '',
+      role,
+      tiles: group === 'pitching' ? pitcherTiles(stat, role) : hitterTiles(stat),
+    })
+  }
+  return out.length ? out : null
+}
+
+// ---------------------------------------------------------------------------
 // One stat block (a group's tiles + career + splits + logs). A normal player
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
@@ -1262,6 +1318,16 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     role,
     title: group === 'pitching' ? 'Pitching' : 'Batting',
     tiles: group === 'pitching' ? pitcherTiles(tile, role) : hitterTiles(tile),
+    // The level the "Current season" tiles belong to (MLB for an up-and-down big
+    // leaguer even while his live club is a MiLB affiliate) — the label uses it,
+    // and it's the level the promoted other-level tiles below skip.
+    tileSportId: currentSportId,
+    // The current season's line at each OTHER level he played this year (the
+    // AAA half of an up-and-down big leaguer, say) — promoted to their own tile
+    // row beside the main tiles rather than buried in the register footnote.
+    otherLevels: otherLevelSeasonBlocks({
+      mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, currentSeason, currentSportId,
+    }),
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits, group),
     splitsLabel: group === 'pitching' ? 'opp. batter' : '',

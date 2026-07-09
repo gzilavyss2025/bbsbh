@@ -59,10 +59,6 @@ export function PlayerPage({ id, asOf, sportId }) {
     ? bio.throws ? `Throws ${bio.throws}` : ''
     : [bio.bats && `Bats ${bio.bats}`, bio.throws && `Throws ${bio.throws}`].filter(Boolean).join(' / ')
   const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
-  // A debuted player currently in the minors (a demotion or an aging lifer's
-  // last stop) has current-season tiles at his MiLB level — label it so a .310
-  // AAA line isn't mistaken for a major-league one.
-  const liveLevel = bio.debut && data.sportId !== 1 ? SPORT_LABEL[data.sportId] ?? '' : ''
   const { first: firstName, last: lastName } = splitDisplayName(bio.fullName)
 
   return (
@@ -176,7 +172,18 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
-        {blocks.map((block) => (
+        {blocks.map((block) => {
+          // A debuted player whose current-season tiles are at a MiLB level (an
+          // aging lifer or a full-season option-down with no MLB games this year)
+          // gets that level labeled, so a .310 AAA line isn't mistaken for a
+          // major-league one. An up-and-down player's tiles resolve to MLB
+          // (block.tileSportId === 1), so no label — his MiLB half shows as its
+          // own promoted tile row below.
+          const liveLevel =
+            bio.debut && block.tileSportId && block.tileSportId !== 1
+              ? SPORT_LABEL[block.tileSportId] ?? ''
+              : ''
+          return (
           <section key={block.group}>
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
@@ -187,14 +194,24 @@ export function PlayerPage({ id, asOf, sportId }) {
                 enteringLabel,
               ].filter(Boolean).join(' · ')
             } />
-            <div className="player__statgrid">
-              {block.tiles.map((t) => (
-                <div key={t.k} className={`stat${t.tone === 'run' ? ' stat--run' : ''}`}>
-                  <div className="stat__v">{t.v}</div>
-                  <div className="stat__k">{t.k}</div>
-                </div>
-              ))}
-            </div>
+            <StatGrid tiles={block.tiles} />
+
+            {/* An up-and-down player's OTHER level(s) this season (e.g. a big
+                leaguer's AAA line) — promoted beside the main tiles instead of
+                buried in the register footnote. Full-season figures, so labeled
+                "this season", not the main tiles' frozen "entering today". */}
+            {block.otherLevels?.map((lvl) => (
+              <div className="player__otherlevel" key={lvl.sportId}>
+                <SectionTitle
+                  title={lvl.level}
+                  note={[
+                    block.group === 'pitching' && lvl.role ? roleWord(lvl.role) : null,
+                    'this season',
+                  ].filter(Boolean).join(' · ')}
+                />
+                <StatGrid tiles={lvl.tiles} />
+              </div>
+            ))}
 
             {block.arsenal && (
               <>
@@ -254,7 +271,8 @@ export function PlayerPage({ id, asOf, sportId }) {
               </>
             )}
           </section>
-        ))}
+          )
+        })}
 
         {data.positionInnings && (
           <PositionInningsCard pi={data.positionInnings} playerId={bio.id} />
@@ -444,6 +462,21 @@ function PositionInningsCard({ pi, playerId }) {
       fielding={active?.fielding ?? null}
       pitching={active?.pitching ?? null}
     />
+  )
+}
+
+// The five-tile "Current season" grid — shared by the main tiles and each
+// promoted other-level tile row (see block.otherLevels).
+function StatGrid({ tiles }) {
+  return (
+    <div className="player__statgrid">
+      {tiles.map((t) => (
+        <div key={t.k} className={`stat${t.tone === 'run' ? ' stat--run' : ''}`}>
+          <div className="stat__v">{t.v}</div>
+          <div className="stat__k">{t.k}</div>
+        </div>
+      ))}
+    </div>
   )
 }
 

@@ -65,26 +65,31 @@ function dayBefore(iso) {
   return d.toISOString().slice(0, 10)
 }
 
-// The "Current season" tiles' stat line. `levelStat` (already fetched at the
+// The "Current season" tiles' stat line, plus the LEVEL that line belongs to
+// (`sportId`) — the two must travel together: the register keys its date-cut
+// current-season row on this level, and the promoted other-level tiles skip it,
+// so a mismatch would strand a whole level's line (an up-and-down player's AAA
+// season vanishing behind his MLB row). `levelStat` (already fetched at the
 // player's current team's level) covers the common cases as-is: an active MLB
 // player, or a MiLB player who's spent the whole year at one level. Two cases
 // need extra fetches: a player who has debuted before but shows no MLB games
 // this season (a rehab assignment or a full-season option down, `sportId` !=
 // 1) should still prefer his MLB line if he's actually appeared there this
-// year; and a player with no MLB action at all this season should get his
-// stints at every MiLB level combined, not just the level he's at right now
-// (e.g. a mid-season AA -> AAA promotion).
+// year (so the resolved level is MLB, NOT his live MiLB club); and a player
+// with no MLB action at all this season should get his stints at every MiLB
+// level combined, not just the level he's at right now (e.g. a mid-season
+// AA -> AAA promotion), reported at his current MiLB level.
 async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate, sportId, hasDebuted, levelStat }) {
-  if (sportId === 1) return levelStat
+  if (sportId === 1) return { stat: levelStat, sportId: 1 }
   if (hasDebuted) {
     const mlbSplits = await fetchPersonStats(id, {
       type: 'byDateRange', group, season, startDate, endDate, sportId: 1,
     })
     const mlbStat = aggregateSplits(mlbSplits, group)
-    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return mlbStat
+    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return { stat: mlbStat, sportId: 1 }
   }
   const milbSplits = await fetchMilbByDateRange(id, group, season, startDate, endDate)
-  return aggregateSplits(milbSplits, group)
+  return { stat: aggregateSplits(milbSplits, group), sportId }
 }
 
 // Fetch the position-innings data for one CAREER scope ('mlb' | 'milb') — the
@@ -203,7 +208,12 @@ export async function loadPlayer(id, asOf) {
               : Promise.resolve([]),
           ])
         const seasonStat = aggregateSplits(seasonSplits, group)
-        const tileStat = await resolveCurrentSeasonStat({
+        // `tileSportId` is the level `tileStat` actually belongs to — MLB for a
+        // debuted player who has appeared in the majors this year even while his
+        // live club is a MiLB affiliate (Rowdy Tellez), else his current level.
+        // The register and the promoted other-level tiles both key off it, so
+        // the current-season line lands on the right level's row.
+        const { stat: tileStat, sportId: tileSportId } = await resolveCurrentSeasonStat({
           id, group, season, startDate, endDate, sportId: currentActivitySportId,
           hasDebuted: Boolean(bio.debut), levelStat: seasonStat,
         })
@@ -211,7 +221,7 @@ export async function loadPlayer(id, asOf) {
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
           gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
-          currentSeason: season, currentSportId: currentActivitySportId, debutYear, tileStat,
+          currentSeason: season, currentSportId: tileSportId, debutYear, tileStat,
           logTagLevel: onRehab,
         })
         return { group, mlbYbySplits, milbYbySplits, block }
