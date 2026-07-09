@@ -10,7 +10,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 // mis-declared dependency array is exactly the kind of bug that could leak a
 // sealed value. Keep those on.
 export default [
-  { ignores: ['dist/', 'dev-dist/', 'node_modules/'] },
+  { ignores: ['dist/', 'dev-dist/', 'node_modules/', '.claude/worktrees/'] },
 
   // App source — browser globals, JSX, hooks.
   {
