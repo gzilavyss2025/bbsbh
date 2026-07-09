@@ -1,6 +1,8 @@
-// Rasterizes scripts/og-image.html into public/og-image.png (1200×630) — the
-// Open Graph / Twitter card shown when the app link is shared (iMessage,
-// Slack, Discord, etc.). Same Playwright-via-global approach as gen-icons.mjs.
+// Rasterizes scripts/og-image.html into public/og-image.png (1200×630) — a
+// generated-art Open Graph / Twitter card. NOT currently shipped: the live
+// og:image is the hand-provided public/og-image.jpg (see index.html); this
+// script is retained in case we go back to generated art. Same
+// Playwright-via-global approach as gen-icons.mjs.
 // Run: node scripts/gen-og-image.mjs
 import { createRequire } from 'node:module'
 import { execSync } from 'node:child_process'
@@ -28,14 +30,28 @@ const H = 630
 
 const browser = await chromium.launch()
 try {
-  // deviceScaleFactor: 2 → shoot at 2400×1200 for crisp text, but the file
-  // declares 1200×630 so scrapers read the intended OG dimensions.
+  // Shoot at deviceScaleFactor 2 (2400×1260) for crisp text, then downsample
+  // to the declared 1200×630 in a second pass — most platforms (and
+  // opengraph.xyz) expect the og:image file itself to BE 1200×630, not just
+  // claim to be via og:image:width/height while actually shipping 2400×1260.
   const page = await browser.newPage({
     viewport: { width: W, height: H },
     deviceScaleFactor: 2,
   })
   await page.goto(pathToFileURL(src).href, { waitUntil: 'networkidle' })
-  await page.screenshot({ path: out, clip: { x: 0, y: 0, width: W, height: H } })
+  const hiRes = await page.screenshot({ clip: { x: 0, y: 0, width: W, height: H } })
+  await page.close()
+
+  const resizePage = await browser.newPage({
+    viewport: { width: W, height: H },
+    deviceScaleFactor: 1,
+  })
+  const b64 = hiRes.toString('base64')
+  await resizePage.setContent(
+    `<style>*{margin:0}img{display:block;width:${W}px;height:${H}px}</style>` +
+      `<img src="data:image/png;base64,${b64}">`,
+  )
+  await resizePage.screenshot({ path: out })
   console.log('wrote', out)
 } finally {
   await browser.close()
