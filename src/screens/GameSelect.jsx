@@ -5,6 +5,7 @@ import { fetchRosterIdsForTeams } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { PINNED_TEAM_ID, SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
@@ -12,6 +13,7 @@ import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
 import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
+import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 import { Loader } from '../components/Loader.jsx'
 
@@ -35,6 +37,8 @@ export function GameSelect({ onPick, onShowLogos }) {
   useDocumentTitle(null)
   const [offset, setOffset] = useState(0) // days from today
   const [sportId, setSportId] = useState(readLevel)
+  const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
+  const [showWelcome, setShowWelcome] = useState(isFirstVisit)
   const pickLevel = (id) => {
     setSportId(id)
     try {
@@ -187,7 +191,20 @@ export function GameSelect({ onPick, onShowLogos }) {
         ))}
       </ul>
 
-      <SiteFooter onShowLogos={onShowLogos} />
+      <SiteFooter
+        onShowLogos={onShowLogos}
+        favoriteTeamId={favoriteTeamId}
+        onSetFavoriteTeam={setFavoriteTeam}
+      />
+
+      {showWelcome && (
+        <FavoriteTeamModal
+          intro
+          favoriteTeamId={favoriteTeamId}
+          onSave={setFavoriteTeam}
+          onClose={() => setShowWelcome(false)}
+        />
+      )}
     </div>
   )
 }

@@ -1,20 +1,29 @@
 import { useState } from 'react'
+import { fetchTeams } from '../api/schedule.js'
+import { useAsync } from '../hooks/useAsync.js'
 import { PlayerSearchBox } from './PlayerSearchBox.jsx'
 import { TeamSearchBox } from './TeamSearchBox.jsx'
 import { GameFinderModal } from './GameFinderModal.jsx'
+import { FavoriteTeamModal } from './FavoriteTeamModal.jsx'
 import { ScorebookMark } from './ScorebookMark.jsx'
+import { TeamLogo } from './TeamLogo.jsx'
+import { SPORT_IDS } from '../lib/teams.js'
 import { useNav } from '../lib/nav.js'
 
 const YEAR = new Date().getFullYear()
 
 // The slate's footer: site-wide player/team search, the past-matchup finder
 // (tucked behind a modal so its two team pickers + results don't have to live
-// inline), the printable logo sheet, and the standard small print. Nothing
-// here is score-revealing — search surfaces identity and schedule only, same
-// as every other spoiler-free selector.
-export function SiteFooter({ onShowLogos }) {
+// inline), the favorite-team picker, the printable logo sheet, and the
+// standard small print. Nothing here is score-revealing — search and the
+// favorite-team pick surface identity and schedule only, same as every other
+// spoiler-free selector.
+export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
   const [showFinder, setShowFinder] = useState(false)
+  const [showFavoriteTeam, setShowFavoriteTeam] = useState(false)
   const navigate = useNav()
+  const mlbTeams = useAsync(() => fetchTeams(SPORT_IDS.MLB), [])
+  const favoriteTeam = mlbTeams.data?.find((t) => t.id === favoriteTeamId) ?? null
 
   return (
     <footer className="sitefooter">
@@ -24,6 +33,19 @@ export function SiteFooter({ onShowLogos }) {
       </div>
 
       <div className="sitefooter__actions">
+        <button
+          type="button"
+          className="sitefooter__action sitefooter__favteam"
+          onClick={() => setShowFavoriteTeam(true)}
+        >
+          <TeamLogo
+            teamId={favoriteTeamId}
+            name={favoriteTeam?.name ?? ''}
+            size={16}
+            className="sitefooter__favteam-logo"
+          />
+          {favoriteTeam ? favoriteTeam.name : 'Favorite team'}
+        </button>
         <button
           type="button"
           className="sitefooter__action"
@@ -65,6 +87,14 @@ export function SiteFooter({ onShowLogos }) {
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}
+
+      {showFavoriteTeam && (
+        <FavoriteTeamModal
+          favoriteTeamId={favoriteTeamId}
+          onSave={onSetFavoriteTeam}
+          onClose={() => setShowFavoriteTeam(false)}
+        />
+      )}
 
       <div className="sitefooter__legal">
         <p className="sitefooter__brand">
