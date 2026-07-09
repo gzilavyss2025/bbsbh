@@ -5638,8 +5638,12 @@ body {
   line-height: 1;
 }
 
-/* ---- rehab-assignment banner — kraft-amber tape, the "on hold / passing
-   through the minors" counterpart to the celebratory blue All-Star tape ---- */
+/* ---- rehab-assignment banner — an actual strip of kraft-amber tape: the same
+   diagonal-hatch weave (--seal-texture) as the spoiler seals and the reveal
+   button, so a player's status reads as tape stuck onto the scorebook page. The
+   "on hold / passing through the minors" counterpart to the clay injured-list
+   tape and the celebratory blue All-Star tape. --seal-ink is tuned to hold AA
+   against both kraft hatch stripes. ---- */
 .rehab-banner {
   display: flex;
   align-items: center;
@@ -5648,15 +5652,16 @@ body {
   margin: 4px 0 var(--space-3);
   padding: 9px 16px;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--seal) 0%, #8f6636 100%);
+  background: var(--seal-texture);
+  border: var(--bw-hair) solid var(--seal-hatch);
   box-shadow: var(--shadow-card);
 }
 .rehab-banner__text {
   font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
+  letter-spacing: var(--ls-label);
   font-weight: var(--w-bold);
-  font-size: 13.5px;
+  font-size: var(--fs-label);
   color: var(--seal-ink);
 }
 .rehab-banner__mark {
@@ -5665,9 +5670,10 @@ body {
   line-height: 1;
 }
 
-/* ---- injured-list banner — the clay/seam-red counterpart to the amber rehab
-   tape; a player can carry both at once (on the IL and out on a rehab stint),
-   so they stack. Final texture treatment set alongside the rehab redesign. ---- */
+/* ---- injured-list banner — the clay/seam-red sibling of the amber rehab tape,
+   same hatch weave in the app's "alert / negative" color (--il-texture). A
+   player can carry both at once (on the IL and out on a rehab stint), so they
+   stack. White text holds AA against both clay stripes. ---- */
 .il-banner {
   display: flex;
   align-items: center;
@@ -5676,15 +5682,16 @@ body {
   margin: 4px 0 var(--space-3);
   padding: 9px 16px;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
+  background: var(--il-texture);
+  border: var(--bw-hair) solid var(--clay-deep);
   box-shadow: var(--shadow-card);
 }
 .il-banner__text {
   font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
+  letter-spacing: var(--ls-label);
   font-weight: var(--w-bold);
-  font-size: 13.5px;
+  font-size: var(--fs-label);
   color: #fff;
 }
 .il-banner__mark {

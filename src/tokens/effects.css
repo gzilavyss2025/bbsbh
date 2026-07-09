@@ -28,6 +28,14 @@
       -45deg,
       var(--seal) 0px, var(--seal) 6px,
       var(--seal-hatch) 6px, var(--seal-hatch) 8px);
+
+  /* Injured-list tape — the same diagonal-hatch weave as the kraft seal but in
+     the clay/seam-red family, so the IL banner reads as a sibling of the amber
+     rehab tape. White text holds WCAG AA (≥5.4:1) against both clay stripes. */
+  --il-texture: repeating-linear-gradient(
+      -45deg,
+      var(--clay) 0px, var(--clay) 6px,
+      var(--clay-deep) 6px, var(--clay-deep) 8px);
 }
 
 /* Faint scorebook grid-paper texture — apply to canvas backgrounds */
