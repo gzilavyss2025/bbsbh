@@ -1,7 +1,9 @@
 import { selectBoxscore, computeThreeStars } from '../api/boxscore.js'
+import { selectWinProbPath } from '../api/winprob.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
+import { WinProbChart } from '../components/WinProbChart.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -76,14 +78,17 @@ export function BoxScore({
       <SealBox label="Tap to reveal the box score">
         {() => {
           const box = selectBoxscore(feed)
-          // Computed here, inside the reveal render, so WPA never reaches the DOM
-          // before the tap — same gate as the box score itself.
+          // Computed here, inside the reveal render, so WPA and the win-prob
+          // path never reach the DOM before the tap — same gate as the box
+          // score itself.
           const stars = computeThreeStars(winProbability, feed)
+          const winProbPoints = selectWinProbPath(winProbability)
           return (
             <BoxScoreBody
               feed={feed}
               box={box}
               stars={stars}
+              winProbPoints={winProbPoints}
               managers={managers}
               uniforms={uniforms}
               scorebookWeather={scorebookWeather}
@@ -105,7 +110,7 @@ export function BoxScore({
 // own header card — the visiting team's crew and first pitch above its
 // batting/pitching, the home team's ballpark/weather/times above its own. The
 // complete MLB-style game-info text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }) {
+function BoxScoreBody({ feed, box, stars, winProbPoints, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -159,6 +164,14 @@ function BoxScoreBody({ feed, box, stars, managers, uniforms, scorebookWeather }
           <Scoreboard away={box.away} home={box.home} innings={box.innings} />
         </div>
       </div>
+      {/* The game's win-probability arc — full width under the stars/line score,
+          the retrospective companion to the three stars (both are the WPA
+          story). Renders nothing at a park with no win-prob feed. */}
+      <WinProbChart
+        points={winProbPoints}
+        awayAbbr={box.away.abbreviation}
+        homeAbbr={box.home.abbreviation}
+      />
       <div className="bs__duo">
         <div className="bs__col">
           <InfoCard fields={awayFields} />

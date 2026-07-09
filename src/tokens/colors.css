@@ -74,4 +74,11 @@
   --seal-cover-ink:   var(--seal-ink);
 
   --focus-ring:       var(--field);
+
+  /* ---- Win-probability chart ---- two bands split at the ink line: the home
+     share below (soft navy), the away share above (soft clay), so the line's
+     height reads as who leads. Muted enough to sit under navy ink + graphite. */
+  --winprob-home:     #C6D2DE;   /* soft navy — home win share */
+  --winprob-away:     #EFDAD3;   /* soft clay — away win share */
+  --winprob-line:     var(--ink-1);
 }

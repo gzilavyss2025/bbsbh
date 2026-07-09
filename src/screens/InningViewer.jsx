@@ -13,11 +13,13 @@ import {
 } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
+import { selectWinProbPath } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
 import { prospectBadge } from '../api/prospects.js'
 import { SealBox } from '../components/SealBox.jsx'
+import { WinProbChart } from '../components/WinProbChart.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
@@ -44,6 +46,7 @@ export function InningViewer({
   onReload,
   loading,
   pitcherRoles,
+  winProbability,
   prospectsData,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
@@ -142,6 +145,16 @@ export function InningViewer({
     [feed, revealedThrough],
   )
 
+  // The win-probability line "so far" — only the plays through the revealed
+  // half. Same reveal gate as the running line and Pitchers table (a
+  // reveal-only selector clamped to revealedThrough; see api/winprob.js), so
+  // nothing sealed is plotted. Empty until at least one half is revealed, and at
+  // MiLB parks with no win-prob feed — the chart then renders nothing.
+  const winProbPoints = useMemo(
+    () => selectWinProbPath(winProbability, { throughHalf: revealedThrough }),
+    [winProbability, revealedThrough],
+  )
+
   if (!started) {
     return (
       <div className="innings">
@@ -188,6 +201,13 @@ export function InningViewer({
             homeAbbr={meta.home.abbreviation}
             curIdx={curIdx}
             onSelect={goTo}
+          />
+
+          <WinProbChart
+            points={winProbPoints}
+            awayAbbr={meta.away.abbreviation}
+            homeAbbr={meta.home.abbreviation}
+            partial
           />
 
           <nav className="inningnav" aria-label="Half-inning navigator">

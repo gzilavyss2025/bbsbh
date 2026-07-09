@@ -3365,6 +3365,128 @@ body {
   letter-spacing: var(--ls-label);
 }
 
+/* ----------------------------------------------------------- win probability
+   The game's win-probability arc — one ink line for the home team's win %, the
+   plot split into a soft-navy home band (below the line) and a soft-clay away
+   band (above). Reveal-gated everywhere it appears (see api/winprob.js): the
+   innings view feeds only the plays through the revealed half, the box score
+   the whole game inside its seal. */
+.winprob {
+  margin-bottom: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 10px;
+}
+
+.winprob__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 8px;
+  margin-bottom: 8px;
+}
+
+.winprob__title {
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.winprob__sofar {
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+/* Current/final split — the two team shares, home inked navy, away clay. */
+.winprob__split {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.winprob__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.winprob__team::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.winprob__team--home::before { background: var(--winprob-home); }
+.winprob__team--away::before { background: var(--winprob-away); }
+
+.winprob__pct { color: var(--text-heading); }
+
+/* Scales uniformly (default preserveAspectRatio) so the dots stay round and the
+   labels crisp. On a phone the viewBox ratio sets the height (~180px); on the
+   wide box-score layout max-height caps it and it letterboxes rather than
+   growing huge. */
+.winprob__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+}
+
+.winprob__band--away { fill: var(--winprob-away); }
+.winprob__band--home { fill: var(--winprob-home); }
+
+.winprob__inningline {
+  stroke: var(--rule-grid);
+  stroke-width: 1;
+}
+
+.winprob__mid {
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.75;
+}
+
+.winprob__line {
+  fill: none;
+  stroke: var(--winprob-line);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.winprob__scoremark {
+  fill: var(--clay);
+  stroke: var(--surface-inset);
+  stroke-width: 0.75;
+}
+
+.winprob__now {
+  fill: var(--winprob-line);
+  stroke: var(--surface-inset);
+  stroke-width: 1.5;
+}
+
+.winprob__ylabel,
+.winprob__inninglabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--text-caption);
+}
+
 /* -------------------------------------------------------------- pitcher lines
    Running lines for every pitcher who has appeared in a revealed half-inning —
    one block per team, each led by the team name and its own header row (gated

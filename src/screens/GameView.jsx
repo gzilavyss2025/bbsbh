@@ -324,6 +324,7 @@ export function GameView({ game, section, onSection }) {
           onReload={feedState.reload}
           loading={feedState.loading}
           pitcherRoles={pitcherRoles.data}
+          winProbability={winProb.data}
           prospectsData={prospectsData}
         />
       )}
