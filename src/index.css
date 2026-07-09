@@ -1277,19 +1277,21 @@ body {
   font-weight: var(--w-bold);
 }
 
-/* The innings bar's primary action while the shown half is still sealed: the
-   same kraft-amber as the seal cover, so revealing from the bar still reads as
-   "peel the tape." Flips to .btn--next once revealed. */
+/* The innings bar's primary action while the shown half is still sealed. It IS
+   the seal now (the inline cover is gone): the same kraft diagonal-hatch texture
+   the cover box carried, so revealing still reads as "peel the tape." Flips to
+   .btn--next once revealed. */
 .btn--reveal {
   width: 100%;
   margin-top: 20px;
-  background: var(--seal);
+  background: var(--seal-texture);
   border-color: var(--seal-hatch);
   color: var(--seal-ink);
   font-weight: var(--w-bold);
 }
-.btn--reveal .btn__lock {
-  margin-right: 4px;
+.btn--reveal .btn__ball {
+  margin-right: 6px;
+  font-size: 1.1em;
 }
 
 .btn--ghost {

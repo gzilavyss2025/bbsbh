@@ -17,10 +17,16 @@ import { useEffect, useRef, useState } from 'react'
 // touched post-reveal, honoring the spoiler rule.
 // `label` names what the cover hides ("Tap to reveal the box score") — it is
 // the sealed button's accessible name, so keep it spoiler-free and specific.
+// `coverless`: render NOTHING while sealed instead of the kraft cover button —
+// for a surface that reveals from elsewhere (the innings view's bottom-bar
+// button). The spoiler guard is unchanged: children are still only invoked once
+// revealed, so nothing sealed reaches the DOM; only the tap-target cover is
+// dropped.
 export function SealBox({
   children,
   forceRevealed = false,
   onReveal,
+  coverless = false,
   label = 'Tap to reveal inning totals',
 }) {
   const [revealed, setRevealed] = useState(false)
@@ -47,6 +53,7 @@ export function SealBox({
   }, [revealed])
 
   if (!shown) {
+    if (coverless) return null
     return (
       <button
         type="button"

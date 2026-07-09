@@ -284,7 +284,7 @@ export function InningViewer({
             onClick={revealCurrent}
             aria-label={`Reveal ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
           >
-            <span className="btn__lock" aria-hidden="true">🔒</span> Reveal {curHalfLabel}
+            <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal {curHalfLabel}
           </button>
         ) : nextIdx != null ? (
           <button className="btn btn--next" onClick={() => goTo(nextIdx)}>
@@ -372,6 +372,7 @@ function HalfInning({
       <SealBox
         forceRevealed={revealed}
         onReveal={() => onReveal(inning, half)}
+        coverless
       >
         {() => {
           // Computed only on reveal. R/H/LOB are the batting side's; E is a
