@@ -5271,6 +5271,7 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 12.5px;
+  line-height: 1.45;
   color: var(--text-body);
   text-align: right;
 }
@@ -5307,6 +5308,10 @@ body {
   font-size: 12.5px;
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
+  /* Data cells are single tokens; keep them on one line so a value like the
+     pitcher W–L ("10–7") never wraps at its en-dash onto a second row. The
+     wrap lives on .ledger-wrap (horizontal scroll) instead. */
+  white-space: nowrap;
 }
 .ledger thead th {
   border-top: none;

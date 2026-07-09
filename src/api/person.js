@@ -14,6 +14,10 @@
 import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
 
 const DASH = '—'
+// Non-breaking space (U+00A0) — joins the count and label inside a game-log
+// stat token so a long broadcast line wraps only at the commas between tokens,
+// never splitting a single stat like "9 K" across two lines.
+const NBSP = '\u00A0'
 
 function num(x) {
   const n = Number(x)
@@ -336,11 +340,13 @@ function oppLabel(opponent) {
 }
 
 // A count-tagged token for a stat line — "HR" for one, "2 HR" for several, ''
-// for none — so a line reads like a broadcast chyron ("2B, HR, 2 RBI, K").
+// for none — so a line reads like a broadcast chyron ("2B, HR, 2 RBI, K"). The
+// count and label are joined by a NON-BREAKING space so a long line wraps only
+// at the commas between tokens — "6 K" never splits across two lines.
 function tag(n, label) {
   const v = num(n)
   if (!v) return null
-  return v === 1 ? label : `${v} ${label}`
+  return v === 1 ? label : `${v}${NBSP}${label}`
 }
 
 // A hitter's one-game line, TV-lower-third style: "2-4, 2B, HR, 2 RBI, K"
@@ -368,12 +374,15 @@ function hitterLine(st) {
 function pitcherLine(st) {
   const parts = []
   if (num(st.gamesStarted) > 0) parts.push('GS')
-  parts.push(`${st.inningsPitched ?? DASH} IP`)
-  parts.push(`${num(st.hits)} H`)
-  parts.push(`${num(st.runs)} R`)
-  parts.push(`${num(st.earnedRuns)} ER`)
-  parts.push(`${num(st.baseOnBalls)} BB`)
-  parts.push(`${num(st.strikeOuts)} K`)
+  // Non-breaking space within each token (see tag/NBSP) so the line wraps only
+  // at the commas — a long start ("6.0 IP, 5 H, 2 R, 2 ER, 3 BB, 9 K") never
+  // splits a stat like "9 K" across two lines.
+  parts.push(`${st.inningsPitched ?? DASH}${NBSP}IP`)
+  parts.push(`${num(st.hits)}${NBSP}H`)
+  parts.push(`${num(st.runs)}${NBSP}R`)
+  parts.push(`${num(st.earnedRuns)}${NBSP}ER`)
+  parts.push(`${num(st.baseOnBalls)}${NBSP}BB`)
+  parts.push(`${num(st.strikeOuts)}${NBSP}K`)
   return parts.join(', ')
 }
 
@@ -539,7 +548,7 @@ function yearByYearCells(st, group, role) {
       st.whip ?? DASH,
     ]
   }
-  return [num(st.gamesPlayed), num(st.atBats), num(st.homeRuns), num(st.rbi), st.avg ?? DASH, st.ops ?? DASH]
+  return [num(st.gamesPlayed), num(st.atBats), st.avg ?? DASH, num(st.homeRuns), num(st.rbi)]
 }
 
 // A season's yearByYear splits at one level can include a synthetic,
@@ -738,7 +747,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
 
   const baseColumns = group === 'pitching'
     ? ['G', 'GS', role === 'CL' ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
-    : ['G', 'AB', 'HR', 'RBI', 'AVG', 'OPS']
+    : ['G', 'AB', 'AVG', 'HR', 'RBI']
   const columns = showWar ? [...baseColumns, 'WAR'] : baseColumns
   return { columns, rows, climb, totals, footnote: stintCaption(foot, group) }
 }
