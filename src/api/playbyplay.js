@@ -437,28 +437,38 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   const progress = new Map() // runnerId -> furthest base (1-3, or 4 for a run)
   const legs = new Map() // runnerId -> { baseNum: { code, slot } }
   for (const play of plays) {
-    const code = advanceCode(play)
     const playBatter = play.matchup?.batter?.id
-    const slot = playBatter != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
+    const batterSlot = playBatter != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
       ? battingSlot(feed, battingSide, playBatter)
       : null
     // The feed can split one runner's multi-base move on a single play into
     // separate legs (2nd→3rd, 3rd→home). Keep only the furthest destination
     // per runner per play, so a two-base advance is labeled once, at its end.
-    const endBase = new Map() // runnerId -> furthest base reached on THIS play
+    // How he advanced is read from the runner's OWN movement event, not the
+    // play's batting result: a steal / wild pitch / passed ball / balk during
+    // another batter's PA is recorded on the runner (details.eventType), so it
+    // must be tagged SB/WP/PB/BK rather than the batter's BB/K/GO. Such a
+    // self-advance credits no hitter (slot null); an advance driven by the
+    // batter's plate appearance credits his lineup slot.
+    const endBase = new Map() // runnerId -> { base, code, slot } furthest this play
     for (const r of play.runners ?? []) {
       const rid = r.details?.runner?.id
       if (rid == null || r.movement?.isOut) continue
+      const base = BASE_NUM[r.movement?.end] ?? 0
+      if (base === 0) continue
       // Credit a pinch runner's advance to the batter whose card he inherited.
       const canon = rootRunner(rid)
-      const base = BASE_NUM[r.movement?.end] ?? 0
-      if (base > (endBase.get(canon) ?? 0)) endBase.set(canon, base)
+      if (base <= (endBase.get(canon)?.base ?? 0)) continue
+      const rEt = r.details?.eventType
+      const code = rEt && ADVANCE_CODES[rEt] ? ADVANCE_CODES[rEt] : advanceCode(play)
+      const slot = rEt && NON_PA_EVENT_TYPES.has(rEt) ? null : batterSlot
+      endBase.set(canon, { base, code, slot })
     }
-    for (const [rid, base] of endBase) {
-      if (base > (progress.get(rid) ?? 0)) progress.set(rid, base)
+    for (const [rid, info] of endBase) {
+      if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
       if (rid !== playBatter) {
         const m = legs.get(rid) ?? {}
-        m[base] = { code, slot }
+        m[info.base] = { code: info.code, slot: info.slot }
         legs.set(rid, m)
       }
     }
