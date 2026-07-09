@@ -1200,9 +1200,13 @@ export function detectRehabAssignment(transactions, debutYear) {
 // Injured-list stint detection — the same most-recent-open-stint shape as the
 // rehab detector, over the same (already spoiler-capped) transactions feed. A
 // placement is an SC row reading "…placed/transferred … on/to the N-day injured
-// list"; it closes on a later SC "activated … from the … injured list" or a
-// roster-removing move (release / free agency / DFA / retirement).
-const IL_END_CODES = new Set(['REL', 'RET', 'DFA', 'SFA', 'FA', 'DES'])
+// list"; it closes on a later SC "activated …" (a club reactivating him — the
+// minor-league form often DOESN'T name the injured list, e.g. "Myrtle Beach
+// Pelicans activated OF …"), a trade (TR — a traded player isn't on the old
+// club's IL; if still hurt, the new club's re-placement becomes the latest
+// placement anyway), or a roster-removing move (release / free agency / DFA /
+// retirement).
+const IL_END_CODES = new Set(['REL', 'RET', 'DFA', 'SFA', 'FA', 'DES', 'TR'])
 function isIlPlacementTxn(t) {
   return (
     t.typeCode === 'SC' &&
@@ -1212,11 +1216,7 @@ function isIlPlacementTxn(t) {
 }
 function isIlEndingTxn(t) {
   if (IL_END_CODES.has(t.typeCode)) return true
-  return (
-    t.typeCode === 'SC' &&
-    /activat/i.test(t.description || '') &&
-    /injured list/i.test(t.description || '')
-  )
+  return t.typeCode === 'SC' && /activat/i.test(t.description || '')
 }
 
 // The player's CURRENT injured-list stint, or null. Takes the most recent IL
