@@ -21,6 +21,7 @@ import { prospectBadge } from '../api/prospects.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { PlayByPlay } from '../components/PlayByPlay.jsx'
+import { StrikeZoneLegend } from '../components/StrikeZone.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
@@ -186,54 +187,33 @@ export function InningViewer({
         </button>
       </div>
 
-      {/* On a phone these wrappers are inert divs and everything stacks in the
-          same order as ever; from the wide breakpoint up they become a grid —
-          the half-inning reading pane on the left, the pitchers table, lineups
-          & defense reference, and rosters riding a sticky column on the right. */}
-      {/* The half-inning heading + Back/Next: full-width above both columns on
-          the wide layout, and above the running line on a phone (moved up out of
-          the reading pane so it stays put as the feed scrolls). */}
-      {/* Header: the half navigator, with the R/H/E + pitch-stat box pinned
-          top-right from the wide breakpoint up (hidden on a phone, where the
-          box rides inline in the half — see StatBox / HalfInning). */}
-      <div className="innings__head">
-        <nav className="inningnav" aria-label="Half-inning navigator">
-          <button
-            onClick={() => goTo(Math.max(0, curIdx - 1))}
-            disabled={curIdx === 0}
-            aria-label="Previous half-inning"
-          >
-            ‹ Back
-          </button>
-          <span className="inningnav__label">
-            {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
-          </span>
-          <button
-            onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
-            disabled={curIdx === maxIdx}
-            aria-label="Next half-inning"
-          >
-            Next ›
-          </button>
-        </nav>
-        <StatBox
-          className="innings__statbox--desk"
-          placeholder
-          feed={feed}
-          inning={effInning}
-          half={effHalf}
-          battingSide={effHalf === 'top' ? 'away' : 'home'}
-          getDerived={getDerived}
-          revealed={curIdx <= revealedThrough}
-        />
-      </div>
+      {/* The half-inning navigator: full width, the same measure as the
+          LINEUPS / INNINGS / BOX step buttons above it. */}
+      <nav className="inningnav" aria-label="Half-inning navigator">
+        <button
+          onClick={() => goTo(Math.max(0, curIdx - 1))}
+          disabled={curIdx === 0}
+          aria-label="Previous half-inning"
+        >
+          ‹ Back
+        </button>
+        <span className="inningnav__label">
+          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
+        </span>
+        <button
+          onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+          disabled={curIdx === maxIdx}
+          aria-label="Next half-inning"
+        >
+          Next ›
+        </button>
+      </nav>
 
-      {/* On a phone this is an inert block and everything stacks in source order
-          (running line, win-prob, the half inline, then the reference band's
-          Pitchers, then rosters). From the wide breakpoint up it becomes a flex
-          column that re-orders: the running line + win-prob span full width, the
-          reference band (pitchers + defense | lineups) rises above the reading
-          pane, and the play-by-play pairs each card with its strike zone. */}
+      {/* On a phone these wrappers are inert divs and everything stacks in the
+          same row order as ever: linescore, then the stat card + WPA chart,
+          then the play-by-play (with its strike zones), then the pitchers /
+          lineups / defense reference band, then rosters. From the wide
+          breakpoint up the stat card and WPA chart sit side by side. */}
       <div className="innings__grid">
         <RollingLine
           feed={feed}
@@ -248,18 +228,30 @@ export function InningViewer({
           onSelect={goTo}
         />
 
-        <WinProbChart
-          points={winProbPoints}
-          awayAbbr={meta.away.abbreviation}
-          homeAbbr={meta.home.abbreviation}
-          partial
-        />
+        {/* Row 2: the R/H/E/LOB + pitch-stat card for the half being viewed,
+            beside the win-probability chart. */}
+        <div className="innings__row2">
+          <StatBox
+            className="innings__statbox"
+            placeholder
+            feed={feed}
+            inning={effInning}
+            half={effHalf}
+            battingSide={effHalf === 'top' ? 'away' : 'home'}
+            getDerived={getDerived}
+            revealed={curIdx <= revealedThrough}
+          />
+          <WinProbChart
+            points={winProbPoints}
+            awayAbbr={meta.away.abbreviation}
+            homeAbbr={meta.home.abbreviation}
+            partial
+          />
+        </div>
 
-        {/* Source order is the phone stack: the half sits here (pitchers &
-            reference below it, rosters last). On the wide layout `order` lifts
-            the reference band above the reading pane (see .innings__grid). key
-            on inning+half → fresh mount; a box at/under the reveal mark stays
-            open. */}
+        {/* Row 3: the half's play-by-play (paired with its strike zone on the
+            wide layout). key on inning+half → fresh mount; a box at/under the
+            reveal mark stays open. */}
         <div className="inning" key={`${effInning}-${effHalf}`} ref={resultsRef} tabIndex={-1}>
           <HalfInning
             feed={feed}
@@ -381,13 +373,11 @@ export function InningViewer({
   )
 }
 
-// The R/H/E/LOB + pitch-stat summary for the current half, its own coverless
-// seal driven by the same reveal flag as the rest of the half (nothing computed
-// until revealed — the spoiler guard is unchanged). Rendered twice: a mobile
-// copy inline in the half flow (hidden ≥740) and a desktop copy pinned top-right
-// in the innings header (hidden <740). Both read identical reveal-only values;
-// duplicating is harmless (idempotent) and lets each live in its own layout
-// region without splitting the seal across the DOM tree.
+// The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
+// beside the win-probability chart — its own coverless seal driven by the same
+// reveal flag as the rest of the half (nothing computed until revealed — the
+// spoiler guard is unchanged). Before reveal, `placeholder` swaps in a sealed
+// hint card rather than an empty slot.
 function StatBox({ feed, inning, half, battingSide, getDerived, revealed, className = '', placeholder = false }) {
   if (!revealed && placeholder) {
     return (
@@ -498,19 +488,6 @@ function HalfInning({
         </>
       )}
 
-      {/* The stat box inline for phones (hidden ≥740, where the header copy
-          takes over). Sits above the play-by-play, so the mobile reveal order
-          is unchanged: R/H/E → pitch stats → play-by-play. */}
-      <StatBox
-        className="half__statbox"
-        feed={feed}
-        inning={inning}
-        half={half}
-        battingSide={battingSide}
-        getDerived={getDerived}
-        revealed={revealed}
-      />
-
       <SealBox
         forceRevealed={revealed}
         onReveal={() => onReveal(inning, half)}
@@ -518,10 +495,14 @@ function HalfInning({
       >
         {() => {
           // Computed only on reveal (the play-by-play + Statcast half of the
-          // former single seal; the R/H/E summary is StatBox above).
+          // former single seal; the R/H/E summary is the row-2 StatBox card).
           const d = revealDerived(getDerived(), inning, half)
           return (
             <>
+              {/* The pitch-color key, once right above the sealed reveal
+                  content it decodes — the ladder dots and every strike-zone
+                  diagram below share this legend. */}
+              <StrikeZoneLegend />
               <PlayByPlay
                 feed={feed}
                 inning={inning}
@@ -691,7 +672,6 @@ function RollingLine({
           </tbody>
         </table>
       </div>
-      <p className="rolling__cap">Tap a half to open it; runs fill in as you reveal.</p>
     </section>
   )
 }

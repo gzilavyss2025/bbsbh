@@ -385,7 +385,7 @@ function MastheadLogo({ team, onSketch }) {
       onClick={onSketch}
       aria-label={`Enlarge ${team.name || 'team'} logo for sketching`}
     >
-      <TeamLogo teamId={team.id} name={team.name} size={44} bw />
+      <TeamLogo teamId={team.id} name={team.name} size={44} />
     </button>
   )
 }
