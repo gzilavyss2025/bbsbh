@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { computeHalfInningFeed, pitchLadder, hasPitchLocations } from '../api/playbyplay.js'
+import {
+  computeHalfInningFeed,
+  pitchLadder,
+  hasPitchLocations,
+  firstRunPlay,
+  firstPAIndexByBatter,
+} from '../api/playbyplay.js'
+import { buildCallouts } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
@@ -10,9 +17,17 @@ import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './Strik
 // notes, first at-bat first. This reads score-revealing data
 // (computeHalfInningFeed), so — same rule as the rest of the half's stat
 // grid — it must only be rendered from inside a SealBox's reveal function.
-export function PlayByPlay({ feed, inning, half, battingSide }) {
+export function PlayByPlay({ feed, inning, half, battingSide, callouts }) {
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
+
+  // Season-context call-out plumbing (see api/callout-notes.js). Both derivations
+  // read the whole-game feed but are reveal-only like everything here, and only
+  // run when a bundle exists (MLB, generated date) — otherwise the cards render
+  // exactly as before. `firstRun` marks the play that scored the game's first
+  // run; `firstPA` gates each batter's streak note to his first card of the game.
+  const firstRun = callouts ? firstRunPlay(feed) : null
+  const firstPA = callouts ? firstPAIndexByBatter(feed) : null
 
   return (
     <div className="pbp">
@@ -20,9 +35,25 @@ export function PlayByPlay({ feed, inning, half, battingSide }) {
         entry.kind === 'event' ? (
           <EventNote key={`event-${i}`} entry={entry} />
         ) : (
-          <AtBatCard key={`${entry.batterId}-${i}`} entry={entry} />
+          <AtBatCard
+            key={`${entry.batterId}-${i}`}
+            entry={entry}
+            calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide }}
+          />
         ),
       )}
+    </div>
+  )
+}
+
+// A season-context call-out line beneath the play description — the leader /
+// streak / situational-record notes (see api/callout-notes.js). Season
+// aggregates only, so it leaks nothing shown alongside an already-revealed play.
+function CalloutNote({ text }) {
+  return (
+    <div className="pbp__callout">
+      <span className="pbp__calloutmark" aria-hidden="true">★</span>
+      {text}
     </div>
   )
 }
@@ -82,9 +113,10 @@ function EventNote({ entry }) {
   )
 }
 
-function AtBatCard({ entry }) {
+function AtBatCard({ entry, calloutCtx }) {
   const { batter, pitches, pitchDetails, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
+  const calloutNotes = buildCallouts(entry, calloutCtx)
   // The pitch-zone diagram only exists where the park tracked plate locations
   // (most MiLB parks don't). On a phone it opens in a modal from an icon button
   // tucked into the card's bottom-left whitespace; the desktop layout shows it
@@ -136,6 +168,9 @@ function AtBatCard({ entry }) {
         </div>
         {baserunningNotes?.map((note, i) => (
           <BaserunningNote key={i} segments={note.segments} />
+        ))}
+        {calloutNotes.map((text, i) => (
+          <CalloutNote key={`c-${i}`} text={text} />
         ))}
         {hasZone && (
           <button

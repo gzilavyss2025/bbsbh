@@ -48,6 +48,7 @@ export function InningViewer({
   pitcherRoles,
   winProbability,
   prospectsData,
+  callouts,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -228,6 +229,19 @@ export function InningViewer({
         />
       </div>
 
+      {/* Extra-innings team-record banner: only shows once the page IS an extra
+          inning, which the user can only reach after revealing through
+          regulation (extras unlock one at a time — ADR-0008), so it leaks
+          nothing. Season W-L splits (spoiler-free); absent for MiLB / un-
+          generated games (callouts null). */}
+      {effInning > regulation && (
+        <ExtrasBanner
+          records={callouts?.teamRecords}
+          awayName={meta.away.clubName || meta.away.abbreviation}
+          homeName={meta.home.clubName || meta.home.abbreviation}
+        />
+      )}
+
       {/* On a phone this is an inert block and everything stacks in source order
           (running line, win-prob, the half inline, then the reference band's
           Pitchers, then rosters). From the wide breakpoint up it becomes a flex
@@ -276,6 +290,7 @@ export function InningViewer({
             getDerived={getDerived}
             onReveal={revealTo}
             prospectsData={prospectsData}
+            callouts={callouts}
           />
         </div>
 
@@ -433,6 +448,32 @@ function StatBox({ feed, inning, half, battingSide, getDerived, revealed, classN
   )
 }
 
+// A slim banner above the extra-innings reading pane: each club's extra-inning
+// record for the season ("BREWERS 5-2 in extras · CUBS 2-5"). Renders nothing
+// until the data's there for both, so a thin/absent bundle just leaves it off.
+function ExtrasBanner({ records, awayName, homeName }) {
+  const away = records?.away?.extraInning
+  const home = records?.home?.extraInning
+  if (!away && !home) return null
+  return (
+    <p className="innings__extras" role="note">
+      <span className="innings__extras-icon" aria-hidden="true">⚾️</span> Extra
+      innings this season:{' '}
+      {away && (
+        <span className="innings__extras-team">
+          {(awayName || 'Away').toUpperCase()} {away}
+        </span>
+      )}
+      {away && home && <span className="innings__extras-dot" aria-hidden="true"> · </span>}
+      {home && (
+        <span className="innings__extras-team">
+          {(homeName || 'Home').toUpperCase()} {home}
+        </span>
+      )}
+    </p>
+  )
+}
+
 function HalfInning({
   feed,
   inning,
@@ -448,6 +489,7 @@ function HalfInning({
   getDerived,
   onReveal,
   prospectsData,
+  callouts,
 }) {
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
@@ -527,6 +569,7 @@ function HalfInning({
                 inning={inning}
                 half={half}
                 battingSide={battingSide}
+                callouts={callouts}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball), sat below the feed.
