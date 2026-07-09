@@ -5665,6 +5665,34 @@ body {
   line-height: 1;
 }
 
+/* ---- injured-list banner — the clay/seam-red counterpart to the amber rehab
+   tape; a player can carry both at once (on the IL and out on a rehab stint),
+   so they stack. Final texture treatment set alongside the rehab redesign. ---- */
+.il-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
+  box-shadow: var(--shadow-card);
+}
+.il-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 13.5px;
+  color: #fff;
+}
+.il-banner__mark {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+}
+
 /* ============================================================
    TEAM HUB
    ============================================================ */

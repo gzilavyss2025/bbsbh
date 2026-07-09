@@ -40,6 +40,7 @@ import {
   careerTimelineView,
   dropRehabStints,
   detectRehabAssignment,
+  detectInjuredList,
   transactionTimelineView,
   tradeKey,
   positionPlayerPastNote,
@@ -136,6 +137,10 @@ export async function loadPlayer(id, asOf) {
   // becomes a combined MLB + rehab log (see below). Null for everyone else.
   const rehab = detectRehabAssignment(txns, debutYear)
   const onRehab = Boolean(rehab)
+  // IL status from the same spoiler-capped feed — independent of rehab: a player
+  // can be on the IL AND out on a rehab assignment at once, so both flags stand.
+  const il = detectInjuredList(txns)
+  const onIL = Boolean(il)
   const currentActivitySportId = onRehab ? 1 : liveSportId
   // Where his career-shaped sections are pinned. A player who has reached the
   // majors gets the major-league treatment even while he's currently in the
@@ -546,6 +551,7 @@ export async function loadPlayer(id, asOf) {
   return {
     bio, blocks, season, asOf, sportId: currentActivitySportId,
     onRehab, rehab,
+    onIL, il,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     conversionNote, positionInnings, transactions,
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,

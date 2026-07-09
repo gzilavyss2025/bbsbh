@@ -83,6 +83,14 @@ export function PlayerPage({ id, asOf, sportId }) {
             </span>
           </div>
         )}
+        {data.onIL && (
+          <div className="il-banner" role="note">
+            <span className="il-banner__mark" aria-hidden="true">✚</span>
+            <span className="il-banner__text">
+              Injured List{data.il?.days ? ` · ${data.il.days}-Day` : ''}
+            </span>
+          </div>
+        )}
         <SiteHeader />
         <BackBtn onClick={back} />
 

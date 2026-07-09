@@ -1195,6 +1195,45 @@ export function detectRehabAssignment(transactions, debutYear) {
   return club?.id ? { id: club.id, name: club.name || '' } : null
 }
 
+// Injured-list stint detection — the same most-recent-open-stint shape as the
+// rehab detector, over the same (already spoiler-capped) transactions feed. A
+// placement is an SC row reading "…placed/transferred … on/to the N-day injured
+// list"; it closes on a later SC "activated … from the … injured list" or a
+// roster-removing move (release / free agency / DFA / retirement).
+const IL_END_CODES = new Set(['REL', 'RET', 'DFA', 'SFA', 'FA', 'DES'])
+function isIlPlacementTxn(t) {
+  return (
+    t.typeCode === 'SC' &&
+    /injured list/i.test(t.description || '') &&
+    /(placed|transferred)/i.test(t.description || '')
+  )
+}
+function isIlEndingTxn(t) {
+  if (IL_END_CODES.has(t.typeCode)) return true
+  return (
+    t.typeCode === 'SC' &&
+    /activat/i.test(t.description || '') &&
+    /injured list/i.test(t.description || '')
+  )
+}
+
+// The player's CURRENT injured-list stint, or null. Takes the most recent IL
+// placement and treats it as active unless a later transaction closes it. The day
+// count ('7'|'10'|'15'|'60') is parsed from the placement description; a placement
+// with no day count (a plain / full-season "injured list") yields days:null and a
+// generic label. Score-safe: transactions are already capped at the spoiler
+// cutoff by the caller, so this reflects IL status AS OF the game being viewed.
+export function detectInjuredList(transactions) {
+  const placements = (transactions ?? []).filter((t) => isIlPlacementTxn(t) && txnDate(t))
+  if (!placements.length) return null
+  const latest = placements.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
+  const start = txnDate(latest)
+  const ends = (transactions ?? []).some((t) => txnDate(t) > start && isIlEndingTxn(t))
+  if (ends) return null
+  const days = (latest.description || '').match(/(\d+)-day injured list/i)?.[1] ?? null
+  return { days, label: days ? `${days}-Day` : 'Injured List' }
+}
+
 // The league-wide counterpart to detectRehabAssignment — every big leaguer
 // currently on a rehab assignment, for the standalone Rehab Assignments page —
 // no longer lives here: that list can't be built spoiler-cheaply on a page load
