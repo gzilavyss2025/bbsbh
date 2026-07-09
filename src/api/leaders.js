@@ -1,21 +1,19 @@
 // League / level / organization leader pools — the Phase 3 producer promised in
-// api/teamLeaders.js. Where normalizeRosterToPool builds a one-team pool, these
-// assemble a MANY-team pool for a broader scope and hand it to the same
-// computeLeaders + descriptors. Nothing here is score-revealing (season
-// aggregates only — see teamLeaders.js's header), so no seals.
+// api/teamLeaders.js. Assembles a MANY-team pool for a broader scope and hands
+// it to the same computeLeaders + descriptors. Nothing here is score-revealing
+// (season aggregates only — see teamLeaders.js's header), so no seals.
 //
 // The team list for every scope comes straight from the static teams snapshot
 // (public/data/teams.json via fetchStaticTeams) — it already carries each MLB
 // club's leagueId (103 AL / 104 NL) and each MiLB club's parentOrgId + sportId,
-// so no live "list the teams at this level" call is needed. Only the per-team
-// season stats are fetched, reusing fetchTeamRoster (hydrated + 15-min cached),
-// fanned out with the same Promise.allSettled "degrade per team" idiom as
-// fetchRosterIdsForTeams / ProspectsPage.
+// so no live "list the teams at this level" call is needed. Every scope's pool
+// is then built from each club's roster-INDEPENDENT season stats
+// (loadCombinedPoolForTeams, api/statsLevels.js) rather than its current
+// roster, so a player traded away, released, or promoted off a club still
+// ranks — credited only for the stats he put up while there.
 
 import { fetchStaticTeams } from './teams-static.js'
-import { fetchTeamRoster } from './team.js'
-import { normalizeRosterToPool } from './teamLeaders.js'
-import { fetchTeamSeasonStats, combineToPool } from './statsLevels.js'
+import { loadCombinedPoolForTeams } from './statsLevels.js'
 import { SPORT_IDS } from '../lib/teams.js'
 
 // The league/level scopes, in the order the switcher shows them. Each resolves
@@ -82,47 +80,20 @@ export async function resolveScopeTeams(scope, orgId) {
     .map((t) => shape(t, meta.sportId))
 }
 
-// Assemble the PoolPlayer[] for a scope. Two shapes:
-//
-// - The 'org' scope sums a player's season across the club's affiliates into one
-//   row (see statsLevels.js), so a prospect who's been promoted mid-season ranks
-//   on his A+ + AA total rather than whichever single stop he's currently
-//   rostered at. (The league-wide all-minors 'minors' board is the same idea but
-//   far heavier, so it's precomputed to a static file and read separately — see
-//   api/minorsLeaders.js — not produced here.)
-// - Every other scope (a single team level, or MLB/AL/NL) fans out
-//   fetchTeamRoster over its clubs and concats one row per (player, club). Each
-//   club is fetched at its OWN level (`sportId`) so a MiLB club's players are
-//   ranked on their AAA/AA/A+/A line rather than an empty MLB one (without this a
-//   level's leaders collapse to just the handful who've also logged MLB time),
-//   and via the '40Man' roster so an injured leader still counts (see
-//   fetchTeamRoster).
+// Assemble the PoolPlayer[] for a scope. Every scope — a single team level,
+// MLB/AL/NL, or a club's whole 'org' — is built the same way now: each scope
+// resolves to a set of clubs, and loadCombinedPoolForTeams (statsLevels.js)
+// reads those clubs' roster-INDEPENDENT season stats rather than their
+// current rosters. That's what makes a traded-away, released, or promoted-out
+// player still rank — scoped to only the stats he put up on the club(s) in
+// this scope — rather than dropping out the moment he's off the roster. The
+// 'org' scope additionally sums a player's season across the club's
+// affiliates into one row, so a prospect promoted mid-season ranks on his
+// A+ + AA total. (The league-wide all-minors 'minors' board is the same idea
+// but far heavier, so it's precomputed to a static file and read separately —
+// see api/minorsLeaders.js — not produced here.)
 export async function loadLeaderPool(scope, orgId, season) {
-  if (scope === 'org') return loadOrgCombinedPool(orgId, season)
-
   const teams = await resolveScopeTeams(scope, orgId)
   if (teams.length === 0) return []
-  const results = await Promise.allSettled(
-    teams.map((t) => fetchTeamRoster(t.id, season, { sportId: t.sportId, rosterType: '40Man' })),
-  )
-  return teams.flatMap((t, i) => {
-    const roster = results[i].status === 'fulfilled' ? results[i].value : []
-    return normalizeRosterToPool(roster, {
-      id: t.id,
-      abbreviation: t.abbreviation,
-      sport: { id: t.sportId },
-    })
-  })
-}
-
-// One org's combined pool: its affiliates' season lines summed per player.
-async function loadOrgCombinedPool(orgId, season) {
-  const teams = await resolveScopeTeams('org', orgId)
-  if (teams.length === 0) return []
-  const [hit, pit] = await Promise.all([
-    Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'hitting', season))),
-    Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'pitching', season))),
-  ])
-  const settledFlat = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  return combineToPool(settledFlat(hit), settledFlat(pit))
+  return loadCombinedPoolForTeams(teams, season)
 }

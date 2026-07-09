@@ -32,7 +32,8 @@ import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { SectionTitle } from '../components/SectionTitle.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
-import { normalizeRosterToPool, FEATURED_CATEGORIES } from '../api/teamLeaders.js'
+import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
+import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
 
 const DASH = '—'
@@ -86,14 +87,15 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, leaderRoster, ilRoster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
+  const [roster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
-      // A second, IL-inclusive roster (40-man) scoped to the club's level — the
-      // leaderboard pool, so an injured leader still ranks and a MiLB club's
-      // players are ranked on their own level's line (see fetchTeamRoster). The
-      // plain active `roster` above still drives the roster-listing sections.
-      fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
+      // The leaderboard pool, built from the club's season stats rather than
+      // its current roster — so a player traded away, released, or promoted
+      // off the club still ranks, scoped to only his stats from while he was
+      // here (see loadCombinedPoolForTeams). The plain active `roster` above
+      // still drives the roster-listing sections.
+      loadCombinedPoolForTeams([{ id }], season),
       fetchTeamIL(id, season),
       team.league?.id
         ? fetchStandings(team.league.id, season, standingsDate)
@@ -260,12 +262,6 @@ async function loadTeam(id, asOf) {
     .sort(
       (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
     )
-
-  // Per-player leaderboard pool — the IL-inclusive 40-man roster is already
-  // hydrated with each player's season hitting+pitching split (see
-  // fetchTeamRoster), so this is a pure reshape, no extra fetch. Powers the Team
-  // Leaders section below.
-  const leaderPool = normalizeRosterToPool(leaderRoster, team)
 
   return {
     team, season, sportId,
