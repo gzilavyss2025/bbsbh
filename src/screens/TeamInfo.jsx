@@ -552,9 +552,9 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
   // `pairs` always runs (away player, home player) — see formerTeammatePairs'
   // header — so any id that ever shows up as an `a` belongs to the away club
   // and any `b` to the home club, regardless of which side's page is asking.
-  // Only a GROUP card's headshot wall uses this (see GroupCard): the tint is
-  // there to make a big multi-player reunion legible as "these are Team A,
-  // those are Team B" at a glance, which a plain 1-vs-1 pair card doesn't need.
+  // Feeds the soft per-player tint on every card (see TeammateHalf) so a
+  // headshot always reads as "this is a Team A face" at a glance, not just on
+  // a big reunion's wall of them.
   const sideTeamId = useMemo(() => {
     const awayIds = new Set(pairs.map((p) => p.a.id))
     return (id) => (awayIds.has(id) ? awayTeamId : homeTeamId)
@@ -582,7 +582,12 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
               sideTeamId={sideTeamId}
             />
           ) : (
-            <PairCard key={`${c.a.id}-${c.b.id}`} card={c} startingLabel={startingLabel} />
+            <PairCard
+              key={`${c.a.id}-${c.b.id}`}
+              card={c}
+              startingLabel={startingLabel}
+              sideTeamId={sideTeamId}
+            />
           ),
         )}
       </ul>
@@ -596,11 +601,11 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
 }
 
 // A plain 1-vs-1 former-teammate card.
-function PairCard({ card: c, startingLabel }) {
+function PairCard({ card: c, startingLabel, sideTeamId }) {
   return (
     <li className="teammatecard">
       {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
-      <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} />
+      <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} tint={teamTintColor(sideTeamId(c.a.id))} />
       <div className="teammatecard__mid">
         <div className="teammatecard__logos">
           {c.clubs.slice(0, 2).map((club) => (
@@ -609,7 +614,7 @@ function PairCard({ card: c, startingLabel }) {
         </div>
         <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
       </div>
-      <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} />
+      <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} tint={teamTintColor(sideTeamId(c.b.id))} />
       <span className="teammatecard__caption">
         {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
       </span>
@@ -627,10 +632,9 @@ function GroupCard({ card: c, startingLabel, sideTeamId }) {
   return (
     <li className="teammatecard teammatecard--group">
       {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
-      {/* A reunion this size is the one place a wall of headshots needs a
-          hint of WHOSE roster each face is on tonight — so, unlike every
-          other headshot in the app, each one gets a soft tint of its
-          player's current club color instead of sitting transparent. */}
+      {/* A reunion this size is exactly where a wall of headshots most needs
+          the per-player club tint (see TeammateHalf) — WHOSE roster each face
+          is on tonight gets easy to lose track of past a couple of rows. */}
       <div className="teammatecard__group">
         <TeammateHalf
           id={c.anchor.id}

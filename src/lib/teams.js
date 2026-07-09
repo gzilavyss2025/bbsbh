@@ -148,11 +148,11 @@ export function headshotUrl(personId, width = 213) {
 // LEAST likely to be mistaken for another club's — favoring a distinctive
 // accent (gold, orange, teal…) over yet another navy whenever a club has one,
 // since roughly half the league's primary color is some shade of navy/blue.
-// Decorative only: used to tint a headshot's background so a mixed group of
-// players reads at a glance as "these are Team A, those are Team B" (see the
-// Former Teammates group card in TeamInfo.jsx) — a rough visual grouping, not
-// a guarantee every possible matchup gets two clearly distinct hues (a run of
-// same-division rivals can still share a color family). MLB clubs only — the
+// Decorative only: used to tint every headshot's background on the Former
+// Teammates cards (TeamInfo.jsx) so a player reads at a glance as "this is a
+// Team A face, that one's Team B" — a rough visual grouping, not a guarantee
+// every possible matchup gets two clearly distinct hues (a run of same-
+// division rivals can still share a color family). MLB clubs only — the
 // Former Teammates card never shows for a MiLB game, so MiLB team ids have no
 // entry and callers must degrade (see teamTintColor).
 const TEAM_COLORS = {
