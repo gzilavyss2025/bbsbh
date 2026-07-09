@@ -30,10 +30,10 @@ function FeaturedLeader({ entry, category, showTeamLogo }) {
           </PlayerLink>
           {entry.position && <span className="tlead__pos">{entry.position}</span>}
         </div>
-        <div className="tlead__stat">
-          <span className="tlead__statval">{entry.display}</span>
-          <span className="tlead__statlabel">{category.short}</span>
-        </div>
+      </div>
+      <div className="tlead__stat">
+        <span className="tlead__statval">{entry.display}</span>
+        <span className="tlead__statlabel">{category.short}</span>
       </div>
     </div>
   )

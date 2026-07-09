@@ -4293,6 +4293,7 @@ body {
   flex: none;
 }
 .tlead__who {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4321,6 +4322,7 @@ body {
   color: var(--text-caption);
 }
 .tlead__stat {
+  flex: none;
   display: flex;
   align-items: baseline;
   gap: 5px;

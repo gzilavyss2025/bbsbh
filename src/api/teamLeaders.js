@@ -197,6 +197,11 @@ export function computeLeaders(pool, category, { limit = 5 } = {}) {
   return eligiblePlayers(pool, category)
     .map((p) => ({ p, v: category.value(p[group]), tb: playingTime(p[group], group) }))
     .filter((r) => r.v != null && Number.isFinite(r.v))
+    // For "most-of-a-good-thing" categories, a 0 means the player never did
+    // it at all — never worth padding the list out with (thin categories
+    // like Pickoffs would otherwise trail off into a wall of zeroes). A
+    // "fewest" (asc) category keeps its zeroes: 0 there is the best value.
+    .filter((r) => category.sortDir !== 'desc' || r.v !== 0)
     .sort((a, b) => {
       const cmp = category.sortDir === 'asc' ? a.v - b.v : b.v - a.v
       if (cmp !== 0) return cmp
