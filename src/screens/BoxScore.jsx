@@ -5,6 +5,7 @@ import { defenseEntering } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
+import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
@@ -82,7 +83,7 @@ export function BoxScore({
           // path never reach the DOM before the tap — same gate as the box
           // score itself.
           const stars = computeThreeStars(winProbability, feed)
-          const potg = computePlayOfTheGame(winProbability)
+          const potg = computePlayOfTheGame(winProbability, feed)
           const winProbPoints = selectWinProbPath(winProbability)
           return (
             <BoxScoreBody
@@ -159,6 +160,15 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, managers, uniform
       <div className="bs__duo">
         <div className="bs__col">
           <LineTotals away={box.away} home={box.home} />
+          {/* The game's win-probability arc, directly under the R/H/E/LOB
+              totals — the retrospective companion to the three stars (both
+              are the WPA story). Renders nothing at a park with no win-prob
+              feed. */}
+          <WinProbChart
+            points={winProbPoints}
+            awayAbbr={box.away.abbreviation}
+            homeAbbr={box.home.abbreviation}
+          />
           <Decisions decisions={box.decisions} />
         </div>
         <div className="bs__col">
@@ -167,14 +177,6 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, managers, uniform
           <Scoreboard away={box.away} home={box.home} innings={box.innings} />
         </div>
       </div>
-      {/* The game's win-probability arc — full width under the stars/line score,
-          the retrospective companion to the three stars (both are the WPA
-          story). Renders nothing at a park with no win-prob feed. */}
-      <WinProbChart
-        points={winProbPoints}
-        awayAbbr={box.away.abbreviation}
-        homeAbbr={box.home.abbreviation}
-      />
       <div className="bs__duo">
         <div className="bs__col">
           <InfoCard fields={awayFields} />
@@ -526,12 +528,21 @@ function PlayOfTheGame({ play }) {
   return (
     <div className="bs__potg">
       <h3 className="bs__potgTitle">Play of the game</h3>
-      <p className="bs__potgDesc">{play.desc}</p>
-      {play.inning != null && (
-        <span className="bs__potgWhen">
-          {halfLabel} {ordinal(play.inning)}
-        </span>
-      )}
+      <div className="bs__potgBody">
+        <Headshot
+          personId={play.batterId}
+          name={play.batterName}
+          className="bs__potgShot"
+        />
+        <p className="bs__potgDesc">
+          {play.inning != null && (
+            <span className="bs__potgWhen">
+              {halfLabel} {ordinal(play.inning)}{' '}
+            </span>
+          )}
+          {play.desc}
+        </p>
+      </div>
     </div>
   )
 }

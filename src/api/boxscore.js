@@ -478,7 +478,11 @@ export function selectBoxscore(feed) {
 // |WPA|; when it's absent or zero for every play (most MiLB parks, and
 // apparently some MLB games), fall back to the play with the single biggest
 // |WPA| swing.
-export function computePlayOfTheGame(winProb) {
+//
+// `feed` (optional) resolves the batter's identity for the card's headshot —
+// same findBoxscorePlayer/firstLast lookup starLine below uses for the three
+// stars, so the name/team stay in lockstep with the rest of the box score.
+export function computePlayOfTheGame(winProb, feed) {
   if (!Array.isArray(winProb) || winProb.length === 0) return null
   const withCaptivating = winProb.filter(
     (e) => typeof e.about?.captivatingIndex === 'number' && e.about.captivatingIndex > 0,
@@ -505,10 +509,15 @@ export function computePlayOfTheGame(winProb) {
     }
   }
   if (!best) return null
+  const batterId = best.matchup?.batter?.id ?? null
+  const found = batterId ? findBoxscorePlayer(feed?.liveData?.boxscore, batterId) : null
+  const batterGd = found ? feed?.gameData?.players?.[`ID${batterId}`] ?? found.player.person : null
   return {
     desc: best.result?.description ?? '',
     inning: best.about?.inning ?? null,
     half: best.about?.isTopInning ? 'top' : 'bottom',
+    batterId,
+    batterName: batterGd ? firstLast(batterGd) : '',
   }
 }
 

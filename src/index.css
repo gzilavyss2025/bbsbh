@@ -4405,20 +4405,39 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
+.bs__potgBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+/* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
+   this reliably outranks the base .shot sizing — same pattern as
+   .topperf__shot above. */
+.shot.bs__potgShot {
+  flex: none;
+  width: auto;
+  height: 52px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.bs__potgShot.shot--fallback {
+  font-size: 20px;
+}
 .bs__potgDesc {
-  margin: 0 0 4px;
+  margin: 0;
   font-family: var(--font-body);
   font-size: 13px;
   line-height: 1.4;
   color: var(--text-heading);
 }
+/* The inning it happened in, inline ahead of the description — same font as
+   the description, tinted the scorebook's kraft-tape amber so it reads as a
+   quiet tag rather than more description text. */
 .bs__potgWhen {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
 }
 
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
