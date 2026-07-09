@@ -2655,6 +2655,14 @@ body {
   min-width: 0;
 }
 
+/* The SealBox's own .statgrid wrapper paints --surface-inset once revealed,
+   which otherwise shows through as a whiter patch inside this card's kraft
+   background. Strip it back to transparent so .statbox's own background is
+   the only one that shows. */
+.statbox .statgrid {
+  background: none;
+}
+
 /* The sealed placeholder shown in the stat-box slot before the current half is
    revealed, so row 2 isn't left with an empty gap. */
 .statbox--sealed {
@@ -4023,6 +4031,15 @@ body {
   stroke-width: 1;
 }
 
+/* Subtler than .winprob__inningline — marks the top/bottom split within a
+   single inning rather than the boundary between two innings. */
+.winprob__halfline {
+  stroke: var(--rule-grid);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+  opacity: 0.45;
+}
+
 .winprob__mid {
   stroke: var(--graphite-soft);
   stroke-width: 1;
@@ -4055,6 +4072,10 @@ body {
   font-family: var(--font-mono);
   font-size: 9px;
   fill: var(--text-caption);
+}
+
+.winprob__inningarrow {
+  font-size: 7px;
 }
 
 /* -------------------------------------------------------------- pitcher lines
@@ -4647,6 +4668,36 @@ body {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--award-ink);
+}
+
+/* Insights — the box score's catch-all "what stood out tonight" card (see
+   computeGameSuperlatives): whole-game Statcast superlatives, reusing the same
+   .statcast card grid as the innings view's per-half row. Sits last inside the
+   sealed box score, directly above the separately-sealed GameBuzzCard. */
+.bs__insights {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--space-3);
+}
+.bs__insightsTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The innings view's .statcast expects to sit under a play-by-play feed
+   (margin/border-top to separate from it above); here it's the card's own
+   full content, so drop that top rule. */
+.bs__insights .statcast {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
 }
 
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber

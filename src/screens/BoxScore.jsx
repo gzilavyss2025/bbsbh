@@ -1,9 +1,11 @@
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
+import { computeGameSuperlatives } from '../api/derive.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
+import { StatcastCard } from '../components/StatcastCard.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -85,6 +87,7 @@ export function BoxScore({
           const stars = computeThreeStars(winProbability, feed)
           const potg = computePlayOfTheGame(winProbability, feed)
           const winProbPoints = selectWinProbPath(winProbability)
+          const insights = computeGameSuperlatives(feed)
           return (
             <BoxScoreBody
               feed={feed}
@@ -92,6 +95,7 @@ export function BoxScore({
               stars={stars}
               potg={potg}
               winProbPoints={winProbPoints}
+              insights={insights}
               managers={managers}
               uniforms={uniforms}
               scorebookWeather={scorebookWeather}
@@ -113,7 +117,7 @@ export function BoxScore({
 // own header card — the visiting team's crew and first pitch above its
 // batting/pitching, the home team's ballpark/weather/times above its own. The
 // complete MLB-style game-info text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, managers, uniforms, scorebookWeather }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, managers, uniforms, scorebookWeather }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -188,7 +192,54 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, managers, uniform
         </div>
       </div>
       <GameInfo rows={box.footNotes} dateLabel={box.dateLabel} />
+      {/* Last thing in the sealed box score, so it lands directly above the
+          separately-sealed GameBuzzCard below — the catch-all for whatever
+          the game turned up as notable, ahead of the crowd's own reaction. */}
+      <InsightsCard insights={insights} />
     </div>
+  )
+}
+
+// Whole-game Statcast superlatives (see computeGameSuperlatives) — the
+// catch-all "what stood out tonight" card: the fastest pitch, the hardest-hit
+// ball, the longest ball, whoever owns each. Hidden entirely when the feed
+// carried no tracking data (most MiLB parks), same graceful-degrade as the
+// per-half Statcast row in the innings view.
+function InsightsCard({ insights }) {
+  if (!insights) return null
+  const { maxVelo, maxVeloType, maxVeloPlayer, hardestHit, hardestHitPlayer, longestHit, longestHitPlayer } = insights
+  if (maxVelo == null && hardestHit == null && longestHit == null) return null
+  return (
+    <section className="bs__insights">
+      <h3 className="bs__insightsTitle">Insights</h3>
+      <div className="statcast">
+        {maxVelo != null && (
+          <StatcastCard
+            label="Fastest pitch"
+            value={maxVelo.toFixed(1)}
+            unit="MPH"
+            who={maxVeloPlayer}
+            detail={maxVeloType}
+          />
+        )}
+        {hardestHit != null && (
+          <StatcastCard
+            label="Hardest hit"
+            value={hardestHit.toFixed(1)}
+            unit="MPH"
+            who={hardestHitPlayer}
+          />
+        )}
+        {longestHit != null && (
+          <StatcastCard
+            label="Longest ball"
+            value={Math.round(longestHit)}
+            unit="FT"
+            who={longestHitPlayer}
+          />
+        )}
+      </div>
+    </section>
   )
 }
 

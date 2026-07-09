@@ -24,6 +24,7 @@ import { PlayByPlay } from '../components/PlayByPlay.jsx'
 import { StrikeZoneLegend } from '../components/StrikeZone.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
+import { StatcastCard } from '../components/StatcastCard.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
@@ -848,27 +849,6 @@ function Stat({ k, v, unit, tone, big, small }) {
         {k}
         {unit ? <em className="stat__unit"> {unit}</em> : null}
       </span>
-    </div>
-  )
-}
-
-// One Statcast superlative below the feed: the measure up top (FASTEST PITCH),
-// the value with its unit trailing in a smaller face (95.2 MPH), then who did
-// it beneath — a pitcher's card also names the pitch type (MAY (SINKER)).
-function StatcastCard({ label, value, unit, who, detail }) {
-  return (
-    <div className="statcast__card">
-      <span className="statcast__label">{label}</span>
-      <span className="statcast__value">
-        {value}
-        <em className="statcast__unit"> {unit}</em>
-      </span>
-      {who && (
-        <span className="statcast__who">
-          {who.toUpperCase()}
-          {detail ? ` (${detail.toUpperCase()})` : ''}
-        </span>
-      )}
     </div>
   )
 }
