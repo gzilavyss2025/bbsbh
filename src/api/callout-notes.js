@@ -9,8 +9,11 @@
 import { firstRunPlay, firstPAIndexByBatter, NON_PA_EVENT_TYPES } from './playbyplay.js'
 import { personNameParts } from './select.js'
 
+// Marquee hit leader category keys, shared with gen-callouts.mjs (imported there).
+export const HIT_CATEGORY_KEYS = ['hr', 'triples', 'doubles', 'bb_b', 'sb', 'hbp']
+
 // Which season leader category each PA result eventType can trigger, and how the
-// note reads. Marquee set only — mirrors gen-callouts.mjs HIT_KEYS.
+// note reads. Marquee set only — derived from HIT_CATEGORY_KEYS above.
 const HIT_TRIGGERS = {
   home_run: { cat: 'hr', phrase: 'home runs' },
   triple: { cat: 'triples', phrase: 'triples' },

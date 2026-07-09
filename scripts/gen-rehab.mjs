@@ -17,6 +17,7 @@
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { SPORT_LABEL } from '../src/lib/teams.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rehab.json')
@@ -29,9 +30,6 @@ const REHAB_WINDOW_DAYS = 40
 // last appearance for them; at or beyond it the stint is treated as ended.
 // Counting contests (not days) clears a starter's 5–6-day turn with margin.
 const REHAB_STALE_GAMES = 7
-// sportId -> level label (a copy of src/lib/teams.js's SPORT_LABEL; this script
-// is deliberately self-contained, like gen-war.mjs / gen-milb-history.mjs).
-const SPORT_LABEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
 
 const isoToday = () => new Date().toISOString().slice(0, 10)
 const daysAgo = (n) => {

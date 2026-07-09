@@ -45,6 +45,7 @@ import {
   HITTING_CATEGORIES,
   PITCHING_CATEGORIES,
 } from '../src/api/teamLeaders.js'
+import { HIT_CATEGORY_KEYS } from '../src/api/callout-notes.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
@@ -62,9 +63,7 @@ const season = target.getUTCFullYear()
 const [ty, tm, td] = targetApi.split('-')
 const outFile = join(outDir, `${tm}${td}${ty}.json`)
 
-// Marquee trigger set (plan: HR / triple / double / walk / SB / HBP, plus
-// pitcher strikeouts). Category keys are teamLeaders.js's own.
-const HIT_KEYS = ['hr', 'triples', 'doubles', 'bb_b', 'sb', 'hbp']
+// Pitcher strikeouts (not a hit category, so separate from HIT_CATEGORY_KEYS).
 const PIT_KEYS = ['so_p']
 
 // Show floors — a streak/split only surfaces once it's genuinely notable, so the
@@ -112,7 +111,7 @@ async function fetchRoster(teamId) {
 // zeroes for "most" stats) simply doesn't appear.
 function clubLeaders(pool) {
   const hitting = {}
-  for (const key of HIT_KEYS) {
+  for (const key of HIT_CATEGORY_KEYS) {
     const cat = HITTING_CATEGORIES.find((c) => c.key === key)
     const top = computeLeaders(pool, cat, { limit: 1 })[0]
     if (top) hitting[key] = { id: top.id, display: top.display }
