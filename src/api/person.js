@@ -1200,13 +1200,21 @@ export function detectRehabAssignment(transactions, debutYear) {
 // Injured-list stint detection — the same most-recent-open-stint shape as the
 // rehab detector, over the same (already spoiler-capped) transactions feed. A
 // placement is an SC row reading "…placed/transferred … on/to the N-day injured
-// list"; it closes on a later SC "activated …" (a club reactivating him — the
-// minor-league form often DOESN'T name the injured list, e.g. "Myrtle Beach
-// Pelicans activated OF …"), a trade (TR — a traded player isn't on the old
-// club's IL; if still hurt, the new club's re-placement becomes the latest
-// placement anyway), or a roster-removing move (release / free agency / DFA /
-// retirement).
-const IL_END_CODES = new Set(['REL', 'RET', 'DFA', 'SFA', 'FA', 'DES', 'TR'])
+// list"; it closes on a later SC "activated … from the … injured list", a
+// return to the active roster — recall (CU), option (OPT), contract selection
+// (SE): a stint that ends via a rehab-then-option or a straight recall leaves NO
+// "activated from the injured list" row, exactly the return-to-majors codes the
+// rehab detector already treats as closers — or a roster-removing move (release /
+// free agency / DFA / retirement).
+//
+// Deliberately NOT a bare "activated" (without "injured list"): an All-Star or
+// international-tournament roster emits "American League All-Stars activated …"
+// mid-season, which must NOT be read as coming off the IL (it wrongly cleared
+// Buxton's live 10-day stint when we tried it). The All-Star form is excluded
+// even WHEN it names the injured list ("American League All-Stars activated RF
+// Aaron Judge from the 10-day injured list" is a phantom reinstatement generated
+// by an injured player's All-Star selection — he's still hurt).
+const IL_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'DFA', 'SFA', 'FA', 'DES'])
 function isIlPlacementTxn(t) {
   return (
     t.typeCode === 'SC' &&
@@ -1216,7 +1224,12 @@ function isIlPlacementTxn(t) {
 }
 function isIlEndingTxn(t) {
   if (IL_END_CODES.has(t.typeCode)) return true
-  return t.typeCode === 'SC' && /activat/i.test(t.description || '')
+  return (
+    t.typeCode === 'SC' &&
+    /activat/i.test(t.description || '') &&
+    /injured list/i.test(t.description || '') &&
+    !/all-stars? activated/i.test(t.description || '')
+  )
 }
 
 // The player's CURRENT injured-list stint, or null. Takes the most recent IL
