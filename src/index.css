@@ -5017,6 +5017,11 @@ body {
   align-items: center;
   gap: 6px;
 }
+.player__ident {
+  /* Grid items default to min-width:auto, which lets long names push this
+     column (and the logo after it) past the viewport edge on mobile. */
+  min-width: 0;
+}
 /* The affiliate mark — the parent MLB org's wordmark, drawn small below a
    MiLB player's own team logo, like a jersey's affiliation patch. Only
    rendered when `bio.team.parentOrgId` is present (see PlayerPage.jsx). */
@@ -5060,17 +5065,24 @@ body {
   text-transform: uppercase;
   color: var(--text-heading);
   letter-spacing: 0.01em;
+  min-width: 0;
 }
 .player__name-first {
   font-weight: var(--w-semibold);
   font-size: 17px;
   line-height: 1.2;
   color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .player__name-last {
   font-weight: var(--w-bold);
-  font-size: 32px;
+  font-size: clamp(20px, 7vw, 32px);
   line-height: 0.98;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .player__num {
   font-family: var(--font-mono);
