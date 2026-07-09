@@ -1522,16 +1522,25 @@ body {
 /* --------------------------------------------------------------- actions
    "Find a past matchup" (opens GameFinderModal) and "Logo sheet" — two real
    buttons, harmonized so neither reads as more important than the other. */
+/* A responsive grid, not a single flex row: the actions have grown to five
+   stops with long labels ("Find a past matchup", "Top MLB Prospects"), which
+   overflowed their boxes when crammed into one row on a phone. auto-fit +
+   minmax lets them flow onto as many rows as fit — two columns on a phone,
+   more as the viewport widens — and each cell is wide enough that its label
+   wraps inside the box instead of spilling past the border. */
 .sitefooter__actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--space-2);
 }
 
 .sitefooter__action {
-  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
   min-height: var(--tap-min);
-  padding: 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   border: var(--bw-rule) solid var(--border-rule);
   background: var(--surface-card);
@@ -1540,6 +1549,7 @@ body {
   font-size: 12.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
+  line-height: 1.15;
   text-transform: uppercase;
   text-align: center;
   cursor: pointer;
@@ -4512,17 +4522,16 @@ body {
   }
 
   /* ---- slate footer: player/team search side by side instead of stacked;
-     the action buttons stay a compact row that doesn't stretch full-width.
-     480px (not the original 360px) is sized for all four stops — Find a past
-     matchup / Logo sheet / Standings / Top MLB Prospects — after the last two
-     were added; 360px let "Standings" and "Top MLB Prospects" overflow their
-     boxes on tablet/desktop. */
+     the action grid stays compact rather than stretching each button full
+     width. The cap holds the auto-fit cells to a tidy size (the base rule
+     wraps them across as many rows as fit); 720px keeps the five stops on one
+     or two rows without ballooning. */
   .sitefooter__search {
     flex-direction: row;
   }
 
   .sitefooter__actions {
-    max-width: 480px;
+    max-width: 720px;
   }
 
   /* ---- game chrome: the section tabs keep a readable width too. */
@@ -6070,14 +6079,105 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
-/* Rehab-assignments page — the affiliate a player is rehabbing at: logo +
-   club name + level pill, kept on one line and right-aligned in its cell. */
-.rehabtable__club {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
+/* Rehab-assignments page — a grid of player cards (the list is small once
+   ended stints are filtered out, so cards read better than a dense table).
+   auto-fill packs two across on a phone and more as the viewport widens, no
+   breakpoint needed. Each card is a little header page: headshot on top, then
+   name + position, then the move (MLB club -> the affiliate) and that
+   affiliate's name with a level badge. */
+.rehabgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
 }
-.rehabtable__clubname {
+
+.rehabcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  text-align: center;
+}
+
+/* The headshot header. .shot's base rule is a big 104x156 portrait; scale it
+   down to a card-sized 2:3 crop, and strip the plink chrome off its wrapper so
+   the tap target carries no underline. */
+.rehabcard__portrait {
+  display: block;
+  line-height: 0;
+}
+.shot.rehabcard__shot {
+  width: 88px;
+  height: 132px;
+  border-radius: var(--radius-sm);
+}
+.shot.rehabcard__shot.shot--fallback {
+  font-size: 30px;
+}
+
+/* Name (display caps, wraps within the card) + position caption. Compounded to
+   beat .plink's `font: inherit`. */
+.rehabcard__name.rehabcard__name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--text-heading);
+  line-height: 1.15;
+}
+.rehabcard__pos {
+  margin: -2px 0 2px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The move: MLB club logo -> arrow -> rehab affiliate logo. */
+.rehabcard__move {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.rehabcard__team {
+  display: inline-flex;
+  line-height: 0;
+}
+.rehabcard__arrow {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+/* Affiliate name + level badge below the logos. */
+.rehabcard__club {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px 5px;
+}
+.rehabcard__clubname.rehabcard__clubname {
   font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-body);
+}
+.rehabcard__since {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
