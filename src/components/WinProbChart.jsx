@@ -57,13 +57,16 @@ export function WinProbChart({ points, awayAbbr, homeAbbr, partial = false }) {
     pts.map((p, i) => `L ${x(i).toFixed(1)} ${y(p.home).toFixed(1)}`).join(' ') +
     ` L ${x(n - 1).toFixed(1)} ${PLOT_B} Z`
 
-  // Contiguous runs of the same inning, for the dividing hairlines and the
-  // inning-number labels centered under each run.
+  // Contiguous runs of the same half-inning (not just the same inning), for the
+  // dividing hairlines and the inning-number labels centered under each run —
+  // this is what lets top and bottom of an inning show as two distinct spans
+  // instead of one merged block.
   const groups = []
   for (let i = 0; i < pts.length; i++) {
+    const key = `${pts[i].inning}-${pts[i].half}`
     const last = groups[groups.length - 1]
-    if (last && last.inning === pts[i].inning) last.end = i
-    else groups.push({ inning: pts[i].inning, start: i, end: i })
+    if (last && last.key === key) last.end = i
+    else groups.push({ inning: pts[i].inning, half: pts[i].half, key, start: i, end: i })
   }
 
   const scoring = pts
@@ -107,13 +110,18 @@ export function WinProbChart({ points, awayAbbr, homeAbbr, partial = false }) {
         />
         <path className="winprob__band winprob__band--home" d={homeArea} />
 
-        {/* Inning dividers, between consecutive inning runs. */}
-        {groups.slice(1).map((g) => {
+        {/* Dividers between consecutive half-inning runs: a solid hairline
+            between innings, a subtle dashed stripe between the top and
+            bottom of the same inning. The synthetic origin point (groups[0],
+            half 'start') gets no divider of its own. */}
+        {groups.slice(1).map((g, idx) => {
+          const prev = groups[idx] // groups.slice(1)[idx] follows groups[idx]
           const bx = (x(g.start - 1) + x(g.start)) / 2
+          const sameInning = prev.half !== 'start' && prev.inning === g.inning
           return (
             <line
-              key={`div-${g.inning}-${g.start}`}
-              className="winprob__inningline"
+              key={`div-${g.key}`}
+              className={sameInning ? 'winprob__halfline' : 'winprob__inningline'}
               x1={bx}
               y1={PLOT_T}
               x2={bx}
@@ -166,15 +174,19 @@ export function WinProbChart({ points, awayAbbr, homeAbbr, partial = false }) {
           </text>
         ))}
 
-        {/* Inning numbers along the foot. */}
-        {groups.map((g) => (
+        {/* Inning numbers along the foot, one per half — an up arrow for the
+            top half, a down arrow for the bottom, so the axis itself reads
+            which half each span covers. The synthetic origin point (half
+            'start') gets no label. */}
+        {groups.filter((g) => g.half !== 'start').map((g) => (
           <text
-            key={`in-${g.inning}-${g.start}`}
+            key={`in-${g.key}`}
             className="winprob__inninglabel"
             x={(x(g.start) + x(g.end)) / 2}
             y={H - 7}
             textAnchor="middle"
           >
+            <tspan className="winprob__inningarrow">{g.half === 'top' ? '▲' : '▼'}</tspan>
             {g.inning}
           </text>
         ))}

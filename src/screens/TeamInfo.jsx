@@ -34,6 +34,7 @@ export function TeamInfo({
   side,
   manager,
   uniform,
+  broadcast,
   scorebookWeather,
   scorebookWeatherLoading,
   oppPitcherLine,
@@ -74,6 +75,11 @@ export function TeamInfo({
             around first pitch, so pregame this reads "—" until a Refresh picks
             it up. Never posted for MiLB. */}
         <Fact label="Uniform" value={uniform} />
+        {/* Broadcast rides on the away page only, filling the cell that
+            otherwise sits empty next to Uniform (an odd fact count leaves it
+            alone at the end of the grid — see the ESPN-sourced fetch in
+            GameView). The home page's grid is already even without it. */}
+        {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
       </dl>
 
       <Umpires officials={officials} />
@@ -104,6 +110,7 @@ export function LineupSpread({
   feed,
   managers,
   uniforms,
+  broadcast,
   scorebookWeather,
   scorebookWeatherLoading,
   starterLines,
@@ -137,6 +144,7 @@ export function LineupSpread({
           info={info}
           scorebookWeather={scorebookWeather}
           scorebookWeatherLoading={scorebookWeatherLoading}
+          broadcast={broadcast}
         />
       </dl>
 
@@ -206,7 +214,10 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
 }
 
 // The game-level fill-ins shared by both clubs, in the sheet's order.
-function GameFacts({ info, scorebookWeather, scorebookWeatherLoading }) {
+// `broadcast` is only passed by the wide spread layout (see LineupSpread) —
+// on the phone page it rides in its own spot next to Uniform instead (see
+// TeamInfo), so it's left out of this shared list there.
+function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast }) {
   return (
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
@@ -224,6 +235,11 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading }) {
         <Fact label="Box weather" value={info.weather} />
       )}
       <Fact label="Attendance" value={info.attendance} />
+      {/* TV/streaming network (see api/broadcast.js, ESPN-sourced). Its
+          presence right after Attendance also keeps the fact count a multiple
+          of three in the common case, so Attendance no longer stretches
+          across two grid cells the way it did as the list's odd one out. */}
+      {broadcast !== undefined && <Fact label="Broadcast" value={broadcast} />}
     </>
   )
 }

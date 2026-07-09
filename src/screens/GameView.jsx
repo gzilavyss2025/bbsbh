@@ -6,6 +6,7 @@ import {
   fetchWinProbability,
 } from '../api/game.js'
 import { fetchGameUniforms, uniformSummary } from '../api/uniforms.js'
+import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
@@ -179,6 +180,17 @@ export function GameView({ game, section, onSection }) {
   )
   const gameCallouts = calloutsForGame(callouts.data, game.gamePk)
 
+  // Which network the game airs on, for the lineup pages' Broadcast fact next
+  // to Attendance (see api/broadcast.js). MLB-only: ESPN's scoreboard has no
+  // MiLB coverage, so a MiLB gamePk just resolves to ''. Keyed on gamePk, like
+  // callouts — a broadcast assignment doesn't change mid-game, so a live
+  // Refresh never re-pulls it.
+  const broadcast = useAsyncOnFeed(
+    feed,
+    (f) => (game.sportId === SPORT_IDS.MLB ? fetchGameBroadcast(f) : Promise.resolve('')),
+    [game.gamePk],
+  )
+
   // Former-teammate ties between the two clubs, for the FORMER TEAMMATES card on
   // the lineup pages. The whole precomputed file is a single cached same-origin
   // read (see formerTeammates.js), and it only carries MLB matchups, so this is
@@ -298,6 +310,7 @@ export function GameView({ game, section, onSection }) {
           feed={feed}
           managers={managers.data}
           uniforms={uniformBrief}
+          broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           starterLines={starterLines.data}
@@ -314,6 +327,7 @@ export function GameView({ game, section, onSection }) {
           side="away"
           manager={managers.data?.away}
           uniform={uniformBrief.away}
+          broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           // The away side FACES the home starter.
@@ -332,6 +346,7 @@ export function GameView({ game, section, onSection }) {
           side="home"
           manager={managers.data?.home}
           uniform={uniformBrief.home}
+          broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}

@@ -123,6 +123,40 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
   )
 }
 
+// Whole-game Statcast superlatives — the fastest pitch, hardest-hit ball, and
+// longest ball across every half-inning, for the box score's Insights card.
+// Same reveal-only rule as the rest of this module: the whole game is already
+// behind the box score's SealBox by the time this is called, so aggregating
+// every half here doesn't leak anything the seal wasn't already covering.
+export function computeGameSuperlatives(feed) {
+  const map = computeDerivedByInning(feed)
+  const best = {
+    maxVelo: null,
+    maxVeloType: '',
+    maxVeloPlayer: '',
+    hardestHit: null,
+    hardestHitPlayer: '',
+    longestHit: null,
+    longestHitPlayer: '',
+  }
+  for (const b of Object.values(map)) {
+    if (b.maxVelo != null && b.maxVelo > (best.maxVelo ?? -Infinity)) {
+      best.maxVelo = b.maxVelo
+      best.maxVeloType = b.maxVeloType
+      best.maxVeloPlayer = b.maxVeloPlayer
+    }
+    if (b.hardestHit != null && b.hardestHit > (best.hardestHit ?? -Infinity)) {
+      best.hardestHit = b.hardestHit
+      best.hardestHitPlayer = b.hardestHitPlayer
+    }
+    if (b.longestHit != null && b.longestHit > (best.longestHit ?? -Infinity)) {
+      best.longestHit = b.longestHit
+      best.longestHitPlayer = b.longestHitPlayer
+    }
+  }
+  return best
+}
+
 // Rolling (cumulative) pitch count for a pitching side through the given
 // inning. The pitching side maps to the half: the home pitcher works the top
 // half, the away pitcher the bottom. Sums pitches for that same half across
