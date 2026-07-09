@@ -1,6 +1,8 @@
-import { computeHalfInningFeed, pitchLadder } from '../api/playbyplay.js'
+import { useState } from 'react'
+import { computeHalfInningFeed, pitchLadder, hasPitchLocations } from '../api/playbyplay.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
 // appearance (pitch-dot sequence, scorebook-style out notation, RBI tag, and
@@ -81,13 +83,20 @@ function EventNote({ entry }) {
 }
 
 function AtBatCard({ entry }) {
-  const { batter, pitches, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
+  const { batter, pitches, pitchDetails, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
+  const [zoneOpen, setZoneOpen] = useState(false)
+  // The pitch-zone diagram only exists where the park tracked plate locations
+  // (most MiLB parks don't). On a phone it opens in a modal from an icon button
+  // tucked into the card's bottom-left whitespace; the desktop layout shows it
+  // inline instead (the button is hidden ≥740, see .pbp__zonebtn).
+  const hasZone = hasPitchLocations(pitchDetails)
   // A batter pinch-run for is crossed out on the card, with the pinch runner
   // penciled in beneath at the PR spot; the diamond gets a red PR by the base he
   // took over at (the last swap's base if a runner was himself pinch-run for).
   const replaced = pinchRunners && pinchRunners.length > 0
   const prBase = replaced ? pinchRunners[pinchRunners.length - 1].base : null
   return (
+    <div className="pbp__atbat">
     <div className="pbp__card">
       <div className="pbp__main">
         <div className="pbp__top">
@@ -128,6 +137,16 @@ function AtBatCard({ entry }) {
         {baserunningNotes?.map((note, i) => (
           <BaserunningNote key={i} segments={note.segments} />
         ))}
+        {hasZone && (
+          <button
+            type="button"
+            className="pbp__zonebtn"
+            onClick={() => setZoneOpen(true)}
+            aria-label={`Show pitch zone for ${batter.last}`}
+          >
+            <StrikeZoneGlyph className="pbp__zoneicon" />
+          </button>
+        )}
       </div>
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
@@ -154,6 +173,37 @@ function AtBatCard({ entry }) {
           )}
         </div>
       </div>
+    </div>
+      {/* Desktop/iPad: the pitch zone + sequence ride in the at-bat's right
+          column (hidden on a phone, which uses the icon button + modal above).
+          Collapses away entirely at parks with no pitch tracking. */}
+      {hasZone && (
+        <div className="pbp__zonecell">
+          <div className="pbp__zonemeta">
+            <h4 className="pbp__zonename">
+              {batter.last}
+              {batter.first ? `, ${batter.first}` : ''}
+              {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
+            </h4>
+            {entry.pitcher && (
+              <div className="pbp__zonevs">
+                vs {entry.pitcher.last} · {pitchDetails.length} pitch
+                {pitchDetails.length === 1 ? '' : 'es'}
+              </div>
+            )}
+            <PitchList pitchDetails={pitchDetails} />
+          </div>
+          <StrikeZone pitchDetails={pitchDetails} className="strikezone--inline" />
+        </div>
+      )}
+      {zoneOpen && hasZone && (
+        <StrikeZoneModal
+          pitchDetails={pitchDetails}
+          batter={batter}
+          pitcher={entry.pitcher?.last}
+          onClose={() => setZoneOpen(false)}
+        />
+      )}
     </div>
   )
 }

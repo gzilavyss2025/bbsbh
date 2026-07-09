@@ -3013,6 +3013,257 @@ body {
   background: var(--surface-card);
 }
 
+/* -------------------------------------------------------------- strike zone
+   Per-at-bat pitch-location diagram. Additive to the play-by-play card: on a
+   phone an icon button (.pbp__zonebtn) opens it in a modal; from the wide
+   breakpoint up the card and its zone pane sit side by side (.pbp__atbat grid
+   below). Pitch-dot colors mirror the five pitch-ladder categories so the two
+   read as one system. Score-adjacent (part of the at-bat account), so it only
+   ever renders inside revealed play-by-play. */
+.strikezone,
+.pitchlist,
+.strikezone__legend {
+  --pd-called: var(--accent-negative);
+  --pd-whiff: var(--ink-1);
+  --pd-foul: var(--graphite);
+  --pd-inplay: var(--accent-positive);
+  --pd-ball-line: var(--graphite-soft);
+  --pd-ball-fill: var(--surface-inset);
+}
+
+.strikezone {
+  display: block;
+  width: 118px;
+  height: auto;
+}
+.strikezone--modal {
+  width: 224px;
+}
+
+.strikezone__frame {
+  fill: none;
+  stroke: var(--seal-hatch);
+  stroke-width: 1.4;
+}
+.strikezone__third {
+  stroke: var(--seal-hatch);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 3;
+  opacity: 0.55;
+}
+.strikezone__plate {
+  fill: none;
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+}
+.strikezone__dot--called { fill: var(--pd-called); }
+.strikezone__dot--whiff { fill: var(--pd-whiff); }
+.strikezone__dot--foul { fill: var(--pd-foul); }
+.strikezone__dot--ball {
+  fill: var(--pd-ball-fill);
+  stroke: var(--pd-ball-line);
+  stroke-width: 1.3;
+}
+.strikezone__dot--inplay {
+  fill: none;
+  stroke: var(--pd-inplay);
+  stroke-width: 2.4;
+}
+.strikezone__num {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: var(--w-bold);
+  fill: var(--paper-3);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.strikezone__num--ball { fill: var(--ink-1); }
+.strikezone__num--inplay { fill: var(--pd-inplay); }
+
+/* Numbered pitch-by-pitch list beside the diagram. */
+.pitchlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.pitchlist__row {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  gap: 7px;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+.pitchlist__num {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: var(--w-bold);
+  color: var(--paper-3);
+}
+.pitchlist__num--called { background: var(--accent-negative); }
+.pitchlist__num--whiff { background: var(--ink-1); }
+.pitchlist__num--foul { background: var(--graphite); }
+.pitchlist__num--ball {
+  background: var(--surface-inset);
+  border: 1.4px solid var(--graphite-soft);
+  color: var(--ink-1);
+}
+.pitchlist__num--inplay {
+  background: transparent;
+  border: 2.4px solid var(--accent-positive);
+  color: var(--accent-positive);
+}
+.pitchlist__type { color: var(--text-body); }
+
+/* Category legend, shared by the modal and the desktop pane. */
+.strikezone__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+.strikezone__li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.strikezone__sw {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.strikezone__sw--called { background: var(--accent-negative); }
+.strikezone__sw--whiff { background: var(--ink-1); }
+.strikezone__sw--foul { background: var(--graphite); }
+.strikezone__sw--ball {
+  background: var(--surface-inset);
+  border: 1.5px solid var(--graphite-soft);
+}
+.strikezone__sw--inplay {
+  background: transparent;
+  border: 2.5px solid var(--accent-positive);
+}
+
+/* The phone icon button, tucked into the card's bottom-left whitespace. Hidden
+   from the wide breakpoint up, where the zone rides inline (see the media
+   query). */
+.pbp__zonebtn {
+  margin-top: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+  cursor: pointer;
+}
+.pbp__zoneicon {
+  width: 19px;
+  height: 19px;
+}
+
+/* The desktop right-column pane (card | zone). Hidden on a phone. */
+.pbp__zonecell {
+  display: none;
+}
+
+/* Strike-zone modal — reuses the .scrim backdrop (see below), a centered card
+   like the logo modal. */
+.szmodal {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal, 0 30px 70px -30px rgba(0, 0, 0, 0.6));
+  max-width: 340px;
+  width: 100%;
+  padding: 14px 16px 16px;
+}
+.szmodal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.szmodal__ttl {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.szmodal__eyebrow {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.szmodal__name {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 15px;
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.szmodal__vs {
+  font-family: var(--font-read);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.szmodal__close {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+/* Phone modal: zone on top, the pitch list full-width beneath it — side by
+   side is too tight at phone width and clips the list's velo/result column. */
+.szmodal__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.szmodal__body .pitchlist {
+  width: 100%;
+}
+.szmodal__body .pitchlist__row {
+  font-size: 11px;
+}
+.szmodal__body .pitchlist__type {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: 10px;
+}
+
 .scrim {
   position: fixed;
   inset: 0;

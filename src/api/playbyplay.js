@@ -94,6 +94,20 @@ export function pitchLadder(codes) {
   })
 }
 
+// Whether a plate appearance's pitch detail carries plottable plate-crossing
+// locations — true only if at least one pitch has numeric pX/pZ AND a batter
+// zone (strikeZoneTop/Bottom) to scale against. False at MiLB parks with no
+// tracking, so callers can drop the strike-zone diagram entirely.
+export function hasPitchLocations(pitchDetails) {
+  return (pitchDetails ?? []).some(
+    (p) =>
+      typeof p.px === 'number' &&
+      typeof p.pz === 'number' &&
+      typeof p.szTop === 'number' &&
+      typeof p.szBottom === 'number',
+  )
+}
+
 function resolveBatter(feed, side, id) {
   const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
   const box = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`] ?? {}
@@ -345,9 +359,38 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
 
     if (isRealPA) {
       const batter = resolveBatter(feed, battingSide, batterId)
-      const pitches = (play.playEvents ?? [])
-        .filter((e) => e.isPitch)
-        .map(pitchCallCode)
+      const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
+      const pitches = pitchEvents.map(pitchCallCode)
+      // Per-pitch detail for the strike-zone diagram: plate-crossing location
+      // (pX/pZ) against the batter's own zone (strikeZoneTop/Bottom), plus velo
+      // and pitch type for the sequence list. All Statcast-ish, so every field
+      // is null-guarded — at MiLB parks with no tracking pX/pZ are simply
+      // absent and StrikeZone renders nothing (same degrade as derive.js).
+      const pitchDetails = pitchEvents.map((e, i) => {
+        const code = pitchCallCode(e)
+        const pd = e.pitchData ?? {}
+        const co = pd.coordinates ?? {}
+        return {
+          no: e.pitchNumber ?? i + 1,
+          code,
+          cat: pitchDotCategory(code),
+          px: typeof co.pX === 'number' ? co.pX : null,
+          pz: typeof co.pZ === 'number' ? co.pZ : null,
+          szTop: typeof pd.strikeZoneTop === 'number' ? pd.strikeZoneTop : null,
+          szBottom: typeof pd.strikeZoneBottom === 'number' ? pd.strikeZoneBottom : null,
+          mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
+          type: e.details?.type?.description ?? '',
+          callDesc: e.details?.call?.description ?? '',
+        }
+      })
+
+      // The pitcher this PA faced (for the strike-zone panel's "vs" header) —
+      // his name parts off gameData, same shape as the batter.
+      const pitcherId = play.matchup?.pitcher?.id
+      const pitcher =
+        pitcherId != null
+          ? { id: pitcherId, ...personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {}) }
+          : null
 
       const cardIndex = entries.length
       const batterRunner = runners.find((r) => r.details?.runner?.id === batterId)
@@ -355,7 +398,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         kind: 'atbat',
         batterId,
         batter,
+        pitcher,
         pitches,
+        pitchDetails,
         rbi: play.result?.rbi ?? 0,
         // The full prose account of the play (batter name trimmed off the
         // front — it's already on the card), split so the other players named
