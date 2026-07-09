@@ -158,8 +158,8 @@ function AtBatCard({ entry, calloutCtx }) {
         {baserunningNotes?.map((note, i) => (
           <BaserunningNote key={i} segments={note.segments} />
         ))}
-        {calloutNotes.map((text, i) => (
-          <CalloutNote key={`c-${i}`} text={text} />
+        {calloutNotes.map((note, i) => (
+          <CalloutNote key={`c-${i}`} text={note.text} />
         ))}
         {hasZone && (
           <button

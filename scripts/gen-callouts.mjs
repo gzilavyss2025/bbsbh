@@ -10,8 +10,9 @@
 //   2. Player streaks — a hitter's current on-base streak and stolen-base run,
 //      from his game log.
 //   3. Situational team records — extra-inning and one-run W-L (from standings
-//      splitRecords), plus "record when scoring first" / "when the opponent
-//      scores first" (joined from each club's game-by-game linescore).
+//      splitRecords), "record when scoring first" / "when the opponent scores
+//      first", and record when leading after the 6th/7th/8th/9th (all three
+//      joined from each club's game-by-game linescore).
 //   4. Player-homer records — a club's W-L in games the hitter homered, kept
 //      only when the split is lopsided enough to be worth surfacing.
 //
@@ -72,6 +73,15 @@ const ONBASE_FLOOR = 8
 const SB_FLOOR = 4
 const HOMER_MIN_GAMES = 5
 const HOMER_LOPSIDED = 0.7 // win% ≥ .700 or ≤ .300
+
+// Innings checked for the "leading after N" record (see leadAfterRecord),
+// and the same show floors as HOMER_MIN_GAMES/HOMER_LOPSIDED — a club needs a
+// real sample AND a genuinely lopsided record for it to be worth flagging
+// tonight's game as a reversal of it (see buildLeadReversalNote in
+// src/api/callout-notes.js, the only place this ever gets read).
+const LEAD_CHECKPOINTS = [6, 7, 8, 9]
+const LEAD_MIN_GAMES = 5
+const LEAD_LOPSIDED = 0.85 // win% ≥ .85 or ≤ .15
 
 const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 
@@ -155,17 +165,23 @@ async function fetchSplitRecords() {
   return map
 }
 
-// "Record when scoring first" / "when the opponent scores first" for one club,
-// joined from its full-season schedule with per-inning linescore. Who scored
-// first = the first inning (top before bottom) in which either side put up a
-// run; W/L from the club's own isWinner. Cut off at `asOf` so a slate scored
-// later never folds tonight's result into the record.
+// "Record when scoring first" / "when the opponent scores first", AND record
+// when leading after the 6th/7th/8th/9th, for one club — both joined from the
+// SAME full-season schedule + per-inning linescore sweep (one fetch covers
+// both families). Who scored first = the first inning (top before bottom) in
+// which either side put up a run; leading-after-N walks the innings in order,
+// stopping at the first one whose bottom half never happened (a walk-off, or
+// a suspended/truncated game) since "leading after N" isn't well-defined past
+// that point. W/L from the club's own isWinner. Cut off at `asOf` so a slate
+// scored later never folds tonight's result into either record.
 async function scoringRecord(teamId) {
   const data = await getJson(
     `/api/v1/schedule?sportId=1&teamId=${teamId}&season=${season}&gameType=R&hydrate=team,linescore`,
   )
   const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
   let sfW = 0, sfL = 0, osW = 0, osL = 0
+  const leadTally = {} // inning num -> { w, l }
+  for (const n of LEAD_CHECKPOINTS) leadTally[n] = { w: 0, l: 0 }
   const seen = new Set()
   for (const g of games) {
     if (g.status?.abstractGameState !== 'Final') continue
@@ -178,20 +194,45 @@ async function scoringRecord(teamId) {
     const isHome = home?.team?.id === teamId
     const me = isHome ? home : away
     if (me?.isWinner == null) continue
+    const won = me.isWinner === true
+
     let firstScorer = null // 'away' | 'home'
+    let cumAway = 0, cumHome = 0
     for (const inn of g.linescore?.innings ?? []) {
-      if (num(inn.away?.runs) > 0) { firstScorer = 'away'; break }
-      if (num(inn.home?.runs) > 0) { firstScorer = 'home'; break }
+      const aR = inn.away?.runs, hR = inn.home?.runs
+      if (!firstScorer) {
+        if (num(aR) > 0) firstScorer = 'away'
+        else if (num(hR) > 0) firstScorer = 'home'
+      }
+      if (typeof aR !== 'number' || typeof hR !== 'number') break
+      cumAway += aR
+      cumHome += hR
+      const bucket = leadTally[inn.num]
+      if (!bucket) continue
+      const meRuns = isHome ? cumHome : cumAway
+      const oppRuns = isHome ? cumAway : cumHome
+      if (meRuns > oppRuns) won ? bucket.w++ : bucket.l++
     }
+
     if (!firstScorer) continue
     const meScoredFirst = (firstScorer === 'home') === isHome
-    const won = me.isWinner === true
     if (meScoredFirst) won ? sfW++ : sfL++
     else won ? osW++ : osL++
   }
+
+  const leadAfter = {}
+  for (const n of LEAD_CHECKPOINTS) {
+    const { w, l } = leadTally[n]
+    const total = w + l
+    if (total < LEAD_MIN_GAMES) continue
+    const pct = w / total
+    if (pct >= LEAD_LOPSIDED || pct <= 1 - LEAD_LOPSIDED) leadAfter[n] = `${w}-${l}`
+  }
+
   return {
     scoringFirst: `${sfW}-${sfL}`,
     opponentScoringFirst: `${osW}-${osL}`,
+    leadAfter,
   }
 }
 
