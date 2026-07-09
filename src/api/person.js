@@ -1225,11 +1225,19 @@ function isIlEndingTxn(t) {
 // with no day count (a plain / full-season "injured list") yields days:null and a
 // generic label. Score-safe: transactions are already capped at the spoiler
 // cutoff by the caller, so this reflects IL status AS OF the game being viewed.
-export function detectInjuredList(transactions) {
+//
+// An IL stint never carries ACROSS a season boundary — a season-ending (typically
+// 60-day) placement "refreshes" back to active over the offseason as rosters
+// reset, and a player still hurt in the spring gets a fresh placement. So a
+// placement from a season before the one being viewed (`asOf`, the same cutoff the
+// caller capped the feed with) is treated as cleared even if no explicit
+// closing transaction was recorded.
+export function detectInjuredList(transactions, asOf) {
   const placements = (transactions ?? []).filter((t) => isIlPlacementTxn(t) && txnDate(t))
   if (!placements.length) return null
   const latest = placements.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
   const start = txnDate(latest)
+  if (asOf && start.slice(0, 4) < asOf.slice(0, 4)) return null
   const ends = (transactions ?? []).some((t) => txnDate(t) > start && isIlEndingTxn(t))
   if (ends) return null
   const days = (latest.description || '').match(/(\d+)-day injured list/i)?.[1] ?? null

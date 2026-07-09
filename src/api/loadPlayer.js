@@ -144,7 +144,7 @@ export async function loadPlayer(id, asOf) {
   const onRehab = Boolean(rehab)
   // IL status from the same spoiler-capped feed — independent of rehab: a player
   // can be on the IL AND out on a rehab assignment at once, so both flags stand.
-  const il = detectInjuredList(txns)
+  const il = detectInjuredList(txns, endDate)
   const onIL = Boolean(il)
   const currentActivitySportId = onRehab ? 1 : liveSportId
   // Where his career-shaped sections are pinned. A player who has reached the
