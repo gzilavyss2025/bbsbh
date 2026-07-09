@@ -1,6 +1,8 @@
-// Rasterizes scripts/og-image.html into public/og-image.png (1200×630) — the
-// Open Graph / Twitter card shown when the app link is shared (iMessage,
-// Slack, Discord, etc.). Same Playwright-via-global approach as gen-icons.mjs.
+// Rasterizes scripts/og-image.html into public/og-image.png (1200×630) — a
+// generated-art Open Graph / Twitter card. NOT currently shipped: the live
+// og:image is the hand-provided public/og-image.jpg (see index.html); this
+// script is retained in case we go back to generated art. Same
+// Playwright-via-global approach as gen-icons.mjs.
 // Run: node scripts/gen-og-image.mjs
 import { createRequire } from 'node:module'
 import { execSync } from 'node:child_process'
