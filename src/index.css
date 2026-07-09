@@ -2388,6 +2388,18 @@ body {
    jersey number │ fielding position right-aligned on a shared column; a
    substituted starter is struck through, the seam-red incomer tagged with the
    inning he entered (shared with the defense diamond's writing-line styling). */
+/* The lineups & defense reference renders in two places for two layouts. On a
+   phone the inline copy inside the half-inning shows (this wrapper is a
+   transparent box so its cards stage around the seal exactly as before), and
+   the right-column card is hidden; the wide breakpoint flips both. */
+.half__entering {
+  display: contents;
+}
+
+.innings__reference {
+  display: none;
+}
+
 .lineupcard {
   margin-top: 12px;
   padding-top: 12px;
@@ -4780,6 +4792,11 @@ body {
     display: none;
   }
 
+  /* The half-inning heading + Back/Next spans both columns above the grid. */
+  .inningnav {
+    margin-bottom: var(--space-3);
+  }
+
   .innings__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4794,6 +4811,41 @@ body {
 
   .innings__side > :first-child {
     margin-top: 0;
+  }
+
+  /* Lineups & Defense move out of the reading pane into their own right-column
+     card (below Pitchers, above the rosters); the inline copy staged around the
+     seal is hidden here (see InningViewer / ADR-0010). */
+  .half__entering {
+    display: none;
+  }
+
+  .innings__reference {
+    display: block;
+    margin-top: var(--space-4);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-card);
+    padding: 12px 14px;
+  }
+
+  .innings__reference-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
+    color: var(--text-heading);
+  }
+
+  /* The lineup card leads the reference body; drop its own dashed divider so it
+     sits flush under the card title (the defense block keeps its divider). */
+  .innings__reference .lineupcard {
+    margin-top: 8px;
+    padding-top: 0;
+    border-top: none;
   }
 
   /* ---- box score: totals beside the decisions, line score beside the three

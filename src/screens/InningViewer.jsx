@@ -188,8 +188,31 @@ export function InningViewer({
 
       {/* On a phone these wrappers are inert divs and everything stacks in the
           same order as ever; from the wide breakpoint up they become a grid —
-          the half-inning reading pane on the left, the pitchers table and
-          roster reference riding a sticky column on the right. */}
+          the half-inning reading pane on the left, the pitchers table, lineups
+          & defense reference, and rosters riding a sticky column on the right. */}
+      {/* The half-inning heading + Back/Next: full-width above both columns on
+          the wide layout, and above the running line on a phone (moved up out of
+          the reading pane so it stays put as the feed scrolls). */}
+      <nav className="inningnav" aria-label="Half-inning navigator">
+        <button
+          onClick={() => goTo(Math.max(0, curIdx - 1))}
+          disabled={curIdx === 0}
+          aria-label="Previous half-inning"
+        >
+          ‹ Back
+        </button>
+        <span className="inningnav__label">
+          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
+        </span>
+        <button
+          onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+          disabled={curIdx === maxIdx}
+          aria-label="Next half-inning"
+        >
+          Next ›
+        </button>
+      </nav>
+
       <div className="innings__grid">
         <div className="innings__main">
           <RollingLine
@@ -209,26 +232,6 @@ export function InningViewer({
             homeAbbr={meta.home.abbreviation}
             partial
           />
-
-          <nav className="inningnav" aria-label="Half-inning navigator">
-            <button
-              onClick={() => goTo(Math.max(0, curIdx - 1))}
-              disabled={curIdx === 0}
-              aria-label="Previous half-inning"
-            >
-              ‹ Back
-            </button>
-            <span className="inningnav__label">
-              {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
-            </span>
-            <button
-              onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
-              disabled={curIdx === maxIdx}
-              aria-label="Next half-inning"
-            >
-              Next ›
-            </button>
-          </nav>
 
           {/* key on inning+half → fresh mount; a box at/under the reveal mark stays open. */}
           <div className="inning" key={`${effInning}-${effHalf}`} ref={resultsRef} tabIndex={-1}>
@@ -258,6 +261,27 @@ export function InningViewer({
               { name: rosters.home.name, rows: pitcherLines.home },
             ]}
           />
+
+          {/* Lineups & Defense reference — its own right-column card on the wide
+              layout (below Pitchers, above the rosters). On a phone this is
+              hidden (.innings__reference) and the same reference renders inline
+              in the half-inning, staged around the seal (see HalfInning). Gated
+              to a half the user has reached — revealed, or the immediate
+              next-to-reveal — the same spoiler gate as the inline copy. */}
+          {curIdx <= revealedThrough + 1 && (
+            <section className="innings__reference">
+              <h3 className="innings__reference-title">Lineups &amp; Defense</h3>
+              <EnteringReference
+                feed={feed}
+                inning={effInning}
+                half={effHalf}
+                battingSide={effHalf === 'top' ? 'away' : 'home'}
+                awayName={meta.away.clubName}
+                homeName={meta.home.clubName}
+                prospectsData={prospectsData}
+              />
+            </section>
+          )}
 
           <RosterPanel
             title={rosters.away.name}
@@ -337,29 +361,25 @@ function HalfInning({
   prospectsData,
 }) {
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
-  // reference (see LineupSection/DefenseSection). Positioned by reveal state:
-  // ABOVE the seal while the half is still sealed (stage the sheet before
+  // reference (see EnteringReference). On a phone it's positioned by reveal
+  // state: ABOVE the seal while the half is still sealed (stage the sheet before
   // tapping), then BELOW the play-by-play once revealed (out of the way of the
   // results). Only for a half the user has reached; a half further out stays
-  // fully sealed — its "entering" state would leak the intervening subs.
+  // fully sealed — its "entering" state would leak the intervening subs. On the
+  // wide layout this inline copy is hidden (.half__entering) and the same
+  // reference rides its own card in the right column instead.
   const enteringCards = (
-    <>
-      <LineupSection
+    <div className="half__entering">
+      <EnteringReference
         feed={feed}
         inning={inning}
         half={half}
+        battingSide={battingSide}
         awayName={awayName}
         homeName={homeName}
         prospectsData={prospectsData}
       />
-      <DefenseSection
-        feed={feed}
-        inning={inning}
-        half={half}
-        fieldingSide={battingSide === 'away' ? 'home' : 'away'}
-        fieldingName={battingSide === 'away' ? homeName : awayName}
-      />
-    </>
+    </div>
   )
 
   return (
@@ -793,6 +813,33 @@ function DefenseSection({ feed, inning, half, fieldingSide, fieldingName }) {
       </h4>
       <DefenseDiamond defense={defense} />
     </section>
+  )
+}
+
+// The pre-scoring reference for a half: both teams' lineup cards + the fielding
+// side's alignment as they stand ENTERING it (subs through first pitch only).
+// Factored out because two layouts render it — inline in the half-inning on a
+// phone (staged around the seal), and as a right-column card on the wide layout.
+// Spoiler-free under the caller's reveal gate (ADR-0010).
+function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, prospectsData }) {
+  return (
+    <>
+      <LineupSection
+        feed={feed}
+        inning={inning}
+        half={half}
+        awayName={awayName}
+        homeName={homeName}
+        prospectsData={prospectsData}
+      />
+      <DefenseSection
+        feed={feed}
+        inning={inning}
+        half={half}
+        fieldingSide={battingSide === 'away' ? 'home' : 'away'}
+        fieldingName={battingSide === 'away' ? homeName : awayName}
+      />
+    </>
   )
 }
 
