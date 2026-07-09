@@ -1641,14 +1641,15 @@ body {
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
    .pbp__desc for the same pattern): the welcome modal's explainer copy —
    headline and pitch — is what a visitor reads first, so it's set in the
-   reading serif at natural title case instead of shouted display uppercase,
-   like a magazine intro rather than app chrome. The `#root`-scoped selectors
-   (1 id + 1 class) are what actually outweigh the global `#root *` uppercase —
-   a plain class alone can't (see the ALL-CAPS INVARIANT block comment). */
+   reading serif at natural sentence case instead of shouted display
+   uppercase, like a magazine intro rather than app chrome. The `#root`-scoped
+   selectors (1 id + 1 class) are what actually outweigh the global `#root *`
+   uppercase — a plain class alone can't (see the ALL-CAPS INVARIANT block
+   comment). */
 #root .favteamsheet__title--intro,
 #root .favteamsheet__pitch {
   font-family: var(--font-read);
-  text-transform: capitalize; /* caps-exempt: approved title case for the welcome-modal headline + pitch only */
+  text-transform: none; /* caps-exempt: welcome-modal headline + pitch read as natural sentences */
 }
 
 .favteamsheet__close {
