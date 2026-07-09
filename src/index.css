@@ -4385,6 +4385,42 @@ body {
   color: var(--text-heading);
 }
 
+/* Play of the game — the single most memorable play (see
+   computePlayOfTheGame), sitting above the three stars. Same card treatment;
+   the description reads like a scorebook note, the inning tag trails it. */
+.bs__potg {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 10px;
+}
+.bs__potgTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__potgDesc {
+  margin: 0 0 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-heading);
+}
+.bs__potgWhen {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
    marks descending 3→1; each name over its game line in smaller mono type. Card
    matches the decisions block above it. */
