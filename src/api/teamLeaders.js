@@ -240,6 +240,9 @@ export function computeLeaders(pool, category, { limit = 5, qualifier = 'roster'
       teamId: r.p.teamId,
       teamAbbr: r.p.teamAbbr,
       sportId: r.p.sportId ?? null,
+      // The levels a combined (org / all-minors) total spans, for the multi-
+      // level badge; absent on single-level pools (badge falls back to sportId).
+      levels: r.p.levels ?? null,
       position: r.p.position,
       value: r.v,
       display: category.format(r.v),

@@ -1,5 +1,5 @@
 import { fetchTeam } from '../api/team.js'
-import { loadLeaderPool, LEADER_SCOPES, scopeMeta, isMilbScope } from '../api/leaders.js'
+import { loadLeaderPool, LEADER_SCOPES, scopeMeta, isMilbScope, isMultiLevelScope } from '../api/leaders.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { ALL_CATEGORIES } from '../api/teamLeaders.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -109,7 +109,7 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
             limit={10}
             title="Leaders"
             showTeamLogo
-            showLevel={isOrg}
+            showLevel={isMultiLevelScope(scope)}
             prospectSnapshot={snapshot}
             qualifier="leader-relative"
           />

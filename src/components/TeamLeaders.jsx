@@ -15,17 +15,24 @@ import { ProspectPill } from './ProspectPill.jsx'
 // so the same component serves both the team page's Phase-1 cross-section and the
 // dedicated leaders page's full list — and, later, a league/level pool.
 
+// The level a ranked row is tagged with. On a combining pool (org / all-minors)
+// a row can span levels, so join every level its totals cover ("A+·AA", ordered
+// low→high by the producer); otherwise fall back to the row's single level.
+function levelLabel(entry) {
+  const ids = entry.levels?.length ? entry.levels : entry.sportId ? [entry.sportId] : []
+  return ids.map((id) => SPORT_LABEL[id]).filter(Boolean).join('·')
+}
+
 // The badges that ride next to a leader's name on the broader (league/level/org)
 // pools — none on a single-team page, so both are opt-in and render nothing when
-// off or inapplicable. `showLevel` (org scope, a multi-level pool) tags the
-// player's level (AAA/AA/…); `prospectSnapshot` (any MiLB scope) adds the same
-// prospect pill the lineup/roster surfaces use, which self-hides when unranked.
+// off or inapplicable. `showLevel` (a multi-level pool) tags the level(s) the
+// row's total covers; `prospectSnapshot` (any MiLB scope) adds the same prospect
+// pill the lineup/roster surfaces use, which self-hides when unranked.
 function LeaderBadges({ entry, showLevel, prospectSnapshot }) {
+  const level = showLevel ? levelLabel(entry) : ''
   return (
     <>
-      {showLevel && entry.sportId && SPORT_LABEL[entry.sportId] && (
-        <span className="tlead__level">{SPORT_LABEL[entry.sportId]}</span>
-      )}
+      {level && <span className="tlead__level">{level}</span>}
       {prospectSnapshot && <ProspectPill {...prospectBadge(prospectSnapshot, entry.id)} />}
     </>
   )
