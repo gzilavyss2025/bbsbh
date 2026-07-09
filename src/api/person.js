@@ -1195,52 +1195,13 @@ export function detectRehabAssignment(transactions, debutYear) {
   return club?.id ? { id: club.id, name: club.name || '' } : null
 }
 
-// The league-wide counterpart, for the standalone rehab-assignments page: from a
-// flat transaction window across every club, the players CURRENTLY on a
-// MAJOR-league rehab assignment — a big leaguer sent to a minor-league affiliate
-// to rehab, whose stint hasn't been closed out. Groups the feed by player, takes
-// each player's live rehab run (the rehab ASGs dated after his most recent
-// rehab-ending move), and keeps it only when at least one leg began at an MLB
-// club (`mlbTeamIds`, the 30 MLB club ids) — so a purely minor-league rehab (an
-// AA player dropping to the complex to rehab) is excluded, matching the player
-// page's debuted-only banner. One row per player, newest stint first. Pure —
-// the caller layers on positions and the club's level. `since` is when the
-// current stint began (its earliest rehab leg in the window).
-export function selectActiveRehabAssignments(transactions, mlbTeamIds) {
-  const mlb = mlbTeamIds instanceof Set ? mlbTeamIds : new Set(mlbTeamIds ?? [])
-  const byPlayer = new Map()
-  for (const t of transactions ?? []) {
-    const pid = t.person?.id
-    if (!pid || !txnDate(t)) continue
-    if (!byPlayer.has(pid)) byPlayer.set(pid, [])
-    byPlayer.get(pid).push(t)
-  }
-  const rows = []
-  for (const [pid, ts] of byPlayer) {
-    const lastEnd = ts.filter(isRehabEndingTxn).reduce((m, t) => (txnDate(t) > m ? txnDate(t) : m), '')
-    const run = ts.filter((t) => isRehabTxn(t) && txnDate(t) > lastEnd)
-    if (!run.length) continue
-    const mlbLeg = run.find((t) => mlb.has(t.fromTeam?.id))
-    if (!mlbLeg) continue
-    const latest = run.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
-    const since = run.reduce((m, t) => (!m || txnDate(t) < m ? txnDate(t) : m), '')
-    const club = latest.toTeam
-    if (!club?.id) continue
-    rows.push({
-      playerId: pid,
-      playerName: latest.person?.fullName || '',
-      orgId: mlbLeg.fromTeam?.id ?? null,
-      orgName: mlbLeg.fromTeam?.name || '',
-      clubId: club.id,
-      clubName: club.name || '',
-      since,
-    })
-  }
-  rows.sort((a, b) =>
-    a.since < b.since ? 1 : a.since > b.since ? -1 : a.playerName.localeCompare(b.playerName),
-  )
-  return rows
-}
+// The league-wide counterpart to detectRehabAssignment — every big leaguer
+// currently on a rehab assignment, for the standalone Rehab Assignments page —
+// no longer lives here: that list can't be built spoiler-cheaply on a page load
+// (each stint has to be verified against the player's game log to drop ones that
+// have really ended), so it's precomputed on a cron into public/data/rehab.json.
+// See scripts/gen-rehab.mjs (which keeps its own copy of the transaction-scan
+// logic above) and src/api/rehab.js.
 
 // ---------------------------------------------------------------------------
 // One stat block (a group's tiles + career + splits + logs). A normal player

@@ -29,6 +29,7 @@ export function RehabPage() {
   useDocumentTitle('Rehab Assignments')
   const { loading, error, data } = useAsync(() => loadRehabAssignments(), [])
   const players = data?.players ?? []
+  const updated = monthDay(data?.generatedAt?.slice(0, 10))
 
   return (
     <div className="screen">
@@ -90,7 +91,8 @@ export function RehabPage() {
             ))}
           </div>
           <p className="hint prospects__caption">
-            {players.length} {players.length === 1 ? 'player' : 'players'} currently on a rehab assignment.
+            {players.length} {players.length === 1 ? 'player' : 'players'} currently on a rehab assignment
+            {updated && ` · updated ${updated}`}.
           </p>
         </>
       )}

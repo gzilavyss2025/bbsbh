@@ -1,0 +1,31 @@
+name: Update rehab assignments
+
+# Daily refresh of public/data/rehab.json from the MLB Stats API (see
+# scripts/gen-rehab.mjs). Pushing to main triggers Vercel's normal auto-deploy,
+# so the Rehab Assignments page picks up the fresh, verified list each morning
+# with no runtime dependency on the per-player game-log checks the script runs.
+# Offset from the WAR job's 09:00 so the two nightly commits don't race to push.
+on:
+  schedule:
+    - cron: '30 9 * * *' # ~5:30am US Eastern, after overnight roster moves settle
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-rehab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/gen-rehab.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/rehab.json
+          git diff --cached --quiet || git commit -m "Update rehab assignments"
+          git push

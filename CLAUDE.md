@@ -54,6 +54,17 @@ node scripts/gen-war.mjs
                    # from FanGraphs' leaderboard API) — normally you don't run
                    # this by hand, it's on a nightly cron; see
                    # .github/workflows/update-war.yml and docs/data-enrichment.md §5
+node scripts/gen-rehab.mjs
+                   # regenerate public/data/rehab.json (the league-wide Rehab
+                   # Assignments list). Same build-time-fetch pattern as
+                   # gen-war.mjs: the list can't be built spoiler-cheaply on a
+                   # page load (each candidate is verified against his game log +
+                   # his club's schedule to drop stints that have really ended),
+                   # so a daily cron precomputes it. Normally you don't run this
+                   # by hand; see .github/workflows/update-rehab.yml. Keeps its
+                   # OWN copy of the transaction-scan logic (it's self-contained,
+                   # like the other gen-*.mjs scripts) — the app just reads the
+                   # static file via src/api/rehab.js.
 npm run e2e        # playwright test — verification harness, not a CI suite (see below)
 ```
 
@@ -215,6 +226,17 @@ notes the gamePk field paths were verified against):
   build-time-fetch pattern (bulk/unofficial source → nightly script → static
   JSON → same-origin read) is meant to be reused for the next source shaped
   like this — see `docs/data-enrichment.md` §5.
+- `rehab.js` — the Rehab Assignments page's data, read from a static same-origin
+  `public/data/rehab.json`. The SECOND use of `war.js`'s build-time-fetch pattern,
+  but here the driver is *cost*, not an unofficial source: the list starts from a
+  league-wide transaction scan (who's been *assigned* a rehab), then verifies each
+  candidate against his own game log + his rehab club's schedule to drop stints
+  that have really ended (activated back to the majors, sent down, or shut down
+  for the season) — dozens of statsapi calls, too heavy for a page load. So
+  `scripts/gen-rehab.mjs` does it on a daily cron (`.github/workflows/update-rehab.yml`)
+  and this module just reads the shaped result. The transaction-scan half mirrors
+  `person.js`'s single-player `detectRehabAssignment`; the script keeps its own
+  self-contained copy (like the other `gen-*.mjs`).
 - `milbHistory.js` — historical MiLB affiliate/franchise data, read from a
   static same-origin `public/data/milb-history.json`. Like `war.js`, that file
   is **script-generated** (`scripts/gen-milb-history.mjs`) but, unlike WAR,
