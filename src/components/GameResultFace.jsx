@@ -99,19 +99,51 @@ function scoreLine(box, potg) {
   return awayScore >= homeScore ? `${away}, ${home}` : `${home}, ${away}`
 }
 
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+// Turns every exact occurrence of a mentioned player's name in `text` into a
+// PlayerLink, leaving the rest as plain text. Safe here specifically because
+// every name comes straight from this same play's own batter/runner identity
+// (computePlayOfTheGame's `runners`) rather than a guessed roster-wide
+// search — the names we look for are exactly the names MLB's own description
+// generator used to build the sentence. Longest names first in the
+// alternation so one name can't be swallowed by a shorter overlapping one.
+function linkifyNames(text, mentions) {
+  const named = mentions.filter((m) => m.id && m.name)
+  if (named.length === 0) return text
+  const byName = new Map(named.map((m) => [m.name, m.id]))
+  const pattern = new RegExp(
+    `(${[...byName.keys()].sort((a, b) => b.length - a.length).map(escapeRegExp).join('|')})`,
+    'g',
+  )
+  return text
+    .split(pattern)
+    .filter((part) => part !== '')
+    .map((part, i) => {
+      const id = byName.get(part)
+      return id ? (
+        <PlayerLink key={i} id={id}>
+          {part}
+        </PlayerLink>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    })
+}
+
 // The night's single most memorable moment (see computePlayOfTheGame). Reads
 // as a natural-case sentence in the app's serif "read" face (see --font-read
 // / .pbp__desc for the established precedent) rather than the app's usual
 // all-caps display type — approved caps-exempt, see the CSS block comment.
-// The batter's name is split off the front of MLB's own description (which
-// almost always opens with it) and made a clickable PlayerLink; the rest of
-// the sentence stays plain text rather than attempting a fragile name-match
-// against every player mentioned in it. The label carries the half+inning
-// ("Top 8th") after a centered dot; the description ends with the score,
-// leading team first.
+// Every player MLB's own description names — the batter and any runner it
+// says scored — becomes a clickable PlayerLink (see linkifyNames above); the
+// label carries the half+inning ("Top 8th") after a centered dot; the
+// description ends with the bolded score, leading team first.
 function PlayOfTheGame({ potg, box }) {
-  const { desc, batterId, batterName, inning, half } = potg
-  const hasClickableLead = batterId && batterName && desc.startsWith(batterName)
+  const { desc, batterId, batterName, inning, half, runners } = potg
+  const mentions = [{ id: batterId, name: batterName }, ...(runners ?? [])]
   const inningLabel = inning != null ? `${half === 'top' ? 'Top' : 'Bottom'} ${ordinal(inning)}` : null
   const score = scoreLine(box, potg)
   return (
@@ -129,15 +161,13 @@ function PlayOfTheGame({ potg, box }) {
         )}
       </span>
       <p className="flipback__potg">
-        {hasClickableLead ? (
+        {linkifyNames(desc, mentions)}
+        {score && (
           <>
-            <PlayerLink id={batterId}>{batterName}</PlayerLink>
-            {desc.slice(batterName.length)}
+            {' '}
+            <b>{score}</b>
           </>
-        ) : (
-          desc
         )}
-        {score && ` ${score}`}
       </p>
     </div>
   )

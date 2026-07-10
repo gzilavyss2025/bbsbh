@@ -5154,6 +5154,14 @@ body {
   align-items: center;
   justify-content: center;
 }
+/* Match the kraft "Tap to reveal" cover's font (.cover__main) — .btn's own
+   base font-family (--font-body) read as a visibly different typeface next
+   to the SealBox cover sitting right beside it. */
+.revealall__top,
+.pagenav--revealall .btn {
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+}
 .pagenav--revealall {
   /* .pagenav already positions/backgrounds the floating bar; nothing else
      needed at phone width. */
@@ -5314,7 +5322,8 @@ body {
   text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
 }
 .flipback__full {
-  align-self: stretch;
+  align-self: center;
+  width: 50%;
   margin-top: auto;
 }
 
@@ -5324,6 +5333,14 @@ body {
    --------------------------------------------------------------------------- */
 .pastdayrecap {
   margin-top: 10px;
+}
+/* The base .statgrid (SealBox's revealed wrapper) paints its own bright
+   near-white inset background — same fix TopPerformersBox already needed
+   (see .topperfbox .statgrid above): switch it off here too, so the only
+   background showing is .pastdayrecap__body's cream card below. */
+.pastdayrecap .statgrid {
+  background: transparent;
+  padding: 12px 0 0;
 }
 /* The revealed panel's own card chrome — same border/radius/shadow/cream
    surface as .gamecard/.flipback, so it reads as one more card on the sheet
@@ -5371,6 +5388,9 @@ body {
   flex-direction: column;
   gap: 8px;
 }
+/* Same layout on every viewport now (no phone-vs-wide split) — the bigger
+   headshot + two-line name that used to only kick in at the wide breakpoint
+   is now the only version. */
 .playercard {
   display: flex;
   align-items: center;
@@ -5380,13 +5400,36 @@ body {
   border-radius: var(--radius-sm);
   background: var(--surface-card);
 }
-.shot.playercard__shot {
+/* Headshot + its position badge, same wrapper idiom as
+   .teammatecard__shotwrap/__posbadge (former teammates cards). */
+.playercard__shotwrap {
+  position: relative;
+  display: block;
   flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.playercard__shot {
   width: auto;
-  height: 48px;
+  height: 84px;
   aspect-ratio: 3 / 4;
   border-radius: var(--radius-sm);
   overflow: hidden;
+}
+.playercard__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  line-height: 1.3;
+  text-align: center;
 }
 .playercard__body {
   min-width: 0;
@@ -5396,27 +5439,12 @@ body {
 }
 .playercard__name {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 5px;
+  flex-direction: column;
+  align-items: flex-start;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: var(--w-semibold);
   color: var(--text-heading);
-}
-/* Collapsed to no line break by default (phone/narrow) — "First Last" reads
-   fine inline at this size. The wide-layout override (740px block) turns it
-   into a real break once the bigger headshot (see .shot.playercard__shot
-   there) leaves enough vertical room for the wrap to look intentional. */
-.playercard__namebreak {
-  display: none;
-}
-.playercard__pos {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 .playercard__team {
   display: flex;
@@ -5981,22 +6009,6 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 6px 14px;
-  }
-
-  /* Winners/Losers baseball-card tiles: 1.75x the phone headshot size now
-     that the sidebar has more room; the name wraps first/last onto two lines
-     (.playercard__namebreak) to match, rather than crowding a much bigger
-     photo with a single cramped line of text. */
-  .shot.playercard__shot {
-    height: 84px;
-  }
-  .playercard__namebreak {
-    display: block;
-  }
-  .playercard__name {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
   }
 
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —

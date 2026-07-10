@@ -31,27 +31,31 @@ function DayHighlightRow({ entry }) {
 }
 
 // "Tyler Tolbert" -> ["Tyler", "Tolbert"] (everything after the first space).
-// Used so the name can wrap to two lines at the wide layout's bigger
-// headshot size (see .playercard__namebreak) without a fixed split table.
+// Used so the name wraps to two lines next to the bigger headshot, without a
+// fixed split table.
 function splitFirstLast(full) {
   const i = (full ?? '').indexOf(' ')
   return i === -1 ? [full ?? '', ''] : [full.slice(0, i), full.slice(i + 1)]
 }
 
-// One "baseball card" tile: headshot, name + position (name a clickable
-// PlayerLink), team logo + abbreviation, stat line underneath.
+// One "baseball card" tile: headshot (with position floated on it as a small
+// badge, same idiom as the former-teammates cards' .teammatecard__posbadge),
+// name (a clickable PlayerLink), team logo + abbreviation, stat line
+// underneath.
 function PerformerCard({ entry }) {
   const [first, last] = splitFirstLast(entry.name)
   return (
     <li className="playercard">
-      <Headshot personId={entry.id} name={entry.name} className="playercard__shot" />
+      <span className="playercard__shotwrap">
+        <Headshot personId={entry.id} name={entry.name} className="playercard__shot" />
+        {entry.position && <span className="playercard__posbadge">{entry.position}</span>}
+      </span>
       <div className="playercard__body">
         <div className="playercard__name">
           <PlayerLink id={entry.id}>
-            {first} {last && <br className="playercard__namebreak" />}
+            {first} {last && <br />}
             {last}
           </PlayerLink>
-          {entry.position && <span className="playercard__pos">{entry.position}</span>}
         </div>
         <div className="playercard__team">
           <TeamLogo teamId={entry.teamId} name={entry.teamAbbr} size={16} />
