@@ -1,0 +1,33 @@
+name: Update game notes
+
+# Daily snapshot of every MLB club's official pre-game Game Notes PDF links into
+# public/data/game-notes.json (see scripts/gen-game-notes.mjs). The source feed
+# only lists a club's last ~10 games, so this job MERGES new links into the file
+# and never drops old ones — that accumulation is the point, keeping a game's
+# notes reachable long after mlb.com de-lists them. Pushing to main triggers
+# Vercel's normal auto-deploy. Offset from the WAR (09:00) and rehab (09:30) jobs
+# so the nightly commits don't race to push.
+on:
+  schedule:
+    - cron: '0 8 * * *' # ~4am US Eastern — the prior day's notes are still listed
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-game-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/gen-game-notes.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/game-notes.json
+          git diff --cached --quiet || git commit -m "Update game notes"
+          git push

@@ -57,8 +57,20 @@ export default defineConfig({
         // the PWA install lean; it's fetched on demand and runtime-cached
         // instead (see the NetworkFirst rule below). Same treatment for
         // umpires.json — it grows across the season (every game × 4 officials)
-        // and is only ever read from the umpire detail page.
-        globIgnores: ['**/data/vs-team-splits.json', '**/data/umpires.json'],
+        // and is only ever read from the umpire detail page. Same for
+        // game-notes.json — an append-only archive of press-notes PDF links that
+        // grows every game day (see scripts/gen-game-notes.mjs).
+        globIgnores: [
+          '**/data/vs-team-splits.json',
+          '**/data/umpires.json',
+          '**/data/game-notes.json',
+          // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
+          // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
+          // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
+          // the app-shell precache so it never lands on the install of a user
+          // who never taps it; it's runtime-cached on first use instead (below).
+          '**/assets/pdf*',
+        ],
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
@@ -76,6 +88,24 @@ export default defineConfig({
             // SPLITS VS TEAM rule above.
             urlPattern: ({ url }) => url.pathname === '/data/umpires.json',
             handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // The append-only Game Notes archive (excluded from precache above).
+            // NetworkFirst so the fresh daily copy wins online but the lineup-page
+            // button still resolves offline from the last good fetch. Just PDF
+            // links (title/date/url) — no live score, so this is spoiler-safe.
+            urlPattern: ({ url }) => url.pathname === '/data/game-notes.json',
+            handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // pdfjs chunk + worker (excluded from precache above). They're
+            // content-hashed and immutable, so CacheFirst: fetched on the first
+            // What's Brewing open, then served from cache on later opens (incl.
+            // offline). Carries no score — it's a PDF parser, not data.
+            urlPattern: ({ url }) => /\/assets\/pdf.*\.(m?js)$/.test(url.pathname),
+            handler: 'CacheFirst',
             method: 'GET',
           },
           {

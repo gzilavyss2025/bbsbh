@@ -223,6 +223,20 @@ node scripts/gen-vs-team-splits.mjs
                    # contained like gen-rehab.mjs; MLB only. The file is large
                    # (~3MB) so it's kept OUT of the PWA precache and fetched at
                    # runtime (see vite.config.js). App reads it via src/api/vsTeamSplits.js.
+node scripts/gen-game-notes.mjs
+                   # regenerate public/data/game-notes.json (each MLB club's
+                   # official pre-game "Game Notes" PDF links — title/date/url —
+                   # the lineup page's Game notes button links out to). Same
+                   # build-time-fetch pattern as gen-rehab.mjs (daily cron; see
+                   # .github/workflows/update-game-notes.yml), but APPEND-ONLY: the
+                   # source feed (dapi.mlbinfra.com, keyed by our teamid) only lists
+                   # a club's last ~10 games, so the job MERGES new links in and
+                   # never drops old ones — the img.mlbstatic.com PDF asset stays
+                   # live forever, so the archive keeps a game reachable after
+                   # mlb.com de-lists it. Self-contained; MLB only. Kept OUT of the
+                   # PWA precache (grows each game day). App reads it via
+                   # src/api/gameNotes.js, which prefers the LIVE feed for the game
+                   # being staged and falls back to this archive for older games.
 npm run e2e        # playwright test — verification harness, not a CI suite (see below)
 ```
 
@@ -448,6 +462,21 @@ notes the gamePk field paths were verified against):
   the last-game line — is gated against the page's `asOf` cutoff in
   `SplitsVsTeam.jsx`, exactly as the game log is. The file is large (~3MB) so it's
   kept OUT of the PWA precache and fetched at runtime (see `vite.config.js`).
+- `gameNotes.js` — the lineup page's Game notes button data: each MLB club's
+  official pre-game press-notes PDF, resolved to the note for the game's date.
+  TWO sources, one shape: the LIVE feed at `dapi.mlbinfra.com` (the JSON the
+  `mlb.com/{team}/news/game-notes` page is built from — CORS-open, no auth, keyed
+  by our own `teamid-{n}`) for the game being staged, and a static same-origin
+  `public/data/game-notes.json` archive for older games. The archive exists
+  because the live feed only lists a club's last ~10 games; once a note ages off
+  it's gone from mlb.com, but the `img.mlbstatic.com` PDF asset stays live, so
+  `scripts/gen-game-notes.mjs` snapshots the feed daily and APPENDS to the file
+  (never dropping old links — the twist vs. the other build-time-fetch scripts,
+  which regenerate from scratch). MLB only, like `war.js`; the button hides for
+  MiLB games and any date with no note. Spoiler-free in-app — it renders only a
+  link (title/date/url), no score — but the PDF it points to is a press packet
+  that recaps prior results, so it opens in a new tab as a deliberate,
+  user-initiated jump, not an in-app reveal.
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — the leader boards. Ranking
   is pool-agnostic: `teamLeaders.js` holds the category descriptors +
   `computeLeaders`, which ranks any normalized `PoolPlayer[]`; `leaders.js`
