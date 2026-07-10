@@ -477,6 +477,16 @@ notes the gamePk field paths were verified against):
   link (title/date/url), no score — but the PDF it points to is a press packet
   that recaps prior results, so it opens in a new tab as a deliberate,
   user-initiated jump, not an in-app reveal.
+- `whatsBrewing.js` — for the BREWERS only, the Game notes button opens an in-app
+  modal (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF's
+  left "WHAT'S BREWING?" column (Hulk Logan, Don't Pitch to Mitch, …), with the
+  full PDF linked inside. Parses client-side on demand (pdfjs-dist, dynamically
+  imported so it stays off the main bundle and out of the PWA precache — see
+  `vite.config.js`) rather than in the cron, because tonight's note posts after
+  the cron runs and the PDF host is CORS-open. Every other club keeps the plain
+  link-out (the parse is calibrated to the Brewers' InDesign template). See
+  `docs/whats-brewing.md` for the font/geometry parsing details and the Node
+  verification harness.
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — the leader boards. Ranking
   is pool-agnostic: `teamLeaders.js` holds the category descriptors +
   `computeLeaders`, which ranks any normalized `PoolPlayer[]`; `leaders.js`
