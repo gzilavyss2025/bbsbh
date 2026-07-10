@@ -241,8 +241,12 @@ const CONFIG = {
     topCutoff: 780,
   },
   // Twins — page 2 (starter notes); page 1 is the season-splits table. The
-  // starter's bio box (height/weight, a game-by-game log) sits above the
-  // narrative on page 2 too — topCutoff drops it.
+  // starter's bio box (height/weight, a game-by-game log that gains a row
+  // every month) sits above the narrative — topCutoffAfter anchors the cutoff
+  // to the game log's own last row ("…CAREER TOTALS") rather than a fixed y,
+  // so it keeps working as that table grows through the season (a plain
+  // topCutoff, tuned against one date's PDF, clipped the real first heading
+  // on a later date once the table had gained rows).
   142: {
     layout: 'flow-bold',
     title: 'Twins Game Notes',
@@ -252,24 +256,40 @@ const CONFIG = {
     headingMaxX: 55,
     columnMaxX: 150,
     tableLeader: /\.(\s*\.){7,}/,
-    topCutoff: 680,
+    topCutoffAfter: /CAREER TOTALS/,
+    allCapsOnly: true,
     skipTitle: /^PITCH \(AVG/i,
   },
-  // Yankees — page 2 (starter notes); page 1 is team stat blocks. On dates
-  // without a featured-starter page, page 2 is instead a bullpen/roster bio
-  // packet (per-player bullets with "Current Trend"/"2026 Multi-Hit Games"
-  // stat sub-labels) — skipTitle drops those sub-labels; the player-bio
-  // bullets themselves still come through as readable (if less punny) blurbs.
+  // Yankees — page 1, NOT page 2 (page 2 is the starting pitcher's own
+  // breakdown, a different feature). Page 1's real narrative is easy to miss:
+  // a thin left-margin sidebar (x<65, "YANKEES BY THE NUMBERS" / team stat
+  // blocks) sits over the true two-column game-notes narrative that starts
+  // further right — two full narrative columns side by side, not one. Handled
+  // as cfg.columns: column 1 ("AT A GLANCE", "YESTERDAY'S NEWS", …) then
+  // column 2 ("RICE RICE BABY", "PEN PALS", …), each read top-to-bottom in
+  // turn (NOT merged into one wide column — see extractFlowBold's note on
+  // why that would interleave two unrelated columns' lines). topCutoff drops
+  // the masthead/matchup header above both columns; bottomCutoff drops the
+  // "Upcoming Probable Pitchers" table below them; rightTableMinX on column 2
+  // drops the "…RANKINGS THIS SEASON" stat box embedded in its prose.
   147: {
     layout: 'flow-bold',
     title: 'Yankees Game Notes',
-    page: 2,
     bodyFont: /MyriadPro-Regular/,
     headFont: /MyriadPro-Bold/,
-    headingMaxX: 55,
-    columnMaxX: 150,
     tableLeader: /\.(\s*\.){7,}/,
-    skipTitle: /^(Current Trend|2026 Multi-Hit Games)/i,
+    topCutoff: 810,
+    bottomCutoff: 70,
+    // Unlike most clubs, NYY bolds player names/stat callouts freely WITHIN a
+    // blurb's body, not just at its title — so a wrapped body line that
+    // happens to start with one of those (e.g. a line beginning "Ryan
+    // McMahon (2-for-5…)") looks like a heading candidate too. allCapsOnly
+    // filters those out, same fix as the single-column clubs.
+    allCapsOnly: true,
+    columns: [
+      { xMin: 140, headingMaxX: 165, columnMaxX: 372 },
+      { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
+    ],
   },
 }
 
@@ -516,12 +536,26 @@ function extractFlow(items, realName, cfg) {
 // geometry knobs for table exclusion (most of these clubs have no separate
 // Gotham display face to anchor a bottom-box cutoff off of, so cfg.topCutoff/
 // cfg.bottomCutoff are plain y-coordinates instead).
+//
+// A genuine two-column page (NYY: a thin left-margin stat sidebar, then the
+// REAL narrative starts as two side-by-side columns further right) is handled
+// by cfg.columns — an array of column-zone overrides (xMin/headingMaxX/
+// columnMaxX/rightTableMinX), each run independently through the same
+// single-column logic below and concatenated left-column-first. Do NOT
+// widen a single column's columnMaxX to "cover both" — that interleaves two
+// unrelated columns' lines whenever they happen to share a y (PDF read order
+// is column-major, not row-major).
 // ---------------------------------------------------------------------------
 function extractFlowBold(items, realName, cfg) {
+  if (cfg.columns) return cfg.columns.flatMap((colCfg) => extractFlowBoldZone(items, realName, { ...cfg, ...colCfg }))
+  return extractFlowBoldZone(items, realName, cfg)
+}
+
+function extractFlowBoldZone(items, realName, cfg) {
   const tol = cfg.lineTol ?? 3
-  const topCutoff = cfg.topCutoff ?? Infinity
+  const xMin = cfg.xMin ?? 0
   const bottomCutoff = cfg.bottomCutoff ?? -Infinity
-  const words = items
+  const allWords = items
     .filter((i) => i.str.trim())
     .map((i) => ({
       x: i.transform[4],
@@ -530,7 +564,17 @@ function extractFlowBold(items, realName, cfg) {
       str: i.str,
       font: realName(i.fontName),
     }))
-    .filter((w) => w.y < topCutoff && w.y > bottomCutoff)
+  // A fixed topCutoff y-coordinate is fragile for a page whose bio/stat box
+  // grows over the season (MIN: a pitcher's game-log table gains a row every
+  // month, pushing the real narrative down) — cfg.topCutoffAfter anchors the
+  // cutoff to that box's own last row instead of a magic number, so it tracks
+  // the boundary as the box grows. Falls back to the plain cfg.topCutoff.
+  let topCutoff = cfg.topCutoff ?? Infinity
+  if (cfg.topCutoffAfter) {
+    const marks = allWords.filter((w) => cfg.topCutoffAfter.test(w.str) && w.x >= xMin && w.x < cfg.columnMaxX)
+    if (marks.length) topCutoff = Math.min(topCutoff, Math.max(...marks.map((w) => w.y)))
+  }
+  const words = allWords.filter((w) => w.x >= xMin && w.y < topCutoff && w.y > bottomCutoff)
   if (!words.length) return []
 
   const isHead = (w) => cfg.headFont.test(w.font)
@@ -602,7 +646,7 @@ function extractFlowBold(items, realName, cfg) {
     (h) =>
       h.title &&
       (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
-      (!cfg.allCapsOnly || h.title === h.title.toUpperCase()),
+      (!cfg.allCapsOnly || isAllCaps(h.title)),
   )
   titled.sort((a, b) => b.y - a.y)
   if (!titled.length) return []
@@ -645,6 +689,15 @@ function extractFlowBold(items, realName, cfg) {
       ),
     }))
     .filter((b) => b.body)
+}
+
+// ALL-CAPS check for cfg.allCapsOnly, tolerant of the "Mc" surname convention
+// (e.g. "McMAHON OF THE HOUR" is a real title — "Mc" stays mixed-case even in
+// an otherwise all-caps headline) — normalize a leading "Mc" before an
+// uppercase letter to "MC" so it doesn't read as a stray lowercase letter.
+function isAllCaps(title) {
+  const normalized = title.replace(/\bMc(?=[A-Z])/g, 'MC')
+  return normalized === normalized.toUpperCase()
 }
 
 // Join x-sorted words, inserting a space only where there's a real horizontal
