@@ -1,3 +1,4 @@
+import { selectPrePitchChanges } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
 import { SealBox } from './SealBox.jsx'
@@ -6,9 +7,47 @@ import { SealBox } from './SealBox.jsx'
 // beside the win-probability chart — its own coverless seal driven by the same
 // reveal flag as the rest of the half (nothing computed until revealed — the
 // spoiler guard is unchanged). Before reveal, `placeholder` swaps in a sealed
-// hint card rather than an empty slot.
-export function StatBox({ feed, inning, half, battingSide, getDerived, revealed, className = '', placeholder = false }) {
+// hint card rather than an empty slot — UNLESS a new pitcher is entering this
+// half, in which case that takes over the slot as a notification card instead
+// (a pitching change is pre-pitch/spoiler-free info, same as
+// HalfInning.jsx's PrePitchChanges, and more worth a scorer's attention here
+// than the generic "seal until you reveal" hint). Only checked for the
+// IMMEDIATE next half to reveal (`isNextToReveal`) — same gate
+// selectPrePitchChanges relies on elsewhere — so a further-out sealed half
+// never leaks its subs.
+export function StatBox({
+  feed,
+  inning,
+  half,
+  battingSide,
+  getDerived,
+  revealed,
+  className = '',
+  placeholder = false,
+  pitchingName,
+  isNextToReveal = false,
+}) {
   if (!revealed && placeholder) {
+    const pitcherChange = isNextToReveal
+      ? selectPrePitchChanges(feed, inning, half).find((c) => c.eventType === 'pitching_substitution')
+      : null
+    if (pitcherChange?.pitcher) {
+      return (
+        <div className={`statbox statbox--pitchernotice ${className}`}>
+          <span className="pitchernotice__icon" aria-hidden="true">⚾</span>
+          <div className="pitchernotice__body">
+            <span className="pitchernotice__now">
+              Now pitching{pitchingName ? ` for the ${pitchingName}` : ''}
+            </span>
+            <span className="pitchernotice__pitcher">
+              {pitcherChange.pitcher.name}
+              {pitcherChange.pitcher.jersey ? ` ${pitcherChange.pitcher.jersey}` : ''}
+              {pitcherChange.pitcher.hand ? ` | ${pitcherChange.pitcher.hand}HP` : ''}
+            </span>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className={`statbox statbox--sealed ${className}`} aria-hidden="true">
         <span className="statbox__hint">Totals seal until you reveal this half</span>

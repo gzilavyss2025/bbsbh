@@ -75,12 +75,7 @@ export function HalfInning({
           pre-pitch list is spoiler-free, and only for the immediate next half. */}
       {!revealed && isNextToReveal && (
         <>
-          <PrePitchChanges
-            feed={feed}
-            inning={inning}
-            half={half}
-            pitchingName={battingSide === 'away' ? homeName : awayName}
-          />
+          <PrePitchChanges feed={feed} inning={inning} half={half} />
           {enteringCards}
         </>
       )}
@@ -152,31 +147,22 @@ export function HalfInning({
   )
 }
 
-// Subs/pitching changes announced before this half's first pitch — rendered
-// above the SealBox (not inside it), gated by the caller to the half the user
-// is about to reveal. See selectPrePitchChanges for why this is spoiler-free.
-function PrePitchChanges({ feed, inning, half, pitchingName }) {
-  const changes = selectPrePitchChanges(feed, inning, half)
+// Subs announced before this half's first pitch — rendered above the SealBox
+// (not inside it), gated by the caller to the half the user is about to
+// reveal. See selectPrePitchChanges for why this is spoiler-free. A pitching
+// substitution is excluded here — it gets its own notification card in row 2's
+// StatBox slot instead (see StatBox.jsx), more prominent than a plain list item.
+function PrePitchChanges({ feed, inning, half }) {
+  const changes = selectPrePitchChanges(feed, inning, half).filter(
+    (c) => c.eventType !== 'pitching_substitution',
+  )
   if (changes.length === 0) return null
   return (
     <div className="prepitch">
       <ul className="prepitch__list">
         {changes.map((c, i) => (
           <li className="prepitch__item" key={i}>
-            {c.eventType === 'pitching_substitution' && c.pitcher ? (
-              <span className="prepitch__pitching">
-                <span className="prepitch__now">
-                  Now pitching{pitchingName ? ` for the ${pitchingName}` : ''}:
-                </span>{' '}
-                <span className="prepitch__pitcher">
-                  {c.pitcher.name}
-                  {c.pitcher.jersey ? ` ${c.pitcher.jersey}` : ''}
-                  {c.pitcher.hand ? ` | ${c.pitcher.hand}HP` : ''}
-                </span>
-              </span>
-            ) : (
-              c.text
-            )}
+            {c.text}
           </li>
         ))}
       </ul>

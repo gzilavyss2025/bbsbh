@@ -35,6 +35,13 @@
 //      summed across seasons from his debut (see birthdayLine). Rides alongside
 //      the existing "celebrating his birthday today" flag; a tiny fan-out since
 //      only the day's birthday boys are swept.
+//   8. Hitter season/career lines — AVG/AB/H/HR for the season (summed from the
+//      same game-log rows as #2/#6) and for his whole career (the API's own
+//      `career` stat type, folded into the same request — no extra fetch). Not
+//      a note on its own; it's the baseline callout-notes.js's "career X
+//      against the Y" note (from vs-team-splits) checks for a significant
+//      deviation against, so that note only fires when facing this opponent is
+//      actually unusual for him.
 //
 // WHY a nightly precompute (the war.js / minors-leaders.js build-time pattern,
 // docs/data-enrichment.md §5) rather than live: scoped to the NEXT day's teams
@@ -386,15 +393,20 @@ async function scoringRecord(teamId) {
 // A hitter's game-log-derived enrichment: current on-base streak (consecutive
 // games PLAYED reaching base), a conservative stolen-base run (SB accumulated
 // back to his last caught stealing — a game-level view can't see intra-game
-// order, so it stops at any CS rather than over-claiming), and his club's W-L in
-// games he homered. Cut off at `asOf`.
+// order, so it stops at any CS rather than over-claiming), his club's W-L in
+// games he homered, and his season/career AVG+HR lines (see `seasonLine` below).
+// Cut off at `asOf`. Fetches `gameLog,career` together — one request, no extra
+// fetch — so the "career X against the Y" note (callout-notes.js) has a
+// same-player baseline to check for a significant deviation against, rather
+// than firing on a bare vs-team-splits line.
 async function hitterEnrich(personId) {
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=gameLog&group=hitting&season=${season}`,
+    `/api/v1/people/${personId}/stats?stats=gameLog,career&group=hitting&season=${season}`,
   )
-  const rows = (data.stats?.[0]?.splits ?? [])
-    .filter((s) => s.date && s.date <= asOf)
-    .sort((a, b) => (a.date < b.date ? 1 : -1)) // newest first
+  const rows = (data.stats ?? [])
+    .find((b) => b.type?.displayName === 'gameLog')
+    ?.splits?.filter((s) => s.date && s.date <= asOf)
+    .sort((a, b) => (a.date < b.date ? 1 : -1)) ?? [] // newest first
 
   let onBase = 0
   for (const s of rows) {
@@ -416,7 +428,27 @@ async function hitterEnrich(personId) {
     if (num(s.stat?.homeRuns) > 0) s.isWin ? hw++ : hl++
   }
 
-  return { onBase, stolenBase, homerW: hw, homerL: hl }
+  // Season totals, summed from the same asOf-cut rows rather than the API's
+  // own running `avg` (which — like formatAvg's birthday line — would include
+  // tonight's not-yet-played game if read off the last row instead).
+  let sAb = 0, sH = 0, sHr = 0
+  for (const s of rows) {
+    const st = s.stat ?? {}
+    sAb += num(st.atBats)
+    sH += num(st.hits)
+    sHr += num(st.homeRuns)
+  }
+  const seasonLine = { ab: sAb, h: sH, hr: sHr, avg: formatAvg(sH, sAb) }
+
+  // Career totals straight off the API's own `career` stat type — a season-
+  // level aggregate through his most recently completed game, same spoiler
+  // profile as the rest of this file's season aggregates.
+  const cSt = (data.stats ?? []).find((b) => b.type?.displayName === 'career')?.splits?.[0]?.stat
+  const careerLine = cSt
+    ? { ab: num(cSt.atBats), h: num(cSt.hits), hr: num(cSt.homeRuns), avg: cSt.avg ?? formatAvg(num(cSt.hits), num(cSt.atBats)) }
+    : null
+
+  return { onBase, stolenBase, homerW: hw, homerL: hl, seasonLine, careerLine }
 }
 
 // A hitter's season situational splits (RISP, vs-L, vs-R), straight from the
@@ -657,6 +689,7 @@ for (const g of games) {
   const streaks = {}
   const homerRecords = {}
   const situational = {}
+  const hitterLines = {}
   const gameHitterIds = [
     ...(hitterIdsByTeam.get(awayId) ?? []),
     ...(hitterIdsByTeam.get(homeId) ?? []),
@@ -674,6 +707,9 @@ for (const g of games) {
         if (pct >= HOMER_LOPSIDED || pct <= 1 - HOMER_LOPSIDED) {
           homerRecords[id] = `${e.homerW}-${e.homerL}`
         }
+      }
+      if (e.seasonLine || e.careerLine) {
+        hitterLines[id] = { season: e.seasonLine ?? null, career: e.careerLine ?? null }
       }
     }
     const sit = situationalById.get(id)
@@ -726,6 +762,7 @@ for (const g of games) {
     streaks,
     homerRecords,
     situational,
+    hitterLines,
     starterRecords,
     birthdays,
     birthdayStats,

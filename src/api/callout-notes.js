@@ -49,10 +49,33 @@ const otherSide = (side) => (side === 'away' ? 'home' : 'away')
 // always reads "career", never "this year". Kept only past a real sample
 // (VS_TEAM_MIN_GAMES) — a 1-game "career" line is a coincidence, not a fact.
 const VS_TEAM_MIN_GAMES = 3
-function vsTeamCareerLine(vsTeam, personId, teamId) {
+
+// The vs-opponent line is only worth a callout when it's actually unusual for
+// him — otherwise "career .275 against the Cubs" next to a .270 career hitter
+// is just restating his season. Gated against gen-callouts.mjs's `hitterLines`
+// (his own season AND whole-career AVG, computed there alongside the game-log
+// sweep — see hitterEnrich): fires only if the vs-team AVG clears
+// AVG_DEVIATION_THRESHOLD away from BOTH baselines he has, so a hitter who's
+// simply been better than usual across the board doesn't get a misleading
+// "against the Cubs" framing. A missing baseline (bundle predates hitterLines,
+// or the player has no career line) doesn't block the note — degrade to
+// whichever baseline is present, or show it unfiltered if neither is.
+const AVG_DEVIATION_THRESHOLD = 0.04
+function vsTeamCareerLine(vsTeam, personId, teamId, hitterLines) {
   const car = vsTeam?.players?.[personId]?.vs?.[String(teamId)]?.car
   if (!car || car.g < VS_TEAM_MIN_GAMES) return null
-  return car
+  const carAvg = Number(car.avg)
+  if (!Number.isFinite(carAvg)) return car
+
+  const lines = hitterLines?.[personId]
+  const baselines = [lines?.season, lines?.career]
+    .filter(Boolean)
+    .map((l) => Number(l.avg))
+    .filter(Number.isFinite)
+  if (!baselines.length) return car
+
+  const deviates = baselines.some((avg) => Math.abs(carAvg - avg) >= AVG_DEVIATION_THRESHOLD)
+  return deviates ? car : null
 }
 
 export function buildCallouts(
@@ -189,7 +212,10 @@ export function buildCallouts(
     // Career line against tonight's opponent (see vsTeamCareerLine) — the
     // "Turang is a career .303 with 2 HR against the Pirates" call-out.
     const oppTeamId = bundle[otherSide(battingSide)]?.teamId
-    const car = oppTeamId != null ? vsTeamCareerLine(vsTeam, entry.batterId, oppTeamId) : null
+    const car =
+      oppTeamId != null
+        ? vsTeamCareerLine(vsTeam, entry.batterId, oppTeamId, bundle.hitterLines)
+        : null
     if (car) {
       const oppName = bundle[otherSide(battingSide)]?.name
       // "(35-for-80)" — only once gen-vs-team-splits.mjs has actually written an
