@@ -82,23 +82,37 @@ function PastGameFlipCard({ game, dateStr, revealed }) {
   )
 }
 
-// The single "reveal all games" control — a top button (wide layout) plus a
+// The single "reveal all results" control — a top button (wide layout) plus a
 // mobile-only fixed bottom bar duplicate, the same floating-bar convention
 // InningViewer already uses for "Reveal {half}" (.pagenav/.btn--reveal). One
-// tap flips every card on the page at once; there's no per-card unlock.
+// tap flips every card on the page AND force-reveals the Day Recap panel (see
+// PastDayRecapBox's forceRevealed prop) — there's no per-card unlock, and the
+// Day Recap's own seal does the same thing in reverse (see onRevealAll).
 function RevealAllBar({ onReveal }) {
   return (
     <>
       <button type="button" className="btn btn--reveal revealall__top" onClick={onReveal}>
-        <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all games
+        <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
       </button>
       <div className="pagenav pagenav--revealall">
         <button type="button" className="btn btn--reveal" onClick={onReveal}>
-          <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all games
+          <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
         </button>
       </div>
     </>
   )
+}
+
+// `?date=YYYY-MM-DD` jumps straight to a specific day (e.g. a pinned test
+// game from docs/test-games.md) instead of clicking Previous Day hundreds of
+// times — dev/testing convenience only, not part of the real feature.
+function anchorDate() {
+  const q = new URLSearchParams(window.location.search).get('date')
+  if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) {
+    const [y, m, d] = q.split('-').map(Number)
+    return new Date(y, m - 1, d)
+  }
+  return new Date()
 }
 
 // THIN LIVE PREVIEW — reachable at /preview/pastday, not linked from any nav.
@@ -110,10 +124,15 @@ function RevealAllBar({ onReveal }) {
 // fan-out — see the plan's "Order of work" for what this preview is (and
 // isn't) for.
 export function PastPreview({ onBack }) {
-  const [offset, setOffset] = useState(-1) // yesterday — likely has real Finals
+  const [anchor] = useState(anchorDate)
+  const hasDateParam = useMemo(
+    () => new URLSearchParams(window.location.search).has('date'),
+    [],
+  )
+  const [offset, setOffset] = useState(hasDateParam ? 0 : -1) // yesterday by default — likely has real Finals
   const [sportId, setSportId] = useState(SPORT_IDS.MLB)
   const [revealedAll, setRevealedAll] = useState(false)
-  const dateStr = useMemo(() => toApiDate(addDays(new Date(), offset)), [offset])
+  const dateStr = useMemo(() => toApiDate(addDays(anchor, offset)), [anchor, offset])
 
   // One-directional reveal, reset when the date/level changes (a fresh day
   // starts sealed again) — same reset pattern PastDayRecapBox uses.
@@ -169,7 +188,14 @@ export function PastPreview({ onBack }) {
                 </li>
               ))}
             </ul>
-            <PastDayRecapBox dateStr={dateStr} sportId={sportId} games={finals} prospectsData={null} />
+            <PastDayRecapBox
+              dateStr={dateStr}
+              sportId={sportId}
+              games={finals}
+              prospectsData={null}
+              revealedAll={revealedAll}
+              onRevealAll={() => setRevealedAll(true)}
+            />
           </div>
         </>
       )}

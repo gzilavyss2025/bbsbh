@@ -15,10 +15,15 @@ export function GameResultFace({ feed, winProb, boxScorePath }) {
   const navigate = useNav()
   const box = selectBoxscore(feed)
   const potg = computePlayOfTheGame(winProb, feed)
+  const totalInnings = box.innings?.length ?? 9
+  const wentToExtras = totalInnings > 9
 
   return (
     <div className="flipback">
       <div className="flipback__linescore">
+        {wentToExtras && (
+          <div className="flipback__extras">{totalInnings} innings</div>
+        )}
         <div className="flipback__lsHeader" aria-hidden="true">
           <span className="flipback__lsTeamCol" />
           <span className="flipback__lsCol">R</span>
@@ -29,13 +34,13 @@ export function GameResultFace({ feed, winProb, boxScorePath }) {
         <TeamLine side={box.home} />
       </div>
       <Decisions decisions={box.decisions} />
-      {potg?.desc && <PlayOfTheGame potg={potg} />}
+      {potg?.desc && <PlayOfTheGame potg={potg} box={box} />}
       <button
         type="button"
-        className="btn btn--ghost flipback__full"
+        className="btn btn--next flipback__full"
         onClick={() => navigate(boxScorePath)}
       >
-        Full box score ›
+        Box score
       </button>
     </div>
   )
@@ -77,6 +82,23 @@ function Decisions({ decisions }) {
   )
 }
 
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
+}
+
+// "MIL 5, STL 3" — the leading team is whoever was ahead at the moment of the
+// play (not always the eventual winner for an earlier-game play, but for the
+// game's single most decisive moment it usually is).
+function scoreLine(box, potg) {
+  const { awayScore, homeScore } = potg
+  if (awayScore == null || homeScore == null) return null
+  const away = `${box.away.abbreviation} ${awayScore}`
+  const home = `${box.home.abbreviation} ${homeScore}`
+  return awayScore >= homeScore ? `${away}, ${home}` : `${home}, ${away}`
+}
+
 // The night's single most memorable moment (see computePlayOfTheGame). Reads
 // as a natural-case sentence in the app's serif "read" face (see --font-read
 // / .pbp__desc for the established precedent) rather than the app's usual
@@ -84,13 +106,28 @@ function Decisions({ decisions }) {
 // The batter's name is split off the front of MLB's own description (which
 // almost always opens with it) and made a clickable PlayerLink; the rest of
 // the sentence stays plain text rather than attempting a fragile name-match
-// against every player mentioned in it.
-function PlayOfTheGame({ potg }) {
-  const { desc, batterId, batterName } = potg
+// against every player mentioned in it. The label carries the half+inning
+// ("Top 8th") after a centered dot; the description ends with the score,
+// leading team first.
+function PlayOfTheGame({ potg, box }) {
+  const { desc, batterId, batterName, inning, half } = potg
   const hasClickableLead = batterId && batterName && desc.startsWith(batterName)
+  const inningLabel = inning != null ? `${half === 'top' ? 'Top' : 'Bottom'} ${ordinal(inning)}` : null
+  const score = scoreLine(box, potg)
   return (
     <div className="flipback__potgWrap">
-      <span className="flipback__potgLabel">Play of the game</span>
+      <span className="flipback__potgLabel">
+        Play of the game
+        {inningLabel && (
+          <>
+            <span className="flipback__potgDot" aria-hidden="true">
+              {' '}
+              &middot;{' '}
+            </span>
+            {inningLabel}
+          </>
+        )}
+      </span>
       <p className="flipback__potg">
         {hasClickableLead ? (
           <>
@@ -100,6 +137,7 @@ function PlayOfTheGame({ potg }) {
         ) : (
           desc
         )}
+        {score && ` ${score}`}
       </p>
     </div>
   )

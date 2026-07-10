@@ -5161,6 +5161,12 @@ body {
   display: none;
   width: 100%;
   margin: 12px 0;
+  /* .btn--reveal doesn't set a flex layout on its own, so switching this
+     button to inline-flex (for the wide-layout override below) needs its own
+     explicit centering — a flex container defaults to flex-start, which is
+     what was making the label read left-justified instead of centered. */
+  align-items: center;
+  justify-content: center;
 }
 .pagenav--revealall {
   /* .pagenav already positions/backgrounds the floating bar; nothing else
@@ -5218,6 +5224,19 @@ body {
   flex-direction: column;
   gap: 4px;
 }
+/* "11 INNINGS" — only shown when the game actually went past 9, sitting above
+   the logo/team-name + R-H-E rows it introduces. Same font/size as the R-H-E
+   VALUES below (not the small column-header labels) so it reads as another
+   headline number, not a caption. */
+.flipback__extras {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  padding-bottom: 2px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
 .flipback__lsHeader,
 .flipback__team {
   display: grid;
@@ -5245,7 +5264,8 @@ body {
   align-items: center;
   gap: 8px;
   font-family: var(--font-display);
-  font-size: 13px;
+  /* 1.5x the original 13px, on every viewport (not gated to wide layout). */
+  font-size: 19.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
@@ -5291,6 +5311,9 @@ body {
   color: var(--text-caption);
   margin-bottom: 2px;
 }
+.flipback__potgDot {
+  color: var(--graphite-soft);
+}
 /* Play of the game (and its batter-name link) reads as a natural sentence in
    the app's serif "read" face, not the usual all-caps display type — same
    sanctioned exception as .pbp__desc (see the ALL-CAPS INVARIANT block
@@ -5315,6 +5338,16 @@ body {
    --------------------------------------------------------------------------- */
 .pastdayrecap {
   margin-top: 10px;
+}
+/* The revealed panel's own card chrome — same border/radius/shadow/cream
+   surface as .gamecard/.flipback, so it reads as one more card on the sheet
+   rather than bare content sitting directly on the page background. */
+.pastdayrecap__body {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 .dayhl__section + .dayhl__section {
   margin-top: 16px;
@@ -5384,6 +5417,13 @@ body {
   font-size: 13px;
   font-weight: var(--w-semibold);
   color: var(--text-heading);
+}
+/* Collapsed to no line break by default (phone/narrow) — "First Last" reads
+   fine inline at this size. The wide-layout override (740px block) turns it
+   into a real break once the bigger headshot (see .shot.playercard__shot
+   there) leaves enough vertical room for the wrap to look intentional. */
+.playercard__namebreak {
+  display: none;
 }
 .playercard__pos {
   font-family: var(--font-display);
@@ -5955,6 +5995,22 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 6px 14px;
+  }
+
+  /* Winners/Losers baseball-card tiles: 1.75x the phone headshot size now
+     that the sidebar has more room; the name wraps first/last onto two lines
+     (.playercard__namebreak) to match, rather than crowding a much bigger
+     photo with a single cramped line of text. */
+  .shot.playercard__shot {
+    height: 84px;
+  }
+  .playercard__namebreak {
+    display: block;
+  }
+  .playercard__name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
   }
 
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —
