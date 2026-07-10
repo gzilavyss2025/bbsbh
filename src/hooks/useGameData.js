@@ -67,19 +67,23 @@ export function useGameData(game) {
   }, [feedState.data, game.away.teamName, game.home.teamName])
 
   // Managers need a separate endpoint per team. The coaches endpoint needs
-  // nothing from the feed — the game prop already carries both team ids — so
-  // this runs in parallel with the feed fetch instead of queuing behind the
-  // app's largest response. Keyed on the stable team ids, not the feed object:
-  // managers can't change mid-game, so a live Refresh (which mints a new feed
-  // object) never re-hits the coaches endpoint or risks blanking a resolved
-  // name on a transient failure.
+  // nothing from the feed — the game prop already carries both team ids and
+  // its gameDate's year is the season to ask for — so this runs in parallel
+  // with the feed fetch instead of queuing behind the app's largest response.
+  // The season is required: without it the endpoint returns the CURRENT
+  // staff, which is wrong for any past-season box score (see fetchManager).
+  // Keyed on the stable team ids + season, not the feed object: managers
+  // can't change mid-game, so a live Refresh (which mints a new feed object)
+  // never re-hits the coaches endpoint or risks blanking a resolved name on a
+  // transient failure.
+  const managerSeason = (game.gameDate || '').slice(0, 4) || null
   const managers = useAsync(async () => {
     const [away, home] = await Promise.all([
-      fetchManager(game.away.id),
-      fetchManager(game.home.id),
+      fetchManager(game.away.id, managerSeason),
+      fetchManager(game.home.id, managerSeason),
     ])
     return { away, home }
-  }, [game.away.id, game.home.id])
+  }, [game.away.id, game.home.id, managerSeason])
 
   // Outdoor scorebook weather string — from the park's lat/lon, not the
   // box-score weather (which reports the interior of a closed roof). Fetched
