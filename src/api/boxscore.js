@@ -533,6 +533,18 @@ export function computePlayOfTheGame(winProb, feed) {
     // consequence attached, not just the bare description.
     awayScore: typeof best.result?.awayScore === 'number' ? best.result.awayScore : null,
     homeScore: typeof best.result?.homeScore === 'number' ? best.result.homeScore : null,
+    // Every runner the description names as scoring on this play ("Matt
+    // Olson scores.") — same firstLast identity lookup as the batter above,
+    // so a caller can link each mentioned name to its player page the same
+    // way. The winProbability endpoint's play entries carry the full
+    // `runners` array (same shape as a play-by-play play), not just WPA.
+    runners: (best.runners ?? [])
+      .filter((r) => r.details?.isScoringEvent && r.details?.runner?.id)
+      .map((r) => {
+        const id = r.details.runner.id
+        const gd = feed?.gameData?.players?.[`ID${id}`] ?? r.details.runner
+        return { id, name: firstLast(gd) }
+      }),
   }
 }
 
