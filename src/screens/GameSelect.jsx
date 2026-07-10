@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { fetchSchedule } from '../api/schedule.js'
 import { fetchScheduleUniforms } from '../api/uniforms.js'
-import { fetchRosterIdsForTeams } from '../api/team.js'
+import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -57,9 +57,27 @@ export function GameSelect({ onPick, onShowLogos }) {
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
 
+  // The favorite team is always an MLB club (FavoriteTeamModal only offers
+  // those), so on a MiLB level its own game never appears — pin its current
+  // affiliate at THIS level instead. Season keys off the slate's own date
+  // (not "now") so paging near a year boundary still asks for the season the
+  // displayed date actually falls in; fetchAffiliates degrades to [] offline.
+  const season = Number(dateStr.slice(0, 4))
+  const affiliates = useAsync(
+    () =>
+      sportId === SPORT_IDS.MLB
+        ? Promise.resolve([])
+        : fetchAffiliates(favoriteTeamId, season),
+    [favoriteTeamId, season, sportId],
+  )
+  const favoriteAffiliateIds = useMemo(
+    () => new Set((affiliates.data ?? []).map((a) => a.id)),
+    [affiliates.data],
+  )
+
   const sorted = useMemo(
-    () => sortGames(data ?? [], favoriteTeamId),
-    [data, favoriteTeamId],
+    () => sortGames(data ?? [], favoriteTeamId, favoriteAffiliateIds),
+    [data, favoriteTeamId, favoriteAffiliateIds],
   )
 
   // Games with a Top Performers box to reveal — any that have started, on
@@ -174,7 +192,7 @@ export function GameSelect({ onPick, onShowLogos }) {
           <li key={`${g.sportId}-${g.gamePk}`}>
             <GameCard
               game={g}
-              pinned={isPinned(g, favoriteTeamId)}
+              pinned={isPinned(g, favoriteTeamId, favoriteAffiliateIds)}
               uniformsReady={!!uniformsReady[g.gamePk]}
               prospectCount={(prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)}
               onSelect={() => onPick(g, dateStr)}
@@ -207,15 +225,21 @@ export function GameSelect({ onPick, onShowLogos }) {
   )
 }
 
-function isPinned(game, favoriteTeamId) {
-  return game.away.id === favoriteTeamId || game.home.id === favoriteTeamId
+function isPinned(game, favoriteTeamId, favoriteAffiliateIds) {
+  return (
+    game.away.id === favoriteTeamId ||
+    game.home.id === favoriteTeamId ||
+    !!favoriteAffiliateIds?.has(game.away.id) ||
+    !!favoriteAffiliateIds?.has(game.home.id)
+  )
 }
 
-// Soonest → latest by first pitch; the favorite team's game floats to the top.
-function sortGames(games, favoriteTeamId) {
+// Soonest → latest by first pitch; the favorite team's game (or, on a MiLB
+// level, its affiliate's game) floats to the top.
+function sortGames(games, favoriteTeamId, favoriteAffiliateIds) {
   return [...games].sort((a, b) => {
-    const pa = isPinned(a, favoriteTeamId) ? 0 : 1
-    const pb = isPinned(b, favoriteTeamId) ? 0 : 1
+    const pa = isPinned(a, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
+    const pb = isPinned(b, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
     if (pa !== pb) return pa - pb
     return new Date(a.gameDate) - new Date(b.gameDate)
   })
