@@ -27,6 +27,9 @@ function normalizeGame(game, sportId) {
     statusCode: game.status?.statusCode,
     detailedState: game.status?.detailedState,
     abstractState: game.status?.abstractGameState,
+    // Free-text delay/postponement cause ("Rain", "Field conditions"), when
+    // MLB supplies one. Feeds selectGameStatus's delayed/suspended banner.
+    reason: game.status?.reason,
     away: {
       id: away?.team?.id,
       name: away?.team?.name,
