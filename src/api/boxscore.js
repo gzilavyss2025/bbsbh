@@ -528,6 +528,11 @@ export function computePlayOfTheGame(winProb, feed) {
     half: best.about?.isTopInning ? 'top' : 'bottom',
     batterId,
     batterName: batterGd ? firstLast(batterGd) : '',
+    // Team + position, same lookup shape as starLine below — lets the card
+    // render the batter's identity (headshot + name + team/pos) the same way
+    // the three stars do.
+    batterTeamAbbr: found ? feed?.gameData?.teams?.[found.side]?.abbreviation ?? '' : '',
+    batterPos: found ? positionLabel(found.player) : '',
     // The running score right after this play — the box score's Play of the
     // Game card appends it as "MIL 5, STL 3" so the moment reads with its
     // consequence attached, not just the bare description.

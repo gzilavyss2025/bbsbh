@@ -4,6 +4,7 @@ import { computeGameSuperlatives } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
+import { longDate } from '../lib/dates.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { StatcastCard } from '../components/StatcastCard.jsx'
@@ -69,10 +70,23 @@ export function BoxScore({
   onReload,
   loading,
 }) {
+  // The game's calendar date — spoiler-free (officialDate carries no score),
+  // so it's read straight off the feed outside the seal, same as the lineup
+  // pages' own date fact.
+  const dateLabel = longDate(feed?.gameData?.datetime?.officialDate)
+
   return (
     <div className="boxscore">
       <div className="boxscore__head">
-        <h2 className="boxscore__title">Box score</h2>
+        <h2 className="boxscore__title">
+          Box score
+          {dateLabel && (
+            <>
+              {' '}
+              <span className="boxscore__titleDate">| {dateLabel}</span>
+            </>
+          )}
+        </h2>
         <div className="boxscore__headright">
           <RefreshButton onReload={onReload} loading={loading} />
           {onInnings && (
@@ -640,24 +654,38 @@ function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
           name={play.batterName}
           className="bs__potgShot"
         />
-        <p className="bs__potgDesc">
-          {play.inning != null && (
-            <span className="bs__potgWhen">
-              {halfLabel} {ordinal(play.inning)}{' '}
-            </span>
+        <div className="bs__potgMain">
+          {play.batterName && (
+            <div className="bs__potgWho">
+              <PlayerLink id={play.batterId} className="bs__potgName">
+                {play.batterName}
+              </PlayerLink>
+              {(play.batterTeamAbbr || play.batterPos) && (
+                <span className="bs__potgMeta">
+                  {[play.batterTeamAbbr, play.batterPos].filter(Boolean).join(' · ')}
+                </span>
+              )}
+            </div>
           )}
-          {play.desc}
-          {/* The score right after this play, so the moment reads with its
-              consequence attached — bold, and (unlike the narrative above it)
-              not run through title case: team abbreviations stay shouting
-              like the rest of the sheet. */}
-          {hasScore && (
-            <span className="bs__potgScore">
-              {' '}
-              {awayAbbr} {play.awayScore}, {homeAbbr} {play.homeScore}
-            </span>
-          )}
-        </p>
+          <p className="bs__potgDesc">
+            {play.inning != null && (
+              <span className="bs__potgWhen">
+                {halfLabel} {ordinal(play.inning)}{' '}
+              </span>
+            )}
+            {play.desc}
+            {/* The score right after this play, so the moment reads with its
+                consequence attached — bold, and (unlike the narrative above it)
+                not run through title case: team abbreviations stay shouting
+                like the rest of the sheet. */}
+            {hasScore && (
+              <span className="bs__potgScore">
+                {' '}
+                {awayAbbr} {play.awayScore}, {homeAbbr} {play.homeScore}
+              </span>
+            )}
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -678,6 +706,7 @@ function ThreeStars({ stars }) {
             <span className="bs__starMarks" aria-label={`${s.stars} star`}>
               {'★'.repeat(s.stars)}
             </span>
+            <Headshot personId={s.id} name={s.name} className="bs__starShot" />
             <span className="bs__starWho">
               <span className="bs__starHead">
                 <PlayerLink id={s.id} className="bs__starName">{s.name}</PlayerLink>
