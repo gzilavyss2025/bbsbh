@@ -20,6 +20,15 @@ const MLB = 'https://statsapi.mlb.com'
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// sportId → level abbreviation, mirrored from src/lib/teams.js SPORT_LABEL. Used
+// to build the team card's "LEVEL | LEAGUE" line (e.g. "MLB | NATIONAL LEAGUE",
+// "AAA | INTERNATIONAL LEAGUE").
+const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
+
+// Collapse runs of whitespace so a name the API hands back with a stray double
+// space (e.g. "Milwaukee  Brewers") renders clean on the card.
+const clean = (s) => String(s ?? '').replace(/\s+/g, ' ').trim()
+
 // --- pure helpers, mirrored from src/lib (see header) ----------------------
 
 export function urlDateToApi(d) {
@@ -95,18 +104,20 @@ async function playerCard(id, origin) {
   const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam`)
   const p = data.people?.[0]
   if (!p) return null
-  const name = p.fullName || p.firstLastName || p.lastFirstName || `Player ${id}`
+  const name = clean(p.fullName || p.firstLastName || p.lastFirstName || `Player ${id}`)
   const posAbbr = p.primaryPosition?.abbreviation
   const pos = posAbbr && posAbbr !== 'Unknown' ? posAbbr : ''
-  const team = p.currentTeam?.name || ''
+  const team = clean(p.currentTeam?.name || '')
   const sub = [team, pos].filter(Boolean).join(' · ')
-  const num = p.primaryNumber ? `#${p.primaryNumber}` : ''
+  // The club whose brand color paints the card's photo box — the MLB parent for
+  // a farmhand (so he gets his org's color), else his own club id.
+  const colorTeam = p.currentTeam?.parentOrgId ?? p.currentTeam?.id ?? ''
   return {
     title: `${name} — Scorebook Helper`,
     description: sub
       ? `${sub}. Bio, career register, and season stats — a spoiler-safe scorecard companion.`
       : `Bio, career register, and season stats — a spoiler-safe scorecard companion.`,
-    image: ogUrl(origin, { type: 'player', id: String(id), name, sub, num }),
+    image: ogUrl(origin, { type: 'player', id: String(id), name, sub, team: String(colorTeam) }),
     alt: sub ? `${name} — ${sub}` : name,
   }
 }
@@ -115,17 +126,24 @@ async function teamCard(id, origin, { leaders = false } = {}) {
   const data = await getJson(`/api/v1/teams/${id}`)
   const t = data.teams?.[0]
   if (!t) return null
-  const name = t.name || `Team ${id}`
-  const sub = [t.league?.name, t.division?.name].filter(Boolean).join(' · ')
-  const kicker = leaders ? 'TEAM LEADERS' : 'TEAM'
+  const name = clean(t.name || `Team ${id}`)
+  // "LEVEL | LEAGUE" — the level abbreviation (MLB/AAA/AA/A+/A) then the league,
+  // so a MiLB club reads e.g. "AAA | INTERNATIONAL LEAGUE" instead of the old
+  // redundant "<league> · <division>".
+  const level = SPORT_LEVEL[t.sport?.id] || ''
+  const league = clean(t.league?.name || '')
+  const sub = [level, league].filter(Boolean).join(' | ')
+  // Cosmetic descriptions still read the old league · division wording.
+  const descBits = clean([t.league?.name, t.division?.name].filter(Boolean).join(' · '))
+  const eyebrow = leaders ? 'TEAM LEADERS' : ''
   return {
     title: `${name}${leaders ? ' — Team Leaders' : ''} — Scorebook Helper`,
     description: leaders
       ? `${name} statistical leaders — spoiler-safe. Every level, every category.`
-      : sub
-        ? `${sub}. Roster, leaders, and schedule — a spoiler-safe scorecard companion.`
+      : descBits
+        ? `${descBits}. Roster, leaders, and schedule — a spoiler-safe scorecard companion.`
         : `Roster, leaders, and schedule — a spoiler-safe scorecard companion.`,
-    image: ogUrl(origin, { type: 'team', id: String(id), name, sub, kicker }),
+    image: ogUrl(origin, { type: 'team', id: String(id), name, sub, eyebrow }),
     alt: `${name}${sub ? ` — ${sub}` : ''}`,
   }
 }
@@ -140,7 +158,10 @@ async function gameCard(date, matchup, origin) {
   if (!away?.id || !home?.id) return null
   const awayAbbr = teamAbbr(away)
   const homeAbbr = teamAbbr(home)
-  const label = `${awayAbbr} @ ${homeAbbr}`
+  // Full nicknames for the card's text line ("BREWERS @ PIRATES"); abbreviations
+  // ride along only as the logo fallback if a mark fails to load.
+  const awayName = clean(away.teamName || away.name || awayAbbr)
+  const homeName = clean(home.teamName || home.name || homeAbbr)
   const gm = (g.gameNumber ?? 1) > 1 ? ` · Game ${g.gameNumber}` : ''
   const when = `${niceDate(apiDate)}${gm}`
   return {
@@ -150,22 +171,25 @@ async function gameCard(date, matchup, origin) {
       type: 'game',
       away: String(away.id),
       home: String(home.id),
-      label,
+      awayName,
+      homeName,
+      awayAbbr,
+      homeAbbr,
       date: when,
     }),
-    alt: `${label} — ${when}`,
+    alt: `${awayAbbr} @ ${homeAbbr} — ${when}`,
   }
 }
 
 // Static-but-labeled cards for the app's non-entity screens. No statsapi call —
 // the words are fixed, so the image is generated from the query alone.
 const GENERIC = {
-  leaders: { kicker: 'LEADERBOARDS', title: 'League Leaders', sub: 'Every level, every category — spoiler-safe.' },
-  standings: { kicker: 'STANDINGS', title: 'Standings', sub: 'MLB divisions and the wild-card race.' },
-  prospects: { kicker: 'PROSPECTS', title: 'Top Prospects', sub: 'The pipeline, ranked — a spoiler-safe scouting board.' },
-  rehab: { kicker: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
-  about: { kicker: 'ABOUT', title: 'Scorebook Helper', sub: 'A spoiler-safe second screen for scoring by hand.' },
-  logos: { kicker: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
+  leaders: { eyebrow: 'LEADERBOARDS', title: 'League Leaders', sub: 'Every level, every category — spoiler-safe.' },
+  standings: { eyebrow: 'STANDINGS', title: 'Standings', sub: 'MLB divisions and the wild-card race.' },
+  prospects: { eyebrow: 'PROSPECTS', title: 'Top Prospects', sub: 'The pipeline, ranked — a spoiler-safe scouting board.' },
+  rehab: { eyebrow: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
+  about: { eyebrow: 'ABOUT', title: 'Scorebook Helper', sub: 'A spoiler-safe second screen for scoring by hand.' },
+  logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
 }
 
 function genericCard(route, origin) {
@@ -174,7 +198,7 @@ function genericCard(route, origin) {
   return {
     title: `${g.title} — Scorebook Helper`,
     description: g.sub,
-    image: ogUrl(origin, { type: 'generic', kicker: g.kicker, title: g.title, sub: g.sub }),
+    image: ogUrl(origin, { type: 'generic', eyebrow: g.eyebrow, title: g.title, sub: g.sub }),
     alt: `${g.title} — ${g.sub}`,
   }
 }
