@@ -5,14 +5,14 @@
 //
 // Why a committed archive and not just a live fetch: the page every club serves
 // at mlb.com/{team}/news/game-notes — and the dapi.mlbinfra.com feed behind it —
-// only lists a club's most recent ~10 games; older notes drop off. The underlying
-// img.mlbstatic.com PDF asset stays live indefinitely, though, so this job
-// snapshots the feed daily and MERGES new links into the file, never dropping the
-// ones that have since aged off the source. The app reads the live feed for the
-// game currently being staged (fresher than any cron) and falls back to this
-// archive for older, de-listed games. Same build-time-fetch pattern as
-// gen-rehab.mjs / gen-war.mjs, with one twist: this one is append-only, because
-// the source is lossy over time.
+// is itself lossy over time (see PER_TEAM below for how far back it reaches).
+// The underlying img.mlbstatic.com PDF asset stays live indefinitely, though, so
+// this job snapshots the feed daily and MERGES new links into the file, never
+// dropping the ones that have since aged off the source. The app reads the live
+// feed for the game currently being staged (fresher than any cron) and falls
+// back to this archive for older, de-listed games. Same build-time-fetch pattern
+// as gen-rehab.mjs / gen-war.mjs, with one twist: this one is append-only,
+// because the source is lossy over time.
 //
 // The feed is an mlb.com convention keyed by our own MLB team id ("teamid-158"):
 // CORS-open, no auth, no browser needed (the mlb.com HTML page is UA-gated, this
@@ -29,9 +29,13 @@ const out = join(here, '..', 'public', 'data', 'game-notes.json')
 const STATSAPI = 'https://statsapi.mlb.com'
 const DAPI = 'https://dapi.mlbinfra.com/v2/content/en-us/documents/'
 
-// How many recent notes to pull per team each run — comfortably more than the
-// ~10 the feed keeps, so nothing can slip through between two daily runs.
-const PER_TEAM = 40
+// How many recent notes to pull per team each run. 100 is the feed's actual
+// ceiling, found by probing: $limit above 100 doesn't error, it silently falls
+// back to a small default page (25) instead — so anything higher is a regression,
+// not an improvement. At 100 the feed reaches back close to Opening Day for most
+// clubs (some clubs' 100 most recent notes go back into 2025's postseason).
+// Comfortably more than any two daily runs need, so nothing can slip through.
+const PER_TEAM = 100
 
 async function getJson(url) {
   const res = await fetch(url)
