@@ -200,3 +200,21 @@ export function teamTintColor(teamId, alpha = 0.22) {
   const b = parseInt(hex.slice(5, 7), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
+
+// A solid per-team accent for the favorite-team highlight (the pinned slate
+// card's border/gradient + star). Distinct from TEAM_COLORS above: that map
+// deliberately picks whichever color is LEAST likely to be confused with
+// another club side-by-side, favoring a distinctive accent over yet another
+// navy — but the favorite highlight is never shown next to another team's, so
+// it's free to use a club's own truest, darkest signature color even where
+// that's navy. Only the Brewers currently differ from TEAM_COLORS' pick.
+const FAVORITE_ACCENT_OVERRIDES = {
+  158: '#12284B', // Brewers navy (TEAM_COLORS uses their gold to stay distinct from rivals)
+}
+
+// Returns a hex string, or null for a team with no known color (MiLB — this
+// map is MLB-only, same coverage as TEAM_COLORS). Callers should degrade to a
+// fixed default rather than render no accent at all.
+export function favoriteAccentColor(teamId) {
+  return FAVORITE_ACCENT_OVERRIDES[teamId] || TEAM_COLORS[teamId] || null
+}

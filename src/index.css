@@ -157,6 +157,15 @@ body {
   gap: 6px;
 }
 
+/* Groups the level toggle + search trigger as one flex item, so the topbar's
+   own space-between splits only title vs. this cluster (see GameSelect). */
+.topbar__slateactions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
 /* Condensed to fit beside the title: content-width (not full-bleed), tighter
    gaps, and smaller pill buttons than the standalone level toggle. */
 .topbar--slate .levelnav {
@@ -170,6 +179,12 @@ body {
   min-height: 30px;
   padding: 0 6px;
   font-size: 11px;
+}
+
+.topbar__search {
+  flex: none;
+  min-width: 30px;
+  min-height: 30px;
 }
 
 .topbar--game {
@@ -319,6 +334,29 @@ body {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-heading);
+}
+
+/* Persistent site-wide search trigger (SiteSearch.jsx) — a plain icon button
+   (no docked input; there's no room for one on a phone-width header, and a
+   tap-to-open modal is the standard mobile pattern) that rides at the far
+   right of the site bar. */
+.sitebar__search {
+  margin-left: auto;
+}
+.sitesearch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-caption);
+  cursor: pointer;
+}
+.sitesearch-btn:active {
+  background: var(--surface-inset);
 }
 
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
@@ -966,11 +1004,17 @@ body {
   transform: translateY(1px);
 }
 
+/* The pinned favorite's border/gradient tint to that club's own accent color
+   (--pin-accent, a per-team hex set inline by GameCard from
+   favoriteAccentColor() — see lib/teams.js) rather than a fixed green, so an
+   Orioles fan's pin reads orange, a Reds fan's reads red, and so on. Falls
+   back to the original --field green for the rare pinned team with no known
+   accent (MiLB affiliates aren't in that color map). */
 .gamecard--pinned {
-  border-color: color-mix(in srgb, var(--field) 45%, var(--border-rule));
+  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
   background: linear-gradient(
     180deg,
-    var(--field-soft),
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
     var(--surface-card) 70%
   );
 }
@@ -1142,7 +1186,7 @@ body {
 }
 
 .gamecard__pin {
-  color: var(--field);
+  color: var(--pin-accent, var(--field));
 }
 
 /* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
@@ -1320,11 +1364,6 @@ body {
   gap: var(--space-6);
 }
 
-.sitefooter__search {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
 
 /* --------------------------------------------------------------- searchbox */
 .searchbox {
@@ -1605,6 +1644,98 @@ body {
   font-size: 16px;
   cursor: pointer;
   border-radius: var(--radius-pill);
+}
+
+/* -------------------------------------------------- site search sheet
+   SiteSearchModal's dialog chrome — the merged player/team search reached
+   from the header's search button on every screen (see SiteSearch.jsx). Same
+   bottom-sheet shape as .gamefindersheet, but the input rides in its own head
+   row (no separate label — the placeholder carries it) with the close button
+   beside it. */
+.sitesearchsheet {
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sitesearchsheet__head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.sitesearchsheet__input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.sitesearchsheet__input::placeholder {
+  color: var(--graphite-soft);
+}
+
+.sitesearchsheet__input:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.sitesearchsheet__close {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+.sitesearchsheet__results {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sitesearchsheet__group {
+  margin: 0 0 4px;
+  padding: 0 2px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.sitesearchsheet__hint {
+  margin: 0;
+  padding: 8px 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* A static (non-dropdown) result list, reusing .searchbox__item/__name/__sub
+   for visual consistency with the picker widgets, but laid out in normal flow
+   rather than .searchbox__results' absolutely-positioned overlay. */
+.sitesearchsheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* -------------------------------------------------- favorite-team modal
@@ -5142,6 +5273,381 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   FLIP CARDS — past-day preview (src/components/FlipCard.jsx). Blackjack-style
+   3D flip: front and back faces occupy the same grid cell (so the container
+   sizes to whichever face is taller, without absolute-position overflow
+   math), rotated in place. Purely a `transition` on `transform` (never
+   `@keyframes`), so the blanket `prefers-reduced-motion` rule further down
+   this file (`* { transition-duration: 0.01ms !important }`) collapses it to
+   an instant swap for free — no separate reduced-motion override needed here.
+   --------------------------------------------------------------------------- */
+/* "Reveal all games" — the single unlock for every flip card at once (see
+   PastPreview.jsx's RevealAllBar). Phone-first default: hide the inline top
+   button and rely on the floating bottom bar instead (same
+   .pagenav/.btn--reveal convention InningViewer uses for "Reveal {half}"),
+   so the action stays in thumb reach on a long single-column list. The wide-
+   layout override (below, in the 740px block) flips this: inline button
+   shown, floating bar hidden — there's no long scroll to reach for there. */
+.revealall__top {
+  display: none;
+  width: 100%;
+  margin: 12px 0;
+  /* .btn--reveal doesn't set a flex layout on its own, so switching this
+     button to inline-flex (for the wide-layout override below) needs its own
+     explicit centering — a flex container defaults to flex-start, which is
+     what was making the label read left-justified instead of centered. */
+  align-items: center;
+  justify-content: center;
+}
+/* Match the kraft "Tap to reveal" cover's font (.cover__main) — .btn's own
+   base font-family (--font-body) read as a visibly different typeface next
+   to the SealBox cover sitting right beside it. */
+.revealall__top,
+.pagenav--revealall .btn {
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+}
+.pagenav--revealall {
+  /* .pagenav already positions/backgrounds the floating bar; nothing else
+     needed at phone width. */
+}
+
+.flipcard {
+  perspective: 1400px;
+}
+.flipcard__inner {
+  display: grid;
+  transform-style: preserve-3d;
+  /* Strong ease-in-out (not ease-out): unlike a one-shot reveal, a flip is
+     bidirectional and should feel symmetric turning either way. 450ms sits at
+     the top of the "modal/drawer"-scale range — this swaps a whole card's
+     worth of content, not a small UI nudge. */
+  transition: transform 450ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+.flipcard--flipped .flipcard__inner {
+  transform: rotateY(180deg);
+}
+.flipcard__face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  min-width: 0;
+}
+.flipcard__face--back {
+  transform: rotateY(180deg);
+}
+
+/* The back face's content — final line, decisions, play of the game (see
+   src/components/GameResultFace.jsx). Same card chrome as .gamecard so the
+   flip reads as one object turning over, not two different cards. */
+.flipback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-card);
+}
+/* Line score: a header row (R/H/E labels, once) above two team rows — team
+   name flexes to fill the leading column, the three stat columns are fixed-
+   width so header and value rows line up. Values are sized up from the
+   original draft (--fs-num-lg) since this is the card's headline number. */
+.flipback__linescore {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* "11 INNINGS" — only shown when the game actually went past 9, sitting above
+   the logo/team-name + R-H-E rows it introduces. Same font/size as the R-H-E
+   VALUES below (not the small column-header labels) so it reads as another
+   headline number, not a caption. */
+.flipback__extras {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  padding-bottom: 2px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.flipback__lsHeader,
+.flipback__team {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 28px);
+  align-items: center;
+  column-gap: 8px;
+}
+.flipback__lsTeamCol {
+  /* Empty — just holds the header row's leading column in alignment with the
+     team logo + name below it. */
+}
+.flipback__lsCol {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.flipback__team {
+  padding: 2px 0;
+}
+.flipback__abbr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  /* 1.5x the original 13px, on every viewport (not gated to wide layout). */
+  font-size: 19.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.flipback__lsVal {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Phone-first: W/L/S each get their own line (more legible at narrow widths
+   than a wrapped inline row). Wide layout below regroups them into one row. */
+.flipback__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.flipback__decision b {
+  color: var(--text-heading);
+  margin-right: 3px;
+}
+.flipback__potgWrap {
+  padding-top: 4px;
+}
+.flipback__potg {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-body);
+}
+.flipback__potgLabel {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 2px;
+}
+.flipback__potgDot {
+  color: var(--graphite-soft);
+}
+/* Play of the game (and its batter-name link) reads as a natural sentence in
+   the app's serif "read" face, not the usual all-caps display type — same
+   sanctioned exception as .pbp__desc (see the ALL-CAPS INVARIANT block
+   comment near the top of this file). A nested .plink needs its OWN entry
+   here too: `#root *`'s uppercase would otherwise win over it directly. */
+.flipback__potg,
+.flipback__potg .plink {
+  font-family: var(--font-read);
+}
+#root .flipback__potg,
+#root .flipback__potg .plink {
+  text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
+}
+.flipback__full {
+  align-self: center;
+  width: 50%;
+  margin-top: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   DAY RECAP — past-day right rail: Top Performers + Day Highlights sharing one
+   seal (src/components/PastDayRecapBox.jsx, src/api/dayHighlights.js).
+   --------------------------------------------------------------------------- */
+.pastdayrecap {
+  margin-top: 10px;
+}
+/* The base .statgrid (SealBox's revealed wrapper) paints its own bright
+   near-white inset background — same fix TopPerformersBox already needed
+   (see .topperfbox .statgrid above): switch it off here too, so the only
+   background showing is .pastdayrecap__body's cream card below. */
+.pastdayrecap .statgrid {
+  background: transparent;
+  padding: 12px 0 0;
+}
+/* The revealed panel's own card chrome — same border/radius/shadow/cream
+   surface as .gamecard/.flipback, so it reads as one more card on the sheet
+   rather than bare content sitting directly on the page background. */
+.pastdayrecap__body {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.dayhl__section + .dayhl__section {
+  margin-top: 16px;
+}
+.dayhl__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Winners/Losers "baseball card" tiles (src/components/PastDayRecapBox.jsx's
+   PerformerCard) — headshot, name + position, team logo + abbreviation, stat
+   line, in a compact horizontal tile (the sidebar is too narrow for a 3-up
+   grid of anything wider than this). */
+.playercard__bucket {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.playercard__bucket + .playercard__list {
+  margin-bottom: 12px;
+}
+.playercard__list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Same layout on every viewport now (no phone-vs-wide split) — the bigger
+   headshot + two-line name that used to only kick in at the wide breakpoint
+   is now the only version. */
+.playercard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+/* Headshot + its position badge, same wrapper idiom as
+   .teammatecard__shotwrap/__posbadge (former teammates cards). */
+.playercard__shotwrap {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.playercard__shot {
+  width: auto;
+  height: 84px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.playercard__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  line-height: 1.3;
+  text-align: center;
+}
+.playercard__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Phone-first: first + last name on one row, a bit bigger than the old
+   universal size (there's only one flex item here — the PlayerLink — so this
+   is really just a font/wrap setting; the actual first/last line break is
+   the .playercard__namebreak <br> below). The wide-layout override (740px
+   block) switches to the two-line stack next to the bigger headshot there. */
+.playercard__name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.playercard__namebreak {
+  display: none;
+}
+.playercard__team {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.playercard__stat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.dayhl__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dayhl__rowBtn {
+  width: 100%;
+  text-align: left;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+  color: var(--text-body);
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.dayhl__rowBtn:active {
+  transform: translateY(1px);
+}
+/* Day Highlights blurbs read as natural sentences in the serif "read" face —
+   same sanctioned exception as .pbp__desc/.flipback__potg above. */
+.dayhl__rowBtn {
+  font-family: var(--font-read);
+}
+#root .dayhl__rowBtn {
+  text-transform: none; /* caps-exempt: day highlights read as natural sentences */
+}
+
+/* ---------------------------------------------------------------------------
    TEAM LEADERS — per-category season leaderboards on the team page + the
    dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
    slate's Top Performers row; the parallel `.tlead__*` classes keep that
@@ -5196,21 +5702,51 @@ body {
   align-items: center;
   gap: 8px;
 }
+/* Favorite-team highlight (league/level leader pages only, not team/org — see
+   TeamLeaders' favoriteTeamId doc) — tints a leader's row in that club's own
+   accent (--fav-accent, set inline from favoriteAccentColor()) so a fan's team
+   jumps out on a board otherwise full of strangers. */
+.tlead__featured--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, var(--surface-card));
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-sm);
+  margin: -4px -6px;
+  padding: 4px 6px;
+}
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same reason as .topperf__shot. */
+   outranks the base .shot sizing, same reason as .topperf__shot. Sized well
+   past that shared 52px baseline — the leader card is this component's one
+   hero image, so it earns a bigger, more readable frame. */
 .shot.tlead__shot {
   flex: none;
   width: auto;
-  height: 52px;
+  height: 84px;
   aspect-ratio: 3 / 4;
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .shot.tlead__shot.shot--fallback {
-  font-size: 20px;
+  font-size: 32px;
+}
+/* Team tag — logo over abbreviation, stacked compactly between the headshot
+   and the name/stat stack. Always names the club the leader plays FOR (see
+   FeaturedLeader's displayTeamId/displayTeamAbbr). */
+.tlead__teamtag {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 .tlead__logo {
   flex: none;
+}
+.tlead__teamabbr {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
 }
 .tlead__who {
   flex: 1;
@@ -5276,6 +5812,15 @@ body {
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+/* Same favorite-team highlight as .tlead__featured--fav, sized down for a
+   chaser row. */
+.tlead__row--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-xs);
+  margin: 0 -6px;
+  padding: 1px 6px;
 }
 .tlead__rank {
   flex: none;
@@ -5623,6 +6168,54 @@ body {
     gap: 12px;
   }
 
+  /* ---- past-day slate body: game grid + Day Recap rail side by side (see
+     PastPreview.jsx / PastDayRecapBox.jsx). The grid drops to ONE column here
+     (rather than keeping the 2-up rule above) — a past-day flip card's back
+     face carries more content (R/H/E, decisions, play of the game) than the
+     plain spoiler-free card, and the ~300px rail leaves less width to share. */
+  .slate-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    align-items: start;
+    gap: 20px;
+  }
+  .slate-body .gamelist {
+    grid-template-columns: 1fr;
+  }
+  /* Deliberately NOT sticky — a pinned rail read as disconnected from the
+     grid it sits beside, so both columns just scroll together with the
+     page. */
+
+  /* "Reveal all games" rides as a normal inline button up top once there's
+     room for it; the mobile floating bottom bar (below) hides here. */
+  .revealall__top {
+    display: inline-flex;
+  }
+  .pagenav--revealall {
+    display: none;
+  }
+
+  /* W/L/S regroup into one wrapped row once the card has room; phone width
+     keeps them stacked one-per-line (see the base .flipback__decisions rule). */
+  .flipback__decisions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+
+  /* Winners/Losers baseball-card tiles: back to the two-line first/last stack
+     next to the bigger headshot (phone keeps them on one row instead — see
+     the base .playercard__name rule — since there's no extra vertical room
+     to spend there). */
+  .playercard__namebreak {
+    display: block;
+  }
+  .playercard__name {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —
      there's room for two columns once the sheet is this wide. The headshots keep
      the portrait-matched-to-text sizing from the base rule above. */
@@ -5638,15 +6231,10 @@ body {
     min-width: 0;
   }
 
-  /* ---- slate footer: player/team search side by side instead of stacked;
-     the action grid stays compact rather than stretching each button full
-     width. The cap holds the auto-fit cells to a tidy size (the base rule
-     wraps them across as many rows as fit); 720px keeps the five stops on one
-     or two rows without ballooning. */
-  .sitefooter__search {
-    flex-direction: row;
-  }
-
+  /* ---- slate footer: the action grid stays compact rather than stretching
+     each button full width. The cap holds the auto-fit cells to a tidy size
+     (the base rule wraps them across as many rows as fit); 720px keeps the
+     five stops on one or two rows without ballooning. */
   .sitefooter__actions {
     max-width: 720px;
   }

@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { fetchTeams } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { PlayerSearchBox } from './PlayerSearchBox.jsx'
-import { TeamSearchBox } from './TeamSearchBox.jsx'
 import { GameFinderModal } from './GameFinderModal.jsx'
 import { FavoriteTeamModal } from './FavoriteTeamModal.jsx'
 import { ScorebookMark } from './ScorebookMark.jsx'
@@ -12,12 +10,14 @@ import { useNav } from '../lib/nav.js'
 
 const YEAR = new Date().getFullYear()
 
-// The slate's footer: site-wide player/team search, the past-matchup finder
-// (tucked behind a modal so its two team pickers + results don't have to live
-// inline), the favorite-team picker, the printable logo sheet, and the
-// standard small print. Nothing here is score-revealing — search and the
-// favorite-team pick surface identity and schedule only, same as every other
-// spoiler-free selector.
+// The slate's footer: the past-matchup finder (tucked behind a modal so its
+// two team pickers + results don't have to live inline), the favorite-team
+// picker, the printable logo sheet, and the standard small print. Site-wide
+// player/team search used to live here as two boxes; it's now the single
+// header search button (see SiteSearch.jsx), reachable from every screen
+// rather than just the slate. Nothing here is score-revealing — the
+// favorite-team pick surfaces identity and schedule only, same as every
+// other spoiler-free selector.
 export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
   const [showFinder, setShowFinder] = useState(false)
   const [showFavoriteTeam, setShowFavoriteTeam] = useState(false)
@@ -27,11 +27,6 @@ export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
 
   return (
     <footer className="sitefooter">
-      <div className="sitefooter__search">
-        <PlayerSearchBox />
-        <TeamSearchBox />
-      </div>
-
       <div className="sitefooter__actions">
         <button
           type="button"
