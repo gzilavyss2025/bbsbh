@@ -2673,6 +2673,46 @@ body {
   line-height: 1;
 }
 
+/* Game Notes link-out (lineup page) — a pill like the Refresh control, sitting
+   just under the team head. Links to the club's official press-notes PDF, which
+   opens in a new tab. See api/gameNotes.js. */
+.teaminfo__notes {
+  margin: -2px 0 14px;
+}
+
+.notesbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.notesbtn:active {
+  transform: scale(0.96);
+}
+
+.notesbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.notesbtn__ext {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-caption);
+}
+
 .inningnav {
   display: flex;
   align-items: center;

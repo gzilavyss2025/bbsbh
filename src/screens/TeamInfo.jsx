@@ -10,6 +10,7 @@ import {
   lastFirst,
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
+import { resolveGameNotes } from '../api/gameNotes.js'
 import { teamTintColor } from '../lib/teams.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
@@ -64,6 +65,8 @@ export function TeamInfo({
           <RefreshButton onReload={onReload} loading={loading} />
         </div>
       </div>
+
+      <GameNotesButton feed={feed} side={side} />
 
       <dl className="factgrid">
         <GameFacts
@@ -211,6 +214,7 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
         <Fact label="Manager" value={managerFact(manager)} />
         <Fact label="Uniform" value={uniform} />
       </dl>
+      <GameNotesButton feed={feed} side={side} />
       <TeamSections
         feed={feed}
         side={side}
@@ -785,6 +789,40 @@ function seasonRange(seasons) {
   if (ys.length === 0) return ''
   const yy = (y) => `’${String(y).slice(-2)}`
   return ys.length === 1 ? yy(ys[0]) : `${yy(ys[0])}–${yy(ys[ys.length - 1])}`
+}
+
+// A link out to this club's official pre-game press-notes PDF, sitting just
+// under the team head on the lineup page (both the phone page and each spread
+// panel). Resolves the freshest note for the game's date — live for the game
+// being staged, from the committed archive for older, de-listed games (see
+// api/gameNotes.js). MLB only, and hidden entirely when there's no note to link
+// (every MiLB game, or a date the club never posted), so it degrades to nothing
+// like the rest of the lineup surfaces. The PDF opens in a new tab: a deliberate
+// jump to an external, spoiler-bearing press packet, not an in-app reveal.
+function GameNotesButton({ feed, side }) {
+  const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  const info = useMemo(() => selectGameInfo(feed), [feed])
+  const isMlb = (meta.sportId ?? 1) === 1
+  const { data: notes } = useAsync(
+    () =>
+      isMlb && meta.id ? resolveGameNotes(meta.id, info.officialDate) : Promise.resolve(null),
+    [isMlb, meta.id, info.officialDate],
+  )
+  if (!notes?.url) return null
+  return (
+    <div className="teaminfo__notes">
+      <a
+        className="notesbtn"
+        href={notes.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
+      >
+        Game notes
+        <span className="notesbtn__ext" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  )
 }
 
 // The manager fill-in: surname-first name with the uniform number inked in

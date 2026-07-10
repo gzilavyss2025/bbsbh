@@ -57,8 +57,14 @@ export default defineConfig({
         // the PWA install lean; it's fetched on demand and runtime-cached
         // instead (see the NetworkFirst rule below). Same treatment for
         // umpires.json — it grows across the season (every game × 4 officials)
-        // and is only ever read from the umpire detail page.
-        globIgnores: ['**/data/vs-team-splits.json', '**/data/umpires.json'],
+        // and is only ever read from the umpire detail page. Same for
+        // game-notes.json — an append-only archive of press-notes PDF links that
+        // grows every game day (see scripts/gen-game-notes.mjs).
+        globIgnores: [
+          '**/data/vs-team-splits.json',
+          '**/data/umpires.json',
+          '**/data/game-notes.json',
+        ],
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
@@ -75,6 +81,15 @@ export default defineConfig({
             // The on-demand umpire-season dataset, same rationale as the
             // SPLITS VS TEAM rule above.
             urlPattern: ({ url }) => url.pathname === '/data/umpires.json',
+            handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // The append-only Game Notes archive (excluded from precache above).
+            // NetworkFirst so the fresh daily copy wins online but the lineup-page
+            // button still resolves offline from the last good fetch. Just PDF
+            // links (title/date/url) — no live score, so this is spoiler-safe.
+            urlPattern: ({ url }) => url.pathname === '/data/game-notes.json',
             handler: 'NetworkFirst',
             method: 'GET',
           },
