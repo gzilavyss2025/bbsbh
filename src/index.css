@@ -8905,14 +8905,18 @@ body {
 }
 
 .bpdiagram__track {
-  fill: none;
-  stroke: var(--rule);
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  fill: var(--rule);
+  stroke: none;
 }
 
 .bpdiagram__dirt {
   fill: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+}
+
+.bpdiagram__baseline {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+  stroke-linecap: round;
 }
 
 .bpdiagram__line {
@@ -8932,13 +8936,6 @@ body {
 .bpdiagram__base {
   fill: var(--surface-inset);
   stroke: var(--ink-2);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-.bpdiagram__mound {
-  fill: none;
-  stroke: var(--graphite);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }

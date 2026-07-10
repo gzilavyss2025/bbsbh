@@ -1,4 +1,4 @@
-import { buildFieldGeometry, wallStroke, TRACK_WIDTH, VIEWBOX, HOME } from '../lib/ballparkGeometry.js'
+import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../lib/ballparkGeometry.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
@@ -21,10 +21,27 @@ export function BallparkDiagram({ dist, wall, arc, className = '' }) {
     >
       <path d={g.foul} className="bpdiagram__foul" />
       <path d={g.fair} className="bpdiagram__grass" />
-      {/* Warning track: a thick underlay stroke along the fence line; the fence is
-          drawn over its center, so the inner half reads as track on the grass. */}
-      <path d={g.wallPath} className="bpdiagram__track" style={{ strokeWidth: TRACK_WIDTH }} />
-      <path d={g.infield} className="bpdiagram__dirt" />
+      {/* Warning track: a band of constant width running the whole fence, inset
+          in from the wall — the fence is drawn over its outer edge. */}
+      <path d={g.track} className="bpdiagram__track" />
+      {/* Infield: a dirt "skin" fanning out from home past the bases (capped by
+          the 95'-off-the-mound arc), grass cut into the middle of it, dirt
+          circles at the mound/home plate, and dirt running lanes on the
+          baselines — the classic skinned-infield look, not a plain dirt diamond. */}
+      <path d={g.skin} className="bpdiagram__dirt" />
+      <path d={g.grassDiamond} className="bpdiagram__grass" />
+      <path
+        d={g.baselineDirtL}
+        className="bpdiagram__dirt bpdiagram__baseline"
+        style={{ strokeWidth: g.baselineDirtW }}
+      />
+      <path
+        d={g.baselineDirtR}
+        className="bpdiagram__dirt bpdiagram__baseline"
+        style={{ strokeWidth: g.baselineDirtW }}
+      />
+      <circle className="bpdiagram__dirt" cx={f(g.mound.x)} cy={f(g.mound.y)} r={g.moundDirtR} />
+      <circle className="bpdiagram__dirt" cx={f(HOME.x)} cy={f(HOME.y)} r={g.homeDirtR} />
       <path d={g.foulLineL} className="bpdiagram__line" />
       <path d={g.foulLineR} className="bpdiagram__line" />
 
@@ -40,7 +57,13 @@ export function BallparkDiagram({ dist, wall, arc, className = '' }) {
           transform={`rotate(45 ${f(b.x)} ${f(b.y)})`}
         />
       ))}
-      <circle className="bpdiagram__mound" cx={f(g.mound.x)} cy={f(g.mound.y)} r="6" />
+      <rect
+        className="bpdiagram__base"
+        x={f(g.mound.x - 4)}
+        y={f(g.mound.y - 1.5)}
+        width="8"
+        height="3"
+      />
       <polygon
         className="bpdiagram__base"
         points={`${HOME.x - 5},${HOME.y - 2} ${HOME.x + 5},${HOME.y - 2} ${HOME.x + 5},${HOME.y + 3} ${HOME.x},${HOME.y + 7} ${HOME.x - 5},${HOME.y + 3}`}
