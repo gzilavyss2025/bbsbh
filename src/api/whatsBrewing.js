@@ -107,7 +107,9 @@ const CONFIG = {
     tableLeader: /\.(\s*\.){7,}/,
     bottomCutoff: 90,
   },
-  // Mets — two lead rows are the opponent/standings line, not a blurb.
+  // Mets — the lead row is the night's opponent/standings line ("{City} {Club}
+  // (W-L)"), not a blurb — matched structurally (ends in a win-loss record) so
+  // it drops regardless of which opponent the Mets are playing that night.
   121: {
     layout: 'flow-bold',
     title: 'Mets Game Notes',
@@ -117,7 +119,7 @@ const CONFIG = {
     columnMaxX: 150,
     rightTableMinX: 320,
     tableLeader: /\.(\s*\.){7,}/,
-    skipTitle: /^(Boston Red Sox|New York Mets|Vs\. )/i,
+    skipTitle: /^(New York Mets|Vs\. )|\(\d+-\d+\)$/i,
   },
   // Marlins — UPCOMING SCHEDULE banner top-right + bottom DATE box dropped by
   // geometry/skipTitle; allCapsOnly drops bold player-name recap lead-ins
@@ -578,10 +580,6 @@ function extractFlowBoldZone(items, realName, cfg) {
   if (!words.length) return []
 
   const isHead = (w) => cfg.headFont.test(w.font)
-  // Body = the family regex minus the heading regex, so a body face split
-  // across multiple pdfjs subsets (DET/BAL/MIN/SEA in the dossier) is still
-  // fully captured — only the bold heading subset is excluded.
-  const isBody = (w) => cfg.bodyFont.test(w.font) && !isHead(w)
 
   // Section headings: head-font runs at the left margin, grouped by baseline.
   // headingMaxX anchors which BASELINES qualify (the line's first word starts
@@ -611,12 +609,7 @@ function extractFlowBoldZone(items, realName, cfg) {
     while (i < l.words.length && isHead(l.words[i])) i++
     const titleWords = l.words.slice(start, i)
     const leadWords = l.words.slice(i)
-    // Mark every word on this heading's baseline as consumed so the body pass
-    // below (which walks the same `words` array) doesn't ALSO pick up the
-    // leadWords portion as an ordinary body line — extraLead already covers it.
-    for (const w of titleWords) w.consumed = true
-    for (const w of leadWords) w.consumed = true
-    headings.push({ y: l.y, titleWords, leadWords })
+    headings.push({ y: l.y, allWords: l.words, titleWords, leadWords })
   }
   for (const h of headings) {
     const line = joinWords(h.titleWords).replace(/\s+/g, ' ').trim()
@@ -635,41 +628,63 @@ function extractFlowBoldZone(items, realName, cfg) {
       h.extraLead = lead
     }
   }
-  // Drop bold inline player-name lead-ins (a stray heading-font run that isn't
-  // really a section title — too long, or not ALL-CAPS) BEFORE assigning body
-  // ownership below, so its body lines reattach to the enclosing real heading
-  // rather than being discarded with it. A cfg.skipTitle match, by contrast, IS
-  // a genuine section boundary (a known non-narrative box: a leaderboard, a
-  // schedule grid) — it still owns its body for ownership purposes, so that
-  // body doesn't leak into a neighboring blurb, but is dropped at output time.
-  const titled = headings.filter(
-    (h) =>
-      h.title &&
-      (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
-      (!cfg.allCapsOnly || isAllCaps(h.title)),
-  )
+  // A stray heading-font run that isn't really a section title (too long, or
+  // not ALL-CAPS — e.g. NYY bolds inline player names like "3B Ryan McMahon"
+  // mid-paragraph, on their own wrapped line) doesn't get to act as a title OR
+  // an ownership boundary. But it must NOT just vanish either: the whole raw
+  // line (its bold name/position included — that text fails the plain isBody
+  // font test on its own, so it needs to be reinstated explicitly) folds back
+  // in as an ordinary continuation line of whichever real heading is above it.
+  // A cfg.skipTitle match, by contrast, IS a genuine section boundary (a known
+  // non-narrative box: a leaderboard, a schedule grid) — it still owns its
+  // body for ownership purposes, so that body doesn't leak into a neighboring
+  // blurb, but the whole thing is dropped at output time, not folded back in.
+  const titled = []
+  const foldedBackLines = []
+  for (const h of headings) {
+    const isRealTitle =
+      h.title && (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) && (!cfg.allCapsOnly || isAllCaps(h.title))
+    if (isRealTitle) {
+      titled.push(h)
+      for (const w of h.titleWords) w.consumed = true
+      for (const w of h.leadWords) w.consumed = true
+    } else {
+      const text = joinWords(h.allWords).trim()
+      if (text && !cfg.tableLeader.test(text)) foldedBackLines.push({ y: h.y, text })
+      for (const w of h.allWords) w.consumed = true
+    }
+  }
   titled.sort((a, b) => b.y - a.y)
   if (!titled.length) return []
 
-  // Body words: left column only, excluding right-column stat tables (by
-  // x-position and/or dotted leader) — the font test alone can't separate them
-  // since most of these clubs set their tables in the body face too.
+  // Body words: everything NOT already consumed by a promoted title or folded
+  // back whole (above), left column only, excluding right-column stat tables
+  // (by x-position and/or dotted leader). Includes BOTH body and head font —
+  // an inline bold run that never even qualified as a heading candidate (NYY
+  // bolds a player name/position mid-sentence — "…Thursday at Tropicana
+  // Field… RHP Paul Blackburn (2.0IP…" — the bold run sits well right of
+  // headingMaxX, so it's not near the left margin) would otherwise silently
+  // vanish rather than reading as plain body text. Still excludes a genuinely
+  // decorative THIRD font (a bullet/symbol glyph, neither body nor head) —
+  // PHI marks every wrapped body LINE with its own margin bullet in one such
+  // font, which would otherwise leak into running text mid-sentence.
+  const isContent = (w) => cfg.bodyFont.test(w.font) || isHead(w)
   const body = words.filter(
     (w) =>
-      isBody(w) &&
+      isContent(w) &&
       !w.consumed &&
       w.x < cfg.columnMaxX &&
       !cfg.tableLeader.test(w.str) &&
       !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
   )
 
-  const lines = []
+  const lines = [...foldedBackLines]
   for (const w of body) {
     let l = lines.find((l) => Math.abs(l.y - w.y) < tol)
     if (!l) { l = { y: w.y, words: [] }; lines.push(l) }
-    l.words.push(w)
+    if (l.words) l.words.push(w)
   }
-  for (const l of lines) l.text = joinWords(l.words)
+  for (const l of lines) if (!l.text) l.text = joinWords(l.words)
 
   // Assign each body line to the lowest surviving heading at or above it.
   for (const l of lines) {
@@ -721,6 +736,11 @@ function joinWords(ws) {
 function tidy(s) {
   return s
     .replace(/\.{3,}/g, ' … ')
+    // Some clubs' notes use a literal "…" glyph packed tight against the
+    // words on either side (no space characters as separate PDF items), so
+    // joinWords never gets a gap to insert a space at — pad it here instead.
+    .replace(/…(?=\S)/g, '… ')
+    .replace(/(?<=\S)…/g, ' …')
     .replace(/([A-Za-z])- ([A-Za-z])/g, '$1-$2')
     .replace(/\s+([,;:.!?])(?=\s|$)/g, '$1')
     .replace(/\s{2,}/g, ' ')
