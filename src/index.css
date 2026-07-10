@@ -4517,6 +4517,12 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
+/* The game's calendar date, trailing "BOX SCORE |" — quieter weight/color so
+   the title itself still leads. */
+.boxscore__titleDate {
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
 
 /* ---------------------------------------------------------------- game buzz */
 /* The night's Bluesky posts — a second, independently sealed card under the box
@@ -4920,21 +4926,51 @@ body {
 .bs__potgBody {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
 }
 /* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
    this reliably outranks the base .shot sizing — same pattern as
-   .topperf__shot above. */
+   .topperf__shot above. Sized up from the three-stars/insight-note headshots
+   (52px/26px) so the card's lead player reads as the card's focal point,
+   matching the slate's Top Performers card treatment. */
 .shot.bs__potgShot {
   flex: none;
   width: auto;
-  height: 52px;
+  height: 76px;
   aspect-ratio: 3 / 4;
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .shot.bs__potgShot.shot--fallback {
-  font-size: 20px;
+  font-size: 28px;
+}
+.bs__potgMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.bs__potgWho {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* Compound to beat .plink's `font: inherit`, same as .topperf__name. */
+.bs__potgWho .bs__potgName {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.bs__potgMeta {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .bs__potgDesc {
   margin: 0;
@@ -5112,18 +5148,32 @@ body {
 }
 .bs__star {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
 }
-/* Fixed to the three-star width so all three names left-align regardless of
-   how many marks the row carries. */
+/* Fixed to the star-mark column's own width so all three rows' headshots
+   line up regardless of how many marks a row carries. */
 .bs__starMarks {
   flex: none;
-  min-width: 44px;
+  min-width: 30px;
   font-size: 13px;
   line-height: 1.35;
   letter-spacing: 1px;
   color: var(--seal);
+}
+/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing,
+   same pattern as .bs__potgShot/.topperf__shot — a good, legible size next to
+   the name/position without dwarfing the row. */
+.shot.bs__starShot {
+  flex: none;
+  width: auto;
+  height: 44px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.bs__starShot.shot--fallback {
+  font-size: 16px;
 }
 .bs__starWho {
   display: flex;
