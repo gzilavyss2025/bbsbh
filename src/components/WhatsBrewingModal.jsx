@@ -12,19 +12,19 @@ import { useEffect, useRef, useState } from 'react'
 // this sits outside any seal like the rest of the lineup page. pdfjs is loaded
 // lazily here (dynamic import) so it and the PDF only download when the sheet
 // opens. Dismiss via the backdrop, the close button, or Escape.
-export function WhatsBrewingModal({ notes, onClose }) {
+export function WhatsBrewingModal({ notes, teamId, title = 'Game Notes', onClose }) {
   const [state, setState] = useState({ loading: true, blurbs: [] })
 
   useEffect(() => {
     let live = true
     import('../api/whatsBrewing.js')
-      .then((m) => m.fetchWhatsBrewing(notes?.url))
+      .then((m) => m.fetchWhatsBrewing(notes?.url, teamId))
       .then((blurbs) => live && setState({ loading: false, blurbs }))
       .catch(() => live && setState({ loading: false, blurbs: [] }))
     return () => {
       live = false
     }
-  }, [notes?.url])
+  }, [notes?.url, teamId])
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -54,10 +54,10 @@ export function WhatsBrewingModal({ notes, onClose }) {
         className="sheet brewsheet"
         role="dialog"
         aria-modal="true"
-        aria-label="What's Brewing"
+        aria-label={title}
       >
         <div className="brewsheet__head">
-          <h2 className="sheet__title">What&apos;s Brewing?</h2>
+          <h2 className="sheet__title">{title}</h2>
           <button ref={closeRef} className="brewsheet__close" onClick={onClose} aria-label="Close">
             ✕
           </button>

@@ -11,7 +11,7 @@ import {
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
-import { BREWERS_ID } from '../api/whatsBrewing.js'
+import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewing.js'
 import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
@@ -838,24 +838,29 @@ function GameNotesButton({ feed, side }) {
 
   if (!notes?.url) return null
 
-  // Brewers: tap opens the What's Brewing modal (the parsed narrative blurbs)
-  // with the full PDF linked inside it. Every other club: the plain link-out to
-  // the PDF in a new tab — parsing is calibrated to the Brewers' template only
-  // (see whatsBrewing.js). Both read "Game Notes"; the arrow distinguishes the
-  // in-app modal (›) from the external-PDF jump (↗).
-  if (meta.id === BREWERS_ID) {
+  // Calibrated clubs (see whatsBrewing.js's CONFIG): tap opens the What's Brewing
+  // modal (the parsed narrative blurbs) with the full PDF linked inside it. Every
+  // other club: the plain link-out to the PDF in a new tab. Both read "Game
+  // Notes"; the arrow distinguishes the in-app modal (›) from the external-PDF
+  // jump (↗).
+  if (hasWhatsBrewing(meta.id)) {
     return (
       <>
         <button
           className="notesbtn"
           onClick={() => setShowBrewing(true)}
-          title={`${notes.title} — the club's What's Brewing notes`}
+          title={`${notes.title} — the club's game notes`}
         >
           Game Notes
           <span className="notesbtn__ext" aria-hidden="true">›</span>
         </button>
         {showBrewing && (
-          <WhatsBrewingModal notes={notes} onClose={() => setShowBrewing(false)} />
+          <WhatsBrewingModal
+            notes={notes}
+            teamId={meta.id}
+            title={whatsBrewingTitle(meta.id)}
+            onClose={() => setShowBrewing(false)}
+          />
         )}
       </>
     )

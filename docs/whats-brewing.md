@@ -1,31 +1,39 @@
-# What's Brewing: parsing the Brewers' Game Notes PDF into text
+# What's Brewing: parsing a club's Game Notes PDF into text
 
 The lineup page's **Game notes** button used to only link out to a club's
 official pre-game press-notes PDF (see `src/api/gameNotes.js` and
-`docs`-adjacent notes there). For the **Brewers**, it now instead opens an
-in-app modal of the narrative blurbs from the PDF's left **"WHAT'S BREWING?"**
-column — the hand-titled callouts (*Hulk Logan*, *Don't Pitch to Mitch*, *When
-You're Hot You're Hot*, …) — with the full PDF still linked inside the modal.
+`docs`-adjacent notes there). For a **calibrated club**, it now instead opens an
+in-app modal of the narrative blurbs from the PDF — the hand-titled callouts
+(Brewers: *Hulk Logan*, *Don't Pitch to Mitch*, …; Pirates: *Beer Batter*, *Jake
+'n Rake*, *Home(r) Happy*, …) — with the full PDF still linked inside the modal.
 
 This documents how that parse works, why it's shaped the way it is, and how to
 verify or extend it. It's the companion to the code: `src/api/whatsBrewing.js`
-(parser), `src/components/WhatsBrewingModal.jsx` (the modal), and the Brewers
-branch of `GameNotesButton` in `src/screens/TeamInfo.jsx`.
+(parser + the per-club `CONFIG`), `src/components/WhatsBrewingModal.jsx` (the
+modal), and `GameNotesButton` in `src/screens/TeamInfo.jsx`.
 
 ## The short version
 
 - The PDF is a real **text layer** (exported from InDesign), not a scan — so
   `pdfjs-dist` extracts positioned text directly, no OCR.
-- The left "WHAT'S BREWING?" column is isolated by **x-position**, its blurbs
-  split into title/body by **font** (Industry-Demi titles over Industry-Book
-  body), anchored at the top by the **Industry-Bold** section header.
-- Standings/records mini-tables in that column are dropped by detecting their
-  long **dotted leaders**; only prose blurbs survive.
+- The parse is **per-club**, driven by a `CONFIG` map keyed by teamId. Each entry
+  picks a `layout` algorithm and its tunables (fonts, x-bounds). Two templates
+  are calibrated so far, in two layouts:
+  - **`column`** (Brewers, 158): the bespoke Industry-font sheet whose blurbs
+    live in a narrow **left column**, isolated by **x-position** and split into
+    title/body by **font** (Industry-Demi titles over Industry-Book body),
+    anchored by the **Industry-Bold** "WHAT'S BREWING?" header.
+  - **`flow`** (Pirates, 134): the **league-standard Myriad + Gotham** sheet
+    whose blurbs are **full-width prose** with an **inline all-caps heading**
+    (`TITLE : body`, all on one baseline), flowing around right-column stat
+    tables. See "The flow layout" below.
+- Standings/records tables are dropped by detecting long **dotted leaders**
+  and/or their **x-position**; only prose blurbs survive.
 - Parsing happens **client-side**, on demand, in the browser — not in the
   nightly `gen-game-notes.mjs` cron. `pdfjs` is dynamically imported so it only
   loads when the modal opens, and it's kept out of the PWA precache.
-- **Brewers only**, deliberately. The geometry and fonts below are calibrated to
-  the Brewers' template. Every other club keeps the plain PDF link-out.
+- Callers gate the modal on **`hasWhatsBrewing(teamId)`** (i.e. "has a CONFIG
+  entry"); every un-calibrated club keeps the plain PDF link-out.
 
 ## Why client-side, not the cron
 
@@ -88,11 +96,12 @@ across PDFs, but the real PostScript names are):
 | `Industry-Medium`    | Table numbers (standings/records)                |
 | `Industry-DemiItalic`| Italic emphasis (excluded)                       |
 
-## The algorithm (`extractBlurbs` in `whatsBrewing.js`)
+## The `column` layout (Brewers) — `extractColumn` in `whatsBrewing.js`
 
-`extractBlurbs(items, realName)` is a **pure** function over `getTextContent()`
-`items` plus a `fontName → realPostScriptName` resolver, so it's testable off a
-raw items array without a browser (see the harness below). Steps:
+`extractBlurbs(items, realName, cfg)` is a **pure** dispatch over
+`getTextContent()` `items` plus a `fontName → realPostScriptName` resolver and
+the club's `cfg`; for a `column`-layout club it runs `extractColumn`. It's
+testable off a raw items array without a browser (see the harness below). Steps:
 
 1. **Emphasis vs header fonts.** `isEmphasis` = `Industry-Demi` (non-italic) —
    titles and inline names. `isHeaderFont` = `Industry-Bold` — the section
@@ -126,52 +135,126 @@ Failure is **safe by design**: any surprise (network error, template change,
 unexpected fonts) returns `[]`, and the modal falls back to just showing the
 "View full PDF ↗" link.
 
+## The `flow` layout (Pirates / league-standard template) — `extractFlow`
+
+Most clubs use MLB's **league-standard** notes template (Myriad body, Gotham
+headers) rather than a bespoke one, and it looks nothing like the Brewers' left
+column — so it gets its own algorithm, selected by `cfg.layout === 'flow'`. The
+Pirates (134) are the first `flow` club.
+
+**What the sheet looks like.** Front page, US Legal, with the narrative set as
+**full-width prose paragraphs**, each introduced by an **inline heading**: an
+all-caps section title, a colon, then the body — *all on the same baseline* —
+e.g. `THE PIRATES : have lost two of the first three games…`. The prose wraps
+full width at the top of the page, then narrows as boxed **stat tables** intrude
+from the right (a "BUCS WHEN…" team-record table top-right; a scoreless-streaks
+table mid-right) and full-width **boxes** close the page (an "ON THIS DATE…"
+recap, an "UPCOMING GAMES…" grid).
+
+The fonts don't split title from body the way the Brewers' do — the headings are
+a **heavier weight of the same variable font** (`MyriadVariableConcept-Roman`),
+which pdfjs surfaces as a *distinct font object with the same base name but a
+different subset prefix*. The **subset prefix is not stable across exports**, so
+the parser never hardcodes it; instead it treats "a Myriad face that is **not**
+the dominant body face" as the heading face. Gotham marks the section/table
+headers and the masthead.
+
+| Real font name (base)          | Role                                        |
+| ------------------------------ | ------------------------------------------- |
+| `MyriadVariableConcept-Roman`  | Body prose **and** headings — separated by which *subset* (dominant = body, the other = heading) |
+| `Gotham-Ultra` / `Gotham-Black`| Section/table headers + the masthead        |
+
+Steps (`extractFlow`):
+
+1. **Body face = the most common font on the page** (dynamically — no hardcoded
+   subset). Headings = an emphasis face (`/Myriad/`) that isn't the body face.
+2. **Headings** are emphasis-face runs at the **left margin** (`x < headingMaxX`,
+   ~37 pt). Group each heading's same-baseline emphasis words (title + its colon)
+   and strip the colon; sort headings top-to-bottom.
+3. **Body words = the body face only.** This alone drops the Gotham headers and
+   the non-body-subset stat-table values (e.g. the streak table's names) for free.
+4. **Two contaminants share the body face** and must be excluded geometrically:
+   - the **bottom boxes** (ON THIS DATE / UPCOMING GAMES) — dropped by a
+     **bottom-Y cutoff** set to the highest Gotham header sitting left-of-center
+     below the narrative (`headerLeftMaxX`), i.e. the top of those boxes;
+   - the **right-column records table** ("BUCS WHEN…") — dropped by excluding its
+     **rectangle** (`x ≥ rightTableMinX`, at/below its own Gotham header). The
+     only prose that reaches that far right is the lead blurb's top lines, which
+     sit *above* that header and so survive. A `tableLeader` regex (10+ dots,
+     possibly space-separated) is a second line of defense.
+5. **Regroup body words into baselines** (`|Δy| ≤ lineTol`, tight — 2 pt — since
+   the two right-column tables interleave baselines with the prose and must not
+   merge), keep lines that start in the left column (`x_min < columnMaxX`) and lie
+   in the narrative band, then **assign each line to the lowest heading at or
+   above it** and join top-to-bottom.
+6. **Join words by gap, not blindly by space** (`joinWords`): a space goes in
+   only where there's a real horizontal gap, so tightly-kerned combining glyphs
+   (`Ram` `í` `rez`) rejoin as `Ramírez`. Then **tidy** (shared with `column`):
+   `...` → ` … `, rejoin line-break hyphenation (`Chicago- NL` → `Chicago-NL`),
+   tighten space before sentence punctuation.
+
+Same **fail-safe-to-`[]`** contract: if the heading face can't be told from the
+body face (or anything else surprises), the result is `[]` and the modal just
+links the PDF.
+
 ## Verifying / iterating
 
 You can exercise the shipped pure function against real PDFs **without a
 browser** — Node can run `pdfjs-dist/legacy/build/pdf.mjs` with `disableWorker`.
-Grab a Brewers PDF URL from the archive and drive `extractBlurbs`:
+Drive **`extractForTeam(items, realName, teamId)`** — the pure core of
+`fetchWhatsBrewing` minus the fetch, which picks the club's `CONFIG` for you:
 
 ```js
-// verify.mjs — run: node verify.mjs
+// verify.mjs — run: node verify.mjs <pdf> <teamId>
 import { getDocument } from 'file:///ABS/PATH/node_modules/pdfjs-dist/legacy/build/pdf.mjs'
-import { extractBlurbs } from 'file:///ABS/PATH/src/api/whatsBrewing.js'
+import { extractForTeam } from 'file:///ABS/PATH/src/api/whatsBrewing.js'
 import fs from 'fs'
-const doc = await getDocument({ data: new Uint8Array(fs.readFileSync('brew.pdf')), disableWorker: true }).promise
+const [file, teamId] = [process.argv[2], Number(process.argv[3])]
+const doc = await getDocument({ data: new Uint8Array(fs.readFileSync(file)), disableWorker: true }).promise
 const page = await doc.getPage(1)
 await page.getOperatorList()                                    // resolves fonts into commonObjs
 const tc = await page.getTextContent()
 const realName = (fn) => { try { return page.commonObjs.get(fn)?.name || '' } catch { return '' } }
-console.log(extractBlurbs(tc.items, realName))
+console.log(extractForTeam(tc.items, realName, teamId))         // e.g. teamId 134 = Pirates
 ```
 
 Grab a few PDFs to test the template across dates (the blurb set changes every
 game, so this checks robustness, not just one sheet):
 
 ```bash
-# URLs live in public/data/game-notes.json under notes["158"] (Brewers = 158)
-node -e "const d=require('./public/data/game-notes.json'); console.log(d.notes['158'].slice(0,3).map(n=>n.url).join('\n'))"
-curl -s -o brew.pdf "<one of those urls>"
+# URLs live in public/data/game-notes.json under notes[teamId] (158 = Brewers, 134 = Pirates)
+node -e "const d=require('./public/data/game-notes.json'); console.log(d.notes['134'].slice(0,3).map(n=>n.url).join('\n'))"
+curl -s -o notes.pdf "<one of those urls>"
 ```
 
-Notes on Windows: absolute `import` paths must be `file:///C:/...` URLs, not bare
-`C:/...`. The scratchpad dir is a fine place for `brew.pdf` and the harness.
+To read off a new club's fonts/geometry, use the standalone dumper in the
+Game-Notes parsing kit (`~/Documents/bbsbh-game-notes/dump-pdf-fonts.mjs`):
+`node dump-pdf-fonts.mjs PIT-latest.pdf 1 fonts` tallies the page's fonts;
+without `fonts` it prints every item's `x, y, font, text` — exactly the raw
+material `extractFlow`/`extractColumn` work from.
 
-To eyeball layout/fonts of a PDF quickly, `pdftotext -raw` (xpdf) dumps the left
-column as a contiguous block in content-stream order, and `pdftotext -layout`
-shows the visual columns interleaved.
+Notes on Windows: absolute `import` paths must be `file:///C:/...` URLs, not bare
+`C:/...`. The scratchpad dir is a fine place for `notes.pdf` and the harness.
+
+To eyeball layout/fonts of a PDF quickly, `pdftotext -raw` (xpdf) dumps the
+content-stream order, and `pdftotext -layout` shows the visual columns
+interleaved.
 
 ## Extending to other clubs
 
-Each of the 30 teams lays its notes out in its **own InDesign template**, so the
-x-threshold, the font names, and the blurb structure above are Brewers-specific.
-`GameNotesButton` gates the modal on `meta.id === BREWERS_ID` (158); every other
-club keeps the plain PDF link.
+Each club lays its notes out in an InDesign template — either a **bespoke** one
+(the Brewers) or the **league-standard** Myriad + Gotham sheet (the Pirates, and
+most others). To add a club:
 
-To add a club, calibrate its template the same way (run the harness against a
-couple of its PDFs, read off its column x-range and its title/body/header fonts)
-and generalize the constants — don't assume the Brewers' numbers transfer. If
-several clubs share the league-standard template, a small per-team config map
-(column x, title font, header matcher) is cleaner than branching. Whatever the
-shape, keep the **fail-safe-to-`[]`** contract so a mis-calibrated club quietly
-falls back to the PDF link rather than showing garbage.
+1. **Read off its template** with the dumper (fonts + column x-bounds).
+2. **Pick a `layout`.** If it's the league-standard sheet, start from the
+   Pirates' `flow` entry and re-tune the x-bounds; if it's bespoke, you may need
+   a new layout function. Don't assume another club's numbers transfer.
+3. **Add a `CONFIG` entry** keyed by its teamId (with a `title` for the modal
+   heading). That's the whole wiring — `hasWhatsBrewing`/`whatsBrewingTitle` and
+   `GameNotesButton` light up automatically the moment the entry exists.
+4. **Verify** with the harness above against a couple of its PDFs before shipping
+   — the parse fails silently to `[]`, so a human glance per club is worth it.
+
+Whatever the shape, keep the **fail-safe-to-`[]`** contract so a mis-calibrated
+club quietly falls back to the PDF link rather than showing garbage.

@@ -462,16 +462,22 @@ notes the gamePk field paths were verified against):
   link (title/date/url), no score — but the PDF it points to is a press packet
   that recaps prior results, so it opens in a new tab as a deliberate,
   user-initiated jump, not an in-app reveal.
-- `whatsBrewing.js` — for the BREWERS only, the Game notes button opens an in-app
-  modal (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF's
-  left "WHAT'S BREWING?" column (Hulk Logan, Don't Pitch to Mitch, …), with the
-  full PDF linked inside. Parses client-side on demand (pdfjs-dist, dynamically
-  imported so it stays off the main bundle and out of the PWA precache — see
-  `vite.config.js`) rather than in the cron, because tonight's note posts after
-  the cron runs and the PDF host is CORS-open. Every other club keeps the plain
-  link-out (the parse is calibrated to the Brewers' InDesign template). See
-  `docs/whats-brewing.md` for the font/geometry parsing details and the Node
-  verification harness.
+- `whatsBrewing.js` — for CALIBRATED clubs (a `CONFIG` map keyed by teamId; the
+  Brewers and Pirates so far), the Game notes button opens an in-app modal
+  (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF (Brewers'
+  "WHAT'S BREWING?" callouts — Hulk Logan, Don't Pitch to Mitch, …; Pirates' full-
+  page blurbs — Beer Batter, Jake 'n Rake, …), with the full PDF linked inside.
+  Parses client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off
+  the main bundle and out of the PWA precache — see `vite.config.js`) rather than in
+  the cron, because tonight's note posts after the cron runs and the PDF host is
+  CORS-open. Each club's InDesign template needs its own calibration, so `CONFIG`
+  carries a `layout` per club — `column` (Brewers' bespoke narrow-column Industry
+  sheet) or `flow` (the league-standard full-width Myriad+Gotham sheet, e.g. the
+  Pirates) — plus that layout's font/geometry tunables. Callers gate on
+  `hasWhatsBrewing(teamId)`; every un-calibrated club keeps the plain link-out. Add
+  a club = add a `CONFIG` entry (not a new parser). See `docs/whats-brewing.md` for
+  the parsing details, the two layouts, and the Node verification harness
+  (`extractForTeam`).
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — the leader boards. Ranking
   is pool-agnostic: `teamLeaders.js` holds the category descriptors +
   `computeLeaders`, which ranks any normalized `PoolPlayer[]`; `leaders.js`
