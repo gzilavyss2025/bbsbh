@@ -49,13 +49,22 @@ async function fetchMlbTeams() {
 // 30 clubs, unlike the title, whose date/opponent formatting varies team to team
 // (Brewers "Game Notes, July 9 at St. Louis" vs Astros "Astros Game Notes
 // 07.08.26 at WSH"), so we key on the date, never on parsing the title.
+//
+// The stored date is the publish time in America/New_York, NOT the raw UTC date:
+// a note posted on a game's evening ET is already the next calendar day in UTC,
+// so slicing the UTC string would tag an evening game's note a day late and let
+// it read as the NEXT day's note. The ET date recovers the true game date and
+// lines up with the game's ET-based officialDate. See src/api/gameNotes.js.
+const ET_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
+const etDate = (iso) => (iso ? ET_DATE.format(new Date(iso)) : '')
+
 async function fetchTeamNotes(teamId) {
   const url = `${DAPI}?$limit=${PER_TEAM}&tags.slug=teamid-${teamId},game-notes&sort=-contentDate`
   const { items = [] } = await getJson(url)
   return items
     .filter((it) => it?.file?.viewUrl)
     .map((it) => ({
-      date: (it.contentDate || '').slice(0, 10),
+      date: etDate(it.contentDate),
       title: it.title || 'Game Notes',
       url: it.file.viewUrl,
     }))

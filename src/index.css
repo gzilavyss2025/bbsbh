@@ -1945,6 +1945,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex: none;
 }
 
 .teaminfo__toolbar {
@@ -1965,6 +1966,7 @@ body {
   font-size: var(--fs-h1);
   font-weight: var(--w-bold);
   margin: 0;
+  min-width: 0;
   letter-spacing: 0.01em;
   color: var(--text-heading);
 }
@@ -2673,29 +2675,29 @@ body {
   line-height: 1;
 }
 
-/* Game Notes link-out (lineup page) — a pill like the Refresh control, sitting
-   just under the team head. Links to the club's official press-notes PDF, which
-   opens in a new tab. See api/gameNotes.js. */
-.teaminfo__notes {
-  margin: -2px 0 14px;
-}
-
+/* Game Notes button (lineup page) — a compact pill riding in the team head,
+   right-aligned beside the Away/Home label (it took over the Refresh control's
+   old spot; Refresh moved to the floating bar). Links to the club's official
+   press-notes PDF (opens in a new tab), or opens the What's Brewing sheet for
+   the Brewers. See api/gameNotes.js / TeamInfo.jsx. */
 .notesbtn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 0 14px;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 12px;
   border-radius: var(--radius-pill);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   text-decoration: none;
+  white-space: nowrap;
+  flex: none;
   cursor: pointer;
 }
 
@@ -6619,6 +6621,13 @@ body {
 
   .teampanel {
     min-width: 0;
+  }
+
+  /* Each panel head now carries the Game Notes pill right-aligned beside the
+     Away/Home label, so the club name drops a step (fs-h1 → fs-h2) to keep name
+     + pill + label on one line in the narrower two-up column. */
+  .teampanel .teaminfo__name {
+    font-size: var(--fs-h2);
   }
 
   /* ---- innings, wide layout. The floating duplicate Refresh button is a

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   selectLineup,
   selectTeamMeta,
@@ -63,11 +63,9 @@ export function TeamInfo({
         </h2>
         <div className="teaminfo__headright">
           <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
-          <RefreshButton onReload={onReload} loading={loading} />
+          <GameNotesButton feed={feed} side={side} />
         </div>
       </div>
-
-      <GameNotesButton feed={feed} side={side} />
 
       <dl className="factgrid">
         <GameFacts
@@ -98,7 +96,11 @@ export function TeamInfo({
         formerTeammatesData={formerTeammatesData}
       />
 
-      <div className="pagenav">
+      {/* Refresh rides the floating bar (stacked above the advance button), the
+          same place the innings page keeps it — freed up by Game Notes taking
+          its old spot in the team head. */}
+      <div className="pagenav pagenav--innings">
+        <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
         <button className="btn btn--next" onClick={onNext}>
           {nextLabel}
         </button>
@@ -209,13 +211,15 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
             {(meta.name || 'Team').toUpperCase()}
           </TeamLink>
         </h2>
-        <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
+        <div className="teaminfo__headright">
+          <GameNotesButton feed={feed} side={side} />
+          <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
+        </div>
       </div>
       <dl className="factgrid">
         <Fact label="Manager" value={managerFact(manager)} />
         <Fact label="Uniform" value={uniform} />
       </dl>
-      <GameNotesButton feed={feed} side={side} />
       <TeamSections
         feed={feed}
         side={side}
@@ -800,53 +804,74 @@ function seasonRange(seasons) {
 // (every MiLB game, or a date the club never posted), so it degrades to nothing
 // like the rest of the lineup surfaces. The PDF opens in a new tab: a deliberate
 // jump to an external, spoiler-bearing press packet, not an in-app reveal.
+// How often to re-check the live feed for a not-yet-posted note (see below).
+const NOTES_POLL_MS = 5 * 60 * 1000
+// Today's calendar date in America/New_York — the tz the game's officialDate and
+// the notes' publish dates are both keyed to (see gameNotes.js).
+const ET_TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
+const etToday = () => ET_TODAY.format(new Date())
+
 function GameNotesButton({ feed, side }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const isMlb = (meta.sportId ?? 1) === 1
   const [showBrewing, setShowBrewing] = useState(false)
-  const { data: notes } = useAsync(
+  const { data: notes, reload } = useAsync(
     () =>
       isMlb && meta.id ? resolveGameNotes(meta.id, info.officialDate) : Promise.resolve(null),
     [isMlb, meta.id, info.officialDate],
   )
+
+  // Tonight's note doesn't post until the afternoon/evening ET — after the page
+  // first loads — and the button stays hidden until it does (the gate only shows
+  // a note actually written for THIS game; see gameNotes.js). So while we're on
+  // the game's own day with no note yet, quietly re-poll the live feed every few
+  // minutes: the button then appears on its own the moment the note drops,
+  // without the user hunting for Refresh. Past games never gain a note, so they
+  // don't poll; once a note is in hand the interval clears.
+  const isGameDay = isMlb && !!info.officialDate && info.officialDate === etToday()
+  useEffect(() => {
+    if (!isGameDay || notes?.url) return
+    const id = setInterval(reload, NOTES_POLL_MS)
+    return () => clearInterval(id)
+  }, [isGameDay, notes?.url, reload])
+
   if (!notes?.url) return null
 
   // Brewers: tap opens the What's Brewing modal (the parsed narrative blurbs)
   // with the full PDF linked inside it. Every other club: the plain link-out to
   // the PDF in a new tab — parsing is calibrated to the Brewers' template only
-  // (see whatsBrewing.js).
+  // (see whatsBrewing.js). Both read "Game Notes"; the arrow distinguishes the
+  // in-app modal (›) from the external-PDF jump (↗).
   if (meta.id === BREWERS_ID) {
     return (
-      <div className="teaminfo__notes">
+      <>
         <button
           className="notesbtn"
           onClick={() => setShowBrewing(true)}
           title={`${notes.title} — the club's What's Brewing notes`}
         >
-          What&apos;s Brewing?
+          Game Notes
           <span className="notesbtn__ext" aria-hidden="true">›</span>
         </button>
         {showBrewing && (
           <WhatsBrewingModal notes={notes} onClose={() => setShowBrewing(false)} />
         )}
-      </div>
+      </>
     )
   }
 
   return (
-    <div className="teaminfo__notes">
-      <a
-        className="notesbtn"
-        href={notes.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
-      >
-        Game notes
-        <span className="notesbtn__ext" aria-hidden="true">↗</span>
-      </a>
-    </div>
+    <a
+      className="notesbtn"
+      href={notes.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
+    >
+      Game Notes
+      <span className="notesbtn__ext" aria-hidden="true">↗</span>
+    </a>
   )
 }
 
@@ -869,12 +894,12 @@ function managerFact(manager) {
 // in the box score so every game page has one, not just the live innings.
 // `onReload` is undefined only for the (unused) case a caller skips it, so
 // this degrades to nothing rather than a dead button.
-export function RefreshButton({ onReload, loading }) {
+export function RefreshButton({ onReload, loading, className = '' }) {
   if (!onReload) return null
   return (
     <button
       type="button"
-      className="refreshbtn"
+      className={`refreshbtn ${className}`.trim()}
       onClick={onReload}
       disabled={loading}
       aria-label="Refresh live game data"

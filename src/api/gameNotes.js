@@ -43,6 +43,21 @@ function loadArchive() {
   return archivePromise
 }
 
+// The note's true game date is its publish time in America/New_York — NOT the
+// raw UTC date. Notes post on the afternoon/evening of the game they cover, and
+// an evening-ET post is already the NEXT calendar day in UTC (a July 9 note
+// published 8:42pm ET carries contentDate 2026-07-10T00:42Z). Slicing the UTC
+// string would tag that note July 10 and let it masquerade as the next day's
+// note; the ET calendar date recovers July 9 — and matches the game's
+// officialDate, which is itself ET-based. (Verified across all 30 clubs: notes
+// publish ~10:00–19:00 ET, so the ET date is unambiguous.)
+const ET_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
+function etDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '' : ET_DATE.format(d)
+}
+
 async function fetchLiveNotes(teamId, limit = 8) {
   const url = `${DAPI}?$limit=${limit}&tags.slug=teamid-${teamId},game-notes&sort=-contentDate`
   const res = await fetch(url)
@@ -51,7 +66,7 @@ async function fetchLiveNotes(teamId, limit = 8) {
   return items
     .filter((it) => it?.file?.viewUrl)
     .map((it) => ({
-      date: (it.contentDate || '').slice(0, 10),
+      date: etDate(it.contentDate),
       title: it.title || 'Game Notes',
       url: it.file.viewUrl,
     }))
@@ -59,25 +74,21 @@ async function fetchLiveNotes(teamId, limit = 8) {
 
 const dayDiff = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 86400000)
 
-// Pick the note that best matches the game's calendar date: an exact date wins,
-// else the nearest within a day (absorbs the rare UTC-rollover on a note posted
-// late in the evening), tie-breaking toward the newer note. With no game date,
-// the newest note is the sensible default.
+// Match a note to the game's calendar date STRICTLY: only the note actually
+// written for this game qualifies. An exact date match wins. Otherwise the sole
+// allowance is a note dated exactly one day AFTER the game — a legacy artifact
+// of archive rows written before the ET-date fix above, which stored the
+// rolled-forward UTC date for evening games. A note dated BEFORE the game is a
+// PRIOR game's note and is never shown: returning it is the "yesterday's notes
+// on today's game" bug this gate closes, so when today's note hasn't posted yet
+// we return null (→ button hidden) rather than the most recent stale one. With
+// no game date (deep-link/crawler path), the newest note is the sane default.
 function matchByDate(notes, gameDate) {
   if (!notes || notes.length === 0) return null
   if (!gameDate) return notes[0]
-  let best = null
-  let bestGap = Infinity
-  for (const n of notes) {
-    if (!n?.date) continue
-    if (n.date === gameDate) return n
-    const gap = Math.abs(dayDiff(n.date, gameDate))
-    if (gap <= 1 && gap < bestGap) {
-      best = n
-      bestGap = gap
-    }
-  }
-  return best
+  const exact = notes.find((n) => n?.date === gameDate)
+  if (exact) return exact
+  return notes.find((n) => n?.date && dayDiff(n.date, gameDate) === 1) || null
 }
 
 // Resolve the best game-notes link for a club on a given calendar date, or null.
