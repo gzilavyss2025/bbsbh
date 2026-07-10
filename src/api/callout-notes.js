@@ -171,6 +171,19 @@ export function buildCallouts(
     // gen-callouts.mjs's isBirthdayOn), so no date math happens client-side.
     if (bundle.birthdays?.includes(entry.batterId)) {
       notes.push({ text: `Celebrating his birthday today`, personId: entry.batterId, side: battingSide })
+
+      // …and how he's historically hit ON his birthday (see gen-callouts.mjs's
+      // birthdayLine) — a career line summed across every birthday he's played,
+      // present only when it cleared the sample floors there.
+      const bday = bundle.birthdayStats?.[entry.batterId]
+      if (bday) {
+        const hrPart = bday.hr > 0 ? `, ${bday.hr} HR` : ''
+        notes.push({
+          text: `Career ${bday.avg} on his birthday (${bday.h}-for-${bday.ab}${hrPart})`,
+          personId: entry.batterId,
+          side: battingSide,
+        })
+      }
     }
 
     // Career line against tonight's opponent (see vsTeamCareerLine) — the

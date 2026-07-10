@@ -41,6 +41,9 @@ export async function fetchCallouts(urlDate) {
 //     streaks:{ [playerId]: { onBase?, stolenBase? } },
 //     homerRecords:{ [playerId]: 'W-L' },
 //     situational:{ [playerId]: { risp?, vl?, vr? } }, each { avg, ops },
+//     birthdays:[ playerId ] (whose birthday is today),
+//     birthdayStats:{ [playerId]: { avg, h, ab, hr, g } } (career line on his
+//       birthday, a subset of `birthdays` that cleared the sample floors),
 //     starterRecords:{ [pitcherId]: { homeAway?:{home,away}, sixIp?, tenK?,
 //       cgShutout?, scorelessStreak?, recentAppearances? } } — one entry per
 //       ROSTERED pitcher on either club, not just the day's probable starters,
