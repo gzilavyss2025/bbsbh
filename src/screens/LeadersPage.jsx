@@ -5,6 +5,7 @@ import { fetchTopProspects } from '../api/prospects.js'
 import { ALL_CATEGORIES } from '../api/teamLeaders.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { leadersPath } from '../lib/route.js'
@@ -69,6 +70,7 @@ function ScopeNav({ scope, asOf, sportId, navigate }) {
 
 export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
   const navigate = useNav()
+  const { favoriteTeamId } = useFavoriteTeam()
   const { loading, error, data } = useAsync(
     () => loadLeaders(scope, orgId, asOf),
     [scope, orgId, asOf],
@@ -119,10 +121,10 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
             categories={ALL_CATEGORIES}
             limit={10}
             title="Leaders"
-            showTeamLogo
             showLevel={isMultiLevelScope(scope)}
             prospectSnapshot={snapshot}
             qualifier="leader-relative"
+            favoriteTeamId={isOrg ? null : favoriteTeamId}
           />
         )}
       </div>

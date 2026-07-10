@@ -1,17 +1,22 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { lookupSplit } from '../lib/teamSplits.js'
-import { leagueLogoUrl } from '../lib/teams.js'
+import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
-export function GameCard({ game, pinned, uniformsReady, prospectCount = 0, onSelect, onBoxScore }) {
+export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
   const dhLabel = doubleHeaderLabel(game)
+  const pinned = !!pinnedTeamId
+  // Sets --pin-accent for the pinned border/gradient + star (see index.css);
+  // left unset (undefined) when not pinned or the team has no known color, so
+  // the CSS var(--pin-accent, var(--field)) fallback takes over.
+  const style = pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : undefined
   return (
-    <div className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`}>
+    <div className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`} style={style}>
       {live && <span className="gamecard__live">Live</span>}
       <button
         type="button"

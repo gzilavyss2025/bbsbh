@@ -157,6 +157,15 @@ body {
   gap: 6px;
 }
 
+/* Groups the level toggle + search trigger as one flex item, so the topbar's
+   own space-between splits only title vs. this cluster (see GameSelect). */
+.topbar__slateactions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
 /* Condensed to fit beside the title: content-width (not full-bleed), tighter
    gaps, and smaller pill buttons than the standalone level toggle. */
 .topbar--slate .levelnav {
@@ -170,6 +179,12 @@ body {
   min-height: 30px;
   padding: 0 6px;
   font-size: 11px;
+}
+
+.topbar__search {
+  flex: none;
+  min-width: 30px;
+  min-height: 30px;
 }
 
 .topbar--game {
@@ -319,6 +334,29 @@ body {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-heading);
+}
+
+/* Persistent site-wide search trigger (SiteSearch.jsx) — a plain icon button
+   (no docked input; there's no room for one on a phone-width header, and a
+   tap-to-open modal is the standard mobile pattern) that rides at the far
+   right of the site bar. */
+.sitebar__search {
+  margin-left: auto;
+}
+.sitesearch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-caption);
+  cursor: pointer;
+}
+.sitesearch-btn:active {
+  background: var(--surface-inset);
 }
 
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
@@ -966,11 +1004,17 @@ body {
   transform: translateY(1px);
 }
 
+/* The pinned favorite's border/gradient tint to that club's own accent color
+   (--pin-accent, a per-team hex set inline by GameCard from
+   favoriteAccentColor() — see lib/teams.js) rather than a fixed green, so an
+   Orioles fan's pin reads orange, a Reds fan's reads red, and so on. Falls
+   back to the original --field green for the rare pinned team with no known
+   accent (MiLB affiliates aren't in that color map). */
 .gamecard--pinned {
-  border-color: color-mix(in srgb, var(--field) 45%, var(--border-rule));
+  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
   background: linear-gradient(
     180deg,
-    var(--field-soft),
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
     var(--surface-card) 70%
   );
 }
@@ -1142,7 +1186,7 @@ body {
 }
 
 .gamecard__pin {
-  color: var(--field);
+  color: var(--pin-accent, var(--field));
 }
 
 /* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
@@ -1320,11 +1364,6 @@ body {
   gap: var(--space-6);
 }
 
-.sitefooter__search {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
 
 /* --------------------------------------------------------------- searchbox */
 .searchbox {
@@ -1605,6 +1644,98 @@ body {
   font-size: 16px;
   cursor: pointer;
   border-radius: var(--radius-pill);
+}
+
+/* -------------------------------------------------- site search sheet
+   SiteSearchModal's dialog chrome — the merged player/team search reached
+   from the header's search button on every screen (see SiteSearch.jsx). Same
+   bottom-sheet shape as .gamefindersheet, but the input rides in its own head
+   row (no separate label — the placeholder carries it) with the close button
+   beside it. */
+.sitesearchsheet {
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sitesearchsheet__head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.sitesearchsheet__input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.sitesearchsheet__input::placeholder {
+  color: var(--graphite-soft);
+}
+
+.sitesearchsheet__input:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.sitesearchsheet__close {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+.sitesearchsheet__results {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sitesearchsheet__group {
+  margin: 0 0 4px;
+  padding: 0 2px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.sitesearchsheet__hint {
+  margin: 0;
+  padding: 8px 2px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* A static (non-dropdown) result list, reusing .searchbox__item/__name/__sub
+   for visual consistency with the picker widgets, but laid out in normal flow
+   rather than .searchbox__results' absolutely-positioned overlay. */
+.sitesearchsheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* -------------------------------------------------- favorite-team modal
@@ -5182,21 +5313,51 @@ body {
   align-items: center;
   gap: 8px;
 }
+/* Favorite-team highlight (league/level leader pages only, not team/org — see
+   TeamLeaders' favoriteTeamId doc) — tints a leader's row in that club's own
+   accent (--fav-accent, set inline from favoriteAccentColor()) so a fan's team
+   jumps out on a board otherwise full of strangers. */
+.tlead__featured--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, var(--surface-card));
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-sm);
+  margin: -4px -6px;
+  padding: 4px 6px;
+}
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same reason as .topperf__shot. */
+   outranks the base .shot sizing, same reason as .topperf__shot. Sized well
+   past that shared 52px baseline — the leader card is this component's one
+   hero image, so it earns a bigger, more readable frame. */
 .shot.tlead__shot {
   flex: none;
   width: auto;
-  height: 52px;
+  height: 84px;
   aspect-ratio: 3 / 4;
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .shot.tlead__shot.shot--fallback {
-  font-size: 20px;
+  font-size: 32px;
+}
+/* Team tag — logo over abbreviation, stacked compactly between the headshot
+   and the name/stat stack. Always names the club the leader plays FOR (see
+   FeaturedLeader's displayTeamId/displayTeamAbbr). */
+.tlead__teamtag {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 .tlead__logo {
   flex: none;
+}
+.tlead__teamabbr {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
 }
 .tlead__who {
   flex: 1;
@@ -5262,6 +5423,15 @@ body {
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+/* Same favorite-team highlight as .tlead__featured--fav, sized down for a
+   chaser row. */
+.tlead__row--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-xs);
+  margin: 0 -6px;
+  padding: 1px 6px;
 }
 .tlead__rank {
   flex: none;
@@ -5624,15 +5794,10 @@ body {
     min-width: 0;
   }
 
-  /* ---- slate footer: player/team search side by side instead of stacked;
-     the action grid stays compact rather than stretching each button full
-     width. The cap holds the auto-fit cells to a tidy size (the base rule
-     wraps them across as many rows as fit); 720px keeps the five stops on one
-     or two rows without ballooning. */
-  .sitefooter__search {
-    flex-direction: row;
-  }
-
+  /* ---- slate footer: the action grid stays compact rather than stretching
+     each button full width. The cap holds the auto-fit cells to a tidy size
+     (the base rule wraps them across as many rows as fit); 720px keeps the
+     five stops on one or two rows without ballooning. */
   .sitefooter__actions {
     max-width: 720px;
   }
