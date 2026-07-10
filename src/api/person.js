@@ -464,11 +464,11 @@ export const FIRSTS_DEFS = [
 
 // Pitching counterpart. Every field but the strikeout victim is a direct
 // gameLog stat (verified live: pitching gameLog rows carry gamesStarted,
-// wins, losses, saves per game), unlike the hitter "first start" case.
-// `appearance` matches unconditionally, so it always resolves to the
-// earliest row — the debut game itself.
+// wins, losses, saves per game), unlike the hitter "first start" case. The
+// "first appearance" milestone that used to live here is now the synthetic
+// "MLB Debut" row (a pitcher's debut IS his first appearance — see loadPlayer),
+// which absorbs the First Start when the two are the same game.
 export const PITCHER_FIRSTS_DEFS = [
-  { key: 'appearance', label: 'First Appearance', test: () => true },
   { key: 'start', label: 'First Start', test: (st) => num(st.gamesStarted) > 0 },
   { key: 'win', label: 'First Win', test: (st) => num(st.wins) > 0 },
   { key: 'loss', label: 'First Loss', test: (st) => num(st.losses) > 0 },

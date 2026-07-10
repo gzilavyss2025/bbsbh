@@ -7082,10 +7082,15 @@ body {
   font-size: 11px;
   color: var(--text-caption);
 }
+/* Phone (base): stack the date over its description so the date gets the card's
+   full width on line one and the opponent/pitcher/hitter reads on line two —
+   the extra room lets the team firsts spell out the full club name. The wider
+   layout restores the single-line date-and-sub row (see the min-width rule). */
 .split__row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   margin-top: 6px;
 }
 .split__v {
@@ -7100,6 +7105,14 @@ body {
   font-variant-numeric: tabular-nums;
   font-size: 12px;
   color: var(--text-muted);
+}
+@media (min-width: 740px) {
+  .split__row {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
 }
 
 /* ---- splits vs team: opponent picker + career line + last meeting ----

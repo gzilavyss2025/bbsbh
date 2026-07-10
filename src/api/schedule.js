@@ -156,6 +156,8 @@ export async function fetchGamesByPk(gamePks) {
           apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
           awayAbbr: teamAbbr(g.teams?.away?.team),
           homeAbbr: teamAbbr(g.teams?.home?.team),
+          awayId: g.teams?.away?.team?.id ?? null,
+          homeId: g.teams?.home?.team?.id ?? null,
           gameNumber: g.gameNumber ?? 1,
         }
       }

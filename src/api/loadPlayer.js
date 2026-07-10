@@ -57,6 +57,7 @@ import {
 } from './person.js'
 import { fetchTopProspects, prospectRankById, orgProspectRankById } from './prospects.js'
 import { gamePath } from '../lib/route.js'
+import { teamFullName } from '../lib/teams.js'
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10)
@@ -538,6 +539,24 @@ export async function loadPlayer(id, asOf) {
     }
   }
 
+  // The MLB Debut milestone — a synthetic "first" pinned to the debut game
+  // (bio.debut / debutGamePk), shown ahead of the rest. When the debut game was
+  // ALSO his first start (a position player or pitcher who started his debut),
+  // fold the two into one "MLB Debut & First Start" row and drop the separate
+  // First Start entry; otherwise they stand as distinct milestones. isHome comes
+  // from the debut-game split so the opponent resolves like every other first.
+  if (firsts && bio.debut) {
+    const debutSplit = (debutSplits ?? []).find((s) => s.date === bio.debut)
+    const sameAsStart = firsts.start && firsts.start.date === bio.debut
+    firsts.debut = {
+      label: sameAsStart ? 'MLB Debut & First Start' : 'MLB Debut',
+      date: bio.debut,
+      gamePk: debutGamePk,
+      isHome: debutSplit?.isHome ?? null,
+    }
+    if (sameAsStart) firsts.start = null
+  }
+
   // Point the debut fact and every game-log row at that game's (sealed) box
   // score, via the normal date/matchup/boxscore route (one batched schedule
   // lookup resolves all the abbreviations the slug needs).
@@ -560,6 +579,7 @@ export async function loadPlayer(id, asOf) {
         ...f,
         path: boxPath(f.gamePk),
         oppAbbr: g ? (f.isHome ? g.awayAbbr : g.homeAbbr) : '',
+        oppName: g ? teamFullName(f.isHome ? g.awayId : g.homeId) : null,
       }
     }
   }
