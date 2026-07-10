@@ -21,7 +21,12 @@ export const HOME = { x: 310, y: 505 }
 const ANGLE = { lf: -45, lc: -22.5, cf: 0, rc: 22.5, rf: 45 }
 const TRACK_FT = 14 // warning-track width, feet
 const FOUL_FT = 26 // stylized foul-ground margin beyond the wall/lines
-const INFIELD_CORNER_FT = 14 // how far the dirt skin's corner rounding eats into each baseline
+const INFIELD_CORNER_FT = 14 // how far the grass diamond's corner rounding eats into each baseline
+const MOUND_FT = 60.5
+const SKIN_RADIUS_FT = 95 // real groundskeeping spec: skin infield is a 95' arc off the pitcher's plate
+const MOUND_DIRT_FT = 9 // dirt circle around the pitching rubber
+const HOME_DIRT_FT = 13 // dirt circle around home plate
+const BASELINE_DIRT_FT = 6 // width of the dirt running-lane strip along each baseline
 
 const f = (n) => Math.round(n * 100) / 100
 
@@ -87,6 +92,38 @@ function roundedPolygonPath(pts, r) {
   return d + ' Z'
 }
 
+// The dirt "skin" infield: home plate, out along each foul line, capped by the
+// arc of a circle of radius `rFt` centered on the pitcher's mound — the real
+// construction spec for where the infield dirt ends and outfield grass begins.
+// Approximated as a sampled polyline rather than an SVG arc command (simpler
+// than working out sweep flags, and this is a stylized "vibe" drawing anyway).
+function skinFanPath(moundFt, rFt) {
+  const footT = (aDeg) => {
+    const cosA = Math.cos((aDeg * Math.PI) / 180)
+    const b = -2 * moundFt * cosA
+    const c = moundFt * moundFt - rFt * rFt
+    return (-b + Math.sqrt(b * b - 4 * c)) / 2
+  }
+  const feetPoint = (aDeg, t) => {
+    const rad = (aDeg * Math.PI) / 180
+    return { x: t * Math.sin(rad), y: t * Math.cos(rad) }
+  }
+  const mound = { x: 0, y: moundFt }
+  const footL = feetPoint(-45, footT(-45))
+  const footR = feetPoint(45, footT(45))
+  const angleFromMound = (p) => (Math.atan2(p.x - mound.x, p.y - mound.y) * 180) / Math.PI
+  const thetaL = angleFromMound(footL)
+  const thetaR = angleFromMound(footR)
+  const STEPS = 16
+  const arcPts = []
+  for (let i = 0; i <= STEPS; i++) {
+    const theta = thetaL + ((thetaR - thetaL) * i) / STEPS
+    const rad = (theta * Math.PI) / 180
+    arcPts.push(toSvg(mound.x + rFt * Math.sin(rad), mound.y + rFt * Math.cos(rad)))
+  }
+  return `M ${f(HOME.x)} ${f(HOME.y)} L ${line(arcPts)} Z`
+}
+
 export function buildFieldGeometry(dist, wall, arc) {
   const pts = wallPoints(dist, wall, arc)
   const lf = pts[0]
@@ -127,7 +164,10 @@ export function buildFieldGeometry(dist, wall, arc) {
   const foulLineL = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(lf.x)} ${f(lf.y)}`
   const foulLineR = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(rf.x)} ${f(rf.y)}`
 
-  // Infield: dirt diamond home→1B→2B→3B (90-ft basepaths), mound at 60.5 ft, bases.
+  // Infield: home→1B→2B→3B (90-ft basepaths), mound at 60.5 ft, bases. Real
+  // infields aren't a plain dirt diamond on grass — a big dirt "skin" fans out
+  // from home past the bases (capped by the 95'-off-the-mound arc), with grass
+  // cut into the middle of it and dirt circles at the mound and home plate.
   const b = (dft, adeg) => {
     const r = (adeg * Math.PI) / 180
     return toSvg(dft * Math.sin(r), dft * Math.cos(r))
@@ -135,16 +175,22 @@ export function buildFieldGeometry(dist, wall, arc) {
   const b1 = b(90, 45)
   const b2 = b(90 * Math.SQRT2, 0)
   const b3 = b(90, -45)
-  const mound = b(60.5, 0)
-  // Corners rounded off — real dirt skins are never knife-edged at the bases.
-  const infield = roundedPolygonPath([{ x: HOME.x, y: HOME.y }, b1, b2, b3], INFIELD_CORNER_FT)
+  const mound = b(MOUND_FT, 0)
+  const skin = skinFanPath(MOUND_FT, SKIN_RADIUS_FT)
+  // Corners rounded off — no real infield grass is knife-edged at the bases.
+  const grassDiamond = roundedPolygonPath([{ x: HOME.x, y: HOME.y }, b1, b2, b3], INFIELD_CORNER_FT)
+  // Dirt running lanes along each baseline, home to 1B/3B.
+  const baselineDirtL = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(b1.x)} ${f(b1.y)}`
+  const baselineDirtR = `M ${f(HOME.x)} ${f(HOME.y)} L ${f(b3.x)} ${f(b3.y)}`
 
   const labelAt = (p, t) => ({ ...offsetFromHome(p, 16), t })
   const tagAt = (p, h) => ({ ...offsetFromHome(p, -12), h })
 
   return {
-    fair, track, fenceSegs, foul, infield, foulLineL, foulLineR,
+    fair, track, fenceSegs, foul, skin, grassDiamond, foulLineL, foulLineR,
+    baselineDirtL, baselineDirtR,
     bases: [b1, b2, b3], mound,
+    moundDirtR: MOUND_DIRT_FT, homeDirtR: HOME_DIRT_FT, baselineDirtW: BASELINE_DIRT_FT,
     labels: [labelAt(lf, dist.lf), labelAt(cf, dist.cf), labelAt(rf, dist.rf)],
     wallTags: [tagAt(lf, wall.lf), tagAt(cf, wall.cf), tagAt(rf, wall.rf)],
   }
