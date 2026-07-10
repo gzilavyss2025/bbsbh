@@ -389,29 +389,56 @@ export async function fetchTransactions(personId, endDate) {
 }
 
 // Player ids selected to this season's All-Star Game. Roster membership isn't
-// score-revealing, so this is spoiler-safe to show year-round (unlike the
-// game itself, which stays sealed like any other). The team roster endpoints
-// for the All-Star squads (ids 159 AL / 160 NL) come back empty, so instead
-// look up the game via the schedule's gameType=A entry and read both teams'
-// player lists off its boxscore — populated as soon as rosters are announced,
-// well before the game is played. Degrades to an empty Set (works fine before
-// rosters are announced, after a season with no game, or off MLB).
+// score-revealing, so this is spoiler-safe to show year-round (unlike the game
+// itself, which stays sealed like any other).
+//
+// Source is the official All-Star SELECTIONS — the awards-recipients endpoint
+// for each league's squad (award ids ALAS = AL, NLAS = NL). This is the
+// authoritative list: it still names a player who was selected but then
+// withdrew / was replaced and never appears in the game (e.g. a starter who
+// pitched the prior Sunday, or a rookie held back for workload) — he earned the
+// honor and stays an All-Star. An earlier version read the game's boxscore
+// instead, which drops those withdrawn selectees (Jacob Misiorowski, a 2026 NL
+// selection who was pulled from the game, was missing that way); the boxscore is
+// now only a fallback for a season the awards data doesn't cover. Degrades to an
+// empty Set (works fine before rosters are announced, after a season with no
+// game, or off MLB).
 export async function fetchAllStarRosterIds(season) {
   if (!season) return new Set()
   try {
-    const sched = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=A`)
-    const gamePk = sched.dates?.[0]?.games?.[0]?.gamePk
-    if (!gamePk) return new Set()
-    const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
-    const teams = feed.liveData?.boxscore?.teams ?? {}
+    const rosters = await Promise.all(
+      ['ALAS', 'NLAS'].map((award) =>
+        getJson(`/api/v1/awards/${award}/recipients?sportId=1&season=${season}`).catch(() => null),
+      ),
+    )
     const ids = new Set()
-    for (const side of ['away', 'home']) {
-      for (const p of Object.values(teams[side]?.players ?? {})) {
-        if (p.person?.id) ids.add(p.person.id)
+    for (const r of rosters) {
+      for (const a of r?.awards ?? []) {
+        if (a.player?.id) ids.add(a.player.id)
       }
     }
-    return ids
+    if (ids.size > 0) return ids
+    return await fetchAllStarBoxscoreIds(season)
   } catch {
     return new Set()
   }
+}
+
+// Fallback for fetchAllStarRosterIds: the All-Star Game's own boxscore rosters,
+// read via the schedule's gameType=A entry. Used only when the awards-recipients
+// source above comes back empty for a season. Misses selectees who withdrew (see
+// above), but populated as soon as rosters are announced — better than nothing.
+async function fetchAllStarBoxscoreIds(season) {
+  const sched = await getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=A`)
+  const gamePk = sched.dates?.[0]?.games?.[0]?.gamePk
+  if (!gamePk) return new Set()
+  const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
+  const teams = feed.liveData?.boxscore?.teams ?? {}
+  const ids = new Set()
+  for (const side of ['away', 'home']) {
+    for (const p of Object.values(teams[side]?.players ?? {})) {
+      if (p.person?.id) ids.add(p.person.id)
+    }
+  }
+  return ids
 }

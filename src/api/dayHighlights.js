@@ -50,7 +50,10 @@ function multiHrSignal(feed) {
           key: 'multiHr',
           tier: TIER.NOTABLE,
           points: 50 + (hr >= 3 ? 15 : 0),
-          text: `${name} — ${hr} HR`,
+          // Colon, not another em dash — buildHeadline already appends
+          // " — {score}", and two dashes back to back ("Name — 2 HR — score")
+          // read like three unrelated fragments instead of one headline.
+          text: `${name}: ${hr} HR`,
         }
       }
     }
@@ -118,8 +121,13 @@ function winProbSignals(winProb, winnerIsHome) {
     signals.push({
       key: 'comeback',
       tier: TIER.STORY,
+      // `worst` is the WINNER's own win probability at its lowest point, so
+      // this reads as the deficit they climbed out of — not the opponent's
+      // peak (that read backwards here until fixed: showing 100-worst made a
+      // 23%-at-the-bottom comeback read as "down to a 77% win probability",
+      // which barely sounds like a comeback at all).
       points: Math.round(1.2 * deficit),
-      text: `Comeback win (down to a ${Math.round(100 - worst)}% win probability)`,
+      text: `Comeback win (down to a ${Math.round(worst)}% win probability)`,
     })
   }
 
@@ -158,16 +166,31 @@ function noHitterSignal(box) {
   }
 }
 
+// The feed's own play description often runs multiple sentences together —
+// "Ezequiel Duran homers (8) on a fly ball to center field. Brandon Nimmo
+// scores." — where that trailing "X scores." clause is redundant once the
+// score is appended right after it. Keep only the first sentence.
+function firstSentence(desc) {
+  const cut = desc.indexOf('. ')
+  return (cut === -1 ? desc : desc.slice(0, cut)).replace(/\.\s*$/, '')
+}
+
+// One template for every headline, so a reader can count on the same shape
+// regardless of which signal fired: "{what happened} — {final score}". Only
+// the walk-off signal gets the actual play spliced in (via potg) — it's
+// reliably the walk-off itself, the game's last and most decisive play.
+// Comeback deliberately does NOT splice in the "most captivating" play: that
+// play can belong to the team that ultimately LOST (e.g. the go-ahead shot
+// the winner later overcame), which read as a non sequitur credited to the
+// wrong side.
 function buildHeadline(signals, box, potg) {
+  const score = `${box.away.abbreviation} ${box.away.line.r}, ${box.home.abbreviation} ${box.home.line.r}`
   if (signals.length === 0) {
-    return `Final: ${box.away.abbreviation} ${box.away.line.r}, ${box.home.abbreviation} ${box.home.line.r}`
+    return `Final: ${score}`
   }
   const top = [...signals].sort((a, b) => a.tier - b.tier || b.points - a.points)[0]
-  const score = `${box.away.abbreviation} ${box.away.line.r}, ${box.home.abbreviation} ${box.home.line.r}`
-  if ((top.key === 'walkoff' || top.key === 'comeback') && potg?.desc) {
-    return `${top.text} — ${potg.desc} (${score})`
-  }
-  return `${top.text} — ${score}`
+  const text = top.key === 'walkoff' && potg?.desc ? `${top.text}: ${firstSentence(potg.desc)}` : top.text
+  return `${text} — ${score}`
 }
 
 // `entries`: [{ gamePk, game, feed, winProb, dateStr }] — `game` is the

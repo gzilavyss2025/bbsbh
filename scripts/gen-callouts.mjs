@@ -30,6 +30,11 @@
 //   6. Hitter situational splits — season RISP and vs-L/vs-R rate lines, from
 //      the API's own statSplits sitCodes (a second per-hitter fetch alongside
 //      the game-log sweep — see hitterEnrich).
+//   7. Birthday performance — for anyone whose birthday IS the slate date, his
+//      career line (AVG / H / AB / HR) in games he's played on his birthday,
+//      summed across seasons from his debut (see birthdayLine). Rides alongside
+//      the existing "celebrating his birthday today" flag; a tiny fan-out since
+//      only the day's birthday boys are swept.
 //
 // WHY a nightly precompute (the war.js / minors-leaders.js build-time pattern,
 // docs/data-enrichment.md §5) rather than live: scoped to the NEXT day's teams
@@ -161,6 +166,14 @@ const RECENT_APPEARANCE_WINDOW_DAYS = 4
 // Situational hitting splits (see hitterSituational) — a rate stat needs real
 // plate appearances behind it or a small sample reads as a false certainty.
 const SPLIT_MIN_PA = 15
+
+// Birthday performance history (see birthdayLine) — the fun "career .350 on his
+// birthday" note that rides alongside the existing "celebrating his birthday
+// today" one. Only players whose birthday IS the slate date are swept, so this
+// is a tiny fan-out; the floors just keep a one-game coincidence from reading as
+// a career trend.
+const BIRTHDAY_MIN_GAMES = 2
+const BIRTHDAY_MIN_AB = 5
 
 const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 
@@ -425,6 +438,45 @@ async function hitterSituational(personId) {
   return { risp: byCode.risp ?? null, vl: byCode.vl ?? null, vr: byCode.vr ?? null }
 }
 
+// Batting average as the API formats it (".350", "1.000") from summed hits/AB —
+// the birthday line is aggregated across seasons here, so its average has to be
+// recomputed rather than read from any one game log's own `avg`.
+function formatAvg(h, ab) {
+  if (ab <= 0) return '.000'
+  return (h / ab).toFixed(3).replace(/^0/, '')
+}
+
+// A hitter's CAREER line in games played on his own birthday, summed across
+// every season from his debut through the slate's eve — the "career .350 on his
+// birthday" note. Unlike every other sweep here this walks MULTIPLE seasons
+// (debut year → this season), but only players whose birthday is actually the
+// slate date are ever passed in, so the extra per-season game-log fetches are a
+// handful of players' worth. `asOf`-cut like the rest, so this year's birthday
+// game (tonight's, on the slate date itself) never folds in — it hasn't
+// happened yet and would be a spoiler if it had. Returns null below the floors.
+async function birthdayLine(personId, birthDate, debutDate) {
+  if (!birthDate || !debutDate) return null
+  const mmdd = birthDate.slice(5)
+  const startYear = num(debutDate.slice(0, 4))
+  if (!startYear) return null
+  let g = 0, ab = 0, h = 0, hr = 0
+  for (let y = startYear; y <= season; y++) {
+    const data = await getJson(
+      `/api/v1/people/${personId}/stats?stats=gameLog&group=hitting&season=${y}`,
+    )
+    for (const s of data.stats?.[0]?.splits ?? []) {
+      if (!s.date || s.date.slice(5) !== mmdd || s.date > asOf) continue
+      const st = s.stat ?? {}
+      g += 1
+      ab += num(st.atBats)
+      h += num(st.hits)
+      hr += num(st.homeRuns)
+    }
+  }
+  if (g < BIRTHDAY_MIN_GAMES || ab < BIRTHDAY_MIN_AB) return null
+  return { g, ab, h, hr, avg: formatAvg(h, ab) }
+}
+
 // A pitcher's game-log-derived enrichment: home/away decision split, the 6+ IP
 // start record, a count of double-digit-strikeout starts, a current scoreless-
 // outing streak (consecutive most-recent APPEARANCES — not innings — with zero
@@ -506,6 +558,7 @@ const leadersByTeam = new Map()
 const scoringByTeam = new Map()
 const poolById = new Map() // personId -> his own PoolPlayer (for season CG/shutout lookup)
 const birthDateById = new Map() // personId -> 'YYYY-MM-DD', free off the same roster fetch
+const debutById = new Map() // personId -> mlbDebutDate 'YYYY-MM-DD', also free off the roster hydrate
 const hitterIdsByTeam = new Map() // teamId -> [personId] (position players)
 const pitcherIdsByTeam = new Map() // teamId -> [personId]
 const allHitterIds = new Set()
@@ -522,6 +575,7 @@ await mapPool(teamIds, 6, async (teamId) => {
   for (const p of pool) poolById.set(p.id, p)
   for (const r of roster) {
     if (r.person?.id != null && r.person.birthDate) birthDateById.set(r.person.id, r.person.birthDate)
+    if (r.person?.id != null && r.person.mlbDebutDate) debutById.set(r.person.id, r.person.mlbDebutDate)
   }
   const hitters = roster
     .filter((r) => r.position?.type !== 'Pitcher' && r.person?.id)
@@ -558,6 +612,19 @@ const pitcherList = [...allPitcherIds]
 const pitcherEnrichList = await mapPool(pitcherList, 8, (id) => pitcherEnrich(id))
 const pitcherEnrichById = new Map()
 pitcherList.forEach((id, i) => pitcherEnrichById.set(id, pitcherEnrichList[i]))
+
+// Birthday performance sweep — ONLY players (across every club on the slate)
+// whose birthday actually falls on the slate date, so this is a handful of
+// people even though birthdayLine itself walks a whole career. Keyed by
+// personId; a null (below the sample floors, or no debut date) simply drops out.
+const birthdayIds = [...birthDateById.keys()].filter((id) =>
+  isBirthdayOn(birthDateById.get(id), targetApi),
+)
+const birthdayStatsById = new Map()
+await mapPool(birthdayIds, 4, async (id) => {
+  const line = await birthdayLine(id, birthDateById.get(id), debutById.get(id))
+  if (line) birthdayStatsById.set(id, line)
+})
 
 // Assemble per-game bundles keyed by gamePk. Everything the render layer needs,
 // pre-joined so the app only ever does one static read + object lookups.
@@ -643,6 +710,14 @@ for (const g of games) {
     isBirthdayOn(birthDateById.get(id), targetApi),
   )
 
+  // A career-on-birthday line for whichever of THIS game's birthday players
+  // cleared the sample floors (see birthdayLine) — a subset of `birthdays`.
+  const birthdayStats = {}
+  for (const id of birthdays) {
+    const line = birthdayStatsById.get(id)
+    if (line) birthdayStats[id] = line
+  }
+
   outGames[g.gamePk] = {
     away: { teamId: awayId, name: teamMeta.get(awayId)?.name ?? '' },
     home: { teamId: homeId, name: teamMeta.get(homeId)?.name ?? '' },
@@ -653,6 +728,7 @@ for (const g of games) {
     situational,
     starterRecords,
     birthdays,
+    birthdayStats,
     teamRecords: {
       away: { ...(splitRecords[awayId] ?? {}), ...(scoringByTeam.get(awayId) ?? {}) },
       home: { ...(splitRecords[homeId] ?? {}), ...(scoringByTeam.get(homeId) ?? {}) },

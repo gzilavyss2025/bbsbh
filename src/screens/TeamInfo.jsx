@@ -6,6 +6,7 @@ import {
   selectGameInfo,
   selectOpposingPitcher,
   selectOpposingDefense,
+  selectBirthdayIds,
   lastFirst,
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
@@ -313,6 +314,19 @@ function startingIdsFor(feed) {
   return ids
 }
 
+// A birthday cake next to a player's name on the staging sheet when today's
+// game falls on his birthday (see selectBirthdayIds) — sits in the same spot an
+// all-star star would, a small non-score flourish. `show` is his membership in
+// the game's birthday set; renders nothing otherwise.
+function BirthdayCake({ show }) {
+  if (!show) return null
+  return (
+    <span className="name-cake" role="img" aria-label="Birthday today" title="Birthday today">
+      🎂
+    </span>
+  )
+}
+
 // The team-specific body shared by the phone page and the spread's panels:
 // batting order, the opposing starter, and the opposing defense diamond.
 function TeamSections({
@@ -324,6 +338,7 @@ function TeamSections({
   showTeammates = true,
 }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
+  const birthdayIds = useMemo(() => selectBirthdayIds(feed), [feed])
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const oppMeta = useMemo(
     () => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'),
@@ -383,6 +398,7 @@ function TeamSections({
                     {p.nameLastFirst.toUpperCase()}
                   </PlayerLink>
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                  <BirthdayCake show={birthdayIds.has(p.id)} />
                 </span>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
                 <span className="lineup__pos">{p.position}</span>
@@ -404,6 +420,7 @@ function TeamSections({
                             {p.name.toUpperCase()}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                          <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
@@ -423,6 +440,7 @@ function TeamSections({
                             {p.name.toUpperCase()}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                          <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
@@ -442,6 +460,7 @@ function TeamSections({
                             {p.name.toUpperCase()}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                          <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
                         <span className="roster__pos">{p.pos}</span>
