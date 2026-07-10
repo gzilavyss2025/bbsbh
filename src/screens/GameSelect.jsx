@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchSchedule } from '../api/schedule.js'
 import { fetchScheduleUniforms } from '../api/uniforms.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
@@ -9,6 +9,7 @@ import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
+import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
 import { SiteSearchButton } from '../components/SiteSearch.jsx'
@@ -16,6 +17,7 @@ import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
+import { PastDayRecapBox } from '../components/PastDayRecapBox.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
@@ -88,6 +90,19 @@ export function GameSelect({ onPick, onShowLogos }) {
     () => sorted.filter((g) => g.abstractState !== 'Preview'),
     [sorted],
   )
+
+  // A day you've paged BACK to (offset < 0) gets the past-day treatment: each
+  // Final game's card flips over to a result summary, and the Day Recap panel
+  // (Top Performers + Day Highlights) replaces the plain Top Performers box.
+  // Today (offset 0) keeps the ordinary live-refresh slate even once its games
+  // go Final — the past-day framing is for days you're looking back on, not
+  // the one still in progress.
+  const finals = useMemo(
+    () => (offset < 0 ? sorted.filter((g) => g.abstractState === 'Final') : []),
+    [sorted, offset],
+  )
+  const [revealedAll, setRevealedAll] = useState(false)
+  useEffect(() => setRevealedAll(false), [dateStr, sportId])
 
   // What each club is wearing isn't in the schedule payload, so it rides a
   // separate one-shot request keyed on the slate's gamePks (posted ~first
@@ -174,7 +189,7 @@ export function GameSelect({ onPick, onShowLogos }) {
           </button>
         </div>
 
-        {offset <= 0 && eligibleGames.length > 0 && (
+        {finals.length === 0 && offset <= 0 && eligibleGames.length > 0 && (
           <TopPerformersBox
             dateStr={dateStr}
             sportId={sportId}
@@ -193,27 +208,58 @@ export function GameSelect({ onPick, onShowLogos }) {
         emptyMessage="No games scheduled."
       />
 
-      <ul className="gamelist">
-        {sorted.map((g) => (
-          <li key={`${g.sportId}-${g.gamePk}`}>
-            <GameCard
-              game={g}
-              pinnedTeamId={
-                isPinned(g, favoriteTeamId, favoriteAffiliateIds) ? favoriteTeamId : null
-              }
-              uniformsReady={!!uniformsReady[g.gamePk]}
-              prospectCount={(prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)}
-              onSelect={() => onPick(g, dateStr)}
-              // A completed game on a past date gets a direct box-score jump.
-              onBoxScore={
-                offset < 0 && g.abstractState === 'Final'
-                  ? () => onPick(g, dateStr, 'boxscore')
-                  : null
-              }
-            />
-          </li>
-        ))}
-      </ul>
+      {finals.length > 0 && !revealedAll && (
+        <RevealAllBar onReveal={() => setRevealedAll(true)} />
+      )}
+
+      <div className={finals.length > 0 ? 'slate-body' : undefined}>
+        <ul className="gamelist">
+          {sorted.map((g) => {
+            const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+              ? favoriteTeamId
+              : null
+            const uReady = !!uniformsReady[g.gamePk]
+            const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+            const isPastFinal = offset < 0 && g.abstractState === 'Final'
+            return (
+              <li key={`${g.sportId}-${g.gamePk}`}>
+                {isPastFinal ? (
+                  <PastGameFlipCard
+                    game={g}
+                    dateStr={dateStr}
+                    revealed={revealedAll}
+                    pinnedTeamId={pinnedTeamId}
+                    uniformsReady={uReady}
+                    prospectCount={pCount}
+                    onSelect={() => onPick(g, dateStr)}
+                    onBoxScore={() => onPick(g, dateStr, 'boxscore')}
+                  />
+                ) : (
+                  <GameCard
+                    game={g}
+                    pinnedTeamId={pinnedTeamId}
+                    uniformsReady={uReady}
+                    prospectCount={pCount}
+                    onSelect={() => onPick(g, dateStr)}
+                    onBoxScore={null}
+                  />
+                )}
+              </li>
+            )
+          })}
+        </ul>
+
+        {finals.length > 0 && (
+          <PastDayRecapBox
+            dateStr={dateStr}
+            sportId={sportId}
+            games={finals}
+            prospectsData={prospects.data}
+            revealedAll={revealedAll}
+            onRevealAll={() => setRevealedAll(true)}
+          />
+        )}
+      </div>
 
       <SiteFooter
         onShowLogos={onShowLogos}
@@ -230,6 +276,28 @@ export function GameSelect({ onPick, onShowLogos }) {
         />
       )}
     </div>
+  )
+}
+
+// The single "reveal all results" control for a past day's flip cards — a top
+// button (wide layout) plus a mobile-only fixed bottom bar duplicate, the same
+// floating-bar convention InningViewer uses for "Reveal {half}"
+// (.pagenav/.btn--reveal). One tap flips every Final game's card AND
+// force-reveals the Day Recap panel (see PastDayRecapBox's forceRevealed
+// prop) — there's no per-card unlock, and the Day Recap's own seal does the
+// same thing in reverse (see onRevealAll).
+function RevealAllBar({ onReveal }) {
+  return (
+    <>
+      <button type="button" className="btn btn--reveal revealall__top" onClick={onReveal}>
+        <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
+      </button>
+      <div className="pagenav pagenav--revealall">
+        <button type="button" className="btn btn--reveal" onClick={onReveal}>
+          <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
+        </button>
+      </div>
+    </>
   )
 }
 

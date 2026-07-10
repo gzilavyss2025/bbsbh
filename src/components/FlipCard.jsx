@@ -4,7 +4,7 @@
 // revealed.
 //
 // Fully controlled by `flipped` — a single, page-level "reveal all games"
-// action decides when every card turns over (see PastPreview.jsx), not a tap
+// action decides when every card turns over (see GameSelect.jsx), not a tap
 // on the card itself (tapping a card always navigates to the real game
 // instead — the flip is a separate, explicit action, never a side effect of
 // browsing). Reveal is still one-directional in effect (the caller only ever

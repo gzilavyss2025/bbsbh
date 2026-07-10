@@ -11,13 +11,11 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 
-// THIN PREVIEW NOTE: this is the live-data preview version of the recap box
-// the plan describes — it fans out its own Day Highlights fetch separately
-// from computeTopPerformersByResult's fetch rather than sharing one cache-
-// backed fetch between the two (that unification is real-implementation
-// work, not this preview's job; see the plan's "data layer" phase). The
-// single-seal shape — one tap revealing both Top Performers and Day
-// Highlights — is the real thing being judged here.
+// Day Highlights' per-game feed/win-probability fetch goes through the same
+// usePastGameSignals cache a flipped slate card uses, so revealing both never
+// double-fetches a gamePk. Top Performers pulls from the lighter boxscore
+// endpoint instead (see topPerformers.js) — it needs no play-by-play, so
+// there's nothing to share there.
 
 function DayHighlightRow({ entry }) {
   const navigate = useNav()
