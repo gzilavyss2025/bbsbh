@@ -91,6 +91,186 @@ const CONFIG = {
     // a blurb line and an adjacent stat-table row never merge.
     lineTol: 2,
   },
+  // --- 'flow-bold' clubs: the league-standard full-width-prose template, but
+  // with a real two-weight (Regular/Bold) body/heading split instead of the
+  // Pirates' same-subset-vs-different-subset trick. See CALIBRATION.md.
+
+  // Red Sox — cleanest sheet in the league; single left column, one bold weight.
+  111: {
+    layout: 'flow-bold',
+    title: 'Red Sox Game Notes',
+    bodyFont: /FrutigerLT-Cn/,
+    headFont: /FrutigerLT-BlackCn/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    rightTableMinX: 460,
+    tableLeader: /\.(\s*\.){7,}/,
+    bottomCutoff: 90,
+  },
+  // Mets — two lead rows are the opponent/standings line, not a blurb.
+  121: {
+    layout: 'flow-bold',
+    title: 'Mets Game Notes',
+    bodyFont: /Grift-Regular/,
+    headFont: /Grift-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    rightTableMinX: 320,
+    tableLeader: /\.(\s*\.){7,}/,
+    skipTitle: /^(Boston Red Sox|New York Mets|Vs\. )/i,
+  },
+  // Marlins — UPCOMING SCHEDULE banner top-right + bottom DATE box dropped by
+  // geometry/skipTitle; allCapsOnly drops bold player-name recap lead-ins
+  // ("Kyle Stowers", "Otto Lopez") that share the heading font but aren't titles.
+  146: {
+    layout: 'flow-bold',
+    title: 'Marlins Game Notes',
+    bodyFont: /GothamXNarrow-Book/,
+    headFont: /GothamXNarrow-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    rightTableMinX: 440,
+    tableLeader: /\.(\s*\.){7,}/,
+    bottomCutoff: 90,
+    allCapsOnly: true,
+    skipTitle: /^(UPCOMING|SCHEDULE|ALL TIMES ET)/i,
+  },
+  // Phillies — very clean single column; allCapsOnly avoids bold player-name
+  // lead-ins ("Wheeler", "Cristopher Sánchez") being mistaken for titles.
+  // bottomCutoff drops the "Score First:"/"DATE" boxes at the page foot.
+  143: {
+    layout: 'flow-bold',
+    title: 'Phillies Game Notes',
+    bodyFont: /Tahoma$/,
+    headFont: /Tahoma-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    rightTableMinX: 460,
+    tableLeader: /\.(\s*\.){7,}/,
+    titleMaxLen: 40,
+    allCapsOnly: true,
+    bottomCutoff: 110,
+  },
+  // Dodgers — small tidy sheet, tighter left margin than most; allCapsOnly
+  // avoids bold player-name lead-ins ("Wrobleski", "Betts") as titles.
+  119: {
+    layout: 'flow-bold',
+    title: 'Dodgers Game Notes',
+    bodyFont: /ArticulatCF-Regular/,
+    headFont: /ArticulatCF-Bold/,
+    headingMaxX: 40,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    skipTitle: /^Date\/Time/i,
+  },
+  // Athletics — heads are BoldItalic; plain -Bold is a different (table) role.
+  // bottomCutoff drops the "Fri./Sat./Sun." schedule box at the page foot.
+  133: {
+    layout: 'flow-bold',
+    title: 'Athletics Game Notes',
+    bodyFont: /ProximaNova-Regular/,
+    headFont: /ProximaNova-BoldIt/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    bottomCutoff: 95,
+  },
+  // Astros — several "titles" are vs-table / history-box headers, plus a
+  // record-summary colon-table with no dotted leader to key off of — drop them
+  // all by skipTitle so their bodies fall through as ownerless (a dropped
+  // heading's own body is simply unclaimed, not reattached, when nothing
+  // survives above it).
+  117: {
+    layout: 'flow-bold',
+    title: 'Astros Game Notes',
+    bodyFont: /Colfax-Regular/,
+    headFont: /Colfax-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    skipTitle: /^(GAME #\d|ABOUT THE RECORD|ASTROS VS\.|TODAY'S MEDIA AVAILABILITY|UPCOMING SCHEDULE|DATE$|pada$)/i,
+    bottomCutoff: 135,
+  },
+  // Royals — body is Gotham too, so the head test must key on -Bold specifically;
+  // masthead + bold player names are also Gotham-Bold, gated by allCapsOnly.
+  // bottomCutoff drops the UPCOMING GAMES box + broadcast footer.
+  118: {
+    layout: 'flow-bold',
+    title: 'Royals Game Notes',
+    bodyFont: /Gotham-Book/,
+    headFont: /Gotham-Bold/,
+    headingMaxX: 60,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    titleMaxLen: 40,
+    allCapsOnly: true,
+    bottomCutoff: 180,
+  },
+  // Angels — bold player-name lead-ins ("Adell") gated out by allCapsOnly; the
+  // numbered ALL-TIME leaderboard boxes ("LEAGUE LEADER", "MOST CAREER…") are
+  // ALL-CAPS too, so they're dropped by skipTitle instead. Bottom DATE/schedule
+  // box dropped by geometry.
+  108: {
+    layout: 'flow-bold',
+    title: 'Angels Game Notes',
+    bodyFont: /QuietSans-Regular/,
+    headFont: /QuietSans-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    titleMaxLen: 40,
+    allCapsOnly: true,
+    skipTitle: /^(LEAGUE LEADER|MOST CAREER)/i,
+    bottomCutoff: 90,
+  },
+  // Mariners — page 2 (starter notes); body also appears as -Cn/-BdCn (tables),
+  // so match -Roman only for body and -Bd (not -BdCn) for heads. topCutoff drops
+  // the "2026/Career MLB Breakdown" stat tables above the narrative; allCapsOnly
+  // drops bold player-name mentions mid-body ("Castillo", "Bryan Woo").
+  136: {
+    layout: 'flow-bold',
+    title: 'Mariners Game Notes',
+    page: 2,
+    bodyFont: /HelveticaNeueLTStd-Roman/,
+    headFont: /HelveticaNeueLTStd-Bd$/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 780,
+  },
+  // Twins — page 2 (starter notes); page 1 is the season-splits table. The
+  // starter's bio box (height/weight, a game-by-game log) sits above the
+  // narrative on page 2 too — topCutoff drops it.
+  142: {
+    layout: 'flow-bold',
+    title: 'Twins Game Notes',
+    page: 2,
+    bodyFont: /TradeGothicLTStd-Cn18/,
+    headFont: /TradeGothicLTStd-BdCn20/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    topCutoff: 680,
+    skipTitle: /^PITCH \(AVG/i,
+  },
+  // Yankees — page 2 (starter notes); page 1 is team stat blocks. On dates
+  // without a featured-starter page, page 2 is instead a bullpen/roster bio
+  // packet (per-player bullets with "Current Trend"/"2026 Multi-Hit Games"
+  // stat sub-labels) — skipTitle drops those sub-labels; the player-bio
+  // bullets themselves still come through as readable (if less punny) blurbs.
+  147: {
+    layout: 'flow-bold',
+    title: 'Yankees Game Notes',
+    page: 2,
+    bodyFont: /MyriadPro-Regular/,
+    headFont: /MyriadPro-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 150,
+    tableLeader: /\.(\s*\.){7,}/,
+    skipTitle: /^(Current Trend|2026 Multi-Hit Games)/i,
+  },
 }
 
 // True when this club's Game Notes template is calibrated — the caller opens the
@@ -138,7 +318,7 @@ async function parsePdf(pdfUrl, cfg) {
   })
   const doc = await pdfjs.getDocument({ data: buf }).promise
   try {
-    const page = await doc.getPage(1)
+    const page = await doc.getPage(cfg.page ?? 1)
     // getOperatorList resolves the page's fonts into commonObjs so we can read
     // each item's real PostScript name (the generated "g_d0_fN" ids aren't
     // stable across PDFs; the font names are).
@@ -162,6 +342,7 @@ async function parsePdf(pdfUrl, cfg) {
 // (see docs/whats-brewing.md's Node harness).
 export function extractBlurbs(items, realName, cfg) {
   if (cfg?.layout === 'flow') return extractFlow(items, realName, cfg)
+  if (cfg?.layout === 'flow-bold') return extractFlowBold(items, realName, cfg)
   return extractColumn(items, realName, cfg)
 }
 
@@ -324,6 +505,146 @@ function extractFlow(items, realName, cfg) {
       ),
     }))
     .filter((b) => b.title && b.body)
+}
+
+// ---------------------------------------------------------------------------
+// 'flow-bold' layout (most other clubs): the same full-width-prose-with-inline-
+// heading shape as 'flow', but the body/heading split is a REAL two-weight font
+// pair (body regular, heads bold/black/demi) rather than "biggest subset wins" —
+// so it's driven by explicit cfg.bodyFont/cfg.headFont regexes instead of a
+// dominant-font heuristic. Reuses 'flow's columnMaxX/rightTableMinX/tableLeader
+// geometry knobs for table exclusion (most of these clubs have no separate
+// Gotham display face to anchor a bottom-box cutoff off of, so cfg.topCutoff/
+// cfg.bottomCutoff are plain y-coordinates instead).
+// ---------------------------------------------------------------------------
+function extractFlowBold(items, realName, cfg) {
+  const tol = cfg.lineTol ?? 3
+  const topCutoff = cfg.topCutoff ?? Infinity
+  const bottomCutoff = cfg.bottomCutoff ?? -Infinity
+  const words = items
+    .filter((i) => i.str.trim())
+    .map((i) => ({
+      x: i.transform[4],
+      y: i.transform[5],
+      w: i.width || 0,
+      str: i.str,
+      font: realName(i.fontName),
+    }))
+    .filter((w) => w.y < topCutoff && w.y > bottomCutoff)
+  if (!words.length) return []
+
+  const isHead = (w) => cfg.headFont.test(w.font)
+  // Body = the family regex minus the heading regex, so a body face split
+  // across multiple pdfjs subsets (DET/BAL/MIN/SEA in the dossier) is still
+  // fully captured — only the bold heading subset is excluded.
+  const isBody = (w) => cfg.bodyFont.test(w.font) && !isHead(w)
+
+  // Section headings: head-font runs at the left margin, grouped by baseline.
+  // headingMaxX anchors which BASELINES qualify (the line's first word starts
+  // at the margin AND is head-font); once anchored, the title is the
+  // CONTIGUOUS head-font run from the start of the line — not every head-font
+  // word up to columnMaxX — because a second, later bold run on the same
+  // baseline (LAA: "12-TIME ALL-STAR: Mike Trout has earned…", the name is
+  // bold again after a body-font colon) is an inline lead-in for the body, not
+  // more of the title. A genuinely multi-word title (SEA: "THE ROAD SO FAR")
+  // IS one contiguous head-font run and must not be truncated at headingMaxX.
+  const lineWords = []
+  for (const w of words) {
+    if (w.x >= cfg.columnMaxX) continue
+    let l = lineWords.find((l) => Math.abs(l.y - w.y) < tol)
+    if (!l) { l = { y: w.y, words: [] }; lineWords.push(l) }
+    l.words.push(w)
+  }
+  const headings = []
+  for (const l of lineWords) {
+    l.words.sort((a, b) => a.x - b.x)
+    // Skip past any leading decoration (e.g. a bullet glyph in a third,
+    // neither-body-nor-head symbol font) to find where the head-font run
+    // actually starts; headingMaxX gates THAT word's x, not the decoration's.
+    const start = l.words.findIndex((w) => isHead(w))
+    if (start === -1 || l.words[start].x >= cfg.headingMaxX) continue
+    let i = start
+    while (i < l.words.length && isHead(l.words[i])) i++
+    const titleWords = l.words.slice(start, i)
+    const leadWords = l.words.slice(i)
+    // Mark every word on this heading's baseline as consumed so the body pass
+    // below (which walks the same `words` array) doesn't ALSO pick up the
+    // leadWords portion as an ordinary body line — extraLead already covers it.
+    for (const w of titleWords) w.consumed = true
+    for (const w of leadWords) w.consumed = true
+    headings.push({ y: l.y, titleWords, leadWords })
+  }
+  for (const h of headings) {
+    const line = joinWords(h.titleWords).replace(/\s+/g, ' ').trim()
+    const lead = joinWords(h.leadWords).replace(/^[\s:]+/, '').trim()
+    // A colon mid-line (not at the very end) means the head-font run itself
+    // continues past the title into an inline bold lead-in on the SAME
+    // baseline (KC: one PDF text item "THE RIGHT LANE: Lane Thomas") — keep
+    // only the part before the colon as the title and fold the rest into this
+    // heading's body as its first line.
+    const colon = line.indexOf(':')
+    if (colon >= 0 && colon < line.length - 1) {
+      h.title = line.slice(0, colon).trim()
+      h.extraLead = [line.slice(colon + 1).trim(), lead].filter(Boolean).join(' ')
+    } else {
+      h.title = line.replace(/\s*:\s*$/, '').trim()
+      h.extraLead = lead
+    }
+  }
+  // Drop bold inline player-name lead-ins (a stray heading-font run that isn't
+  // really a section title — too long, or not ALL-CAPS) BEFORE assigning body
+  // ownership below, so its body lines reattach to the enclosing real heading
+  // rather than being discarded with it. A cfg.skipTitle match, by contrast, IS
+  // a genuine section boundary (a known non-narrative box: a leaderboard, a
+  // schedule grid) — it still owns its body for ownership purposes, so that
+  // body doesn't leak into a neighboring blurb, but is dropped at output time.
+  const titled = headings.filter(
+    (h) =>
+      h.title &&
+      (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
+      (!cfg.allCapsOnly || h.title === h.title.toUpperCase()),
+  )
+  titled.sort((a, b) => b.y - a.y)
+  if (!titled.length) return []
+
+  // Body words: left column only, excluding right-column stat tables (by
+  // x-position and/or dotted leader) — the font test alone can't separate them
+  // since most of these clubs set their tables in the body face too.
+  const body = words.filter(
+    (w) =>
+      isBody(w) &&
+      !w.consumed &&
+      w.x < cfg.columnMaxX &&
+      !cfg.tableLeader.test(w.str) &&
+      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
+  )
+
+  const lines = []
+  for (const w of body) {
+    let l = lines.find((l) => Math.abs(l.y - w.y) < tol)
+    if (!l) { l = { y: w.y, words: [] }; lines.push(l) }
+    l.words.push(w)
+  }
+  for (const l of lines) l.text = joinWords(l.words)
+
+  // Assign each body line to the lowest surviving heading at or above it.
+  for (const l of lines) {
+    let owner = null
+    for (const h of titled) if (h.y + tol >= l.y) owner = h
+    l.owner = owner
+  }
+
+  return titled
+    .filter((h) => !(cfg.skipTitle && cfg.skipTitle.test(h.title)))
+    .map((h) => ({
+      title: h.title,
+      body: tidy(
+        [h.extraLead, ...lines.filter((l) => l.owner === h).sort((a, b) => b.y - a.y).map((l) => l.text)]
+          .filter(Boolean)
+          .join(' '),
+      ),
+    }))
+    .filter((b) => b.body)
 }
 
 // Join x-sorted words, inserting a space only where there's a real horizontal
