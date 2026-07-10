@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { TeamLogo } from './TeamLogo.jsx'
+import { teamLocationName, teamClubName } from '../lib/teams.js'
 
 // SPLITS VS TEAM — a player's career line against a chosen opponent, with a
 // finger-scrollable strip of every MLB club's logo to pick a different one
@@ -120,11 +121,11 @@ export function SplitsVsTeam({ vsTeam, season, asOf }) {
       {last && (
         <div className="vsteam__last">
           <div className="vsteam__last-label">
-            Last game{sel?.abbr ? ` vs ${sel.abbr}` : ''}
+            Last game against {teamLocationName(sel.id) ?? sel.name}
           </div>
           <p className="vsteam__last-row">
             <span className="vsteam__last-meta">
-              {gameDate(last.date, season)} {last.home ? `vs ${last.opp}` : `@${last.opp}`}
+              {gameDate(last.date, season)} {last.home ? 'vs' : '@'} {teamClubName(sel.id) ?? last.opp}
             </span>
             <span className="vsteam__last-sep">|</span>
             <span className="vsteam__last-line">{last.line}</span>
