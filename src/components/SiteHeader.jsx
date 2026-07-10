@@ -1,13 +1,15 @@
 import { ScorebookMark } from './ScorebookMark.jsx'
 import { SiteSearchButton } from './SiteSearch.jsx'
+import { SiteMenuButton } from './SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
 
 // The small "Scorebook" brand mark + wordmark shown atop every screen (except
 // the slate, which is already home) — tapping it returns to '/' with a full
 // reload (see lib/home.js). Not sticky; each screen still owns whatever
-// page-specific header sits below it. The search button rides on the same
-// row so site-wide search is reachable from anywhere (the slate gets its own
-// copy in its topbar — see GameSelect — since it doesn't render SiteHeader).
+// page-specific header sits below it. The search + menu buttons ride on the
+// same row so site-wide search and the standalone pages (standings,
+// prospects, etc.) are reachable from anywhere (the slate gets its own copy
+// in its topbar — see GameSelect — since it doesn't render SiteHeader).
 export function SiteHeader() {
   return (
     <div className="sitebar">
@@ -20,7 +22,10 @@ export function SiteHeader() {
         <ScorebookMark size={22} simplified />
         <span className="sitebar__word">Scorebook</span>
       </button>
-      <SiteSearchButton className="sitebar__search" />
+      <div className="sitebar__actions">
+        <SiteSearchButton />
+        <SiteMenuButton />
+      </div>
     </div>
   )
 }

@@ -13,6 +13,7 @@ import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
 import { SiteSearchButton } from '../components/SiteSearch.jsx'
+import { SiteMenuButton } from '../components/SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
@@ -163,6 +164,7 @@ export function GameSelect({ onPick, onShowLogos }) {
           <div className="topbar__slateactions">
             <LevelNav sportId={sportId} onChange={pickLevel} />
             <SiteSearchButton className="topbar__search" />
+            <SiteMenuButton className="topbar__search" />
           </div>
         </header>
 
