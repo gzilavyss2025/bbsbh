@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchSchedule } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
+import { useNav } from '../lib/nav.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { gamePath } from '../lib/route.js'
 import { SPORT_IDS } from '../lib/teams.js'
@@ -13,21 +14,34 @@ import { LevelNav } from '../components/LevelNav.jsx'
 import { Loader } from '../components/Loader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 
-// One past, Final game's flip card, wired to the real feed + win-probability
-// endpoints (see usePastGameSignals) — nothing is fetched until the card is
-// actually flipped (FlipCard's `onReveal`), same spoiler-gated-fetch-timing
-// convention TopPerformersBox already uses.
-function PastGameFlipCard({ game, dateStr }) {
+// One past, Final game's flip card. The flip itself is fully controlled by
+// the page-level `revealedAll` switch (see PastPreview below) — tapping the
+// card itself always navigates to the real game (lineups → innings), same as
+// today's slate. Only "Reveal all games" turns every card over at once, and
+// only then does this card's own feed/win-probability fetch fire (via the
+// shared usePastGameSignals cache, so it's a no-op if the Day Recap panel
+// already pulled this same gamePk).
+function PastGameFlipCard({ game, dateStr, revealed }) {
   const getSignals = usePastGameSignals()
+  const navigate = useNav()
   const [state, setState] = useState({ loading: false, error: false, data: null })
 
-  const handleReveal = () => {
+  useEffect(() => {
+    if (!revealed) return
+    let cancelled = false
     setState({ loading: true, error: false, data: null })
     getSignals(game.gamePk).then(
-      (data) => setState({ loading: false, error: false, data }),
-      () => setState({ loading: false, error: true, data: null }),
+      (data) => {
+        if (!cancelled) setState({ loading: false, error: false, data })
+      },
+      () => {
+        if (!cancelled) setState({ loading: false, error: true, data: null })
+      },
     )
-  }
+    return () => {
+      cancelled = true
+    }
+  }, [revealed, game.gamePk, getSignals])
 
   const boxScorePath = gamePath(
     dateStr,
@@ -36,12 +50,19 @@ function PastGameFlipCard({ game, dateStr }) {
     'boxscore',
     game.gameNumber,
   )
+  const lineupPath = gamePath(
+    dateStr,
+    game.away.abbreviation,
+    game.home.abbreviation,
+    'lineup1',
+    game.gameNumber,
+  )
 
   return (
     <FlipCard
-      onReveal={handleReveal}
-      renderFront={({ flip }) => <GameCard game={game} onSelect={flip} />}
-      renderBack={({ flipBack }) => {
+      flipped={revealed}
+      renderFront={() => <GameCard game={game} onSelect={() => navigate(lineupPath)} />}
+      renderBack={() => {
         if (state.loading) {
           return <Loader size="inline" message="Pulling the box score…" />
         }
@@ -54,11 +75,29 @@ function PastGameFlipCard({ game, dateStr }) {
             feed={state.data.feed}
             winProb={state.data.winProb}
             boxScorePath={boxScorePath}
-            onFlipBack={flipBack}
           />
         )
       }}
     />
+  )
+}
+
+// The single "reveal all games" control — a top button (wide layout) plus a
+// mobile-only fixed bottom bar duplicate, the same floating-bar convention
+// InningViewer already uses for "Reveal {half}" (.pagenav/.btn--reveal). One
+// tap flips every card on the page at once; there's no per-card unlock.
+function RevealAllBar({ onReveal }) {
+  return (
+    <>
+      <button type="button" className="btn btn--reveal revealall__top" onClick={onReveal}>
+        <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all games
+      </button>
+      <div className="pagenav pagenav--revealall">
+        <button type="button" className="btn btn--reveal" onClick={onReveal}>
+          <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all games
+        </button>
+      </div>
+    </>
   )
 }
 
@@ -73,7 +112,12 @@ function PastGameFlipCard({ game, dateStr }) {
 export function PastPreview({ onBack }) {
   const [offset, setOffset] = useState(-1) // yesterday — likely has real Finals
   const [sportId, setSportId] = useState(SPORT_IDS.MLB)
+  const [revealedAll, setRevealedAll] = useState(false)
   const dateStr = useMemo(() => toApiDate(addDays(new Date(), offset)), [offset])
+
+  // One-directional reveal, reset when the date/level changes (a fresh day
+  // starts sealed again) — same reset pattern PastDayRecapBox uses.
+  useEffect(() => setRevealedAll(false), [dateStr, sportId])
 
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
@@ -115,16 +159,19 @@ export function PastPreview({ onBack }) {
       />
 
       {finals.length > 0 && (
-        <div className="slate-body">
-          <ul className="gamelist">
-            {finals.map((g) => (
-              <li key={`${g.sportId}-${g.gamePk}`}>
-                <PastGameFlipCard game={g} dateStr={dateStr} />
-              </li>
-            ))}
-          </ul>
-          <PastDayRecapBox dateStr={dateStr} sportId={sportId} games={finals} prospectsData={null} />
-        </div>
+        <>
+          {!revealedAll && <RevealAllBar onReveal={() => setRevealedAll(true)} />}
+          <div className="slate-body">
+            <ul className="gamelist">
+              {finals.map((g) => (
+                <li key={`${g.sportId}-${g.gamePk}`}>
+                  <PastGameFlipCard game={g} dateStr={dateStr} revealed={revealedAll} />
+                </li>
+              ))}
+            </ul>
+            <PastDayRecapBox dateStr={dateStr} sportId={sportId} games={finals} prospectsData={null} />
+          </div>
+        </>
       )}
     </div>
   )

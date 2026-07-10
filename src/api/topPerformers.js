@@ -103,14 +103,12 @@ function topN(map, ctxById, role, dateStr, n = 5) {
     .filter(Boolean)
 }
 
-// `games`: eligible (non-Preview) games on the current slate (the normalized
-// schedule rows GameSelect already has, each with `gamePk`/`away`/`home`/
-// `gameNumber`). `prospects`: the app-wide snapshot from fetchTopProspects()
-// (session-memoized upstream, so passing it in here avoids a second fetch).
-// `dateStr`: the slate's queried date (YYYY-MM-DD), for building each entry's
-// box-score link. One game's failure — bad gamePk, an MiLB park with no WPA —
-// just drops that game.
-export async function computeTopPerformers({ games, prospects, dateStr }) {
+// Shared by both exports below: fetches every game's light boxscore + win
+// probability and builds the per-player WPA maps + the context needed to
+// resolve a player's identity/stat line. Split out so the past-day Winners/
+// Losers split (computeTopPerformersByResult) doesn't refetch or re-derive
+// anything computeTopPerformers already does.
+async function buildWpaMaps(games) {
   const perGame = await Promise.all(
     (games ?? []).map(async (game) => {
       const [boxscore, winProb] = await Promise.all([
@@ -139,14 +137,67 @@ export async function computeTopPerformers({ games, prospects, dateStr }) {
     }
   }
 
-  const attachProspect = (entry) => ({
+  return { battingWpa, pitchingWpa, ctxById }
+}
+
+function attachProspect(prospects, entry) {
+  return {
     ...entry,
     prospectRank: prospectRankById(prospects?.players, entry.id),
     orgProspectRank: orgProspectRankById(prospects?.orgProspects, entry.id),
-  })
-
-  return {
-    batters: topN(battingWpa, ctxById, 'batting', dateStr).map(attachProspect),
-    pitchers: topN(pitchingWpa, ctxById, 'pitching', dateStr).map(attachProspect),
   }
+}
+
+// `games`: eligible (non-Preview) games on the current slate (the normalized
+// schedule rows GameSelect already has, each with `gamePk`/`away`/`home`/
+// `gameNumber`). `prospects`: the app-wide snapshot from fetchTopProspects()
+// (session-memoized upstream, so passing it in here avoids a second fetch).
+// `dateStr`: the slate's queried date (YYYY-MM-DD), for building each entry's
+// box-score link. One game's failure — bad gamePk, an MiLB park with no WPA —
+// just drops that game.
+export async function computeTopPerformers({ games, prospects, dateStr }) {
+  const { battingWpa, pitchingWpa, ctxById } = await buildWpaMaps(games)
+  return {
+    batters: topN(battingWpa, ctxById, 'batting', dateStr).map((e) => attachProspect(prospects, e)),
+    pitchers: topN(pitchingWpa, ctxById, 'pitching', dateStr).map((e) => attachProspect(prospects, e)),
+  }
+}
+
+// The past-day recap's Winners/Losers split: unlike computeTopPerformers
+// (separate batting/pitching leaderboards), this combines both into ONE
+// cross-role ranking per player (a two-way player keeps whichever role earned
+// him more WPA) and buckets each by whether HIS team won or lost that game —
+// so a big individual game in a losing effort still gets recognized, same
+// spirit as a hockey "star" nod. Top `n` per bucket by WPA.
+export async function computeTopPerformersByResult({ games, prospects, dateStr }, n = 3) {
+  const { battingWpa, pitchingWpa, ctxById } = await buildWpaMaps(games)
+
+  const merged = new Map()
+  for (const [id, e] of battingWpa) merged.set(id, { id, w: e.w, role: 'batting' })
+  for (const [id, e] of pitchingWpa) {
+    const existing = merged.get(id)
+    if (!existing || e.w > existing.w) merged.set(id, { id, w: e.w, role: 'pitching' })
+  }
+
+  const winners = []
+  const losers = []
+  for (const e of merged.values()) {
+    const ctx = ctxById.get(e.id)
+    if (!ctx) continue
+    const entry = resolveEntry(ctx, e.id, e.role, dateStr)
+    const found = findBoxscorePlayer(ctx.boxscore, e.id)
+    if (!entry || !found) continue
+    const awayRuns = ctx.boxscore.teams.away?.teamStats?.batting?.runs ?? 0
+    const homeRuns = ctx.boxscore.teams.home?.teamStats?.batting?.runs ?? 0
+    const won = found.side === 'away' ? awayRuns > homeRuns : homeRuns > awayRuns
+    ;(won ? winners : losers).push({ ...entry, w: e.w })
+  }
+
+  const topOf = (arr) =>
+    arr
+      .sort((a, b) => b.w - a.w)
+      .slice(0, n)
+      .map((e) => attachProspect(prospects, e))
+
+  return { winners: topOf(winners), losers: topOf(losers) }
 }
