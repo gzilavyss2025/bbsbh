@@ -53,7 +53,7 @@ function PerformerCard({ entry }) {
       <div className="playercard__body">
         <div className="playercard__name">
           <PlayerLink id={entry.id}>
-            {first} {last && <br />}
+            {first} {last && <br className="playercard__namebreak" />}
             {last}
           </PlayerLink>
         </div>

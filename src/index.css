@@ -5451,14 +5451,22 @@ body {
   flex-direction: column;
   gap: 2px;
 }
+/* Phone-first: first + last name on one row, a bit bigger than the old
+   universal size (there's only one flex item here — the PlayerLink — so this
+   is really just a font/wrap setting; the actual first/last line break is
+   the .playercard__namebreak <br> below). The wide-layout override (740px
+   block) switches to the two-line stack next to the bigger headshot there. */
 .playercard__name {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: baseline;
+  flex-wrap: wrap;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: var(--w-semibold);
   color: var(--text-heading);
+}
+.playercard__namebreak {
+  display: none;
 }
 .playercard__team {
   display: flex;
@@ -6023,6 +6031,19 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 6px 14px;
+  }
+
+  /* Winners/Losers baseball-card tiles: back to the two-line first/last stack
+     next to the bigger headshot (phone keeps them on one row instead — see
+     the base .playercard__name rule — since there's no extra vertical room
+     to spend there). */
+  .playercard__namebreak {
+    display: block;
+  }
+  .playercard__name {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 13px;
   }
 
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —

@@ -123,12 +123,17 @@ function linkifyNames(text, mentions) {
     .filter((part) => part !== '')
     .map((part, i) => {
       const id = byName.get(part)
+      // A plain string (not wrapped in an element) for the non-name parts —
+      // `#root *`'s uppercase rule matches ELEMENTS directly, so wrapping
+      // this in a <span> would force it back to caps despite .flipback__potg's
+      // exemption (inheritance loses to a rule that hits the element itself).
+      // Bare text stays a text node, so it correctly inherits sentence case.
       return id ? (
         <PlayerLink key={i} id={id}>
           {part}
         </PlayerLink>
       ) : (
-        <span key={i}>{part}</span>
+        part
       )
     })
 }
