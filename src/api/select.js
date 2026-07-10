@@ -447,6 +447,7 @@ export function selectPrePitchChanges(feed, inning, half) {
         changes.push({
           eventType: type,
           pitcher: {
+            id: ev.player.id,
             name: lastFirst(person),
             jersey: boxscoreJersey(feed, ev.player.id) || person.primaryNumber || '',
             hand: person.pitchHand?.code ?? '', // 'L' | 'R'

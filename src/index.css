@@ -3009,18 +3009,42 @@ body {
 .statbox--pitchernotice {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-height: 96px;
-  padding: 14px;
+  padding: 10px 14px;
   border-style: solid;
   border-color: var(--seal-hatch);
   background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
 }
 
-.pitchernotice__icon {
+/* The entering pitcher's headshot (see PitcherPhoto in StatBox.jsx) — sized
+   like the app's other card-mounted headshots (.shot), not the cramped inline
+   emoji this replaced, so the photo actually reads at a glance. Object-fit:
+   cover on a fixed-ratio frame keeps it from ever looking squished. */
+.pitchernotice__shot {
   flex: 0 0 auto;
-  font-size: 22px;
+  display: block;
+  width: 52px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: transparent;
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.pitchernotice__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  filter: grayscale(0.16) contrast(1.02);
+}
+.pitchernotice__shot--fallback {
+  display: grid;
+  place-items: center;
+  font-size: 26px;
   line-height: 1;
+  background: var(--surface-inset);
 }
 
 .pitchernotice__body {

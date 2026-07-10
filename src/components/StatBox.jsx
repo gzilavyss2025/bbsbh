@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { selectPrePitchChanges } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
+import { realHeadshotUrl } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
@@ -34,7 +36,7 @@ export function StatBox({
     if (pitcherChange?.pitcher) {
       return (
         <div className={`statbox statbox--pitchernotice ${className}`}>
-          <span className="pitchernotice__icon" aria-hidden="true">⚾</span>
+          <PitcherPhoto personId={pitcherChange.pitcher.id} />
           <div className="pitchernotice__body">
             <span className="pitchernotice__now">
               Now pitching{pitchingName ? ` for the ${pitchingName}` : ''}
@@ -88,6 +90,39 @@ export function StatBox({
         }}
       </SealBox>
     </div>
+  )
+}
+
+// The entering pitcher's headshot for the notification card above, degrading
+// to a plain baseball emoji rather than the mlbstatic CDN's own generic
+// silhouette placeholder — realHeadshotUrl (unlike the usual headshotUrl)
+// 404s for a personId with no real photo on file instead of silently serving
+// that placeholder, so a true photo miss is distinguishable here (see
+// lib/teams.js). A true network error degrades the same way.
+function PitcherPhoto({ personId }) {
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [personId])
+  const url = personId && !failed ? realHeadshotUrl(personId, 120) : null
+
+  if (!url) {
+    return (
+      <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
+        ⚾
+      </span>
+    )
+  }
+  return (
+    <span className="pitchernotice__shot">
+      <img
+        key={url}
+        src={url}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        aria-hidden="true"
+      />
+    </span>
   )
 }
 

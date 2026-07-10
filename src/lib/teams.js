@@ -140,6 +140,20 @@ export function headshotUrl(personId, width = 213) {
   return `${HEADSHOT_BASE}/d_people:generic:headshot:silo:current.png/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
 
+// Same underlying image, but WITHOUT the `d_...` default-image transform, so
+// a personId with no real photo on file 404s instead of silently getting the
+// generic gray silo placeholder (verified live: a real photo's id returns 200
+// either way; an id with no photo 404s here but 200s through headshotUrl
+// above). Only worth the distinction where showing the generic placeholder
+// would be worse than a different fallback entirely — e.g. the innings
+// view's pitching-change notification (see StatBox.jsx), which drops to an
+// emoji rather than a faceless gray silhouette. Not for the general
+// Headshot.jsx case, which is fine with the generic placeholder.
+export function realHeadshotUrl(personId, width = 213) {
+  if (!personId) return null
+  return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
+}
+
 // ---------------------------------------------------------------------------
 // Team colors
 //
