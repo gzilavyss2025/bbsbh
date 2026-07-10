@@ -10,11 +10,6 @@
 //   '/prospects'                        -> { name: 'prospects' }
 //   '/rehab'                            -> { name: 'rehab' }
 //   '/standings'                        -> { name: 'standings' }
-//   '/preview/pastday'                  -> { name: 'pastday-preview' } (thin
-//                                           live preview of the past-day flip-
-//                                           card redesign — see plan doc, not
-//                                           linked from any nav; throwaway once
-//                                           the real GameSelect wiring lands)
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
@@ -52,8 +47,6 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
   if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
   if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
-  if (parts.length === 2 && parts[0] === 'preview' && parts[1] === 'pastday')
-    return { name: 'pastday-preview' }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')

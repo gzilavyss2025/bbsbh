@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AboutPage } from './screens/AboutPage.jsx'
 import { GameSelect } from './screens/GameSelect.jsx'
-import { PastPreview } from './screens/PastPreview.jsx'
 import { GameView } from './screens/GameView.jsx'
 import { LogoSheet } from './screens/LogoSheet.jsx'
 import { PlayerPage } from './screens/PlayerPage.jsx'
@@ -81,8 +80,6 @@ export default function App() {
     content = <RehabPage />
   } else if (route.name === 'standings') {
     content = <StandingsPage />
-  } else if (route.name === 'pastday-preview') {
-    content = <PastPreview onBack={() => go('/')} />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {
