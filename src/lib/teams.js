@@ -126,29 +126,17 @@ export function leagueLogoUrl() {
 // cutout (426×426 at w_426, palette PNG + tRNS), the subject already framed
 // consistently — head crown ~3.3% from the top, shoulders bleeding off the
 // bottom — so a plain CSS top-center cover crop (see .shot img) reframes it to
-// 3:4 with no per-image work. The `d_people:generic:headshot:silo` transform
-// baked into the path means the CDN itself serves a transparent silhouette PNG
-// for an id it has no photo for (verified: the plain silo URL 404s for an
-// unknown id, this default returns 200 image/png) — so this degrades one more
-// step than logos do (a true network/404 still drops to the monogram in
-// components/Headshot.jsx). MiLB coverage is partial, hence the same
-// "decorative, render behind a fallback" rule as logos.
+// 3:4 with no per-image work. MiLB coverage is partial, hence the same
+// "decorative, render behind a fallback" rule as logos: components/Headshot.jsx
+// and StatBox.jsx's PitcherPhoto both use the URL below (WITHOUT the CDN's
+// `d_people:generic:headshot:silo` default-image transform some other
+// integrations use), so a personId with no real photo on file 404s instead of
+// silently serving the CDN's own generic gray silo placeholder — the miss is
+// then distinguishable from a real photo and can fall back to something more
+// useful (Headshot.jsx falls back further to the player's team logo, or a
+// monogram with no team).
 const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 
-export function headshotUrl(personId, width = 213) {
-  if (!personId) return null
-  return `${HEADSHOT_BASE}/d_people:generic:headshot:silo:current.png/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
-}
-
-// Same underlying image, but WITHOUT the `d_...` default-image transform, so
-// a personId with no real photo on file 404s instead of silently getting the
-// generic gray silo placeholder (verified live: a real photo's id returns 200
-// either way; an id with no photo 404s here but 200s through headshotUrl
-// above). Only worth the distinction where showing the generic placeholder
-// would be worse than a different fallback entirely — e.g. the innings
-// view's pitching-change notification (see StatBox.jsx), which drops to an
-// emoji rather than a faceless gray silhouette. Not for the general
-// Headshot.jsx case, which is fine with the generic placeholder.
 export function realHeadshotUrl(personId, width = 213) {
   if (!personId) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
