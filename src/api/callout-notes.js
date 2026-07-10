@@ -192,10 +192,15 @@ export function buildCallouts(
     const car = oppTeamId != null ? vsTeamCareerLine(vsTeam, entry.batterId, oppTeamId) : null
     if (car) {
       const oppName = bundle[otherSide(battingSide)]?.name
+      // "(35-for-80)" — only once gen-vs-team-splits.mjs has actually written an
+      // `h` count (it was added after `car` first shipped; a not-yet-refreshed
+      // committed file still lacks it, so this degrades to the bare average
+      // rather than an "undefined-for-80" line).
+      const hitLine = Number.isFinite(car.h) ? ` (${car.h}-for-${car.ab})` : ''
       const hrPart = car.hr > 0 ? ` with ${car.hr} HR` : ''
       if (oppName) {
         notes.push({
-          text: `Career ${car.avg}${hrPart} against the ${oppName}`,
+          text: `Career ${car.avg}${hitLine}${hrPart} against the ${oppName}`,
           personId: entry.batterId,
           side: battingSide,
         })

@@ -266,7 +266,7 @@ async function buildPlayerVs(personId, group, teamAbbr) {
     const s = b.sums
     const car = isPitcher
       ? { g: s.g, ip: outsToIp(s.outs), era: eraOf(s.er, s.outs), k: s.k, bb: s.bb }
-      : { g: s.g, ab: s.ab, avg: avgOf(s.h, s.ab), hr: s.hr, rbi: s.rbi, ops: opsOf(s) }
+      : { g: s.g, ab: s.ab, h: s.h, avg: avgOf(s.h, s.ab), hr: s.hr, rbi: s.rbi, ops: opsOf(s) }
     vs[oppId] = { car, last: b.last }
   }
   return vs
