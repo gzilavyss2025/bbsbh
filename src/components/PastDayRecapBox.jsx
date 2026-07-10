@@ -30,15 +30,27 @@ function DayHighlightRow({ entry }) {
   )
 }
 
+// "Tyler Tolbert" -> ["Tyler", "Tolbert"] (everything after the first space).
+// Used so the name can wrap to two lines at the wide layout's bigger
+// headshot size (see .playercard__namebreak) without a fixed split table.
+function splitFirstLast(full) {
+  const i = (full ?? '').indexOf(' ')
+  return i === -1 ? [full ?? '', ''] : [full.slice(0, i), full.slice(i + 1)]
+}
+
 // One "baseball card" tile: headshot, name + position (name a clickable
 // PlayerLink), team logo + abbreviation, stat line underneath.
 function PerformerCard({ entry }) {
+  const [first, last] = splitFirstLast(entry.name)
   return (
     <li className="playercard">
       <Headshot personId={entry.id} name={entry.name} className="playercard__shot" />
       <div className="playercard__body">
         <div className="playercard__name">
-          <PlayerLink id={entry.id}>{entry.name}</PlayerLink>
+          <PlayerLink id={entry.id}>
+            {first} {last && <br className="playercard__namebreak" />}
+            {last}
+          </PlayerLink>
           {entry.position && <span className="playercard__pos">{entry.position}</span>}
         </div>
         <div className="playercard__team">
@@ -104,7 +116,7 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             <h3 className="dayhl__title">Top Performers</h3>
             {winners.length > 0 && (
               <>
-                <h4 className="playercard__bucket">Winners</h4>
+                <h4 className="playercard__bucket">In a Win</h4>
                 <ul className="playercard__list">
                   {winners.map((e) => (
                     <PerformerCard key={e.id} entry={e} />
@@ -114,7 +126,7 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             )}
             {losers.length > 0 && (
               <>
-                <h4 className="playercard__bucket">Losers</h4>
+                <h4 className="playercard__bucket">In a Loss</h4>
                 <ul className="playercard__list">
                   {losers.map((e) => (
                     <PerformerCard key={e.id} entry={e} />
@@ -146,17 +158,29 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
 // date+level like ADR-0011, whose single reveal renders both Top Performers
 // (split into Winners/Losers) and Day Highlights stacked underneath — one
 // tap, one recap, since both are the same "flavor" of sealed daily digest.
-export function PastDayRecapBox({ dateStr, sportId, games, prospectsData }) {
+//
+// `revealedAll`/`onRevealAll` link this box's own seal to the page-level
+// "Reveal all results" control (see PastPreview.jsx): tapping THIS seal also
+// flips every game card (via onRevealAll), and tapping the OTHER control
+// force-reveals this box too (via `forceRevealed`) — both buttons do the same
+// thing. SealBox's onReveal fires either way shown becomes true, whether from
+// this box's own tap or an external forceRevealed flip.
+export function PastDayRecapBox({ dateStr, sportId, games, prospectsData, revealedAll, onRevealAll }) {
   const [revealed, setRevealed] = useState(false)
   useEffect(() => setRevealed(false), [dateStr, sportId])
+  const shown = revealed || revealedAll
 
   return (
     <div className="pastdayrecap">
-      {!revealed && <h2 className="topperf__banner">Day Recap</h2>}
+      {!shown && <h2 className="topperf__banner">Day Recap</h2>}
       <SealBox
         key={`${dateStr}-${sportId}`}
         label="Tap to reveal this day's recap"
-        onReveal={() => setRevealed(true)}
+        forceRevealed={revealedAll}
+        onReveal={() => {
+          setRevealed(true)
+          onRevealAll?.()
+        }}
       >
         {() => (
           <RecapPanel games={games} prospects={prospectsData} dateStr={dateStr} sportId={sportId} />
