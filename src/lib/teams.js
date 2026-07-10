@@ -162,13 +162,12 @@ export function realHeadshotUrl(personId, width = 213) {
 // LEAST likely to be mistaken for another club's — favoring a distinctive
 // accent (gold, orange, teal…) over yet another navy whenever a club has one,
 // since roughly half the league's primary color is some shade of navy/blue.
-// Decorative only: used to tint every headshot's background on the Former
-// Teammates cards (TeamInfo.jsx) so a player reads at a glance as "this is a
+// Decorative only: used to tint a headshot's background (see teamTintColor
+// and components/Headshot.jsx) so a player reads at a glance as "this is a
 // Team A face, that one's Team B" — a rough visual grouping, not a guarantee
 // every possible matchup gets two clearly distinct hues (a run of same-
-// division rivals can still share a color family). MLB clubs only — the
-// Former Teammates card never shows for a MiLB game, so MiLB team ids have no
-// entry and callers must degrade (see teamTintColor).
+// division rivals can still share a color family). MLB clubs only — MiLB team
+// ids have no entry and callers must degrade (see teamTintColor).
 const TEAM_COLORS = {
   108: '#BA0021', // Angels
   109: '#A71930', // Diamondbacks
@@ -213,15 +212,6 @@ export function teamTintColor(teamId, alpha = 0.22) {
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
-// The same brand color TEAM_COLORS maps, at FULL opacity — a solid card
-// background behind a player's silo-cutout headshot (see components/Headshot.jsx),
-// the bolder counterpart to teamTintColor's soft wash. Null for an unmapped
-// (MiLB) team id, so a headshot without a known club just keeps its transparent
-// frame.
-export function teamColorHex(teamId) {
-  return TEAM_COLORS[teamId] ?? null
 }
 
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed
