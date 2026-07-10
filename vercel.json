@@ -4,6 +4,12 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "ignoreCommand": "scripts/vercel-ignore-build.sh",
+  "git": {
+    "deploymentEnabled": {
+      "claude/*": false
+    }
+  },
   "rewrites": [
     { "source": "/player/:id", "destination": "/api/preview?route=player&id=:id" },
     { "source": "/team/:id/leaders", "destination": "/api/preview?route=team-leaders&id=:id" },
