@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { computeLeaders } from '../api/teamLeaders.js'
 import { prospectBadge } from '../api/prospects.js'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { SectionTitle } from './SectionTitle.jsx'
 import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
@@ -39,15 +39,29 @@ function LeaderBadges({ entry, showLevel, prospectSnapshot }) {
 }
 
 // Rank 1 — the featured card. Reuses the Top Performers headshot frame + name/
-// stat stack (`.shot.tlead__shot` mirrors `.topperf__shot`'s 2:3 sizing). The
-// team logo shows only when the pool spans multiple clubs (`showTeamLogo`);
-// on a single-team page it would be the same mark on every card, so it's hidden.
-function FeaturedLeader({ entry, category, showTeamLogo, showLevel, prospectSnapshot }) {
+// stat stack, sized up from that shared pattern for readability at this card's
+// larger footprint (see `.shot.tlead__shot`). The team tag (logo + abbreviation)
+// always names the club the leader plays FOR — a MiLB entry shows its MLB
+// parent affiliate's mark/abbreviation rather than its own farm club's, since
+// that's the identity a fan skimming the board actually recognizes (see
+// `displayTeamId`/`displayTeamAbbr`, attached in api/statsLevels.js).
+//
+// `favoriteTeamId` (league/level leader pages only — see TeamLeaders) tints
+// the row in that club's own accent when the leader plays for it, so a fan's
+// team jumps out on a board otherwise full of strangers.
+function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favoriteTeamId }) {
+  const teamId = entry.displayTeamId ?? entry.teamId
+  const teamAbbr = entry.displayTeamAbbr ?? entry.teamAbbr
+  const isFavorite = favoriteTeamId != null && teamId === favoriteTeamId
+  const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined
   return (
-    <div className="tlead__featured">
+    <div className={`tlead__featured${isFavorite ? ' tlead__featured--fav' : ''}`} style={favStyle}>
       <Headshot personId={entry.id} name={entry.name} className="tlead__shot" />
-      {showTeamLogo && entry.teamId && (
-        <TeamLogo teamId={entry.teamId} name={entry.teamAbbr} size={20} className="tlead__logo" />
+      {teamId && (
+        <div className="tlead__teamtag">
+          <TeamLogo teamId={teamId} name={teamAbbr} size={24} className="tlead__logo" />
+          {teamAbbr && <span className="tlead__teamabbr">{teamAbbr}</span>}
+        </div>
       )}
       <div className="tlead__who">
         <div className="tlead__head">
@@ -87,7 +101,7 @@ function displayRanks(entries) {
   })
 }
 
-function LeaderCategory({ category, entries, showTeamLogo, showLevel, prospectSnapshot }) {
+function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favoriteTeamId }) {
   const [leader, ...rest] = entries
   const ranks = displayRanks(entries)
   return (
@@ -96,22 +110,31 @@ function LeaderCategory({ category, entries, showTeamLogo, showLevel, prospectSn
       <FeaturedLeader
         entry={leader}
         category={category}
-        showTeamLogo={showTeamLogo}
         showLevel={showLevel}
         prospectSnapshot={prospectSnapshot}
+        favoriteTeamId={favoriteTeamId}
       />
       {rest.length > 0 && (
         <ol className="tlead__rest">
-          {rest.map((e, i) => (
-            <li key={e.id} className="tlead__row">
-              <span className="tlead__rank">{ranks[i + 1].text}</span>
-              <PlayerLink id={e.id} className="tlead__rowname">
-                {e.name}
-              </PlayerLink>
-              <LeaderBadges entry={e} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
-              <span className="tlead__rowval">{e.display}</span>
-            </li>
-          ))}
+          {rest.map((e, i) => {
+            const teamId = e.displayTeamId ?? e.teamId
+            const isFavorite = favoriteTeamId != null && teamId === favoriteTeamId
+            const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined
+            return (
+              <li
+                key={e.id}
+                className={`tlead__row${isFavorite ? ' tlead__row--fav' : ''}`}
+                style={favStyle}
+              >
+                <span className="tlead__rank">{ranks[i + 1].text}</span>
+                <PlayerLink id={e.id} className="tlead__rowname">
+                  {e.name}
+                </PlayerLink>
+                <LeaderBadges entry={e} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
+                <span className="tlead__rowval">{e.display}</span>
+              </li>
+            )
+          })}
         </ol>
       )}
     </section>
@@ -121,28 +144,31 @@ function LeaderCategory({ category, entries, showTeamLogo, showLevel, prospectSn
 // `pool`: normalized PoolPlayer[]. `categories`: descriptor array to rank.
 // `limit`: how many players per category (5 on the team page, more on the
 // full page). `onSeeAll`: optional — renders a "See all ›" affordance in the
-// header (the team page links to the dedicated leaders page). `showTeamLogo`:
-// set once the pool spans multiple teams. `title`: section heading (the broader
-// leader pages pass their scope's title). `showLevel`: badge each leader's level
-// (org scope, a multi-level pool). `prospectSnapshot`: fetchTopProspects() result
-// to add prospect pills (any MiLB scope). `qualifier`: playing-time bar mode for
-// rate categories, forwarded to computeLeaders ('leader-relative' for the large
-// pools; see api/teamLeaders.js). `precomputed`: a { categoryKey: entries[] } map
-// of ALREADY-RANKED rows (computeLeaders' output shape) — passed instead of
-// `pool` when the ranking was baked at build time (the static all-minors board,
-// too heavy to rank live; see api/minorsLeaders.js). When set, pool/qualifier are
-// unused and entries are just sliced to `limit`.
+// header (the team page links to the dedicated leaders page). `title`: section
+// heading (the broader leader pages pass their scope's title). `showLevel`:
+// badge each leader's level (org scope, a multi-level pool). `prospectSnapshot`:
+// fetchTopProspects() result to add prospect pills (any MiLB scope). `qualifier`:
+// playing-time bar mode for rate categories, forwarded to computeLeaders
+// ('leader-relative' for the large pools; see api/teamLeaders.js).
+// `precomputed`: a { categoryKey: entries[] } map of ALREADY-RANKED rows
+// (computeLeaders' output shape) — passed instead of `pool` when the ranking
+// was baked at build time (the static all-minors board, too heavy to rank
+// live; see api/minorsLeaders.js). When set, pool/qualifier are unused and
+// entries are just sliced to `limit`. `favoriteTeamId`: highlights any row
+// whose leader plays for that club — LeadersPage passes it for the league/
+// level scopes only (not 'org', not the single-team pages), since a team's
+// own leaders page has no "stranger" rows to pick the favorite out from.
 export function TeamLeaders({
   pool,
   categories,
   limit = 5,
   onSeeAll,
-  showTeamLogo = false,
   title = 'Team leaders',
   showLevel = false,
   prospectSnapshot = null,
   qualifier = 'roster',
   precomputed = null,
+  favoriteTeamId = null,
 }) {
   const ranked = useMemo(
     () =>
@@ -179,9 +205,9 @@ export function TeamLeaders({
             key={category.key}
             category={category}
             entries={entries}
-            showTeamLogo={showTeamLogo}
             showLevel={showLevel}
             prospectSnapshot={prospectSnapshot}
+            favoriteTeamId={favoriteTeamId}
           />
         ))}
       </div>

@@ -24,7 +24,7 @@
 // also what keeps the leader-relative qualifier's playing-time floor correct —
 // the app can't reproduce that floor from a trimmed pool, so it must be baked in.
 // Run by hand: node scripts/gen-minors-leaders.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, readFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
@@ -32,7 +32,31 @@ import { computeLeaders, ALL_CATEGORIES } from '../src/api/teamLeaders.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'minors-leaders.json')
+const teamsFile = join(here, '..', 'public', 'data', 'teams.json')
 const season = new Date().getFullYear()
+
+// Same "leader shows its MLB parent affiliate's mark, not its own farm club's"
+// resolution TeamLeaders.jsx's live scopes get from api/statsLevels.js's
+// attachDisplayTeams — reimplemented here (rather than imported) because that
+// version reads public/data/teams.json via a same-origin `fetch()`, which has
+// no base URL in a plain Node script; this reads the same file straight off
+// disk instead. Keeps the precomputed all-minors board's leader tags (and the
+// favorite-team highlight, which keys off the same field) in step with every
+// live scope.
+async function attachDisplayTeams(pool) {
+  const { bySportId } = JSON.parse(await readFile(teamsFile, 'utf8'))
+  const byId = new Map(Object.values(bySportId ?? {}).flat().map((t) => [t.id, t]))
+  return pool.map((p) => {
+    const team = byId.get(p.teamId)
+    if (!team?.parentOrgId) return { ...p, displayTeamId: p.teamId, displayTeamAbbr: p.teamAbbr }
+    const parent = byId.get(team.parentOrgId)
+    return {
+      ...p,
+      displayTeamId: team.parentOrgId,
+      displayTeamAbbr: parent?.abbreviation ?? p.teamAbbr,
+    }
+  })
+}
 
 // The four full-season farm levels (AAA/AA/A+/A) — matches ORG_SPORT_IDS in
 // api/leaders.js; Rookie/complex ball is excluded, as it is from every board.
@@ -48,7 +72,7 @@ const [hit, pit] = await Promise.all([
   Promise.allSettled(LEVEL_SPORT_IDS.map((sid) => fetchLevelSeasonStats(sid, 'hitting', season))),
   Promise.allSettled(LEVEL_SPORT_IDS.map((sid) => fetchLevelSeasonStats(sid, 'pitching', season))),
 ])
-const pool = combineToPool(settled(hit), settled(pit))
+const pool = await attachDisplayTeams(combineToPool(settled(hit), settled(pit)))
 
 // Rank the full pool once per category, exactly as the app would, and keep the
 // top DEPTH rows — the SAME 'leader-relative' qualifier the leaders page passes.

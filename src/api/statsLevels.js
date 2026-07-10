@@ -24,6 +24,7 @@
 import { getJson } from './statsapi.js'
 import { firstLast } from './person.js'
 import { teamAbbr } from '../lib/teams.js'
+import { fetchStaticTeams } from './teams-static.js'
 
 // A whole level's season lines for one group ('hitting'|'pitching'): one split
 // per player (playerPool=all so part-timers aren't dropped — a sub-qualified
@@ -75,7 +76,30 @@ export async function loadCombinedPoolForTeams(teams, season) {
     Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'pitching', season))),
   ])
   const settledFlat = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  return combineToPool(settledFlat(hit), settledFlat(pit))
+  const pool = combineToPool(settledFlat(hit), settledFlat(pit))
+  return attachDisplayTeams(pool)
+}
+
+// The team a leader row shows its logo/abbreviation for: the player's own club
+// for an MLB pool, or that club's MLB parent affiliate for any MiLB club — a
+// farmhand's own club mark means little to a fan skimming a leaderboard, but
+// his parent org's is instantly recognizable. Resolved against the same static
+// snapshot fetchTeam() reads (one cached file read, not a call per player);
+// falls back to the player's own team/abbr when the org tree doesn't resolve
+// (thin/stale static data, or the team truly has no parent on file).
+async function attachDisplayTeams(pool) {
+  const { bySportId } = await fetchStaticTeams()
+  const byId = new Map(Object.values(bySportId ?? {}).flat().map((t) => [t.id, t]))
+  return pool.map((p) => {
+    const team = byId.get(p.teamId)
+    if (!team?.parentOrgId) return { ...p, displayTeamId: p.teamId, displayTeamAbbr: p.teamAbbr }
+    const parent = byId.get(team.parentOrgId)
+    return {
+      ...p,
+      displayTeamId: team.parentOrgId,
+      displayTeamAbbr: parent?.abbreviation ?? p.teamAbbr,
+    }
+  })
 }
 
 const num = (x) => {
