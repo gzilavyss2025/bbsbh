@@ -209,5 +209,9 @@ export function rankDayHighlights(entries) {
         ),
       }
     })
+    // A quiet game with no fired signal (tier 4, the "Final: X, Y" default
+    // headline) isn't a HIGHLIGHT — drop it rather than pad the list with
+    // scores that don't belong in a "most interesting" ranking.
+    .filter((entry) => entry.signals.length > 0)
     .sort((a, b) => a.tier - b.tier || b.score - a.score)
 }

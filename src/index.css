@@ -5150,6 +5150,23 @@ body {
    this file (`* { transition-duration: 0.01ms !important }`) collapses it to
    an instant swap for free — no separate reduced-motion override needed here.
    --------------------------------------------------------------------------- */
+/* "Reveal all games" — the single unlock for every flip card at once (see
+   PastPreview.jsx's RevealAllBar). Phone-first default: hide the inline top
+   button and rely on the floating bottom bar instead (same
+   .pagenav/.btn--reveal convention InningViewer uses for "Reveal {half}"),
+   so the action stays in thumb reach on a long single-column list. The wide-
+   layout override (below, in the 740px block) flips this: inline button
+   shown, floating bar hidden — there's no long scroll to reach for there. */
+.revealall__top {
+  display: none;
+  width: 100%;
+  margin: 12px 0;
+}
+.pagenav--revealall {
+  /* .pagenav already positions/backgrounds the floating bar; nothing else
+     needed at phone width. */
+}
+
 .flipcard {
   perspective: 1400px;
 }
@@ -5192,65 +5209,61 @@ body {
   color: var(--text-body);
   box-shadow: var(--shadow-card);
 }
-.flipback__flipBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--paper-1);
-  color: var(--text-heading);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.flipback__flipBtn:active {
-  transform: translateY(1px);
-}
-.flipback__teams {
+/* Line score: a header row (R/H/E labels, once) above two team rows — team
+   name flexes to fill the leading column, the three stat columns are fixed-
+   width so header and value rows line up. Values are sized up from the
+   original draft (--fs-num-lg) since this is the card's headline number. */
+.flipback__linescore {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
+.flipback__lsHeader,
 .flipback__team {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 28px);
   align-items: center;
-  gap: 8px;
+  column-gap: 8px;
 }
-.flipback__abbr {
-  flex: 1 1 auto;
+.flipback__lsTeamCol {
+  /* Empty — just holds the header row's leading column in alignment with the
+     team logo + name below it. */
+}
+.flipback__lsCol {
+  text-align: center;
   font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-.flipback__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 24px;
-  font-family: var(--font-mono);
-  font-size: 16px;
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.flipback__stat small {
-  font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 9px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
+.flipback__team {
+  padding: 2px 0;
+}
+.flipback__abbr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.flipback__lsVal {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Phone-first: W/L/S each get their own line (more legible at narrow widths
+   than a wrapped inline row). Wide layout below regroups them into one row. */
 .flipback__decisions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  padding-top: 4px;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 2px;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-mono);
   font-size: 11.5px;
@@ -5260,9 +5273,12 @@ body {
   color: var(--text-heading);
   margin-right: 3px;
 }
+.flipback__potgWrap {
+  padding-top: 4px;
+}
 .flipback__potg {
   margin: 0;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--text-body);
 }
 .flipback__potgLabel {
@@ -5274,6 +5290,19 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   margin-bottom: 2px;
+}
+/* Play of the game (and its batter-name link) reads as a natural sentence in
+   the app's serif "read" face, not the usual all-caps display type — same
+   sanctioned exception as .pbp__desc (see the ALL-CAPS INVARIANT block
+   comment near the top of this file). A nested .plink needs its OWN entry
+   here too: `#root *`'s uppercase would otherwise win over it directly. */
+.flipback__potg,
+.flipback__potg .plink {
+  font-family: var(--font-read);
+}
+#root .flipback__potg,
+#root .flipback__potg .plink {
+  text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
 }
 .flipback__full {
   align-self: stretch;
@@ -5299,26 +5328,81 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.dayhl__perfList {
+/* Winners/Losers "baseball card" tiles (src/components/PastDayRecapBox.jsx's
+   PerformerCard) — headshot, name + position, team logo + abbreviation, stat
+   line, in a compact horizontal tile (the sidebar is too narrow for a 3-up
+   grid of anything wider than this). */
+.playercard__bucket {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.playercard__bucket + .playercard__list {
+  margin-bottom: 12px;
+}
+.playercard__list {
   list-style: none;
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
-.dayhl__perf {
+.playercard {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
+  gap: 8px;
+  padding: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
 }
-.dayhl__perfName {
+.shot.playercard__shot {
+  flex: none;
+  width: auto;
+  height: 48px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.playercard__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.playercard__name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 13px;
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
-.dayhl__perfStat {
-  margin-left: auto;
+.playercard__pos {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.playercard__team {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.playercard__stat {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
@@ -5339,13 +5423,21 @@ body {
   background: var(--paper-1);
   color: var(--text-body);
   padding: 8px 10px;
-  font-size: 12.5px;
-  line-height: 1.35;
+  font-size: 13px;
+  line-height: 1.4;
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
 }
 .dayhl__rowBtn:active {
   transform: translateY(1px);
+}
+/* Day Highlights blurbs read as natural sentences in the serif "read" face —
+   same sanctioned exception as .pbp__desc/.flipback__potg above. */
+.dayhl__rowBtn {
+  font-family: var(--font-read);
+}
+#root .dayhl__rowBtn {
+  text-transform: none; /* caps-exempt: day highlights read as natural sentences */
 }
 
 /* ---------------------------------------------------------------------------
@@ -5844,9 +5936,25 @@ body {
   .slate-body .gamelist {
     grid-template-columns: 1fr;
   }
-  .slate-body .pastdayrecap {
-    position: sticky;
-    top: 12px;
+  /* Deliberately NOT sticky — a pinned rail read as disconnected from the
+     grid it sits beside, so both columns just scroll together with the
+     page. */
+
+  /* "Reveal all games" rides as a normal inline button up top once there's
+     room for it; the mobile floating bottom bar (below) hides here. */
+  .revealall__top {
+    display: inline-flex;
+  }
+  .pagenav--revealall {
+    display: none;
+  }
+
+  /* W/L/S regroup into one wrapped row once the card has room; phone width
+     keeps them stacked one-per-line (see the base .flipback__decisions rule). */
+  .flipback__decisions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px 14px;
   }
 
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —

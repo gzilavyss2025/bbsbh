@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react'
-import { computeTopPerformers } from '../api/topPerformers.js'
+import { computeTopPerformersByResult } from '../api/topPerformers.js'
 import { rankDayHighlights } from '../api/dayHighlights.js'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { SealBox } from './SealBox.jsx'
 import { Loader } from './Loader.jsx'
+import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 
 // THIN PREVIEW NOTE: this is the live-data preview version of the recap box
 // the plan describes — it fans out its own Day Highlights fetch separately
-// from computeTopPerformers' fetch rather than sharing one cache-backed fetch
-// between the two (that unification is real-implementation work, not this
-// preview's job; see the plan's "data layer" phase). The single-seal shape —
-// one tap revealing both Top Performers and Day Highlights — is the real
-// thing being judged here.
+// from computeTopPerformersByResult's fetch rather than sharing one cache-
+// backed fetch between the two (that unification is real-implementation
+// work, not this preview's job; see the plan's "data layer" phase). The
+// single-seal shape — one tap revealing both Top Performers and Day
+// Highlights — is the real thing being judged here.
 
 function DayHighlightRow({ entry }) {
   const navigate = useNav()
@@ -28,14 +30,23 @@ function DayHighlightRow({ entry }) {
   )
 }
 
-function PerformerMini({ entry }) {
+// One "baseball card" tile: headshot, name + position (name a clickable
+// PlayerLink), team logo + abbreviation, stat line underneath.
+function PerformerCard({ entry }) {
   return (
-    <li className="dayhl__perf">
-      <TeamLogo teamId={entry.teamId} name={entry.teamAbbr} size={18} />
-      <PlayerLink id={entry.id} className="dayhl__perfName">
-        {entry.name}
-      </PlayerLink>
-      <span className="dayhl__perfStat">{entry.stat}</span>
+    <li className="playercard">
+      <Headshot personId={entry.id} name={entry.name} className="playercard__shot" />
+      <div className="playercard__body">
+        <div className="playercard__name">
+          <PlayerLink id={entry.id}>{entry.name}</PlayerLink>
+          {entry.position && <span className="playercard__pos">{entry.position}</span>}
+        </div>
+        <div className="playercard__team">
+          <TeamLogo teamId={entry.teamId} name={entry.teamAbbr} size={16} />
+          <TeamLink id={entry.teamId}>{entry.teamAbbr}</TeamLink>
+        </div>
+        <div className="playercard__stat">{entry.stat}</div>
+      </div>
     </li>
   )
 }
@@ -48,7 +59,7 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
     let cancelled = false
     setState({ loading: true, error: false, data: null })
     Promise.all([
-      computeTopPerformers({ games, prospects, dateStr }),
+      computeTopPerformersByResult({ games, prospects, dateStr }),
       Promise.all(
         games.map((game) =>
           getSignals(game.gamePk)
@@ -57,12 +68,12 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
         ),
       ),
     ])
-      .then(([topPerformers, entries]) => {
+      .then(([performersByResult, entries]) => {
         if (cancelled) return
         setState({
           loading: false,
           error: false,
-          data: { topPerformers, highlights: rankDayHighlights(entries) },
+          data: { performersByResult, highlights: rankDayHighlights(entries) },
         })
       })
       .catch(() => {
@@ -81,8 +92,9 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
   }
   if (!state.data) return null
 
-  const { topPerformers, highlights } = state.data
-  const hasPerformers = topPerformers.batters.length > 0 || topPerformers.pitchers.length > 0
+  const { performersByResult, highlights } = state.data
+  const { winners, losers } = performersByResult
+  const hasPerformers = winners.length > 0 || losers.length > 0
 
   return (
     <LinkScope asOf={dateStr} sportId={sportId}>
@@ -90,19 +102,25 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
         {hasPerformers && (
           <section className="dayhl__section">
             <h3 className="dayhl__title">Top Performers</h3>
-            {topPerformers.batters.length > 0 && (
-              <ul className="dayhl__perfList">
-                {topPerformers.batters.map((e) => (
-                  <PerformerMini key={e.id} entry={e} />
-                ))}
-              </ul>
+            {winners.length > 0 && (
+              <>
+                <h4 className="playercard__bucket">Winners</h4>
+                <ul className="playercard__list">
+                  {winners.map((e) => (
+                    <PerformerCard key={e.id} entry={e} />
+                  ))}
+                </ul>
+              </>
             )}
-            {topPerformers.pitchers.length > 0 && (
-              <ul className="dayhl__perfList">
-                {topPerformers.pitchers.map((e) => (
-                  <PerformerMini key={e.id} entry={e} />
-                ))}
-              </ul>
+            {losers.length > 0 && (
+              <>
+                <h4 className="playercard__bucket">Losers</h4>
+                <ul className="playercard__list">
+                  {losers.map((e) => (
+                    <PerformerCard key={e.id} entry={e} />
+                  ))}
+                </ul>
+              </>
             )}
           </section>
         )}
@@ -126,8 +144,8 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
 
 // The past-day replacement for TopPerformersBox: one SealBox, keyed on
 // date+level like ADR-0011, whose single reveal renders both Top Performers
-// and Day Highlights stacked underneath — one tap, one recap, since both are
-// the same "flavor" of sealed daily digest.
+// (split into Winners/Losers) and Day Highlights stacked underneath — one
+// tap, one recap, since both are the same "flavor" of sealed daily digest.
 export function PastDayRecapBox({ dateStr, sportId, games, prospectsData }) {
   const [revealed, setRevealed] = useState(false)
   useEffect(() => setRevealed(false), [dateStr, sportId])
