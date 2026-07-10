@@ -492,3 +492,25 @@ export function selectHasStarted(feed) {
   const abstract = feed?.gameData?.status?.abstractGameState
   return abstract === 'Live' || abstract === 'Final'
 }
+
+// Coarse game-state flags for the delayed/suspended/postponed banner.
+// Structural metadata, not a score — safe to render unconditionally, same as
+// selectHasStarted above. `detailedState` carries MLB's specific phrasing
+// ("Delayed Start: Rain", "Suspended: Rain", "Postponed"); `reason` is the
+// separate free-text cause field the feed sometimes also carries. Works from
+// either a full live feed (`feed.gameData.status`) or a slate row already
+// normalized by schedule.js's normalizeGame (same field names, flattened).
+export function selectGameStatus(source) {
+  const status = source?.gameData?.status ?? source ?? {}
+  const detailedState = status.detailedState ?? ''
+  const reason = status.reason ?? ''
+  const lower = detailedState.toLowerCase()
+  const isPostponed = lower.includes('postponed')
+  const isSuspended = lower.includes('suspended')
+  const isDelayed = lower.includes('delayed')
+  // Coarsest-first badge label, or null for a normal game. Postponed beats
+  // suspended beats delayed, matching how MLB's own detailedState phrasing
+  // nests them (a postponed game is never also "delayed").
+  const label = isPostponed ? 'Postponed' : isSuspended ? 'Suspended' : isDelayed ? 'Delayed' : null
+  return { detailedState, reason, isDelayed, isSuspended, isPostponed, label }
+}

@@ -1,6 +1,7 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { lookupSplit } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
+import { selectGameStatus } from '../api/select.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -9,6 +10,7 @@ import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
 export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
+  const status = selectGameStatus(game)
   const dhLabel = doubleHeaderLabel(game)
   const pinned = !!pinnedTeamId
   // Sets --pin-accent for the pinned border/gradient + star (see index.css);
@@ -17,7 +19,13 @@ export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0,
   const style = pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : undefined
   return (
     <div className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`} style={style}>
-      {live && <span className="gamecard__live">Live</span>}
+      {status.label ? (
+        <span className="gamecard__delay" title={status.reason || undefined}>
+          {status.label}
+        </span>
+      ) : (
+        live && <span className="gamecard__live">Live</span>
+      )}
       <button
         type="button"
         className="gamecard__open"
@@ -153,6 +161,8 @@ function doubleHeaderLabel(game) {
 // timezone (lean MiLB rows) or when the two clocks read the same (viewer is in
 // the park's zone) — no redundant "(7:10 CDT)".
 function StatusText({ game }) {
+  const status = selectGameStatus(game)
+  if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
   if (s === 'Final') return <span className="gamecard__status">Final</span>
   if (s === 'Live') return null // the LIVE pill carries it; no redundant text

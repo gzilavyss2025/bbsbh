@@ -1034,6 +1034,27 @@ body {
   background: currentColor;
 }
 
+/* Delayed/suspended/postponed badge — same corner and pill shape as
+   .gamecard__live above (the two are mutually exclusive), but in the kraft-
+   amber "on hold" color rather than live-game red. Flat fill, not the hatch
+   weave (--seal-texture) the spoiler covers use, so it doesn't read as a seal. */
+.gamecard__delay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--seal);
+  color: var(--seal-ink);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
 .gamecard__open:active {
   transform: translateY(1px);
 }
@@ -7754,6 +7775,35 @@ body {
   color: #fff;
   font-size: 14px;
   line-height: 1;
+}
+
+/* ---- game-status banner — flat kraft-amber strip flagging a delayed,
+   suspended, or postponed game, shown under the masthead on every section so
+   it stays visible while the user navigates around a paused game. Structural
+   metadata, not a score, so it renders unconditionally like the masthead
+   date. Same amber as .gamecard__delay's slate badge; flat fill, not the
+   hatch weave the spoiler covers use. ---- */
+.game-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+}
+.game-status-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: var(--seal-ink);
+}
+.game-status-banner__reason {
+  font-weight: var(--w-semibold);
 }
 
 /* ---- as-of banner — neutral graphite strip (not a status tape like the

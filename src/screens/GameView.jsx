@@ -3,6 +3,7 @@ import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
+import { selectGameStatus } from '../api/select.js'
 import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
@@ -66,6 +67,12 @@ export function GameView({ game, section, onSection }) {
       <SiteHeader />
 
       <Masthead away={game.away} home={game.home} date={officialDate} onSketch={setSketching} />
+
+      {/* Delayed/suspended/postponed is structural game state, not a score —
+          safe to render unconditionally, same as the masthead date above. Sits
+          above the seal on every section of this game so it stays visible no
+          matter where the user has navigated to. */}
+      {feed && <GameStatusBanner status={selectGameStatus(feed)} />}
 
       {/* Every game section, one tap away — the same four stops the "next"
           buttons walk in order, so you can flip around the way you flip
@@ -249,6 +256,22 @@ function Masthead({ away, home, date, onSketch }) {
         <MastheadLogo team={home} onSketch={() => onSketch('home')} />
       </div>
       {date && <span className="masthead__date">{humanDate(date)}</span>}
+    </div>
+  )
+}
+
+// Delayed/suspended/postponed banner, shown between the masthead and the
+// step nav. `status` is selectGameStatus's output; renders nothing for a
+// normal scheduled/live/final game. Appends the free-text reason ("Rain")
+// when the feed carries one.
+function GameStatusBanner({ status }) {
+  if (!status?.label) return null
+  return (
+    <div className="game-status-banner" role="status">
+      <span className="game-status-banner__text">
+        {status.label}
+        {status.reason && <span className="game-status-banner__reason"> — {status.reason}</span>}
+      </span>
     </div>
   )
 }
