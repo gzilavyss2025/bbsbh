@@ -39,23 +39,44 @@ function outsToIp(outs) {
   return `${Math.floor(outs / 3)}.${outs % 3}`
 }
 
-// A minor-league stint's size, in the group's natural unit (games for a hitter,
-// outs for a pitcher). The single knob the rehab/option classifier turns on.
-function stintWork(stat, group) {
-  return group === 'pitching' ? ipToOuts(stat?.inningsPitched) : num(stat?.gamesPlayed)
+// A minor-league stint clears a workload threshold in whichever unit fits the
+// group and role: games played for a hitter, but EITHER innings pitched OR
+// games pitched for a pitcher. Innings alone undercounts a RELIEVER, who
+// racks up games far faster than innings — a starter's rehab ramps up in
+// innings per outing, so an innings floor catches him fine, but a shuttling
+// reliever can go 16 appearances / 19.2 IP over nine weeks (Joel Payamps,
+// Gwinnett, 2026) without ever threatening an innings-only bar, even though
+// nine weeks is well beyond any rehab window. So a pitcher's games count
+// (its OWN threshold, not the hitter's daily-appearance number — a reliever
+// pitches every 2-4 days, not every day) can also clear the bar on its own.
+function meetsWorkload(games, outs, group, threshold) {
+  const t = threshold[group === 'pitching' ? 'pitching' : 'hitting']
+  return group === 'pitching' ? outs >= t.outs || games >= t.games : games >= t.games
 }
 
-// The ceiling of a rehab-assignment window (~20 days ≈ 20 G for a position
-// player, ~30 days ≈ 30 IP for a pitcher). A POST-DEBUT minor-league stint at
+// The floor a MiLB stint must clear to count as real presence at all — below
+// this it's a bare cameo. ~10 days for a position player (10 G, one per day);
+// for a pitcher, ~20 IP (a starter's few tune-up outings) OR 5 relief outings
+// (fewer than that is just a look, not a stretch of work).
+const CUP_OF_COFFEE_FLOOR = { hitting: { games: 10 }, pitching: { games: 5, outs: 60 } }
+
+// The ceiling of a rehab-assignment window. A POST-DEBUT minor-league stint at
 // or above this is too big to be rehab — a real option-down or demotion, shown
-// as its own row; below it, it's rehab-or-shuttle noise that drops to a caption.
-// Deliberately an ABSOLUTE cap, not "was the player MiLB-primary that year": an
-// injured pitcher who threw 5 MLB innings and 14 rehab innings has MORE minor-
-// league work but was never demoted (verified against Kodai Senga's 2024), so a
-// relative test would wrongly promote his rehab to a demotion row.
-const REHAB_CAP = { games: 20, outs: 90 }
+// as its own row; below it, it's rehab-or-shuttle noise that drops to a
+// caption. Deliberately an ABSOLUTE cap, not "was the player MiLB-primary that
+// year": an injured pitcher who threw 5 MLB innings and 14 rehab innings has
+// MORE minor-league work but was never demoted (verified against Kodai
+// Senga's 2024), so a relative test would wrongly promote his rehab to a
+// demotion row. ~20 days ≈ 20 G for a position player; for a pitcher, ~30
+// days ≈ 30 IP (a starter's several rehab starts) OR 15 relief outings — an
+// MLB rehab assignment is capped at 30 days by rule, so even a reliever
+// pitching every other day tops out around 15 outings before it must convert
+// to a real assignment or he's recalled.
+const REHAB_CAP = { hitting: { games: 20 }, pitching: { games: 15, outs: 90 } }
 function meetsStintCap(stat, group) {
-  return stintWork(stat, group) >= (group === 'pitching' ? REHAB_CAP.outs : REHAB_CAP.games)
+  const games = num(stat?.gamesPitched ?? stat?.gamesPlayed)
+  const outs = ipToOuts(stat?.inningsPitched)
+  return meetsWorkload(games, outs, group, REHAB_CAP)
 }
 
 // ---------------------------------------------------------------------------
@@ -863,9 +884,6 @@ export function careerTimelineView(splits, group, debutYear) {
     acc.games += games
     acc.outs += outs
   }
-  const work = (a) => (group === 'pitching' ? a.outs : a.games)
-  const minWork = group === 'pitching' ? 60 : 10
-  const capWork = group === 'pitching' ? REHAB_CAP.outs : REHAB_CAP.games
   const qualifies = (a) => {
     // Any MLB action at all is real team history — even a single AB or a third
     // of an inning puts that club on the map. The cup-of-coffee floor and the
@@ -874,8 +892,9 @@ export function careerTimelineView(splits, group, debutYear) {
     // Feyereisen with only the Rays — his one 20+ IP club — of the several MLB
     // teams he pitched for).
     if (a.sportId === 1) return a.games >= 1 || a.outs >= 1
-    // Below the cup-of-coffee threshold (10 G / 20 IP) a MiLB stint never counts.
-    if (work(a) < minWork) return false
+    // Below the cup-of-coffee threshold (10 G / 20 IP, or 10 relief outings) a
+    // MiLB stint never counts.
+    if (!meetsWorkload(a.games, a.outs, group, CUP_OF_COFFEE_FLOOR)) return false
     // A MiLB stint AFTER the debut year is rehab-assignment noise (or a brief
     // option down), NOT real team history — an established regular's stray AAA
     // games would otherwise append a misleading season to his old farm club.
@@ -883,7 +902,7 @@ export function careerTimelineView(splits, group, debutYear) {
     // or demotion) — the SAME absolute test the career register uses, so the
     // timeline and the table always agree on which post-debut stints are real.
     // The ascent (seasons up to and including the debut year) is always kept.
-    if (debutYear && a.season > debutYear && work(a) < capWork) return false
+    if (debutYear && a.season > debutYear && !meetsWorkload(a.games, a.outs, group, REHAB_CAP)) return false
     return true
   }
   const kept = [...byKey.values()].filter(qualifies)
