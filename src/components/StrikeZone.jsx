@@ -28,8 +28,17 @@ const sy = (pz) => PAD + ((DOM_Z[1] - pz) / (DOM_Z[1] - DOM_Z[0])) * (H - 2 * PA
 
 // Extra strip added to one side of the diagram for the batter's-box
 // silhouette (see BatterSilhouette below) — added to the viewBox, not carved
-// out of it, so the plate/pitch-dot plot keeps its usual scale.
-const BATTER_W = 32
+// out of it, so the plate/pitch-dot plot keeps its usual scale. Keep in sync
+// with the .strikezone--withbatter / .strikezone--modal.strikezone--withbatter
+// widths in index.css, which are this same viewBox growth scaled by the
+// diagram's own CSS width.
+const BATTER_W = 60
+// BatterSilhouette's source art (see its own comment) is drawn in a
+// 112.63×195.63 box; scale it to BATTER_W wide and vertically center it on
+// roughly the same band the old stick figure occupied.
+const BATTER_ART_W = 112.63
+const BATTER_SCALE = BATTER_W / BATTER_ART_W
+const BATTER_TOP = 87
 
 function median(xs) {
   const s = [...xs].sort((a, b) => a - b)
@@ -44,23 +53,29 @@ const plottable = (p) =>
   typeof p.szTop === 'number' &&
   typeof p.szBottom === 'number'
 
-// The batter's-box silhouette: a plain stick figure with a bat raised,
-// drawn canonically facing right (as if standing in a strip to the LEFT of
-// the plate) and mirrored for the opposite box. Which side is which is
-// decided by the caller (see the batSide handling in StrikeZone below).
+// The batter's-box silhouette: a batter at the plate, bat cocked over the
+// shoulder, drawn canonically facing right (as if standing in a strip to the
+// LEFT of the plate) and mirrored for the opposite box. Which side is which
+// is decided by the caller (see the batSide handling in StrikeZone below).
+// Public-domain art ("baseball2" by shokunin, part of a 2010 Ubuntu-palette
+// sports-silhouette set — https://openclipart.org/detail/76927/baseball2-by-shokunin),
+// traced at 112.63×195.63; the path below is that art's `d` unchanged, still
+// in its original coordinate space, so the outer transforms below (BATTER_SCALE
+// + BATTER_TOP, then the mirror) are what map it into the diagram.
 function BatterSilhouette({ x, mirror }) {
-  const cx = BATTER_W / 2
   return (
     <g
       className="strikezone__batter"
       transform={mirror ? `translate(${x + BATTER_W}, 0) scale(-1, 1)` : `translate(${x}, 0)`}
     >
-      <circle className="strikezone__battersil" cx={cx} cy={80} r={10} />
-      <path
-        className="strikezone__battersil"
-        fill="none"
-        d={`M${cx},92 L${cx},150 M${cx - 9},224 L${cx},150 L${cx + 9},224 M${cx},100 L${cx + 14},55`}
-      />
+      <g transform={`translate(0, ${BATTER_TOP}) scale(${BATTER_SCALE})`}>
+        <g transform="translate(-435.52, -310.31)">
+          <path
+            className="strikezone__battersil"
+            d="m461.53 331.6-1.0214 5.9239 3.4726 1.2256 1.0214 2.8598-1.8385 2.0427s-2.6556 3.0641-2.4513 4.494c0.20427 1.4299 3.0641 16.546 3.0641 16.546l1.4299 5.9239 3.2684 2.0427 4.6983 4.6983 2.6556 6.5367 2.6555 8.988s-0.81709 2.0427 0.40854 2.8598c1.2256 0.81709-12.256 20.019-12.256 20.019l-6.5367 8.5795-9.6008 13.482s-1.4299 4.2897-1.0214 5.1068c0.40854 0.81709 2.4513 7.3538 2.4513 7.3538l0.81709 15.525 1.4299 22.266-13.073 11.031s-6.3325 1.4299-5.5154 2.8598 5.1068 2.6556 6.9453 2.4513c1.8385-0.20428 18.18-2.4513 18.18-2.4513l4.2897-0.20428s5.5154-0.40854 5.5154-1.2256c0-0.81709-0.61282-6.5367-0.61282-6.5367s-3.8812-5.5154-3.8812-6.3325c0-0.81709-1.2256-12.052-0.61282-13.482 0.61282-1.4299 1.0214-5.7196 1.0214-5.7196s2.0427-0.81709 1.8385-1.6342c-0.20427-0.8171-0.20427-4.0855-0.61282-4.9026-0.40854-0.81709-1.0214-7.5581-1.0214-8.3752 0-0.81709 0.20427-3.6769 0.20427-4.494 0-0.81709 4.9026-7.1496 5.5154-7.9666 0.61282-0.81709 8.988-8.7837 8.988-8.7837l8.3752-7.5581 2.8598-1.4299-0.40855 9.3966-0.61282 9.3966s-0.40855 8.5795-0.40855 9.8051 1.2256 6.1282 2.6556 6.3325c1.4299 0.20427 17.567 10.826 17.567 10.826l6.741 5.9239 12.256 12.869-1.4299 6.741-6.9453 8.7837s-3.6769 2.0427-1.6342 2.4513c2.0427 0.40854 11.848-0.61282 12.665-0.8171 0.81709-0.20427 8.5795-1.0214 8.5795-1.0214s4.0855-4.9026 4.6983-6.3325c0.61282-1.4299 1.8385-7.1496 1.8385-7.1496s-3.2684-3.0641-4.494-4.0855-6.1282-5.3111-6.741-6.1282c-0.61282-0.81709-2.6555-4.9026-3.4726-5.7196-0.81709-0.81709-4.9026-6.9453-4.9026-6.9453l-4.2897-7.1496-13.278-12.869 5.1068-21.653 3.6769-10.622 1.8385-11.031 0.81709-10.418-3.0641-4.6983s-0.20427-3.8812-0.40855-4.6983c-0.20427-0.81709-0.40854-3.6769-0.40854-3.6769s5.7196 2.247 6.5367 3.0641c0.81709 0.8171 6.9453 0.8171 6.9453 0.8171l0.61282-3.4726-1.8384-7.1496-2.8598-6.3325-2.4513-2.247 0.40855-2.4513-4.2897-2.6556-2.247-3.8812-1.6342-1.0214 0.20428-4.2897-2.0427-3.8812 6.9453-16.546 1.0214-3.8812-2.8598-3.0641-3.4726 0.61282-2.0427 1.8384s-1.2256 5.1068-1.4299 5.9239c-0.20427 0.81709-1.6342 13.073-1.6342 13.073l-5.9239-2.0427-8.1709-2.8598-7.3538-2.247-3.6769-1.8385s0-1.4299 0.61282-2.247c0.61281-0.81709 2.4513-4.0855 2.6555-4.9026 0.20428-0.8171-0.61282-6.5367-0.61282-6.5367s-2.4513-7.7624-3.2684-8.1709c-0.81709-0.40855-6.741-3.4726-8.7837-3.6769-2.0427-0.20427-8.3752-1.0214-10.418 0.20427-2.0427 1.2256-4.9026 2.8598-5.3111 3.8812-0.40855 1.0214-2.4513 3.0641-2.4513 3.8812 0 0.81709 0.20427 2.247 0.20427 2.247l-4.0855 1.6342-4.494 1.4299-1.4299 0.40855s2.0427 2.0427 3.6769 3.2684c1.6342 1.2256 5.7196 2.0427 5.7196 2.0427l2.247 1.8385z"
+          />
+        </g>
+      </g>
     </g>
   )
 }

@@ -247,8 +247,10 @@ export function InningViewer({
             inning={effInning}
             half={effHalf}
             battingSide={effHalf === 'top' ? 'away' : 'home'}
+            pitchingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
             getDerived={getDerived}
             revealed={curIdx <= revealedThrough}
+            isNextToReveal={curIdx === revealedThrough + 1}
           />
           <WinProbChart
             points={winProbPoints}

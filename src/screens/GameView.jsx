@@ -11,6 +11,7 @@ import { LogoModal } from '../components/LogoModal.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { LinkScope } from '../lib/nav.jsx'
+import { humanDate } from '../lib/dates.js'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -64,7 +65,7 @@ export function GameView({ game, section, onSection }) {
     <div className="screen">
       <SiteHeader />
 
-      <Masthead away={game.away} home={game.home} onSketch={setSketching} />
+      <Masthead away={game.away} home={game.home} date={officialDate} onSketch={setSketching} />
 
       {/* Every game section, one tap away — the same four stops the "next"
           buttons walk in order, so you can flip around the way you flip
@@ -235,14 +236,19 @@ export function GameView({ game, section, onSection }) {
 }
 
 // The game's masthead: two grayscale marks — away on the left, home on the
-// right, an @ between — sized like the logos on the lineup pages. Tapping a mark
-// opens it enlarged for pencil sketching.
-function Masthead({ away, home, onSketch }) {
+// right, an @ between — sized like the logos on the lineup pages, left-aligned
+// in the page header with the game's date right-aligned opposite them. Tapping
+// a mark opens it enlarged for pencil sketching. The date is structural, not
+// score-revealing, so it renders unconditionally (no seal).
+function Masthead({ away, home, date, onSketch }) {
   return (
     <div className="masthead">
-      <MastheadLogo team={away} onSketch={() => onSketch('away')} />
-      <span className="masthead__at" aria-hidden="true">@</span>
-      <MastheadLogo team={home} onSketch={() => onSketch('home')} />
+      <div className="masthead__teams">
+        <MastheadLogo team={away} onSketch={() => onSketch('away')} />
+        <span className="masthead__at" aria-hidden="true">@</span>
+        <MastheadLogo team={home} onSketch={() => onSketch('home')} />
+      </div>
+      {date && <span className="masthead__date">{humanDate(date)}</span>}
     </div>
   )
 }

@@ -400,14 +400,31 @@ body {
 
 /* --------------------------------------------------------------- masthead
    The game's identity in-view: two full-color marks — away @ home — sized
-   like the logos on the lineup pages, right-aligned in the page header. Each
-   is a button that opens the sketch modal. */
+   like the logos on the lineup pages, left-aligned in the page header, with
+   the game's date opposite them on the right. Each mark is a button that
+   opens the sketch modal. */
 .masthead {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 20px;
   margin: 2px 0 16px;
+}
+
+.masthead__teams {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.masthead__date {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  white-space: nowrap;
 }
 
 .masthead__logo {
@@ -2587,8 +2604,12 @@ body {
   padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
+/* Phone-only: the floating bar's own Refresh (refreshbtn--float, fixed at the
+   page bottom) already covers this viewport, so the top toolbar's copy would
+   be a second Refresh sitting right above the half-inning nav's Next button.
+   Shown again at the wide breakpoint below, where the floating one hides. */
 .innings__toolbar {
-  display: flex;
+  display: none;
   justify-content: flex-end;
   margin: 0 0 8px;
 }
@@ -2978,6 +2999,52 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
   text-align: center;
+}
+
+/* A pitcher entering the game, filling the same row-2 slot as the sealed
+   "Totals" hint above — a kraft/seal-amber notification card (the app's
+   attention color for "something just happened," same family as the seal
+   cover) rather than the plain dashed hint, since a pitching change is worth
+   noticing before the scorer even reveals the half. */
+.statbox--pitchernotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 96px;
+  padding: 14px;
+  border-style: solid;
+  border-color: var(--seal-hatch);
+  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
+}
+
+.pitchernotice__icon {
+  flex: 0 0 auto;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.pitchernotice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pitchernotice__now {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--seal-ink);
+}
+
+.pitchernotice__pitcher {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
 }
 
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
@@ -3660,12 +3727,14 @@ body {
 }
 /* When the batter's-box silhouette is shown, the viewBox grows by BATTER_W —
    scale the rendered width by the same ratio so the plate/dots stay the same
-   size instead of shrinking to fit the wider canvas. */
+   size instead of shrinking to fit the wider canvas. Keep these in sync with
+   BATTER_W in StrikeZone.jsx (190 + BATTER_W, scaled by 118/190 and 224/190
+   respectively). */
 .strikezone--withbatter {
-  width: 138px;
+  width: 155px;
 }
 .strikezone--modal.strikezone--withbatter {
-  width: 262px;
+  width: 295px;
 }
 
 .strikezone__frame {
@@ -3709,15 +3778,11 @@ body {
 .strikezone__num--inplay { fill: var(--pd-inplay); }
 
 /* The batter's-box silhouette (see BatterSilhouette in StrikeZone.jsx) — a
-   plain pencil-line figure, drawn no heavier than the home-plate outline it
-   stands beside. The diagram grows a bit wider to fit it (.strikezone--
-   withbatter below) rather than shrinking the pitch plot to make room. */
+   filled figure, inked no heavier than the home-plate outline it stands
+   beside. The diagram grows a bit wider to fit it (.strikezone--withbatter
+   below) rather than shrinking the pitch plot to make room. */
 .strikezone__battersil {
-  stroke: var(--graphite-soft);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
+  fill: var(--graphite-soft);
 }
 
 /* Numbered pitch-by-pitch list beside the diagram. */
@@ -6390,6 +6455,9 @@ body {
      phone-only convenience — at this width the top toolbar is reachable. */
   .refreshbtn--float {
     display: none;
+  }
+  .innings__toolbar {
+    display: flex;
   }
 
   /* The half navigator: same measure as the LINEUPS / INNINGS / BOX step
