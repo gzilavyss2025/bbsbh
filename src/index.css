@@ -6966,6 +6966,24 @@ body {
   background: var(--surface-inset);
   box-shadow: var(--inset-cell);
 }
+/* A player with no real photo on file falls back to his team's logo (see
+   Headshot.jsx) rather than the plain monogram. Same mounted-chip background
+   as .shot--fallback, but padded and object-fit: contain (not cover) so the
+   whole mark stays visible instead of cropping into it like a photo. */
+.shot--logo {
+  display: grid;
+  place-items: center;
+  background: var(--surface-inset);
+  box-shadow: var(--inset-cell);
+  padding: 16%;
+  box-sizing: border-box;
+}
+.shot--logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: none;
+}
 .player__name {
   margin: 0;
   display: flex;
