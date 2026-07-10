@@ -5142,6 +5142,213 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   FLIP CARDS — past-day preview (src/components/FlipCard.jsx). Blackjack-style
+   3D flip: front and back faces occupy the same grid cell (so the container
+   sizes to whichever face is taller, without absolute-position overflow
+   math), rotated in place. Purely a `transition` on `transform` (never
+   `@keyframes`), so the blanket `prefers-reduced-motion` rule further down
+   this file (`* { transition-duration: 0.01ms !important }`) collapses it to
+   an instant swap for free — no separate reduced-motion override needed here.
+   --------------------------------------------------------------------------- */
+.flipcard {
+  perspective: 1400px;
+}
+.flipcard__inner {
+  display: grid;
+  transform-style: preserve-3d;
+  /* Strong ease-in-out (not ease-out): unlike a one-shot reveal, a flip is
+     bidirectional and should feel symmetric turning either way. 450ms sits at
+     the top of the "modal/drawer"-scale range — this swaps a whole card's
+     worth of content, not a small UI nudge. */
+  transition: transform 450ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+.flipcard--flipped .flipcard__inner {
+  transform: rotateY(180deg);
+}
+.flipcard__face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  min-width: 0;
+}
+.flipcard__face--back {
+  transform: rotateY(180deg);
+}
+
+/* The back face's content — final line, decisions, play of the game (see
+   src/components/GameResultFace.jsx). Same card chrome as .gamecard so the
+   flip reads as one object turning over, not two different cards. */
+.flipback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-card);
+}
+.flipback__flipBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--paper-1);
+  color: var(--text-heading);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.flipback__flipBtn:active {
+  transform: translateY(1px);
+}
+.flipback__teams {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flipback__team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.flipback__abbr {
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.flipback__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 24px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.flipback__stat small {
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.flipback__decisions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding-top: 4px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.flipback__decision b {
+  color: var(--text-heading);
+  margin-right: 3px;
+}
+.flipback__potg {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-body);
+}
+.flipback__potgLabel {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 2px;
+}
+.flipback__full {
+  align-self: stretch;
+  margin-top: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   DAY RECAP — past-day right rail: Top Performers + Day Highlights sharing one
+   seal (src/components/PastDayRecapBox.jsx, src/api/dayHighlights.js).
+   --------------------------------------------------------------------------- */
+.pastdayrecap {
+  margin-top: 10px;
+}
+.dayhl__section + .dayhl__section {
+  margin-top: 16px;
+}
+.dayhl__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.dayhl__perfList {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dayhl__perf {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.dayhl__perfName {
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.dayhl__perfStat {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.dayhl__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dayhl__rowBtn {
+  width: 100%;
+  text-align: left;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+  color: var(--text-body);
+  padding: 8px 10px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.dayhl__rowBtn:active {
+  transform: translateY(1px);
+}
+
+/* ---------------------------------------------------------------------------
    TEAM LEADERS — per-category season leaderboards on the team page + the
    dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
    slate's Top Performers row; the parallel `.tlead__*` classes keep that
@@ -5621,6 +5828,25 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  /* ---- past-day slate body: game grid + Day Recap rail side by side (see
+     PastPreview.jsx / PastDayRecapBox.jsx). The grid drops to ONE column here
+     (rather than keeping the 2-up rule above) — a past-day flip card's back
+     face carries more content (R/H/E, decisions, play of the game) than the
+     plain spoiler-free card, and the ~300px rail leaves less width to share. */
+  .slate-body {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    align-items: start;
+    gap: 20px;
+  }
+  .slate-body .gamelist {
+    grid-template-columns: 1fr;
+  }
+  .slate-body .pastdayrecap {
+    position: sticky;
+    top: 12px;
   }
 
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —
