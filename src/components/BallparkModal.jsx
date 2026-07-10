@@ -46,7 +46,7 @@ export function BallparkModal({ venue, onClose }) {
           </button>
         </div>
 
-        <BallparkDiagram dist={data.dist} wall={data.wall} />
+        <BallparkDiagram dist={data.dist} wall={data.wall} arc={data.arc} />
 
         <dl className="bpsheet__facts">
           <Facts label="Opened" value={data.built} />
@@ -60,7 +60,8 @@ export function BallparkModal({ venue, onClose }) {
         </div>
 
         <p className="bpsheet__foot">
-          Distances from the MLB Stats API · ranked among the 30 MLB parks
+          Distances from the MLB Stats API, ranked among the MLB parks · wall shapes
+          from GeomMLBStadiums
         </p>
       </div>
     </div>

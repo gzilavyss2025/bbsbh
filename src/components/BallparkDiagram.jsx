@@ -1,17 +1,17 @@
-import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../lib/ballparkGeometry.js'
+import { buildFieldGeometry, wallStroke, TRACK_WIDTH, VIEWBOX, HOME } from '../lib/ballparkGeometry.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
-// surrounding foul ground — with the outfield wall shaped TO SCALE from the park's
-// five posted distances and the fence drawn thicker where the wall is taller (so
-// Fenway's 37' Monster reads as a wall, not a line). Geometry (and the reasoning
-// behind the fixed scale) lives in lib/ballparkGeometry.js; this file just paints
-// it. Pure and spoiler-free — field geometry carries no score.
+// surrounding foul ground. The fence is the park's REAL wall (straight segments,
+// true corners — Fenway's Monster, PNC's angular RF) when we have the digitized
+// polygon, else a straight five-point outline; either way it's drawn thicker where
+// the wall is taller. Geometry (and the fixed-scale reasoning) lives in
+// lib/ballparkGeometry.js; this file just paints it. Pure and spoiler-free.
 
 const f = (n) => Math.round(n * 100) / 100
 
-export function BallparkDiagram({ dist, wall, className = '' }) {
-  const g = buildFieldGeometry(dist, wall)
+export function BallparkDiagram({ dist, wall, arc, className = '' }) {
+  const g = buildFieldGeometry(dist, wall, arc)
   return (
     <svg
       className={`bpdiagram ${className}`}
@@ -21,7 +21,9 @@ export function BallparkDiagram({ dist, wall, className = '' }) {
     >
       <path d={g.foul} className="bpdiagram__foul" />
       <path d={g.fair} className="bpdiagram__grass" />
-      <path d={g.track} className="bpdiagram__track" />
+      {/* Warning track: a thick underlay stroke along the fence line; the fence is
+          drawn over its center, so the inner half reads as track on the grass. */}
+      <path d={g.wallPath} className="bpdiagram__track" style={{ strokeWidth: TRACK_WIDTH }} />
       <path d={g.infield} className="bpdiagram__dirt" />
       <path d={g.foulLineL} className="bpdiagram__line" />
       <path d={g.foulLineR} className="bpdiagram__line" />
@@ -44,14 +46,9 @@ export function BallparkDiagram({ dist, wall, className = '' }) {
         points={`${HOME.x - 5},${HOME.y - 2} ${HOME.x + 5},${HOME.y - 2} ${HOME.x + 5},${HOME.y + 3} ${HOME.x},${HOME.y + 7} ${HOME.x - 5},${HOME.y + 3}`}
       />
 
-      {/* Fence — stroke width scales with wall height */}
-      {g.wallSegs.map((s, i) => (
-        <path
-          key={i}
-          d={s.d}
-          className="bpdiagram__wall"
-          style={{ strokeWidth: wallStroke(s.h) }}
-        />
+      {/* Fence — each segment stroked to its local wall height */}
+      {g.fenceSegs.map((s, i) => (
+        <path key={i} d={s.d} className="bpdiagram__wall" style={{ strokeWidth: wallStroke(s.h) }} />
       ))}
 
       {/* Distance labels outside the fence */}

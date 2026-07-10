@@ -24,6 +24,8 @@
 // the bearing table. To add/refresh a park: re-pull fieldInfo from statsapi for
 // the distances and drop the verified wall heights in alongside.
 
+import { WALLS } from './ballparkFields.js'
+
 // Normalize a venue name to a stable lookup key (mirrors ballparks.js).
 // "Oriole Park at Camden Yards" → "orioleparkatcamdenyards".
 function normalizeVenue(name) {
@@ -66,6 +68,19 @@ export const BALLPARKS = {
   uniqlofieldatdodgerstadium: { name: 'Dodger Stadium', dist: { lf: 330, lc: 385, cf: 395, rc: 385, rf: 330 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1962, roof: 'Open', capacity: 56000 },
   wrigleyfield: { name: 'Wrigley Field', dist: { lf: 355, lc: 368, cf: 400, rc: 368, rf: 353 }, wall: { lf: 11, cf: 11, rf: 11 }, built: 1914, roof: 'Open', capacity: 41363 },
   yankeestadium: { name: 'Yankee Stadium', dist: { lf: 318, lc: 399, cf: 408, rc: 385, rf: 314 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 47309 },
+  // The Athletics' interim home (a Triple-A park). Only the three line/center
+  // distances are posted; the gaps (lc/rc) and wall heights are estimated, so its
+  // gap ranks are approximate. No digitized wall polygon exists, so the diagram
+  // uses the straight five-point fallback.
+  sutterhealthpark: { name: 'Sutter Health Park', dist: { lf: 330, lc: 372, cf: 403, rc: 372, rf: 325 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2000, roof: 'Open', capacity: 14014 },
+}
+
+// Attach each park's digitized outfield-wall polygon (feet, home-origin) so the
+// diagram can draw the true fence shape. Aliases share the same record object, so
+// they inherit the arc automatically. Parks with no polygon keep arc undefined and
+// fall back to the five-point straight outline (see ballparkGeometry.js).
+for (const [key, arc] of Object.entries(WALLS)) {
+  if (BALLPARKS[key]) BALLPARKS[key].arc = arc
 }
 
 // Aliases for parks whose feed name can appear under a former/sponsor variant, so
