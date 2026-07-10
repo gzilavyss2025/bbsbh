@@ -10,5 +10,11 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "mcp__github__pull_request_read"
+    ]
   }
 }
