@@ -55,6 +55,18 @@ for (const d of data.dates ?? []) {
   for (const g of d.games ?? []) {
     const state = g.status?.abstractGameState
     if (state !== 'Final') continue // only games that actually happened
+    // A postponed-then-replayed game can be listed TWICE in this season-wide
+    // response: once under its original calendar date (with a stale/incorrect
+    // gameNumber) and once under the date it actually happened
+    // (`officialDate`). Only the listing whose bucket matches its own
+    // officialDate is the real one — the other is a schedule-API echo that
+    // would otherwise double-count the game and, worse, collide on the same
+    // (gamePk, gameNumber, role) key as the real listing when it also carries
+    // a mislabeled gameNumber, confusing React's list reconciliation on the
+    // umpire page. Verified against a live schedule pull: every affected
+    // gamePk's officials are identical between the two listings, so dropping
+    // the mismatched one loses no information.
+    if (d.date !== g.officialDate) continue
     const officials = g.officials ?? []
     if (!officials.length) continue
     gamesSeen++
@@ -68,6 +80,16 @@ for (const d of data.dates ?? []) {
       awayAbbr: teamAbbr(away),
       homeId: home?.id ?? null,
       homeAbbr: teamAbbr(home),
+      venueId: g.venue?.id ?? null,
+      venueName: g.venue?.name ?? '',
+      // Final score's already in this same schedule payload (no extra call) —
+      // lets the umpire page tally each team's record in games this umpire
+      // worked, without a per-game feed fetch. isTie is the rare
+      // suspended-and-not-resumed case; both isWinner flags are false then.
+      awayScore: g.teams?.away?.score ?? null,
+      homeScore: g.teams?.home?.score ?? null,
+      awayIsWinner: g.teams?.away?.isWinner ?? null,
+      homeIsWinner: g.teams?.home?.isWinner ?? null,
     }
     for (const o of officials) {
       const id = o.official?.id

@@ -427,7 +427,11 @@ notes the gamePk field paths were verified against):
   (`select.js`) now threading each official's `id` through to the Umpires card
   (`TeamInfo.jsx`), which renders each name as an `UmpireLink` to `/umpire/{id}`
   (`route.js`); the page itself needs no `SealBox` — umpire assignments and game
-  dates carry no score, same as the rest of the roster-move surfaces.
+  dates carry no score, same as the rest of the roster-move surfaces. Each
+  game entry also carries the venue (id + name), so `UmpirePage.jsx` can tally
+  two summary cards above the game list — most-worked teams (a wrapping logo
+  grid, counting both sides of each game) and most-worked ballparks (by
+  venue) — purely client-side from the same games array the list already has.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card data (career
   regular-season line vs each opposing club + the last meeting's stat line, per
   MLB active-roster player), read from a static same-origin
