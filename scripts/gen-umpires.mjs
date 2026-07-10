@@ -68,6 +68,8 @@ for (const d of data.dates ?? []) {
       awayAbbr: teamAbbr(away),
       homeId: home?.id ?? null,
       homeAbbr: teamAbbr(home),
+      venueId: g.venue?.id ?? null,
+      venueName: g.venue?.name ?? '',
     }
     for (const o of officials) {
       const id = o.official?.id
