@@ -68,6 +68,14 @@ export const BALLPARKS = {
   yankeestadium: { name: 'Yankee Stadium', dist: { lf: 318, lc: 399, cf: 408, rc: 385, rf: 314 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 2009, roof: 'Open', capacity: 47309 },
 }
 
+// Aliases for parks whose feed name can appear under a former/sponsor variant, so
+// the modal still resolves (same idea as ballparks.js keying a park per name). The
+// live feed uses the current statsapi name, but sponsorships churn — map the
+// likely alternates to the same record.
+BALLPARKS.dodgerstadium = BALLPARKS.uniqlofieldatdodgerstadium
+BALLPARKS.minutemaidpark = BALLPARKS.daikinpark
+BALLPARKS.guaranteedratefield = BALLPARKS.ratefield
+
 // Dimension descriptors, in the order they read on the field (LF line → RF line,
 // then the three wall heights). `group` splits the two ranked families so the
 // modal can render distances and wall heights as separate lists.
@@ -119,7 +127,9 @@ export function ordinal(n) {
 export function rankedDimensions(venueName) {
   const park = ballparkFor(venueName)
   if (!park) return null
-  const all = Object.values(BALLPARKS)
+  // Dedupe by object identity so alias keys (same record under a former/sponsor
+  // name) don't count a park twice in the league pool.
+  const all = [...new Set(Object.values(BALLPARKS))]
   const rows = DIMENSIONS.map(({ key, group, label }) => {
     const value = park[group][key]
     const values = all.map((p) => p[group][key])

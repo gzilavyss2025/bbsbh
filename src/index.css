@@ -8822,3 +8822,251 @@ body {
   color: var(--text-body);
   text-transform: uppercase;
 }
+
+/* ── Ballpark modal ─────────────────────────────────────────────────────────
+   The venue name on the lineup page opens a to-scale ink sketch of the field
+   (BallparkDiagram) plus the park's outfield distances / wall heights ranked
+   against the league. Paper-scorebook idiom: manila fills, navy fence, graphite
+   lines, mono tabular figures — see BallparkModal.jsx / BallparkDiagram.jsx. */
+
+/* Venue name rendered as a tap target when the park is on file. */
+.fact__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.fact__link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.bpsheet {
+  max-height: min(90vh, 780px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.bpsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bpsheet__head .sheet__title {
+  margin: 0;
+}
+
+.bpsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.bpsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+/* The field drawing. viewBox is 620×560; it scales to the sheet width. */
+.bpdiagram {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  margin: 8px auto 4px;
+}
+
+.bpdiagram__foul {
+  fill: var(--rule-soft);
+}
+
+.bpdiagram__grass {
+  fill: var(--field-soft);
+}
+
+.bpdiagram__track {
+  fill: var(--rule);
+}
+
+.bpdiagram__dirt {
+  fill: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+}
+
+.bpdiagram__line {
+  fill: none;
+  stroke: var(--paper-3);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.bpdiagram__wall {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.bpdiagram__base {
+  fill: var(--surface-inset);
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.bpdiagram__mound {
+  fill: none;
+  stroke: var(--graphite);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.bpdiagram__dist {
+  fill: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: var(--w-semibold);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.bpdiagram__wallh {
+  fill: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* Facts strip: opened / roof / capacity. */
+.bpsheet__facts {
+  display: flex;
+  margin: 6px 0 4px;
+  padding: 12px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.bpfact {
+  flex: 1;
+  text-align: center;
+}
+
+.bpfact__label {
+  margin: 0;
+  font-family: var(--font-condensed, var(--font-mono));
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.bpfact__value {
+  margin: 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* Ranked dimension lists. */
+.bpsheet__ranks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 24px;
+  margin-top: 14px;
+}
+
+.rankgrp {
+  flex: 1;
+  min-width: 150px;
+}
+
+.rankgrp__title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.rankgrp__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rankrow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.rankrow:first-child {
+  border-top: none;
+}
+
+.rankrow__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.rankrow__value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.rankrow__rank {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  min-width: 62px;
+  text-align: right;
+}
+
+.rankrow__rank.is-most {
+  color: var(--accent-primary);
+  font-weight: var(--w-semibold);
+}
+
+.rankrow__rank.is-least {
+  color: var(--accent-negative);
+  font-weight: var(--w-semibold);
+}
+
+.rankrow__of {
+  color: var(--graphite-soft);
+}
+
+.bpsheet__foot {
+  margin: 16px 0 0;
+  font-size: 11px;
+  color: var(--graphite-soft);
+  text-align: center;
+}

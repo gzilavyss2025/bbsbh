@@ -13,6 +13,8 @@ import { fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewing.js'
 import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
+import { BallparkModal } from '../components/BallparkModal.jsx'
+import { ballparkFor } from '../lib/ballparkData.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
@@ -239,7 +241,7 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
   return (
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
-      <Fact label="Ballpark" value={info.venue} />
+      <BallparkFact venue={info.venue} />
       <Fact label="First pitch" value={info.firstPitch} />
       <Fact
         label="Weather"
@@ -922,6 +924,26 @@ function Fact({ label, value }) {
     <div className="fact">
       <dt className="fact__label">{label}</dt>
       <dd className="fact__value">{value || <span className="fact__na">—</span>}</dd>
+    </div>
+  )
+}
+
+// The Ballpark fact. When we have the park on file (the 30 MLB parks — see
+// ballparkData.js), the venue name becomes a button that opens the to-scale
+// field diagram + league-ranked dimensions. MiLB parks and any venue not on file
+// degrade to the plain read-only Fact, per the app's graceful-degradation rule.
+function BallparkFact({ venue }) {
+  const [open, setOpen] = useState(false)
+  if (!ballparkFor(venue)) return <Fact label="Ballpark" value={venue} />
+  return (
+    <div className="fact">
+      <dt className="fact__label">Ballpark</dt>
+      <dd className="fact__value">
+        <button className="fact__link" onClick={() => setOpen(true)}>
+          {venue}
+        </button>
+      </dd>
+      {open && <BallparkModal venue={venue} onClose={() => setOpen(false)} />}
     </div>
   )
 }
