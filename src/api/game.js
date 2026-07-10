@@ -46,12 +46,19 @@ export async function fetchVenue(venueId) {
 // 'Interim Manager' (jobId 'NTRM') — e.g. Don Mattingly for the 2026 Phillies.
 // So we match any job ending in "Manager", prefer a permanent one, and tag an
 // interim with "(interim)" so the label stays honest.
+//
+// The endpoint defaults to the CURRENT roster, so a historical box score
+// needs its game's own `season` passed through — otherwise a 2014 game shows
+// today's skipper instead of the one who actually managed it (verified: the
+// endpoint accepts `?season=YYYY` and returns that season's staff).
 // ---------------------------------------------------------------------------
 
-export async function fetchManager(teamId) {
+export async function fetchManager(teamId, season) {
   if (!teamId) return null
   try {
-    const data = await getJson(`/api/v1/teams/${teamId}/coaches`)
+    const data = await getJson(
+      `/api/v1/teams/${teamId}/coaches${season ? `?season=${season}` : ''}`,
+    )
     const roster = data.roster ?? []
     const managers = roster.filter((r) => /(^|\s)manager$/i.test(r.job ?? ''))
     // Prefer the exact 'Manager' over an 'Interim Manager' if both appear.
