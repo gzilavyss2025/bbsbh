@@ -1,4 +1,4 @@
-import { buildFieldGeometry, wallStroke, TRACK_WIDTH, VIEWBOX, HOME } from '../lib/ballparkGeometry.js'
+import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../lib/ballparkGeometry.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
@@ -21,9 +21,9 @@ export function BallparkDiagram({ dist, wall, arc, className = '' }) {
     >
       <path d={g.foul} className="bpdiagram__foul" />
       <path d={g.fair} className="bpdiagram__grass" />
-      {/* Warning track: a thick underlay stroke along the fence line; the fence is
-          drawn over its center, so the inner half reads as track on the grass. */}
-      <path d={g.wallPath} className="bpdiagram__track" style={{ strokeWidth: TRACK_WIDTH }} />
+      {/* Warning track: a band of constant width running the whole fence, inset
+          in from the wall — the fence is drawn over its outer edge. */}
+      <path d={g.track} className="bpdiagram__track" />
       <path d={g.infield} className="bpdiagram__dirt" />
       <path d={g.foulLineL} className="bpdiagram__line" />
       <path d={g.foulLineR} className="bpdiagram__line" />

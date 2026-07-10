@@ -8905,10 +8905,8 @@ body {
 }
 
 .bpdiagram__track {
-  fill: none;
-  stroke: var(--rule);
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  fill: var(--rule);
+  stroke: none;
 }
 
 .bpdiagram__dirt {
