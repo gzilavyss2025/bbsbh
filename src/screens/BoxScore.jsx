@@ -64,6 +64,7 @@ export function BoxScore({
   scorebookWeather,
   winProbability,
   callouts,
+  vsTeam,
   onInnings,
   onReload,
   loading,
@@ -96,7 +97,7 @@ export function BoxScore({
           // in the game (see api/callout-notes.js) — the same notes the
           // innings view shows one at a time on the play they belong to,
           // rolled up here into the Insights card.
-          const calloutNotes = computeGameCalloutNotes(feed, callouts)
+          const calloutNotes = computeGameCalloutNotes(feed, callouts, vsTeam)
           return (
             <BoxScoreBody
               feed={feed}

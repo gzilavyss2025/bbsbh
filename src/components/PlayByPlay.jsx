@@ -5,6 +5,7 @@ import {
   hasPitchLocations,
   firstRunPlay,
   firstPAIndexByBatter,
+  timesFacingPitcher,
 } from '../api/playbyplay.js'
 import { buildCallouts } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
@@ -18,17 +19,20 @@ import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './Strik
 // notes, first at-bat first. This reads score-revealing data
 // (computeHalfInningFeed), so — same rule as the rest of the half's stat
 // grid — it must only be rendered from inside a SealBox's reveal function.
-export function PlayByPlay({ feed, inning, half, battingSide, callouts }) {
+export function PlayByPlay({ feed, inning, half, battingSide, callouts, vsTeam }) {
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
 
-  // Season-context call-out plumbing (see api/callout-notes.js). Both derivations
-  // read the whole-game feed but are reveal-only like everything here, and only
-  // run when a bundle exists (MLB, generated date) — otherwise the cards render
-  // exactly as before. `firstRun` marks the play that scored the game's first
-  // run; `firstPA` gates each batter's streak note to his first card of the game.
+  // Season-context call-out plumbing (see api/callout-notes.js). All three
+  // derivations read the whole-game feed but are reveal-only like everything
+  // here, and only run when a bundle exists (MLB, generated date) — otherwise
+  // the cards render exactly as before. `firstRun` marks the play that scored
+  // the game's first run; `firstPA` gates each batter's streak/situational/
+  // vs-team notes to his first card of the game; `timesFacing` drives the
+  // times-through-the-order note.
   const firstRun = callouts ? firstRunPlay(feed) : null
   const firstPA = callouts ? firstPAIndexByBatter(feed) : null
+  const timesFacing = callouts ? timesFacingPitcher(feed) : null
 
   return (
     <div className="pbp">
@@ -39,7 +43,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, callouts }) {
           <AtBatCard
             key={`${entry.batterId}-${i}`}
             entry={entry}
-            calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide }}
+            calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, timesFacing }}
           />
         ),
       )}

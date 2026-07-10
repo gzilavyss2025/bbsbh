@@ -45,6 +45,7 @@ export function GameView({ game, section, onSection }) {
     gameCallouts,
     broadcast,
     formerTeammatesData,
+    vsTeamSplitsData,
     started,
   } = useGameData(game)
 
@@ -211,6 +212,7 @@ export function GameView({ game, section, onSection }) {
           winProbability={winProb.data}
           prospectsData={prospectsData}
           callouts={gameCallouts}
+          vsTeam={vsTeamSplitsData}
         />
       )}
       {feed && step === 3 && (
@@ -221,6 +223,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeather={weather.data}
           winProbability={winProb.data}
           callouts={gameCallouts}
+          vsTeam={vsTeamSplitsData}
           onInnings={() => onSection(lastInningSection.current)}
           onReload={feedState.reload}
           loading={feedState.loading}

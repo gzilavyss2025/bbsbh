@@ -15,7 +15,12 @@
 // score's Insights roll-up (computeGameCalloutNotes below) is what actually
 // uses the identity fields to draw a headshot/logo card per note.
 
-import { firstRunPlay, firstPAIndexByBatter, NON_PA_EVENT_TYPES } from './playbyplay.js'
+import {
+  firstRunPlay,
+  firstPAIndexByBatter,
+  timesFacingPitcher,
+  NON_PA_EVENT_TYPES,
+} from './playbyplay.js'
 import { personNameParts } from './select.js'
 
 // Marquee hit leader category keys, shared with gen-callouts.mjs (imported there).
@@ -36,7 +41,24 @@ const SB_EVENTS = new Set(['stolen_base_2b', 'stolen_base_3b', 'stolen_base_home
 
 const otherSide = (side) => (side === 'away' ? 'home' : 'away')
 
-export function buildCallouts(entry, { bundle, firstRun, firstPA, battingSide } = {}) {
+// A hitter's career line against one club, from the separately-fetched
+// vs-team-splits file (api/vsTeamSplits.js) — read directly here rather than
+// through that module's vsTeamSplitsFor, which also builds the player-page's
+// opponent-selector strip that this per-PA note has no use for. `car` is a
+// CAREER total (see gen-vs-team-splits.mjs), not season-only, so the note
+// always reads "career", never "this year". Kept only past a real sample
+// (VS_TEAM_MIN_GAMES) — a 1-game "career" line is a coincidence, not a fact.
+const VS_TEAM_MIN_GAMES = 3
+function vsTeamCareerLine(vsTeam, personId, teamId) {
+  const car = vsTeam?.players?.[personId]?.vs?.[String(teamId)]?.car
+  if (!car || car.g < VS_TEAM_MIN_GAMES) return null
+  return car
+}
+
+export function buildCallouts(
+  entry,
+  { bundle, firstRun, firstPA, battingSide, vsTeam, timesFacing } = {},
+) {
   if (!bundle) return []
   const notes = []
   const {
@@ -44,6 +66,7 @@ export function buildCallouts(entry, { bundle, firstRun, firstPA, battingSide } 
     pitcherLeaders = {},
     streaks = {},
     homerRecords = {},
+    situational = {},
     teamRecords = {},
   } = bundle
 
@@ -104,7 +127,8 @@ export function buildCallouts(entry, { bundle, firstRun, firstPA, battingSide } 
   }
 
   // Coming into today — a streak, shown once per game (on his first PA).
-  if (firstPA && entry.atBatIndex != null && firstPA.get(entry.batterId) === entry.atBatIndex) {
+  const isFirstPA = firstPA && entry.atBatIndex != null && firstPA.get(entry.batterId) === entry.atBatIndex
+  if (isFirstPA) {
     const s = streaks[entry.batterId]
     if (s?.onBase) {
       notes.push({
@@ -120,6 +144,62 @@ export function buildCallouts(entry, { bundle, firstRun, firstPA, battingSide } 
         side: battingSide,
       })
     }
+
+    // Season situational splits (RISP, vs-L/vs-R) — also shown once, on his
+    // first PA, same as the streaks above: these describe the season, not
+    // whatever's actually on base (or who's on the mound) for this specific
+    // at-bat, so there's no per-play base-state tracking to gate them on.
+    const sit = situational[entry.batterId]
+    if (sit?.risp) {
+      notes.push({
+        text: `Hitting ${sit.risp.avg} with RISP this season`,
+        personId: entry.batterId,
+        side: battingSide,
+      })
+    }
+    const platoon = entry.pitcher?.hand === 'L' ? sit?.vl : entry.pitcher?.hand === 'R' ? sit?.vr : null
+    if (platoon) {
+      const arm = entry.pitcher.hand === 'L' ? 'lefties' : 'righties'
+      notes.push({
+        text: `Hitting ${platoon.avg} (${platoon.ops} OPS) against ${arm} this year`,
+        personId: entry.batterId,
+        side: battingSide,
+      })
+    }
+
+    // His birthday — precomputed against the slate's own date (see
+    // gen-callouts.mjs's isBirthdayOn), so no date math happens client-side.
+    if (bundle.birthdays?.includes(entry.batterId)) {
+      notes.push({ text: `Celebrating his birthday today`, personId: entry.batterId, side: battingSide })
+    }
+
+    // Career line against tonight's opponent (see vsTeamCareerLine) — the
+    // "Turang is a career .303 with 2 HR against the Pirates" call-out.
+    const oppTeamId = bundle[otherSide(battingSide)]?.teamId
+    const car = oppTeamId != null ? vsTeamCareerLine(vsTeam, entry.batterId, oppTeamId) : null
+    if (car) {
+      const oppName = bundle[otherSide(battingSide)]?.name
+      const hrPart = car.hr > 0 ? ` with ${car.hr} HR` : ''
+      if (oppName) {
+        notes.push({
+          text: `Career ${car.avg}${hrPart} against the ${oppName}`,
+          personId: entry.batterId,
+          side: battingSide,
+        })
+      }
+    }
+  }
+
+  // Times-through-the-order: his 3rd (or later) look at this same pitcher
+  // tonight — the point where the "TTO penalty" kicks in (see
+  // api/playbyplay.js's timesFacingPitcher).
+  const trip = timesFacing?.get(entry.atBatIndex)
+  if (trip >= 3) {
+    notes.push({
+      text: `Seeing ${entry.pitcher?.last || 'him'} for the ${ordinal(trip)} time tonight`,
+      personId: entry.pitcher?.id ?? null,
+      side: otherSide(battingSide),
+    })
   }
 
   // This play scored the game's first run — the club's record when it does.
@@ -140,11 +220,31 @@ export function buildCallouts(entry, { bundle, firstRun, firstPA, battingSide } 
   return notes
 }
 
-// Ordinal-inning wording ("6th", "9th"...) for the lead-reversal note below.
-function ordinalInning(n) {
+// Ordinal wording ("6th", "9th", "3rd"...) — shared by the lead-reversal note
+// (inning number) and the times-through-the-order note above (trip number).
+function ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd']
   const v = n % 100
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
+}
+
+// Cumulative runs each side has scored through each inning, stopping at the
+// first inning whose bottom half never happened (a walk-off, or a truncated/
+// suspended game) — "through inning N" isn't well-defined past that point.
+// Shared by every whole-game, checkpoint-based note below.
+function cumulativeInnings(feed) {
+  let cumAway = 0
+  let cumHome = 0
+  const rows = [] // { inning, cumAway, cumHome }
+  for (const inn of feed?.liveData?.linescore?.innings ?? []) {
+    const aR = inn.away?.runs
+    const hR = inn.home?.runs
+    if (typeof aR !== 'number' || typeof hR !== 'number') break
+    cumAway += aR
+    cumHome += hR
+    rows.push({ inning: inn.num, cumAway, cumHome })
+  }
+  return rows
 }
 
 // Checkpoints to look for a blown lead at, LATEST first — a team that led
@@ -170,19 +270,9 @@ export function buildLeadReversalNote(feed, bundle) {
   }
   const winnerSide = finalAway > finalHome ? 'away' : 'home'
 
-  // Cumulative score through each inning, stopping at the first inning whose
-  // bottom half never happened (a walk-off, or a truncated/suspended game) —
-  // "leading after inning N" isn't well-defined once that's true.
-  let cumAway = 0
-  let cumHome = 0
   const leaderAt = {} // inning num -> 'away' | 'home' | null (tied)
-  for (const inn of feed?.liveData?.linescore?.innings ?? []) {
-    const aR = inn.away?.runs
-    const hR = inn.home?.runs
-    if (typeof aR !== 'number' || typeof hR !== 'number') break
-    cumAway += aR
-    cumHome += hR
-    leaderAt[inn.num] = cumAway > cumHome ? 'away' : cumHome > cumAway ? 'home' : null
+  for (const row of cumulativeInnings(feed)) {
+    leaderAt[row.inning] = row.cumAway > row.cumHome ? 'away' : row.cumHome > row.cumAway ? 'home' : null
   }
 
   for (const n of LEAD_CHECKPOINTS) {
@@ -192,13 +282,97 @@ export function buildLeadReversalNote(feed, bundle) {
     const teamName = bundle[leadingSide]?.name
     if (!rec || !teamName) continue
     return {
-      text: `The ${teamName} were ${rec} when leading after the ${ordinalInning(n)} — until tonight`,
+      text: `The ${teamName} were ${rec} when leading after the ${ordinal(n)} — until tonight`,
       personId: null,
       side: leadingSide,
       oppSide: winnerSide,
     }
   }
   return null
+}
+
+// These three thresholds/checkpoint lists must match gen-callouts.mjs's
+// RUN_SCORED_BUCKETS / RUNS_ALLOWED_THRESHOLD+RUNS_ALLOWED_CHECKPOINTS /
+// COMEBACK_DEFICIT — the record was precomputed against those exact numbers,
+// so tonight's check has to agree with them (same duplication as
+// LEAD_CHECKPOINTS above, which mirrors gen-callouts.mjs for the same reason).
+const RUN_SCORED_BUCKETS = [8, 6, 4] // highest first — show the most impressive bucket cleared
+const RUNS_ALLOWED_THRESHOLD = 4
+const RUNS_ALLOWED_CHECKPOINTS = [8, 7, 6, 5] // latest first, same "most dramatic" rule as LEAD_CHECKPOINTS
+const COMEBACK_DEFICIT = 3
+
+// "The Dodgers are 32-4 when scoring 8+ runs" — the highest bucket each side's
+// own final score actually clears. No "reversal" framing (unlike the lead note
+// above) since RUN_SCORED_BUCKETS carries no lopsidedness floor at the data
+// layer — the record itself, however it reads, is the point.
+export function buildRunsScoredNote(feed, bundle) {
+  if (!bundle) return null
+  const finals = {
+    away: feed?.liveData?.linescore?.teams?.away?.runs,
+    home: feed?.liveData?.linescore?.teams?.home?.runs,
+  }
+  for (const side of ['away', 'home']) {
+    const final = finals[side]
+    if (typeof final !== 'number') continue
+    for (const n of RUN_SCORED_BUCKETS) {
+      if (final < n) continue
+      const rec = bundle.teamRecords?.[side]?.runsScored?.[n]
+      const teamName = bundle[side]?.name
+      if (!rec || !teamName) continue
+      return { text: `The ${teamName} are ${rec} when scoring ${n}+ runs`, personId: null, side, oppSide: otherSide(side) }
+    }
+  }
+  return null
+}
+
+// "The Cubs are 3-19 when allowing 4+ runs by the 7th" — symmetric to
+// buildLeadReversalNote but for runs ALLOWED rather than a lead. Checked
+// LATEST checkpoint first, same reasoning as LEAD_CHECKPOINTS: a team that
+// blew up early AND late only needs the one, more dramatic, note.
+export function buildRunsAllowedNote(feed, bundle) {
+  if (!bundle) return null
+  const rows = cumulativeInnings(feed)
+  for (const n of RUNS_ALLOWED_CHECKPOINTS) {
+    const row = rows.find((r) => r.inning === n)
+    if (!row) continue
+    for (const side of ['away', 'home']) {
+      const allowed = side === 'away' ? row.cumHome : row.cumAway
+      if (allowed < RUNS_ALLOWED_THRESHOLD) continue
+      const rec = bundle.teamRecords?.[side]?.runsAllowedByInning?.[n]
+      const teamName = bundle[side]?.name
+      if (!rec || !teamName) continue
+      return {
+        text: `The ${teamName} are ${rec} when allowing ${RUNS_ALLOWED_THRESHOLD}+ runs by the ${ordinal(n)}`,
+        personId: null,
+        side,
+        oppSide: otherSide(side),
+      }
+    }
+  }
+  return null
+}
+
+// "The Twins are 14-22 in games they've trailed by 3+" — fires for whichever
+// side actually fell behind by COMEBACK_DEFICIT+ at some point tonight,
+// regardless of the final result (the record itself covers both outcomes).
+export function buildComebackNote(feed, bundle) {
+  if (!bundle) return null
+  let deficitSide = null
+  for (const row of cumulativeInnings(feed)) {
+    if (row.cumHome - row.cumAway >= COMEBACK_DEFICIT) deficitSide = 'away'
+    else if (row.cumAway - row.cumHome >= COMEBACK_DEFICIT) deficitSide = 'home'
+    if (deficitSide) break
+  }
+  if (!deficitSide) return null
+  const rec = bundle.teamRecords?.[deficitSide]?.comeback
+  const teamName = bundle[deficitSide]?.name
+  if (!rec || !teamName) return null
+  return {
+    text: `The ${teamName} are ${rec} in games they've trailed by ${COMEBACK_DEFICIT}+`,
+    personId: null,
+    side: deficitSide,
+    oppSide: otherSide(deficitSide),
+  }
 }
 
 // Every call-out that actually fired somewhere in the game, deduped in
@@ -212,7 +386,9 @@ export function buildLeadReversalNote(feed, bundle) {
 // each play's own result, batter, pitcher, and any baserunning event it
 // carries. REVEAL-ONLY: the whole game is already behind the box score's
 // SealBox by the time this is called, same rule as computeGameSuperlatives.
-export function computeGameCalloutNotes(feed, bundle) {
+// `vsTeam` (the separately-fetched vs-team-splits file, api/vsTeamSplits.js)
+// is optional — the career-vs-opponent note simply doesn't fire without it.
+export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   if (!bundle) return []
 
   // A note's `side`/`oppSide` ('away'|'home') resolve to the bundle's own
@@ -236,6 +412,7 @@ export function computeGameCalloutNotes(feed, bundle) {
 
   const firstRun = firstRunPlay(feed)
   const firstPA = firstPAIndexByBatter(feed)
+  const timesFacing = timesFacingPitcher(feed)
   const seen = new Set()
   const ordered = []
   const add = (note) => {
@@ -247,9 +424,10 @@ export function computeGameCalloutNotes(feed, bundle) {
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     const battingSide = play.about?.halfInning === 'top' ? 'away' : 'home'
     const pitcherId = play.matchup?.pitcher?.id
+    const pitcherPerson = pitcherId != null ? feed?.gameData?.players?.[`ID${pitcherId}`] ?? {} : {}
     const pitcher =
       pitcherId != null
-        ? { id: pitcherId, ...personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {}) }
+        ? { id: pitcherId, ...personNameParts(pitcherPerson), hand: pitcherPerson.pitchHand?.code ?? '' }
         : null
     const baserunningNotes = (play.playEvents ?? [])
       .filter((e) => !e.isPitch && NON_PA_EVENT_TYPES.has(e.details?.eventType))
@@ -261,11 +439,19 @@ export function computeGameCalloutNotes(feed, bundle) {
       pitcher,
       baserunningNotes,
     }
-    for (const note of buildCallouts(entry, { bundle, firstRun, firstPA, battingSide })) add(note)
+    for (const note of buildCallouts(entry, { bundle, firstRun, firstPA, battingSide, vsTeam, timesFacing })) {
+      add(note)
+    }
   }
 
   const reversal = buildLeadReversalNote(feed, bundle)
   if (reversal) add(reversal)
+  const runsScored = buildRunsScoredNote(feed, bundle)
+  if (runsScored) add(runsScored)
+  const runsAllowed = buildRunsAllowedNote(feed, bundle)
+  if (runsAllowed) add(runsAllowed)
+  const comeback = buildComebackNote(feed, bundle)
+  if (comeback) add(comeback)
 
   return ordered
 }

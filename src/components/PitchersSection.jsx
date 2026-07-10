@@ -1,6 +1,8 @@
-import { useLayoutEffect, useRef } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 import { useNav, useLinkScope } from '../lib/nav.js'
 import { playerPath } from '../lib/route.js'
+import { buildPitcherNotes } from '../api/pitcher-callouts.js'
+import { CalloutNote } from './CalloutNote.jsx'
 
 // Running pitching lines for every pitcher who has appeared in a revealed
 // half-inning — a separate block per team, each led by the team name with its
@@ -10,7 +12,13 @@ import { playerPath } from '../lib/route.js'
 // horizontal scroll: the caps-locked name auto-shrinks to one line (PitcherName)
 // while the numeric columns hold their size, and the jersey number is inked in
 // clay red and right-aligned within its own slot in the Pitcher cell.
-export function PitchersSection({ teams }) {
+//
+// `starterRecords` (the callouts bundle's per-pitcher season family — see
+// gen-callouts.mjs) is optional; each team entry additionally carries `side`
+// ('away'|'home', which club he's on) so buildPitcherNotes can pick the right
+// half of a home/away split. Absent bundle or no matching record → no notes,
+// same degrade as every other callout family.
+export function PitchersSection({ teams, starterRecords }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
@@ -35,27 +43,41 @@ export function PitchersSection({ teams }) {
               </tr>
             </thead>
             <tbody>
-              {t.rows.map((p) => (
-                <tr key={p.id}>
-                  <td className="pitchers__pitcher">
-                    <div className="pitchers__cell">
-                      <PitcherName id={p.id} last={p.last} first={p.first} />
-                      {p.jersey ? (
-                        <span className="pitchers__num">{p.jersey}</span>
-                      ) : null}
-                    </div>
-                  </td>
-                  <td>{p.hand || '—'}</td>
-                  <td>{p.ip}</td>
-                  <td>{p.pitches}</td>
-                  <td>{p.bf}</td>
-                  <td>{p.h}</td>
-                  <td>{p.r}</td>
-                  <td>{p.er}</td>
-                  <td>{p.bb}</td>
-                  <td>{p.k}</td>
-                </tr>
-              ))}
+              {t.rows.map((p) => {
+                const notes = buildPitcherNotes(p, t.side, t.name, starterRecords)
+                return (
+                  <Fragment key={p.id}>
+                    <tr>
+                      <td className="pitchers__pitcher">
+                        <div className="pitchers__cell">
+                          <PitcherName id={p.id} last={p.last} first={p.first} />
+                          {p.jersey ? (
+                            <span className="pitchers__num">{p.jersey}</span>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td>{p.hand || '—'}</td>
+                      <td>{p.ip}</td>
+                      <td>{p.pitches}</td>
+                      <td>{p.bf}</td>
+                      <td>{p.h}</td>
+                      <td>{p.r}</td>
+                      <td>{p.er}</td>
+                      <td>{p.bb}</td>
+                      <td>{p.k}</td>
+                    </tr>
+                    {notes.length > 0 && (
+                      <tr>
+                        <td colSpan={10} className="pitchers__notes">
+                          {notes.map((text, i) => (
+                            <CalloutNote key={i} text={text} />
+                          ))}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                )
+              })}
             </tbody>
           </table>
         </div>
