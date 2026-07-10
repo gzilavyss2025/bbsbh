@@ -150,7 +150,7 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
           )
         })}
       </g>
-      {showBatter && <BatterSilhouette x={batSide === 'R' ? 0 : W + zoneOffsetX} mirror={batSide === 'L'} />}
+      {showBatter && <BatterSilhouette x={batSide === 'R' ? 0 : W + zoneOffsetX} mirror={batSide === 'R'} />}
     </svg>
   )
 }
