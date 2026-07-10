@@ -183,7 +183,8 @@ function eligiblePlayers(pool, category, qualifier = 'roster') {
 }
 
 // Top-N leaders for one category. Pure: reads only the pool + descriptor.
-// Returns [{ rank, id, name, teamId, teamAbbr, sportId, position, value, display }].
+// Returns [{ rank, id, name, teamId, teamAbbr, displayTeamId, displayTeamAbbr,
+// sportId, position, value, display }].
 // `qualifier` selects the playing-time bar for rate categories (see
 // eligiblePlayers) — 'roster' for a single team, 'leader-relative' for a
 // league/level/org pool.
@@ -210,6 +211,8 @@ export function computeLeaders(pool, category, { limit = 5, qualifier = 'roster'
       name: r.p.name,
       teamId: r.p.teamId,
       teamAbbr: r.p.teamAbbr,
+      displayTeamId: r.p.displayTeamId ?? r.p.teamId,
+      displayTeamAbbr: r.p.displayTeamAbbr ?? r.p.teamAbbr,
       sportId: r.p.sportId ?? null,
       // The levels a combined (org / all-minors) total spans, for the multi-
       // level badge; absent on single-level pools (badge falls back to sportId).

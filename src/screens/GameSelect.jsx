@@ -11,6 +11,7 @@ import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
+import { SiteSearchButton } from '../components/SiteSearch.jsx'
 import { goHome } from '../lib/home.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
@@ -129,9 +130,11 @@ export function GameSelect({ onPick, onShowLogos }) {
           date). Pinned together on an opaque backdrop so the cards scroll
           cleanly underneath instead of bleeding through a see-through header. */}
       <div className="slatehead">
-        {/* Title + level toggle share one row: the Scorebook mark taps home
-            (a full reload — see lib/home.js) on the left, the condensed
-            MLB/AAA/… buttons ride to its right. */}
+        {/* Title + level toggle + search share one row: the Scorebook mark taps
+            home (a full reload — see lib/home.js) on the left, the condensed
+            MLB/AAA/… buttons and the search trigger ride together to its
+            right (grouped so `justify-content: space-between` splits only
+            title vs. that cluster, not each button individually). */}
         <header className="topbar topbar--slate">
           <button
             type="button"
@@ -142,7 +145,10 @@ export function GameSelect({ onPick, onShowLogos }) {
             <ScorebookMark size={20} simplified />
             Scorebook
           </button>
-          <LevelNav sportId={sportId} onChange={pickLevel} />
+          <div className="topbar__slateactions">
+            <LevelNav sportId={sportId} onChange={pickLevel} />
+            <SiteSearchButton className="topbar__search" />
+          </div>
         </header>
 
         <div className="datenav datenav--row">
@@ -192,7 +198,9 @@ export function GameSelect({ onPick, onShowLogos }) {
           <li key={`${g.sportId}-${g.gamePk}`}>
             <GameCard
               game={g}
-              pinned={isPinned(g, favoriteTeamId, favoriteAffiliateIds)}
+              pinnedTeamId={
+                isPinned(g, favoriteTeamId, favoriteAffiliateIds) ? favoriteTeamId : null
+              }
               uniformsReady={!!uniformsReady[g.gamePk]}
               prospectCount={(prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)}
               onSelect={() => onPick(g, dateStr)}

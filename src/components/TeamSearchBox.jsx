@@ -1,24 +1,17 @@
 import { useState } from 'react'
 import { fetchTeamDirectory, searchTeams } from '../api/search.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { useNav } from '../lib/nav.js'
-import { teamPath } from '../lib/route.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 
-// Team-name search box. Standalone (no `onPick`), picking a result navigates
-// straight to the team hub, like PlayerSearchBox. Passed an `onPick`, it hands
-// the chosen team back to the caller instead — how GameFinder lets someone
-// choose two clubs before looking up their meetings. `selected` renders the
-// already-chosen team as a chip with a clear button, for that same picker use.
-export function TeamSearchBox({
-  label = 'Find a team',
-  placeholder = 'Team name…',
-  onPick = null,
-  selected = null,
-}) {
+// Team-name search box — GameFinder's club picker. Picking a result hands the
+// chosen team back via `onPick` — how GameFinder lets someone choose two
+// clubs before looking up their meetings. `selected` renders the
+// already-chosen team as a chip with a clear button, for that same picker
+// use. (Site-wide team search lives in the header's merged search modal —
+// see SiteSearch.jsx — not here.)
+export function TeamSearchBox({ label = 'Find a team', placeholder = 'Team name…', onPick, selected = null }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
-  const navigate = useNav()
   const directory = useAsync(fetchTeamDirectory, [])
 
   const matches = query.trim() ? searchTeams(directory.data ?? [], query, 8) : []
@@ -26,8 +19,7 @@ export function TeamSearchBox({
   const pick = (t) => {
     setQuery('')
     setOpen(false)
-    if (onPick) onPick(t)
-    else navigate(teamPath(t.id))
+    onPick(t)
   }
 
   return (
