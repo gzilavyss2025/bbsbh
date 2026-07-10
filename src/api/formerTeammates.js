@@ -116,13 +116,17 @@ export function orgTiesFor(data, teamIdA, teamIdB) {
 // unrelated players together). Three independent gates, all required:
 //   - level floor: only an AA-or-better stint can anchor a group (kills the
 //     Rookie/A-ball chains outright — that's where the explosion came from)
-//   - a real hub: one specific player ties to ≥3 others via that SAME
-//     (team, season) — hub-and-spokes only, never a many-to-many blob
+//   - a real hub: one specific player ties to ≥2 others via that SAME
+//     (team, season) — hub-and-spokes only, never a many-to-many blob. Two is
+//     the floor rather than one because a lone pair is already its own card;
+//     the group form only earns its keep once a shared club actually chains
+//     multiple opposing players to the same anchor (e.g. Kenley Jansen's '24
+//     Red Sox stint tying to both Brad Keller and Chase Shugart).
 //   - a per-pair floor: every spoke must individually clear a minimum score,
 //     so a weak/incidental tie doesn't ride along just because it shares the
 //     cluster key
 const GROUP_LEVEL_FLOOR = LEVEL_RANK('AA')
-const GROUP_MIN_SPOKES = 3
+const GROUP_MIN_SPOKES = 2
 const GROUP_SCORE_FLOOR = 25
 
 // Collapses formerTeammatePairs() output into display cards: a plain 1-vs-1
