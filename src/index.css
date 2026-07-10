@@ -4274,6 +4274,20 @@ body {
   border-bottom: none;
 }
 
+/* The season-context note row under a pitcher's line (see api/pitcher-callouts.js)
+   — same .pbp__callout strip as the play-by-play/box score, just left-aligned
+   and de-tabularized since this cell is prose, not a stat column. */
+.pitchers__notes {
+  text-align: left;
+  font-family: var(--font-body);
+}
+.pitchers__notes .pbp__callout {
+  margin-top: 2px;
+}
+.pitchers__notes .pbp__callout:first-child {
+  margin-top: 0;
+}
+
 /* Name column takes a fixed share (the nine numeric columns split the remainder
    evenly under table-layout: fixed). The cell stays a table-cell; an inner flex
    row wraps the name on the left and pins the jersey number to the right. */

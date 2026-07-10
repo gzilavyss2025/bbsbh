@@ -33,13 +33,20 @@ export async function fetchCallouts(urlDate) {
 }
 
 // This game's bundle, or null when the file didn't cover it. Shape (all keys
-// present, values possibly empty):
+// present, values possibly empty) — see scripts/gen-callouts.mjs's header for
+// how each family is derived:
 //   { away:{teamId,name}, home:{teamId,name},
 //     leaders:{ [playerId]: { team, cats:{ hr, doubles, ... } } },
 //     pitcherLeaders:{ [playerId]: { team, cats:{ so_p } } },
 //     streaks:{ [playerId]: { onBase?, stolenBase? } },
 //     homerRecords:{ [playerId]: 'W-L' },
-//     teamRecords:{ away:{extraInning,oneRun,scoringFirst,opponentScoringFirst}, home:{…} } }
+//     situational:{ [playerId]: { risp?, vl?, vr? } }, each { avg, ops },
+//     starterRecords:{ [pitcherId]: { homeAway?:{home,away}, sixIp?, tenK?,
+//       cgShutout?, scorelessStreak?, recentAppearances? } } — one entry per
+//       ROSTERED pitcher on either club, not just the day's probable starters,
+//     teamRecords:{ away:{extraInning,oneRun,scoringFirst,opponentScoringFirst,
+//       leadAfter:{[inning]:'W-L'}, runsScored:{[bucket]:'W-L'},
+//       runsAllowedByInning:{[inning]:'W-L'}, comeback}, home:{…} } }
 export function calloutsForGame(data, gamePk) {
   return data?.games?.[gamePk] ?? null
 }

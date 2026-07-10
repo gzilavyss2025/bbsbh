@@ -29,6 +29,7 @@ export function HalfInning({
   onReveal,
   prospectsData,
   callouts,
+  vsTeam,
 }) {
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
@@ -105,6 +106,7 @@ export function HalfInning({
                 half={half}
                 battingSide={battingSide}
                 callouts={callouts}
+                vsTeam={vsTeam}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball), sat below the feed.

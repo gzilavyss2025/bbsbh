@@ -318,6 +318,30 @@ export function firstPAIndexByBatter(feed) {
   return first
 }
 
+// Times-through-the-order: for every plate appearance, which trip this is for
+// that (batter, pitcher) pair THIS GAME — 1st time seeing him, 2nd, 3rd… A
+// pitcher's 3rd time through is the classic "times through the order" penalty
+// (batters do measurably better having seen him twice already), so the call-out
+// fires once a trip hits 3 (see api/callout-notes.js). Walked fresh off the raw
+// feed rather than derived from a single half's computeHalfInningFeed, since
+// the trip count spans the whole game, not one half. Reveal-only, like the
+// rest of this module. Returns a Map(atBatIndex -> tripNumber).
+export function timesFacingPitcher(feed) {
+  const seen = new Map() // "batterId-pitcherId" -> trips so far
+  const trips = new Map() // atBatIndex -> trip number for this PA
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const batterId = p.matchup?.batter?.id
+    const pitcherId = p.matchup?.pitcher?.id
+    if (batterId == null || pitcherId == null) continue
+    if (NON_PA_EVENT_TYPES.has(p.result?.eventType)) continue
+    const key = `${batterId}-${pitcherId}`
+    const trip = (seen.get(key) ?? 0) + 1
+    seen.set(key, trip)
+    if (p.about?.atBatIndex != null) trips.set(p.about.atBatIndex, trip)
+  }
+  return trips
+}
+
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
 // mound-visit / pitching-change notes, first-at-bat first. `battingSide` is
 // 'away' | 'home' (top bats away, bottom bats home — same convention as the
@@ -424,11 +448,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       })
 
       // The pitcher this PA faced (for the strike-zone panel's "vs" header) —
-      // his name parts off gameData, same shape as the batter.
+      // his name parts off gameData, same shape as the batter. `hand`
+      // ('L'/'R', bio fact not a result) feeds the platoon-split call-out (see
+      // api/callout-notes.js), same field pitchers.js already reads.
       const pitcherId = play.matchup?.pitcher?.id
+      const pitcherPerson = pitcherId != null ? feed?.gameData?.players?.[`ID${pitcherId}`] ?? {} : {}
       const pitcher =
         pitcherId != null
-          ? { id: pitcherId, ...personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {}) }
+          ? { id: pitcherId, ...personNameParts(pitcherPerson), hand: pitcherPerson.pitchHand?.code ?? '' }
           : null
 
       const cardIndex = entries.length

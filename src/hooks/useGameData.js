@@ -13,6 +13,7 @@ import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
+import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
@@ -181,6 +182,15 @@ export function useGameData(game) {
   const teammates = useAsync(() => loadFormerTeammates(), [])
   const formerTeammatesData = teammates.data ?? null
 
+  // Career vs-opponent lines (see api/vsTeamSplits.js) — the same static file
+  // the player page's SPLITS VS TEAM card reads, reused here for the
+  // "Turang is a career .303 against the Pirates" call-out (see
+  // buildCallouts's vsTeamCareerLine). Season aggregates, spoiler-free, so it
+  // rides the same eager tier as prospects/former-teammates — no gamePk key,
+  // one cached same-origin read for the whole app.
+  const vsTeamSplits = useAsync(() => fetchVsTeamSplits(), [])
+  const vsTeamSplitsData = vsTeamSplits.data ?? null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   return {
@@ -197,6 +207,7 @@ export function useGameData(game) {
     gameCallouts,
     broadcast,
     formerTeammatesData,
+    vsTeamSplitsData,
     started,
   }
 }

@@ -44,6 +44,7 @@ export function InningViewer({
   winProbability,
   prospectsData,
   callouts,
+  vsTeam,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -278,6 +279,7 @@ export function InningViewer({
             onReveal={revealTo}
             prospectsData={prospectsData}
             callouts={callouts}
+            vsTeam={vsTeam}
           />
         </div>
 
@@ -294,9 +296,10 @@ export function InningViewer({
           <div className="innings__ref-left">
             <PitchersSection
               teams={[
-                { name: rosters.away.name, rows: pitcherLines.away },
-                { name: rosters.home.name, rows: pitcherLines.home },
+                { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
+                { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
               ]}
+              starterRecords={callouts?.starterRecords}
             />
             {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">
