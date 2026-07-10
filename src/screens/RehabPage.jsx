@@ -53,7 +53,7 @@ export function RehabPage() {
             {players.map((p) => (
               <article className="rehabcard" key={p.playerId}>
                 <PlayerLink id={p.playerId} className="rehabcard__portrait">
-                  <Headshot personId={p.playerId} name={p.playerName} className="rehabcard__shot" />
+                  <Headshot personId={p.playerId} name={p.playerName} teamId={p.orgId} className="rehabcard__shot" />
                 </PlayerLink>
 
                 <PlayerLink id={p.playerId} className="rehabcard__name">

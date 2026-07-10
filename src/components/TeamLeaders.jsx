@@ -56,7 +56,7 @@ function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favorite
   const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined
   return (
     <div className={`tlead__featured${isFavorite ? ' tlead__featured--fav' : ''}`} style={favStyle}>
-      <Headshot personId={entry.id} name={entry.name} className="tlead__shot" />
+      <Headshot personId={entry.id} name={entry.name} teamId={teamId} className="tlead__shot" />
       {teamId && (
         <div className="tlead__teamtag">
           <TeamLogo teamId={teamId} name={teamAbbr} size={24} className="tlead__logo" />

@@ -32,12 +32,14 @@ function debutLabel(iso) {
   const [y, m, d] = (iso || '').split('-')
   return y ? `${MONTHS[Number(m) - 1].toUpperCase()} ${Number(d)}, ${y}` : ''
 }
-// Reads as the story of a rookie season: first taking the field, then each
-// milestone at the plate in the order it's likeliest to arrive.
-const FIRSTS_ORDER = ['start', 'hit', 'xbh', 'hr', 'run', 'so']
-// Pitching counterpart: first taking the mound, then each way an outing can
-// go, ending with the first punch-out.
-const PITCHER_FIRSTS_ORDER = ['appearance', 'start', 'win', 'loss', 'save', 'so']
+// Reads as the story of a rookie season: the MLB debut, first taking the field,
+// then each milestone at the plate in the order it's likeliest to arrive. The
+// debut row folds in "First Start" when the debut game was also his first start
+// (see loadPlayer), so the separate 'start' entry drops out in that case.
+const FIRSTS_ORDER = ['debut', 'start', 'hit', 'xbh', 'hr', 'run', 'so']
+// Pitching counterpart: the debut (a pitcher's first appearance), then each way
+// an outing can go, ending with the first punch-out.
+const PITCHER_FIRSTS_ORDER = ['debut', 'start', 'win', 'loss', 'save', 'so']
 
 function draftLabel(draft) {
   if (!draft || !draft.year) return DASH
@@ -94,7 +96,7 @@ export function PlayerPage({ id, asOf, sportId }) {
         <BackBtn onClick={back} />
 
         <header className="player__hero">
-          <Headshot personId={bio.id} name={bio.fullName} />
+          <Headshot personId={bio.id} name={bio.fullName} teamId={bio.team?.parentOrgId ?? bio.team?.id} />
           <div className="player__ident">
             <h1 className="player__name">
               {firstName && <span className="player__name-first">{firstName}</span>}
@@ -319,7 +321,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                         ) : f.pitcher ? (
                           <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName.toUpperCase()}</PlayerLink>
                         ) : (
-                          f.oppAbbr
+                          f.oppName || f.oppAbbr
                         )}
                       </span>
                     </div>

@@ -45,7 +45,7 @@ function PerformerCard({ entry }) {
   return (
     <li className="playercard">
       <span className="playercard__shotwrap">
-        <Headshot personId={entry.id} name={entry.name} className="playercard__shot" />
+        <Headshot personId={entry.id} name={entry.name} teamId={entry.parentOrgId ?? entry.teamId} className="playercard__shot" />
         {entry.position && <span className="playercard__posbadge">{entry.position}</span>}
       </span>
       <div className="playercard__body">

@@ -57,7 +57,7 @@ function GameScoreLink({ game }) {
 function PerformerRow({ entry }) {
   return (
     <li className="topperf__row">
-      <Headshot personId={entry.id} name={entry.name} className="topperf__shot" />
+      <Headshot personId={entry.id} name={entry.name} teamId={entry.parentOrgId ?? entry.teamId} className="topperf__shot" />
       <TeamLogo
         teamId={entry.teamId}
         name={entry.teamAbbr}

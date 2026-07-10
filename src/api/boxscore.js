@@ -532,6 +532,7 @@ export function computePlayOfTheGame(winProb, feed) {
     // render the batter's identity (headshot + name + team/pos) the same way
     // the three stars do.
     batterTeamAbbr: found ? feed?.gameData?.teams?.[found.side]?.abbreviation ?? '' : '',
+    batterTeamId: found ? feed?.gameData?.teams?.[found.side]?.id ?? null : null,
     batterPos: found ? positionLabel(found.player) : '',
     // The running score right after this play — the box score's Play of the
     // Game card appends it as "MIL 5, STL 3" so the moment reads with its
@@ -618,6 +619,7 @@ function starLine(feed, id) {
     id,
     name: firstLast(gd),
     teamAbbr: feed?.gameData?.teams?.[side]?.abbreviation ?? '',
+    teamId: feed?.gameData?.teams?.[side]?.id ?? null,
     pos: pitched ? 'P' : positionLabel(bp),
     stat: pitched ? pitchingStat(pit) : battingStat(bat),
   }

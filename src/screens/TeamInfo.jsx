@@ -13,7 +13,6 @@ import { fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { BREWERS_ID } from '../api/whatsBrewing.js'
 import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
-import { teamTintColor } from '../lib/teams.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
@@ -594,7 +593,7 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
   // `pairs` always runs (away player, home player) — see formerTeammatePairs'
   // header — so any id that ever shows up as an `a` belongs to the away club
   // and any `b` to the home club, regardless of which side's page is asking.
-  // Feeds the soft per-player tint on every card (see TeammateHalf) so a
+  // Feeds each headshot's solid team-color background (see TeammateHalf) so a
   // headshot always reads as "this is a Team A face" at a glance, not just on
   // a big reunion's wall of them.
   const sideTeamId = useMemo(() => {
@@ -647,7 +646,7 @@ function PairCard({ card: c, startingLabel, sideTeamId }) {
   return (
     <li className="teammatecard">
       {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
-      <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} tint={teamTintColor(sideTeamId(c.a.id))} />
+      <TeammateHalf id={c.a.id} name={c.a.name} pos={c.a.pos} teamId={sideTeamId(c.a.id)} />
       <div className="teammatecard__mid">
         <div className="teammatecard__logos">
           {c.clubs.slice(0, 2).map((club) => (
@@ -656,7 +655,7 @@ function PairCard({ card: c, startingLabel, sideTeamId }) {
         </div>
         <span className="teammatecard__years">{clubsYears(c.clubs)}</span>
       </div>
-      <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} tint={teamTintColor(sideTeamId(c.b.id))} />
+      <TeammateHalf id={c.b.id} name={c.b.name} pos={c.b.pos} teamId={sideTeamId(c.b.id)} />
       <span className="teammatecard__caption">
         {connectionCaption(c.clubs[0]?.level, c.clubs[0]?.teamName, c.clubs[0]?.seasons)}
       </span>
@@ -675,17 +674,17 @@ function GroupCard({ card: c, startingLabel, sideTeamId }) {
     <li className="teammatecard teammatecard--group">
       {c.tonight && <span className="teammatecard__badge">{startingLabel}</span>}
       {/* A reunion this size is exactly where a wall of headshots most needs
-          the per-player club tint (see TeammateHalf) — WHOSE roster each face
+          the per-player club color (see TeammateHalf) — WHOSE roster each face
           is on tonight gets easy to lose track of past a couple of rows. */}
       <div className="teammatecard__group">
         <TeammateHalf
           id={c.anchor.id}
           name={c.anchor.name}
           pos={c.anchor.pos}
-          tint={teamTintColor(sideTeamId(c.anchor.id))}
+          teamId={sideTeamId(c.anchor.id)}
         />
         {shownMates.map((m) => (
-          <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} tint={teamTintColor(sideTeamId(m.id))} />
+          <TeammateHalf key={m.id} id={m.id} name={m.name} pos={m.pos} teamId={sideTeamId(m.id)} />
         ))}
       </div>
       <div className="teammatecard__mid">
@@ -738,7 +737,7 @@ function OrgTies({ ties }) {
                 id={t.player.id}
                 name={t.player.name}
                 pos={t.player.pos}
-                tint={teamTintColor(t.rosterTeamId)}
+                teamId={t.rosterTeamId}
               />
             </div>
             <div className="teammatecard__mid">
@@ -762,12 +761,12 @@ const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 // big) — the same treatment as the player page's hero, shrunk to fit a card —
 // with his roster position as a small badge floating on the headshot's
 // bottom-left corner.
-function TeammateHalf({ id, name, pos, tint }) {
+function TeammateHalf({ id, name, pos, teamId }) {
   const { first, last } = splitDisplayName(name)
   return (
     <PlayerLink id={id} className="teammatecard__half">
-      <span className="teammatecard__shotwrap" style={tint ? { backgroundColor: tint } : undefined}>
-        <Headshot personId={id} name={name} className="teammatecard__shot" />
+      <span className="teammatecard__shotwrap">
+        <Headshot personId={id} name={name} teamId={teamId} className="teammatecard__shot" />
         {pos && <span className="teammatecard__posbadge">{posLabel(pos)}</span>}
       </span>
       <span className="teammatecard__name">

@@ -293,7 +293,7 @@ function InsightNoteCard({ note }) {
     <div className="bs__noteCard">
       <span className="bs__noteAvatar">
         {note.personId != null ? (
-          <Headshot personId={note.personId} name={note.personName} className="bs__noteShot" />
+          <Headshot personId={note.personId} name={note.personName} teamId={note.teamId} className="bs__noteShot" />
         ) : (
           <span className="bs__noteLogos">
             <TeamLogo teamId={note.teamId} name={note.teamName} size={26} />
@@ -652,6 +652,7 @@ function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
         <Headshot
           personId={play.batterId}
           name={play.batterName}
+          teamId={play.batterTeamId}
           className="bs__potgShot"
         />
         <div className="bs__potgMain">
@@ -706,7 +707,7 @@ function ThreeStars({ stars }) {
             <span className="bs__starMarks" aria-label={`${s.stars} star`}>
               {'★'.repeat(s.stars)}
             </span>
-            <Headshot personId={s.id} name={s.name} className="bs__starShot" />
+            <Headshot personId={s.id} name={s.name} teamId={s.teamId} className="bs__starShot" />
             <span className="bs__starWho">
               <span className="bs__starHead">
                 <PlayerLink id={s.id} className="bs__starName">{s.name}</PlayerLink>

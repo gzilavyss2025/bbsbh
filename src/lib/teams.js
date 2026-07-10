@@ -215,6 +215,73 @@ export function teamTintColor(teamId, alpha = 0.22) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
+// The same brand color TEAM_COLORS maps, at FULL opacity — a solid card
+// background behind a player's silo-cutout headshot (see components/Headshot.jsx),
+// the bolder counterpart to teamTintColor's soft wash. Null for an unmapped
+// (MiLB) team id, so a headshot without a known club just keeps its transparent
+// frame.
+export function teamColorHex(teamId) {
+  return TEAM_COLORS[teamId] ?? null
+}
+
+// The 30 MLB clubs' display names, split into [location, club nickname], keyed
+// by the team id carried everywhere in the app. statsapi does expose these
+// (locationName / teamName), but every surface that wants a name already has
+// the id in hand and the identities are effectively immutable, so a static map
+// beats threading extra name fields (or an extra fetch) through. MLB only — the
+// name helpers below return null for a MiLB id, and callers degrade.
+const MLB_TEAM_NAMES = {
+  108: ['Los Angeles', 'Angels'],
+  109: ['Arizona', 'Diamondbacks'],
+  110: ['Baltimore', 'Orioles'],
+  111: ['Boston', 'Red Sox'],
+  112: ['Chicago', 'Cubs'],
+  113: ['Cincinnati', 'Reds'],
+  114: ['Cleveland', 'Guardians'],
+  115: ['Colorado', 'Rockies'],
+  116: ['Detroit', 'Tigers'],
+  117: ['Houston', 'Astros'],
+  118: ['Kansas City', 'Royals'],
+  119: ['Los Angeles', 'Dodgers'],
+  120: ['Washington', 'Nationals'],
+  121: ['New York', 'Mets'],
+  133: ['Athletics', 'Athletics'], // relocating club, MLB-branded simply "Athletics"
+  134: ['Pittsburgh', 'Pirates'],
+  135: ['San Diego', 'Padres'],
+  136: ['Seattle', 'Mariners'],
+  137: ['San Francisco', 'Giants'],
+  138: ['St. Louis', 'Cardinals'],
+  139: ['Tampa Bay', 'Rays'],
+  140: ['Texas', 'Rangers'],
+  141: ['Toronto', 'Blue Jays'],
+  142: ['Minnesota', 'Twins'],
+  143: ['Philadelphia', 'Phillies'],
+  144: ['Atlanta', 'Braves'],
+  145: ['Chicago', 'White Sox'],
+  146: ['Miami', 'Marlins'],
+  147: ['New York', 'Yankees'],
+  158: ['Milwaukee', 'Brewers'],
+}
+
+// "Pittsburgh" — the club's place name, for prose like "Last game against
+// Pittsburgh". Null for a MiLB id.
+export function teamLocationName(teamId) {
+  return MLB_TEAM_NAMES[teamId]?.[0] ?? null
+}
+
+// "Pirates" — the club's nickname, for prose like "@ Pirates". Null for a MiLB id.
+export function teamClubName(teamId) {
+  return MLB_TEAM_NAMES[teamId]?.[1] ?? null
+}
+
+// "Pittsburgh Pirates" — the full club name. Collapses the relocating
+// Athletics' duplicated halves to a single "Athletics". Null for a MiLB id.
+export function teamFullName(teamId) {
+  const t = MLB_TEAM_NAMES[teamId]
+  if (!t) return null
+  return t[0] === t[1] ? t[1] : `${t[0]} ${t[1]}`
+}
+
 // A solid per-team accent for the favorite-team highlight (the pinned slate
 // card's border/gradient + star). Distinct from TEAM_COLORS above: that map
 // deliberately picks whichever color is LEAST likely to be confused with
