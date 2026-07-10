@@ -52,6 +52,44 @@ neither can see the other's in-flight work. To keep that cheap to untangle:
     (`npm run dev` / `npm run e2e`) before opening the PR rather than expecting
     a preview URL on the PR check.
 
+## Previewing changes before they ship (interactive sessions with the maintainer)
+
+The maintainer doesn't code and was, for a while, having every session push
+straight to `main` after each small tweak — each push is a live production
+deploy, and Vercel Hobby's 100/day cap (see Deployment below) doesn't leave
+much room for that plus the daily cron jobs. The fix: a standing `preview`
+branch that gets its own real Vercel URL (only `claude/*` branches are
+deploy-disabled — see below — so a plain `preview` branch deploys normally),
+used as a look-before-you-ship staging area. This applies to **interactive
+back-and-forth sessions where the maintainer is steering changes directly**
+(the local-CLI case above) — it's separate from the autonomous multi-agent
+`claude/*` PR flow, which is unaffected and already costs nothing to deploy.
+
+Default behavior, no slash command or git knowledge required from the
+maintainer:
+- Make the requested change(s) as commits on `preview` (branching it off the
+  latest `main` if it doesn't exist yet, or if it's drifted stale), but
+  **don't push after every single edit** — accumulate a few related changes
+  first when it's natural to.
+- Push `preview` (and give the maintainer the live `bbsbh-git-preview-*.vercel.app`
+  URL) when they ask to look at something — phrases like "show me," "let me
+  see it," "what does it look like now." Each push here is one deployment, so
+  don't push on every micro-tweak; batch until they actually want to look.
+- Only merge `preview` into `main` — the action that actually publishes to the
+  real site — when the maintainer says something like "ship it," "make it
+  live," "deploy," or "publish." After merging, fast-forward `preview` back to
+  the new `main` so the next round of changes starts clean.
+- A daily scheduled check (see the maintainer's Routines) looks for anything
+  sitting unshipped on `preview` and sends the maintainer a push notification
+  with a summary + the preview link if so. It does **not** merge or publish
+  anything on its own — nothing reaches `main`/production without the
+  maintainer explicitly saying to ship it, even from this reminder.
+- Screenshots from a Claude session are unreliable for this app specifically —
+  this sandbox's network policy generally can't reach `statsapi.mlb.com`, so a
+  screenshot would show broken/loading state rather than the real page. The
+  `preview` URL (built and served by Vercel, not the sandbox) is the reliable
+  way to actually look at a change.
+
 ## Deployment
 
 Hosted on Vercel, auto-deploying `main` to production on every push. Two
