@@ -11,6 +11,8 @@ import {
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
+import { BREWERS_ID } from '../api/whatsBrewing.js'
+import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
 import { teamTintColor } from '../lib/teams.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
@@ -803,12 +805,36 @@ function GameNotesButton({ feed, side }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const isMlb = (meta.sportId ?? 1) === 1
+  const [showBrewing, setShowBrewing] = useState(false)
   const { data: notes } = useAsync(
     () =>
       isMlb && meta.id ? resolveGameNotes(meta.id, info.officialDate) : Promise.resolve(null),
     [isMlb, meta.id, info.officialDate],
   )
   if (!notes?.url) return null
+
+  // Brewers: tap opens the What's Brewing modal (the parsed narrative blurbs)
+  // with the full PDF linked inside it. Every other club: the plain link-out to
+  // the PDF in a new tab — parsing is calibrated to the Brewers' template only
+  // (see whatsBrewing.js).
+  if (meta.id === BREWERS_ID) {
+    return (
+      <div className="teaminfo__notes">
+        <button
+          className="notesbtn"
+          onClick={() => setShowBrewing(true)}
+          title={`${notes.title} — the club's What's Brewing notes`}
+        >
+          What&apos;s Brewing?
+          <span className="notesbtn__ext" aria-hidden="true">›</span>
+        </button>
+        {showBrewing && (
+          <WhatsBrewingModal notes={notes} onClose={() => setShowBrewing(false)} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="teaminfo__notes">
       <a

@@ -64,6 +64,12 @@ export default defineConfig({
           '**/data/vs-team-splits.json',
           '**/data/umpires.json',
           '**/data/game-notes.json',
+          // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
+          // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
+          // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
+          // the app-shell precache so it never lands on the install of a user
+          // who never taps it; it's runtime-cached on first use instead (below).
+          '**/assets/pdf*',
         ],
         navigateFallback: '/index.html',
         runtimeCaching: [
@@ -91,6 +97,15 @@ export default defineConfig({
             // links (title/date/url) — no live score, so this is spoiler-safe.
             urlPattern: ({ url }) => url.pathname === '/data/game-notes.json',
             handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // pdfjs chunk + worker (excluded from precache above). They're
+            // content-hashed and immutable, so CacheFirst: fetched on the first
+            // What's Brewing open, then served from cache on later opens (incl.
+            // offline). Carries no score — it's a PDF parser, not data.
+            urlPattern: ({ url }) => /\/assets\/pdf.*\.(m?js)$/.test(url.pathname),
+            handler: 'CacheFirst',
             method: 'GET',
           },
           {

@@ -2696,6 +2696,7 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .notesbtn:active {
@@ -2708,6 +2709,111 @@ body {
 }
 
 .notesbtn__ext {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-caption);
+}
+
+/* What's Brewing sheet — the Brewers' Game notes button opens this instead of
+   jumping straight to the PDF: the parsed narrative blurbs as scrollable text,
+   with the full PDF linked at the foot. Rides the shared .scrim/.sheet
+   bottom-sheet chrome (see below); these rules add the header row, the blurb
+   list, and the PDF footer link. */
+.brewsheet {
+  max-height: min(76vh, 640px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.brewsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brewsheet__head .sheet__title {
+  margin: 0;
+}
+
+.brewsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.brewsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.brewsheet__status {
+  margin: 14px 0 4px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.brewsheet__list {
+  list-style: none;
+  margin: 12px 0 4px;
+  padding: 0 2px 0 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.brewblurb + .brewblurb {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.brewblurb__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-amber, var(--text-heading));
+}
+
+.brewblurb__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-body);
+}
+
+.brewsheet__pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 16px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.brewsheet__pdf:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.brewsheet__ext {
   font-size: 13px;
   line-height: 1;
   color: var(--text-caption);
