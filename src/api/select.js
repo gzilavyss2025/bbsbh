@@ -71,6 +71,25 @@ function isPitcherByTrade(person, box) {
   return abbr === 'P' || abbr === 'TWP'
 }
 
+// The ids of every player in this game whose birthday falls on the game's own
+// date — matched by MM-DD against gameData.datetime.officialDate, off each
+// player's gameData birthDate. Spoiler-free (a birthday is not a score) and
+// MiLB-safe: it reads straight from the feed, so it needs no callouts file and
+// works wherever the feed carries birthDate. A Feb-29 birthday simply never
+// matches in a non-leap year, same as how anyone actually celebrates it.
+// Returns a Set for O(1) membership at render time.
+export function selectBirthdayIds(feed) {
+  const ids = new Set()
+  const mmdd = (feed?.gameData?.datetime?.officialDate ?? '').slice(5)
+  if (!mmdd) return ids
+  for (const p of Object.values(feed?.gameData?.players ?? {})) {
+    if (p?.id != null && typeof p.birthDate === 'string' && p.birthDate.slice(5) === mmdd) {
+      ids.add(p.id)
+    }
+  }
+  return ids
+}
+
 // A total order over half-innings: top of the 1st = 0, bottom = 1, top of the
 // 2nd = 2, … Lets a single number express "revealed through here". Structural,
 // never a score — safe to compute anywhere.

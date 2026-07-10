@@ -2105,6 +2105,14 @@ body {
   text-transform: uppercase;
 }
 
+/* Birthday cake beside a name on the staging sheet (see TeamInfo's
+   BirthdayCake), sitting in the namewrap after the prospect pill. A small
+   emoji flourish — its own color, no ink token needed. */
+.name-cake {
+  font-size: 12px;
+  line-height: 1;
+}
+
 /* -------------------------------------------------- opposing pitcher/defense */
 .opp__pitcher {
   display: grid;
