@@ -13,6 +13,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const TOP_TEAMS_LIMIT = 10
 const TOP_VENUES_LIMIT = 5
+const HP_RECORDS_LIMIT = 10
 
 function monthDay(iso) {
   const [, m, d] = (iso || '').split('-')
@@ -45,6 +46,31 @@ function topVenues(games, limit) {
   return [...byVenue.values()].sort((a, b) => b.count - a.count).slice(0, limit)
 }
 
+// Each team's W-L record in games this umpire called from behind the plate —
+// the final score is already in the schedule payload gen-umpires.mjs pulls
+// (no per-game feed fetch needed), so this is a plain tally over the HP
+// games. Ranked by decisions (games), most first; a suspended-and-not-
+// resumed tie (isWinner false for both sides) counts toward neither W nor L.
+function hpTeamRecords(games, limit) {
+  const byTeam = new Map()
+  for (const g of games) {
+    if (g.role !== 'HP') continue
+    for (const [id, abbr, won] of [
+      [g.awayId, g.awayAbbr, g.awayIsWinner],
+      [g.homeId, g.homeAbbr, g.homeIsWinner],
+    ]) {
+      if (!id) continue
+      if (!byTeam.has(id)) byTeam.set(id, { id, abbr, wins: 0, losses: 0 })
+      const rec = byTeam.get(id)
+      if (won === true) rec.wins++
+      else if (won === false) rec.losses++
+    }
+  }
+  return [...byTeam.values()]
+    .sort((a, b) => b.wins + b.losses - (a.wins + a.losses))
+    .slice(0, limit)
+}
+
 // An umpire's page: every MLB game he's worked this season, most recent
 // first, with a toggle to show only the games he had behind the plate. Game
 // dates and who-worked-what carry no score, so — unlike the player/team pages
@@ -65,6 +91,7 @@ export function UmpirePage({ id }) {
   const shown = hpOnly ? games.filter((g) => g.role === 'HP') : games
   const teams = topTeams(games, TOP_TEAMS_LIMIT)
   const venues = topVenues(games, TOP_VENUES_LIMIT)
+  const hpRecords = hpTeamRecords(games, HP_RECORDS_LIMIT)
 
   return (
     <div className="screen umpire">
@@ -106,6 +133,24 @@ export function UmpirePage({ id }) {
                   <span className="umpage__venuerank">{i + 1}</span>
                   <span className="umpage__venuename">{v.name || 'Unknown'}</span>
                   <span className="umpage__venuecount">{v.count}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {hpRecords.length > 0 && (
+          <section className="umpage__card">
+            <h2 className="umpage__cardtitle">Team records, this ump behind the plate</h2>
+            <ul className="umpage__venuelist">
+              {hpRecords.map((r, i) => (
+                <li key={r.id} className="umpage__venuerow">
+                  <span className="umpage__venuerank">{i + 1}</span>
+                  <TeamLogo teamId={r.id} name={r.abbr} size={18} className="umpage__reclogo" />
+                  <span className="umpage__venuename">{r.abbr}</span>
+                  <span className="umpage__venuecount">
+                    {r.wins}-{r.losses}
+                  </span>
                 </li>
               ))}
             </ul>

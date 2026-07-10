@@ -7756,6 +7756,9 @@ body {
   align-items: baseline;
   gap: 8px;
 }
+.umpage__reclogo {
+  align-self: center;
+}
 .umpage__venuerank {
   flex: none;
   width: 14px;
