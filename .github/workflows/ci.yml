@@ -1,0 +1,25 @@
+name: CI
+
+# Lint + build gate for every PR and every push to main. Added because
+# multiple concurrent agent sessions each push their own branch trusting that
+# session ran `npm run lint`/`npm run build` locally first — this makes that
+# a required, visible check instead of an honor system, so a session that
+# skipped it (or whose change only breaks in combination with another
+# still-open PR) can't merge unnoticed.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
