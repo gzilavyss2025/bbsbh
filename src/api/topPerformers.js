@@ -1,9 +1,12 @@
 // Slate-wide "Top Performers" leaderboard — the day's top 5 batters and top 5
-// pitchers by win-probability added, across every in-progress/final game at
-// the current level. SPOILER RULE: reveal-only, exactly like linescore.js,
-// derive.js, and boxscore.js's computeThreeStars — only ever call
-// computeTopPerformers from inside a SealBox's reveal render function. Never
-// at render top-level or in a pre-reveal useMemo.
+// pitchers, across every in-progress/final game at the current level, ranked
+// by win-probability added PLUS the stat line's context-neutral points
+// (performanceScore.js; ADR-0013 — pure WPA buried a near-no-hitter thrown in
+// a blowout under every reliever who protected a one-run lead). SPOILER RULE:
+// reveal-only, exactly like linescore.js, derive.js, and boxscore.js's
+// computeThreeStars — only ever call computeTopPerformers from inside a
+// SealBox's reveal render function. Never at render top-level or in a
+// pre-reveal useMemo.
 //
 // Distinct from computeThreeStars (per-game, top 3, batters and pitchers
 // mixed into one ranking): this fans out across every game on the slate and
@@ -22,6 +25,7 @@ import {
   battingStat,
   pitchingStat,
 } from './boxscore.js'
+import { batterPoints, pitcherPoints } from './performanceScore.js'
 import { prospectRankById, orgProspectRankById } from './prospects.js'
 import { gamePath } from '../lib/route.js'
 
@@ -92,9 +96,22 @@ function resolveEntry(ctx, id, role, dateStr) {
   }
 }
 
+// Blend each accumulated WPA total with the player's context-neutral points
+// for the role, read off his boxscore game line (ADR-0013). Both halves are
+// on the same percentage-points-of-a-win scale, so a plain sum ranks them.
+function scoredEntries(map, ctxById, role) {
+  return [...map.values()].map((e) => {
+    const found = findBoxscorePlayer(ctxById.get(e.id)?.boxscore, e.id)
+    const stats = found?.player?.stats
+    const points =
+      role === 'pitching' ? pitcherPoints(stats?.pitching) : batterPoints(stats?.batting)
+    return { ...e, score: e.w + points }
+  })
+}
+
 function topN(map, ctxById, role, dateStr, n = 5) {
-  return [...map.values()]
-    .sort((a, b) => b.w - a.w)
+  return scoredEntries(map, ctxById, role)
+    .sort((a, b) => b.score - a.score)
     .slice(0, n)
     .map((e) => {
       const ctx = ctxById.get(e.id)
@@ -166,17 +183,20 @@ export async function computeTopPerformers({ games, prospects, dateStr }) {
 // The past-day recap's Winners/Losers split: unlike computeTopPerformers
 // (separate batting/pitching leaderboards), this combines both into ONE
 // cross-role ranking per player (a two-way player keeps whichever role earned
-// him more WPA) and buckets each by whether HIS team won or lost that game —
-// so a big individual game in a losing effort still gets recognized, same
-// spirit as a hockey "star" nod. Top `n` per bucket by WPA.
+// him the higher blended score) and buckets each by whether HIS team won or
+// lost that game — so a big individual game in a losing effort still gets
+// recognized, same spirit as a hockey "star" nod. Top `n` per bucket by the
+// same blended score the leaderboards use.
 export async function computeTopPerformersByResult({ games, prospects, dateStr }, n = 3) {
   const { battingWpa, pitchingWpa, ctxById } = await buildWpaMaps(games)
 
   const merged = new Map()
-  for (const [id, e] of battingWpa) merged.set(id, { id, w: e.w, role: 'batting' })
-  for (const [id, e] of pitchingWpa) {
-    const existing = merged.get(id)
-    if (!existing || e.w > existing.w) merged.set(id, { id, w: e.w, role: 'pitching' })
+  for (const e of scoredEntries(battingWpa, ctxById, 'batting')) {
+    merged.set(e.id, { ...e, role: 'batting' })
+  }
+  for (const e of scoredEntries(pitchingWpa, ctxById, 'pitching')) {
+    const existing = merged.get(e.id)
+    if (!existing || e.score > existing.score) merged.set(e.id, { ...e, role: 'pitching' })
   }
 
   const winners = []
@@ -190,12 +210,12 @@ export async function computeTopPerformersByResult({ games, prospects, dateStr }
     const awayRuns = ctx.boxscore.teams.away?.teamStats?.batting?.runs ?? 0
     const homeRuns = ctx.boxscore.teams.home?.teamStats?.batting?.runs ?? 0
     const won = found.side === 'away' ? awayRuns > homeRuns : homeRuns > awayRuns
-    ;(won ? winners : losers).push({ ...entry, w: e.w })
+    ;(won ? winners : losers).push({ ...entry, score: e.score })
   }
 
   const topOf = (arr) =>
     arr
-      .sort((a, b) => b.w - a.w)
+      .sort((a, b) => b.score - a.score)
       .slice(0, n)
       .map((e) => attachProspect(prospects, e))
 

@@ -14,23 +14,13 @@
 // dependent signals (walk-off, comeback) just don't fire; margin, hits, extra
 // innings, decisions, and multi-HR all still work from the box score alone.
 import { selectBoxscore, computePlayOfTheGame } from './boxscore.js'
+// Bill James Game Score (40 + 2*outs + K - 2*H - 4*ER - 2*(R-ER) - BB) —
+// shared with the three-stars/top-performers blend so the "dominant start"
+// signal here and the player rankings can't drift apart.
+import { gameScore } from './performanceScore.js'
 import { gamePath } from '../lib/route.js'
 
 const TIER = { RARE: 0, NOTABLE: 1, STORY: 2, CLOSE: 3 }
-
-// Bill James Game Score from a starter's line: 40 + 2*outs + K - 2*H - 4*ER -
-// 2*(R-ER) - BB. `ip` is the feed's "6.1" (whole innings + outs-past, NOT a
-// decimal) notation, so outs = whole*3 + the digit after the dot.
-function ipToOuts(ip) {
-  const [whole, part] = String(ip ?? '0.0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(part) || 0)
-}
-function gameScore(s) {
-  const outs = ipToOuts(s.inningsPitched)
-  const r = s.runs ?? 0
-  const er = s.earnedRuns ?? 0
-  return 40 + 2 * outs + (s.strikeOuts ?? 0) - 2 * (s.hits ?? 0) - 4 * er - 2 * (r - er) - (s.baseOnBalls ?? 0)
-}
 
 // Every player who batted, from the raw feed (selectBoxscore's battingRows
 // strips fields like homeRuns that this module needs but the printed box
