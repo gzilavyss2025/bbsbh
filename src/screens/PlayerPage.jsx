@@ -16,6 +16,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
+import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
@@ -217,6 +218,8 @@ export function PlayerPage({ id, asOf, sportId }) {
                 <StatGrid tiles={lvl.tiles} />
               </div>
             ))}
+
+            <StatcastPercentiles savant={block.savant} group={block.group} />
 
             {/* Career splits vs the club this player's team is next facing (a
                 finger-scrollable strip to pick a different opponent). Rendered in

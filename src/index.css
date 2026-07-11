@@ -7213,6 +7213,61 @@ body {
   }
 }
 
+/* ---- Statcast percentile bars ----
+   One inked row per metric: label, a horizontal track filled to the
+   percentile, and the number in mono tabular figures. A standout (>=90th
+   percentile) fill picks up the kraft-tape seal amber instead of ink navy —
+   the only "notable figure" accent already used elsewhere on this page — but
+   otherwise every metric renders identically (no red/green good/bad framing;
+   see StatcastPercentiles.jsx). */
+.statcast {
+  margin-top: var(--space-3);
+}
+.statcast__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 8px;
+}
+.statcast__row {
+  display: grid;
+  grid-template-columns: 84px 1fr 30px;
+  align-items: center;
+  gap: 8px;
+}
+.statcast__label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.statcast__track {
+  height: 8px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: 999px;
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.statcast__fill {
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: 999px;
+}
+.statcast__fill.is-standout {
+  background: var(--seal-cover);
+}
+.statcast__pct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-align: right;
+}
+
 /* ---- splits vs team: opponent picker + career line + last meeting ----
    A finger-scrollable strip of every MLB club's logo (unselected clubs dulled to
    grayscale, the selected one in full color), the career stat tiles below it,
