@@ -28,6 +28,8 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
+import { MilestonePill } from '../components/MilestonePill.jsx'
+import { milestoneTextFor } from '../api/callouts.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -46,6 +48,7 @@ export function TeamInfo({
   oppPitcherLine,
   prospectsData,
   formerTeammatesData,
+  callouts,
   onNext,
   nextLabel,
   onReload,
@@ -96,6 +99,7 @@ export function TeamInfo({
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
         formerTeammatesData={formerTeammatesData}
+        callouts={callouts}
       />
 
       {/* Refresh rides the floating bar (stacked above the advance button), the
@@ -126,6 +130,7 @@ export function LineupSpread({
   starterLines,
   prospectsData,
   formerTeammatesData,
+  callouts,
   onNext,
   onReload,
   loading,
@@ -177,6 +182,7 @@ export function LineupSpread({
             // Each side FACES the other side's starter.
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
             prospectsData={prospectsData}
+            callouts={callouts}
           />
         ))}
       </div>
@@ -203,7 +209,7 @@ export function LineupSpread({
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
 // Former teammates is deliberately NOT part of this column — see LineupSpread,
 // which renders one shared, full-width card grid below both columns instead.
-function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData }) {
+function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData, callouts }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   return (
     <section className="teampanel">
@@ -227,6 +233,7 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
         side={side}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
+        callouts={callouts}
         showTeammates={false}
       />
     </section>
@@ -346,6 +353,7 @@ function TeamSections({
   oppPitcherLine,
   prospectsData,
   formerTeammatesData,
+  callouts,
   showTeammates = true,
 }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
@@ -409,6 +417,7 @@ function TeamSections({
                     {p.nameLastFirst.toUpperCase()}
                   </PlayerLink>
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                  <MilestonePill text={milestoneTextFor(callouts, p.id)} />
                   <BirthdayCake show={birthdayIds.has(p.id)} />
                 </span>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
@@ -496,6 +505,7 @@ function TeamSections({
                 {oppPitcher.nameLastFirst.toUpperCase()}
               </PlayerLink>
               <ProspectPill {...prospectBadge(prospectsData, oppPitcher.id)} />
+              <MilestonePill text={milestoneTextFor(callouts, oppPitcher.id)} />
             </span>
             <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>
