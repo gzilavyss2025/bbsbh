@@ -16,17 +16,29 @@
 //      record when scoring N+ runs, record when allowing 4+ runs by a given
 //      inning, and record in games trailed by 3+ runs at some point (comeback
 //      win%) — see scoringRecord's RUN_SCORED_BUCKETS / RUNS_ALLOWED_* /
-//      COMEBACK_DEFICIT.
+//      COMEBACK_DEFICIT. The leading-after record is written TWICE: `leadAfter`
+//      keeps only the lopsided checkpoints (the blown-lead reversal note's
+//      floor, see LEAD_LOPSIDED) while `leadAfterFull` carries every
+//      checkpoint's raw {w,l} tally past the sample floor — the live "leading
+//      after the 8th" strip and the box score's "moved to 18-2" note need the
+//      record however it reads, and need numbers (not a display string) to
+//      fold tonight's result in client-side. That walk also tallies
+//      `inningRuns` — season runs scored/allowed per inning 1–9 (plus how many
+//      games sampled), the "run differential by inning" note's data
+//      ("outscored opponents 38-14 in the 7th").
 //   4. Player-homer records — a club's W-L in games the hitter homered, kept
 //      only when the split is lopsided enough to be worth surfacing.
 //   5. Starter records — for every ROSTERED pitcher on either club (not just
 //      the day's probable starter — a bullpen call-up can start too), his
 //      season home/away decision split, his club's record in his 6+ IP starts,
-//      his count of double-digit-strikeout starts, his season CG/shutout total
-//      (straight off the roster's hydrated season stats — no extra fetch), his
-//      current scoreless-outing streak, and his appearance count in the last
-//      few days (a bullpen-rest note) — all from one per-pitcher game-log sweep
-//      (see pitcherEnrich), same shape/cost as the hitter sweep below.
+//      his club's record in ALL his starts (`teamStarts` — the team's result,
+//      independent of his personal W-L, for the first-inning "the Brewers are
+//      12-5 in his starts" strip note), his count of double-digit-strikeout
+//      starts, his season CG/shutout total (straight off the roster's hydrated
+//      season stats — no extra fetch), his current scoreless-outing streak,
+//      and his appearance count in the last few days (a bullpen-rest note) —
+//      all from one per-pitcher game-log sweep (see pitcherEnrich), same
+//      shape/cost as the hitter sweep below.
 //   6. Hitter situational splits — season RISP and vs-L/vs-R rate lines, from
 //      the API's own statSplits sitCodes (a second per-hitter fetch alongside
 //      the game-log sweep — see hitterEnrich).
@@ -174,6 +186,14 @@ const RUNS_ALLOWED_LOPSIDED = 0.85 // win% ≤ .15 — allowing that many that e
 const COMEBACK_DEFICIT = 3
 const COMEBACK_MIN_GAMES = 5
 
+// Per-inning run tallies ("outscored opponents 38-14 in the 7th") cover the
+// regulation innings only — extras are a different animal (ghost runners) and
+// already have their own extra-inning record note. No noteworthiness gate at
+// the data layer: the note layer (callout-notes.js / prehalf-callouts.js)
+// judges the differential against the games sampled, so it needs the raw
+// numbers either way.
+const INNING_RUNS_MAX = 9
+
 // Starter-record thresholds (see pitcherEnrich) — a 6+ IP start, a double-
 // digit-strikeout start, and the trailing window for a "Nth appearance in the
 // last N days" bullpen-rest note. Mirrors HOMER_MIN_GAMES's role: a floor
@@ -317,6 +337,8 @@ async function scoringRecord(teamId) {
   for (const n of RUNS_ALLOWED_CHECKPOINTS) raTally[n] = { w: 0, l: 0 }
   const rsTally = {} // run bucket -> { w, l } (scored bucket+ runs, final)
   for (const n of RUN_SCORED_BUCKETS) rsTally[n] = { w: 0, l: 0 }
+  const runsTally = {} // inning num (1..INNING_RUNS_MAX) -> { f, a, g }
+  for (let n = 1; n <= INNING_RUNS_MAX; n++) runsTally[n] = { f: 0, a: 0, g: 0 }
   const seen = new Set()
   for (const g of games) {
     if (g.status?.abstractGameState !== 'Final') continue
@@ -339,6 +361,19 @@ async function scoringRecord(teamId) {
       if (!firstScorer) {
         if (num(aR) > 0) firstScorer = 'away'
         else if (num(hR) > 0) firstScorer = 'home'
+      }
+      // Per-inning run tallies, counted half by half BEFORE the break below —
+      // a home win's skipped bottom 9th still has the top half's runs on the
+      // books (aR is a number, hR is not), and those belong in the 9th's
+      // scored/allowed totals even though "through inning 9" cumulative
+      // checkpoints aren't well-defined for that game.
+      const t = runsTally[inn.num]
+      if (t) {
+        const meR = isHome ? hR : aR
+        const opR = isHome ? aR : hR
+        if (typeof meR === 'number') t.f += meR
+        if (typeof opR === 'number') t.a += opR
+        if (typeof meR === 'number' || typeof opR === 'number') t.g++
       }
       if (typeof aR !== 'number' || typeof hR !== 'number') break
       cumAway += aR
@@ -366,12 +401,23 @@ async function scoringRecord(teamId) {
   }
 
   const leadAfter = {}
+  const leadAfterFull = {}
   for (const n of LEAD_CHECKPOINTS) {
     const { w, l } = leadTally[n]
     const total = w + l
     if (total < LEAD_MIN_GAMES) continue
+    // The full tally (numbers, not a display string) for the live strip and
+    // the box score's fold-tonight's-result-in note, however the record reads…
+    leadAfterFull[n] = { w, l }
+    // …and the lopsided-only string the blown-lead reversal note keys on.
     const pct = w / total
     if (pct >= LEAD_LOPSIDED || pct <= 1 - LEAD_LOPSIDED) leadAfter[n] = `${w}-${l}`
+  }
+
+  const inningRuns = {}
+  for (let n = 1; n <= INNING_RUNS_MAX; n++) {
+    const { f, a, g: played } = runsTally[n]
+    if (played > 0) inningRuns[n] = { f, a, g: played }
   }
 
   const runsAllowedByInning = {}
@@ -397,6 +443,8 @@ async function scoringRecord(teamId) {
     scoringFirst: `${sfW}-${sfL}`,
     opponentScoringFirst: `${osW}-${osL}`,
     leadAfter,
+    leadAfterFull,
+    inningRuns,
     runsScored,
     runsAllowedByInning,
     comeback,
@@ -602,6 +650,12 @@ async function pitcherEnrich(personId) {
     if (ipToOuts(st.inningsPitched) >= SIX_IP_OUTS) won ? sixIpW++ : sixIpL++
     if (num(st.strikeOuts) >= TEN_K_THRESHOLD) tenK++
   }
+  // The club's record across ALL his starts (`isWin` is the team's result, not
+  // his decision — same field homerRecords reads on the hitter side), which is
+  // exactly the home + away tallies above summed. Written as numbers so the
+  // box score can fold tonight's result in ("moved to 13-5 in his starts").
+  const teamStartsW = homeW + awayW
+  const teamStartsL = homeL + awayL
 
   let scorelessStreak = 0
   for (const s of rows) {
@@ -626,6 +680,8 @@ async function pitcherEnrich(personId) {
   return {
     homeAway:
       homeAwayGames >= STARTER_MIN_GAMES ? { home: `${homeW}-${homeL}`, away: `${awayW}-${awayL}` } : null,
+    teamStarts:
+      teamStartsW + teamStartsL >= STARTER_MIN_GAMES ? { w: teamStartsW, l: teamStartsL } : null,
     sixIp: sixIpW + sixIpL >= STARTER_MIN_GAMES ? `${sixIpW}-${sixIpL}` : null,
     tenK,
     scorelessStreak,
@@ -805,6 +861,7 @@ for (const g of games) {
     const cgShutout = num(p?.pitching?.completeGames) + num(p?.pitching?.shutouts)
     const entry = {}
     if (e.homeAway) entry.homeAway = e.homeAway
+    if (e.teamStarts) entry.teamStarts = e.teamStarts
     if (e.sixIp) entry.sixIp = e.sixIp
     if (e.tenK > 0) entry.tenK = e.tenK
     if (cgShutout > 0) entry.cgShutout = cgShutout

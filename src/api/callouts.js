@@ -47,16 +47,24 @@ export async function fetchCallouts(urlDate) {
 //     birthdays:[ playerId ] (whose birthday is today),
 //     birthdayStats:{ [playerId]: { avg, h, ab, hr, g } } (career line on his
 //       birthday, a subset of `birthdays` that cleared the sample floors),
-//     starterRecords:{ [pitcherId]: { homeAway?:{home,away}, sixIp?, tenK?,
-//       cgShutout?, scorelessStreak?, recentAppearances? } } — one entry per
-//       ROSTERED pitcher on either club, not just the day's probable starters,
+//     starterRecords:{ [pitcherId]: { homeAway?:{home,away},
+//       teamStarts?:{w,l}, sixIp?, tenK?, cgShutout?, scorelessStreak?,
+//       recentAppearances? } } — one entry per ROSTERED pitcher on either
+//       club, not just the day's probable starters; teamStarts is the CLUB's
+//       W-L in his starts (numbers, so tonight's result can fold in),
 //     milestones:{ [playerId]: { stat, label, value, threshold, remaining } }
 //       — the nearest round career-total milestone (see MILESTONE_DEFS,
 //       src/api/person.js) any rostered hitter or pitcher is within a single
 //       game's plausible reach of, for the lineup-staging pill,
 //     teamRecords:{ away:{extraInning,oneRun,scoringFirst,opponentScoringFirst,
-//       leadAfter:{[inning]:'W-L'}, runsScored:{[bucket]:'W-L'},
+//       leadAfter:{[inning]:'W-L'}, leadAfterFull:{[inning]:{w,l}},
+//       inningRuns:{[inning]:{f,a,g}} (runs for/against + games sampled,
+//       innings 1–9), runsScored:{[bucket]:'W-L'},
 //       runsAllowedByInning:{[inning]:'W-L'}, comeback}, home:{…} } }
+//
+// Fields newer than a given date's committed file simply aren't there (the
+// nightly cron regenerates future dates only) — every consumer null-guards, so
+// a stale bundle just means fewer notes, never a crash.
 export function calloutsForGame(data, gamePk) {
   return data?.games?.[gamePk] ?? null
 }

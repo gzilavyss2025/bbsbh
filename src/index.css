@@ -3236,6 +3236,71 @@ body {
    above the seal (see api/select.js's selectPrePitchChanges). Kept visually
    distinct from the sealed content below it: a plain rule and caption, no
    seal texture, since it isn't gated by the tap. */
+/* The pre-half callout strip (see PreHalfCallouts.jsx) — the "entering this
+   half" season-context cards above the seal: starter team record, the
+   leading-after checkpoint, an inning's run-differential story. Same card
+   anatomy as the box score's .bs__noteCard (avatar beside a star-marked
+   sentence), sat with the pre-pitch staging content. */
+.prehalf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.prehalf__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.prehalf__avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+.shot.prehalf__shot {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.shot.prehalf__shot.shot--fallback {
+  font-size: 15px;
+}
+.prehalf__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.prehalf__who {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.prehalf__text {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-read);
+  font-size: 12px;
+  font-weight: var(--w-medium);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+.prehalf__mark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: 11px;
+}
+
 .prepitch {
   margin-bottom: 12px;
   padding-bottom: 12px;
@@ -5592,6 +5657,28 @@ body {
   background: none;
   font-size: 13px;
   line-height: 1.4;
+}
+
+/* Show-more for the ranked note grid — the notes arrive most-impactful-first
+   (see computeGameCalloutNotes), the tail folds behind this. Same quiet
+   full-width affordance as .teammates__more. */
+.bs__noteMore {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.bs__noteMore:hover {
+  color: var(--text-body);
 }
 
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
