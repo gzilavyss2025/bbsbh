@@ -142,6 +142,20 @@ export function realHeadshotUrl(personId, width = 213) {
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
 
+// The `milb` context of the SAME CDN/personId — what milb.com's own team pages
+// render. Verified live: a 426×640 portrait JPEG (a real photo on a colored
+// backdrop, NOT a transparent silo cutout), and crucially present for many
+// prospects whose `silo` variant 404s (they've no posed MLB studio shot yet).
+// Same no-`d_people:generic` rule as realHeadshotUrl: a personId with no photo
+// on file still 404s cleanly here, so it degrades to the team-logo fallback.
+// Headshot.jsx uses this as the second rung of its chain — silo (preferred,
+// matches the app's floating-cutout treatment) → milb (a real face for a
+// prospect) → team logo → monogram.
+export function milbHeadshotUrl(personId, width = 213) {
+  if (!personId) return null
+  return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/milb/current`
+}
+
 // ---------------------------------------------------------------------------
 // Team colors
 //

@@ -7039,20 +7039,25 @@ body {
 }
 /* A player with no real photo on file falls back to his team's logo (see
    Headshot.jsx) rather than the plain monogram. Same mounted-chip background
-   as .shot--fallback, but padded and object-fit: contain (not cover) so the
-   whole mark stays visible instead of cropping into it like a photo. */
+   as .shot--fallback, but the mark is oversized so it bleeds past the 3:4
+   frame and its edges clip off at the border — the same "printed badge"
+   treatment the slate matchup tiles use (.gamecard__logobox), scaled up
+   enough to overcome most marks' internal viewBox padding. Centered on BOTH
+   axes: object-position: center overrides the top-center cover crop the base
+   .shot img rule sets for real photos, and scale() grows from the box center,
+   so the mark sits dead-center in the (unchanged 3:4) headshot space. */
 .shot--logo {
   display: grid;
   place-items: center;
   background: var(--surface-inset);
   box-shadow: var(--inset-cell);
-  padding: 16%;
-  box-sizing: border-box;
 }
 .shot--logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
+  transform: scale(1.6);
   filter: none;
 }
 .player__name {
