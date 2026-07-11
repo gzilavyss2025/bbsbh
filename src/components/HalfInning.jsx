@@ -3,6 +3,7 @@ import { revealDerived } from '../api/derive.js'
 import { SealBox } from './SealBox.jsx'
 import { StrikeZoneLegend } from './StrikeZone.jsx'
 import { PlayByPlay } from './PlayByPlay.jsx'
+import { PreHalfCallouts } from './PreHalfCallouts.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
 import { EnteringReference } from './EnteringReference.jsx'
 
@@ -68,6 +69,23 @@ export function HalfInning({
           {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
         </span>
       </h3>
+
+      {/* The pre-half callout strip — the "entering this half" season-context
+          cards (starter team record, leading-after checkpoint, inning run
+          differential; see api/prehalf-callouts.js). Above the seal like the
+          pre-pitch list, and it STAYS above the results once revealed (it
+          reads as staging either way). Gated to a reached half, same contract
+          as the entering cards below; the note that reads tonight's score
+          gates itself further on revealedThrough inside the builder. */}
+      {(revealed || isNextToReveal) && (
+        <PreHalfCallouts
+          feed={feed}
+          bundle={callouts}
+          inning={inning}
+          half={half}
+          revealedThrough={revealedThrough}
+        />
+      )}
 
       {/* Reached but still sealed: the lineups/defense sit ABOVE the seal, with
           the pre-pitch change list, so the scorer stages the half before

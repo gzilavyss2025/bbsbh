@@ -7,7 +7,7 @@ import {
   firstPAIndexByBatter,
   timesFacingPitcher,
 } from '../api/playbyplay.js'
-import { buildCallouts } from '../api/callout-notes.js'
+import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
@@ -23,16 +23,19 @@ export function PlayByPlay({ feed, inning, half, battingSide, callouts, vsTeam }
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
 
-  // Season-context call-out plumbing (see api/callout-notes.js). All three
+  // Season-context call-out plumbing (see api/callout-notes.js). All four
   // derivations read the whole-game feed but are reveal-only like everything
   // here, and only run when a bundle exists (MLB, generated date) — otherwise
   // the cards render exactly as before. `firstRun` marks the play that scored
   // the game's first run; `firstPA` gates each batter's streak/situational/
   // vs-team notes to his first card of the game; `timesFacing` drives the
-  // times-through-the-order note.
+  // times-through-the-order note; `progress` carries the per-play in-game
+  // counts that keep a note's number current through the play it sits on
+  // (never past it — see the two-tenses rule in callout-notes.js).
   const firstRun = callouts ? firstRunPlay(feed) : null
   const firstPA = callouts ? firstPAIndexByBatter(feed) : null
   const timesFacing = callouts ? timesFacingPitcher(feed) : null
+  const progress = callouts ? computeCalloutProgress(feed) : null
 
   return (
     <div className="pbp">
@@ -43,7 +46,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, callouts, vsTeam }
           <AtBatCard
             key={`${entry.batterId}-${i}`}
             entry={entry}
-            calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, timesFacing }}
+            calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, timesFacing, progress }}
           />
         ),
       )}
