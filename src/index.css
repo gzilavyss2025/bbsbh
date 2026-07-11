@@ -1066,6 +1066,13 @@ body {
   top: 10px;
   right: 10px;
   z-index: 1;
+  /* Hide this badge's own back face too: on a flipped past-game card (see
+     FlipCard) the front face is rotated away, but iOS Safari would still paint
+     an absolutely-positioned, z-indexed child through it — mirrored. The face's
+     backface-visibility doesn't cascade to such a child, so it's set here as
+     well. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1097,6 +1104,8 @@ body {
   top: 10px;
   right: 10px;
   z-index: 1;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
   padding: 3px 9px;
@@ -1112,6 +1121,115 @@ body {
 
 .gamecard__open:active {
   transform: translateY(1px);
+}
+
+/* ---- Postponed game treatment ----------------------------------------------
+   A postponed game has no result to reveal, so instead of the corner delay pill
+   (+ a flip card that would only turn over to an empty 0-0 line) it gets a
+   kraft-tape strip under the matchup: a rubber-stamped POSTPONED, the cause,
+   and the make-up date it moved to. The matchup above is eased back a touch so
+   the stamp reads as the card's headline. */
+.gamecard--postponed .gamecard__teams {
+  opacity: 0.82;
+}
+
+.postponed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 4px;
+  padding: 8px 12px 8px 10px;
+  border-radius: var(--radius-sm);
+  /* A faint wash of the kraft-seal amber rather than a full fill, edged with the
+     same hatch color as a dashed tape line — reads as "held" without shouting a
+     sealed cover. */
+  background: color-mix(in srgb, var(--seal) 15%, var(--surface-card));
+  border: var(--bw-hair) dashed var(--seal-hatch);
+  /* Rare, first-load-only event (a slate has few postponements) — so a small
+     entrance is warranted (see .agents/skills/review-animations): the strip
+     rises and fades in as one, ease-out, under 300ms. */
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+
+.postponed__stamp {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--seal-ink);
+  padding: 4px 9px 3px;
+  /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
+  border: 2px double var(--seal-ink);
+  border-radius: 3px;
+  transform: rotate(-4deg);
+  /* The stamp itself gets the hero motion: it presses DOWN onto the paper —
+     starting larger (nearer the eye) and motion-blurred, overshooting past its
+     resting size on contact, then settling. Slightly delayed so it lands just
+     after the tape appears. */
+  animation: stamp-press 300ms var(--ease-out) 60ms both;
+}
+
+.postponed__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.postponed__reason {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  color: var(--seal-ink);
+}
+.postponed__makeup {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
+}
+
+@keyframes postponed-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: rotate(-4deg) scale(1.35);
+    filter: blur(1.5px);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(0.96);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Reduced motion: keep the tilt (static decoration, not movement) but drop the
+   press/rise so nothing flies in — the `both` fill leaves each element at its
+   resting state. */
+@media (prefers-reduced-motion: reduce) {
+  .postponed,
+  .postponed__stamp {
+    animation: none;
+  }
 }
 
 /* The pinned favorite's border/gradient tint to that club's own accent color
@@ -7946,6 +8064,111 @@ body {
 }
 .game-status-banner__reason {
   font-weight: var(--w-semibold);
+}
+
+/* ---- Delay notice — a between-half-innings card flagging that play stopped
+   for a delay (rain, etc.) during the half being viewed (see
+   components/DelayCard, api/select.js selectDelays). Spoiler-free structural
+   info: the stoppage, its cause, and how long it lasted — never a score. A cool
+   navy family (a weather interlude), set apart from the amber "on hold" status
+   tape and the clay out/alert red. "Pops up" on mount. ---- */
+.delaycard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-left: 3px solid var(--navy);
+  box-shadow: var(--shadow-card);
+  animation: delay-pop var(--dur-med) var(--ease-out) both;
+}
+.delaycard__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--navy) 12%, var(--surface-inset));
+}
+.delaycard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.delaycard__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: var(--text-heading);
+}
+.delaycard__detail {
+  font-family: var(--font-read);
+  font-size: 12.5px;
+  color: var(--text-caption);
+}
+.delaycard__detail b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+.delayrain__cloud {
+  fill: var(--navy);
+}
+.delaypause rect {
+  fill: var(--navy);
+}
+.delayrain__drop {
+  stroke: var(--allstar-blue);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  animation: rain-fall 1.7s linear infinite;
+}
+.delayrain__drop--2 {
+  animation-delay: 0.35s;
+}
+.delayrain__drop--3 {
+  animation-delay: 0.7s;
+}
+
+@keyframes delay-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes rain-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .delaycard {
+    animation: none;
+  }
+  .delayrain__drop {
+    animation: none;
+    opacity: 0.9;
+  }
 }
 
 /* ---- as-of banner — neutral graphite strip (not a status tape like the

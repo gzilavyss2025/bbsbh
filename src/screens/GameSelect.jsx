@@ -8,6 +8,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
+import { selectGameStatus } from '../api/select.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
@@ -98,8 +99,16 @@ export function GameSelect({ onPick, onShowLogos }) {
   // Today (offset 0) keeps the ordinary live-refresh slate even once its games
   // go Final — the past-day framing is for days you're looking back on, not
   // the one still in progress.
+  // A postponed game reports abstractGameState 'Final' (coded 'D') but has no
+  // result to reveal, so it's excluded from the flip-card set and the day
+  // recap — it renders as a plain GameCard with its own postponed stamp.
   const finals = useMemo(
-    () => (offset < 0 ? sorted.filter((g) => g.abstractState === 'Final') : []),
+    () =>
+      offset < 0
+        ? sorted.filter(
+            (g) => g.abstractState === 'Final' && !selectGameStatus(g).isPostponed,
+          )
+        : [],
     [sorted, offset],
   )
   const [revealedAll, setRevealedAll] = useState(false)
@@ -222,7 +231,10 @@ export function GameSelect({ onPick, onShowLogos }) {
               : null
             const uReady = !!uniformsReady[g.gamePk]
             const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
-            const isPastFinal = offset < 0 && g.abstractState === 'Final'
+            const isPastFinal =
+              offset < 0 &&
+              g.abstractState === 'Final' &&
+              !selectGameStatus(g).isPostponed
             return (
               <li key={`${g.sportId}-${g.gamePk}`}>
                 {isPastFinal ? (

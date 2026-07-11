@@ -2,6 +2,7 @@ import { TeamLogo } from './TeamLogo.jsx'
 import { lookupSplit } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
+import { humanDate } from '../lib/dates.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -11,6 +12,12 @@ import { selectGameStatus } from '../api/select.js'
 export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0, onSelect, onBoxScore }) {
   const live = game.abstractState === 'Live'
   const status = selectGameStatus(game)
+  // A postponed game gets its own stamped treatment (see PostponedBanner) rather
+  // than the corner pill — and, critically, is never wrapped in the past-day
+  // flip card (see GameSelect), whose rotated back face made an absolutely-
+  // positioned corner pill leak through mirrored on iOS. There's also no result
+  // to reveal: the game didn't happen.
+  const postponed = status.isPostponed
   const dhLabel = doubleHeaderLabel(game)
   const pinned = !!pinnedTeamId
   // Sets --pin-accent for the pinned border/gradient + star (see index.css);
@@ -18,8 +25,11 @@ export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0,
   // the CSS var(--pin-accent, var(--field)) fallback takes over.
   const style = pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : undefined
   return (
-    <div className={`gamecard ${pinned ? 'gamecard--pinned' : ''}`} style={style}>
-      {status.label ? (
+    <div
+      className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
+      style={style}
+    >
+      {postponed ? null : status.label ? (
         <span className="gamecard__delay" title={status.reason || undefined}>
           {status.label}
         </span>
@@ -38,7 +48,8 @@ export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0,
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
         </div>
-        {game.abstractState !== 'Final' && (
+        {postponed && <PostponedBanner game={game} status={status} />}
+        {!postponed && game.abstractState !== 'Final' && (
           <ReadyStrip game={game} uniformsReady={uniformsReady} />
         )}
         <div className="gamecard__meta">
@@ -56,7 +67,7 @@ export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0,
           <StatusText game={game} />
         </div>
       </button>
-      {onBoxScore && (
+      {onBoxScore && !postponed && (
         <button
           type="button"
           className="gamecard__box"
@@ -67,6 +78,39 @@ export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0,
       )}
     </div>
   )
+}
+
+// The postponed treatment: a kraft-tape strip under the matchup carrying a
+// rubber-stamped "POSTPONED", the cause ("Inclement Weather"), and — once MLB
+// has set one — the make-up date the game moved to (rescheduleGameDate, a
+// spoiler-free calendar date, never a score). Replaces both the corner delay
+// pill and the readiness strip: neither applies to a game that isn't happening.
+function PostponedBanner({ game, status }) {
+  const makeup = rescheduleLabel(game)
+  return (
+    <div className="postponed" role="status">
+      <span className="postponed__stamp">Postponed</span>
+      {(status.reason || makeup) && (
+        <span className="postponed__lines">
+          {status.reason && (
+            <span className="postponed__reason">{status.reason}</span>
+          )}
+          {makeup && (
+            <span className="postponed__makeup">Makeup&nbsp;·&nbsp;{makeup}</span>
+          )}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// "Sat, Jul 11" for a rescheduled game, or '' when no make-up date is set yet
+// (a fresh postponement carries no rescheduleGameDate — the banner then just
+// reads POSTPONED). Parsed as a plain calendar date (humanDate), never shifted
+// by the viewer's zone.
+function rescheduleLabel(game) {
+  const d = game.rescheduleGameDate
+  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
 // Scorebook-readiness strip: four tiny red/green chips under the matchup telling
