@@ -2163,6 +2163,20 @@ body {
   letter-spacing: 0.01em;
 }
 
+.umps__nameblock {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+/* Season called-pitch accuracy for tonight's plate ump — a staging fact under
+   his name; hidden for every other base and for umps with no accuracy data. */
+.umps__acc {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 /* ---------------------------------------------------------------- lineup */
 .lineup__list {
   list-style: none;
@@ -8936,7 +8950,7 @@ body {
 }
 .umpage__row {
   display: grid;
-  grid-template-columns: 40px 64px 1fr;
+  grid-template-columns: 40px 64px 1fr auto;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
@@ -8963,6 +8977,38 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
+}
+/* Per-game called-pitch accuracy, on the games the ump had behind the plate. */
+.umpage__rowacc {
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Plate-accuracy summary card: the headline season figure + zone tendency. */
+.umpage__accfig {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.umpage__accpct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 30px;
+  font-weight: var(--w-bold);
+  line-height: 1;
+  color: var(--text-body);
+}
+.umpage__acclabel {
+  font-size: 12px;
+  color: var(--text-caption);
+}
+.umpage__acctendency {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--text-body);
 }
 
 /* ── Ballpark modal ─────────────────────────────────────────────────────────

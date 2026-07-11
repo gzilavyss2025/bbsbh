@@ -163,6 +163,21 @@ node scripts/gen-umpires.mjs
                    # thousands of (game, official) rows by umpire id — too much
                    # to redo on every umpire-page visit. MLB-only, like war.js.
                    # App reads it via src/api/umpires.js.
+node scripts/gen-umpire-accuracy.mjs
+                   # regenerate public/data/umpire-accuracy.json (each home-plate
+                   # umpire's season called-pitch accuracy + a compact zone-tendency
+                   # breakdown, keyed by the same personId as umpires.json). The
+                   # COMPANION to umpires.json: it needs each game's full live feed
+                   # (per-pitch pX/pZ vs the batter's strike zone), so it's a feed
+                   # fetch PER GAME — too much to redo nightly for the whole season,
+                   # and a Final game's accuracy is immutable, so this job is
+                   # APPEND-ONLY/incremental like gen-game-notes.mjs (NOT a full
+                   # rebuild like gen-umpires.mjs): each run sweeps a small trailing
+                   # window of finals and MERGES per-game rows in, deduped by gamePk.
+                   # Nightly cron uses the default trailing window; a one-time
+                   # season backfill is `--since=YYYY-MM-DD [--until=…]`. MLB-only.
+                   # App reads it via src/api/umpires.js (loadUmpire merges it in;
+                   # umpireAccuracySummary serves the lineup page's one-liner).
 node scripts/gen-minors-leaders.mjs
                    # regenerate public/data/minors-leaders.json (the combined
                    # ALL-MINORS leaderboard — every farmhand's season totals SUMMED
@@ -431,6 +446,23 @@ notes the gamePk field paths were verified against):
   two summary cards above the game list — most-worked teams (a wrapping logo
   grid, counting both sides of each game) and most-worked ballparks (by
   venue) — purely client-side from the same games array the list already has.
+  A COMPANION file `public/data/umpire-accuracy.json`
+  (`scripts/gen-umpire-accuracy.mjs`, same cron) adds each home-plate umpire's
+  season called-pitch accuracy + a compact zone-tendency breakdown, keyed by
+  the same personId. Unlike `umpires.json` (a cheap one-call schedule scan,
+  full rebuild nightly), accuracy needs each game's full live feed (per-pitch
+  `pX/pZ` vs the batter's `strikeZoneTop/Bottom`, with a plate + ball-radius
+  buffer — the Umpire Scorecards convention), so it's an APPEND-ONLY
+  incremental sweep of the last few days' finals (like `gen-game-notes.mjs`),
+  deduped by gamePk. `umpires.js` merges it: `loadUmpire` attaches the umpire's
+  `accuracy` (`{ season, byGamePk }`) for `UmpirePage.jsx`'s Plate-accuracy card
+  + per-HP-row figures, and `umpireAccuracySummary(id)` serves the one-line fact
+  the lineup page's Umpires card (`TeamInfo.jsx`) shows for tonight's plate ump.
+  Still no `SealBox` — accuracy is a count of ball/strike JUDGMENTS, not runs or
+  hits, so it's spoiler-free on the same footing as the game log; the lineup
+  one-liner is a season aggregate of Final games only, so it can't leak
+  tonight's (unplayed) result. MLB-only; MiLB / umps with no data degrade to
+  absent. Full write-up: `.scratch/umpire-accuracy/plan.md`.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card data (career
   regular-season line vs each opposing club + the last meeting's stat line, per
   MLB active-roster player), read from a static same-origin

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { loadUmpire } from '../api/umpires.js'
+import { loadUmpire, accuracyTendency } from '../api/umpires.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -71,6 +71,36 @@ function hpTeamRecords(games, limit) {
     .slice(0, limit)
 }
 
+// The plate-accuracy summary: season called-pitch accuracy plus a one-line
+// zone tendency, from the append-only umpire-accuracy.json (merged into the
+// umpire record by loadUmpire). Absent — like the other cards here — when the
+// umpire has no accuracy data (MiLB, or no scored games yet), so it never
+// shows an empty shell. Called-pitch counts carry no score; see the plan's
+// spoiler audit.
+function PlateAccuracyCard({ accuracy }) {
+  const s = accuracy?.season
+  if (!s || !s.called) return null
+  const pct = (s.accuracy * 100).toFixed(1)
+  const tendency = accuracyTendency(s)
+  return (
+    <section className="umpage__card umpage__acccard">
+      <h2 className="umpage__cardtitle">Plate accuracy</h2>
+      <div className="umpage__accfig">
+        <span className="umpage__accpct">{pct}%</span>
+        <span className="umpage__acclabel">
+          {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches
+          {s.games > 0 && ` · ${s.games} ${s.games === 1 ? 'game' : 'games'} behind the plate`}
+        </span>
+      </div>
+      {tendency && (
+        <p className="umpage__acctendency">
+          {tendency.charAt(0).toUpperCase() + tendency.slice(1)}.
+        </p>
+      )}
+    </section>
+  )
+}
+
 // An umpire's page: every MLB game he's worked this season, most recent
 // first, with a toggle to show only the games he had behind the plate. Game
 // dates and who-worked-what carry no score, so — unlike the player/team pages
@@ -87,6 +117,7 @@ export function UmpirePage({ id }) {
   if (gate) return gate
 
   const games = data.games ?? []
+  const accByGamePk = data.accuracy?.byGamePk ?? {}
   const hpCount = games.filter((g) => g.role === 'HP').length
   const shown = hpOnly ? games.filter((g) => g.role === 'HP') : games
   const teams = topTeams(games, TOP_TEAMS_LIMIT)
@@ -108,6 +139,8 @@ export function UmpirePage({ id }) {
       </header>
 
       <div className="umpage__cards">
+        <PlateAccuracyCard accuracy={data.accuracy} />
+
         {teams.length > 0 && (
           <section className="umpage__card">
             <h2 className="umpage__cardtitle">Most worked teams</h2>
@@ -182,21 +215,27 @@ export function UmpirePage({ id }) {
         </p>
       ) : (
         <ul className="umpage__list">
-          {shown.map((g) => (
-            <li key={`${g.gamePk}-${g.gameNumber}-${g.role}`} className="umpage__row">
-              <span className="umpage__role">{g.role}</span>
-              <span className="umpage__date">{monthDay(g.date)}</span>
-              <button
-                type="button"
-                className="plink umpage__matchup"
-                onClick={() =>
-                  navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
-                }
-              >
-                {g.awayAbbr} @ {g.homeAbbr}
-              </button>
-            </li>
-          ))}
+          {shown.map((g) => {
+            const acc = g.role === 'HP' ? accByGamePk[g.gamePk] : null
+            return (
+              <li key={`${g.gamePk}-${g.gameNumber}-${g.role}`} className="umpage__row">
+                <span className="umpage__role">{g.role}</span>
+                <span className="umpage__date">{monthDay(g.date)}</span>
+                <button
+                  type="button"
+                  className="plink umpage__matchup"
+                  onClick={() =>
+                    navigate(gamePath(g.date, g.awayAbbr, g.homeAbbr, 'boxscore', g.gameNumber))
+                  }
+                >
+                  {g.awayAbbr} @ {g.homeAbbr}
+                </button>
+                {acc?.called ? (
+                  <span className="umpage__rowacc">{((acc.correct / acc.called) * 100).toFixed(1)}%</span>
+                ) : null}
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
