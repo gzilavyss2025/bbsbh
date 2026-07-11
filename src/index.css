@@ -8119,13 +8119,23 @@ body {
 .standings-ctrl {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
   margin-bottom: 16px;
+}
+/* Readout + the kraft reveal chip share one row: the "as of" context reads left,
+   the spoiler opt-in sits right. Wraps the chip below on a very narrow phone. */
+.standings-ctrl__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 10px;
 }
 .standings-ctrl__asof {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px 8px;
 }
 .standings-ctrl__mode {
   font-family: var(--font-display);
@@ -8141,25 +8151,35 @@ body {
   font-size: 12px;
   color: var(--text-caption);
 }
+/* Date quick-jumps as flat scorebook index tabs — hairline-ruled, no drop
+   shadow or filled chip, so they read as pencil-ruled paper tabs rather than
+   heavy Material buttons. The active tab inks solid navy. */
 .standings-jumps {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 .standings-jump {
-  min-height: 32px;
-  padding: 0 10px;
+  min-height: 28px;
+  padding: 0 9px;
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
+  background: transparent;
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: var(--shadow-card);
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    background var(--dur-fast) var(--ease-standard);
+}
+.standings-jump:hover {
+  color: var(--text-body);
+  border-color: var(--text-caption);
 }
 .standings-jump:active {
   transform: scale(0.96);
@@ -8168,26 +8188,28 @@ body {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: var(--text-on-ink);
-  box-shadow: none;
 }
-/* Reveal-today reads as a seal cover you peel — same kraft amber as SealBox. */
+/* Reveal-today reads as a strip of kraft seal tape you peel — same amber as
+   SealBox, but a compact inline chip rather than a full-width block. */
 .standings-reveal {
-  align-self: flex-start;
-  min-height: var(--tap-min);
-  padding: 0 14px;
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 11px;
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--seal-deep);
   background: var(--seal-cover);
   color: var(--seal-cover-ink);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
 }
 .standings-reveal:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 .standings-reveal.is-on {
   background: var(--surface-card);
@@ -8317,19 +8339,26 @@ body {
   background: var(--bg-page);
 }
 /* Solid (not the translucent row tint) so scrolled cells can't bleed through
-   the pinned column. */
+   the pinned column. The row-divider hairline is layered on top (see below). */
 .standings--full tr.is-me td.team {
-  background: var(--field-soft);
+  background:
+    linear-gradient(var(--border-hairline), var(--border-hairline)) top / 100% var(--bw-hair) no-repeat,
+    var(--field-soft);
 }
 /* `border-collapse: collapse` + `position: sticky` don't cooperate: the
    collapsed top hairline belongs to the table grid, but the sticky team cell is
    promoted to its own paint layer that repaints its solid background over that
-   shared border — leaving the column's top rule a pixel adrift from its
-   neighbors. Drop the (overpainted) collapsed border on these cells and redraw
-   the same hairline as an inset shadow that paints with the sticky layer. */
+   shared border — leaving the column's row dividers missing entirely. box-shadow
+   can't redraw them either (browsers drop box-shadow on cells under
+   border-collapse: collapse). So drop the overpainted collapsed border and paint
+   the same hairline as a 1px background layer over the solid fill — a background
+   DOES render with the sticky layer, so the dividers line up across the whole
+   row again. */
 .standings--full td.team {
   border-top-color: transparent;
-  box-shadow: inset 0 var(--bw-hair) 0 0 var(--border-hairline);
+  background:
+    linear-gradient(var(--border-hairline), var(--border-hairline)) top / 100% var(--bw-hair) no-repeat,
+    var(--surface-card);
 }
 
 @media (min-width: 740px) {

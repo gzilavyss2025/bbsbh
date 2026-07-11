@@ -53,7 +53,7 @@ function labelDate(iso) {
 function buildJumps(today) {
   const y = Number(today.slice(0, 4))
   const curMonth = Number(today.slice(5, 7))
-  const jumps = [{ key: '30d', label: '30 days ago', date: shiftDays(today, -30) }]
+  const jumps = [{ key: '30d', label: '30d ago', date: shiftDays(today, -30) }]
   for (let m = FIRST_SEASON_MONTH; m <= curMonth; m++) {
     const date = `${y}-${String(m).padStart(2, '0')}-01`
     if (date < today) {
@@ -139,9 +139,32 @@ export function StandingsPage() {
       </header>
 
       <div className="standings-ctrl">
-        <div className="standings-ctrl__asof">
-          <span className="standings-ctrl__mode">{view.mode}</span>
-          <span className="standings-ctrl__detail">{view.detail}</span>
+        <div className="standings-ctrl__top">
+          <div className="standings-ctrl__asof">
+            <span className="standings-ctrl__mode">{view.mode}</span>
+            <span className="standings-ctrl__detail">{view.detail}</span>
+          </div>
+
+          {selKey === 'entering' && (
+            <button
+              type="button"
+              className="standings-reveal"
+              aria-label="Reveal today’s live standings"
+              onClick={() => pick('live')}
+            >
+              Reveal live
+            </button>
+          )}
+          {selKey === 'live' && (
+            <button
+              type="button"
+              className="standings-reveal is-on"
+              aria-label="Reseal — hide today’s live standings"
+              onClick={() => pick('entering')}
+            >
+              Live · reseal
+            </button>
+          )}
         </div>
 
         <div className="standings-jumps" role="group" aria-label="Standings date">
@@ -165,25 +188,6 @@ export function StandingsPage() {
             </button>
           ))}
         </div>
-
-        {selKey === 'entering' && (
-          <button
-            type="button"
-            className="standings-reveal"
-            onClick={() => pick('live')}
-          >
-            Reveal today’s live standings
-          </button>
-        )}
-        {selKey === 'live' && (
-          <button
-            type="button"
-            className="standings-reveal is-on"
-            onClick={() => pick('entering')}
-          >
-            Live — today included · reseal
-          </button>
-        )}
       </div>
 
       <AsyncStatus
