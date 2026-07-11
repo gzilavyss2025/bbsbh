@@ -17,6 +17,9 @@
 // can't drift apart.
 import { lastName as shortName } from './select.js'
 
+// Context-neutral half of the three-stars blend (ADR-0013).
+import { contextNeutralPoints } from './performanceScore.js'
+
 // "Cooper Pratt" — first name ahead of the shortened surname, for the three
 // stars' full-name style (the batting/pitching tables use the LAST, First
 // order instead — see lastFirst below). Reuses shortName so
@@ -476,46 +479,41 @@ export function selectBoxscore(feed) {
 }
 
 // PLAY OF THE GAME — the single most memorable play, distinct from the three
-// stars below (which rank PLAYERS by cumulative WPA over the whole game; this
-// ranks one PLAY). Reveal-only, same rule as computeThreeStars: WPA
-// and captivatingIndex both come from the /winProbability endpoint, so only
-// ever call this inside the SealBox's reveal render.
+// stars below (which rank PLAYERS by their cumulative score over the whole
+// game; this ranks one PLAY). Reveal-only, same rule as computeThreeStars:
+// WPA and captivatingIndex both come from the /winProbability endpoint, so
+// only ever call this inside the SealBox's reveal render.
 //
-// MLB's own (undocumented) `about.captivatingIndex` already tracks how
-// memorable a play reads to a human — unlike raw WPA, it isn't blind to plays
-// like a bases-loaded slam that don't swing the game's win probability much
-// because the team was already heavily favored. Prefer it, tie-broken by
-// |WPA|; when it's absent or zero for every play (most MiLB parks, and
-// apparently some MLB games), fall back to the play with the single biggest
-// |WPA| swing.
-//
-// `feed` (optional) resolves the batter's identity for the card's headshot —
-// same findBoxscorePlayer/firstLast lookup starLine below uses for the three
-// stars, so the name/team stay in lockstep with the rest of the box score.
+// Ranking (ADR-0013): each play scores |WPA| + 0.5 * captivatingIndex — the
+// win-probability swing carries the game's actual story, with MLB's own
+// (undocumented) `about.captivatingIndex` as a highlight-reel bonus (it isn't
+// blind to plays like a bases-loaded slam in a decided game, but on its own
+// it loves fireworks regardless of consequence). A play that moved the game
+// TOWARD the eventual loser keeps only 40% of its score: the losing side's
+// 7th-inning go-ahead shot is precisely the moment the winner then overcame,
+// and it read wrong as "the play of the game" — a loser's play now wins only
+// when it truly dwarfs everything the winner did. captivatingIndex is absent
+// or zero at most MiLB parks; the WPA half still ranks fine there.
 export function computePlayOfTheGame(winProb, feed) {
   if (!Array.isArray(winProb) || winProb.length === 0) return null
-  const withCaptivating = winProb.filter(
-    (e) => typeof e.about?.captivatingIndex === 'number' && e.about.captivatingIndex > 0,
-  )
-  const pool = withCaptivating.length > 0 ? withCaptivating : winProb
-  const rank = (e) => {
-    const h = typeof e.homeTeamWinProbabilityAdded === 'number' ? e.homeTeamWinProbabilityAdded : 0
-    return {
-      captivating: e.about?.captivatingIndex ?? 0,
-      absWpa: Math.abs(h),
-    }
-  }
+  // The eventual winner, read off the final play's running score (null when
+  // tied — a live look mid-game — where no side gets the discount).
+  const final = winProb[winProb.length - 1]?.result
+  const awayFinal = typeof final?.awayScore === 'number' ? final.awayScore : null
+  const homeFinal = typeof final?.homeScore === 'number' ? final.homeScore : null
+  const homeWon =
+    awayFinal != null && homeFinal != null && awayFinal !== homeFinal ? homeFinal > awayFinal : null
   let best = null
-  let bestRank = null
-  for (const e of pool) {
-    const r = rank(e)
-    if (
-      !bestRank ||
-      r.captivating > bestRank.captivating ||
-      (r.captivating === bestRank.captivating && r.absWpa > bestRank.absWpa)
-    ) {
+  let bestScore = -Infinity
+  for (const e of winProb) {
+    const h = typeof e.homeTeamWinProbabilityAdded === 'number' ? e.homeTeamWinProbabilityAdded : 0
+    const captivating = e.about?.captivatingIndex ?? 0
+    let score = Math.abs(h) + 0.5 * captivating
+    const benefitsWinner = homeWon == null || (homeWon ? h > 0 : h < 0)
+    if (!benefitsWinner) score *= 0.4
+    if (score > bestScore) {
       best = e
-      bestRank = r
+      bestScore = score
     }
   }
   if (!best) return null
@@ -554,18 +552,21 @@ export function computePlayOfTheGame(winProb, feed) {
   }
 }
 
-// THREE STARS — the game's three most valuable players by win-probability added,
-// the hockey-style nod under the pitchers of record. Reveal-only, SAME rule as
-// selectBoxscore: only ever call this inside the SealBox's reveal render. WPA is
-// NOT in the feed — it comes from the separate /winProbability endpoint — so the
-// per-play array is passed in; absent at most MiLB parks, so a null/empty array
-// returns [] and the card hides.
+// THREE STARS — the game's three most valuable players, the hockey-style nod
+// under the pitchers of record. Reveal-only, SAME rule as selectBoxscore: only
+// ever call this inside the SealBox's reveal render. WPA is NOT in the feed —
+// it comes from the separate /winProbability endpoint — so the per-play array
+// is passed in; absent at most MiLB parks, so a null/empty array returns []
+// and the card hides.
 //
-// A play's WPA (`homeTeamWinProbabilityAdded`, in percentage points) is credited
-// to the two players in the box: the BATTER earns his own team's win-prob swing,
-// the PITCHER the opposite. Which team bats is `about.isTopInning` (away bats the
-// top). Sum per player, take the three biggest movers, and attach each one's
-// game line (pitching if he recorded an out, otherwise batting).
+// Each player's score is his summed WPA plus his stat line's context-neutral
+// points (ADR-0013 — WPA alone buried a dominant start in a blowout, where
+// the win probability has nothing left to move). WPA credit: a play's WPA
+// (`homeTeamWinProbabilityAdded`, in percentage points) goes to the two
+// players in the box — the BATTER earns his own team's win-prob swing, the
+// PITCHER the opposite. Which team bats is `about.isTopInning` (away bats the
+// top). Take the three biggest scores and attach each one's game line
+// (pitching if he recorded an out, otherwise batting).
 export function computeThreeStars(winProb, feed) {
   if (!Array.isArray(winProb) || winProb.length === 0) return []
   const wpa = new Map()
@@ -582,8 +583,12 @@ export function computeThreeStars(winProb, feed) {
     add(e.matchup?.batter, top ? -h : h) // away (top) batter earns −h
     add(e.matchup?.pitcher, top ? h : -h)
   }
-  return [...wpa.values()]
-    .sort((a, b) => b.w - a.w)
+  const scored = [...wpa.values()].map((e) => {
+    const stats = findBoxscorePlayer(feed?.liveData?.boxscore, e.id)?.player?.stats
+    return { ...e, score: e.w + contextNeutralPoints(stats) }
+  })
+  return scored
+    .sort((a, b) => b.score - a.score)
     .slice(0, 3)
     .map((e, i) => {
       const line = starLine(feed, e.id)
