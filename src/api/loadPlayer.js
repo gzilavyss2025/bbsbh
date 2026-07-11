@@ -31,6 +31,7 @@ import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
+import { fetchSavantPercentiles, savantPercentilesFor } from './savantPercentiles.js'
 import { historicalParentOrg } from './milbHistory.js'
 import {
   personBio,
@@ -136,12 +137,16 @@ export async function loadPlayer(id, asOf) {
   // more same-origin static file (nightly), session-cached, so this is free
   // after the first player page. MLB-only at the source; null for a player not
   // on an MLB active roster, and the card then simply doesn't render.
-  const [person, txns, warCurrent, warHistory, vsTeamData] = await Promise.all([
+  // Statcast percentile ranks (the STATCAST card) are a fourth same-origin
+  // static file, same session-cached, degrade-to-empty pattern — see
+  // api/savantPercentiles.js.
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
     fetchWarHistory(),
     fetchVsTeamSplits(),
+    fetchSavantPercentiles(),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -239,6 +244,9 @@ export async function loadPlayer(id, asOf) {
           logTagLevel: onRehab,
           warByYear: warByYearFor(id, group, warCurrent, warHistory),
         })
+        // Pure passthrough lookup, not a derivation — attached here rather
+        // than threaded into buildBlock's (pure-shaping) signature.
+        block.savant = savantPercentilesFor(savantData, id, group)
         return { group, mlbYbySplits, milbYbySplits, block }
       }),
     ),
