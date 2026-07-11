@@ -1,7 +1,7 @@
 // The pre-half callout strip — the season-context cards shown ABOVE a
 // half-inning's seal, staging the half the way the pre-pitch change list and
 // entering-lineup cards do (ADR-0003/0010): what a broadcast would tell you as
-// the half begins, before any of its results. Three families (ADR-0014):
+// the half begins, before any of its results. Four families (ADR-0014):
 //
 //   1. Starter team record (1st inning only) — the club's W-L in tonight's
 //      starter's starts, on the half where HE takes the mound (top = the home
@@ -21,10 +21,17 @@
 //      story in this inning is noteworthy (see buildInningRunDiffNote's
 //      floors). Pure season aggregate, spoiler-free, shown entering the
 //      inning's top half only so it doesn't repeat on the bottom.
+//   4. Times through the order — "Batters see Imanaga a 3rd time this inning —
+//      they're hitting .444 off him the 3rd time through this season", the
+//      persistent per-half card that replaced the old per-play note. Counting
+//      who has faced the pitcher how often reads PLAYS from this side's
+//      previous halves — revealed material under the same caller-gate — so
+//      like the leading-after note it is additionally gated here on
+//      `revealedThrough` covering everything before this half.
 //
 // Ranked by the shared worthiness score and capped at PREHALF_MAX so the strip
-// stages the half rather than burying it. Returns [] with no bundle (MiLB /
-// un-generated date), like every other callout surface.
+// stages the half rather than burying it. Returns [] with no bundle
+// (an un-generated date), like every other callout surface.
 
 import { halfIndex } from './select.js'
 import {
@@ -32,6 +39,7 @@ import {
   buildStarterTeamRecordNote,
   buildLeadingAfterNote,
   buildInningRunDiffNote,
+  buildThirdTimeThroughNote,
 } from './callout-notes.js'
 
 const PREHALF_MAX = 2
@@ -68,6 +76,15 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
       const note = buildInningRunDiffNote(bundle, side, inning)
       if (note) notes.push(note)
     }
+  }
+
+  // 4. The order turning over a 3rd (or later) time on the pitcher — reads
+  // this side's previous halves' plays, so it only computes once everything
+  // before this half sits at or under the reveal mark (the strip's outer
+  // reached-half gate implies it, this defense-in-depth gate guarantees it).
+  if (halfIndex(inning, half) <= revealedThrough + 1) {
+    const note = buildThirdTimeThroughNote(feed, bundle, inning, half)
+    if (note) notes.push(note)
   }
 
   return notes.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, PREHALF_MAX)

@@ -1,14 +1,16 @@
 // Regenerates public/data/callouts/<MMDDYYYY>.json — the per-game "call-out"
-// enrichment for ONE day's MLB slate: the season context that makes a live play
-// notable. Six families, all keyed so the app can look them up at render time
-// with no live fetch of its own:
+// enrichment for ONE day's slate, MLB plus the four full-season MiLB levels
+// (AAA/AA/A+/A): the season context that makes a live play notable. The
+// families, all keyed so the app can look them up at render time with no live
+// fetch of its own:
 //
 //   1. Leader call-outs — for each club playing, the season leader (rank 1) in a
 //      handful of marquee categories (HR / triple / double / walk / SB / HBP for
 //      hitters, strikeouts for pitchers), so the play card can note "going into
 //      today, X leads the Brewers in walks" when that leader does the thing.
-//   2. Player streaks — a hitter's current on-base streak and stolen-base run,
-//      from his game log.
+//   2. Player streaks — a hitter's current on-base streak (plus the date it
+//      began, for the box score's "snapping a streak that began 6/25" prose)
+//      and stolen-base run, from his game log.
 //   3. Situational team records — extra-inning and one-run W-L (from standings
 //      splitRecords); "record when scoring first" / "when the opponent scores
 //      first" and record when leading after the 6th/7th/8th/9th (joined from
@@ -36,9 +38,16 @@
 //      12-5 in his starts" strip note), his count of double-digit-strikeout
 //      starts, his season CG/shutout total (straight off the roster's hydrated
 //      season stats — no extra fetch), his current scoreless-outing streak,
-//      and his appearance count in the last few days (a bullpen-rest note) —
-//      all from one per-pitcher game-log sweep (see pitcherEnrich), same
-//      shape/cost as the hitter sweep below.
+//      and his appearance count AND pitch count in the last few days (the
+//      bullpen-workload notes) — all from one per-pitcher game-log sweep (see
+//      pitcherEnrich), same shape/cost as the hitter sweep below. Relievers
+//      additionally get a back-to-back-days ERA split (relief outings the day
+//      after another appearance vs the rest, derived from the same game log),
+//      a pitched-yesterday flag (so tonight's outing is knowably his 2nd
+//      straight day), and a leverage split — opponents' AVG/OPS with his club
+//      ahead / behind / tied (the API's own sah/sbh/sti sitCodes; the closest
+//      the public data gets to "entering with the lead") — one extra
+//      statSplits fetch per RELIEVER only.
 //   6. Hitter situational splits — season RISP and vs-L/vs-R rate lines, from
 //      the API's own statSplits sitCodes (a second per-hitter fetch alongside
 //      the game-log sweep — see hitterEnrich).
@@ -66,6 +75,23 @@
 //      stat type already fetched for #8 (hitters) / a new career fetch added
 //      to pitcherEnrich (pitchers) — no extra request for hitters, one more
 //      field on the existing pitcher request.
+//  10. Times-through-the-order splits — for each PROBABLE STARTER on the
+//      slate, opponents' AVG/OPS the 1st / 2nd / 3rd+ time through the order
+//      this season, derived from his playLog (one entry per plate appearance,
+//      with batter + game attached — trips are counted per batter within each
+//      game, the same walk timesFacingPitcher does live). Probables only:
+//      playLog is the script's heaviest per-person response, and the pre-half
+//      "order turns over a 3rd time" card only ever concerns the starter.
+//
+// MiLB (sportIds 11–14) gets a TRIMMED family set: leaders, streaks, homer
+// records, situational splits, birthdays (flag only), starter/reliever
+// records, TTO splits, and the full teamRecords sweep — but NOT career-based
+// families (hitterLines/vs-team baselines, milestones, birthday career lines:
+// the careers cross levels, the vs-team-splits file is MLB-only, and a MiLB
+// "career milestone" isn't a story) and NOT the standings splitRecords
+// (extra-inning / one-run records — MLB standings only). Every person-stats
+// fetch for a MiLB player carries his level's sportId — without it the API
+// silently returns his (usually empty) MLB line.
 //
 // WHY a nightly precompute (the war.js / minors-leaders.js build-time pattern,
 // docs/data-enrichment.md §5) rather than live: scoped to the NEXT day's teams
@@ -102,6 +128,16 @@ import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
+
+// The levels swept: MLB + the four full-season MiLB levels (mirrors
+// src/lib/teams.js's SPORT_IDS, inlined like the rest of this script's
+// self-contained fetches). Rookie/complex ball (16) is skipped, same call
+// gen-former-teammates.mjs makes.
+const MLB = 1
+const SWEPT_SPORT_IDS = [1, 11, 12, 13, 14]
+// Person-stats endpoints default to MLB; a MiLB player's rows only come back
+// when his level's sportId is passed explicitly.
+const sportParam = (sportId) => (sportId === MLB ? '' : `&sportId=${sportId}`)
 
 // One team's roster → PoolPlayer[] (see teamLeaders.js's PoolPlayer shape),
 // self-contained like the rest of this script's fetches — `normalizeRosterToPool`
@@ -203,6 +239,16 @@ const TEN_K_THRESHOLD = 10
 const STARTER_MIN_GAMES = 3
 const RECENT_APPEARANCE_WINDOW_DAYS = 4
 
+// Reliever-only enrichments (see pitcherEnrich). "Reliever" is inferred from
+// the game log itself — a real relief workload, not a starter with one bulk
+// outing. The back-to-back split needs a few games on BOTH sides before an
+// ERA contrast means anything; the leverage split needs real innings in a
+// bucket before its opponents' line does.
+const RELIEVER_MIN_G = 8 // relief outings before he's treated as a reliever
+const RELIEVER_START_RATIO = 3 // relief outings ≥ 3× starts
+const B2B_MIN_G = 4 // back-to-back outings (and non-b2b outings) sampled
+const LEVERAGE_MIN_OUTS = 24 // 8 IP in a bucket before it's kept
+
 // Situational hitting splits (see hitterSituational) — a rate stat needs real
 // plate appearances behind it or a small sample reads as a false certainty.
 const SPLIT_MIN_PA = 15
@@ -257,10 +303,13 @@ async function mapPool(items, size, fn) {
 // One club's 40-man roster with season hitting+pitching hydrated — the exact
 // request fetchTeamRoster builds, inlined so this script needn't import the
 // app's browser-oriented team.js. rosterType=40Man so an injured leader (e.g. a
-// club's HR leader on the IL) still counts.
-async function fetchRoster(teamId) {
+// club's HR leader on the IL) still counts; for a MiLB affiliate it resolves to
+// the affiliate's own roster (same as team.js's fetchTeamIl notes). The season
+// stats hydrate is scoped to the club's own level so minor leaguers rank on
+// their level's line, not an empty MLB one.
+async function fetchRoster(teamId, sportId) {
   const data = await getJson(
-    `/api/v1/teams/${teamId}/roster?rosterType=40Man&hydrate=person(stats(type=season,group=[hitting,pitching],sportId=1,season=${season}))`,
+    `/api/v1/teams/${teamId}/roster?rosterType=40Man&hydrate=person(stats(type=season,group=[hitting,pitching],sportId=${sportId},season=${season}))`,
   )
   return data.roster ?? []
 }
@@ -324,9 +373,9 @@ async function fetchSplitRecords() {
 // a suspended/truncated game) since "leading after N" isn't well-defined past
 // that point. W/L from the club's own isWinner. Cut off at `asOf` so a slate
 // scored later never folds tonight's result into either record.
-async function scoringRecord(teamId) {
+async function scoringRecord(teamId, sportId) {
   const data = await getJson(
-    `/api/v1/schedule?sportId=1&teamId=${teamId}&season=${season}&gameType=R&hydrate=team,linescore`,
+    `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team,linescore`,
   )
   const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
   let sfW = 0, sfL = 0, osW = 0, osL = 0
@@ -452,17 +501,22 @@ async function scoringRecord(teamId) {
 }
 
 // A hitter's game-log-derived enrichment: current on-base streak (consecutive
-// games PLAYED reaching base), a conservative stolen-base run (SB accumulated
-// back to his last caught stealing — a game-level view can't see intra-game
-// order, so it stops at any CS rather than over-claiming), his club's W-L in
-// games he homered, and his season/career AVG+HR lines (see `seasonLine` below).
-// Cut off at `asOf`. Fetches `gameLog,career` together — one request, no extra
-// fetch — so the "career X against the Y" note (callout-notes.js) has a
-// same-player baseline to check for a significant deviation against, rather
-// than firing on a bare vs-team-splits line.
-async function hitterEnrich(personId) {
+// games PLAYED reaching base, plus the date of the game it began — the box
+// score's "snapping a streak that began 6/25" prose), a conservative
+// stolen-base run (SB accumulated back to his last caught stealing — a
+// game-level view can't see intra-game order, so it stops at any CS rather
+// than over-claiming), his club's W-L in games he homered, and his
+// season/career AVG+HR lines (see `seasonLine` below).
+// Cut off at `asOf`. For an MLB hitter, fetches `gameLog,career` together —
+// one request, no extra fetch — so the "career X against the Y" note
+// (callout-notes.js) has a same-player baseline to check for a significant
+// deviation against, rather than firing on a bare vs-team-splits line. A MiLB
+// hitter gets the gameLog only, scoped to his level's sportId: his "career"
+// crosses levels and the career-based families are MLB-only anyway.
+async function hitterEnrich(personId, sportId) {
+  const mlb = sportId === MLB
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=gameLog,career&group=hitting&season=${season}`,
+    `/api/v1/people/${personId}/stats?stats=${mlb ? 'gameLog,career' : 'gameLog'}&group=hitting&season=${season}${sportParam(sportId)}`,
   )
   const rows = (data.stats ?? [])
     .find((b) => b.type?.displayName === 'gameLog')
@@ -470,11 +524,14 @@ async function hitterEnrich(personId) {
     .sort((a, b) => (a.date < b.date ? 1 : -1)) ?? [] // newest first
 
   let onBase = 0
+  let onBaseStart = null // date of the streak's first game
   for (const s of rows) {
     const st = s.stat ?? {}
     if (num(st.plateAppearances) === 0) continue // didn't bat — neither breaks nor counts
-    if (num(st.hits) + num(st.baseOnBalls) + num(st.hitByPitch) > 0) onBase++
-    else break
+    if (num(st.hits) + num(st.baseOnBalls) + num(st.hitByPitch) > 0) {
+      onBase++
+      onBaseStart = s.date
+    } else break
   }
 
   let stolenBase = 0
@@ -508,7 +565,8 @@ async function hitterEnrich(personId) {
 
   // Career totals straight off the API's own `career` stat type — a season-
   // level aggregate through his most recently completed game, same spoiler
-  // profile as the rest of this file's season aggregates.
+  // profile as the rest of this file's season aggregates. MLB only (the
+  // request above simply didn't ask for it otherwise).
   const cSt = (data.stats ?? []).find((b) => b.type?.displayName === 'career')?.splits?.[0]?.stat
   const careerLine = cSt
     ? {
@@ -528,7 +586,7 @@ async function hitterEnrich(personId) {
   // `window`). Nearest one only, or null.
   const milestone = cSt ? nearestHitterMilestone(cSt) : null
 
-  return { onBase, stolenBase, homerW: hw, homerL: hl, seasonLine, careerLine, milestone }
+  return { onBase, onBaseStart, stolenBase, homerW: hw, homerL: hl, seasonLine, careerLine, milestone }
 }
 
 // The nearest milestone (any hitting stat family) a raw career stat object
@@ -564,9 +622,9 @@ function nearestPitcherMilestone(cSt) {
 // API's own statSplits sitCodes — one fetch, all three at once. Each split is
 // kept only once it clears SPLIT_MIN_PA (a 20-PA RISP average reads as
 // certainty it isn't). Returns `{ risp, vl, vr }`, each `{ avg, ops } | null`.
-async function hitterSituational(personId) {
+async function hitterSituational(personId, sportId) {
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=statSplits&sitCodes=risp,vl,vr&group=hitting&season=${season}`,
+    `/api/v1/people/${personId}/stats?stats=statSplits&sitCodes=risp,vl,vr&group=hitting&season=${season}${sportParam(sportId)}`,
   )
   const splits = data.stats?.[0]?.splits ?? []
   const byCode = {}
@@ -622,16 +680,27 @@ async function birthdayLine(personId, birthDate, debutDate) {
 // start record, a count of double-digit-strikeout starts, a current scoreless-
 // outing streak (consecutive most-recent APPEARANCES — not innings — with zero
 // earned runs; stops at the first one that allowed an earned run), and how many
-// times he's pitched in the last RECENT_APPEARANCE_WINDOW_DAYS days (a bullpen-
-// rest note). Cut off at `asOf`, same as hitterEnrich. Season CG/shutout TOTALS
-// aren't derived here — those come straight off the roster's hydrated season
-// pitching stats (see clubLeaders's pool), no need to re-sum a game log for a
-// number the API already aggregates.
-async function pitcherEnrich(personId) {
+// times he's pitched — and how many PITCHES he's thrown — in the last
+// RECENT_APPEARANCE_WINDOW_DAYS days (the bullpen-workload notes). Cut off at
+// `asOf`, same as hitterEnrich. Season CG/shutout TOTALS aren't derived here —
+// those come straight off the roster's hydrated season pitching stats (see
+// clubLeaders's pool), no need to re-sum a game log for a number the API
+// already aggregates.
+//
+// A RELIEVER (inferred from the log itself — see RELIEVER_MIN_G) additionally
+// gets: `pitchedYesterday` (an appearance dated the slate's eve, so tonight's
+// outing is knowably his 2nd straight day), `backToBack` (his ERA in relief
+// outings the day after another appearance vs the rest of his relief work),
+// and `leverage` (opponents' AVG/OPS with his club ahead / behind / tied —
+// the API's sah/sbh/sti sitCodes, one extra statSplits fetch, relievers only
+// so the fan-out stays bounded).
+async function pitcherEnrich(personId, sportId) {
+  const mlb = sportId === MLB
   const data = await getJson(
     // `career` rides along for the milestone-watch check (family #9) — one
     // request, no extra fetch, same pattern as hitterEnrich's gameLog,career.
-    `/api/v1/people/${personId}/stats?stats=gameLog,career&group=pitching&season=${season}`,
+    // MLB only, like the hitter side.
+    `/api/v1/people/${personId}/stats?stats=${mlb ? 'gameLog,career' : 'gameLog'}&group=pitching&season=${season}${sportParam(sportId)}`,
   )
   const rows = (data.stats ?? [])
     .find((b) => b.type?.displayName === 'gameLog')
@@ -665,15 +734,77 @@ async function pitcherEnrich(personId) {
 
   const asOfMs = Date.parse(`${asOf}T12:00:00Z`)
   let recentAppearances = 0
+  let recentPitches = 0
   for (const s of rows) {
     const days = (asOfMs - Date.parse(`${s.date}T12:00:00Z`)) / DAY_MS
-    if (days >= 0 && days < RECENT_APPEARANCE_WINDOW_DAYS) recentAppearances++
+    if (days >= 0 && days < RECENT_APPEARANCE_WINDOW_DAYS) {
+      recentAppearances++
+      recentPitches += num(s.stat?.numberOfPitches)
+    }
   }
 
   const homeAwayGames = homeW + homeL + awayW + awayL
 
+  // --- reliever-only enrichments -------------------------------------------
+  // Relief workload shape, from the same rows: starts vs relief outings, an
+  // appearance on the slate's eve, and the back-to-back ERA split (relief
+  // outings dated the day after ANY other appearance vs his remaining relief
+  // work — ERA recomputed from summed ER/outs on each side).
+  const starts = rows.filter((s) => num(s.stat?.gamesStarted) > 0).length
+  const reliefRows = rows.filter((s) => num(s.stat?.gamesStarted) === 0)
+  const isReliever = reliefRows.length >= RELIEVER_MIN_G && reliefRows.length >= RELIEVER_START_RATIO * starts
+  const pitchedYesterday = rows.some((s) => s.date === asOf)
+
+  const eraOf = (er, outs) => (outs > 0 ? Math.round(((er * 27) / outs) * 100) / 100 : null)
+  let backToBack = null
+  if (isReliever) {
+    const appearanceDates = new Set(rows.map((s) => s.date))
+    let bEr = 0, bOuts = 0, bG = 0, rEr = 0, rOuts = 0, rG = 0
+    for (const s of reliefRows) {
+      const dayBefore = iso(new Date(Date.parse(`${s.date}T12:00:00Z`) - DAY_MS))
+      const st = s.stat ?? {}
+      if (appearanceDates.has(dayBefore)) {
+        bG += 1
+        bEr += num(st.earnedRuns)
+        bOuts += num(st.outs)
+      } else {
+        rG += 1
+        rEr += num(st.earnedRuns)
+        rOuts += num(st.outs)
+      }
+    }
+    if (bG >= B2B_MIN_G && rG >= B2B_MIN_G && bOuts > 0 && rOuts > 0) {
+      backToBack = { g: bG, era: eraOf(bEr, bOuts), restEra: eraOf(rEr, rOuts) }
+    }
+  }
+
+  // Leverage split — opponents' line with his club ahead / behind / tied. Its
+  // own fetch, relievers only; a failure just drops the field, never the
+  // pitcher's whole enrichment.
+  let leverage = null
+  if (isReliever) {
+    try {
+      const lev = await getJson(
+        `/api/v1/people/${personId}/stats?stats=statSplits&sitCodes=sah,sbh,sti&group=pitching&season=${season}${sportParam(sportId)}`,
+      )
+      const byCode = {}
+      for (const s of lev.stats?.[0]?.splits ?? []) {
+        const code = s.split?.code
+        const st = s.stat ?? {}
+        if (!code || num(st.outsPitched ?? st.outs) < LEVERAGE_MIN_OUTS) continue
+        byCode[code] = { avg: st.avg ?? null, ops: st.ops ?? null, ip: st.inningsPitched ?? null }
+      }
+      // Ahead plus at least one contrast bucket, or there's nothing to compare.
+      if (byCode.sah && (byCode.sbh || byCode.sti)) {
+        leverage = { ahead: byCode.sah, behind: byCode.sbh ?? null, tied: byCode.sti ?? null }
+      }
+    } catch {
+      /* leverage is optional enrichment */
+    }
+  }
+
   // Milestone watch (family #9) — same shared table as the hitter side, the
-  // pitching career stat carried alongside the gameLog fetch above.
+  // pitching career stat carried alongside the gameLog fetch above (MLB only).
   const cSt = (data.stats ?? []).find((b) => b.type?.displayName === 'career')?.splits?.[0]?.stat
   const milestone = cSt ? nearestPitcherMilestone(cSt) : null
 
@@ -686,55 +817,132 @@ async function pitcherEnrich(personId) {
     tenK,
     scorelessStreak,
     recentAppearances,
+    recentPitches,
+    isReliever,
+    pitchedYesterday,
+    backToBack,
+    leverage,
     milestone,
   }
 }
 
+// --- times-through-the-order splits (family #10) -----------------------------
+// Opponents' AVG/OPS against one pitcher the 1st / 2nd / 3rd+ time batters see
+// him in a game, from his playLog (one entry per plate appearance, batter and
+// game attached). Trips are counted per batter within each game — the same
+// definition the app's live timesFacingPitcher walk uses — so bucket 3 is
+// "batters facing him a 3rd-or-later time". Rate lines are recomputed from
+// summed components; a bucket with no PAs simply isn't written.
+const TTO_TOTAL_BASES = { single: 1, double: 2, triple: 3, home_run: 4 }
+async function ttoSplits(personId, sportId) {
+  const data = await getJson(
+    `/api/v1/people/${personId}/stats?stats=playLog&group=pitching&season=${season}${sportParam(sportId)}`,
+  )
+  const splits = ((data.stats ?? []).find((b) => b.type?.displayName === 'playLog')?.splits ?? [])
+    .filter((s) => s.stat?.play?.details?.isPlateAppearance && s.date && s.date <= asOf)
+
+  const byGame = new Map() // gamePk -> PA rows
+  for (const s of splits) {
+    const pk = s.game?.gamePk ?? s.date
+    if (!byGame.has(pk)) byGame.set(pk, [])
+    byGame.get(pk).push(s)
+  }
+
+  const mk = () => ({ pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, sf: 0, tb: 0 })
+  const tally = { 1: mk(), 2: mk(), 3: mk() }
+  for (const plays of byGame.values()) {
+    plays.sort((a, b) => num(a.stat?.play?.atBatNumber) - num(b.stat?.play?.atBatNumber))
+    const seen = new Map() // batterId -> times faced in this game
+    for (const s of plays) {
+      const bid = s.batter?.id
+      if (bid == null) continue
+      const trips = (seen.get(bid) ?? 0) + 1
+      seen.set(bid, trips)
+      const d = s.stat.play.details
+      const t = tally[Math.min(trips, 3)]
+      t.pa++
+      if (d.isAtBat) t.ab++
+      if (d.isBaseHit) t.h++
+      const et = d.eventType
+      if (et === 'walk' || et === 'intent_walk') t.bb++
+      else if (et === 'hit_by_pitch') t.hbp++
+      else if (et === 'sac_fly') t.sf++
+      if (d.isBaseHit) t.tb += TTO_TOTAL_BASES[et] ?? 1
+    }
+  }
+
+  const out = {}
+  for (const trip of [1, 2, 3]) {
+    const t = tally[trip]
+    if (t.pa === 0) continue
+    const obpDen = t.ab + t.bb + t.hbp + t.sf
+    const ops =
+      t.ab > 0 && obpDen > 0
+        ? ((t.h + t.bb + t.hbp) / obpDen + t.tb / t.ab).toFixed(3).replace(/^0/, '')
+        : null
+    out[trip] = { pa: t.pa, ab: t.ab, h: t.h, avg: formatAvg(t.h, t.ab), ops }
+  }
+  return Object.keys(out).length > 0 ? out : null
+}
+
 // ---------------------------------------------------------------------------
 
-const slate = await getJson(`/api/v1/schedule?sportId=1&date=${targetApi}&hydrate=team`)
+const slate = await getJson(
+  `/api/v1/schedule?sportId=${SWEPT_SPORT_IDS.join(',')}&date=${targetApi}&hydrate=team,probablePitcher`,
+)
 const games = (slate.dates ?? []).flatMap((d) => d.games ?? [])
 if (games.length === 0) {
-  console.log(`no MLB games on ${targetApi} — nothing to generate`)
+  console.log(`no games on ${targetApi} — nothing to generate`)
   process.exit(0)
 }
 
-// Every club on the slate, and the metadata each game needs.
-const teamMeta = new Map() // teamId -> { name }
+// Every club on the slate, and the metadata each game needs. A club's own
+// sportId (its level) rides along — it scopes every stats fetch below and
+// names the peer group for the bullpen-workload baseline.
+const teamMeta = new Map() // teamId -> { name, sportId }
+// Probable starters, for the times-through-the-order sweep (family #10):
+// playLog is heavy, so ONLY the slate's announced probables are swept.
+const probableSport = new Map() // personId -> sportId
 for (const g of games) {
+  const sportId = g.teams?.home?.team?.sport?.id ?? MLB
   for (const side of ['away', 'home']) {
     const t = g.teams?.[side]?.team
     if (t?.id != null && !teamMeta.has(t.id)) {
-      teamMeta.set(t.id, { name: t.teamName ?? t.name ?? '' })
+      teamMeta.set(t.id, { name: t.teamName ?? t.name ?? '', sportId })
     }
+    const pid = g.teams?.[side]?.probablePitcher?.id
+    if (pid != null) probableSport.set(pid, sportId)
   }
 }
 const teamIds = [...teamMeta.keys()]
 
 // Per-club: roster pool → leaders, and the sets of hitter/pitcher ids to sweep.
-const splitRecords = await fetchSplitRecords()
+const splitRecords = await fetchSplitRecords() // MLB standings only — MiLB clubs just aren't in it
 const leadersByTeam = new Map()
 const scoringByTeam = new Map()
 const poolById = new Map() // personId -> his own PoolPlayer (for season CG/shutout lookup)
 const birthDateById = new Map() // personId -> 'YYYY-MM-DD', free off the same roster fetch
 const debutById = new Map() // personId -> mlbDebutDate 'YYYY-MM-DD', also free off the roster hydrate
+const sportIdByPerson = new Map() // personId -> his club's level, scoping every stats fetch
 const hitterIdsByTeam = new Map() // teamId -> [personId] (position players)
 const pitcherIdsByTeam = new Map() // teamId -> [personId]
 const allHitterIds = new Set()
 const allPitcherIds = new Set()
 
 await mapPool(teamIds, 6, async (teamId) => {
-  const roster = await fetchRoster(teamId)
+  const sportId = teamMeta.get(teamId)?.sportId ?? MLB
+  const roster = await fetchRoster(teamId, sportId)
   const pool = normalizeRosterToPool(roster, {
     id: teamId,
     abbreviation: '',
-    sport: { id: 1 },
+    sport: { id: sportId },
   })
   leadersByTeam.set(teamId, clubLeaders(pool))
   for (const p of pool) poolById.set(p.id, p)
   for (const r of roster) {
     if (r.person?.id != null && r.person.birthDate) birthDateById.set(r.person.id, r.person.birthDate)
     if (r.person?.id != null && r.person.mlbDebutDate) debutById.set(r.person.id, r.person.mlbDebutDate)
+    if (r.person?.id != null) sportIdByPerson.set(r.person.id, sportId)
   }
   const hitters = roster
     .filter((r) => r.position?.type !== 'Pitcher' && r.person?.id)
@@ -746,7 +954,7 @@ await mapPool(teamIds, 6, async (teamId) => {
   pitcherIdsByTeam.set(teamId, pitchers)
   for (const id of hitters) allHitterIds.add(id)
   for (const id of pitchers) allPitcherIds.add(id)
-  scoringByTeam.set(teamId, await scoringRecord(teamId))
+  scoringByTeam.set(teamId, await scoringRecord(teamId, sportId))
 })
 
 // Per-hitter game-log + situational-splits sweep (the heaviest fan-out) —
@@ -755,29 +963,70 @@ await mapPool(teamIds, 6, async (teamId) => {
 // concurrency cap covers both without a second full pass over the list.
 const hitterList = [...allHitterIds]
 const enrichList = await mapPool(hitterList, 8, (id) =>
-  Promise.all([hitterEnrich(id), hitterSituational(id)]),
+  Promise.all([
+    hitterEnrich(id, sportIdByPerson.get(id) ?? MLB),
+    hitterSituational(id, sportIdByPerson.get(id) ?? MLB),
+  ]),
 )
 const enrichById = new Map()
 const situationalById = new Map()
 hitterList.forEach((id, i) => {
-  enrichById.set(id, enrichList[i][0])
-  situationalById.set(id, enrichList[i][1])
+  const [enrich, situational] = enrichList[i] ?? [null, null]
+  enrichById.set(id, enrich)
+  situationalById.set(id, situational)
 })
 
 // Per-pitcher game-log sweep — every rostered pitcher on either club, not just
 // probable starters (a bullpen call-up can start; a reliever's own scoreless
 // streak/rest note fires whenever HE actually takes the mound tonight).
 const pitcherList = [...allPitcherIds]
-const pitcherEnrichList = await mapPool(pitcherList, 8, (id) => pitcherEnrich(id))
+const pitcherEnrichList = await mapPool(pitcherList, 8, (id) =>
+  pitcherEnrich(id, sportIdByPerson.get(id) ?? MLB),
+)
 const pitcherEnrichById = new Map()
 pitcherList.forEach((id, i) => pitcherEnrichById.set(id, pitcherEnrichList[i]))
+
+// The bullpen-workload baseline: the average pitch count an ACTIVE reliever at
+// each level has thrown over the trailing window — the peer group the
+// Pitchers-table workload note compares a reliever's own count against.
+// Averaged over every swept reliever at the level, including the rested ones
+// sitting on zero, which is exactly what "the average reliever" means.
+const bullpenAvgBySport = {}
+{
+  const agg = new Map() // sportId -> { pitches, n }
+  for (const id of pitcherList) {
+    const e = pitcherEnrichById.get(id)
+    if (!e?.isReliever) continue
+    const sportId = sportIdByPerson.get(id) ?? MLB
+    const a = agg.get(sportId) ?? { pitches: 0, n: 0 }
+    a.pitches += e.recentPitches ?? 0
+    a.n += 1
+    agg.set(sportId, a)
+  }
+  for (const [sportId, a] of agg) {
+    if (a.n > 0) bullpenAvgBySport[sportId] = Math.round(a.pitches / a.n)
+  }
+}
+
+// Times-through-the-order sweep — the slate's probable starters only (see
+// ttoSplits). Keyed by personId; a failed/empty playLog simply drops out.
+const ttoById = new Map()
+{
+  const ids = [...probableSport.keys()]
+  const results = await mapPool(ids, 6, (id) => ttoSplits(id, probableSport.get(id) ?? MLB))
+  ids.forEach((id, i) => {
+    if (results[i]) ttoById.set(id, results[i])
+  })
+}
 
 // Birthday performance sweep — ONLY players (across every club on the slate)
 // whose birthday actually falls on the slate date, so this is a handful of
 // people even though birthdayLine itself walks a whole career. Keyed by
-// personId; a null (below the sample floors, or no debut date) simply drops out.
-const birthdayIds = [...birthDateById.keys()].filter((id) =>
-  isBirthdayOn(birthDateById.get(id), targetApi),
+// personId; a null (below the sample floors, or no debut date) simply drops
+// out. MLB only — birthdayLine's season-by-season walk reads MLB game logs.
+const birthdayIds = [...birthDateById.keys()].filter(
+  (id) =>
+    (sportIdByPerson.get(id) ?? MLB) === MLB && isBirthdayOn(birthDateById.get(id), targetApi),
 )
 const birthdayStatsById = new Map()
 await mapPool(birthdayIds, 4, async (id) => {
@@ -792,6 +1041,8 @@ for (const g of games) {
   const awayId = g.teams?.away?.team?.id
   const homeId = g.teams?.home?.team?.id
   if (awayId == null || homeId == null) continue
+  const sportId = teamMeta.get(homeId)?.sportId ?? MLB
+  const mlb = sportId === MLB
 
   // Leaders keyed by playerId across BOTH clubs, so AtBatCard looks up batter.id
   // directly. Each carries the club name for the note ("leads the Brewers …").
@@ -826,7 +1077,11 @@ for (const g of games) {
     const e = enrichById.get(id)
     if (e) {
       const s = {}
-      if (e.onBase >= ONBASE_FLOOR) s.onBase = e.onBase
+      if (e.onBase >= ONBASE_FLOOR) {
+        s.onBase = e.onBase
+        // The streak's first game, for the box score's "began 6/25" prose.
+        if (e.onBaseStart) s.onBaseStart = e.onBaseStart
+      }
       if (e.stolenBase >= SB_FLOOR) s.stolenBase = e.stolenBase
       if (s.onBase || s.stolenBase) streaks[id] = s
       const homerGames = e.homerW + e.homerL
@@ -836,7 +1091,10 @@ for (const g of games) {
           homerRecords[id] = `${e.homerW}-${e.homerL}`
         }
       }
-      if (e.seasonLine || e.careerLine) {
+      // hitterLines exist only to baseline the vs-opponent note, whose data
+      // file (vs-team-splits) is MLB-only — skipping them for MiLB keeps the
+      // committed file from carrying dead weight for ~120 extra clubs.
+      if (mlb && (e.seasonLine || e.careerLine)) {
         hitterLines[id] = { season: e.seasonLine ?? null, career: e.careerLine ?? null }
       }
       if (e.milestone) milestones[id] = e.milestone
@@ -867,8 +1125,23 @@ for (const g of games) {
     if (cgShutout > 0) entry.cgShutout = cgShutout
     if (e.scorelessStreak > 0) entry.scorelessStreak = e.scorelessStreak
     if (e.recentAppearances > 0) entry.recentAppearances = e.recentAppearances
+    if (e.recentPitches > 0) entry.recentPitches = e.recentPitches
+    if (e.isReliever) entry.reliever = true
+    if (e.pitchedYesterday) entry.pitchedYesterday = true
+    if (e.backToBack) entry.backToBack = e.backToBack
+    if (e.leverage) entry.leverage = e.leverage
+    if (ttoById.has(id)) entry.tto = ttoById.get(id)
     if (Object.keys(entry).length > 0) starterRecords[id] = entry
     if (e.milestone) milestones[id] = e.milestone
+  }
+
+  // A probable starter freshly called up may not be on the 40-man roster
+  // sweep — make sure his TTO split still lands in the bundle.
+  for (const side of ['away', 'home']) {
+    const pid = g.teams?.[side]?.probablePitcher?.id
+    if (pid != null && ttoById.has(pid) && !starterRecords[pid]?.tto) {
+      starterRecords[pid] = { ...(starterRecords[pid] ?? {}), tto: ttoById.get(pid) }
+    }
   }
 
   // Anyone on either roster (hitter or pitcher) whose birthday IS this
@@ -886,8 +1159,14 @@ for (const g of games) {
   }
 
   outGames[g.gamePk] = {
+    sportId,
     away: { teamId: awayId, name: teamMeta.get(awayId)?.name ?? '' },
     home: { teamId: homeId, name: teamMeta.get(homeId)?.name ?? '' },
+    // The level's average reliever pitch count over the trailing window — the
+    // peer figure the bullpen-workload note reads.
+    ...(bullpenAvgBySport[sportId] != null
+      ? { bullpen: { avgPitches: bullpenAvgBySport[sportId], windowDays: RECENT_APPEARANCE_WINDOW_DAYS } }
+      : {}),
     leaders,
     pitcherLeaders,
     streaks,
@@ -910,7 +1189,9 @@ await writeFile(
   outFile,
   JSON.stringify({ date: targetApi, season, generatedAt: new Date().toISOString(), games: outGames }),
 )
-console.log(`wrote ${outFile} (${Object.keys(outGames).length} games, ${hitterList.length} hitters swept)`)
+console.log(
+  `wrote ${outFile} (${Object.keys(outGames).length} games across MLB+MiLB, ${hitterList.length} hitters and ${pitcherList.length} pitchers swept, ${ttoById.size} TTO splits)`,
+)
 
 // Prune old per-date files so the committed folder stays small — keep anything
 // from the last ~10 days onward (a game scored a few days late still finds its
