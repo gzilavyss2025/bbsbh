@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { computeTopPerformersByResult } from '../api/topPerformers.js'
 import { rankDayHighlights } from '../api/dayHighlights.js'
+import { computeDaySuperlatives } from '../api/daySuperlatives.js'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -87,7 +88,11 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
         setState({
           loading: false,
           error: false,
-          data: { performersByResult, highlights: rankDayHighlights(entries) },
+          data: {
+            performersByResult,
+            highlights: rankDayHighlights(entries),
+            superlatives: computeDaySuperlatives(entries),
+          },
         })
       })
       .catch(() => {
@@ -106,9 +111,14 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
   }
   if (!state.data) return null
 
-  const { performersByResult, highlights } = state.data
+  const { performersByResult, highlights, superlatives } = state.data
   const { winners, losers } = performersByResult
   const hasPerformers = winners.length > 0 || losers.length > 0
+  const statcastCards = [
+    { label: 'Longest Home Run', entry: superlatives.longestHomeRun },
+    { label: 'Hardest Base Hit', entry: superlatives.hardestBaseHit },
+    { label: 'Fastest Strikeout', entry: superlatives.fastestStrikeout },
+  ].filter((c) => c.entry)
 
   return (
     <LinkScope asOf={dateStr} sportId={sportId}>
@@ -138,6 +148,19 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             )}
           </section>
         )}
+        {statcastCards.length > 0 && (
+          <section className="dayhl__section">
+            <h3 className="dayhl__title">Statcast Leaders</h3>
+            {statcastCards.map(({ label, entry }) => (
+              <div key={label}>
+                <h4 className="playercard__bucket">{label}</h4>
+                <ul className="playercard__list">
+                  <PerformerCard entry={entry} />
+                </ul>
+              </div>
+            ))}
+          </section>
+        )}
         {highlights.length > 0 && (
           <section className="dayhl__section">
             <h3 className="dayhl__title">Day Highlights</h3>
@@ -148,7 +171,7 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             </ol>
           </section>
         )}
-        {!hasPerformers && highlights.length === 0 && (
+        {!hasPerformers && highlights.length === 0 && statcastCards.length === 0 && (
           <p className="hint hint--prose">Nothing to recap for this day yet.</p>
         )}
       </div>
