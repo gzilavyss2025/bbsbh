@@ -514,3 +514,44 @@ export function selectGameStatus(source) {
   const label = isPostponed ? 'Postponed' : isSuspended ? 'Suspended' : isDelayed ? 'Delayed' : null
   return { detailedState, reason, isDelayed, isSuspended, isPostponed, label }
 }
+
+// In-game delays (rain, etc.) for the between-half-innings notice (see
+// components/DelayCard). Spoiler-FREE: a stoppage carries no score — only WHEN
+// it happened, WHY, and (once play resumed) how long it lasted. Each delay is a
+// non-pitch "Game Advisory" playEvent whose description reads "Status Change -
+// Delayed: <reason>" (or "Delayed Start: <reason>"); the resume is a separate
+// "In Progress" advisory. The delay event's own startTime/endTime bracket the
+// stoppage — its endTime is when play resumed — so the duration comes straight
+// from the event, no pairing needed. A still-ongoing delay has no resume yet
+// (endTime absent or == startTime) and reports resolved:false with no duration.
+// Attributed to the half-inning of the play it sits inside, so InningViewer can
+// surface it on that half's page. Deliberately reads no score field on the
+// event (it also carries awayScore/homeScore — left untouched).
+export function selectDelays(feed) {
+  const delays = []
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const inning = play?.about?.inning
+    const half = play?.about?.halfInning
+    for (const ev of play.playEvents ?? []) {
+      const desc = ev.details?.description ?? ''
+      if (!/delayed/i.test(desc)) continue // "In Progress" / "Delay Over" don't match
+      // Reason is whatever trails the "Delayed[ Start]: " prefix ("Rain",
+      // "Field conditions"), or '' when the advisory carries none.
+      const reason = (desc.split(/delayed[^:]*:\s*/i)[1] ?? '').trim()
+      const start = ev.startTime ? Date.parse(ev.startTime) : NaN
+      const end = ev.endTime ? Date.parse(ev.endTime) : NaN
+      const durationMinutes =
+        Number.isFinite(start) && Number.isFinite(end) && end - start > 60_000
+          ? Math.round((end - start) / 60_000)
+          : null
+      delays.push({
+        inning,
+        half,
+        reason,
+        durationMinutes,
+        resolved: durationMinutes != null,
+      })
+    }
+  }
+  return delays
+}

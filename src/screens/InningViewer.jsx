@@ -5,6 +5,7 @@ import {
   selectBullpen,
   selectBench,
   selectTeamMeta,
+  selectDelays,
   halfIndex,
 } from '../api/select.js'
 import { selectWinProbPath } from '../api/winprob.js'
@@ -15,6 +16,7 @@ import { RollingLine } from '../components/RollingLine.jsx'
 import { StatBox } from '../components/StatBox.jsx'
 import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
 import { HalfInning } from '../components/HalfInning.jsx'
+import { DelayCard } from '../components/DelayCard.jsx'
 import { PitchersSection } from '../components/PitchersSection.jsx'
 import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
 import { RosterPanel } from '../components/RosterPanel.jsx'
@@ -62,6 +64,10 @@ export function InningViewer({
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
     [feed],
   )
+
+  // In-game delays (rain, etc.), spoiler-free (see selectDelays) — surfaced as a
+  // between-half-innings notice on the affected half's page. Almost always empty.
+  const delays = useMemo(() => selectDelays(feed), [feed])
 
   const rosters = useMemo(
     () => ({
@@ -217,6 +223,15 @@ export function InningViewer({
           homeName={meta.home.clubName || meta.home.abbreviation}
         />
       )}
+
+      {/* A rain/other delay that stopped play during the half being viewed —
+          spoiler-free structural info (see selectDelays), rendered like the
+          status banner rather than behind a seal. Usually none. */}
+      {delays
+        .filter((d) => d.inning === effInning && d.half === effHalf)
+        .map((d, i) => (
+          <DelayCard key={`${d.inning}-${d.half}-${i}`} delay={d} />
+        ))}
 
       {/* On a phone these wrappers are inert divs and everything stacks in the
           same row order as ever: linescore, then the stat card + WPA chart,

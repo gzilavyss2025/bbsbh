@@ -175,6 +175,9 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
       wide: true,
     },
     { label: 'Time of Game', value: box.times.duration },
+    // Only shown when the game was actually delayed (rain, etc.) — it explains
+    // why Game End is later than First Pitch + Time of Game would suggest.
+    ...(box.times.delay ? [{ label: 'Delay', value: box.times.delay }] : []),
     { label: 'Game End', value: box.times.end },
   ]
 

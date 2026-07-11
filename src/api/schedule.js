@@ -30,6 +30,13 @@ function normalizeGame(game, sportId) {
     // Free-text delay/postponement cause ("Rain", "Field conditions"), when
     // MLB supplies one. Feeds selectGameStatus's delayed/suspended banner.
     reason: game.status?.reason,
+    // When a postponed game has already been rescheduled, MLB carries the new
+    // date on the ORIGINAL date's row (rescheduleGameDate 'YYYY-MM-DD' + the
+    // full rescheduleDate ISO). Spoiler-free — a make-up date, never a score —
+    // so the postponed card can tell you when the game moved to. Both absent
+    // until the league sets a make-up (a fresh postponement shows no date yet).
+    rescheduleDate: game.rescheduleDate,
+    rescheduleGameDate: game.rescheduleGameDate,
     away: {
       id: away?.team?.id,
       name: away?.team?.name,
