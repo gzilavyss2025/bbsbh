@@ -5,7 +5,7 @@
 // There's no "games by umpire" endpoint, so getting this list means scanning
 // the whole season's schedule and re-indexing by umpire id — too much to fetch
 // on every umpire-page visit, so scripts/gen-umpires.mjs does it on a cron (see
-// .github/workflows/update-umpires.yml) and this module just reads the shaped
+// .github/workflows/update-nightly-data.yml) and this module just reads the shaped
 // result. Same build-time-fetch pattern as war.js/rehab.js (see
 // docs/data-enrichment.md §5). Game dates/assignments carry no score, so the
 // file is spoiler-free like the rest of the roster-move surfaces.

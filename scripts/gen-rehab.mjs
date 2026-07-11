@@ -2,7 +2,7 @@
 // rehab assignment, league-wide, already shaped for the Rehab Assignments page
 // (src/api/rehab.js just reads this file). Keyed by MLB Stats API personId.
 //
-// This runs on a cron via .github/workflows/update-rehab.yml, NOT at request
+// This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at request
 // time. Building the list is expensive: the transaction feed tells us who STARTS
 // a rehab but not reliably when one ENDS, so each candidate has to be verified
 // against his actual game log and his rehab club's schedule (a few statsapi

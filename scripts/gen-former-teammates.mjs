@@ -3,7 +3,7 @@
 // teammates (majors or minors), already shaped for the lineup page's FORMER
 // TEAMMATES card (src/api/formerTeammates.js just reads this file).
 //
-// This runs on a cron via .github/workflows/update-former-teammates.yml, NOT at
+// This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Building it is expensive: two opposing players are "former
 // teammates" iff their careers share a (teamId, season) pair, and reducing a
 // career to that set means year-by-year stats across MLB *and* each MiLB level

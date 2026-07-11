@@ -1,0 +1,88 @@
+name: Update nightly data
+
+# Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
+# minor-league leaders, game call-outs, former teammates, and vs-team splits
+# (each documented at the top of its own scripts/gen-*.mjs) in ONE workflow
+# with a SINGLE commit+push, instead of eight separate crons each triggering
+# its own Vercel deployment. Consolidated 2026-07-11 after two of the eight
+# (update-callouts and update-former-teammates, both previously at 10:30 UTC)
+# collided on the push — a non-fast-forward rejection that silently dropped
+# that night's call-outs. The generators are otherwise unchanged and fully
+# independent (each writes its own public/data/* file with no read dependency
+# on another's output — gen-callouts.mjs reads vs-team-splits.json only at
+# app runtime, never at generation time), so continue-on-error lets one
+# script's failure fall through to the rest instead of blocking the batch;
+# the job still fails at the end (for cron-failure visibility in the Actions
+# tab) if anything errored, but whatever succeeded is already committed by
+# then.
+on:
+  schedule:
+    - cron: '0 11 * * *' # ~7am US Eastern — the latest of the eight former per-job times, so every "after overnight X settles" / "after games go Final" constraint they each documented still holds
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-nightly-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Game notes
+        id: game-notes
+        continue-on-error: true
+        run: node scripts/gen-game-notes.mjs
+      - name: WAR
+        id: war
+        continue-on-error: true
+        run: node scripts/gen-war.mjs
+      - name: Rehab assignments
+        id: rehab
+        continue-on-error: true
+        run: node scripts/gen-rehab.mjs
+      - name: Umpires
+        id: umpires
+        continue-on-error: true
+        run: node scripts/gen-umpires.mjs
+      - name: Minor-league leaders
+        id: minors-leaders
+        continue-on-error: true
+        run: node scripts/gen-minors-leaders.mjs
+      - name: Game call-outs
+        id: callouts
+        continue-on-error: true
+        run: node scripts/gen-callouts.mjs
+      - name: Former teammates
+        id: former-teammates
+        continue-on-error: true
+        run: node scripts/gen-former-teammates.mjs
+      - name: Vs-team splits
+        id: vs-team-splits
+        continue-on-error: true
+        run: node scripts/gen-vs-team-splits.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Update nightly data"
+          git push
+
+      - name: Fail if any generator errored
+        if: |
+          steps.game-notes.outcome == 'failure' ||
+          steps.war.outcome == 'failure' ||
+          steps.rehab.outcome == 'failure' ||
+          steps.umpires.outcome == 'failure' ||
+          steps.minors-leaders.outcome == 'failure' ||
+          steps.callouts.outcome == 'failure' ||
+          steps.former-teammates.outcome == 'failure' ||
+          steps.vs-team-splits.outcome == 'failure'
+        run: |
+          echo "One or more nightly generators failed — see the step logs above."
+          exit 1

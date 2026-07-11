@@ -47,7 +47,7 @@
 // docs/data-enrichment.md §5) rather than live: scoped to the NEXT day's teams
 // this is still ~hundreds of statsapi calls (a roster + a full-season linescore
 // sweep per club, a game log + splits pull per player) — far too heavy for a
-// phone page load. So .github/workflows/update-callouts.yml runs this on a
+// phone page load. So .github/workflows/update-nightly-data.yml runs this on a
 // nightly cron, commits the small shaped file, and the app (src/api/callouts.js)
 // reads it same-origin and degrades to nothing when it's absent (MiLB games, an
 // un-generated date, a failed run). Everything written here is a SEASON

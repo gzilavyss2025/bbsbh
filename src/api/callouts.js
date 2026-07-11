@@ -2,7 +2,7 @@
 // (public/data/callouts/<MMDDYYYY>.json) rather than assembled live.
 //
 // The file is precomputed the night before by scripts/gen-callouts.mjs (see
-// .github/workflows/update-callouts.yml) for that day's MLB slate — season
+// .github/workflows/update-nightly-data.yml) for that day's MLB slate — season
 // leaders, streaks, and situational team records for every club playing, joined
 // per gamePk. Same build-time-fetch pattern as war.js / minors-leaders.js; every
 // value in it is a SEASON AGGREGATE, so it's spoiler-free — the app's

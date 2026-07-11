@@ -130,7 +130,7 @@ node scripts/gen-war.mjs
                    # regenerate public/data/war.json (season WAR per player,
                    # from FanGraphs' leaderboard API) — normally you don't run
                    # this by hand, it's on a nightly cron; see
-                   # .github/workflows/update-war.yml and docs/data-enrichment.md §5
+                   # .github/workflows/update-nightly-data.yml and docs/data-enrichment.md §5
 node scripts/gen-war-history.mjs
                    # regenerate public/data/war-history.json (season WAR per
                    # player for COMPLETED seasons, 2010+ — the multi-year
@@ -148,7 +148,7 @@ node scripts/gen-rehab.mjs
                    # page load (each candidate is verified against his game log +
                    # his club's schedule to drop stints that have really ended),
                    # so a daily cron precomputes it. Normally you don't run this
-                   # by hand; see .github/workflows/update-rehab.yml. Keeps its
+                   # by hand; see .github/workflows/update-nightly-data.yml. Keeps its
                    # OWN copy of the transaction-scan logic (it's self-contained,
                    # like the other gen-*.mjs scripts) — the app just reads the
                    # static file via src/api/rehab.js.
@@ -159,7 +159,7 @@ node scripts/gen-umpires.mjs
                    # Same build-time-fetch pattern as gen-war.mjs, driven by
                    # COST: there's no "games by umpire" endpoint, so building
                    # this means a full-season schedule scan (one call — see
-                   # .github/workflows/update-umpires.yml) then re-indexing
+                   # .github/workflows/update-nightly-data.yml) then re-indexing
                    # thousands of (game, official) rows by umpire id — too much
                    # to redo on every umpire-page visit. MLB-only, like war.js.
                    # App reads it via src/api/umpires.js.
@@ -168,7 +168,7 @@ node scripts/gen-minors-leaders.mjs
                    # ALL-MINORS leaderboard — every farmhand's season totals SUMMED
                    # across the levels he's climbed, so a two-level slugger ranks on
                    # his combined line). Same build-time-fetch pattern as gen-war.mjs
-                   # (daily cron; see .github/workflows/update-minors-leaders.yml),
+                   # (daily cron; see .github/workflows/update-nightly-data.yml),
                    # driven by COST: it's a league-wide, four-level board (eight full-
                    # level stat pulls, ~4,700 players) — too heavy to combine on a
                    # page load. Stores PRE-RANKED top rows per category (not the
@@ -185,7 +185,7 @@ node scripts/gen-former-teammates.mjs
                    # teammates — majors or minors — the lineup page's FORMER
                    # TEAMMATES card). Same build-time-fetch pattern as
                    # gen-war.mjs (daily cron; see
-                   # .github/workflows/update-former-teammates.yml), driven by
+                   # .github/workflows/update-nightly-data.yml), driven by
                    # COST: two opposing players are teammates iff their careers
                    # share a (teamId, season) pair, and reducing a career to that
                    # set is a year-by-year pull PER MiLB level per player —
@@ -200,7 +200,7 @@ node scripts/gen-vs-team-splits.mjs
                    # each opposing club plus the LAST meeting's stat line — the
                    # player page's SPLITS VS TEAM card). Same build-time-fetch
                    # pattern as gen-former-teammates.mjs (daily cron; see
-                   # .github/workflows/update-vs-team-splits.yml), driven by COST:
+                   # .github/workflows/update-nightly-data.yml), driven by COST:
                    # the API's vs-team split types carry no game granularity, so
                    # getting both the career totals AND the last-game line means
                    # sweeping each player's whole MLB game log season by season —
@@ -213,7 +213,7 @@ node scripts/gen-game-notes.mjs
                    # official pre-game "Game Notes" PDF links — title/date/url —
                    # the lineup page's Game notes button links out to). Same
                    # build-time-fetch pattern as gen-rehab.mjs (daily cron; see
-                   # .github/workflows/update-game-notes.yml), but APPEND-ONLY: the
+                   # .github/workflows/update-nightly-data.yml), but APPEND-ONLY: the
                    # source feed (dapi.mlbinfra.com, keyed by our teamid) only lists
                    # a club's last ~10 games, so the job MERGES new links in and
                    # never drops old ones — the img.mlbstatic.com PDF asset stays
@@ -387,7 +387,7 @@ notes the gamePk field paths were verified against):
   `public/data/war.json`. That file is **not** fetched live: FanGraphs'
   leaderboard API is CORS-open but bulk-only (~1MB for the whole league) and
   unofficial, so `scripts/gen-war.mjs` fetches + trims it to `{personId: war}`
-  and a nightly GitHub Action (`.github/workflows/update-war.yml`) commits the
+  and a nightly GitHub Action (`.github/workflows/update-nightly-data.yml`) commits the
   refreshed file to `main`, which Vercel then auto-deploys — no server, no
   runtime dependency on FanGraphs. Keyed by MLB Stats API `personId`
   (FanGraphs' own `xMLBAMID` field is that same id, so no name-matching).
@@ -410,7 +410,7 @@ notes the gamePk field paths were verified against):
   candidate against his own game log + his rehab club's schedule to drop stints
   that have really ended (activated back to the majors, sent down, or shut down
   for the season) — dozens of statsapi calls, too heavy for a page load. So
-  `scripts/gen-rehab.mjs` does it on a daily cron (`.github/workflows/update-rehab.yml`)
+  `scripts/gen-rehab.mjs` does it on a daily cron (`.github/workflows/update-nightly-data.yml`)
   and this module just reads the shaped result. The transaction-scan half mirrors
   `person.js`'s single-player `detectRehabAssignment`; the script keeps its own
   self-contained copy (like the other `gen-*.mjs`).
@@ -421,7 +421,7 @@ notes the gamePk field paths were verified against):
   a full-season schedule scan (`scripts/gen-umpires.mjs`, one call —
   `/api/v1/schedule?...&hydrate=officials,team` returns every game's officials
   in one shot) then re-indexing thousands of rows by umpire id — too much to
-  redo on every visit, so a daily cron (`.github/workflows/update-umpires.yml`)
+  redo on every visit, so a daily cron (`.github/workflows/update-nightly-data.yml`)
   precomputes it. MLB-only, like `war.js`. Wired up via `selectOfficials`
   (`select.js`) now threading each official's `id` through to the Umpires card
   (`TeamInfo.jsx`), which renders each name as an `UmpireLink` to `/umpire/{id}`
@@ -439,7 +439,7 @@ notes the gamePk field paths were verified against):
   granularity, so getting both the career totals AND the last-game line means
   sweeping each player's whole MLB game log season by season (one request per
   season) — too heavy for a page load, so `scripts/gen-vs-team-splits.mjs`
-  precomputes it on a daily cron (`.github/workflows/update-vs-team-splits.yml`).
+  precomputes it on a daily cron (`.github/workflows/update-nightly-data.yml`).
   Threaded into the player page via `loadPlayer.js` (`vsTeamSplitsFor`), which
   pre-selects the player's club's next scheduled opponent. The player page is a
   spoiler-FREE surface (open game logs / season splits), so the career totals
@@ -492,7 +492,7 @@ notes the gamePk field paths were verified against):
   build-time-fetch pattern, cost-driven like `rehab.js`: a league-wide four-level
   board is eight full-level stat pulls (~4,700 players to combine), too heavy for
   a page load, so `scripts/gen-minors-leaders.mjs` precomputes it on a daily cron
-  (`.github/workflows/update-minors-leaders.yml`). It stores PRE-RANKED top rows
+  (`.github/workflows/update-nightly-data.yml`). It stores PRE-RANKED top rows
   per category (via the app's own `combineToPool` + `computeLeaders`, so it can't
   drift from the live `org` board) rather than the raw pool — keeps the committed
   file ~150KB and bakes in the leader-relative qualifier's playing-time floor,
