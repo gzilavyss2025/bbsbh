@@ -7398,7 +7398,17 @@ body {
 .ledger,
 .standings {
   width: 100%;
-  border-collapse: collapse;
+  /* `separate` (not `collapse`) so the sticky first column's row-divider
+     hairlines stay pixel-aligned with the scrolling columns'. Under `collapse`
+     the divider is a SHARED border owned by the table grid, and the sticky team
+     cell — promoted to its own paint layer — renders that border a pixel or two
+     adrift (and iOS/Chromium disagree on whether it paints at all), leaving a
+     visible step in every row rule at the column seam. With `separate` +
+     zero spacing every cell owns its own top border at the same box position,
+     so the rule is continuous across the seam. See the sticky team column
+     rules below. */
+  border-collapse: separate;
+  border-spacing: 0;
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -8339,26 +8349,11 @@ body {
   background: var(--bg-page);
 }
 /* Solid (not the translucent row tint) so scrolled cells can't bleed through
-   the pinned column. The row-divider hairline is layered on top (see below). */
+   the pinned column. With `border-collapse: separate` the cell keeps its own
+   `border-top` (from `.standings td`), so the row rule stays continuous across
+   the pinned/scrolling seam — no border hacks needed here. */
 .standings--full tr.is-me td.team {
-  background:
-    linear-gradient(var(--border-hairline), var(--border-hairline)) top / 100% var(--bw-hair) no-repeat,
-    var(--field-soft);
-}
-/* `border-collapse: collapse` + `position: sticky` don't cooperate: the
-   collapsed top hairline belongs to the table grid, but the sticky team cell is
-   promoted to its own paint layer that repaints its solid background over that
-   shared border — leaving the column's row dividers missing entirely. box-shadow
-   can't redraw them either (browsers drop box-shadow on cells under
-   border-collapse: collapse). So drop the overpainted collapsed border and paint
-   the same hairline as a 1px background layer over the solid fill — a background
-   DOES render with the sticky layer, so the dividers line up across the whole
-   row again. */
-.standings--full td.team {
-  border-top-color: transparent;
-  background:
-    linear-gradient(var(--border-hairline), var(--border-hairline)) top / 100% var(--bw-hair) no-repeat,
-    var(--surface-card);
+  background: var(--field-soft);
 }
 
 @media (min-width: 740px) {
