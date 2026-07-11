@@ -41,6 +41,9 @@ export async function fetchCallouts(urlDate) {
 //     streaks:{ [playerId]: { onBase?, stolenBase? } },
 //     homerRecords:{ [playerId]: 'W-L' },
 //     situational:{ [playerId]: { risp?, vl?, vr? } }, each { avg, ops },
+//     hitterLines:{ [playerId]: { season, career } }, each
+//       { pa, ab, h, hr, bb, xbh, avg } | null — the baselines the
+//       vs-opponent note is judged against (see callout-notes.js),
 //     birthdays:[ playerId ] (whose birthday is today),
 //     birthdayStats:{ [playerId]: { avg, h, ab, hr, g } } (career line on his
 //       birthday, a subset of `birthdays` that cleared the sample floors),

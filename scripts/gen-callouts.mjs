@@ -35,13 +35,13 @@
 //      summed across seasons from his debut (see birthdayLine). Rides alongside
 //      the existing "celebrating his birthday today" flag; a tiny fan-out since
 //      only the day's birthday boys are swept.
-//   8. Hitter season/career lines — AVG/AB/H/HR for the season (summed from the
-//      same game-log rows as #2/#6) and for his whole career (the API's own
-//      `career` stat type, folded into the same request — no extra fetch). Not
-//      a note on its own; it's the baseline callout-notes.js's "career X
-//      against the Y" note (from vs-team-splits) checks for a significant
-//      deviation against, so that note only fires when facing this opponent is
-//      actually unusual for him.
+//   8. Hitter season/career lines — AVG/PA/AB/H/HR/BB/XBH for the season
+//      (summed from the same game-log rows as #2/#6) and for his whole career
+//      (the API's own `career` stat type, folded into the same request — no
+//      extra fetch). Not a note on its own; it's the baseline callout-notes.js's
+//      vs-opponent note (from vs-team-splits) compares against — batting
+//      average, HR share, extra-base share, walk rate — so that note only
+//      fires when facing this opponent is actually unusual for him.
 //
 // WHY a nightly precompute (the war.js / minors-leaders.js build-time pattern,
 // docs/data-enrichment.md §5) rather than live: scoped to the NEXT day's teams
@@ -430,22 +430,35 @@ async function hitterEnrich(personId) {
 
   // Season totals, summed from the same asOf-cut rows rather than the API's
   // own running `avg` (which — like formatAvg's birthday line — would include
-  // tonight's not-yet-played game if read off the last row instead).
-  let sAb = 0, sH = 0, sHr = 0
+  // tonight's not-yet-played game if read off the last row instead). PA/BB/XBH
+  // ride along as the baselines the vs-opponent callout's rate comparisons
+  // (walk rate, extra-base share — see callout-notes.js) are judged against.
+  let sPa = 0, sAb = 0, sH = 0, sHr = 0, sBb = 0, sXbh = 0
   for (const s of rows) {
     const st = s.stat ?? {}
+    sPa += num(st.plateAppearances)
     sAb += num(st.atBats)
     sH += num(st.hits)
     sHr += num(st.homeRuns)
+    sBb += num(st.baseOnBalls)
+    sXbh += num(st.doubles) + num(st.triples) + num(st.homeRuns)
   }
-  const seasonLine = { ab: sAb, h: sH, hr: sHr, avg: formatAvg(sH, sAb) }
+  const seasonLine = { pa: sPa, ab: sAb, h: sH, hr: sHr, bb: sBb, xbh: sXbh, avg: formatAvg(sH, sAb) }
 
   // Career totals straight off the API's own `career` stat type — a season-
   // level aggregate through his most recently completed game, same spoiler
   // profile as the rest of this file's season aggregates.
   const cSt = (data.stats ?? []).find((b) => b.type?.displayName === 'career')?.splits?.[0]?.stat
   const careerLine = cSt
-    ? { ab: num(cSt.atBats), h: num(cSt.hits), hr: num(cSt.homeRuns), avg: cSt.avg ?? formatAvg(num(cSt.hits), num(cSt.atBats)) }
+    ? {
+        pa: num(cSt.plateAppearances),
+        ab: num(cSt.atBats),
+        h: num(cSt.hits),
+        hr: num(cSt.homeRuns),
+        bb: num(cSt.baseOnBalls),
+        xbh: num(cSt.doubles) + num(cSt.triples) + num(cSt.homeRuns),
+        avg: cSt.avg ?? formatAvg(num(cSt.hits), num(cSt.atBats)),
+      }
     : null
 
   return { onBase, stolenBase, homerW: hw, homerL: hl, seasonLine, careerLine }
