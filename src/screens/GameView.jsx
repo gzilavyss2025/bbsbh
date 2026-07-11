@@ -277,6 +277,10 @@ function Masthead({ away, home, date, gamePk, onSketch }) {
 // the app (with its own Watch entry point to the live/archived broadcast);
 // without the app it opens mlb.com's web Gameday, which offers the same
 // entry point. Never spoiler-revealing — it's a game identifier, not a score.
+// The wordmark is MLB's own "MLBTV-19-ondark" asset (linked from
+// mlb.com/live-stream-games), saved locally at public/icons/mlbtv-logo.svg
+// rather than hotlinked — it already carries its own light badge shape,
+// meant to sit on a dark surface like this pill's navy fill.
 function WatchButton({ gamePk }) {
   return (
     <a
@@ -286,7 +290,7 @@ function WatchButton({ gamePk }) {
       rel="noopener noreferrer"
       title="Open this game in the MLB app (or mlb.com) to watch"
     >
-      Watch
+      <img className="watchbtn__logo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
       <span className="watchbtn__ext" aria-hidden="true">↗</span>
     </a>
   )
