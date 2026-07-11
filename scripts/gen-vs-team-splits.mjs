@@ -1,7 +1,9 @@
 // Regenerates public/data/vs-team-splits.json — for every player on an MLB
 // active roster, his CAREER regular-season stats against each opposing club plus
 // the stat line of the LAST game he played against them. Feeds the player page's
-// SPLITS VS TEAM card (src/api/vsTeamSplits.js just reads this file).
+// SPLITS VS TEAM card (src/api/vsTeamSplits.js just reads this file) and the
+// play-by-play/box-score vs-opponent callout (src/api/callout-notes.js), whose
+// rate comparisons read the hitter line's pa/bb/xbh component sums.
 //
 // This runs on a cron via .github/workflows/update-vs-team-splits.yml, NOT at
 // request time. Building it is expensive: the API's vs-team split types return
@@ -229,7 +231,7 @@ async function buildPlayerVs(personId, group, teamAbbr) {
       if (!b) {
         b = { last: null, sums: isPitcher
           ? { g: 0, outs: 0, er: 0, k: 0, bb: 0 }
-          : { g: 0, ab: 0, h: 0, hr: 0, rbi: 0, bb: 0, hbp: 0, sf: 0, tb: 0 } }
+          : { g: 0, pa: 0, ab: 0, h: 0, d: 0, t: 0, hr: 0, rbi: 0, bb: 0, hbp: 0, sf: 0, tb: 0 } }
         buckets.set(oppId, b)
       }
       if (isPitcher) {
@@ -240,8 +242,11 @@ async function buildPlayerVs(personId, group, teamAbbr) {
         b.sums.bb += num(st.baseOnBalls)
       } else {
         b.sums.g += num(st.gamesPlayed)
+        b.sums.pa += num(st.plateAppearances)
         b.sums.ab += num(st.atBats)
         b.sums.h += num(st.hits)
+        b.sums.d += num(st.doubles)
+        b.sums.t += num(st.triples)
         b.sums.hr += num(st.homeRuns)
         b.sums.rbi += num(st.rbi)
         b.sums.bb += num(st.baseOnBalls)
@@ -264,9 +269,11 @@ async function buildPlayerVs(personId, group, teamAbbr) {
   const vs = {}
   for (const [oppId, b] of buckets) {
     const s = b.sums
+    // `pa`/`bb`/`xbh` feed the vs-opponent callout's rate comparisons (see
+    // src/api/callout-notes.js) — the player-page card doesn't read them.
     const car = isPitcher
       ? { g: s.g, ip: outsToIp(s.outs), era: eraOf(s.er, s.outs), k: s.k, bb: s.bb }
-      : { g: s.g, ab: s.ab, h: s.h, avg: avgOf(s.h, s.ab), hr: s.hr, rbi: s.rbi, ops: opsOf(s) }
+      : { g: s.g, pa: s.pa, ab: s.ab, h: s.h, avg: avgOf(s.h, s.ab), hr: s.hr, xbh: s.d + s.t + s.hr, rbi: s.rbi, bb: s.bb, ops: opsOf(s) }
     vs[oppId] = { car, last: b.last }
   }
   return vs
