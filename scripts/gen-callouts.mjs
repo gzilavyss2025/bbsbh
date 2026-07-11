@@ -42,6 +42,18 @@
 //      vs-opponent note (from vs-team-splits) compares against — batting
 //      average, HR share, extra-base share, walk rate — so that note only
 //      fires when facing this opponent is actually unusual for him.
+//   9. Milestone watch — for any rostered hitter or pitcher within a single
+//      game's plausible reach of a round career-total milestone (hits, HR,
+//      RBI, runs, SB, doubles for hitters; wins, strikeouts, saves for
+//      pitchers), the nearest one ("4 hits shy of 2,000"). Shares its
+//      threshold table + distance math (MILESTONE_DEFS/nearestMilestone) with
+//      the player page's forward-looking MILESTONE WATCH line
+//      (src/api/person.js), just gated to the tighter `gameGate` distance
+//      instead of that page's wider `window` — see MILESTONE_DEFS's own
+//      comment for why the two windows differ. Read off the same `career`
+//      stat type already fetched for #8 (hitters) / a new career fetch added
+//      to pitcherEnrich (pitchers) — no extra request for hitters, one more
+//      field on the existing pitcher request.
 //
 // WHY a nightly precompute (the war.js / minors-leaders.js build-time pattern,
 // docs/data-enrichment.md §5) rather than live: scoped to the NEXT day's teams
@@ -74,6 +86,7 @@ import {
   PITCHING_CATEGORIES,
 } from '../src/api/teamLeaders.js'
 import { HIT_CATEGORY_KEYS } from '../src/api/callout-notes.js'
+import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
@@ -461,7 +474,42 @@ async function hitterEnrich(personId) {
       }
     : null
 
-  return { onBase, stolenBase, homerW: hw, homerL: hl, seasonLine, careerLine }
+  // Milestone watch (family #9) — the same `cSt` career stat object already
+  // fetched above, checked against the hitting half of MILESTONE_DEFS at the
+  // tight single-game-plausible `gameGate` (not the player page's wider
+  // `window`). Nearest one only, or null.
+  const milestone = cSt ? nearestHitterMilestone(cSt) : null
+
+  return { onBase, stolenBase, homerW: hw, homerL: hl, seasonLine, careerLine, milestone }
+}
+
+// The nearest milestone (any hitting stat family) a raw career stat object
+// (`cSt`, the API's own field names) is within single-game-plausible reach
+// of, or null. Shared field-name mapping between MILESTONE_DEFS's
+// aggregateSplits()-shaped keys (hits/homeRuns/rbi/runs/stolenBases/doubles —
+// the same names the raw API stat object already uses for these fields) and
+// `cSt` — no translation needed, they line up.
+function nearestHitterMilestone(cSt) {
+  return MILESTONE_DEFS.filter((d) => d.group === 'hitting')
+    .map((d) => {
+      const m = nearestMilestone(cSt[d.stat], d.thresholds, d.gameGate)
+      return m && { ...m, stat: d.stat, label: d.label }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.remaining - b.remaining)[0] ?? null
+}
+
+// Pitching counterpart to nearestHitterMilestone — same shared table, the
+// pitching field names (wins/strikeOuts/saves) also line up 1:1 with the raw
+// API stat object's own names.
+function nearestPitcherMilestone(cSt) {
+  return MILESTONE_DEFS.filter((d) => d.group === 'pitching')
+    .map((d) => {
+      const m = nearestMilestone(cSt[d.stat], d.thresholds, d.gameGate)
+      return m && { ...m, stat: d.stat, label: d.label }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.remaining - b.remaining)[0] ?? null
 }
 
 // A hitter's season situational splits (RISP, vs-L, vs-R), straight from the
@@ -533,11 +581,14 @@ async function birthdayLine(personId, birthDate, debutDate) {
 // number the API already aggregates.
 async function pitcherEnrich(personId) {
   const data = await getJson(
-    `/api/v1/people/${personId}/stats?stats=gameLog&group=pitching&season=${season}`,
+    // `career` rides along for the milestone-watch check (family #9) — one
+    // request, no extra fetch, same pattern as hitterEnrich's gameLog,career.
+    `/api/v1/people/${personId}/stats?stats=gameLog,career&group=pitching&season=${season}`,
   )
-  const rows = (data.stats?.[0]?.splits ?? [])
-    .filter((s) => s.date && s.date <= asOf)
-    .sort((a, b) => (a.date < b.date ? 1 : -1)) // newest first
+  const rows = (data.stats ?? [])
+    .find((b) => b.type?.displayName === 'gameLog')
+    ?.splits?.filter((s) => s.date && s.date <= asOf)
+    .sort((a, b) => (a.date < b.date ? 1 : -1)) ?? [] // newest first
 
   let homeW = 0, homeL = 0, awayW = 0, awayL = 0
   let sixIpW = 0, sixIpL = 0
@@ -566,6 +617,12 @@ async function pitcherEnrich(personId) {
   }
 
   const homeAwayGames = homeW + homeL + awayW + awayL
+
+  // Milestone watch (family #9) — same shared table as the hitter side, the
+  // pitching career stat carried alongside the gameLog fetch above.
+  const cSt = (data.stats ?? []).find((b) => b.type?.displayName === 'career')?.splits?.[0]?.stat
+  const milestone = cSt ? nearestPitcherMilestone(cSt) : null
+
   return {
     homeAway:
       homeAwayGames >= STARTER_MIN_GAMES ? { home: `${homeW}-${homeL}`, away: `${awayW}-${awayL}` } : null,
@@ -573,6 +630,7 @@ async function pitcherEnrich(personId) {
     tenK,
     scorelessStreak,
     recentAppearances,
+    milestone,
   }
 }
 
@@ -703,6 +761,7 @@ for (const g of games) {
   const homerRecords = {}
   const situational = {}
   const hitterLines = {}
+  const milestones = {}
   const gameHitterIds = [
     ...(hitterIdsByTeam.get(awayId) ?? []),
     ...(hitterIdsByTeam.get(homeId) ?? []),
@@ -724,6 +783,7 @@ for (const g of games) {
       if (e.seasonLine || e.careerLine) {
         hitterLines[id] = { season: e.seasonLine ?? null, career: e.careerLine ?? null }
       }
+      if (e.milestone) milestones[id] = e.milestone
     }
     const sit = situationalById.get(id)
     if (sit && (sit.risp || sit.vl || sit.vr)) situational[id] = sit
@@ -751,6 +811,7 @@ for (const g of games) {
     if (e.scorelessStreak > 0) entry.scorelessStreak = e.scorelessStreak
     if (e.recentAppearances > 0) entry.recentAppearances = e.recentAppearances
     if (Object.keys(entry).length > 0) starterRecords[id] = entry
+    if (e.milestone) milestones[id] = e.milestone
   }
 
   // Anyone on either roster (hitter or pitcher) whose birthday IS this
@@ -777,6 +838,7 @@ for (const g of games) {
     situational,
     hitterLines,
     starterRecords,
+    milestones,
     birthdays,
     birthdayStats,
     teamRecords: {

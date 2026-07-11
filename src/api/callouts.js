@@ -50,9 +50,26 @@ export async function fetchCallouts(urlDate) {
 //     starterRecords:{ [pitcherId]: { homeAway?:{home,away}, sixIp?, tenK?,
 //       cgShutout?, scorelessStreak?, recentAppearances? } } — one entry per
 //       ROSTERED pitcher on either club, not just the day's probable starters,
+//     milestones:{ [playerId]: { stat, label, value, threshold, remaining } }
+//       — the nearest round career-total milestone (see MILESTONE_DEFS,
+//       src/api/person.js) any rostered hitter or pitcher is within a single
+//       game's plausible reach of, for the lineup-staging pill,
 //     teamRecords:{ away:{extraInning,oneRun,scoringFirst,opponentScoringFirst,
 //       leadAfter:{[inning]:'W-L'}, runsScored:{[bucket]:'W-L'},
 //       runsAllowedByInning:{[inning]:'W-L'}, comeback}, home:{…} } }
 export function calloutsForGame(data, gamePk) {
   return data?.games?.[gamePk] ?? null
+}
+
+// The lineup-staging pill text for one player, or null when he's not within
+// plausible reach of a milestone tonight (no bundle, MiLB game, or simply not
+// close). Takes the already-resolved per-game bundle (`calloutsForGame`'s
+// return — the same shape GameView threads down as `gameCallouts`/`callouts`
+// to InningViewer/BoxScore), not the raw fetched data + gamePk. "4 H shy of
+// 2,000 for his career" — see MILESTONE_DEFS for the stat/label table.
+export function milestoneTextFor(bundle, playerId) {
+  const m = bundle?.milestones?.[playerId]
+  if (!m) return null
+  const label = m.remaining === 1 ? m.label.replace(/s$/, '') : m.label
+  return `${m.remaining} ${label} shy of ${m.threshold.toLocaleString('en-US')} for his career`
 }

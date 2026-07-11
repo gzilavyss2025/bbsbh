@@ -270,6 +270,11 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             {block.register && <CareerRegister register={block.register} />}
+            {block.milestones.map((m) => (
+              <p key={m.stat} className="hint reg-milestone">
+                {m.value.toLocaleString('en-US')} {m.label} — {m.remaining} shy of {m.threshold.toLocaleString('en-US')}
+              </p>
+            ))}
 
             {block.splits && (
               <>

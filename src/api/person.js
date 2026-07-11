@@ -249,6 +249,7 @@ export function aggregateSplits(splits, group) {
   return {
     atBats: ab,
     hits: h,
+    doubles: sum('doubles'),
     homeRuns: sum('homeRuns'),
     rbi: sum('rbi'),
     runs: sum('runs'),
@@ -518,6 +519,74 @@ export function firstMilestoneSeasons(ybySplits, defs, throughYear) {
     if (earliest !== null) seasons.add(earliest)
   }
   return [...seasons].sort((a, b) => a - b)
+}
+
+// ---------------------------------------------------------------------------
+// Milestone watch — forward-looking countdown to a round career-total
+// milestone, the complement to "Firsts" above (which looks backward). Reads
+// off the same aggregateSplits()-shaped stat object every other section of
+// this file uses — `hits`/`homeRuns`/`rbi`/`runs`/`stolenBases`/`doubles` for
+// hitting, `wins`/`strikeOuts`/`saves` for pitching. `window` is the
+// player-page "worth mentioning" distance (wide — weeks out is fine);
+// `gameGate` is the tighter single-game-plausible distance the nightly
+// callouts precompute (gen-callouts.mjs) uses for its lineup-staging note.
+// Both windows are a first cut — hits/HR/300-win/3000-K are well-worn
+// milestone conventions, RBI/runs/SB/doubles less so.
+// ---------------------------------------------------------------------------
+
+export const MILESTONE_DEFS = [
+  { stat: 'hits', group: 'hitting', label: 'H', thresholds: [1000, 1500, 2000, 2500, 3000, 3500, 4000], window: 50, gameGate: 4 },
+  { stat: 'homeRuns', group: 'hitting', label: 'HR', thresholds: [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 700, 762], window: 15, gameGate: 2 },
+  { stat: 'rbi', group: 'hitting', label: 'RBI', thresholds: [1000, 1500, 2000], window: 50, gameGate: 4 },
+  { stat: 'runs', group: 'hitting', label: 'R', thresholds: [1000, 1500, 2000], window: 50, gameGate: 4 },
+  { stat: 'stolenBases', group: 'hitting', label: 'SB', thresholds: [300, 400, 500], window: 20, gameGate: 2 },
+  { stat: 'doubles', group: 'hitting', label: '2B', thresholds: [400, 500, 600], window: 20, gameGate: 2 },
+  { stat: 'wins', group: 'pitching', label: 'W', thresholds: [100, 150, 200, 250, 300], window: 5, gameGate: 1 },
+  { stat: 'strikeOuts', group: 'pitching', label: 'K', thresholds: [1000, 1500, 2000, 2500, 3000, 3500, 4000], window: 50, gameGate: 8 },
+  { stat: 'saves', group: 'pitching', label: 'SV', thresholds: [200, 300, 400, 500, 600], window: 15, gameGate: 1 },
+]
+
+// The smallest threshold still ahead of `value`, only when within `window` of
+// it — otherwise null (too far out to be worth flagging, or already passed
+// every threshold in the table).
+export function nearestMilestone(value, thresholds, window) {
+  const v = num(value)
+  const next = (thresholds ?? []).find((t) => t > v)
+  if (next == null) return null
+  const remaining = next - v
+  return remaining <= window ? { threshold: next, value: v, remaining } : null
+}
+
+// Every stat family in `group` currently within striking distance of its
+// nearest milestone, nearest-first. Always an array — [] (never null) when
+// nothing's in range, so callers can render unconditionally with no
+// empty-state branch, matching this file's convention elsewhere.
+export function milestoneWatchView(stat, group) {
+  if (!stat) return []
+  return MILESTONE_DEFS.filter((d) => d.group === group)
+    .map((d) => {
+      const m = nearestMilestone(stat[d.stat], d.thresholds, d.window)
+      return m && { ...m, stat: d.stat, label: d.label }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.remaining - b.remaining)
+}
+
+// The MLB career total AS OF the page's spoiler cutoff — every full season
+// strictly before `currentSeason` (immutable, already fetched via
+// `mlbSplits`) summed with the date-cut current-season stat (`tileStat`),
+// rather than the API's own `stats=career` type (see `careerSplits` in
+// loadPlayer.js), which takes no startDate/endDate and always returns the
+// player's LIVE up-to-the-minute total. Using that live total for a
+// countdown would leak whether a milestone was reached in a later game the
+// user hasn't revealed yet when viewing an old game's player-page link
+// (`asOf` set). Null when the player hasn't appeared at the MLB level this
+// season (`tileSportId !== 1`) — MiLB action doesn't count toward an MLB
+// milestone, and a stale prior-MLB total would misrepresent "as of now."
+export function mlbCareerThroughCutoff({ mlbSplits, tileStat, tileSportId, currentSeason }, group) {
+  if (tileSportId !== 1) return null
+  const priorSeasons = (mlbSplits ?? []).filter((s) => Number(s.season) < currentSeason)
+  return aggregateSplits([...priorSeasons, { stat: tileStat }], group)
 }
 
 // ---------------------------------------------------------------------------
@@ -1365,6 +1434,13 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
   // MLB (an up-and-down big leaguer's tiles resolve to MLB even while his live
   // club is a MiLB affiliate), else the tile shows a dash.
   const tileWar = currentSportId === 1 ? warByYear[currentSeason] ?? null : null
+  // Milestone watch reads a cutoff-safe career total (mlbCareerThroughCutoff),
+  // deliberately NOT `career` above — see that function's header for why the
+  // API's live career total would leak a not-yet-revealed milestone.
+  const milestoneStat = mlbCareerThroughCutoff(
+    { mlbSplits: mlbYbySplits, tileStat: tile, tileSportId: currentSportId, currentSeason },
+    group,
+  )
   return {
     group,
     role,
@@ -1391,6 +1467,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
       currentStat: tile, currentSeason, currentSportId, careerStat: career, warByYear,
     }),
+    milestones: milestoneWatchView(milestoneStat, group),
   }
 }
 
