@@ -153,13 +153,14 @@ export function useGameData(game) {
   // Season-context call-outs for the play-by-play — the leader / streak /
   // situational-record notes, precomputed nightly to a static per-date file (see
   // api/callouts.js). Spoiler-free season aggregates (no seal), same eager tier
-  // as prospect badges. MLB-only: the file only covers the majors, so a MiLB
-  // gamePk simply resolves to no bundle. Keyed on gamePk, like the other
-  // feed-derived static fetches — a live Refresh never re-pulls it.
+  // as prospect badges. Covers MLB and the four full-season MiLB levels alike
+  // (the file carries every level's slate since the phase-3 generator; a MiLB
+  // gamePk in an older file simply resolves to no bundle). Keyed on gamePk,
+  // like the other feed-derived static fetches — a live Refresh never
+  // re-pulls it.
   const callouts = useAsyncOnFeed(
     feed,
     async (f) => {
-      if (game.sportId !== SPORT_IDS.MLB) return null
       const api = f.gameData?.datetime?.officialDate
       return api ? fetchCallouts(apiDateToUrl(api)) : null
     },

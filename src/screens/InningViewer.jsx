@@ -316,7 +316,7 @@ export function InningViewer({
                 { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
                 { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
               ]}
-              starterRecords={callouts?.starterRecords}
+              bundle={callouts}
             />
             {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">

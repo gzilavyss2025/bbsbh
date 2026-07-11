@@ -60,10 +60,14 @@ export default defineConfig({
         // and is only ever read from the umpire detail page. Same for
         // game-notes.json — an append-only archive of press-notes PDF links that
         // grows every game day (see scripts/gen-game-notes.mjs).
+        // Same for the per-date callouts bundles — since they cover the MiLB
+        // levels too each day's file runs ~0.5-1 MB, and the folder holds ~10
+        // days of them; only the day being scored is ever read.
         globIgnores: [
           '**/data/vs-team-splits.json',
           '**/data/umpires.json',
           '**/data/game-notes.json',
+          '**/data/callouts/*.json',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -96,6 +100,14 @@ export default defineConfig({
             // button still resolves offline from the last good fetch. Just PDF
             // links (title/date/url) — no live score, so this is spoiler-safe.
             urlPattern: ({ url }) => url.pathname === '/data/game-notes.json',
+            handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // The per-date callouts bundles (excluded from precache above).
+            // Season aggregates only — spoiler-free — so NetworkFirst is safe:
+            // fresh nightly copy when online, last good copy at the park.
+            urlPattern: ({ url }) => /^\/data\/callouts\/\d{8}\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
           },

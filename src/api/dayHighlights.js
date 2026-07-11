@@ -124,21 +124,38 @@ function winProbSignals(winProb, winnerIsHome) {
   return signals
 }
 
-function marginSignals(awayR, homeR, extraInnings) {
+// Margin/length storylines, written as prose with the clubs named — "The
+// Brewers edged the Cubs by a single run" reads like the other signals'
+// narrative headlines, where the old label-style "One-run game" read like a
+// filing tag. Takes both box sides (not bare run totals) for the names.
+function marginSignals(away, home, extraInnings) {
   const signals = []
-  const margin = Math.abs(awayR - homeR)
+  const margin = Math.abs(away.line.r - home.line.r)
+  const winner = away.line.r > home.line.r ? away : home
+  const loser = winner === away ? home : away
+  const name = (side) => side.clubName || side.abbreviation || side.teamName
   if (extraInnings > 0) {
     signals.push({
       key: 'extras',
       tier: TIER.STORY,
       points: Math.min(20 + 8 * extraInnings, 60),
-      text: `${9 + extraInnings}-inning thriller`,
+      text: `The ${name(winner)} outlasted the ${name(loser)} in ${9 + extraInnings} innings`,
     })
   }
   if (margin === 1) {
-    signals.push({ key: 'oneRun', tier: TIER.CLOSE, points: 18, text: 'One-run game' })
+    signals.push({
+      key: 'oneRun',
+      tier: TIER.CLOSE,
+      points: 18,
+      text: `The ${name(winner)} edged the ${name(loser)} by a single run`,
+    })
   } else if (margin >= 8) {
-    signals.push({ key: 'blowout', tier: TIER.CLOSE, points: -10, text: 'Lopsided final' })
+    signals.push({
+      key: 'blowout',
+      tier: TIER.CLOSE,
+      points: -10,
+      text: `A ${margin}-run laugher for the ${name(winner)}`,
+    })
   }
   return signals
 }
@@ -200,7 +217,7 @@ export function rankDayHighlights(entries) {
         multiHrSignal(feed),
         eliteGameScoreSignal(feed),
         ...winProbSignals(winProb, winnerIsHome),
-        ...marginSignals(box.away.line.r, box.home.line.r, extraInnings),
+        ...marginSignals(box.away, box.home, extraInnings),
       ].filter(Boolean)
 
       const tier = signals.length ? Math.min(...signals.map((s) => s.tier)) : 4

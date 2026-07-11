@@ -3,8 +3,9 @@
 // atbat entry (see computeHalfInningFeed) plus a precomputed callouts bundle
 // (see api/callouts.js) and returns an ordered list of notes the card renders.
 // Kept pure + separate so the trigger rules and wording are checkable and
-// PlayByPlay.jsx stays a view. Empty when there's no bundle (MiLB /
-// un-generated game), so the card renders exactly as before.
+// PlayByPlay.jsx stays a view. Empty when there's no bundle (an un-generated
+// date, or a MiLB game in a file predating the MiLB expansion), so the card
+// renders exactly as before.
 //
 // Each note is `{ text, personId, side, oppSide, kind, score, dedupeKey }` —
 // `personId` (nullable) is who the note is ABOUT, for a headshot; `side`/
@@ -30,7 +31,6 @@
 import {
   firstRunPlay,
   firstPAIndexByBatter,
-  timesFacingPitcher,
   NON_PA_EVENT_TYPES,
 } from './playbyplay.js'
 import { personNameParts } from './select.js'
@@ -90,12 +90,15 @@ const SCORE_BASE = {
   sbStreak: 35,
   runsScored: 35,
   runsAllowed: 35,
+  oneRun: 35,
+  extraInnings: 35,
+  ttoSplit: 35, // the pre-half order-turns-over card WITH a season split behind it
   comeback: 30,
   scoringFirst: 30,
   inningRunDiff: 30,
   risp: 25,
   platoon: 25,
-  tto: 15,
+  tto: 20, // …and the plain trip-fact fallback without one
 }
 const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 // How far a W-L record sits from .500, 0–0.5 — the lopsidedness bonus scale.
@@ -157,7 +160,9 @@ export function gameResult(feed) {
 // only ever counts plays the reader has also revealed. REVEAL-ONLY, same rule
 // as the other whole-feed walks here (results give away hits/runs).
 //
-// Returns { byPlay: Map(atBatIndex -> snapshot), reached: Set(batterId) }:
+// Returns { byPlay: Map(atBatIndex -> snapshot), reached: Set(batterId),
+//           sbGame: Map(runnerId -> { n, firstInning, beforeCaught }),
+//           caught: Map(runnerId -> inning) }:
 //   snapshot = {
 //     cats: { hr/triples/doubles/bb_b/hbp: n } — the play's own batter's counts,
 //     reachedBefore / reachedHere — his on-base state (streak extension),
@@ -165,10 +170,13 @@ export function gameResult(feed) {
 //     sb: Map(runnerId -> { n, caughtBefore }) — steals credited on THIS play,
 //   }
 // `reached` is every batter who got aboard at any point (the roll-up's
-// streak-ended check). Steals are counted off each play's own playEvents —
-// the same path the SB leader note triggers on — so the two can't disagree;
-// a steal logged as its own top-level play (no playEvents entry) is simply
-// not folded in, an undercount never an overclaim.
+// streak-ended check); `sbGame`/`caught` are each runner's whole-game steal
+// tally (with the inning of his first bag, and how many came before any CS)
+// and the inning he was first caught — the roll-up's narrative steal wording.
+// Steals are counted off each play's own playEvents — the same path the SB
+// leader note triggers on — so the two can't disagree; a steal logged as its
+// own top-level play (no playEvents entry) is simply not folded in, an
+// undercount never an overclaim.
 export function computeCalloutProgress(feed) {
   const byPlay = new Map()
   const catByBatter = new Map() // batterId -> { [cat]: n }
@@ -176,6 +184,8 @@ export function computeCalloutProgress(feed) {
   const kByPitcher = new Map()
   const sbByRunner = new Map()
   const caughtRunners = new Set()
+  const sbGame = new Map() // runnerId -> { n, firstInning, beforeCaught }
+  const caught = new Map() // runnerId -> inning of his first CS tonight
 
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     const idx = play.about?.atBatIndex
@@ -211,8 +221,13 @@ export function computeCalloutProgress(feed) {
         const n = (sbByRunner.get(rid) ?? 0) + 1
         sbByRunner.set(rid, n)
         sbHere.set(rid, { n, caughtBefore })
+        const g = sbGame.get(rid) ?? { n: 0, firstInning: play.about?.inning ?? null, beforeCaught: 0 }
+        g.n = n
+        if (!caughtBefore) g.beforeCaught = n
+        sbGame.set(rid, g)
       } else if (CS_EVENTS.has(et)) {
         caughtRunners.add(rid)
+        if (!caught.has(rid)) caught.set(rid, play.about?.inning ?? null)
       }
     }
 
@@ -225,7 +240,7 @@ export function computeCalloutProgress(feed) {
       sb: sbHere,
     })
   }
-  return { byPlay, reached }
+  return { byPlay, reached, sbGame, caught }
 }
 
 // --- the vs-opponent career note ---------------------------------------------
@@ -385,7 +400,7 @@ function scoringFirstNote(recStr, side, teamName, opponentScored) {
 
 export function buildCallouts(
   entry,
-  { bundle, firstRun, firstPA, battingSide, vsTeam, timesFacing, progress } = {},
+  { bundle, firstRun, firstPA, battingSide, vsTeam, progress } = {},
 ) {
   if (!bundle) return []
   const notes = []
@@ -419,6 +434,12 @@ export function buildCallouts(
         personId: entry.batterId,
         side: battingSide,
         kind: 'leader',
+        // cat/inGame/total feed the box-score roll-up's narrative rewrite
+        // ("Doubled twice tonight — now 16 on the season…"), same idea as
+        // `rec` on the record notes.
+        cat: trig.cat,
+        inGame,
+        total,
         dedupeKey: `leader-${trig.cat}-${entry.batterId}`,
         score: clampScore(SCORE_BASE.leader + Math.min(15, (total ?? entering ?? 0) / 4)),
       })
@@ -461,6 +482,9 @@ export function buildCallouts(
         personId: entry.pitcher.id,
         side: otherSide(battingSide),
         kind: 'leader',
+        cat: 'so_p',
+        inGame,
+        total,
         dedupeKey: `leaderK-${entry.pitcher.id}`,
         score: clampScore(SCORE_BASE.leader + Math.min(15, (total ?? entering ?? 0) / 12)),
       })
@@ -486,6 +510,9 @@ export function buildCallouts(
         personId: bn.runnerId,
         side: battingSide,
         kind: 'leader',
+        cat: 'sb',
+        inGame: sbSnap?.n ?? 0,
+        total,
         dedupeKey: `leaderSb-${bn.runnerId}`,
         score: clampScore(SCORE_BASE.leader + Math.min(15, (total ?? entering ?? 0) / 4)),
       })
@@ -497,6 +524,7 @@ export function buildCallouts(
         personId: bn.runnerId,
         side: battingSide,
         kind: 'sbStreak',
+        run, // the entering streak, for the roll-up's narrative rewrite
         dedupeKey: `sbstreak-${bn.runnerId}`,
         score: clampScore(SCORE_BASE.sbStreak + Math.min(10, run + sbSnap.n - 4)),
       })
@@ -514,6 +542,8 @@ export function buildCallouts(
       personId: entry.batterId,
       side: battingSide,
       kind: 'onBaseExtended',
+      streak: s.onBase + 1,
+      start: s.onBaseStart ?? null, // when the run began, for the roll-up's prose
       dedupeKey: `onbase-${entry.batterId}`,
       score: clampScore(SCORE_BASE.onBaseExtended + Math.min(15, s.onBase + 1 - 8)),
     })
@@ -538,6 +568,7 @@ export function buildCallouts(
         personId: entry.batterId,
         side: battingSide,
         kind: 'sbStreak',
+        run: s.stolenBase,
         dedupeKey: `sbstreak-${entry.batterId}`,
         score: clampScore(SCORE_BASE.sbStreak + Math.min(10, s.stolenBase - 4)),
       })
@@ -622,19 +653,9 @@ export function buildCallouts(
     }
   }
 
-  // Times-through-the-order: his 3rd (or later) look at this same pitcher
-  // tonight — the point where the "TTO penalty" kicks in (see
-  // api/playbyplay.js's timesFacingPitcher).
-  const trip = timesFacing?.get(entry.atBatIndex)
-  if (trip >= 3) {
-    notes.push({
-      text: `Seeing ${entry.pitcher?.last || 'him'} for the ${ordinal(trip)} time tonight`,
-      personId: entry.pitcher?.id ?? null,
-      side: otherSide(battingSide),
-      kind: 'tto',
-      score: clampScore(SCORE_BASE.tto),
-    })
-  }
+  // (The old per-play times-through-the-order note lived here — it repeated on
+  // every card of the half, so it's now the pre-half strip's single persistent
+  // card instead: see buildThirdTimeThroughNote below.)
 
   // This play scored the game's first run — two SEPARATE cards, one per club:
   // the scorer's record when scoring first, and the conceder's record when
@@ -658,11 +679,59 @@ export function buildCallouts(
 
 // Ordinal wording ("6th", "9th", "3rd"...) — shared by the checkpoint notes
 // (inning number), the folded-record phrasing ("the 2nd loss"), and the
-// times-through-the-order note above (trip number).
+// times-through-the-order card above (trip number).
 function ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd']
   const v = n % 100
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
+}
+
+// "2026-06-25" -> "6/25" — the season-scoped date the streak prose cites
+// ("a streak that began 6/25"). No year: every streak lives inside one season.
+const monthDay = (isoDate) =>
+  isoDate ? `${Number(isoDate.slice(5, 7))}/${Number(isoDate.slice(8, 10))}` : ''
+
+// A batter's official at-bats tonight, from the live boxscore — read only by
+// the Final-only streak-snapped prose, which runs inside the box score's seal.
+function tonightAtBats(feed, side, personId) {
+  const ab = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${personId}`]?.stats?.batting?.atBats
+  return typeof ab === 'number' ? ab : null
+}
+
+// The narrative, tonight-included restatement of a leader note for the
+// box-score roll-up ("Struck out 7 tonight and leads the Braves with 117
+// strikeouts this season") — only built once the game is Final, from the
+// `cat`/`inGame`/`total` fields the play-time note carried along.
+const timesWord = (n) => (n === 2 ? 'twice' : `${n} times`)
+const LEADER_VERB = {
+  hr: 'Homered',
+  triples: 'Tripled',
+  doubles: 'Doubled',
+  bb_b: 'Walked',
+  hbp: 'Was hit by a pitch',
+}
+const LEADER_NOUN = {
+  hr: 'home runs',
+  triples: 'triples',
+  doubles: 'doubles',
+  bb_b: 'walks',
+  hbp: 'times hit by a pitch',
+  sb: 'steals',
+}
+function leaderTonightText(n, teamName) {
+  if (n.cat === 'so_p') {
+    const tonight = n.inGame === 1 ? 'a batter' : n.inGame
+    return `Struck out ${tonight} tonight and leads the ${teamName} with ${n.total} strikeouts this season`
+  }
+  const noun = LEADER_NOUN[n.cat] ?? 'of those'
+  if (n.cat === 'sb') {
+    const stole = n.inGame === 1 ? 'Stole a base' : `Stole ${n.inGame} bases`
+    return `${stole} tonight — that's ${n.total} this season, most on the ${teamName}`
+  }
+  const verb = LEADER_VERB[n.cat] ?? 'Did it'
+  return n.inGame === 1
+    ? `${verb} tonight for No. ${n.total} this season — he leads the ${teamName} in ${noun}`
+    : `${verb} ${timesWord(n.inGame)} tonight — now ${n.total} this season, most on the ${teamName}`
 }
 
 // Cumulative runs each side has scored through each inning, stopping at the
@@ -757,6 +826,76 @@ export function buildLeadingAfterNote(bundle, side, inning) {
     kind: 'leadAfterLive',
     dedupeKey: `leadAfterLive-${side}-${inning}`,
     score: clampScore(SCORE_BASE.leadHeld + 40 * skew(rec.w, rec.l)),
+  }
+}
+
+// --- times-through-the-order --------------------------------------------------
+// "Batters see Imanaga a 3rd time this inning — they're hitting .444 off him
+// the 3rd time through this season (.242 the 1st time)" — the pre-half strip's
+// persistent card for the half where the order turns over on the starter,
+// replacing the old per-play note that repeated the same fact on every card of
+// the half. The season split comes from the bundle's playLog-derived
+// starterRecords[pid].tto (probable starters only — see gen-callouts.mjs);
+// without one the card still fires as the plain trip fact.
+//
+// CALLER-GATED like buildLeadingAfterNote: it reads plate appearances from
+// this side's PREVIOUS halves to count who has faced the pitcher how often, so
+// the caller (prehalf-callouts.js) must not invoke it until those halves are
+// revealed. Fires only while the side's own STARTER is still pitching — the
+// last pitcher this side saw must be the first — since a reliever's 3rd trip
+// is vanishingly rare and the bundle's split belongs to starters anyway.
+const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
+export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const pitchingSide = otherSide(battingSide)
+  let firstPitcher = null
+  let lastPitcher = null
+  const counts = new Map() // `${batterId}-${pitcherId}` -> times faced
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const about = p.about ?? {}
+    // Same half TYPE only (this side batting), strictly before this inning.
+    if (about.halfInning !== half || !(about.inning < inning)) continue
+    if (NON_PA_EVENT_TYPES.has(p.result?.eventType)) continue
+    const bid = p.matchup?.batter?.id
+    const pid = p.matchup?.pitcher?.id
+    if (bid == null || pid == null) continue
+    if (firstPitcher == null) firstPitcher = pid
+    lastPitcher = pid
+    const key = `${bid}-${pid}`
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+  }
+  if (lastPitcher == null || lastPitcher !== firstPitcher) return null
+
+  let maxTrips = 0
+  for (const [key, n] of counts) {
+    if (key.endsWith(`-${lastPitcher}`) && n > maxTrips) maxTrips = n
+  }
+  if (maxTrips < 2) return null // the order hasn't turned over twice yet
+
+  const trip = maxTrips + 1 // the look the top of the order is now getting
+  const { last } = personNameParts(feed?.gameData?.players?.[`ID${lastPitcher}`] ?? {})
+  const who = last || 'the starter'
+  const tto = bundle?.starterRecords?.[lastPitcher]?.tto
+  const t1 = tto?.[1]
+  const t3 = tto?.[3]
+  if (t1?.avg && t3?.avg && t3.ab >= TTO_MIN_AB) {
+    const diff = Math.abs(Number(t3.avg) - Number(t1.avg))
+    return {
+      text: `Batters see ${who} a ${ordinal(trip)} time this inning — they're hitting ${t3.avg} off him the 3rd time through this season (${t1.avg} the 1st time)`,
+      personId: lastPitcher,
+      side: pitchingSide,
+      kind: 'tto',
+      dedupeKey: `tto-${pitchingSide}-${lastPitcher}`,
+      score: clampScore(SCORE_BASE.ttoSplit + Math.min(15, diff * 100)),
+    }
+  }
+  return {
+    text: `The order turns over — batters see ${who} a ${ordinal(trip)} time this inning`,
+    personId: lastPitcher,
+    side: pitchingSide,
+    kind: 'tto',
+    dedupeKey: `tto-${pitchingSide}-${lastPitcher}`,
+    score: clampScore(SCORE_BASE.tto),
   }
 }
 
@@ -896,6 +1035,58 @@ export function buildComebackNote(feed, bundle, result) {
   }
 }
 
+// --- close-game records (one-run / extra-inning) ---------------------------------
+// "Just the 4th loss in 19 one-run games for the Brewers (now 15-4)" — the
+// standings splitRecords (one-run and extra-inning W-L) folded with tonight's
+// result, fired only when tonight actually WAS that kind of game. Roll-up
+// only and Final-only, like the other result-aware families: whether the game
+// ended one-run or went to extras is itself the outcome. MLB-only data (the
+// precompute reads MLB standings), so MiLB bundles simply never fire these.
+export function buildCloseGameNotes(feed, bundle, result) {
+  if (!bundle || !result?.final) return []
+  const a = feed?.liveData?.linescore?.teams?.away?.runs
+  const h = feed?.liveData?.linescore?.teams?.home?.runs
+  if (typeof a !== 'number' || typeof h !== 'number') return []
+  const oneRun = Math.abs(a - h) === 1
+  const scheduled = feed?.liveData?.linescore?.scheduledInnings ?? 9
+  const extras = (feed?.liveData?.linescore?.innings?.length ?? 0) > scheduled
+  const notes = []
+  for (const side of ['away', 'home']) {
+    const teamName = bundle[side]?.name
+    if (!teamName) continue
+    const won = side === result.winnerSide
+    if (oneRun) {
+      const rec = parseRecord(bundle.teamRecords?.[side]?.oneRun)
+      if (rec) {
+        notes.push({
+          text: foldedRecordText(rec.w, rec.l, won, teamName, 'in one-run games'),
+          personId: null,
+          side,
+          oppSide: otherSide(side),
+          kind: 'oneRun',
+          dedupeKey: `oneRun-${side}`,
+          score: clampScore(SCORE_BASE.oneRun + 40 * skew(rec.w, rec.l)),
+        })
+      }
+    }
+    if (extras) {
+      const rec = parseRecord(bundle.teamRecords?.[side]?.extraInning)
+      if (rec) {
+        notes.push({
+          text: foldedRecordText(rec.w, rec.l, won, teamName, 'in extra innings'),
+          personId: null,
+          side,
+          oppSide: otherSide(side),
+          kind: 'extraInnings',
+          dedupeKey: `extraInnings-${side}`,
+          score: clampScore(SCORE_BASE.extraInnings + 40 * skew(rec.w, rec.l)),
+        })
+      }
+    }
+  }
+  return notes
+}
+
 // --- run differential by inning --------------------------------------------------
 // "The Brewers have outscored opponents 38-14 in the 7th this season" — from
 // the precompute's per-inning runs-for/against tallies (`inningRuns`). Shared
@@ -1015,7 +1206,6 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   const result = gameResult(feed)
   const firstRun = firstRunPlay(feed)
   const firstPA = firstPAIndexByBatter(feed)
-  const timesFacing = timesFacingPitcher(feed)
   const progress = computeCalloutProgress(feed)
 
   // Dedupe by dedupeKey (falling back to the text itself), LATEST wording
@@ -1055,35 +1245,95 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
       baserunningNotes,
     }
     for (const note of buildCallouts(entry, {
-      bundle, firstRun, firstPA, battingSide, vsTeam, timesFacing, progress,
+      bundle, firstRun, firstPA, battingSide, vsTeam, progress,
     })) {
       add(note)
     }
   }
 
-  // Result-aware rewrites of the per-play families that carried their record
-  // numbers along (see the two-tenses rule in the module header): once the
-  // game is decided, the entering record folds tonight in.
+  // Result-aware rewrites of the per-play families (see the two-tenses rule in
+  // the module header): once the game is decided, records fold tonight in and
+  // the count/streak notes restate themselves narratively, tonight's own
+  // events named ("Struck out 7 tonight…", "Stole a base in the 4th…").
+  const dropped = new Set() // ordered[] indices to leave out of the roll-up
   if (result.final) {
     for (const [i, n] of ordered.entries()) {
-      if (!n.rec) continue
       const teamName = n.side ? bundle[n.side]?.name : ''
-      if (!teamName) continue
-      const won = n.side === result.winnerSide
-      const when =
-        n.kind === 'homerRec' ? 'when he goes deep' : n.when ?? null
-      if (!when) continue
-      ordered[i] = { ...n, text: foldedRecordText(n.rec.w, n.rec.l, won, teamName, when) }
+
+      // Record notes ("W-L when …") fold tonight's result in.
+      if (n.rec && teamName) {
+        const won = n.side === result.winnerSide
+        const when = n.kind === 'homerRec' ? 'when he goes deep' : n.when ?? null
+        if (when) {
+          ordered[i] = { ...n, text: foldedRecordText(n.rec.w, n.rec.l, won, teamName, when) }
+        }
+        continue
+      }
+
+      // Leader notes fold in what he actually did tonight. A leader note with
+      // no in-game count means the category never fired tonight — it can only
+      // exist mid-rewrite for steals (below), so leave any such note alone.
+      if (n.kind === 'leader' && n.total != null && n.inGame > 0 && teamName) {
+        ordered[i] = { ...n, text: leaderTonightText(n, teamName) }
+        continue
+      }
+
+      // Steal-streak cards: only worth a roll-up spot when something happened
+      // on the bases tonight — a steal extends the run, a caught stealing ends
+      // it. The entering "has stolen N straight" card with no attempt is play-
+      // card staging, not a post-game insight.
+      if (n.kind === 'sbStreak' && n.personId != null) {
+        const run = n.run ?? 0
+        const game = progress.sbGame.get(n.personId)
+        const caughtInning = progress.caught.get(n.personId)
+        if (caughtInning != null) {
+          ordered[i] = {
+            ...n,
+            text: `Was caught stealing in the ${ordinal(caughtInning)}, ending a run of ${run + (game?.beforeCaught ?? 0)} straight steals`,
+            score: clampScore(SCORE_BASE.onBaseEnded + Math.min(10, run - 4)),
+          }
+        } else if (game?.n > 0) {
+          const stole =
+            game.n === 1 && game.firstInning != null
+              ? `Stole a base in the ${ordinal(game.firstInning)}`
+              : game.n === 1
+                ? 'Stole a base tonight'
+                : `Stole ${game.n} bases tonight`
+          ordered[i] = {
+            ...n,
+            text: `${stole} and has now stolen ${run + game.n} straight without being caught`,
+          }
+        } else {
+          dropped.add(i)
+        }
+        continue
+      }
+
+      // An extended on-base streak reads with its full arc once the night is
+      // in the books — how long, and since when.
+      if (n.kind === 'onBaseExtended' && n.streak && n.start) {
+        ordered[i] = {
+          ...n,
+          text: `Reached base again tonight — his on-base streak is now ${n.streak} straight games, dating to ${monthDay(n.start)}`,
+        }
+      }
     }
 
     // An on-base streak that got no knock all night is OVER — the flip side
-    // of the extends note, only knowable (and only tellable) post-game.
+    // of the extends note, only knowable (and only tellable) post-game. Told
+    // with tonight's line and the streak's starting date when we have them:
+    // "Went 0-for-3 tonight, snapping a 10-game on-base streak that began 6/25".
     for (const [idStr, s] of Object.entries(bundle.streaks ?? {})) {
       const id = Number(idStr)
       if (!s?.onBase || !firstPA.has(id) || progress.reached.has(id)) continue
       const battingSide = bundle.away && bundle.home ? sideOfBatter(feed, id) : null
+      const ab = battingSide != null ? tonightAtBats(feed, battingSide, id) : null
+      const began = s.onBaseStart ? ` that began ${monthDay(s.onBaseStart)}` : ''
       add({
-        text: `His ${s.onBase}-game on-base streak came to an end tonight`,
+        text:
+          isNum(ab) && ab > 0
+            ? `Went 0-for-${ab} tonight, snapping a ${s.onBase}-game on-base streak${began}`
+            : `His ${s.onBase}-game on-base streak came to an end tonight`,
         personId: id,
         side: battingSide,
         kind: 'onBaseEnded',
@@ -1115,6 +1365,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   add(buildRunsScoredNote(feed, bundle, result))
   add(buildRunsAllowedNote(feed, bundle, result))
   add(buildComebackNote(feed, bundle, result))
+  for (const note of buildCloseGameNotes(feed, bundle, result)) add(note)
 
   // Each club's single most lopsided inning-differential note (its signature
   // inning), tonight's runs in that inning folded in once decided. One per
@@ -1143,13 +1394,13 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   // letting it crowd out the rest of the card. The innings view is untouched:
   // there each note sits alone on the batter's own first-PA card, where
   // volume was never the problem.
-  const vsNotes = ordered.filter((n) => n.kind === 'vsTeam')
-  let keep = ordered
+  let keep = ordered.filter((_, i) => !dropped.has(i))
+  const vsNotes = keep.filter((n) => n.kind === 'vsTeam')
   if (vsNotes.length > VS_TEAM_ROLLUP_MAX) {
     const top = new Set(
       [...vsNotes].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, VS_TEAM_ROLLUP_MAX),
     )
-    keep = ordered.filter((n) => n.kind !== 'vsTeam' || top.has(n))
+    keep = keep.filter((n) => n.kind !== 'vsTeam' || top.has(n))
   }
 
   // Most impactful first — the whole point of the worthiness score. Ties keep
