@@ -250,7 +250,7 @@ export function GameView({ game, section, onSection }) {
 
 // The game's masthead: two grayscale marks — away on the left, home on the
 // right, an @ between — sized like the logos on the lineup pages, left-aligned
-// in the page header, with the game's date and a Watch link stacked
+// in the page header, with the game's date and a Watch link side by side,
 // right-aligned opposite them. Tapping a mark opens it enlarged for pencil
 // sketching. The date and the Watch link are both structural, not
 // score-revealing, so they render unconditionally (no seal).
