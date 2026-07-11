@@ -16,6 +16,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
+import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
@@ -218,6 +219,8 @@ export function PlayerPage({ id, asOf, sportId }) {
               </div>
             ))}
 
+            <StatcastPercentiles savant={block.savant} group={block.group} />
+
             {/* Career splits vs the club this player's team is next facing (a
                 finger-scrollable strip to pick a different opponent). Rendered in
                 the primary stat block only — between "Current season" and the
@@ -267,6 +270,11 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             {block.register && <CareerRegister register={block.register} />}
+            {block.milestones.map((m) => (
+              <p key={m.stat} className="hint reg-milestone">
+                {m.value.toLocaleString('en-US')} {m.label} — {m.remaining} shy of {m.threshold.toLocaleString('en-US')}
+              </p>
+            ))}
 
             {block.splits && (
               <>

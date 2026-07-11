@@ -170,6 +170,7 @@ export function GameView({ game, section, onSection }) {
           starterLines={starterLines.data}
           prospectsData={prospectsData}
           formerTeammatesData={formerTeammatesData}
+          callouts={gameCallouts}
           onNext={() => onSection('top1')}
           onReload={feedState.reload}
           loading={feedState.loading}
@@ -188,6 +189,7 @@ export function GameView({ game, section, onSection }) {
           oppPitcherLine={starterLines.data?.home}
           prospectsData={prospectsData}
           formerTeammatesData={formerTeammatesData}
+          callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
           onReload={feedState.reload}
@@ -206,6 +208,7 @@ export function GameView({ game, section, onSection }) {
           oppPitcherLine={starterLines.data?.away}
           prospectsData={prospectsData}
           formerTeammatesData={formerTeammatesData}
+          callouts={gameCallouts}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
           onReload={feedState.reload}
