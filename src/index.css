@@ -417,6 +417,12 @@ body {
   gap: 20px;
 }
 
+.masthead__side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .masthead__date {
   font-family: var(--font-display);
   font-size: 12px;
@@ -425,6 +431,47 @@ body {
   text-transform: uppercase;
   color: var(--text-caption);
   white-space: nowrap;
+}
+
+/* Watch button (masthead) — hands off to the MLB app/site's Gameday page for
+   this game (see GameView.jsx's WatchButton). A filled pill rather than
+   Game Notes' outline treatment: it's the one masthead control that's a call
+   to action, not just information. Shows the MLB.TV wordmark (its own "ondark"
+   variant, so it reads cleanly on this pill's navy fill) rather than a text
+   label. */
+.watchbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--accent-primary);
+  background: var(--accent-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.watchbtn:active {
+  transform: scale(0.96);
+}
+
+.watchbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.watchbtn__logo {
+  display: block;
+  height: 16px;
+  width: auto;
+}
+
+.watchbtn__ext {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-on-ink);
 }
 
 .masthead__logo {

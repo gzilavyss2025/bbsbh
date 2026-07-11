@@ -66,7 +66,13 @@ export function GameView({ game, section, onSection }) {
     <div className="screen">
       <SiteHeader />
 
-      <Masthead away={game.away} home={game.home} date={officialDate} onSketch={setSketching} />
+      <Masthead
+        away={game.away}
+        home={game.home}
+        date={officialDate}
+        gamePk={game.gamePk}
+        onSketch={setSketching}
+      />
 
       {/* Delayed/suspended/postponed is structural game state, not a score —
           safe to render unconditionally, same as the masthead date above. Sits
@@ -244,10 +250,11 @@ export function GameView({ game, section, onSection }) {
 
 // The game's masthead: two grayscale marks — away on the left, home on the
 // right, an @ between — sized like the logos on the lineup pages, left-aligned
-// in the page header with the game's date right-aligned opposite them. Tapping
-// a mark opens it enlarged for pencil sketching. The date is structural, not
-// score-revealing, so it renders unconditionally (no seal).
-function Masthead({ away, home, date, onSketch }) {
+// in the page header, with the game's date and a Watch link side by side,
+// right-aligned opposite them. Tapping a mark opens it enlarged for pencil
+// sketching. The date and the Watch link are both structural, not
+// score-revealing, so they render unconditionally (no seal).
+function Masthead({ away, home, date, gamePk, onSketch }) {
   return (
     <div className="masthead">
       <div className="masthead__teams">
@@ -255,8 +262,37 @@ function Masthead({ away, home, date, onSketch }) {
         <span className="masthead__at" aria-hidden="true">@</span>
         <MastheadLogo team={home} onSketch={() => onSketch('home')} />
       </div>
-      {date && <span className="masthead__date">{humanDate(date)}</span>}
+      <div className="masthead__side">
+        {date && <span className="masthead__date">{humanDate(date)}</span>}
+        {gamePk && <WatchButton gamePk={gamePk} />}
+      </div>
     </div>
+  )
+}
+
+// Hands off to the MLB app/site's own game page — mlb.com's bare
+// /gameday/{gamePk} URL 301s to the full team-slug/date page, so we don't
+// need to know team slugs ourselves. On iOS/Android with the MLB app
+// installed this resolves as a universal link straight into that game inside
+// the app (with its own Watch entry point to the live/archived broadcast);
+// without the app it opens mlb.com's web Gameday, which offers the same
+// entry point. Never spoiler-revealing — it's a game identifier, not a score.
+// The wordmark is MLB's own "MLBTV-19-ondark" asset (linked from
+// mlb.com/live-stream-games), saved locally at public/icons/mlbtv-logo.svg
+// rather than hotlinked — it already carries its own light badge shape,
+// meant to sit on a dark surface like this pill's navy fill.
+function WatchButton({ gamePk }) {
+  return (
+    <a
+      className="watchbtn"
+      href={`https://www.mlb.com/gameday/${gamePk}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Open this game in the MLB app (or mlb.com) to watch"
+    >
+      <img className="watchbtn__logo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
+      <span className="watchbtn__ext" aria-hidden="true">↗</span>
+    </a>
   )
 }
 
