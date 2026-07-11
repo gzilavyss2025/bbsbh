@@ -273,13 +273,20 @@ function Masthead({ away, home, date, gamePk, onSketch }) {
   )
 }
 
-// Hands off to the MLB app/site's own game page — mlb.com's bare
-// /gameday/{gamePk} URL 301s to the full team-slug/date page, so we don't
-// need to know team slugs ourselves. On iOS/Android with the MLB app
-// installed this resolves as a universal link straight into that game inside
-// the app (with its own Watch entry point to the live/archived broadcast);
-// without the app it opens mlb.com's web Gameday, which offers the same
-// entry point. Never spoiler-revealing — it's a game identifier, not a score.
+// Hands off to MLB.TV's own video player for this game — mlb.com's
+// /tv/g{gamePk} route (confirmed live against mlb.com/tv: the page identifies
+// itself as "MLB.TV Web"). Deliberately NOT /gameday/{gamePk} (an earlier
+// version of this button used that): mlb.com's own
+// /.well-known/apple-app-site-association lists "/tv/g*" as a path the MLB
+// app registers for universal links but does NOT list "/gameday/*" at all —
+// so a gameday link never actually opened the app, only Safari — and
+// gameday is MLB's play-by-play/box-score tracker, i.e. exactly the kind of
+// score-revealing page this app exists to seal, the opposite of what a
+// "watch" button should hand off to. /tv/g* is registered, opens the app
+// directly into the video player, and never routes through that tracker.
+// Never spoiler-revealing on OUR side — it's a game identifier, not a score;
+// once the user is watching, seeing the live broadcast (and its score) is
+// the point of tapping Watch, not a leak from this app's own UI.
 // The wordmark is MLB's own "MLBTV-19-ondark" asset (linked from
 // mlb.com/live-stream-games), saved locally at public/icons/mlbtv-logo.svg
 // rather than hotlinked — it already carries its own light badge shape,
@@ -288,10 +295,10 @@ function WatchButton({ gamePk }) {
   return (
     <a
       className="watchbtn"
-      href={`https://www.mlb.com/gameday/${gamePk}`}
+      href={`https://www.mlb.com/tv/g${gamePk}`}
       target="_blank"
       rel="noopener noreferrer"
-      title="Open this game in the MLB app (or mlb.com) to watch"
+      title="Watch this game on MLB.TV"
     >
       <img className="watchbtn__logo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
       <span className="watchbtn__ext" aria-hidden="true">↗</span>
