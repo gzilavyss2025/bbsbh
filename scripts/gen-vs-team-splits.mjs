@@ -5,7 +5,7 @@
 // play-by-play/box-score vs-opponent callout (src/api/callout-notes.js), whose
 // rate comparisons read the hitter line's pa/bb/xbh component sums.
 //
-// This runs on a cron via .github/workflows/update-vs-team-splits.yml, NOT at
+// This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Building it is expensive: the API's vs-team split types return
 // season/pitcher aggregates with no game granularity, so the only way to get
 // BOTH the career-vs-club totals AND the most-recent meeting's line is to sweep

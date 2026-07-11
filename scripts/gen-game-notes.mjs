@@ -18,7 +18,7 @@
 // CORS-open, no auth, no browser needed (the mlb.com HTML page is UA-gated, this
 // backing JSON API is not). MLB only — MiLB clubs (milb.com) don't publish to it.
 //
-// Runs on a cron (.github/workflows/update-game-notes.yml); also by hand:
+// Runs on a cron (.github/workflows/update-nightly-data.yml); also by hand:
 //   node scripts/gen-game-notes.mjs
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'

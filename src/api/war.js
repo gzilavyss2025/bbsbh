@@ -1,6 +1,6 @@
 // Season WAR, read from a static same-origin file (public/data/war.json)
 // rather than fetched live from FanGraphs. That file is regenerated nightly
-// by scripts/gen-war.mjs (see .github/workflows/update-war.yml) — this module
+// by scripts/gen-war.mjs (see .github/workflows/update-nightly-data.yml) — this module
 // just reads it. Keyed by MLB Stats API personId (FanGraphs' xMLBAMID is the
 // same id), so callers can index straight off a roster entry's person.id.
 // Degrades to empty maps before the file exists or on any fetch failure — a

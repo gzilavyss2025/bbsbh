@@ -6,7 +6,7 @@
 // level league-wide — eight full-level stat pulls and several thousand players
 // to combine — far too heavy for a phone page load. So scripts/gen-minors-
 // leaders.mjs precomputes it on a daily cron (see
-// .github/workflows/update-minors-leaders.yml) and this module just reads it.
+// .github/workflows/update-nightly-data.yml) and this module just reads it.
 // Same build-time-fetch pattern as war.js / rehab.js; still spoiler-free (season
 // aggregates only).
 //

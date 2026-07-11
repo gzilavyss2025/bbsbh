@@ -8,7 +8,7 @@
 // schedule (a few statsapi calls apiece) to drop stints that have really
 // finished — the player activated back to the majors, sent down, or shut down
 // for the season. That's dozens of requests, so scripts/gen-rehab.mjs does it on
-// a cron and commits the shaped result (see .github/workflows/update-rehab.yml);
+// a cron and commits the shaped result (see .github/workflows/update-nightly-data.yml);
 // this module just reads it. Same build-time-fetch pattern as war.js (see
 // docs/data-enrichment.md §5). Roster moves + game *dates* carry no score, so
 // the file is spoiler-free like the rest of the roster surfaces.

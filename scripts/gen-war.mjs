@@ -5,7 +5,7 @@
 // with `xMLBAMID` — the SAME id as statsapi's personId, so no name-matching
 // is needed to join it against a roster.
 //
-// This runs nightly via .github/workflows/update-war.yml, NOT at request
+// This runs nightly via .github/workflows/update-nightly-data.yml, NOT at request
 // time: the live app only ever fetches this small same-origin static file
 // (src/api/war.js), never FanGraphs directly. That keeps a page load fast
 // (this pulls the whole league's leaderboard, ~1MB+ raw JSON, trimmed here to

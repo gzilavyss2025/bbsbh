@@ -8,7 +8,7 @@
 // most-recent meeting's line means sweeping a player's whole MLB game log season
 // by season (one request per season) — dozens per veteran. Past game logs are
 // immutable, so scripts/gen-vs-team-splits.mjs precomputes it on a cron (see
-// .github/workflows/update-vs-team-splits.yml) and this module just reads it.
+// .github/workflows/update-nightly-data.yml) and this module just reads it.
 // Same build-time-fetch pattern as war.js / former-teammates.js (see
 // docs/data-enrichment.md §5).
 //

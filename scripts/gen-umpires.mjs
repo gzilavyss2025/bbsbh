@@ -4,7 +4,7 @@
 // Keyed by MLB Stats API personId (umpires get real personIds, same id space
 // as players).
 //
-// This runs on a cron via .github/workflows/update-umpires.yml, NOT at request
+// This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at request
 // time. Building a season-wide, umpire-indexed view isn't something a page load
 // can do cheaply: there's no "games by umpire" endpoint, so the only way to get
 // it is a full-season schedule scan (one call — `/api/v1/schedule` accepts a
