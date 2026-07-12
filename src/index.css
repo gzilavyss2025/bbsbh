@@ -2288,15 +2288,18 @@ body {
 }
 /* The plate ump's season accuracy rank for tonight's game — a tap target under
    his name that opens the accuracy modal; hidden for every other base and for
-   umps with no accuracy data. Accent ink so it reads as actionable. */
+   umps with no accuracy data. Deliberately much smaller than the name and in
+   the medal-amber "honors" ink (not navy body/link color) so it reads as a
+   secondary accent stat, not a second line of the name itself. */
 .umps__accbtn {
   align-self: flex-start;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: var(--w-semibold);
   line-height: 1.3;
   text-align: left;
-  color: var(--accent-primary);
+  color: var(--award-ink);
 }
 
 /* ---------------------------------------------------------------- lineup */
@@ -4782,8 +4785,9 @@ body {
 .umpmodal__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  color: var(--text-body);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
 }
 .umpmodal__hint {
   margin: 4px 0 0;
