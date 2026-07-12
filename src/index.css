@@ -4707,15 +4707,6 @@ body {
   fill: none;
   stroke: var(--accent-negative);
 }
-/* The legend swatch echoing the over-average outline. */
-.zonemap__swatch {
-  display: inline-block;
-  width: 11px;
-  height: 11px;
-  vertical-align: -1px;
-  border: 2px solid var(--accent-negative);
-  border-radius: 2px;
-}
 
 /* ── Umpire accuracy modal ───────────────────────────────────────────────────
    Opened from the lineup Umpires card's accuracy rank. Centered card (reuses
@@ -4780,20 +4771,12 @@ body {
   gap: 8px;
   margin-bottom: 14px;
 }
-.umpmodal__zonekey {
-  align-self: stretch;
-}
 .umpmodal__zonecap {
-  margin: 0 0 2px;
+  margin: 0;
   font-size: 11px;
   color: var(--text-muted);
   line-height: 1.35;
-}
-.umpmodal__zoneaxes {
-  margin: 4px 0 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-caption);
+  text-align: center;
 }
 .umpmodal__gtitle {
   margin: 0 0 6px;
@@ -4837,15 +4820,9 @@ body {
   font-size: 12px;
   color: var(--text-muted);
 }
+/* .btn--next handles sizing/color; this just tightens the modal-local gap. */
 .umpmodal__full {
-  display: inline-block;
-  margin-top: 12px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--accent-primary);
+  margin-top: 14px;
 }
 
 .scrim {
@@ -9706,6 +9683,11 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
+/* A club this umpire hasn't worked this season: kept in the grid (so the
+   whole league always shows) but dimmed, with TeamLogo's own bw treatment. */
+.umpage__teamitem--unworked {
+  opacity: 0.35;
+}
 
 .umpage__venuelist {
   list-style: none;
@@ -9747,6 +9729,17 @@ body {
   font-variant-numeric: tabular-nums;
   font-size: 13px;
   color: var(--text-muted);
+}
+/* "Show all" toggle under a truncated ballparks/team-records list. */
+.umpage__showall {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
 }
 
 .umpage__filter {
@@ -9798,6 +9791,11 @@ body {
 .umpage__list li:first-child.umpage__row {
   border-top: none;
 }
+/* Zebra-stripe the games this ump had behind the plate, in the mixed "All
+   games" view, so they read at a glance against his base/field assignments. */
+.umpage__row--hp {
+  background: var(--surface-inset);
+}
 .umpage__role {
   font-family: var(--font-display);
   font-size: 11px;
@@ -9825,36 +9823,53 @@ body {
   font-size: 12px;
   color: var(--text-muted);
 }
+/* The "Accurate strike zone" label riding the per-game % — spelled out only
+   once there's room for it (tablet/desktop); a phone-width row keeps just the
+   figure so it doesn't crowd the matchup column. */
+.umpage__rowacclabel {
+  display: none;
+  font-family: var(--font-body);
+  font-weight: var(--w-medium);
+}
 
-/* Plate-accuracy summary card: the headline season figure + zone tendency. */
-.umpage__accfig {
+/* Plate-accuracy summary card: the headline figure/rank tiles + zone map. */
+.umpage__accrow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.umpage__acctile {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  text-align: center;
 }
 .umpage__accpct {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: var(--w-bold);
   line-height: 1;
   color: var(--text-body);
 }
-.umpage__acclabel {
-  font-size: 12px;
+.umpage__acctilelabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.umpage__acctendency {
-  margin: 8px 0 0;
-  font-size: 13px;
-  color: var(--text-body);
-}
-.umpage__accrank {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  font-weight: var(--w-semibold);
-  color: var(--accent-primary);
+.umpage__acclabel {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-caption);
+  text-align: center;
 }
 /* The zone map + its caption inside the Plate-accuracy card. */
 .umpage__acczone {
@@ -9870,6 +9885,13 @@ body {
   color: var(--text-muted);
   line-height: 1.35;
   text-align: center;
+}
+
+@media (min-width: 740px) {
+  /* Tablet/desktop has the width to spell out what the per-game % means. */
+  .umpage__rowacclabel {
+    display: inline;
+  }
 }
 
 /* ── Ballpark modal ─────────────────────────────────────────────────────────
