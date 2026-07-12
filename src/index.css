@@ -3577,6 +3577,32 @@ body {
   color: var(--text-caption);
 }
 
+/* The ejection notification bar (see EjectionBar) — same thin full-width strip
+   as a mound visit, but in the negative accent: an ejection is a stoppage
+   worth flagging at a glance, distinct from the routine amber of a sub or
+   pitching change. The label is a full sentence (already sentence-case from
+   the feed), not a caps token, so no text-transform here. */
+.ejectbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-negative) 10%, var(--surface-inset));
+  border-left: 3px solid var(--accent-negative);
+}
+.ejectbar__icon {
+  font-size: 12px;
+  line-height: 1;
+}
+.ejectbar__label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
 /* The entering pitcher's headshot (see PitcherPhoto in StatBox.jsx) — sized
    like the app's other card-mounted headshots (.shot), not the cramped inline
    emoji this replaced, so the photo actually reads at a glance. Object-fit:
