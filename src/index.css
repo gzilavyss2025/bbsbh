@@ -4599,6 +4599,32 @@ body {
   display: none;
 }
 
+/* "Watch highlight" — sits in the same bottom-left whitespace as the zone
+   icon button, generic text label only (never the clip's own title, which
+   would spoil the play — see PlayByPlay.jsx). Present only on the small
+   fraction of plays with a matched clip. */
+.pbp__hlbtn {
+  margin-top: 7px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+.pbp__hlicon {
+  font-size: 10px;
+}
+
 /* Strike-zone modal — reuses the .scrim backdrop (see below), a centered card
    like the logo modal. */
 .szmodal {
@@ -4707,15 +4733,6 @@ body {
   fill: none;
   stroke: var(--accent-negative);
 }
-/* The legend swatch echoing the over-average outline. */
-.zonemap__swatch {
-  display: inline-block;
-  width: 11px;
-  height: 11px;
-  vertical-align: -1px;
-  border: 2px solid var(--accent-negative);
-  border-radius: 2px;
-}
 
 /* ── Umpire accuracy modal ───────────────────────────────────────────────────
    Opened from the lineup Umpires card's accuracy rank. Centered card (reuses
@@ -4780,20 +4797,12 @@ body {
   gap: 8px;
   margin-bottom: 14px;
 }
-.umpmodal__zonekey {
-  align-self: stretch;
-}
 .umpmodal__zonecap {
-  margin: 0 0 2px;
+  margin: 0;
   font-size: 11px;
   color: var(--text-muted);
   line-height: 1.35;
-}
-.umpmodal__zoneaxes {
-  margin: 4px 0 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-caption);
+  text-align: center;
 }
 .umpmodal__gtitle {
   margin: 0 0 6px;
@@ -4837,15 +4846,9 @@ body {
   font-size: 12px;
   color: var(--text-muted);
 }
+/* .btn--next handles sizing/color; this just tightens the modal-local gap. */
 .umpmodal__full {
-  display: inline-block;
-  margin-top: 12px;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--accent-primary);
+  margin-top: 14px;
 }
 
 .scrim {
@@ -6032,15 +6035,19 @@ body {
   font-size: 12px;
 }
 
-/* The call-out notes grid — one card per note (see InsightNoteCard), each
-   wide enough for a full sentence beside its avatar, wrapping to fit however
-   many fired tonight. When Statcast cards sit above it, a dashed rule
-   (matching .statcast's own) separates the two sections instead of them
-   running together. */
+/* The call-out notes grid — one card per player/club (see InsightNoteCard,
+   groupCalloutNotes), each wide enough for a full sentence beside its
+   avatar. Cards vary in height (a player with 3 notes vs. one with 1), so
+   this is a CSS-columns waterfall rather than a row-locked grid — each card
+   flows into the shortest column instead of every row stretching to its
+   tallest member, keeping the same gap between cards without the excess
+   whitespace a fixed-row grid leaves behind. `column-width` lets the browser
+   pick the column count itself, same auto-fit intent as the old grid. When
+   Statcast cards sit above it, a dashed rule (matching .statcast's own)
+   separates the two sections instead of them running together. */
 .bs__noteGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 8px;
+  column-width: 240px;
+  column-gap: 8px;
 }
 .bs__noteGrid--divided {
   margin-top: 10px;
@@ -6056,14 +6063,16 @@ body {
    a number. */
 .bs__noteCard {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 8px;
+  margin-bottom: 8px;
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
   min-width: 0;
+  break-inside: avoid;
 }
 .bs__noteAvatar {
   flex: none;
@@ -9706,6 +9715,11 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
+/* A club this umpire hasn't worked this season: kept in the grid (so the
+   whole league always shows) but dimmed, with TeamLogo's own bw treatment. */
+.umpage__teamitem--unworked {
+  opacity: 0.35;
+}
 
 .umpage__venuelist {
   list-style: none;
@@ -9747,6 +9761,17 @@ body {
   font-variant-numeric: tabular-nums;
   font-size: 13px;
   color: var(--text-muted);
+}
+/* "Show all" toggle under a truncated ballparks/team-records list. */
+.umpage__showall {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
 }
 
 .umpage__filter {
@@ -9798,6 +9823,11 @@ body {
 .umpage__list li:first-child.umpage__row {
   border-top: none;
 }
+/* Zebra-stripe the games this ump had behind the plate, in the mixed "All
+   games" view, so they read at a glance against his base/field assignments. */
+.umpage__row--hp {
+  background: var(--surface-inset);
+}
 .umpage__role {
   font-family: var(--font-display);
   font-size: 11px;
@@ -9825,36 +9855,53 @@ body {
   font-size: 12px;
   color: var(--text-muted);
 }
+/* The "Accurate strike zone" label riding the per-game % — spelled out only
+   once there's room for it (tablet/desktop); a phone-width row keeps just the
+   figure so it doesn't crowd the matchup column. */
+.umpage__rowacclabel {
+  display: none;
+  font-family: var(--font-body);
+  font-weight: var(--w-medium);
+}
 
-/* Plate-accuracy summary card: the headline season figure + zone tendency. */
-.umpage__accfig {
+/* Plate-accuracy summary card: the headline figure/rank tiles + zone map. */
+.umpage__accrow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.umpage__acctile {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  text-align: center;
 }
 .umpage__accpct {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: var(--w-bold);
   line-height: 1;
   color: var(--text-body);
 }
-.umpage__acclabel {
-  font-size: 12px;
+.umpage__acctilelabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.umpage__acctendency {
-  margin: 8px 0 0;
-  font-size: 13px;
-  color: var(--text-body);
-}
-.umpage__accrank {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  font-weight: var(--w-semibold);
-  color: var(--accent-primary);
+.umpage__acclabel {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-caption);
+  text-align: center;
 }
 /* The zone map + its caption inside the Plate-accuracy card. */
 .umpage__acczone {
@@ -9870,6 +9917,13 @@ body {
   color: var(--text-muted);
   line-height: 1.35;
   text-align: center;
+}
+
+@media (min-width: 740px) {
+  /* Tablet/desktop has the width to spell out what the per-game % means. */
+  .umpage__rowacclabel {
+    display: inline;
+  }
 }
 
 /* ── Ballpark modal ─────────────────────────────────────────────────────────
@@ -10118,4 +10172,76 @@ body {
   font-size: 11px;
   color: var(--graphite-soft);
   text-align: center;
+}
+
+/* ---------------------------------------------------------- highlight sheet
+   The "Watch highlight" bottom sheet (see HighlightSheet.jsx). Same .scrim/
+   .sheet dialog contract as the ballpark sheet — docked, slide-up, safe-area
+   padding — carrying a 16:9 video instead of a diagram. */
+.hlsheet {
+  max-height: min(90vh, 640px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.hlsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hlsheet__head .sheet__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+}
+
+.hlsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hlsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.hlsheet__video {
+  margin: 12px 0 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.hlsheet__video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.hlsheet__empty {
+  margin: 12px 0 0;
+  padding: 32px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--surface-card);
+  border-radius: var(--radius-sm);
+}
+
+.hlsheet__desc {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
 }

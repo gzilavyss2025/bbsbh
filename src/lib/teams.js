@@ -389,6 +389,11 @@ const MLB_TEAM_NAMES = {
   158: ['Milwaukee', 'Brewers'],
 }
 
+// Every current MLB club's team id, in no particular order — for surfaces that
+// need to enumerate the whole league (e.g. showing all 30 clubs even ones a
+// given umpire/player hasn't touched this season).
+export const ALL_MLB_TEAM_IDS = Object.keys(MLB_TEAM_NAMES).map(Number)
+
 // "Pittsburgh" — the club's place name, for prose like "Last game against
 // Pittsburgh". Null for a MiLB id.
 export function teamLocationName(teamId) {

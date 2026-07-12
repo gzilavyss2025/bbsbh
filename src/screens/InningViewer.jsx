@@ -48,6 +48,7 @@ export function InningViewer({
   prospectsData,
   callouts,
   vsTeam,
+  highlights,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -279,6 +280,7 @@ export function InningViewer({
             prospectsData={prospectsData}
             callouts={callouts}
             vsTeam={vsTeam}
+            highlights={highlights}
           />
         </div>
 

@@ -1,5 +1,6 @@
 import { selectPrePitchChanges } from '../api/select.js'
 import { revealDerived } from '../api/derive.js'
+import { highlightsByPlayId } from '../api/highlights.js'
 import { SealBox } from './SealBox.jsx'
 import { PitchColorsKey } from './StrikeZone.jsx'
 import { PlayByPlay } from './PlayByPlay.jsx'
@@ -31,6 +32,7 @@ export function HalfInning({
   prospectsData,
   callouts,
   vsTeam,
+  highlights,
 }) {
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
@@ -112,6 +114,11 @@ export function HalfInning({
           // Computed only on reveal (the play-by-play + Statcast half of the
           // former single seal; the R/H/E summary is the row-2 StatBox card).
           const d = revealDerived(getDerived(), inning, half)
+          // guid -> highlight clip lookup (see api/highlights.js), built here
+          // rather than by the caller so it stays reveal-only in the same
+          // textual sense as revealDerived above — never at render top-level
+          // or in an eager useMemo (ADR-0001).
+          const highlightsMap = highlightsByPlayId(highlights)
           return (
             <>
               {/* The pitch-color key now lives behind the "Pitch colors" button
@@ -125,6 +132,7 @@ export function HalfInning({
                 battingName={battingSide === 'away' ? awayName : homeName}
                 callouts={callouts}
                 vsTeam={vsTeam}
+                highlightsMap={highlightsMap}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball), sat below the feed.

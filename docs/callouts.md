@@ -105,7 +105,10 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   "Was caught stealing in the 6th, ending a run of 9 straight steals"; the
   entering card with no attempt tonight is dropped.
 - **risp / platoon** — season RISP and vs-L/vs-R lines (`situational`,
-  ≥ 15 PA per split), once on his first PA.
+  ≥ 15 PA per split), once on his first PA. Gate: the split average also has
+  to deviate from his own season average by ≥ `SPLIT_AVG_DEVIATION` (.05) —
+  an ordinary split that just tracks his overall line doesn't clear the bar,
+  same shape as `AVG_DEVIATION_THRESHOLD` gating `vsTeam` below.
 - **birthday / birthdayStats** — slate-date birthday flag + his career line
   ON his birthday (`birthdays`/`birthdayStats`, ≥ 2 games and ≥ 5 AB).
 - **vsTeam** — career vs tonight's opponent, only on a notable angle

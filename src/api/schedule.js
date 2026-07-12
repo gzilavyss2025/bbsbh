@@ -178,6 +178,19 @@ export async function fetchGamesByPk(gamePks) {
   }
 }
 
+// Both schedule fetchers below prune with `fields=`: the raw schedule row
+// carries each side's score/isWinner/leagueRecord, which are score-revealing and
+// which these selectors deliberately never read. An allowlist keeps them out of
+// the response (and client memory) entirely rather than fetching then discarding
+// — a payload win (~85% smaller) and a spoiler win. Each list is the exact
+// read-set of its function; `fields=` is name-based, so a name absent here
+// arrives `undefined`. (Verified 2026-07-12 against a live season: `fields=`
+// composes with `hydrate=team` — abbreviations still resolve.)
+const HEAD_TO_HEAD_FIELDS =
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
+const TEAM_SCHEDULE_FIELDS =
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation'
+
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
 // two-team filter, so this pulls team A's full-season schedule and keeps only
@@ -189,7 +202,7 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
   if (!teamAId || !teamBId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R&fields=${HEAD_TO_HEAD_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     // A suspended/resumed game can be listed under both its original and
@@ -226,7 +239,7 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1) {
   if (!teamId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team&fields=${TEAM_SCHEDULE_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()

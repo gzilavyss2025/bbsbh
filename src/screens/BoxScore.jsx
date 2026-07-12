@@ -229,11 +229,42 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
   )
 }
 
-// How many call-out notes the Insights card shows before folding the rest
+// How many insight CARDS the Insights card shows before folding the rest
 // behind a Show-more button (the former-teammates pattern). The notes arrive
 // already ranked by worthiness (see computeGameCalloutNotes), so the cap
 // keeps the most impactful ones on top without dropping anything.
 const INSIGHTS_SHOWN = 6
+
+// Every note about the same player (or, for a club-level note, the same
+// team) folds into ONE card with a bullet per note, instead of one card per
+// note — a hitter with a streak note AND a platoon split shouldn't get two
+// cards competing for grid space. `calloutNotes` arrives globally sorted by
+// worthiness (see computeGameCalloutNotes), so a group's position is set by
+// its first (i.e. highest-scored) note and the resulting group order stays
+// worthiness-ranked without a re-sort.
+function groupCalloutNotes(notes) {
+  const groups = []
+  const byKey = new Map()
+  for (const note of notes) {
+    const key = note.personId != null ? `p:${note.personId}` : `t:${note.teamId}`
+    let group = byKey.get(key)
+    if (!group) {
+      group = {
+        personId: note.personId,
+        personName: note.personName,
+        teamId: note.teamId,
+        teamName: note.teamName,
+        oppTeamId: note.oppTeamId,
+        oppTeamName: note.oppTeamName,
+        notes: [],
+      }
+      byKey.set(key, group)
+      groups.push(group)
+    }
+    group.notes.push(note)
+  }
+  return groups
+}
 
 // Whole-game Statcast superlatives (see computeGameSuperlatives) — the
 // catch-all "what stood out tonight" card: the fastest pitch, the hardest-hit
@@ -247,12 +278,9 @@ function InsightsCard({ insights, calloutNotes }) {
   const hasStatcast = maxVelo != null || hardestHit != null || longestHit != null
   const hasNotes = calloutNotes && calloutNotes.length > 0
   if (!hasStatcast && !hasNotes) return null
-  const shownNotes = hasNotes
-    ? showAll
-      ? calloutNotes
-      : calloutNotes.slice(0, INSIGHTS_SHOWN)
-    : []
-  const hiddenCount = hasNotes ? calloutNotes.length - shownNotes.length : 0
+  const groups = hasNotes ? groupCalloutNotes(calloutNotes) : []
+  const shownGroups = showAll ? groups : groups.slice(0, INSIGHTS_SHOWN)
+  const hiddenCount = groups.length - shownGroups.length
   return (
     <section className="bs__insights">
       <h3 className="bs__insightsTitle">Insights</h3>
@@ -289,14 +317,16 @@ function InsightsCard({ insights, calloutNotes }) {
           the game (see computeGameCalloutNotes) — the same notes shown one at
           a time on the play they belong to in the innings view, rolled up
           here as tonight's full set with the game's outcome folded into the
-          record-based ones ("moved to 18-2…"), each carrying its own player
-          headshot or team logo(s) so it's clear at a glance who it's about.
-          Ranked most-impactful-first by the shared worthiness score; the tail
-          waits behind Show more. */}
+          record-based ones ("moved to 18-2…"), grouped one card per player
+          (or club) with a headshot/logo(s) so it's clear at a glance who it's
+          about. A waterfall column layout (see .bs__noteGrid) packs the
+          variable-height cards tightly instead of stretching every row to its
+          tallest card. Ranked most-impactful-first by the shared worthiness
+          score; the tail waits behind Show more. */}
       {hasNotes && (
         <div className={`bs__noteGrid${hasStatcast ? ' bs__noteGrid--divided' : ''}`}>
-          {shownNotes.map((note, i) => (
-            <InsightNoteCard key={i} note={note} />
+          {shownGroups.map((group, i) => (
+            <InsightNoteCard key={i} group={group} />
           ))}
         </div>
       )}
@@ -309,28 +339,30 @@ function InsightsCard({ insights, calloutNotes }) {
   )
 }
 
-// One call-out note as its own card: the player's headshot (or, for a note
-// about a club rather than a person — a situational team record — that
-// club's logo, both logos when it pits two clubs against each other) beside
-// his name and the note text.
-function InsightNoteCard({ note }) {
+// One player's (or club's) insight card: the headshot (or, for a note about
+// a club rather than a person — a situational team record — that club's
+// logo, both logos when it pits two clubs against each other) beside his
+// name and a bullet per note that fired for him tonight.
+function InsightNoteCard({ group }) {
   return (
     <div className="bs__noteCard">
       <span className="bs__noteAvatar">
-        {note.personId != null ? (
-          <Headshot personId={note.personId} name={note.personName} teamId={note.teamId} className="bs__noteShot" />
+        {group.personId != null ? (
+          <Headshot personId={group.personId} name={group.personName} teamId={group.teamId} className="bs__noteShot" />
         ) : (
           <span className="bs__noteLogos">
-            <TeamLogo teamId={note.teamId} name={note.teamName} size={26} />
-            {note.oppTeamId != null && (
-              <TeamLogo teamId={note.oppTeamId} name={note.oppTeamName} size={26} />
+            <TeamLogo teamId={group.teamId} name={group.teamName} size={26} />
+            {group.oppTeamId != null && (
+              <TeamLogo teamId={group.oppTeamId} name={group.oppTeamName} size={26} />
             )}
           </span>
         )}
       </span>
       <span className="bs__noteBody">
-        {note.personName && <span className="bs__noteWho">{note.personName}</span>}
-        <CalloutNote text={note.text} />
+        {group.personName && <span className="bs__noteWho">{group.personName}</span>}
+        {group.notes.map((note, i) => (
+          <CalloutNote key={i} text={note.text} />
+        ))}
       </span>
     </div>
   )

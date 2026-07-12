@@ -69,6 +69,7 @@ export function PlayerPage({ id, asOf, sportId }) {
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen player">
+        <SiteHeader />
         {data.isAllStar && (
           <div className="allstar-banner" role="note">
             <span className="allstar-banner__star" aria-hidden="true">★</span>
@@ -92,7 +93,6 @@ export function PlayerPage({ id, asOf, sportId }) {
             </span>
           </div>
         )}
-        <SiteHeader />
         <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
@@ -342,11 +342,11 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {data.transactions && <TransactionTimeline rows={data.transactions.rows} />}
 
-        <p className="hint hint--prose player__caveat">
-          {asOf
-            ? 'Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row and the splits are full-season figures.'
-            : 'Current-season figures (no game context).'}
-        </p>
+        {asOf && (
+          <p className="hint hint--prose player__caveat">
+            Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row and the splits are full-season figures.
+          </p>
+        )}
       </div>
     </LinkScope>
   )

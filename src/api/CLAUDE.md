@@ -10,7 +10,13 @@ root `CLAUDE.md` carries only the spoiler-rule summary that governs these module
 
 `linescore.js` and `derive.js` are **reveal-only** modules — callable only from
 inside a `SealBox`'s reveal render function, never at render top-level or in an
-eager `useMemo` (ADR-0001). `select.js` is spoiler-**free**. In between sit
+eager `useMemo` (ADR-0001). `highlights.js`'s join (`highlightsByPlayId`) is
+reveal-only in the same sense — a video clip's title/description narrate the
+play's outcome, so the map is built inside `HalfInning`'s `SealBox` reveal
+function (next to `revealDerived`), never at `InningViewer`'s top level; the
+fetch itself (`fetchHighlights`) is safe eagerly, same as `game.js`'s
+`fetchWinProbability`, since a raw fetch result produces no DOM on its own.
+`select.js` is spoiler-**free**. In between sit
 **caller-gated pre-pitch selectors** (`selectPrePitchChanges` in `select.js`,
 `defenseEntering` in `defense.js`, `lineupEntering` in `battingorder.js`),
 spoiler-free only when restricted to the half the user has reached
@@ -34,6 +40,14 @@ spoiler-free only when restricted to the half the user has reached
   carries no WPA). It's score-revealing, so `GameView` fetches it lazily and
   the DOM only gets it inside the box-score seal; it's null-guarded (absent at
   most MiLB parks).
+- `highlights.js` — video highlight clips (`/api/v1/game/{gamePk}/content`),
+  joined to a specific play by matching a clip's `guid` to the terminal pitch
+  event's `playId` in `feed/live` (the only reliable join key; verified live
+  against both batted-ball and strikeout-ending plays — see
+  `.scratch/video-highlights/`). Reveal-only (see above): `useGameData`
+  fetches it lazily alongside the feed, same tier as `winProb`, but
+  `highlightsByPlayId` is only ever called inside `HalfInning`'s `SealBox`
+  reveal function. Degrades to `[]` on failure or off-MLB.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface.

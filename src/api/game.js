@@ -13,9 +13,44 @@ export async function fetchGameFeed(gamePk) {
 // view and resolves null on failure — many MiLB parks don't compute it, and it
 // must never take the game view down. Score-revealing (like the feed itself), so
 // the caller only turns it into DOM inside the box score's seal.
+//
+// The unpruned response is ~186 KB gzipped — nearly a whole second feed —
+// because each play entry carries the full `playEvents` pitch-by-pitch array
+// (~85% of the payload), which this app never reads (it takes pitch data from
+// /feed/live instead). WIN_PROB_FIELDS is the COMPLETE read-set of the two
+// consumers — `computeThreeStars` and `computePlayOfTheGame` in boxscore.js —
+// so the `fields=` allowlist prunes it to ~6 KB with byte-identical output
+// (measured/validated across 5 games, 2026-07-12; ADR/api-audit R1). `matchup`
+// keeps BOTH `batter` and `pitcher` (three stars credit the pitcher the inverse
+// WPA — dropping `pitcher` silently corrupts the stars on games a pitcher stars
+// in). If you read a NEW field off a win-prob entry, add its name here or it
+// arrives `undefined`.
+const WIN_PROB_FIELDS = [
+  'homeTeamWinProbabilityAdded',
+  'atBatIndex',
+  'about',
+  'captivatingIndex',
+  'inning',
+  'isTopInning',
+  'matchup',
+  'batter',
+  'pitcher',
+  'id',
+  'result',
+  'awayScore',
+  'homeScore',
+  'description',
+  'runners',
+  'details',
+  'isScoringEvent',
+  'runner',
+].join(',')
+
 export async function fetchWinProbability(gamePk) {
   try {
-    const data = await getJson(`/api/v1/game/${gamePk}/winProbability`)
+    const data = await getJson(
+      `/api/v1/game/${gamePk}/winProbability?fields=${WIN_PROB_FIELDS}`,
+    )
     return Array.isArray(data) ? data : null
   } catch {
     return null
