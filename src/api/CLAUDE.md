@@ -163,9 +163,12 @@ for each generator; the reader modules:
   note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
   template needs its own calibration, so `CONFIG` carries a `layout` per club —
   `column` (Brewers' narrow-column sheet) or `flow` (league-standard full-width,
-  e.g. Pirates) — plus font/geometry tunables. Callers gate on
-  `hasWhatsBrewing(teamId)`; add a club = add a `CONFIG` entry (not a new parser).
-  See `docs/whats-brewing.md` for parsing details + the Node harness
+  e.g. Pirates) — plus font/geometry tunables. `hasWhatsBrewing`/
+  `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
+  teamId→title map) rather than here, so `TeamInfo.jsx`'s gate check can import
+  them statically without pulling this whole parser out of its lazy chunk; add a
+  club = add a `CONFIG` entry here + a title there (not a new parser). See
+  `docs/whats-brewing.md` for parsing details + the Node harness
   (`extractForTeam`).
 - `minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
   `public/data/minors-leaders.json`. Cost-driven: a league-wide four-level board is

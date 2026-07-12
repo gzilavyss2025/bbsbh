@@ -27,13 +27,16 @@
 //   - Pirates (134) — 'flow': the league-standard Myriad+Gotham sheet whose
 //     blurbs are full-width prose with an INLINE all-caps heading (title, colon,
 //     body all on one baseline) flowing around right-column stat tables.
-// Callers gate on hasWhatsBrewing(teamId); every un-calibrated club keeps the
-// plain full-PDF button. Parsing fails safe: any surprise → [] → the modal just
-// shows the PDF link. Adding a club means a new CONFIG entry (calibrate its
-// template with the dumper in docs/whats-brewing.md), not a new parser.
+// Callers gate on hasWhatsBrewing(teamId) (whatsBrewingClubs.js — kept out of
+// this module so that gate check doesn't force a static import of this whole
+// heavy parser, which would defeat the dynamic import above). Parsing fails
+// safe: any surprise → [] → the modal just shows the PDF link. Adding a club
+// means a new CONFIG entry here + a title in whatsBrewingClubs.js (calibrate
+// the template with the dumper in docs/whats-brewing.md), not a new parser.
 
-export const BREWERS_ID = 158
-export const PIRATES_ID = 134
+import { BREWERS_ID, PIRATES_ID } from './whatsBrewingClubs.js'
+
+export { BREWERS_ID, PIRATES_ID }
 
 // Per-club parse calibration. `layout` selects the algorithm; the rest are that
 // layout's tunables (read off the club's PDF with the font/geometry dumper —
@@ -43,8 +46,6 @@ const CONFIG = {
   // Brewers — narrow left "WHAT'S BREWING?" column, Industry font family.
   [BREWERS_ID]: {
     layout: 'column',
-    // Modal heading — the club's own name for this column (a Brewers pun).
-    title: "What's Brewing?",
     // The left column lives left of this x (page is 612pt wide; the column runs
     // ~36–160pt, the next column starts past 165).
     columnMaxX: 165,
@@ -64,9 +65,7 @@ const CONFIG = {
   // Pirates — full-width narrative flow, league-standard Myriad + Gotham template.
   [PIRATES_ID]: {
     layout: 'flow',
-    // Modal heading — neutral, since these blurbs span the whole sheet (their own
     // "THE PIRATES" section is the first blurb, so don't reuse it as the heading).
-    title: 'Pirates Game Notes',
     // Section headings sit at the page's left margin (~37pt).
     headingMaxX: 55,
     // A prose line starting right of this is a right-column stat table, not body.
@@ -98,7 +97,6 @@ const CONFIG = {
   // Red Sox — cleanest sheet in the league; single left column, one bold weight.
   111: {
     layout: 'flow-bold',
-    title: 'Red Sox Game Notes',
     bodyFont: /FrutigerLT-Cn/,
     headFont: /FrutigerLT-BlackCn/,
     headingMaxX: 55,
@@ -112,7 +110,6 @@ const CONFIG = {
   // it drops regardless of which opponent the Mets are playing that night.
   121: {
     layout: 'flow-bold',
-    title: 'Mets Game Notes',
     bodyFont: /Grift-Regular/,
     headFont: /Grift-Bold/,
     headingMaxX: 55,
@@ -126,7 +123,6 @@ const CONFIG = {
   // ("Kyle Stowers", "Otto Lopez") that share the heading font but aren't titles.
   146: {
     layout: 'flow-bold',
-    title: 'Marlins Game Notes',
     bodyFont: /GothamXNarrow-Book/,
     headFont: /GothamXNarrow-Bold/,
     headingMaxX: 55,
@@ -142,7 +138,6 @@ const CONFIG = {
   // bottomCutoff drops the "Score First:"/"DATE" boxes at the page foot.
   143: {
     layout: 'flow-bold',
-    title: 'Phillies Game Notes',
     bodyFont: /Tahoma$/,
     headFont: /Tahoma-Bold/,
     headingMaxX: 55,
@@ -157,7 +152,6 @@ const CONFIG = {
   // avoids bold player-name lead-ins ("Wrobleski", "Betts") as titles.
   119: {
     layout: 'flow-bold',
-    title: 'Dodgers Game Notes',
     bodyFont: /ArticulatCF-Regular/,
     headFont: /ArticulatCF-Bold/,
     headingMaxX: 40,
@@ -170,7 +164,6 @@ const CONFIG = {
   // bottomCutoff drops the "Fri./Sat./Sun." schedule box at the page foot.
   133: {
     layout: 'flow-bold',
-    title: 'Athletics Game Notes',
     bodyFont: /ProximaNova-Regular/,
     headFont: /ProximaNova-BoldIt/,
     headingMaxX: 55,
@@ -185,7 +178,6 @@ const CONFIG = {
   // survives above it).
   117: {
     layout: 'flow-bold',
-    title: 'Astros Game Notes',
     bodyFont: /Colfax-Regular/,
     headFont: /Colfax-Bold/,
     headingMaxX: 55,
@@ -199,7 +191,6 @@ const CONFIG = {
   // bottomCutoff drops the UPCOMING GAMES box + broadcast footer.
   118: {
     layout: 'flow-bold',
-    title: 'Royals Game Notes',
     bodyFont: /Gotham-Book/,
     headFont: /Gotham-Bold/,
     headingMaxX: 60,
@@ -215,7 +206,6 @@ const CONFIG = {
   // box dropped by geometry.
   108: {
     layout: 'flow-bold',
-    title: 'Angels Game Notes',
     bodyFont: /QuietSans-Regular/,
     headFont: /QuietSans-Bold/,
     headingMaxX: 55,
@@ -232,7 +222,6 @@ const CONFIG = {
   // drops bold player-name mentions mid-body ("Castillo", "Bryan Woo").
   136: {
     layout: 'flow-bold',
-    title: 'Mariners Game Notes',
     page: 2,
     bodyFont: /HelveticaNeueLTStd-Roman/,
     headFont: /HelveticaNeueLTStd-Bd$/,
@@ -251,7 +240,6 @@ const CONFIG = {
   // on a later date once the table had gained rows).
   142: {
     layout: 'flow-bold',
-    title: 'Twins Game Notes',
     page: 2,
     bodyFont: /TradeGothicLTStd-Cn18/,
     headFont: /TradeGothicLTStd-BdCn20/,
@@ -276,7 +264,6 @@ const CONFIG = {
   // drops the "…RANKINGS THIS SEASON" stat box embedded in its prose.
   147: {
     layout: 'flow-bold',
-    title: 'Yankees Game Notes',
     bodyFont: /MyriadPro-Regular/,
     headFont: /MyriadPro-Bold/,
     tableLeader: /\.(\s*\.){7,}/,
@@ -293,17 +280,6 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
-}
-
-// True when this club's Game Notes template is calibrated — the caller opens the
-// What's Brewing modal; otherwise it keeps the plain full-PDF link-out.
-export function hasWhatsBrewing(teamId) {
-  return !!CONFIG[teamId]
-}
-
-// The modal heading for a calibrated club (the club's own name for its notes).
-export function whatsBrewingTitle(teamId) {
-  return CONFIG[teamId]?.title || 'Game Notes'
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
@@ -517,7 +493,6 @@ function extractFlow(items, realName, cfg) {
   }
   return headings
     .map((h) => ({
-      title: h.title,
       body: tidy(
         narrative
           .filter((l) => l.owner === h)
@@ -696,7 +671,6 @@ function extractFlowBoldZone(items, realName, cfg) {
   return titled
     .filter((h) => !(cfg.skipTitle && cfg.skipTitle.test(h.title)))
     .map((h) => ({
-      title: h.title,
       body: tidy(
         [h.extraLead, ...lines.filter((l) => l.owner === h).sort((a, b) => b.y - a.y).map((l) => l.text)]
           .filter(Boolean)
