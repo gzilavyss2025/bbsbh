@@ -61,6 +61,65 @@ export function GameView({ game, section, onSection }) {
 
   const sketchTeam = sketching ? game[sketching] : null
 
+  // The section tabs (LINEUPS / INNINGS / BOX). Rendered in place for the lineup
+  // and box-score sections; for the innings view it's handed to InningViewer
+  // instead, which sets it on the same row as the half-inning Back/Next nav on
+  // the wide layout (one bar of chrome) and stacked on a phone.
+  const sectionTabs = feed ? (
+    <nav className="stepnav" aria-label="Game sections">
+      {(wide
+        ? // Wide screens show both lineups on one spread, so the two team
+          // tabs collapse into a single "Lineups" stop.
+          [
+            {
+              key: 'lineups',
+              label: 'Lineups',
+              active: step === 0 || step === 1,
+              section: 'lineup1',
+            },
+            {
+              key: 'innings',
+              label: 'Innings',
+              active: step === 2,
+              section: lastInningSection.current,
+            },
+            { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+          ]
+        : [
+            {
+              key: 'away',
+              label: game.away.abbreviation || 'Away',
+              active: step === 0,
+              section: 'lineup1',
+            },
+            {
+              key: 'home',
+              label: game.home.abbreviation || 'Home',
+              active: step === 1,
+              section: 'lineup2',
+            },
+            {
+              key: 'innings',
+              label: 'Innings',
+              active: step === 2,
+              section: lastInningSection.current,
+            },
+            { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+          ]
+      ).map((s) => (
+        <button
+          key={s.key}
+          type="button"
+          className={`stepnav__btn ${s.active ? 'is-active' : ''}`}
+          aria-current={s.active ? 'page' : undefined}
+          onClick={() => !s.active && onSection(s.section)}
+        >
+          {s.label}
+        </button>
+      ))}
+    </nav>
+  ) : null
+
   return (
     <LinkScope asOf={officialDate} sportId={game.sportId}>
     <div className="screen">
@@ -82,61 +141,10 @@ export function GameView({ game, section, onSection }) {
 
       {/* Every game section, one tap away — the same four stops the "next"
           buttons walk in order, so you can flip around the way you flip
-          scorebook pages instead of only marching forward. */}
-      {feed && (
-        <nav className="stepnav" aria-label="Game sections">
-          {(wide
-            ? // Wide screens show both lineups on one spread, so the two team
-              // tabs collapse into a single "Lineups" stop.
-              [
-                {
-                  key: 'lineups',
-                  label: 'Lineups',
-                  active: step === 0 || step === 1,
-                  section: 'lineup1',
-                },
-                {
-                  key: 'innings',
-                  label: 'Innings',
-                  active: step === 2,
-                  section: lastInningSection.current,
-                },
-                { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-              ]
-            : [
-                {
-                  key: 'away',
-                  label: game.away.abbreviation || 'Away',
-                  active: step === 0,
-                  section: 'lineup1',
-                },
-                {
-                  key: 'home',
-                  label: game.home.abbreviation || 'Home',
-                  active: step === 1,
-                  section: 'lineup2',
-                },
-                {
-                  key: 'innings',
-                  label: 'Innings',
-                  active: step === 2,
-                  section: lastInningSection.current,
-                },
-                { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-              ]
-          ).map((s) => (
-            <button
-              key={s.key}
-              type="button"
-              className={`stepnav__btn ${s.active ? 'is-active' : ''}`}
-              aria-current={s.active ? 'page' : undefined}
-              onClick={() => !s.active && onSection(s.section)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </nav>
-      )}
+          scorebook pages instead of only marching forward. On the innings view
+          the tabs ride down into InningViewer's nav row instead (see below), so
+          they share one line with Back/Next on the wide layout. */}
+      {step !== 2 && sectionTabs}
 
       {sketchTeam && (
         <LogoModal
@@ -219,6 +227,7 @@ export function GameView({ game, section, onSection }) {
         <InningViewer
           feed={feed}
           started={started}
+          sectionNav={sectionTabs}
           inning={inning}
           half={half}
           onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}

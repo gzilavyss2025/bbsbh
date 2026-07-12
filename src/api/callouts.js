@@ -40,6 +40,9 @@ export async function fetchCallouts(urlDate) {
 // present, values possibly empty) — see scripts/gen-callouts.mjs's header for
 // how each family is derived:
 //   { sportId (the game's level — 1 MLB, 11-14 MiLB),
+//     dayNight ('day'|'night'|'' — the schedule endpoint's own copy of
+//       gameData.datetime.dayNight, so the note builders can say "today" vs
+//       "tonight" without needing the whole feed; see select.js's dayWordFor),
 //     away:{teamId,name}, home:{teamId,name},
 //     bullpen?:{ avgPitches, windowDays } — the level's average-reliever pitch
 //       count over the trailing window (the workload note's peer figure),

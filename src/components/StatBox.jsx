@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
 import { selectPrePitchChanges } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
-import { realHeadshotUrl } from '../lib/teams.js'
+import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
 import { SealBox } from './SealBox.jsx'
+import { PitcherNotice } from './PitcherNotice.jsx'
 
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
@@ -27,6 +27,8 @@ export function StatBox({
   className = '',
   placeholder = false,
   pitchingName,
+  awayAbbr,
+  homeAbbr,
   isNextToReveal = false,
 }) {
   if (!revealed && placeholder) {
@@ -35,19 +37,11 @@ export function StatBox({
       : null
     if (pitcherChange?.pitcher) {
       return (
-        <div className={`statbox statbox--pitchernotice ${className}`}>
-          <PitcherPhoto personId={pitcherChange.pitcher.id} />
-          <div className="pitchernotice__body">
-            <span className="pitchernotice__now">
-              Now pitching{pitchingName ? ` for the ${pitchingName}` : ''}
-            </span>
-            <span className="pitchernotice__pitcher">
-              {pitcherChange.pitcher.name}
-              {pitcherChange.pitcher.jersey ? ` ${pitcherChange.pitcher.jersey}` : ''}
-              {pitcherChange.pitcher.hand ? ` | ${pitcherChange.pitcher.hand}HP` : ''}
-            </span>
-          </div>
-        </div>
+        <PitcherNotice
+          pitcher={pitcherChange.pitcher}
+          teamName={pitchingName}
+          className={`statbox statbox--pitchernotice ${className}`}
+        />
       )
     }
     return (
@@ -67,6 +61,9 @@ export function StatBox({
           const fieldLine = revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')
           const d = revealDerived(getDerived(), inning, half)
           const rolling = rollingPitches(getDerived(), inning, half)
+          // ABS challenge history through this half (reveal-only, clamped to the
+          // reached half — see api/challenges.js). MLB only.
+          const challenges = gameHasAbs(feed) ? selectChallengeState(feed, inning, half) : null
           return (
             <>
               <div className="rhe">
@@ -85,6 +82,15 @@ export function StatBox({
                   small
                 />
               </div>
+              {challenges && (
+                <div className="abs">
+                  <span className="abs__title">ABS challenges</span>
+                  <div className="abs__rows">
+                    <AbsRow abbr={awayAbbr || 'AWAY'} outcomes={challenges.away.outcomes} />
+                    <AbsRow abbr={homeAbbr || 'HOME'} outcomes={challenges.home.outcomes} />
+                  </div>
+                </div>
+              )}
             </>
           )
         }}
@@ -93,36 +99,38 @@ export function StatBox({
   )
 }
 
-// The entering pitcher's headshot for the notification card above, degrading
-// to a plain baseball emoji rather than the mlbstatic CDN's own generic
-// silhouette placeholder — realHeadshotUrl (unlike the usual headshotUrl)
-// 404s for a personId with no real photo on file instead of silently serving
-// that placeholder, so a true photo miss is distinguishable here (see
-// lib/teams.js). A true network error degrades the same way.
-function PitcherPhoto({ personId }) {
-  const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [personId])
-  const url = personId && !failed ? realHeadshotUrl(personId, 120) : null
-
-  if (!url) {
-    return (
-      <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
-        ⚾
-      </span>
-    )
-  }
+// One club's ABS challenge history: the club abbreviation, then a pip per
+// challenge in order — a filled dot for a successful (retained) challenge, an ✗
+// for a failed (lost) one. A club that hasn't challenged shows its two starting
+// challenges as hollow pips ("both remaining"). Extra-inning bonus challenges
+// need no special case — they just extend the outcome list, so a club can show
+// more than two ✗ across a long extra-inning game.
+function AbsRow({ abbr, outcomes }) {
+  const used = outcomes.length > 0
+  const successes = outcomes.filter((o) => o === 'success').length
+  const fails = outcomes.length - successes
+  const label = used
+    ? `${abbr}: ${successes} successful, ${fails} unsuccessful ABS challenge${
+        outcomes.length === 1 ? '' : 's'
+      }`
+    : `${abbr}: both ABS challenges remaining`
   return (
-    <span className="pitchernotice__shot">
-      <img
-        key={url}
-        src={url}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        onError={() => setFailed(true)}
-        aria-hidden="true"
-      />
-    </span>
+    <div className="abs__row" aria-label={label}>
+      <span className="abs__team">{abbr}</span>
+      <span className="abs__pips" aria-hidden="true">
+        {used
+          ? outcomes.map((o, i) => (
+              <span key={i} className={`abs__pip abs__pip--${o}`}>
+                {o === 'fail' ? '✕' : '●'}
+              </span>
+            ))
+          : Array.from({ length: START_CHALLENGES }, (_, i) => (
+              <span key={i} className="abs__pip abs__pip--ghost">
+                ○
+              </span>
+            ))}
+      </span>
+    </div>
   )
 }
 

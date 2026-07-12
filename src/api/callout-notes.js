@@ -33,7 +33,7 @@ import {
   firstPAIndexByBatter,
   NON_PA_EVENT_TYPES,
 } from './playbyplay.js'
-import { personNameParts } from './select.js'
+import { personNameParts, dayWordFor, dayWord } from './select.js'
 
 // Marquee hit leader category keys, shared with gen-callouts.mjs (imported there).
 export const HIT_CATEGORY_KEYS = ['hr', 'triples', 'doubles', 'bb_b', 'sb', 'hbp']
@@ -454,7 +454,7 @@ export function buildCallouts(
     const team = bundle[battingSide]?.name
     if (rec && team) {
       notes.push({
-        text: `Entering tonight, the ${team} are ${rec.w}-${rec.l} when he goes deep`,
+        text: `Entering ${dayWordFor(bundle.dayNight)}, the ${team} are ${rec.w}-${rec.l} when he goes deep`,
         personId: entry.batterId,
         side: battingSide,
         kind: 'homerRec',
@@ -718,20 +718,20 @@ const LEADER_NOUN = {
   hbp: 'times hit by a pitch',
   sb: 'steals',
 }
-function leaderTonightText(n, teamName) {
+function leaderTonightText(n, teamName, word) {
   if (n.cat === 'so_p') {
     const tonight = n.inGame === 1 ? 'a batter' : n.inGame
-    return `Struck out ${tonight} tonight and leads the ${teamName} with ${n.total} strikeouts this season`
+    return `Struck out ${tonight} ${word} and leads the ${teamName} with ${n.total} strikeouts this season`
   }
   const noun = LEADER_NOUN[n.cat] ?? 'of those'
   if (n.cat === 'sb') {
     const stole = n.inGame === 1 ? 'Stole a base' : `Stole ${n.inGame} bases`
-    return `${stole} tonight — that's ${n.total} this season, most on the ${teamName}`
+    return `${stole} ${word} — that's ${n.total} this season, most on the ${teamName}`
   }
   const verb = LEADER_VERB[n.cat] ?? 'Did it'
   return n.inGame === 1
-    ? `${verb} tonight for No. ${n.total} this season — he leads the ${teamName} in ${noun}`
-    : `${verb} ${timesWord(n.inGame)} tonight — now ${n.total} this season, most on the ${teamName}`
+    ? `${verb} ${word} for No. ${n.total} this season — he leads the ${teamName} in ${noun}`
+    : `${verb} ${timesWord(n.inGame)} ${word} — now ${n.total} this season, most on the ${teamName}`
 }
 
 // Cumulative runs each side has scored through each inning, stopping at the
@@ -798,7 +798,7 @@ export function buildLeadReversalNote(feed, bundle) {
     const teamName = bundle[leadingSide]?.name
     if (!rec || !teamName) continue
     return {
-      text: `The ${teamName} were ${rec.w}-${rec.l} when leading after the ${ordinal(n)} — until tonight`,
+      text: `The ${teamName} were ${rec.w}-${rec.l} when leading after the ${ordinal(n)} — until ${dayWord(feed)}`,
       personId: null,
       side: leadingSide,
       oppSide: winnerSide,
@@ -1097,7 +1097,7 @@ export function buildCloseGameNotes(feed, bundle, result) {
 export const INNING_DIFF_MIN_GAMES = 15
 const INNING_DIFF_MIN_MARGIN = 12
 const INNING_DIFF_RATIO = 2
-export function buildInningRunDiffNote(bundle, side, inning, extraF = 0, extraA = 0) {
+export function buildInningRunDiffNote(bundle, side, inning, extraF = 0, extraA = 0, word = 'tonight') {
   const ir = bundle?.teamRecords?.[side]?.inningRuns?.[inning]
   const teamName = bundle?.[side]?.name
   if (!ir || !teamName || !isNum(ir.f) || !isNum(ir.a) || !(ir.g >= INNING_DIFF_MIN_GAMES)) return null
@@ -1106,7 +1106,7 @@ export function buildInningRunDiffNote(bundle, side, inning, extraF = 0, extraA 
   const margin = Math.abs(f - a)
   if (margin < INNING_DIFF_MIN_MARGIN) return null
   if (Math.max(f, a) < INNING_DIFF_RATIO * Math.max(1, Math.min(f, a))) return null
-  const folded = extraF > 0 || extraA > 0 ? ', tonight included' : ''
+  const folded = extraF > 0 || extraA > 0 ? `, ${word} included` : ''
   const text =
     f > a
       ? `The ${teamName} have outscored opponents ${f}-${a} in the ${ordinal(inning)} this season${folded}`
@@ -1207,6 +1207,10 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   const firstRun = firstRunPlay(feed)
   const firstPA = firstPAIndexByBatter(feed)
   const progress = computeCalloutProgress(feed)
+  // "today" for a day game, "tonight" for a night game — every result-aware
+  // rewrite below (all of them fold in what happened THIS game) uses this
+  // instead of a hard-coded "tonight".
+  const word = dayWord(feed)
 
   // Dedupe by dedupeKey (falling back to the text itself), LATEST wording
   // winning in place — so "Riding a 14-game on-base streak" gives way to
@@ -1274,7 +1278,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
       // no in-game count means the category never fired tonight — it can only
       // exist mid-rewrite for steals (below), so leave any such note alone.
       if (n.kind === 'leader' && n.total != null && n.inGame > 0 && teamName) {
-        ordered[i] = { ...n, text: leaderTonightText(n, teamName) }
+        ordered[i] = { ...n, text: leaderTonightText(n, teamName, word) }
         continue
       }
 
@@ -1297,8 +1301,8 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
             game.n === 1 && game.firstInning != null
               ? `Stole a base in the ${ordinal(game.firstInning)}`
               : game.n === 1
-                ? 'Stole a base tonight'
-                : `Stole ${game.n} bases tonight`
+                ? `Stole a base ${word}`
+                : `Stole ${game.n} bases ${word}`
           ordered[i] = {
             ...n,
             text: `${stole} and has now stolen ${run + game.n} straight without being caught`,
@@ -1314,7 +1318,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
       if (n.kind === 'onBaseExtended' && n.streak && n.start) {
         ordered[i] = {
           ...n,
-          text: `Reached base again tonight — his on-base streak is now ${n.streak} straight games, dating to ${monthDay(n.start)}`,
+          text: `Reached base again ${word} — his on-base streak is now ${n.streak} straight games, dating to ${monthDay(n.start)}`,
         }
       }
     }
@@ -1332,8 +1336,8 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
       add({
         text:
           isNum(ab) && ab > 0
-            ? `Went 0-for-${ab} tonight, snapping a ${s.onBase}-game on-base streak${began}`
-            : `His ${s.onBase}-game on-base streak came to an end tonight`,
+            ? `Went 0-for-${ab} ${word}, snapping a ${s.onBase}-game on-base streak${began}`
+            : `His ${s.onBase}-game on-base streak came to an end ${word}`,
         personId: id,
         side: battingSide,
         kind: 'onBaseEnded',
@@ -1381,6 +1385,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
         bundle, side, n,
         typeof myRuns === 'number' ? myRuns : 0,
         typeof oppRuns === 'number' ? oppRuns : 0,
+        word,
       )
       if (note && (!best || note.margin > best.margin)) best = note
     }

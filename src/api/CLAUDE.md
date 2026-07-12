@@ -46,6 +46,11 @@ spoiler-free only when restricted to the half the user has reached
   would sprout PH rows on the staging pages late in a game. It also feeds
   `DefenseDiamond` (the scorebook-style opposing-defense drawing on the lineup
   pages).
+- `challenges.js` — reveal-only ABS (Automated Ball-Strike) challenge history
+  for the R/H/E card's third row (`StatBox`), clamped to the reached half. Each
+  club's success/fail outcome list from the pitch-event `reviewDetails`
+  (`isOverturned` + `challengeTeamId`); MLB only (`gameHasAbs`). See ADR/`docs`
+  research on the retain-on-success rule + extra-inning bonus challenges.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
   hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent

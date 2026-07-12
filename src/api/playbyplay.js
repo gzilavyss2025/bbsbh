@@ -59,6 +59,77 @@ const STOPPAGE_EVENTS = new Set([
   'defensive_switch',
 ])
 
+// statsapi event descriptions arrive Title-Cased ("Defensive Substitution:
+// David Hamilton replaces Sal Frelick…"). The play-by-play event notes read as
+// natural sentences (they're caps-exempt in the CSS), so lowercase the
+// Title-Case LABEL that prefixes the first colon — all but its first word — and
+// leave the sentence body untouched (it already carries natural-case player
+// names). A description with no "Label:" prefix ("Lawrence Butler remains in the
+// game as the right fielder.") is already sentence-case and passes through. The
+// transform never changes the string's length, so name offsets computed by
+// linkifyNames stay valid.
+export function sentenceCaseEventText(text) {
+  if (!text) return text
+  const ci = text.indexOf(':')
+  if (ci === -1) return text
+  const label = text
+    .slice(0, ci)
+    .replace(/(\w)(\w*)/g, (m, first, tail, off) =>
+      off === 0 ? first + tail : first.toLowerCase() + tail,
+    )
+  return label + text.slice(ci)
+}
+
+// Mound-visit accounting for the notification bar. MLB gives each club 5 mound
+// visits through 9 innings and one more for each extra inning played; a visit is
+// charged to the DEFENSIVE club. Walks every play through (inning, half)
+// inclusive and, for the club fielding THIS half (the opposite of battingSide),
+// returns the running "visits remaining" AFTER each of its mound visits that
+// happened in this half, in order — so the bar on each mound-visit card shows
+// how many that club had left right after it. `allowed` grows with extra
+// innings; remaining never goes negative.
+export function moundVisitRemainings(feed, inning, half, battingSide) {
+  const defenseSide = battingSide === 'away' ? 'home' : 'away'
+  const allowed = 5 + Math.max(0, inning - 9)
+  const targetIdx = half === 'bottom' ? inning * 2 : inning * 2 - 1 // 1-based half order
+  let used = 0
+  const inHalf = []
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const pi = p.about?.inning
+    const ph = p.about?.halfInning // 'top' | 'bottom'
+    if (pi == null || ph == null) continue
+    const playIdx = ph === 'bottom' ? pi * 2 : pi * 2 - 1
+    if (playIdx > targetIdx) break
+    if ((ph === 'top' ? 'home' : 'away') !== defenseSide) continue
+    for (const e of p.playEvents ?? []) {
+      if (e.details?.eventType === 'mound_visit') {
+        used += 1
+        if (playIdx === targetIdx) inHalf.push(Math.max(0, allowed - used))
+      }
+    }
+  }
+  return inHalf
+}
+
+// The incoming pitcher's card fields for a mid-inning pitching-change note — the
+// same shape selectPrePitchChanges builds for a between-halves change, so both
+// render through the one PitcherNotice card. Name as "Last, First", jersey and
+// throwing hand off his gameData record.
+export function pitchingChangePitcher(feed, playerId) {
+  if (playerId == null) return null
+  const person = feed?.gameData?.players?.[`ID${playerId}`] ?? {}
+  const { last, first, useName } = personNameParts(person)
+  const name = last
+    ? `${last}${first ? `, ${useName || first}` : ''}`
+    : person.fullName ?? ''
+  return {
+    id: playerId,
+    name,
+    jersey: person.primaryNumber ?? '',
+    hand: person.pitchHand?.code ?? '',
+  }
+}
+
 // Swinging strike, swinging strike (blocked). Shared with derive.js.
 export const WHIFF_CODES = new Set(['S', 'W'])
 const FOUL_CODES = new Set(['F', 'L', 'T']) // foul, foul bunt, foul tip
@@ -383,8 +454,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       if (e.isPitch) continue
       const et = e.details?.eventType
       if (STOPPAGE_EVENTS.has(et)) {
-        const text = e.details.description
-        entries.push({ kind: 'event', eventType: et, text, segments: linkifyNames(text, nameIndex) })
+        const text = sentenceCaseEventText(e.details.description)
+        entries.push({
+          kind: 'event',
+          eventType: et,
+          text,
+          playerId: e.player?.id ?? null,
+          segments: linkifyNames(text, nameIndex),
+        })
       } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {
         // `e.player.id` on a baserunning playEvent is the runner it's about (the
         // stealer / picked-off man) — verified against a live steal — so a

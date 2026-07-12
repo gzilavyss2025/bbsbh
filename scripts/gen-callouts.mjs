@@ -1160,6 +1160,11 @@ for (const g of games) {
 
   outGames[g.gamePk] = {
     sportId,
+    // 'day' | 'night' | '' — the schedule endpoint's own copy of
+    // gameData.datetime.dayNight, carried here so the callout note builders
+    // can say "today"/"tonight" without needing the whole feed (see
+    // api/select.js's dayWordFor).
+    dayNight: g.dayNight ?? '',
     away: { teamId: awayId, name: teamMeta.get(awayId)?.name ?? '' },
     home: { teamId: homeId, name: teamMeta.get(homeId)?.name ?? '' },
     // The level's average reliever pitch count over the trailing window — the

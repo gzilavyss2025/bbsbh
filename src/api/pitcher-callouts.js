@@ -16,6 +16,8 @@
 //     threshold — computePitcherLines already keeps `ip`/`k` gated to
 //     `revealedThrough`, so nothing sealed is read here either.
 
+import { dayWordFor } from './select.js'
+
 // Innings pitched ("6.1" = 6⅓) -> outs, so a 6.0-or-better check compares
 // linearly. Self-contained copy of the same helper used elsewhere (teamLeaders.js,
 // gen-callouts.mjs) — not exported from either.
@@ -47,6 +49,7 @@ export function buildPitcherNotes(row, side, teamName, bundle) {
   const bullpen = bundle?.bullpen
   const notes = []
   const team = teamName || 'His team'
+  const word = dayWordFor(bundle?.dayNight)
 
   if (rec.homeAway) {
     const wl = rec.homeAway[side]
@@ -56,7 +59,7 @@ export function buildPitcherNotes(row, side, teamName, bundle) {
     notes.push(`${rec.cgShutout} complete game${rec.cgShutout === 1 ? '' : 's'}/shutout${rec.cgShutout === 1 ? '' : 's'} this season`)
   }
   if (rec.scorelessStreak > 1) {
-    notes.push(`Riding a ${rec.scorelessStreak}-outing scoreless streak entering tonight`)
+    notes.push(`Riding a ${rec.scorelessStreak}-outing scoreless streak entering ${word}`)
   }
 
   // Bullpen workload — a reliever who's been ridden hard lately, measured in
@@ -86,7 +89,7 @@ export function buildPitcherNotes(row, side, teamName, bundle) {
         `Pitching on back-to-back days — he has a ${rec.backToBack.era.toFixed(2)} ERA on no rest this season (${rec.backToBack.restEra.toFixed(2)} otherwise)`,
       )
     } else {
-      notes.push('Pitching on back-to-back days tonight')
+      notes.push(`Pitching on back-to-back days ${word}`)
     }
   }
 
