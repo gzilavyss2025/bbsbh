@@ -18,6 +18,7 @@ import { PitcherNotice } from './PitcherNotice.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
+import { HighlightSheet } from './HighlightSheet.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
 // appearance (pitch-dot sequence, scorebook-style out notation, RBI tag, and
@@ -25,7 +26,7 @@ import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './Strik
 // notes, first at-bat first. This reads score-revealing data
 // (computeHalfInningFeed), so — same rule as the rest of the half's stat
 // grid — it must only be rendered from inside a SealBox's reveal function.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam, highlightsMap }) {
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
 
@@ -63,6 +64,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
               key={`${entry.batterId}-${i}`}
               entry={entry}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, progress }}
+              highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
             />
           )
         }
@@ -226,9 +228,10 @@ function EjectionBar({ text }) {
   )
 }
 
-function AtBatCard({ entry, calloutCtx }) {
+function AtBatCard({ entry, calloutCtx, highlight }) {
   const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
+  const [highlightOpen, setHighlightOpen] = useState(false)
   const calloutNotes = buildCallouts(entry, calloutCtx)
   // The pitch-zone diagram only exists where the park tracked plate locations
   // (most MiLB parks don't). On a phone it opens in a modal from an icon button
@@ -295,6 +298,18 @@ function AtBatCard({ entry, calloutCtx }) {
             <StrikeZoneGlyph className="pbp__zoneicon" />
           </button>
         )}
+        {/* Generic label only — never the clip's own title/description, which
+            would spoil the play for anyone glancing at the card before
+            reading the prose above it (see HighlightSheet's spoiler note). */}
+        {highlight && (
+          <button
+            type="button"
+            className="pbp__hlbtn"
+            onClick={() => setHighlightOpen(true)}
+          >
+            <span className="pbp__hlicon" aria-hidden="true">▶</span> Watch highlight
+          </button>
+        )}
       </div>
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
@@ -341,6 +356,9 @@ function AtBatCard({ entry, calloutCtx }) {
           pitcher={entry.pitcher?.last}
           onClose={() => setZoneOpen(false)}
         />
+      )}
+      {highlightOpen && highlight && (
+        <HighlightSheet item={highlight} onClose={() => setHighlightOpen(false)} />
       )}
     </div>
   )

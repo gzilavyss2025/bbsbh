@@ -626,6 +626,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         // run. Spoiler-free to READ here — this whole module is reveal-only.
         atBatIndex: play.about?.atBatIndex ?? null,
         eventType: play.result?.eventType ?? null,
+        // The terminal pitch's playId — matches a video highlight clip's guid
+        // 1:1 (see api/highlights.js). Verified against both batted-ball and
+        // strikeout-ending plays; null when the PA has no pitch events on
+        // record (shouldn't happen for a real PA, but null-guard anyway).
+        playId: pitchEvents.at(-1)?.playId ?? null,
         batter,
         pitcher,
         pitches,
