@@ -4599,6 +4599,32 @@ body {
   display: none;
 }
 
+/* "Watch highlight" — sits in the same bottom-left whitespace as the zone
+   icon button, generic text label only (never the clip's own title, which
+   would spoil the play — see PlayByPlay.jsx). Present only on the small
+   fraction of plays with a matched clip. */
+.pbp__hlbtn {
+  margin-top: 7px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+.pbp__hlicon {
+  font-size: 10px;
+}
+
 /* Strike-zone modal — reuses the .scrim backdrop (see below), a centered card
    like the logo modal. */
 .szmodal {
@@ -10118,4 +10144,76 @@ body {
   font-size: 11px;
   color: var(--graphite-soft);
   text-align: center;
+}
+
+/* ---------------------------------------------------------- highlight sheet
+   The "Watch highlight" bottom sheet (see HighlightSheet.jsx). Same .scrim/
+   .sheet dialog contract as the ballpark sheet — docked, slide-up, safe-area
+   padding — carrying a 16:9 video instead of a diagram. */
+.hlsheet {
+  max-height: min(90vh, 640px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.hlsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hlsheet__head .sheet__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+}
+
+.hlsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hlsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.hlsheet__video {
+  margin: 12px 0 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.hlsheet__video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.hlsheet__empty {
+  margin: 12px 0 0;
+  padding: 32px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--surface-card);
+  border-radius: var(--radius-sm);
+}
+
+.hlsheet__desc {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
 }

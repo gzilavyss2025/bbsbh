@@ -48,6 +48,7 @@ export function GameView({ game, section, onSection }) {
     broadcast,
     formerTeammatesData,
     vsTeamSplitsData,
+    highlightsData,
     started,
   } = useGameData(game)
 
@@ -239,6 +240,7 @@ export function GameView({ game, section, onSection }) {
           prospectsData={prospectsData}
           callouts={gameCallouts}
           vsTeam={vsTeamSplitsData}
+          highlights={highlightsData}
         />
       )}
       {feed && step === 3 && (

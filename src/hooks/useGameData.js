@@ -5,6 +5,7 @@ import {
   fetchPitcherSeasonLine,
   fetchWinProbability,
 } from '../api/game.js'
+import { fetchHighlights } from '../api/highlights.js'
 import { fetchGameUniforms, uniformSummary } from '../api/uniforms.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
@@ -116,6 +117,14 @@ export function useGameData(game) {
   // off-MLB, hiding the card.
   const winProb = useAsyncOnFeed(feed, () => fetchWinProbability(game.gamePk), [game.gamePk])
 
+  // Video highlight clips for this game (see api/highlights.js) — fetched
+  // lazily once the feed exists, same tier as win probability. The fetch
+  // itself is safe eagerly (nothing here is score-revealing until a clip is
+  // matched to a specific already-revealed play); resolves [] on failure or
+  // off-MLB (most MiLB games carry no clips) and the innings view simply
+  // shows no "Watch highlight" buttons.
+  const highlights = useAsyncOnFeed(feed, () => fetchHighlights(game.gamePk), [game.gamePk])
+
   // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
   // gamesStarted-ratio/saves heuristic the team page badges pitchers with
   // (see rosterPitcherRole). The live feed carries no season stats, so this is
@@ -213,6 +222,7 @@ export function useGameData(game) {
     broadcast,
     formerTeammatesData,
     vsTeamSplitsData,
+    highlightsData: highlights.data ?? null,
     started,
   }
 }

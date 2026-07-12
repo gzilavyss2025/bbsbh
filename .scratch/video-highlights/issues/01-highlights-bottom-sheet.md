@@ -1,4 +1,4 @@
-Status: needs-triage
+Status: ready-for-human
 
 # Watch-highlight bottom sheet on revealed plate appearances
 
@@ -156,19 +156,23 @@ bottom-left card whitespace area.
 
 ## 6. Spoiler audit checklist (must all be true before merge)
 
-- [ ] `fetchHighlights` firing (the network call) never puts a clip's
+- [x] `fetchHighlights` firing (the network call) never puts a clip's
       `title`/`description`/`guid` into the render tree — only the fetch
       result state, which is inert until §3's lookup happens inside an
       already-revealed `AtBatCard`.
-- [ ] No `poster`/thumbnail image renders before tap.
-- [ ] The "Watch highlight" button's own label is generic, not the clip's
+- [x] No `poster`/thumbnail image renders before tap.
+- [x] The "Watch highlight" button's own label is generic, not the clip's
       title (never render `highlight.title` or `.description` as visible
       text on the unopened button — only after the sheet is open, where the
       play itself is already revealed prose on the card above it, so the
       clip's title carries no additional spoiler risk at that point).
-- [ ] A half that is not yet revealed never renders a highlight button, even
+      Verified via Playwright: button text is exactly "▶ Watch highlight",
+      and the clip title string is absent from the page body until tapped.
+- [x] A half that is not yet revealed never renders a highlight button, even
       transiently (confirm via the same manual "does this leak on the
-      sealed page" check the other reveal-only work uses).
+      sealed page" check the other reveal-only work uses). Verified: 0
+      `.pbp__hlbtn` nodes on an unrevealed half (`bottom3`), 0 before reveal
+      on the target half, 1 after tapping Reveal.
 
 ## Where this touches
 
@@ -190,12 +194,44 @@ bottom-left card whitespace area.
    button appears only on that play's card, only after reveal, and opens a
    sheet that actually plays the clip on an iPhone (Safari — PWA install if
    possible, per root `CLAUDE.md`'s screenshot-unreliable-in-sandbox note).
-2. Confirm a routine single/groundout play renders no button.
+   Done via Playwright against gamePk 823357 (this sandbox could reach
+   statsapi.mlb.com this session) — Chromium only, not Safari/iPhone; a real
+   device pass is still worth doing before shipping.
+2. Confirm a routine single/groundout play renders no button. Implicitly
+   covered — only 1 of many at-bat cards on the tested half rendered a
+   button.
 3. Strikeout-clip join already verified in §2 (2026-07-12, gamePk 823357) —
-   sanity-check one strikeout highlight end-to-end in the running app anyway
-   as part of this pass, since §2's check was against raw API responses only.
-4. Confirm sealed (unrevealed) halves show zero highlight buttons — tap
-   through from a fresh game load, inspect the DOM before revealing.
-5. `npm run lint` / `npm run build` before pushing (root `CLAUDE.md`).
+   confirmed again end-to-end in the running app: revealing top 3 rendered
+   exactly one "Watch highlight" button, on Garrett Mitchell's strikeout
+   card, opening a sheet titled "Braxton Ashcraft strikes out Garrett
+   Mitchell" playing the correct `.m3u8`.
+4. Confirmed sealed (unrevealed) halves show zero highlight buttons — 0 on
+   `bottom3` (not yet reached).
+5. `npm run lint` and `npm run build` both pass clean in the implementation
+   worktree.
 
 ## Comments
+
+**2026-07-12 — implementation drafted.** All of §1–§6 implemented on branch
+`feat/video-highlights-bottom-sheet-wt` in an isolated worktree
+(`/Users/garyzilavy/bbsbh-video-highlights` — a sibling main-repo checkout was
+mid-edit on unrelated files at the same time, so a plain `checkout -b` in the
+shared directory wasn't safe isolation; moved to a real `git worktree` instead
+and left the other in-progress work untouched). Files touched exactly match
+the "Where this touches" list, plus `src/components/PlayByPlay.jsx` (the
+actual button/sheet-open wiring lives in `AtBatCard`, not a new file) and
+`src/hooks/useGameData.js` (the lazy fetch lives in the existing per-game data
+hook, mirroring `winProb`'s wiring, rather than directly in `GameView.jsx`).
+
+Sheet implementation reused the app's existing `.scrim`/`.sheet` docked-sheet
+dialog contract (`BallparkModal.jsx`'s pattern) instead of building new
+gesture/swipe mechanics — no other modal in the codebase has drag-to-dismiss,
+so inventing one here would have been a bigger footprint than the PRD
+intended. `StrikeZoneModal` precedent for local (not lifted) per-card open
+state was followed for the sheet too — `AtBatCard` owns `highlightOpen`
+alongside its existing `zoneOpen`.
+
+Not yet done: a real-device Safari/iPhone playback check (native HLS support
+assumed but only checked via HLS URL correctness + Chromium's `<source>`
+resolution, not actual playback), and a code review pass. Changes are
+committed nowhere yet — sitting uncommitted in the worktree pending review.
