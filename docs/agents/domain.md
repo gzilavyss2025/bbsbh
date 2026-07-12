@@ -2,6 +2,19 @@
 
 How the engineering skills should consume this repo's domain documentation when exploring the codebase.
 
+## Doc tiers
+
+Guidance is split by how often it's needed, so the always-loaded file stays lean:
+
+- **Root `CLAUDE.md`** — always loaded every session: the project one-liner, the
+  spoiler-rule invariant, the high-level map, and pointers. Kept under 200 lines
+  (guarded by `scripts/check-claude-md.mjs`).
+- **Nested `CLAUDE.md`** — `src/`, `src/api/`, `scripts/`: subsystem detail that
+  Claude Code loads only when it navigates into that directory. Put per-module /
+  per-script detail here, not in root.
+- **`docs/*` + `docs/adr/` + `CONTEXT.md`** — reference material and rationale,
+  read on demand.
+
 ## Before exploring, read these
 
 - **`CONTEXT.md`** at the repo root, or
