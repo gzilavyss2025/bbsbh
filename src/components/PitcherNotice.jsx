@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { realHeadshotUrl } from '../lib/teams.js'
+import { PlayerLink } from './PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
 // his name / number / throwing hand, on the seal-amber attention surface. Shared
@@ -20,7 +21,7 @@ export function PitcherNotice({ pitcher, teamName, className = '' }) {
           Now pitching{teamName ? ` for the ${teamName}` : ''}
         </span>
         <span className="pitchernotice__pitcher">
-          {pitcher.name}
+          <PlayerLink id={pitcher.id}>{pitcher.name}</PlayerLink>
           {pitcher.jersey ? ` ${pitcher.jersey}` : ''}
           {pitcher.hand ? ` | ${pitcher.hand}HP` : ''}
         </span>

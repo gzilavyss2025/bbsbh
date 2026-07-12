@@ -46,18 +46,36 @@ export const NON_PA_EVENT_TYPES = new Set([
 ])
 
 // Non-pitch playEvents that get their own interstitial note in the feed: mound
-// visits, pitching changes, and the fielding-side moves (a fresh defender, or a
-// player who stays in the game at a new position — 'X remains in the game as
-// the right fielder'). These live INSIDE a play's playEvents, at the start of
-// whichever plate appearance follows the stoppage, so they're already gated to
-// the half being revealed. Offensive subs are skipped — a pinch-hitter shows up
-// as his own batting row, a pinch-runner as the baserunner he becomes.
+// visits, pitching changes, ejections, and the fielding-side moves (a fresh
+// defender, or a player who stays in the game at a new position — 'X remains
+// in the game as the right fielder'). These live INSIDE a play's playEvents,
+// at the start of whichever plate appearance follows the stoppage, so they're
+// already gated to the half being revealed. Offensive subs are mostly skipped
+// — a pinch-hitter shows up as his own batting row — except a pinch-RUNNER,
+// which gets its own notification pushed separately below (see the main loop)
+// since it happens mid-flow, distinct from the batter-card annotation that
+// also strikes the replaced runner's name.
 const STOPPAGE_EVENTS = new Set([
   'mound_visit',
   'pitching_substitution',
   'defensive_substitution',
   'defensive_switch',
+  'ejection',
 ])
+
+// Position abbreviation -> lowercase phrase, for "now playing {phrase}" on a
+// defensive-substitution notice. No DH entry — a DH never takes the field.
+const POSITION_LOWER = {
+  C: 'catcher',
+  '1B': 'first base',
+  '2B': 'second base',
+  '3B': 'third base',
+  SS: 'shortstop',
+  LF: 'left field',
+  CF: 'center field',
+  RF: 'right field',
+  P: 'pitcher',
+}
 
 // statsapi event descriptions arrive Title-Cased ("Defensive Substitution:
 // David Hamilton replaces Sal Frelick…"). The play-by-play event notes read as
@@ -128,6 +146,43 @@ export function pitchingChangePitcher(feed, playerId) {
     jersey: person.primaryNumber ?? '',
     hand: person.pitchHand?.code ?? '',
   }
+}
+
+// The incoming fielder's card fields for a mid-inning defensive-substitution
+// note (see FielderNotice) — same "Last, First" + jersey shape as
+// pitchingChangePitcher, plus the lowercase position phrase for "now playing
+// {position}". `positionAbbr` comes off the same playEvent (`position.abbreviation`)
+// computeHalfInningFeed already carries on the entry.
+export function defensiveChangeFielder(feed, playerId, positionAbbr) {
+  if (playerId == null) return null
+  const person = feed?.gameData?.players?.[`ID${playerId}`] ?? {}
+  const { last, first, useName } = personNameParts(person)
+  const name = last
+    ? `${last}${first ? `, ${useName || first}` : ''}`
+    : person.fullName ?? ''
+  return {
+    id: playerId,
+    name,
+    jersey: person.primaryNumber ?? '',
+    position: POSITION_LOWER[positionAbbr] ?? '',
+  }
+}
+
+// The incoming pinch runner + the runner he replaced, for a mid-inning
+// pinch-running note (see PinchRunNotice) — pushed at the moment the swap
+// happens, distinct from the retroactive strike-through this same swap also
+// leaves on the replaced batter's own card (see the prSubs bookkeeping below).
+export function pinchRunningPlayers(feed, pinchId, replacedId) {
+  const nameOf = (id) => {
+    if (id == null) return null
+    const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
+    const { last, first, useName } = personNameParts(person)
+    const name = last
+      ? `${last}${first ? `, ${useName || first}` : ''}`
+      : person.fullName ?? ''
+    return { id, name, jersey: person.primaryNumber ?? '' }
+  }
+  return { runner: nameOf(pinchId), replaced: nameOf(replacedId) }
 }
 
 // Swinging strike, swinging strike (blocked). Shared with derive.js.
@@ -460,6 +515,23 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
           eventType: et,
           text,
           playerId: e.player?.id ?? null,
+          position: et === 'defensive_substitution' ? e.position?.abbreviation ?? '' : undefined,
+          segments: linkifyNames(text, nameIndex),
+        })
+      } else if (et === 'offensive_substitution' && e.position?.abbreviation === 'PR') {
+        // A pinch runner entering mid-flow — its own notification at the
+        // moment it happens (see pinchRunningPlayers), separate from the
+        // strike-through this same swap leaves on the replaced runner's card.
+        // text/segments are a fallback only (EventNote), for the vanishingly
+        // unlikely case the incoming runner isn't in gameData.players.
+        const text = sentenceCaseEventText(e.details?.description ?? '')
+        entries.push({
+          kind: 'event',
+          eventType: 'pinch_running',
+          pinchId: e.player?.id ?? null,
+          replacedId: e.replacedPlayer?.id ?? null,
+          base: e.base ?? null,
+          text,
           segments: linkifyNames(text, nameIndex),
         })
       } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {

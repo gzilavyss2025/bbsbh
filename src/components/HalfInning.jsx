@@ -122,6 +122,7 @@ export function HalfInning({
                 half={half}
                 battingSide={battingSide}
                 pitchingName={battingSide === 'away' ? homeName : awayName}
+                battingName={battingSide === 'away' ? awayName : homeName}
                 callouts={callouts}
                 vsTeam={vsTeam}
               />

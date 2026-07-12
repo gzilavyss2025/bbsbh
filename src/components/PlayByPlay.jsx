@@ -7,12 +7,16 @@ import {
   firstPAIndexByBatter,
   moundVisitRemainings,
   pitchingChangePitcher,
+  defensiveChangeFielder,
+  pinchRunningPlayers,
 } from '../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
+import { FielderNotice } from './FielderNotice.jsx'
+import { PinchRunNotice } from './PinchRunNotice.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
@@ -21,7 +25,7 @@ import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './Strik
 // notes, first at-bat first. This reads score-revealing data
 // (computeHalfInningFeed), so — same rule as the rest of the half's stat
 // grid — it must only be rendered from inside a SealBox's reveal function.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, callouts, vsTeam }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam }) {
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
 
@@ -84,6 +88,47 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, call
         if (entry.eventType === 'mound_visit') {
           return <MoundVisitBar key={`event-${i}`} team={pitchingName} remaining={entry.mvRemaining} />
         }
+        // A defensive substitution (a fresh fielder entering) gets the same
+        // headshot card as a pitching change. A defensive SWITCH (a player
+        // already in the game moving positions) stays a plain EventNote below
+        // — falls through with mound visits' non-entrant siblings.
+        if (entry.eventType === 'defensive_substitution') {
+          const fielder = defensiveChangeFielder(feed, entry.playerId, entry.position)
+          return fielder ? (
+            <FielderNotice
+              key={`event-${i}`}
+              fielder={fielder}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
+          ) : (
+            <EventNote key={`event-${i}`} entry={entry} />
+          )
+        }
+        // An ejection is a thin notification bar, same weight as a mound
+        // visit — the description sentence already carries every detail
+        // (who, by which umpire), so there's nothing else to add to a card.
+        if (entry.eventType === 'ejection') {
+          return <EjectionBar key={`event-${i}`} text={entry.text} />
+        }
+        // A pinch runner entering mid-flow gets the same headshot card as a
+        // pitching/defensive change — on the BATTING team's side, since he's
+        // an offensive substitution, not the fielding team the other cards
+        // key off of.
+        if (entry.eventType === 'pinch_running') {
+          const { runner, replaced } = pinchRunningPlayers(feed, entry.pinchId, entry.replacedId)
+          return runner ? (
+            <PinchRunNotice
+              key={`event-${i}`}
+              runner={runner}
+              replaced={replaced}
+              teamName={battingName}
+              className="pitchernotice--pbp"
+            />
+          ) : (
+            <EventNote key={`event-${i}`} entry={entry} />
+          )
+        }
         return <EventNote key={`event-${i}`} entry={entry} />
       })}
     </div>
@@ -95,6 +140,8 @@ const EVENT_ICONS = {
   pitching_substitution: '🔄',
   defensive_substitution: '👥',
   defensive_switch: '🧤',
+  ejection: '🚫',
+  pinch_running: '🏃',
   // Baserunning events — used when one has no plate appearance to hang on and
   // renders as its own note (see computeHalfInningFeed's non-PA fallback).
   stolen_base_2b: '🏃', stolen_base_3b: '🏃', stolen_base_home: '🏃',
@@ -160,6 +207,21 @@ function MoundVisitBar({ team, remaining }) {
           {remaining} {remaining === 1 ? 'visit' : 'visits'} left
         </span>
       )}
+    </div>
+  )
+}
+
+// An ejection: a thin full-width strip like a mound visit, but in the
+// negative/warning accent — the description sentence already carries every
+// detail worth showing (who, by which umpire), so there's nothing to add
+// beyond an icon and the sentence itself.
+function EjectionBar({ text }) {
+  return (
+    <div className="ejectbar">
+      <span className="ejectbar__icon" aria-hidden="true">
+        🚫
+      </span>
+      <span className="ejectbar__label">{text}</span>
     </div>
   )
 }
