@@ -105,6 +105,25 @@ function missRegion(pX, pZ, top, bot, batSide) {
   return region
 }
 
+// Place a called pitch in a 3×3 zone grid (row-major, index = row*3 + col) for
+// the umpire-page zone map. Rows split the batter's own zone by normalized
+// height zn = (pZ - bot) / (top - bot): top third (zn > 2/3, anything above the
+// zone folds in), middle, bottom third (zn < 1/3, anything below folds in).
+// Columns split the rule-book plate into thirds oriented to the batter (bx > 0
+// = inside), off-plate pitches folding into the inside/outside columns: col 0 =
+// outside, col 1 = middle, col 2 = inside. Every called judgment lands in
+// exactly one cell, so the three per-cell tallies (called / called-strike /
+// missed) feed both the perceived-zone shading and the over-average-miss
+// overlay without storing any raw coordinates.
+function cellIndex(pX, pZ, top, bot, batSide) {
+  const bx = batSide === 'L' ? -pX : pX
+  const third = HALF_PLATE / 3
+  const zn = top > bot ? (pZ - bot) / (top - bot) : 0.5
+  const row = zn > 2 / 3 ? 0 : zn < 1 / 3 ? 2 : 1
+  const col = bx > third ? 2 : bx < -third ? 0 : 1
+  return row * 3 + col
+}
+
 function computeGameAccuracy(feed) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   let called = 0
@@ -112,6 +131,11 @@ function computeGameAccuracy(feed) {
   let expanded = 0 // called strike, out of zone → generous
   let squeezed = 0 // called ball, in zone → tight
   const region = { high: 0, low: 0, inside: 0, outside: 0 }
+  // 3×3 zone-map tallies (see cellIndex): all called judgments, how many were
+  // called strikes (perceived zone), and how many were wrong (miss overlay).
+  const cellCalled = Array(9).fill(0)
+  const cellStrikeCall = Array(9).fill(0)
+  const cellMiss = Array(9).fill(0)
 
   for (const p of plays) {
     const batSide = p.matchup?.batSide?.code ?? 'R'
@@ -131,7 +155,10 @@ function computeGameAccuracy(feed) {
       const inZ = c.pZ <= top + BALL_R && c.pZ >= bot - BALL_R
       const actualStrike = inX && inZ
 
+      const cell = cellIndex(c.pX, c.pZ, top, bot, batSide)
       called++
+      cellCalled[cell]++
+      if (strikeCall) cellStrikeCall[cell]++
       if (actualStrike === strikeCall) {
         correct++
         continue
@@ -139,16 +166,20 @@ function computeGameAccuracy(feed) {
       if (strikeCall) expanded++
       else squeezed++
       region[missRegion(c.pX, c.pZ, top, bot, batSide)]++
+      cellMiss[cell]++
     }
   }
 
   if (called === 0) return null
-  return { called, correct, expanded, squeezed, ...region }
+  return { called, correct, expanded, squeezed, ...region, cellCalled, cellStrikeCall, cellMiss }
 }
 
 // --- season aggregate from a umpire's game rows -------------------------------
 function aggregate(games) {
   const sum = { games: games.length, called: 0, correct: 0, expanded: 0, squeezed: 0, high: 0, low: 0, inside: 0, outside: 0 }
+  const cellCalled = Array(9).fill(0)
+  const cellStrikeCall = Array(9).fill(0)
+  const cellMiss = Array(9).fill(0)
   for (const g of games) {
     sum.called += g.called
     sum.correct += g.correct
@@ -158,8 +189,18 @@ function aggregate(games) {
     sum.low += g.low
     sum.inside += g.inside
     sum.outside += g.outside
+    // Cell arrays only exist on rows swept after the zone-map schema shipped; an
+    // older row simply contributes nothing to the grid (its totals still count).
+    for (let i = 0; i < 9; i++) {
+      cellCalled[i] += g.cellCalled?.[i] ?? 0
+      cellStrikeCall[i] += g.cellStrikeCall?.[i] ?? 0
+      cellMiss[i] += g.cellMiss?.[i] ?? 0
+    }
   }
   sum.accuracy = sum.called ? sum.correct / sum.called : null
+  sum.cellCalled = cellCalled
+  sum.cellStrikeCall = cellStrikeCall
+  sum.cellMiss = cellMiss
   return sum
 }
 

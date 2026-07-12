@@ -24,6 +24,12 @@
 // Degrades to null before the file exists or on any failure.
 let cached = null
 let accuracyCached = null
+let indexCached = null
+
+// A plate umpire needs at least this many scored games before we rank him among
+// his peers — below it a hot/cold handful of games would swing the ordering
+// wildly. Tunable; a plate ump reaches it within the first few weeks of work.
+const MIN_RANK_GAMES = 5
 
 async function load() {
   if (cached) return cached
@@ -49,6 +55,59 @@ async function loadAccuracy() {
     accuracyCached = { season: null, umpires: {} }
   }
   return accuracyCached
+}
+
+// One pass over the whole accuracy file (memoized) that both surfaces need:
+//   • rankById — each qualifying umpire's { rank, total } in season plate
+//     accuracy, best first. Only umpires with >= MIN_RANK_GAMES scored games
+//     qualify; everyone else has no rank (the surfaces then omit it).
+//   • leagueShare — the league-wide distribution of MISSED calls across the
+//     3×3 zone grid, normalized to shares. It's the "typical umpire" baseline
+//     the zone map compares each umpire against (a cell where he misses a
+//     bigger share than the league is where he's worse than average).
+async function accuracyIndex() {
+  if (indexCached) return indexCached
+  const { umpires } = await loadAccuracy()
+  const all = Object.values(umpires)
+
+  const qualified = all
+    .filter((u) => u.season?.called && u.season.accuracy != null && (u.season.games ?? 0) >= MIN_RANK_GAMES)
+    .sort((a, b) => b.season.accuracy - a.season.accuracy)
+  const rankById = new Map()
+  qualified.forEach((u, i) => rankById.set(String(u.id), { rank: i + 1, total: qualified.length }))
+
+  const leagueMiss = Array(9).fill(0)
+  for (const u of all) {
+    const cm = u.season?.cellMiss
+    if (!cm) continue
+    for (let i = 0; i < 9; i++) leagueMiss[i] += cm[i] ?? 0
+  }
+  const missTotal = leagueMiss.reduce((a, b) => a + b, 0)
+  const leagueShare = leagueMiss.map((m) => (missTotal ? m / missTotal : 0))
+
+  indexCached = { rankById, leagueShare }
+  return indexCached
+}
+
+// Shape a season aggregate's 3×3 cell tallies into what the zone map draws: per
+// cell, the umpire's called-STRIKE rate (his perceived zone — how often he
+// rings a pitch up there) and `over`, how much of his misses cluster in that
+// cell above the league baseline (> 0 = he's worse there than a typical ump).
+// Returns null for rows predating the cell schema (no grid to draw).
+export function umpireZoneCells(season, leagueShare) {
+  if (!season?.cellCalled) return null
+  const missTotal = (season.cellMiss ?? []).reduce((a, b) => a + b, 0)
+  return season.cellCalled.map((called, i) => {
+    const strikes = season.cellStrikeCall?.[i] ?? 0
+    const miss = season.cellMiss?.[i] ?? 0
+    const umpShare = missTotal ? miss / missTotal : 0
+    return {
+      called,
+      miss,
+      strikeRate: called ? strikes / called : null,
+      over: umpShare - (leagueShare?.[i] ?? 0),
+    }
+  })
 }
 
 // Turn a season aggregate into a short tendency phrase for the UI. A plate ump
@@ -84,24 +143,42 @@ function accuracyFor(umpires, id) {
   return { season: a.season, byGamePk }
 }
 
-// { id, name, games, season, generatedAt, accuracy } for one umpire, or null if
-// he hasn't worked a game this season (or the file failed to load). `accuracy`
-// is null when he has no plate-accuracy data (MiLB, or no scored games yet).
+// { id, name, games, season, generatedAt, accuracy, rank, zoneCells } for one
+// umpire, or null if he hasn't worked a game this season (or the file failed to
+// load). `accuracy` is null when he has no plate-accuracy data (MiLB, or no
+// scored games yet); `rank` ({ rank, total }) is null when he's below the
+// ranking floor; `zoneCells` is null when his rows predate the cell schema.
 export async function loadUmpire(id) {
-  const [{ umpires, season, generatedAt }, acc] = await Promise.all([load(), loadAccuracy()])
+  const [{ umpires, season, generatedAt }, acc, idx] = await Promise.all([load(), loadAccuracy(), accuracyIndex()])
   const u = umpires[id]
   if (!u) return null
-  return { ...u, season, generatedAt, accuracy: accuracyFor(acc.umpires, id) }
+  const accuracy = accuracyFor(acc.umpires, id)
+  return {
+    ...u,
+    season,
+    generatedAt,
+    accuracy,
+    rank: idx.rankById.get(String(id)) ?? null,
+    zoneCells: accuracy ? umpireZoneCells(accuracy.season, idx.leagueShare) : null,
+  }
 }
 
 // Just the one-line fact for tonight's plate ump — { season, accuracy,
-// tendency } — or null when there's no accuracy data for this umpire (MiLB
-// games, or the file hasn't caught up). Keeps TeamInfo from needing the whole
+// tendency, rank, total } — or null when there's no accuracy data for this
+// umpire (MiLB games, or the file hasn't caught up). `rank`/`total` are null
+// when he's below the ranking floor. Keeps TeamInfo from needing the whole
 // game list.
 export async function umpireAccuracySummary(id) {
   if (id == null) return null
-  const acc = await loadAccuracy()
+  const [acc, idx] = await Promise.all([loadAccuracy(), accuracyIndex()])
   const rec = accuracyFor(acc.umpires, id)
   if (!rec) return null
-  return { season: acc.season, accuracy: rec.season.accuracy, tendency: accuracyTendency(rec.season) }
+  const rank = idx.rankById.get(String(id)) ?? null
+  return {
+    season: acc.season,
+    accuracy: rec.season.accuracy,
+    tendency: accuracyTendency(rec.season),
+    rank: rank?.rank ?? null,
+    total: rank?.total ?? null,
+  }
 }
