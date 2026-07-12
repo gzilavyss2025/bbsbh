@@ -110,11 +110,16 @@ for each generator; the reader modules:
   rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
   batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
   Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few
-  days' finals, deduped by gamePk. `loadUmpire` merges it in as `accuracy` (`{
-  season, byGamePk }`) for `UmpirePage.jsx`'s plate-accuracy card + per-HP-row
-  figures; `umpireAccuracySummary(id)` serves the one-line fact the lineup page's
-  Umpires card (`TeamInfo.jsx`) shows for tonight's plate ump. Still no `SealBox` —
-  accuracy counts ball/strike JUDGMENTS, not runs or hits, and the lineup one-liner
+  days' finals, deduped by gamePk. Each row also carries a 3×3 zone grid; a
+  memoized `accuracyIndex()` ranks every qualifying plate ump by season accuracy
+  (`MIN_RANK_GAMES` floor) and builds the league miss-share baseline the zone map
+  compares against. `loadUmpire` merges it all in as `accuracy` (`{ season,
+  byGamePk }`) + `rank` + `zoneCells` (via `umpireZoneCells`) for `UmpirePage.jsx`'s
+  plate-accuracy card (rank line + `UmpireZoneMap`) and per-HP-row figures;
+  `umpireAccuracySummary(id)` serves the rank the lineup page's Umpires card
+  (`TeamInfo.jsx`) shows for tonight's plate ump, which opens `UmpireAccuracyModal`
+  (zone map + last-5 plate games linking to their box scores). Still no `SealBox` —
+  accuracy counts ball/strike JUDGMENTS, not runs or hits, and the lineup rank
   aggregates Final games only, so it can't leak tonight's result. MLB-only; MiLB /
   umps with no data degrade to absent.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card (career line vs each

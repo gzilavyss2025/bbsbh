@@ -24,6 +24,7 @@ import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
+import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -273,13 +274,15 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
 }
 
 function Umpires({ officials }) {
-  // The plate ump's season called-pitch accuracy — a one-line staging fact
-  // under his name. Rides its own async load (keyed to his id) so it works
-  // for both this card and the wide LineupSpread that also renders <Umpires>.
-  // It's a season aggregate of Final games only, so it can't leak tonight's
-  // (unplayed) result; hidden entirely for MiLB / umps with no accuracy data.
+  // Under tonight's plate ump: his season RANK in called-pitch accuracy among
+  // all qualifying plate umpires, as a tap target that opens the accuracy modal
+  // (his zone map + last five plate games). Rides its own async load (keyed to
+  // his id) so it works for both this card and the wide LineupSpread that also
+  // renders <Umpires>. It's a season aggregate of Final games only, so it can't
+  // leak tonight's (unplayed) result; hidden for MiLB / umps with no data.
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
+  const [modalId, setModalId] = useState(null)
 
   if (officials.length === 0) return null
   return (
@@ -294,16 +297,18 @@ function Umpires({ officials }) {
                 {o.name}
               </UmpireLink>
               {o.role === 'HP' && hpAccuracy?.accuracy != null && (
-                <span className="umps__acc">
-                  {hpAccuracy.season ? `${hpAccuracy.season} ` : ''}
-                  {(hpAccuracy.accuracy * 100).toFixed(1)}% accuracy
+                <button type="button" className="plink umps__accbtn" onClick={() => setModalId(o.id)}>
+                  {hpAccuracy.rank
+                    ? `#${hpAccuracy.rank} of ${hpAccuracy.total} in plate accuracy`
+                    : `${(hpAccuracy.accuracy * 100).toFixed(1)}% plate accuracy`}
                   {hpAccuracy.tendency ? ` · ${hpAccuracy.tendency}` : ''}
-                </span>
+                </button>
               )}
             </span>
           </li>
         ))}
       </ul>
+      {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </section>
   )
 }
