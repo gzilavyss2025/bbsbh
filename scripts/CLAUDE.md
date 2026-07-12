@@ -49,9 +49,12 @@ don't run these by hand.
   one-call full rebuild, this is a feed fetch PER GAME — too costly to redo nightly
   for the whole season. Runs APPEND-ONLY/incremental like `gen-game-notes.mjs`: each
   run sweeps a small trailing window of finals and merges per-game rows in, deduped
-  by gamePk. Nightly cron uses the default trailing window; a one-time season
-  backfill is `--since=YYYY-MM-DD [--until=…]`. MLB-only. App reads it via
-  `src/api/umpires.js`. Full write-up: `.scratch/umpire-accuracy/plan.md`.
+  by gamePk. Each row also carries a 3×3 zone grid (`cellCalled`/`cellStrikeCall`/
+  `cellMiss`, `cellIndex`) that feeds the app's zone map (perceived-zone shading +
+  over-league-average miss overlay); a schema change means a one-time `--since`
+  backfill so old rows gain the grid. Nightly cron uses the default trailing window;
+  a one-time season backfill is `--since=YYYY-MM-DD [--until=…]`. MLB-only. App reads
+  it via `src/api/umpires.js`. Full write-up: `.scratch/umpire-accuracy/plan.md`.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so

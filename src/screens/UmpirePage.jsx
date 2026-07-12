@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { loadUmpire, accuracyTendency } from '../api/umpires.js'
+import { UmpireZoneMap } from '../components/UmpireAccuracyModal.jsx'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -77,7 +78,7 @@ function hpTeamRecords(games, limit) {
 // umpire has no accuracy data (MiLB, or no scored games yet), so it never
 // shows an empty shell. Called-pitch counts carry no score; see the plan's
 // spoiler audit.
-function PlateAccuracyCard({ accuracy }) {
+function PlateAccuracyCard({ accuracy, rank, zoneCells }) {
   const s = accuracy?.season
   if (!s || !s.called) return null
   const pct = (s.accuracy * 100).toFixed(1)
@@ -91,7 +92,21 @@ function PlateAccuracyCard({ accuracy }) {
           {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches
           {s.games > 0 && ` · ${s.games} ${s.games === 1 ? 'game' : 'games'} behind the plate`}
         </span>
+        {rank && (
+          <span className="umpage__accrank">
+            #{rank.rank} of {rank.total} among plate umpires
+          </span>
+        )}
       </div>
+      {zoneCells && (
+        <div className="umpage__acczone">
+          <UmpireZoneMap cells={zoneCells} />
+          <p className="umpage__acczonecap">
+            Darker cells are where he calls strikes; marked cells are where he misses more than a
+            typical umpire.
+          </p>
+        </div>
+      )}
       {tendency && (
         <p className="umpage__acctendency">
           {tendency.charAt(0).toUpperCase() + tendency.slice(1)}.
@@ -139,7 +154,7 @@ export function UmpirePage({ id }) {
       </header>
 
       <div className="umpage__cards">
-        <PlateAccuracyCard accuracy={data.accuracy} />
+        <PlateAccuracyCard accuracy={data.accuracy} rank={data.rank} zoneCells={data.zoneCells} />
 
         {teams.length > 0 && (
           <section className="umpage__card">
