@@ -170,6 +170,11 @@ List every file you expect to touch and keep the diff small.
 
 ## 3. Umpire plate-accuracy scorecards
 
+> **Implemented** (`scripts/gen-umpire-accuracy.mjs` →
+> `public/data/umpire-accuracy.json`, read by `src/api/umpires.js`; card on
+> `UmpirePage.jsx` + one-liner on `TeamInfo.jsx`). See
+> `.scratch/umpire-accuracy/plan.md` for the design that shipped.
+
 **What.** Extend the existing umpire pipeline with ball/strike accuracy:
 for every game an umpire works behind the plate, derive called-strike
 accuracy from the feed's per-pitch data (`pitchData.coordinates.pX/pZ`

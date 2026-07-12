@@ -42,6 +42,16 @@ don't run these by hand.
   log, indexed by umpire id. A full-season schedule scan
   (`/api/v1/schedule?...&hydrate=officials,team`, one call) re-indexed by umpire id.
   MLB-only.
+- `gen-umpire-accuracy.mjs` → `public/data/umpire-accuracy.json` — COMPANION to
+  `umpires.json`: each home-plate umpire's season called-pitch accuracy + a compact
+  zone-tendency breakdown, keyed by the same personId. Needs each game's full live
+  feed (per-pitch `pX/pZ` vs the batter's strike zone), so unlike `gen-umpires.mjs`'s
+  one-call full rebuild, this is a feed fetch PER GAME — too costly to redo nightly
+  for the whole season. Runs APPEND-ONLY/incremental like `gen-game-notes.mjs`: each
+  run sweeps a small trailing window of finals and merges per-game rows in, deduped
+  by gamePk. Nightly cron uses the default trailing window; a one-time season
+  backfill is `--since=YYYY-MM-DD [--until=…]`. MLB-only. App reads it via
+  `src/api/umpires.js`. Full write-up: `.scratch/umpire-accuracy/plan.md`.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so

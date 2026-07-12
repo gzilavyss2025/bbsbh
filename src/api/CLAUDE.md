@@ -103,7 +103,20 @@ for each generator; the reader modules:
   each official's `id` to the Umpires card (`TeamInfo.jsx`), rendered as an
   `UmpireLink` to `/umpire/{id}`; the page needs no `SealBox` (assignments + dates
   carry no score). Each entry carries the venue, so `UmpirePage.jsx` tallies
-  most-worked teams + ballparks client-side.
+  most-worked teams + ballparks client-side. A COMPANION file
+  `public/data/umpire-accuracy.json` (`gen-umpire-accuracy.mjs`, same cron) adds
+  each home-plate umpire's season called-pitch accuracy + a compact zone-tendency
+  breakdown, keyed by the same personId; unlike `umpires.json`'s cheap full nightly
+  rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
+  batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
+  Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few
+  days' finals, deduped by gamePk. `loadUmpire` merges it in as `accuracy` (`{
+  season, byGamePk }`) for `UmpirePage.jsx`'s plate-accuracy card + per-HP-row
+  figures; `umpireAccuracySummary(id)` serves the one-line fact the lineup page's
+  Umpires card (`TeamInfo.jsx`) shows for tonight's plate ump. Still no `SealBox` —
+  accuracy counts ball/strike JUDGMENTS, not runs or hits, and the lineup one-liner
+  aggregates Final games only, so it can't leak tonight's result. MLB-only; MiLB /
+  umps with no data degrade to absent.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card (career line vs each
   opposing club + last meeting's line, per MLB active-roster player), from
   `public/data/vs-team-splits.json`. Cost-driven: the API's vs-team split types
