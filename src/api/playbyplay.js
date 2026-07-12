@@ -459,7 +459,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   )
 
   const entries = []
-  const originIndex = new Map() // batterId -> index of their own atbat card
+  // batterId -> index of his CURRENT (most recent) atbat card. A batter who
+  // bats around comes up more than once in the half; this always points at
+  // his latest trip, never a stale earlier one.
+  const originIndex = new Map()
   const nameIndex = buildNameIndex(feed)
 
   // Pinch runners: an `offensive_substitution` whose incoming man is a Runner
@@ -472,18 +475,6 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
   // Field paths (player.id incoming, replacedPlayer.id outgoing,
   // position.abbreviation, numeric `base`) verified against gamePk 776137/776141.
   const prAlias = new Map() // pinch-runner id -> replaced runner id
-  const prSubs = [] // { pinchId, replacedId, base }, in game order
-  for (const play of plays) {
-    for (const e of play.playEvents ?? []) {
-      if (e.details?.eventType !== 'offensive_substitution') continue
-      if (e.position?.abbreviation !== 'PR') continue
-      const pinchId = e.player?.id
-      const replacedId = e.replacedPlayer?.id
-      if (pinchId == null || replacedId == null) continue
-      prAlias.set(pinchId, replacedId)
-      prSubs.push({ pinchId, replacedId, base: e.base ?? null })
-    }
-  }
   // Resolve a runner id to the card-owning batter, following pinch-runner swaps
   // to their root (an id that never pinch-ran returns unchanged).
   const rootRunner = (id) => {
@@ -494,6 +485,25 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       cur = prAlias.get(cur)
     }
     return cur
+  }
+
+  // Advancement tracking, per batter. A batter can only lead off a second
+  // plate appearance in the same half (the lineup batting around) once his
+  // first trip on the bases is fully resolved — scored or put out, since he
+  // can't simultaneously be a live baserunner and the man due up — so these
+  // maps hold at most one LIVE trip per batter id at a time. `finalizeTrip`
+  // snapshots the current trip onto its card; called both when a repeat
+  // batter's new card bumps out the old trip, and once at the end for every
+  // batter's final (or only) trip.
+  const progress = new Map() // batterId -> furthest base of his current trip (1-3, 4 = run)
+  const legs = new Map() // batterId -> { baseNum: { code, slot } } for his current trip
+  const finalizeTrip = (batterId) => {
+    const cardIndex = originIndex.get(batterId)
+    if (cardIndex == null) return
+    const base = progress.get(batterId) ?? 0
+    entries[cardIndex].scored = base === 4
+    entries[cardIndex].reached = base
+    entries[cardIndex].legNotations = legs.get(batterId) ?? {}
   }
 
   for (const play of plays) {
@@ -534,6 +544,22 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
           text,
           segments: linkifyNames(text, nameIndex),
         })
+        // Alias + attach right here, at the moment the swap happens, so a
+        // batter who bats around later (and gets a fresh card + originIndex
+        // entry) doesn't retroactively steal a pinch-runner note that
+        // belonged to his earlier trip.
+        const pinchId = e.player?.id
+        const replacedId = e.replacedPlayer?.id
+        if (pinchId != null && replacedId != null) {
+          prAlias.set(pinchId, replacedId)
+          const cardIndex = originIndex.get(rootRunner(replacedId))
+          if (cardIndex != null) {
+            const person = feed?.gameData?.players?.[`ID${pinchId}`] ?? {}
+            const card = entries[cardIndex]
+            card.pinchRunners = card.pinchRunners ?? []
+            card.pinchRunners.push({ id: pinchId, ...personNameParts(person), base: e.base ?? null })
+          }
+        }
       } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {
         // `e.player.id` on a baserunning playEvent is the runner it's about (the
         // stealer / picked-off man) — verified against a live steal — so a
@@ -624,12 +650,21 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
         baserunningNotes,
         outNumber: null,
         // Furthest base this batter reached / whether he scored — filled in
-        // by the advancement pass below, which follows him as a baserunner
-        // across the rest of the half.
+        // by the advancement bookkeeping below, which follows him as a
+        // baserunner across the rest of his trip.
         reached: 0,
         scored: false,
       }
       entries.push(card)
+      // A repeat plate appearance — the lineup batting around — bumps out
+      // whatever's tracked under this batter id. His prior trip is already
+      // fully resolved (out or scored) by now, so bank it on his earlier
+      // card before resetting for this new trip.
+      if (originIndex.has(batterId)) {
+        finalizeTrip(batterId)
+        progress.delete(batterId)
+        legs.delete(batterId)
+      }
       originIndex.set(batterId, cardIndex)
 
       if (batterRunner?.movement?.isOut) {
@@ -662,38 +697,22 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       entries[origin].outAt = BASE_NUM[r.movement.outBase] ?? null
       entries[origin].outCode = runnerOutCode(play, r)
     }
-  }
 
-  // Hang each pinch-runner swap on the card of the batter it ultimately replaced
-  // (chains resolved to the root), so the card can strike that batter's name and
-  // list the pinch runner(s) who took over — with the base each entered at, for
-  // the diamond's red PR marker.
-  for (const sub of prSubs) {
-    const cardIndex = originIndex.get(rootRunner(sub.replacedId))
-    if (cardIndex == null) continue
-    const person = feed?.gameData?.players?.[`ID${sub.pinchId}`] ?? {}
-    const card = entries[cardIndex]
-    card.pinchRunners = card.pinchRunners ?? []
-    card.pinchRunners.push({ id: sub.pinchId, ...personNameParts(person), base: sub.base })
-  }
-
-  // Advancement pass: follow each batter as a baserunner across every play of
-  // the half. Record the furthest base he reached (and whether he scored), so
-  // his diamond can shade the bases he legged out — filled solid when he came
-  // around to score. Also record, per base, HOW he got there (BB, GO, 2B…),
-  // for the notations drawn along the base paths — with the lineup slot of the
-  // hitter who drove him over — but only for advancement on OTHER plays; the
-  // leg(s) he reached on his own PA are already labeled by the code above the
-  // diamond. Only a plate appearance credits a hitter; steals/wild pitches
-  // advance a runner on their own, so those carry no slot. An out on the bases
-  // doesn't advance him.
-  const progress = new Map() // runnerId -> furthest base (1-3, or 4 for a run)
-  const legs = new Map() // runnerId -> { baseNum: { code, slot } }
-  for (const play of plays) {
-    const playBatter = play.matchup?.batter?.id
-    const batterSlot = playBatter != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
-      ? battingSlot(feed, battingSide, playBatter)
-      : null
+    // Advancement bookkeeping for this same play, folded into this same
+    // per-play pass (rather than a separate walk over `plays`) so a repeat
+    // batter's finalize-and-reset above lands strictly between his two
+    // trips, instead of conflating them under one cumulative "furthest base
+    // reached." Record the furthest base each runner reached this play (and
+    // whether he scored) into `progress`/`legs`, so his diamond can shade the
+    // bases he legged out — filled solid when he came around to score. Also
+    // record, per base, HOW he got there (BB, GO, 2B…), for the notations
+    // drawn along the base paths — with the lineup slot of the hitter who
+    // drove him over — but only for advancement on OTHER plays; the leg(s) he
+    // reached on his own PA are already labeled by the code above the
+    // diamond. Only a plate appearance credits a hitter; steals/wild pitches
+    // advance a runner on their own, so those carry no slot. An out on the
+    // bases doesn't advance him.
+    const batterSlot = isRealPA ? battingSlot(feed, battingSide, batterId) : null
     // The feed can split one runner's multi-base move on a single play into
     // separate legs (2nd→3rd, 3rd→home). Keep only the furthest destination
     // per runner per play, so a two-base advance is labeled once, at its end.
@@ -704,7 +723,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
     // self-advance credits no hitter (slot null); an advance driven by the
     // batter's plate appearance credits his lineup slot.
     const endBase = new Map() // runnerId -> { base, code, slot } furthest this play
-    for (const r of play.runners ?? []) {
+    for (const r of runners) {
       const rid = r.details?.runner?.id
       if (rid == null || r.movement?.isOut) continue
       const base = BASE_NUM[r.movement?.end] ?? 0
@@ -719,19 +738,16 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
     }
     for (const [rid, info] of endBase) {
       if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
-      if (rid !== playBatter) {
+      if (rid !== batterId) {
         const m = legs.get(rid) ?? {}
         m[info.base] = { code: info.code, slot: info.slot }
         legs.set(rid, m)
       }
     }
   }
-  for (const [rid, cardIndex] of originIndex) {
-    const base = progress.get(rid) ?? 0
-    entries[cardIndex].scored = base === 4
-    entries[cardIndex].reached = base
-    entries[cardIndex].legNotations = legs.get(rid) ?? {}
-  }
+
+  // Bank every batter's final (or only) trip.
+  for (const batterId of originIndex.keys()) finalizeTrip(batterId)
 
   return entries
 }
