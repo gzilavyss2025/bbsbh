@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import {
   fetchGameFeed,
   fetchManager,
@@ -20,6 +20,11 @@ import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
 import { apiDateToUrl } from '../lib/route.js'
 import { SPORT_IDS } from '../lib/teams.js'
+
+// How often to re-poll for newly-posted highlight clips during a live game
+// (see the `highlights` fetch below). Matches GameNotesButton's
+// NOTES_POLL_MS (TeamInfo.jsx).
+const HIGHLIGHTS_POLL_MS = 5 * 60 * 1000
 
 // Owns every data fetch a game page needs: the feed itself plus the roughly
 // nine independent lookups derived from or alongside it (managers, weather,
@@ -117,13 +122,26 @@ export function useGameData(game) {
   // off-MLB, hiding the card.
   const winProb = useAsyncOnFeed(feed, () => fetchWinProbability(game.gamePk), [game.gamePk])
 
-  // Video highlight clips for this game (see api/highlights.js) — fetched
-  // lazily once the feed exists, same tier as win probability. The fetch
-  // itself is safe eagerly (nothing here is score-revealing until a clip is
-  // matched to a specific already-revealed play); resolves [] on failure or
-  // off-MLB (most MiLB games carry no clips) and the innings view simply
-  // shows no "Watch highlight" buttons.
+  // Video highlight clips for this game (see api/highlights.js). Unlike the
+  // rest of this hook's useAsyncOnFeed tier, clips keep posting THROUGHOUT a
+  // live game (MLB cuts them play-by-play, not all at once), so a one-shot
+  // fetch near game start would miss nearly all of them. Poll every 5 minutes
+  // while the game is Live — same interval/cleanup shape as GameNotesButton's
+  // NOTES_POLL_MS (TeamInfo.jsx) — and stop once it leaves Live (Final, or
+  // not started yet). HalfInning's SealBox reveal function re-runs on every
+  // render and rebuilds highlightsByPlayId from whatever this resolves to, so
+  // a newly-posted clip surfaces on an already-revealed half with no other
+  // wiring: nothing here is rendered until highlightsByPlayId is called
+  // inside that reveal, so a poll landing mid-game is still spoiler-safe.
+  // Fetch itself is safe eagerly, same as before; resolves [] on failure or
+  // off-MLB (most MiLB games carry no clips).
   const highlights = useAsyncOnFeed(feed, () => fetchHighlights(game.gamePk), [game.gamePk])
+  const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
+  useEffect(() => {
+    if (!isLive) return
+    const id = setInterval(highlights.reload, HIGHLIGHTS_POLL_MS)
+    return () => clearInterval(id)
+  }, [isLive, highlights.reload])
 
   // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
   // gamesStarted-ratio/saves heuristic the team page badges pitchers with
