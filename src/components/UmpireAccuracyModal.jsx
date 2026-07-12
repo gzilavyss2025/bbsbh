@@ -19,15 +19,14 @@ const pct1 = (x) => (x == null ? '' : `${(x * 100).toFixed(1)}%`)
 function accuracyRankLabel(rank, accuracy) {
   const p = pct1(accuracy)
   if (!rank) return `${p} plate accuracy`
-  return `#${rank.rank} of ${rank.total} · ${p}`
+  return `#${rank.rank} of ${rank.total} · ${p} accuracy`
 }
 
-// The 3×3 zone map, shared by the modal and UmpirePage. Two encodings on one
-// grid (see umpireZoneCells): each cell is SHADED by the umpire's called-strike
-// rate — his perceived zone, where he actually rings pitches up — and any cell
-// where his misses cluster above the league average (over > 0) is OUTLINED in
-// the negative-accent ink, heavier the further above average. Batter-oriented:
-// columns run outside → inside, rows high → low. Renders nothing without cells.
+// The 3×3 zone map, shared by the modal and UmpirePage. Any cell where the
+// umpire's misses cluster above the league average (over > 0) is OUTLINED in
+// the negative-accent ink, heavier the further above average — the rest of the
+// grid is just reference lines. Batter-oriented: columns run outside → inside,
+// rows high → low. Renders nothing without cells.
 const COL_W = 46
 const ROW_H = 52
 const PAD = 3
@@ -47,7 +46,7 @@ export function UmpireZoneMap({ cells, className = '' }) {
       className={`zonemap ${className}`}
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Where this umpire calls strikes, and where he misses more than a typical umpire"
+      aria-label="Where this umpire misses more than a typical umpire"
     >
       {cells.map((c, i) => {
         const col = i % 3
@@ -58,14 +57,6 @@ export function UmpireZoneMap({ cells, className = '' }) {
         const weight = flagged ? Math.min(1, (c.over - OVER_FLOOR) / (OVER_FULL - OVER_FLOOR)) : 0
         return (
           <g key={i}>
-            <rect
-              className="zonemap__cell"
-              x={x}
-              y={y}
-              width={COL_W}
-              height={ROW_H}
-              style={{ fillOpacity: c.strikeRate == null ? 0 : c.strikeRate }}
-            />
             {flagged && (
               <rect
                 className="zonemap__over"
@@ -157,18 +148,10 @@ export function UmpireAccuracyModal({ id, onClose }) {
         {season && data.zoneCells && (
           <section className="umpmodal__zone">
             <UmpireZoneMap cells={data.zoneCells} />
-            <div className="umpmodal__zonekey">
-              <p className="umpmodal__zonecap">
-                Darker cells are where he calls strikes — his effective zone.
-              </p>
-              <p className="umpmodal__zonecap">
-                <span className="zonemap__swatch" aria-hidden="true" /> Marked cells are where he
-                misses more than a typical umpire.
-              </p>
-              <p className="umpmodal__zoneaxes" aria-hidden="true">
-                Up ↑ · Low ↓ · Outside ← → Inside
-              </p>
-            </div>
+            <p className="umpmodal__zonecap">
+              The red boxes show the parts of the strike zone where he misses the most calls,
+              compared to a typical umpire.
+            </p>
           </section>
         )}
 
@@ -192,8 +175,8 @@ export function UmpireAccuracyModal({ id, onClose }) {
         )}
 
         {data && (
-          <button type="button" className="plink umpmodal__full" onClick={() => { onClose(); navigate(umpirePath(id)) }}>
-            Full umpire page →
+          <button type="button" className="btn btn--next umpmodal__full" onClick={() => { onClose(); navigate(umpirePath(id)) }}>
+            Full umpire page
           </button>
         )}
       </div>
