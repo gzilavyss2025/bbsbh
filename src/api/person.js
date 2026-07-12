@@ -621,12 +621,13 @@ export function arsenalView(splits) {
 
 // One season / career / level row's cells, in the group's register columns. A
 // pitching row leads its counting stats with G/GS, then the role stat (SV for a
-// closer, W–L otherwise — mirroring the season tiles), and closes with the rate
-// pair K/BB and WHIP. The narrower secondary columns (GS, K, BB) drop out on a
-// phone (see CareerRegister's hideNarrow), so the essentials stay legible there.
-function yearByYearCells(st, group, role) {
+// player who regularly closes, W–L otherwise — mirroring the season tiles), and
+// closes with the rate pair K/BB and WHIP. The narrower secondary columns (GS,
+// K, BB) drop out on a phone (see CareerRegister's hideNarrow), so the
+// essentials stay legible there.
+function yearByYearCells(st, group, showSaves) {
   if (group === 'pitching') {
-    const lead = role === 'CL' ? num(st.saves) : `${num(st.wins)}–${num(st.losses)}`
+    const lead = showSaves ? num(st.saves) : `${num(st.wins)}–${num(st.losses)}`
     return [
       num(st.gamesPlayed),
       num(st.gamesStarted),
@@ -761,6 +762,15 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   real.sort(bySeasonOrder)
   foot.sort(bySeasonOrder)
 
+  // SV leads the register (instead of W–L) for anyone who regularly closes —
+  // the player's CURRENT role (mirrors the season tiles), or, failing that, a
+  // career MLB save total too big to be incidental (an established closer who
+  // has cooled off below this year's CL threshold shouldn't lose his column).
+  const careerSaves = real
+    .filter((s) => s.tier === 'mlb')
+    .reduce((sum, s) => sum + num(s.stat?.saves), 0)
+  const showSaves = role === 'CL' || careerSaves >= 20
+
   // Season WAR (FanGraphs) is MLB-only and lives outside the stat line, so it's
   // appended as a trailing column rather than folded into yearByYearCells. Only
   // worth a column when the player has an MLB row to carry a value — a pure
@@ -778,7 +788,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     sportId: st.sid,
     pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
     teamIds: st.teamIds,
-    cells: withWar(yearByYearCells(st.stat ?? {}, group, role), warCell(st)),
+    cells: withWar(yearByYearCells(st.stat ?? {}, group, showSaves), warCell(st)),
   }))
 
   // Split totals — never blend levels. MLB uses the API career line when we have
@@ -797,19 +807,19 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     totals.push({
       label: 'MLB',
       tier: 'mlb',
-      cells: withWar(yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group, role), warTotal),
+      cells: withWar(yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group, showSaves), warTotal),
     })
   }
   if (milbVisible.length) {
     totals.push({
       label: 'MiLB',
       tier: 'milb',
-      cells: withWar(yearByYearCells(aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group, role), DASH),
+      cells: withWar(yearByYearCells(aggregateSplits(milbVisible.map((s) => ({ stat: s.stat })), group) ?? {}, group, showSaves), DASH),
     })
   }
 
   const baseColumns = group === 'pitching'
-    ? ['G', 'GS', role === 'CL' ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
+    ? ['G', 'GS', showSaves ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
     : ['G', 'AB', 'AVG', 'HR', 'RBI']
   const columns = showWar ? [...baseColumns, 'WAR'] : baseColumns
   return { columns, rows, totals, footnote: stintCaption(foot, group) }
