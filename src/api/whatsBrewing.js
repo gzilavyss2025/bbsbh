@@ -493,6 +493,7 @@ function extractFlow(items, realName, cfg) {
   }
   return headings
     .map((h) => ({
+      title: h.title,
       body: tidy(
         narrative
           .filter((l) => l.owner === h)
@@ -671,6 +672,7 @@ function extractFlowBoldZone(items, realName, cfg) {
   return titled
     .filter((h) => !(cfg.skipTitle && cfg.skipTitle.test(h.title)))
     .map((h) => ({
+      title: h.title,
       body: tidy(
         [h.extraLead, ...lines.filter((l) => l.owner === h).sort((a, b) => b.y - a.y).map((l) => l.text)]
           .filter(Boolean)
