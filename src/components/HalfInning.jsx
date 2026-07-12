@@ -1,7 +1,7 @@
 import { selectPrePitchChanges } from '../api/select.js'
 import { revealDerived } from '../api/derive.js'
 import { SealBox } from './SealBox.jsx'
-import { StrikeZoneLegend } from './StrikeZone.jsx'
+import { PitchColorsKey } from './StrikeZone.jsx'
 import { PlayByPlay } from './PlayByPlay.jsx'
 import { PreHalfCallouts } from './PreHalfCallouts.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
@@ -62,11 +62,16 @@ export function HalfInning({
   return (
     <section className="half">
       <h3 className="half__title">
-        {label} {ordinal(inning)}
-        <span className="half__team">
-          {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
-          <span className="half__dot" aria-hidden="true">•</span>{' '}
-          {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+        <span className="half__titlemain">
+          {label} {ordinal(inning)}
+        </span>
+        <span className="half__meta">
+          <span className="half__team">
+            {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
+            <span className="half__dot" aria-hidden="true">•</span>{' '}
+            {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+          </span>
+          <PitchColorsKey className="half__pitchkey" />
         </span>
       </h3>
 
@@ -109,15 +114,14 @@ export function HalfInning({
           const d = revealDerived(getDerived(), inning, half)
           return (
             <>
-              {/* The pitch-color key, once right above the sealed reveal
-                  content it decodes — the ladder dots and every strike-zone
-                  diagram below share this legend. */}
-              <StrikeZoneLegend />
+              {/* The pitch-color key now lives behind the "Pitch colors" button
+                  in this half's header (see PitchColorsKey), not inline here. */}
               <PlayByPlay
                 feed={feed}
                 inning={inning}
                 half={half}
                 battingSide={battingSide}
+                pitchingName={battingSide === 'away' ? homeName : awayName}
                 callouts={callouts}
                 vsTeam={vsTeam}
               />
