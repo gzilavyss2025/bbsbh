@@ -32,8 +32,9 @@ modal), and `GameNotesButton` in `src/screens/TeamInfo.jsx`.
 - Parsing happens **client-side**, on demand, in the browser — not in the
   nightly `gen-game-notes.mjs` cron. `pdfjs` is dynamically imported so it only
   loads when the modal opens, and it's kept out of the PWA precache.
-- Callers gate the modal on **`hasWhatsBrewing(teamId)`** (i.e. "has a CONFIG
-  entry"); every un-calibrated club keeps the plain PDF link-out.
+- Callers gate the modal on **`hasWhatsBrewing(teamId)`** (`whatsBrewingClubs.js`
+  — split out of the parser so the gate check doesn't force a static import of
+  the whole heavy module); every un-calibrated club keeps the plain PDF link-out.
 
 ## Why client-side, not the cron
 
@@ -250,9 +251,10 @@ most others). To add a club:
 2. **Pick a `layout`.** If it's the league-standard sheet, start from the
    Pirates' `flow` entry and re-tune the x-bounds; if it's bespoke, you may need
    a new layout function. Don't assume another club's numbers transfer.
-3. **Add a `CONFIG` entry** keyed by its teamId (with a `title` for the modal
-   heading). That's the whole wiring — `hasWhatsBrewing`/`whatsBrewingTitle` and
-   `GameNotesButton` light up automatically the moment the entry exists.
+3. **Add a `CONFIG` entry** in `whatsBrewing.js` keyed by its teamId, plus a
+   title in `whatsBrewingClubs.js`'s `TITLES` map. That's the whole wiring —
+   `hasWhatsBrewing`/`whatsBrewingTitle` and `GameNotesButton` light up
+   automatically the moment both entries exist.
 4. **Verify** with the harness above against a couple of its PDFs before shipping
    — the parse fails silently to `[]`, so a human glance per club is worth it.
 

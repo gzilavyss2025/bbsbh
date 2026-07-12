@@ -11,7 +11,7 @@ import {
 } from '../api/select.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
-import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewing.js'
+import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewingClubs.js'
 import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
 import { BallparkModal } from '../components/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
