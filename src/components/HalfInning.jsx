@@ -1,8 +1,9 @@
 import { selectPrePitchChanges } from '../api/select.js'
 import { revealDerived } from '../api/derive.js'
 import { SealBox } from './SealBox.jsx'
-import { StrikeZoneLegend } from './StrikeZone.jsx'
+import { PitchColorsKey } from './StrikeZone.jsx'
 import { PlayByPlay } from './PlayByPlay.jsx'
+import { PreHalfCallouts } from './PreHalfCallouts.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
 import { EnteringReference } from './EnteringReference.jsx'
 
@@ -61,13 +62,35 @@ export function HalfInning({
   return (
     <section className="half">
       <h3 className="half__title">
-        {label} {ordinal(inning)}
-        <span className="half__team">
-          {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
-          <span className="half__dot" aria-hidden="true">•</span>{' '}
-          {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+        <span className="half__titlemain">
+          {label} {ordinal(inning)}
+        </span>
+        <span className="half__meta">
+          <span className="half__team">
+            {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
+            <span className="half__dot" aria-hidden="true">•</span>{' '}
+            {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+          </span>
+          <PitchColorsKey className="half__pitchkey" />
         </span>
       </h3>
+
+      {/* The pre-half callout strip — the "entering this half" season-context
+          cards (starter team record, leading-after checkpoint, inning run
+          differential; see api/prehalf-callouts.js). Above the seal like the
+          pre-pitch list, and it STAYS above the results once revealed (it
+          reads as staging either way). Gated to a reached half, same contract
+          as the entering cards below; the note that reads tonight's score
+          gates itself further on revealedThrough inside the builder. */}
+      {(revealed || isNextToReveal) && (
+        <PreHalfCallouts
+          feed={feed}
+          bundle={callouts}
+          inning={inning}
+          half={half}
+          revealedThrough={revealedThrough}
+        />
+      )}
 
       {/* Reached but still sealed: the lineups/defense sit ABOVE the seal, with
           the pre-pitch change list, so the scorer stages the half before
@@ -91,15 +114,14 @@ export function HalfInning({
           const d = revealDerived(getDerived(), inning, half)
           return (
             <>
-              {/* The pitch-color key, once right above the sealed reveal
-                  content it decodes — the ladder dots and every strike-zone
-                  diagram below share this legend. */}
-              <StrikeZoneLegend />
+              {/* The pitch-color key now lives behind the "Pitch colors" button
+                  in this half's header (see PitchColorsKey), not inline here. */}
               <PlayByPlay
                 feed={feed}
                 inning={inning}
                 half={half}
                 battingSide={battingSide}
+                pitchingName={battingSide === 'away' ? homeName : awayName}
                 callouts={callouts}
                 vsTeam={vsTeam}
               />

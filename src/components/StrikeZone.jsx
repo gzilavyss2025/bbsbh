@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS
@@ -187,6 +187,87 @@ export function StrikeZoneLegend() {
       <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--whiff" />Whiff</span>
       <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--foul" />Foul</span>
       <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--inplay" />In play</span>
+    </div>
+  )
+}
+
+// The pitch-color key as an on-demand button + modal, sat in the half's header
+// beside the "X bats • Y pitches" line. The five-color key used to sit inline
+// above every revealed half; it's a static reference, so it moves behind a
+// small "Pitch colors" button (a row of the five swatches as its icon) that
+// opens the legend in a modal — the same dismiss contract as StrikeZoneModal.
+// The key carries no game data, so the button is spoiler-free and can sit above
+// the seal.
+const PITCH_CATS = [
+  { cat: 'ball', label: 'Ball' },
+  { cat: 'called', label: 'Called' },
+  { cat: 'whiff', label: 'Whiff' },
+  { cat: 'foul', label: 'Foul' },
+  { cat: 'inplay', label: 'In play' },
+]
+
+export function PitchColorsKey({ className = '' }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        type="button"
+        className={`pitchkeybtn ${className}`}
+        onClick={() => setOpen(true)}
+        aria-label="Show the pitch-color key"
+      >
+        <span className="pitchkeybtn__dots" aria-hidden="true">
+          {PITCH_CATS.map((c) => (
+            <i key={c.cat} className={`strikezone__sw strikezone__sw--${c.cat}`} />
+          ))}
+        </span>
+        Pitch colors
+      </button>
+      {open && <PitchColorsModal onClose={() => setOpen(false)} />}
+    </>
+  )
+}
+
+function PitchColorsModal({ onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const closeRef = useRef(null)
+  useEffect(() => {
+    const trigger = document.activeElement
+    closeRef.current?.focus()
+    return () => {
+      if (trigger instanceof HTMLElement) trigger.focus()
+    }
+  }, [])
+
+  return (
+    <div
+      className="scrim scrim--center"
+      onClick={(e) => e.target.classList.contains('scrim') && onClose()}
+    >
+      <div className="pcmodal" role="dialog" aria-modal="true" aria-label="Pitch color key">
+        <div className="pcmodal__head">
+          <span className="pcmodal__ttl">Pitch colors</span>
+          <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+        <p className="pcmodal__hint">
+          How every pitch dot — in the sequence ladder and each strike-zone plot — is colored.
+        </p>
+        <ul className="pcmodal__list">
+          {PITCH_CATS.map((c) => (
+            <li className="pcmodal__row" key={c.cat}>
+              <i className={`strikezone__sw strikezone__sw--${c.cat}`} />
+              {c.label}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
 import { computeGameSuperlatives } from '../api/derive.js'
@@ -175,6 +176,9 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
       wide: true,
     },
     { label: 'Time of Game', value: box.times.duration },
+    // Only shown when the game was actually delayed (rain, etc.) — it explains
+    // why Game End is later than First Pitch + Time of Game would suggest.
+    ...(box.times.delay ? [{ label: 'Delay', value: box.times.delay }] : []),
     { label: 'Game End', value: box.times.end },
   ]
 
@@ -225,17 +229,30 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
   )
 }
 
+// How many call-out notes the Insights card shows before folding the rest
+// behind a Show-more button (the former-teammates pattern). The notes arrive
+// already ranked by worthiness (see computeGameCalloutNotes), so the cap
+// keeps the most impactful ones on top without dropping anything.
+const INSIGHTS_SHOWN = 6
+
 // Whole-game Statcast superlatives (see computeGameSuperlatives) — the
 // catch-all "what stood out tonight" card: the fastest pitch, the hardest-hit
 // ball, the longest ball, whoever owns each. Hidden entirely when the feed
 // carried no tracking data (most MiLB parks), same graceful-degrade as the
 // per-half Statcast row in the innings view.
 function InsightsCard({ insights, calloutNotes }) {
+  const [showAll, setShowAll] = useState(false)
   const { maxVelo, maxVeloType, maxVeloPlayer, hardestHit, hardestHitPlayer, longestHit, longestHitPlayer } =
     insights ?? {}
   const hasStatcast = maxVelo != null || hardestHit != null || longestHit != null
   const hasNotes = calloutNotes && calloutNotes.length > 0
   if (!hasStatcast && !hasNotes) return null
+  const shownNotes = hasNotes
+    ? showAll
+      ? calloutNotes
+      : calloutNotes.slice(0, INSIGHTS_SHOWN)
+    : []
+  const hiddenCount = hasNotes ? calloutNotes.length - shownNotes.length : 0
   return (
     <section className="bs__insights">
       <h3 className="bs__insightsTitle">Insights</h3>
@@ -271,14 +288,22 @@ function InsightsCard({ insights, calloutNotes }) {
       {/* Every leader/streak/situational-record note that fired somewhere in
           the game (see computeGameCalloutNotes) — the same notes shown one at
           a time on the play they belong to in the innings view, rolled up
-          here as tonight's full set, each carrying its own player headshot or
-          team logo(s) so it's clear at a glance who it's about. */}
+          here as tonight's full set with the game's outcome folded into the
+          record-based ones ("moved to 18-2…"), each carrying its own player
+          headshot or team logo(s) so it's clear at a glance who it's about.
+          Ranked most-impactful-first by the shared worthiness score; the tail
+          waits behind Show more. */}
       {hasNotes && (
         <div className={`bs__noteGrid${hasStatcast ? ' bs__noteGrid--divided' : ''}`}>
-          {calloutNotes.map((note, i) => (
+          {shownNotes.map((note, i) => (
             <InsightNoteCard key={i} note={note} />
           ))}
         </div>
+      )}
+      {hiddenCount > 0 && (
+        <button type="button" className="bs__noteMore" onClick={() => setShowAll(true)}>
+          Show {hiddenCount} more {hiddenCount === 1 ? 'insight' : 'insights'}
+        </button>
       )}
     </section>
   )

@@ -5,12 +5,14 @@ import {
   hasPitchLocations,
   firstRunPlay,
   firstPAIndexByBatter,
-  timesFacingPitcher,
+  moundVisitRemainings,
+  pitchingChangePitcher,
 } from '../api/playbyplay.js'
-import { buildCallouts } from '../api/callout-notes.js'
+import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { PitcherNotice } from './PitcherNotice.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
 
 // Renders the play-by-play feed for one half-inning: one card per plate
@@ -19,34 +21,71 @@ import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './Strik
 // notes, first at-bat first. This reads score-revealing data
 // (computeHalfInningFeed), so — same rule as the rest of the half's stat
 // grid — it must only be rendered from inside a SealBox's reveal function.
-export function PlayByPlay({ feed, inning, half, battingSide, callouts, vsTeam }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, callouts, vsTeam }) {
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   if (entries.length === 0) return null
 
+  // Annotate each mound-visit note with the club's visits-remaining right after
+  // it (see moundVisitRemainings) — the mound-visit events come back in
+  // chronological order, matching the remainings list one-for-one.
+  const mvRemaining = moundVisitRemainings(feed, inning, half, battingSide)
+  let mvSeen = 0
+  for (const e of entries) {
+    if (e.kind === 'event' && e.eventType === 'mound_visit') {
+      e.mvRemaining = mvRemaining[mvSeen] ?? null
+      mvSeen += 1
+    }
+  }
+
   // Season-context call-out plumbing (see api/callout-notes.js). All three
   // derivations read the whole-game feed but are reveal-only like everything
-  // here, and only run when a bundle exists (MLB, generated date) — otherwise
+  // here, and only run when a bundle exists (a generated date) — otherwise
   // the cards render exactly as before. `firstRun` marks the play that scored
   // the game's first run; `firstPA` gates each batter's streak/situational/
-  // vs-team notes to his first card of the game; `timesFacing` drives the
-  // times-through-the-order note.
+  // vs-team notes to his first card of the game; `progress` carries the
+  // per-play in-game counts that keep a note's number current through the
+  // play it sits on (never past it — see the two-tenses rule in
+  // callout-notes.js).
   const firstRun = callouts ? firstRunPlay(feed) : null
   const firstPA = callouts ? firstPAIndexByBatter(feed) : null
-  const timesFacing = callouts ? timesFacingPitcher(feed) : null
+  const progress = callouts ? computeCalloutProgress(feed) : null
 
   return (
     <div className="pbp">
-      {entries.map((entry, i) =>
-        entry.kind === 'event' ? (
-          <EventNote key={`event-${i}`} entry={entry} />
-        ) : (
-          <AtBatCard
-            key={`${entry.batterId}-${i}`}
-            entry={entry}
-            calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, timesFacing }}
-          />
-        ),
-      )}
+      {entries.map((entry, i) => {
+        if (entry.kind !== 'event') {
+          return (
+            <AtBatCard
+              key={`${entry.batterId}-${i}`}
+              entry={entry}
+              calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, progress }}
+            />
+          )
+        }
+        // A mid-inning pitching change renders as the same "now pitching" card
+        // the stat slot shows for a between-halves change (see PitcherNotice),
+        // headshot and all — falling back to the plain note only if the pitcher
+        // can't be resolved.
+        if (entry.eventType === 'pitching_substitution') {
+          const pitcher = pitchingChangePitcher(feed, entry.playerId)
+          return pitcher ? (
+            <PitcherNotice
+              key={`event-${i}`}
+              pitcher={pitcher}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
+          ) : (
+            <EventNote key={`event-${i}`} entry={entry} />
+          )
+        }
+        // A mound visit is a momentary stoppage — a thin notification bar with
+        // the club's visits-remaining, not a full note.
+        if (entry.eventType === 'mound_visit') {
+          return <MoundVisitBar key={`event-${i}`} team={pitchingName} remaining={entry.mvRemaining} />
+        }
+        return <EventNote key={`event-${i}`} entry={entry} />
+      })}
     </div>
   )
 }
@@ -102,6 +141,25 @@ function EventNote({ entry }) {
           ),
         )}
       </span>
+    </div>
+  )
+}
+
+// A mound visit: a thin full-width strip between at-bat cards. The useful bit
+// is how many visits the club has left after this one (MLB caps them — see
+// moundVisitRemainings), so it rides on the right.
+function MoundVisitBar({ team, remaining }) {
+  return (
+    <div className="mvbar">
+      <span className="mvbar__icon" aria-hidden="true">
+        ⏱
+      </span>
+      <span className="mvbar__label">Mound visit{team ? ` — ${team}` : ''}</span>
+      {remaining != null && (
+        <span className="mvbar__remaining">
+          {remaining} {remaining === 1 ? 'visit' : 'visits'} left
+        </span>
+      )}
     </div>
   )
 }

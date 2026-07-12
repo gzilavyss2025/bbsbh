@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
   selectBullpen,
   selectBench,
   selectTeamMeta,
+  selectDelays,
   halfIndex,
 } from '../api/select.js'
 import { selectWinProbPath } from '../api/winprob.js'
@@ -15,6 +16,7 @@ import { RollingLine } from '../components/RollingLine.jsx'
 import { StatBox } from '../components/StatBox.jsx'
 import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
 import { HalfInning } from '../components/HalfInning.jsx'
+import { DelayCard } from '../components/DelayCard.jsx'
 import { PitchersSection } from '../components/PitchersSection.jsx'
 import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
 import { RosterPanel } from '../components/RosterPanel.jsx'
@@ -34,6 +36,7 @@ import { useRevealProgress } from '../hooks/useRevealProgress.js'
 export function InningViewer({
   feed,
   started,
+  sectionNav,
   inning,
   half,
   onInning,
@@ -62,6 +65,10 @@ export function InningViewer({
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
     [feed],
   )
+
+  // In-game delays (rain, etc.), spoiler-free (see selectDelays) — surfaced as a
+  // between-half-innings notice on the affected half's page. Almost always empty.
+  const delays = useMemo(() => selectDelays(feed), [feed])
 
   const rosters = useMemo(
     () => ({
@@ -105,25 +112,13 @@ export function InningViewer({
   // Whether the half being shown is still sealed. When it is, the fixed bottom
   // bar's primary action becomes "Reveal {this half}" (in thumb reach, so you
   // never scroll down past the staging lineups to find the kraft cover); once
-  // revealed it flips back to the Next / View-box-score advance. Revealing from
-  // the bar then scrolls the freshly-uncovered results into view, since the
-  // layout flips the results up above where the button sits.
+  // revealed it flips back to the Next / View-box-score advance. Revealing keeps
+  // the viewer exactly where they are — a completed half unlocks in place, no
+  // scroll or focus jump (the results appear above the button, which flips to
+  // Next right under the thumb).
   const currentSealed = curIdx > revealedThrough
   const curHalfLabel = `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`
-  const resultsRef = useRef(null)
-  const scrollPendingRef = useRef(false)
-  const revealCurrent = () => {
-    scrollPendingRef.current = true
-    revealTo(effInning, effHalf)
-  }
-  useEffect(() => {
-    if (!scrollPendingRef.current) return
-    scrollPendingRef.current = false
-    const el = resultsRef.current
-    if (!el) return
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    el.focus?.({ preventScroll: true }) // AT parity: land on the results, not <body>
-  }, [revealedThrough])
+  const revealCurrent = () => revealTo(effInning, effHalf)
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -168,42 +163,33 @@ export function InningViewer({
 
   return (
     <div className="innings">
-      <div className="innings__toolbar">
-        <button
-          type="button"
-          className="refreshbtn"
-          onClick={onReload}
-          disabled={loading}
-          aria-label="Refresh live game data"
-        >
-          <span className="refreshbtn__icon" aria-hidden="true">
-            ↻
+      {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
+          and the half-inning navigator share one chrome row on the wide layout,
+          stacked on a phone. Refresh no longer sits up here — it moved to the
+          floating bottom bar (below) at every width, so refreshing live data is
+          always one reach from the Next button. */}
+      <div className="inningchrome">
+        {sectionNav}
+        <nav className="inningnav" aria-label="Half-inning navigator">
+          <button
+            onClick={() => goTo(Math.max(0, curIdx - 1))}
+            disabled={curIdx === 0}
+            aria-label="Previous half-inning"
+          >
+            ‹ Back
+          </button>
+          <span className="inningnav__label">
+            {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
           </span>
-          {loading ? 'Refreshing…' : 'Refresh'}
-        </button>
+          <button
+            onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+            disabled={curIdx === maxIdx}
+            aria-label="Next half-inning"
+          >
+            Next ›
+          </button>
+        </nav>
       </div>
-
-      {/* The half-inning navigator: full width, the same measure as the
-          LINEUPS / INNINGS / BOX step buttons above it. */}
-      <nav className="inningnav" aria-label="Half-inning navigator">
-        <button
-          onClick={() => goTo(Math.max(0, curIdx - 1))}
-          disabled={curIdx === 0}
-          aria-label="Previous half-inning"
-        >
-          ‹ Back
-        </button>
-        <span className="inningnav__label">
-          {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
-        </span>
-        <button
-          onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
-          disabled={curIdx === maxIdx}
-          aria-label="Next half-inning"
-        >
-          Next ›
-        </button>
-      </nav>
 
       {/* Extra-innings team-record banner: only shows once the page IS an extra
           inning, which the user can only reach after revealing through
@@ -217,6 +203,15 @@ export function InningViewer({
           homeName={meta.home.clubName || meta.home.abbreviation}
         />
       )}
+
+      {/* A rain/other delay that stopped play during the half being viewed —
+          spoiler-free structural info (see selectDelays), rendered like the
+          status banner rather than behind a seal. Usually none. */}
+      {delays
+        .filter((d) => d.inning === effInning && d.half === effHalf)
+        .map((d, i) => (
+          <DelayCard key={`${d.inning}-${d.half}-${i}`} delay={d} />
+        ))}
 
       {/* On a phone these wrappers are inert divs and everything stacks in the
           same row order as ever: linescore, then the stat card + WPA chart,
@@ -248,6 +243,8 @@ export function InningViewer({
             half={effHalf}
             battingSide={effHalf === 'top' ? 'away' : 'home'}
             pitchingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
+            awayAbbr={meta.away.abbreviation}
+            homeAbbr={meta.home.abbreviation}
             getDerived={getDerived}
             revealed={curIdx <= revealedThrough}
             isNextToReveal={curIdx === revealedThrough + 1}
@@ -263,7 +260,7 @@ export function InningViewer({
         {/* Row 3: the half's play-by-play (paired with its strike zone on the
             wide layout). key on inning+half → fresh mount; a box at/under the
             reveal mark stays open. */}
-        <div className="inning" key={`${effInning}-${effHalf}`} ref={resultsRef} tabIndex={-1}>
+        <div className="inning" key={`${effInning}-${effHalf}`}>
           <HalfInning
             feed={feed}
             inning={effInning}
@@ -301,7 +298,7 @@ export function InningViewer({
                 { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
                 { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
               ]}
-              starterRecords={callouts?.starterRecords}
+              bundle={callouts}
             />
             {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">

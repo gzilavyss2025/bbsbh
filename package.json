@@ -8,8 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . && node scripts/check-caps.mjs",
+    "lint": "eslint . && node scripts/check-caps.mjs && node scripts/check-claude-md.mjs",
     "check:caps": "node scripts/check-caps.mjs",
+    "check:claude-md": "node scripts/check-claude-md.mjs",
     "lint:fix": "eslint . --fix",
     "e2e": "playwright test"
   },

@@ -1066,6 +1066,13 @@ body {
   top: 10px;
   right: 10px;
   z-index: 1;
+  /* Hide this badge's own back face too: on a flipped past-game card (see
+     FlipCard) the front face is rotated away, but iOS Safari would still paint
+     an absolutely-positioned, z-indexed child through it — mirrored. The face's
+     backface-visibility doesn't cascade to such a child, so it's set here as
+     well. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1097,6 +1104,8 @@ body {
   top: 10px;
   right: 10px;
   z-index: 1;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
   display: inline-flex;
   align-items: center;
   padding: 3px 9px;
@@ -1112,6 +1121,115 @@ body {
 
 .gamecard__open:active {
   transform: translateY(1px);
+}
+
+/* ---- Postponed game treatment ----------------------------------------------
+   A postponed game has no result to reveal, so instead of the corner delay pill
+   (+ a flip card that would only turn over to an empty 0-0 line) it gets a
+   kraft-tape strip under the matchup: a rubber-stamped POSTPONED, the cause,
+   and the make-up date it moved to. The matchup above is eased back a touch so
+   the stamp reads as the card's headline. */
+.gamecard--postponed .gamecard__teams {
+  opacity: 0.82;
+}
+
+.postponed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 4px;
+  padding: 8px 12px 8px 10px;
+  border-radius: var(--radius-sm);
+  /* A faint wash of the kraft-seal amber rather than a full fill, edged with the
+     same hatch color as a dashed tape line — reads as "held" without shouting a
+     sealed cover. */
+  background: color-mix(in srgb, var(--seal) 15%, var(--surface-card));
+  border: var(--bw-hair) dashed var(--seal-hatch);
+  /* Rare, first-load-only event (a slate has few postponements) — so a small
+     entrance is warranted (see .agents/skills/review-animations): the strip
+     rises and fades in as one, ease-out, under 300ms. */
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+
+.postponed__stamp {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--seal-ink);
+  padding: 4px 9px 3px;
+  /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
+  border: 2px double var(--seal-ink);
+  border-radius: 3px;
+  transform: rotate(-4deg);
+  /* The stamp itself gets the hero motion: it presses DOWN onto the paper —
+     starting larger (nearer the eye) and motion-blurred, overshooting past its
+     resting size on contact, then settling. Slightly delayed so it lands just
+     after the tape appears. */
+  animation: stamp-press 300ms var(--ease-out) 60ms both;
+}
+
+.postponed__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.postponed__reason {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  color: var(--seal-ink);
+}
+.postponed__makeup {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
+}
+
+@keyframes postponed-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: rotate(-4deg) scale(1.35);
+    filter: blur(1.5px);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(0.96);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Reduced motion: keep the tilt (static decoration, not movement) but drop the
+   press/rise so nothing flies in — the `both` fill leaves each element at its
+   resting state. */
+@media (prefers-reduced-motion: reduce) {
+  .postponed,
+  .postponed__stamp {
+    animation: none;
+  }
 }
 
 /* The pinned favorite's border/gradient tint to that club's own accent color
@@ -2700,10 +2818,12 @@ body {
    page bottom) already covers this viewport, so the top toolbar's copy would
    be a second Refresh sitting right above the half-inning nav's Next button.
    Shown again at the wide breakpoint below, where the floating one hides. */
-.innings__toolbar {
-  display: none;
-  justify-content: flex-end;
-  margin: 0 0 8px;
+/* Section tabs + half navigator wrapper. On a phone they stack (each child
+   keeps its own margins); the wide layout flips this to a single row (see the
+   740px media query). */
+.inningchrome {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Extra-innings team-record banner (see ExtrasBanner) — a slim, kraft-tinted
@@ -2996,6 +3116,20 @@ body {
   font-weight: var(--w-bold);
 }
 
+/* The header's right side: the "X bats • Y pitches" line stacked over the
+   "Pitch colors" key button, right-aligned so both hug the header edge and the
+   pill never crowds the batting/pitching line on a narrow phone. */
+.half__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+.half__titlemain {
+  flex: 1 1 auto;
+}
+
 /* ---------------------------------------------------------------- sealbox */
 /* The signature spoiler cover: kraft tape hatch over the inning totals. */
 .sealbox.cover {
@@ -3068,6 +3202,64 @@ body {
   border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
+/* ABS (Automated Ball-Strike) challenge history — the card's third row (see
+   StatBox's AbsRow). One row per club: the abbreviation, then a pip per
+   challenge in order — filled dot = successful/retained, ✗ = failed/lost, hollow
+   = an unused starting challenge. */
+.abs {
+  padding-top: 10px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.abs__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 6px;
+}
+.abs__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.abs__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.abs__team {
+  flex: 0 0 auto;
+  min-width: 34px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.abs__pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.abs__pip {
+  font-size: 12px;
+  line-height: 1;
+}
+.abs__pip--success {
+  color: var(--accent-positive);
+}
+.abs__pip--fail {
+  color: var(--accent-negative);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+}
+.abs__pip--ghost {
+  color: var(--graphite-soft);
+}
+
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
    below the play-by-play feed. Each card reads top-to-bottom: the measure, the
    value with its unit trailing small, then who did it. Only rendered when the
@@ -3132,6 +3324,84 @@ body {
    above the seal (see api/select.js's selectPrePitchChanges). Kept visually
    distinct from the sealed content below it: a plain rule and caption, no
    seal texture, since it isn't gated by the tap. */
+/* The pre-half callout strip (see PreHalfCallouts.jsx) — the "entering this
+   half" season-context cards above the seal: starter team record, the
+   leading-after checkpoint, an inning's run-differential story. Same card
+   anatomy as the box score's .bs__noteCard (avatar beside a star-marked
+   sentence), sat with the pre-pitch staging content. */
+.prehalf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.prehalf__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.prehalf__avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+/* Rectangular headshot, the same portrait frame every other card-mounted
+   photo uses (see .pitchernotice__shot — the pitching-change card these
+   callout cards sit beside), not the old circle avatar: consistent shape and
+   large enough to actually read a face. */
+.shot.prehalf__shot {
+  flex: none;
+  width: 52px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.prehalf__shot.shot--fallback {
+  font-size: 24px;
+}
+.prehalf__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.prehalf__who {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.prehalf__text {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-read);
+  font-size: 12px;
+  font-weight: var(--w-medium);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+.prehalf__mark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: 11px;
+}
+
+/* The pre-half callout cards read as natural-case sentences — the player's own
+   name and the season-context fun-fact line — the same sanctioned exception as
+   the play-by-play copy (see the ALL-CAPS INVARIANT block). Opt out of the
+   global uppercase; the #root-scoped selector outranks `#root *`. */
+#root .prehalf__who,
+#root .prehalf__text {
+  text-transform: none; /* caps-exempt: pre-half callout cards read as natural sentences */
+}
+
 .prepitch {
   margin-bottom: 12px;
   padding-bottom: 12px;
@@ -3244,15 +3514,67 @@ body {
    attention color for "something just happened," same family as the seal
    cover) rather than the plain dashed hint, since a pitching change is worth
    noticing before the scorer even reveals the half. */
-.statbox--pitchernotice {
+/* Shared inner layout for the "now pitching" card (see PitcherNotice), used in
+   both the row-2 stat slot and the play-by-play feed; the card chrome is added
+   by the context class beside it. */
+.pitchernotice {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+.statbox--pitchernotice {
   min-height: 96px;
   padding: 10px 14px;
   border-style: solid;
   border-color: var(--seal-hatch);
   background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
+}
+
+/* The same card in the play-by-play feed, where a pitching change happens
+   mid-inning — a self-contained seal-amber card interleaved with the at-bat
+   cards, so a new arm reads as prominently in the feed as it does in the stat
+   slot (rather than the old plain "Pitching Change: X replaces Y" note line). */
+.pitchernotice--pbp {
+  margin: 4px 0;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--seal-hatch);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
+}
+
+/* The mound-visit notification bar (see MoundVisitBar) — a thin full-width
+   strip between at-bat cards, not a card of its own: a mound visit is a
+   momentary stoppage, and the useful nugget is how many the club has left. */
+.mvbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  border-left: 3px solid var(--seal-hatch);
+}
+.mvbar__icon {
+  font-size: 12px;
+  line-height: 1;
+}
+.mvbar__label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.mvbar__remaining {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 /* The entering pitcher's headshot (see PitcherPhoto in StatBox.jsx) — sized
@@ -4124,6 +4446,101 @@ body {
 .strikezone__sw--inplay {
   background: transparent;
   border: 2.5px solid var(--accent-positive);
+}
+
+/* The "Pitch colors" button in the half header (see PitchColorsKey) — a compact
+   pill whose icon is the five pitch swatches in a row, opening the key in a
+   modal. Sits beside the "X bats • Y pitches" line, so keep it small/quiet. */
+.pitchkeybtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: 999px;
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pitchkeybtn__dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.pitchkeybtn__dots .strikezone__sw {
+  width: 8px;
+  height: 8px;
+}
+.pitchkeybtn__dots .strikezone__sw--ball {
+  border-width: 1px;
+}
+.pitchkeybtn__dots .strikezone__sw--inplay {
+  border-width: 1.5px;
+}
+
+/* The pitch-color key modal (opened by the header button). Reuses the szmodal
+   scrim/close chrome; the legend is laid out as a readable one-per-row list. */
+.pcmodal {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal, 0 30px 70px -30px rgba(0, 0, 0, 0.6));
+  max-width: 300px;
+  width: 100%;
+  padding: 14px 16px 16px;
+}
+.pcmodal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.pcmodal__ttl {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.pcmodal__hint {
+  margin: 0 0 12px;
+  font-family: var(--font-read);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.pcmodal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.pcmodal__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-body);
+}
+.pcmodal__row .strikezone__sw {
+  width: 14px;
+  height: 14px;
 }
 
 /* The phone icon button, tucked into the card's bottom-left whitespace. Hidden
@@ -5490,6 +5907,28 @@ body {
   line-height: 1.4;
 }
 
+/* Show-more for the ranked note grid — the notes arrive most-impactful-first
+   (see computeGameCalloutNotes), the tail folds behind this. Same quiet
+   full-width affordance as .teammates__more. */
+.bs__noteMore {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.bs__noteMore:hover {
+  color: var(--text-body);
+}
+
 /* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
    marks descending 3→1; each name over its game line in smaller mono type. Card
    matches the decisions block above it. */
@@ -6715,20 +7154,28 @@ body {
     font-size: var(--fs-h2);
   }
 
-  /* ---- innings, wide layout. The floating duplicate Refresh button is a
-     phone-only convenience — at this width the top toolbar is reachable. */
-  .refreshbtn--float {
-    display: none;
-  }
-  .innings__toolbar {
-    display: flex;
-  }
+  /* ---- innings, wide layout. Refresh rides in the floating bottom bar above
+     Next at every width now (see .pagenav--innings), so it's always one reach
+     from the primary action — the old top toolbar is gone. */
 
-  /* The half navigator: same measure as the LINEUPS / INNINGS / BOX step
-     buttons above it, so the two rows read as one column of chrome. */
-  .inningnav {
-    max-width: 640px;
-    margin-inline: auto;
+  /* Section tabs + the half navigator share ONE row here — LINEUPS / INNINGS /
+     BOX on the left, ‹ Back · Bottom 4th · Next › on the right — instead of two
+     stacked bars. Centered to a comfortable measure. */
+  .inningchrome {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 780px;
+    margin: 0 auto 14px;
+  }
+  .inningchrome .stepnav {
+    flex: 1 1 0;
+    max-width: none;
+    margin: 0;
+  }
+  .inningchrome .inningnav {
+    flex: 1 1 0;
+    margin: 0;
   }
 
   /* The grid is a plain flex column — source order already matches the row
@@ -7053,20 +7500,25 @@ body {
 }
 /* A player with no real photo on file falls back to his team's logo (see
    Headshot.jsx) rather than the plain monogram. Same mounted-chip background
-   as .shot--fallback, but padded and object-fit: contain (not cover) so the
-   whole mark stays visible instead of cropping into it like a photo. */
+   as .shot--fallback, but the mark is oversized so it bleeds past the 3:4
+   frame and its edges clip off at the border — the same "printed badge"
+   treatment the slate matchup tiles use (.gamecard__logobox), scaled up
+   enough to overcome most marks' internal viewBox padding. Centered on BOTH
+   axes: object-position: center overrides the top-center cover crop the base
+   .shot img rule sets for real photos, and scale() grows from the box center,
+   so the mark sits dead-center in the (unchanged 3:4) headshot space. */
 .shot--logo {
   display: grid;
   place-items: center;
   background: var(--surface-inset);
   box-shadow: var(--inset-cell);
-  padding: 16%;
-  box-sizing: border-box;
 }
 .shot--logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
+  transform: scale(1.6);
   filter: none;
 }
 .player__name {
@@ -7960,6 +8412,111 @@ body {
 }
 .game-status-banner__reason {
   font-weight: var(--w-semibold);
+}
+
+/* ---- Delay notice — a between-half-innings card flagging that play stopped
+   for a delay (rain, etc.) during the half being viewed (see
+   components/DelayCard, api/select.js selectDelays). Spoiler-free structural
+   info: the stoppage, its cause, and how long it lasted — never a score. A cool
+   navy family (a weather interlude), set apart from the amber "on hold" status
+   tape and the clay out/alert red. "Pops up" on mount. ---- */
+.delaycard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-left: 3px solid var(--navy);
+  box-shadow: var(--shadow-card);
+  animation: delay-pop var(--dur-med) var(--ease-out) both;
+}
+.delaycard__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--navy) 12%, var(--surface-inset));
+}
+.delaycard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.delaycard__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: var(--text-heading);
+}
+.delaycard__detail {
+  font-family: var(--font-read);
+  font-size: 12.5px;
+  color: var(--text-caption);
+}
+.delaycard__detail b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+.delayrain__cloud {
+  fill: var(--navy);
+}
+.delaypause rect {
+  fill: var(--navy);
+}
+.delayrain__drop {
+  stroke: var(--allstar-blue);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  animation: rain-fall 1.7s linear infinite;
+}
+.delayrain__drop--2 {
+  animation-delay: 0.35s;
+}
+.delayrain__drop--3 {
+  animation-delay: 0.7s;
+}
+
+@keyframes delay-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes rain-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .delaycard {
+    animation: none;
+  }
+  .delayrain__drop {
+    animation: none;
+    opacity: 0.9;
+  }
 }
 
 /* ---- as-of banner — neutral graphite strip (not a status tape like the

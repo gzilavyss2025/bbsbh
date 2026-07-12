@@ -13,12 +13,13 @@ import { CalloutNote } from './CalloutNote.jsx'
 // while the numeric columns hold their size, and the jersey number is inked in
 // clay red and right-aligned within its own slot in the Pitcher cell.
 //
-// `starterRecords` (the callouts bundle's per-pitcher season family — see
-// gen-callouts.mjs) is optional; each team entry additionally carries `side`
-// ('away'|'home', which club he's on) so buildPitcherNotes can pick the right
-// half of a home/away split. Absent bundle or no matching record → no notes,
-// same degrade as every other callout family.
-export function PitchersSection({ teams, starterRecords }) {
+// `bundle` (the game's callouts bundle — its per-pitcher starterRecords
+// family plus the bullpen workload baseline; see gen-callouts.mjs) is
+// optional; each team entry additionally carries `side` ('away'|'home', which
+// club he's on) so buildPitcherNotes can pick the right half of a home/away
+// split. Absent bundle or no matching record → no notes, same degrade as
+// every other callout family.
+export function PitchersSection({ teams, bundle }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
@@ -44,7 +45,7 @@ export function PitchersSection({ teams, starterRecords }) {
             </thead>
             <tbody>
               {t.rows.map((p) => {
-                const notes = buildPitcherNotes(p, t.side, t.name, starterRecords)
+                const notes = buildPitcherNotes(p, t.side, t.name, bundle)
                 return (
                   <Fragment key={p.id}>
                     <tr>

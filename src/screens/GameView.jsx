@@ -61,6 +61,65 @@ export function GameView({ game, section, onSection }) {
 
   const sketchTeam = sketching ? game[sketching] : null
 
+  // The section tabs (LINEUPS / INNINGS / BOX). Rendered in place for the lineup
+  // and box-score sections; for the innings view it's handed to InningViewer
+  // instead, which sets it on the same row as the half-inning Back/Next nav on
+  // the wide layout (one bar of chrome) and stacked on a phone.
+  const sectionTabs = feed ? (
+    <nav className="stepnav" aria-label="Game sections">
+      {(wide
+        ? // Wide screens show both lineups on one spread, so the two team
+          // tabs collapse into a single "Lineups" stop.
+          [
+            {
+              key: 'lineups',
+              label: 'Lineups',
+              active: step === 0 || step === 1,
+              section: 'lineup1',
+            },
+            {
+              key: 'innings',
+              label: 'Innings',
+              active: step === 2,
+              section: lastInningSection.current,
+            },
+            { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+          ]
+        : [
+            {
+              key: 'away',
+              label: game.away.abbreviation || 'Away',
+              active: step === 0,
+              section: 'lineup1',
+            },
+            {
+              key: 'home',
+              label: game.home.abbreviation || 'Home',
+              active: step === 1,
+              section: 'lineup2',
+            },
+            {
+              key: 'innings',
+              label: 'Innings',
+              active: step === 2,
+              section: lastInningSection.current,
+            },
+            { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+          ]
+      ).map((s) => (
+        <button
+          key={s.key}
+          type="button"
+          className={`stepnav__btn ${s.active ? 'is-active' : ''}`}
+          aria-current={s.active ? 'page' : undefined}
+          onClick={() => !s.active && onSection(s.section)}
+        >
+          {s.label}
+        </button>
+      ))}
+    </nav>
+  ) : null
+
   return (
     <LinkScope asOf={officialDate} sportId={game.sportId}>
     <div className="screen">
@@ -82,61 +141,10 @@ export function GameView({ game, section, onSection }) {
 
       {/* Every game section, one tap away — the same four stops the "next"
           buttons walk in order, so you can flip around the way you flip
-          scorebook pages instead of only marching forward. */}
-      {feed && (
-        <nav className="stepnav" aria-label="Game sections">
-          {(wide
-            ? // Wide screens show both lineups on one spread, so the two team
-              // tabs collapse into a single "Lineups" stop.
-              [
-                {
-                  key: 'lineups',
-                  label: 'Lineups',
-                  active: step === 0 || step === 1,
-                  section: 'lineup1',
-                },
-                {
-                  key: 'innings',
-                  label: 'Innings',
-                  active: step === 2,
-                  section: lastInningSection.current,
-                },
-                { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-              ]
-            : [
-                {
-                  key: 'away',
-                  label: game.away.abbreviation || 'Away',
-                  active: step === 0,
-                  section: 'lineup1',
-                },
-                {
-                  key: 'home',
-                  label: game.home.abbreviation || 'Home',
-                  active: step === 1,
-                  section: 'lineup2',
-                },
-                {
-                  key: 'innings',
-                  label: 'Innings',
-                  active: step === 2,
-                  section: lastInningSection.current,
-                },
-                { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-              ]
-          ).map((s) => (
-            <button
-              key={s.key}
-              type="button"
-              className={`stepnav__btn ${s.active ? 'is-active' : ''}`}
-              aria-current={s.active ? 'page' : undefined}
-              onClick={() => !s.active && onSection(s.section)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </nav>
-      )}
+          scorebook pages instead of only marching forward. On the innings view
+          the tabs ride down into InningViewer's nav row instead (see below), so
+          they share one line with Back/Next on the wide layout. */}
+      {step !== 2 && sectionTabs}
 
       {sketchTeam && (
         <LogoModal
@@ -219,6 +227,7 @@ export function GameView({ game, section, onSection }) {
         <InningViewer
           feed={feed}
           started={started}
+          sectionNav={sectionTabs}
           inning={inning}
           half={half}
           onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
@@ -273,13 +282,20 @@ function Masthead({ away, home, date, gamePk, onSketch }) {
   )
 }
 
-// Hands off to the MLB app/site's own game page — mlb.com's bare
-// /gameday/{gamePk} URL 301s to the full team-slug/date page, so we don't
-// need to know team slugs ourselves. On iOS/Android with the MLB app
-// installed this resolves as a universal link straight into that game inside
-// the app (with its own Watch entry point to the live/archived broadcast);
-// without the app it opens mlb.com's web Gameday, which offers the same
-// entry point. Never spoiler-revealing — it's a game identifier, not a score.
+// Hands off to MLB.TV's own video player for this game — mlb.com's
+// /tv/g{gamePk} route (confirmed live against mlb.com/tv: the page identifies
+// itself as "MLB.TV Web"). Deliberately NOT /gameday/{gamePk} (an earlier
+// version of this button used that): mlb.com's own
+// /.well-known/apple-app-site-association lists "/tv/g*" as a path the MLB
+// app registers for universal links but does NOT list "/gameday/*" at all —
+// so a gameday link never actually opened the app, only Safari — and
+// gameday is MLB's play-by-play/box-score tracker, i.e. exactly the kind of
+// score-revealing page this app exists to seal, the opposite of what a
+// "watch" button should hand off to. /tv/g* is registered, opens the app
+// directly into the video player, and never routes through that tracker.
+// Never spoiler-revealing on OUR side — it's a game identifier, not a score;
+// once the user is watching, seeing the live broadcast (and its score) is
+// the point of tapping Watch, not a leak from this app's own UI.
 // The wordmark is MLB's own "MLBTV-19-ondark" asset (linked from
 // mlb.com/live-stream-games), saved locally at public/icons/mlbtv-logo.svg
 // rather than hotlinked — it already carries its own light badge shape,
@@ -288,10 +304,10 @@ function WatchButton({ gamePk }) {
   return (
     <a
       className="watchbtn"
-      href={`https://www.mlb.com/gameday/${gamePk}`}
+      href={`https://www.mlb.com/tv/g${gamePk}`}
       target="_blank"
       rel="noopener noreferrer"
-      title="Open this game in the MLB app (or mlb.com) to watch"
+      title="Watch this game on MLB.TV"
     >
       <img className="watchbtn__logo" src="/icons/mlbtv-logo.svg" alt="Watch on MLB.TV" />
       <span className="watchbtn__ext" aria-hidden="true">↗</span>

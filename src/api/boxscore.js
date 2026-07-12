@@ -185,25 +185,40 @@ function scoreboardInnings(feed) {
   }))
 }
 
-// First-pitch and game-end clock times for the scorebook header. The feed gives
-// the actual first pitch ("3:06 PM.") and the elapsed time of game ("2:31."); we
-// derive the end by adding one to the other, and tag both with the venue's time
-// zone (EDT, PDT…) after the AM/PM the way the scorebook's time fields want.
+// First-pitch, time-of-game, delay, and game-end clock times for the scorebook
+// header. The feed gives the actual first pitch ("3:06 PM.") and, in the "T"
+// row, the elapsed PLAYING time — which excludes stoppages: "2:23 (2:44 delay)"
+// is 2:23 of ball with a separate 2:44 rain delay. So the wall-clock end is NOT
+// first pitch + T; it's first pitch + playing + delay. We take the end straight
+// from the last play's own timestamp (delays and all) read in the park's zone,
+// which is right no matter when or how many delays fell, and surface the delay
+// as its own field. Times are tagged with the venue zone (EDT, PDT…) after the
+// AM/PM the way the scorebook's time fields want.
 function cleanClock(value) {
   const m = (value ?? '').match(/(\d{1,2}:\d{2})\s*(AM|PM)/i)
   return m ? `${m[1]} ${m[2].toUpperCase()}` : ''
 }
 
-function addDuration(clock, dur) {
-  const c = clock.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
-  const d = (dur ?? '').match(/(\d{1,2}):(\d{2})/)
-  if (!c || !d) return ''
+// Minutes in the first "H:MM" of a string ("2:23 (2:44 delay)." -> 143), or null.
+function parseClockMinutes(str) {
+  const m = (str ?? '').match(/(\d{1,2}):(\d{2})/)
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null
+}
+
+// Minutes -> "2 HRS 44 MINS" — the scorebook fill-in box spells out the units
+// rather than using the feed's bare clock-style reading. '' for null.
+function spellMinutes(min) {
+  return min == null ? '' : `${Math.floor(min / 60)} HRS ${min % 60} MINS`
+}
+
+// Add whole minutes to a "7:16 PM" clock, rolling past midnight. Fallback for a
+// lean feed with no play timestamps to read the true end from. '' if unparsable.
+function addMinutes(clock, minutes) {
+  const c = (clock ?? '').match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!c || minutes == null) return ''
   let h = Number(c[1]) % 12
   if (/PM/i.test(c[3])) h += 12
-  const total =
-    (((h * 60 + Number(c[2]) + Number(d[1]) * 60 + Number(d[2])) % 1440) +
-      1440) %
-    1440
+  const total = (((h * 60 + Number(c[2]) + minutes) % 1440) + 1440) % 1440
   const hh = Math.floor(total / 60)
   const mm = total % 60
   const ap = hh >= 12 ? 'PM' : 'AM'
@@ -211,26 +226,60 @@ function addDuration(clock, dur) {
   return `${h12}:${String(mm).padStart(2, '0')} ${ap}`
 }
 
-// "2:38" -> "2 HRS 38 MINS" — the scorebook fill-in box spells out the units
-// rather than using the feed's bare clock-style reading.
-function spellDuration(duration) {
-  const m = duration.match(/^(\d{1,2}):(\d{2})$/)
-  if (!m) return duration
-  return `${Number(m[1])} HRS ${Number(m[2])} MINS`
+// An ISO timestamp as a "12:23 AM" clock in the given IANA zone. '' if either
+// is missing/unparsable — callers fall back to the arithmetic end.
+function clockInZone(iso, tzId) {
+  if (!iso || !tzId) return ''
+  const t = new Date(iso)
+  if (Number.isNaN(t.getTime())) return ''
+  try {
+    return t.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: tzId,
+    })
+  } catch {
+    return ''
+  }
 }
 
 function gameTimes(feed) {
   const info = feed?.liveData?.boxscore?.info ?? []
+  const gi = feed?.gameData?.gameInfo ?? {}
+  const tzInfo = feed?.gameData?.venue?.timeZone ?? {}
+  const tz = tzInfo.tz ?? ''
+  const withTz = (t) => (t && tz ? `${t} ${tz}` : t)
+
   const first = cleanClock(info.find((r) => r.label === 'First pitch')?.value)
   const durRaw = info.find((r) => r.label === 'T')?.value ?? ''
-  const duration = (durRaw.match(/\d{1,2}:\d{2}/) ?? [''])[0]
-  const end = addDuration(first, duration)
-  const tz = feed?.gameData?.venue?.timeZone?.tz ?? ''
-  const withTz = (t) => (t && tz ? `${t} ${tz}` : t)
+
+  // Playing time (excludes stoppages): the numeric gameInfo field when present,
+  // else the leading H:MM of the T string.
+  const playMin = Number.isFinite(gi.gameDurationMinutes)
+    ? gi.gameDurationMinutes
+    : parseClockMinutes(durRaw)
+
+  // Total delay. Prefer the numeric gameInfo field; else parse the
+  // "(H:MM delay)" the T string carries when there was one. None -> 0.
+  const delayNote = (durRaw.match(/\(([^)]*)\)/) ?? [])[1] ?? ''
+  const delayMin = Number.isFinite(gi.delayDurationMinutes)
+    ? gi.delayDurationMinutes
+    : (/delay/i.test(delayNote) ? parseClockMinutes(delayNote) : null) ?? 0
+
+  // The authoritative end is the last play's own timestamp — it already
+  // includes every delay — read in the park's zone. Fall back to first pitch +
+  // playing + delay when a lean feed carries no play timestamps.
+  const lastEndIso = feed?.liveData?.plays?.allPlays?.at(-1)?.about?.endTime
+  const end =
+    clockInZone(lastEndIso, tzInfo.id) ||
+    (playMin != null ? addMinutes(first, playMin + delayMin) : '')
+
   return {
     firstPitch: withTz(first),
     end: withTz(end),
-    duration: duration ? spellDuration(duration) : '',
+    duration: spellMinutes(playMin),
+    delay: delayMin > 0 ? spellMinutes(delayMin) : '',
   }
 }
 
