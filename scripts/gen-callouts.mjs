@@ -253,6 +253,13 @@ const LEVERAGE_MIN_OUTS = 24 // 8 IP in a bucket before it's kept
 // plate appearances behind it or a small sample reads as a false certainty.
 const SPLIT_MIN_PA = 15
 
+// A situational split only clears the noteworthiness bar once it's meaningfully
+// different from the hitter's own season average — a RISP or platoon line that
+// just tracks his overall average isn't worth a card of its own (see
+// AVG_DEVIATION_THRESHOLD's identical role gating the vsTeam family in
+// callout-notes.js).
+const SPLIT_AVG_DEVIATION = 0.05
+
 // Birthday performance history (see birthdayLine) — the fun "career .350 on his
 // birthday" note that rides alongside the existing "celebrating his birthday
 // today" one. Only players whose birthday IS the slate date are swept, so this
@@ -635,6 +642,16 @@ async function hitterSituational(personId, sportId) {
     byCode[code] = { avg: st.avg ?? null, ops: st.ops ?? null }
   }
   return { risp: byCode.risp ?? null, vl: byCode.vl ?? null, vr: byCode.vr ?? null }
+}
+
+// Whether a situational split (RISP, vs-L, vs-R) deviates far enough from the
+// hitter's own season average to be worth a card — an ordinary split predicted
+// by his overall line is just noise wearing a stat line.
+function isNoteworthySplit(splitAvg, baselineAvg) {
+  const s = Number(splitAvg)
+  const b = Number(baselineAvg)
+  if (!Number.isFinite(s) || !Number.isFinite(b)) return false
+  return Math.abs(s - b) >= SPLIT_AVG_DEVIATION
 }
 
 // Batting average as the API formats it (".350", "1.000") from summed hits/AB —
@@ -1100,7 +1117,15 @@ for (const g of games) {
       if (e.milestone) milestones[id] = e.milestone
     }
     const sit = situationalById.get(id)
-    if (sit && (sit.risp || sit.vl || sit.vr)) situational[id] = sit
+    if (sit) {
+      const baseline = e?.seasonLine?.avg
+      const noteworthy = {
+        risp: sit.risp && isNoteworthySplit(sit.risp.avg, baseline) ? sit.risp : null,
+        vl: sit.vl && isNoteworthySplit(sit.vl.avg, baseline) ? sit.vl : null,
+        vr: sit.vr && isNoteworthySplit(sit.vr.avg, baseline) ? sit.vr : null,
+      }
+      if (noteworthy.risp || noteworthy.vl || noteworthy.vr) situational[id] = noteworthy
+    }
   }
 
   // Starter records for every rostered pitcher on either club (see
