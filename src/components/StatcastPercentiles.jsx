@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BATTER_METRICS, PITCHER_METRICS } from '../api/savantPercentiles.js'
 
 // STATCAST — season percentile-rank bars (Baseball Savant), redrawn in the
@@ -12,7 +13,15 @@ import { BATTER_METRICS, PITCHER_METRICS } from '../api/savantPercentiles.js'
 // Renders nothing when there's no data at all (MiLB player, or under
 // Savant's sample floor for every metric this app keeps) — no empty state,
 // same as SplitsVsTeam/conversionNote.
+//
+// Each row is tappable: the acronym alone (xwOBA, Chase %, …) doesn't mean
+// anything to a casual reader, so tapping opens a one-line plain-language
+// gloss (`m.def`) in place, rather than crowding a permanent subtitle into
+// the label column or sending the reader to an external glossary. Only one
+// row open at a time — reading two at once isn't the point, a quick "what
+// is this" is.
 export function StatcastPercentiles({ savant, group }) {
+  const [openKey, setOpenKey] = useState(null)
   if (!savant) return null
   const metrics = group === 'pitching' ? PITCHER_METRICS : BATTER_METRICS
   const rows = metrics.filter((m) => savant[m.key] != null)
@@ -24,16 +33,25 @@ export function StatcastPercentiles({ savant, group }) {
       <div className="statcast__rows">
         {rows.map((m) => {
           const pct = savant[m.key]
+          const open = openKey === m.key
           return (
-            <div className="statcast__row" key={m.key}>
-              <div className="statcast__label">{m.label}</div>
-              <div className="statcast__track">
-                <div
-                  className={`statcast__fill${pct >= 90 ? ' is-standout' : ''}`}
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <div className="statcast__pct">{pct}</div>
+            <div className="statcast__rowgroup" key={m.key}>
+              <button
+                type="button"
+                className="statcast__row"
+                aria-expanded={open}
+                onClick={() => setOpenKey(open ? null : m.key)}
+              >
+                <span className="statcast__label">{m.label}</span>
+                <span className="statcast__track">
+                  <span
+                    className={`statcast__fill${pct >= 90 ? ' is-standout' : ''}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </span>
+                <span className="statcast__pct">{pct}</span>
+              </button>
+              {open && <p className="statcast__def">{m.def}</p>}
             </div>
           )
         })}

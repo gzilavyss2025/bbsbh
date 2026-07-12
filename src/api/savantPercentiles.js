@@ -30,22 +30,78 @@ export function savantPercentilesFor(data, personId, group) {
 }
 
 // Metric display order + labels for the percentile bars — kept here so the
-// component doesn't hard-code JSX per metric.
+// component doesn't hard-code JSX per metric. `def` is the plain-language
+// gloss shown when a row is tapped open (StatcastPercentiles.jsx); every one
+// notes that a longer bar is the good direction, since Savant's own percentiles
+// are pre-flipped so 99th is always "elite" even for stats where a low raw
+// number is good (xERA, Chase%, BB% allowed) — see gen-savant-percentiles.mjs.
 export const BATTER_METRICS = [
-  { key: 'xwoba', label: 'xwOBA' },
-  { key: 'ev', label: 'Exit velo' },
-  { key: 'hardHit', label: 'Hard-hit %' },
-  { key: 'brl', label: 'Barrel %' },
-  { key: 'chase', label: 'Chase %' },
-  { key: 'sprintSpeed', label: 'Sprint speed' },
+  {
+    key: 'xwoba',
+    label: 'xwOBA',
+    def: 'Expected quality of contact and outcome, adjusted for luck — the all-in-one number. Longer bar is better.',
+  },
+  {
+    key: 'ev',
+    label: 'Exit velo',
+    def: 'Average speed the ball leaves the bat. Longer bar is better.',
+  },
+  {
+    key: 'hardHit',
+    label: 'Hard-hit %',
+    def: 'Share of batted balls hit 95+ mph. Longer bar is better.',
+  },
+  {
+    key: 'brl',
+    label: 'Barrel %',
+    def: 'Share of batted balls hit at the ideal speed-and-angle combo for extra-base hits. Longer bar is better.',
+  },
+  {
+    key: 'chase',
+    label: 'Chase %',
+    def: 'How often he swings at pitches outside the strike zone. Longer bar means more disciplined (fewer chases).',
+  },
+  {
+    key: 'sprintSpeed',
+    label: 'Sprint speed',
+    def: 'Top running speed, in feet per second. Longer bar is faster.',
+  },
 ]
 
 export const PITCHER_METRICS = [
-  { key: 'xera', label: 'xERA' },
-  { key: 'k', label: 'K %' },
-  { key: 'bb', label: 'BB %' },
-  { key: 'whiff', label: 'Whiff %' },
-  { key: 'chase', label: 'Chase %' },
-  { key: 'fbVelo', label: 'Fastball velo' },
-  { key: 'hardHit', label: 'Hard-hit %' },
+  {
+    key: 'xera',
+    label: 'xERA',
+    def: 'Expected ERA based on the quality of contact allowed, not what actually happened. Longer bar means fewer earned runs expected.',
+  },
+  {
+    key: 'k',
+    label: 'K %',
+    def: 'Share of batters faced that he strikes out. Longer bar is better.',
+  },
+  {
+    key: 'bb',
+    label: 'BB %',
+    def: 'Share of batters faced that he walks. Longer bar means fewer walks allowed.',
+  },
+  {
+    key: 'whiff',
+    label: 'Whiff %',
+    def: 'Share of swings against him that miss entirely. Longer bar is better.',
+  },
+  {
+    key: 'chase',
+    label: 'Chase %',
+    def: 'How often batters swing at his pitches outside the strike zone. Longer bar is better.',
+  },
+  {
+    key: 'fbVelo',
+    label: 'Fastball velo',
+    def: 'Average fastball speed. Longer bar is faster.',
+  },
+  {
+    key: 'hardHit',
+    label: 'Hard-hit %',
+    def: 'Share of batted balls allowed at 95+ mph. Longer bar means less hard contact allowed.',
+  },
 ]
