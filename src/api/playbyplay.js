@@ -466,7 +466,17 @@ export function nextStepBoundary(entries, fromCount) {
 // mound-visit / pitching-change notes, first-at-bat first. `battingSide` is
 // 'away' | 'home' (top bats away, bottom bats home — same convention as the
 // rest of InningViewer).
-export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
+// `stepCap` (ADR-0016, at-bat stepping): when not null, caps how many entries
+// are considered "visible" so far. A play's effect on any card OTHER than its
+// own — a later out on the bases, an advance that lets an earlier runner
+// score — must not be written onto that earlier, already-revealed card until
+// the play that causes it is itself within the visible window; otherwise a
+// batter's diamond would show his eventual fate (e.g. scoring on a hit two
+// batters later) the moment his own at-bat is revealed, before that later
+// play has been shown. A play's own card/notes always push onto `entries`
+// regardless of stepCap — visibility only gates what OTHER, already-pushed
+// cards get retroactively annotated with.
+export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCap = null) {
   const plays = (feed?.liveData?.plays?.allPlays ?? []).filter(
     (p) => p?.about?.inning === inningNum && p?.about?.halfInning === half,
   )
@@ -698,22 +708,29 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
       }
     }
 
+    // This play's own card/notes (if any) just pushed above — whether ITS
+    // effect on other, already-carded runners may be applied yet depends on
+    // whether the play itself is within the visible step window.
+    const visible = stepCap == null || entries.length <= stepCap
+
     // A runner other than this play's batter can also be put out here — a
     // force, a caught stealing, the back half of a double play. That runner
     // already has their own card from when they batted (walked, singled...),
     // several cards back. This later out only adds their sequence number to
     // that card; it doesn't replace how they got on base with a description
     // of the play that ended it.
-    for (const r of runners) {
-      const rid = r.details?.runner?.id
-      if (rid == null || rid === batterId || !r.movement?.isOut) continue
-      // A pinch runner resolves back to the card of the batter he ran for.
-      const origin = originIndex.get(rootRunner(rid))
-      if (origin == null) continue // no known origin card — nothing to attach to
-      entries[origin].outNumber = r.movement.outNumber
-      // Where and how he was cut down, for the diamond's tick + out code.
-      entries[origin].outAt = BASE_NUM[r.movement.outBase] ?? null
-      entries[origin].outCode = runnerOutCode(play, r)
+    if (visible) {
+      for (const r of runners) {
+        const rid = r.details?.runner?.id
+        if (rid == null || rid === batterId || !r.movement?.isOut) continue
+        // A pinch runner resolves back to the card of the batter he ran for.
+        const origin = originIndex.get(rootRunner(rid))
+        if (origin == null) continue // no known origin card — nothing to attach to
+        entries[origin].outNumber = r.movement.outNumber
+        // Where and how he was cut down, for the diamond's tick + out code.
+        entries[origin].outAt = BASE_NUM[r.movement.outBase] ?? null
+        entries[origin].outCode = runnerOutCode(play, r)
+      }
     }
 
     // Advancement bookkeeping for this same play, folded into this same
@@ -740,26 +757,28 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide) {
     // must be tagged SB/WP/PB/BK rather than the batter's BB/K/GO. Such a
     // self-advance credits no hitter (slot null); an advance driven by the
     // batter's plate appearance credits his lineup slot.
-    const endBase = new Map() // runnerId -> { base, code, slot } furthest this play
-    for (const r of runners) {
-      const rid = r.details?.runner?.id
-      if (rid == null || r.movement?.isOut) continue
-      const base = BASE_NUM[r.movement?.end] ?? 0
-      if (base === 0) continue
-      // Credit a pinch runner's advance to the batter whose card he inherited.
-      const canon = rootRunner(rid)
-      if (base <= (endBase.get(canon)?.base ?? 0)) continue
-      const rEt = r.details?.eventType
-      const code = rEt && ADVANCE_CODES[rEt] ? ADVANCE_CODES[rEt] : advanceCode(play)
-      const slot = rEt && NON_PA_EVENT_TYPES.has(rEt) ? null : batterSlot
-      endBase.set(canon, { base, code, slot })
-    }
-    for (const [rid, info] of endBase) {
-      if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
-      if (rid !== batterId) {
-        const m = legs.get(rid) ?? {}
-        m[info.base] = { code: info.code, slot: info.slot }
-        legs.set(rid, m)
+    if (visible) {
+      const endBase = new Map() // runnerId -> { base, code, slot } furthest this play
+      for (const r of runners) {
+        const rid = r.details?.runner?.id
+        if (rid == null || r.movement?.isOut) continue
+        const base = BASE_NUM[r.movement?.end] ?? 0
+        if (base === 0) continue
+        // Credit a pinch runner's advance to the batter whose card he inherited.
+        const canon = rootRunner(rid)
+        if (base <= (endBase.get(canon)?.base ?? 0)) continue
+        const rEt = r.details?.eventType
+        const code = rEt && ADVANCE_CODES[rEt] ? ADVANCE_CODES[rEt] : advanceCode(play)
+        const slot = rEt && NON_PA_EVENT_TYPES.has(rEt) ? null : batterSlot
+        endBase.set(canon, { base, code, slot })
+      }
+      for (const [rid, info] of endBase) {
+        if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
+        if (rid !== batterId) {
+          const m = legs.get(rid) ?? {}
+          m[info.base] = { code: info.code, slot: info.slot }
+          legs.set(rid, m)
+        }
       }
     }
   }

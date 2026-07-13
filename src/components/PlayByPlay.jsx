@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   computeHalfInningFeed,
   pitchLadder,
@@ -39,8 +39,11 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
 export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete }) {
-  const entries = computeHalfInningFeed(feed, inning, half, battingSide)
   const stepping = stepCap != null
+  // Pass stepCap through so any runner advancement/out that happens on a
+  // later, not-yet-revealed play isn't retroactively written onto an earlier
+  // card's diamond (see computeHalfInningFeed's stepCap doc).
+  const entries = computeHalfInningFeed(feed, inning, half, battingSide, stepCap)
   const exhausted = stepping && entries.length > 0 && stepCap >= entries.length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
@@ -54,6 +57,21 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
       onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length })
     }
   }, [stepping, exhausted, stepCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll the newly revealed at-bat into view on each step (ADR-0016): a
+  // step boundary always lands right after a plate-appearance card (see
+  // nextStepBoundary), so the last visible entry is the one that just came
+  // in. Skipped on the very first render of a step count (initial mount /
+  // returning to a half already mid-step) so the page doesn't jump before
+  // the user has tapped anything this visit.
+  const lastEntryRef = useRef(null)
+  const prevStepCapRef = useRef(stepCap)
+  useEffect(() => {
+    if (stepping && stepCap !== prevStepCapRef.current) {
+      lastEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    prevStepCapRef.current = stepCap
+  }, [stepping, stepCap])
 
   if (entries.length === 0) return null
   const visibleEntries = stepping ? entries.slice(0, stepCap) : entries
@@ -86,80 +104,78 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
   return (
     <div className="pbp">
       {visibleEntries.map((entry, i) => {
+        const isLast = i === visibleEntries.length - 1
+        const scrollRef = isLast ? lastEntryRef : null
+
+        let node
         if (entry.kind !== 'event') {
-          return (
+          node = (
             <AtBatCard
-              key={`${entry.batterId}-${i}`}
               entry={entry}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
             />
           )
-        }
-        // A mid-inning pitching change renders as the same "now pitching" card
-        // the stat slot shows for a between-halves change (see PitcherNotice),
-        // headshot and all — falling back to the plain note only if the pitcher
-        // can't be resolved.
-        if (entry.eventType === 'pitching_substitution') {
+        } else if (entry.eventType === 'pitching_substitution') {
+          // A mid-inning pitching change renders as the same "now pitching" card
+          // the stat slot shows for a between-halves change (see PitcherNotice),
+          // headshot and all — falling back to the plain note only if the pitcher
+          // can't be resolved.
           const pitcher = pitchingChangePitcher(feed, entry.playerId)
-          return pitcher ? (
-            <PitcherNotice
-              key={`event-${i}`}
-              pitcher={pitcher}
-              teamName={pitchingName}
-              className="pitchernotice--pbp"
-            />
+          node = pitcher ? (
+            <PitcherNotice pitcher={pitcher} teamName={pitchingName} className="pitchernotice--pbp" />
           ) : (
-            <EventNote key={`event-${i}`} entry={entry} />
+            <EventNote entry={entry} />
           )
-        }
-        // A mound visit is a momentary stoppage — a thin notification bar with
-        // the club's visits-remaining, not a full note.
-        if (entry.eventType === 'mound_visit') {
-          return <MoundVisitBar key={`event-${i}`} team={pitchingName} remaining={entry.mvRemaining} />
-        }
-        // A defensive substitution (a fresh fielder entering) gets the same
-        // headshot card as a pitching change. A defensive SWITCH (a player
-        // already in the game moving positions) stays a plain EventNote below
-        // — falls through with mound visits' non-entrant siblings.
-        if (entry.eventType === 'defensive_substitution') {
+        } else if (entry.eventType === 'mound_visit') {
+          // A mound visit is a momentary stoppage — a thin notification bar with
+          // the club's visits-remaining, not a full note.
+          node = <MoundVisitBar team={pitchingName} remaining={entry.mvRemaining} />
+        } else if (entry.eventType === 'defensive_substitution') {
+          // A defensive substitution (a fresh fielder entering) gets the same
+          // headshot card as a pitching change. A defensive SWITCH (a player
+          // already in the game moving positions) stays a plain EventNote below
+          // — falls through with mound visits' non-entrant siblings.
           const fielder = defensiveChangeFielder(feed, entry.playerId, entry.position)
-          return fielder ? (
-            <FielderNotice
-              key={`event-${i}`}
-              fielder={fielder}
-              teamName={pitchingName}
-              className="pitchernotice--pbp"
-            />
+          node = fielder ? (
+            <FielderNotice fielder={fielder} teamName={pitchingName} className="pitchernotice--pbp" />
           ) : (
-            <EventNote key={`event-${i}`} entry={entry} />
+            <EventNote entry={entry} />
           )
-        }
-        // An ejection is a thin notification bar, same weight as a mound
-        // visit — the description sentence already carries every detail
-        // (who, by which umpire), so there's nothing else to add to a card.
-        if (entry.eventType === 'ejection') {
-          return <EjectionBar key={`event-${i}`} text={entry.text} />
-        }
-        // A pinch runner entering mid-flow gets the same headshot card as a
-        // pitching/defensive change — on the BATTING team's side, since he's
-        // an offensive substitution, not the fielding team the other cards
-        // key off of.
-        if (entry.eventType === 'pinch_running') {
+        } else if (entry.eventType === 'ejection') {
+          // An ejection is a thin notification bar, same weight as a mound
+          // visit — the description sentence already carries every detail
+          // (who, by which umpire), so there's nothing else to add to a card.
+          node = <EjectionBar text={entry.text} />
+        } else if (entry.eventType === 'pinch_running') {
+          // A pinch runner entering mid-flow gets the same headshot card as a
+          // pitching/defensive change — on the BATTING team's side, since he's
+          // an offensive substitution, not the fielding team the other cards
+          // key off of.
           const { runner, replaced } = pinchRunningPlayers(feed, entry.pinchId, entry.replacedId)
-          return runner ? (
+          node = runner ? (
             <PinchRunNotice
-              key={`event-${i}`}
               runner={runner}
               replaced={replaced}
               teamName={battingName}
               className="pitchernotice--pbp"
             />
           ) : (
-            <EventNote key={`event-${i}`} entry={entry} />
+            <EventNote entry={entry} />
           )
+        } else {
+          node = <EventNote entry={entry} />
         }
-        return <EventNote key={`event-${i}`} entry={entry} />
+
+        return (
+          <div
+            className="pbp__entry"
+            ref={scrollRef}
+            key={entry.kind === 'event' ? `event-${i}` : `${entry.batterId}-${i}`}
+          >
+            {node}
+          </div>
+        )
       })}
     </div>
   )

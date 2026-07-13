@@ -59,6 +59,7 @@ function shapeTeam(t, pinnedTeamId) {
     l: t.losses ?? DASH,
     pct: t.winningPercentage ?? DASH,
     gb: t.gamesBack ?? DASH,
+    wcgb: t.wildCardGamesBack ?? DASH,
     home: splitWL(t, 'home'),
     away: splitWL(t, 'away'),
     rs: Number.isFinite(t.runsScored) ? t.runsScored : DASH,
@@ -103,6 +104,76 @@ export function shapeStandings(records, pinnedTeamId = null) {
     lg.divisions.sort(
       (a, b) => (DIVISION_ORDER[a.id] ?? 9) - (DIVISION_ORDER[b.id] ?? 9),
     )
+  }
+  return leagues
+}
+
+// Competition ("1224") ranking by winning pct, same tie convention as
+// TeamLeaders' displayRanks: entries sharing a pct all get the SAME rank, and
+// the next distinct pct skips ahead by the tie's size (two teams tied at
+// .500 are both "rank 1"; the next team is rank 3). Mutates each entry with a
+// `wcRank`, and returns the index of the LAST entry at rank <= 3 — the row the
+// cutoff divider draws under — so a tie for the final wild-card spot keeps
+// every tied team above the line together, matching mlb.com's own standings
+// page rather than an arbitrary top-3-by-array-position cut.
+function rankWildCardField(teams) {
+  const sorted = [...teams].sort((a, b) => b.pctNum - a.pctNum)
+  sorted.forEach((t, i) => {
+    let first = i
+    while (first > 0 && sorted[first - 1].pctNum === t.pctNum) first -= 1
+    t.wcRank = first + 1
+    t.inWildCard = t.wcRank <= 3
+  })
+  let cutoffIndex = -1
+  sorted.forEach((t, i) => {
+    if (t.inWildCard) cutoffIndex = i
+  })
+  sorted.forEach((t, i) => {
+    t.wcCutoff = i === cutoffIndex
+  })
+  return sorted
+}
+
+// records[] → per-league { id, name, leaders: [3 division leaders, best
+// record first], wildcard: [every other team, ranked for the wild card] }.
+// Unlike shapeStandings' division-grouped tree, mlb.com's Wild Card board
+// pools every team in the league into one ranking — a division's 2nd-5th
+// place teams compete against every OTHER division's non-leaders, not just
+// their own — so this flattens `records` across divisions before ranking.
+export function shapeWildCard(records, pinnedTeamId = null) {
+  const byLeague = new Map()
+  for (const rec of records ?? []) {
+    const leagueId = rec.league?.id
+    if (leagueId == null) continue
+    if (!byLeague.has(leagueId)) {
+      byLeague.set(leagueId, {
+        id: leagueId,
+        name: LEAGUE_NAME[leagueId] || rec.league?.name || DASH,
+        leaders: [],
+        wildcard: [],
+      })
+    }
+    const leagueName = LEAGUE_NAME[leagueId] || rec.league?.name || ''
+    const divShort = shortDivisionName(rec.division?.name, leagueName)
+    const lg = byLeague.get(leagueId)
+    for (const t of rec.teamRecords ?? []) {
+      const shaped = shapeTeam(t, pinnedTeamId)
+      shaped.division = divShort
+      shaped.pctNum = Number.parseFloat(t.winningPercentage) || 0
+      if (t.divisionLeader) {
+        lg.leaders.push(shaped)
+      } else {
+        lg.wildcard.push(shaped)
+      }
+    }
+  }
+
+  const leagues = [...byLeague.values()].sort(
+    (a, b) => (LEAGUE_ORDER[a.id] ?? 9) - (LEAGUE_ORDER[b.id] ?? 9),
+  )
+  for (const lg of leagues) {
+    lg.leaders.sort((a, b) => b.pctNum - a.pctNum)
+    lg.wildcard = rankWildCardField(lg.wildcard)
   }
   return leagues
 }

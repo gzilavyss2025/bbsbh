@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
-import { shapeStandings } from '../api/standings.js'
-import { PINNED_TEAM_ID } from '../lib/teams.js'
+import { shapeStandings, shapeWildCard } from '../api/standings.js'
+import { favoriteAccentColor } from '../lib/teams.js'
+import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
@@ -72,10 +73,17 @@ function buildJumps(today) {
 export function StandingsPage() {
   useDocumentTitle('Standings')
 
+  const { favoriteTeamId } = useFavoriteTeam()
+
   const today = useMemo(() => baseballToday(), [])
   const season = Number(today.slice(0, 4))
   const yesterday = useMemo(() => shiftDays(today, -1), [today])
   const jumps = useMemo(() => buildJumps(today), [today])
+
+  // 'division' (the traditional three-divisions-per-league grid) or
+  // 'wildcard' (mlb.com's pooled wild-card race board, one list per league
+  // with a cutoff line after the 3rd wild-card spot).
+  const [boardMode, setBoardMode] = useState('division')
 
   // Selected date key: 'entering' (default, through yesterday), 'live' (opt-in,
   // includes today), 'step' (the bottom day-stepper is driving), or a jump key
@@ -127,9 +135,25 @@ export function StandingsPage() {
   const lastGood = useRef([])
   if (data) lastGood.current = data
   const shown = data ?? lastGood.current
-  const leagues = useMemo(() => shapeStandings(shown, PINNED_TEAM_ID), [shown])
+  const leagues = useMemo(
+    () =>
+      boardMode === 'wildcard'
+        ? shapeWildCard(shown, favoriteTeamId)
+        : shapeStandings(shown, favoriteTeamId),
+    [shown, favoriteTeamId, boardMode],
+  )
 
-  const refreshing = loading && leagues.length > 0
+  const refreshing = loading && shown.length > 0
+
+  // The favorite team's own accent color for its highlighted row (falls back
+  // to the scorebook field green in .standings tr.is-me when the club has no
+  // known accent — MiLB affiliates aren't in that color map).
+  function rowProps(t) {
+    return {
+      className: t.pinned ? 'is-me' : '',
+      style: t.pinned ? { '--fav-accent': favoriteAccentColor(t.id) } : undefined,
+    }
+  }
 
   return (
     <div className="screen standings-screen">
@@ -188,26 +212,43 @@ export function StandingsPage() {
             </button>
           ))}
         </div>
+
+        <div className="standings-jumps" role="group" aria-label="Standings board">
+          <button
+            type="button"
+            aria-pressed={boardMode === 'division'}
+            className={`standings-jump ${boardMode === 'division' ? 'is-active' : ''}`}
+            onClick={() => setBoardMode('division')}
+          >
+            Division
+          </button>
+          <button
+            type="button"
+            aria-pressed={boardMode === 'wildcard'}
+            className={`standings-jump ${boardMode === 'wildcard' ? 'is-active' : ''}`}
+            onClick={() => setBoardMode('wildcard')}
+          >
+            Wild Card
+          </button>
+        </div>
       </div>
 
       <AsyncStatus
         loading={loading}
         error={error}
-        hasData={leagues.length > 0}
+        hasData={shown.length > 0}
         errorMessage="Couldn’t load standings. Try again."
         emptyMessage="No standings available for this date."
         emptyProse
       />
 
       <div className={refreshing ? 'standings-body is-refreshing' : 'standings-body'}>
-        {leagues.map((lg) => (
-          <section className="lgstand" key={lg.id}>
-            <h2 className="lgstand__league">{lg.name}</h2>
-            {lg.divisions.map((div) => (
-              <div className="lgstand__div" key={div.id}>
-                <h3 className="lgstand__divname">{div.name}</h3>
+        {boardMode === 'wildcard'
+          ? leagues.map((lg) => (
+              <section className="lgstand" key={lg.id}>
+                <h2 className="lgstand__league">{lg.name}</h2>
                 <div className="ledger-wrap">
-                  <table className="standings standings--full">
+                  <table className="standings standings--full standings--wc">
                     <thead>
                       <tr>
                         <th className="team">Team</th>
@@ -215,44 +256,116 @@ export function StandingsPage() {
                         <th>L</th>
                         <th>Pct</th>
                         <th>GB</th>
-                        <th className="st-ext">Home</th>
-                        <th className="st-ext">Away</th>
-                        <th className="st-ext">RS</th>
-                        <th className="st-ext">RA</th>
-                        <th>Diff</th>
                         <th className="st-ext">Strk</th>
                         <th className="st-ext">L10</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {div.teams.map((t) => (
-                        <tr key={t.id} className={t.pinned ? 'is-me' : ''}>
+                      <tr className="wc-grouphead">
+                        <td colSpan={7}>Division leaders</td>
+                      </tr>
+                      {lg.leaders.map((t) => (
+                        <tr key={t.id} {...rowProps(t)}>
                           <td className="team">
                             <TeamLink id={t.id}>
                               <TeamLogo teamId={t.id} name={t.name} size={18} />
                               {t.name}
+                              <span className="wc-div">{t.division}</span>
                             </TeamLink>
                           </td>
                           <td>{t.w}</td>
                           <td>{t.l}</td>
                           <td>{t.pct}</td>
                           <td>{t.gb}</td>
-                          <td className="st-ext">{t.home}</td>
-                          <td className="st-ext">{t.away}</td>
-                          <td className="st-ext">{t.rs}</td>
-                          <td className="st-ext">{t.ra}</td>
-                          <td className={t.diffTone}>{t.diff}</td>
                           <td className="st-ext">{t.streak}</td>
                           <td className="st-ext">{t.l10}</td>
                         </tr>
                       ))}
+                      <tr className="wc-grouphead">
+                        <td colSpan={7}>Wild card</td>
+                      </tr>
+                      {lg.wildcard.map((t) => {
+                        const { className, style } = rowProps(t)
+                        return (
+                          <tr
+                            key={t.id}
+                            className={`${className} ${t.wcCutoff ? 'wc-cutoff' : ''}`.trim()}
+                            style={style}
+                          >
+                            <td className="team">
+                              <TeamLink id={t.id}>
+                                <TeamLogo teamId={t.id} name={t.name} size={18} />
+                                {t.name}
+                                <span className="wc-div">{t.division}</span>
+                              </TeamLink>
+                            </td>
+                            <td>{t.w}</td>
+                            <td>{t.l}</td>
+                            <td>{t.pct}</td>
+                            <td>{t.wcgb}</td>
+                            <td className="st-ext">{t.streak}</td>
+                            <td className="st-ext">{t.l10}</td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </section>
+            ))
+          : leagues.map((lg) => (
+              <section className="lgstand" key={lg.id}>
+                <h2 className="lgstand__league">{lg.name}</h2>
+                {lg.divisions.map((div) => (
+                  <div className="lgstand__div" key={div.id}>
+                    <h3 className="lgstand__divname">{div.name}</h3>
+                    <div className="ledger-wrap">
+                      <table className="standings standings--full">
+                        <thead>
+                          <tr>
+                            <th className="team">Team</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>Pct</th>
+                            <th>GB</th>
+                            <th className="st-ext">Home</th>
+                            <th className="st-ext">Away</th>
+                            <th className="st-ext">RS</th>
+                            <th className="st-ext">RA</th>
+                            <th>Diff</th>
+                            <th className="st-ext">Strk</th>
+                            <th className="st-ext">L10</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {div.teams.map((t) => (
+                            <tr key={t.id} {...rowProps(t)}>
+                              <td className="team">
+                                <TeamLink id={t.id}>
+                                  <TeamLogo teamId={t.id} name={t.name} size={18} />
+                                  {t.name}
+                                </TeamLink>
+                              </td>
+                              <td>{t.w}</td>
+                              <td>{t.l}</td>
+                              <td>{t.pct}</td>
+                              <td>{t.gb}</td>
+                              <td className="st-ext">{t.home}</td>
+                              <td className="st-ext">{t.away}</td>
+                              <td className="st-ext">{t.rs}</td>
+                              <td className="st-ext">{t.ra}</td>
+                              <td className={t.diffTone}>{t.diff}</td>
+                              <td className="st-ext">{t.streak}</td>
+                              <td className="st-ext">{t.l10}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </section>
             ))}
-          </section>
-        ))}
       </div>
 
       <nav className="standings-daynav" aria-label="Standings date stepper">
