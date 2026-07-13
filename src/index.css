@@ -2853,8 +2853,8 @@ body {
 }
 
 .shot.teammatecard__shot {
-  width: 64px;
-  height: 85px;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
 }
 
 .shot.teammatecard__shot.shot--fallback {
@@ -3632,8 +3632,8 @@ body {
    large enough to actually read a face. */
 .shot.prehalf__shot {
   flex: none;
-  width: 52px;
-  height: 70px;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -3885,8 +3885,8 @@ body {
 .pitchernotice__shot {
   flex: 0 0 auto;
   display: block;
-  width: 52px;
-  height: 70px;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: transparent;
@@ -6198,9 +6198,8 @@ body {
    matching the slate's Top Performers card treatment. */
 .shot.bs__potgShot {
   flex: none;
-  width: auto;
-  height: 76px;
-  aspect-ratio: 3 / 4;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -6349,11 +6348,14 @@ body {
 .bs__noteAvatar {
   flex: none;
 }
+/* On the shared 3:4 headshot scale like every other card — the former 40×40
+   circular "avatar" treatment was the app's only round headshot, folded in
+   here for consistency. */
 .shot.bs__noteShot {
   flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .shot.bs__noteShot.shot--fallback {
@@ -6457,9 +6459,8 @@ body {
    the name/position without dwarfing the row. */
 .shot.bs__starShot {
   flex: none;
-  width: auto;
-  height: 44px;
-  aspect-ratio: 3 / 4;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -6560,9 +6561,9 @@ body {
    later in the file). */
 .shot.topperf__shot {
   flex: none;
-  width: auto;
-  height: 52px; /* ≈ the row's stacked text lines (name + stat + score) */
-  aspect-ratio: 3 / 4;
+  /* --shot-xs height ≈ the row's stacked text lines (name + stat + score) */
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -6903,9 +6904,8 @@ body {
   border-radius: var(--radius-sm);
 }
 .shot.playercard__shot {
-  width: auto;
-  height: 84px;
-  aspect-ratio: 3 / 4;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -7043,9 +7043,8 @@ body {
   border-radius: var(--radius-sm);
 }
 .shot.dayhl__rowShot {
-  width: auto;
-  height: 52px;
-  aspect-ratio: 3 / 4;
+  width: var(--shot-xs-w);
+  height: var(--shot-xs-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -7166,9 +7165,8 @@ body {
    hero image, so it earns a bigger, more readable frame. */
 .shot.tlead__shot {
   flex: none;
-  width: auto;
-  height: 84px;
-  aspect-ratio: 3 / 4;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -8051,8 +8049,8 @@ body {
 }
 .shot {
   display: block;
-  width: 104px;
-  height: 139px;
+  width: var(--shot-xl-w);
+  height: var(--shot-xl-h);
   border-radius: var(--radius-md);
   overflow: hidden;
   /* Transparent fill so the silo cutout floats on whatever card/page sits
@@ -10042,8 +10040,8 @@ body {
   line-height: 0;
 }
 .shot.rehabcard__shot {
-  width: 88px;
-  height: 117px;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
   border-radius: var(--radius-sm);
 }
 .shot.rehabcard__shot.shot--fallback {
@@ -10139,8 +10137,8 @@ body {
 }
 .shot.milestonewatch-page__shot {
   flex: none;
-  width: 30px;
-  height: 40px;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
   border-radius: var(--radius-xs);
 }
 .shot.milestonewatch-page__shot.shot--fallback {
