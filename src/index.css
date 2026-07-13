@@ -9441,6 +9441,19 @@ body {
   color: var(--graphite-soft);
   font-size: 11px;
 }
+.team-hub__manager {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.team-hub__manager .plink {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.team-hub__manager-interim {
+  color: var(--graphite-soft);
+  font-size: 11px;
+}
 
 /* team-hub schedule strip — one block per series (run of consecutive games
    vs. the same opponent), wrapping left-to-right/top-to-bottom instead of

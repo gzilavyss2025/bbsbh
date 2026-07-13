@@ -11,6 +11,7 @@ import {
   fetchTeamRosterIds,
 } from '../api/team.js'
 import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
+import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
@@ -26,6 +27,7 @@ import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
+import { ManagerLink } from '../components/ManagerLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
@@ -158,7 +160,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -193,6 +195,9 @@ async function loadTeam(id, asOf) {
       // MLB only — MiLB clubs play through the break, so no All-Star card
       // belongs in their strip.
       sportId === 1 ? fetchAllStarGame(season) : Promise.resolve(null),
+      // Degrades to null on a thin MiLB feed (see fetchManager's own
+      // try/catch) — the header line below simply hides.
+      fetchManager(id, season),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -509,6 +514,7 @@ async function loadTeam(id, asOf) {
     batting, pitching, position, pitchers, injured,
     preferredLineup, startingPitchers, bullpen,
     affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
+    manager,
   }
 }
 
@@ -522,7 +528,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, injured, preferredLineup, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, injured, preferredLineup, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -568,6 +574,12 @@ export function TeamPage({ id, asOf, sportId }) {
                   <span className="team-hub__div">{ordinal(record.rank)} · {record.div}</span>
                 )}
                 {asOf && <em>· entering today</em>}
+              </p>
+            )}
+            {manager && (
+              <p className="team-hub__manager">
+                Manager: <ManagerLink id={manager.personId}>{manager.name}</ManagerLink>
+                {manager.interim && <span className="team-hub__manager-interim"> (interim)</span>}
               </p>
             )}
           </div>
