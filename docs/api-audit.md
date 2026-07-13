@@ -452,12 +452,40 @@ only done carefully.
 ballpark benefit — a tidy-up, not a priority.
 **Files:** `scripts/gen-callouts.mjs:377`.
 
+> **Measured update — DONE (with a correction).** The `scoringRecord` sweep is at
+> `gen-callouts.mjs:383`. **The audit's literal fix is wrong**: `season=` + `endDate=` returns an
+> error (the API rejects the combination, verified live). The correct bound *replaces* `season=`
+> with `startDate=${season}-01-01&endDate=${asOf}`. Validated against MIL 2025 (asOf 2025-06-08):
+> the bounded fetch returns the **identical 66-game set** the local `date > asOf` filter keeps.
+> Combined with R6's `fields=` prune of this same sweep (below): **~63 KB → ~3 KB gzipped (95%)**,
+> every read-field byte-identical. The local `date > asOf` guard is kept as defense for suspended
+> games whose schedule date and `officialDate` can straddle the cutoff.
+
 ### R6 — `fields=` on the heavy cron sweeps
 **Impact: low for the ballpark user (nightly server-side); real for cron runtime/reliability.
 Risk: low–medium (a dropped field silently breaks a callout).** Candidates: `gen-vs-team-splits`
 game logs, `gen-callouts` roster + linescore sweeps, `gen-umpires` season scan, `statsLevels`
 `limit=5000` pulls. Worth doing for cron health, but weigh against the silent-drop risk and the
 fact that it doesn't help the phone.
+
+> **Measured update — one candidate DONE, the rest deliberately deferred.** Each candidate was
+> assessed against its silent-drop risk (a missing stat name blanks a callout in the *nightly data*,
+> caught by nobody):
+> - **`gen-callouts` linescore sweep — DONE.** Same `scoringRecord` fetch as R5; the read-set is a
+>   small, fixed structural projection (no open-ended stat names), so the allowlist is safe and was
+>   validated byte-identical (see R5). ~63 KB → ~3 KB gzipped.
+> - **`gen-callouts` roster sweep (`fetchRoster`, `:317`) — DEFERRED.** Hydrates
+>   `person(stats(...))` feeding `computeLeaders`, whose category defs read many season-stat keys.
+>   A `fields=` list here must enumerate every stat name the leaderboard categories touch — the
+>   exact silent-break surface. Needs a stat-key audit + a before/after diff of the generated
+>   `callouts/*.json`, so it belongs in its own change, not bundled here.
+> - **`gen-vs-team-splits` game logs, `gen-umpires` season scan, `statsLevels` `limit=5000` —
+>   DEFERRED.** Same shape: stat/box payloads with open-ended field sets; each needs its own
+>   read-set audit and output diff. Low ballpark value (cron-only), real silent-break risk — do
+>   them one at a time, each gated on regenerating its file and diffing, not as a batch.
+>
+> Net: took the one R6 target that shares R5's already-validated sweep; the rest are notated with a
+> concrete safe-implementation recipe (audit read-set → `fields=` → regenerate → diff the JSON).
 
 ### R7 — Optional: a `meta`-backed enum **coverage check** (not enum generation)
 **Impact: low (defensive). Risk: low.** A nightly lint that flags any `eventType`/`pitchCode` in a

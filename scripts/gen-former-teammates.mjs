@@ -59,6 +59,7 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { meetsStintCap } from '../src/api/rehab-policy.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'former-teammates.json')
@@ -89,20 +90,10 @@ async function getJson(path) {
   return res.json()
 }
 
-// --- REHAB_CAP filter (replicated from src/api/person.js) ---------------------
-// A post-debut minor-league season below this is rehab/shuttle noise, not a real
-// demotion — dropping it stops a rehabbing veteran from matching a level's
-// prospects. Absolute cap, in the group's natural unit (games / outs).
-const REHAB_CAP = { games: 20, outs: 90 }
+// meetsStintCap (the REHAB_CAP filter): see src/api/rehab-policy.js — shared
+// with the player page so a rehabbing veteran can't match a level's prospects
+// here while being classified as a real demotion there (or vice versa).
 const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
-const ipToOuts = (ip) => {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
-const stintWork = (stat, group) =>
-  group === 'pitching' ? ipToOuts(stat?.inningsPitched) : num(stat?.gamesPlayed)
-const meetsStintCap = (stat, group) =>
-  stintWork(stat, group) >= (group === 'pitching' ? REHAB_CAP.outs : REHAB_CAP.games)
 
 // Run an async mapper across items with a small concurrency cap, keeping results
 // in order (be polite to statsapi rather than firing hundreds at once). Mirrors

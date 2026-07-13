@@ -206,6 +206,16 @@ for each generator; the reader modules:
   `historicalClubName()` covers renames/relocations but isn't wired into any screen
   yet (no historical logo art; see `docs/milb-historical-logos.md`).
 
+- `gameScore.js` — the slate card's `FINAL · 7.5` badge, from
+  `public/data/game-score.json`. Unlike every file above, this ISN'T on the
+  once-nightly cron — `gen-game-score.mjs` runs on its own 10-minute cron
+  (`update-game-score.yml`) since the whole point is a score within minutes of
+  a game going Final. `gameScoreFor(scores, gamePk)` formats to one decimal or
+  returns null (not yet scored). This is the one score-derived number the app
+  renders OUTSIDE a `SealBox` — see ADR-0015 for the deliberate mitigation
+  that keeps that safe, and `docs/game-score.md` for the formula. Gated by the
+  `useGameScoreVisible` preference (off by default), not the spoiler rule.
+
 ## Leader boards (live)
 
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — ranking is pool-agnostic:

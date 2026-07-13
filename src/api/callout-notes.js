@@ -33,7 +33,7 @@ import {
   firstPAIndexByBatter,
   NON_PA_EVENT_TYPES,
 } from './playbyplay.js'
-import { personNameParts, dayWordFor, dayWord } from './select.js'
+import { personNameParts, dayWordFor, dayWord, selectPrePitchChanges } from './select.js'
 
 // Marquee hit leader category keys, shared with gen-callouts.mjs (imported there).
 export const HIT_CATEGORY_KEYS = ['hr', 'triples', 'doubles', 'bb_b', 'sb', 'hbp']
@@ -841,16 +841,26 @@ export function buildLeadingAfterNote(bundle, side, inning) {
 // CALLER-GATED like buildLeadingAfterNote: it reads plate appearances from
 // this side's PREVIOUS halves to count who has faced the pitcher how often, so
 // the caller (prehalf-callouts.js) must not invoke it until those halves are
-// revealed. Fires only while the side's own STARTER is still pitching — the
-// last pitcher this side saw must be the first — since a reliever's 3rd trip
-// is vanishingly rare and the bundle's split belongs to starters anyway.
+// revealed. It also reads the STAGED half's own pre-pitch changes via
+// selectPrePitchChanges — safe here for the same reason: the caller already
+// restricts this to halfIndex(inning, half) <= revealedThrough + 1, the exact
+// condition that selector requires (ADR-0003/0010). Fires only while the
+// side's own STARTER is still pitching entering the staged half — the pitcher
+// of record from the side's previous halves must still be the one taking the
+// mound now, not someone a between-innings pitching change swapped in — since
+// a reliever's 3rd trip is vanishingly rare and the bundle's split belongs to
+// starters anyway.
 const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
 export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   const battingSide = half === 'top' ? 'away' : 'home'
   const pitchingSide = otherSide(battingSide)
   let firstPitcher = null
   let lastPitcher = null
-  const counts = new Map() // `${batterId}-${pitcherId}` -> times faced
+  // `${batterId}-${pitcherId}` -> distinct innings (turns through the order)
+  // that pairing has faced off, not raw PA count — a batter who bats around
+  // twice in one big inning is still only ONE trip through the order, so
+  // counting PAs would inflate a 2nd trip to a false 3rd.
+  const inningsFaced = new Map()
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const about = p.about ?? {}
     // Same half TYPE only (this side batting), strictly before this inning.
@@ -862,13 +872,23 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
     if (firstPitcher == null) firstPitcher = pid
     lastPitcher = pid
     const key = `${bid}-${pid}`
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+    if (!inningsFaced.has(key)) inningsFaced.set(key, new Set())
+    inningsFaced.get(key).add(about.inning)
   }
   if (lastPitcher == null || lastPitcher !== firstPitcher) return null
 
+  // The pitcher actually entering the staged half — a between-innings change
+  // shows up as a leading pitching_substitution on the half's own first play.
+  // If it swapped in someone other than the side's last pitcher, the starter
+  // is gone and this card must not fire (crediting a departed pitcher).
+  const entering = selectPrePitchChanges(feed, inning, half)
+    .filter((c) => c.eventType === 'pitching_substitution')
+    .pop()
+  if (entering && entering.pitcher.id !== lastPitcher) return null
+
   let maxTrips = 0
-  for (const [key, n] of counts) {
-    if (key.endsWith(`-${lastPitcher}`) && n > maxTrips) maxTrips = n
+  for (const [key, innings] of inningsFaced) {
+    if (key.endsWith(`-${lastPitcher}`) && innings.size > maxTrips) maxTrips = innings.size
   }
   if (maxTrips < 2) return null // the order hasn't turned over twice yet
 
@@ -878,7 +898,9 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   const tto = bundle?.starterRecords?.[lastPitcher]?.tto
   const t1 = tto?.[1]
   const t3 = tto?.[3]
-  if (t1?.avg && t3?.avg && t3.ab >= TTO_MIN_AB) {
+  // The season split is specifically "the 3rd time through" — only cite it on
+  // an actual 3rd trip; a 4th+ trip gets the plain fact, not a stale citation.
+  if (trip === 3 && t1?.avg && t3?.avg && t3.ab >= TTO_MIN_AB) {
     const diff = Math.abs(Number(t3.avg) - Number(t1.avg))
     return {
       text: `Batters see ${who} a ${ordinal(trip)} time this inning — they're hitting ${t3.avg} off him the 3rd time through this season (${t1.avg} the 1st time)`,

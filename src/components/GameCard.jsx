@@ -5,11 +5,22 @@ import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
-// and coarse status only — never the score, even for finals.
+// and coarse status only — never the score, even for finals. The one
+// exception is `gameScore` — the blended, capped-factor Game Score rating
+// (see ADR-0015) — which the caller passes in already gated by the
+// useGameScoreVisible preference and null when not yet computed.
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
-export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0, onSelect, onBoxScore }) {
+export function GameCard({
+  game,
+  pinnedTeamId,
+  uniformsReady,
+  prospectCount = 0,
+  gameScore = null,
+  onSelect,
+  onBoxScore,
+}) {
   const live = game.abstractState === 'Live'
   const status = selectGameStatus(game)
   // A postponed game gets its own stamped treatment (see PostponedBanner) rather
@@ -64,7 +75,7 @@ export function GameCard({ game, pinnedTeamId, uniformsReady, prospectCount = 0,
             </span>
           )}
           {pinned && <span className="gamecard__pin">★</span>}
-          <StatusText game={game} />
+          <StatusText game={game} gameScore={gameScore} />
         </div>
       </button>
       {onBoxScore && !postponed && (
@@ -204,11 +215,26 @@ function doubleHeaderLabel(game) {
 // starts on-site. The parenthetical is dropped when the feed carries no venue
 // timezone (lean MiLB rows) or when the two clocks read the same (viewer is in
 // the park's zone) — no redundant "(7:10 CDT)".
-function StatusText({ game }) {
+// `gameScore`: the pre-formatted ("7.5") Game Score badge, already gated by
+// the useGameScoreVisible preference and null when this gamePk hasn't been
+// scored yet (see api/gameScore.js) — this component just renders whatever
+// it's handed, dot-joined after "Final". A deliberate, narrow exception to
+// "never spoiler-revealing" (see ADR-0015): the number is a blended,
+// capped-factor rating, never the score itself.
+function StatusText({ game, gameScore }) {
   const status = selectGameStatus(game)
   if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
-  if (s === 'Final') return <span className="gamecard__status">Final</span>
+  if (s === 'Final') {
+    return (
+      <span className="gamecard__status">
+        Final
+        {gameScore && (
+          <span className="gamecard__gamescore"> · {gameScore}</span>
+        )}
+      </span>
+    )
+  }
   if (s === 'Live') return null // the LIVE pill carries it; no redundant text
   let local
   let park = null

@@ -1468,6 +1468,14 @@ body {
   color: var(--text-muted);
 }
 
+/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. Same
+   caption color/weight as the status text it rides on; not a separate
+   attention-grabbing color, since it's a taste-preference extra, not a
+   status. */
+.gamecard__gamescore {
+  font-weight: var(--w-bold);
+}
+
 /* Scorebook-readiness chips: four tiny red/green flags under the matchup that
    say whether the basics you'd pencil in pre-game (each team's lineup, the
    umpires, both starters) are posted yet. Intentionally small (~9px) — a glance
@@ -2085,6 +2093,55 @@ body {
 .favteamsheet .vsteam__strip {
   padding-left: calc(50% - 23px);
   padding-right: calc(50% - 23px);
+}
+
+/* Game Score visibility toggle row, shared by both the intro welcome modal
+   and the footer-reopened "Favorite team" modal (see FavoriteTeamModal.jsx) —
+   a taste preference row, not part of the team picker above it. */
+.favteamsheet__pref {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.favteamsheet__prefText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.favteamsheet__prefLabel {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.favteamsheet__prefHint {
+  margin: 0;
+  font-size: 11.5px;
+}
+.favteamsheet__prefToggle {
+  flex: 0 0 auto;
+  min-width: 52px;
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.favteamsheet__prefToggle.is-on {
+  background: var(--accent-positive);
+  border-color: var(--accent-positive);
+  color: var(--surface-card);
 }
 
 /* --------------------------------------------------------------- legal */
@@ -3216,6 +3273,25 @@ body {
   font-weight: var(--w-medium);
   color: var(--seal-ink);
   opacity: 0.82;
+}
+
+/* Thinner, button-like cover — currently just the slate's Top Performers box
+   (see TopPerformersBox.jsx's `compact` prop). Same kraft texture/tap target,
+   just a slim horizontal bar instead of the full-height reveal panel, since a
+   short leaderboard box doesn't need the same visual weight as a sealed
+   inning or box score. */
+.sealbox.cover.sealbox--compact {
+  min-height: 0;
+  flex-direction: row;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+}
+.sealbox--compact .cover__lock {
+  font-size: 15px;
+}
+.sealbox--compact .cover__main {
+  font-size: 12px;
 }
 
 .statgrid {
@@ -9731,23 +9807,94 @@ body {
 }
 
 /* --------------------------------------------------------- milestone watch page
-   The league-wide list — a Ledger table (see prospects/register usage), so
-   the player-cell headshot rides small inline rather than card-sized like
-   the Rehab page's grid (this page reads as a ranked leaderboard, not a
-   photo grid). */
-.milestonewatch-row__player {
+   One card per PLAYER (see groupMilestoneRows in MilestoneWatchPage.jsx), not
+   per milestone — a player chasing both a hits and a doubles milestone at
+   once nests both rows inside one card instead of splitting across two.
+   Cards vary in height with how many milestones a player is chasing, so this
+   is a CSS-columns waterfall (same shape as .bs__noteGrid on the box score's
+   Insights card) rather than a row-locked grid: each card flows into the
+   shortest column instead of every row stretching to its tallest member. */
+.milestonewatch-page__grid {
+  column-width: 260px;
+  column-gap: 8px;
+  margin-top: var(--space-4);
+}
+.milestonewatch-page__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--inset-cell);
+  break-inside: avoid;
+}
+.shot.milestonewatch-page__shot {
+  flex: none;
+  width: 30px;
+  height: 40px;
+  border-radius: var(--radius-xs);
+}
+.shot.milestonewatch-page__shot.shot--fallback {
+  font-size: 13px;
+}
+.milestonewatch-page__body {
+  min-width: 0;
+  flex: 1;
+}
+.milestonewatch-page__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+}
+.milestonewatch-page__team {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
 }
-.shot.milestonewatch-row__shot {
-  width: 24px;
-  height: 32px;
-  border-radius: var(--radius-xs);
-  flex-shrink: 0;
+/* One nested milestone row inside the card — stat/threshold, the plain
+   progress fact, and the projected timeframe inked in the accent color (like
+   .milestonepill) so the forward-looking half of the fact reads distinctly. */
+.milestonewatch-page__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
 }
-.shot.milestonewatch-row__shot.shot--fallback {
+.milestonewatch-page__row:first-of-type {
+  margin-top: 5px;
+  padding-top: 5px;
+}
+.milestonewatch-page__stat {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
   font-size: 12px;
+}
+.milestonewatch-page__progress {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.milestonewatch-page__eta {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
 }
 
 /* ---------------------------------------------------------------- umpire page */

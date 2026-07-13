@@ -22,11 +22,16 @@ import { useEffect, useRef, useState } from 'react'
 // button). The spoiler guard is unchanged: children are still only invoked once
 // revealed, so nothing sealed reaches the DOM; only the tap-target cover is
 // dropped.
+// `compact`: a thinner, button-like cover (see .sealbox--compact in
+// index.css) for a surface that doesn't need the full-height kraft-tape
+// treatment — currently just the slate's Top Performers box. Purely a class
+// modifier; the reveal mechanism below is identical either way.
 export function SealBox({
   children,
   forceRevealed = false,
   onReveal,
   coverless = false,
+  compact = false,
   label = 'Tap to reveal inning totals',
 }) {
   const [revealed, setRevealed] = useState(false)
@@ -57,7 +62,7 @@ export function SealBox({
     return (
       <button
         type="button"
-        className="sealbox cover"
+        className={`sealbox cover${compact ? ' sealbox--compact' : ''}`}
         onClick={() => {
           tapped.current = true
           setRevealed(true)

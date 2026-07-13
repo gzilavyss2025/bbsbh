@@ -6,9 +6,11 @@ import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
+import { useGameScoreVisible } from '../hooks/useGameScoreVisible.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
+import { fetchGameScores, gameScoreFor } from '../api/gameScore.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
@@ -44,6 +46,7 @@ export function GameSelect({ onPick, onShowLogos }) {
   const [offset, setOffset] = useState(0) // days from today
   const [sportId, setSportId] = useState(readLevel)
   const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
+  const { gameScoreVisible, setGameScoreVisible } = useGameScoreVisible()
   const [showWelcome, setShowWelcome] = useState(isFirstVisit)
   const pickLevel = (id) => {
     setSportId(id)
@@ -61,6 +64,15 @@ export function GameSelect({ onPick, onShowLogos }) {
 
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
+
+  // Game Score badges — only fetched at all when the preference is on (see
+  // useGameScoreVisible), same-origin static file, degrades to {} on failure.
+  const gameScores = useAsync(
+    () => (gameScoreVisible ? fetchGameScores() : Promise.resolve({})),
+    [gameScoreVisible],
+  )
+  const scoreFor = (gamePk) =>
+    gameScoreVisible ? gameScoreFor(gameScores.data, gamePk) : null
 
   // The favorite team is always an MLB club (FavoriteTeamModal only offers
   // those), so on a MiLB level its own game never appears — pin its current
@@ -96,20 +108,29 @@ export function GameSelect({ onPick, onShowLogos }) {
   // A day you've paged BACK to (offset < 0) gets the past-day treatment: each
   // Final game's card flips over to a result summary, and the Day Recap panel
   // (Top Performers + Day Highlights) replaces the plain Top Performers box.
-  // Today (offset 0) keeps the ordinary live-refresh slate even once its games
-  // go Final — the past-day framing is for days you're looking back on, not
-  // the one still in progress.
+  // Today (offset 0) gets the SAME treatment once every one of its games has
+  // gone Final — at that point there's no more live refreshing to do, so it's
+  // effectively already a "day you're looking back on". Before that (any game
+  // still in Preview/Live), today keeps the ordinary live-refresh slate.
   // A postponed game reports abstractGameState 'Final' (coded 'D') but has no
-  // result to reveal, so it's excluded from the flip-card set and the day
-  // recap — it renders as a plain GameCard with its own postponed stamp.
+  // result to reveal, so it's excluded from the flip-card set, the day recap,
+  // AND the "every game Final" check below — a day with only a postponed game
+  // never flips to the past-day treatment, since there's nothing to reveal.
+  // A postponed game also reports abstractGameState 'Final' (see above), so
+  // this alone means "nothing on today's slate is still Preview/Live" —
+  // exactly the "day is done" signal, without separately excluding
+  // postponed games (a slate that's 4 Finals + 1 postponement still counts).
+  const todayAllFinal =
+    offset === 0 && sorted.length > 0 && sorted.every((g) => g.abstractState === 'Final')
+  const showPastDayTreatment = offset < 0 || todayAllFinal
   const finals = useMemo(
     () =>
-      offset < 0
+      showPastDayTreatment
         ? sorted.filter(
             (g) => g.abstractState === 'Final' && !selectGameStatus(g).isPostponed,
           )
         : [],
-    [sorted, offset],
+    [sorted, showPastDayTreatment],
   )
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
@@ -232,7 +253,7 @@ export function GameSelect({ onPick, onShowLogos }) {
             const uReady = !!uniformsReady[g.gamePk]
             const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
             const isPastFinal =
-              offset < 0 &&
+              showPastDayTreatment &&
               g.abstractState === 'Final' &&
               !selectGameStatus(g).isPostponed
             return (
@@ -245,6 +266,7 @@ export function GameSelect({ onPick, onShowLogos }) {
                     pinnedTeamId={pinnedTeamId}
                     uniformsReady={uReady}
                     prospectCount={pCount}
+                    gameScore={scoreFor(g.gamePk)}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={() => onPick(g, dateStr, 'boxscore')}
                   />
@@ -254,6 +276,7 @@ export function GameSelect({ onPick, onShowLogos }) {
                     pinnedTeamId={pinnedTeamId}
                     uniformsReady={uReady}
                     prospectCount={pCount}
+                    gameScore={scoreFor(g.gamePk)}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={null}
                   />
@@ -279,6 +302,8 @@ export function GameSelect({ onPick, onShowLogos }) {
         onShowLogos={onShowLogos}
         favoriteTeamId={favoriteTeamId}
         onSetFavoriteTeam={setFavoriteTeam}
+        gameScoreVisible={gameScoreVisible}
+        onSetGameScoreVisible={setGameScoreVisible}
       />
 
       {showWelcome && (
@@ -287,6 +312,8 @@ export function GameSelect({ onPick, onShowLogos }) {
           favoriteTeamId={favoriteTeamId}
           onSave={setFavoriteTeam}
           onClose={() => setShowWelcome(false)}
+          gameScoreVisible={gameScoreVisible}
+          onSetGameScoreVisible={setGameScoreVisible}
         />
       )}
     </div>
