@@ -87,6 +87,17 @@ don't run these by hand.
   silently returns the empty MLB line); career-derived families + standings splits
   stay MLB-only. Per-date files are ~1MB, kept out of the PWA precache. See
   `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a parallel path.
+- `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone
+  Watch list: every MLB active-roster player within reach of a round career-total
+  milestone (`MILESTONE_DEFS` in `src/api/person.js`), each with a projected
+  timeframe. Per player, one `yearByYear` stats call yields both his career total
+  and this season's pace; each of the 30 teams' season schedule (fetched once, not
+  per player) supplies games-played-so-far + remaining dates, so the projection can
+  scale by how often the player actually plays rather than assuming every team
+  game. Imports `aggregateSplits`/`MILESTONE_DEFS`/`projectMilestoneETA`/
+  `careerPerSeasonRate`/`milestoneRarityRank` straight from `src/api/person.js`
+  (pure, no DOM deps) — extend the projection math there, not in the script.
+  MLB-only.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 

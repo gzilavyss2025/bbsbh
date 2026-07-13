@@ -2286,17 +2286,66 @@ body {
   flex-direction: column;
   gap: 1px;
 }
+.umps__namerow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
 /* The plate ump's season accuracy rank for tonight's game — a tap target under
    his name that opens the accuracy modal; hidden for every other base and for
-   umps with no accuracy data. Accent ink so it reads as actionable. */
+   umps with no accuracy data. Deliberately much smaller than the name and in
+   the medal-amber "honors" ink (not navy body/link color) so it reads as a
+   secondary accent stat, not a second line of the name itself. */
 .umps__accbtn {
   align-self: flex-start;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: var(--w-semibold);
   line-height: 1.3;
   text-align: left;
-  color: var(--accent-primary);
+  color: var(--award-ink);
+}
+
+/* Umpire accuracy tier pill — a statistical-tier badge (Elite / Good /
+   Average / Below Average; see api/umpires.js's tierForZ) shown next to a
+   plate umpire's name on the lineup Umpires card, his own page, and the
+   rankings table. Same four-ink language as the transaction-timeline chips
+   (field=positive, award=honors, clay=negative) so the tiers read as
+   distinct at a glance without a legend. */
+.tierpill {
+  display: inline-block;
+  padding: 1px 7px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--graphite);
+}
+.tierpill--elite {
+  color: var(--field-deep);
+  border-color: var(--field);
+  background: var(--field-soft);
+}
+.tierpill--good {
+  color: var(--award-ink);
+  border-color: var(--award-line);
+  background: var(--award-soft);
+}
+.tierpill--average {
+  color: var(--text-muted);
+  border-color: var(--border-rule);
+  background: var(--bg-page);
+}
+.tierpill--below {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+  background: var(--clay-soft);
 }
 
 /* ---------------------------------------------------------------- lineup */
@@ -4782,8 +4831,9 @@ body {
 .umpmodal__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  color: var(--text-body);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
 }
 .umpmodal__hint {
   margin: 4px 0 0;
@@ -7888,59 +7938,59 @@ body {
   }
 }
 
-/* ---- Statcast percentile bars ----
-   One inked row per metric: label, a horizontal track filled to the
-   percentile, and the number in mono tabular figures. A standout (>=90th
-   percentile) fill picks up the kraft-tape seal amber instead of ink navy —
-   the only "notable figure" accent already used elsewhere on this page — but
-   otherwise every metric renders identically (no red/green good/bad framing;
-   see StatcastPercentiles.jsx). */
-.statcast {
-  margin-top: var(--space-3);
-}
-.statcast__rows {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+/* ---- Statcast percentile cards ----
+   Each metric is a small StatcastCard tile (the same one the innings view
+   and box score use for per-half superlatives), not a bar mimicking
+   Baseball Savant's own chart. `.statcast` here is the same grid rule used
+   there (see the "Statcast superlatives" block above); this override just
+   drops the play-by-play-feed divider (nothing sits above it on the player
+   page) and gives the grid a real minimum column width so 6-7 cards wrap
+   instead of squeezing onto one row (the shared rule's own minmax(0, 1fr)
+   only works for the 3-card superlative row). */
+.statcast-section .statcast {
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
   margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
 }
-.statcast__row {
-  display: grid;
-  grid-template-columns: 84px 1fr 30px;
-  align-items: center;
-  gap: 8px;
+
+/* The button wrapping each FlipCard — reset to a plain pressable card (see
+   .agents/skills/review-animations STANDARDS.md "button press feedback":
+   scale(0.97) on :active, sub-200ms ease-out). The flip itself reuses
+   FlipCard's own transform transition untouched (src/index.css "FLIP
+   CARDS" block) — same 450ms turn as the slate's past-game reveal. */
+.statcast__flipbtn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
 }
-.statcast__label {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
+.statcast__flipbtn:active {
+  transform: scale(0.97);
 }
-.statcast__track {
-  height: 8px;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: 999px;
-  box-shadow: var(--inset-cell);
-  overflow: hidden;
+.statcast__flipbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
-.statcast__fill {
-  height: 100%;
-  background: var(--accent-primary);
-  border-radius: 999px;
+
+/* The back face: same tile chrome as the front (.statcast__card), holding
+   the metric name + its plain-language gloss instead of the value. */
+.statcast__card--back {
+  justify-content: center;
 }
-.statcast__fill.is-standout {
-  background: var(--seal-cover);
-}
-.statcast__pct {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  text-align: right;
+.statcast__def {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--text-body);
 }
 
 /* ---- splits vs team: opponent picker + career line + last meeting ----
@@ -8312,13 +8362,43 @@ body {
   font-style: italic;
   color: var(--graphite);
 }
-/* MILESTONE WATCH line(s) below the career register — same weight as the
-   footnote above, but inked in the accent color (like .milestonepill) so a
-   countdown reads as a distinct kind of fact from the ledger's own captions. */
-.reg-milestone {
-  margin: 4px 2px 0;
-  font-size: 12px;
+/* MILESTONE WATCH card below the career register — a small bordered block
+   (echoes .rehabcard's card treatment) rather than a bare line, since it now
+   carries a projected timeframe alongside the progress fact. Title uppercase
+   like every other SectionTitle; each row's progress text stays neutral, the
+   projected timeframe inked in the accent color (like .milestonepill) so the
+   forward-looking half of the fact reads as distinct from the plain count. */
+.milestonewatch {
+  margin: 8px 2px 0;
+  padding: 8px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.milestonewatch__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+.milestonewatch__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 3px 0;
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+}
+.milestonewatch__eta {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   color: var(--accent-primary);
 }
 
@@ -9646,9 +9726,35 @@ body {
   color: var(--text-caption);
 }
 
+/* --------------------------------------------------------- milestone watch page
+   The league-wide list — a Ledger table (see prospects/register usage), so
+   the player-cell headshot rides small inline rather than card-sized like
+   the Rehab page's grid (this page reads as a ranked leaderboard, not a
+   photo grid). */
+.milestonewatch-row__player {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shot.milestonewatch-row__shot {
+  width: 24px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+}
+.shot.milestonewatch-row__shot.shot--fallback {
+  font-size: 12px;
+}
+
 /* ---------------------------------------------------------------- umpire page */
 .umpage__head {
   margin: 6px 0 14px;
+}
+.umpage__namerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .umpage__name {
   margin: 0;
@@ -9924,6 +10030,19 @@ body {
   .umpage__rowacclabel {
     display: inline;
   }
+}
+
+/* ---------------------------------------------------------- umpire rankings
+   The full league table (UmpireRankingsPage) reuses .standings/.ledger-wrap's
+   ledger styling (see the Standings page above) rather than a parallel table
+   skin — same right-aligned mono figures, left-aligned .team cell. Only the
+   rank number riding the name cell is specific to this table. */
+.umprank__rank {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-caption);
+  min-width: 1.4em;
 }
 
 /* ── Ballpark modal ─────────────────────────────────────────────────────────

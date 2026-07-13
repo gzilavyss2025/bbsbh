@@ -2,8 +2,8 @@ name: Update nightly data
 
 # Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
 # umpire plate accuracy, minor-league leaders, game call-outs, former
-# teammates, and vs-team splits (each documented at the top of its own
-# scripts/gen-*.mjs) in ONE workflow
+# teammates, vs-team splits, and milestone watch (each documented at the top
+# of its own scripts/gen-*.mjs) in ONE workflow
 # with a SINGLE commit+push, instead of eight separate crons each triggering
 # its own Vercel deployment. Consolidated 2026-07-11 after two of the eight
 # (update-callouts and update-former-teammates, both previously at 10:30 UTC)
@@ -73,12 +73,16 @@ jobs:
         id: savant-percentiles
         continue-on-error: true
         run: node scripts/gen-savant-percentiles.mjs
+      - name: Milestone watch
+        id: milestones
+        continue-on-error: true
+        run: node scripts/gen-milestones.mjs
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Update nightly data"
           git push
 
@@ -93,7 +97,8 @@ jobs:
           steps.callouts.outcome == 'failure' ||
           steps.former-teammates.outcome == 'failure' ||
           steps.vs-team-splits.outcome == 'failure' ||
-          steps.savant-percentiles.outcome == 'failure'
+          steps.savant-percentiles.outcome == 'failure' ||
+          steps.milestones.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1

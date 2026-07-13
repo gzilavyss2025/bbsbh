@@ -29,23 +29,81 @@ export function savantPercentilesFor(data, personId, group) {
   return data?.[key]?.[personId] ?? null
 }
 
-// Metric display order + labels for the percentile bars — kept here so the
-// component doesn't hard-code JSX per metric.
+// Metric display order + labels for the percentile cards — kept here so the
+// component doesn't hard-code JSX per metric. `def` is the plain-language
+// gloss shown on a card's flipped-open back face (StatcastPercentiles.jsx).
+// A higher percentile is always the good direction — Savant's own
+// percentiles are pre-flipped so 99th is always "elite" even for stats where
+// a low raw number is good (xERA, Chase%, BB% allowed) — see
+// gen-savant-percentiles.mjs — so only the metrics where that's non-obvious
+// spell it out.
 export const BATTER_METRICS = [
-  { key: 'xwoba', label: 'xwOBA' },
-  { key: 'ev', label: 'Exit velo' },
-  { key: 'hardHit', label: 'Hard-hit %' },
-  { key: 'brl', label: 'Barrel %' },
-  { key: 'chase', label: 'Chase %' },
-  { key: 'sprintSpeed', label: 'Sprint speed' },
+  {
+    key: 'xwoba',
+    label: 'xwOBA',
+    def: 'Expected quality of contact and result, luck-adjusted — the single best all-around number.',
+  },
+  {
+    key: 'ev',
+    label: 'Exit velo',
+    def: 'Average speed the ball leaves the bat.',
+  },
+  {
+    key: 'hardHit',
+    label: 'Hard-hit %',
+    def: 'Share of batted balls hit 95+ mph.',
+  },
+  {
+    key: 'brl',
+    label: 'Barrel %',
+    def: 'Share of batted balls hit at the ideal speed-and-angle combo for extra bases.',
+  },
+  {
+    key: 'chase',
+    label: 'Chase %',
+    def: 'How often he swings at pitches outside the strike zone. Higher percentile means more disciplined, not more chasing.',
+  },
+  {
+    key: 'sprintSpeed',
+    label: 'Sprint speed',
+    def: 'Top running speed, in feet per second.',
+  },
 ]
 
 export const PITCHER_METRICS = [
-  { key: 'xera', label: 'xERA' },
-  { key: 'k', label: 'K %' },
-  { key: 'bb', label: 'BB %' },
-  { key: 'whiff', label: 'Whiff %' },
-  { key: 'chase', label: 'Chase %' },
-  { key: 'fbVelo', label: 'Fastball velo' },
-  { key: 'hardHit', label: 'Hard-hit %' },
+  {
+    key: 'xera',
+    label: 'xERA',
+    def: 'Expected ERA from the contact he allows, not what actually happened. Higher percentile means fewer runs expected.',
+  },
+  {
+    key: 'k',
+    label: 'K %',
+    def: 'Share of batters faced that he strikes out.',
+  },
+  {
+    key: 'bb',
+    label: 'BB %',
+    def: 'Share of batters faced that he walks. Higher percentile means fewer walks.',
+  },
+  {
+    key: 'whiff',
+    label: 'Whiff %',
+    def: 'Share of swings against him that miss entirely.',
+  },
+  {
+    key: 'chase',
+    label: 'Chase %',
+    def: 'How often batters chase his pitches outside the strike zone.',
+  },
+  {
+    key: 'fbVelo',
+    label: 'Fastball velo',
+    def: 'Average fastball speed.',
+  },
+  {
+    key: 'hardHit',
+    label: 'Hard-hit %',
+    def: 'Share of batted balls allowed at 95+ mph. Higher percentile means less hard contact allowed.',
+  },
 ]

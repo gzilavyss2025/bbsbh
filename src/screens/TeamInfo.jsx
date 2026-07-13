@@ -25,6 +25,7 @@ import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
+import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -293,9 +294,12 @@ function Umpires({ officials }) {
           <li key={o.role}>
             <span className="umps__role">{o.role}</span>
             <span className="umps__nameblock">
-              <UmpireLink id={o.id} className="umps__name">
-                {o.name}
-              </UmpireLink>
+              <span className="umps__namerow">
+                <UmpireLink id={o.id} className="umps__name">
+                  {o.name}
+                </UmpireLink>
+                {o.role === 'HP' && hpAccuracy?.tier && <UmpireTierPill tier={hpAccuracy.tier} />}
+              </span>
               {o.role === 'HP' && hpAccuracy?.accuracy != null && (
                 <button type="button" className="plink umps__accbtn" onClick={() => setModalId(o.id)}>
                   {hpAccuracy.rank
