@@ -159,12 +159,14 @@ export async function loadPlayer(id, asOf) {
   // sections (season tiles, splits, game log, the register's current-season row)
   // are pinned to MLB even though his live club is a MiLB affiliate. The game log
   // becomes a combined MLB + rehab log (see below). Null for everyone else.
-  const rehab = detectRehabAssignment(txns, debutYear)
-  const onRehab = Boolean(rehab)
-  // IL status from the same spoiler-capped feed — independent of rehab: a player
-  // can be on the IL AND out on a rehab assignment at once, so both flags stand.
+  // IL status from the same spoiler-capped feed.
   const il = detectInjuredList(txns, endDate)
   const onIL = Boolean(il)
+  // A rehab assignment is by definition an IL rehab, so it's gated on onIL: a
+  // rehab ASG whose closing transaction went uncaptured (esp. across a season
+  // boundary) must not paint a since-activated player with the amber banner.
+  const rehab = detectRehabAssignment(txns, debutYear, endDate)
+  const onRehab = Boolean(rehab) && onIL
   const currentActivitySportId = onRehab ? 1 : liveSportId
   // Where his career-shaped sections are pinned. A player who has reached the
   // majors gets the major-league treatment even while he's currently in the

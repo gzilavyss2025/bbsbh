@@ -12,6 +12,16 @@
 // a stat at a level OTHER than the game being scored, never that game's own line.
 
 import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
+import {
+  ipToOuts,
+  meetsWorkload,
+  CUP_OF_COFFEE_FLOOR,
+  REHAB_CAP,
+  meetsStintCap,
+  txnDate,
+  isRehabTxn,
+  isRehabEndingTxn,
+} from './rehab-policy.js'
 
 const DASH = '—'
 // Non-breaking space (U+00A0) — joins the count and label inside a game-log
@@ -30,54 +40,13 @@ function rate3(x) {
   return x.toFixed(3).replace(/^0(?=\.)/, '')
 }
 
-// Innings pitched ("104.1" = 104 ⅓) <-> outs, so multi-stint lines sum right.
-function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
-}
 function outsToIp(outs) {
   return `${Math.floor(outs / 3)}.${outs % 3}`
 }
 
-// A minor-league stint clears a workload threshold in whichever unit fits the
-// group and role: games played for a hitter, but EITHER innings pitched OR
-// games pitched for a pitcher. Innings alone undercounts a RELIEVER, who
-// racks up games far faster than innings — a starter's rehab ramps up in
-// innings per outing, so an innings floor catches him fine, but a shuttling
-// reliever can go 16 appearances / 19.2 IP over nine weeks (Joel Payamps,
-// Gwinnett, 2026) without ever threatening an innings-only bar, even though
-// nine weeks is well beyond any rehab window. So a pitcher's games count
-// (its OWN threshold, not the hitter's daily-appearance number — a reliever
-// pitches every 2-4 days, not every day) can also clear the bar on its own.
-function meetsWorkload(games, outs, group, threshold) {
-  const t = threshold[group === 'pitching' ? 'pitching' : 'hitting']
-  return group === 'pitching' ? outs >= t.outs || games >= t.games : games >= t.games
-}
-
-// The floor a MiLB stint must clear to count as real presence at all — below
-// this it's a bare cameo. ~10 days for a position player (10 G, one per day);
-// for a pitcher, ~20 IP (a starter's few tune-up outings) OR 5 relief outings
-// (fewer than that is just a look, not a stretch of work).
-const CUP_OF_COFFEE_FLOOR = { hitting: { games: 10 }, pitching: { games: 5, outs: 60 } }
-
-// The ceiling of a rehab-assignment window. A POST-DEBUT minor-league stint at
-// or above this is too big to be rehab — a real option-down or demotion, shown
-// as its own row; below it, it's rehab-or-shuttle noise that drops to a
-// caption. Deliberately an ABSOLUTE cap, not "was the player MiLB-primary that
-// year": an injured pitcher who threw 5 MLB innings and 14 rehab innings has
-// MORE minor-league work but was never demoted (verified against Kodai
-// Senga's 2024), so a relative test would wrongly promote his rehab to a
-// demotion row. ~20 days ≈ 20 G for a position player; for a pitcher, ~30
-// days ≈ 30 IP (a starter's several rehab starts) OR 15 relief outings — an
-// MLB rehab assignment is capped at 30 days by rule, so even a reliever
-// pitching every other day tops out around 15 outings before it must convert
-// to a real assignment or he's recalled.
-const REHAB_CAP = { hitting: { games: 20 }, pitching: { games: 15, outs: 90 } }
-function meetsStintCap(stat, group) {
-  const games = num(stat?.gamesPitched ?? stat?.gamesPlayed)
-  const outs = ipToOuts(stat?.inningsPitched)
-  return meetsWorkload(games, outs, group, REHAB_CAP)
-}
+// meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, meetsStintCap: see
+// rehab-policy.js — shared with the nightly generators so the rehab-vs-demotion
+// policy can't drift out of lockstep between the player page and precomputes.
 
 // ---------------------------------------------------------------------------
 // Player identity
@@ -548,14 +517,20 @@ export const MILESTONE_DEFS = [
   { stat: 'doubles', group: 'hitting', label: '2B', thresholds: [400, 500, 600], window: 20, farWindow: 150, gameGate: 2 },
   { stat: 'wins', group: 'pitching', label: 'W', thresholds: [100, 150, 200, 250, 300], window: 5, farWindow: 60, gameGate: 1 },
   { stat: 'strikeOuts', group: 'pitching', label: 'K', thresholds: [1000, 1500, 2000, 2500, 3000, 3500, 4000], window: 50, farWindow: 400, gameGate: 8 },
-  { stat: 'saves', group: 'pitching', label: 'SV', thresholds: [200, 300, 400, 500, 600], window: 15, farWindow: 120, gameGate: 1 },
+  { stat: 'saves', group: 'pitching', label: 'SV', thresholds: [100, 200, 300, 400, 500, 600], window: 15, farWindow: 120, gameGate: 1 },
 ]
 
 // The smallest threshold still ahead of `value`, only when within `window` of
 // it — otherwise null (too far out to be worth flagging, or already passed
-// every threshold in the table).
+// every threshold in the table). Also null below the FIRST threshold's own
+// distance, i.e. `value <= 0`: a wide `farWindow` can otherwise exceed a
+// stat's lowest threshold (100 HR's farWindow of 120 is wider than 100
+// itself), which would flag a player who hasn't recorded a single one yet as
+// "in range" of his first milestone — worth nothing until he's actually
+// started the count.
 export function nearestMilestone(value, thresholds, window) {
   const v = num(value)
+  if (v <= 0) return null
   const next = (thresholds ?? []).find((t) => t > v)
   if (next == null) return null
   const remaining = next - v
@@ -686,7 +661,7 @@ export const MILESTONE_RARITY = {
   doubles: { 400: 110, 500: 30, 600: 8 },
   wins: { 100: 450, 150: 230, 200: 120, 250: 55, 300: 24 },
   strikeOuts: { 1000: 350, 1500: 180, 2000: 110, 2500: 55, 3000: 20, 3500: 6, 4000: 4 },
-  saves: { 200: 110, 300: 55, 400: 25, 500: 9, 600: 1 },
+  saves: { 100: 230, 200: 110, 300: 55, 400: 25, 500: 9, 600: 1 },
 }
 export function milestoneRarityRank(stat, threshold) {
   return MILESTONE_RARITY[stat]?.[threshold] ?? 999
@@ -1391,32 +1366,24 @@ export function transactionTimelineView(
 // it's gated on debutYear). Returns the rehab club { id, name } or null — the
 // caller shows a banner and pins his current-activity sections to MLB, since a
 // rehabber is a major leaguer passing through the minors, not a demotion.
+//
+// txnDate / isRehabTxn / isRehabEndingTxn: see
+// rehab-policy.js — shared with gen-rehab.mjs so the app's per-player detector
+// and the league-wide Rehab Assignments generator agree on when a rehab ends.
+//
+// A rehab stint never carries ACROSS a season boundary, same reasoning as
+// detectInjuredList below: an uncaptured closing transaction from a prior
+// season must not keep painting today's (now-active) player with the amber
+// rehab banner. `asOf` is the same spoiler cutoff the caller already used to
+// cap the transactions feed.
 // ---------------------------------------------------------------------------
-// The move types that CLOSE OUT a rehab stint — a return to the majors (recall,
-// contract selection), a real option down, a release/retirement, any non-rehab
-// reassignment, or an activation off the injured list. Shared by the single-
-// player detector and the league-wide selector so the two agree on when a rehab
-// is over.
-const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET'])
-function txnDate(t) {
-  return t.effectiveDate || t.date || ''
-}
-function isRehabTxn(t) {
-  return t.typeCode === 'ASG' && /rehab/i.test(t.description || '')
-}
-function isRehabEndingTxn(t) {
-  const c = t.typeCode
-  if (REHAB_END_CODES.has(c)) return true
-  if (c === 'ASG' && !isRehabTxn(t)) return true
-  return c === 'SC' && /activat/i.test(t.description || '') && /injured list/i.test(t.description || '')
-}
-
-export function detectRehabAssignment(transactions, debutYear) {
+export function detectRehabAssignment(transactions, debutYear, asOf) {
   if (!debutYear) return null
   const rehabs = (transactions ?? []).filter((t) => isRehabTxn(t) && txnDate(t))
   if (!rehabs.length) return null
   const latest = rehabs.reduce((a, b) => (txnDate(a) >= txnDate(b) ? a : b))
   const start = txnDate(latest)
+  if (asOf && start.slice(0, 4) < asOf.slice(0, 4)) return null
   const ends = (transactions ?? []).some((t) => txnDate(t) > start && isRehabEndingTxn(t))
   if (ends) return null
   const club = latest.toTeam
