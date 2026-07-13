@@ -114,6 +114,30 @@ export async function fetchAllStarInfo(season) {
   }
 }
 
+// The All-Star Game itself, for the team page's season schedule strip: a real,
+// schedulable MLB game (see fetchAllStarInfo's note — real teams "AL/NL
+// All-Stars", real logos/abbreviations), so unlike the Derby (no statsapi
+// event at all — see DerbyCard) this can be a normal clickable card that
+// opens like any other game. Spoiler-free — `normalizeGame` never carries a
+// score/isWinner, same as every other slate row. Degrades to null off a
+// missing break window or an All-Star date with no game posted (e.g. a
+// lockout-shortened season).
+export async function fetchAllStarGame(season) {
+  const info = await fetchAllStarInfo(season)
+  if (!info) return null
+  const games = await fetchSchedule(info.allStarDate, 1, 'team')
+  const game = games[0]
+  if (!game) return null
+  return {
+    gamePk: game.gamePk,
+    apiDate: info.allStarDate,
+    resumeDate: info.firstDate2ndHalf,
+    gameNumber: game.gameNumber,
+    away: game.away,
+    home: game.home,
+  }
+}
+
 // Every active club at a level, independent of any date's schedule — used by
 // the logo sheet's level browser so it can show a league's full set of marks
 // rather than just the teams playing today, and by the footer's team

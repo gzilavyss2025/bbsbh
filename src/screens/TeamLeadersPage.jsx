@@ -72,7 +72,7 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
           </div>
         </header>
 
-        <TeamLeaders pool={data.pool} categories={ALL_CATEGORIES} limit={10} />
+        <TeamLeaders pool={data.pool} categories={ALL_CATEGORIES} limit={10} showTeamAbbr={false} />
       </div>
     </LinkScope>
   )

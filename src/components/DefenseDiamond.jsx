@@ -1,3 +1,6 @@
+import { InjuredMark } from './InjuredMark.jsx'
+import { PlayerLink } from './PlayerLink.jsx'
+
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:
 // the infield square rotated onto its point, each fielder's surname on a
 // writing line at his position with the small position number beneath, and
@@ -6,7 +9,10 @@
 // so he rides a small line under the diamond instead.
 //
 // Two input shapes, one drawing:
-//  • Lineup page (spoiler-free starting nine): each item is { position, last }.
+//  • Lineup page (spoiler-free starting nine): each item is { position, last,
+//    hurt?, id? } — `hurt` (optional, e.g. TeamPage's Preferred Lineup card)
+//    flags the name with the shared IL cross (see InjuredMark.jsx); `id`
+//    (optional, same card) makes the name a PlayerLink to his profile.
 //  • Innings page (reveal-gated live alignment, see api/defense.js): each item
 //    is { position, entries: [{ last, inning, replaced }, …] } — a scorebook
 //    substitution stack. A replaced player is struck through with the reliever
@@ -39,7 +45,9 @@ function toStacks(defense) {
   const byPos = {}
   for (const item of defense) {
     if (!item?.position) continue
-    byPos[item.position] = item.entries ?? [{ last: item.last, inning: null, replaced: false }]
+    byPos[item.position] = item.entries ?? [
+      { last: item.last, inning: null, replaced: false, hurt: item.hurt ?? false, id: item.id ?? null },
+    ]
   }
   return byPos
 }
@@ -131,18 +139,23 @@ function DefenseSpot({ pos, stack, spot }) {
 // A single surname on its writing line. A replaced player is struck through; a
 // player who entered mid-game carries the inning he took the field and, while
 // he's the standing occupant, his surname is inked seam-red like the inning tag.
+// An entry carrying an `id` (only the Preferred Lineup card does today) links
+// the surname to his player page — plain text otherwise, unchanged everywhere
+// else the diamond is used.
 function DefenseName({ entry }) {
   const entered = entry.inning != null && !entry.replaced
+  const name = entry.last.toUpperCase()
   return (
     <span
       className={`defdiamond__name ${entry.replaced ? 'defdiamond__name--out' : ''} ${
         entered ? 'defdiamond__name--in' : ''
       }`}
     >
-      {entry.last.toUpperCase()}
+      {entry.id ? <PlayerLink id={entry.id}>{name}</PlayerLink> : name}
       {entry.inning != null && (
         <span className="defdiamond__enter"> ({ordinal(entry.inning)})</span>
       )}
+      <InjuredMark hurt={entry.hurt} />
     </span>
   )
 }
