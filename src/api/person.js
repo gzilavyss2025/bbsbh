@@ -1257,11 +1257,21 @@ function assignedDescription(t, fromLevel, toLevel) {
 // (see loadPlayer): `levelByTeamId` maps a club id to its sportId (for the
 // CALLED UP / SENT DOWN direction and the level tags), `tradeOthers` maps a
 // tradeKey to the other players in that swap (for the in-description links),
-// `awards` is the raw awards feed, and `draft` is the shaped draft record. Rows
-// dated after `endDate` (the spoiler cutoff) are dropped. Newest first.
+// `awards` is the raw awards feed, `draft` is the shaped draft record, and
+// `rookieUntil` is the date (from public/data/rookies.json) he exceeded the
+// rookie limit, if ever. Rows dated after `endDate` (the spoiler cutoff) are
+// dropped. Newest first.
 export function transactionTimelineView(
   transactions,
-  { selfId, levelByTeamId = new Map(), tradeOthers = new Map(), awards = [], draft = null, endDate = null } = {},
+  {
+    selfId,
+    levelByTeamId = new Map(),
+    tradeOthers = new Map(),
+    awards = [],
+    draft = null,
+    rookieUntil = null,
+    endDate = null,
+  } = {},
 ) {
   const rows = []
   const seen = new Set()
@@ -1360,6 +1370,20 @@ export function transactionTimelineView(
           : `Won the ${a.season} ${a.name}.`,
       links: null,
       club: a.team?.id ? { id: a.team.id, name: a.team.teamName || a.team.name || '' } : null,
+    })
+  }
+
+  // Rookie status lost — a synthetic row on the date his career AB/IP crossed
+  // the rookie limit (public/data/rookies.json), same style as DRAFT above.
+  if (rookieUntil) {
+    push({
+      code: 'ROOKIE_LOST',
+      date: rookieUntil,
+      label: 'Lost Rookie Status',
+      tone: 'move',
+      description: 'Exceeded the rookie limit of 130 at-bats or 50 innings pitched.',
+      links: null,
+      club: null,
     })
   }
 

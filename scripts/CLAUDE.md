@@ -104,6 +104,22 @@ don't run these by hand.
   `projectMilestoneETA`/`careerPerSeasonRate`/`milestoneRarityRank` straight from
   `src/api/person.js` (pure, no DOM deps) — extend the projection math there, not in
   the script. MLB careers only.
+- `gen-rookies.mjs` → `public/data/rookies.json` — each player's rookie window
+  (debut date + the date, if any, his career crossed the rookie limit: 130
+  at-bats or 50 innings pitched — AB/IP only, not MLB's full official rule,
+  which also has a 45-active-roster-days clause). Feeds `RookiePill` + the
+  player page's "Lost Rookie Status" timeline row (`src/api/rookies.js`).
+  Same `fullRoster` scan as `gen-milestones.mjs`, but APPEND-ONLY/incremental
+  like `gen-game-notes.mjs`/`gen-umpire-accuracy.mjs`, not a full rebuild: a
+  closed record is a frozen historical fact the timeline already shows, so
+  this script only ever adds a new debut or closes a still-open one — it
+  never recomputes a closed record, and never touches a player who's fallen
+  off every MLB org's roster (his existing record, open or closed, is left
+  alone). `scripts/gen-rookies-backfill.mjs` (hand-run, below) establishes
+  everyone else. Shares its crossing-detection helpers with that script by
+  deliberate small duplication (self-contained generators, same convention as
+  `gen-rehab.mjs` mirroring `person.js`'s `detectRehabAssignment`), not a
+  shared import.
 
 ## Own-cadence generators (not the nightly batch)
 
@@ -143,6 +159,19 @@ Re-run only to fold in a new season.
   team snapshots for 2005+ (where its affiliate data is clean) and merges a small
   hand-verified seed (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the
   SEED, never the output.** See the generator header for the 2005-floor rationale.
+- `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
+  historical sweep that establishes every player's rookie window before
+  `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB
+  season's player pool (`/api/v1/sports/1/players?season=YYYY`, which carries
+  each player's own `mlbDebutDate` — no separate debut lookup needed), deduped
+  by personId, defaulting to the full modern-era range (1901–present;
+  `--since`/`--until` narrow it for a chunked run). A re-run only computes
+  personIds NOT already in the output file, so widening the range later never
+  recomputes — or overwrites — anyone already done. Not "immutable data" in
+  quite the same sense as the other two generators in this section (a
+  player's crossing date doesn't change once computed, but the file is still
+  actively appended to every night by `gen-rookies.mjs`) — it's here because,
+  like them, it's a large one-time crawl, never re-run wholesale.
 
 ## Assets / off-app
 
