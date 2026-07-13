@@ -381,8 +381,16 @@ async function fetchSplitRecords() {
 // that point. W/L from the club's own isWinner. Cut off at `asOf` so a slate
 // scored later never folds tonight's result into either record.
 async function scoringRecord(teamId, sportId) {
+  // Bounded to games through `asOf` (startDate/endDate — NOT `season=`, which the
+  // API rejects alongside endDate) and pruned to this sweep's exact read-set, so a
+  // slate scored later never even fetches tonight's result. The `date > asOf`
+  // guard below STAYS as defense for suspended games whose schedule date and
+  // officialDate can straddle the cutoff. Payload ~63 KB -> ~3 KB gzipped;
+  // game set + every read-field verified identical to the full-season fetch.
+  const fields =
+    'dates,games,gamePk,officialDate,gameDate,status,abstractGameState,teams,away,home,team,id,isWinner,score,linescore,innings,num,runs'
   const data = await getJson(
-    `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team,linescore`,
+    `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&startDate=${season}-01-01&endDate=${asOf}&gameType=R&hydrate=team,linescore&fields=${fields}`,
   )
   const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
   let sfW = 0, sfL = 0, osW = 0, osL = 0
