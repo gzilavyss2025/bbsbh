@@ -548,14 +548,20 @@ export const MILESTONE_DEFS = [
   { stat: 'doubles', group: 'hitting', label: '2B', thresholds: [400, 500, 600], window: 20, farWindow: 150, gameGate: 2 },
   { stat: 'wins', group: 'pitching', label: 'W', thresholds: [100, 150, 200, 250, 300], window: 5, farWindow: 60, gameGate: 1 },
   { stat: 'strikeOuts', group: 'pitching', label: 'K', thresholds: [1000, 1500, 2000, 2500, 3000, 3500, 4000], window: 50, farWindow: 400, gameGate: 8 },
-  { stat: 'saves', group: 'pitching', label: 'SV', thresholds: [200, 300, 400, 500, 600], window: 15, farWindow: 120, gameGate: 1 },
+  { stat: 'saves', group: 'pitching', label: 'SV', thresholds: [100, 200, 300, 400, 500, 600], window: 15, farWindow: 120, gameGate: 1 },
 ]
 
 // The smallest threshold still ahead of `value`, only when within `window` of
 // it — otherwise null (too far out to be worth flagging, or already passed
-// every threshold in the table).
+// every threshold in the table). Also null below the FIRST threshold's own
+// distance, i.e. `value <= 0`: a wide `farWindow` can otherwise exceed a
+// stat's lowest threshold (100 HR's farWindow of 120 is wider than 100
+// itself), which would flag a player who hasn't recorded a single one yet as
+// "in range" of his first milestone — worth nothing until he's actually
+// started the count.
 export function nearestMilestone(value, thresholds, window) {
   const v = num(value)
+  if (v <= 0) return null
   const next = (thresholds ?? []).find((t) => t > v)
   if (next == null) return null
   const remaining = next - v
@@ -686,7 +692,7 @@ export const MILESTONE_RARITY = {
   doubles: { 400: 110, 500: 30, 600: 8 },
   wins: { 100: 450, 150: 230, 200: 120, 250: 55, 300: 24 },
   strikeOuts: { 1000: 350, 1500: 180, 2000: 110, 2500: 55, 3000: 20, 3500: 6, 4000: 4 },
-  saves: { 200: 110, 300: 55, 400: 25, 500: 9, 600: 1 },
+  saves: { 100: 230, 200: 110, 300: 55, 400: 25, 500: 9, 600: 1 },
 }
 export function milestoneRarityRank(stat, threshold) {
   return MILESTONE_RARITY[stat]?.[threshold] ?? 999
