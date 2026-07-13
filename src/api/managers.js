@@ -36,10 +36,11 @@ async function load() {
   return cached
 }
 
-// Same job-title convention as fetchManager (game.js) and the generator: a
-// permanent skipper's job is exactly 'Manager', a fill-in 'Interim Manager' —
-// both end in "manager".
-const MANAGER_JOB_RE = /(^|\s)manager$/i
+// Same jobId convention as fetchManager (game.js) and the generator: a
+// permanent skipper is 'MNGR', a fill-in 'NTRM' (Interim Manager) — matched
+// by jobId, not a job-NAME match, since the coaches endpoint also has an
+// 'Associate Manager' role (jobId 'ASSM') that isn't a second team manager.
+const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 
 // One person's whole coaching career, chronological (oldest first, as stored),
 // each stint carrying its resolved team name and an `isManager` flag. Empty
@@ -51,7 +52,7 @@ export async function loadManagerHistory(personId) {
   const stints = raw.map((s) => ({
     ...s,
     teamName: teamFullName(s.teamId) || '',
-    isManager: MANAGER_JOB_RE.test(s.job || ''),
+    isManager: MANAGER_JOB_IDS.has(s.jobId),
   }))
   return { stints, generatedAt }
 }

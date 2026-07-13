@@ -10834,8 +10834,8 @@ body {
 }
 .mgrpage__shot {
   flex: none;
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
+  /* No size override — same page-header treatment as the player page's
+     `.shot` (base rule, --shot-xl), the biggest rung in the app. */
 }
 .mgrpage__ident {
   min-width: 0;
@@ -11012,6 +11012,19 @@ body {
   flex: none;
   font-size: 12px;
   color: var(--text-caption);
+}
+/* That season's own W-L, next to the job label — only Manager/Interim
+   Manager rows carry one (see ManagerPage's isManager guard). A shared,
+   not-yet-researched season reads "Shared season" instead of a number,
+   same caveat convention as the record table above. */
+.mgrpage__timelinerecord {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
 /* Manager/Interim Manager rows carry the page's "story" — inked bold, unlike
    the lighter assistant-coach rows around them. */

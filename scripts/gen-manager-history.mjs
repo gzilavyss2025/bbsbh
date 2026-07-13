@@ -54,11 +54,13 @@ const API = 'https://statsapi.mlb.com/api/v1'
 const START_YEAR = 2000
 const currentSeason = () => new Date().getUTCFullYear()
 
-// Same convention as fetchManager (src/api/game.js): a permanent skipper is
-// 'Manager', a fill-in 'Interim Manager' — both end in "manager". The
-// /coaches endpoint only returns on-field staff (never front-office titles
-// like "General Manager"), so this regex doesn't need to guard against that.
-const MANAGER_JOB_RE = /(^|\s)manager$/i
+// A permanent skipper is jobId 'MNGR', a fill-in 'NTRM' (Interim Manager) —
+// matched by jobId, NOT a job-name regex: the /coaches endpoint also has an
+// 'Associate Manager' role (jobId 'ASSM', e.g. Rickie Weeks Jr. for the
+// 2024-25 Brewers), a senior-advisor title that ends in "Manager" but isn't
+// a second team manager. A name-substring match falsely flagged those
+// seasons as a shared/interim managerial change.
+const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 
 const CURRENT_ONLY = process.argv.includes('--current-only')
 
@@ -135,7 +137,7 @@ function tally(games) {
 // Sweep every (teamId, season) pair's coaches roster, building:
 //  - byPersonId: personId -> [{ teamId, season, job, jobId }] (unsorted)
 //  - teamSeasonManagers: `${teamId}:${season}` -> Set of distinct personIds
-//    whose job matched MANAGER_JOB_RE that season (for the shared/unshared
+//    whose jobId was in MANAGER_JOB_IDS that season (for the shared/unshared
 //    split below)
 async function sweepCoaches(teamIds, seasons) {
   const jobs = []
@@ -163,7 +165,7 @@ async function sweepCoaches(teamIds, seasons) {
       if (!personId || !job) continue
       if (!byPersonId.has(personId)) byPersonId.set(personId, [])
       byPersonId.get(personId).push({ teamId, season, job, jobId: r.jobId ?? null })
-      if (MANAGER_JOB_RE.test(job)) {
+      if (MANAGER_JOB_IDS.has(r.jobId)) {
         if (!teamSeasonManagers.has(tsKey)) teamSeasonManagers.set(tsKey, new Set())
         teamSeasonManagers.get(tsKey).add(personId)
       }

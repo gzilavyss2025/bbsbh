@@ -95,7 +95,10 @@ export async function fetchManager(teamId, season) {
       `/api/v1/teams/${teamId}/coaches${season ? `?season=${season}` : ''}`,
     )
     const roster = data.roster ?? []
-    const managers = roster.filter((r) => /(^|\s)manager$/i.test(r.job ?? ''))
+    // jobId, not a job-name match — the coaches endpoint also has an
+    // 'Associate Manager' role (jobId 'ASSM'), a senior-advisor title that
+    // isn't a second team manager but would false-match a "manager" regex.
+    const managers = roster.filter((r) => r.jobId === 'MNGR' || r.jobId === 'NTRM')
     // Prefer the exact 'Manager' over an 'Interim Manager' if both appear.
     const mgr =
       managers.find((r) => r.job === 'Manager') ?? managers[0] ?? null

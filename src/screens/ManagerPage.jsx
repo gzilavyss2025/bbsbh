@@ -160,6 +160,11 @@ function CoachingTimeline({ stints }) {
             <TeamLogo teamId={s.teamId} name={s.teamName} size={20} />
             <span className="mgrpage__timelineteam">{s.teamName}</span>
             <span className="mgrpage__timelinejob">{s.job}</span>
+            {s.isManager && (
+              <span className="mgrpage__timelinerecord">
+                {s.record ? `${s.record.w}-${s.record.l}` : 'Shared season'}
+              </span>
+            )}
           </li>
         ))}
       </ul>
