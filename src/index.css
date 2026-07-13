@@ -3034,6 +3034,10 @@ body {
   font-weight: var(--w-bold);
 }
 
+.defdiamond__name .ilmark {
+  font-size: 9px;
+  margin-left: 1px;
+}
 .defdiamond__num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -7221,6 +7225,21 @@ body {
   text-transform: uppercase;
   color: var(--text-heading);
 }
+/* Shared inline IL cross (see components/InjuredMark.jsx) — same glyph/color
+   as .il-banner__mark (player page), sized inline for a name rather than a
+   full banner. Base rule here; each context that uses it sets its own size. */
+.ilmark {
+  flex: none;
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+  line-height: 1;
+}
+.tlead__head .ilmark {
+  font-size: 13px;
+}
+.tlead__row .ilmark {
+  font-size: 10px;
+}
 .tlead__pos {
   font-family: var(--font-display);
   font-size: 9px;
@@ -9278,79 +9297,51 @@ body {
   font-size: 11px;
 }
 
-/* team-hub schedule calendar */
-.tcal {
+/* team-hub schedule strip — one block per series (run of consecutive games
+   vs. the same opponent), wrapping left-to-right/top-to-bottom instead of
+   paging by month; see SeriesStrip in TeamPage.jsx. */
+.sstrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   margin: 4px 0 2px;
 }
-.tcal__nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-bottom: 8px;
-}
-.tcal__navbtn {
-  min-height: 32px;
-  min-width: 32px;
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-size: 16px;
-  font-weight: var(--w-bold);
-  line-height: 1;
-  cursor: pointer;
-}
-.tcal__month {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--text-heading);
-}
-.tcal__dow,
-.tcal__grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-}
-.tcal__dow {
-  margin-bottom: 3px;
-}
-.tcal__dow span {
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-}
-.tcal__cell {
-  min-height: 44px;
-  padding: 3px;
+.sstrip__series {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  padding: 4px 5px;
   border-radius: var(--radius-sm);
   background: var(--bg-page);
   border: var(--bw-hair) solid var(--border-hairline);
 }
-.tcal__cell--blank {
-  background: transparent;
-  border-color: transparent;
+/* The series the page was opened from (asOf, or today on a bare visit) gets
+   a kraft-tape ring so it reads as "you are here" among a season's worth of
+   otherwise-identical blocks. */
+.sstrip__series--current {
+  border-color: var(--seal);
+  border-width: 2px;
 }
-.tcal__daynum {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--text-caption);
-}
-.tcal__game {
-  position: relative;
+.sstrip__opp {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 26px;
+  gap: 3px;
+}
+.sstrip__opplabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.sstrip__cells {
+  display: flex;
+  gap: 2px;
+}
+.sstrip__cell {
+  height: 16px;
+  width: 16px;
   padding: 0;
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -9360,44 +9351,46 @@ body {
 /* Home games get the scorebook's kraft-tape tone (see --seal) rather than
    the opponent's own color — same "paper" vocabulary as the seal covers,
    just solid instead of hatched. */
-.tcal__game--home {
+.sstrip__cell--home {
   background: color-mix(in srgb, var(--seal) 80%, transparent);
   border-color: transparent;
 }
 /* Once a game's result is safe to show (see fetchTeamSchedule's resultsCutoff),
-   the tile itself carries the W/L rather than a separate badge — muted tints
-   off the same accent tokens the standings table's run-diff column uses, not
-   a solid stoplight color. A home game keeps its identity via the kraft-tape
-   ring instead of the amber fill, since the fill is now spoken for by the
-   result. Applies per-tile, not per-cell, so a doubleheader's two games (two
-   separate buttons in the same day cell) can read split — one green, one red. */
-.tcal__game--win {
-  background: color-mix(in srgb, var(--accent-positive) 26%, var(--paper-2));
+   the cell itself carries the W/L as a solid fill off the field-green/clay-red
+   accent tokens — at strip scale (16px, no label) a pale tint reads as empty,
+   so this deliberately breaks from the muted-tint convention elsewhere (e.g.
+   the standings table's run-diff column) in favor of a color a whole season
+   can be read from arm's length. A home game keeps its identity via the
+   kraft-tape ring instead of the amber fill, since the fill is now spoken for
+   by the result. */
+.sstrip__cell--win {
+  background: var(--accent-positive);
+  border-color: var(--field-deep);
 }
-.tcal__game--loss {
-  background: color-mix(in srgb, var(--accent-negative) 26%, var(--paper-2));
+.sstrip__cell--loss {
+  background: var(--accent-negative);
+  border-color: var(--clay-deep);
 }
-.tcal__game--home.tcal__game--win,
-.tcal__game--home.tcal__game--loss {
+.sstrip__cell--home.sstrip__cell--win,
+.sstrip__cell--home.sstrip__cell--loss {
   border: 2px solid var(--seal);
 }
-.tcal__gm {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  min-width: 13px;
-  height: 13px;
-  padding: 0 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  border: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: var(--w-bold);
-  color: var(--text-muted);
+/* The All-Star Game card — a real, clickable game (see fetchAllStarGame) so
+   it's a <button> rather than the .sstrip__series div wrapper the opponent
+   blocks use; kraft-tape tinted to read as a break in the season rather than
+   just another series. */
+.sstrip__series--allstar {
+  font: inherit;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--seal) 14%, var(--bg-page));
+  border-color: var(--seal);
+}
+.sstrip__series--allstar .sstrip__opp {
+  gap: 1px;
+}
+.sstrip__series--allstar .sstrip__opplabel {
+  color: var(--award-ink);
+  white-space: nowrap;
 }
 
 /* standings */
@@ -9449,6 +9442,17 @@ body {
 }
 .standings td.is-positive {
   color: var(--accent-positive);
+}
+/* Home/Away split columns — phone width is too narrow for them alongside
+   Team/W/L/GB/Streak/L10/RD, so they only join in at the desktop/iPad
+   breakpoint the rest of the app already uses (see e.g. .standings-daynav). */
+.standings__wide {
+  display: none;
+}
+@media (min-width: 740px) {
+  .standings__wide {
+    display: table-cell;
+  }
 }
 .standings td.is-negative {
   color: var(--accent-negative);
@@ -9748,37 +9752,79 @@ body {
   }
 }
 
-/* ranked team stats */
+/* ranked team stats — a dense two-column ledger of stat / value / rank lines.
+   Each stat is one baseline-aligned row (condensed uppercase label, mono
+   tabular figure, tinted rank ordinal) rather than a padded card, so 9–13
+   rows read as a compact box-score block, not a wall of boxes. Two columns
+   on phone width, collapsing to one on the narrowest viewports. The whole
+   block sits on one soft-cream card with a kraft-tape border, rather than
+   each row floating over the page's own graph-paper background — the grid
+   lines behind an unbounded ledger made the rows hard to read at a glance. */
+.tstats-card {
+  padding: 4px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-sm);
+}
 .tstats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  column-gap: 18px;
 }
-.tstat {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: 8px 11px;
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
+.tstatrow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 1px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
-.tstat__k {
+/* The top row of each column sits flush against the card's own top border
+   (see .tstats-card) — dropping its rule keeps the two from doubling up. */
+.tstatrow:nth-child(-n + 2) {
+  border-top: none;
+}
+.tstatrow__k {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10px;
+  font-size: 10.5px;
+  line-height: 1.1;
   color: var(--text-caption);
+  min-width: 0;
 }
-.tstat__v {
+.tstatrow__v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 17px;
+  font-size: 14px;
   font-weight: var(--w-bold);
   color: var(--text-heading);
-  margin-top: 2px;
+}
+.tstatrow__r {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  min-width: 2.6ch;
+  text-align: right;
+}
+.tstatrow__r--good {
+  color: var(--field-deep);
+}
+.tstatrow__r--bad {
+  color: var(--clay-deep);
+}
+@media (max-width: 359px) {
+  .tstats {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+  /* Single column now — only the very first row is flush against the card
+     top; row 2 goes back to needing its own rule. */
+  .tstatrow:nth-child(2) {
+    border-top: var(--bw-hair) solid var(--border-hairline);
+  }
 }
 .rankchip {
   font-family: var(--font-mono);
@@ -9888,6 +9934,9 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
+.thub-namewrap .ilmark {
+  font-size: 12px;
+}
 .thub-allstar {
   color: var(--clay);
   margin-left: 4px;
@@ -9925,6 +9974,69 @@ body {
 .rolechip--cl {
   background: var(--clay-soft);
   color: var(--clay-deep);
+}
+/* The Bullpen list's compound "SV · G · IP" badge — longer than every other
+   rolechip use, but still kept to one line (wrapping read badly); the name
+   column shrinks/ellipsizes first instead (see .thub-name). */
+.rolechip--stats {
+  white-space: nowrap;
+}
+
+/* Roster super-section (Preferred Lineup / Starting Pitchers / Bullpen) — one
+   bordered soft-cream card (same convention as .tstats-card) so the three
+   projection subsections read as one group, distinct from the actual
+   40-man Current Roster section below. */
+.roster-super {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-sm);
+}
+/* Lineup + Starting Pitchers pair up at the desktop/iPad breakpoint (see
+   e.g. .standings__wide); Bullpen (outside this row) stays full-width. */
+.roster-super__row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (min-width: 740px) {
+  .roster-super__row {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .roster-super__row > .roster-sub {
+    flex: 1;
+    min-width: 0;
+  }
+}
+.roster-sub__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+/* Position players / Pitchers, side by side at the desktop/iPad breakpoint
+   instead of stacked full-width. */
+.roster-cols {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (min-width: 740px) {
+  .roster-cols {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .roster-cols > div {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 /* Injured-List day-count badge on the Team page's IL section — clay/seam-red

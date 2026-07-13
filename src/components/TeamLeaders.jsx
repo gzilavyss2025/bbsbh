@@ -7,6 +7,7 @@ import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
+import { InjuredMark } from './InjuredMark.jsx'
 
 // TEAM LEADERS — per-category season leaderboards for a team. Each category
 // features its leader as a headshot card (styled like the slate's Top Performers
@@ -40,16 +41,19 @@ function LeaderBadges({ entry, showLevel, prospectSnapshot }) {
 
 // Rank 1 — the featured card. Reuses the Top Performers headshot frame + name/
 // stat stack, sized up from that shared pattern for readability at this card's
-// larger footprint (see `.shot.tlead__shot`). The team tag (logo + abbreviation)
-// always names the club the leader plays FOR — a MiLB entry shows its MLB
-// parent affiliate's mark/abbreviation rather than its own farm club's, since
-// that's the identity a fan skimming the board actually recognizes (see
-// `displayTeamId`/`displayTeamAbbr`, attached in api/statsLevels.js).
+// larger footprint (see `.shot.tlead__shot`). The team tag always names the
+// club the leader plays FOR via its logo — a MiLB entry shows its MLB parent
+// affiliate's mark rather than its own farm club's, since that's the identity
+// a fan skimming the board actually recognizes (see `displayTeamId`/
+// `displayTeamAbbr`, attached in api/statsLevels.js). The abbreviation text
+// underneath is opt-in (`showTeamAbbr`) — on a single-team pool every leader
+// plays for the same club, so it's redundant with the page's own header; a
+// multi-team board (league/level/org scope) needs it to tell strangers apart.
 //
 // `favoriteTeamId` (league/level leader pages only — see TeamLeaders) tints
 // the row in that club's own accent when the leader plays for it, so a fan's
 // team jumps out on a board otherwise full of strangers.
-function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favoriteTeamId }) {
+function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favoriteTeamId, showTeamAbbr, injuredIds }) {
   const teamId = entry.displayTeamId ?? entry.teamId
   const teamAbbr = entry.displayTeamAbbr ?? entry.teamAbbr
   const isFavorite = favoriteTeamId != null && teamId === favoriteTeamId
@@ -60,7 +64,7 @@ function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favorite
       {teamId && (
         <div className="tlead__teamtag">
           <TeamLogo teamId={teamId} name={teamAbbr} size={24} className="tlead__logo" />
-          {teamAbbr && <span className="tlead__teamabbr">{teamAbbr}</span>}
+          {showTeamAbbr && teamAbbr && <span className="tlead__teamabbr">{teamAbbr}</span>}
         </div>
       )}
       <div className="tlead__who">
@@ -68,6 +72,7 @@ function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favorite
           <PlayerLink id={entry.id} className="tlead__name">
             {entry.name}
           </PlayerLink>
+          <InjuredMark hurt={injuredIds?.has(entry.id)} />
           {entry.position && <span className="tlead__pos">{entry.position}</span>}
         </div>
         <div className="tlead__badges">
@@ -101,7 +106,7 @@ function displayRanks(entries) {
   })
 }
 
-function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favoriteTeamId }) {
+function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favoriteTeamId, showTeamAbbr, injuredIds }) {
   const [leader, ...rest] = entries
   const ranks = displayRanks(entries)
   return (
@@ -113,6 +118,8 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
         showLevel={showLevel}
         prospectSnapshot={prospectSnapshot}
         favoriteTeamId={favoriteTeamId}
+        showTeamAbbr={showTeamAbbr}
+        injuredIds={injuredIds}
       />
       {rest.length > 0 && (
         <ol className="tlead__rest">
@@ -130,6 +137,7 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
                 <PlayerLink id={e.id} className="tlead__rowname">
                   {e.name}
                 </PlayerLink>
+                <InjuredMark hurt={injuredIds?.has(e.id)} />
                 <LeaderBadges entry={e} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
                 <span className="tlead__rowval">{e.display}</span>
               </li>
@@ -158,6 +166,14 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
 // whose leader plays for that club — LeadersPage passes it for the league/
 // level scopes only (not 'org', not the single-team pages), since a team's
 // own leaders page has no "stranger" rows to pick the favorite out from.
+// `showTeamAbbr`: shows the club abbreviation under the featured leader's
+// logo — on by default for the multi-team boards (league/level/org) where
+// it's the only way to tell whose row is whose; the single-team pages
+// (TeamPage, TeamLeadersPage) pass false since every row already shares the
+// one team the page is about. `injuredIds`: a Set of person ids currently on
+// that team's IL, flagging a leader's name with the same ✚ mark as the
+// player page's il-banner — TeamPage passes its own already-fetched IL list
+// (see loadTeam's `injured`); null everywhere else (see InjuredMark above).
 export function TeamLeaders({
   pool,
   categories,
@@ -169,6 +185,8 @@ export function TeamLeaders({
   qualifier = 'roster',
   precomputed = null,
   favoriteTeamId = null,
+  showTeamAbbr = true,
+  injuredIds = null,
 }) {
   const ranked = useMemo(
     () =>
@@ -208,6 +226,8 @@ export function TeamLeaders({
             showLevel={showLevel}
             prospectSnapshot={prospectSnapshot}
             favoriteTeamId={favoriteTeamId}
+            showTeamAbbr={showTeamAbbr}
+            injuredIds={injuredIds}
           />
         ))}
       </div>
