@@ -108,7 +108,7 @@ async function loadTeam(id, asOf) {
       // affiliate's own page gets the same tree its MLB parent would.
       orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
       fetchTopProspects(),
-      fetchTeamSchedule(id, season, sportId),
+      fetchTeamSchedule(id, season, sportId, standingsDate),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -509,9 +509,12 @@ const MONTH_NAMES = [
 const DOW_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
 // Monthly schedule grid for the team page. `games` is spoiler-free (dates,
-// opponents, home/away — see fetchTeamSchedule), so every game renders
-// regardless of whether it's already been played; only the destination page
-// (lineup1) manages its own sealing from there. `refDate` seeds which month
+// opponents, home/away — see fetchTeamSchedule) plus a `won` flag that's
+// already cutoff-gated by the caller (null for anything not yet safe to
+// show), so every game renders regardless of whether it's already been
+// played, and a played game's tile tints green/won or red/loss once `won`
+// isn't null; the destination page (lineup1) still manages its own sealing
+// independently for anyone who taps through. `refDate` seeds which month
 // opens first (the game this page was opened from, or today for a bare
 // visit) — the calendar itself can page anywhere from there.
 function ScheduleCalendar({ games, refDate }) {
@@ -573,18 +576,23 @@ function ScheduleCalendar({ games, refDate }) {
           return (
             <div key={iso} className="tcal__cell">
               <span className="tcal__daynum">{d}</span>
-              {dayGames.map((g) => (
-                <button
-                  key={g.gamePk}
-                  type="button"
-                  className={`tcal__game${g.isHome ? ' tcal__game--home' : ''}`}
-                  onClick={() => openGame(g)}
-                  title={`${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}`}
-                >
-                  <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={21} />
-                  {g.doubleHeader !== 'N' && <span className="tcal__gm">{g.gameNumber}</span>}
-                </button>
-              ))}
+              {dayGames.map((g) => {
+                const resultClass =
+                  g.won === true ? ' tcal__game--win' : g.won === false ? ' tcal__game--loss' : ''
+                const resultLabel = g.won === true ? ' · W' : g.won === false ? ' · L' : ''
+                return (
+                  <button
+                    key={g.gamePk}
+                    type="button"
+                    className={`tcal__game${g.isHome ? ' tcal__game--home' : ''}${resultClass}`}
+                    onClick={() => openGame(g)}
+                    title={`${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
+                  >
+                    <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={21} />
+                    {g.doubleHeader !== 'N' && <span className="tcal__gm">{g.gameNumber}</span>}
+                  </button>
+                )
+              })}
             </div>
           )
         })}

@@ -9243,6 +9243,23 @@ body {
   background: color-mix(in srgb, var(--seal) 80%, transparent);
   border-color: transparent;
 }
+/* Once a game's result is safe to show (see fetchTeamSchedule's resultsCutoff),
+   the tile itself carries the W/L rather than a separate badge — muted tints
+   off the same accent tokens the standings table's run-diff column uses, not
+   a solid stoplight color. A home game keeps its identity via the kraft-tape
+   ring instead of the amber fill, since the fill is now spoken for by the
+   result. Applies per-tile, not per-cell, so a doubleheader's two games (two
+   separate buttons in the same day cell) can read split — one green, one red. */
+.tcal__game--win {
+  background: color-mix(in srgb, var(--accent-positive) 26%, var(--paper-2));
+}
+.tcal__game--loss {
+  background: color-mix(in srgb, var(--accent-negative) 26%, var(--paper-2));
+}
+.tcal__game--home.tcal__game--win,
+.tcal__game--home.tcal__game--loss {
+  border: 2px solid var(--seal);
+}
 .tcal__gm {
   position: absolute;
   top: -5px;
