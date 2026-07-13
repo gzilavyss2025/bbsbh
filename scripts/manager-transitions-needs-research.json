@@ -1,0 +1,713 @@
+[
+  {
+    "teamId": 116,
+    "season": 2000,
+    "managerIds": [
+      114625,
+      118942
+    ]
+  },
+  {
+    "teamId": 111,
+    "season": 2001,
+    "managerIds": [
+      117022,
+      124318
+    ]
+  },
+  {
+    "teamId": 120,
+    "season": 2001,
+    "managerIds": [
+      110186,
+      123401
+    ]
+  },
+  {
+    "teamId": 139,
+    "season": 2001,
+    "managerIds": [
+      118872,
+      121495
+    ]
+  },
+  {
+    "teamId": 140,
+    "season": 2001,
+    "managerIds": [
+      119655,
+      119881
+    ]
+  },
+  {
+    "teamId": 146,
+    "season": 2001,
+    "managerIds": [
+      492621,
+      120404
+    ]
+  },
+  {
+    "teamId": 112,
+    "season": 2002,
+    "managerIds": [
+      110719,
+      117067,
+      117389
+    ]
+  },
+  {
+    "teamId": 114,
+    "season": 2002,
+    "managerIds": [
+      118261,
+      122298
+    ]
+  },
+  {
+    "teamId": 115,
+    "season": 2002,
+    "managerIds": [
+      110815,
+      116346
+    ]
+  },
+  {
+    "teamId": 116,
+    "season": 2002,
+    "managerIds": [
+      114625,
+      120797
+    ]
+  },
+  {
+    "teamId": 118,
+    "season": 2002,
+    "managerIds": [
+      119600,
+      120370,
+      119209
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2002,
+    "managerIds": [
+      118369,
+      427510
+    ]
+  },
+  {
+    "teamId": 158,
+    "season": 2002,
+    "managerIds": [
+      117912,
+      121520
+    ]
+  },
+  {
+    "teamId": 113,
+    "season": 2003,
+    "managerIds": [
+      111221,
+      429730
+    ]
+  },
+  {
+    "teamId": 146,
+    "season": 2003,
+    "managerIds": [
+      429341,
+      123401
+    ]
+  },
+  {
+    "teamId": 109,
+    "season": 2004,
+    "managerIds": [
+      111423,
+      120349
+    ]
+  },
+  {
+    "teamId": 117,
+    "season": 2004,
+    "managerIds": [
+      114625,
+      124318
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2004,
+    "managerIds": [
+      114744,
+      427510
+    ]
+  },
+  {
+    "teamId": 110,
+    "season": 2005,
+    "managerIds": [
+      118499,
+      120427
+    ]
+  },
+  {
+    "teamId": 113,
+    "season": 2005,
+    "managerIds": [
+      429730,
+      119655
+    ]
+  },
+  {
+    "teamId": 118,
+    "season": 2005,
+    "managerIds": [
+      110815,
+      120370,
+      427452
+    ]
+  },
+  {
+    "teamId": 134,
+    "season": 2005,
+    "managerIds": [
+      118093,
+      118576
+    ]
+  },
+  {
+    "teamId": 110,
+    "season": 2007,
+    "managerIds": [
+      120427,
+      492539
+    ]
+  },
+  {
+    "teamId": 113,
+    "season": 2007,
+    "managerIds": [
+      118093,
+      119655
+    ]
+  },
+  {
+    "teamId": 117,
+    "season": 2007,
+    "managerIds": [
+      112651,
+      114625
+    ]
+  },
+  {
+    "teamId": 136,
+    "season": 2007,
+    "managerIds": [
+      115474,
+      427334
+    ]
+  },
+  {
+    "teamId": 121,
+    "season": 2008,
+    "managerIds": [
+      118262,
+      120927
+    ]
+  },
+  {
+    "teamId": 136,
+    "season": 2008,
+    "managerIds": [
+      427334,
+      427427
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2008,
+    "managerIds": [
+      114650,
+      114744
+    ]
+  },
+  {
+    "teamId": 158,
+    "season": 2008,
+    "managerIds": [
+      123011,
+      124681
+    ]
+  },
+  {
+    "teamId": 109,
+    "season": 2009,
+    "managerIds": [
+      134460,
+      118942
+    ]
+  },
+  {
+    "teamId": 115,
+    "season": 2009,
+    "managerIds": [
+      116346,
+      123432
+    ]
+  },
+  {
+    "teamId": 117,
+    "season": 2009,
+    "managerIds": [
+      112320,
+      112651
+    ]
+  },
+  {
+    "teamId": 120,
+    "season": 2009,
+    "managerIds": [
+      427000,
+      427427
+    ]
+  },
+  {
+    "teamId": 109,
+    "season": 2010,
+    "managerIds": [
+      114752,
+      134460
+    ]
+  },
+  {
+    "teamId": 110,
+    "season": 2010,
+    "managerIds": [
+      427469,
+      492539,
+      121651
+    ]
+  },
+  {
+    "teamId": 112,
+    "season": 2010,
+    "managerIds": [
+      120586,
+      433641
+    ]
+  },
+  {
+    "teamId": 118,
+    "season": 2010,
+    "managerIds": [
+      527068,
+      124681
+    ]
+  },
+  {
+    "teamId": 136,
+    "season": 2010,
+    "managerIds": [
+      123798,
+      492474
+    ]
+  },
+  {
+    "teamId": 146,
+    "season": 2010,
+    "managerIds": [
+      427190,
+      121351
+    ]
+  },
+  {
+    "teamId": 120,
+    "season": 2011,
+    "managerIds": [
+      116576,
+      427427,
+      427334
+    ]
+  },
+  {
+    "teamId": 133,
+    "season": 2011,
+    "managerIds": [
+      114712,
+      118942
+    ]
+  },
+  {
+    "teamId": 145,
+    "season": 2011,
+    "managerIds": [
+      115230,
+      112653
+    ]
+  },
+  {
+    "teamId": 146,
+    "season": 2011,
+    "managerIds": [
+      121351,
+      492493,
+      429341
+    ]
+  },
+  {
+    "teamId": 114,
+    "season": 2012,
+    "managerIds": [
+      427000,
+      110184
+    ]
+  },
+  {
+    "teamId": 117,
+    "season": 2012,
+    "managerIds": [
+      119149,
+      429728
+    ]
+  },
+  {
+    "teamId": 143,
+    "season": 2013,
+    "managerIds": [
+      118261,
+      121665
+    ]
+  },
+  {
+    "teamId": 117,
+    "season": 2014,
+    "managerIds": [
+      216694,
+      117554
+    ]
+  },
+  {
+    "teamId": 140,
+    "season": 2014,
+    "managerIds": [
+      123965,
+      111148
+    ]
+  },
+  {
+    "teamId": 111,
+    "season": 2015,
+    "managerIds": [
+      114023,
+      117950
+    ]
+  },
+  {
+    "teamId": 135,
+    "season": 2015,
+    "managerIds": [
+      111034,
+      580268,
+      150353
+    ]
+  },
+  {
+    "teamId": 143,
+    "season": 2015,
+    "managerIds": [
+      118093,
+      121665
+    ]
+  },
+  {
+    "teamId": 146,
+    "season": 2015,
+    "managerIds": [
+      664479,
+      133226
+    ]
+  },
+  {
+    "teamId": 158,
+    "season": 2015,
+    "managerIds": [
+      112736,
+      121373
+    ]
+  },
+  {
+    "teamId": 144,
+    "season": 2016,
+    "managerIds": [
+      427190,
+      492535
+    ]
+  },
+  {
+    "teamId": 113,
+    "season": 2018,
+    "managerIds": [
+      427406,
+      427427
+    ]
+  },
+  {
+    "teamId": 138,
+    "season": 2018,
+    "managerIds": [
+      118414,
+      492917
+    ]
+  },
+  {
+    "teamId": 140,
+    "season": 2018,
+    "managerIds": [
+      110529,
+      123798
+    ]
+  },
+  {
+    "teamId": 135,
+    "season": 2019,
+    "managerIds": [
+      433477,
+      150148
+    ]
+  },
+  {
+    "teamId": 116,
+    "season": 2020,
+    "managerIds": [
+      114599,
+      118576
+    ]
+  },
+  {
+    "teamId": 135,
+    "season": 2020,
+    "managerIds": [
+      461344,
+      435401
+    ]
+  },
+  {
+    "teamId": 114,
+    "season": 2021,
+    "managerIds": [
+      114378,
+      427204
+    ]
+  },
+  {
+    "teamId": 135,
+    "season": 2021,
+    "managerIds": [
+      461344,
+      435401
+    ]
+  },
+  {
+    "teamId": 108,
+    "season": 2022,
+    "managerIds": [
+      427309,
+      119732
+    ]
+  },
+  {
+    "teamId": 140,
+    "season": 2022,
+    "managerIds": [
+      218595,
+      433639
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2022,
+    "managerIds": [
+      119271,
+      456120
+    ]
+  },
+  {
+    "teamId": 143,
+    "season": 2022,
+    "managerIds": [
+      114833,
+      479080
+    ]
+  },
+  {
+    "teamId": 145,
+    "season": 2022,
+    "managerIds": [
+      117517,
+      111867
+    ]
+  },
+  {
+    "teamId": 135,
+    "season": 2023,
+    "managerIds": [
+      118942,
+      134342
+    ]
+  },
+  {
+    "teamId": 140,
+    "season": 2023,
+    "managerIds": [
+      111136,
+      461416
+    ]
+  },
+  {
+    "teamId": 113,
+    "season": 2024,
+    "managerIds": [
+      110816,
+      110848
+    ]
+  },
+  {
+    "teamId": 136,
+    "season": 2024,
+    "managerIds": [
+      122011,
+      124383
+    ]
+  },
+  {
+    "teamId": 140,
+    "season": 2024,
+    "managerIds": [
+      111136,
+      461416
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2024,
+    "managerIds": [
+      456120,
+      427204
+    ]
+  },
+  {
+    "teamId": 145,
+    "season": 2024,
+    "managerIds": [
+      437073,
+      429713
+    ]
+  },
+  {
+    "teamId": 158,
+    "season": 2024,
+    "managerIds": [
+      580268,
+      430001
+    ]
+  },
+  {
+    "teamId": 108,
+    "season": 2025,
+    "managerIds": [
+      123965,
+      119268
+    ]
+  },
+  {
+    "teamId": 110,
+    "season": 2025,
+    "managerIds": [
+      492493,
+      489081
+    ]
+  },
+  {
+    "teamId": 114,
+    "season": 2025,
+    "managerIds": [
+      519390,
+      503360
+    ]
+  },
+  {
+    "teamId": 115,
+    "season": 2025,
+    "managerIds": [
+      111034,
+      519256
+    ]
+  },
+  {
+    "teamId": 120,
+    "season": 2025,
+    "managerIds": [
+      118363,
+      111867
+    ]
+  },
+  {
+    "teamId": 134,
+    "season": 2025,
+    "managerIds": [
+      430603,
+      486359
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2025,
+    "managerIds": [
+      456120,
+      427204
+    ]
+  },
+  {
+    "teamId": 158,
+    "season": 2025,
+    "managerIds": [
+      580268,
+      430001
+    ]
+  },
+  {
+    "teamId": 111,
+    "season": 2026,
+    "managerIds": [
+      133321,
+      501913
+    ]
+  },
+  {
+    "teamId": 121,
+    "season": 2026,
+    "managerIds": [
+      425825,
+      433477
+    ]
+  },
+  {
+    "teamId": 141,
+    "season": 2026,
+    "managerIds": [
+      456120,
+      427204
+    ]
+  },
+  {
+    "teamId": 143,
+    "season": 2026,
+    "managerIds": [
+      479080,
+      118443
+    ]
+  }
+]
