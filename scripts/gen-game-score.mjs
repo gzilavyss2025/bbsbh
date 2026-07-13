@@ -281,5 +281,9 @@ for (const gamePk of candidates) {
   }
 }
 
-await writeOut()
-console.log(`wrote ${out} (${scored} newly scored, ${skipped} skipped, ${Object.keys(scores).length} total)`)
+if (scored > 0) {
+  await writeOut()
+  console.log(`wrote ${out} (${scored} newly scored, ${skipped} skipped, ${Object.keys(scores).length} total)`)
+} else {
+  console.log(`no changes (${skipped} skipped, ${Object.keys(scores).length} total)`)
+}
