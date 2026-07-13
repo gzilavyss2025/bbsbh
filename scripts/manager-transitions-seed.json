@@ -1,1 +1,93 @@
-[]
+[
+  {
+    "teamId": 108,
+    "season": 2022,
+    "transitionDate": "2022-06-07",
+    "outgoingManagerId": 427309,
+    "incomingManagerId": 119732
+  },
+  {
+    "teamId": 111,
+    "season": 2026,
+    "transitionDate": "2026-04-25",
+    "outgoingManagerId": 133321,
+    "incomingManagerId": 501913
+  },
+  {
+    "teamId": 113,
+    "season": 2024,
+    "transitionDate": "2024-09-22",
+    "outgoingManagerId": 110816,
+    "incomingManagerId": 110848
+  },
+  {
+    "teamId": 120,
+    "season": 2025,
+    "transitionDate": "2025-07-06",
+    "outgoingManagerId": 118363,
+    "incomingManagerId": 111867
+  },
+  {
+    "teamId": 121,
+    "season": 2026,
+    "transitionDate": "2026-06-26",
+    "outgoingManagerId": 425825,
+    "incomingManagerId": 433477
+  },
+  {
+    "teamId": 134,
+    "season": 2025,
+    "transitionDate": "2025-05-08",
+    "outgoingManagerId": 486359,
+    "incomingManagerId": 430603
+  },
+  {
+    "teamId": 136,
+    "season": 2024,
+    "transitionDate": "2024-08-22",
+    "outgoingManagerId": 122011,
+    "incomingManagerId": 124383
+  },
+  {
+    "teamId": 141,
+    "season": 2022,
+    "transitionDate": "2022-07-13",
+    "outgoingManagerId": 119271,
+    "incomingManagerId": 456120
+  },
+  {
+    "teamId": 143,
+    "season": 2022,
+    "transitionDate": "2022-06-03",
+    "outgoingManagerId": 114833,
+    "incomingManagerId": 479080
+  },
+  {
+    "teamId": 143,
+    "season": 2026,
+    "transitionDate": "2026-04-28",
+    "outgoingManagerId": 479080,
+    "incomingManagerId": 118443
+  },
+  {
+    "teamId": 110,
+    "season": 2025,
+    "transitionDate": "2025-05-17",
+    "outgoingManagerId": 492493,
+    "incomingManagerId": 489081
+  },
+  {
+    "teamId": 115,
+    "season": 2025,
+    "transitionDate": "2025-05-11",
+    "outgoingManagerId": 111034,
+    "incomingManagerId": 519256
+  },
+  {
+    "teamId": 145,
+    "season": 2024,
+    "transitionDate": "2024-08-08",
+    "outgoingManagerId": 437073,
+    "incomingManagerId": 429713
+  }
+]

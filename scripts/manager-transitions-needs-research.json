@@ -511,35 +511,11 @@
     ]
   },
   {
-    "teamId": 108,
-    "season": 2022,
-    "managerIds": [
-      427309,
-      119732
-    ]
-  },
-  {
     "teamId": 140,
     "season": 2022,
     "managerIds": [
       218595,
       433639
-    ]
-  },
-  {
-    "teamId": 141,
-    "season": 2022,
-    "managerIds": [
-      119271,
-      456120
-    ]
-  },
-  {
-    "teamId": 143,
-    "season": 2022,
-    "managerIds": [
-      114833,
-      479080
     ]
   },
   {
@@ -567,22 +543,6 @@
     ]
   },
   {
-    "teamId": 113,
-    "season": 2024,
-    "managerIds": [
-      110816,
-      110848
-    ]
-  },
-  {
-    "teamId": 136,
-    "season": 2024,
-    "managerIds": [
-      122011,
-      124383
-    ]
-  },
-  {
     "teamId": 140,
     "season": 2024,
     "managerIds": [
@@ -596,14 +556,6 @@
     "managerIds": [
       456120,
       427204
-    ]
-  },
-  {
-    "teamId": 145,
-    "season": 2024,
-    "managerIds": [
-      437073,
-      429713
     ]
   },
   {
@@ -623,43 +575,11 @@
     ]
   },
   {
-    "teamId": 110,
-    "season": 2025,
-    "managerIds": [
-      492493,
-      489081
-    ]
-  },
-  {
     "teamId": 114,
     "season": 2025,
     "managerIds": [
       519390,
       503360
-    ]
-  },
-  {
-    "teamId": 115,
-    "season": 2025,
-    "managerIds": [
-      111034,
-      519256
-    ]
-  },
-  {
-    "teamId": 120,
-    "season": 2025,
-    "managerIds": [
-      118363,
-      111867
-    ]
-  },
-  {
-    "teamId": 134,
-    "season": 2025,
-    "managerIds": [
-      430603,
-      486359
     ]
   },
   {
@@ -679,35 +599,11 @@
     ]
   },
   {
-    "teamId": 111,
-    "season": 2026,
-    "managerIds": [
-      133321,
-      501913
-    ]
-  },
-  {
-    "teamId": 121,
-    "season": 2026,
-    "managerIds": [
-      425825,
-      433477
-    ]
-  },
-  {
     "teamId": 141,
     "season": 2026,
     "managerIds": [
       456120,
       427204
-    ]
-  },
-  {
-    "teamId": 143,
-    "season": 2026,
-    "managerIds": [
-      479080,
-      118443
     ]
   }
 ]

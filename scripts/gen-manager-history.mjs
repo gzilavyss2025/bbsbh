@@ -286,8 +286,13 @@ async function main() {
 
   // Merge the unresolved shared seasons into the needs-research queue,
   // deduping by teamId+season (a re-run shouldn't pile up duplicates).
+  // Also filter out any entries that are now resolved in the seed file.
+  const seedKeys = new Set(seed.map((s) => `${s.teamId}:${s.season}`))
   const needsResearch = await readJson(needsResearchPath, [])
   const nrByKey = new Map(needsResearch.map((e) => [`${e.teamId}:${e.season}`, e]))
+  // Remove any entries that are now in the seed
+  for (const key of seedKeys) nrByKey.delete(key)
+  // Add unresolved entries
   for (const u of unresolved) nrByKey.set(`${u.teamId}:${u.season}`, u)
   const mergedNeedsResearch = [...nrByKey.values()].sort(
     (a, b) => a.season - b.season || a.teamId - b.teamId,
