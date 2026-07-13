@@ -103,6 +103,7 @@ export async function fetchManager(teamId, season) {
     if (!name) return null
     return {
       name,
+      personId: mgr.person?.id ?? null,
       lastFirst: toLastFirst(name),
       jersey: mgr.jerseyNumber ?? '',
       interim: mgr.job !== 'Manager',

@@ -10822,6 +10822,205 @@ body {
   min-width: 1.4em;
 }
 
+/* ---------------------------------------------------------------- manager page
+   ManagerPage.jsx — mirrors the umpire page's card layout (.umpage__card
+   above), with a photo header like the player page. No SealBox: a coaching
+   career/awards carry no live score. */
+.mgrpage__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 6px 0 14px;
+}
+.mgrpage__shot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+.mgrpage__ident {
+  min-width: 0;
+}
+.mgrpage__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--text-heading);
+}
+.mgrpage__sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-caption);
+}
+
+.mgrpage__card {
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.mgrpage__cardtitle {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.mgrpage__awards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgrpage__award {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.mgrpage__awardseason {
+  flex: none;
+  width: 3.4em;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-caption);
+}
+.mgrpage__awardname {
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.mgrpage__recordlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mgrpage__recordrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding-top: 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.mgrpage__recordlist li:first-child.mgrpage__recordrow {
+  padding-top: 0;
+  border-top: none;
+}
+.mgrpage__recordteam {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.mgrpage__recordteamname {
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+}
+.mgrpage__recordyears {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-caption);
+}
+.mgrpage__recordwl {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.mgrpage__recordpct {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.mgrpage__recordcaveat {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+.mgrpage__recordinterim {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.mgrpage__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgrpage__timelinerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+.mgrpage__timeline li:first-child.mgrpage__timelinerow {
+  padding-top: 0;
+  border-top: none;
+}
+.mgrpage__timelineseason {
+  flex: none;
+  width: 3em;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--text-caption);
+}
+.mgrpage__timelineteam {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mgrpage__timelinejob {
+  flex: none;
+  font-size: 12px;
+  color: var(--text-caption);
+}
+/* Manager/Interim Manager rows carry the page's "story" — inked bold, unlike
+   the lighter assistant-coach rows around them. */
+.mgrpage__timelinerow--mgr .mgrpage__timelineteam,
+.mgrpage__timelinerow--mgr .mgrpage__timelinejob {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
 /* ── Ballpark modal ─────────────────────────────────────────────────────────
    The venue name on the lineup page opens a to-scale ink sketch of the field
    (BallparkDiagram) plus the park's outfield distances / wall heights ranked

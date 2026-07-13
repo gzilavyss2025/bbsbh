@@ -24,6 +24,7 @@ import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
+import { ManagerLink } from '../components/ManagerLink.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { umpireAccuracySummary } from '../api/umpires.js'
@@ -918,16 +919,19 @@ function GameNotesButton({ feed, side }) {
 
 // The manager fill-in: surname-first name with the uniform number inked in
 // seam red, like every lineup row. Null (→ the Fact's "—") until resolved.
+// Linked to his manager page once fetchManager resolves a personId (older
+// cached data / a fetch that raced ahead of that field lands here without
+// one — ManagerLink degrades to plain text rather than a dead link).
 function managerFact(manager) {
   if (!manager) return null
   return (
-    <span className="fact__person">
+    <ManagerLink id={manager.personId} className="fact__person">
       {manager.lastFirst}
       {manager.jersey ? (
         <span className="fact__jersey">{manager.jersey}</span>
       ) : null}
       {manager.interim ? <span className="fact__note">interim</span> : null}
-    </span>
+    </ManagerLink>
   )
 }
 
