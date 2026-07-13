@@ -7938,59 +7938,59 @@ body {
   }
 }
 
-/* ---- Statcast percentile bars ----
-   One inked row per metric: label, a horizontal track filled to the
-   percentile, and the number in mono tabular figures. A standout (>=90th
-   percentile) fill picks up the kraft-tape seal amber instead of ink navy —
-   the only "notable figure" accent already used elsewhere on this page — but
-   otherwise every metric renders identically (no red/green good/bad framing;
-   see StatcastPercentiles.jsx). */
-.statcast {
-  margin-top: var(--space-3);
-}
-.statcast__rows {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+/* ---- Statcast percentile cards ----
+   Each metric is a small StatcastCard tile (the same one the innings view
+   and box score use for per-half superlatives), not a bar mimicking
+   Baseball Savant's own chart. `.statcast` here is the same grid rule used
+   there (see the "Statcast superlatives" block above); this override just
+   drops the play-by-play-feed divider (nothing sits above it on the player
+   page) and gives the grid a real minimum column width so 6-7 cards wrap
+   instead of squeezing onto one row (the shared rule's own minmax(0, 1fr)
+   only works for the 3-card superlative row). */
+.statcast-section .statcast {
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
   margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
 }
-.statcast__row {
-  display: grid;
-  grid-template-columns: 84px 1fr 30px;
-  align-items: center;
-  gap: 8px;
+
+/* The button wrapping each FlipCard — reset to a plain pressable card (see
+   .agents/skills/review-animations STANDARDS.md "button press feedback":
+   scale(0.97) on :active, sub-200ms ease-out). The flip itself reuses
+   FlipCard's own transform transition untouched (src/index.css "FLIP
+   CARDS" block) — same 450ms turn as the slate's past-game reveal. */
+.statcast__flipbtn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
 }
-.statcast__label {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
+.statcast__flipbtn:active {
+  transform: scale(0.97);
 }
-.statcast__track {
-  height: 8px;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: 999px;
-  box-shadow: var(--inset-cell);
-  overflow: hidden;
+.statcast__flipbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
-.statcast__fill {
-  height: 100%;
-  background: var(--accent-primary);
-  border-radius: 999px;
+
+/* The back face: same tile chrome as the front (.statcast__card), holding
+   the metric name + its plain-language gloss instead of the value. */
+.statcast__card--back {
+  justify-content: center;
 }
-.statcast__fill.is-standout {
-  background: var(--seal-cover);
-}
-.statcast__pct {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  text-align: right;
+.statcast__def {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--text-body);
 }
 
 /* ---- splits vs team: opponent picker + career line + last meeting ----
