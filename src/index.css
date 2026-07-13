@@ -7462,6 +7462,17 @@ body {
   font-size: 13px;
   color: var(--text-muted);
 }
+/* Chaser-row team tag — same typography as .tlead__teamabbr (the featured
+   leader's abbreviation under its logo), set inline next to the name instead
+   of stacked, since a chaser row has no logo to sit under. */
+.tlead__rowteam {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
 
 /* Leader badges (broader league/level/org pools only) — the featured card
    stacks them under the name; the chaser rows tuck them just left of the value
