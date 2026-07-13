@@ -11,6 +11,7 @@ const MENU_ITEMS = [
   { label: 'Top MLB Prospects', path: '/prospects' },
   { label: 'Rehab Assignments', path: '/rehab' },
   { label: 'Umpire Rankings', path: '/umpires' },
+  { label: 'Milestone Watch', path: '/milestones' },
   { label: 'Logo Sheet', path: '/logos' },
   { label: 'About', path: '/about' },
 ]

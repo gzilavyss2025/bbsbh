@@ -86,6 +86,13 @@ export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
         >
           Umpire Rankings
         </button>
+        <button
+          type="button"
+          className="sitefooter__action"
+          onClick={() => navigate('/milestones')}
+        >
+          Milestone Watch
+        </button>
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}
