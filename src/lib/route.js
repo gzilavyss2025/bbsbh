@@ -16,6 +16,7 @@
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
 //   '/top-games'                        -> { name: 'top-games' }
+//   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
@@ -53,6 +54,9 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
   if (parts.length === 1 && parts[0] === 'top-games') return { name: 'top-games' }
+  // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
+  if (parts.length === 1 && parts[0] === 'scorecard-lab')
+    return { name: 'scorecard-lab' }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
