@@ -11,15 +11,21 @@ import { loadMilestoneWatch, milestonesForPlayer, formatMilestoneProjection } fr
 // projection is an ADDITIONAL annotation, shown only on a bare current-day
 // view (`asOf` unset). The precompute is generated against TODAY's pace and
 // schedule, so it can't be retrofit to an old game's cutoff — a historical
-// view just shows the plain progress line, no projection.
-export function MilestoneWatchCard({ playerId, asOf, milestones }) {
+// view just shows the plain progress line, no projection. `groupLabel`
+// (a two-way player's block.title, "Batting"/"Pitching") disambiguates a
+// second card when both groups have milestones pending — the achievements
+// zone renders both blocks' cards together, ahead of either block's own
+// heading.
+export function MilestoneWatchCard({ playerId, asOf, milestones, groupLabel }) {
   const { data } = useAsync(() => (asOf ? Promise.resolve(null) : loadMilestoneWatch()), [asOf])
   if (!milestones?.length) return null
   const projections = data ? milestonesForPlayer(data, playerId) : []
 
   return (
     <div className="milestonewatch">
-      <p className="milestonewatch__title">Milestone Watch</p>
+      <p className="milestonewatch__title">
+        Milestone Watch{groupLabel ? ` — ${groupLabel}` : ''}
+      </p>
       {milestones.map((m) => {
         const proj = projections.find((p) => p.stat === m.stat)
         const eta = formatMilestoneProjection(proj?.projection)

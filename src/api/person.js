@@ -1262,15 +1262,22 @@ function badgeFields(instancesAsc, formatOne) {
 // recent first) rather than one badge per instance. `awards` is the same raw
 // per-player awards feed the transaction timeline used to carry a single
 // buried chip from — that row type is retired in favor of this dedicated
-// card. Returns null when the player has none of the three, so the card can
-// skip rendering entirely rather than show an empty case.
-export function trophyCaseView(awards) {
+// card. `endDate` is the same spoiler cutoff every other date-bound section
+// of the player page respects ("entering today" for a game-scoped view) —
+// an award dated after it hasn't happened yet from the page's vantage point,
+// so it's excluded same as a too-late transaction row used to be. Returns
+// null when the player has none of the three, so the card can skip
+// rendering entirely rather than show an empty case.
+export function trophyCaseView(awards, endDate = null) {
   const hardwareByLabel = new Map()
   const inSeasonByLabel = new Map()
   const allStarYears = new Set()
 
   for (const a of awards ?? []) {
-    if (!a.season) continue
+    // Every tier keys off the award's own date — required to enforce the
+    // cutoff above, so an award with no date can't be graded either way.
+    if (!a.season || !a.date) continue
+    if (endDate && a.date > endDate) continue
     if (a.id === 'ALAS' || a.id === 'NLAS') {
       allStarYears.add(Number(a.season))
       continue
@@ -1284,7 +1291,7 @@ export function trophyCaseView(awards) {
     const label = INSEASON_AWARDS[a.id]
     if (label) {
       if (!inSeasonByLabel.has(label)) inSeasonByLabel.set(label, [])
-      if (a.date) inSeasonByLabel.get(label).push(a.date)
+      inSeasonByLabel.get(label).push(a.date)
     }
   }
 
@@ -1293,12 +1300,9 @@ export function trophyCaseView(awards) {
   // flips to most-recent-first, so a long run of repeats truncates the stale
   // end rather than the current one.
   const hardware = [...hardwareByLabel.entries()]
-    .map(([label, years]) => {
-      const yearsAsc = [...years].sort((a, b) => a - b)
-      return { key: label, label, firstYear: yearsAsc[0], ...badgeFields(yearsAsc, String) }
-    })
-    .sort((a, b) => a.firstYear - b.firstYear)
-    .map(({ firstYear: _firstYear, ...badge }) => badge)
+    .map(([label, years]) => [label, [...years].sort((a, b) => a - b)])
+    .sort((a, b) => a[1][0] - b[1][0])
+    .map(([label, yearsAsc]) => ({ key: label, label, ...badgeFields(yearsAsc, String) }))
 
   const inSeason = [...inSeasonByLabel.entries()]
     .map(([label, dates]) => ({

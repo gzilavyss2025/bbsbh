@@ -325,7 +325,7 @@ export async function loadPlayer(id, asOf) {
     draft: bio.draft,
     endDate,
   })
-  const trophyCase = trophyCaseView(awards)
+  const trophyCase = trophyCaseView(awards, endDate)
   const blocks = results.map((r) => r.block)
   const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)

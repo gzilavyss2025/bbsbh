@@ -192,6 +192,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             playerId={bio.id}
             asOf={asOf}
             milestones={block.milestones}
+            groupLabel={blocks.length > 1 ? block.title : null}
           />
         ))}
         {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (

@@ -8914,8 +8914,19 @@ body {
    hardware, All-Star selections, and in-season honors (Player of the
    Week/Month, ...), each grouped into one badge per label with a count
    rather than one per instance. Sits in the achievements zone alongside
-   Milestone Watch and Firsts, right after the fact grid. Group labels reuse
-   the same small uppercase caption as .milestonewatch__title. */
+   Milestone Watch and Firsts, right after the fact grid — same bordered-card
+   treatment as .milestonewatch so the two read as siblings. Group labels
+   reuse the same small uppercase caption as .milestonewatch__title. */
+.trophycase {
+  margin: 8px 2px 0;
+  padding: 10px 12px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.trophycase .section__title {
+  margin-top: 0;
+}
 .trophycase__group {
   margin-top: 12px;
 }
