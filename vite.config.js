@@ -62,12 +62,16 @@ export default defineConfig({
         // grows every game day (see scripts/gen-game-notes.mjs).
         // Same for the per-date callouts bundles — since they cover the MiLB
         // levels too each day's file runs ~0.5-1 MB, and the folder holds ~10
-        // days of them; only the day being scored is ever read.
+        // days of them; only the day being scored is ever read. Same for
+        // rookies.json — a debut/rookie-limit row for every player who's ever
+        // appeared in MLB (~1.3 MB and growing, see scripts/gen-rookies.mjs /
+        // gen-rookies-backfill.mjs).
         globIgnores: [
           '**/data/vs-team-splits.json',
           '**/data/umpires.json',
           '**/data/game-notes.json',
           '**/data/callouts/*.json',
+          '**/data/rookies.json',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -91,6 +95,14 @@ export default defineConfig({
             // The on-demand umpire-season dataset, same rationale as the
             // SPLITS VS TEAM rule above.
             urlPattern: ({ url }) => url.pathname === '/data/umpires.json',
+            handler: 'NetworkFirst',
+            method: 'GET',
+          },
+          {
+            // The on-demand rookie-status dataset (excluded from precache
+            // above), same rationale as the SPLITS VS TEAM rule — career facts
+            // only, no live score, so NetworkFirst is spoiler-safe.
+            urlPattern: ({ url }) => url.pathname === '/data/rookies.json',
             handler: 'NetworkFirst',
             method: 'GET',
           },

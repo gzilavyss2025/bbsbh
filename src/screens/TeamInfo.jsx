@@ -17,6 +17,7 @@ import { BallparkModal } from '../components/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
 import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
+import { isActiveRookie } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -32,6 +33,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
 import { MilestonePill } from '../components/MilestonePill.jsx'
+import { RookiePill } from '../components/RookiePill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
@@ -50,6 +52,7 @@ export function TeamInfo({
   scorebookWeatherLoading,
   oppPitcherLine,
   prospectsData,
+  rookiesData,
   formerTeammatesData,
   callouts,
   onNext,
@@ -101,6 +104,7 @@ export function TeamInfo({
         side={side}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
+        rookiesData={rookiesData}
         formerTeammatesData={formerTeammatesData}
         callouts={callouts}
       />
@@ -132,6 +136,7 @@ export function LineupSpread({
   scorebookWeatherLoading,
   starterLines,
   prospectsData,
+  rookiesData,
   formerTeammatesData,
   callouts,
   onNext,
@@ -185,6 +190,7 @@ export function LineupSpread({
             // Each side FACES the other side's starter.
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
             prospectsData={prospectsData}
+            rookiesData={rookiesData}
             callouts={callouts}
           />
         ))}
@@ -212,7 +218,7 @@ export function LineupSpread({
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
 // Former teammates is deliberately NOT part of this column — see LineupSpread,
 // which renders one shared, full-width card grid below both columns instead.
-function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData, callouts }) {
+function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData, rookiesData, callouts }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   return (
     <section className="teampanel">
@@ -236,6 +242,7 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
         side={side}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
+        rookiesData={rookiesData}
         callouts={callouts}
         showTeammates={false}
       />
@@ -376,6 +383,7 @@ function TeamSections({
   side,
   oppPitcherLine,
   prospectsData,
+  rookiesData,
   formerTeammatesData,
   callouts,
   showTeammates = true,
@@ -442,6 +450,7 @@ function TeamSections({
                   </PlayerLink>
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                   <MilestonePill text={milestoneTextFor(callouts, p.id)} />
+                  <RookiePill active={isActiveRookie(rookiesData, p.id)} />
                   <BirthdayCake show={birthdayIds.has(p.id)} />
                 </span>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
@@ -464,6 +473,7 @@ function TeamSections({
                             {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                          <RookiePill active={isActiveRookie(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
@@ -484,6 +494,7 @@ function TeamSections({
                             {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                          <RookiePill active={isActiveRookie(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
@@ -504,6 +515,7 @@ function TeamSections({
                             {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                          <RookiePill active={isActiveRookie(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
@@ -530,6 +542,7 @@ function TeamSections({
               </PlayerLink>
               <ProspectPill {...prospectBadge(prospectsData, oppPitcher.id)} />
               <MilestonePill text={milestoneTextFor(callouts, oppPitcher.id)} />
+              <RookiePill active={isActiveRookie(rookiesData, oppPitcher.id)} />
             </span>
             <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
             <span className="opp__hand">{oppPitcher.hand}</span>

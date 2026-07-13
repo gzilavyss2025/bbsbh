@@ -13,6 +13,7 @@ import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
+import { fetchRookiesData } from '../api/rookies.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -223,6 +224,13 @@ export function useGameData(game) {
   const vsTeamSplits = useAsync(() => fetchVsTeamSplits(), [])
   const vsTeamSplitsData = vsTeamSplits.data ?? null
 
+  // Rookie status for the roster/lineup surfaces (see RookiePill /
+  // isActiveRookie) — the nightly rookies precompute, same eager
+  // not-gated-to-MLB tier as vsTeamSplits/formerTeammates (a MiLB matchup's
+  // roster just resolves to no active rookies since the file is MLB-debut-only).
+  const rookies = useAsync(() => fetchRookiesData(), [])
+  const rookiesData = rookies.data ?? null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   return {
@@ -236,6 +244,7 @@ export function useGameData(game) {
     winProb,
     pitcherRoles,
     prospectsData,
+    rookiesData,
     gameCallouts,
     broadcast,
     formerTeammatesData,

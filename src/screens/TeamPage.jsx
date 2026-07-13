@@ -17,6 +17,7 @@ import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
+import { fetchRookiesData, isActiveRookie } from '../api/rookies.js'
 import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -36,6 +37,7 @@ import { SectionTitle } from '../components/SectionTitle.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { InjuredMark } from '../components/InjuredMark.jsx'
+import { RookiePill } from '../components/RookiePill.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
@@ -158,7 +160,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, rookiesData] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -193,6 +195,7 @@ async function loadTeam(id, asOf) {
       // MLB only — MiLB clubs play through the break, so no All-Star card
       // belongs in their strip.
       sportId === 1 ? fetchAllStarGame(season) : Promise.resolve(null),
+      fetchRookiesData(),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -318,6 +321,7 @@ async function loadTeam(id, asOf) {
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
       prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+      rookie: isActiveRookie(rookiesData, r.person?.id),
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
 
@@ -331,6 +335,7 @@ async function loadTeam(id, asOf) {
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
       prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+      rookie: isActiveRookie(rookiesData, r.person?.id),
     }))
     .sort(comparePitchers)
 
@@ -348,6 +353,7 @@ async function loadTeam(id, asOf) {
         allStar: allStarIds.has(r.person?.id),
         war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
         prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+        rookie: isActiveRookie(rookiesData, r.person?.id),
         gs: Number(stat?.gamesStarted) || 0,
         saves: Number(stat?.saves) || 0,
         appearances: Number(stat?.gamesPitched ?? stat?.gamesPlayed) || 0,
@@ -952,6 +958,7 @@ function RosterList({ rows, season, showProspect }) {
             </PlayerLink>
             <InjuredMark hurt={r.hurt} />
             {showProspect && <ProspectPill {...r.prospect} />}
+            <RookiePill active={r.rookie} />
           </span>
           {r.war !== undefined && (
             <span
