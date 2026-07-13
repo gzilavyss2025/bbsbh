@@ -244,7 +244,7 @@ export async function fetchGameCardsByPk(gamePks) {
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner'
 
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
@@ -285,12 +285,20 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
 
 // One team's full regular-season schedule, for the team page's monthly
 // calendar card. Dates/opponents/home-away are spoiler-free (same rationale as
-// fetchHeadToHead above), but the raw schedule row also carries each side's
-// score/isWinner/leagueRecord — those ARE score-revealing, so they are
-// deliberately never copied into the returned shape below. `hydrate=team` gets
-// real abbreviations instead of the teamAbbr() name-derived fallback. Regular
-// season only ('R'), like fetchHeadToHead. Degrades to [].
-export async function fetchTeamSchedule(teamId, season, sportId = 1) {
+// fetchHeadToHead above). The raw schedule row also carries each side's
+// score/isWinner/leagueRecord — score is never copied into the returned shape
+// below, but `won` IS, gated by `resultsCutoff`: the same day-level cutoff the
+// team page already freezes its standings table to (`dayBefore(asOf)` when
+// reached from inside a sealed game, `null`/unbounded on a bare visit — see
+// TeamPage.jsx). A game on or after the cutoff gets `won: null` regardless of
+// what the feed says, so the specific game the caller opened this page from
+// (and anything same-day or later) never has its own result attached to the
+// object handed back — mirrors "deliberately never copied" for the case that
+// actually needs protecting, rather than stripping `won` unconditionally.
+// `hydrate=team` gets real abbreviations instead of the teamAbbr()
+// name-derived fallback. Regular season only ('R'), like fetchHeadToHead.
+// Degrades to [].
+export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCutoff = null) {
   if (!teamId || !season) return []
   try {
     const data = await getJson(
@@ -299,20 +307,27 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1) {
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()
     for (const g of games) {
-      const away = g.teams?.away?.team
-      const home = g.teams?.home?.team
+      const awaySide = g.teams?.away
+      const homeSide = g.teams?.home
+      const away = awaySide?.team
+      const home = homeSide?.team
       if (!away?.id || !home?.id) continue
       const isHome = home.id === teamId
       const opponent = isHome ? away : home
+      const apiDate = g.officialDate ?? (g.gameDate ?? '').slice(0, 10)
+      const final = g.status?.abstractGameState === 'Final'
+      const resultVisible = final && (!resultsCutoff || apiDate <= resultsCutoff)
+      const mySide = isHome ? homeSide : awaySide
       byPk.set(g.gamePk, {
         gamePk: g.gamePk,
-        apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+        apiDate,
         gameNumber: g.gameNumber ?? 1,
         doubleHeader: g.doubleHeader ?? 'N',
         isHome,
         away: { abbreviation: teamAbbr(away) },
         home: { abbreviation: teamAbbr(home) },
         opponent: { id: opponent.id, name: opponent.name, abbreviation: teamAbbr(opponent) },
+        won: resultVisible && typeof mySide?.isWinner === 'boolean' ? mySide.isWinner : null,
       })
     }
     return [...byPk.values()].sort(
