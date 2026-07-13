@@ -2426,7 +2426,7 @@ body {
    distinct at a glance without a legend. */
 .tierpill {
   display: inline-block;
-  padding: 1px 7px;
+  padding: 2px 7px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
@@ -2434,6 +2434,7 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
+  line-height: 1;
   white-space: nowrap;
   color: var(--graphite);
 }
