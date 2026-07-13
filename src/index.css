@@ -9205,11 +9205,17 @@ body {
   align-items: center;
   gap: 7px;
 }
+/* The highlighted favorite-team row tints to that club's own accent
+   (--fav-accent, a per-team hex set inline by StandingsPage from
+   favoriteAccentColor() — see lib/teams.js), same convention as
+   .gamecard--pinned / .tlead__row--fav, rather than a fixed green — an
+   Orioles fan's row reads orange, a Reds fan's reads red. Falls back to the
+   original --field green for a pinned team with no known accent (MiLB). */
 .standings tr.is-me td {
-  background: rgba(47, 110, 79, 0.1);
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
 }
 .standings tr.is-me .team {
-  color: var(--field-deep);
+  color: var(--fav-accent, var(--field-deep));
 }
 .standings td.is-positive {
   color: var(--accent-positive);
@@ -9456,7 +9462,43 @@ body {
    `border-top` (from `.standings td`), so the row rule stays continuous across
    the pinned/scrolling seam — no border hacks needed here. */
 .standings--full tr.is-me td.team {
-  background: var(--field-soft);
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 16%, var(--surface-card));
+}
+
+/* ---- Wild Card board ------------------------------------------------------ */
+
+/* "Division leaders" / "Wild card" section labels, inline as a full-width row
+   rather than a second <table> — keeps one sticky team column and one
+   horizontal-scroll container for the whole league instead of two. */
+.wc-grouphead td {
+  padding-top: 12px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  background: var(--bg-page);
+  border-top: none;
+}
+.standings--wc tbody tr:first-child td {
+  padding-top: 6px;
+}
+/* The short division tag riding next to a team name in the pooled wild-card
+   list (teams aren't grouped by division here, so the badge is the only cue
+   left of which division a row belongs to). */
+.wc-div {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--w-medium);
+  color: var(--text-caption);
+}
+/* The cutoff line after the last team AT or tied-into the 3rd wild-card
+   spot — mlb.com's own convention for "in" vs. "out" of the field. A bold
+   rule rather than a background change so it reads clearly under a
+   .is-me tint too. */
+.wc-cutoff td {
+  border-bottom: 2px solid var(--text-heading);
 }
 
 @media (min-width: 740px) {
