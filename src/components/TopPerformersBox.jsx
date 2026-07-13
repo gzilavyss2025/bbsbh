@@ -160,6 +160,7 @@ export function TopPerformersBox({ dateStr, sportId, games, prospectsData }) {
         key={`${dateStr}-${sportId}`}
         label="Tap to reveal today's top performers"
         onReveal={() => setRevealed(true)}
+        compact
       >
         {() => (
           <TopPerformersPanel

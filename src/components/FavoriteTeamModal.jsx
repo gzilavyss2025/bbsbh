@@ -16,7 +16,14 @@ import { TeamLogo } from './TeamLogo.jsx'
 // first-time visitor who just dismisses the welcome modal without tapping
 // anything still ends up with the Brewers default persisted, rather than
 // leaving the "first visit" state to pop the modal again next time.
-export function FavoriteTeamModal({ favoriteTeamId, intro = false, onSave, onClose }) {
+export function FavoriteTeamModal({
+  favoriteTeamId,
+  intro = false,
+  onSave,
+  onClose,
+  gameScoreVisible = false,
+  onSetGameScoreVisible,
+}) {
   const [selId, setSelId] = useState(favoriteTeamId ?? PINNED_TEAM_ID)
   const mlbTeams = useAsync(() => fetchTeams(SPORT_IDS.MLB), [])
   const teams = mlbTeams.data ?? []
@@ -134,6 +141,29 @@ export function FavoriteTeamModal({ favoriteTeamId, intro = false, onSave, onClo
             })}
           </div>
         </div>
+
+        {onSetGameScoreVisible && (
+          <div className="favteamsheet__pref">
+            <div className="favteamsheet__prefText">
+              <span className="favteamsheet__prefLabel">
+                Show Game Score on FINAL cards
+              </span>
+              <span className="hint hint--prose favteamsheet__prefHint">
+                A 0–10 rating of how exciting a finished game was — never the
+                score itself.
+              </span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={gameScoreVisible}
+              className={`favteamsheet__prefToggle${gameScoreVisible ? ' is-on' : ''}`}
+              onClick={() => onSetGameScoreVisible(!gameScoreVisible)}
+            >
+              {gameScoreVisible ? 'On' : 'Off'}
+            </button>
+          </div>
+        )}
 
         {intro && (
           <div className="sheet__actions favteamsheet__actions">

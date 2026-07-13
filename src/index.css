@@ -1468,6 +1468,14 @@ body {
   color: var(--text-muted);
 }
 
+/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. Same
+   caption color/weight as the status text it rides on; not a separate
+   attention-grabbing color, since it's a taste-preference extra, not a
+   status. */
+.gamecard__gamescore {
+  font-weight: var(--w-bold);
+}
+
 /* Scorebook-readiness chips: four tiny red/green flags under the matchup that
    say whether the basics you'd pencil in pre-game (each team's lineup, the
    umpires, both starters) are posted yet. Intentionally small (~9px) — a glance
@@ -2085,6 +2093,55 @@ body {
 .favteamsheet .vsteam__strip {
   padding-left: calc(50% - 23px);
   padding-right: calc(50% - 23px);
+}
+
+/* Game Score visibility toggle row, shared by both the intro welcome modal
+   and the footer-reopened "Favorite team" modal (see FavoriteTeamModal.jsx) —
+   a taste preference row, not part of the team picker above it. */
+.favteamsheet__pref {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.favteamsheet__prefText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.favteamsheet__prefLabel {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.favteamsheet__prefHint {
+  margin: 0;
+  font-size: 11.5px;
+}
+.favteamsheet__prefToggle {
+  flex: 0 0 auto;
+  min-width: 52px;
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.favteamsheet__prefToggle.is-on {
+  background: var(--accent-positive);
+  border-color: var(--accent-positive);
+  color: var(--surface-card);
 }
 
 /* --------------------------------------------------------------- legal */
@@ -3170,6 +3227,25 @@ body {
   font-weight: var(--w-medium);
   color: var(--seal-ink);
   opacity: 0.82;
+}
+
+/* Thinner, button-like cover — currently just the slate's Top Performers box
+   (see TopPerformersBox.jsx's `compact` prop). Same kraft texture/tap target,
+   just a slim horizontal bar instead of the full-height reveal panel, since a
+   short leaderboard box doesn't need the same visual weight as a sealed
+   inning or box score. */
+.sealbox.cover.sealbox--compact {
+  min-height: 0;
+  flex-direction: row;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+}
+.sealbox--compact .cover__lock {
+  font-size: 15px;
+}
+.sealbox--compact .cover__main {
+  font-size: 12px;
 }
 
 .statgrid {

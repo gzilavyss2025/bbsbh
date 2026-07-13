@@ -18,7 +18,13 @@ const YEAR = new Date().getFullYear()
 // rather than just the slate. Nothing here is score-revealing — the
 // favorite-team pick surfaces identity and schedule only, same as every
 // other spoiler-free selector.
-export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
+export function SiteFooter({
+  onShowLogos,
+  favoriteTeamId,
+  onSetFavoriteTeam,
+  gameScoreVisible,
+  onSetGameScoreVisible,
+}) {
   const [showFinder, setShowFinder] = useState(false)
   const [showFavoriteTeam, setShowFavoriteTeam] = useState(false)
   const navigate = useNav()
@@ -88,6 +94,8 @@ export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
           favoriteTeamId={favoriteTeamId}
           onSave={onSetFavoriteTeam}
           onClose={() => setShowFavoriteTeam(false)}
+          gameScoreVisible={gameScoreVisible}
+          onSetGameScoreVisible={onSetGameScoreVisible}
         />
       )}
 
