@@ -1611,6 +1611,7 @@ body {
   display: flex;
   gap: 8px;
   width: 100%;
+  max-width: calc(440px - 2 * var(--app-gutter));
   margin-top: 20px;
 }
 .revealsplit__btn {
