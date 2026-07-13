@@ -99,6 +99,24 @@ don't run these by hand.
   (pure, no DOM deps) — extend the projection math there, not in the script.
   MLB-only.
 
+## Own-cadence generators (not the nightly batch)
+
+- `gen-game-score.mjs` → `public/data/game-score.json` — the 0.0–10.0 "how
+  exciting was this game" rating shown unsealed next to FINAL on the slate
+  (`FINAL · 7.5`). APPEND-ONLY/incremental like `gen-umpire-accuracy.mjs`: each
+  run sweeps a trailing window of dates (`--days`, default 3) across MLB + the
+  four full-season MiLB levels, fetches the live feed for every newly-Final
+  gamePk not yet scored, and merges the result in (deduped by gamePk — a
+  Final game's score never changes). Runs on its OWN tight cron
+  (`.github/workflows/update-game-score.yml`, every 10 minutes), not
+  `update-nightly-data.yml` — the whole point is a score within minutes of a
+  game going Final, which the once-nightly batch can't deliver. Self-contained
+  except for `selectRegulationInnings` (`src/api/select.js`), reused so
+  "extra innings" never drifts from what the innings viewer itself calls
+  extra. See `docs/game-score.md` for the formula's factor table + calibration
+  anchors, and ADR-0015 for why this is the one score-derived number allowed
+  to render outside a `SealBox`. App reads it via `src/api/gameScore.js`.
+
 ## Hand-run generators (immutable data — NOT on a cron)
 
 Re-run only to fold in a new season.

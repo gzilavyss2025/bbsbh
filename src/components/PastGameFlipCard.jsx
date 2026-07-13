@@ -20,6 +20,7 @@ export function PastGameFlipCard({
   pinnedTeamId,
   uniformsReady,
   prospectCount,
+  gameScore = null,
   onSelect,
   onBoxScore,
 }) {
@@ -60,6 +61,7 @@ export function PastGameFlipCard({
           pinnedTeamId={pinnedTeamId}
           uniformsReady={uniformsReady}
           prospectCount={prospectCount}
+          gameScore={gameScore}
           onSelect={onSelect}
           onBoxScore={onBoxScore}
         />

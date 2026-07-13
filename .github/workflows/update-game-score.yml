@@ -1,0 +1,50 @@
+name: Update game score
+
+# Runs gen-game-score.mjs on its OWN tight cron, separate from
+# update-nightly-data.yml — Game Score's whole point is landing within
+# minutes of a game going Final (see docs/game-score.md), which a once-nightly
+# batch can't deliver. Every 10 minutes is GitHub Actions' scheduling slop
+# already factored in — cron is best-effort, not exact, so scores typically
+# show up ~10-15 minutes after Final. The generator itself is cheap and
+# incremental (only newly-Final gamePks get a feed fetch), so a 10-minute
+# cadence doesn't add meaningful cost even though it's a separate workflow
+# from the nightly batch.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-game-score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Game score
+        run: node scripts/gen-game-score.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/game-score.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update game score"
+          # This cron's :00 minute collides with update-nightly-data.yml's
+          # 11:00 UTC run once a day — retry with a rebase on a push race
+          # instead of silently dropping this run's scores (see that
+          # workflow's header for the collision this same push shape once hit).
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            git fetch origin "$(git rev-parse --abbrev-ref HEAD)"
+            git rebase "origin/$(git rev-parse --abbrev-ref HEAD)"
+            sleep $((RANDOM % 10 + 1))
+          done
+          echo "push failed after retries" >&2
+          exit 1
