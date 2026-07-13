@@ -10114,48 +10114,90 @@ body {
    One card per PLAYER (see groupMilestoneRows in MilestoneWatchPage.jsx), not
    per milestone — a player chasing both a hits and a doubles milestone at
    once nests both rows inside one card instead of splitting across two.
-   Cards vary in height with how many milestones a player is chasing, so this
-   is a CSS-columns waterfall (same shape as .bs__noteGrid on the box score's
-   Insights card) rather than a row-locked grid: each card flows into the
-   shortest column instead of every row stretching to its tallest member. */
+   Cards vary in height with how many milestones a player is chasing, but the
+   rarest-first ordering is the point of the page — so the cards are laid out
+   as round-robin masonry (MasonryColumns.jsx): card #1 (rarest) reads top-left
+   and importance flows left-to-right across the first row, while each column
+   still stacks tightly with no internal gaps even when columns end at
+   different heights. The grid is a flex row of equal columns; the column COUNT
+   is measured in JS (columnWidth 288 / gap 12 here mirror those CSS values).
+   On the phone frame it collapses to a single column. */
 .milestonewatch-page__grid {
-  column-width: 260px;
-  column-gap: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
   margin-top: var(--space-4);
+}
+.milestonewatch-page__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 0;
+  min-width: 0;
 }
 .milestonewatch-page__card {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 8px;
-  margin-bottom: 8px;
+  gap: var(--space-3);
+  padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--inset-cell);
-  break-inside: avoid;
+}
+/* Portrait bumped to the standardized --shot-md rung (roster/leader/recap
+   size) — mounted like a scorebook photo with a hairline frame so the larger
+   image reads as the anchor of the card. The mug wraps the photo so the
+   position pill can anchor to its corner. */
+.milestonewatch-page__mug {
+  position: relative;
+  flex: none;
+  align-self: flex-start;
 }
 .shot.milestonewatch-page__shot {
-  flex: none;
-  width: var(--shot-2xs-w);
-  height: var(--shot-2xs-h);
-  border-radius: var(--radius-xs);
+  display: block;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
 }
 .shot.milestonewatch-page__shot.shot--fallback {
-  font-size: 13px;
+  font-size: 30px;
+}
+/* Primary position as a jersey-tag pill anchored to the photo's bottom-left,
+   navy ink on paper so it stays legible over any headshot. */
+.milestonewatch-page__pos {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--paper-0);
+  background: var(--accent-primary);
+  border-top-right-radius: var(--radius-xs);
+  border-bottom-left-radius: var(--radius-sm);
 }
 .milestonewatch-page__body {
   min-width: 0;
   flex: 1;
+  align-self: stretch;
 }
+/* Name stacked over its club so the identity block rises to the full height of
+   the taller portrait beside it. */
 .milestonewatch-page__who {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: var(--w-bold);
+  line-height: 1.15;
 }
 .milestonewatch-page__team {
   display: inline-flex;
@@ -10166,27 +10208,25 @@ body {
   font-weight: var(--w-regular);
   color: var(--text-muted);
 }
-/* One nested milestone row inside the card — stat/threshold, the plain
-   progress fact, and the projected timeframe inked in the accent color (like
-   .milestonepill) so the forward-looking half of the fact reads distinctly. */
+/* One nested milestone row inside the card — the stat/threshold reads as a
+   headline on its own line, then the plain progress fact and the projected
+   timeframe (inked accent, like .milestonepill) share the line below it. */
 .milestonewatch-page__row {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 2px 8px;
-  margin-top: 6px;
-  padding-top: 6px;
+  gap: 3px var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
   border-top: var(--bw-hair) dashed var(--border-hairline);
 }
-.milestonewatch-page__row:first-of-type {
-  margin-top: 5px;
-  padding-top: 5px;
-}
 .milestonewatch-page__stat {
+  flex: 1 0 100%;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 12px;
+  font-size: 14px;
+  color: var(--text-heading);
 }
 .milestonewatch-page__progress {
   font-size: 12px;
