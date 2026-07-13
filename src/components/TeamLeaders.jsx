@@ -125,6 +125,7 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
         <ol className="tlead__rest">
           {rest.map((e, i) => {
             const teamId = e.displayTeamId ?? e.teamId
+            const teamAbbr = e.displayTeamAbbr ?? e.teamAbbr
             const isFavorite = favoriteTeamId != null && teamId === favoriteTeamId
             const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined
             return (
@@ -137,6 +138,7 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
                 <PlayerLink id={e.id} className="tlead__rowname">
                   {e.name}
                 </PlayerLink>
+                {showTeamAbbr && teamAbbr && <span className="tlead__rowteam">{teamAbbr}</span>}
                 <InjuredMark hurt={injuredIds?.has(e.id)} />
                 <LeaderBadges entry={e} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
                 <span className="tlead__rowval">{e.display}</span>
@@ -167,11 +169,12 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
 // level scopes only (not 'org', not the single-team pages), since a team's
 // own leaders page has no "stranger" rows to pick the favorite out from.
 // `showTeamAbbr`: shows the club abbreviation under the featured leader's
-// logo — on by default for the multi-team boards (league/level/org) where
-// it's the only way to tell whose row is whose; the single-team pages
-// (TeamPage, TeamLeadersPage) pass false since every row already shares the
-// one team the page is about. `injuredIds`: a Set of person ids currently on
-// that team's IL, flagging a leader's name with the same ✚ mark as the
+// logo, and inline next to each chaser's name — on by default for the
+// multi-team boards (league/level/org) where it's the only way to tell whose
+// row is whose; the single-team pages (TeamPage, TeamLeadersPage) pass false
+// since every row already shares the one team the page is about. `injuredIds`:
+// a Set of person ids currently on that team's IL, flagging a leader's name
+// with the same ✚ mark as the
 // player page's il-banner — TeamPage passes its own already-fetched IL list
 // (see loadTeam's `injured`); null everywhere else (see InjuredMark above).
 export function TeamLeaders({
