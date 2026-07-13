@@ -18,6 +18,7 @@ import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
+import { txnDate, isRehabTxn, isRehabEndingTxn } from '../src/api/rehab-policy.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rehab.json')
@@ -49,16 +50,8 @@ async function getJson(path) {
 // A rehab starts with an "Assigned" (ASG) row whose description says "rehab" and
 // ends when the player returns to the majors (recall / contract selection /
 // activation off the IL), is really sent down, is released/retired, or is
-// reassigned somewhere non-rehab. Shared helpers mirror person.js.
-const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET'])
-const txnDate = (t) => t.effectiveDate || t.date || ''
-const isRehabTxn = (t) => t.typeCode === 'ASG' && /rehab/i.test(t.description || '')
-function isRehabEndingTxn(t) {
-  const c = t.typeCode
-  if (REHAB_END_CODES.has(c)) return true
-  if (c === 'ASG' && !isRehabTxn(t)) return true
-  return c === 'SC' && /activat/i.test(t.description || '') && /injured list/i.test(t.description || '')
-}
+// reassigned somewhere non-rehab. txnDate/isRehabTxn/isRehabEndingTxn: see
+// src/api/rehab-policy.js — shared with person.js's single-player detector.
 
 // From a flat league-wide transaction window, the players CURRENTLY on a
 // major-league rehab assignment — a big leaguer sent to a minor-league affiliate
