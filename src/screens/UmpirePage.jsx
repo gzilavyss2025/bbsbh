@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
 import { UmpireZoneMap } from '../components/UmpireAccuracyModal.jsx'
+import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { gamePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -150,7 +151,10 @@ export function UmpirePage({ id }) {
       <BackBtn onClick={back} />
 
       <header className="umpage__head">
-        <h1 className="umpage__name">{data.name}</h1>
+        <div className="umpage__namerow">
+          <h1 className="umpage__name">{data.name}</h1>
+          {data.rank?.tier && <UmpireTierPill tier={data.rank.tier} />}
+        </div>
         <p className="umpage__sub">
           {data.season ? `${data.season} season` : 'This season'} · {games.length}{' '}
           {games.length === 1 ? 'game' : 'games'}

@@ -79,6 +79,13 @@ export function SiteFooter({ onShowLogos, favoriteTeamId, onSetFavoriteTeam }) {
         >
           Rehab assignments
         </button>
+        <button
+          type="button"
+          className="sitefooter__action"
+          onClick={() => navigate('/umpires')}
+        >
+          Umpire Rankings
+        </button>
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}
