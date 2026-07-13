@@ -4,6 +4,7 @@ import { teamPath } from '../lib/route.js'
 import { splitName } from '../lib/teamSplits.js'
 import {
   teamClubName,
+  teamClubNameShort,
   teamFullName,
   favoriteAccentColor,
 } from '../lib/teams.js'
@@ -46,6 +47,10 @@ function OffDayCard({ id, pinned, onOpen }) {
   // Same hand-maintained splits the slate cards use, so the Athletics render as
   // "It's Just / Athletics" rather than the API's duplicated "Athletics / Athletics".
   const { location, mascot } = splitName(full, teamClubName(id))
+  // The mascot line uses the brand-approved short form where a nickname would
+  // otherwise wrap on the tight tile (Arizona -> "D-backs"); the logo alt below
+  // keeps the full mascot.
+  const shortMascot = teamClubNameShort(id)
   const style = pinned ? { '--pin-accent': favoriteAccentColor(id) } : undefined
   return (
     <button
@@ -60,7 +65,7 @@ function OffDayCard({ id, pinned, onOpen }) {
       </span>
       <span className="offdaycard__name">
         {location && <span className="offdaycard__loc">{location}</span>}
-        <span className="offdaycard__mascot">{mascot || full}</span>
+        <span className="offdaycard__mascot">{shortMascot || full}</span>
       </span>
       {pinned && (
         <span className="offdaycard__pin" aria-hidden="true">
