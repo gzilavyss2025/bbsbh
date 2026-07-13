@@ -1191,12 +1191,12 @@ const TXN_TYPES = {
 // leagues, alternate sites) have no rank, so their move stays a plain "Assigned".
 const LEVEL_RANK = { 1: 6, 11: 5, 12: 4, 13: 3, 14: 2, 16: 1 }
 
-// The awards worth a timeline row — the majors only, keyed by the stable award
-// `id` (league-prefixed AL*/NL* pairs), mapped to the short chip label. Every
-// other award the feed carries (Player of the Week/Month, MiLB honors, Futures
-// Game, etc.) is noise and dropped by falling outside this allowlist. All-Star
-// selections (ALAS/NLAS) live here too — the awards feed carries them with the
-// game's own date, so they need no separate roster lookup. Verified live.
+// The awards worth surfacing — the majors only, keyed by the stable award `id`
+// (league-prefixed AL*/NL* pairs), mapped to a short label. All-Star selections
+// (ALAS/NLAS) live here too — the awards feed carries them with the game's own
+// date, so they need no separate roster lookup. Verified live. Used by
+// trophyCaseView below (the transaction timeline no longer carries awards —
+// see ADR note there).
 const MAJOR_AWARDS = {
   ALMVP: 'MVP', NLMVP: 'MVP',
   ALCY: 'Cy Young', NLCY: 'Cy Young',
@@ -1210,6 +1210,110 @@ const MAJOR_AWARDS = {
   ALHAA: 'Hank Aaron Award', NLHAA: 'Hank Aaron Award',
   MLBRC: 'Roberto Clemente Award',
   MLBAFIRST: 'All-MLB First Team', MLBSECOND: 'All-MLB Second Team',
+}
+
+// In-season honors — the majors only, same AL/NL-pair collapse as MAJOR_AWARDS
+// above. Kept separate from it (rather than folded in) because these belong in
+// the Trophy Case's own "in-season" tier, grouped into one badge with a count
+// per label — a decorated veteran can rack up a dozen Player of the Week nods,
+// which would drown the hardware tier if treated the same way. Ids verified
+// live against GET /api/v1/awards.
+const INSEASON_AWARDS = {
+  ALPOM: 'Player of the Month', NLPOM: 'Player of the Month',
+  ALPITOM: 'Pitcher of the Month', NLPITOM: 'Pitcher of the Month',
+  ALROM: 'Rookie of the Month', NLROM: 'Rookie of the Month',
+  ALRRELMON: 'Reliever of the Month', NLRRELMON: 'Reliever of the Month',
+  ALPOW: 'Player of the Week', NLPOW: 'Player of the Week',
+}
+
+const AWARD_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function awardMonthYear(iso) {
+  const [y, m] = (iso || '').split('-')
+  return m ? `${AWARD_MONTHS[Number(m) - 1]} ${y}` : ''
+}
+
+// A badge's detail line stays short even for a heavily-decorated veteran (an
+// 11-time Player of the Week is real): capped to the MOST RECENT few, oldest
+// dropped, "+N more" standing in for the rest.
+const MAX_BADGE_DETAIL = 4
+function badgeDetail(itemsDesc) {
+  if (itemsDesc.length <= 1) return null
+  if (itemsDesc.length <= MAX_BADGE_DETAIL) return itemsDesc.join(', ')
+  return `${itemsDesc.slice(0, MAX_BADGE_DETAIL).join(', ')} +${itemsDesc.length - MAX_BADGE_DETAIL} more`
+}
+
+// One badge's worth of {count, sub, detail} from its raw instance list —
+// `sub` is the one-line count/year a badge always shows, `detail` is the
+// optional second line naming which ones (only when there's more than one).
+function badgeFields(instancesAsc, formatOne) {
+  const count = instancesAsc.length
+  const desc = instancesAsc.slice().reverse()
+  return {
+    count,
+    sub: count > 1 ? `${count}×` : formatOne(instancesAsc[0]),
+    detail: badgeDetail(desc.map(formatOne)),
+  }
+}
+
+// Trophy Case — the player page's career-honors card, grouped into three
+// tiers: major hardware (MVP, Cy Young, Silver Slugger, ...), All-Star
+// selections, and in-season honors (Player of the Week/Month, ...). Each
+// group collapses repeats into one badge (a count + which years/months, most
+// recent first) rather than one badge per instance. `awards` is the same raw
+// per-player awards feed the transaction timeline used to carry a single
+// buried chip from — that row type is retired in favor of this dedicated
+// card. Returns null when the player has none of the three, so the card can
+// skip rendering entirely rather than show an empty case.
+export function trophyCaseView(awards) {
+  const hardwareByLabel = new Map()
+  const inSeasonByLabel = new Map()
+  const allStarYears = new Set()
+
+  for (const a of awards ?? []) {
+    if (!a.season) continue
+    if (a.id === 'ALAS' || a.id === 'NLAS') {
+      allStarYears.add(Number(a.season))
+      continue
+    }
+    const hw = MAJOR_AWARDS[a.id]
+    if (hw) {
+      if (!hardwareByLabel.has(hw)) hardwareByLabel.set(hw, new Set())
+      hardwareByLabel.get(hw).add(Number(a.season))
+      continue
+    }
+    const label = INSEASON_AWARDS[a.id]
+    if (label) {
+      if (!inSeasonByLabel.has(label)) inSeasonByLabel.set(label, [])
+      if (a.date) inSeasonByLabel.get(label).push(a.date)
+    }
+  }
+
+  // Badge grid order stays chronological-by-first-won (a career reads left to
+  // right the way it happened); it's only the detail LINE inside a badge that
+  // flips to most-recent-first, so a long run of repeats truncates the stale
+  // end rather than the current one.
+  const hardware = [...hardwareByLabel.entries()]
+    .map(([label, years]) => {
+      const yearsAsc = [...years].sort((a, b) => a - b)
+      return { key: label, label, firstYear: yearsAsc[0], ...badgeFields(yearsAsc, String) }
+    })
+    .sort((a, b) => a.firstYear - b.firstYear)
+    .map(({ firstYear: _firstYear, ...badge }) => badge)
+
+  const inSeason = [...inSeasonByLabel.entries()]
+    .map(([label, dates]) => ({
+      key: label,
+      label,
+      ...badgeFields(dates.slice().sort(), awardMonthYear),
+    }))
+    .sort((a, b) => b.count - a.count)
+
+  const allStar = allStarYears.size
+    ? badgeFields([...allStarYears].sort((a, b) => a - b), String)
+    : null
+
+  if (!hardware.length && !allStar && !inSeason.length) return null
+  return { hardware, allStar, inSeason }
 }
 
 // MLB Draft first-round (Day 1) dates — the API carries no draft date anywhere
@@ -1257,11 +1361,12 @@ function assignedDescription(t, fromLevel, toLevel) {
 // (see loadPlayer): `levelByTeamId` maps a club id to its sportId (for the
 // CALLED UP / SENT DOWN direction and the level tags), `tradeOthers` maps a
 // tradeKey to the other players in that swap (for the in-description links),
-// `awards` is the raw awards feed, and `draft` is the shaped draft record. Rows
-// dated after `endDate` (the spoiler cutoff) are dropped. Newest first.
+// and `draft` is the shaped draft record. Rows dated after `endDate` (the
+// spoiler cutoff) are dropped. Newest first. Awards no longer ride this
+// timeline — see trophyCaseView, the player page's dedicated honors card.
 export function transactionTimelineView(
   transactions,
-  { selfId, levelByTeamId = new Map(), tradeOthers = new Map(), awards = [], draft = null, endDate = null } = {},
+  { selfId, levelByTeamId = new Map(), tradeOthers = new Map(), draft = null, endDate = null } = {},
 ) {
   const rows = []
   const seen = new Set()
@@ -1337,29 +1442,6 @@ export function transactionTimelineView(
       description: `Drafted by the ${draft.teamName || 'club'} in Round ${draft.round} (#${draft.overall} overall).`,
       links: null,
       club: draft.teamId ? { id: draft.teamId, name: draft.teamName } : null,
-    })
-  }
-
-  // Awards — one synthetic row per major award, on its announcement/game date.
-  for (const a of awards ?? []) {
-    const short = MAJOR_AWARDS[a.id]
-    if (!short || !a.date) continue
-    const isAllStar = a.id === 'ALAS' || a.id === 'NLAS'
-    // A roster/team honor is one you're "named to"; a trophy is one you "win".
-    const named = a.id === 'MLBAFIRST' || a.id === 'MLBSECOND'
-    push({
-      sig: `AWD|${a.id}|${a.season}`,
-      code: 'AWD',
-      date: a.date,
-      label: short,
-      tone: 'award',
-      description: isAllStar
-        ? `Selected to the ${a.season} MLB All-Star Game.`
-        : named
-          ? `Named to the ${a.season} ${a.name}.`
-          : `Won the ${a.season} ${a.name}.`,
-      links: null,
-      club: a.team?.id ? { id: a.team.id, name: a.team.teamName || a.team.name || '' } : null,
     })
   }
 

@@ -11,6 +11,7 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
 import { MilestoneWatchCard } from '../components/MilestoneWatchCard.jsx'
+import { TrophyCase } from '../components/TrophyCase.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TransactionTimeline } from '../components/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -179,6 +180,51 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
+        {/* Achievements zone — everything that answers "what has he done", both
+            backward-looking (Trophy Case, Firsts) and forward-looking
+            (Milestone Watch), grouped right after the bio facts and ahead of
+            the stat tables. A player with none of the three renders nothing
+            here and the page falls straight through into stats. */}
+        <TrophyCase trophyCase={data.trophyCase} />
+        {blocks.map((block) => (
+          <MilestoneWatchCard
+            key={block.group}
+            playerId={bio.id}
+            asOf={asOf}
+            milestones={block.milestones}
+          />
+        ))}
+        {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
+          <section>
+            <SectionTitle title="Firsts" />
+            <div className="player__splits">
+              {(bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).map((key) => {
+                const f = data.firsts[key]
+                if (!f) return null
+                return (
+                  <div className="split" key={key}>
+                    <div className="split__k">{f.label}</div>
+                    <div className="split__row">
+                      <GameLink path={f.path} className="split__v">
+                        {debutLabel(f.date)}
+                      </GameLink>
+                      <span className="split__sub">
+                        {f.batter ? (
+                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
+                        ) : f.pitcher ? (
+                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
+                        ) : (
+                          f.oppName || f.oppAbbr
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
         {blocks.map((block) => {
           // A debuted player whose current-season tiles are at a MiLB level (an
           // aging lifer or a full-season option-down with no MLB games this year)
@@ -271,7 +317,6 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             {block.register && <CareerRegister register={block.register} />}
-            <MilestoneWatchCard playerId={bio.id} asOf={asOf} milestones={block.milestones} />
 
             {block.splits && (
               <>
@@ -304,37 +349,6 @@ export function PlayerPage({ id, asOf, sportId }) {
             levels={data.progression.levels}
             debutYear={Number(bio.debut.slice(0, 4))}
           />
-        )}
-
-        {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
-          <section>
-            <SectionTitle title="Firsts" />
-            <div className="player__splits">
-              {(bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).map((key) => {
-                const f = data.firsts[key]
-                if (!f) return null
-                return (
-                  <div className="split" key={key}>
-                    <div className="split__k">{f.label}</div>
-                    <div className="split__row">
-                      <GameLink path={f.path} className="split__v">
-                        {debutLabel(f.date)}
-                      </GameLink>
-                      <span className="split__sub">
-                        {f.batter ? (
-                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
-                        ) : f.pitcher ? (
-                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
-                        ) : (
-                          f.oppName || f.oppAbbr
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
         )}
 
         {data.transactions && <TransactionTimeline rows={data.transactions.rows} />}
