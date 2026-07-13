@@ -80,6 +80,30 @@ function leagueOf(awardId) {
   return null
 }
 
+// Silver Slugger + Gold Glove hand out one winner per fielding position, but
+// the API's own `primaryPosition.abbreviation` is inconsistent about WHICH
+// positions it splits out from year to year (Gold Glove sometimes reports
+// specific LF/CF/RF, Silver Slugger's outfield winners always come back as
+// plain "OF"; the "P" bucket has shown up as SP/RP/CP too). A naive
+// left-to-right render of the API's own order would then reshuffle position
+// to position every year, defeating the point of a scannable history. This
+// bucket order fixes each position to the same slot regardless of which
+// exact label the API used for it — OF ties LF's rank so the (ungrouped)
+// Silver Slugger "OF" trio clusters at the front of the outfield block
+// rather than sorting separately from Gold Glove's LF/CF/RF rows. Unknown
+// positions sort last rather than erroring, same graceful-degradation rule
+// as everywhere else in this app.
+const POSITION_ORDER = ['C', '1B', '2B', '3B', 'SS', 'OF', 'LF', 'CF', 'RF', 'DH', 'UT', 'P', 'SP', 'RP', 'CP']
+const POSITION_RANK = Object.fromEntries(POSITION_ORDER.map((p, i) => [p, p === 'OF' ? POSITION_ORDER.indexOf('LF') : i]))
+const POSITION_SORTED_FAMILIES = new Set(['Silver Slugger', 'Gold Glove'])
+
+function sortByPosition(recipients) {
+  return recipients
+    .map((r, i) => ({ r, i, rank: POSITION_RANK[r.position] ?? 99 }))
+    .sort((a, b) => a.rank - b.rank || a.i - b.i)
+    .map(({ r }) => r)
+}
+
 const awardIds = Object.keys(HARDWARE_AWARDS)
 const jobs = awardIds.flatMap((awardId) => seasons.map((season) => ({ awardId, season })))
 
@@ -120,6 +144,18 @@ for (const r of results) {
   const family = families.get(label)
   const yearRecipients = (family.years[r.season] ??= [])
   yearRecipients.push(...r.recipients)
+}
+
+// Re-sort each Silver Slugger/Gold Glove season by the fixed position order
+// above. AwardsHistoryPage still splits AL from NL itself (by each
+// recipient's own `league` field, not array order) before rendering, so
+// sorting AL and NL together here is fine — a sorted array's AL-only
+// subsequence is still sorted by rank.
+for (const family of families.values()) {
+  if (!POSITION_SORTED_FAMILIES.has(family.label)) continue
+  for (const season of Object.keys(family.years)) {
+    family.years[season] = sortByPosition(family.years[season])
+  }
 }
 
 const familiesOut = familyOrder
