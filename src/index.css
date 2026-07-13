@@ -858,6 +858,19 @@ body {
   letter-spacing: 0.015em;
 }
 
+/* An inline text-link riding inside a .hint paragraph (e.g. "How's this
+   calculated?" on the Top Games page) — underlined, no button chrome, so it
+   reads as part of the sentence. */
+.hint__link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--accent-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* On the slate every bit of copy reads in scorebook all-caps — the shared hint
    and button text (loading / no games / error / Retry) are uppercased here only,
    leaving the same classes as-is on every other screen. */
@@ -1012,6 +1025,47 @@ body {
 }
 .topgames__tier {
   align-self: flex-start;
+}
+
+/* Level filter row — reuses the .levelnav toggle look (same convention as
+   LeadersPage's scope switcher), allowed to wrap onto a second line on a
+   phone (seven options: All + MLB/MiLB/AAA/AA/A+/A vs. the slate's five). */
+.topgames__levels {
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+/* The dependent "favorite team only" toggle, styled like a single levelnav
+   pill but left-aligned rather than stretched full-width, since it's one
+   button rather than a segmented group. */
+.topgames__favtoggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  margin-bottom: 4px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--inset-cell);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.topgames__favtoggle:active {
+  transform: scale(0.96);
+}
+.topgames__favtoggle.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
 }
 
 .gamecard {
@@ -10576,6 +10630,86 @@ body {
 
 .bpsheet__foot {
   margin: 16px 0 0;
+  font-size: 11px;
+  color: var(--graphite-soft);
+  text-align: center;
+}
+
+/* ---------------------------------------------------------- game score sheet
+   "How Game Score works" bottom sheet, opened from the Top Games hint. Same
+   .scrim/.sheet dialog contract as the ballpark sheet — docked, slide-up,
+   safe-area padding, scrollable if content runs long on a short phone. */
+.gsmodal {
+  max-height: min(90vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.gsmodal__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gsmodal__head .sheet__title {
+  margin: 0;
+}
+
+.gsmodal__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gsmodal__factors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 12px 0 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.gsfactor {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.gsfactor__label {
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.gsfactor--negative .gsfactor__label {
+  color: var(--accent-negative);
+}
+
+.gsfactor__note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-caption);
+  text-align: right;
+}
+
+.gsmodal__tiers {
+  padding-top: 12px;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.gsmodal__foot {
+  margin: 4px 0 0;
   font-size: 11px;
   color: var(--graphite-soft);
   text-align: center;
