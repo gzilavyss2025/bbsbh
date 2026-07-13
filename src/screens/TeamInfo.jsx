@@ -275,12 +275,15 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
 }
 
 function Umpires({ officials }) {
-  // Under tonight's plate ump: his season RANK in called-pitch accuracy among
-  // all qualifying plate umpires, as a tap target that opens the accuracy modal
-  // (his zone map + last five plate games). Rides its own async load (keyed to
-  // his id) so it works for both this card and the wide LineupSpread that also
-  // renders <Umpires>. It's a season aggregate of Final games only, so it can't
-  // leak tonight's (unplayed) result; hidden for MiLB / umps with no data.
+  // Under tonight's plate ump: his season accuracy TIER (Elite/Good/Average/
+  // Below Average — see api/umpires.js's tierForZ), as a small badge next to
+  // his name that opens the full accuracy modal (zone map + last five plate
+  // games) on tap. Rides its own async load (keyed to his id) so it works for
+  // both this card and the wide LineupSpread that also renders <Umpires>.
+  // It's a season aggregate of Final games only, so it can't leak tonight's
+  // (unplayed) result; hidden for MiLB / umps with no data. Deliberately just
+  // the tier shown inline (no rank/%/tendency) — that detail lives one tap
+  // away in the modal instead of cluttering the card.
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)
@@ -293,19 +296,13 @@ function Umpires({ officials }) {
         {officials.map((o) => (
           <li key={o.role}>
             <span className="umps__role">{o.role}</span>
-            <span className="umps__nameblock">
-              <span className="umps__namerow">
-                <UmpireLink id={o.id} className="umps__name">
-                  {o.name}
-                </UmpireLink>
-                {o.role === 'HP' && hpAccuracy?.tier && <UmpireTierPill tier={hpAccuracy.tier} />}
-              </span>
-              {o.role === 'HP' && hpAccuracy?.accuracy != null && (
-                <button type="button" className="plink umps__accbtn" onClick={() => setModalId(o.id)}>
-                  {hpAccuracy.rank
-                    ? `#${hpAccuracy.rank} of ${hpAccuracy.total} in plate accuracy`
-                    : `${(hpAccuracy.accuracy * 100).toFixed(1)}% plate accuracy`}
-                  {hpAccuracy.tendency ? ` · ${hpAccuracy.tendency}` : ''}
+            <span className="umps__namerow">
+              <UmpireLink id={o.id} className="umps__name">
+                {o.name}
+              </UmpireLink>
+              {o.role === 'HP' && hpAccuracy?.tier && (
+                <button type="button" className="umps__tierbtn" onClick={() => setModalId(o.id)}>
+                  <UmpireTierPill tier={hpAccuracy.tier} />
                 </button>
               )}
             </span>

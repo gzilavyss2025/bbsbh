@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
 import { computeGameSuperlatives } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
+import { selectOfficials } from '../api/select.js'
+import { umpireAccuracySummary } from '../api/umpires.js'
 import { longDate } from '../lib/dates.js'
+import { useAsync } from '../hooks/useAsync.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { StatcastCard } from '../components/StatcastCard.jsx'
@@ -16,6 +19,8 @@ import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
+import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { RefreshButton } from './TeamInfo.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
@@ -148,12 +153,32 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
 
+  // The HP umpire's accuracy tier, as a tappable badge riding the "HP Umpire"
+  // fill-in field — same tier badge + modal as the lineup page's Umpires card
+  // (see TeamInfo.jsx), just fetched here since the box score doesn't share
+  // that component. `selectOfficials` (spoiler-free — umpire assignments carry
+  // no score) supplies the id `box.umpires` doesn't carry (it's parsed from
+  // free text with no id).
+  const hpId = useMemo(() => selectOfficials(feed).find((o) => o.role === 'HP')?.id ?? null, [feed])
+  const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
+  const [modalId, setModalId] = useState(null)
+  const hpUmpireValue = u.hp ? (
+    <>
+      {u.hp}
+      {hpAccuracy?.tier && (
+        <button type="button" className="umps__tierbtn bs__tierbtn" onClick={() => setModalId(hpId)}>
+          <UmpireTierPill tier={hpAccuracy.tier} />
+        </button>
+      )}
+    </>
+  ) : ''
+
   const awayFields = [
     { label: 'Visiting Team', value: box.away.teamName, wide: true },
     { label: 'Manager', value: managerValue(managers?.away), wide: true },
     // What they wore (jersey · pants · cap) — spoiler-free, posted ~game time.
     { label: 'Uniform', value: uniforms?.away, wide: true },
-    { label: 'HP Umpire', value: u.hp },
+    { label: 'HP Umpire', value: hpUmpireValue },
     { label: '1B Umpire', value: u.first },
     { label: '2B Umpire', value: u.second },
     { label: '3B Umpire', value: u.third },
@@ -225,6 +250,7 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
           separately-sealed GameBuzzCard below — the catch-all for whatever
           the game turned up as notable, ahead of the crowd's own reaction. */}
       <InsightsCard insights={insights} calloutNotes={calloutNotes} />
+      {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>
   )
 }
