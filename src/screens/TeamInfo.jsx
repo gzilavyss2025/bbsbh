@@ -15,7 +15,7 @@ import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewingClubs.js'
 import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
 import { BallparkModal } from '../components/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
-import { POS_ORDER, rosterPitcherRole } from '../api/person.js'
+import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
@@ -24,6 +24,7 @@ import { scorebookDate } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
+import { ManagerLink } from '../components/ManagerLink.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { umpireAccuracySummary } from '../api/umpires.js'
@@ -324,14 +325,22 @@ function Umpires({ officials }) {
 // (rosterPitcherRole — gamesStarted ratio / saves); a pitcher with no
 // resolved role (no starts on record yet) defaults into the bullpen list.
 function rosterFallbackGroups(roster) {
-  const rows = (roster ?? []).map((r) => ({
-    id: r.person?.id,
-    name: lastFirst(r.person),
-    jersey: r.jerseyNumber ?? '',
-    pos: r.position?.abbreviation ?? '',
-    isPitcher: r.position?.type === 'Pitcher',
-    role: r.position?.type === 'Pitcher' ? rosterPitcherRole(r) : null,
-  }))
+  const rows = (roster ?? []).map((r) => {
+    // A two-way player (Ohtani-type) carries a single roster spot typed
+    // 'Two-Way Player', not 'Pitcher' — treat him as a pitcher for the
+    // starters/bullpen split (isTwoWay) without pulling him out of the
+    // batters list below, so he lists in both, same as the team page.
+    const twoWay = isTwoWay(r.person)
+    return {
+      id: r.person?.id,
+      name: lastFirst(r.person),
+      jersey: r.jerseyNumber ?? '',
+      pos: r.position?.abbreviation ?? '',
+      isPitcher: r.position?.type === 'Pitcher',
+      twoWay,
+      role: r.position?.type === 'Pitcher' || twoWay ? rosterPitcherRole(r) : null,
+    }
+  })
   const batters = rows
     .filter((r) => !r.isPitcher)
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
@@ -339,7 +348,7 @@ function rosterFallbackGroups(roster) {
     .filter((r) => r.role === 'SP')
     .sort((a, b) => a.name.localeCompare(b.name))
   const bullpen = rows
-    .filter((r) => r.isPitcher && r.role !== 'SP')
+    .filter((r) => (r.isPitcher || r.twoWay) && r.role !== 'SP')
     .sort((a, b) => a.name.localeCompare(b.name))
   return { batters, starters, bullpen }
 }
@@ -918,16 +927,19 @@ function GameNotesButton({ feed, side }) {
 
 // The manager fill-in: surname-first name with the uniform number inked in
 // seam red, like every lineup row. Null (→ the Fact's "—") until resolved.
+// Linked to his manager page once fetchManager resolves a personId (older
+// cached data / a fetch that raced ahead of that field lands here without
+// one — ManagerLink degrades to plain text rather than a dead link).
 function managerFact(manager) {
   if (!manager) return null
   return (
-    <span className="fact__person">
+    <ManagerLink id={manager.personId} className="fact__person">
       {manager.lastFirst}
       {manager.jersey ? (
         <span className="fact__jersey">{manager.jersey}</span>
       ) : null}
       {manager.interim ? <span className="fact__note">interim</span> : null}
-    </span>
+    </ManagerLink>
   )
 }
 

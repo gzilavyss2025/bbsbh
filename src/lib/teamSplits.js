@@ -236,3 +236,21 @@ for (const { location, mascot } of rows) {
 export function lookupSplit(fullName = '') {
   return SPLITS.get(normalize(fullName)) ?? null
 }
+
+// "Milwaukee Brewers" + "Brewers" -> { location: 'Milwaukee', mascot: 'Brewers' }.
+// The hand-maintained table above wins (so "Athletics" becomes "It's Just" /
+// "Athletics"); otherwise fall back to the API's teamName (mascot) and strip it
+// off the end of the full name. Returns { location: '', mascot } when we can't
+// cleanly split off a location (some MiLB clubs). Shared by the slate cards
+// (GameCard) and the off-day cards (OffDaySection).
+export function splitName(name = '', mascot = '') {
+  const full = name.trim()
+  const manual = lookupSplit(full)
+  if (manual) return manual
+  const club = (mascot || full).trim()
+  if (club && full.toLowerCase().endsWith(club.toLowerCase())) { // caps-js-exempt: case-insensitive comparison, not display casing
+    const location = full.slice(0, full.length - club.length).trim()
+    return { location, mascot: club }
+  }
+  return { location: '', mascot: full }
+}

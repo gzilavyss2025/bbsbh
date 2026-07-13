@@ -15,6 +15,7 @@
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
+//   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
@@ -65,6 +66,10 @@ export function parseRoute(url) {
   // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
   if (parts.length === 2 && parts[0] === 'umpire')
     return { name: 'umpire', id: parts[1] }
+  // Managers carry no spoiler-cutoff hint either — a coaching career/awards
+  // record is never score-revealing, same footing as umpires above.
+  if (parts.length === 2 && parts[0] === 'manager')
+    return { name: 'manager', id: parts[1] }
   if (parts.length === 1 && parts[0] === 'leaders')
     return { name: 'leaders', scope: 'mlb', asOf, sportId }
   if (parts.length === 2 && parts[0] === 'leaders')
@@ -150,6 +155,9 @@ export function teamPath(id, opts = {}) {
 }
 export function umpirePath(id) {
   return `/umpire/${id}`
+}
+export function managerPath(id) {
+  return `/manager/${id}`
 }
 export function umpireRankingsPath() {
   return '/umpires'
