@@ -520,6 +520,17 @@ export const MILESTONE_DEFS = [
   { stat: 'saves', group: 'pitching', label: 'SV', thresholds: [100, 200, 300, 400, 500, 600], window: 15, farWindow: 120, gameGate: 1 },
 ]
 
+// The league-wide Milestone Watch page's inclusion floor: only flag a chase
+// once the player already has at least this FRACTION of the milestone. The
+// distance-based `farWindow` alone isn't enough on the small-threshold stats —
+// it's a flat 120 for saves and HR, wider than the 100-save / 100-HR clubs
+// themselves, so it would sweep in every reliever with a couple of saves and
+// every 40-homer bat as "chasing 100". A player 75%+ of the way there is a
+// genuine chase; below that it's just noise on a page that already lists most
+// of the league. (Non-binding on the player-page card, which uses the tight
+// `window` — within `window` of any threshold already implies ≥85% of it.)
+export const MILESTONE_PROGRESS_FLOOR = 0.75
+
 // The smallest threshold still ahead of `value`, only when within `window` of
 // it — otherwise null (too far out to be worth flagging, or already passed
 // every threshold in the table). Also null below the FIRST threshold's own
@@ -527,12 +538,16 @@ export const MILESTONE_DEFS = [
 // stat's lowest threshold (100 HR's farWindow of 120 is wider than 100
 // itself), which would flag a player who hasn't recorded a single one yet as
 // "in range" of his first milestone — worth nothing until he's actually
-// started the count.
-export function nearestMilestone(value, thresholds, window) {
+// started the count. `minFraction` (default 0, off) is the league-wide page's
+// additional progress floor (see MILESTONE_PROGRESS_FLOOR): require the value
+// to be at least that fraction of the next threshold, dropping barely-started
+// chases the wide farWindow would otherwise admit.
+export function nearestMilestone(value, thresholds, window, minFraction = 0) {
   const v = num(value)
   if (v <= 0) return null
   const next = (thresholds ?? []).find((t) => t > v)
   if (next == null) return null
+  if (v < minFraction * next) return null
   const remaining = next - v
   return remaining <= window ? { threshold: next, value: v, remaining } : null
 }

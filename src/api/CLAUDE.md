@@ -115,10 +115,15 @@ for each generator; the reader modules:
   logic, which mirrors `person.js`'s `detectRehabAssignment`.
 - `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
   card, from `public/data/milestones.json`. Cost-driven: a career-total + this
-  season's pace pull per MLB active-roster player plus every team's season
-  schedule (`gen-milestones.mjs`, daily cron), so the projection can scale by how
-  often a player actually plays rather than assuming a #5 starter takes the mound
-  every team game. `milestonesForPlayer` filters the league-wide file to one
+  season's pace pull per debuted player on any MLB org's full roster (active,
+  IL, or minors — so an injured or optioned veteran near a milestone still
+  shows; undebuted prospects are gated out on the roster's hydrated
+  `mlbDebutDate`) plus every team's season schedule (`gen-milestones.mjs`, daily
+  cron), so the projection can scale by how often a player actually plays rather
+  than assuming a #5 starter takes the mound every team game. An inclusion floor
+  (`MILESTONE_PROGRESS_FLOOR`, 75% of the threshold) keeps it to genuine chases,
+  since the distance-based `farWindow` alone is wider than the smallest
+  thresholds. `milestonesForPlayer` filters the league-wide file to one
   player for the card; the projection math (`projectMilestoneETA`,
   `careerPerSeasonRate`, `milestoneRarityRank`) lives in `person.js` alongside
   `MILESTONE_DEFS`, shared by the generator. Counting-stat totals carry no
