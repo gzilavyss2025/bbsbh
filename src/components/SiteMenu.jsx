@@ -12,6 +12,7 @@ const MENU_ITEMS = [
   { label: 'Rehab Assignments', path: '/rehab' },
   { label: 'Umpire Rankings', path: '/umpires' },
   { label: 'Milestone Watch', path: '/milestones' },
+  { label: 'Awards History', path: '/awards' },
   { label: 'Logo Sheet', path: '/logos' },
   { label: 'About', path: '/about' },
 ]

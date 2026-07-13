@@ -7,6 +7,7 @@ import { PlayerPage } from './screens/PlayerPage.jsx'
 import { ProspectsPage } from './screens/ProspectsPage.jsx'
 import { RehabPage } from './screens/RehabPage.jsx'
 import { MilestoneWatchPage } from './screens/MilestoneWatchPage.jsx'
+import { AwardsHistoryPage } from './screens/AwardsHistoryPage.jsx'
 import { StandingsPage } from './screens/StandingsPage.jsx'
 import { TeamPage } from './screens/TeamPage.jsx'
 import { TeamLeadersPage } from './screens/TeamLeadersPage.jsx'
@@ -85,6 +86,8 @@ export default function App() {
     content = <RehabPage />
   } else if (route.name === 'milestones') {
     content = <MilestoneWatchPage />
+  } else if (route.name === 'awards-history') {
+    content = <AwardsHistoryPage />
   } else if (route.name === 'standings') {
     content = <StandingsPage />
   } else if (route.name === 'player') {

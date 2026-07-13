@@ -154,6 +154,15 @@ Re-run only to fold in a new season.
 - `gen-war-history.mjs` → `public/data/war-history.json` — season WAR per player for
   COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same FanGraphs
   source/join. A finished season's WAR is immutable.
+- `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
+  MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
+  Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
+  First/Second Team) over the last 5 seasons, grouped by award then by season. Loops
+  `MAJOR_AWARDS`' ids (imported straight from `src/api/person.js`, not duplicated, so
+  this page can't drift from what the player page's own Trophy Case counts as
+  hardware) × season through `GET /api/v1/awards/{awardId}/recipients?season=YYYY`.
+  The in-progress current season simply comes back empty per award until decided —
+  no special-casing needed. App reads it via `src/api/awardsHistory.js`.
 - `gen-milb-history.mjs` → `public/data/milb-history.json` — per-season parent-org +
   club-name history for every AAA/AA/A+/A affiliate. Sweeps statsapi's season-scoped
   team snapshots for 2005+ (where its affiliate data is clean) and merges a small
