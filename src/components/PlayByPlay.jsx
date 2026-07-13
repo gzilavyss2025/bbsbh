@@ -61,13 +61,20 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
   // Scroll the newly revealed at-bat into view on each step (ADR-0016): a
   // step boundary always lands right after a plate-appearance card (see
   // nextStepBoundary), so the last visible entry is the one that just came
-  // in. Skipped on the very first render of a step count (initial mount /
-  // returning to a half already mid-step) so the page doesn't jump before
-  // the user has tapped anything this visit.
+  // in. Skipped when a step count carries over from a PREVIOUS visit (mount
+  // at stepCap > 1, e.g. returning to a half already mid-step) so the page
+  // doesn't jump before the user has tapped anything this visit — but the
+  // very first tap of a still-fully-sealed half (mount at stepCap === 1)
+  // always scrolls: that tap is the only visible change on the page (the
+  // card appears well below the floating bar the user just tapped), so
+  // without this the tap looks like it did nothing.
   const lastEntryRef = useRef(null)
   const prevStepCapRef = useRef(stepCap)
+  const isFirstRenderRef = useRef(true)
   useEffect(() => {
-    if (stepping && stepCap !== prevStepCapRef.current) {
+    const firstTapOfHalf = isFirstRenderRef.current && stepCap === 1
+    isFirstRenderRef.current = false
+    if (stepping && (stepCap !== prevStepCapRef.current || firstTapOfHalf)) {
       lastEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
     prevStepCapRef.current = stepCap
