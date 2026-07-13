@@ -25,6 +25,7 @@ export function HalfInning({
   revealedThrough,
   onReveal,
   prospectsData,
+  rookiesData,
   callouts,
   vsTeam,
   highlights,
@@ -60,6 +61,7 @@ export function HalfInning({
         awayName={awayName}
         homeName={homeName}
         prospectsData={prospectsData}
+        rookiesData={rookiesData}
       />
     </div>
   )
