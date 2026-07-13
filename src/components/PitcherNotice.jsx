@@ -39,7 +39,7 @@ export function PitcherNotice({ pitcher, teamName, className = '' }) {
 export function PitcherPhoto({ personId }) {
   const [failed, setFailed] = useState(false)
   useEffect(() => setFailed(false), [personId])
-  const url = personId && !failed ? realHeadshotUrl(personId, 120) : null
+  const url = personId && !failed ? realHeadshotUrl(personId) : null
 
   if (!url) {
     return (

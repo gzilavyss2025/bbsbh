@@ -41,32 +41,32 @@ export const BATTER_METRICS = [
   {
     key: 'xwoba',
     label: 'xwOBA',
-    def: 'Expected quality of contact and result, luck-adjusted — the single best all-around number.',
+    def: 'A single all-around rating of how well he hits, based on how hard and how squarely he makes contact.',
   },
   {
     key: 'ev',
     label: 'Exit velo',
-    def: 'Average speed the ball leaves the bat.',
+    def: 'How hard he hits the ball on average.',
   },
   {
     key: 'hardHit',
     label: 'Hard-hit %',
-    def: 'Share of batted balls hit 95+ mph.',
+    def: 'How often he really crushes a ball rather than hitting it softly.',
   },
   {
     key: 'brl',
     label: 'Barrel %',
-    def: 'Share of batted balls hit at the ideal speed-and-angle combo for extra bases.',
+    def: 'How often he catches a ball with the ideal mix of speed and angle for extra-base damage.',
   },
   {
     key: 'chase',
     label: 'Chase %',
-    def: 'How often he swings at pitches outside the strike zone. Higher percentile means more disciplined, not more chasing.',
+    def: 'How well he lays off pitches outside the strike zone — a higher percentile means better plate discipline.',
   },
   {
     key: 'sprintSpeed',
     label: 'Sprint speed',
-    def: 'Top running speed, in feet per second.',
+    def: 'How fast he runs at full sprint.',
   },
 ]
 
@@ -74,36 +74,36 @@ export const PITCHER_METRICS = [
   {
     key: 'xera',
     label: 'xERA',
-    def: 'Expected ERA from the contact he allows, not what actually happened. Higher percentile means fewer runs expected.',
+    def: 'How stingy the quality of contact he allows suggests he should be — a higher percentile means fewer runs expected.',
   },
   {
     key: 'k',
     label: 'K %',
-    def: 'Share of batters faced that he strikes out.',
+    def: 'How often he strikes out the batters he faces.',
   },
   {
     key: 'bb',
     label: 'BB %',
-    def: 'Share of batters faced that he walks. Higher percentile means fewer walks.',
+    def: 'How often he walks the batters he faces — a higher percentile means fewer walks.',
   },
   {
     key: 'whiff',
     label: 'Whiff %',
-    def: 'Share of swings against him that miss entirely.',
+    def: 'How often batters swing and miss against him.',
   },
   {
     key: 'chase',
     label: 'Chase %',
-    def: 'How often batters chase his pitches outside the strike zone.',
+    def: 'How often he gets batters to swing at pitches outside the strike zone — a higher percentile means more chases drawn.',
   },
   {
     key: 'fbVelo',
     label: 'Fastball velo',
-    def: 'Average fastball speed.',
+    def: 'How hard he throws his fastball on average.',
   },
   {
     key: 'hardHit',
     label: 'Hard-hit %',
-    def: 'Share of batted balls allowed at 95+ mph. Higher percentile means less hard contact allowed.',
+    def: 'How often hitters really crush the ball off him — a higher percentile means less hard contact allowed.',
   },
 ]

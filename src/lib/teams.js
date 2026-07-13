@@ -137,7 +137,13 @@ export function leagueLogoUrl() {
 // monogram with no team).
 const HEADSHOT_BASE = 'https://img.mlbstatic.com/mlb-photos/image/upload'
 
-export function realHeadshotUrl(personId, width = 213) {
+// `width` is the CDN-delivered pixel width, NOT the CSS display size. It
+// defaults to 320 so the largest on-screen rung (--shot-xl, 104px wide) is
+// still ≥1 device pixel per source pixel on a 3× phone (104×3 = 312) — at the
+// old 213 those big headshots were upscaled ~1.5× and looked pixelated. One
+// shared width means every call site reuses a single cached image; callers
+// should only override it for a materially larger surface.
+export function realHeadshotUrl(personId, width = 320) {
   if (!personId) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/silo/current`
 }
@@ -151,7 +157,7 @@ export function realHeadshotUrl(personId, width = 213) {
 // Headshot.jsx uses this as the second rung of its chain — silo (preferred,
 // matches the app's floating-cutout treatment) → milb (a real face for a
 // prospect) → team logo → monogram.
-export function milbHeadshotUrl(personId, width = 213) {
+export function milbHeadshotUrl(personId, width = 320) {
   if (!personId) return null
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/milb/current`
 }
