@@ -10716,6 +10716,16 @@ body {
   min-width: 0;
   font-family: var(--font-body);
   font-size: 13px;
+  border-radius: var(--radius-xs);
+}
+/* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
+   from favoriteAccentColor()) — a recipient who played for the user's
+   favorite club jumps out among the rest of a season's winners. */
+.awardhistory__recipient--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  padding: 1px 4px 1px 5px;
+  margin: -1px -4px -1px -5px;
 }
 .awardhistory__teamlink {
   flex: none;

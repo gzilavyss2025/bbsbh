@@ -1,13 +1,14 @@
 import { loadAwardsHistory } from '../api/awardsHistory.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SectionTitle } from '../components/SectionTitle.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { teamClubNameShort } from '../lib/teams.js'
+import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {
@@ -27,7 +28,7 @@ function groupByLeague(recipients) {
   })).filter((g) => g.recipients.length > 0)
 }
 
-function AwardYear({ year, recipients }) {
+function AwardYear({ year, recipients, favoriteTeamId }) {
   const groups = groupByLeague(recipients)
   return (
     <div className="awardhistory__year">
@@ -37,26 +38,36 @@ function AwardYear({ year, recipients }) {
           <div className="awardhistory__league" key={g.league ?? 'mlb'}>
             {g.league && <span className="awardhistory__leaguetag">{g.league}</span>}
             <div className="awardhistory__recipients">
-              {g.recipients.map((r) => (
-                <span className="awardhistory__recipient" key={`${r.playerId}-${r.position}`}>
-                  {r.teamId ? (
-                    <TeamLink id={r.teamId} className="awardhistory__teamlink">
+              {g.recipients.map((r) => {
+                const isFavorite = favoriteTeamId != null && r.teamId === favoriteTeamId
+                const favStyle = isFavorite
+                  ? { '--fav-accent': favoriteAccentColor(r.teamId) }
+                  : undefined
+                return (
+                  <span
+                    className={`awardhistory__recipient${isFavorite ? ' awardhistory__recipient--fav' : ''}`}
+                    style={favStyle}
+                    key={`${r.playerId}-${r.position}`}
+                  >
+                    {r.teamId ? (
+                      <TeamLink id={r.teamId} className="awardhistory__teamlink">
+                        <TeamLogo teamId={r.teamId} name={r.teamName} size={16} />
+                      </TeamLink>
+                    ) : (
                       <TeamLogo teamId={r.teamId} name={r.teamName} size={16} />
-                    </TeamLink>
-                  ) : (
-                    <TeamLogo teamId={r.teamId} name={r.teamName} size={16} />
-                  )}
-                  <PlayerLink id={r.playerId} className="awardhistory__name">
-                    {r.name}
-                  </PlayerLink>
-                  <span className="awardhistory__team">
-                    {r.teamId ? teamClubNameShort(r.teamId) : r.teamName}
+                    )}
+                    <PlayerLink id={r.playerId} className="awardhistory__name">
+                      {r.name}
+                    </PlayerLink>
+                    <span className="awardhistory__team">
+                      {r.teamId ? teamClubNameShort(r.teamId) : r.teamName}
+                    </span>
+                    {g.recipients.length > 1 && r.position && (
+                      <em className="awardhistory__pos">{r.position}</em>
+                    )}
                   </span>
-                  {g.recipients.length > 1 && r.position && (
-                    <em className="awardhistory__pos">{r.position}</em>
-                  )}
-                </span>
-              ))}
+                )
+              })}
             </div>
           </div>
         ))}
@@ -75,10 +86,17 @@ function AwardYear({ year, recipients }) {
 // winners are decided once and never change, same footing as
 // war-history.json/milb-history.json) — no SealBox needed, same as Milestone
 // Watch/League Leaders/WAR: a past season's award roll carries no individual
-// game's score.
+// game's score. Silver Slugger/Gold Glove rows arrive PRE-SORTED into a fixed
+// position order (see gen-awards-history.mjs's POSITION_ORDER) so the same
+// position always lands in the same slot year over year, rather than
+// reshuffling with whatever order the source feed happened to return. A
+// recipient who plays for the user's favoriteTeamId (useFavoriteTeam, same
+// preference the slate/standings/leaders pages already highlight with) gets
+// the same --fav-accent treatment as those surfaces.
 export function AwardsHistoryPage() {
   useDocumentTitle('Awards History')
   const { loading, error, data } = useAsync(() => loadAwardsHistory(), [])
+  const { favoriteTeamId } = useFavoriteTeam()
   const families = data?.families ?? []
   const updated = monthDay(data?.generatedAt?.slice(0, 10))
 
@@ -110,7 +128,12 @@ export function AwardsHistoryPage() {
                   <SectionTitle title={family.label} />
                   <div className="awardhistory__years">
                     {years.map((year) => (
-                      <AwardYear key={year} year={year} recipients={family.years[year]} />
+                      <AwardYear
+                        key={year}
+                        year={year}
+                        recipients={family.years[year]}
+                        favoriteTeamId={favoriteTeamId}
+                      />
                     ))}
                   </div>
                 </section>
