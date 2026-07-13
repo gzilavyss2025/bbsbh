@@ -1,8 +1,8 @@
 name: Update nightly data
 
-# Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
-# umpire plate accuracy, minor-league leaders, game call-outs, former
-# teammates, and vs-team splits (each documented at the top of its own
+# Nightly precompute batch: game notes, WAR, rehab assignments, milestone
+# watch, umpires, umpire plate accuracy, minor-league leaders, game call-outs,
+# former teammates, and vs-team splits (each documented at the top of its own
 # scripts/gen-*.mjs) in ONE workflow
 # with a SINGLE commit+push, instead of eight separate crons each triggering
 # its own Vercel deployment. Consolidated 2026-07-11 after two of the eight
@@ -45,6 +45,10 @@ jobs:
         id: rehab
         continue-on-error: true
         run: node scripts/gen-rehab.mjs
+      - name: Milestone watch
+        id: milestones
+        continue-on-error: true
+        run: node scripts/gen-milestones.mjs
       - name: Umpires
         id: umpires
         continue-on-error: true
@@ -78,7 +82,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/milestones.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Update nightly data"
           git push
 
@@ -87,6 +91,7 @@ jobs:
           steps.game-notes.outcome == 'failure' ||
           steps.war.outcome == 'failure' ||
           steps.rehab.outcome == 'failure' ||
+          steps.milestones.outcome == 'failure' ||
           steps.umpires.outcome == 'failure' ||
           steps.umpire-accuracy.outcome == 'failure' ||
           steps.minors-leaders.outcome == 'failure' ||

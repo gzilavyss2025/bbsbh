@@ -8295,6 +8295,45 @@ body {
   font-weight: var(--w-bold);
   color: var(--accent-primary);
 }
+/* MILESTONE WATCH card (MilestoneWatchCard.jsx) — a small bordered block
+   (echoes .rehabcard's card treatment) rather than a bare line, since it
+   carries a projected timeframe alongside the progress fact. Title uppercase
+   like every other SectionTitle; each row's progress text stays neutral, the
+   projected timeframe inked in the accent color (like .milestonepill) so the
+   forward-looking half of the fact reads as distinct from the plain count. */
+.milestonewatch {
+  margin: 8px 2px 0;
+  padding: 8px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.milestonewatch__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+.milestonewatch__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 3px 0;
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+}
+.milestonewatch__eta {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
 
 /* ---------------------------------------------------------------- posinn
    "Innings by position" — career/season workload by fielding spot, drawn on
@@ -9618,6 +9657,97 @@ body {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+/* --------------------------------------------------------- milestone watch page
+   One card per PLAYER (see groupMilestoneRows in MilestoneWatchPage.jsx), not
+   per milestone — a player chasing both a hits and a doubles milestone at
+   once nests both rows inside one card instead of splitting across two.
+   Cards vary in height with how many milestones a player is chasing, so this
+   is a CSS-columns waterfall (same shape as .bs__noteGrid on the box score's
+   Insights card) rather than a row-locked grid: each card flows into the
+   shortest column instead of every row stretching to its tallest member. */
+.milestonewatch-page__grid {
+  column-width: 260px;
+  column-gap: 8px;
+  margin-top: var(--space-4);
+}
+.milestonewatch-page__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--inset-cell);
+  break-inside: avoid;
+}
+.shot.milestonewatch-page__shot {
+  flex: none;
+  width: 30px;
+  height: 40px;
+  border-radius: var(--radius-xs);
+}
+.shot.milestonewatch-page__shot.shot--fallback {
+  font-size: 13px;
+}
+.milestonewatch-page__body {
+  min-width: 0;
+  flex: 1;
+}
+.milestonewatch-page__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+}
+.milestonewatch-page__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
+}
+/* One nested milestone row inside the card — stat/threshold, the plain
+   progress fact, and the projected timeframe inked in the accent color (like
+   .milestonepill) so the forward-looking half of the fact reads distinctly. */
+.milestonewatch-page__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+.milestonewatch-page__row:first-of-type {
+  margin-top: 5px;
+  padding-top: 5px;
+}
+.milestonewatch-page__stat {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 12px;
+}
+.milestonewatch-page__progress {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.milestonewatch-page__eta {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
 }
 
 /* ---------------------------------------------------------------- umpire page */

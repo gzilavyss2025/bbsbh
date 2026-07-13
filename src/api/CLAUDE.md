@@ -95,6 +95,19 @@ for each generator; the reader modules:
   against his game log + rehab club's schedule to drop ended stints — dozens of
   calls. `gen-rehab.mjs` (daily cron) keeps its own copy of the transaction-scan
   logic, which mirrors `person.js`'s `detectRehabAssignment`.
+- `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
+  card, from `public/data/milestones.json`. Cost-driven: a career-total + this
+  season's pace pull per MLB active-roster player plus every team's season
+  schedule (`gen-milestones.mjs`, daily cron), so the projection can scale by how
+  often a player actually plays rather than assuming a #5 starter takes the mound
+  every team game. `milestonesForPlayer` filters the league-wide file to one
+  player for the card; the projection math (`projectMilestoneETA`,
+  `careerPerSeasonRate`, `milestoneRarityRank`) lives in `person.js` alongside
+  `MILESTONE_DEFS`, shared by the generator. Counting-stat totals carry no
+  individual game's score (same footing as League Leaders/WAR), so the page needs
+  no `SealBox`; the player-page card still only shows its projection on a bare
+  current-day view (`asOf` unset) since the precompute can't be retrofit to an old
+  game's cutoff.
 - `umpires.js` — the umpire detail page (every game an umpire worked this season +
   base, most recent first), from `public/data/umpires.json`, keyed by umpire
   personId. Cost-driven: no "games by umpire" endpoint, so `gen-umpires.mjs` does a

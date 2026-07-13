@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { loadUmpire, accuracyTendency } from '../api/umpires.js'
+import { loadUmpire } from '../api/umpires.js'
 import { UmpireZoneMap } from '../components/UmpireAccuracyModal.jsx'
 import { gamePath } from '../lib/route.js'
+import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
@@ -12,7 +13,6 @@ import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const TOP_TEAMS_LIMIT = 10
 const TOP_VENUES_LIMIT = 5
 const HP_RECORDS_LIMIT = 10
 
@@ -21,10 +21,13 @@ function monthDay(iso) {
   return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
 }
 
-// Every club involved in a game the umpire worked (away or home both count —
-// this counts games *involving* a team, not just ones at its own park; see
-// topVenues below for "at their own park"), ranked most games first.
-function topTeams(games, limit) {
+// Every one of the 30 MLB clubs, ranked by games involving that club this
+// umpire has worked (away or home both count — this counts games *involving*
+// a team, not just ones at its own park; see topVenues below for "at their
+// own park"), most first. A club he hasn't worked stays in the list at
+// count 0 (sort is stable, so the zero-count clubs trail in team-id order)
+// so the grid always shows the whole league — UmpirePage grays those out.
+function allTeams(games) {
   const byTeam = new Map()
   for (const g of games) {
     for (const [id, abbr] of [[g.awayId, g.awayAbbr], [g.homeId, g.homeAbbr]]) {
@@ -33,18 +36,20 @@ function topTeams(games, limit) {
       byTeam.get(id).count++
     }
   }
-  return [...byTeam.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+  return ALL_MLB_TEAM_IDS.map((id) => byTeam.get(id) ?? { id, abbr: teamClubName(id) || '', count: 0 }).sort(
+    (a, b) => b.count - a.count,
+  )
 }
 
 // Every ballpark the umpire has worked a game at, ranked most games first.
-function topVenues(games, limit) {
+function topVenues(games) {
   const byVenue = new Map()
   for (const g of games) {
     if (!g.venueId) continue
     if (!byVenue.has(g.venueId)) byVenue.set(g.venueId, { id: g.venueId, name: g.venueName, count: 0 })
     byVenue.get(g.venueId).count++
   }
-  return [...byVenue.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+  return [...byVenue.values()].sort((a, b) => b.count - a.count)
 }
 
 // Each team's W-L record in games this umpire called from behind the plate —
@@ -52,7 +57,7 @@ function topVenues(games, limit) {
 // (no per-game feed fetch needed), so this is a plain tally over the HP
 // games. Ranked by decisions (games), most first; a suspended-and-not-
 // resumed tie (isWinner false for both sides) counts toward neither W nor L.
-function hpTeamRecords(games, limit) {
+function hpTeamRecords(games) {
   const byTeam = new Map()
   for (const g of games) {
     if (g.role !== 'HP') continue
@@ -67,50 +72,46 @@ function hpTeamRecords(games, limit) {
       else if (won === false) rec.losses++
     }
   }
-  return [...byTeam.values()]
-    .sort((a, b) => b.wins + b.losses - (a.wins + a.losses))
-    .slice(0, limit)
+  return [...byTeam.values()].sort((a, b) => b.wins + b.losses - (a.wins + a.losses))
 }
 
-// The plate-accuracy summary: season called-pitch accuracy plus a one-line
-// zone tendency, from the append-only umpire-accuracy.json (merged into the
-// umpire record by loadUmpire). Absent — like the other cards here — when the
-// umpire has no accuracy data (MiLB, or no scored games yet), so it never
-// shows an empty shell. Called-pitch counts carry no score; see the plan's
-// spoiler audit.
+// The plate-accuracy summary: season called-pitch accuracy, its league rank,
+// and the miss-tendency zone map, from the append-only umpire-accuracy.json
+// (merged into the umpire record by loadUmpire). Absent — like the other
+// cards here — when the umpire has no accuracy data (MiLB, or no scored games
+// yet), so it never shows an empty shell. Called-pitch counts carry no score;
+// see the plan's spoiler audit.
 function PlateAccuracyCard({ accuracy, rank, zoneCells }) {
   const s = accuracy?.season
   if (!s || !s.called) return null
   const pct = (s.accuracy * 100).toFixed(1)
-  const tendency = accuracyTendency(s)
   return (
     <section className="umpage__card umpage__acccard">
       <h2 className="umpage__cardtitle">Plate accuracy</h2>
-      <div className="umpage__accfig">
-        <span className="umpage__accpct">{pct}%</span>
-        <span className="umpage__acclabel">
-          {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches
-          {s.games > 0 && ` · ${s.games} ${s.games === 1 ? 'game' : 'games'} behind the plate`}
-        </span>
+      <div className="umpage__accrow">
+        <div className="umpage__acctile">
+          <span className="umpage__accpct">{pct}%</span>
+          <span className="umpage__acctilelabel">Accuracy</span>
+        </div>
         {rank && (
-          <span className="umpage__accrank">
-            #{rank.rank} of {rank.total} among plate umpires
-          </span>
+          <div className="umpage__acctile">
+            <span className="umpage__accpct">#{rank.rank}</span>
+            <span className="umpage__acctilelabel">of {rank.total} plate umpires</span>
+          </div>
         )}
       </div>
+      <p className="umpage__acclabel">
+        {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches
+        {s.games > 0 && ` · ${s.games} ${s.games === 1 ? 'game' : 'games'} behind the plate`}
+      </p>
       {zoneCells && (
         <div className="umpage__acczone">
           <UmpireZoneMap cells={zoneCells} />
           <p className="umpage__acczonecap">
-            Darker cells are where he calls strikes; marked cells are where he misses more than a
-            typical umpire.
+            The red boxes show the parts of the strike zone where he misses the most calls,
+            compared to a typical umpire.
           </p>
         </div>
-      )}
-      {tendency && (
-        <p className="umpage__acctendency">
-          {tendency.charAt(0).toUpperCase() + tendency.slice(1)}.
-        </p>
       )}
     </section>
   )
@@ -125,6 +126,8 @@ export function UmpirePage({ id }) {
   const { loading, error, data } = useAsync(() => loadUmpire(id), [id])
   const navigate = useNav()
   const [hpOnly, setHpOnly] = useState(false)
+  const [showAllVenues, setShowAllVenues] = useState(false)
+  const [showAllRecords, setShowAllRecords] = useState(false)
   useDocumentTitle(data?.name || null)
 
   const back = () => window.history.back()
@@ -135,9 +138,11 @@ export function UmpirePage({ id }) {
   const accByGamePk = data.accuracy?.byGamePk ?? {}
   const hpCount = games.filter((g) => g.role === 'HP').length
   const shown = hpOnly ? games.filter((g) => g.role === 'HP') : games
-  const teams = topTeams(games, TOP_TEAMS_LIMIT)
-  const venues = topVenues(games, TOP_VENUES_LIMIT)
-  const hpRecords = hpTeamRecords(games, HP_RECORDS_LIMIT)
+  const teams = allTeams(games)
+  const venues = topVenues(games)
+  const shownVenues = showAllVenues ? venues : venues.slice(0, TOP_VENUES_LIMIT)
+  const hpRecords = hpTeamRecords(games)
+  const shownRecords = showAllRecords ? hpRecords : hpRecords.slice(0, HP_RECORDS_LIMIT)
 
   return (
     <div className="screen umpire">
@@ -161,10 +166,13 @@ export function UmpirePage({ id }) {
             <h2 className="umpage__cardtitle">Most worked teams</h2>
             <ul className="umpage__teamgrid">
               {teams.map((t) => (
-                <li key={t.id} className="umpage__teamitem">
+                <li
+                  key={t.id}
+                  className={`umpage__teamitem ${t.count === 0 ? 'umpage__teamitem--unworked' : ''}`}
+                >
                   <TeamLink id={t.id} className="umpage__teamlink">
-                    <TeamLogo teamId={t.id} name={t.abbr} size={34} />
-                    <span className="umpage__teamcount">{t.count}</span>
+                    <TeamLogo teamId={t.id} name={t.abbr} size={34} bw={t.count === 0} />
+                    {t.count > 0 && <span className="umpage__teamcount">{t.count}</span>}
                   </TeamLink>
                 </li>
               ))}
@@ -176,7 +184,7 @@ export function UmpirePage({ id }) {
           <section className="umpage__card">
             <h2 className="umpage__cardtitle">Most worked ballparks</h2>
             <ul className="umpage__venuelist">
-              {venues.map((v, i) => (
+              {shownVenues.map((v, i) => (
                 <li key={v.id} className="umpage__venuerow">
                   <span className="umpage__venuerank">{i + 1}</span>
                   <span className="umpage__venuename">{v.name || 'Unknown'}</span>
@@ -184,6 +192,15 @@ export function UmpirePage({ id }) {
                 </li>
               ))}
             </ul>
+            {!showAllVenues && venues.length > TOP_VENUES_LIMIT && (
+              <button
+                type="button"
+                className="plink umpage__showall"
+                onClick={() => setShowAllVenues(true)}
+              >
+                Show all {venues.length}
+              </button>
+            )}
           </section>
         )}
 
@@ -191,7 +208,7 @@ export function UmpirePage({ id }) {
           <section className="umpage__card">
             <h2 className="umpage__cardtitle">Team records, this ump behind the plate</h2>
             <ul className="umpage__venuelist">
-              {hpRecords.map((r, i) => (
+              {shownRecords.map((r, i) => (
                 <li key={r.id} className="umpage__venuerow">
                   <span className="umpage__venuerank">{i + 1}</span>
                   <TeamLogo teamId={r.id} name={r.abbr} size={18} className="umpage__reclogo" />
@@ -202,6 +219,15 @@ export function UmpirePage({ id }) {
                 </li>
               ))}
             </ul>
+            {!showAllRecords && hpRecords.length > HP_RECORDS_LIMIT && (
+              <button
+                type="button"
+                className="plink umpage__showall"
+                onClick={() => setShowAllRecords(true)}
+              >
+                Show all {hpRecords.length}
+              </button>
+            )}
           </section>
         )}
       </div>
@@ -232,8 +258,16 @@ export function UmpirePage({ id }) {
         <ul className="umpage__list">
           {shown.map((g) => {
             const acc = g.role === 'HP' ? accByGamePk[g.gamePk] : null
+            // Zebra-stripe the plate-umpire games only in the mixed "All games"
+            // view, where they'd otherwise blend in with his base/field
+            // assignments — pointless once "Home plate only" already filters to
+            // nothing else.
+            const isHpRow = g.role === 'HP' && !hpOnly
             return (
-              <li key={`${g.gamePk}-${g.gameNumber}-${g.role}`} className="umpage__row">
+              <li
+                key={`${g.gamePk}-${g.gameNumber}-${g.role}`}
+                className={`umpage__row ${isHpRow ? 'umpage__row--hp' : ''}`}
+              >
                 <span className="umpage__role">{g.role}</span>
                 <span className="umpage__date">{monthDay(g.date)}</span>
                 <button
@@ -246,7 +280,10 @@ export function UmpirePage({ id }) {
                   {g.awayAbbr} @ {g.homeAbbr}
                 </button>
                 {acc?.called ? (
-                  <span className="umpage__rowacc">{((acc.correct / acc.called) * 100).toFixed(1)}%</span>
+                  <span className="umpage__rowacc">
+                    {((acc.correct / acc.called) * 100).toFixed(1)}%
+                    <span className="umpage__rowacclabel"> Accurate strike zone</span>
+                  </span>
                 ) : null}
               </li>
             )
