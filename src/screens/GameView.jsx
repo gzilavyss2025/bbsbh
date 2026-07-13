@@ -44,6 +44,7 @@ export function GameView({ game, section, onSection }) {
     winProb,
     pitcherRoles,
     prospectsData,
+    rookiesData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
@@ -178,6 +179,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           starterLines={starterLines.data}
           prospectsData={prospectsData}
+          rookiesData={rookiesData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
@@ -197,6 +199,7 @@ export function GameView({ game, section, onSection }) {
           // The away side FACES the home starter.
           oppPitcherLine={starterLines.data?.home}
           prospectsData={prospectsData}
+          rookiesData={rookiesData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
@@ -216,6 +219,7 @@ export function GameView({ game, section, onSection }) {
           scorebookWeatherLoading={weather.loading}
           oppPitcherLine={starterLines.data?.away}
           prospectsData={prospectsData}
+          rookiesData={rookiesData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
@@ -238,6 +242,7 @@ export function GameView({ game, section, onSection }) {
           pitcherRoles={pitcherRoles.data}
           winProbability={winProb.data}
           prospectsData={prospectsData}
+          rookiesData={rookiesData}
           callouts={gameCallouts}
           vsTeam={vsTeamSplitsData}
           highlights={highlightsData}

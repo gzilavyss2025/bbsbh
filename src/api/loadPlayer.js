@@ -32,6 +32,7 @@ import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor } from './savantPercentiles.js'
+import { fetchRookiesData, rookieRecordFor } from './rookies.js'
 import { historicalParentOrg } from './milbHistory.js'
 import {
   personBio,
@@ -141,13 +142,14 @@ export async function loadPlayer(id, asOf) {
   // Statcast percentile ranks (the STATCAST card) are a fourth same-origin
   // static file, same session-cached, degrade-to-empty pattern — see
   // api/savantPercentiles.js.
-  const [person, txns, warCurrent, warHistory, vsTeamData, savantData] = await Promise.all([
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookiesData] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
     fetchWarHistory(),
     fetchVsTeamSplits(),
     fetchSavantPercentiles(),
+    fetchRookiesData(),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -318,11 +320,13 @@ export async function loadPlayer(id, asOf) {
     for (const p of others) if (!list.some((x) => x.id === p.id)) list.push(p)
     tradeOthers.set(key, list)
   }
+  const rookieInfo = rookieRecordFor(rookiesData, bio.id)
   const transactions = transactionTimelineView(txns, {
     selfId: bio.id,
     levelByTeamId,
     tradeOthers,
     draft: bio.draft,
+    rookieUntil: rookieInfo?.rookieUntil ?? null,
     endDate,
   })
   const trophyCase = trophyCaseView(awards, endDate)

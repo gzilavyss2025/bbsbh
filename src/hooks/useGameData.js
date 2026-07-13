@@ -11,8 +11,9 @@ import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
-import { rosterPitcherRole } from '../api/person.js'
+import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
+import { fetchRookiesData } from '../api/rookies.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -160,7 +161,10 @@ export function useGameData(game) {
       ])
       const roles = {}
       for (const r of [...awayRoster, ...homeRoster]) {
-        if (r.position?.type === 'Pitcher' && r.person?.id) {
+        // A two-way player (Ohtani-type) is roster-typed 'Two-Way Player', not
+        // 'Pitcher' — without isTwoWay here he'd carry no role at all and
+        // splitBullpen would default him into relief instead of starters.
+        if ((r.position?.type === 'Pitcher' || isTwoWay(r.person)) && r.person?.id) {
           roles[r.person.id] = rosterPitcherRole(r)
         }
       }
@@ -223,6 +227,13 @@ export function useGameData(game) {
   const vsTeamSplits = useAsync(() => fetchVsTeamSplits(), [])
   const vsTeamSplitsData = vsTeamSplits.data ?? null
 
+  // Rookie status for the roster/lineup surfaces (see RookiePill /
+  // isActiveRookie) — the nightly rookies precompute, same eager
+  // not-gated-to-MLB tier as vsTeamSplits/formerTeammates (a MiLB matchup's
+  // roster just resolves to no active rookies since the file is MLB-debut-only).
+  const rookies = useAsync(() => fetchRookiesData(), [])
+  const rookiesData = rookies.data ?? null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   return {
@@ -236,6 +247,7 @@ export function useGameData(game) {
     winProb,
     pitcherRoles,
     prospectsData,
+    rookiesData,
     gameCallouts,
     broadcast,
     formerTeammatesData,

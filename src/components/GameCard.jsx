@@ -1,5 +1,5 @@
 import { TeamLogo } from './TeamLogo.jsx'
-import { lookupSplit } from '../lib/teamSplits.js'
+import { splitName } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
@@ -189,21 +189,6 @@ function TeamName({ team, side }) {
       <span className="gamecard__mascot">{mascot}</span>
     </span>
   )
-}
-
-// "Milwaukee Brewers" + "Brewers" -> { location: 'Milwaukee', mascot: 'Brewers' }.
-// The hand-maintained table in teamSplits.js wins; otherwise fall back to the
-// API's teamName (mascot) and strip it off the end of the full name.
-function splitName(name = '', mascot = '') {
-  const full = name.trim()
-  const manual = lookupSplit(full)
-  if (manual) return manual
-  const club = (mascot || full).trim()
-  if (club && full.toLowerCase().endsWith(club.toLowerCase())) { // caps-js-exempt: case-insensitive comparison, not display casing
-    const location = full.slice(0, full.length - club.length).trim()
-    return { location, mascot: club }
-  }
-  return { location: '', mascot: full }
 }
 
 // "Game 1" / "Game 2" for a card that's part of a doubleheader (regular or

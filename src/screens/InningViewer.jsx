@@ -48,6 +48,7 @@ export function InningViewer({
   pitcherRoles,
   winProbability,
   prospectsData,
+  rookiesData,
   callouts,
   vsTeam,
   highlights,
@@ -302,6 +303,7 @@ export function InningViewer({
             revealedThrough={revealedThrough}
             onReveal={revealTo}
             prospectsData={prospectsData}
+            rookiesData={rookiesData}
             callouts={callouts}
             vsTeam={vsTeam}
             highlights={highlights}
@@ -352,6 +354,7 @@ export function InningViewer({
                 awayName={meta.away.clubName}
                 homeName={meta.home.clubName}
                 prospectsData={prospectsData}
+                rookiesData={rookiesData}
                 revealedThrough={revealedThrough}
               />
             </div>
@@ -364,12 +367,14 @@ export function InningViewer({
             roster={rosters.away}
             revealedThrough={revealedThrough}
             prospectsData={prospectsData}
+            rookiesData={rookiesData}
           />
           <RosterPanel
             title={rosters.home.name}
             roster={rosters.home}
             revealedThrough={revealedThrough}
             prospectsData={prospectsData}
+            rookiesData={rookiesData}
           />
         </div>
       </div>

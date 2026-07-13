@@ -411,6 +411,20 @@ export function teamClubName(teamId) {
   return MLB_TEAM_NAMES[teamId]?.[1] ?? null
 }
 
+// A club nickname short enough for a tight two-line tile (the off-day card),
+// where the canonical nickname would wrap. Only clubs whose nickname overflows
+// get an entry; everyone else falls back to teamClubName. "D-backs" is the
+// team's own brand-approved short form for the Diamondbacks.
+const SHORT_CLUB_NAMES = {
+  109: 'D-backs',
+}
+
+// "Pirates" / "D-backs" — the nickname to show on space-constrained tiles.
+// Falls back to the full nickname (teamClubName) when there's no short form.
+export function teamClubNameShort(teamId) {
+  return SHORT_CLUB_NAMES[teamId] ?? teamClubName(teamId)
+}
+
 // "Pittsburgh Pirates" — the full club name. Collapses the relocating
 // Athletics' duplicated halves to a single "Athletics". Null for a MiLB id.
 export function teamFullName(teamId) {

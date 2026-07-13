@@ -1,9 +1,10 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
+import { splitName } from '../lib/teamSplits.js'
 import {
-  teamLocationName,
   teamClubName,
+  teamClubNameShort,
   teamFullName,
   favoriteAccentColor,
 } from '../lib/teams.js'
@@ -42,9 +43,14 @@ export function OffDaySection({ teamIds, favoriteTeamId, dateStr, sportId }) {
 // gets the pinned accent (border tint + star) via the --pin-accent inline var,
 // exactly like .gamecard--pinned.
 function OffDayCard({ id, pinned, onOpen }) {
-  const location = teamLocationName(id)
-  const mascot = teamClubName(id)
   const full = teamFullName(id)
+  // Same hand-maintained splits the slate cards use, so the Athletics render as
+  // "It's Just / Athletics" rather than the API's duplicated "Athletics / Athletics".
+  const { location, mascot } = splitName(full, teamClubName(id))
+  // The mascot line uses the brand-approved short form where a nickname would
+  // otherwise wrap on the tight tile (Arizona -> "D-backs"); the logo alt below
+  // keeps the full mascot.
+  const shortMascot = teamClubNameShort(id)
   const style = pinned ? { '--pin-accent': favoriteAccentColor(id) } : undefined
   return (
     <button
@@ -59,7 +65,7 @@ function OffDayCard({ id, pinned, onOpen }) {
       </span>
       <span className="offdaycard__name">
         {location && <span className="offdaycard__loc">{location}</span>}
-        <span className="offdaycard__mascot">{mascot || full}</span>
+        <span className="offdaycard__mascot">{shortMascot || full}</span>
       </span>
       {pinned && (
         <span className="offdaycard__pin" aria-hidden="true">
