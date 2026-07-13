@@ -348,7 +348,7 @@ function gameTitle(game, step, inning, half) {
   const matchup = `${away} @ ${home}`
   if (step === 0) return `${matchup} · ${away} Lineup`
   if (step === 1) return `${matchup} · ${home} Lineup`
-  if (step === 3) return `${matchup} · Box Score`
+  if (step === 3) return `${matchup} · Box score`
   return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
 }
 

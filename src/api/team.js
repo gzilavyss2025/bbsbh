@@ -48,13 +48,23 @@ export async function fetchTeam(teamId) {
 const TEAM_ROSTER_CACHE_TTL_MS = 15 * 60 * 1000
 const teamRosterCache = new Map()
 
-// A team's roster, with each player's season hitting AND pitching lines
-// hydrated: pitching so the team page can infer starter/reliever/closer (there
-// is no role field in the API), hitting+pitching so the Team Leaders section can
-// rank individual players by any season stat (see api/teamLeaders.js). Both
-// groups arrive in one request; the API returns only the split(s) a given player
-// has, so a position player carries just a hitting split and a pitcher just a
-// pitching one (a two-way player carries both). Degrades to [].
+// A team's roster, with each player's season hitting, pitching, AND fielding
+// lines hydrated: pitching so the team page can infer starter/reliever/closer
+// (there is no role field in the API), hitting+pitching so the Team Leaders
+// section can rank individual players by any season stat (see
+// api/teamLeaders.js), fielding so the Preferred Lineup diamond can find each
+// position's #1 starter by games started there (see rosterFieldingSplits,
+// TeamPage.jsx). All three arrive in one request; the API returns only the
+// split(s) a given player has, so a position player carries a hitting split
+// (plus one fielding split per position he's played), a pitcher a pitching
+// one, and a two-way player all three. Degrades to [].
+//
+// NOTE: the fielding group's shape through THIS roster hydrate hasn't been
+// verified live (unlike the dedicated per-player endpoint — see
+// fetchFielding, api/person-fetch.js, which this mirrors); if it doesn't come
+// back the way fetchFielding's does, the diamond just shows every spot
+// unresolved rather than breaking (same graceful-degrade convention as thin
+// MiLB data) — confirm against a live response before trusting it further.
 //
 // Two options steer WHO and WHICH stats come back:
 //   - `sportId`: the club's LEVEL — WITHOUT it the season-stats hydrate defaults
@@ -76,7 +86,7 @@ export async function fetchTeamRoster(
   if (cached && Date.now() - cached.ts < TEAM_ROSTER_CACHE_TTL_MS) return cached.data
   try {
     const data = await getJson(
-      `/api/v1/teams/${teamId}/roster?rosterType=${rosterType}&hydrate=person(stats(type=season,group=[hitting,pitching],sportId=${sportId},season=${season}))`,
+      `/api/v1/teams/${teamId}/roster?rosterType=${rosterType}&hydrate=person(stats(type=season,group=[hitting,pitching,fielding],sportId=${sportId},season=${season}))`,
     )
     const roster = data.roster ?? []
     teamRosterCache.set(key, { ts: Date.now(), data: roster })
@@ -110,27 +120,33 @@ export async function fetchTeamIL(teamId, season) {
   }
 }
 
-// Session cache for fetchTeamRosterIds, keyed by teamId. Active rosters only
-// churn on transactions (call-ups/trades/IL moves) — a few times a week per
-// team, not intraday — so a 30-minute TTL is long enough to spare a refetch
-// on every slate re-render within a session, while staying short enough that
-// a "roughly how many prospects" badge never goes stale for long. A failed
-// fetch is never cached, so a transient network blip doesn't stick around
-// for the full TTL.
+// Session cache for fetchTeamRosterIds, keyed by `${teamId}:${rosterType}`.
+// Active rosters only churn on transactions (call-ups/trades/IL moves) — a few
+// times a week per team, not intraday — so a 30-minute TTL is long enough to
+// spare a refetch on every slate re-render within a session, while staying
+// short enough that a "roughly how many prospects" badge never goes stale for
+// long. A failed fetch is never cached, so a transient network blip doesn't
+// stick around for the full TTL.
 const ROSTER_IDS_CACHE_TTL_MS = 30 * 60 * 1000
 const rosterIdsCache = new Map()
 
-// Just the active roster's person ids — no stat hydration — for the slate's
-// "N prospects on this roster" badge, which only needs to know who's on the
-// roster, not their stats. Lighter than fetchTeamRoster. Degrades to [].
-export async function fetchTeamRosterIds(teamId) {
+// Just a roster's person ids — no stat hydration — for the slate's "N
+// prospects on this roster" badge (rosterType='active', the default: who's on
+// the field now), which only needs to know who's on the roster, not their
+// stats. Lighter than fetchTeamRoster. TeamPage's prospect-affiliate
+// resolution (see loadTeam) passes '40Man' instead, so an injured prospect
+// still resolves to his real affiliate — 'active' alone was dropping any
+// prospect on a 7-/60-day IL to the scraped level text with no logo (see
+// prospects.js). Degrades to [].
+export async function fetchTeamRosterIds(teamId, rosterType = 'active') {
   if (!teamId) return []
-  const cached = rosterIdsCache.get(teamId)
+  const key = `${teamId}:${rosterType}`
+  const cached = rosterIdsCache.get(key)
   if (cached && Date.now() - cached.ts < ROSTER_IDS_CACHE_TTL_MS) return cached.data
   try {
-    const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=active`)
+    const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=${rosterType}`)
     const ids = (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
-    rosterIdsCache.set(teamId, { ts: Date.now(), data: ids })
+    rosterIdsCache.set(key, { ts: Date.now(), data: ids })
     return ids
   } catch {
     return []
@@ -140,8 +156,8 @@ export async function fetchTeamRosterIds(teamId) {
 // Fan out fetchTeamRosterIds across every team on the current slate — same
 // Promise.allSettled "degrade per item" idiom as fetchTeamDirectory /
 // fetchMilbYearByYear, since there's no batched multi-team roster endpoint.
-export async function fetchRosterIdsForTeams(teamIds) {
-  const results = await Promise.allSettled(teamIds.map((id) => fetchTeamRosterIds(id)))
+export async function fetchRosterIdsForTeams(teamIds, rosterType = 'active') {
+  const results = await Promise.allSettled(teamIds.map((id) => fetchTeamRosterIds(id, rosterType)))
   const out = {}
   teamIds.forEach((id, i) => {
     out[id] = results[i].status === 'fulfilled' ? results[i].value : []
@@ -202,6 +218,28 @@ export async function fetchAffiliates(teamId, season) {
         state: t.venue?.location?.stateAbbrev || t.venue?.location?.state || '',
       }))
       .sort((a, b) => AFFILIATE_SPORT_IDS.indexOf(a.sportId) - AFFILIATE_SPORT_IDS.indexOf(b.sportId))
+  } catch {
+    return []
+  }
+}
+
+// An org's complex/rookie-level clubs (ACL/FCL/DSL/VSL — sportId 16, see
+// SPORT_IDS.ROK), deliberately kept OUT of fetchAffiliates above: they aren't
+// "an affiliate" the rest of the app tracks (no slate level, no logo sheet
+// entry, and gen-affiliates.mjs's static snapshot excludes them entirely — see
+// AFFILIATE_SPORT_IDS), and an org can field several at once (ACL + DSL),
+// unlike the one-club-per-level shape everywhere else. Used ONLY by
+// TeamPage's Top Prospects table to resolve a ROK-level prospect's real
+// affiliate for the table's logo — never rendered as its own affiliate card.
+// Always a live call (no static file backs this). Degrades to [].
+export async function fetchComplexAffiliates(teamId, season) {
+  if (!teamId || !season) return []
+  try {
+    const data = await getJson(`/api/v1/teams/affiliates?teamIds=${teamId}&season=${season}`)
+    const teams = data.teams ?? []
+    return teams
+      .filter((t) => t.id !== teamId && t.sport?.id === SPORT_IDS.ROK)
+      .map((t) => ({ id: t.id, name: t.name, sportId: t.sport?.id }))
   } catch {
     return []
   }

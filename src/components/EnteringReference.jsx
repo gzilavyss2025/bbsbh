@@ -1,6 +1,7 @@
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
 import { prospectBadge } from '../api/prospects.js'
+import { ordinal } from '../lib/format.js'
 import { PlayerLink } from './PlayerLink.jsx'
 import { DefenseDiamond } from './DefenseDiamond.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
@@ -131,7 +132,7 @@ function LineupName({ entry }) {
       }`}
     >
       <PlayerLink id={entry.id}>
-        {entry.last.toUpperCase()}
+        {entry.last}
         {entry.first ? `, ${entry.first}` : ''}
       </PlayerLink>
       {entry.inning != null && (
@@ -139,10 +140,4 @@ function LineupName({ entry }) {
       )}
     </span>
   )
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }

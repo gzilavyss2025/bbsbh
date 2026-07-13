@@ -35,7 +35,8 @@ export function Headshot({ personId, name, teamId = null, className = '' }) {
     setLogoFailed(false)
   }, [personId, teamId])
 
-  const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?'
+  // A single-letter monogram fallback, not a re-uppercase of displayed text.
+  const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
   // Walk the photo rungs in order: silo, then the milb variant once silo 404s.
   const siloUrl = personId && !siloFailed ? realHeadshotUrl(personId) : null
   const milbUrl =

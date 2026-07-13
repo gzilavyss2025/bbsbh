@@ -66,7 +66,7 @@ export function TeamInfo({
       <div className="teaminfo__head">
         <h2 className="teaminfo__name">
           <TeamLink id={meta.id} className="teaminfo__namelink">
-            {(meta.name || 'Team').toUpperCase()}
+            {meta.name || 'Team'}
           </TeamLink>
         </h2>
         <div className="teaminfo__headright">
@@ -219,7 +219,7 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
       <div className="teaminfo__head">
         <h2 className="teaminfo__name">
           <TeamLink id={meta.id} className="teaminfo__namelink">
-            {(meta.name || 'Team').toUpperCase()}
+            {meta.name || 'Team'}
           </TeamLink>
         </h2>
         <div className="teaminfo__headright">
@@ -438,7 +438,7 @@ function TeamSections({
                 <span className="lineup__order">{p.order}</span>
                 <span className="lineup__namewrap">
                   <PlayerLink id={p.id} className="lineup__name">
-                    {p.nameLastFirst.toUpperCase()}
+                    {p.nameLastFirst}
                   </PlayerLink>
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                   <MilestonePill text={milestoneTextFor(callouts, p.id)} />
@@ -461,7 +461,7 @@ function TeamSections({
                       <li key={p.id} className="roster__row">
                         <span className="roster__namewrap">
                           <PlayerLink id={p.id} className="roster__name">
-                            {p.name.toUpperCase()}
+                            {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
@@ -481,7 +481,7 @@ function TeamSections({
                       <li key={p.id} className="roster__row">
                         <span className="roster__namewrap">
                           <PlayerLink id={p.id} className="roster__name">
-                            {p.name.toUpperCase()}
+                            {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
@@ -501,7 +501,7 @@ function TeamSections({
                       <li key={p.id} className="roster__row">
                         <span className="roster__namewrap">
                           <PlayerLink id={p.id} className="roster__name">
-                            {p.name.toUpperCase()}
+                            {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
@@ -526,7 +526,7 @@ function TeamSections({
           <div className="opp__pitcher">
             <span className="opp__namewrap">
               <PlayerLink id={oppPitcher.id} className="opp__name">
-                {oppPitcher.nameLastFirst.toUpperCase()}
+                {oppPitcher.nameLastFirst}
               </PlayerLink>
               <ProspectPill {...prospectBadge(prospectsData, oppPitcher.id)} />
               <MilestonePill text={milestoneTextFor(callouts, oppPitcher.id)} />
@@ -810,8 +810,8 @@ function TeammateHalf({ id, name, pos, teamId }) {
         {pos && <span className="teammatecard__posbadge">{posLabel(pos)}</span>}
       </span>
       <span className="teammatecard__name">
-        {first && <span className="teammatecard__name-first">{first.toUpperCase()}</span>}
-        <span className="teammatecard__name-last">{last.toUpperCase()}</span>
+        {first && <span className="teammatecard__name-first">{first}</span>}
+        <span className="teammatecard__name-last">{last}</span>
       </span>
     </PlayerLink>
   )
@@ -922,7 +922,7 @@ function managerFact(manager) {
   if (!manager) return null
   return (
     <span className="fact__person">
-      {manager.lastFirst.toUpperCase()}
+      {manager.lastFirst}
       {manager.jersey ? (
         <span className="fact__jersey">{manager.jersey}</span>
       ) : null}

@@ -11,6 +11,8 @@ import {
 import { selectWinProbPath } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { safeToShowEntering } from '../api/enteringHalf.js'
+import { ordinal } from '../lib/format.js'
+import { RefreshButton } from './TeamInfo.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { RollingLine } from '../components/RollingLine.jsx'
 import { StatBox } from '../components/StatBox.jsx'
@@ -98,9 +100,10 @@ export function InningViewer({
   // The next half within what's unlocked, for the floating advance button (§ the
   // lineup pages' btn--next, carried over to the innings view). Null at the last
   // unlocked half — which is always the bottom of the furthest revealed inning
-  // (regulation or an unlocked extra). There the floating button becomes "View
-  // box score" instead of Next, so the bottom of the 9th never sprouts a "Next:
-  // Top 10th" that would leak the game going to extras before it's revealed.
+  // (regulation or an unlocked extra). There the floating button becomes
+  // "Box score ›" instead of the next-half label, so the bottom of the 9th
+  // never sprouts a "Top 10th ›" that would leak the game going to extras
+  // before it's revealed.
   const nextIdx = curIdx < maxIdx ? curIdx + 1 : null
   const nextLabel =
     nextIdx == null
@@ -130,6 +133,18 @@ export function InningViewer({
   useEffect(() => setStepInfo(null), [curIdx])
   const revealNextAtBat = () =>
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (stepInfo?.nextCap ?? curAtBatCount + 1))
+
+  // Stepping through at-bats one at a time keeps scrolling the newest card
+  // into view (see PlayByPlay.jsx); once the LAST tap finishes the half, that
+  // leaves the reader wherever the last at-bat happened to sit rather than at
+  // the R/H/E/LOB totals every half starts with. Only fires on the
+  // step-through path (HalfInning's onStepComplete) — tapping "Reveal whole
+  // half" already shows everything at once with no mid-half scroll to undo.
+  const scrollToStatBoxAfterStepping = () => {
+    setTimeout(() => {
+      document.querySelector('.innings__statbox')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -165,9 +180,7 @@ export function InningViewer({
           This game hasn’t started yet. Lineups and info are on the previous
           pages; inning totals appear once first pitch is thrown.
         </p>
-        <button className="btn" onClick={onReload} disabled={loading}>
-          {loading ? 'Refreshing…' : 'Refresh'}
-        </button>
+        <RefreshButton onReload={onReload} loading={loading} />
       </div>
     )
   }
@@ -185,7 +198,7 @@ export function InningViewer({
           <button
             onClick={() => goTo(Math.max(0, curIdx - 1))}
             disabled={curIdx === 0}
-            aria-label="Previous half-inning"
+            aria-label="Back one half-inning"
           >
             ‹ Back
           </button>
@@ -282,10 +295,11 @@ export function InningViewer({
             pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
             awayName={meta.away.clubName}
             homeName={meta.home.clubName}
+            awayId={meta.away.id}
+            homeId={meta.home.id}
             revealed={curIdx <= revealedThrough}
             isNextToReveal={curIdx === revealedThrough + 1}
             revealedThrough={revealedThrough}
-            getDerived={getDerived}
             onReveal={revealTo}
             prospectsData={prospectsData}
             callouts={callouts}
@@ -293,6 +307,7 @@ export function InningViewer({
             highlights={highlights}
             revealedAtBatCount={curAtBatCount}
             onStepInfo={setStepInfo}
+            onHalfSteppedThrough={scrollToStatBoxAfterStepping}
           />
         </div>
 
@@ -360,31 +375,23 @@ export function InningViewer({
       </div>
 
       {/* Floating bar — the same fixed blue bar the lineup pages page forward
-          with. On narrow viewports it carries a duplicate Refresh stacked above
-          the primary action, so refreshing live data doesn't mean scrolling back
-          up to the toolbar (hidden again on the wide layout, where the top
-          toolbar stays reachable). The primary action advances to the next
-          half-inning when one is unlocked; at the bottom of the furthest
-          revealed inning it becomes "View box score" instead — so the bottom of
-          the 9th (or any extra) never shows a "Next: Top 10th" that would leak
-          the game going to extras. Revealing that bottom half unlocks the next
-          inning and the button flips back to Next. A sealed half offers two
-          side-by-side choices instead (ADR-0016): step one plate appearance at
-          a time, or reveal the whole half at once — either flips the bar back
-          to Next once the half is fully committed. */}
+          with, and the same destination-named + trailing-› convention their
+          nextLabel buttons use ("Home team ›", "Innings ›") — no "Next:"
+          prefix, no arrow glyph. On narrow viewports it carries a duplicate
+          Refresh stacked above the primary action, so refreshing live data
+          doesn't mean scrolling back up to the toolbar (hidden again on the
+          wide layout, where the top toolbar stays reachable). The primary
+          action advances to the next half-inning when one is unlocked; at the
+          bottom of the furthest revealed inning it becomes "Box score ›"
+          instead — so the bottom of the 9th (or any extra) never shows a
+          "Top 10th ›" that would leak the game going to extras. Revealing
+          that bottom half unlocks the next inning and the button flips back
+          to the next-half label. A sealed half offers two side-by-side
+          choices instead (ADR-0016): step one plate appearance at a time, or
+          reveal the whole half at once — either flips the bar back once the
+          half is fully committed. */}
       <div className="pagenav pagenav--innings">
-        <button
-          type="button"
-          className="refreshbtn refreshbtn--float"
-          onClick={onReload}
-          disabled={loading}
-          aria-label="Refresh live game data"
-        >
-          <span className="refreshbtn__icon" aria-hidden="true">
-            ↻
-          </span>
-          {loading ? 'Refreshing…' : 'Refresh'}
-        </button>
+        <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
         {currentSealed ? (
           <div className="revealsplit">
             <button
@@ -393,24 +400,24 @@ export function InningViewer({
               onClick={revealNextAtBat}
               aria-label={`Reveal the next at-bat in the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
             >
-              <span className="btn__ball" aria-hidden="true">⚾️</span> Next at-bat
+              <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal next at-bat
             </button>
             <button
               type="button"
               className="btn btn--reveal revealsplit__btn"
               onClick={revealWholeHalf}
-              aria-label={`Reveal ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
+              aria-label={`Reveal the whole ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
             >
-              Whole {curHalfLabel}
+              <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal whole {curHalfLabel}
             </button>
           </div>
         ) : nextIdx != null ? (
           <button className="btn btn--next" onClick={() => goTo(nextIdx)}>
-            Next: {nextLabel} →
+            {nextLabel} ›
           </button>
         ) : (
           <button className="btn btn--next" onClick={onBoxScore}>
-            View box score →
+            Box score ›
           </button>
         )}
       </div>
@@ -429,10 +436,4 @@ function splitBullpen(bullpen, roles) {
   const starters = bullpen.filter((p) => roles?.[p.id] === 'SP')
   const relief = bullpen.filter((p) => roles?.[p.id] !== 'SP')
   return { starters, bullpen: relief }
-}
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }

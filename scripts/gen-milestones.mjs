@@ -1,17 +1,28 @@
 // Regenerates public/data/milestones.json — the league-wide Milestone Watch
-// list: every MLB active-roster player within reach of a round career-total
+// list: every player in an MLB org within reach of a round career-total
 // milestone (MILESTONE_DEFS in src/api/person.js), each with a projected
 // timeframe (see projectMilestoneETA there). Feeds both the standalone
 // Milestone Watch page (src/screens/MilestoneWatchPage.jsx) and the player
 // page's Milestone Watch card (src/api/milestones.js reads this file for
 // both).
 //
+// We scan each club's FULL roster (rosterType=fullRoster), not just the 26-man
+// active roster, so a player on the IL or optioned/assigned to the minors who
+// is close to a career milestone still shows up — the compelling cases (an
+// injured veteran, a comeback bid in AAA) are exactly the ones the active
+// roster would drop. We keep only players who've made their MLB debut (a career
+// MLB milestone is unreachable without one), gated on the roster's hydrated
+// mlbDebutDate so undebuted prospects never cost a stats fetch. Career totals
+// stay MLB-only regardless: the yearByYear pull returns only MLB seasons, so
+// MiLB totals never inflate a milestone, and MILESTONE_PROGRESS_FLOOR keeps the
+// output to genuine chases no matter how wide the input roster is.
+//
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
-// request time. Building it needs, per active-roster player, his full MLB
+// request time. Building it needs, per rostered player, his full MLB
 // year-by-year line (career total + this season's pace in one call) plus his
 // current team's season schedule (games played so far + remaining dates, for
 // the appearance-rate scaling and in-season ETA — fetched once per team, not
-// per player). ~800 players + 30 team schedules is far too heavy for a page
+// per player). ~8,000 players + 30 team schedules is far too heavy for a page
 // load; a nightly job that writes a small static file keeps the live pages to
 // a single same-origin read, same as gen-vs-team-splits.mjs.
 //
@@ -23,6 +34,7 @@ import { ALL_MLB_TEAM_IDS, teamFullName } from '../src/lib/teams.js'
 import {
   aggregateSplits,
   MILESTONE_DEFS,
+  MILESTONE_PROGRESS_FLOOR,
   nearestMilestone,
   projectMilestoneETA,
   careerPerSeasonRate,
@@ -61,8 +73,12 @@ async function mapConcurrent(items, limit, mapper) {
 
 // --- team schedules: games played so far + remaining dates, once per team ---
 async function fetchTeamSeasonSchedule(teamId) {
+  // sportId=1 is REQUIRED here — the schedule endpoint 400s on a teamId query
+  // without it, which (silently, via mapConcurrent's catch) would leave every
+  // team with an empty schedule and force every projection into the future-
+  // season career-rate fallback (no in-season ETA ever). MLB-only generator.
   const data = await getJson(
-    `/api/v1/schedule?teamId=${teamId}&season=${SEASON}&gameType=R`,
+    `/api/v1/schedule?sportId=1&teamId=${teamId}&season=${SEASON}&gameType=R`,
   )
   let played = 0
   const remainingDates = []
@@ -79,8 +95,15 @@ async function fetchTeamSeasonSchedule(teamId) {
 }
 
 // --- roster: who to check, and which stat group each player belongs to -----
-async function fetchActiveRoster(teamId) {
-  const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=active`)
+// fullRoster (not active) so IL and optioned/minor-league players are included
+// — see the header. Hydrate person so each entry carries mlbDebutDate: we only
+// keep players who've actually debuted in the majors (see main), which skips
+// the thousands of prospects who'd fetch an empty MLB line and produce no row
+// anyway — same output, ~5× fewer per-player stat calls.
+async function fetchFullRoster(teamId) {
+  const data = await getJson(
+    `/api/v1/teams/${teamId}/roster?rosterType=fullRoster&hydrate=person`,
+  )
   return data.roster ?? []
 }
 
@@ -119,7 +142,7 @@ async function playerMilestones(person, teamId, teamName, group, teamSchedule) {
 
   const rows = []
   for (const def of MILESTONE_DEFS.filter((d) => d.group === group)) {
-    const m = nearestMilestone(career[def.stat], def.thresholds, def.farWindow)
+    const m = nearestMilestone(career[def.stat], def.thresholds, def.farWindow, MILESTONE_PROGRESS_FLOOR)
     if (!m) continue
     const rate = careerPerSeasonRate(seasonTotals, def.stat, SEASON)
     const projection = projectMilestoneETA({
@@ -160,8 +183,13 @@ await mapConcurrent(ALL_MLB_TEAM_IDS, 8, async (teamId) => {
 })
 
 const rosterEntries = (
-  await mapConcurrent(ALL_MLB_TEAM_IDS, 8, (teamId) => fetchActiveRoster(teamId))
-).flatMap((roster, i) => (roster ?? []).map((r) => ({ ...r, teamId: ALL_MLB_TEAM_IDS[i] })))
+  await mapConcurrent(ALL_MLB_TEAM_IDS, 8, (teamId) => fetchFullRoster(teamId))
+)
+  .flatMap((roster, i) => (roster ?? []).map((r) => ({ ...r, teamId: ALL_MLB_TEAM_IDS[i] })))
+  // Only players who've made their MLB debut — career milestones are MLB-career
+  // totals, so an undebuted prospect can't be near one. Gating here (on the
+  // hydrated mlbDebutDate) skips his stats fetch entirely.
+  .filter((r) => r.person?.mlbDebutDate)
 
 const perPlayerRows = await mapConcurrent(rosterEntries, 10, async (entry) => {
   const teamId = entry.teamId

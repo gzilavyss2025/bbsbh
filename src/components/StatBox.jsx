@@ -4,6 +4,8 @@ import { revealDerived, rollingPitches } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
 import { SealBox } from './SealBox.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
+import { StatcastCard } from './StatcastCard.jsx'
+import { UsagePips } from './UsagePips.jsx'
 
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
@@ -91,6 +93,45 @@ export function StatBox({
                   </div>
                 </div>
               )}
+              {/* Statcast superlatives for the half — the game-notes numbers
+                  (fastest pitch, hardest/longest ball) — sat below the play-by-play
+                  feed until moved here, right under the ABS row, so they're at the
+                  top of the half's content with the rest of the totals instead of
+                  wherever the feed happened to scroll to. Tracking data is often
+                  absent at MiLB levels, so the row only renders when the feed
+                  carried it. Same reveal path as everything else in this card —
+                  and since this whole block only runs once SealBox has actually
+                  revealed (never mid-step, see HalfInning.jsx/PlayByPlay.jsx's
+                  stepping gate), it can't leak plays not yet shown. */}
+              {(d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
+                <div className="statcast">
+                  {d.maxVelo != null && (
+                    <StatcastCard
+                      label="Fastest pitch"
+                      value={d.maxVelo.toFixed(1)}
+                      unit="MPH"
+                      who={d.maxVeloPlayer}
+                      detail={d.maxVeloType}
+                    />
+                  )}
+                  {d.hardestHit != null && (
+                    <StatcastCard
+                      label="Hardest hit"
+                      value={d.hardestHit.toFixed(1)}
+                      unit="MPH"
+                      who={d.hardestHitPlayer}
+                    />
+                  )}
+                  {d.longestHit != null && (
+                    <StatcastCard
+                      label="Longest ball"
+                      value={Math.round(d.longestHit)}
+                      unit="FT"
+                      who={d.longestHitPlayer}
+                    />
+                  )}
+                </div>
+              )}
             </>
           )
         }}
@@ -99,37 +140,23 @@ export function StatBox({
   )
 }
 
-// One club's ABS challenge history: the club abbreviation, then a pip per
-// challenge in order — a filled dot for a successful (retained) challenge, an ✗
-// for a failed (lost) one. A club that hasn't challenged shows its two starting
-// challenges as hollow pips ("both remaining"). Extra-inning bonus challenges
-// need no special case — they just extend the outcome list, so a club can show
-// more than two ✗ across a long extra-inning game.
+// One club's ABS challenges: the club abbreviation, then how many are left as
+// used/open pips — a challenge is only SPENT when it fails (a success is
+// retained, per the real rule — see api/challenges.js), so a club that keeps
+// winning its challenges always shows its full starting count, and a pip only
+// fills in once a challenge has actually been lost. Extra-inning bonus
+// challenges (see api/challenges.js) aren't tracked precisely here — the
+// max() below just guarantees the pip row never shows fewer challenges than
+// the fails on record prove the club actually had.
 function AbsRow({ abbr, outcomes }) {
-  const used = outcomes.length > 0
-  const successes = outcomes.filter((o) => o === 'success').length
-  const fails = outcomes.length - successes
-  const label = used
-    ? `${abbr}: ${successes} successful, ${fails} unsuccessful ABS challenge${
-        outcomes.length === 1 ? '' : 's'
-      }`
-    : `${abbr}: both ABS challenges remaining`
+  const failed = outcomes.filter((o) => o === 'fail').length
+  const allowed = Math.max(START_CHALLENGES, failed)
+  const remaining = allowed - failed
+  const label = `${abbr}: ${remaining} ABS challenge${remaining === 1 ? '' : 's'} remaining`
   return (
-    <div className="abs__row" aria-label={label}>
+    <div className="abs__row">
       <span className="abs__team">{abbr}</span>
-      <span className="abs__pips" aria-hidden="true">
-        {used
-          ? outcomes.map((o, i) => (
-              <span key={i} className={`abs__pip abs__pip--${o}`}>
-                {o === 'fail' ? '✕' : '●'}
-              </span>
-            ))
-          : Array.from({ length: START_CHALLENGES }, (_, i) => (
-              <span key={i} className="abs__pip abs__pip--ghost">
-                ○
-              </span>
-            ))}
-      </span>
+      <UsagePips allowed={allowed} used={failed} label={label} />
     </div>
   )
 }

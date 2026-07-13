@@ -61,11 +61,27 @@ read the linked ADRs before refactoring:
   advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator
   (away row = tops, home row = bottoms, current half inked as selected); its
   Back/Next controls cover the full unlocked range.
-- **At-bat stepping**: a sealed half's floating-bar button splits into "Next
-  at-bat" / "Whole {half}" choices, stepping `PlayByPlay`'s cards one plate
-  appearance at a time via a transient cursor (`atBatCountFor`,
+- **At-bat stepping**: a sealed half's floating-bar button splits into "Reveal
+  next at-bat" / "Reveal whole {half}" choices, stepping `PlayByPlay`'s cards
+  one plate appearance at a time via a transient cursor (`atBatCountFor`,
   `useRevealProgress`) that always collapses into a normal `revealTo` commit
   rather than becoming a second spoiler boundary (ADR-0016).
+
+## Notification cards, casing, color, and button copy (ADR-0017)
+
+Every mid-inning "something happened" moment in `PlayByPlay.jsx` sorts into one
+of three tiers — a fresh/changed actor (`PitcherNotice`/`FielderNotice`/
+`PinchRunNotice`), a team/administrative event (mound visit, ejection), or a
+baserunning/misc event with no plate appearance of its own (steal, wild pitch,
+balk, …) — and all three render in the *same* kraft-amber
+`.pitchernotice.pitchernotice--pbp` card, distinguished by what's inside (a
+headshot vs. a scorer's-shorthand code) rather than a colored accent rail.
+Read ADR-0017 before touching any of `PlayByPlay.jsx`'s notification
+components, `MoundVisitPips`, or `HalfInning.jsx`'s `PrePitchChanges` — it
+also covers the casing rule (no per-component `.toUpperCase()`, guarded by
+`scripts/check-name-casing.mjs`), the `--accent-positive`/`--accent-negative`
+color pairing, and the button/label conventions (chevron vs. destination-named
+link, "Reveal" always visible, accessible name contains the visible word).
 
 ## Design system (`src/index.css` + `src/tokens/*`)
 
@@ -75,4 +91,7 @@ manila paper, navy ink, pencil graphite, kraft-tape amber for seals. Use the
 semantic CSS variables (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.)
 rather than raw hex. Numbers render as mono tabular figures; structural labels are
 condensed uppercase. The global ALL-CAPS invariant (see the block comment in
-`src/index.css`) is guarded by `scripts/check-caps.mjs` via `npm run lint`.
+`src/index.css`) is guarded by `scripts/check-caps.mjs` (the CSS half) and
+`scripts/check-name-casing.mjs` (the JS half — no per-component
+`.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via
+`npm run lint`.

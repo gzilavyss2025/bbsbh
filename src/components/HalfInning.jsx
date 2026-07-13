@@ -1,18 +1,12 @@
 import { selectPrePitchChanges } from '../api/select.js'
-import { revealDerived } from '../api/derive.js'
 import { highlightsByPlayId } from '../api/highlights.js'
+import { ordinal } from '../lib/format.js'
 import { SealBox } from './SealBox.jsx'
 import { PitchColorsKey } from './StrikeZone.jsx'
 import { PlayByPlay } from './PlayByPlay.jsx'
 import { PreHalfCallouts } from './PreHalfCallouts.jsx'
-import { StatcastCard } from './StatcastCard.jsx'
 import { EnteringReference } from './EnteringReference.jsx'
-
-function ordinal(n) {
-  const s = ['th', 'st', 'nd', 'rd']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
-}
+import { FielderNotice } from './FielderNotice.jsx'
 
 export function HalfInning({
   feed,
@@ -24,10 +18,11 @@ export function HalfInning({
   pitchingAbbr,
   awayName,
   homeName,
+  awayId,
+  homeId,
   revealed,
   isNextToReveal,
   revealedThrough,
-  getDerived,
   onReveal,
   prospectsData,
   callouts,
@@ -35,6 +30,7 @@ export function HalfInning({
   highlights,
   revealedAtBatCount,
   onStepInfo,
+  onHalfSteppedThrough,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Reveal next at-bat" button) has
@@ -107,7 +103,12 @@ export function HalfInning({
           pre-pitch list is spoiler-free, and only for the immediate next half. */}
       {!revealed && isNextToReveal && (
         <>
-          <PrePitchChanges feed={feed} inning={inning} half={half} />
+          <PrePitchChanges
+            feed={feed}
+            inning={inning}
+            half={half}
+            pitchingName={battingSide === 'away' ? homeName : awayName}
+          />
           {enteringCards}
         </>
       )}
@@ -118,69 +119,37 @@ export function HalfInning({
         coverless
       >
         {() => {
-          // Computed only on reveal (the play-by-play + Statcast half of the
-          // former single seal; the R/H/E summary is the row-2 StatBox card).
-          const d = revealDerived(getDerived(), inning, half)
           // guid -> highlight clip lookup (see api/highlights.js), built here
           // rather than by the caller so it stays reveal-only in the same
-          // textual sense as revealDerived above — never at render top-level
-          // or in an eager useMemo (ADR-0001).
+          // textual sense as the rest of this render function — never at
+          // render top-level or in an eager useMemo (ADR-0001).
           const highlightsMap = highlightsByPlayId(highlights)
           return (
-            <>
-              {/* The pitch-color key now lives behind the "Pitch colors" button
-                  in this half's header (see PitchColorsKey), not inline here. */}
-              <PlayByPlay
-                feed={feed}
-                inning={inning}
-                half={half}
-                battingSide={battingSide}
-                pitchingName={battingSide === 'away' ? homeName : awayName}
-                battingName={battingSide === 'away' ? awayName : homeName}
-                callouts={callouts}
-                vsTeam={vsTeam}
-                highlightsMap={highlightsMap}
-                stepCap={stepping ? revealedAtBatCount : null}
-                onStepInfo={onStepInfo}
-                onStepComplete={() => onReveal(inning, half)}
-              />
-              {/* Statcast superlatives for the half — the game-notes numbers
-                  (fastest pitch, hardest/longest ball), sat below the feed.
-                  Tracking data is often absent at MiLB levels, so the row only
-                  renders when the feed carried it. Same reveal path as above.
-                  Held back entirely while still stepping (ADR-0016) — these
-                  are whole-half aggregates and would leak plays not yet
-                  shown. */}
-              {!stepping && (d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
-                <div className="statcast">
-                  {d.maxVelo != null && (
-                    <StatcastCard
-                      label="Fastest pitch"
-                      value={d.maxVelo.toFixed(1)}
-                      unit="MPH"
-                      who={d.maxVeloPlayer}
-                      detail={d.maxVeloType}
-                    />
-                  )}
-                  {d.hardestHit != null && (
-                    <StatcastCard
-                      label="Hardest hit"
-                      value={d.hardestHit.toFixed(1)}
-                      unit="MPH"
-                      who={d.hardestHitPlayer}
-                    />
-                  )}
-                  {d.longestHit != null && (
-                    <StatcastCard
-                      label="Longest ball"
-                      value={Math.round(d.longestHit)}
-                      unit="FT"
-                      who={d.longestHitPlayer}
-                    />
-                  )}
-                </div>
-              )}
-            </>
+            // The pitch-color key now lives behind the "Pitch colors" button
+            // in this half's header (see PitchColorsKey), not inline here.
+            // Statcast superlatives (fastest pitch, hardest/longest ball) used
+            // to sit below this feed; they now render in StatBox.jsx, right
+            // under the ABS row, so they're at the top of the half's content
+            // with the rest of the totals instead of wherever the feed
+            // happened to end.
+            <PlayByPlay
+              feed={feed}
+              inning={inning}
+              half={half}
+              battingSide={battingSide}
+              pitchingName={battingSide === 'away' ? homeName : awayName}
+              pitchingTeamId={battingSide === 'away' ? homeId : awayId}
+              battingName={battingSide === 'away' ? awayName : homeName}
+              callouts={callouts}
+              vsTeam={vsTeam}
+              highlightsMap={highlightsMap}
+              stepCap={stepping ? revealedAtBatCount : null}
+              onStepInfo={onStepInfo}
+              onStepComplete={() => {
+                onReveal(inning, half)
+                onHalfSteppedThrough?.()
+              }}
+            />
           )
         }}
       </SealBox>
@@ -195,21 +164,39 @@ export function HalfInning({
 // (not inside it), gated by the caller to the half the user is about to
 // reveal. See selectPrePitchChanges for why this is spoiler-free. A pitching
 // substitution is excluded here — it gets its own notification card in row 2's
-// StatBox slot instead (see StatBox.jsx), more prominent than a plain list item.
-function PrePitchChanges({ feed, inning, half }) {
+// StatBox slot instead (see StatBox.jsx). A defensive sub/switch gets the same
+// "now playing" FielderNotice card as its mid-inning counterpart (PlayByPlay.jsx)
+// — a fresh fielder or a position change is worth exactly as much notice
+// between halves as it is mid-inning, so neither stays a plain list line.
+// Only offensive_substitution (a pinch hitter/runner announced pre-pitch)
+// still falls to the plain list — it's covered by its own at-bat card or
+// PinchRunNotice once the half is revealed.
+function PrePitchChanges({ feed, inning, half, pitchingName }) {
   const changes = selectPrePitchChanges(feed, inning, half).filter(
     (c) => c.eventType !== 'pitching_substitution',
   )
   if (changes.length === 0) return null
+  const cards = changes.filter((c) => c.fielder)
+  const rest = changes.filter((c) => !c.fielder)
   return (
     <div className="prepitch">
-      <ul className="prepitch__list">
-        {changes.map((c, i) => (
-          <li className="prepitch__item" key={i}>
-            {c.text}
-          </li>
-        ))}
-      </ul>
+      {cards.map((c, i) => (
+        <FielderNotice
+          key={`f-${i}`}
+          fielder={c.fielder}
+          teamName={pitchingName}
+          className="pitchernotice--pbp"
+        />
+      ))}
+      {rest.length > 0 && (
+        <ul className="prepitch__list">
+          {rest.map((c, i) => (
+            <li className="prepitch__item" key={i}>
+              {c.text}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

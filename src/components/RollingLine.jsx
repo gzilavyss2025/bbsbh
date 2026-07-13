@@ -1,5 +1,6 @@
 import { halfIndex } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
+import { ordinal } from '../lib/format.js'
 
 // The running line at the top of the innings view. It "builds as you reveal":
 // each half you uncover drops its runs into this grid; halves you haven't
@@ -39,8 +40,8 @@ export function RollingLine({
   // Team label: the mascot/club name ("BREWERS", "WHITE SOX"), falling back to
   // the abbreviation for a thin MiLB feed that never posted a clubName.
   const rows = [
-    { abbr: (awayName || awayAbbr || 'AWY').toUpperCase(), half: 'top', side: 'away' },
-    { abbr: (homeName || homeAbbr || 'HOM').toUpperCase(), half: 'bottom', side: 'home' },
+    { abbr: awayName || awayAbbr || 'AWY', half: 'top', side: 'away' },
+    { abbr: homeName || homeAbbr || 'HOM', half: 'bottom', side: 'home' },
   ]
 
   // Totals span every revealed inning (1..unlocked), not just the visible window.
@@ -101,7 +102,7 @@ export function RollingLine({
                           // and the sealed/revealed distinction from a screen
                           // reader. Revealed runs are only read here when the
                           // half is already at/under the reveal mark.
-                          aria-label={`${row.half === 'top' ? 'Top' : 'Bottom'} of inning ${n}${
+                          aria-label={`${row.half === 'top' ? 'Top' : 'Bottom'} of the ${ordinal(n)}${
                             l ? `, ${l.runs} run${l.runs === 1 ? '' : 's'}` : ', sealed'
                           }`}
                           onClick={() => onSelect(idx)}

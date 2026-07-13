@@ -5,6 +5,7 @@ import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
+import { MasonryColumns } from '../components/MasonryColumns.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 
@@ -28,7 +29,7 @@ function groupMilestoneRows(rows) {
   for (const row of rows) {
     let group = byId.get(row.playerId)
     if (!group) {
-      group = { playerId: row.playerId, playerName: row.playerName, teamId: row.teamId, teamName: row.teamName, milestones: [] }
+      group = { playerId: row.playerId, playerName: row.playerName, teamId: row.teamId, teamName: row.teamName, position: row.position, milestones: [] }
       byId.set(row.playerId, group)
       groups.push(group)
     }
@@ -37,7 +38,8 @@ function groupMilestoneRows(rows) {
   return groups
 }
 
-// League-wide Milestone Watch: every active-roster player within reach of a
+// League-wide Milestone Watch: every debuted player in an MLB org (active, on
+// the IL, or in the minors) within reach of a
 // round career-total milestone, rarest club first — the standalone
 // counterpart to the player page's Milestone Watch card, sibling in spirit to
 // the Rehab Assignments page (same "one small precomputed static file,
@@ -76,10 +78,19 @@ export function MilestoneWatchPage() {
 
       {rows.length > 0 && (
         <>
-          <div className="milestonewatch-page__grid">
-            {groups.map((g) => (
+          <MasonryColumns
+            items={groups}
+            columnWidth={288}
+            gap={12}
+            className="milestonewatch-page__grid"
+            columnClassName="milestonewatch-page__col"
+          >
+            {(g) => (
               <article className="milestonewatch-page__card" key={g.playerId}>
-                <Headshot personId={g.playerId} name={g.playerName} teamId={g.teamId} className="milestonewatch-page__shot" />
+                <span className="milestonewatch-page__mug">
+                  <Headshot personId={g.playerId} name={g.playerName} teamId={g.teamId} className="milestonewatch-page__shot" />
+                  {g.position && <span className="milestonewatch-page__pos">{g.position}</span>}
+                </span>
                 <div className="milestonewatch-page__body">
                   <span className="milestonewatch-page__who">
                     <PlayerLink id={g.playerId}>{g.playerName}</PlayerLink>
@@ -88,17 +99,20 @@ export function MilestoneWatchPage() {
                       {g.teamName}
                     </TeamLink>
                   </span>
-                  {g.milestones.map((m) => (
-                    <div className="milestonewatch-page__row" key={`${m.stat}-${m.threshold}`}>
-                      <span className="milestonewatch-page__stat">{m.threshold.toLocaleString('en-US')} {m.label}</span>
-                      <span className="milestonewatch-page__progress">{m.value.toLocaleString('en-US')} · {m.remaining} to go</span>
-                      <span className="milestonewatch-page__eta">{formatMilestoneProjection(m.projection) || '—'}</span>
-                    </div>
-                  ))}
+                  {g.milestones.map((m) => {
+                    const eta = formatMilestoneProjection(m.projection)
+                    return (
+                      <div className="milestonewatch-page__row" key={`${m.stat}-${m.threshold}`}>
+                        <span className="milestonewatch-page__stat">{m.threshold.toLocaleString('en-US')} {m.label}</span>
+                        <span className="milestonewatch-page__progress">{m.value.toLocaleString('en-US')} · {m.remaining} to go</span>
+                        {eta && <span className="milestonewatch-page__eta">{eta}</span>}
+                      </div>
+                    )
+                  })}
                 </div>
               </article>
-            ))}
-          </div>
+            )}
+          </MasonryColumns>
           <p className="hint prospects__caption">
             {rows.length} milestone{rows.length === 1 ? '' : 's'} in range across {groups.length} player{groups.length === 1 ? '' : 's'}
             {updated && ` · updated ${updated}`}.

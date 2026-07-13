@@ -2,11 +2,10 @@
 // (see StatBox). Each club starts a game with two challenges, KEEPS one when its
 // challenge succeeds (the umpire's call is overturned) and LOSES one only when it
 // fails; a club that runs out gets one more for each extra inning it enters
-// empty. We surface the per-club OUTCOME HISTORY — a filled pip per successful
-// challenge, an ✗ per failed one, in the order they happened — which encodes both
-// what happened and, via the ✗ count, how many the club has spent. (Real
-// broadcasts show only a remaining count; the history strip is strictly more
-// informative and suits a scorebook companion — see docs research.)
+// empty. StatBox's AbsRow surfaces this as a REMAINING COUNT — used/open pips,
+// same grammar as the mound-visit notice's pip row (UsagePips) — not an outcome
+// history: a club that keeps winning its challenges always shows its full
+// starting count, since a success never spends one.
 //
 // REVEAL-ONLY by caller contract: a challenge can flip a called third strike, so
 // this reads score-adjacent in-game state. It's computed only from inside

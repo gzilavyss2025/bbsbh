@@ -11,13 +11,13 @@ export function ExtrasBanner({ records, awayName, homeName }) {
       innings this season:{' '}
       {away && (
         <span className="innings__extras-team">
-          {(awayName || 'Away').toUpperCase()} {away}
+          {awayName || 'Away'} {away}
         </span>
       )}
       {away && home && <span className="innings__extras-dot" aria-hidden="true"> · </span>}
       {home && (
         <span className="innings__extras-team">
-          {(homeName || 'Home').toUpperCase()} {home}
+          {homeName || 'Home'} {home}
         </span>
       )}
     </p>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -6,17 +6,18 @@ import {
   fetchStandings,
   fetchLeagueTeamStats,
   fetchAffiliates,
+  fetchComplexAffiliates,
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
 } from '../api/team.js'
-import { fetchAllStarRosterIds } from '../api/person-fetch.js'
-import { fetchTeamSchedule } from '../api/schedule.js'
+import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
+import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -33,6 +34,8 @@ import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { SectionTitle } from '../components/SectionTitle.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
+import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { InjuredMark } from '../components/InjuredMark.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
@@ -41,6 +44,9 @@ const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
 // Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
 const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
+// The Preferred Lineup diamond's eight field spots plus DH, in no particular
+// order (DefenseDiamond itself lays the field spots out; DH rides beneath).
+const PREFERRED_LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10)
@@ -53,9 +59,73 @@ function dayBefore(iso) {
 function nickname(name) {
   return (name || '').split(/\s+/).slice(-1)[0] || name || DASH
 }
-function lastTen(rec) {
-  const t = (rec.records?.splitRecords ?? []).find((s) => s.type === 'lastTen')
+// A split record ('lastTen' / 'home' / 'away') as a "W-L" string, or DASH
+// when the split is absent (thin/early feeds) — same convention as
+// api/standings.js's own splitWL, kept local since this file already had its
+// own lastTen() and the two shapers don't otherwise share code.
+function splitWL(rec, type) {
+  const t = (rec.records?.splitRecords ?? []).find((s) => s.type === type)
   return t ? `${t.wins}-${t.losses}` : DASH
+}
+function lastTen(rec) {
+  return splitWL(rec, 'lastTen')
+}
+// Innings pitched ("104.1" = 104⅓) → outs, so the Bullpen sort's IP tiebreak
+// compares linearly (see api/teamLeaders.js's identical ipToOuts — kept local
+// here rather than imported since this file has no other reason to reach
+// into that module).
+function ipToOuts(ip) {
+  const [whole, frac = '0'] = String(ip ?? '0').split('.')
+  return (Number(whole) || 0) * 3 + (Number(frac[0]) || 0)
+}
+// A roster row's season pitching stat object, same group-name selection as
+// person.js's rosterPitcherRole — GS/SV/appearances/IP for the Starting
+// Pitchers and Bullpen lists. Callers must pre-filter to actual pitchers
+// (r.position?.type === 'Pitcher'); the `?? stats[0]` fallback exists only
+// for a true pitcher whose stats array happens to lack a pitching split yet,
+// and would misread a position player's hitting split as pitching otherwise.
+//
+// A player who's changed teams mid-season (trade, waiver claim, DFA pickup)
+// carries MULTIPLE splits here — one per team, each tagged `.team.id`, same
+// shape person.js's fieldingView already has to guard against for the
+// per-player fielding endpoint. Blindly reading splits[0] silently picked up
+// whichever row happened to sort first, which could be an ex-team's line (or
+// a team-less season aggregate) — a Brewers page showing a recent pickup's
+// FULL season numbers, snuck-in appearances from a team he's since left
+// included. `preferTeamSplits` narrows to the CURRENT team's own row(s)
+// first, falling back to the raw list only when nothing is team-tagged (the
+// normal case for someone who's been here all year).
+function preferTeamSplits(splits, teamId) {
+  const teamRows = splits.filter((s) => s.team?.id === teamId)
+  return teamRows.length ? teamRows : splits
+}
+function rosterPitchingStat(r, teamId) {
+  const stats = r.person?.stats ?? []
+  const pit = stats.find((s) => s.group?.displayName === 'pitching') ?? stats[0]
+  const splits = preferTeamSplits(pit?.splits ?? [], teamId)
+  return splits[0]?.stat ?? null
+}
+// A roster row's season fielding splits (one per position played, filtered
+// to this team — see preferTeamSplits above) — see fetchTeamRoster's hydrate
+// note (api/team.js) on why this needs live verification. Feeds the
+// Preferred Lineup diamond below.
+function rosterFieldingSplits(r, teamId) {
+  const stats = r.person?.stats ?? []
+  const splits = stats.find((s) => s.group?.displayName === 'fielding')?.splits ?? []
+  return preferTeamSplits(splits, teamId)
+}
+// Grouped SP → CL → RP (ROLE_ORDER), then descending by season WAR within
+// each group — a missing WAR (MiLB, or an MLB arm WAR hasn't caught up to
+// yet) sorts last in its group rather than crashing the comparison, falling
+// back to jersey number. Named (not inline) since the Current Roster
+// Pitchers list re-sorts after patching a role in place — see pitchers'
+// recentStarterIds fixup below.
+function comparePitchers(a, b) {
+  return (
+    (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) ||
+    (b.war ?? -Infinity) - (a.war ?? -Infinity) ||
+    Number(a.jersey) - Number(b.jersey)
+  )
 }
 function runDiff(rec) {
   const d = rec.runDifferential
@@ -88,9 +158,17 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, prospectsSnapshot, schedule] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
+      // 40Man superset of the active roster above — the Roster super-section
+      // (Preferred Lineup / Starting Pitchers / Bullpen) draws from THIS one
+      // instead, deliberately including the IL and rehab assignments: a
+      // season's #1 starter at a spot, or a team's ace, doesn't stop being
+      // the "preferred" answer just because he's hurt right now (the
+      // Injured List section already flags that separately via the shared
+      // IL glyph) — see rosterPitchingStat.
+      fetchTeamRoster(id, season, { sportId, rosterType: '40Man' }),
       // The leaderboard pool, built from the club's season stats rather than
       // its current roster — so a player traded away, released, or promoted
       // off the club still ranks, scoped to only his stats from while he was
@@ -107,26 +185,37 @@ async function loadTeam(id, asOf) {
       // The affiliate tree is keyed off the ORG id (not `id`), so an
       // affiliate's own page gets the same tree its MLB parent would.
       orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
+      // Complex/rookie-level clubs, resolved separately — see
+      // fetchComplexAffiliates for why they can't just join AFFILIATE_SPORT_IDS.
+      orgId ? fetchComplexAffiliates(orgId, season) : Promise.resolve([]),
       fetchTopProspects(),
       fetchTeamSchedule(id, season, sportId, standingsDate),
+      // MLB only — MiLB clubs play through the break, so no All-Star card
+      // belongs in their strip.
+      sportId === 1 ? fetchAllStarGame(season) : Promise.resolve(null),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
   // (not the scraped, sometimes-ambiguous level string, e.g. "ALL (2)") — a
-  // second small fan-out over this org's affiliates PLUS the MLB roster
-  // itself, so a prospect who's been called up resolves to MLB rather than
-  // his last MiLB stop. `fetchAffiliates` excludes the org's own MLB team, so
-  // it's added in here; on the org's own page `roster` already IS that MLB
-  // roster and needs no extra fetch.
-  const affiliateRosterIds = affiliates.length
-    ? await fetchRosterIdsForTeams(affiliates.map((a) => a.id))
+  // second small fan-out over this org's affiliates (full-season AAA/AA/A+/A
+  // PLUS complex/rookie clubs) PLUS the MLB roster itself, so a prospect
+  // who's been called up resolves to MLB rather than his last MiLB stop.
+  // `rosterType=40Man` (not the default 'active') so a prospect currently on
+  // a 7-/60-day IL still resolves to his real affiliate instead of falling
+  // through to the scraped level text with no logo. `fetchAffiliates` /
+  // `fetchComplexAffiliates` both exclude the org's own MLB team, so it's
+  // added in here; on the org's own page `roster` already IS that MLB roster
+  // and needs no extra fetch.
+  const farmTeams = [...affiliates, ...complexAffiliates]
+  const affiliateRosterIds = farmTeams.length
+    ? await fetchRosterIdsForTeams(farmTeams.map((a) => a.id), '40Man')
     : {}
   if (orgId) {
     affiliateRosterIds[orgId] =
-      sportId === 1 ? roster.map((r) => r.person?.id).filter(Boolean) : await fetchTeamRosterIds(orgId)
+      sportId === 1 ? roster.map((r) => r.person?.id).filter(Boolean) : await fetchTeamRosterIds(orgId, '40Man')
   }
   const affiliateByPlayer = prospectAffiliateMap(affiliateRosterIds)
-  const affiliateById = new Map(affiliates.map((a) => [a.id, a]))
+  const affiliateById = new Map(farmTeams.map((a) => [a.id, a]))
   if (orgId) {
     affiliateById.set(orgId, { id: orgId, sportId: 1, name: sportId === 1 ? team.name : team.parentOrgName })
   }
@@ -181,6 +270,8 @@ async function loadTeam(id, asOf) {
     gb: t.gamesBack,
     streak: t.streak?.streakCode ?? DASH,
     l10: lastTen(t),
+    home: splitWL(t, 'home'),
+    away: splitWL(t, 'away'),
     diff: runDiff(t),
     diffTone: runDiffTone(t),
     isMe: t.team.id === id,
@@ -241,7 +332,152 @@ async function loadTeam(id, asOf) {
       war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
       prospect: prospectBadge(prospectsSnapshot, r.person?.id),
     }))
-    .sort((a, b) => (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) || Number(a.jersey) - Number(b.jersey))
+    .sort(comparePitchers)
+
+  // Starting Pitchers / Bullpen draw from the 40Man `fullRoster` (see its
+  // fetch above) rather than the active-only `pitchers` list above, so a
+  // team's ace still shows up while he's on the IL or a minors rehab stint.
+  const fullPitchers = fullRoster
+    .filter((r) => r.position?.type === 'Pitcher')
+    .map((r) => {
+      const stat = rosterPitchingStat(r, id)
+      return {
+        id: r.person?.id,
+        name: firstLast(r.person),
+        jersey: r.jerseyNumber ?? '',
+        allStar: allStarIds.has(r.person?.id),
+        war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
+        prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+        gs: Number(stat?.gamesStarted) || 0,
+        saves: Number(stat?.saves) || 0,
+        appearances: Number(stat?.gamesPitched ?? stat?.gamesPlayed) || 0,
+        ipOuts: ipToOuts(stat?.inningsPitched),
+        ip: stat?.inningsPitched ?? DASH,
+        era: stat?.era ?? DASH,
+      }
+    })
+  // Which of these pitchers is CURRENTLY starting, from each one's own most
+  // recent outing — a season-total games-started count alone misreads a
+  // pitcher who's moved from the bullpen into the rotation mid-season (his
+  // total still trails arms who started all year), which drops him into the
+  // Bullpen list below despite him taking the ball every 5th day now. One
+  // gameLog fetch per pitcher (bounded to the 40-man staff, ~13-15 arms), so
+  // this genuinely costs an extra request round-trip beyond the rest of the
+  // page — worth it for a section whose whole point is "who's pitching for
+  // this team right now."
+  const recentStarterIds = new Set(
+    (
+      await Promise.allSettled(
+        fullPitchers
+          .filter((p) => p.id)
+          .map(async (p) => {
+            const splits = await fetchPersonStats(p.id, {
+              type: 'gameLog',
+              group: 'pitching',
+              season,
+              sportId,
+            })
+            const last = [...splits]
+              .filter((s) => s.date)
+              .sort((a, b) => (a.date < b.date ? 1 : -1))[0]
+            return last?.stat?.gamesStarted === 1 ? p.id : null
+          }),
+      )
+    )
+      .map((r) => (r.status === 'fulfilled' ? r.value : null))
+      .filter(Boolean),
+  )
+  // The Current Roster's own Pitchers list (below) shows literal current
+  // status, not a projection — so its SP/RP/CL badge needs the same recency
+  // fix: rosterPitcherRole reads the season-long innings ratio, which still
+  // calls a mid-season bullpen-to-rotation convert an RP until his total
+  // catches up. A pitcher whose last outing was a start reads as SP here
+  // regardless of what the season ratio says (this only ever promotes,
+  // never demotes a role rosterPitcherRole already called SP) — then the
+  // list re-sorts since a patched role can move him into a different group.
+  for (const p of pitchers) {
+    if (recentStarterIds.has(p.id)) p.role = 'SP'
+  }
+  pitchers.sort(comparePitchers)
+  // Starting Pitchers — pure season projection, top 5 by games started,
+  // health status irrelevant (this card is deliberately "who's the best
+  // answer here regardless of health," per the injured/rehab-eligible design
+  // — see fullPitchers above). The recency signal above (recentStarterIds)
+  // is ONLY for the Current Roster's literal-status role badge; folding it
+  // in here too previously bumped a higher-GS injured ace (e.g. an
+  // established starter on the IL) below a healthy but lower-GS teammate,
+  // which is backwards for a projection view.
+  const startingPitchers = [...fullPitchers]
+    .filter((p) => p.gs > 0)
+    .sort((a, b) => b.gs - a.gs || Number(a.jersey) - Number(b.jersey))
+    .slice(0, 5)
+  // Bullpen — everyone else who's actually pitched. The closer (most saves,
+  // if anyone has one) leads the list; everyone else is ranked by workload
+  // (appearances, innings as the tiebreak) rather than by their own save
+  // total, so a mop-up guy with one vulture save doesn't outrank the actual
+  // setup crew. Capped at 8: the current CBA caps an active roster at 13
+  // pitchers, and a standard 5-man rotation leaves 8 relief spots.
+  const startingIds = new Set(startingPitchers.map((p) => p.id))
+  const relievers = fullPitchers.filter((p) => !startingIds.has(p.id) && p.appearances > 0)
+  const maxSaves = relievers.reduce((max, p) => Math.max(max, p.saves), 0)
+  const closer = maxSaves > 0 ? relievers.find((p) => p.saves === maxSaves) : null
+  const setupCrew = relievers
+    .filter((p) => p !== closer)
+    .sort((a, b) => b.appearances - a.appearances || b.ipOuts - a.ipOuts)
+  const bullpen = (closer ? [closer, ...setupCrew] : setupCrew).slice(0, 8)
+
+  // Preferred Lineup — one player per field position, off the 40Man
+  // `fullRoster` (so an injured/rehabbing regular still counts — the same
+  // reasoning as fullPitchers above), keyed FIRST off each player's CURRENT
+  // primary position (r.position?.abbreviation — the same field the
+  // `position` list's own `pos` column reads) rather than season-cumulative
+  // games started: a player who's since moved off a position (e.g. a
+  // shortstop slid to third once a rookie took over) still owns the
+  // season's higher SS games-started total, so ranking each position
+  // independently by GS double-booked him at both SS and 3B. GS only breaks
+  // ties among teammates who share a primary position (rare — a real battle
+  // for a spot).
+  //
+  // A position can still come up empty on primary position alone (a thin
+  // feed, or the incumbent's primary-position tag hasn't caught up with a
+  // recent move) — a SECOND pass fills any position still open with
+  // whoever has the most games started there among players not already
+  // claimed elsewhere, so a spot that's genuinely been played this season
+  // never shows unresolved. DH skips the first pass entirely (it's almost
+  // never anyone's primary position — most clubs rotate several regulars
+  // through it) and goes straight to the games-started fallback.
+  const gsAt = (r, pos) =>
+    Number(rosterFieldingSplits(r, id).find((s) => s.position?.abbreviation === pos)?.stat?.gamesStarted) || 0
+  const bestByPosition = {}
+  const claimed = new Set()
+  for (const pos of PREFERRED_LINEUP_POSITIONS) {
+    if (pos === 'DH') continue
+    const candidates = fullRoster.filter((r) => r.person?.id && r.position?.abbreviation === pos)
+    if (!candidates.length) continue
+    const best = candidates.reduce((a, b) => (gsAt(b, pos) > gsAt(a, pos) ? b : a))
+    bestByPosition[pos] = {
+      position: pos,
+      id: best.person.id,
+      last: nickname(firstLast(best.person)),
+      gs: gsAt(best, pos),
+    }
+    claimed.add(best.person.id)
+  }
+  for (const pos of PREFERRED_LINEUP_POSITIONS) {
+    if (bestByPosition[pos]) continue
+    let best = null
+    for (const r of fullRoster) {
+      const pid = r.person?.id
+      if (!pid || claimed.has(pid)) continue
+      const gs = gsAt(r, pos)
+      if (gs > 0 && (!best || gs > best.gs)) best = { position: pos, id: pid, last: nickname(firstLast(r.person)), gs }
+    }
+    if (best) {
+      bestByPosition[pos] = best
+      claimed.add(best.id)
+    }
+  }
+  const preferredLineup = PREFERRED_LINEUP_POSITIONS.map((pos) => bestByPosition[pos]).filter(Boolean)
 
   // Injured List — every injured player on the club's 40-man view in one combined
   // list, each tagged with which IL (10/15/60-day; MiLB shows 7/60/full-season).
@@ -271,7 +507,8 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers, injured,
-    affiliationHistory, affiliates, prospects, schedule, leaderPool,
+    preferredLineup, startingPitchers, bullpen,
+    affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
   }
 }
 
@@ -285,8 +522,18 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, injured, affiliationHistory, affiliates, prospects, schedule, leaderPool } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, injured, preferredLineup, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
+  // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
+  // to build fresh each render (injured is a handful of rows), no
+  // memoization needed.
+  const injuredIds = new Set(injured.map((p) => p.id))
+  const preferredLineupDefense = preferredLineup.map((p) => ({
+    position: p.position,
+    last: p.last,
+    id: p.id,
+    hurt: injuredIds.has(p.id),
+  }))
   // On a MiLB affiliate page, lead the Affiliates section with a card for the
   // parent MLB club (which fetchAffiliates deliberately omits from the farm
   // tree). Location is unavailable from the static team record, so the card
@@ -331,17 +578,6 @@ export function TeamPage({ id, asOf, sportId }) {
           )}
         </header>
 
-        {schedule.length > 0 && (
-          <>
-            <SectionTitle title="Schedule" />
-            <ScheduleCalendar
-              key={`${team.id}-${asOf ?? ''}`}
-              games={schedule}
-              refDate={asOf || isoToday()}
-            />
-          </>
-        )}
-
         {standings.length > 0 && (
           <>
             <SectionTitle title={team.division?.name || 'Standings'} note={asOf ? 'entering today' : ''} />
@@ -350,12 +586,19 @@ export function TeamPage({ id, asOf, sportId }) {
                 <thead>
                   <tr>
                     <th className="team">Team</th>
-                    <th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th><th>RD</th>
+                    <th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th>
+                    <th className="standings__wide">Home</th>
+                    <th className="standings__wide">Away</th>
+                    <th>RD</th>
                   </tr>
                 </thead>
                 <tbody>
                   {standings.map((s) => (
-                    <tr key={s.id} className={s.isMe ? 'is-me' : ''}>
+                    <tr
+                      key={s.id}
+                      className={s.isMe ? 'is-me' : ''}
+                      style={s.isMe ? { '--fav-accent': favoriteAccentColor(s.id) } : undefined}
+                    >
                       <td className="team">
                         <TeamLink id={s.isMe ? null : s.id}>
                           <TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}
@@ -363,12 +606,26 @@ export function TeamPage({ id, asOf, sportId }) {
                       </td>
                       <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td>
                       <td>{s.streak}</td><td>{s.l10}</td>
+                      <td className="standings__wide">{s.home}</td>
+                      <td className="standings__wide">{s.away}</td>
                       <td className={s.diffTone}>{s.diff}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          </>
+        )}
+
+        {schedule.length > 0 && (
+          <>
+            <SectionTitle title="Schedule" />
+            <SeriesStrip
+              key={`${team.id}-${asOf ?? ''}`}
+              games={schedule}
+              allStarGame={allStarGame}
+              refDate={asOf || isoToday()}
+            />
           </>
         )}
 
@@ -379,6 +636,8 @@ export function TeamPage({ id, asOf, sportId }) {
           pool={leaderPool}
           categories={FEATURED_CATEGORIES}
           onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
+          showTeamAbbr={false}
+          injuredIds={injuredIds}
         />
 
         {/* Org-wide leaders across the club's whole farm system — the MLB club
@@ -399,28 +658,90 @@ export function TeamPage({ id, asOf, sportId }) {
           </button>
         )}
 
-        {position.length > 0 && (
+        {(preferredLineup.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
           <>
-            <SectionTitle title="Position players" note={sportId === 1 ? 'season WAR' : ''} />
-            <RosterList
-              season={season}
-              showProspect={isMilb}
-              rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))}
-            />
+            <SectionTitle title="Roster" note="preferred lineup" />
+            {/* One bordered soft-cream card (same convention as .tstats-card)
+                around all three projection subsections, so they read as one
+                group distinct from the actual 40-man list further down. */}
+            <div className="roster-super">
+              <div className="roster-super__row">
+                {preferredLineup.length > 0 && (
+                  <section className="roster-sub">
+                    <h4 className="roster-sub__title">Preferred Lineup</h4>
+                    <DefenseDiamond defense={preferredLineupDefense} />
+                  </section>
+                )}
+                {startingPitchers.length > 0 && (
+                  <section className="roster-sub">
+                    <h4 className="roster-sub__title">Starting Pitchers</h4>
+                    <RosterList
+                      season={season}
+                      showProspect={isMilb}
+                      rows={startingPitchers.map((p) => ({
+                        ...p,
+                        hurt: injuredIds.has(p.id),
+                        badge: `${p.gs} GS`,
+                        badgeClass: 'rolechip',
+                      }))}
+                    />
+                  </section>
+                )}
+              </div>
+              {bullpen.length > 0 && (
+                <section className="roster-sub">
+                  <h4 className="roster-sub__title">Bullpen</h4>
+                  <RosterList
+                    season={season}
+                    showProspect={isMilb}
+                    rows={bullpen.map((p, i) => ({
+                      ...p,
+                      hurt: injuredIds.has(p.id),
+                      badge: [p.saves > 0 ? `${p.saves} SV` : null, `${p.appearances} G`, `${p.ip} IP`]
+                        .filter(Boolean)
+                        .join(' · '),
+                      // Only the closer (bullpen is already sorted saves-first,
+                      // so that's whoever's in slot 0 with a save to his name)
+                      // gets the clay "closer" tint — every other reliever,
+                      // saves or not, reads as a standard neutral chip.
+                      badgeClass: `rolechip rolechip--stats${i === 0 && p.saves > 0 ? ' rolechip--cl' : ' rolechip--rp'}`,
+                    }))}
+                  />
+                </section>
+              )}
+            </div>
           </>
         )}
-        {pitchers.length > 0 && (
+
+        {(position.length > 0 || pitchers.length > 0) && (
           <>
-            <SectionTitle title="Pitchers" note={sportId === 1 ? 'role inferred · season WAR' : 'role inferred'} />
-            <RosterList
-              season={season}
-              showProspect={isMilb}
-              rows={pitchers.map((p) => ({
-                ...p,
-                badge: p.role ?? DASH,
-                badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
-              }))}
-            />
+            <SectionTitle title="Current Roster" />
+            <div className="roster-cols">
+              {position.length > 0 && (
+                <div>
+                  <h4 className="roster-sub__title">Position players{sportId === 1 ? ' · season WAR' : ''}</h4>
+                  <RosterList
+                    season={season}
+                    showProspect={isMilb}
+                    rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))}
+                  />
+                </div>
+              )}
+              {pitchers.length > 0 && (
+                <div>
+                  <h4 className="roster-sub__title">Pitchers · role inferred{sportId === 1 ? ' · season WAR' : ''}</h4>
+                  <RosterList
+                    season={season}
+                    showProspect={isMilb}
+                    rows={pitchers.map((p) => ({
+                      ...p,
+                      badge: p.role ?? DASH,
+                      badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
+                    }))}
+                  />
+                </div>
+              )}
+            </div>
           </>
         )}
 
@@ -502,101 +823,97 @@ export function TeamPage({ id, asOf, sportId }) {
   )
 }
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
-const DOW_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-
-// Monthly schedule grid for the team page. `games` is spoiler-free (dates,
-// opponents, home/away — see fetchTeamSchedule) plus a `won` flag that's
-// already cutoff-gated by the caller (null for anything not yet safe to
-// show), so every game renders regardless of whether it's already been
-// played, and a played game's tile tints green/won or red/loss once `won`
-// isn't null; the destination page (lineup1) still manages its own sealing
-// independently for anyone who taps through. `refDate` seeds which month
-// opens first (the game this page was opened from, or today for a bare
-// visit) — the calendar itself can page anywhere from there.
-function ScheduleCalendar({ games, refDate }) {
-  const [cursor, setCursor] = useState(() => ({
-    year: Number(refDate.slice(0, 4)),
-    month: Number(refDate.slice(5, 7)) - 1,
-  }))
+// Season progress strip for the team page — one block per series (a run of
+// consecutive games against the same opponent), one small cell per game
+// within it, in chronological order left-to-right/top-to-bottom (wraps on
+// narrow screens rather than paging by month). `games` is spoiler-free
+// (dates, opponents, home/away — see fetchTeamSchedule) plus a `won` flag
+// that's already cutoff-gated by the caller (null for anything not yet safe
+// to show), so every game renders regardless of whether it's already been
+// played, and a played game's cell tints green/won or red/loss only once
+// `won` isn't null; the destination page (lineup1) still manages its own
+// sealing independently for anyone who taps through. `refDate` marks the
+// series the page was opened from (or today's) so it can be highlighted.
+function SeriesStrip({ games, allStarGame, refDate }) {
   const navigate = useNav()
 
-  const byDate = useMemo(() => {
-    const m = new Map()
+  const series = useMemo(() => {
+    const out = []
     for (const g of games) {
-      if (!m.has(g.apiDate)) m.set(g.apiDate, [])
-      m.get(g.apiDate).push(g)
+      const last = out[out.length - 1]
+      if (last && last.opponent.id === g.opponent.id) {
+        last.games.push(g)
+      } else {
+        out.push({ opponent: g.opponent, games: [g] })
+      }
     }
-    for (const list of m.values()) list.sort((a, b) => a.gameNumber - b.gameNumber)
-    return m
+    return out
   }, [games])
 
-  const startDow = new Date(Date.UTC(cursor.year, cursor.month, 1)).getUTCDay()
-  const daysInMonth = new Date(Date.UTC(cursor.year, cursor.month + 1, 0)).getUTCDate()
-  const cells = [
-    ...Array.from({ length: startDow }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ]
-
-  const goMonth = (delta) => {
-    setCursor((c) => {
-      const total = c.year * 12 + c.month + delta
-      return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 }
-    })
-  }
+  // Splice the All-Star Game in chronologically — right before the first
+  // series that resumes after the break (a team's own schedule has no games
+  // during the break itself, so there's no series to attach it to).
+  const items = useMemo(() => {
+    const list = series.map((s) => ({ type: 'series', key: `${s.opponent.id}-${s.games[0].apiDate}`, ...s }))
+    if (allStarGame) {
+      const card = { type: 'allstar', key: `allstar-${allStarGame.apiDate}`, ...allStarGame }
+      const idx = list.findIndex((it) => it.games[0].apiDate > allStarGame.apiDate)
+      if (idx === -1) list.push(card)
+      else list.splice(idx, 0, card)
+    }
+    return list
+  }, [series, allStarGame])
 
   const openGame = (g) => {
     navigate(gamePath(g.apiDate, g.away.abbreviation, g.home.abbreviation, 'lineup1', g.gameNumber))
   }
 
   return (
-    <div className="tcal">
-      <div className="tcal__nav">
-        <button type="button" className="tcal__navbtn" onClick={() => goMonth(-1)} aria-label="Previous month">
-          ‹
-        </button>
-        <span className="tcal__month">{MONTH_NAMES[cursor.month]} {cursor.year}</span>
-        <button type="button" className="tcal__navbtn" onClick={() => goMonth(1)} aria-label="Next month">
-          ›
-        </button>
-      </div>
-      <div className="tcal__dow">
-        {DOW_LABELS.map((d, i) => (
-          <span key={i}>{d}</span>
-        ))}
-      </div>
-      <div className="tcal__grid">
-        {cells.map((d, i) => {
-          if (d == null) return <div key={`b${i}`} className="tcal__cell tcal__cell--blank" />
-          const iso = `${cursor.year}-${String(cursor.month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-          const dayGames = byDate.get(iso) ?? []
+    <div className="sstrip">
+      {items.map((it) => {
+        if (it.type === 'allstar') {
           return (
-            <div key={iso} className="tcal__cell">
-              <span className="tcal__daynum">{d}</span>
-              {dayGames.map((g) => {
+            <button
+              key={it.key}
+              type="button"
+              className="sstrip__series sstrip__series--allstar"
+              onClick={() => openGame(it)}
+              title={`${it.apiDate} · All-Star Game · ${it.away.name} vs ${it.home.name}`}
+            >
+              <div className="sstrip__opp">
+                <TeamLogo teamId={it.away.id} name={it.away.name} size={18} />
+                <TeamLogo teamId={it.home.id} name={it.home.name} size={18} />
+              </div>
+              <span className="sstrip__opplabel">All-Star Break</span>
+            </button>
+          )
+        }
+        const isCurrent = it.games.some((g) => g.apiDate === refDate)
+        return (
+          <div key={it.key} className={`sstrip__series${isCurrent ? ' sstrip__series--current' : ''}`}>
+            <div className="sstrip__opp" title={it.opponent.name}>
+              <TeamLogo teamId={it.opponent.id} name={it.opponent.name} size={18} />
+              <span className="sstrip__opplabel">{it.opponent.abbreviation}</span>
+            </div>
+            <div className="sstrip__cells">
+              {it.games.map((g) => {
                 const resultClass =
-                  g.won === true ? ' tcal__game--win' : g.won === false ? ' tcal__game--loss' : ''
+                  g.won === true ? ' sstrip__cell--win' : g.won === false ? ' sstrip__cell--loss' : ''
                 const resultLabel = g.won === true ? ' · W' : g.won === false ? ' · L' : ''
                 return (
                   <button
                     key={g.gamePk}
                     type="button"
-                    className={`tcal__game${g.isHome ? ' tcal__game--home' : ''}${resultClass}`}
+                    className={`sstrip__cell${g.isHome ? ' sstrip__cell--home' : ''}${resultClass}`}
                     onClick={() => openGame(g)}
-                    title={`${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
-                  >
-                    <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={21} />
-                    {g.doubleHeader !== 'N' && <span className="tcal__gm">{g.gameNumber}</span>}
-                  </button>
+                    title={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
+                  />
                 )
               })}
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -604,17 +921,17 @@ function ScheduleCalendar({ games, refDate }) {
 function TeamStats({ title, stats }) {
   return (
     <>
-      <SectionTitle title={title} note="rank of 30" />
-      <div className="tstats">
-        {stats.map((s) => (
-          <div key={s.k} className="tstat">
-            <div>
-              <div className="tstat__k">{s.k}</div>
-              <div className="tstat__v">{s.v}</div>
+      <SectionTitle title={title} note="rank out of 30" />
+      <div className="tstats-card">
+        <div className="tstats">
+          {stats.map((s) => (
+            <div key={s.k} className="tstatrow">
+              <span className="tstatrow__k">{s.k}</span>
+              <span className="tstatrow__v">{s.v}</span>
+              <span className={`tstatrow__r${s.tone ? ` tstatrow__r--${s.tone}` : ''}`}>{s.rank}</span>
             </div>
-            <span className={`rankchip${s.tone ? ` rankchip--${s.tone}` : ''}`}>{s.rank}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </>
   )
@@ -633,6 +950,7 @@ function RosterList({ rows, season, showProspect }) {
                 <span className="thub-allstar" title={`${season} All Star`}>★</span>
               )}
             </PlayerLink>
+            <InjuredMark hurt={r.hurt} />
             {showProspect && <ProspectPill {...r.prospect} />}
           </span>
           {r.war !== undefined && (
@@ -650,5 +968,3 @@ function RosterList({ rows, season, showProspect }) {
     </ul>
   )
 }
-
-
