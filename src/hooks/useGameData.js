@@ -11,7 +11,7 @@ import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
 import { selectHasStarted } from '../api/select.js'
-import { rosterPitcherRole } from '../api/person.js'
+import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
@@ -160,7 +160,10 @@ export function useGameData(game) {
       ])
       const roles = {}
       for (const r of [...awayRoster, ...homeRoster]) {
-        if (r.position?.type === 'Pitcher' && r.person?.id) {
+        // A two-way player (Ohtani-type) is roster-typed 'Two-Way Player', not
+        // 'Pitcher' — without isTwoWay here he'd carry no role at all and
+        // splitBullpen would default him into relief instead of starters.
+        if ((r.position?.type === 'Pitcher' || isTwoWay(r.person)) && r.person?.id) {
           roles[r.person.id] = rosterPitcherRole(r)
         }
       }

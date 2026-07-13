@@ -9934,7 +9934,7 @@ body {
   grid-template-columns: 1fr auto auto;
   align-items: baseline;
   gap: 8px;
-  padding: 6px 1px;
+  padding: 6px 8px;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 /* The top row of each column sits flush against the card's own top border
@@ -9972,6 +9972,18 @@ body {
 }
 .tstatrow__r--bad {
   color: var(--clay-deep);
+}
+/* League-best (1st) / league-worst (last) gets the whole row tinted, a
+   stronger claim than the rank ordinal's plain good/bad color. */
+.tstatrow--best,
+.tstatrow--worst {
+  border-radius: var(--radius-sm);
+}
+.tstatrow--best {
+  background: var(--field-soft);
+}
+.tstatrow--worst {
+  background: var(--clay-soft);
 }
 @media (max-width: 359px) {
   .tstats {
