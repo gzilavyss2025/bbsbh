@@ -4,6 +4,7 @@ import { teamPath } from '../lib/route.js'
 import {
   teamLocationName,
   teamClubName,
+  teamClubNameShort,
   teamFullName,
   favoriteAccentColor,
 } from '../lib/teams.js'
@@ -44,6 +45,7 @@ export function OffDaySection({ teamIds, favoriteTeamId, dateStr, sportId }) {
 function OffDayCard({ id, pinned, onOpen }) {
   const location = teamLocationName(id)
   const mascot = teamClubName(id)
+  const shortMascot = teamClubNameShort(id)
   const full = teamFullName(id)
   const style = pinned ? { '--pin-accent': favoriteAccentColor(id) } : undefined
   return (
@@ -59,7 +61,7 @@ function OffDayCard({ id, pinned, onOpen }) {
       </span>
       <span className="offdaycard__name">
         {location && <span className="offdaycard__loc">{location}</span>}
-        <span className="offdaycard__mascot">{mascot || full}</span>
+        <span className="offdaycard__mascot">{shortMascot || full}</span>
       </span>
       {pinned && (
         <span className="offdaycard__pin" aria-hidden="true">
