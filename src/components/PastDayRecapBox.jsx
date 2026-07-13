@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { computeTopPerformersByResult } from '../api/topPerformers.js'
 import { rankDayHighlights } from '../api/dayHighlights.js'
 import { computeDaySuperlatives } from '../api/daySuperlatives.js'
+import { fetchCallouts } from '../api/callouts.js'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { useNav } from '../lib/nav.js'
+import { apiDateToUrl } from '../lib/route.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { SealBox } from './SealBox.jsx'
 import { Loader } from './Loader.jsx'
@@ -18,12 +20,56 @@ import { TeamLogo } from './TeamLogo.jsx'
 // endpoint instead (see topPerformers.js) — it needs no play-by-play, so
 // there's nothing to share there.
 
+// "Face the Story": a row shows the winning signal's protagonist (headshot +
+// name + team + stat, "baseball card" idiom matching Top Performers/Statcast
+// Leaders) when dayHighlights.js resolved one, or falls back to a lighter
+// team-logo-pair row for the signals with no single protagonist (margin/
+// length storylines, the win-probability comeback) — see dayHighlights.js's
+// `performer` field. The box-score link lives on the headline text itself, a
+// button, rather than wrapping the whole row: the performer variant also
+// needs its own PlayerLink/TeamLink buttons alongside, and HTML disallows
+// nesting interactive elements inside a button.
 function DayHighlightRow({ entry }) {
   const navigate = useNav()
+  const goToBox = () => navigate(entry.boxScorePath)
+
+  if (entry.performer) {
+    const { performer } = entry
+    return (
+      <li className="dayhl__row dayhl__row--performer">
+        <span className="dayhl__rowShotwrap">
+          <Headshot
+            personId={performer.id}
+            name={performer.name}
+            teamId={performer.teamId}
+            className="dayhl__rowShot"
+          />
+          {performer.position && <span className="playercard__posbadge">{performer.position}</span>}
+        </span>
+        <div className="dayhl__rowBody">
+          <button type="button" className="dayhl__rowHeadlineBtn" onClick={goToBox}>
+            {entry.headline}
+          </button>
+          <div className="dayhl__rowMeta">
+            <PlayerLink id={performer.id}>{performer.name}</PlayerLink>
+            <TeamLogo teamId={performer.teamId} name={performer.teamAbbr} size={14} />
+            <TeamLink id={performer.teamId}>{performer.teamAbbr}</TeamLink>
+            {entry.subCaption && <span className="dayhl__rowSub">· {entry.subCaption}</span>}
+          </div>
+        </div>
+      </li>
+    )
+  }
+
+  const { teams } = entry
   return (
     <li className="dayhl__row">
-      <button type="button" className="dayhl__rowBtn" onClick={() => navigate(entry.boxScorePath)}>
-        {entry.headline}
+      <button type="button" className="dayhl__rowBtn dayhl__rowBtn--teams" onClick={goToBox}>
+        <span className="dayhl__rowLogos">
+          <TeamLogo teamId={teams?.winner?.id} name={teams?.winner?.abbr} size={20} />
+          <TeamLogo teamId={teams?.loser?.id} name={teams?.loser?.abbr} size={20} />
+        </span>
+        <span className="dayhl__rowText">{entry.headline}</span>
       </button>
     </li>
   )
@@ -82,15 +128,21 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             .catch(() => null),
         ),
       ),
+      // Same nightly bundle the pre-half strip/play cards read — one fetch
+      // for the whole date, cached in-memory by fetchCallouts itself. Feeds
+      // Day Highlights' protagonist sub-captions (dayHighlights.js); degrades
+      // to {games:{}} on any failure or an un-generated date, same as every
+      // other callouts consumer.
+      fetchCallouts(apiDateToUrl(dateStr)),
     ])
-      .then(([performersByResult, entries]) => {
+      .then(([performersByResult, entries, calloutsData]) => {
         if (cancelled) return
         setState({
           loading: false,
           error: false,
           data: {
             performersByResult,
-            highlights: rankDayHighlights(entries),
+            highlights: rankDayHighlights(entries, calloutsData),
             superlatives: computeDaySuperlatives(entries),
           },
         })
