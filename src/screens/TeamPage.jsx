@@ -15,7 +15,7 @@ import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
-import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER } from '../api/person.js'
+import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
@@ -142,7 +142,11 @@ function statRank(rows, teamId, key, label, lowerBetter) {
   const mine = rows.find((r) => r.teamId === teamId)
   const r = rankTeam(rows, teamId, key, lowerBetter)
   const tone = r ? (r.rank <= 5 ? 'good' : r.rank >= 20 ? 'bad' : '') : ''
-  return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? ordinal(r.rank) : DASH, tone }
+  // Top-5 / bottom-5 gets the whole ROW tinted, a stronger claim than the
+  // rank ordinal's plain good/bad tone — bottom-5 measured off r.of (not a
+  // hardcoded 30, since a rank pool's size isn't guaranteed).
+  const extreme = r ? (r.rank <= 5 ? 'best' : r.rank > r.of - 5 ? 'worst' : '') : ''
+  return { k: label, v: mine?.stat?.[key] ?? DASH, rank: r ? ordinal(r.rank) : DASH, tone, extreme }
 }
 
 async function loadTeam(id, asOf) {
@@ -219,17 +223,38 @@ async function loadTeam(id, asOf) {
   if (orgId) {
     affiliateById.set(orgId, { id: orgId, sportId: 1, name: sportId === 1 ? team.name : team.parentOrgName })
   }
-  const prospects = orgId
-    ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId).map((p) => {
-        const affTeamId = affiliateByPlayer.get(p.playerId) ?? null
-        const aff = affTeamId ? affiliateById.get(affTeamId) : null
-        return {
-          ...p,
-          affiliateTeamId: aff ? aff.id : null,
-          levelLabel: aff ? SPORT_LABEL[aff.sportId] ?? p.levelRaw : p.levelRaw,
-        }
-      })
-    : []
+  const orgProspectRows = orgId ? orgProspectsForTeam(prospectsSnapshot.orgProspects, orgId) : []
+  // Roster membership (above) still misses anyone not on ANY org 40-man roster
+  // right now (released, a stint between assignments, or a foreign-league
+  // loanee). For exactly those, fall back to THIS season's stats across the
+  // org's affiliates + MLB roster: combineToPool already resolves a player's
+  // identity to his highest level reached (lowest sportId), so it can find
+  // the real current level a roster snapshot can't — only fetched when at
+  // least one prospect actually needs it.
+  const unresolvedIds = orgProspectRows
+    .filter((p) => !affiliateByPlayer.has(p.playerId))
+    .map((p) => p.playerId)
+  const statsPoolByPlayer = unresolvedIds.length
+    ? new Map(
+        (await loadCombinedPoolForTeams([...affiliateById.values()].map((t) => ({ id: t.id })), season)).map(
+          (p) => [p.id, p],
+        ),
+      )
+    : new Map()
+  const prospects = orgProspectRows.map((p) => {
+    const affTeamId = affiliateByPlayer.get(p.playerId) ?? null
+    const aff = affTeamId ? affiliateById.get(affTeamId) : null
+    if (aff) {
+      return { ...p, affiliateTeamId: aff.id, levelLabel: SPORT_LABEL[aff.sportId] ?? p.levelRaw }
+    }
+    const statRow = statsPoolByPlayer.get(p.playerId)
+    if (statRow?.teamId && statRow?.sportId) {
+      return { ...p, affiliateTeamId: statRow.teamId, levelLabel: SPORT_LABEL[statRow.sportId] ?? p.levelRaw }
+    }
+    // Neither roster membership nor this season's stats resolved a real
+    // level — never surface the raw ambiguous scraped string (e.g. "ALL (2)").
+    return { ...p, affiliateTeamId: null, levelLabel: /^ALL\b/i.test(p.levelRaw) ? DASH : p.levelRaw }
+  })
   // WAR data is a single current-season file (see src/api/war.js); only trust
   // it when its season matches the team page's — otherwise (a historical
   // `asOf` team page, or MiLB with no WAR source) every badge shows DASH
@@ -321,8 +346,13 @@ async function loadTeam(id, asOf) {
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
 
+  // A two-way player (Ohtani-type) carries a single roster spot typed
+  // 'Two-Way Player', not 'Pitcher' — include him here too (isTwoWay) so his
+  // pitching side isn't dropped from the roster entirely; he still also
+  // shows above among position players with his own TWP badge, since
+  // `position`'s filter is untouched.
   const pitchers = roster
-    .filter((r) => r.position?.type === 'Pitcher')
+    .filter((r) => r.position?.type === 'Pitcher' || isTwoWay(r.person))
     .map((r) => ({
       id: r.person?.id,
       name: firstLast(r.person),
@@ -338,7 +368,7 @@ async function loadTeam(id, asOf) {
   // fetch above) rather than the active-only `pitchers` list above, so a
   // team's ace still shows up while he's on the IL or a minors rehab stint.
   const fullPitchers = fullRoster
-    .filter((r) => r.position?.type === 'Pitcher')
+    .filter((r) => r.position?.type === 'Pitcher' || isTwoWay(r.person))
     .map((r) => {
       const stat = rosterPitchingStat(r, id)
       return {
@@ -925,7 +955,7 @@ function TeamStats({ title, stats }) {
       <div className="tstats-card">
         <div className="tstats">
           {stats.map((s) => (
-            <div key={s.k} className="tstatrow">
+            <div key={s.k} className={`tstatrow${s.extreme ? ` tstatrow--${s.extreme}` : ''}`}>
               <span className="tstatrow__k">{s.k}</span>
               <span className="tstatrow__v">{s.v}</span>
               <span className={`tstatrow__r${s.tone ? ` tstatrow__r--${s.tone}` : ''}`}>{s.rank}</span>
