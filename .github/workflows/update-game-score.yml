@@ -22,6 +22,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # main requires the lint-and-build status check, which the default
+          # GITHUB_TOKEN can never satisfy on a bare push (no PR = no check
+          # run for that commit, and a PR opened with GITHUB_TOKEN doesn't
+          # even trigger CI — GitHub suppresses workflow-triggered-workflow
+          # chains). GH_BOT_TOKEN is a fine-grained PAT for the repo owner
+          # (admin), so pushes with it bypass the required check the same
+          # way the maintainer's own direct pushes already do.
+          token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
