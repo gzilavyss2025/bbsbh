@@ -214,17 +214,22 @@ for each generator; the reader modules:
   `public/data/game-score.json`. Unlike every file above, this ISN'T on the
   once-nightly cron — `gen-game-score.mjs` runs on its own 10-minute cron
   (`update-game-score.yml`) since the whole point is a score within minutes of
-  a game going Final. `gameScoreFor(scores, gamePk)` formats to one decimal or
-  returns null (not yet scored). This is the one score-derived number the app
-  renders OUTSIDE a `SealBox` — see ADR-0015 for the deliberate mitigation
-  that keeps that safe, and `docs/game-score.md` for the formula. Gated by the
+  a game going Final. Each entry is `{ score, sportId, homeId, awayId }` — the
+  level + both team ids ride along from the same feed already fetched to score
+  the game, so a caller can filter the pool by level/team with no extra fetch.
+  `gameScoreFor(scores, gamePk)` formats the score to one decimal or returns
+  null (not yet scored). This is the one score-derived number the app renders
+  OUTSIDE a `SealBox` — see ADR-0015 for the deliberate mitigation that keeps
+  that safe, and `docs/game-score.md` for the formula. Gated by the
   `useGameScoreVisible` preference (off by default), not the spoiler rule.
   `gameScoreIndex(scores)` / `topGamesByScore(scores, limit)` rank the whole
   pool (SD-bucket tiers via `lib/statTiers.js`, the same convention
   `umpires.js` uses for plate-accuracy tiers) for the Top Games page
   (`TopGamesPage.jsx`, `/top-games`) — deliberately NOT gated by
   `useGameScoreVisible`, since landing on that page is already an explicit
-  "show me scores" action.
+  "show me scores" action. The page filters the raw `scores` map by
+  sportId/homeId/awayId BEFORE calling `gameScoreIndex` so tiers recompute
+  relative to whatever level/team subset is currently shown.
 
 ## Leader boards (live)
 

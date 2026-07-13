@@ -56,9 +56,25 @@ extra cap needed — capped per-factor), `spectacle` the HR-related three
 ## Data scope
 
 MLB + the four full-season MiLB levels (`SWEPT_SPORT_IDS = [1, 11, 12, 13,
-14]`, the same set `gen-callouts.mjs` sweeps). Deliberately never touches
-`winProbability` (MLB-only) — every factor comes from the live feed's
-linescore + play-by-play, which every level carries.
+14]`, the same set `gen-callouts.mjs` sweeps). Regular season only (`gameType
+'R'` — spring training/exhibition games are skipped, they aren't "the
+season"). Deliberately never touches `winProbability` (MLB-only) — every
+factor comes from the live feed's linescore + play-by-play, which every level
+carries.
+
+## Storage shape
+
+Each `public/data/game-score.json` entry is keyed by gamePk:
+
+```json
+{ "score": 7.5, "sportId": 1, "homeId": 158, "awayId": 133 }
+```
+
+`sportId`/`homeId`/`awayId` come straight off the same live feed already
+fetched to compute `score` (`feed.gameData.teams.{home,away}.id` /
+`.sport.id`) — no extra call. Neither is score-revealing, and together they
+let a caller (the Top Games page's level + favorite-team filters) filter the
+whole season's pool without fetching per-game metadata separately.
 
 ## Pipeline
 
@@ -71,3 +87,9 @@ recomputed). Runs on its own tight cron
 (`.github/workflows/update-game-score.yml`, every 10 minutes) rather than the
 once-nightly batch, so a score is normally available within ~10-15 minutes of
 a game going Final.
+
+A full-season backfill (folding in a new season, or a storage-shape change
+like the one above) is a one-time hand-run: delete the JSON file so every
+entry rebuilds in the current schema, then run with `--days` covering back to
+the earliest sportId's `regularSeasonStartDate` for that season (see
+`/api/v1/seasons?sportId={id}&season={year}`).

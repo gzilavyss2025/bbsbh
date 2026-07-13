@@ -103,7 +103,11 @@ don't run these by hand.
 
 - `gen-game-score.mjs` → `public/data/game-score.json` — the 0.0–10.0 "how
   exciting was this game" rating shown unsealed next to FINAL on the slate
-  (`FINAL · 7.5`). APPEND-ONLY/incremental like `gen-umpire-accuracy.mjs`: each
+  (`FINAL · 7.5`). Each entry is `{ score, sportId, homeId, awayId }` — the
+  level + both team ids come straight off the same feed already fetched to
+  score the game (no extra call), so the Top Games page can filter its pool by
+  level/team. Regular season only (`gameType 'R'`; spring training/exhibition
+  are skipped). APPEND-ONLY/incremental like `gen-umpire-accuracy.mjs`: each
   run sweeps a trailing window of dates (`--days`, default 3) across MLB + the
   four full-season MiLB levels, fetches the live feed for every newly-Final
   gamePk not yet scored, and merges the result in (deduped by gamePk — a
@@ -115,7 +119,11 @@ don't run these by hand.
   "extra innings" never drifts from what the innings viewer itself calls
   extra. See `docs/game-score.md` for the formula's factor table + calibration
   anchors, and ADR-0015 for why this is the one score-derived number allowed
-  to render outside a `SealBox`. App reads it via `src/api/gameScore.js`.
+  to render outside a `SealBox`. App reads it via `src/api/gameScore.js`. A
+  full-season backfill (new season, or a schema change) is a hand-run
+  `--days=N` covering back to the earliest sportId's
+  `regularSeasonStartDate` — delete the JSON first so every entry rebuilds in
+  the current schema.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 

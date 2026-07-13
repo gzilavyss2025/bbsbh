@@ -8,6 +8,12 @@
 // score-revealing data: every factor is capped/blended before summing, so no
 // individual factor (margin especially) is recoverable from the shown value.
 //
+// Each entry is { score, sportId, homeId, awayId } — the level + both team ids
+// ride along from the SAME live feed already fetched to compute the score (no
+// extra call), so the Top Games page can filter its pool by level/team without
+// fetching metadata for every scored game in the season. None of these three
+// are score-revealing.
+//
 // APPEND-ONLY / incremental, same shape as gen-umpire-accuracy.mjs: each run
 // sweeps a small trailing window of dates across MLB + the four full-season
 // MiLB levels, fetches the live feed for every newly-Final gamePk not already
@@ -17,11 +23,18 @@
 // every 10 minutes) — deliberately NOT the once-nightly batch — so a score is
 // usually available within minutes of a game going Final. MLB + MiLB (no
 // winProbability dependency, which is MLB-only — see game.js — so this works
-// anywhere the live feed carries play-by-play).
+// anywhere the live feed carries play-by-play). Regular-season games only
+// (gameType 'R') — spring training/exhibition results aren't "the season".
 //
 // Run by hand:
 //   node scripts/gen-game-score.mjs           # trailing 3 days
 //   node scripts/gen-game-score.mjs --days=7
+//
+// One-time season backfill (e.g. folding in a new season, or the gap before
+// this generator existed): delete public/data/game-score.json first so every
+// entry gets rebuilt in the current schema, then run with `--days` covering
+// from the earliest sportId's regularSeasonStartDate (see
+// /api/v1/seasons?sportId={id}&season={year}) through today.
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -219,6 +232,7 @@ for (const dateStr of dates) {
   for (const g of games) {
     if (g.status?.abstractGameState !== 'Final') continue
     if (g.status?.detailedState === 'Postponed') continue
+    if (g.gameType !== 'R') continue
     if (scores[g.gamePk] != null) continue
     candidates.push(g.gamePk)
   }
@@ -226,6 +240,19 @@ for (const dateStr of dates) {
 candidates = [...new Set(candidates)]
 
 console.log(`${candidates.length} newly-Final game(s) to score (${dates[dates.length - 1]}..${dates[0]})`)
+
+// Checkpointed every CHECKPOINT_EVERY games, not just at the very end — a
+// large one-time backfill (thousands of gamePks, each its own feed fetch) can
+// run long enough to get interrupted, and this loop is otherwise all-or-
+// nothing. A checkpoint write is safe mid-run: `scores` is only ever added to,
+// never rewritten, so a resumed run's `scores[g.gamePk] != null` skip check
+// picks up exactly where the last checkpoint left off.
+const CHECKPOINT_EVERY = 200
+
+async function writeOut() {
+  await mkdir(dirname(out), { recursive: true })
+  await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), scores }))
+}
 
 let scored = 0
 let skipped = 0
@@ -237,13 +264,22 @@ for (const gamePk of candidates) {
       skipped++
       continue
     }
-    scores[gamePk] = score
+    const teams = feed?.gameData?.teams
+    scores[gamePk] = {
+      score,
+      sportId: teams?.home?.sport?.id ?? null,
+      homeId: teams?.home?.id ?? null,
+      awayId: teams?.away?.id ?? null,
+    }
     scored++
+    if (scored % CHECKPOINT_EVERY === 0) {
+      await writeOut()
+      console.log(`checkpoint: ${scored} scored so far (${Object.keys(scores).length} total)`)
+    }
   } catch (err) {
     console.error(`gamePk ${gamePk}: ${err.message}`)
   }
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), scores }))
+await writeOut()
 console.log(`wrote ${out} (${scored} newly scored, ${skipped} skipped, ${Object.keys(scores).length} total)`)
