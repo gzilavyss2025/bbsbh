@@ -92,6 +92,28 @@ export async function fetchSchedule(
   return games.map((g) => normalizeGame(g, sportId))
 }
 
+// The season's All-Star break bounds, for the slate's empty-day treatment
+// (GameSelect): `allStarDate` is the All-Star Game's own date (which DOES show
+// up as a normal-looking schedule row, teams "AL/NL All-Stars" — real logos,
+// real abbreviations, so it needs no special handling); the Home Run Derby
+// falls the evening before it, and the break runs through the day before
+// `firstDate2ndHalf` resumes. Deliberately not a hardcoded date list — this
+// endpoint gives the exact bounds every season. There's no statsapi endpoint
+// for the Derby itself (verified live — it's not a schedulable game or
+// event), so this only supports a static "Derby's tonight" pointer, never a
+// live score. MLB-only; degrades to null on failure or a lean/missing season row.
+export async function fetchAllStarInfo(season) {
+  if (!season) return null
+  try {
+    const data = await getJson(`/api/v1/seasons/${season}?sportId=1`)
+    const s = data.seasons?.[0]
+    if (!s?.allStarDate || !s?.firstDate2ndHalf) return null
+    return { allStarDate: s.allStarDate, firstDate2ndHalf: s.firstDate2ndHalf }
+  } catch {
+    return null
+  }
+}
+
 // Every active club at a level, independent of any date's schedule — used by
 // the logo sheet's level browser so it can show a league's full set of marks
 // rather than just the teams playing today, and by the footer's team

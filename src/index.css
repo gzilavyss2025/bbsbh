@@ -1082,6 +1082,43 @@ body {
   transform: translateY(1px);
 }
 
+/* The Home Run Derby hand-off card (DerbyCard.jsx) — the whole card is the
+   link (unlike .gamecard, which nests its tap target in .gamecard__open),
+   shown in place of the ordinary game list on the one night of the All-Star
+   break that has no game at all to show. */
+.derbycard {
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.derbycard:active {
+  transform: translateY(1px);
+}
+.derbycard__eyebrow {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.derbycard__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.derbycard__ext {
+  font-size: 14px;
+  color: var(--accent-primary);
+}
+.derbycard__sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* In-progress badge, pinned to the card's top-right corner. z-index needed
    because the home team's logo (see .gamecard__logobox .teamlogo) is scaled
    with `transform`, which creates its own stacking context; that context

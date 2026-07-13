@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchSchedule } from '../api/schedule.js'
+import { fetchSchedule, fetchAllStarInfo } from '../api/schedule.js'
 import { fetchScheduleUniforms } from '../api/uniforms.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -12,6 +12,7 @@ import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { fetchGameScores, gameScoreFor } from '../api/gameScore.js'
 import { GameCard } from '../components/GameCard.jsx'
+import { DerbyCard } from '../components/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
 import { ScorebookMark } from '../components/ScorebookMark.jsx'
@@ -95,6 +96,21 @@ export function GameSelect({ onPick, onShowLogos }) {
   const sorted = useMemo(
     () => sortGames(data ?? [], favoriteTeamId, favoriteAffiliateIds),
     [data, favoriteTeamId, favoriteAffiliateIds],
+  )
+
+  // All-Star break detection — only worth a fetch once the MLB slate has
+  // already come back empty (every other day, this never fires). Turns a
+  // bare "No games scheduled." into the Derby hand-off card on Derby night,
+  // or a plain break notice on the rest of the gameless week.
+  const isEmptyMlbDay =
+    sportId === SPORT_IDS.MLB && !loading && !error && sorted.length === 0
+  const allStarInfo = useAsync(
+    () => (isEmptyMlbDay ? fetchAllStarInfo(season) : Promise.resolve(null)),
+    [isEmptyMlbDay, season],
+  )
+  const breakWindow = useMemo(
+    () => allStarBreakWindow(allStarInfo.data, dateStr),
+    [allStarInfo.data, dateStr],
   )
 
   // Games with a Top Performers box to reveal — any that have started, on
@@ -237,8 +253,17 @@ export function GameSelect({ onPick, onShowLogos }) {
         hasData={sorted.length > 0}
         errorMessage="Couldn’t load games. Check your connection and try again."
         onRetry={slate.reload}
-        emptyMessage="No games scheduled."
+        // Suppressed for a day the break window will claim (below) — briefly
+        // while allStarInfo is still in flight too, so a Derby night doesn't
+        // flash "No games scheduled." before the fetch resolves.
+        emptyMessage={allStarInfo.loading || breakWindow ? null : 'No games scheduled.'}
       />
+
+      {sorted.length === 0 && breakWindow && !breakWindow.isDerbyDay && (
+        <p className="hint">
+          All-Star Break — next game {humanDate(breakWindow.resumeDate)}
+        </p>
+      )}
 
       {finals.length > 0 && !revealedAll && (
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
@@ -246,6 +271,11 @@ export function GameSelect({ onPick, onShowLogos }) {
 
       <div className={finals.length > 0 ? 'slate-body' : undefined}>
         <ul className="gamelist">
+          {sorted.length === 0 && breakWindow?.isDerbyDay && (
+            <li>
+              <DerbyCard />
+            </li>
+          )}
           {sorted.map((g) => {
             const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
               ? favoriteTeamId
@@ -340,6 +370,20 @@ function RevealAllBar({ onReveal }) {
       </div>
     </>
   )
+}
+
+// Turns fetchAllStarInfo's two season dates into "is this empty day part of
+// the break, and is it Derby night specifically" for the given slate date.
+// The All-Star Game's own date is deliberately EXCLUDED (dateStr < resumeDate
+// stops one day short of it, and the Derby falls the day before): that day
+// already has a real game row from fetchSchedule (see fetchAllStarInfo's
+// header note), so this window never needs to cover it.
+function allStarBreakWindow(info, dateStr) {
+  if (!info) return null
+  const [y, m, d] = info.allStarDate.split('-').map(Number)
+  const derbyDate = toApiDate(addDays(new Date(y, m - 1, d), -1))
+  if (dateStr < derbyDate || dateStr >= info.firstDate2ndHalf) return null
+  return { isDerbyDay: dateStr === derbyDate, resumeDate: info.firstDate2ndHalf }
 }
 
 function isPinned(game, favoriteTeamId, favoriteAffiliateIds) {
