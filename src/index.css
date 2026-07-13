@@ -6995,6 +6995,104 @@ body {
 #root .dayhl__rowBtn {
   text-transform: none; /* caps-exempt: day highlights read as natural sentences */
 }
+.dayhl__rowBtn--teams {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Overlapping team-logo pair for the no-protagonist fallback row (margin/
+   length storylines, comeback) — a light echo of the performer row's
+   headshot without implying a face where the signal has none. */
+.dayhl__rowLogos {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.dayhl__rowLogos .teamlogo,
+.dayhl__rowLogos .teamlogo--fallback {
+  margin-right: -6px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--paper-1);
+  background: var(--surface-card);
+}
+.dayhl__rowLogos .teamlogo:last-child,
+.dayhl__rowLogos .teamlogo--fallback:last-child {
+  margin-right: 0;
+}
+.dayhl__rowText {
+  flex: 1;
+  min-width: 0;
+}
+/* "Face the Story" protagonist row — same card chrome as .playercard, with a
+   smaller headshot (this is a list row, not a grid tile) and the headline
+   sentence as its own inline button rather than the whole row, since the
+   row also carries separate PlayerLink/TeamLink buttons alongside it. */
+.dayhl__row--performer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+.dayhl__rowShotwrap {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.dayhl__rowShot {
+  width: auto;
+  height: 52px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.dayhl__rowBody {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dayhl__rowHeadlineBtn {
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text-body);
+  font-family: var(--font-read);
+  font-size: 13px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+#root .dayhl__rowHeadlineBtn {
+  text-transform: none; /* caps-exempt: same sentence idiom as .dayhl__rowBtn */
+}
+.dayhl__rowHeadlineBtn:active {
+  transform: translateY(1px);
+}
+.dayhl__rowMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.dayhl__rowSub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--w-regular);
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+#root .dayhl__rowSub {
+  text-transform: none; /* caps-exempt: reads as a natural phrase, same idiom as .dayhl__rowBtn */
+}
 
 /* ---------------------------------------------------------------------------
    TEAM LEADERS — per-category season leaderboards on the team page + the
