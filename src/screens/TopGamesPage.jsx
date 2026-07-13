@@ -88,7 +88,7 @@ export function TopGamesPage() {
         <h1 className="topbar__title">Top Games</h1>
       </header>
 
-      <div className="levelnav topgames__levels" aria-label="Filter by level">
+      <div className="levelnav topgames__levels" aria-label="Filter games">
         {LEVEL_FILTERS.map((f) => (
           <button
             key={f.key}
@@ -100,18 +100,17 @@ export function TopGamesPage() {
             {f.label}
           </button>
         ))}
+        <button
+          type="button"
+          aria-pressed={favoriteOnly}
+          className={`topgames__favtoggle ${favoriteOnly ? 'is-active' : ''}`}
+          onClick={() => setFavoriteOnly((v) => !v)}
+        >
+          ★ {favoriteName} only
+        </button>
       </div>
 
-      <button
-        type="button"
-        aria-pressed={favoriteOnly}
-        className={`topgames__favtoggle ${favoriteOnly ? 'is-active' : ''}`}
-        onClick={() => setFavoriteOnly((v) => !v)}
-      >
-        ★ {favoriteName} only
-      </button>
-
-      <p className="hint">
+      <p className="hint topgames__hint">
         {index.n > 0
           ? `The ${Math.min(LIMIT, index.n)} most exciting finished games this season, out of ${index.n} scored.`
           : 'No scored games match this filter yet.'}

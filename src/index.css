@@ -41,6 +41,10 @@
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
+     - the Game Score modal's explainer paragraphs — `.gsmodal .sheet__body`,
+       `.gsmodal__foot` (the per-factor table stays shouted)
+     - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
+       `.hint__link` button)
      - `.buzz__text` (Bluesky posts keep their authors' original casing) */
 #root * {
   text-transform: uppercase;
@@ -1036,22 +1040,25 @@ body {
 }
 
 /* Level filter row — reuses the .levelnav toggle look (same convention as
-   LeadersPage's scope switcher), allowed to wrap onto a second line on a
-   phone (seven options: All + MLB/MiLB/AAA/AA/A+/A vs. the slate's five). */
+   LeadersPage's scope switcher). The "favorite team only" toggle is now a
+   fellow flex child here (not a separate block below), so on a narrow phone
+   the eight buttons wrap and redistribute across as many lines as needed
+   together, instead of the lone favorite-team button always claiming a whole
+   empty-looking line to itself. */
 .topgames__levels {
   flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
 /* The dependent "favorite team only" toggle, styled like a single levelnav
-   pill but left-aligned rather than stretched full-width, since it's one
-   button rather than a segmented group. */
+   pill but sized to its content (not stretched, unlike the flex:1 level
+   buttons around it) since it's one button rather than a segmented group. */
 .topgames__favtoggle {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  flex: 0 1 auto;
   min-height: 34px;
-  margin-bottom: 4px;
   padding: 0 12px;
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
@@ -1074,6 +1081,24 @@ body {
   border-color: var(--accent-primary);
   color: var(--text-on-ink);
   box-shadow: none;
+}
+
+/* The "How's this calculated?" hint, boxed in the same kraft-amber
+   notification card the innings feed uses for pitching/event notices
+   (.pitchernotice--pbp) — reads as something worth noticing rather than a
+   throwaway caption. Explainer prose, so it's also caps-exempt (see the
+   ALL-CAPS INVARIANT block up top): the sentence + its embedded button read
+   naturally instead of shouting. */
+.topgames__hint {
+  margin: 4px 0 16px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--seal-hatch);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
+}
+#root .topgames__hint,
+#root .topgames__hint .hint__link {
+  text-transform: none; /* caps-exempt: Top Games hint reads as a natural sentence, boxed like an innings notification card */
 }
 
 .gamecard {
@@ -11123,6 +11148,13 @@ body {
   font-size: 11px;
   color: var(--graphite-soft);
   text-align: center;
+}
+
+/* Explainer prose reads as natural sentences; the per-factor table below it
+   (.gsfactor__label/__note) stays shouted like the rest of the app chrome. */
+#root .gsmodal .sheet__body,
+#root .gsmodal__foot {
+  text-transform: none; /* caps-exempt: Game Score modal's explainer paragraphs read as natural sentences */
 }
 
 /* ---------------------------------------------------------- highlight sheet
