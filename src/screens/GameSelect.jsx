@@ -8,7 +8,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { useGameScoreVisible } from '../hooks/useGameScoreVisible.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { SPORT_IDS, LEVELS } from '../lib/teams.js'
+import { SPORT_IDS, LEVELS, ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { fetchGameScores, gameScoreFor } from '../api/gameScore.js'
 import { GameCard } from '../components/GameCard.jsx'
@@ -23,6 +23,7 @@ import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 import { PastDayRecapBox } from '../components/PastDayRecapBox.jsx'
+import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
@@ -97,6 +98,24 @@ export function GameSelect({ onPick, onShowLogos }) {
     () => sortGames(data ?? [], favoriteTeamId, favoriteAffiliateIds),
     [data, favoriteTeamId, favoriteAffiliateIds],
   )
+
+  // The 30-team MLB league minus whoever's on today's slate = the clubs with an
+  // off day, favorite first then alphabetical. MLB only (the name/enumeration
+  // helpers are MLB-only, and off-days are a clean concept for a fixed league).
+  // When NONE of the 30 clubs are playing this comes back as all 30 — an empty
+  // break day, or All-Star Game day (whose lone "AL @ NL All-Stars" row carries
+  // squad ids that aren't any of the 30). That all-30 case is kept ON PURPOSE:
+  // the break has no club games, so the full grid gives the slate something to
+  // browse instead of a bare "No games scheduled."
+  const offDayTeamIds = useMemo(() => {
+    if (sportId !== SPORT_IDS.MLB) return []
+    const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
+    return ALL_MLB_TEAM_IDS.filter((id) => !playing.has(id)).sort((a, b) => {
+      if (a === favoriteTeamId) return -1
+      if (b === favoriteTeamId) return 1
+      return teamFullName(a).localeCompare(teamFullName(b))
+    })
+  }, [sorted, sportId, favoriteTeamId])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
@@ -315,6 +334,18 @@ export function GameSelect({ onPick, onShowLogos }) {
             )
           })}
         </ul>
+
+        {/* Any idle club — including the all-30 case on an All-Star break or
+            All-Star Game day, where there are no club games and the full grid
+            is the point (something to browse). */}
+        {offDayTeamIds.length > 0 && (
+          <OffDaySection
+            teamIds={offDayTeamIds}
+            favoriteTeamId={favoriteTeamId}
+            dateStr={dateStr}
+            sportId={sportId}
+          />
+        )}
 
         {finals.length > 0 && (
           <PastDayRecapBox

@@ -1163,6 +1163,16 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
+/* The 2026 Home Run Derby wordmark leading the card — a wide mark (~4.2:1),
+   so height-constrained with auto width and capped to the card so it never
+   overflows the manila tile. */
+.derbycard__logo {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: 100%;
+  margin: 6px 0 2px;
+}
 .derbycard__title {
   display: flex;
   align-items: center;
@@ -1474,6 +1484,116 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.01em;
   color: var(--text-heading);
+}
+
+/* ------------------------------------------------------------------- off day
+   The clubs not playing today, below the games (above the Day Recap on a past
+   day). Each is a compact card reusing the slate matchup card's framed,
+   overscaled logo tile treatment (.gamecard__logobox), scaled down, over a
+   two-line location/mascot name. The favorite team's card carries the same
+   --pin-accent border tint + star as .gamecard--pinned. See OffDaySection.jsx. */
+.offday {
+  margin-top: 18px;
+}
+.offday__banner {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.offday__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: var(--space-2);
+}
+.offdaycard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.offdaycard__logobox {
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--inset-cell);
+}
+.offdaycard__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  /* Bleed to the frame like the slate tiles; the box clips the overflow. */
+  transform: scale(1.32);
+}
+.offdaycard__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: 28px;
+}
+.offdaycard__name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 1.12;
+  min-width: 0;
+}
+.offdaycard__loc {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.offdaycard__mascot {
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--text-heading);
+}
+/* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
+.offdaycard--pinned {
+  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+.offdaycard__pin {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 11px;
+  color: var(--pin-accent, var(--field));
 }
 
 /* ---------------------------------------------------------------- team logo */
