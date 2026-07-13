@@ -1563,6 +1563,10 @@ body {
   text-align: center;
   line-height: 1.12;
   min-width: 0;
+  /* A long single-word mascot (DIAMONDBACKS) must wrap within the narrow card
+     rather than overflow its border. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .offdaycard__loc {
   font-family: var(--font-display);
