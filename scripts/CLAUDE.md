@@ -156,6 +156,10 @@ Re-run only to fold in a new season.
 
 - `check-caps.mjs` — guards the global ALL-CAPS invariant (no CSS `text-transform`
   sneaks a caps-defeating value back in). See the block comment in `src/index.css`.
+- `check-name-casing.mjs` — the JS half of the same invariant: fails if a
+  component calls `.toUpperCase()`/`.toLowerCase()` on rendered text (redundant
+  with the CSS invariant, and can drift from it on real Unicode names) without
+  a `caps-js-exempt` marker comment on the same line. See ADR-0017.
 - `check-claude-md.mjs` — guards the CLAUDE.md leanness rule: fails if the root
   `CLAUDE.md` exceeds `MAX_LINES` (200). Keeps subsystem detail in the nested
   `CLAUDE.md` files (this one, `src/CLAUDE.md`, `src/api/CLAUDE.md`) that load only

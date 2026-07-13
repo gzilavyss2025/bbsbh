@@ -27,7 +27,8 @@ export function TeamLogo({
   const [stage, setStage] = useState('variant')
   useEffect(() => setStage('variant'), [teamId, variant])
 
-  const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?'
+  // A single-letter monogram fallback, not a re-uppercase of displayed text.
+  const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
   const bwClass = bw ? 'teamlogo--bw' : ''
 
   const effectiveVariant = stage === 'variant' ? variant : 'base'

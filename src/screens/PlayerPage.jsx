@@ -32,7 +32,7 @@ function monthDay(iso) {
 }
 function debutLabel(iso) {
   const [y, m, d] = (iso || '').split('-')
-  return y ? `${MONTHS[Number(m) - 1].toUpperCase()} ${Number(d)}, ${y}` : ''
+  return y ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
 }
 // Reads as the story of a rookie season: the MLB debut, first taking the field,
 // then each milestone at the plate in the order it's likeliest to arrive. The
@@ -240,7 +240,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                   rows={block.arsenal.map((p) => ({
                     key: p.code,
                     cells: [
-                      p.name.toUpperCase(),
+                      p.name,
                       p.velo != null ? <>{p.velo.toFixed(1)} <span className="pitch__unit">mph</span></> : DASH,
                       p.usage != null ? `${Math.round(p.usage * 100)}%` : DASH,
                     ],
@@ -259,7 +259,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                         <span className="gamelog__date">{r.date}</span>
                         <span className="gamelog__opp">
                           {r.home ? 'vs' : '@'}{' '}
-                          <GameLink path={r.boxscorePath}>{r.opp.toUpperCase()}</GameLink>
+                          <GameLink path={r.boxscorePath}>{r.opp}</GameLink>
                           {r.level && <span className="gamelog__level">{r.level}</span>}
                         </span>
                       </div>
@@ -322,9 +322,9 @@ export function PlayerPage({ id, asOf, sportId }) {
                       </GameLink>
                       <span className="split__sub">
                         {f.batter ? (
-                          <PlayerLink id={f.batter.id}>{f.batter.fullName.toUpperCase()}</PlayerLink>
+                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
                         ) : f.pitcher ? (
-                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName.toUpperCase()}</PlayerLink>
+                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
                         ) : (
                           f.oppName || f.oppAbbr
                         )}

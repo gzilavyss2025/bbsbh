@@ -29,11 +29,19 @@
    (1,0,1) beats any plain class selector, so nothing downstream can quietly
    undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
    guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
-   if you do. The sanctioned exceptions are `.buzz__text` (Bluesky posts keep
-   their authors' original casing) and the play-by-play copy — `.pbp__desc`
-   descriptions and `.pbp__note` event notes — which read as natural-case
-   sentences; each opts out with a `caps-exempt` marker the guard recognizes —
-   don't add another without the same deliberate marker. */
+   if you do. The sanctioned exceptions, each opting out with a `caps-exempt`
+   marker the guard recognizes (don't add another without the same
+   deliberate marker), all read as natural-case sentences rather than
+   shouted app chrome:
+     - play-by-play copy and its feed-sourced siblings — `.pbp__desc`,
+       `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
+       `.pitchernotice__eventtext` (mound visit / ejection / baserunning
+       notification cards), `.bs__potgDesc`, `.flipback__potg`,
+       `.dayhl__rowBtn`
+     - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
+     - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
+       `.favteamsheet__pitch`
+     - `.buzz__text` (Bluesky posts keep their authors' original casing) */
 #root * {
   text-transform: uppercase;
 }
@@ -3477,10 +3485,12 @@ body {
   border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
-/* ABS (Automated Ball-Strike) challenge history — the card's third row (see
-   StatBox's AbsRow). One row per club: the abbreviation, then a pip per
-   challenge in order — filled dot = successful/retained, ✗ = failed/lost, hollow
-   = an unused starting challenge. */
+/* ABS (Automated Ball-Strike) challenges — the card's third row (see
+   StatBox's AbsRow). One row per club: the abbreviation, then how many
+   challenges are left as used/open pips (UsagePips, shared with the
+   mound-visit notice) — a challenge only spends a pip when it FAILS, so a
+   club that keeps winning its challenges always shows its full starting
+   count. */
 .abs {
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
@@ -3513,26 +3523,6 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
-}
-.abs__pips {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.abs__pip {
-  font-size: 12px;
-  line-height: 1;
-}
-.abs__pip--success {
-  color: var(--accent-positive);
-}
-.abs__pip--fail {
-  color: var(--accent-negative);
-  font-size: 11px;
-  font-weight: var(--w-bold);
-}
-.abs__pip--ghost {
-  color: var(--graphite-soft);
 }
 
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
@@ -3817,65 +3807,78 @@ body {
   background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
 }
 
-/* The mound-visit notification bar (see MoundVisitBar) — a thin full-width
-   strip between at-bat cards, not a card of its own: a mound visit is a
-   momentary stoppage, and the useful nugget is how many the club has left. */
-.mvbar {
-  display: flex;
-  align-items: center;
+/* Notification-card family, tier 2/3 — mound visits, ejections, and the
+   baserunning/misc events with no plate appearance of their own (steal,
+   caught stealing, pickoff, wild pitch, passed ball, balk) all ride the SAME
+   .pitchernotice/.pitchernotice--pbp kraft-amber card tier 1 (pitching/
+   defensive/pinch-running notices) already uses — no separate colored-rail
+   strip. What used to be a bare icon is now the real scorer's shorthand for
+   the event ("MV", "EJ", "SB", "WP", …), same family as the at-bat card's own
+   .pbp__code. --event just tightens the gap for this denser, iconless row. */
+.pitchernotice--event {
   gap: 8px;
-  margin: 4px 0;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-inset);
-  border-left: 3px solid var(--seal-hatch);
 }
-.mvbar__icon {
-  font-size: 12px;
-  line-height: 1;
+.pitchernotice__code {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-1);
+  flex: none;
 }
-.mvbar__label {
+/* An ejection's code, in the same negative accent .pbp__code--error uses for
+   a reached-on-error play — this is the one alert-weight event in the family. */
+.pitchernotice__code--alert {
+  color: var(--clay-deep);
+}
+.pitchernotice__teammark {
+  flex: none;
+}
+.pitchernotice__label {
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: var(--w-bold);
-  text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
-.mvbar__remaining {
-  margin-left: auto;
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+.pitchernotice__spacer {
+  flex: 1;
 }
-
-/* The ejection notification bar (see EjectionBar) — same thin full-width strip
-   as a mound visit, but in the negative accent: an ejection is a stoppage
-   worth flagging at a glance, distinct from the routine amber of a sub or
-   pitching change. The label is a full sentence (already sentence-case from
-   the feed), not a caps token, so no text-transform here. */
-.ejectbar {
-  display: flex;
+/* UsagePips (shared by the mound-visit notice above and StatBox.jsx's ABS
+   challenge row) — "how many of a capped resource are left" as used/open
+   circles. Drawn as CSS shapes rather than ●/○/✕ glyphs: those characters
+   aren't rendered at the same optical size in any font (a filled dot reads
+   smaller than a hollow ring at an identical font-size), so a glyph-based
+   pip row can never actually match itself pip-to-pip; a shared fixed box
+   with only the fill/border swapped can. */
+.usagepips {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin: 4px 0;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--accent-negative) 10%, var(--surface-inset));
-  border-left: 3px solid var(--accent-negative);
+  gap: 5px;
+  flex: none;
 }
-.ejectbar__icon {
-  font-size: 12px;
-  line-height: 1;
+.usagepips__pip {
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
-.ejectbar__label {
-  font-family: var(--font-display);
+.usagepips__pip--used {
+  background: var(--seal-hatch);
+}
+.usagepips__pip--open {
+  border: 1.3px solid var(--graphite-soft);
+}
+/* An ejection/event card's sentence — same natural-case prose treatment as
+   .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
+   sentence straight from the feed, not a caps token. */
+.pitchernotice__eventtext {
+  font-family: var(--font-read);
   font-size: 12px;
   font-weight: var(--w-semibold);
+  letter-spacing: 0.015em;
   color: var(--text-heading);
+  min-width: 0;
 }
 
 /* The entering pitcher's headshot (see PitcherPhoto in StatBox.jsx) — sized
@@ -4443,7 +4446,10 @@ body {
 #root .pbp__subnote .pbp__name,
 #root .pbp__note,
 #root .pbp__note .plink,
-#root .pbp__callout {
+#root .pbp__notetext,
+#root .pbp__callout,
+#root .pitchernotice__eventtext,
+#root .pitchernotice__eventtext .plink {
   text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
 }
 
@@ -5460,11 +5466,12 @@ body {
   color: var(--graphite-soft);
 }
 
-/* A frame that scored: inked bold and seam-red, the way a scorer's eye jumps
-   to the runs. Placed before is-active so the selected half still wins (the
-   crossing white-on-navy ink). */
+/* A frame that scored: inked bold and field-green (the same positive accent
+   as the R stat and the RBI tag), the way a scorer's eye jumps to the runs.
+   Placed before is-active so the selected half still wins (the crossing
+   white-on-navy ink). */
 .rolling__pick.rolling__runs {
-  color: var(--accent-negative);
+  color: var(--accent-positive);
   font-weight: var(--w-bold);
 }
 
@@ -7742,11 +7749,29 @@ body {
      Next at every width now (see .pagenav--innings), so it's always one reach
      from the primary action — the old top toolbar is gone. */
 
+  /* The base .pagenav .btn rule caps every floating-bar button to the phone
+     column's width (calc(440px - 2*gutter)) — fine for a single Next/Box
+     score button, but the reveal-split pair's longer "Reveal next at-bat" /
+     "Reveal whole {half}" labels truncate with an ellipsis at that width once
+     there's actually 780px of column (.inningchrome's own measure) to give
+     them. Both rules share this selector's specificity with the base one, so
+     source order here (after it) is what makes this win. */
+  .pagenav--innings .btn,
+  .pagenav--innings .revealsplit {
+    max-width: 780px;
+  }
+
   /* Section tabs + the half navigator share ONE row here — LINEUPS / INNINGS /
      BOX on the left, ‹ Back · Bottom 4th · Next › on the right — instead of two
-     stacked bars. Centered to a comfortable measure. */
+     stacked bars. Centered to a comfortable measure. The base rule sets
+     flex-direction: column for the phone-stacked layout; row must be
+     re-asserted here; a same-specificity rule that doesn't mention a
+     property never resets it, so without this the two bars silently kept
+     stacking (and centering, each far narrower than the 780px measure) at
+     every width. */
   .inningchrome {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 16px;
     max-width: 780px;

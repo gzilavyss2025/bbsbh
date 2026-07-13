@@ -430,6 +430,24 @@ const PRE_PITCH_EVENT_TYPES = new Set([
   'pitching_substitution',
   'offensive_substitution',
 ])
+
+// Position abbreviation -> lowercase phrase, for the "now playing {phrase}"
+// fielder-entry card below — mirrors api/playbyplay.js's own copy of this map
+// (kept separate rather than imported to avoid a select.js <-> playbyplay.js
+// circular import; both are 9 fixed baseball positions, not a value that
+// drifts). No DH entry — a DH never takes the field.
+const POSITION_LOWER = {
+  C: 'catcher',
+  '1B': 'first base',
+  '2B': 'second base',
+  '3B': 'third base',
+  SS: 'shortstop',
+  LF: 'left field',
+  CF: 'center field',
+  RF: 'right field',
+  P: 'pitcher',
+}
+
 export function selectPrePitchChanges(feed, inning, half) {
   const changes = []
   const players = playerIndex(feed)
@@ -451,6 +469,27 @@ export function selectPrePitchChanges(feed, inning, half) {
             name: lastFirst(person),
             jersey: boxscoreJersey(feed, ev.player.id) || person.primaryNumber || '',
             hand: person.pitchHand?.code ?? '', // 'L' | 'R'
+          },
+        })
+      } else if (
+        (type === 'defensive_substitution' || type === 'defensive_switch') &&
+        ev.player?.id != null
+      ) {
+        // Same "now playing {position}" card api/playbyplay.js's
+        // defensiveChangeFielder builds for a mid-inning change — a fresh
+        // fielder or a position switch announced before this half's first
+        // pitch is exactly as worth a scorer's notice, so it gets the same
+        // headshot card instead of a plain list line.
+        const person = players[`ID${ev.player.id}`] ?? {}
+        const { last, first } = personNameParts(person)
+        const name = last ? `${last}${first ? `, ${first}` : ''}` : person.fullName ?? ''
+        changes.push({
+          eventType: type,
+          fielder: {
+            id: ev.player.id,
+            name,
+            jersey: person.primaryNumber ?? '',
+            position: POSITION_LOWER[ev.position?.abbreviation] ?? '',
           },
         })
       } else {

@@ -1,3 +1,5 @@
+import { ordinal } from '../lib/format.js'
+
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:
 // the infield square rotated onto its point, each fielder's surname on a
 // writing line at his position with the small position number beneath, and
@@ -139,16 +141,10 @@ function DefenseName({ entry }) {
         entered ? 'defdiamond__name--in' : ''
       }`}
     >
-      {entry.last.toUpperCase()}
+      {entry.last}
       {entry.inning != null && (
         <span className="defdiamond__enter"> ({ordinal(entry.inning)})</span>
       )}
     </span>
   )
-}
-
-function ordinal(n) {
-  const s = ['TH', 'ST', 'ND', 'RD']
-  const v = n % 100
-  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }

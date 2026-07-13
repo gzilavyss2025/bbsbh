@@ -40,7 +40,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData }) {
                   <li key={p.id} className={rowClass(p)}>
                     <span className="roster__namewrap">
                       <PlayerLink id={p.id} className="roster__name">
-                        {p.nameLastFirst.toUpperCase()}
+                        {p.nameLastFirst}
                       </PlayerLink>
                       <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                     </span>
@@ -60,7 +60,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData }) {
                   <li key={p.id} className={rowClass(p)}>
                     <span className="roster__namewrap">
                       <PlayerLink id={p.id} className="roster__name">
-                        {p.nameLastFirst.toUpperCase()}
+                        {p.nameLastFirst}
                       </PlayerLink>
                       <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                     </span>
@@ -80,7 +80,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData }) {
                   <li key={p.id} className={rowClass(p)}>
                     <span className="roster__namewrap">
                       <PlayerLink id={p.id} className="roster__name">
-                        {p.nameLastFirst.toUpperCase()}
+                        {p.nameLastFirst}
                       </PlayerLink>
                       <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                     </span>
@@ -99,7 +99,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData }) {
 
 // 'Left' / 'Right' handedness -> pitcher shorthand.
 function handAbbr(hand) {
-  const h = (hand || '').toLowerCase()
+  const h = (hand || '').toLowerCase() // caps-js-exempt: normalizing for comparison below, not display casing
   if (h.startsWith('l')) return 'LHP'
   if (h.startsWith('r')) return 'RHP'
   return ''

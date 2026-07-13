@@ -12,8 +12,8 @@ export function StatcastCard({ label, value, unit, who, detail }) {
       </span>
       {who && (
         <span className="statcast__who">
-          {who.toUpperCase()}
-          {detail ? ` (${detail.toUpperCase()})` : ''}
+          {who}
+          {detail ? ` (${detail})` : ''}
         </span>
       )}
     </div>

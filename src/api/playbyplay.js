@@ -98,17 +98,23 @@ export function sentenceCaseEventText(text) {
   return label + text.slice(ci)
 }
 
-// Mound-visit accounting for the notification bar. MLB gives each club 5 mound
-// visits through 9 innings and one more for each extra inning played; a visit is
-// charged to the DEFENSIVE club. Walks every play through (inning, half)
-// inclusive and, for the club fielding THIS half (the opposite of battingSide),
-// returns the running "visits remaining" AFTER each of its mound visits that
-// happened in this half, in order — so the bar on each mound-visit card shows
-// how many that club had left right after it. `allowed` grows with extra
-// innings; remaining never goes negative.
+// MLB gives each club 5 mound visits through 9 innings and one more for each
+// extra inning played. Exported so the notification bar's pip row (used vs
+// still-available) can size itself off the same rule moundVisitRemainings
+// uses internally, without duplicating the "+1 per extra inning" formula.
+export function moundVisitsAllowed(inning) {
+  return 5 + Math.max(0, inning - 9)
+}
+
+// Mound-visit accounting for the notification bar. A visit is charged to the
+// DEFENSIVE club. Walks every play through (inning, half) inclusive and, for
+// the club fielding THIS half (the opposite of battingSide), returns the
+// running "visits remaining" AFTER each of its mound visits that happened in
+// this half, in order — so the bar on each mound-visit card shows how many
+// that club had left right after it. Remaining never goes negative.
 export function moundVisitRemainings(feed, inning, half, battingSide) {
   const defenseSide = battingSide === 'away' ? 'home' : 'away'
-  const allowed = 5 + Math.max(0, inning - 9)
+  const allowed = moundVisitsAllowed(inning)
   const targetIdx = half === 'bottom' ? inning * 2 : inning * 2 - 1 // 1-based half order
   let used = 0
   const inHalf = []
@@ -538,6 +544,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // (they live inside that PA's playEvents), so the feed explains the out /
     // advance instead of leaving a bare mark on the diamond.
     const baserunningNotes = []
+    // A pinch runner's strike-through-and-pencil-in on the ORIGIN card (the
+    // batter he's running for) is exactly the kind of retroactive annotation
+    // the `visible` gate below exists for — it must not appear on that
+    // earlier, already-revealed card until the pinch-running notification
+    // itself is within the visible step window (ADR-0016), so stepping
+    // through "he walked" doesn't silently show who ran for him before that
+    // notification card has actually been reached. Collected here, applied
+    // after `visible` is known for this play, same pattern as baserunningNotes.
+    const pendingPinchRunnerCards = []
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) continue
       const et = e.details?.eventType
@@ -548,7 +563,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           eventType: et,
           text,
           playerId: e.player?.id ?? null,
-          position: et === 'defensive_substitution' ? e.position?.abbreviation ?? '' : undefined,
+          position:
+            et === 'defensive_substitution' || et === 'defensive_switch'
+              ? e.position?.abbreviation ?? ''
+              : undefined,
           segments: linkifyNames(text, nameIndex),
         })
       } else if (et === 'offensive_substitution' && e.position?.abbreviation === 'PR') {
@@ -567,10 +585,13 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           text,
           segments: linkifyNames(text, nameIndex),
         })
-        // Alias + attach right here, at the moment the swap happens, so a
-        // batter who bats around later (and gets a fresh card + originIndex
-        // entry) doesn't retroactively steal a pinch-runner note that
-        // belonged to his earlier trip.
+        // Alias right here, at the moment the swap happens, so a batter who
+        // bats around later (and gets a fresh card + originIndex entry)
+        // doesn't retroactively steal a pinch-runner note that belonged to
+        // his earlier trip — this bookkeeping must stay immediate regardless
+        // of stepCap, or later baserunning on this same pinch runner couldn't
+        // resolve back to the right origin card. The actual card annotation
+        // (pendingPinchRunnerCards) is deferred to the `visible` check below.
         const pinchId = e.player?.id
         const replacedId = e.replacedPlayer?.id
         if (pinchId != null && replacedId != null) {
@@ -578,9 +599,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           const cardIndex = originIndex.get(rootRunner(replacedId))
           if (cardIndex != null) {
             const person = feed?.gameData?.players?.[`ID${pinchId}`] ?? {}
-            const card = entries[cardIndex]
-            card.pinchRunners = card.pinchRunners ?? []
-            card.pinchRunners.push({ id: pinchId, ...personNameParts(person), base: e.base ?? null })
+            pendingPinchRunnerCards.push({
+              cardIndex,
+              id: pinchId,
+              ...personNameParts(person),
+              base: e.base ?? null,
+            })
           }
         }
       } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {
@@ -704,7 +728,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       // inning) has no card to hang its prose on — emit it as its own note so
       // the account isn't lost.
       for (const n of baserunningNotes) {
-        entries.push({ kind: 'event', eventType: n.eventType, segments: n.segments })
+        entries.push({
+          kind: 'event',
+          eventType: n.eventType,
+          playerId: n.runnerId,
+          segments: n.segments,
+        })
       }
     }
 
@@ -712,6 +741,17 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // effect on other, already-carded runners may be applied yet depends on
     // whether the play itself is within the visible step window.
     const visible = stepCap == null || entries.length <= stepCap
+
+    // See pendingPinchRunnerCards above — only pencil the incoming runner
+    // onto the origin card once the pinch-running notification that
+    // announces him is itself within the visible step window.
+    if (visible) {
+      for (const p of pendingPinchRunnerCards) {
+        const card = entries[p.cardIndex]
+        card.pinchRunners = card.pinchRunners ?? []
+        card.pinchRunners.push({ id: p.id, last: p.last, first: p.first, base: p.base })
+      }
+    }
 
     // A runner other than this play's batter can also be put out here — a
     // force, a caught stealing, the back half of a double play. That runner

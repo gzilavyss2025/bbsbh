@@ -18,7 +18,9 @@ export function AsyncGate({ loading, error, data, screenClass, noun, onBack }) {
     )
   }
   if (!data) {
-    const capitalized = noun[0].toUpperCase() + noun.slice(1)
+    // Sentence capitalization of a dynamic word, not a redundant re-uppercase
+    // of a name/label the CSS invariant already handles.
+    const capitalized = noun[0].toUpperCase() + noun.slice(1) // caps-js-exempt
     return (
       <div className={`screen ${screenClass}`}>
         <SiteHeader />

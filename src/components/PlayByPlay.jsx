@@ -6,6 +6,7 @@ import {
   firstRunPlay,
   firstPAIndexByBatter,
   moundVisitRemainings,
+  moundVisitsAllowed,
   pitchingChangePitcher,
   defensiveChangeFielder,
   pinchRunningPlayers,
@@ -15,9 +16,11 @@ import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
-import { PitcherNotice } from './PitcherNotice.jsx'
+import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
+import { TeamLogo } from './TeamLogo.jsx'
+import { UsagePips } from './UsagePips.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
 import { HighlightSheet } from './HighlightSheet.jsx'
 
@@ -38,7 +41,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // entries list (every entry shown, whether by tapping through or because the
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -135,14 +138,23 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
             <EventNote entry={entry} />
           )
         } else if (entry.eventType === 'mound_visit') {
-          // A mound visit is a momentary stoppage — a thin notification bar with
-          // the club's visits-remaining, not a full note.
-          node = <MoundVisitBar team={pitchingName} remaining={entry.mvRemaining} />
-        } else if (entry.eventType === 'defensive_substitution') {
-          // A defensive substitution (a fresh fielder entering) gets the same
-          // headshot card as a pitching change. A defensive SWITCH (a player
-          // already in the game moving positions) stays a plain EventNote below
-          // — falls through with mound visits' non-entrant siblings.
+          // A mound visit is a momentary stoppage — the same notification card
+          // as a substitution, captioned with the visiting club's mark and its
+          // used/open visit pips instead of a headshot.
+          node = (
+            <MoundVisitBar
+              team={pitchingName}
+              teamId={pitchingTeamId}
+              remaining={entry.mvRemaining}
+              allowed={moundVisitsAllowed(inning)}
+            />
+          )
+        } else if (entry.eventType === 'defensive_substitution' || entry.eventType === 'defensive_switch') {
+          // A defensive substitution (a fresh fielder entering) AND a defensive
+          // switch (a player already in the game moving to a new position) both
+          // get the same "now playing" headshot card as a pitching change — a
+          // position change is just as worth a scorer's notice as a fresh
+          // entrant, so it shouldn't read as a lesser plain text line.
           const fielder = defensiveChangeFielder(feed, entry.playerId, entry.position)
           node = fielder ? (
             <FielderNotice fielder={fielder} teamName={pitchingName} className="pitchernotice--pbp" />
@@ -170,6 +182,19 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
           ) : (
             <EventNote entry={entry} />
           )
+        } else if (EVENT_CODES[entry.eventType]) {
+          // A baserunning/misc event with no plate appearance of its own
+          // (steal, caught stealing, pickoff, wild pitch, passed ball, balk) —
+          // the same notification card family, captioned with the real
+          // scorer's shorthand instead of an emoji, plus the one clear person
+          // most of these events are actually about.
+          node = (
+            <EventCard
+              code={EVENT_CODES[entry.eventType]}
+              runnerId={entry.playerId}
+              segments={entry.segments}
+            />
+          )
         } else {
           node = <EventNote entry={entry} />
         }
@@ -188,6 +213,11 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
   )
 }
 
+// Fallback icon for EventNote — only reached when a substitution's fielder/
+// pitcher/runner can't be resolved from gameData.players (a thin feed), so
+// these stay a plain note instead of the FielderNotice/PitcherNotice/
+// PinchRunNotice card. Baserunning/misc events never fall back here — they
+// always resolve to EventCard (see EVENT_CODES below).
 const EVENT_ICONS = {
   mound_visit: '⏱',
   pitching_substitution: '🔄',
@@ -195,13 +225,17 @@ const EVENT_ICONS = {
   defensive_switch: '🧤',
   ejection: '🚫',
   pinch_running: '🏃',
-  // Baserunning events — used when one has no plate appearance to hang on and
-  // renders as its own note (see computeHalfInningFeed's non-PA fallback).
-  stolen_base_2b: '🏃', stolen_base_3b: '🏃', stolen_base_home: '🏃',
-  caught_stealing_2b: '🏃', caught_stealing_3b: '🏃', caught_stealing_home: '🏃',
-  pickoff_1b: '🏃', pickoff_2b: '🏃', pickoff_3b: '🏃',
-  pickoff_caught_stealing_2b: '🏃', pickoff_caught_stealing_3b: '🏃', pickoff_caught_stealing_home: '🏃',
-  wild_pitch: '⚾', passed_ball: '⚾', balk: '⚠️',
+}
+
+// The real scorer's shorthand for a baserunning/misc event with no plate
+// appearance of its own — the same abbreviation a scorer pencils on paper,
+// captioning EventCard instead of an emoji.
+const EVENT_CODES = {
+  stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
+  caught_stealing_2b: 'CS', caught_stealing_3b: 'CS', caught_stealing_home: 'CS',
+  pickoff_1b: 'PO', pickoff_2b: 'PO', pickoff_3b: 'PO',
+  pickoff_caught_stealing_2b: 'PO', pickoff_caught_stealing_3b: 'PO', pickoff_caught_stealing_home: 'PO',
+  wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
 }
 
 // The play-by-play prose for a baserunning event (steal, caught stealing, wild
@@ -245,36 +279,62 @@ function EventNote({ entry }) {
   )
 }
 
-// A mound visit: a thin full-width strip between at-bat cards. The useful bit
-// is how many visits the club has left after this one (MLB caps them — see
-// moundVisitRemainings), so it rides on the right.
-function MoundVisitBar({ team, remaining }) {
+// A mound visit: the same kraft-amber notification card as a substitution —
+// no headshot to show (it's a team-level event, not a person), so the code
+// ("MV") sits beside the visiting club's own mark instead. The useful bit is
+// how many visits the club has left (MLB caps them — see moundVisitsAllowed),
+// drawn as used/open pips (UsagePips) — the same shared component StatBox.jsx's
+// ABS challenge row uses.
+function MoundVisitBar({ team, teamId, remaining, allowed }) {
+  const used = remaining != null && allowed != null ? Math.max(0, allowed - remaining) : null
+  const label =
+    used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
   return (
-    <div className="mvbar">
-      <span className="mvbar__icon" aria-hidden="true">
-        ⏱
-      </span>
-      <span className="mvbar__label">Mound visit{team ? ` — ${team}` : ''}</span>
-      {remaining != null && (
-        <span className="mvbar__remaining">
-          {remaining} {remaining === 1 ? 'visit' : 'visits'} left
-        </span>
-      )}
+    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+      <span className="pitchernotice__code">MV</span>
+      <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
+      <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
+      <span className="pitchernotice__spacer" />
+      {used != null && <UsagePips allowed={allowed} used={used} label={label} />}
     </div>
   )
 }
 
-// An ejection: a thin full-width strip like a mound visit, but in the
-// negative/warning accent — the description sentence already carries every
-// detail worth showing (who, by which umpire), so there's nothing to add
-// beyond an icon and the sentence itself.
+// An ejection: the same kraft-amber notification card, captioned "EJ" in the
+// negative accent instead of an icon — the description sentence already
+// carries every detail worth showing (who, by which umpire), so there's
+// nothing else to add.
 function EjectionBar({ text }) {
   return (
-    <div className="ejectbar">
-      <span className="ejectbar__icon" aria-hidden="true">
-        🚫
+    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+      <span className="pitchernotice__code pitchernotice__code--alert">EJ</span>
+      <span className="pitchernotice__eventtext">{text}</span>
+    </div>
+  )
+}
+
+// A baserunning/misc event with no plate appearance of its own (steal, caught
+// stealing, pickoff, wild pitch, passed ball, balk) — the same kraft-amber
+// notification card, captioned with the real scorer's shorthand (EVENT_CODES)
+// instead of an emoji, plus the one clear person the event is actually about
+// when the feed names one (a runner stealing, the pitcher on a balk/wild
+// pitch, the catcher on a passed ball).
+function EventCard({ code, runnerId, segments }) {
+  return (
+    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
+      <span className="pitchernotice__code">{code}</span>
+      {runnerId != null && <PitcherPhoto personId={runnerId} />}
+      <span className="pitchernotice__eventtext">
+        {segments.map((seg, i) =>
+          seg.id != null ? (
+            <PlayerLink key={i} id={seg.id}>
+              {seg.text}
+            </PlayerLink>
+          ) : (
+            seg.text
+          ),
+        )}
       </span>
-      <span className="ejectbar__label">{text}</span>
     </div>
   )
 }
