@@ -4,11 +4,12 @@ import { useAsync } from '../hooks/useAsync.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { TeamLogo } from './TeamLogo.jsx'
 
-// Favorite-team picker, shared by the first-visit welcome modal (GameSelect)
-// and the footer's "Favorite team" button. The picker itself reuses the
-// Splits vs Team card's tray/strip styling (vsteam__* — see index.css) rather
-// than a new one: the same finger-scrollable row of every MLB club's logo,
-// grayscaled except the pick.
+// Settings modal, shared by the first-visit welcome flow (GameSelect, `intro`)
+// and the footer's "Settings" button: the favorite-team picker plus the Game
+// Score visibility toggle, each under its own sub-heading. The team picker
+// reuses the Splits vs Team card's tray/strip styling (vsteam__* — see
+// index.css) rather than a new one: the same finger-scrollable row of every
+// MLB club's logo, grayscaled except the pick.
 //
 // Tapping a club applies it immediately (no separate Save step), and closing
 // by any route — backdrop tap, the X, Escape, or (in `intro` mode) the "Get
@@ -82,11 +83,11 @@ export function FavoriteTeamModal({
         className="favteamsheet"
         role="dialog"
         aria-modal="true"
-        aria-label="Favorite team"
+        aria-label={intro ? 'Welcome to Scorebook Helper' : 'Settings'}
       >
         <div className="favteamsheet__head">
           <h2 className={`sheet__title${intro ? ' favteamsheet__title--intro' : ''}`}>
-            {intro ? 'Welcome to Scorebook Helper' : 'Favorite team'}
+            {intro ? 'Welcome to Scorebook Helper' : 'Settings'}
           </h2>
           <button
             ref={closeRef}
@@ -109,60 +110,66 @@ export function FavoriteTeamModal({
           </p>
         )}
 
-        <p className="favteamsheet__subtitle">
-          {intro
-            ? "Pick your favorite team — we'll pin them to the top of the schedule."
-            : 'Choose a different favorite team.'}
-        </p>
+        <section className="favteamsheet__section">
+          <h3 className="favteamsheet__sectionTitle">Favorite team</h3>
+          <p className="favteamsheet__subtitle">
+            {intro
+              ? "Pick your favorite team — we'll pin them to the top of the schedule."
+              : 'Choose a different favorite team.'}
+          </p>
 
-        <div className="vsteam__tray">
-          <div
-            className="vsteam__strip"
-            role="tablist"
-            aria-label="Favorite team"
-            ref={stripRef}
-          >
-            {teams.map((t) => {
-              const active = t.id === selId
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  title={t.name}
-                  ref={active ? activeRef : null}
-                  className={`vsteam__team${active ? ' is-active' : ''}`}
-                  onClick={() => pick(t.id)}
-                >
-                  <TeamLogo teamId={t.id} name={t.name} size={36} />
-                </button>
-              )
-            })}
+          <div className="vsteam__tray">
+            <div
+              className="vsteam__strip"
+              role="tablist"
+              aria-label="Favorite team"
+              ref={stripRef}
+            >
+              {teams.map((t) => {
+                const active = t.id === selId
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    title={t.name}
+                    ref={active ? activeRef : null}
+                    className={`vsteam__team${active ? ' is-active' : ''}`}
+                    onClick={() => pick(t.id)}
+                  >
+                    <TeamLogo teamId={t.id} name={t.name} size={36} />
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </div>
+        </section>
 
         {onSetGameScoreVisible && (
-          <div className="favteamsheet__pref">
-            <div className="favteamsheet__prefText">
-              <span className="favteamsheet__prefLabel">
-                Show Game Score on FINAL cards
-              </span>
-              <span className="hint hint--prose favteamsheet__prefHint">
-                A 0–10 rating of how exciting a finished game was — never the
-                score itself.
-              </span>
+          <section className="favteamsheet__section favteamsheet__section--divider">
+            <h3 className="favteamsheet__sectionTitle">Game Score</h3>
+            <div className="favteamsheet__pref">
+              <div className="favteamsheet__prefText">
+                <span className="favteamsheet__prefLabel">
+                  Show Game Score on FINAL cards
+                </span>
+                <span className="hint hint--prose favteamsheet__prefHint">
+                  A 0–10 rating of how exciting a finished game was — never the
+                  score itself.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={gameScoreVisible}
+                className={`favteamsheet__prefToggle${gameScoreVisible ? ' is-on' : ''}`}
+                onClick={() => onSetGameScoreVisible(!gameScoreVisible)}
+              >
+                {gameScoreVisible ? 'On' : 'Off'}
+              </button>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={gameScoreVisible}
-              className={`favteamsheet__prefToggle${gameScoreVisible ? ' is-on' : ''}`}
-              onClick={() => onSetGameScoreVisible(!gameScoreVisible)}
-            >
-              {gameScoreVisible ? 'On' : 'Off'}
-            </button>
-          </div>
+          </section>
         )}
 
         {intro && (

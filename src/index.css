@@ -1891,14 +1891,6 @@ body {
   box-shadow: var(--ring);
 }
 
-.sitefooter__favteam {
-  gap: 6px;
-}
-
-.sitefooter__favteam-logo {
-  flex: 0 0 auto;
-}
-
 /* -------------------------------------------------- past-matchup sheet
    GameFinderModal's dialog chrome; the finder itself is unstyled beyond
    .gamefinder's own row/results rules above. */
@@ -2055,7 +2047,7 @@ body {
   font-weight: var(--w-semibold);
 }
 
-/* -------------------------------------------------- favorite-team modal
+/* -------------------------------------------------- settings modal
    FavoriteTeamModal's dialog chrome — a centered card (like .logomodal, via
    .scrim--center) rather than a docked bottom sheet, so it reads as a
    deliberate "stop and choose" moment rather than a quick in-flow picker. The
@@ -2126,6 +2118,24 @@ body {
   color: var(--text-caption);
 }
 
+/* Settings modal's two sections (favorite team, Game Score) — each gets its
+   own sub-heading; --divider adds the rule + top gap that separates the
+   second section from the first, in place of a border on .favteamsheet__pref
+   itself (which now sits below its own heading). */
+.favteamsheet__section--divider {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.favteamsheet__sectionTitle {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
 .favteamsheet__actions {
   margin-top: var(--space-4);
 }
@@ -2145,16 +2155,13 @@ body {
 }
 
 /* Game Score visibility toggle row, shared by both the intro welcome modal
-   and the footer-reopened "Favorite team" modal (see FavoriteTeamModal.jsx) —
-   a taste preference row, not part of the team picker above it. */
+   and the footer-reopened Settings modal (see FavoriteTeamModal.jsx) — sits
+   under its own "Game Score" sub-heading (.favteamsheet__section--divider). */
 .favteamsheet__pref {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  margin-top: var(--space-4);
-  padding-top: var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .favteamsheet__prefText {
   display: flex;
