@@ -1,8 +1,8 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
+import { splitName } from '../lib/teamSplits.js'
 import {
-  teamLocationName,
   teamClubName,
   teamFullName,
   favoriteAccentColor,
@@ -42,9 +42,10 @@ export function OffDaySection({ teamIds, favoriteTeamId, dateStr, sportId }) {
 // gets the pinned accent (border tint + star) via the --pin-accent inline var,
 // exactly like .gamecard--pinned.
 function OffDayCard({ id, pinned, onOpen }) {
-  const location = teamLocationName(id)
-  const mascot = teamClubName(id)
   const full = teamFullName(id)
+  // Same hand-maintained splits the slate cards use, so the Athletics render as
+  // "It's Just / Athletics" rather than the API's duplicated "Athletics / Athletics".
+  const { location, mascot } = splitName(full, teamClubName(id))
   const style = pinned ? { '--pin-accent': favoriteAccentColor(id) } : undefined
   return (
     <button
