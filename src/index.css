@@ -10639,6 +10639,98 @@ body {
   color: var(--accent-primary);
 }
 
+/* ------------------------------------------------------------ awards history
+   One section per award family (MVP, Cy Young, ...), each a stack of season
+   rows newest-first. A season row splits into AL/NL columns (or one plain
+   column for the MLB-wide awards); a family with more than one recipient per
+   league per year (Silver Slugger, Gold Glove) tags each name with its
+   position so the row still reads as one glance instead of a wall of names. */
+.awardhistory__award {
+  margin-top: var(--space-2);
+}
+.awardhistory__years {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.awardhistory__year {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.awardhistory__yearnum {
+  flex: none;
+  width: 40px;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 14px;
+  color: var(--text-heading);
+}
+.awardhistory__leagues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  flex: 1;
+  min-width: 0;
+}
+.awardhistory__league {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.awardhistory__leaguetag {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.awardhistory__recipients {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.awardhistory__recipient {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+.awardhistory__teamlink {
+  flex: none;
+  display: inline-flex;
+}
+.awardhistory__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.awardhistory__team {
+  flex: none;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.awardhistory__pos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
 /* ---------------------------------------------------------------- umpire page */
 .umpage__head {
   margin: 6px 0 14px;

@@ -1196,8 +1196,10 @@ const LEVEL_RANK = { 1: 6, 11: 5, 12: 4, 13: 3, 14: 2, 16: 1 }
 // (ALAS/NLAS) live here too — the awards feed carries them with the game's own
 // date, so they need no separate roster lookup. Verified live. Used by
 // trophyCaseView below (the transaction timeline no longer carries awards —
-// see ADR note there).
-const MAJOR_AWARDS = {
+// see ADR note there) and exported for scripts/gen-awards-history.mjs, so the
+// league-wide Awards History page can't drift from what a player's own Trophy
+// Case counts as hardware.
+export const MAJOR_AWARDS = {
   ALMVP: 'MVP', NLMVP: 'MVP',
   ALCY: 'Cy Young', NLCY: 'Cy Young',
   ALROY: 'Rookie of the Year', NLROY: 'Rookie of the Year',
