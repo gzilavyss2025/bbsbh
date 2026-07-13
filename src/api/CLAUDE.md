@@ -28,7 +28,11 @@ spoiler-free only when restricted to the half the user has reached
 - `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
 - `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
   teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
-  `fetchHeadToHead`, `fetchTeamSchedule`.
+  `fetchHeadToHead`, `fetchTeamSchedule`. `fetchGameCardsByPk` is the
+  cross-date sibling of `fetchGamesByPk` — full `normalizeGame`-shaped rows
+  (+ `officialDate`) for a gamePk list spanning many dates/levels, e.g. the
+  Top Games page, where each card needs its own team identity rather than
+  inheriting one date's sportId like the ordinary slate.
 - `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
   the live feed; spoiler-free but empty until ~first pitch, so it rides the
   feed's fetch/reload in `GameView` and renders on the lineup pages + box
@@ -215,6 +219,12 @@ for each generator; the reader modules:
   renders OUTSIDE a `SealBox` — see ADR-0015 for the deliberate mitigation
   that keeps that safe, and `docs/game-score.md` for the formula. Gated by the
   `useGameScoreVisible` preference (off by default), not the spoiler rule.
+  `gameScoreIndex(scores)` / `topGamesByScore(scores, limit)` rank the whole
+  pool (SD-bucket tiers via `lib/statTiers.js`, the same convention
+  `umpires.js` uses for plate-accuracy tiers) for the Top Games page
+  (`TopGamesPage.jsx`, `/top-games`) — deliberately NOT gated by
+  `useGameScoreVisible`, since landing on that page is already an explicit
+  "show me scores" action.
 
 ## Leader boards (live)
 

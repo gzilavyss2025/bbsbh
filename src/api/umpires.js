@@ -1,3 +1,5 @@
+import { TIER_LABELS, tierForZ, meanAndSd } from '../lib/statTiers.js'
+
 // The umpire detail page's data — for a given umpire, every MLB game he's
 // worked this season plus which base he had — read from a static same-origin
 // file (public/data/umpires.json) rather than computed live.
@@ -36,21 +38,10 @@ const MIN_RANK_GAMES = 5
 // deviations from the qualifying pool's mean (see accuracyIndex below), not
 // an even split — real season accuracy across ~90 plate umpires clusters in
 // a band just a few points wide, so a neat 1/3-1/3-1/3 split would put
-// umpires a fraction of a point apart in different tiers. "Elite"/"Below
-// Average" mark a full SD or more from the mean; "Good"/"Average" split the
-// rest at the mean itself.
-export const UMPIRE_TIER_LABELS = {
-  elite: 'Elite',
-  good: 'Good',
-  average: 'Average',
-  below: 'Below Average',
-}
-function tierForZ(z) {
-  if (z >= 1) return 'elite'
-  if (z >= 0) return 'good'
-  if (z >= -1) return 'average'
-  return 'below'
-}
+// umpires a fraction of a point apart in different tiers. See
+// lib/statTiers.js for the shared bucket definition (also used by Game Score
+// rankings) and the "Elite"/"Below Average" = 1 SD rationale.
+export const UMPIRE_TIER_LABELS = TIER_LABELS
 
 async function load() {
   if (cached) return cached
@@ -102,9 +93,7 @@ async function accuracyIndex() {
     .filter((u) => u.season?.called && u.season.accuracy != null && (u.season.games ?? 0) >= MIN_RANK_GAMES)
     .sort((a, b) => b.season.accuracy - a.season.accuracy)
 
-  const n = qualified.length
-  const mean = n ? qualified.reduce((sum, u) => sum + u.season.accuracy, 0) / n : 0
-  const sd = n ? Math.sqrt(qualified.reduce((sum, u) => sum + (u.season.accuracy - mean) ** 2, 0) / n) : 0
+  const { mean, sd, n } = meanAndSd(qualified.map((u) => u.season.accuracy))
 
   const rankById = new Map()
   const ranked = qualified.map((u, i) => {

@@ -18,6 +18,7 @@ export function GameCard({
   uniformsReady,
   prospectCount = 0,
   gameScore = null,
+  dateLabel = null,
   onSelect,
   onBoxScore,
 }) {
@@ -40,6 +41,10 @@ export function GameCard({
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
       style={style}
     >
+      {/* Full-width date strip for a cross-date list (Top Games) where each
+          card needs its own day, unlike the slate (one date heads the whole
+          page). Absent on every ordinary slate card. */}
+      {dateLabel && <div className="gamecard__datebanner">{dateLabel}</div>}
       {postponed ? null : status.label ? (
         <span className="gamecard__delay" title={status.reason || undefined}>
           {status.label}

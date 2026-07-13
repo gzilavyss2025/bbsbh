@@ -8,6 +8,8 @@
 // broken slate. Cached in-memory for the session; the file only grows a
 // little every ~10 minutes, so a stale in-session read just means a
 // just-Finaled game's score shows up on the next full page load.
+import { tierForZ, meanAndSd } from '../lib/statTiers.js'
+
 let cached = null
 
 export async function fetchGameScores() {
@@ -28,4 +30,41 @@ export async function fetchGameScores() {
 export function gameScoreFor(scores, gamePk) {
   const v = scores?.[gamePk]
   return typeof v === 'number' ? v.toFixed(1) : null
+}
+
+// One pass over every scored game (population mean/SD — see lib/statTiers.js,
+// the same SD-bucket convention api/umpires.js uses for plate-umpire accuracy
+// tiers, applied here to Game Score instead of called-pitch accuracy):
+//   • ranked — every {gamePk, score, tier}, best first.
+//   • mean / sd / n — the whole pool's stats.
+//   • thresholds — the numeric score each tier starts at, for a "here's the
+//     range" readout (Top Games page): eliteMin (mean + 1 SD), goodMin
+//     (== mean), averageMin (mean − 1 SD) — below averageMin is "Below
+//     Average". A tiny or empty pool (n < 2, or sd === 0) still returns
+//     thresholds; every game just lands in the same tier.
+export function gameScoreIndex(scores) {
+  const entries = Object.entries(scores ?? {})
+    .filter(([, v]) => typeof v === 'number')
+    .map(([gamePk, score]) => ({ gamePk, score }))
+    .sort((a, b) => b.score - a.score)
+
+  const { mean, sd, n } = meanAndSd(entries.map((e) => e.score))
+  const ranked = entries.map((e) => ({
+    ...e,
+    tier: tierForZ(sd ? (e.score - mean) / sd : 0),
+  }))
+
+  return {
+    n,
+    mean,
+    sd,
+    thresholds: { eliteMin: mean + sd, goodMin: mean, averageMin: mean - sd },
+    ranked,
+  }
+}
+
+// The top N games by score — just `gameScoreIndex`'s already-sorted `ranked`,
+// trimmed. A thin convenience for the Top Games page.
+export function topGamesByScore(scores, limit = 25) {
+  return gameScoreIndex(scores).ranked.slice(0, limit)
 }

@@ -99,6 +99,13 @@ export function SiteFooter({
         >
           Milestone Watch
         </button>
+        <button
+          type="button"
+          className="sitefooter__action"
+          onClick={() => navigate('/top-games')}
+        >
+          Top Games
+        </button>
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}

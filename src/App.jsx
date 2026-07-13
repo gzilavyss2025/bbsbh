@@ -13,6 +13,7 @@ import { TeamLeadersPage } from './screens/TeamLeadersPage.jsx'
 import { LeadersPage } from './screens/LeadersPage.jsx'
 import { UmpirePage } from './screens/UmpirePage.jsx'
 import { UmpireRankingsPage } from './screens/UmpireRankingsPage.jsx'
+import { TopGamesPage } from './screens/TopGamesPage.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
@@ -92,6 +93,8 @@ export default function App() {
     content = <UmpirePage id={route.id} />
   } else if (route.name === 'umpire-rankings') {
     content = <UmpireRankingsPage />
+  } else if (route.name === 'top-games') {
+    content = <TopGamesPage />
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {

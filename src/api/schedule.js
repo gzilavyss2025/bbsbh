@@ -178,6 +178,39 @@ export async function fetchGamesByPk(gamePks) {
   }
 }
 
+// Resolve a set of gamePks to full, GameCard-ready game objects — same shape
+// as a normal slate row (fetchSchedule), for a CROSS-DATE list like the Top
+// Games page, where each card carries its own team identity/level rather
+// than inheriting one date's sportId like the ordinary slate does. One
+// batched request (same endpoint/hydrate as fetchGamesByPk above), reusing
+// normalizeGame so a Top Games card can never drift from an ordinary slate
+// card's shape. `officialDate` rides alongside for the card's date banner
+// (GameCard's `dateLabel` prop) — normalizeGame's own `gameDate` is a full
+// ISO timestamp, not a calendar day. Degrades to {} on failure.
+export async function fetchGameCardsByPk(gamePks) {
+  const list = [...new Set((gamePks ?? []).filter(Boolean))]
+  if (!list.length) return {}
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?gamePks=${list.join(',')}&hydrate=team`,
+    )
+    const out = {}
+    for (const d of data.dates ?? []) {
+      for (const g of d.games ?? []) {
+        const sportId =
+          g.teams?.home?.team?.sport?.id ?? g.teams?.away?.team?.sport?.id ?? 1
+        out[g.gamePk] = {
+          ...normalizeGame(g, sportId),
+          officialDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+        }
+      }
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
 // Both schedule fetchers below prune with `fields=`: the raw schedule row
 // carries each side's score/isWinner/leagueRecord, which are score-revealing and
 // which these selectors deliberately never read. An allowlist keeps them out of
