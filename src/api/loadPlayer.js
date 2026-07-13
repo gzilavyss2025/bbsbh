@@ -46,6 +46,7 @@ import {
   detectRehabAssignment,
   detectInjuredList,
   transactionTimelineView,
+  trophyCaseView,
   tradeKey,
   positionPlayerPastNote,
   fieldingView,
@@ -276,10 +277,11 @@ export async function loadPlayer(id, asOf) {
   // Transaction timeline enrichment — everything the raw player-scoped feed
   // can't give on its own: each affiliate club's level (for CALLED UP / SENT
   // DOWN + the level tags), the other players in each trade (named only as free
-  // text on the player's own row), the player's major awards, and his draft
-  // record. Gathered here, then shaped by transactionTimelineView. Awards are
-  // MLB-only; only fetch them for a debuted player (a pure prospect has none in
-  // the majors-award allowlist).
+  // text on the player's own row), and his draft record. Gathered here, then
+  // shaped by transactionTimelineView. The same awards fetch also feeds the
+  // Trophy Case card (trophyCaseView, below) — awards are MLB-only, so only
+  // fetch them for a debuted player (a pure prospect has none in either
+  // allowlist).
   const asgTeamIds = new Set()
   const trades = []
   for (const t of txns) {
@@ -323,11 +325,11 @@ export async function loadPlayer(id, asOf) {
     selfId: bio.id,
     levelByTeamId,
     tradeOthers,
-    awards,
     draft: bio.draft,
     rookieUntil: rookieInfo?.rookieUntil ?? null,
     endDate,
   })
+  const trophyCase = trophyCaseView(awards, endDate)
   const blocks = results.map((r) => r.block)
   const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)
@@ -603,7 +605,7 @@ export async function loadPlayer(id, asOf) {
     onRehab, rehab,
     onIL, il,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
-    conversionNote, positionInnings, transactions,
+    conversionNote, positionInnings, transactions, trophyCase,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }
