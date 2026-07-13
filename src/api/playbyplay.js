@@ -449,6 +449,19 @@ export function firstPAIndexByBatter(feed) {
 // card, which does its own prior-halves walk — see buildThirdTimeThroughNote
 // in api/callout-notes.js.)
 
+// At-bat-mode stepping (ADR-0016): the entries index marking the end of the
+// NEXT step from `fromCount` — every leading event note (a mound visit, a
+// sub) up to and including the next plate-appearance card, so one tap reads
+// as "reveal the next batter" rather than "reveal the next note." Returns
+// entries.length when no at-bat card remains after fromCount (trailing
+// notes with nobody left to bat, e.g. a closing ejection).
+export function nextStepBoundary(entries, fromCount) {
+  for (let i = fromCount; i < entries.length; i++) {
+    if (entries[i].kind === 'atbat') return i + 1
+  }
+  return entries.length
+}
+
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
 // mound-visit / pitching-change notes, first-at-bat first. `battingSide` is
 // 'away' | 'home' (top bats away, bottom bats home — same convention as the

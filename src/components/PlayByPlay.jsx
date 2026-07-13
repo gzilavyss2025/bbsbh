@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   computeHalfInningFeed,
   pitchLadder,
@@ -9,6 +9,7 @@ import {
   pitchingChangePitcher,
   defensiveChangeFielder,
   pinchRunningPlayers,
+  nextStepBoundary,
 } from '../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
@@ -26,9 +27,36 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // notes, first at-bat first. This reads score-revealing data
 // (computeHalfInningFeed), so — same rule as the rest of the half's stat
 // grid — it must only be rendered from inside a SealBox's reveal function.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam, highlightsMap }) {
+//
+// `stepCap` (ADR-0016, at-bat stepping): when not null, only the first
+// `stepCap` entries render — the caller (HalfInning/InningViewer's floating
+// bar) drives the cap forward one plate appearance at a time. Each render
+// reports back either `onStepInfo({ nextCap, isLastStep })` — the cap the
+// NEXT "reveal next at-bat" tap should pass, computed via nextStepBoundary so
+// one tap bundles a leading event note (a sub, a mound visit) with the
+// plate appearance it precedes — or, once `stepCap` has caught up to the full
+// entries list (every entry shown, whether by tapping through or because the
+// very first step happened to be the whole half), `onStepComplete()` once, so
+// the caller can promote this half to a normal full commit.
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete }) {
   const entries = computeHalfInningFeed(feed, inning, half, battingSide)
+  const stepping = stepCap != null
+  const exhausted = stepping && entries.length > 0 && stepCap >= entries.length
+
+  // Must run before the empty-entries early return below (rules-of-hooks) —
+  // guarded internally by `stepping`/`exhausted` instead.
+  useEffect(() => {
+    if (!stepping || entries.length === 0) return
+    if (exhausted) {
+      onStepComplete?.()
+    } else {
+      const nextCap = nextStepBoundary(entries, stepCap)
+      onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length })
+    }
+  }, [stepping, exhausted, stepCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (entries.length === 0) return null
+  const visibleEntries = stepping ? entries.slice(0, stepCap) : entries
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
@@ -57,7 +85,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, batt
 
   return (
     <div className="pbp">
-      {entries.map((entry, i) => {
+      {visibleEntries.map((entry, i) => {
         if (entry.kind !== 'event') {
           return (
             <AtBatCard

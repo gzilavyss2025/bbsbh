@@ -61,6 +61,11 @@ read the linked ADRs before refactoring:
   advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator
   (away row = tops, home row = bottoms, current half inked as selected); its
   Back/Next controls cover the full unlocked range.
+- **At-bat stepping**: a sealed half's floating-bar button splits into "Next
+  at-bat" / "Whole {half}" choices, stepping `PlayByPlay`'s cards one plate
+  appearance at a time via a transient cursor (`atBatCountFor`,
+  `useRevealProgress`) that always collapses into a normal `revealTo` commit
+  rather than becoming a second spoiler boundary (ADR-0016).
 
 ## Design system (`src/index.css` + `src/tokens/*`)
 

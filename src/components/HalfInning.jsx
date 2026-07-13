@@ -33,7 +33,14 @@ export function HalfInning({
   callouts,
   vsTeam,
   highlights,
+  revealedAtBatCount,
+  onStepInfo,
 }) {
+  // At-bat stepping (ADR-0016): a half being stepped through one plate
+  // appearance at a time (the floating bar's "Reveal next at-bat" button) has
+  // revealedAtBatCount > 0 before it's fully committed. An already-committed
+  // half (revealed) always shows everything regardless.
+  const stepping = !revealed && revealedAtBatCount > 0
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
   // state: ABOVE the seal while the half is still sealed (stage the sheet before
@@ -106,8 +113,8 @@ export function HalfInning({
       )}
 
       <SealBox
-        forceRevealed={revealed}
-        onReveal={() => onReveal(inning, half)}
+        forceRevealed={revealed || revealedAtBatCount > 0}
+        onReveal={stepping ? undefined : () => onReveal(inning, half)}
         coverless
       >
         {() => {
@@ -133,12 +140,18 @@ export function HalfInning({
                 callouts={callouts}
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
+                stepCap={stepping ? revealedAtBatCount : null}
+                onStepInfo={onStepInfo}
+                onStepComplete={() => onReveal(inning, half)}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball), sat below the feed.
                   Tracking data is often absent at MiLB levels, so the row only
-                  renders when the feed carried it. Same reveal path as above. */}
-              {(d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
+                  renders when the feed carried it. Same reveal path as above.
+                  Held back entirely while still stepping (ADR-0016) — these
+                  are whole-half aggregates and would leak plays not yet
+                  shown. */}
+              {!stepping && (d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
                 <div className="statcast">
                   {d.maxVelo != null && (
                     <StatcastCard

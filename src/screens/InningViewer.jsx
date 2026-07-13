@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -56,11 +56,8 @@ export function InningViewer({
   // Reveal high-water mark, extras-unlock state, and the feed-keyed derived
   // cache — see useRevealProgress. The running line and Pitchers section both
   // read from `revealedThrough`; any half at or below it renders unsealed.
-  const { revealedThrough, revealTo, unlocked, getDerived } = useRevealProgress(
-    feed,
-    regulation,
-    actualCount,
-  )
+  const { revealedThrough, revealTo, unlocked, getDerived, atBatCountFor, revealAtBat } =
+    useRevealProgress(feed, regulation, actualCount)
 
   const meta = useMemo(
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
@@ -119,7 +116,20 @@ export function InningViewer({
   // Next right under the thumb).
   const currentSealed = curIdx > revealedThrough
   const curHalfLabel = `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`
-  const revealCurrent = () => revealTo(effInning, effHalf)
+  // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
+  // as two side-by-side choices — reveal just the next plate appearance, or
+  // the whole half at once. Keyed on the half actually being shown, not a
+  // reveal frontier — RollingLine and direct links both let a user jump
+  // straight to any unlocked half.
+  const curAtBatCount = atBatCountFor(effInning, effHalf)
+  const revealWholeHalf = () => revealTo(effInning, effHalf)
+  // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
+  // until HalfInning/PlayByPlay has actually computed the half's entries
+  // (nothing to report before the first tap, which just starts at 1).
+  const [stepInfo, setStepInfo] = useState(null)
+  useEffect(() => setStepInfo(null), [curIdx])
+  const revealNextAtBat = () =>
+    revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (stepInfo?.nextCap ?? curAtBatCount + 1))
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -281,6 +291,8 @@ export function InningViewer({
             callouts={callouts}
             vsTeam={vsTeam}
             highlights={highlights}
+            revealedAtBatCount={curAtBatCount}
+            onStepInfo={setStepInfo}
           />
         </div>
 
@@ -356,7 +368,10 @@ export function InningViewer({
           revealed inning it becomes "View box score" instead — so the bottom of
           the 9th (or any extra) never shows a "Next: Top 10th" that would leak
           the game going to extras. Revealing that bottom half unlocks the next
-          inning and the button flips back to Next. */}
+          inning and the button flips back to Next. A sealed half offers two
+          side-by-side choices instead (ADR-0016): step one plate appearance at
+          a time, or reveal the whole half at once — either flips the bar back
+          to Next once the half is fully committed. */}
       <div className="pagenav pagenav--innings">
         <button
           type="button"
@@ -371,14 +386,24 @@ export function InningViewer({
           {loading ? 'Refreshing…' : 'Refresh'}
         </button>
         {currentSealed ? (
-          <button
-            type="button"
-            className="btn btn--reveal"
-            onClick={revealCurrent}
-            aria-label={`Reveal ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
-          >
-            <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal {curHalfLabel}
-          </button>
+          <div className="revealsplit">
+            <button
+              type="button"
+              className="btn btn--reveal revealsplit__btn"
+              onClick={revealNextAtBat}
+              aria-label={`Reveal the next at-bat in the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
+            >
+              <span className="btn__ball" aria-hidden="true">⚾️</span> Next at-bat
+            </button>
+            <button
+              type="button"
+              className="btn btn--reveal revealsplit__btn"
+              onClick={revealWholeHalf}
+              aria-label={`Reveal ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
+            >
+              Whole {curHalfLabel}
+            </button>
+          </div>
         ) : nextIdx != null ? (
           <button className="btn btn--next" onClick={() => goTo(nextIdx)}>
             Next: {nextLabel} →

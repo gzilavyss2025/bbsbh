@@ -16,6 +16,30 @@ function readRevealMark(storageKey) {
   }
 }
 
+// localStorage key prefix + reader for the at-bat-mode stepping cursor (see
+// ADR-0016): how many play-by-play entries of whichever half is currently
+// being stepped through have been revealed so far. Stored as "{halfIdx}:
+// {count}" — the caller compares halfIdx against the half it's actually
+// showing (RollingLine and direct links both let a user jump to any unlocked
+// half, not just the reveal frontier, so this can't assume "frontier" means
+// "the half being viewed"). A stale value from a half that's since been
+// fully committed is simply ignored rather than misread as live progress.
+const ATBAT_KEY = 'bbsbh:reveal-atbat:'
+function readAtBatMark(storageKey) {
+  if (!storageKey) return { halfIdx: -1, count: 0 }
+  try {
+    const raw = window.localStorage.getItem(storageKey)
+    if (raw == null) return { halfIdx: -1, count: 0 }
+    const [h, c] = raw.split(':').map(Number)
+    if (!Number.isInteger(h) || !Number.isInteger(c) || h < 0 || c < 0) {
+      return { halfIdx: -1, count: 0 }
+    }
+    return { halfIdx: h, count: c }
+  } catch {
+    return { halfIdx: -1, count: 0 }
+  }
+}
+
 // Everything that advances with the reveal high-water mark: the mark itself
 // (persisted per gamePk so leaving the innings view and returning — even in a
 // new session — keeps your place, per InningViewer's spoiler-safety
@@ -31,9 +55,27 @@ export function useRevealProgress(feed, regulation, actualCount) {
   const [revealedThrough, setRevealedThrough] = useState(() =>
     readRevealMark(storageKey),
   )
+
+  const atBatStorageKey = feed?.gamePk ? `${ATBAT_KEY}${feed.gamePk}` : null
+  const [atBatMark, setAtBatMark] = useState(() => readAtBatMark(atBatStorageKey))
+  // How many entries have been stepped through for a given half-index — 0 for
+  // any half other than the one the mark belongs to (a different half, or no
+  // stepping done yet).
+  const atBatCountFor = useCallback(
+    (n, half) => (atBatMark.halfIdx === halfIndex(n, half) ? atBatMark.count : 0),
+    [atBatMark],
+  )
+
   const revealTo = useCallback((n, half) => {
     const idx = halfIndex(n, half)
     setRevealedThrough((prev) => (idx > prev ? idx : prev))
+    // Whatever was mid-step just got fully committed — clear it so a later
+    // half doesn't inherit a stale count.
+    setAtBatMark({ halfIdx: -1, count: 0 })
+  }, [])
+
+  const revealAtBat = useCallback((n, half, count) => {
+    setAtBatMark({ halfIdx: halfIndex(n, half), count })
   }, [])
 
   useEffect(() => {
@@ -44,6 +86,19 @@ export function useRevealProgress(feed, regulation, actualCount) {
       // Private-mode / storage-disabled — degrade to in-session memory only.
     }
   }, [storageKey, revealedThrough])
+
+  useEffect(() => {
+    if (!atBatStorageKey) return
+    try {
+      if (atBatMark.halfIdx < 0) {
+        window.localStorage.removeItem(atBatStorageKey)
+      } else {
+        window.localStorage.setItem(atBatStorageKey, `${atBatMark.halfIdx}:${atBatMark.count}`)
+      }
+    } catch {
+      // Private-mode / storage-disabled — degrade to in-session memory only.
+    }
+  }, [atBatStorageKey, atBatMark])
 
   // How many innings are currently visible: regulation, plus one more for each
   // extra inning whose predecessor has already been fully revealed.
@@ -67,5 +122,5 @@ export function useRevealProgress(feed, regulation, actualCount) {
     return derivedRef.current.map
   }
 
-  return { revealedThrough, revealTo, unlocked, getDerived }
+  return { revealedThrough, revealTo, unlocked, getDerived, atBatCountFor, revealAtBat }
 }
