@@ -10,6 +10,7 @@ const MENU_ITEMS = [
   { label: 'League Leaders', path: '/leaders' },
   { label: 'Top MLB Prospects', path: '/prospects' },
   { label: 'Rehab Assignments', path: '/rehab' },
+  { label: 'Milestone Watch', path: '/milestones' },
   { label: 'Logo Sheet', path: '/logos' },
   { label: 'About', path: '/about' },
 ]

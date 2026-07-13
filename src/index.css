@@ -8312,13 +8312,43 @@ body {
   font-style: italic;
   color: var(--graphite);
 }
-/* MILESTONE WATCH line(s) below the career register — same weight as the
-   footnote above, but inked in the accent color (like .milestonepill) so a
-   countdown reads as a distinct kind of fact from the ledger's own captions. */
-.reg-milestone {
-  margin: 4px 2px 0;
-  font-size: 12px;
+/* MILESTONE WATCH card below the career register — a small bordered block
+   (echoes .rehabcard's card treatment) rather than a bare line, since it now
+   carries a projected timeframe alongside the progress fact. Title uppercase
+   like every other SectionTitle; each row's progress text stays neutral, the
+   projected timeframe inked in the accent color (like .milestonepill) so the
+   forward-looking half of the fact reads as distinct from the plain count. */
+.milestonewatch {
+  margin: 8px 2px 0;
+  padding: 8px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.milestonewatch__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 10.5px;
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+.milestonewatch__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 3px 0;
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+}
+.milestonewatch__eta {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   color: var(--accent-primary);
 }
 
@@ -9644,6 +9674,26 @@ body {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+/* --------------------------------------------------------- milestone watch page
+   The league-wide list — a Ledger table (see prospects/register usage), so
+   the player-cell headshot rides small inline rather than card-sized like
+   the Rehab page's grid (this page reads as a ranked leaderboard, not a
+   photo grid). */
+.milestonewatch-row__player {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shot.milestonewatch-row__shot {
+  width: 24px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+}
+.shot.milestonewatch-row__shot.shot--fallback {
+  font-size: 12px;
 }
 
 /* ---------------------------------------------------------------- umpire page */

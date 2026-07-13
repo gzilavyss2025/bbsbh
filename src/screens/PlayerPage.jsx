@@ -10,6 +10,7 @@ import { Headshot } from '../components/Headshot.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { LevelProgressionCard } from '../components/LevelProgressionCard.jsx'
+import { MilestoneWatchCard } from '../components/MilestoneWatchCard.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TransactionTimeline } from '../components/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -270,11 +271,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             {block.register && <CareerRegister register={block.register} />}
-            {block.milestones.map((m) => (
-              <p key={m.stat} className="hint reg-milestone">
-                {m.value.toLocaleString('en-US')} {m.label} — {m.remaining} shy of {m.threshold.toLocaleString('en-US')}
-              </p>
-            ))}
+            <MilestoneWatchCard playerId={bio.id} asOf={asOf} milestones={block.milestones} />
 
             {block.splits && (
               <>
