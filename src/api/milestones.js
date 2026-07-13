@@ -1,9 +1,10 @@
-// The Milestone Watch data — every MLB active-roster player within reach of a
-// round career-total milestone, league-wide — read from a static same-origin
-// file (public/data/milestones.json) rather than computed live.
+// The Milestone Watch data — every debuted player in an MLB org (active, IL,
+// or in the minors) within reach of a round career-total milestone,
+// league-wide — read from a static same-origin file
+// (public/data/milestones.json) rather than computed live.
 //
-// Building the list needs a full MLB year-by-year stat line per active-roster
-// player (~800 players) plus each team's season schedule, to scale a
+// Building the list needs a full MLB year-by-year stat line per debuted
+// player (~1,700) plus each team's season schedule, to scale a
 // projection by how often the player actually plays — dozens of statsapi
 // calls per team, hundreds league-wide. scripts/gen-milestones.mjs does it on
 // a cron and commits the shaped result (see .github/workflows/update-nightly-data.yml);

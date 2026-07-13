@@ -88,16 +88,22 @@ don't run these by hand.
   stay MLB-only. Per-date files are ~1MB, kept out of the PWA precache. See
   `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a parallel path.
 - `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone
-  Watch list: every MLB active-roster player within reach of a round career-total
-  milestone (`MILESTONE_DEFS` in `src/api/person.js`), each with a projected
-  timeframe. Per player, one `yearByYear` stats call yields both his career total
+  Watch list: every debuted player on an MLB org's `fullRoster` (active, IL, or in
+  the minors) within reach of a round career-total milestone (`MILESTONE_DEFS` in
+  `src/api/person.js`), each with a projected timeframe. Undebuted prospects are
+  filtered out on the roster's hydrated `mlbDebutDate` (a career MLB milestone
+  needs a debut) so they never cost a stats fetch; an injured or optioned veteran
+  near a milestone still shows. Per kept player, one `yearByYear` stats call
+  (MLB-only, so MiLB totals never inflate a milestone) yields both his career total
   and this season's pace; each of the 30 teams' season schedule (fetched once, not
-  per player) supplies games-played-so-far + remaining dates, so the projection can
-  scale by how often the player actually plays rather than assuming every team
-  game. Imports `aggregateSplits`/`MILESTONE_DEFS`/`projectMilestoneETA`/
-  `careerPerSeasonRate`/`milestoneRarityRank` straight from `src/api/person.js`
-  (pure, no DOM deps) — extend the projection math there, not in the script.
-  MLB-only.
+  per player — `sportId=1` is REQUIRED or the endpoint 400s) supplies
+  games-played-so-far + remaining dates, so the projection can scale by how often
+  the player actually plays rather than assuming every team game. An inclusion floor
+  (`MILESTONE_PROGRESS_FLOOR`, 75%) trims barely-started chases the wide `farWindow`
+  admits. Imports `aggregateSplits`/`MILESTONE_DEFS`/`MILESTONE_PROGRESS_FLOOR`/
+  `projectMilestoneETA`/`careerPerSeasonRate`/`milestoneRarityRank` straight from
+  `src/api/person.js` (pure, no DOM deps) — extend the projection math there, not in
+  the script. MLB careers only.
 
 ## Own-cadence generators (not the nightly batch)
 
