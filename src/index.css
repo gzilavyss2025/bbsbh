@@ -9714,6 +9714,76 @@ body {
     transition: none;
   }
 }
+.postseason-odds {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 9px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.postseason-odds__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.postseason-odds__head em {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: var(--w-regular);
+  letter-spacing: 0;
+}
+.postseason-odds__values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.postseason-odds__value {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 7px;
+}
+.postseason-odds__value + .postseason-odds__value {
+  border-left: var(--bw-hair) solid var(--border-rule);
+}
+.postseason-odds__value > span {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.postseason-odds__value strong {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  line-height: .95;
+}
+.postseason-odds__meta {
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  padding-top: 7px;
+  color: var(--graphite-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+@media (max-width: 420px) {
+  .postseason-odds__value {
+    padding-inline: 5px;
+  }
+  .postseason-odds__value strong {
+    font-size: 19px;
+  }
+}
 .team-hub__manager {
   margin: 4px 0 0;
   font-size: 13px;
