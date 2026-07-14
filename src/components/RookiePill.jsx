@@ -6,5 +6,10 @@
 // (scripts/gen-rookies.mjs).
 export function RookiePill({ active }) {
   if (!active) return null
-  return <span className="rookiepill">ROOKIE</span>
+  return (
+    <span className="rookiepill" title="Rookie">
+      <span className="rookiepill__full">ROOKIE</span>
+      <span className="rookiepill__short">R</span>
+    </span>
+  )
 }

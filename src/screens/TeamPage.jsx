@@ -790,8 +790,6 @@ export function TeamPage({ id, asOf, sportId }) {
                         rows={substitutes.map((p) => ({
                           ...p,
                           hurt: injuredIds.has(p.id),
-                          badge: `${p.pos} · ${p.games} G`,
-                          badgeClass: 'rolechip rolechip--stats',
                         }))}
                       />
                     </section>
@@ -809,8 +807,6 @@ export function TeamPage({ id, asOf, sportId }) {
                         rows={startingPitchers.map((p) => ({
                           ...p,
                           hurt: injuredIds.has(p.id),
-                          badge: `${p.gs} GS`,
-                          badgeClass: 'rolechip',
                         }))}
                       />
                     </section>
@@ -821,17 +817,9 @@ export function TeamPage({ id, asOf, sportId }) {
                       <RosterList
                         season={season}
                         showProspect={isMilb}
-                        rows={bullpen.map((p, i) => ({
+                        rows={bullpen.map((p) => ({
                           ...p,
                           hurt: injuredIds.has(p.id),
-                          badge: [p.saves > 0 ? `${p.saves} SV` : null, `${p.ip} IP`]
-                            .filter(Boolean)
-                            .join(' · '),
-                          // Only the closer (bullpen is already sorted saves-first,
-                          // so that's whoever's in slot 0 with a save to his name)
-                          // gets the clay "closer" tint — every other reliever,
-                          // saves or not, reads as a standard neutral chip.
-                          badgeClass: `rolechip rolechip--stats${i === 0 && p.saves > 0 ? ' rolechip--cl' : ' rolechip--rp'}`,
                         }))}
                       />
                     </section>
@@ -1091,7 +1079,7 @@ function RosterList({ rows, season, showProspect }) {
               {r.war == null ? DASH : r.war.toFixed(1)}
             </span>
           )}
-          <span className={r.badgeClass}>{r.badge}</span>
+          {r.badge && <span className={r.badgeClass}>{r.badge}</span>}
           <span className="thub-chev">›</span>
         </li>
       ))}
