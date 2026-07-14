@@ -1,0 +1,50 @@
+name: Update day recap
+
+# Final games are immutable, so the recap is generated once each morning for
+# yesterday. This is intentionally separate from the existing nightly workflow
+# so it can be staged and retried independently without touching that workflow's
+# unrelated generators.
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Completed slate date (YYYY-MM-DD)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update-day-recap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_BOT_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Day recap
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            node scripts/gen-day-recap.mjs --date=${{ inputs.date }}
+          else
+            node scripts/gen-day-recap.mjs
+          fi
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@github.com"
+          git add public/data/day-recap
+          git diff --cached --quiet && exit 0
+          git commit -m "Update day recap"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            git fetch origin main
+            git rebase origin/main
+            sleep $((RANDOM % 10 + 1))
+          done
+          exit 1
