@@ -9526,45 +9526,145 @@ body {
   font-size: 11px;
 }
 
-/* A compact, date-stamped entry point to the score's full accounting. It is a
-   button rather than a static badge because the headline stays deliberately
-   terse; the sheet exposes baseline, residual, earned pace, and trend. */
-.team-hub__season-score {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 7px 0 0;
-  padding: 3px 7px;
+/* Team-quality summary — two equal-weight entry points. A small expandable
+   ledger keeps the header focused on the two numbers rather than a paragraph
+   of methodology. */
+.team-score {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 14px;
+  padding: 9px 10px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--surface-card);
+}
+.team-score__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
   color: var(--text-caption);
-  font: inherit;
-  cursor: pointer;
-}
-.team-hub__season-score:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-}
-.team-hub__season-score:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-.team-hub__season-score span {
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }
-.team-hub__season-score strong {
+.team-score__head em {
   font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--text-heading);
-}
-.team-hub__season-score em {
   font-size: 10px;
   font-style: normal;
+  font-weight: var(--w-regular);
+  letter-spacing: 0;
+}
+.team-score__values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.team-score__value {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease, transform 140ms cubic-bezier(.23, 1, .32, 1);
+}
+.team-score__value + .team-score__value {
+  border-left: var(--bw-hair) solid var(--border-rule);
+}
+.team-score__value.is-active {
+  background: var(--bg-page);
+}
+@media (hover: hover) and (pointer: fine) {
+  .team-score__value:hover {
+    background: var(--bg-page);
+  }
+}
+.team-score__value:active {
+  transform: scale(.98);
+}
+.team-score__value:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.team-score__value > span {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__value strong {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+  line-height: .95;
+}
+.team-score__value em {
+  overflow: hidden;
   color: var(--graphite-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.team-score__detail {
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 160ms ease, transform 180ms cubic-bezier(.23, 1, .32, 1);
+}
+@starting-style {
+  .team-score__detail {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+.team-score__detail dl {
+  display: grid;
+  gap: 0;
+  margin: 7px 0 0;
+}
+.team-score__detail dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+.team-score__detail dt {
+  color: var(--text-caption);
+  font-size: 11px;
+}
+.team-score__detail dd {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+@media (max-width: 420px) {
+  .team-score__value {
+    padding-inline: 5px;
+  }
+  .team-score__value strong {
+    font-size: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .team-score__value,
+  .team-score__detail {
+    transition: none;
+  }
 }
 .team-hub__manager {
   margin: 4px 0 0;
@@ -11659,67 +11759,6 @@ body {
   margin: 0 0 16px;
   padding: 12px 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
-}
-
-/* Season Surprise Score's sheet shares Game Score's shell/close button but its
-   content is an accounting table, not a factor menu. */
-.ssmodal {
-  max-height: min(90vh, 580px);
-  overflow-y: auto;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-}
-.ssmodal__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-.ssmodal__head .sheet__title {
-  margin: 0;
-}
-.ssmodal__asof {
-  margin: 3px 0 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-caption);
-}
-.ssmodal__facts {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin: 16px 0 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-.ssmodal__fact {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-3);
-  padding: 9px 0;
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
-}
-.ssmodal__fact dt {
-  font-size: 12px;
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-.ssmodal__fact dt span {
-  margin-left: 6px;
-  font-size: 10px;
-  font-weight: var(--w-regular);
-  color: var(--text-caption);
-}
-.ssmodal__fact dd {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-#root .ssmodal .sheet__body {
-  text-transform: none; /* caps-exempt: Season Surprise Score explains its methodology in prose */
 }
 
 .gsfactor {
