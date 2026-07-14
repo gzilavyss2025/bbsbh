@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 492 160" role="img" aria-labelledby="title">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" role="img" aria-labelledby="title">
   <title id="title">Tally</title>
   <defs><mask id="wordmark"><g fill="white">
     <rect x="0" y="0" width="88" height="42" rx="5"/><rect x="32" y="48" width="24" height="112" rx="4"/>
-    <path fill-rule="evenodd" d="M128 0h44l34 160h-31l-10-50h-32l-10 50H92L128 0Zm22 61-13 13 13 13 13-13-13-13Zm-10 55-8 44h36l-9-44h-19Z"/>
-    <rect x="218" y="0" width="28" height="160" rx="4"/><path d="M262 0h28v132h58v28h-86V0Z"/>
-    <path d="M354 0h28v132h58v28h-86V0Z"/><path d="M412 0h30l17 54L476 0h16l-20 76v84h-27V76L412 0Z"/>
-  </g><g fill="black"><rect x="116" y="42" width="70" height="6"/><rect x="218" y="42" width="28" height="6"/><rect x="262" y="42" width="28" height="6"/><rect x="354" y="42" width="28" height="6"/><rect x="444" y="70" width="29" height="6"/></g></mask></defs>
-  <rect width="492" height="160" fill="#B4453A" mask="url(#wordmark)"/>
+    <path fill-rule="evenodd" d="M128 0h44l34 160h-31l-10-50h-32l-10 50H92L128 0Zm22 61-13 13 13 13 13-13-13-13Z"/>
+    <path d="M218 0h28v132h58v28h-86V0Z"/><path d="M310 0h28v132h58v28h-86V0Z"/>
+    <path d="M400 0h30l17 54L464 0h16l-20 76v84h-27V76L400 0Z"/>
+  </g><g fill="black"><rect x="116" y="42" width="70" height="6"/><rect x="218" y="42" width="28" height="6"/><rect x="310" y="42" width="28" height="6"/><rect x="432" y="70" width="29" height="6"/></g></mask></defs>
+  <rect width="480" height="160" fill="#B4453A" mask="url(#wordmark)"/>
 </svg>
