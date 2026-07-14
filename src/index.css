@@ -10536,6 +10536,20 @@ body {
   color: var(--field);
   border: var(--bw-hair) solid var(--field);
 }
+.rookiepill__short {
+  display: none;
+}
+/* Phone widths swap the full "ROOKIE" word for just "R" — with WAR, name,
+   and a chevron already sharing the row (see .thub-row), the full word was
+   a big part of what made roster rows feel scrunched. */
+@media (max-width: 420px) {
+  .rookiepill__full {
+    display: none;
+  }
+  .rookiepill__short {
+    display: inline;
+  }
+}
 
 /* team-hub roster (own classes — the .roster panel is a different component) */
 .thub-roster {
