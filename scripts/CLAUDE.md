@@ -155,13 +155,18 @@ don't run these by hand.
   game going Final, which the once-nightly batch can't deliver. Self-contained
   except for `selectRegulationInnings` (`src/api/select.js`), reused so
   "extra innings" never drifts from what the innings viewer itself calls
-  extra. See `docs/game-score.md` for the formula's factor table + calibration
-  anchors, and ADR-0015 for why this is the one score-derived number allowed
-  to render outside a `SealBox`. App reads it via `src/api/gameScore.js`. A
-  full-season backfill (new season, or a schema change) is a hand-run
-  `--days=N` covering back to the earliest sportId's
-  `regularSeasonStartDate` — delete the JSON first so every entry rebuilds in
-  the current schema.
+  extra. The five-bucket formula (drama, action, spectacle, **dominance**, dud)
+  scores from the feed's linescore + play-by-play + **boxscore** (individual
+  pitching/batting lines drive the dominance axis) + **gameData** bios
+  (`birthDate`/`mlbDebutDate` for the career-arc modifier). See
+  `docs/game-score.md` for the factor table + calibration anchors, and ADR-0015
+  for why this is the one score-derived number allowed to render outside a
+  `SealBox`. App reads it via `src/api/gameScore.js`. A full backfill (new
+  season, schema change, or **formula change** — a Final game is never
+  recomputed otherwise) is a hand-run **`--rescore`**: re-scores every gamePk
+  already in the file plus the trailing window, checkpointing every 200 so a
+  long run resumes cleanly. `computeGameScore` is exported and the sweep is
+  entry-point-guarded, so the formula is importable for tests.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 

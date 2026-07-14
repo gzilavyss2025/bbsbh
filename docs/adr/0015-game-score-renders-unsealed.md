@@ -11,13 +11,22 @@ before reveal, right on the spoiler-free `GameCard`.
 That's safe only because the number itself carries no exploitable signal back
 to the raw result:
 
-- It's an additive blend of a dozen-plus capped/saturating factors (lead
-  changes, largest comeback, late-and-close, extra innings, walk-off, total
-  runs, run distribution, clutch homers, rare feats, a blowout penalty…) —
-  see `docs/game-score.md` for the full factor table. No single factor is
-  allowed more than ~15% of the 0–10 range, so dozens of distinct game shapes
-  collide onto the same displayed value (a "7.5" could be a 2-1 pitchers'
-  duel or a 9-8 seesaw).
+- It's an additive blend of a dozen-plus capped/saturating factors across five
+  buckets (drama, action, spectacle, dominance, dud) — see `docs/game-score.md`
+  for the full factor table. What keeps it safe is **collision**: so many
+  distinct game shapes map onto the same displayed value that the number doesn't
+  invert to a result. A "10" can be a walk-off, a lead-trading slugfest, a
+  perfect game, or a 3-HR night; a "7.5" a 2-1 duel or a 9-8 seesaw.
+- The **dominance axis** (a dominant individual pitching or batting line ×
+  a career-arc modifier, which lets a game reach 10 without a walk-off/extras)
+  is a larger bucket than the others but built from several small sub-factors,
+  and it *increases* collision rather than reducing it — it folds in whole new
+  game-shapes (a quiet 1-0 gem, a rookie debut, a 42-year-old's twilight start)
+  that now share high values with the loud ones. Its inputs (strikeouts, total
+  bases, age) carry no signal about *who won* or *by how much*, which is the
+  only thing the spoiler rule protects; it reads the feed's `boxscore` +
+  `gameData` bios but stays precomputed off-DOM in the cron, so no new DOM
+  exposure.
 - Final margin — the most spoiler-adjacent input — only enters through a
   thresholded, capped penalty (zero for any margin ≤3, flat-capped at a 9+
   run blowout), never directly.

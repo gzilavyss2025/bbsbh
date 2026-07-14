@@ -37,7 +37,7 @@
 // /api/v1/seasons?sportId={id}&season={year}) through today.
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { selectRegulationInnings } from '../src/api/select.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -55,8 +55,8 @@ async function getJson(path) {
 function parseArgs(argv) {
   const args = {}
   for (const a of argv) {
-    const m = /^--([^=]+)=(.*)$/.exec(a)
-    if (m) args[m[1]] = m[2]
+    const m = /^--([^=]+)(?:=(.*))?$/.exec(a)
+    if (m) args[m[1]] = m[2] ?? true // bare --flag -> true, --key=value -> value
   }
   return args
 }
@@ -67,12 +67,62 @@ const days = Number(args.days) || DEFAULT_DAYS
 
 // --- the formula -------------------------------------------------------------
 // Additive composite: base 2.0 (every completed game earns something) + drama
-// + action + spectacle − dud, clamped to [0, 10] and rounded to one decimal
-// AFTER summing, so no single factor is individually recoverable from the
-// shown number. Needs only the live feed's linescore + play-by-play — never
-// runs/hits/errors' exact values are exposed to the caller, only this one
-// blended score.
+// + action + spectacle + dominance − dud, clamped to [0, 10] and rounded to one
+// decimal AFTER summing, so no single factor is individually recoverable from
+// the shown number. Every factor is capped, and DOMINANCE (a co-equal axis) is
+// built from several sub-factors each kept modest, so many distinct game shapes
+// collide onto the same displayed value — a "10" can be a walk-off, a slugfest,
+// a perfect game, or a 3-HR night. That collision is what keeps this safe to
+// render unsealed (see ADR-0015). Needs only the live feed's linescore +
+// play-by-play + boxscore + gameData bios — never winProbability (MLB-only), so
+// it works at every MiLB level too.
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
+const ipOuts = (ip) => {
+  if (ip == null) return 0
+  const [full, part = 0] = String(ip).split('.')
+  return Number(full) * 3 + Number(part)
+}
+
+// One dominant PITCHING line: suppression-led floor + strikeout spice + a small
+// depth/cleanliness bonus. A gem SUPPRESSES scoring, so it correlates with a low
+// margin — which is why pitching dominance is allowed to cancel the dud penalty
+// (a 6-0 no-hitter must not be scored as a blowout).
+function pitchLineDom(o, h, bb, k) {
+  const supp = clamp(o * 0.16 - h * 0.55, 0, 4.2) // suppression spine
+  const kScore = clamp(k * 0.13, 0, 1.6) // strikeouts (balanced with suppression)
+  const clean = bb === 0 && o >= 24 ? 0.5 : 0 // walkless, deep — perfect-game flavor
+  const deep = o >= 24 ? 0.4 : 0 // went 8+
+  return clamp(supp + kScore + clean + deep, 0, 7.5)
+}
+
+// One dominant BATTING line — HISTORIC lines only. Leans on context-INDEPENDENT
+// signals (total bases, 4+ hits, multi-HR) so an ordinary line inflated by a
+// blowout's RBI chances stays ~0; only a genuine monster (Swanson's 3H/2HR/6RBI)
+// scores. RBI is de-weighted because it just accumulates with runners on.
+function batLineDom(h, tb, rbi, hr) {
+  const hitsC = clamp((h - 3) * 0.9, 0, 1.8) // 4h .9 / 5h 1.8
+  const tbC = clamp((tb - 5) * 0.5, 0, 2.5) // extra-base explosion (the spine)
+  const rbiC = clamp((rbi - 4) * 0.3, 0, 1.2) // de-weighted, context-dependent
+  const hrC = hr >= 2 ? clamp((hr - 1) * 0.8, 0, 1.6) : 0 // multi-HR only
+  return clamp(hitsC + tbC + rbiC + hrC, 0, 7.5)
+}
+
+// Typical player age per full-season MiLB level, for the young-for-level arc:
+// a 19yo dominating AA (norm ~23.5) is more remarkable than a 23yo doing the
+// same. MLB uses the mlbDebut/rookie + twilight-age arc instead (see below).
+const LEVEL_BASELINE_AGE = { 11: 26.5, 12: 23.5, 13: 22, 14: 21 } // AAA/AA/A+/A
+
+// Dominance is only credited ABOVE a floor, then GAIN-amplified — a routine
+// quality start nets ~0 (it clears neither), so it stops lifting the typical
+// game, while a genuine gem/monster survives and the gain restores the tail.
+// ARC_BONUS is a floor-EXEMPT additive lift for the career-arc: a short but
+// electric edge-of-career gem (a 5-inning MLB debut) would otherwise be washed
+// out by a floor high enough to keep 10s rare — this keeps it above the field
+// without moving the median, since prime players (arc === 1) get zero bonus.
+// Tuned against the full 886-game population: median ~5.4, 10s ~2-3%.
+const DOM_FLOOR = 2.0
+const DOM_GAIN = 1.5
+const ARC_BONUS = 0.6
 
 export function computeGameScore(feed) {
   const linescore = feed?.liveData?.linescore
@@ -165,15 +215,80 @@ export function computeGameScore(feed) {
     lastPlay?.about?.halfInning === 'bottom' &&
     (lastPlay?.count?.outs ?? 3) < 3
 
-  // No-hit bid through the late-start inning: the eventual loser's cumulative
-  // hits sat at 0 through at least that many innings, even if broken up later.
-  const loserSide = winnerIsHome ? 'away' : 'home'
-  let loserHitsThruLate = 0
-  for (const inn of innings) {
-    if (inn.num > lateStart) break
-    loserHitsThruLate += inn?.[loserSide]?.hits ?? 0
+  // ---- DOMINANCE: the best individual performance, either side of the ball --
+  // A historic individual line makes a game worth scoring regardless of the
+  // score's shape. Best PITCHING line (>=5 IP to be the story of the game) or
+  // best BATTING line, whichever is more impressive; plus a combined-team
+  // shutout bonus that only rewards a genuinely stingy staff (<=3 hits allowed).
+  // All null-guarded: a thin MiLB box score just degrades dominance to 0.
+  const box = feed?.liveData?.boxscore?.teams ?? {}
+  let bestPitch = 0
+  let bestPitchId = null
+  let bestBat = 0
+  let bestBatId = null
+  for (const side of ['away', 'home']) {
+    const t = box[side]
+    if (!t) continue
+    for (const pid of t.pitchers ?? []) {
+      const s = t.players?.['ID' + pid]?.stats?.pitching ?? {}
+      const o = ipOuts(s.inningsPitched)
+      if (o < 15) continue
+      const d = pitchLineDom(o, +s.hits || 0, +s.baseOnBalls || 0, +s.strikeOuts || 0)
+      if (d > bestPitch) {
+        bestPitch = d
+        bestPitchId = pid
+      }
+    }
+    for (const pid of t.batters ?? []) {
+      const s = t.players?.['ID' + pid]?.stats?.batting ?? {}
+      const d = batLineDom(+s.hits || 0, +s.totalBases || 0, +s.rbi || 0, +s.homeRuns || 0)
+      if (d > bestBat) {
+        bestBat = d
+        bestBatId = pid
+      }
+    }
   }
-  const noHitBid = loserHitsThruLate === 0
+  // Combined-team dominance: only impressive at <=3 hits in a shutout.
+  const combinedDom = (hitsAllowed, oppRuns) =>
+    oppRuns === 0 && hitsAllowed <= 3 ? [3.0, 2.4, 1.8, 1.2][hitsAllowed] : 0
+  const teamDom = Math.max(
+    combinedDom(totals.home?.hits ?? 99, homeFinal),
+    combinedDom(totals.away?.hits ?? 99, awayFinal),
+  )
+  const pitchDom = Math.max(bestPitch, teamDom)
+  const battingWins = bestBat >= pitchDom
+
+  // Career-arc modifier for the dominance owner — dominant at EITHER END of a
+  // career weighs more (reverse bell). MLB: MLB-debut ×1.5, tapering across the
+  // first ~1.5 seasons, flat 1.0 in the prime, rising again with age (×1.0 at
+  // 35 → ×1.5 at 40+). MiLB: no meaningful MLB debut, so young-FOR-LEVEL instead
+  // (5+ years under the level norm → ×1.5). Amplifies the dominance bucket only.
+  const gameDate = feed?.gameData?.datetime?.officialDate
+  const sportId = feed?.gameData?.teams?.home?.sport?.id ?? feed?.gameData?.teams?.away?.sport?.id
+  const owner = feed?.gameData?.players?.['ID' + (battingWins ? bestBatId : bestPitchId)]
+  let arc = 1.0
+  if (owner && (battingWins ? bestBat : pitchDom) > 0) {
+    const ageAtGame =
+      owner.birthDate && gameDate
+        ? (Date.parse(gameDate) - Date.parse(owner.birthDate)) / (365.25 * 864e5)
+        : (owner.currentAge ?? 28)
+    if (sportId === 1) {
+      const daysSinceDebut =
+        owner.mlbDebutDate && gameDate
+          ? (Date.parse(gameDate) - Date.parse(owner.mlbDebutDate)) / 864e5
+          : 9999
+      const rookieFrac = clamp(1 - daysSinceDebut / 540, 0, 1) // first ~1.5 yrs
+      const wYoung = owner.mlbDebutDate === gameDate ? 1.5 : 1 + 0.45 * rookieFrac
+      const wOld = 1 + 0.5 * clamp((ageAtGame - 35) / 5, 0, 1)
+      arc = clamp(Math.max(wYoung, wOld), 1, 1.5)
+    } else {
+      const baseline = LEVEL_BASELINE_AGE[sportId] ?? 20
+      arc = clamp(1 + 0.5 * clamp((baseline - ageAtGame) / 5, 0, 1), 1, 1.5)
+    }
+  }
+  const rawDom = Math.max(pitchDom, bestBat)
+  const arcBonus = ARC_BONUS * (arc - 1) * Math.min(rawDom, 4) // floor-exempt edge-of-career lift
+  const dominance = Math.min(7.5, Math.max(0, rawDom - DOM_FLOOR) * DOM_GAIN * arc + arcBonus)
 
   // ---- composite --------------------------------------------------------
   const leadFlux = Math.min(1.5, 0.4 * leadChanges + 0.2 * ties)
@@ -181,7 +296,14 @@ export function computeGameScore(feed) {
   const lateCloseScore = lateClose ? 0.8 : 0
   const extras = Math.min(1.0, extraInnings * 0.5)
   const walkoffScore = walkoff ? 0.8 : 0
-  const drama = Math.min(5.0, leadFlux + comeback + lateCloseScore + extras + walkoffScore)
+  // Low-score tension: a taut, low-scoring game is gripping to score even
+  // without lead changes — a 1-0 pitchers' duel, a 3-2 stolen late.
+  const tension =
+    margin <= 2 && totalRuns <= 6 ? (margin === 1 ? 0.9 : 0.5) + (totalRuns <= 3 ? 0.4 : 0) : 0
+  const drama = Math.min(
+    5.0,
+    leadFlux + comeback + lateCloseScore + extras + walkoffScore + tension,
+  )
 
   const runsScore = Math.min(1.2, totalRuns * 0.1)
   const balance = 0.6 * (Math.min(loserRuns, 4) / 4)
@@ -191,14 +313,19 @@ export function computeGameScore(feed) {
   const spread = 0.7 * (Math.min(scoringHalfInnings, 7) / 7)
   const action = runsScore + balance + spread
 
+  // Spectacle keeps the OFFENSIVE feats (clutch HRs, cycle/GS, HR count); the
+  // no-hit bid moved into the dominance axis.
   const bigHRs = 0.5 * Math.min(2, clutchHomers)
-  const rare = noHitBid ? 1.0 : cycle ? 0.6 : grandSlam ? 0.4 : 0
+  const feats = cycle ? 0.6 : grandSlam ? 0.4 : 0
   const hrScore = Math.min(0.4, homeRuns * 0.1)
-  const spectacle = Math.min(1.5, bigHRs + rare + hrScore)
+  const spectacle = Math.min(1.5, bigHRs + feats + hrScore)
 
-  const dud = Math.min(2.0, Math.max(0, margin - 3) * 0.35) + (errorsTotal >= 4 ? 0.3 : 0)
+  // Dominance (either kind) cancels the blowout penalty — a gem or a monster
+  // individual game must not be dismissed as a laugher.
+  const dudRaw = Math.min(2.0, Math.max(0, margin - 3) * 0.35) + (errorsTotal >= 4 ? 0.3 : 0)
+  const dud = Math.max(0, dudRaw - 0.5 * dominance)
 
-  const raw = 2.0 + drama + action + spectacle - dud
+  const raw = 2.0 + drama + action + spectacle + dominance - dud
   return Math.round(clamp(raw, 0, 10) * 10) / 10
 }
 
@@ -212,35 +339,6 @@ async function loadExisting() {
   }
 }
 
-const existing = await loadExisting()
-const scores = { ...existing.scores }
-
-const today = new Date()
-const dates = []
-for (let i = 0; i < days; i++) {
-  const d = new Date(today)
-  d.setUTCDate(d.getUTCDate() - i)
-  dates.push(isoDay(d))
-}
-
-let candidates = []
-for (const dateStr of dates) {
-  const slate = await getJson(
-    `/api/v1/schedule?sportId=${SWEPT_SPORT_IDS.join(',')}&date=${dateStr}`,
-  )
-  const games = (slate.dates ?? []).flatMap((d) => d.games ?? [])
-  for (const g of games) {
-    if (g.status?.abstractGameState !== 'Final') continue
-    if (g.status?.detailedState === 'Postponed') continue
-    if (g.gameType !== 'R') continue
-    if (scores[g.gamePk] != null) continue
-    candidates.push(g.gamePk)
-  }
-}
-candidates = [...new Set(candidates)]
-
-console.log(`${candidates.length} newly-Final game(s) to score (${dates[dates.length - 1]}..${dates[0]})`)
-
 // Checkpointed every CHECKPOINT_EVERY games, not just at the very end — a
 // large one-time backfill (thousands of gamePks, each its own feed fetch) can
 // run long enough to get interrupted, and this loop is otherwise all-or-
@@ -249,41 +347,83 @@ console.log(`${candidates.length} newly-Final game(s) to score (${dates[dates.le
 // picks up exactly where the last checkpoint left off.
 const CHECKPOINT_EVERY = 200
 
-async function writeOut() {
-  await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), scores }))
-}
+// Normal run sweeps a trailing window of newly-Final games not yet scored.
+// `--rescore` re-scores every gamePk already in the file too — the one-time
+// backfill after a formula change (a Final game is otherwise never recomputed).
+async function main() {
+  const rescore = args.rescore != null
+  const existing = await loadExisting()
+  const scores = { ...existing.scores }
 
-let scored = 0
-let skipped = 0
-for (const gamePk of candidates) {
-  try {
-    const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
-    const score = computeGameScore(feed)
-    if (score == null) {
-      skipped++
-      continue
+  const writeOut = async () => {
+    await mkdir(dirname(out), { recursive: true })
+    await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), scores }))
+  }
+
+  const today = new Date()
+  const dates = []
+  for (let i = 0; i < days; i++) {
+    const d = new Date(today)
+    d.setUTCDate(d.getUTCDate() - i)
+    dates.push(isoDay(d))
+  }
+
+  const candidates = new Set(rescore ? Object.keys(existing.scores) : [])
+  for (const dateStr of dates) {
+    const slate = await getJson(
+      `/api/v1/schedule?sportId=${SWEPT_SPORT_IDS.join(',')}&date=${dateStr}`,
+    )
+    const games = (slate.dates ?? []).flatMap((d) => d.games ?? [])
+    for (const g of games) {
+      if (g.status?.abstractGameState !== 'Final') continue
+      if (g.status?.detailedState === 'Postponed') continue
+      if (g.gameType !== 'R') continue
+      if (!rescore && scores[g.gamePk] != null) continue
+      candidates.add(String(g.gamePk))
     }
-    const teams = feed?.gameData?.teams
-    scores[gamePk] = {
-      score,
-      sportId: teams?.home?.sport?.id ?? null,
-      homeId: teams?.home?.id ?? null,
-      awayId: teams?.away?.id ?? null,
+  }
+
+  console.log(
+    `${candidates.size} game(s) to score${rescore ? ' (--rescore: full backfill)' : ` (${dates[dates.length - 1]}..${dates[0]})`}`,
+  )
+
+  let scored = 0
+  let skipped = 0
+  for (const gamePk of candidates) {
+    try {
+      const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
+      const score = computeGameScore(feed)
+      if (score == null) {
+        skipped++
+        continue
+      }
+      const teams = feed?.gameData?.teams
+      scores[gamePk] = {
+        score,
+        sportId: teams?.home?.sport?.id ?? null,
+        homeId: teams?.home?.id ?? null,
+        awayId: teams?.away?.id ?? null,
+      }
+      scored++
+      if (scored % CHECKPOINT_EVERY === 0) {
+        await writeOut()
+        console.log(`checkpoint: ${scored} scored so far (${Object.keys(scores).length} total)`)
+      }
+    } catch (err) {
+      console.error(`gamePk ${gamePk}: ${err.message}`)
     }
-    scored++
-    if (scored % CHECKPOINT_EVERY === 0) {
-      await writeOut()
-      console.log(`checkpoint: ${scored} scored so far (${Object.keys(scores).length} total)`)
-    }
-  } catch (err) {
-    console.error(`gamePk ${gamePk}: ${err.message}`)
+  }
+
+  if (scored > 0) {
+    await writeOut()
+    console.log(`wrote ${out} (${scored} scored, ${skipped} skipped, ${Object.keys(scores).length} total)`)
+  } else {
+    console.log(`no changes (${skipped} skipped, ${Object.keys(scores).length} total)`)
   }
 }
 
-if (scored > 0) {
-  await writeOut()
-  console.log(`wrote ${out} (${scored} newly scored, ${skipped} skipped, ${Object.keys(scores).length} total)`)
-} else {
-  console.log(`no changes (${skipped} skipped, ${Object.keys(scores).length} total)`)
+// Only sweep when run as a script — keeps computeGameScore importable for tests
+// without triggering a live fetch + file write.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main()
 }
