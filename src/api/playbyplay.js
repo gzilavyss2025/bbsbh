@@ -375,8 +375,9 @@ const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3, '4B': 4, score: 4 }
 
 // The lineup slot (1-9) a player bats in, from his boxscore battingOrder —
 // starters are exact multiples of 100 (500 → 5), subs are offset (503 → 5).
-// Used to credit which hitter drove a runner over.
-function battingSlot(feed, side, id) {
+// Used to credit which hitter drove a runner over, and by the Scorecard Lab's
+// full-reveal grid to place each plate appearance on its batting-order row.
+export function battingSlot(feed, side, id) {
   const order = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`]?.battingOrder
   const n = parseInt(order, 10)
   return Number.isFinite(n) ? Math.floor(n / 100) : null

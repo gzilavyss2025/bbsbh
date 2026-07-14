@@ -1,22 +1,5 @@
-import { useEffect, useState } from 'react'
-import { AboutPage } from './screens/AboutPage.jsx'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { GameSelect } from './screens/GameSelect.jsx'
-import { GameView } from './screens/GameView.jsx'
-import { LogoSheet } from './screens/LogoSheet.jsx'
-import { PlayerPage } from './screens/PlayerPage.jsx'
-import { ProspectsPage } from './screens/ProspectsPage.jsx'
-import { RehabPage } from './screens/RehabPage.jsx'
-import { MilestoneWatchPage } from './screens/MilestoneWatchPage.jsx'
-import { AwardsHistoryPage } from './screens/AwardsHistoryPage.jsx'
-import { StandingsPage } from './screens/StandingsPage.jsx'
-import { TeamPage } from './screens/TeamPage.jsx'
-import { TeamLeadersPage } from './screens/TeamLeadersPage.jsx'
-import { LeadersPage } from './screens/LeadersPage.jsx'
-import { UmpirePage } from './screens/UmpirePage.jsx'
-import { UmpireRankingsPage } from './screens/UmpireRankingsPage.jsx'
-import { ManagerPage } from './screens/ManagerPage.jsx'
-import { TopGamesPage } from './screens/TopGamesPage.jsx'
-import { ScorecardLab } from './screens/ScorecardLab.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
@@ -28,6 +11,44 @@ import {
   urlDateToApi,
   apiDateToUrl,
 } from './lib/route.js'
+
+function lazyNamed(loader, name) {
+  return lazy(() => loader().then((module) => ({ default: module[name] })))
+}
+
+const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
+const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
+const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
+const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
+const ProspectsPage = lazyNamed(() => import('./screens/ProspectsPage.jsx'), 'ProspectsPage')
+const RehabPage = lazyNamed(() => import('./screens/RehabPage.jsx'), 'RehabPage')
+const MilestoneWatchPage = lazyNamed(
+  () => import('./screens/MilestoneWatchPage.jsx'),
+  'MilestoneWatchPage',
+)
+const AwardsHistoryPage = lazyNamed(
+  () => import('./screens/AwardsHistoryPage.jsx'),
+  'AwardsHistoryPage',
+)
+const StandingsPage = lazyNamed(() => import('./screens/StandingsPage.jsx'), 'StandingsPage')
+const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
+const TeamLeadersPage = lazyNamed(
+  () => import('./screens/TeamLeadersPage.jsx'),
+  'TeamLeadersPage',
+)
+const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
+const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
+const UmpireRankingsPage = lazyNamed(
+  () => import('./screens/UmpireRankingsPage.jsx'),
+  'UmpireRankingsPage',
+)
+const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
+const TopGamesPage = lazyNamed(() => import('./screens/TopGamesPage.jsx'), 'TopGamesPage')
+// Scorecard Lab deliberately contains full-reveal code. It is available only
+// in development and is omitted from the production module graph.
+const ScorecardLab = import.meta.env.DEV
+  ? lazyNamed(() => import('./screens/ScorecardLab.jsx'), 'ScorecardLab')
+  : null
 
 // The current URL, path + query — player/team links carry a `?d=&s=` spoiler
 // cutoff, so the query is part of route identity, not just the path.
@@ -102,7 +123,7 @@ export default function App() {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'top-games') {
     content = <TopGamesPage />
-  } else if (route.name === 'scorecard-lab') {
+  } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
@@ -145,7 +166,17 @@ export default function App() {
   // name anywhere can navigate without threading a prop through the tree.
   return (
     <NavProvider navigate={go}>
-      <div className="app">{content}</div>
+      <Suspense
+        fallback={
+          <div className="app">
+            <div className="screen">
+              <Loader />
+            </div>
+          </div>
+        }
+      >
+        <div className="app">{content}</div>
+      </Suspense>
     </NavProvider>
   )
 }

@@ -188,7 +188,10 @@ export function GameSelect({ onPick, onShowLogos }) {
   // card on screen at once). Rosters are fetched per team on the current
   // slate; the prospects snapshot is session-memoized after its first call
   // anywhere in the app.
-  const prospects = useAsync(() => fetchTopProspects(), [])
+  const prospects = useAsync(
+    () => (sportId === SPORT_IDS.MLB ? Promise.resolve(null) : fetchTopProspects()),
+    [sportId],
+  )
   const teamIdsKey = useMemo(
     () => [...new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))].join(','),
     [sorted],

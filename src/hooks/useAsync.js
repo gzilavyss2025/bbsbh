@@ -24,12 +24,16 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
   // — or paint a stale error over a perfectly fresh result. Bumping the token
   // in the effect cleanup also covers unmount, so no separate mounted ref.
   const runId = useRef(0)
+  const abortController = useRef(null)
 
   const run = useCallback(() => {
     const id = ++runId.current
+    abortController.current?.abort()
+    const controller = new AbortController()
+    abortController.current = controller
     setState((s) => ({ ...s, loading: true, error: null }))
     Promise.resolve()
-      .then(fn)
+      .then(() => fn(controller.signal))
       .then((data) => {
         if (runId.current === id) setState({ loading: false, error: null, data })
       })
@@ -58,6 +62,8 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
       // the exhaustive-deps stale-ref warning doesn't apply).
       // eslint-disable-next-line react-hooks/exhaustive-deps
       runId.current++
+      abortController.current?.abort()
+      abortController.current = null
     }
   }, [run])
 

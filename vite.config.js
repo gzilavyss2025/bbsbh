@@ -72,6 +72,16 @@ export default defineConfig({
           '**/data/game-notes.json',
           '**/data/callouts/*.json',
           '**/data/rookies.json',
+          // Route-specific snapshots are fetched on demand instead of adding
+          // hundreds of KB to every install. The runtime rule below keeps the
+          // last successful copy available for offline browsing.
+          '**/data/manager-history.json',
+          '**/data/umpire-accuracy.json',
+          '**/data/game-score.json',
+          '**/data/former-teammates.json',
+          '**/data/top-prospects.json',
+          '**/data/war-history.json',
+          '**/data/minors-leaders.json',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -81,6 +91,25 @@ export default defineConfig({
         ],
         navigateFallback: '/index.html',
         runtimeCaching: [
+          {
+            // Page-specific static snapshots are too large for the app-shell
+            // precache. NetworkFirst keeps them fresh online and usable after
+            // a successful visit when the user is offline at the park.
+            urlPattern: ({ url }) =>
+              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders)\.json$/.test(
+                url.pathname,
+              ),
+            handler: 'NetworkFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-static-data',
+              networkTimeoutSeconds: 3,
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+            },
+          },
           {
             // The on-demand SPLITS VS TEAM dataset (excluded from precache
             // above). NetworkFirst so a fresh nightly copy wins when online but

@@ -10,10 +10,10 @@ import { getJson } from './statsapi.js'
 // Assets sort jersey → pants → cap so the composed line always reads top-down.
 const UNIFORM_PIECE_ORDER = { J: 0, P: 1, C: 2 }
 
-export async function fetchGameUniforms(gamePk) {
+export async function fetchGameUniforms(gamePk, options) {
   if (!gamePk) return null
   try {
-    const data = await getJson(`/api/v1/uniforms/game?gamePks=${gamePk}`)
+    const data = await getJson(`/api/v1/uniforms/game?gamePks=${gamePk}`, options)
     const game = data.uniforms?.[0]
     const normalize = (side) => {
       const assets = (side?.uniformAssets ?? [])

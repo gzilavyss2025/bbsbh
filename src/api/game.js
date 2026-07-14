@@ -3,8 +3,8 @@
 
 import { getJson } from './statsapi.js'
 
-export async function fetchGameFeed(gamePk) {
-  return getJson(`/api/v1.1/game/${gamePk}/feed/live`)
+export async function fetchGameFeed(gamePk, options) {
+  return getJson(`/api/v1.1/game/${gamePk}/feed/live`, options)
 }
 
 // Per-play win probability — the ONLY source of WPA, which is absent from the

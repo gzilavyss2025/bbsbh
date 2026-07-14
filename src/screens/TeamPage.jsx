@@ -118,6 +118,14 @@ function rosterFieldingSplits(r, teamId) {
   const splits = stats.find((s) => s.group?.displayName === 'fielding')?.splits ?? []
   return preferTeamSplits(splits, teamId)
 }
+// A roster row's season hitting line (filtered to this team — see
+// preferTeamSplits) — feeds the Top Substitutes list's games-played ranking.
+function rosterHittingStat(r, teamId) {
+  const stats = r.person?.stats ?? []
+  const hit = stats.find((s) => s.group?.displayName === 'hitting')
+  const splits = preferTeamSplits(hit?.splits ?? [], teamId)
+  return splits[0]?.stat ?? null
+}
 // Grouped SP → CL → RP (ROLE_ORDER), then descending by season WAR within
 // each group — a missing WAR (MiLB, or an MLB arm WAR hasn't caught up to
 // yet) sorts last in its group rather than crashing the comparison, falling
@@ -520,6 +528,35 @@ async function loadTeam(id, asOf) {
   }
   const preferredLineup = PREFERRED_LINEUP_POSITIONS.map((pos) => bestByPosition[pos]).filter(Boolean)
 
+  // Top Substitutes — the position players who DIDN'T win one of the nine
+  // diamond spots above, ranked by how much they've actually played (season
+  // games). Same 40Man `fullRoster` source as the lineup, minus everyone
+  // already claimed there, so it reads as "next men up / the bench behind the
+  // preferred nine." Games-played gate drops the 40-man depth pieces who've
+  // barely appeared; capped at 6 to stay a bench, not a second roster list.
+  const lineupIds = new Set(preferredLineup.map((p) => p.id))
+  const substitutes = fullRoster
+    .filter(
+      (r) =>
+        r.person?.id &&
+        (r.position?.type !== 'Pitcher' || isTwoWay(r.person)) &&
+        !lineupIds.has(r.person.id),
+    )
+    .map((r) => ({
+      id: r.person.id,
+      name: firstLast(r.person),
+      jersey: r.jerseyNumber ?? '',
+      pos: r.position?.abbreviation ?? '',
+      allStar: allStarIds.has(r.person?.id),
+      war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
+      prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+      rookie: isActiveRookie(rookiesData, r.person?.id),
+      games: Number(rosterHittingStat(r, id)?.gamesPlayed) || 0,
+    }))
+    .filter((p) => p.games > 0)
+    .sort((a, b) => b.games - a.games || a.name.localeCompare(b.name))
+    .slice(0, 6)
+
   // Injured List — every injured player on the club's 40-man view in one combined
   // list, each tagged with which IL (10/15/60-day; MiLB shows 7/60/full-season).
   // Filter to IL status codes (D<n> or ILF) and derive the badge from the code.
@@ -548,7 +585,7 @@ async function loadTeam(id, asOf) {
       : null,
     standings: standingsRows,
     batting, pitching, position, pitchers, injured,
-    preferredLineup, startingPitchers, bullpen,
+    preferredLineup, substitutes, startingPitchers, bullpen,
     affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
     manager,
   }
@@ -564,7 +601,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, injured, preferredLineup, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager } = data
+  const { team, season, record, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -706,57 +743,80 @@ export function TeamPage({ id, asOf, sportId }) {
           </button>
         )}
 
-        {(preferredLineup.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
+        {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
           <>
             <SectionTitle title="Roster" note="preferred lineup" />
             {/* One bordered soft-cream card (same convention as .tstats-card)
-                around all three projection subsections, so they read as one
+                around all the projection subsections, so they read as one
                 group distinct from the actual 40-man list further down. */}
             <div className="roster-super">
               <div className="roster-super__row">
-                {preferredLineup.length > 0 && (
-                  <section className="roster-sub">
-                    <h4 className="roster-sub__title">Preferred Lineup</h4>
-                    <DefenseDiamond defense={preferredLineupDefense} />
-                  </section>
-                )}
-                {startingPitchers.length > 0 && (
-                  <section className="roster-sub">
-                    <h4 className="roster-sub__title">Starting Pitchers</h4>
-                    <RosterList
-                      season={season}
-                      showProspect={isMilb}
-                      rows={startingPitchers.map((p) => ({
-                        ...p,
-                        hurt: injuredIds.has(p.id),
-                        badge: `${p.gs} GS`,
-                        badgeClass: 'rolechip',
-                      }))}
-                    />
-                  </section>
-                )}
+                {/* Left column: the defensive nine, with the bench (Top
+                    Substitutes) stacked directly beneath it. */}
+                <div className="roster-super__col">
+                  {preferredLineup.length > 0 && (
+                    <section className="roster-sub">
+                      <h4 className="roster-sub__title">Preferred Lineup</h4>
+                      <DefenseDiamond defense={preferredLineupDefense} />
+                    </section>
+                  )}
+                  {substitutes.length > 0 && (
+                    <section className="roster-sub">
+                      <h4 className="roster-sub__title">Top Substitutes</h4>
+                      <RosterList
+                        season={season}
+                        showProspect={isMilb}
+                        rows={substitutes.map((p) => ({
+                          ...p,
+                          hurt: injuredIds.has(p.id),
+                          badge: `${p.pos} · ${p.games} G`,
+                          badgeClass: 'rolechip rolechip--stats',
+                        }))}
+                      />
+                    </section>
+                  )}
+                </div>
+                {/* Right column: the two pitching staffs, Starting Pitchers
+                    over Bullpen. */}
+                <div className="roster-super__col">
+                  {startingPitchers.length > 0 && (
+                    <section className="roster-sub">
+                      <h4 className="roster-sub__title">Starting Pitchers</h4>
+                      <RosterList
+                        season={season}
+                        showProspect={isMilb}
+                        rows={startingPitchers.map((p) => ({
+                          ...p,
+                          hurt: injuredIds.has(p.id),
+                          badge: `${p.gs} GS`,
+                          badgeClass: 'rolechip',
+                        }))}
+                      />
+                    </section>
+                  )}
+                  {bullpen.length > 0 && (
+                    <section className="roster-sub">
+                      <h4 className="roster-sub__title">Bullpen</h4>
+                      <RosterList
+                        season={season}
+                        showProspect={isMilb}
+                        rows={bullpen.map((p, i) => ({
+                          ...p,
+                          hurt: injuredIds.has(p.id),
+                          badge: [p.saves > 0 ? `${p.saves} SV` : null, `${p.ip} IP`]
+                            .filter(Boolean)
+                            .join(' · '),
+                          // Only the closer (bullpen is already sorted saves-first,
+                          // so that's whoever's in slot 0 with a save to his name)
+                          // gets the clay "closer" tint — every other reliever,
+                          // saves or not, reads as a standard neutral chip.
+                          badgeClass: `rolechip rolechip--stats${i === 0 && p.saves > 0 ? ' rolechip--cl' : ' rolechip--rp'}`,
+                        }))}
+                      />
+                    </section>
+                  )}
+                </div>
               </div>
-              {bullpen.length > 0 && (
-                <section className="roster-sub">
-                  <h4 className="roster-sub__title">Bullpen</h4>
-                  <RosterList
-                    season={season}
-                    showProspect={isMilb}
-                    rows={bullpen.map((p, i) => ({
-                      ...p,
-                      hurt: injuredIds.has(p.id),
-                      badge: [p.saves > 0 ? `${p.saves} SV` : null, `${p.appearances} G`, `${p.ip} IP`]
-                        .filter(Boolean)
-                        .join(' · '),
-                      // Only the closer (bullpen is already sorted saves-first,
-                      // so that's whoever's in slot 0 with a save to his name)
-                      // gets the clay "closer" tint — every other reliever,
-                      // saves or not, reads as a standard neutral chip.
-                      badgeClass: `rolechip rolechip--stats${i === 0 && p.saves > 0 ? ' rolechip--cl' : ' rolechip--rp'}`,
-                    }))}
-                  />
-                </section>
-              )}
             </div>
           </>
         )}

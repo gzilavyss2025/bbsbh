@@ -8,6 +8,9 @@
 import { MILB_LEVELS, teamAbbr, teamLogoUrl } from '../lib/teams.js'
 import { tintFromSvg } from '../lib/logoTint.js'
 import { getJson } from './statsapi.js'
+import { careerTimelineView } from './person.js'
+import { fetchTeam } from './team.js'
+import { historicalParentOrg } from './milbHistory.js'
 
 // Pruned feed views for the player-page "firsts" scans below. Each reads only a
 // tiny slice of a concluded game's feed, so a `fields=` allowlist fetches ~1 KB
@@ -102,6 +105,56 @@ export async function fetchMilbByDateRange(personId, group, season, startDate, e
     ),
   )
   return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
+// Career totals across every MiLB level, fanned out one request per level (the
+// API takes a single sportId). Raw splits, each tagged with its level's sportId
+// so the caller can label/sum them; degrades per level. Used by
+// fetchManagerPlaying below for a manager who never reached the majors.
+export async function fetchMilbCareer(personId, group) {
+  const results = await Promise.allSettled(
+    MILB_LEVELS.map((lvl) =>
+      fetchPersonStats(personId, { type: 'career', group, sportId: lvl.sportId }).then((splits) =>
+        splits.map((s) => ({ ...s, sport: s.sport ?? { id: lvl.sportId } })),
+      ),
+    ),
+  )
+  return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+}
+
+// A manager/coach's own PLAYING career, if statsapi has one. Most managers
+// reached MLB as a player, so their career line lives at sportId 1 (the default);
+// `primaryPosition` picks the group (a former pitcher's line is in `pitching`, a
+// position player's in `hitting`). We fetch BOTH groups at MLB in parallel rather
+// than trusting the position alone — cheap, and it makes the rare two-way / oddly-
+// labeled case just work — and prefer the position-implied group when both exist.
+// A manager who never reached the majors falls to the MiLB level fan-out. If
+// the primary group is absent at every level, the other group gets the same
+// fallback so a missing or misclassified position does not hide a real career.
+// Someone whose playing days predate statsapi's thin pre-~2005 MiLB coverage
+// simply has no data and returns null, so the page drops the card. Returns
+// `{ group, level: 'mlb' | 'milb', splits }` (raw splits — the caller sums via
+// statsLevels' sumHitting/sumPitching) or null.
+export async function fetchManagerPlaying(personId, primaryPosition) {
+  if (!personId) return null
+  const isPitcher = primaryPosition?.code === '1' || primaryPosition?.type === 'Pitcher'
+  const primary = isPitcher ? 'pitching' : 'hitting'
+  const other = isPitcher ? 'hitting' : 'pitching'
+  try {
+    const [primMlb, otherMlb] = await Promise.all([
+      fetchPersonStats(personId, { type: 'career', group: primary }),
+      fetchPersonStats(personId, { type: 'career', group: other }),
+    ])
+    if (primMlb.length) return { group: primary, level: 'mlb', splits: primMlb }
+    if (otherMlb.length) return { group: other, level: 'mlb', splits: otherMlb }
+    const primMilb = await fetchMilbCareer(personId, primary)
+    if (primMilb.length) return { group: primary, level: 'milb', splits: primMilb }
+    const otherMilb = await fetchMilbCareer(personId, other)
+    if (otherMilb.length) return { group: other, level: 'milb', splits: otherMilb }
+    return null
+  } catch {
+    return null
+  }
 }
 
 // Game-log rows across every MiLB level, fanned out one request per level (the
@@ -256,6 +309,55 @@ export function fetchTeamLogoTint(teamId) {
   })()
   logoTintCache.set(teamId, p)
   return p
+}
+
+// Enrich a careerTimelineView's entries IN PLACE with each stop's logo tint and
+// hover label — the shared treatment behind both the player page's "Team history"
+// and the manager page's "Playing career" timelines. Tint is resolved per
+// DISTINCT team (it doesn't depend on when he was there); the title is resolved
+// per STOP, because an affiliate can be reassigned to a different parent org
+// between two separate stints at the same club. MLB stops use the club name
+// alone; a farm club appends its parent org in parens ("Nashville Sounds
+// (Milwaukee Brewers)"), preferring the hand-curated historical org for that
+// season over the club's live parent. Returns the same `entries` for chaining.
+export async function enrichTimelineEntries(entries) {
+  const tintByTeam = new Map()
+  await Promise.all(
+    [...new Set((entries ?? []).map((e) => e.teamId))].map(async (teamId) => {
+      tintByTeam.set(teamId, await fetchTeamLogoTint(teamId))
+    }),
+  )
+  await Promise.all(
+    (entries ?? []).map(async (e) => {
+      e.tint = tintByTeam.get(e.teamId)
+      if (e.sportId === 1) {
+        e.title = e.teamName
+        return
+      }
+      const hist = await historicalParentOrg(e.teamId, e.minSeason)
+      const parentOrgName = hist?.name ?? (await fetchTeam(e.teamId))?.parentOrgName ?? ''
+      e.title = parentOrgName ? `${e.teamName} (${parentOrgName})` : e.teamName
+    }),
+  )
+  return entries
+}
+
+// The clubs a manager/coach played for as a PLAYER — the same "Team history"
+// timeline the player page shows, sourced from his own year-by-year splits (MLB
+// + the MiLB level fan-out) and shaped by careerTimelineView. `group` is the
+// playing group fetchManagerPlaying already resolved; `debutYear` (from the
+// bio's mlbDebutDate) lets the shaper drop post-debut rehab/option-down MiLB
+// noise. Returns the enriched entries[] (for <CareerTimeline>) or null when he
+// has no qualifying playing history (most MiLB-only managers predate coverage).
+export async function fetchPlayingTimeline(personId, group, debutYear) {
+  if (!personId || !group) return null
+  const [mlbYby, milbYby] = await Promise.all([
+    fetchPersonStats(personId, { type: 'yearByYear', group, sportId: 1 }),
+    fetchMilbYearByYear(personId, group),
+  ])
+  const timeline = careerTimelineView([...mlbYby, ...milbYby], group, debutYear)
+  if (!timeline) return null
+  return enrichTimelineEntries(timeline.entries)
 }
 
 // ---------------------------------------------------------------------------

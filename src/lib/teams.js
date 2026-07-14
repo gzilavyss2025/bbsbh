@@ -162,6 +162,21 @@ export function milbHeadshotUrl(personId, width = 320) {
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/milb/current`
 }
 
+// Coaches and managers have NO `silo`/`milb` variant — both 404 for a coaching
+// personId (verified live). Their photo lives under a distinct `{code}/coach`
+// context instead. Verified live across teams: the code is NOT team-specific —
+// `67` and `83` both resolve for every manager tested (Murphy/Melvin/Boone/
+// Counsell); we use `67`, a 426×640-family ~2:3 portrait JPEG on a colored
+// backdrop (same shape as the milb variant, so the .shot top-center cover crop
+// reframes it head-near-top with no per-image work). Same no-`d_people:generic`
+// rule as the player URLs: a personId with no coach photo on file still 404s
+// cleanly, so Headshot.jsx degrades to the team logo. Used by Headshot's
+// `coach` mode (components/Headshot.jsx) — the manager page's only photo source.
+export function coachHeadshotUrl(personId, width = 320) {
+  if (!personId) return null
+  return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/67/coach/current`
+}
+
 // ---------------------------------------------------------------------------
 // Team colors
 //

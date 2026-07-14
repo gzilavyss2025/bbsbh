@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   fetchGameFeed,
   fetchManager,
@@ -40,10 +40,10 @@ export function useGameData(game) {
   // an already-posted assignment. fetchGameUniforms resolves null on its own
   // failures, so it can't take the feed down with it.
   const feedState = useAsync(
-    async () => {
+    async (signal) => {
       const [feed, uniforms] = await Promise.all([
-        fetchGameFeed(game.gamePk),
-        fetchGameUniforms(game.gamePk),
+        fetchGameFeed(game.gamePk, { signal }),
+        fetchGameUniforms(game.gamePk, { signal }),
       ])
       return { feed, uniforms }
     },
@@ -53,6 +53,35 @@ export function useGameData(game) {
     { refetchOnForeground: true },
   )
   const feed = feedState.data?.feed
+  const activeFeed =
+    feed && String(feed.gamePk ?? '') === String(game.gamePk) ? feed : null
+  const hasActiveFeed = Boolean(activeFeed)
+
+  // Static enrichment is useful after the game structure is visible, but it
+  // competes with the feed and uniforms on a cold phone load. Start it during
+  // an idle window after the first feed resolves, with a timeout fallback for
+  // browsers that do not expose requestIdleCallback.
+  const [enrichmentReady, setEnrichmentReady] = useState(false)
+  useEffect(() => {
+    setEnrichmentReady(false)
+    if (!hasActiveFeed) return undefined
+    let cancelled = false
+    const start = () => {
+      if (!cancelled) setEnrichmentReady(true)
+    }
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(start, { timeout: 1500 })
+      return () => {
+        cancelled = true
+        window.cancelIdleCallback?.(id)
+      }
+    }
+    const id = setTimeout(start, 0)
+    return () => {
+      cancelled = true
+      clearTimeout(id)
+    }
+  }, [game.gamePk, hasActiveFeed])
 
   // The date a name-link inside this game should cut its stats off at: the
   // game's official date. Falls back to the scheduled date before the feed
@@ -134,7 +163,7 @@ export function useGameData(game) {
   // a newly-posted clip surfaces on an already-revealed half with no other
   // wiring: nothing here is rendered until highlightsByPlayId is called
   // inside that reveal, so a poll landing mid-game is still spoiler-safe.
-  // Fetch itself is safe eagerly, same as before; resolves [] on failure or
+  // Fetch itself is safe to start eagerly, same as before; resolves [] on failure or
   // off-MLB (most MiLB games carry no clips).
   const highlights = useAsyncOnFeed(feed, () => fetchHighlights(game.gamePk), [game.gamePk])
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
@@ -178,12 +207,18 @@ export function useGameData(game) {
   // session-memoized so this costs nothing beyond the first call anywhere in
   // the app. Gated to MiLB: the rare still-ranked MLB call-up isn't worth the
   // extra badge noise on the majors' pages.
-  const prospects = useAsync(() => fetchTopProspects(), [])
+  const prospects = useAsync(
+    () =>
+      enrichmentReady && game.sportId !== SPORT_IDS.MLB
+        ? fetchTopProspects()
+        : Promise.resolve(null),
+    [enrichmentReady, game.sportId],
+  )
   const prospectsData = game.sportId === SPORT_IDS.MLB ? null : prospects.data ?? null
 
   // Season-context call-outs for the play-by-play — the leader / streak /
   // situational-record notes, precomputed nightly to a static per-date file (see
-  // api/callouts.js). Spoiler-free season aggregates (no seal), same eager tier
+  // api/callouts.js). Spoiler-free season aggregates (no seal), same feed-derived tier
   // as prospect badges. Covers MLB and the four full-season MiLB levels alike
   // (the file carries every level's slate since the phase-3 generator; a MiLB
   // gamePk in an older file simply resolves to no bundle). Keyed on gamePk,
@@ -215,23 +250,35 @@ export function useGameData(game) {
   // whole precomputed file is a single cached same-origin read (see
   // formerTeammates.js); it now covers MiLB matchups too, so this isn't gated
   // to MLB games — a matchup outside the build's window just yields no card.
-  const teammates = useAsync(() => loadFormerTeammates(), [])
+  const teammates = useAsync(
+    () => (enrichmentReady ? loadFormerTeammates() : Promise.resolve(null)),
+    [enrichmentReady],
+  )
   const formerTeammatesData = teammates.data ?? null
 
   // Career vs-opponent lines (see api/vsTeamSplits.js) — the same static file
   // the player page's SPLITS VS TEAM card reads, reused here for the
   // "Turang is a career .303 against the Pirates" call-out (see
   // buildCallouts's vsTeamCareerLine). Season aggregates, spoiler-free, so it
-  // rides the same eager tier as prospects/former-teammates — no gamePk key,
+  // rides the same deferred tier as prospects/former-teammates — no gamePk key,
   // one cached same-origin read for the whole app.
-  const vsTeamSplits = useAsync(() => fetchVsTeamSplits(), [])
+  const vsTeamSplits = useAsync(
+    () => (enrichmentReady ? fetchVsTeamSplits() : Promise.resolve(null)),
+    [enrichmentReady],
+  )
   const vsTeamSplitsData = vsTeamSplits.data ?? null
 
   // Rookie status for the roster/lineup surfaces (see RookiePill /
-  // isActiveRookie) — the nightly rookies precompute, same eager
-  // not-gated-to-MLB tier as vsTeamSplits/formerTeammates (a MiLB matchup's
+  // isActiveRookie) — the nightly rookies precompute, same deferred
+  // MLB-only tier as vsTeamSplits/formerTeammates (a MiLB matchup's
   // roster just resolves to no active rookies since the file is MLB-debut-only).
-  const rookies = useAsync(() => fetchRookiesData(), [])
+  const rookies = useAsync(
+    () =>
+      enrichmentReady && game.sportId === SPORT_IDS.MLB
+        ? fetchRookiesData()
+        : Promise.resolve(null),
+    [enrichmentReady, game.sportId],
+  )
   const rookiesData = rookies.data ?? null
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
