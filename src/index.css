@@ -11176,6 +11176,23 @@ body {
   color: var(--text-body);
 }
 
+/* Playing-career tile grid — reuses the shared .stat tile (see PlayerPage's
+   .player__statgrid) but at 4 columns, since a hitting/pitching line runs 8–9
+   headline stats rather than the player page's 5. */
+.mgrpage__statgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+.mgrpage__statgrid .stat {
+  padding: 10px 3px;
+}
+.mgrpage__statgrid .stat__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+}
+
 .mgrpage__recordlist {
   list-style: none;
   margin: 0;

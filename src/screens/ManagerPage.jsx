@@ -4,7 +4,13 @@ import {
   currentStint,
   lastManagerialStint,
 } from '../api/managers.js'
-import { fetchPerson, fetchPlayerAwards } from '../api/person-fetch.js'
+import {
+  fetchPerson,
+  fetchPlayerAwards,
+  fetchManagerPlaying,
+  fetchPlayingTimeline,
+} from '../api/person-fetch.js'
+import { sumHitting, sumPitching } from '../api/statsLevels.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
@@ -28,7 +34,18 @@ async function loadManager(id) {
     fetchPlayerAwards(id),
   ])
   if (!bio && stints.length === 0) return null
-  return { bio, awards, stints, generatedAt }
+  // His own playing career keys off primaryPosition (a former pitcher's stats
+  // are in the pitching group), so it fetches after the bio resolves. Returns
+  // null when statsapi has no playing data (most MiLB-only managers), so the
+  // card simply drops.
+  const playing = await fetchManagerPlaying(id, bio?.primaryPosition)
+  // The clubs he played for, same "Team history" timeline as the player page —
+  // only when he has a playing career, using the group we just resolved.
+  const debutYear = bio?.mlbDebutDate ? Number(bio.mlbDebutDate.slice(0, 4)) : null
+  const playingTeams = playing
+    ? await fetchPlayingTimeline(id, playing.group, debutYear)
+    : null
+  return { bio, awards, stints, generatedAt, playing, playingTeams }
 }
 
 function seasonLabel(startSeason, endSeason) {
@@ -57,7 +74,7 @@ export function ManagerPage({ id }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'manager', noun: 'manager', onBack: back })
   if (gate) return gate
 
-  const { bio, awards, stints } = data
+  const { bio, awards, stints, playing, playingTeams } = data
   const name = bio?.fullName || 'Manager'
   const active = currentStint(stints)
   const headshotTeamId = active?.teamId ?? stints[stints.length - 1]?.teamId ?? null
@@ -69,7 +86,7 @@ export function ManagerPage({ id }) {
       <BackBtn onClick={back} />
 
       <header className="mgrpage__head">
-        <Headshot personId={id} name={name} teamId={headshotTeamId} className="mgrpage__shot" />
+        <Headshot personId={id} name={name} teamId={headshotTeamId} coach className="mgrpage__shot" />
         <div className="mgrpage__ident">
           <h1 className="mgrpage__name">{name}</h1>
           <p className="mgrpage__sub">{roleLine(stints)}</p>
@@ -77,6 +94,10 @@ export function ManagerPage({ id }) {
       </header>
 
       {awards.length > 0 && <AwardsStrip awards={awards} />}
+
+      {playing && <PlayingCareer playing={playing} />}
+
+      {playingTeams?.length > 0 && <PlayingTeams entries={playingTeams} />}
 
       {record.length > 0 && <RecordTable rows={record} />}
 
@@ -101,6 +122,97 @@ function AwardsStrip({ awards }) {
           </li>
         ))}
       </ul>
+    </section>
+  )
+}
+
+// ".302"-style rate: three decimals, no leading zero (baseball convention).
+function rate3(x) {
+  return Number.isFinite(x) ? x.toFixed(3).replace(/^0(?=\.)/, '') : '—'
+}
+// ERA / WHIP: two decimals, keep the leading digit.
+function rate2(x) {
+  return Number.isFinite(x) ? x.toFixed(2) : '—'
+}
+function int(x) {
+  const n = Number(x)
+  return Number.isFinite(n) ? String(n) : '—'
+}
+
+// The manager's OWN playing career, before he coached — the flip side of the
+// managerial record. `playing` is `{ group, level, splits }` from
+// fetchManagerPlaying; we sum the raw splits here (a single MLB career split is
+// a no-op sum, a MiLB career sums across levels) and lay the headline stats out
+// as a tile grid, hitting or pitching depending on what he was. `gamesPlayed`
+// isn't summed by sumHitting, so G is tallied straight off the splits.
+function PlayingCareer({ playing }) {
+  const { group, level, splits } = playing
+  const games = splits.reduce((t, s) => t + (Number(s.stat?.gamesPlayed) || 0), 0)
+  const title = level === 'mlb' ? 'Playing career · MLB' : 'Playing career · minors'
+  let tiles
+  if (group === 'pitching') {
+    const st = sumPitching(splits)
+    tiles = [
+      { k: 'W', v: int(st.wins) },
+      { k: 'L', v: int(st.losses) },
+      { k: 'ERA', v: rate2(st.era) },
+      { k: 'WHIP', v: rate2(st.whip) },
+      { k: 'G', v: int(st.gamesPitched) },
+      { k: 'GS', v: int(st.gamesStarted) },
+      { k: 'SV', v: int(st.saves) },
+      { k: 'IP', v: st.inningsPitched ?? '—' },
+      { k: 'SO', v: int(st.strikeOuts) },
+    ]
+  } else {
+    const st = sumHitting(splits)
+    tiles = [
+      { k: 'G', v: int(games) },
+      { k: 'AVG', v: rate3(st.avg) },
+      { k: 'OBP', v: rate3(st.obp) },
+      { k: 'SLG', v: rate3(st.slg) },
+      { k: 'HR', v: int(st.homeRuns) },
+      { k: 'RBI', v: int(st.rbi) },
+      { k: 'H', v: int(st.hits) },
+      { k: 'SB', v: int(st.stolenBases) },
+    ]
+  }
+  return (
+    <section className="mgrpage__card">
+      <h2 className="mgrpage__cardtitle">{title}</h2>
+      <div className="mgrpage__statgrid">
+        {tiles.map((t) => (
+          <div key={t.k} className="stat">
+            <div className="stat__v">{t.v}</div>
+            <div className="stat__k">{t.k}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// The clubs he played for — the same stop-per-stint timeline the player page
+// shows (`entries` come from fetchPlayingTimeline / careerTimelineView, already
+// tint- and title-enriched), but wrapped in the manager page's card so it sits
+// with the record/timeline cards. Reuses the shared .careertl__* stop styling.
+function PlayingTeams({ entries }) {
+  return (
+    <section className="mgrpage__card">
+      <h2 className="mgrpage__cardtitle">Teams played for</h2>
+      <ol className="careertl__track">
+        {entries.map((e) => (
+          <li className="careertl__stop" key={`${e.teamId}-${e.minSeason}`} title={e.title}>
+            <span
+              className="careertl__badge"
+              style={e.tint ? { background: e.tint } : undefined}
+            >
+              <TeamLogo teamId={e.teamId} name={e.teamName} size={42} />
+            </span>
+            <span className="careertl__years">{e.yearText}</span>
+            {e.level && <span className="careertl__years careertl__level">{e.level}</span>}
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
