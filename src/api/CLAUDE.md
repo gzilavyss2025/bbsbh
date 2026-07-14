@@ -264,6 +264,12 @@ for each generator; the reader modules:
   "show me scores" action. The page filters the raw `scores` map by
   sportId/homeId/awayId BEFORE calling `gameScoreIndex` so tiers recompute
   relative to whatever level/team subset is currently shown.
+- `seasonScore.js` — the MLB Team Page's Season Surprise Score, from
+  `public/data/season-score.json`. The nightly generator stores snapshots by
+  season, team, and completed date rather than one mutable current row;
+  `seasonScoreFor` selects the latest snapshot at or before the Team Page's
+  standings cutoff. The static reader degrades to no badge before the first
+  generated file exists. See `docs/season-score.md` and ADR-0018.
 
 ## Leader boards (live)
 
