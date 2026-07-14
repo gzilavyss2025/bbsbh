@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { computeTopPerformers } from '../api/topPerformers.js'
+import { fetchDayRecap, recapForSport } from '../api/dayRecap.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { leagueLogoUrl } from '../lib/teams.js'
 import { useNav } from '../lib/nav.js'
@@ -79,12 +80,17 @@ function PerformerRow({ entry }) {
   )
 }
 
-// Mounted only after reveal → the useAsync fetch fan-out fires on reveal,
-// never before.
+// Mounted only after reveal → the artifact read starts on reveal, never before.
+// Older dates without an artifact retain the original on-demand fallback.
 function TopPerformersPanel({ games, prospects, dateStr, sportId }) {
+  const load = async () => {
+    const recap = recapForSport(await fetchDayRecap(dateStr), sportId)
+    if (recap?.topPerformers) return recap.topPerformers
+    return computeTopPerformers({ games, prospects, dateStr })
+  }
   const { loading, error, data, reload } = useAsync(
-    () => computeTopPerformers({ games, prospects, dateStr }),
-    [games, prospects, dateStr],
+    load,
+    [games, prospects, dateStr, sportId],
   )
 
   if (loading) {

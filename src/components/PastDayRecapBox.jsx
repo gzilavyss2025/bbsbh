@@ -3,6 +3,7 @@ import { computeTopPerformersByResult } from '../api/topPerformers.js'
 import { rankDayHighlights } from '../api/dayHighlights.js'
 import { computeDaySuperlatives } from '../api/daySuperlatives.js'
 import { fetchCallouts } from '../api/callouts.js'
+import { fetchDayRecap, recapForSport } from '../api/dayRecap.js'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { useNav } from '../lib/nav.js'
 import { apiDateToUrl } from '../lib/route.js'
@@ -14,11 +15,10 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 
-// Day Highlights' per-game feed/win-probability fetch goes through the same
-// usePastGameSignals cache a flipped slate card uses, so revealing both never
-// double-fetches a gamePk. Top Performers pulls from the lighter boxscore
-// endpoint instead (see topPerformers.js) — it needs no play-by-play, so
-// there's nothing to share there.
+// Final dates normally read one precomputed day-recap artifact. The per-game
+// signal path remains as a fallback for dates not yet generated, and shares the
+// same cache as a flipped slate card so revealing both never double-fetches a
+// gamePk. Top Performers' fallback uses the lighter boxscore endpoint instead.
 
 // "Face the Story": a row shows the winning signal's protagonist (headshot +
 // name + team + stat, "baseball card" idiom matching Top Performers/Statcast
@@ -119,24 +119,32 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
   useEffect(() => {
     let cancelled = false
     setState({ loading: true, error: false, data: null })
-    Promise.all([
-      computeTopPerformersByResult({ games, prospects, dateStr }),
-      Promise.all(
-        games.map((game) =>
-          getSignals(game.gamePk)
-            .then(({ feed, winProb }) => ({ gamePk: game.gamePk, game, feed, winProb, dateStr }))
-            .catch(() => null),
+    ;(async () => {
+      const artifact = recapForSport(await fetchDayRecap(dateStr), sportId)
+      if (artifact) {
+        if (!cancelled) {
+          setState({ loading: false, error: false, data: artifact })
+        }
+        return
+      }
+
+      const [performersByResult, entries, calloutsData] = await Promise.all([
+        computeTopPerformersByResult({ games, prospects, dateStr }),
+        Promise.all(
+          games.map((game) =>
+            getSignals(game.gamePk)
+              .then(({ feed, winProb }) => ({ gamePk: game.gamePk, game, feed, winProb, dateStr }))
+              .catch(() => null),
+          ),
         ),
-      ),
-      // Same nightly bundle the pre-half strip/play cards read — one fetch
-      // for the whole date, cached in-memory by fetchCallouts itself. Feeds
-      // Day Highlights' protagonist sub-captions (dayHighlights.js); degrades
-      // to {games:{}} on any failure or an un-generated date, same as every
-      // other callouts consumer.
-      fetchCallouts(apiDateToUrl(dateStr)),
-    ])
-      .then(([performersByResult, entries, calloutsData]) => {
-        if (cancelled) return
+        // Same nightly bundle the pre-half strip/play cards read — one fetch
+        // for the whole date, cached in-memory by fetchCallouts itself. Feeds
+        // Day Highlights' protagonist sub-captions (dayHighlights.js); degrades
+        // to {games:{}} on any failure or an un-generated date, same as every
+        // other callouts consumer.
+        fetchCallouts(apiDateToUrl(dateStr)),
+      ])
+      if (cancelled) return
         setState({
           loading: false,
           error: false,
@@ -146,14 +154,13 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             superlatives: computeDaySuperlatives(entries),
           },
         })
-      })
-      .catch(() => {
+    })().catch(() => {
         if (!cancelled) setState({ loading: false, error: true, data: null })
-      })
+    })
     return () => {
       cancelled = true
     }
-  }, [games, prospects, dateStr, getSignals])
+  }, [games, prospects, dateStr, sportId, getSignals])
 
   if (state.loading) {
     return <Loader size="inline" message="Crunching this day's games…" />
