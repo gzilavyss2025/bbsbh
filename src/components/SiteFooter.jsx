@@ -123,7 +123,7 @@ export function SiteFooter({
           <span>Baseball</span>
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
-        <p>Score on paper — every run, hit, and error stays sealed until you tap.</p>
+        <p>Built for keeping score by hand. Game results stay sealed until opened.</p>
         <p>
           <button
             type="button"

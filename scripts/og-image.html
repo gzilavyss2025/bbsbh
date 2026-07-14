@@ -59,8 +59,7 @@
     text-transform: uppercase; font-size: 30px; padding: 16px 92px;
     box-shadow: 0 12px 30px rgba(0,0,0,.2);
   }
-  /* call-to-action pill — the image needs its own "click here" cue, since
-     scrapers/platforms judge the image in isolation from the page text. */
+  /* Small status pill for routes that use the static fallback card. */
   .cta {
     display: inline-flex; align-items: center; gap: 14px; align-self: flex-start;
     background: var(--navy); color: var(--cream); border-radius: 999px;
@@ -71,20 +70,36 @@
 </head>
 <body>
   <div class="og">
-    <span class="tape">Spoiler-safe</span>
+    <span class="tape">Sealed results</span>
     <span class="mark">
-      <svg viewBox="0 0 120 120" aria-hidden="true">
-        <rect width="120" height="120" rx="18" fill="#B4453A"/>
-        <g fill="none" stroke="#FBF6E9" stroke-width="10" stroke-linecap="square" stroke-linejoin="miter"><path d="M20 45V20h25"/><path d="M75 20h25v25"/><path d="M20 75v25h25"/><path d="M75 100h25V75"/></g>
-        <circle cx="60" cy="60" r="25" fill="#FBF6E9"/>
-        <g fill="none" stroke="#B4453A" stroke-width="5" stroke-linecap="round"><path d="M49 39c-8 11-8 31 0 42"/><path d="M71 39c8 11 8 31 0 42"/></g>
+      <svg viewBox="0 0 320 320" aria-hidden="true">
+        <defs>
+          <linearGradient id="ogMarkClay" x1="0" y1="0" x2="0.88" y2="1">
+            <stop offset="0" stop-color="#B93F31"/>
+            <stop offset="0.52" stop-color="#B43C2E"/>
+            <stop offset="1" stop-color="#AE392D"/>
+          </linearGradient>
+        </defs>
+        <rect width="320" height="320" rx="32" fill="url(#ogMarkClay)"/>
+        <g fill="#F7EEE2">
+          <rect x="47" y="52" width="87" height="83" rx="6"/>
+          <rect x="188" y="52" width="87" height="83" rx="6"/>
+          <rect x="47" y="190" width="87" height="83" rx="6"/>
+          <rect x="188" y="190" width="87" height="83" rx="6"/>
+        </g>
+        <circle cx="161" cy="164" r="82" fill="url(#ogMarkClay)"/>
+        <circle cx="161" cy="164" r="63" fill="#F7EEE2"/>
+        <g fill="none" stroke="url(#ogMarkClay)" stroke-width="10" stroke-linecap="round">
+          <path d="M117 121C146 141 146 187 117 207"/>
+          <path d="M205 121C176 141 176 187 205 207"/>
+        </g>
       </svg>
     </span>
     <span class="txt">
-      <img class="wordmark" src="../public/brand/tally-wordmark.svg" alt="Tally">
+      <img class="wordmark" src="../public/brand/tally-wordmark.png" alt="Tally">
       <span class="sport">Baseball</span>
-      <span class="sub">Score the game by hand. Every number stays sealed until you tap.</span>
-      <span class="cta">Score along free <span class="arrow">&rarr;</span></span>
+      <span class="sub">For scorekeeping, delayed watching, and baseball research with sealed game results.</span>
+      <span class="cta">Open the slate <span class="arrow">&rarr;</span></span>
     </span>
   </div>
 </body>

@@ -1,4 +1,4 @@
-import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
+import { TallyWordmark } from './TallyBrand.jsx'
 import { SiteSearchButton } from './SiteSearch.jsx'
 import { SiteMenuButton } from './SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
@@ -19,10 +19,7 @@ export function SiteHeader() {
         onClick={goHome}
         aria-label="Back to games"
       >
-        <span className="tally-lockup" aria-hidden="true">
-          <TallyBaseballMark size={38} className="tally-lockup__mark" />
-          <TallyWordmark height={34} className="tally-lockup__wordmark sitebar__wordmark" />
-        </span>
+        <TallyWordmark height={22} className="sitebar__wordmark" />
       </button>
       <div className="sitebar__actions">
         <SiteSearchButton />

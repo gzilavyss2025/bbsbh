@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Tally Baseball — a spoiler-safe, read-only second-screen companion for scoring games by hand.",
+  "description": "Tally Baseball companion for scorekeeping, delayed watching, and baseball research.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
