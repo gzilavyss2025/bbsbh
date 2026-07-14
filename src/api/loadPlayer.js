@@ -11,7 +11,7 @@ import {
   fetchMilbByDateRange,
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
-  fetchTeamLogoTint,
+  enrichTimelineEntries,
   findFirstStart,
   findFirstStrikeoutBatter,
   findFirstPitcherFaced,
@@ -33,7 +33,6 @@ import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor } from './savantPercentiles.js'
 import { fetchRookiesData, rookieRecordFor } from './rookies.js'
-import { historicalParentOrg } from './milbHistory.js'
 import {
   personBio,
   personSportId,
@@ -360,42 +359,10 @@ export async function loadPlayer(id, asOf) {
     ...(primaryResult?.milbYbySplits ?? []),
   ]
   const timeline = careerTimelineView(timelineSplits, primaryGroup, debutYear)
-  if (timeline) {
-    // Resolve each stop's logo tint (per DISTINCT team — the tint doesn't
-    // depend on when the player was there) and hover label (per STOP, not per
-    // team: an affiliate can be reassigned to a different parent org between
-    // two separate stints at the same club, and the label must reflect the
-    // org that stint actually belonged to). The label names the club; a farm
-    // club adds its parent org in parens ("Nashville Sounds (Milwaukee
-    // Brewers)"), skipped for MLB stops whose own name is already the whole
-    // label.
-    const byTeam = new Map()
-    for (const e of timeline.entries) {
-      if (!byTeam.has(e.teamId)) byTeam.set(e.teamId, {})
-    }
-    await Promise.all(
-      [...byTeam.entries()].map(async ([teamId, meta]) => {
-        meta.tint = await fetchTeamLogoTint(teamId)
-      }),
-    )
-    await Promise.all(
-      timeline.entries.map(async (e) => {
-        e.tint = byTeam.get(e.teamId).tint
-        if (e.sportId === 1) {
-          e.title = e.teamName
-          return
-        }
-        // A hand-curated historical override wins when this club/year is
-        // covered (see api/milbHistory.js) — it's the only way to know the
-        // org a since-reassigned affiliate belonged to AT THE TIME rather
-        // than today; otherwise fall back to the live/current parent org,
-        // same as before this override existed.
-        const hist = await historicalParentOrg(e.teamId, e.minSeason)
-        const parentOrgName = hist?.name ?? (await fetchTeam(e.teamId))?.parentOrgName ?? ''
-        e.title = parentOrgName ? `${e.teamName} (${parentOrgName})` : e.teamName
-      }),
-    )
-  }
+  // Resolve each stop's logo tint + hover label (the club, farm clubs adding
+  // their parent org) — see enrichTimelineEntries, shared with the manager
+  // page's playing-career timeline.
+  if (timeline) await enrichTimelineEntries(timeline.entries)
 
   // Position innings — the fielding diamond (position players) or the
   // starter/reliever IP pair (pitchers + two-way). Season scope is eager; the

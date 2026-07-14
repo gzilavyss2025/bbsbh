@@ -115,8 +115,11 @@ const outsToIp = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
 // Sum a player's hitting splits into one stat object shaped like the API's, with
 // the rate fields the descriptors read (avg/obp/slg/ops/babip) recomputed from
 // summed components rather than averaged. Counting fields are summed straight;
-// atBats/totalBases/sacFlies ride along only to feed the rate math.
-function sumHitting(splits) {
+// atBats/totalBases/sacFlies ride along only to feed the rate math. Exported for
+// reuse by the manager page's playing-career line (person-fetch.js), where a
+// single MLB career split is a no-op "sum" and a MiLB career is summed across
+// levels — note it drops `gamesPlayed`, so a caller wanting G sums it separately.
+export function sumHitting(splits) {
   const t = {
     atBats: 0, plateAppearances: 0, hits: 0, doubles: 0, triples: 0, homeRuns: 0,
     rbi: 0, baseOnBalls: 0, hitByPitch: 0, strikeOuts: 0, stolenBases: 0,
@@ -139,7 +142,7 @@ function sumHitting(splits) {
 // (era/whip/opp-avg/rate-per-9/K:BB/P-IP) from summed outs + components. `outs`
 // is the linear innings unit; inningsPitched is re-derived from it as the
 // display/parse string.
-function sumPitching(splits) {
+export function sumPitching(splits) {
   const t = {
     gamesPitched: 0, gamesStarted: 0, saves: 0, wins: 0, losses: 0, homeRuns: 0,
     hitBatsmen: 0, baseOnBalls: 0, strikeOuts: 0, holds: 0, wildPitches: 0,
