@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title">
   <title id="title">Tally Baseball</title><rect width="512" height="512" fill="#B4453A"/>
-  <g transform="translate(56 56) scale(3.333333)"><g fill="#FBF6E9"><path d="M18 18h31v17L35 49H18V18Z"/><path d="M71 18h31v31H85L71 35V18Z"/><path d="M18 71h17l14 14v17H18V71Z"/><path d="M85 71h17v31H71V85l14-14Z"/><circle cx="60" cy="60" r="27"/></g><g fill="none" stroke="#B4453A" stroke-width="5" stroke-linecap="round"><path d="M48 38c-8 10-8 34 0 44"/><path d="M72 38c8 10 8 34 0 44"/></g></g>
+  <g transform="translate(56 56) scale(3.333333)"><g fill="none" stroke="#FBF6E9" stroke-width="10" stroke-linecap="square" stroke-linejoin="miter"><path d="M20 45V20h25"/><path d="M75 20h25v25"/><path d="M20 75v25h25"/><path d="M75 100h25V75"/></g><circle cx="60" cy="60" r="25" fill="#FBF6E9"/><g fill="none" stroke="#B4453A" stroke-width="5" stroke-linecap="round"><path d="M49 39c-8 11-8 31 0 42"/><path d="M71 39c8 11 8 31 0 42"/></g></g>
 </svg>
