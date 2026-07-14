@@ -128,11 +128,13 @@ export async function fetchMilbCareer(personId, group) {
 // position player's in `hitting`). We fetch BOTH groups at MLB in parallel rather
 // than trusting the position alone — cheap, and it makes the rare two-way / oddly-
 // labeled case just work — and prefer the position-implied group when both exist.
-// A manager who never reached the majors falls to the MiLB level fan-out; one
-// whose playing days predate statsapi's thin pre-~2005 MiLB coverage (e.g. an
-// '80s farmhand like Pat Murphy) simply has no data and returns null, so the
-// page drops the card. Returns `{ group, level: 'mlb' | 'milb', splits }` (raw
-// splits — the caller sums via statsLevels' sumHitting/sumPitching) or null.
+// A manager who never reached the majors falls to the MiLB level fan-out. If
+// the primary group is absent at every level, the other group gets the same
+// fallback so a missing or misclassified position does not hide a real career.
+// Someone whose playing days predate statsapi's thin pre-~2005 MiLB coverage
+// simply has no data and returns null, so the page drops the card. Returns
+// `{ group, level: 'mlb' | 'milb', splits }` (raw splits — the caller sums via
+// statsLevels' sumHitting/sumPitching) or null.
 export async function fetchManagerPlaying(personId, primaryPosition) {
   if (!personId) return null
   const isPitcher = primaryPosition?.code === '1' || primaryPosition?.type === 'Pitcher'
@@ -147,6 +149,8 @@ export async function fetchManagerPlaying(personId, primaryPosition) {
     if (otherMlb.length) return { group: other, level: 'mlb', splits: otherMlb }
     const primMilb = await fetchMilbCareer(personId, primary)
     if (primMilb.length) return { group: primary, level: 'milb', splits: primMilb }
+    const otherMilb = await fetchMilbCareer(personId, other)
+    if (otherMilb.length) return { group: other, level: 'milb', splits: otherMilb }
     return null
   } catch {
     return null

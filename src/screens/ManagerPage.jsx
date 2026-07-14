@@ -201,7 +201,12 @@ function PlayingTeams({ entries }) {
       <h2 className="mgrpage__cardtitle">Teams played for</h2>
       <ol className="careertl__track">
         {entries.map((e) => (
-          <li className="careertl__stop" key={`${e.teamId}-${e.minSeason}`} title={e.title}>
+          <li
+            className="careertl__stop"
+            key={`${e.teamId}-${e.minSeason}`}
+            title={e.title}
+            aria-label={e.title}
+          >
             <span
               className="careertl__badge"
               style={e.tint ? { background: e.tint } : undefined}

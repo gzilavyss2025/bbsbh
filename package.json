@@ -13,6 +13,7 @@
     "check:name-casing": "node scripts/check-name-casing.mjs",
     "check:claude-md": "node scripts/check-claude-md.mjs",
     "lint:fix": "eslint . --fix",
+    "test": "node --test",
     "e2e": "playwright test"
   },
   "dependencies": {

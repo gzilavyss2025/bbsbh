@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -37,7 +37,10 @@ export function ScorecardLab() {
     () => (gamePk ? loadScorecardGame(gamePk) : Promise.resolve(null)),
     [gamePk],
   )
-  const view = gamePk ? scorecardFull(loaded.data, side) : null
+  const view = useMemo(
+    () => (gamePk ? scorecardFull(loaded.data, side) : null),
+    [gamePk, loaded.data, side],
+  )
 
   const load = (e) => {
     e.preventDefault()

@@ -537,7 +537,10 @@ async function loadTeam(id, asOf) {
   const lineupIds = new Set(preferredLineup.map((p) => p.id))
   const substitutes = fullRoster
     .filter(
-      (r) => r.person?.id && r.position?.type !== 'Pitcher' && !lineupIds.has(r.person.id),
+      (r) =>
+        r.person?.id &&
+        (r.position?.type !== 'Pitcher' || isTwoWay(r.person)) &&
+        !lineupIds.has(r.person.id),
     )
     .map((r) => ({
       id: r.person.id,
