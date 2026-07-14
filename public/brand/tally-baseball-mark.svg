@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">Tally Baseball</title>
+  <desc id="desc">Rounded clay-red square with four cream scorecard corners and a cream baseball at center.</desc>
+  <defs>
+    <linearGradient id="clay" x1="0" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#B93F31"/>
+      <stop offset="0.52" stop-color="#B43C2E"/>
+      <stop offset="1" stop-color="#AE392D"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="32" fill="url(#clay)"/>
+  <g fill="#F7EEE2">
+    <rect x="47" y="52" width="87" height="83" rx="6"/>
+    <rect x="188" y="52" width="87" height="83" rx="6"/>
+    <rect x="47" y="190" width="87" height="83" rx="6"/>
+    <rect x="188" y="190" width="87" height="83" rx="6"/>
+  </g>
+  <circle cx="161" cy="164" r="82" fill="url(#clay)"/>
+  <circle cx="161" cy="164" r="63" fill="#F7EEE2"/>
+  <g fill="none" stroke="url(#clay)" stroke-width="10" stroke-linecap="round">
+    <path d="M117 121C146 141 146 187 117 207"/>
+    <path d="M205 121C176 141 176 187 205 207"/>
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 /* ============================================================
-   Scorekeeper — Baseball Scorebook Helper
+   Tally Baseball
    App styling built on the Scorekeeper Design System tokens.
    Metaphor: paper on a desk. Warm manila canvas, cream cards,
    navy ink, kraft-tape spoiler covers. All numbers are mono
@@ -41,6 +41,7 @@
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
+     - the About page body copy — `.aboutpage .caps-exempt`
      - the Game Score modal's explainer paragraphs — `.gsmodal .sheet__body`,
        `.gsmodal__foot` (the per-factor table stays shouted)
      - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
@@ -147,7 +148,7 @@ body {
   color: var(--text-heading);
 }
 
-/* Slate header: the Scorebook mark taps home, and the level toggle rides on the
+/* Slate header: the Tally wordmark taps home, and the level toggle rides on the
    same row to its right rather than on its own line below. The title shrinks so
    all five level buttons fit beside it on a narrow phone. */
 .topbar--slate {
@@ -2466,6 +2467,11 @@ body {
   color: var(--text-caption);
 }
 
+.sitefooter__brand > span {
+  font-size: 11px;
+  letter-spacing: var(--ls-label);
+}
+
 .sitefooter__about {
   padding: 0;
   border: none;
@@ -2475,6 +2481,123 @@ body {
   text-decoration: underline dotted;
   text-underline-offset: 2px;
   cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- about page */
+.aboutpage {
+  padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom));
+}
+
+#root .aboutpage .caps-exempt {
+  text-transform: none; /* caps-exempt: About page explanatory copy reads as natural sentences */
+}
+
+.aboutpage__intro {
+  padding: var(--space-4) 0 var(--space-5);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.aboutpage__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-3);
+  color: var(--text-heading);
+}
+
+.aboutpage__title {
+  margin: 0;
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 0.95;
+  letter-spacing: 0;
+  color: var(--text-heading);
+}
+
+.aboutpage__lede {
+  margin: var(--space-3) 0 0;
+  font-size: 16px;
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+.aboutpage__section {
+  padding: var(--space-5) 0 0;
+}
+
+.aboutpage__principles {
+  display: grid;
+  gap: 8px;
+}
+
+.aboutpage__principle,
+.aboutpage__note {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.aboutpage__principle {
+  padding: 13px 14px 12px;
+}
+
+.aboutpage__principle h3 {
+  margin: 0 0 5px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.aboutpage__principle p,
+.aboutpage__note p {
+  margin: 0;
+  font-size: 14px;
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+.aboutpage__list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.aboutpage__list li {
+  padding: 11px 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: 14px;
+  line-height: var(--lh-tight);
+  color: var(--text-body);
+}
+
+.aboutpage__list li::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border: var(--bw-hair) solid var(--field);
+  border-radius: 50%;
+  background: var(--surface-card);
+  vertical-align: 1px;
+}
+
+.aboutpage__note {
+  margin-top: var(--space-5);
+  padding: 13px 14px;
+  color: var(--text-caption);
+  background: var(--surface-inset);
+}
+
+.aboutpage__note p {
+  color: var(--text-caption);
 }
 
 /* ---------------------------------------------------------------- team info */
@@ -9524,6 +9647,15 @@ body {
   font-style: normal;
   color: var(--graphite-soft);
   font-size: 11px;
+}
+
+.sitebar__wordmark,
+.topbar__home svg,
+.topbar__home img,
+.sitefooter__brand svg,
+.sitefooter__brand img {
+  display: block;
+  flex: none;
 }
 
 /* Team-quality summary — two equal-weight entry points. A small expandable

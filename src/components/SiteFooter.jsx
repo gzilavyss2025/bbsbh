@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { GameFinderModal } from './GameFinderModal.jsx'
 import { FavoriteTeamModal } from './FavoriteTeamModal.jsx'
-import { ScorebookMark } from './ScorebookMark.jsx'
+import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { useNav } from '../lib/nav.js'
 
 const YEAR = new Date().getFullYear()
@@ -118,11 +118,12 @@ export function SiteFooter({
 
       <div className="sitefooter__legal">
         <p className="sitefooter__brand">
-          <ScorebookMark size={14} simplified />
-          Scorebook Helper
+          <TallyBaseballMark size={18} />
+          <TallyWordmark height={14} />
+          <span>Baseball</span>
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
-        <p>Score on paper — every run, hit, and error stays sealed until you tap.</p>
+        <p>Built for keeping score by hand. Game results stay sealed until opened.</p>
         <p>
           <button
             type="button"

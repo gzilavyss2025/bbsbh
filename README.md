@@ -1,23 +1,29 @@
-# Scorebook Helper
+# Tally Baseball
 
-A **spoiler-safe companion** for scoring baseball games by hand.
+A baseball companion for scorekeeping, delayed watching, and research.
 
-If you keep score in a paper scorebook, this app rides along on your phone as a
-second screen. It looks up the game you're at (or watching on a delay) and shows
-you everything you need to fill in your book — lineups, uniform numbers,
-umpires, the bullpen and bench — **without ever spoiling the score.**
+If you keep score in a paper scorebook, this app provides the live context that
+usually requires checking a scoreboard app. It looks up the game you're at and
+shows the references needed to fill in your book: lineups, uniform numbers,
+umpires, the bullpen, and the bench.
 
-Every number that could give away what's happening stays hidden behind a cover
-until you decide you're ready to see it. Tap to reveal, one inning at a time.
+Numbers that could give away what's happening stay hidden behind a cover until
+you decide you're ready to see them. Tap to reveal, one inning at a time.
+
+That same sealed view is useful when you cannot watch live. Open a recording
+later, pick the original matchup, and reveal the game at the pace you are
+watching instead of getting the final score up front. Away from a single game,
+the player, team, standings, leaders, prospects, awards, rehab, and umpire pages
+also make it a compact baseball reference.
 
 ---
 
 ## Why it exists
 
-Scoring by hand is the fun part — but the moment you glance at your phone to
-check a batter's number or which reliever is warming up, you risk seeing the
-score and ruining the surprise. Regular baseball apps are built to tell you the
-score as fast as possible. This one is built to *not*.
+Scoring by hand, watching on delay, and researching a matchup all mean checking
+a phone for small facts: a batter's number, the plate umpire, a reliever's role,
+or a team's recent context. Most baseball apps put the score first. Tally
+Baseball keeps outcome data covered until it is opened.
 
 It's a lookup tool, not a scoring tool. You still do all the scoring yourself,
 on paper. This just answers the questions that come up while you do — and, when
