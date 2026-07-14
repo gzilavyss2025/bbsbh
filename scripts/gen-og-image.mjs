@@ -1,7 +1,5 @@
 // Rasterizes scripts/og-image.html into public/og-image.png (1200×630) — a
-// generated-art Open Graph / Twitter card. NOT currently shipped: the live
-// og:image is the hand-provided public/og-image.jpg (see index.html); this
-// script is retained in case we go back to generated art. Same
+// generated-art Open Graph / Twitter card used by index.html. Same
 // Playwright-via-global approach as gen-icons.mjs.
 // Run: node scripts/gen-og-image.mjs
 import { createRequire } from 'node:module'

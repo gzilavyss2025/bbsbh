@@ -18,8 +18,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Scorebook Helper',
-        short_name: 'Scorebook',
+        name: 'Tally Baseball',
+        short_name: 'Tally',
         description:
           'Spoiler-safe second-screen companion for scoring baseball games by hand.',
         theme_color: '#1B2A3A',

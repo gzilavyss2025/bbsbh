@@ -1,9 +1,9 @@
-import { ScorebookMark } from './ScorebookMark.jsx'
+import { TallyWordmark } from './TallyBrand.jsx'
 import { SiteSearchButton } from './SiteSearch.jsx'
 import { SiteMenuButton } from './SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
 
-// The small "Scorebook" brand mark + wordmark shown atop every screen (except
+// The Tally wordmark shown atop every screen (except
 // the slate, which is already home) — tapping it returns to '/' with a full
 // reload (see lib/home.js). Not sticky; each screen still owns whatever
 // page-specific header sits below it. The search + menu buttons ride on the
@@ -19,8 +19,7 @@ export function SiteHeader() {
         onClick={goHome}
         aria-label="Back to games"
       >
-        <ScorebookMark size={22} simplified />
-        <span className="sitebar__word">Scorebook</span>
+        <TallyWordmark height={22} className="sitebar__wordmark" />
       </button>
       <div className="sitebar__actions">
         <SiteSearchButton />

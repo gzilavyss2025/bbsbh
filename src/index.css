@@ -1,5 +1,5 @@
 /* ============================================================
-   Scorekeeper — Baseball Scorebook Helper
+   Tally Baseball
    App styling built on the Scorekeeper Design System tokens.
    Metaphor: paper on a desk. Warm manila canvas, cream cards,
    navy ink, kraft-tape spoiler covers. All numbers are mono
@@ -147,7 +147,7 @@ body {
   color: var(--text-heading);
 }
 
-/* Slate header: the Scorebook mark taps home, and the level toggle rides on the
+/* Slate header: the Tally wordmark taps home, and the level toggle rides on the
    same row to its right rather than on its own line below. The title shrinks so
    all five level buttons fit beside it on a narrow phone. */
 .topbar--slate {
@@ -2464,6 +2464,22 @@ body {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+.sitefooter__brand > span {
+  font-size: 11px;
+  letter-spacing: var(--ls-label);
+}
+
+.sitebar__wordmark,
+.topbar__home svg,
+.sitefooter__brand svg {
+  display: block;
+  flex: none;
+}
+
+.sitebar__wordmark {
+  color: var(--clay);
 }
 
 .sitefooter__about {
