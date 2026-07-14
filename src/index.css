@@ -10209,8 +10209,12 @@ body {
 .thub-namewrap .ilmark {
   font-size: 12px;
 }
+/* Kraft-tape amber, deliberately NOT the clay red the IL cross (.ilmark) uses:
+   an All-Star who's also hurt would otherwise show a red star and a red cross
+   side by side in the same hue, reading as one smeared mark. Amber keeps the
+   honor distinct from the injury flag (and matches the gold-star convention). */
 .thub-allstar {
-  color: var(--clay);
+  color: var(--seal);
   margin-left: 4px;
   font-size: 12px;
 }
@@ -10267,9 +10271,16 @@ body {
   border: var(--bw-hair) solid var(--seal);
   border-radius: var(--radius-sm);
 }
-/* Lineup + Starting Pitchers pair up at the desktop/iPad breakpoint (see
-   e.g. .standings__wide); Bullpen (outside this row) stays full-width. */
+/* Two columns pair up at the desktop/iPad breakpoint (see e.g.
+   .standings__wide): the defensive nine + bench on the left, both pitching
+   staffs on the right. Below the breakpoint each column collapses and the four
+   subsections stack in reading order (Lineup, Substitutes, Starters, Bullpen). */
 .roster-super__row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.roster-super__col {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -10279,7 +10290,7 @@ body {
     flex-direction: row;
     align-items: flex-start;
   }
-  .roster-super__row > .roster-sub {
+  .roster-super__row > .roster-super__col {
     flex: 1;
     min-width: 0;
   }
