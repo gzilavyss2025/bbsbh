@@ -83,11 +83,11 @@ export function FavoriteTeamModal({
         className="favteamsheet"
         role="dialog"
         aria-modal="true"
-        aria-label={intro ? 'Welcome to Scorebook Helper' : 'Settings'}
+        aria-label={intro ? 'Welcome to Tally Baseball' : 'Settings'}
       >
         <div className="favteamsheet__head">
           <h2 className={`sheet__title${intro ? ' favteamsheet__title--intro' : ''}`}>
-            {intro ? 'Welcome to Scorebook Helper' : 'Settings'}
+            {intro ? 'Welcome to Tally Baseball' : 'Settings'}
           </h2>
           <button
             ref={closeRef}
@@ -102,7 +102,7 @@ export function FavoriteTeamModal({
 
         {intro && (
           <p className="sheet__body favteamsheet__pitch">
-            Scorebook Helper pulls live lineups, umpires, and rosters straight
+            Tally Baseball pulls live lineups, umpires, and rosters straight
             from MLB&rsquo;s own data — everything you need to fill in your
             scorebook before first pitch. Every run, hit, and out stays sealed
             until you tap to reveal it, inning by inning, so you&rsquo;re

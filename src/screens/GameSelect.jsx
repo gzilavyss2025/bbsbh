@@ -15,7 +15,7 @@ import { GameCard } from '../components/GameCard.jsx'
 import { DerbyCard } from '../components/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
-import { ScorebookMark } from '../components/ScorebookMark.jsx'
+import { TallyWordmark } from '../components/TallyBrand.jsx'
 import { SiteSearchButton } from '../components/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
@@ -214,7 +214,7 @@ export function GameSelect({ onPick, onShowLogos }) {
           date). Pinned together on an opaque backdrop so the cards scroll
           cleanly underneath instead of bleeding through a see-through header. */}
       <div className="slatehead">
-        {/* Title + level toggle + search share one row: the Scorebook mark taps
+        {/* Title + level toggle + search share one row: the Tally wordmark taps
             home (a full reload — see lib/home.js) on the left, the condensed
             MLB/AAA/… buttons and the search trigger ride together to its
             right (grouped so `justify-content: space-between` splits only
@@ -226,8 +226,7 @@ export function GameSelect({ onPick, onShowLogos }) {
             onClick={goHome}
             aria-label="Reload games"
           >
-            <ScorebookMark size={20} simplified />
-            Scorebook
+            <TallyWordmark height={20} />
           </button>
           <div className="topbar__slateactions">
             <LevelNav sportId={sportId} onChange={pickLevel} />

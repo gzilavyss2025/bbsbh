@@ -341,7 +341,7 @@ function genericCard(gc, F) {
         { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', width: '100%', height: '100%', padding: '0 104px', gap: '22px' },
         [
           gc.eyebrow ? eyebrow(gc.eyebrow, F) : null,
-          el('div', { display: 'flex', fontFamily: F.head, fontSize: '92px', fontWeight: 700, lineHeight: 1.0, color: C.navy }, gc.title || 'Scorebook Helper'),
+          el('div', { display: 'flex', fontFamily: F.head, fontSize: '92px', fontWeight: 700, lineHeight: 1.0, color: C.navy }, gc.title || 'Tally Baseball'),
           gc.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 500, color: C.ink2, maxWidth: '880px' }, gc.sub) : null,
         ].filter(Boolean),
       ),

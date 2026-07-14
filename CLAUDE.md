@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**bbsbh** ("Baseball Scorebook Helper") is a spoiler-safe, read-only second-screen
+**Tally Baseball** (repository name: `bbsbh`) is a spoiler-safe, read-only second-screen
 PWA for scoring baseball by hand. It displays lineups, umpires, rosters, and
 inning totals pulled live from the public MLB Stats API — but every
 score-revealing number stays sealed until the user taps to reveal it. It is
