@@ -15,7 +15,7 @@ import { GameCard } from '../components/GameCard.jsx'
 import { DerbyCard } from '../components/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
-import { TallyWordmark } from '../components/TallyBrand.jsx'
+import { TallyBaseballMark, TallyWordmark } from '../components/TallyBrand.jsx'
 import { SiteSearchButton } from '../components/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
@@ -226,7 +226,10 @@ export function GameSelect({ onPick, onShowLogos }) {
             onClick={goHome}
             aria-label="Reload games"
           >
-            <TallyWordmark height={20} />
+            <span className="tally-lockup" aria-hidden="true">
+              <TallyBaseballMark size={38} className="tally-lockup__mark" />
+              <TallyWordmark height={34} className="tally-lockup__wordmark" />
+            </span>
           </button>
           <div className="topbar__slateactions">
             <LevelNav sportId={sportId} onChange={pickLevel} />

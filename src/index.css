@@ -157,11 +157,43 @@ body {
 }
 
 .topbar__home {
+  display: flex;
+  align-items: center;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
   flex: 0 0 auto;
+}
+
+/* The primary signature needs enough mass for its scorecard cuts to read as
+   deliberate geometry. On narrow screens, the sport mark takes over rather
+   than crushing the full wordmark into an illegible thumbnail. */
+.tally-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tally-lockup > svg {
+  display: block;
+  flex: none;
+}
+
+@media (max-width: 600px) {
+  .tally-lockup {
+    gap: 0;
+  }
+
+  .tally-lockup__mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .tally-lockup__wordmark {
+    display: none;
+  }
 }
 
 .topbar--slate .topbar__title {
