@@ -9541,6 +9541,47 @@ body {
   color: var(--graphite-soft);
   font-size: 11px;
 }
+
+/* A compact, date-stamped entry point to the score's full accounting. It is a
+   button rather than a static badge because the headline stays deliberately
+   terse; the sheet exposes baseline, residual, earned pace, and trend. */
+.team-hub__season-score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 7px 0 0;
+  padding: 3px 7px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font: inherit;
+  cursor: pointer;
+}
+.team-hub__season-score:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+.team-hub__season-score:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.team-hub__season-score span {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.team-hub__season-score strong {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-heading);
+}
+.team-hub__season-score em {
+  font-size: 10px;
+  font-style: normal;
+  color: var(--graphite-soft);
+}
 .team-hub__manager {
   margin: 4px 0 0;
   font-size: 13px;
@@ -11634,6 +11675,67 @@ body {
   margin: 0 0 16px;
   padding: 12px 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+/* Season Surprise Score's sheet shares Game Score's shell/close button but its
+   content is an accounting table, not a factor menu. */
+.ssmodal {
+  max-height: min(90vh, 580px);
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.ssmodal__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ssmodal__head .sheet__title {
+  margin: 0;
+}
+.ssmodal__asof {
+  margin: 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-caption);
+}
+.ssmodal__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 16px 0 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.ssmodal__fact {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: 9px 0;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.ssmodal__fact dt {
+  font-size: 12px;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.ssmodal__fact dt span {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+.ssmodal__fact dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+#root .ssmodal .sheet__body {
+  text-transform: none; /* caps-exempt: Season Surprise Score explains its methodology in prose */
 }
 
 .gsfactor {
