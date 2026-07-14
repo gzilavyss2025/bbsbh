@@ -113,7 +113,7 @@ async function playerCard(id, origin) {
   // a farmhand (so he gets his org's color), else his own club id.
   const colorTeam = p.currentTeam?.parentOrgId ?? p.currentTeam?.id ?? ''
   return {
-    title: `${name} — Scorebook Helper`,
+    title: `${name} — Tally Baseball`,
     description: sub
       ? `${sub}. Bio, career register, and season stats — a spoiler-safe scorecard companion.`
       : `Bio, career register, and season stats — a spoiler-safe scorecard companion.`,
@@ -137,7 +137,7 @@ async function teamCard(id, origin, { leaders = false } = {}) {
   const descBits = clean([t.league?.name, t.division?.name].filter(Boolean).join(' · '))
   const eyebrow = leaders ? 'TEAM LEADERS' : ''
   return {
-    title: `${name}${leaders ? ' — Team Leaders' : ''} — Scorebook Helper`,
+    title: `${name}${leaders ? ' — Team Leaders' : ''} — Tally Baseball`,
     description: leaders
       ? `${name} statistical leaders — spoiler-safe. Every level, every category.`
       : descBits
@@ -188,7 +188,7 @@ const GENERIC = {
   standings: { eyebrow: 'STANDINGS', title: 'Standings', sub: 'MLB divisions and the wild-card race.' },
   prospects: { eyebrow: 'PROSPECTS', title: 'Top Prospects', sub: 'The pipeline, ranked — a spoiler-safe scouting board.' },
   rehab: { eyebrow: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
-  about: { eyebrow: 'ABOUT', title: 'Scorebook Helper', sub: 'A spoiler-safe second screen for scoring by hand.' },
+  about: { eyebrow: 'ABOUT', title: 'Tally Baseball', sub: 'Keep score. Keep the surprise.' },
   logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
 }
 
@@ -196,7 +196,7 @@ function genericCard(route, origin) {
   const g = GENERIC[route]
   if (!g) return null
   return {
-    title: `${g.title} — Scorebook Helper`,
+    title: `${g.title} — Tally Baseball`,
     description: g.sub,
     image: ogUrl(origin, { type: 'generic', eyebrow: g.eyebrow, title: g.title, sub: g.sub }),
     alt: `${g.title} — ${g.sub}`,

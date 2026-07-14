@@ -73,7 +73,7 @@ function renderHead(card, url) {
   return `<!-- OG:BEGIN (dynamic, injected per route by /api/preview) -->
     <meta name="description" content="${d}" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Scorebook Helper" />
+    <meta property="og:site_name" content="Tally Baseball" />
     <meta property="og:title" content="${t}" />
     <meta property="og:description" content="${d}" />
     <meta property="og:url" content="${u}" />
@@ -112,7 +112,7 @@ export default async function handler(req) {
     // Own origin unreachable (the whole deploy is down) — last resort that
     // can't loop back into this function: bounce the browser to the home route.
     return new Response(
-      `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/"><title>Scorebook Helper</title>`,
+      `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/"><title>Tally Baseball</title>`,
       { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } },
     )
   }

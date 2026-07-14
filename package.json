@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Baseball scorebook helper — a spoiler-safe, read-only second-screen companion for scoring games by hand.",
+  "description": "Tally Baseball — a spoiler-safe, read-only second-screen companion for scoring games by hand.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

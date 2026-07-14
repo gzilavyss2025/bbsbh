@@ -1,4 +1,4 @@
-# Scorebook Helper
+# Tally Baseball
 
 A **spoiler-safe companion** for scoring baseball games by hand.
 

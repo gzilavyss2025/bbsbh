@@ -30,10 +30,9 @@ const svg = readFileSync(join(iconsDir, 'icon.svg'), 'utf8').replace(
   '<svg style="display:block;width:100%;height:100%" ',
 )
 
-// name -> { size, pad }. icon.svg is a full-bleed manila photo of the scorebook
-// sketch with the drawing already inset to ~68% of the frame — so it is its own
-// safe area and the maskable variant needs no extra padding (padding would inset
-// the manila and leave a background border after Android's circular masking).
+// name -> { size, pad }. icon.svg has a full-bleed brick field and keeps the
+// modular baseball mark inside the mask-safe center, so every target uses the
+// same zero-padding render.
 const targets = [
   { file: 'icon-192.png', size: 192, pad: 0 },
   { file: 'icon-512.png', size: 512, pad: 0 },

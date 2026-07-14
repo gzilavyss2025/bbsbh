@@ -14,7 +14,7 @@
     <meta name="theme-color" content="#F6EFDC" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Scorebook" />
+    <meta name="apple-mobile-web-app-title" content="Tally" />
     <!-- Numbers all over this app are innings/scores, not phone numbers —
          stop Safari from auto-linking number-looking text (e.g. "3-2") into
          tappable tel: links. -->
@@ -26,43 +26,43 @@
          api/og.js, docs/adr/0012-dynamic-link-previews.md). The defaults below
          are the home-page card AND the fallback whenever a route can't be
          resolved — so they must stay valid on their own. og:image here is
-         public/og-image.jpg, a hand-provided phone-mockup asset (NOT generated
-         by scripts/gen-og-image.mjs). URLs must be ABSOLUTE for scrapers.
+         public/og-image.png, generated from scripts/og-image.html. URLs must be
+         ABSOLUTE for scrapers.
          Keep the OG:BEGIN/OG:END markers intact — the injector keys on them. -->
     <meta
       name="description"
       content="Score baseball by hand while your phone is a spoiler-safe second screen: live lineups, umpires, and rosters, with every run and error sealed until you tap."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Scorebook Helper" />
+    <meta property="og:site_name" content="Tally Baseball" />
     <meta
       property="og:title"
-      content="Scorebook Helper — score by hand, spoiler-free"
+      content="Tally Baseball — keep score, keep the surprise"
     />
     <meta
       property="og:description"
       content="Live lineups, umpires, and rosters from the MLB — every run, hit, and error stays sealed until you tap to reveal it."
     />
     <meta property="og:url" content="https://bbsbh.vercel.app/" />
-    <meta property="og:image" content="https://bbsbh.vercel.app/og-image.jpg" />
-    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image" content="https://bbsbh.vercel.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Scorebook app on a phone showing a live inning next to a hand-scored paper scorebook — spoiler-safe, score your way."
+      content="Tally Baseball — a spoiler-safe companion for keeping score by hand."
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Scorebook Helper — score by hand, spoiler-free"
+      content="Tally Baseball — keep score, keep the surprise"
     />
     <meta
       name="twitter:description"
       content="Live lineups, umpires, and rosters from the MLB — every run, hit, and error stays sealed until you tap to reveal it."
     />
-    <meta name="twitter:image" content="https://bbsbh.vercel.app/og-image.jpg" />
-    <title>Scorebook Helper — Spoiler-Safe Baseball Scorekeeping</title>
+    <meta name="twitter:image" content="https://bbsbh.vercel.app/og-image.png" />
+    <title>Tally Baseball — Keep Score, Keep the Surprise</title>
     <!-- OG:END -->
   </head>
   <body>
