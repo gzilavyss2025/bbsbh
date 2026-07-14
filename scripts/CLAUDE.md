@@ -136,6 +136,14 @@ don't run these by hand.
   deliberate small duplication (self-contained generators, same convention as
   `gen-rehab.mjs` mirroring `person.js`'s `detectRehabAssignment`), not a
   shared import.
+- `gen-season-score.mjs` → `public/data/season-score.json` — an MLB-only,
+  date-keyed 0.0–10.0 Season Surprise Score. One normal run adds yesterday's
+  snapshot; `--date` and `--from`/`--to` make a reproducible backfill. The
+  generator sums schedule-adjusted preseason win expectations through the
+  cutoff, stores actual-vs-expected as the headline, and keeps earned pace plus
+  last-30 form as diagnostics. Market baselines live in the hand-curated
+  `season-expectations-seed.json`; incomplete seasons fall back to Marcel. See
+  `docs/season-score.md` and ADR-0018.
 
 ## Own-cadence generators (not the nightly batch)
 

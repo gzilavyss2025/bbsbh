@@ -14,6 +14,8 @@ import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
+import { fetchSeasonScores, seasonScoreFor } from '../api/seasonScore.js'
+import { fetchTeamScores, teamScoreFor } from '../api/teamScore.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../api/person.js'
@@ -40,6 +42,7 @@ import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { InjuredMark } from '../components/InjuredMark.jsx'
 import { RookiePill } from '../components/RookiePill.jsx'
+import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
@@ -174,7 +177,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -198,6 +201,8 @@ async function loadTeam(id, asOf) {
       sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
       sportId === 1 ? fetchAllStarRosterIds(season) : Promise.resolve(new Set()),
       sportId === 1 ? fetchWarData() : Promise.resolve({ season: null, bat: {}, pit: {} }),
+      sportId === 1 ? fetchSeasonScores() : Promise.resolve(null),
+      sportId === 1 ? fetchTeamScores() : Promise.resolve(null),
       // The affiliate tree is keyed off the ORG id (not `id`), so an
       // affiliate's own page gets the same tree its MLB parent would.
       orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
@@ -303,6 +308,12 @@ async function loadTeam(id, asOf) {
 
   const div = standings.find((r) => r.division?.id === team.division?.id)
   const myRec = div?.teamRecords?.find((t) => t.team.id === id)
+  // The live standings view is intentionally current, but the precomputed score
+  // is always through the latest completed day. A dated page uses the exact same
+  // day-before cutoff as its standings request, so the score never looks ahead.
+  const scoreCutoff = asOf ? dayBefore(asOf) : dayBefore(isoToday())
+  const seasonScore = sportId === 1 ? seasonScoreFor(seasonScores, id, season, scoreCutoff) : null
+  const teamScore = sportId === 1 ? teamScoreFor(teamScores, id, season, scoreCutoff) : null
   const standingsRows = (div?.teamRecords ?? []).map((t) => ({
     id: t.team.id,
     name: nickname(t.team.name),
@@ -583,6 +594,8 @@ async function loadTeam(id, asOf) {
     record: myRec
       ? { wins: myRec.wins, losses: myRec.losses, rank: myRec.divisionRank, div: team.division?.name }
       : null,
+    seasonScore,
+    teamScore,
     standings: standingsRows,
     batting, pitching, position, pitchers, injured,
     preferredLineup, substitutes, startingPitchers, bullpen,
@@ -601,7 +614,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager } = data
+  const { team, season, record, seasonScore, teamScore, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -662,6 +675,8 @@ export function TeamPage({ id, asOf, sportId }) {
             </TeamLink>
           )}
         </header>
+
+        {teamScore?.season?.score != null && <TeamScoreCard snapshot={teamScore} surprise={seasonScore} />}
 
         {standings.length > 0 && (
           <>
