@@ -350,18 +350,24 @@ export function selectTeamMeta(feed, side) {
   }
 }
 
-// The four umpires. officialType is one of Home Plate / First Base /
-// Second Base / Third Base.
+// The umpire crew, in standard scorecard order. Crew SIZE varies: a full
+// four-man infield crew is the regular-season norm, but MiLB games are often
+// worked by two or three (the missing bases simply aren't in the feed), and the
+// All-Star Game + postseason add Left Field and Right Field for a six-man crew.
+// `order` lists every role we know how to place; the filter below keeps only the
+// ones actually present, so any crew size renders correctly.
 const UMP_LABELS = {
   'Home Plate': 'HP',
   'First Base': '1B',
   'Second Base': '2B',
   'Third Base': '3B',
+  'Left Field': 'LF',
+  'Right Field': 'RF',
 }
 
 export function selectOfficials(feed) {
   const officials = feed?.liveData?.boxscore?.officials ?? []
-  const order = ['Home Plate', 'First Base', 'Second Base', 'Third Base']
+  const order = ['Home Plate', 'First Base', 'Second Base', 'Third Base', 'Left Field', 'Right Field']
   const byType = {}
   for (const o of officials) {
     if (o.officialType) byType[o.officialType] = o.official

@@ -10874,6 +10874,43 @@ body {
   font-size: 13px;
   color: var(--text-muted);
 }
+/* Level tag on AAA rows (game log + ballparks). MLB is the implicit default, so
+   only AAA is chipped — a small kraft-amber pill, the level toggle's own hue. */
+.umpage__levelchip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--seal-ink);
+  background: var(--seal);
+  vertical-align: middle;
+}
+/* Game-context tag (postseason round / All-Star Game) on game-log rows — same
+   pill as the level chip, in navy ink to read as a different axis than level. */
+.umpage__ctxchip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
+  vertical-align: middle;
+}
+/* Sub-line under an accuracy card title (e.g. the postseason "not ranked" note). */
+.umpage__cardsub {
+  margin: -2px 0 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
 /* "Show all" toggle under a truncated ballparks/team-records list. */
 .umpage__showall {
   display: block;

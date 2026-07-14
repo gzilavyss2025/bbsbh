@@ -38,10 +38,17 @@ don't run these by hand.
   list. Starts from a transaction scan, then verifies each candidate against his
   game log + club's schedule to drop ended stints. Keeps its own self-contained copy
   of the transaction-scan logic (mirrors `person.js`'s `detectRehabAssignment`).
-- `gen-umpires.mjs` → `public/data/umpires.json` — every MLB umpire's season game
-  log, indexed by umpire id. A full-season schedule scan
-  (`/api/v1/schedule?...&hydrate=officials,team`, one call) re-indexed by umpire id.
-  MLB-only.
+- `gen-umpires.mjs` → `public/data/umpires.json` — every MLB + AAA umpire's season
+  game log, indexed by umpire id. A full-season schedule scan per level
+  (`/api/v1/schedule?...&hydrate=officials,team`, one call each for sportId 1 + 11)
+  re-indexed by umpire id, each game row tagged with its `level` + `gameType`. AAA
+  rides along because the same umpires shuttle between the levels (shared
+  personIds); AA and below stay out (thinner officials data + no pitch tracking for
+  the accuracy companion). Sweeps regular season + postseason + the All-Star Game
+  (`gameType=R,F,D,L,W,A`) so six-man crews (Left/Right Field, ASG + postseason) and
+  variable MiLB crews (two/three-man) all land in the log; `UMP_LABELS` maps every
+  role incl. LF/RF, and `selectOfficials` (`src/api/select.js`) mirrors it for the
+  live crew card.
 - `gen-umpire-accuracy.mjs` → `public/data/umpire-accuracy.json` — COMPANION to
   `umpires.json`: each home-plate umpire's season called-pitch accuracy + a compact
   zone-tendency breakdown, keyed by the same personId. Needs each game's full live
@@ -53,8 +60,17 @@ don't run these by hand.
   `cellMiss`, `cellIndex`) that feeds the app's zone map (perceived-zone shading +
   over-league-average miss overlay); a schema change means a one-time `--since`
   backfill so old rows gain the grid. Nightly cron uses the default trailing window;
-  a one-time season backfill is `--since=YYYY-MM-DD [--until=…]`. MLB-only. App reads
-  it via `src/api/umpires.js`. Full write-up: `.scratch/umpire-accuracy/plan.md`.
+  a one-time season backfill is `--since=YYYY-MM-DD [--until=…]`. Covers MLB + AAA
+  (sportId 1 + 11 — every AAA park feeds Hawk-Eye coordinates; AA/below carry none
+  and score to null). The two levels stay SEPARATE (different regime + peer pool):
+  the per-umpire aggregate splits into `season` (MLB) + `seasonAAA`, each row carries
+  a `level`, and `--sports=1,11` restricts the sweep (its use: `--since=… --sports=11`
+  backfills a newly-added level alone without re-fetching the others' immutable rows).
+  Also splits by game CONTEXT (`gameType=R,F,D,L,W,A`): only regular-season rows feed
+  the ranked `season`/`seasonAAA`; postseason (F/D/L/W) rolls up into a separate
+  unranked `seasonPost`; the All-Star Game (A) counts toward no aggregate (per-game
+  figure only). App reads it via `src/api/umpires.js`. Full write-up:
+  `.scratch/umpire-accuracy/plan.md`.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so

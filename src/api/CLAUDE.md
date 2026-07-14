@@ -149,7 +149,9 @@ for each generator; the reader modules:
   base, most recent first), from `public/data/umpires.json`, keyed by umpire
   personId. Cost-driven: no "games by umpire" endpoint, so `gen-umpires.mjs` does a
   full-season schedule scan (`hydrate=officials,team`) then re-indexes thousands of
-  rows by umpire id. MLB-only. Wired via `selectOfficials` (`select.js`) threading
+  rows by umpire id. MLB + AAA (one scan each, sportId 1 + 11; the same umpires
+  shuttle between the levels, so each game row is `level`-tagged). Wired via
+  `selectOfficials` (`select.js`) threading
   each official's `id` to the Umpires card (`TeamInfo.jsx`), rendered as an
   `UmpireLink` to `/umpire/{id}`; the page needs no `SealBox` (assignments + dates
   carry no score). Each entry carries the venue, so `UmpirePage.jsx` tallies
@@ -160,18 +162,31 @@ for each generator; the reader modules:
   rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
   batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
   Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few
-  days' finals, deduped by gamePk. Each row also carries a 3×3 zone grid; a
-  memoized `accuracyIndex()` ranks every qualifying plate ump by season accuracy
-  (`MIN_RANK_GAMES` floor) and builds the league miss-share baseline the zone map
-  compares against. `loadUmpire` merges it all in as `accuracy` (`{ season,
-  byGamePk }`) + `rank` + `zoneCells` (via `umpireZoneCells`) for `UmpirePage.jsx`'s
-  plate-accuracy card (rank line + `UmpireZoneMap`) and per-HP-row figures;
-  `umpireAccuracySummary(id)` serves the rank the lineup page's Umpires card
-  (`TeamInfo.jsx`) shows for tonight's plate ump, which opens `UmpireAccuracyModal`
-  (zone map + last-5 plate games linking to their box scores). Still no `SealBox` —
-  accuracy counts ball/strike JUDGMENTS, not runs or hits, and the lineup rank
-  aggregates Final games only, so it can't leak tonight's result. MLB-only; MiLB /
-  umps with no data degrade to absent.
+  days' finals, deduped by gamePk. It covers MLB + AAA (AAA parks feed the pitch
+  tracking; AA/below don't and score to null), and the two levels are kept SEPARATE
+  — different regime (AAA runs the ABS challenge system) + different peer pool — so
+  the per-umpire aggregate splits into `season` (MLB) + `seasonAAA` and every row is
+  `level`-tagged. It also splits by game CONTEXT (`gameType`): only regular-season
+  rows feed the ranked aggregates, postseason (F/D/L/W) rolls into an unranked
+  `seasonPost`, and the All-Star Game (A) counts toward no aggregate (per-game figure
+  only) — a different-stakes sample never moves the season rank. Each row also carries
+  a 3×3 zone grid; a memoized `accuracyIndex(level)` ranks every qualifying plate ump
+  at that level by REGULAR-SEASON accuracy (`MIN_RANK_GAMES` floor) and builds the
+  level's miss-share baseline the zone map compares against. (Crew SIZE varies —
+  two/three-man in the low minors, six-man with Left/Right Field for the ASG +
+  postseason; `selectOfficials` in `select.js` renders whatever crew the feed carries,
+  the source of the live Umpires card.) `loadUmpire` merges it all in as `accuracy` (`{ season,
+  byGamePk }`) + `rank` + `zoneCells` (via `umpireZoneCells`) — plus a parallel
+  `accuracyAAA`/`rankAAA`/`zoneCellsAAA` triplet and an unranked `accuracyPost`/
+  `zoneCellsPost` (postseason) — for `UmpirePage.jsx`'s plate-accuracy cards (one per
+  level + a separate postseason card, rank line + `UmpireZoneMap`) and per-HP-row
+  figures; `umpireAccuracySummary(id)` serves the MLB rank the lineup page's Umpires
+  card (`TeamInfo.jsx`) shows for tonight's plate ump, which opens
+  `UmpireAccuracyModal` (zone map + last-5 plate games linking to their box scores).
+  The summary, modal, and rankings page stay MLB-only (they front an MLB game).
+  Still no `SealBox` — accuracy counts ball/strike JUDGMENTS, not runs or hits, and
+  the lineup rank aggregates Final games only, so it can't leak tonight's result.
+  Umps below AAA / with no data degrade to absent.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card (career line vs each
   opposing club + last meeting's line, per MLB active-roster player), from
   `public/data/vs-team-splits.json`. Cost-driven: the API's vs-team split types

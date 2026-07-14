@@ -17,6 +17,18 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const TOP_VENUES_LIMIT = 5
 const HP_RECORDS_LIMIT = 10
 
+// Non-regular-season game contexts get a small chip in the game log. Short label
+// for the chip, full name for its tooltip; a regular-season row (gameType R or
+// untagged) gets no chip.
+const CTX_SHORT = { F: 'WC', D: 'DS', L: 'LCS', W: 'WS', A: 'ASG' }
+const CTX_FULL = {
+  F: 'Wild Card',
+  D: 'Division Series',
+  L: 'League Championship Series',
+  W: 'World Series',
+  A: 'All-Star Game',
+}
+
 function monthDay(iso) {
   const [, m, d] = (iso || '').split('-')
   return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
@@ -42,12 +54,15 @@ function allTeams(games) {
   )
 }
 
-// Every ballpark the umpire has worked a game at, ranked most games first.
+// Every ballpark the umpire has worked a game at, ranked most games first. A
+// park belongs to one level, so each venue carries the level it was worked at
+// (for the AAA chip in the list).
 function topVenues(games) {
   const byVenue = new Map()
   for (const g of games) {
     if (!g.venueId) continue
-    if (!byVenue.has(g.venueId)) byVenue.set(g.venueId, { id: g.venueId, name: g.venueName, count: 0 })
+    if (!byVenue.has(g.venueId))
+      byVenue.set(g.venueId, { id: g.venueId, name: g.venueName, level: g.level ?? 'MLB', count: 0 })
     byVenue.get(g.venueId).count++
   }
   return [...byVenue.values()].sort((a, b) => b.count - a.count)
@@ -82,13 +97,14 @@ function hpTeamRecords(games) {
 // cards here — when the umpire has no accuracy data (MiLB, or no scored games
 // yet), so it never shows an empty shell. Called-pitch counts carry no score;
 // see the plan's spoiler audit.
-function PlateAccuracyCard({ accuracy, rank, zoneCells }) {
+function PlateAccuracyCard({ accuracy, rank, zoneCells, title = 'Plate accuracy', subtitle = null }) {
   const s = accuracy?.season
   if (!s || !s.called) return null
   const pct = (s.accuracy * 100).toFixed(1)
   return (
     <section className="umpage__card umpage__acccard">
-      <h2 className="umpage__cardtitle">Plate accuracy</h2>
+      <h2 className="umpage__cardtitle">{title}</h2>
+      {subtitle && <p className="umpage__cardsub">{subtitle}</p>}
       <div className="umpage__accrow">
         <div className="umpage__acctile">
           <span className="umpage__accpct">{pct}%</span>
@@ -136,10 +152,16 @@ export function UmpirePage({ id }) {
   if (gate) return gate
 
   const games = data.games ?? []
-  const accByGamePk = data.accuracy?.byGamePk ?? {}
+  // Per-game accuracy figures span both levels — the two byGamePk maps cover
+  // disjoint gamePks, so a plain union keys every scored HP row.
+  const accByGamePk = { ...(data.accuracyAAA?.byGamePk ?? {}), ...(data.accuracy?.byGamePk ?? {}) }
   const hpCount = games.filter((g) => g.role === 'HP').length
+  const aaaCount = games.filter((g) => g.level === 'AAA').length
+  const mlbCount = games.length - aaaCount
   const shown = hpOnly ? games.filter((g) => g.role === 'HP') : games
-  const teams = allTeams(games)
+  // The teams grid is the 30-club MLB league, so it counts MLB games only; AAA
+  // games still show in the venue list and the game log below.
+  const teams = allTeams(games.filter((g) => (g.level ?? 'MLB') === 'MLB'))
   const venues = topVenues(games)
   const shownVenues = showAllVenues ? venues : venues.slice(0, TOP_VENUES_LIMIT)
   const hpRecords = hpTeamRecords(games)
@@ -156,14 +178,38 @@ export function UmpirePage({ id }) {
           {data.rank?.tier && <UmpireTierPill tier={data.rank.tier} />}
         </div>
         <p className="umpage__sub">
-          {data.season ? `${data.season} season` : 'This season'} · {games.length}{' '}
-          {games.length === 1 ? 'game' : 'games'}
+          {data.season ? `${data.season} season` : 'This season'} ·{' '}
+          {aaaCount > 0
+            ? `${mlbCount} MLB · ${aaaCount} AAA`
+            : `${games.length} ${games.length === 1 ? 'game' : 'games'}`}
           {hpCount > 0 && ` · ${hpCount} behind the plate`}
         </p>
       </header>
 
       <div className="umpage__cards">
-        <PlateAccuracyCard accuracy={data.accuracy} rank={data.rank} zoneCells={data.zoneCells} />
+        <PlateAccuracyCard
+          accuracy={data.accuracy}
+          rank={data.rank}
+          zoneCells={data.zoneCells}
+          title={data.accuracyAAA ? 'MLB plate accuracy' : 'Plate accuracy'}
+        />
+        {data.accuracyAAA && (
+          <PlateAccuracyCard
+            accuracy={data.accuracyAAA}
+            rank={data.rankAAA}
+            zoneCells={data.zoneCellsAAA}
+            title="AAA plate accuracy"
+          />
+        )}
+        {data.accuracyPost && (
+          <PlateAccuracyCard
+            accuracy={data.accuracyPost}
+            rank={null}
+            zoneCells={data.zoneCellsPost}
+            title="Postseason plate accuracy"
+            subtitle="Playoff games — not counted in the season ranking."
+          />
+        )}
 
         {teams.length > 0 && (
           <section className="umpage__card">
@@ -191,7 +237,10 @@ export function UmpirePage({ id }) {
               {shownVenues.map((v, i) => (
                 <li key={v.id} className="umpage__venuerow">
                   <span className="umpage__venuerank">{i + 1}</span>
-                  <span className="umpage__venuename">{v.name || 'Unknown'}</span>
+                  <span className="umpage__venuename">
+                    {v.name || 'Unknown'}
+                    {v.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
+                  </span>
                   <span className="umpage__venuecount">{v.count}</span>
                 </li>
               ))}
@@ -283,6 +332,12 @@ export function UmpirePage({ id }) {
                 >
                   {g.awayAbbr} @ {g.homeAbbr}
                 </button>
+                {g.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
+                {CTX_SHORT[g.gameType] && (
+                  <span className="umpage__ctxchip" title={CTX_FULL[g.gameType]}>
+                    {CTX_SHORT[g.gameType]}
+                  </span>
+                )}
                 {acc?.called ? (
                   <span className="umpage__rowacc">
                     {((acc.correct / acc.called) * 100).toFixed(1)}%

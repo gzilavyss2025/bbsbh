@@ -1,8 +1,8 @@
 import { TIER_LABELS, tierForZ, meanAndSd } from '../lib/statTiers.js'
 
-// The umpire detail page's data — for a given umpire, every MLB game he's
-// worked this season plus which base he had — read from a static same-origin
-// file (public/data/umpires.json) rather than computed live.
+// The umpire detail page's data — for a given umpire, every MLB and AAA game
+// he's worked this season plus which base he had — read from a static
+// same-origin file (public/data/umpires.json) rather than computed live.
 //
 // There's no "games by umpire" endpoint, so getting this list means scanning
 // the whole season's schedule and re-indexing by umpire id — too much to fetch
@@ -22,11 +22,21 @@ import { TIER_LABELS, tierForZ, meanAndSd } from '../lib/statTiers.js'
 // same footing as the game log (see the plan's spoiler audit,
 // .scratch/umpire-accuracy/plan.md §4).
 //
-// MLB-only for now, like war.js — a MiLB umpire simply won't be found.
-// Degrades to null before the file exists or on any failure.
+// LEVELS: MLB + AAA (the two levels with the pitch tracking accuracy needs).
+// The two are kept STRICTLY SEPARATE, never blended: they run different regimes
+// (AAA uses the ABS challenge system) and rank against different peer pools, so
+// the accuracy file carries a per-level aggregate (`season` = MLB, `seasonAAA`)
+// and each game row a `level` tag. loadUmpire() returns MLB accuracy/rank/
+// zoneCells plus a parallel `*AAA` triplet, each ranked + zone-baselined against
+// its own level via a per-level accuracyIndex(). The lineup summary + rankings
+// page stay MLB-only (they front an MLB game). A MiLB umpire below AAA, or one
+// with no data, degrades to null before the file exists or on any failure.
 let cached = null
 let accuracyCached = null
-let indexCached = null
+// accuracyIndex is memoized per level ('MLB' | 'AAA') — the two levels rank
+// against separate pools and have separate zone-map baselines, so each gets its
+// own index.
+const indexCached = new Map()
 
 // A plate umpire needs at least this many scored games before we rank him among
 // his peers — below it a hot/cold handful of games would swing the ordering
@@ -69,7 +79,15 @@ async function loadAccuracy() {
   return accuracyCached
 }
 
-// One pass over the whole accuracy file (memoized) that both surfaces need:
+// A umpire's season aggregate for a given level. MLB is the top-level `season`
+// (back-compat with the pre-AAA file shape); AAA is `seasonAAA`, null when he
+// has no AAA plate games.
+function seasonForLevel(u, level) {
+  return level === 'AAA' ? u.seasonAAA : u.season
+}
+
+// One pass over the whole accuracy file (memoized per level) that the surfaces
+// need. `level` selects which per-level aggregate to rank on ('MLB' | 'AAA'):
 //   • rankById — each qualifying umpire's { rank, total, tier, accuracy, games,
 //     name, tendency } in season plate accuracy, best first. Only umpires with
 //     >= MIN_RANK_GAMES scored games qualify; everyone else has no rank (the
@@ -84,10 +102,15 @@ async function loadAccuracy() {
 //     3×3 zone grid, normalized to shares. It's the "typical umpire" baseline
 //     the zone map compares each umpire against (a cell where he misses a
 //     bigger share than the league is where he's worse than average).
-async function accuracyIndex() {
-  if (indexCached) return indexCached
+async function accuracyIndex(level = 'MLB') {
+  if (indexCached.has(level)) return indexCached.get(level)
   const { umpires } = await loadAccuracy()
+  // A per-level view where each umpire's `season` is that level's aggregate, so
+  // the ranking/baseline logic below reads `u.season` unchanged. Umpires with no
+  // aggregate at this level (e.g. never worked AAA) drop out.
   const all = Object.values(umpires)
+    .map((u) => ({ id: u.id, name: u.name, season: seasonForLevel(u, level) }))
+    .filter((u) => u.season)
 
   const qualified = all
     .filter((u) => u.season?.called && u.season.accuracy != null && (u.season.games ?? 0) >= MIN_RANK_GAMES)
@@ -121,8 +144,9 @@ async function accuracyIndex() {
   const missTotal = leagueMiss.reduce((a, b) => a + b, 0)
   const leagueShare = leagueMiss.map((m) => (missTotal ? m / missTotal : 0))
 
-  indexCached = { rankById, ranked, mean, sd, leagueShare }
-  return indexCached
+  const index = { rankById, ranked, mean, sd, leagueShare }
+  indexCached.set(level, index)
+  return index
 }
 
 // Shape a season aggregate's 3×3 cell tallies into what the zone map draws: per
@@ -170,13 +194,18 @@ export function accuracyTendency(season) {
   return where ? `generous ${where}` : 'generous zone'
 }
 
-// The full accuracy record for one umpire ({ season, byGamePk }) or null.
-function accuracyFor(umpires, id) {
+// The full accuracy record for one umpire at a level ({ season, byGamePk }) or
+// null. `byGamePk` holds only that level's game rows (a row predating the level
+// tag is treated as MLB, matching the generator).
+function accuracyFor(umpires, id, level = 'MLB') {
   const a = umpires[id]
-  if (!a?.season || !a.season.called) return null
+  const season = a && seasonForLevel(a, level)
+  if (!season || !season.called) return null
   const byGamePk = {}
-  for (const g of a.games ?? []) byGamePk[g.gamePk] = g
-  return { season: a.season, byGamePk }
+  for (const g of a.games ?? []) {
+    if ((g.level ?? 'MLB') === level) byGamePk[g.gamePk] = g
+  }
+  return { season, byGamePk }
 }
 
 // { id, name, games, season, generatedAt, accuracy, rank, zoneCells } for one
@@ -184,19 +213,39 @@ function accuracyFor(umpires, id) {
 // load). `accuracy` is null when he has no plate-accuracy data (MiLB, or no
 // scored games yet); `rank` ({ rank, total, tier, ... }) is null when he's
 // below the ranking floor; `zoneCells` is null when his rows predate the cell
-// schema.
+// schema. The `*AAA` triplet mirrors all three for the umpire's AAA plate work
+// (call-up umpires who also work Triple-A), each ranked/baselined against the
+// AAA pool — null throughout when he has no AAA plate games.
 export async function loadUmpire(id) {
-  const [{ umpires, season, generatedAt }, acc, idx] = await Promise.all([load(), loadAccuracy(), accuracyIndex()])
+  const [{ umpires, season, generatedAt }, acc, idxMlb, idxAaa] = await Promise.all([
+    load(),
+    loadAccuracy(),
+    accuracyIndex('MLB'),
+    accuracyIndex('AAA'),
+  ])
   const u = umpires[id]
   if (!u) return null
-  const accuracy = accuracyFor(acc.umpires, id)
+  const accuracy = accuracyFor(acc.umpires, id, 'MLB')
+  const accuracyAAA = accuracyFor(acc.umpires, id, 'AAA')
+  // Postseason plate work is aggregated separately and NEVER ranked (a
+  // different-stakes, small sample): its zone map is drawn against the MLB
+  // regular-season baseline for reference. Null unless he has scored playoff
+  // plate games. The All-Star Game feeds no aggregate, so it isn't here — only
+  // its per-game figure shows, via the game log.
+  const seasonPost = acc.umpires[id]?.seasonPost
+  const accuracyPost = seasonPost?.called ? { season: seasonPost } : null
   return {
     ...u,
     season,
     generatedAt,
     accuracy,
-    rank: idx.rankById.get(String(id)) ?? null,
-    zoneCells: accuracy ? umpireZoneCells(accuracy.season, idx.leagueShare) : null,
+    rank: idxMlb.rankById.get(String(id)) ?? null,
+    zoneCells: accuracy ? umpireZoneCells(accuracy.season, idxMlb.leagueShare) : null,
+    accuracyAAA,
+    rankAAA: idxAaa.rankById.get(String(id)) ?? null,
+    zoneCellsAAA: accuracyAAA ? umpireZoneCells(accuracyAAA.season, idxAaa.leagueShare) : null,
+    accuracyPost,
+    zoneCellsPost: accuracyPost ? umpireZoneCells(accuracyPost.season, idxMlb.leagueShare) : null,
   }
 }
 

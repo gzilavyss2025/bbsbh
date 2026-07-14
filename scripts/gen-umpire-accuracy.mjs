@@ -25,13 +25,29 @@
 // Bottom), never a league constant. A call is correct when the umpire's call
 // matches that geometry.
 //
-// MLB-only (sportId 1), like gen-umpires.mjs. Runs on a cron
+// MLB (sportId 1) + AAA (sportId 11), like gen-umpires.mjs. Every AAA park
+// feeds full Hawk-Eye pitch coordinates (the ABS/challenge-system rig — verified
+// 100% coverage league-wide), so the exact same geometry scores an AAA game.
+// The same umpires shuttle between the levels, so a call-up ump's page shows
+// both. AA and below carry NO pitch coordinates (verified 0% across every AA
+// park), so computeGameAccuracy() returns null for them and they contribute
+// nothing even if one slips into the sweep — keep them out. Because the two
+// levels run different regimes (AAA uses the ABS challenge system) and rank
+// against different peer pools, the per-umpire aggregate is split BY LEVEL
+// (`season` = MLB for back-compat, `seasonAAA` = AAA) rather than blended, and
+// every game row carries a `level` tag. Runs on a cron
 // (.github/workflows/update-nightly-data.yml); also by hand:
 //   node scripts/gen-umpire-accuracy.mjs                 # trailing 3 days
 //   node scripts/gen-umpire-accuracy.mjs --days=7
 //   node scripts/gen-umpire-accuracy.mjs --since=2026-03-01 [--until=2026-07-10]
+//   node scripts/gen-umpire-accuracy.mjs --since=2026-03-01 --sports=11
 // The --since form is the one-time season backfill; nightly runs use the
-// default trailing window.
+// default trailing window. --sports restricts the sweep to a comma-separated
+// list of sportIds (default: all levels below) — its one real use is adding a
+// NEW level to a file that already has the others: since a Final game's
+// accuracy is immutable, re-fetching the existing level's feeds is pure waste,
+// so `--since=… --sports=11` backfills AAA alone and leaves the MLB rows (which
+// default to level MLB) untouched.
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -241,26 +257,47 @@ try {
   // first run — no file yet
 }
 
-const schedule = await getJson(
-  `/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=R&hydrate=officials,team`,
-)
+// The levels swept, most-senior first. AAA rides along because its parks carry
+// the pitch tracking the score needs (see header); AA/below don't, so they stay
+// out. Each target is tagged with its level so the aggregate can split by it.
+const ALL_LEVELS = [
+  { sportId: 1, level: 'MLB' },
+  { sportId: 11, level: 'AAA' },
+]
+// --sports=1,11 restricts the sweep (default: every level); see the header.
+const sportsFilter = args.sports
+  ? new Set(String(args.sports).split(',').map((s) => Number(s.trim())))
+  : null
+const LEVELS = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.sportId)) : ALL_LEVELS
 
-// Collect the (gamePk, plate ump) pairs to fetch. Same postponed-replay dedup
-// guard as gen-umpires.mjs: a replayed game is listed under both its original
-// date and its officialDate; keep only the bucket that matches officialDate.
+// Collect the (gamePk, plate ump, level) triples to fetch. Same postponed-replay
+// dedup guard as gen-umpires.mjs: a replayed game is listed under both its
+// original date and its officialDate; keep only the bucket that matches
+// officialDate.
 const targets = []
-for (const d of schedule.dates ?? []) {
-  for (const g of d.games ?? []) {
-    if (g.status?.abstractGameState !== 'Final') continue
-    if (d.date !== g.officialDate) continue
-    const hp = (g.officials ?? []).find((o) => o.officialType === 'Home Plate')
-    if (!hp?.official?.id) continue
-    targets.push({
-      gamePk: g.gamePk,
-      date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
-      umpId: hp.official.id,
-      umpName: hp.official.fullName,
-    })
+for (const { sportId, level } of LEVELS) {
+  // Regular season (R) + postseason (F/D/L/W) + All-Star Game (A). Regular-season
+  // rows feed the ranked `season`/`seasonAAA` aggregates; postseason rows go to a
+  // separate unranked `seasonPost`; the ASG shows per-game only. Each target
+  // carries its gameType so the split can happen at aggregate time.
+  const schedule = await getJson(
+    `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=R,F,D,L,W,A&hydrate=officials,team`,
+  )
+  for (const d of schedule.dates ?? []) {
+    for (const g of d.games ?? []) {
+      if (g.status?.abstractGameState !== 'Final') continue
+      if (d.date !== g.officialDate) continue
+      const hp = (g.officials ?? []).find((o) => o.officialType === 'Home Plate')
+      if (!hp?.official?.id) continue
+      targets.push({
+        gamePk: g.gamePk,
+        date: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+        level,
+        gameType: g.gameType ?? 'R',
+        umpId: hp.official.id,
+        umpName: hp.official.fullName,
+      })
+    }
   }
 }
 
@@ -286,15 +323,39 @@ for (const r of rows) {
   umpires[key].games = upsertGame(umpires[key].games, {
     gamePk: r.gamePk,
     date: r.date,
+    level: r.level,
+    gameType: r.gameType,
     ...r.acc,
   })
   if (umpires[key].games.length > before) added++
 }
 
-// Recompute each umpire's season aggregate from his (merged) rows.
+// Recompute each umpire's aggregates from his (merged) rows, split two ways.
+//   • By LEVEL (MLB vs AAA) — the two run different regimes and rank against
+//     different pools, so they never blend. A row predating the `level` tag is
+//     treated as MLB (the file was MLB-only before AAA was added).
+//   • By game CONTEXT — only REGULAR-SEASON (gameType R) rows feed the ranked
+//     `season`/`seasonAAA` aggregates. Postseason (F/D/L/W) rolls up into a
+//     separate, unranked `seasonPost`; the All-Star Game (A) is a low-stakes
+//     exhibition and counts toward no aggregate at all (it still appears in
+//     `games` for its per-game figure). A row predating the `gameType` tag is
+//     treated as regular season. See docs/adr for the exclude-from-rank rationale.
+const gameLevel = (g) => g.level ?? 'MLB'
+const gameCtx = (g) => g.gameType ?? 'R'
+const POSTSEASON = new Set(['F', 'D', 'L', 'W'])
 const result = {}
 for (const [id, u] of Object.entries(umpires)) {
-  result[id] = { id: u.id, name: u.name, season: aggregate(u.games), games: u.games }
+  const mlbReg = u.games.filter((g) => gameLevel(g) === 'MLB' && gameCtx(g) === 'R')
+  const aaaReg = u.games.filter((g) => gameLevel(g) === 'AAA' && gameCtx(g) === 'R')
+  const postGames = u.games.filter((g) => POSTSEASON.has(gameCtx(g)))
+  result[id] = {
+    id: u.id,
+    name: u.name,
+    season: aggregate(mlbReg),
+    seasonAAA: aaaReg.length ? aggregate(aaaReg) : null,
+    seasonPost: postGames.length ? aggregate(postGames) : null,
+    games: u.games,
+  }
 }
 
 await mkdir(dirname(out), { recursive: true })
