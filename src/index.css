@@ -42,8 +42,9 @@
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
      - the About page body copy — `.aboutpage .caps-exempt`
-     - the Game Score modal's explainer paragraphs — `.gsmodal .sheet__body`,
-       `.gsmodal__foot` (the per-factor table stays shouted)
+     - the Game Score modal's explainer paragraphs — `.gsmodal .sheet__body`
+       and its example lines `.gsexample__line` (the shouted group
+       subheadings + per-factor table stay uppercase)
      - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
        `.hint__link` button)
      - `.buzz__text` (Bluesky posts keep their authors' original casing) */
@@ -1055,15 +1056,59 @@ body {
   gap: 10px;
 }
 
-/* Top Games page: each card's row gets its statistical tier pill above it
-   (see TierPill.jsx) — the ordinary slate's <li> has no such wrapper. */
+/* Top Games page: each card's row is topped by a header line carrying the
+   rank, the statistical tier pill (see TierPill.jsx), and the Game Score
+   itself surfaced large — the ordinary slate's <li> has no such wrapper. */
 .topgames__row {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
+/* Rank + tier on the left, the big Game Score readout pushed to the right.
+   Baseline-aligned so the "#1", the pill, and the score number all sit on the
+   same line above the card. */
+.topgames__rowhead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 2px;
+}
+.topgames__rank {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
 .topgames__tier {
-  align-self: flex-start;
+  flex: 0 0 auto;
+}
+/* The Game Score, the reason this page exists — the number reads big and
+   inky with a small condensed label under it, right-aligned so the eye can
+   scan the ranked column of scores straight down. */
+.topgames__score {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+}
+.topgames__scorenum {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-primary);
+}
+.topgames__scorelabel {
+  margin-top: 3px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 /* Level filter row — reuses the .levelnav toggle look (same convention as
@@ -12498,13 +12543,31 @@ body {
   cursor: pointer;
 }
 
-.gsmodal__factors {
+/* The four plain-language factor groups (drama / action / standout / dud),
+   each a small shouted subheading over its own list of factor rows. */
+.gsgroups {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   margin: 0 0 16px;
-  padding: 12px 0 0;
+  padding: 14px 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.gsgroup__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+.gsgroup__factors {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
 }
 
 .gsfactor {
@@ -12531,23 +12594,66 @@ body {
   text-align: right;
 }
 
+/* Made-up example games: a big Game Score chip on the left, a one-line plain-
+   language reason on the right — the calibration anchors, shown not told. */
+.gsexamples {
+  margin: 0 0 16px;
+  padding: 14px 0 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.gsexamples__title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+.gsexample {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.gsexample:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.gsexample__score {
+  flex: 0 0 auto;
+  min-width: 3ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-primary);
+}
+
+.gsexample__line {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+
 .gsmodal__tiers {
   padding-top: 12px;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
-.gsmodal__foot {
-  margin: 4px 0 0;
-  font-size: 11px;
-  color: var(--graphite-soft);
-  text-align: center;
-}
-
-/* Explainer prose reads as natural sentences; the per-factor table below it
-   (.gsfactor__label/__note) stays shouted like the rest of the app chrome. */
+/* Explainer prose (intro paragraphs, example lines, tier readout) reads as
+   natural sentences; the shouted subheadings + factor table stay uppercase
+   like the rest of the app chrome. The descendant selector keeps inline
+   emphasis (`<em>`) from being re-shouted by the global `#root *` rule, which
+   otherwise matches the child directly and beats the parent's inherited value. */
 #root .gsmodal .sheet__body,
-#root .gsmodal__foot {
-  text-transform: none; /* caps-exempt: Game Score modal's explainer paragraphs read as natural sentences */
+#root .gsmodal .sheet__body *,
+#root .gsexample__line {
+  text-transform: none; /* caps-exempt: Game Score modal's explainer paragraphs + example lines read as natural sentences */
 }
 
 /* ---------------------------------------------------------- highlight sheet
