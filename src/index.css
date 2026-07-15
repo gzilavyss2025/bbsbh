@@ -11203,104 +11203,346 @@ body {
 
 /* ------------------------------------------------------------ awards history
    One section per award family (MVP, Cy Young, ...), each a stack of season
-   rows newest-first. A season row splits into AL/NL columns (or one plain
-   column for the MLB-wide awards); a family with more than one recipient per
-   league per year (Silver Slugger, Gold Glove) tags each name with its
-   position so the row still reads as one glance instead of a wall of names. */
+   rows newest-first. A season row's year sits in a narrow rail on the left
+   (.awardhistory__seasonyear) rather than its own full-width row, so the year
+   costs vertical rail space, not horizontal card space. Recipients render as
+   .playercard tiles — the app's own headshot idiom (position badge floated on
+   the headshot's bottom-left corner, same as Top Performers/Day Highlights;
+   see PastDayRecapBox.jsx's PerformerCard) rather than a bespoke avatar.
+   Three card treatments, by what a group actually has to show:
+     - MVP/Cy Young/Rookie of the Year (one recipient per league, a stat
+       line) render full-width (.awardhistory__cards--base).
+     - Platinum Glove/Reliever of the Year/Comeback Player/Hank Aaron/Roberto
+       Clemente (one recipient, no stat line) get a BIGGER headshot instead
+       (.awardhistory__cards--full) — a bare name+team card would otherwise
+       read as half-empty next to a stat-line card.
+     - Silver Slugger/Gold Glove (up to ~9 recipients per league) drop to a
+       dense 2-up grid, with the name broken onto two lines at the first/last
+       boundary (.awardhistory__namebreak) and shrunk for a long name part
+       (.awardhistory__name--small/--tiny) so "Pete Crow-Armstrong" still
+       fits a card half the width of a full one. All-MLB Team columns
+       (.awardhistory__cards--compact) match this same headshot size —
+       they're both "a roster of names" tiles, just a different grid shape.
+   In the "By Award" view, a league-split award's American League/National
+   League banner (red for AL, blue for NL — .awardhistory__leaguetag--al/-nl)
+   shows ONCE at the top of its column (AwardFamilySplit/LeagueRows in
+   AwardsHistoryPage.jsx), with every season stacked underneath, rather than
+   repeating per season. The "By Year" view does the same per award instead
+   of per season (AwardYearSplit) — a league banner never repeats down the
+   page in either view. */
 .awardhistory__award {
   margin-top: var(--space-2);
 }
 .awardhistory__years {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
 }
-.awardhistory__year {
+/* Year rail (left) + content (right). Only ever has one child when the year
+   isn't shown (the "By Year" view already names it in a SectionTitle) — the
+   row layout is harmless there since a lone flex item just fills the width. */
+.awardhistory__season {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
+  align-items: flex-start;
+  gap: 10px;
 }
-.awardhistory__yearnum {
+.awardhistory__season > :last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Zebra stripe every other year — "By Award" view only (.awardhistory__list
+   only carries --zebra there; "By Year" has just one season row per section,
+   nothing to alternate). Scoped to each direct season list
+   (.awardhistory__years for a non-split award, .awardhistory__leagueyears
+   per league column for a split one) so the stripe count restarts at each
+   award/column rather than running continuously down the whole page. */
+.awardhistory__list--zebra .awardhistory__season {
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+}
+.awardhistory__list--zebra .awardhistory__years > .awardhistory__season:nth-child(even),
+.awardhistory__list--zebra .awardhistory__leagueyears > .awardhistory__season:nth-child(even) {
+  background: var(--surface-inset);
+}
+/* Stretches to the row's full height (align-self overrides the row's own
+   align-items: flex-start) so the rotated year number below can center
+   along the whole row rather than pinning to its top. */
+.awardhistory__seasonyear {
   flex: none;
-  width: 40px;
+  align-self: stretch;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Rotated 90° so it reads bottom-to-top, like a spine label — text-orientation:
+   sideways is needed alongside writing-mode (its default, "mixed", would keep
+   digits upright and stack them instead of rotating the whole run). */
+.awardhistory__yearnum {
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+  transform: rotate(180deg);
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
   color: var(--text-heading);
 }
-.awardhistory__leagues {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  flex: 1;
-  min-width: 0;
-}
-.awardhistory__league {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
+/* Full banner spelling out the league name, red for American League and blue
+   for National League (kraft-clay / allstar-blue) — same treatment at every
+   viewport, not just wide, so a phone gets the same banner instead of a
+   small pill. */
 .awardhistory__leaguetag {
-  flex: none;
+  display: block;
+  align-self: stretch;
+  text-align: center;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
 }
-.awardhistory__recipients {
+.awardhistory__leaguetag--al {
+  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
+}
+.awardhistory__leaguetag--nl {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+.awardhistory__leaguetag-short {
+  display: none;
+}
+
+/* One recipient card. .awardhistory__card only carries the favorite-team
+   highlight below — sizing/layout is the shared .playercard (index.css
+   ~L7256). Compound (.playercard.awardhistory__card) so this can't drift
+   from the base tile if .playercard itself changes. */
+.awardhistory__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+  gap: 8px;
 }
-.awardhistory__recipient {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  font-family: var(--font-body);
-  font-size: 13px;
-  border-radius: var(--radius-xs);
+/* MVP/Cy Young/Rookie of the Year — the base tile, at the plain
+   .playercard size (no override needed). */
+.awardhistory__cards--base {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Multi-recipient groups (Silver Slugger/Gold Glove) — 2-up, up to ~9
+   recipients per league. The headshot still gets real size (--shot-md, the
+   same tile used for roster/leader/recap cards elsewhere) rather than
+   shrinking to fit — the name wraps onto two lines instead (see
+   .awardhistory__namebreak/-name--small/-tiny). */
+.awardhistory__cards--dense {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.awardhistory__cards--dense .shot.playercard__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+.awardhistory__cards--dense .playercard__name {
+  font-size: 12.5px;
+  line-height: 1.2;
+}
+.awardhistory__cards--dense .playercard__stat {
+  font-size: 10px;
+}
+.awardhistory__namebreak {
+  display: block;
+}
+.awardhistory__name--small .playercard__name {
+  font-size: 11px;
+}
+.awardhistory__name--tiny .playercard__name {
+  font-size: 9.5px;
+}
+/* A recipient the stats endpoint had nothing for (an incomplete/malformed
+   season row — see gen-awards-history.mjs) falls back to this bigger,
+   "fuller" headshot instead of a stat line, so a bare name+team card doesn't
+   read as half-empty next to every other card's stat line. */
+.awardhistory__cards--full .playercard {
+  padding: 10px;
+  gap: 12px;
+}
+.awardhistory__cards--full .shot.playercard__shot {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+}
+.awardhistory__cards--full .playercard__name {
+  font-size: 17px;
+}
+.awardhistory__cards--full .playercard__team {
+  font-size: 11px;
+}
+/* All-MLB Team columns — same headshot size as Silver Slugger/Gold Glove's
+   dense tile (both are "a roster of names," just First/Second Team's own
+   two-column grid instead of .awardhistory__cards--dense's), a bit tighter
+   on padding so two full rosters still sit side by side on a phone. */
+.awardhistory__cards--compact .playercard {
+  padding: 6px;
+  gap: 8px;
+}
+.awardhistory__cards--compact .shot.playercard__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+.awardhistory__cards--compact .playercard__name {
+  font-size: 14px;
+}
+.awardhistory__cards--compact .playercard__team {
+  font-size: 11px;
+}
+.awardhistory__cards--compact .playercard__stat {
+  font-size: 10px;
 }
 /* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
    from favoriteAccentColor()) — a recipient who played for the user's
    favorite club jumps out among the rest of a season's winners. */
-.awardhistory__recipient--fav {
-  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
-  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
-  padding: 1px 4px 1px 5px;
-  margin: -1px -4px -1px -5px;
+.awardhistory__card--fav {
+  border-color: var(--fav-accent, var(--accent-primary));
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
 }
 .awardhistory__teamlink {
-  flex: none;
   display: inline-flex;
 }
-.awardhistory__name {
+/* The team logo docks to its own column at the right edge of the CARD (not
+   just the end of the text) — the base .playercard__body has no flex-grow of
+   its own (it shrink-wraps to its content on every other .playercard surface,
+   which is what those want), so without this override .playercard__team's
+   space-between only had the width of the longest line to work with and the
+   logo landed right next to the name instead of at the card's edge.
+   .awardhistory__teamname's `order: -1` pulls the name text ahead of the
+   logo, so the row reads "name ⟶ logo" left to right. Logo size fits each
+   card tier (bigger on the roomier base/full cards, a touch smaller on the
+   tighter dense/compact grids) rather than one fixed size everywhere — it's
+   an inline size on TeamLogo's own <img>, so overriding it needs
+   !important, same pattern as .player__herologo > .teamlogo. */
+.awardhistory__card .playercard__body {
+  flex: 1 1 auto;
+}
+.awardhistory__card .playercard__team {
+  justify-content: space-between;
+}
+.awardhistory__card .awardhistory__teamname {
+  order: -1;
+}
+.awardhistory__cards--base .teamlogo,
+.awardhistory__cards--full .teamlogo {
+  width: 28px !important;
+  height: 28px !important;
+}
+.awardhistory__cards--dense .teamlogo,
+.awardhistory__cards--compact .teamlogo {
+  width: 24px !important;
+  height: 24px !important;
+}
+.awardhistory__teamname {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.awardhistory__team {
-  flex: none;
-  font-size: 11px;
-  color: var(--text-muted);
+
+/* All-MLB Teams — First/Second Team stacked side by side rather than as two
+   separate award rows (see AwardsHistoryPage's AllMlbYear). Always 2-up
+   (even on a phone) — the compact card size above is sized for exactly that. */
+.awardhistory__allmlb {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
-.awardhistory__pos {
-  flex: none;
+.awardhistory__allmlbcol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.awardhistory__allmlbhead {
   font-family: var(--font-display);
-  font-size: 9.5px;
   font-weight: var(--w-bold);
+  font-size: 11px;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
-  font-style: normal;
+  color: var(--award-ink);
+  background: var(--award-soft);
+  border: var(--bw-hair) solid var(--award-line);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  text-align: center;
+}
+
+/* A league-split award family in the "By Award" view: American League and
+   National League each get their own column, one banner at the top, every
+   season's winners stacked underneath (AwardsHistoryPage's
+   AwardFamilySplit/LeagueColumn). Phone stacks AL above NL — same shape as
+   .awardhistory__years otherwise; the two-column split (below) only kicks in
+   once there's the width a full-size card needs. */
+.awardhistory__familysplit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.awardhistory__leaguecol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.awardhistory__leagueyears {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Wide viewport (iPad/desktop) — same 740px breakpoint as the rest of the app
+   (see the WIDE LAYOUT section). A league-split family's two columns
+   (.awardhistory__familysplit, used by both AwardFamilySplit and
+   AwardYearSplit) go side by side — same width structure as
+   .awardhistory__allmlb; a phone stacks AL above NL instead. */
+@media (min-width: 740px) {
+  .awardhistory__familysplit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
+/* "By Year" grouping — one award label per nested block, in place of the
+   award family's own SectionTitle. */
+.awardhistory__yearaward {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.awardhistory__yearawardlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 11px;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The By Award / By Year toggle — reuses the slate's .levelnav segmented
+   control look rather than a bespoke switch, right-aligned beside the page
+   title on the same row (same convention as .topbar--slate's level toggle). */
+.awardhistory__grouptoggle {
+  flex: 0 0 auto;
+  margin: 0;
+}
+.awardhistory__grouptoggle .levelnav__btn {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 11px;
 }
 
 /* ------------------------------------------------------------- postseason
@@ -11706,7 +11948,7 @@ body {
 .allstarrosters__rows li:first-child {
   border-top: none;
 }
-/* Same favorite-team highlight as .awardhistory__recipient--fav — a
+/* Same favorite-team highlight as .awardhistory__card--fav — a
    selectee who played for the highlighted club (either the team filter's
    pick, or absent a filter, the user's favorite team — see
    AllStarRostersPage's effectiveTeamId) jumps out among the rest of the

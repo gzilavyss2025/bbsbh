@@ -25,6 +25,15 @@
 // context, a plain award id has no such ambiguity). Verified live: 2024 ALMVP
 // returns Aaron Judge; ALSS returns one recipient per position.
 //
+// A second pass adds a `statLine` string (e.g. ".322 AVG · 41 HR · 112 RBI")
+// to EVERY recipient, via
+// GET /api/v1/people/{id}/stats?stats=season&season=YYYY&group=hitting|pitching
+// — the group is picked off each recipient's own position, not the award,
+// since several awards (MVP, ROY, Silver Slugger's "P" slot, ...) can go to
+// either a hitter or a pitcher. A recipient the stats endpoint has nothing
+// for (an incomplete/malformed season row) just renders without one —
+// same graceful degradation as everywhere else in this app.
+//
 // Run by hand: node scripts/gen-awards-history.mjs
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -123,6 +132,41 @@ const results = await mapConcurrent(jobs, 8, async ({ awardId, season }) => {
       position: a.player.primaryPosition?.abbreviation || '',
     }))
   return { awardId, season, recipients }
+})
+
+const PITCHER_POSITIONS = new Set(['P', 'SP', 'RP', 'CP'])
+
+function formatStatLine(group, stat) {
+  if (!stat) return null
+  if (group === 'pitching') {
+    if (stat.era == null || stat.wins == null || stat.strikeOuts == null) return null
+    return `${stat.era} ERA · ${stat.wins} W · ${stat.strikeOuts} K`
+  }
+  if (stat.avg == null || stat.homeRuns == null || stat.rbi == null) return null
+  return `${stat.avg} AVG · ${stat.homeRuns} HR · ${stat.rbi} RBI`
+}
+
+const statLineJobs = []
+for (const r of results) {
+  if (!r || !r.recipients.length) continue
+  for (const rec of r.recipients) statLineJobs.push({ rec, season: r.season })
+}
+await mapConcurrent(statLineJobs, 8, async ({ rec, season }) => {
+  const group = PITCHER_POSITIONS.has(rec.position) ? 'pitching' : 'hitting'
+  const data = await getJson(`/api/v1/people/${rec.playerId}/stats?stats=season&season=${season}&group=${group}`)
+  const split = data.stats?.[0]?.splits?.[0]
+  const line = formatStatLine(group, split?.stat)
+  if (line) rec.statLine = line
+  // The awards/recipients endpoint occasionally attaches the wrong "team" —
+  // verified live: Andrés Giménez's 2023 AL Platinum Glove record comes back
+  // with team 944, "Venezuela" (his World Baseball Classic entry), not the
+  // Guardians. The season stats split's own team is the reliable source
+  // (it's keyed off his actual game log, not a roster snapshot), so prefer
+  // it whenever this fetch succeeds and is actually MLB-sourced.
+  if (split?.team?.id && split.sport?.id === 1) {
+    rec.teamId = split.team.id
+    rec.teamName = split.team.name || rec.teamName
+  }
 })
 
 // Group by the shared label (ALMVP + NLMVP -> "MVP"), then by season, in the
