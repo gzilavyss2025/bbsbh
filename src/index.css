@@ -54,7 +54,8 @@
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Game Score modal above)
-     - `.buzz__text` (Bluesky posts keep their authors' original casing) */
+     - `.buzz__text` (Bluesky posts keep their authors' original casing)
+     - the Team Transactions card's cutline prose — `.txstory__cutline` */
 #root * {
   text-transform: uppercase;
 }
@@ -10228,7 +10229,7 @@ body {
    other self-contained cards instead. */
 .txcard {
   display: grid;
-  margin: 0 0 14px;
+  margin: 14px 0 14px;
   padding: 9px 10px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -10299,31 +10300,20 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  width: var(--shot-xs-w);
+  width: var(--shot-sm-w);
 }
 
+/* Plain headshot treatment — the same `.shot` base every other card in the
+   app uses (Headshot.jsx already applies the club-tint wash itself), not a
+   one-off halftone/dot-screen texture. */
 .shot.txstory__shot {
-  position: relative;
-  width: var(--shot-xs-w);
-  height: var(--shot-xs-h);
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
 .shot.txstory__shot.shot--fallback {
-  font-size: 20px;
-}
-/* Halftone dot-screen — the "newspaper wire photo" read the locked design
-   calls for, standing in for color-coding one side vs. the other (that's
-   carried by the banner below instead). A photo's own pixels don't invert
-   for the dark theme, so this one texture is deliberately left un-themed. */
-.shot.txstory__shot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(0, 0, 0, 0.55) 0.55px, transparent 0.6px);
-  background-size: 2.4px 2.4px;
-  mix-blend-mode: multiply;
-  opacity: 0.5;
+  font-size: 26px;
 }
 
 /* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
@@ -10365,10 +10355,18 @@ body {
   text-transform: uppercase;
   color: var(--graphite);
 }
+/* Same three-tone system as .txntl__chip--add/--out/--move, mapped per story
+   type (see TYPE_TONE in TeamTransactionsCard.jsx) rather than per row. */
+.txstory__type--add { color: var(--field-deep); }
+.txstory__type--out { color: var(--clay-deep); }
+.txstory__type--move { color: var(--text-muted); }
 
 /* The serif cutline register — same --font-read (Newsreader) the app already
    uses for box-score-notes / in-game notification copy, distinct from the
-   plainer Plex Sans .txntl__desc uses on the player page's timeline. */
+   plainer Plex Sans .txntl__desc uses on the player page's timeline. Reads
+   as an ordinary sentence rather than shouted app chrome (sanctioned
+   exception to the ALL-CAPS INVARIANT, see that block comment up top) — no
+   bold/italic emphasis; a player's name is a plain PlayerLink instead. */
 .txstory__cutline {
   margin: 0;
   font-family: var(--font-read);
@@ -10376,13 +10374,17 @@ body {
   line-height: 1.42;
   color: var(--text-body);
 }
-.txstory__cutline b {
-  font-weight: var(--w-semibold);
-  color: var(--text-heading);
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .txstory__cutline selector can't outrank #root * and would be
+   silently ignored (see .brewblurb__body above for the same technique). */
+#root .txstory__cutline {
+  text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
 }
-.txstory__cutline i {
-  font-style: italic;
-  color: var(--text-muted);
+/* #root * also matches the PlayerLink <button> INSIDE the cutline directly
+   (not just via inheritance), so it needs its own equally-specific override
+   to actually inherit the sentence case above it rather than re-shouting. */
+#root .txstory__cutline .plink {
+  text-transform: inherit; /* caps-exempt: same natural-sentence cutline prose */
 }
 
 /* Same full-width "load more" affordance as .pshistory__more /

@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { Headshot } from './Headshot.jsx'
+import { PlayerLink } from './PlayerLink.jsx'
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTHS = [
@@ -17,35 +18,53 @@ function dateline(iso) {
 }
 
 const BANNER_TONE = { in: 'banner--in', out: 'banner--out', move: 'banner--move' }
+// Reuses the same three-tone system TransactionTimeline's own chips already
+// use (add/out/move — field/clay/muted), mapped per story type rather than
+// per row: an add-flavored story (a trade-in, a signing) reads green, a
+// health/departure story (an IL placement, a suspension) reads clay, and a
+// mixed/neutral one (a shuffle, a solo roster move) stays graphite.
+const TYPE_TONE = {
+  trade: 'add',
+  signing: 'add',
+  'injured-list': 'out',
+  suspension: 'out',
+  shuffle: 'move',
+  'roster-move': 'move',
+}
 
 // One rail slot: kicker banner (In/Out/Up/Down/Up-Down/IL-N) over a headshot,
-// a plain surname caption below. No player-page link yet — the cutline/rail
-// `playerId` is carried for a future deep-link (see data-layer-scope.md), not
-// wired up this pass.
+// a surname caption below that links to the player's page (same spoiler-safe
+// PlayerLink treatment used everywhere else in the app).
 function RailSlot({ slot }) {
   return (
     <div className="photorail__slot">
       <span className={`banner ${BANNER_TONE[slot.role] ?? 'banner--move'}`}>{slot.banner}</span>
       <Headshot personId={slot.playerId} name={slot.name} teamId={slot.tintTeamId} className="txstory__shot" />
-      <span className="photo__cap">{slot.surname}</span>
+      <PlayerLink id={slot.playerId} className="photo__cap">{slot.surname}</PlayerLink>
     </div>
   )
 }
 
-// A cutline's segment array -> <b>/<i>/plain, per data-layer-scope.md §1.
+// A cutline's segment array — plain sentence text, with any segment carrying
+// a playerId linked to that player's page (same PlayerLink treatment as the
+// rail caption and TransactionTimeline's own linkifyNames). No bold/italic
+// emphasis — every segment reads as ordinary sentence prose.
 function Cutline({ segments }) {
   return (
     <p className="txstory__cutline">
-      {segments.map((seg, i) => {
-        if (seg.emphasis === 'primary') return <b key={i}>{seg.text}</b>
-        if (seg.emphasis === 'secondary') return <i key={i}>{seg.text}</i>
-        return <Fragment key={i}>{seg.text}</Fragment>
-      })}
+      {segments.map((seg, i) =>
+        seg.playerId ? (
+          <PlayerLink key={i} id={seg.playerId}>{seg.text}</PlayerLink>
+        ) : (
+          <Fragment key={i}>{seg.text}</Fragment>
+        ),
+      )}
     </p>
   )
 }
 
 function TxStory({ story }) {
+  const tone = TYPE_TONE[story.type] ?? 'move'
   return (
     <div className="txstory">
       {story.rail.length > 0 && (
@@ -55,7 +74,7 @@ function TxStory({ story }) {
           ))}
         </div>
       )}
-      <span className="txstory__type">{story.typeLabel}</span>
+      <span className={`txstory__type txstory__type--${tone}`}>{story.typeLabel}</span>
       <Cutline segments={story.cutline} />
     </div>
   )
