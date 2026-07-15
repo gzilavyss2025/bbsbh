@@ -11321,6 +11321,28 @@ body {
   flex-direction: column;
   min-width: 148px;
 }
+
+/* Between the wide breakpoint and the point .screen actually reaches its
+   1200px cap (~1280px viewport), 7 columns of seed+logo+CLUB NAME+wins
+   don't fit without .psbracket's own overflow-x scrollbar kicking in. Drop
+   the name and size the logo up in its place instead — TeamLogo's `size`
+   prop is an inline px style, so overriding it needs !important (an
+   established pattern elsewhere in this file) rather than a plain rule. */
+@media (min-width: 740px) and (max-width: 1279px) {
+  .psbracket {
+    grid-template-columns: repeat(7, minmax(84px, 1fr));
+  }
+  .psbracket__col {
+    min-width: 84px;
+  }
+  .psbracket .seedrow__name {
+    display: none;
+  }
+  .psbracket .teamlogo {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}
 .psbracket__collabel {
   margin: 0 0 8px;
   font-family: var(--font-display);
