@@ -31,17 +31,27 @@ const LOAD_MORE_CUTOFF = 1990
 
 // AL first, then NL — a fixed order so a season's row always reads the same
 // way regardless of what order the source recipients arrived in (same
-// convention as AwardsHistoryPage's groupByLeague).
-const LEAGUE_ORDER = ['AL', 'NL']
+// convention as AwardsHistoryPage's groupByLeague). Each carries its full
+// name (for the card header) and which colored header class it gets — red
+// for the American League, the app's existing All-Star blue for the
+// National League (see .allstarrosters__leaguehead--al/--nl).
+const LEAGUES = [
+  { key: 'AL', name: 'American League', headClass: 'allstarrosters__leaguehead--al' },
+  { key: 'NL', name: 'National League', headClass: 'allstarrosters__leaguehead--nl' },
+]
 
 // The three buckets gen-all-star-rosters.mjs precomputes per league, in
 // display order — the starting lineup (pitcher, DH, and every defensive
 // spot, already scorebook-sorted by the generator), then the bullpen, then
 // the bench. No client-side grouping/sorting needed for any of the three.
-// Starting Lineup gets its own column (see RosterLeagues); Bullpen and
-// Substitutes stack in the second column, same two-column split as the Team
-// Page's Preferred Lineup super-section (.roster-super).
-const SECOND_COLUMN = [
+// Each gets its OWN column at the iPad/desktop breakpoint (see
+// .roster-super__row) rather than stacking Bullpen+Substitutes in one tall
+// column next to a short Starting Lineup — three independent columns keep
+// the card's overall height close to whichever section happens to be
+// longest that season, instead of one short column leaving a block of
+// visible whitespace next to a much taller stacked one.
+const SECTIONS = [
+  { key: 'starters', label: 'Starting Lineup' },
   { key: 'bullpen', label: 'Bullpen' },
   { key: 'substitutes', label: 'Substitutes' },
 ]
@@ -97,43 +107,33 @@ function RosterCard({ recipients, effectiveTeamId, filtering }) {
 }
 
 // A season's full roster, AL then NL, each broken into its three precomputed
-// sections and laid out in the same two-column "super-section" shape as the
-// Team Page's Preferred Lineup (.roster-super/.roster-super__row/__col) —
-// Starting Lineup on its own in column one, Bullpen + Substitutes stacked in
-// column two. `teamName` (unused for display now that the logo carries team
-// identity — see TeamLink/TeamLogo above) is still the club's name AS OF that
-// season (a season-scoped lookup in the generator, not the app's current-team
-// table) — a 1933 Washington Senators pick reads as a Senator, not a Twin,
-// even though the franchise id is the same.
+// sections and laid out in the Team Page's "super-section" shape
+// (.roster-super/.roster-super__row/__col) — but with three independent
+// columns, one per section, rather than pairing two sections into one tall
+// stacked column (see SECTIONS above). Each league card gets a full-width,
+// colored header naming the league (not just "AL"/"NL"). `teamName` (unused
+// for display now that the logo carries team identity — see TeamLink/
+// TeamLogo above) is still the club's name AS OF that season (a season-
+// scoped lookup in the generator, not the app's current-team table) — a
+// 1933 Washington Senators pick reads as a Senator, not a Twin, even though
+// the franchise id is the same.
 function RosterLeagues({ roster, effectiveTeamId, filtering }) {
-  const leagues = LEAGUE_ORDER.filter((league) => roster?.[league])
+  const leagues = LEAGUES.filter((l) => roster?.[l.key])
   if (!leagues.length) return null
   return (
     <div className="allstarrosters__leagues">
-      {leagues.map((league) => {
-        const bucket = roster[league]
+      {leagues.map(({ key, name, headClass }) => {
+        const bucket = roster[key]
         return (
-          <div className="roster-super" key={league}>
-            <span className="allstarrosters__leaguetag">{league}</span>
+          <div className="roster-super" key={key}>
+            <div className={`allstarrosters__leaguehead ${headClass}`}>{name}</div>
             <div className="roster-super__row">
-              <div className="roster-super__col">
-                {bucket.starters?.length > 0 && (
-                  <section className="roster-sub">
-                    <h4 className="roster-sub__title">Starting Lineup</h4>
-                    <RosterCard
-                      recipients={bucket.starters}
-                      effectiveTeamId={effectiveTeamId}
-                      filtering={filtering}
-                    />
-                  </section>
-                )}
-              </div>
-              <div className="roster-super__col">
-                {SECOND_COLUMN.map(({ key, label }) => {
-                  const recipients = bucket[key] ?? []
-                  if (!recipients.length) return null
-                  return (
-                    <section className="roster-sub" key={key}>
+              {SECTIONS.map(({ key: sectionKey, label }) => {
+                const recipients = bucket[sectionKey] ?? []
+                if (!recipients.length) return null
+                return (
+                  <div className="roster-super__col" key={sectionKey}>
+                    <section className="roster-sub">
                       <h4 className="roster-sub__title">{label}</h4>
                       <RosterCard
                         recipients={recipients}
@@ -141,9 +141,9 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
                         filtering={filtering}
                       />
                     </section>
-                  )
-                })}
-              </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )

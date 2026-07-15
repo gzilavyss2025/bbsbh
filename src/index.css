@@ -11581,18 +11581,37 @@ body {
 /* Each league reuses the Team Page's "roster super-section" card
    (.roster-super/.roster-super__row/__col, .roster-sub/__title — see
    TeamPage.jsx's Preferred Lineup) instead of a loose flex-wrap of inline
-   names: Starting Lineup in one column, Bullpen + Substitutes stacked in the
-   other, each section a bordered row-list — the same "columns of sub-cards"
-   shape used there, so a 30+ name roster reads as compact rows rather than
-   wrapped whitespace. */
-.allstarrosters__leaguetag {
-  flex: none;
+   names — Starting Lineup / Bullpen / Substitutes each get their OWN column
+   (not two sections stacked in one tall column), so a short and a long
+   section sitting side by side don't leave a visible block of blank card
+   behind the shorter one. Scoped overrides (not touching the shared rule,
+   which the Team Page also uses) let the three columns wrap to 2-then-1 at
+   an iPad-ish width instead of squeezing into three narrow slivers. */
+.allstarrosters__leagues .roster-super__row {
+  flex-wrap: wrap;
+}
+.allstarrosters__leagues .roster-super__col {
+  flex: 1 1 220px;
+}
+/* Full-width, colored league header bled to the card's edges — red for the
+   American League, the app's existing "All-Star blue" banner color (see
+   TrophyCase's All-Star medal) for the National League. */
+.allstarrosters__leaguehead {
+  margin: -14px -12px 12px;
+  padding: 8px 14px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-on-ink);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.allstarrosters__leaguehead--al {
+  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
+}
+.allstarrosters__leaguehead--nl {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
 }
 /* One roster section's row list — same bordered-card convention as the Team
    Page's .thub-roster. */
