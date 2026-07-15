@@ -25,6 +25,14 @@
 // context, a plain award id has no such ambiguity). Verified live: 2024 ALMVP
 // returns Aaron Judge; ALSS returns one recipient per position.
 //
+// A second pass adds a `statLine` string (e.g. ".322 AVG · 41 HR · 112 RBI")
+// to each MVP/Cy Young/Rookie of the Year recipient only, via
+// GET /api/v1/people/{id}/stats?stats=season&season=YYYY&group=hitting|pitching
+// — the group is picked off the recipient's own position, not the award,
+// since MVP/ROY (unlike Cy Young) can go to a pitcher. Silver Slugger/Gold
+// Glove/etc. skip this pass; up to ~9 recipients per league already keeps
+// their cards dense, and a stat line there would just be noise.
+//
 // Run by hand: node scripts/gen-awards-history.mjs
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -123,6 +131,38 @@ const results = await mapConcurrent(jobs, 8, async ({ awardId, season }) => {
       position: a.player.primaryPosition?.abbreviation || '',
     }))
   return { awardId, season, recipients }
+})
+
+// One-recipient-per-league awards (MVP/Cy Young/ROY) get a thin season stat
+// line on the Awards History page's card — Silver Slugger/Gold Glove/etc. stay
+// bare (up to ~9 recipients per league; a stat line there would just be noise).
+// Cy Young is always a pitcher; MVP/ROY can go either way, so the group is
+// picked off the recipient's own primaryPosition rather than the award.
+const STAT_LINE_LABELS = new Set(['MVP', 'Cy Young', 'Rookie of the Year'])
+const PITCHER_POSITIONS = new Set(['P', 'SP', 'RP', 'CP'])
+
+function formatStatLine(group, stat) {
+  if (!stat) return null
+  if (group === 'pitching') {
+    if (stat.era == null || stat.wins == null || stat.strikeOuts == null) return null
+    return `${stat.era} ERA · ${stat.wins} W · ${stat.strikeOuts} K`
+  }
+  if (stat.avg == null || stat.homeRuns == null || stat.rbi == null) return null
+  return `${stat.avg} AVG · ${stat.homeRuns} HR · ${stat.rbi} RBI`
+}
+
+const statLineJobs = []
+for (const r of results) {
+  if (!r || !r.recipients.length) continue
+  if (!STAT_LINE_LABELS.has(HARDWARE_AWARDS[r.awardId])) continue
+  for (const rec of r.recipients) statLineJobs.push({ rec, season: r.season })
+}
+await mapConcurrent(statLineJobs, 8, async ({ rec, season }) => {
+  const group = PITCHER_POSITIONS.has(rec.position) ? 'pitching' : 'hitting'
+  const data = await getJson(`/api/v1/people/${rec.playerId}/stats?stats=season&season=${season}&group=${group}`)
+  const stat = data.stats?.[0]?.splits?.[0]?.stat
+  const line = formatStatLine(group, stat)
+  if (line) rec.statLine = line
 })
 
 // Group by the shared label (ALMVP + NLMVP -> "MVP"), then by season, in the
