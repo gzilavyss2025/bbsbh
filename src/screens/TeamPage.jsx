@@ -14,6 +14,7 @@ import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
+import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor } from '../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js'
@@ -622,6 +623,29 @@ async function loadTeam(id, asOf) {
   }
 }
 
+// The club's most recent official press-notes PDF — a direct link-out (never
+// the What's Brewing in-app modal the lineup page's Game Notes button opens
+// for calibrated clubs; the team hub always jumps straight to the PDF, since
+// there's no single game's blurbs to parse). No gameDate, so resolveGameNotes
+// falls through to the newest note on file rather than one tied to tonight's
+// game. MLB only — see gameNotes.js.
+function GameNotesLink({ teamId }) {
+  const { data: notes } = useAsync(() => resolveGameNotes(teamId), [teamId])
+  if (!notes?.url) return null
+  return (
+    <a
+      className="notesbtn"
+      href={notes.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
+    >
+      Game Notes
+      <span className="notesbtn__ext" aria-hidden="true">↗</span>
+    </a>
+  )
+}
+
 export function TeamPage({ id, asOf, sportId }) {
   const teamId = Number(id)
   const navigate = useNav()
@@ -692,6 +716,7 @@ export function TeamPage({ id, asOf, sportId }) {
               <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={45} />
             </TeamLink>
           )}
+          {!isMilb && <GameNotesLink teamId={team.id} />}
         </header>
 
         {teamScore?.season?.score != null && (
