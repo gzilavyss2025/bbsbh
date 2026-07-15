@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -50,6 +50,8 @@ import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
 
 const DASH = '—'
+// Org prospect list starts collapsed to the top 10, expandable to the full ~30.
+const PROSPECTS_PREVIEW_COUNT = 10
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
 // Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
 const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
@@ -619,6 +621,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
   useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
+  const [showAllProspects, setShowAllProspects] = useState(false)
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
@@ -923,7 +926,7 @@ export function TeamPage({ id, asOf, sportId }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {prospects.map((p) => {
+                  {(showAllProspects ? prospects : prospects.slice(0, PROSPECTS_PREVIEW_COUNT)).map((p) => {
                     const isTop = p.topRank != null
                     return (
                       <tr key={p.playerId}>
@@ -944,6 +947,11 @@ export function TeamPage({ id, asOf, sportId }) {
                   })}
                 </tbody>
               </table>
+              {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
+                <button type="button" className="pshistory__more" onClick={() => setShowAllProspects(true)}>
+                  Show all {prospects.length} prospects
+                </button>
+              )}
             </div>
           </>
         )}
