@@ -1,16 +1,17 @@
 # Team Transactions — data layer
 
-**Status:** data-layer plan; awaiting approval before implementation
+**Status:** data-layer design approved; a few live-API details to verify before implementation (see bottom)
 **Slug:** team-transactions
 **Relationship to prior work:** The visual/product design is locked in
 `scope.md` + `wireframe.html` in this directory — this document does NOT revisit
 it. It scopes only the pipeline that feeds the locked card: a nightly
-`scripts/gen-team-transactions.mjs` precompute → static
-`public/data/team-transactions.json` → same-origin `src/api/teamTransactions.js`
-reader, following the build-time-fetch pattern (`src/api/CLAUDE.md`), with the
-grouping/de-dupe/cutline logic in pure, testable shapers the generator imports
-(the `gen-callouts.mjs` / `gen-minors-leaders.mjs` "import the app's own shaper
-so the two can't drift" convention).
+`scripts/gen-team-transactions.mjs` precompute → static, season-chunked
+`public/data/team-transactions/{season}.json` files → same-origin
+`src/api/teamTransactions.js` reader, following the build-time-fetch pattern
+(`src/api/CLAUDE.md`), with the grouping/de-dupe/cutline logic in pure,
+testable shapers the generator imports (the `gen-callouts.mjs` /
+`gen-minors-leaders.mjs` "import the app's own shaper so the two can't drift"
+convention).
 
 The card is **spoiler-free** by nature — roster moves and their dates carry no
 score, exactly like the roster/rehab surfaces — so no `SealBox` is involved. The
@@ -20,17 +21,38 @@ that hadn't happened from that page's vantage point), mirroring `seasonScoreFor`
 
 ## 1. The `public/data/*.json` shape
 
-**One file, all teams, keyed by teamId** — `public/data/team-transactions.json`
-(the single-file, keyed-map convention of `rehab.json` / `season-score.json`, not
-30 per-team files). Fully shaped: the reader selects and cutoff-filters, nothing
-more. The `day → story → rail-slot` nesting matches the card structure 1:1.
+**One file per season, all teams, keyed by teamId — chunked by season, not a
+single ever-growing file (maintainer decision).**
+`public/data/team-transactions/{season}.json` (e.g. `2026.json`, `2025.json`,
+…). Full history accumulates permanently — nothing is ever pruned — but it's
+stored as one immutable file per completed season plus one "live" file for the
+season in progress, so the client only pays for what it actually loads.
+
+- **Only the current season's file is rewritten nightly.** Once a season ends
+  (rolls to a new year), that season's file is written one final time and
+  never touched again — a naturally immutable, indefinitely-cacheable
+  artifact, no merge-with-previous-output logic required.
+- **The client loads lazily, 45 days at a time, oldest-first pagination.** A
+  team page fetches only the current season's file by default and renders up
+  to the most recent 45 days of stories. A "Load more" affordance pages
+  further back: first through the remainder of the current season's
+  already-fetched file, then — once that's exhausted — fetching the prior
+  season's file, and so on. Nothing beyond the current season is ever
+  downloaded unless the reader actually asks for more.
+- **No manifest needed.** Season files are just `{currentYear}.json`,
+  `{currentYear - 1}.json`, … — the reader tries the previous year down from
+  the current one and treats a 404 as "no more history" (a team's inaugural
+  season, or simply reaching back further than this feature has existed).
 
 ~~~jsonc
+// public/data/team-transactions/2026.json
 {
   "version": 1,
-  "generatedAt": "2026-07-15T09:12:00Z",
   "season": 2026,
-  "windowStart": "2026-05-31",          // earliest date covered (rolling window)
+  "generatedAt": "2026-07-15T09:12:00Z",
+  "seasonStart": "2026-03-26",          // this season's Opening Day; fixed once known
+  "final": false,                       // true once the season has ended and
+                                         // this file stops being rewritten
   "byTeamId": {
     "158": {
       "days": [                          // newest day first
@@ -82,10 +104,17 @@ Notes on the shape:
   deep-link to the player page).
 - `type` enum: `trade | shuffle | roster-move | injured-list | signing |
   suspension`. Drives `typeLabel` and is the story's identity for tests.
+- **`final`** lets the generator (and, defensively, the reader) assert a
+  completed season's file is never expected to change — a guard against a
+  future bug re-triggering a rewrite of frozen history.
 
-Size: ~30 orgs × a few dozen stories over the window ≈ small (est. 150–400 KB).
-Provisionally **included** in the PWA precache; revisit and move it out (the
-`vs-team-splits.json` treatment) only if it grows past a few hundred KB.
+Size: ~30 orgs × maybe 150–250 stories per season ≈ est. 400–800 KB **per
+season file** — bounded and roughly constant year over year, since chunking
+by season means the payload no longer grows without limit the way one
+combined file would. **Exclude from the PWA precache** regardless (the
+`vs-team-splits.json` treatment): a same-origin runtime fetch of one season's
+file is cheap, and precaching every season a team page might page back into
+isn't worth it.
 
 ## 2. De-dupe algorithm
 
@@ -161,8 +190,8 @@ Then, in strict priority order (each step **consumes** the rows it uses):
 5. **Signings with no corollary → solo `signing` story (Strzelecki case).** Any
    unconsumed `SFA`/`SGN`/`IFA` becomes a one-slot story.
 6. **Leftover `transfer` rows → rail-less `roster-move` story (Woodruff case).**
-   No headshot; cutline only. (See open question 6 on optionally *folding* this
-   into a neighboring story's cutline as an "also transferred …" clause instead.)
+   No headshot; cutline only. Its own story, not folded into a neighbor's
+   cutline (see Decisions, #6).
 
 All four cases the brief names — clean 2-player pair (step 2), 3+-player shuffle
 (step 4), same-player double-move (step 1), solo with no pair (steps 5/6) — fall
@@ -196,23 +225,24 @@ when **any** of:
   AA→AAA move), which belong on the *player* page's career timeline, not the MLB
   club's transactions feed.
 
-`SU` (suspension) is retained as a rare solo story (matches `person.js` keeping it
-as a `move`); flag if the maintainer would rather drop it (open question 7).
+`SU` (suspension) is retained as a rare solo story, matching `person.js`'s
+existing treatment of it as a `move` (see Decisions, #7).
 
 ## 5. Generator + reader shape
 
 **`scripts/gen-team-transactions.mjs`** (nightly, `update-nightly-data.yml`; a
-full rebuild over a rolling window — transactions in a fixed recent window are
-cheap to regenerate, so **not** append-only like game-notes/rookies):
+full rebuild of the *current season's file only* — a completed season's file is
+never touched again once written with `final: true`):
 
 ~~~text
-const WINDOW_DAYS = 45                    // rolling; see open question 2
-
 main:
+  season      = currentSeasonYear()
+  seasonStart = openingDayFor(season)      // fixed once known; from schedule API
   orgs        = fetchMlbTeamIds()          // sportId=1, 30 clubs (as gen-rehab)
   affilToOrg  = fetchAffiliateParentMap()  // affiliate teamId → parent org id
-  raw         = getJson(`/api/v1/transactions?startDate=${windowStart}&endDate=${today}`)
-                                           // ONE league-wide window fetch, like gen-rehab
+  raw         = getJson(`/api/v1/transactions?startDate=${seasonStart}&endDate=${today}`)
+                                           // ONE league-wide fetch per run, like gen-rehab —
+                                           // always season-start-to-today, not a rolling window
   positions   = fetchPositions(personIds)  // batch /people, pos fallback (gen-rehab helper)
   byTeamId = {}
   for each org O in orgs:
@@ -221,8 +251,16 @@ main:
     kept      = filterStoryworthy(deduped)           // §4  (imported shaper)
     days      = groupIntoStories(kept, { positions }) // §3 (imported shaper) → shaped days
     if days.length: byTeamId[O] = { days }
-  write { version, generatedAt, season, windowStart, byTeamId }
+  write to public/data/team-transactions/{season}.json:
+    { version, season, generatedAt, seasonStart, final: seasonHasEnded(season), byTeamId }
 ~~~
+
+Nothing reads or merges a *previous* run's output — each run recomputes the
+current season's file from scratch from the raw feed, same as every other
+`gen-*.mjs` in this repo. The only thing that makes history "accumulate" is
+that a season's file simply stops being touched (and a new `{season+1}.json`
+starts existing) once that season ends — there is no cross-run state to get
+wrong.
 
 The `dedupeTransactions` / `filterStoryworthy` / `groupIntoStories` / `buildCutline`
 functions and the typeCode tables are **pure, exported from
@@ -244,19 +282,26 @@ export function groupIntoStories(rows, ctx) {…}       // §3 → [{ date, stor
 export function buildCutline(story) {…}               // segment array
 export const TXN_STORY_TYPES = {…}                    // code → {dir, label, banner}
 
-// reader (dumb — select + cutoff-filter + degrade), session-cached like rehab.js
-let cached = null
-export async function loadTeamTransactions() {…}      // fetch /data/…json, degrade to {byTeamId:{}}
-export function teamTransactionsFor(data, teamId, cutoff) {
-  // data.byTeamId[teamId]?.days, dropping days/stories with date > cutoff, → null if empty
-}
+const PAGE_DAYS = 45
+
+// Loads one season file (session-cached per season, like rehab.js), degrades
+// to null on 404/error rather than throwing — a 404 means "no more history."
+async function loadSeasonFile(season) {…}             // fetch /data/team-transactions/{season}.json
+
+// Stateful pager: first call with no cursor returns the most recent PAGE_DAYS
+// of a team's days (fetching only the current season's file); each subsequent
+// call with the previous cursor pages further back, crossing into
+// loadSeasonFile(season - 1) only once the newer season's days are exhausted.
+// Returns { days, cursor, hasMore } — cursor is opaque ({ season, index }).
+export async function loadMoreTeamTransactions(teamId, cursor, cutoff) {…}
 ~~~
 
-**Cached vs recomputed:** the JSON is *fully shaped* (days/stories/rail/cutline),
-so nothing is recomputed at request time — the reader only selects the teamId,
-trims to the `asOf` cutoff, and degrades to `null` (friendly empty state) before
-the file exists or on any error. In-memory session cache (once-a-day file), same
-as `rehab.js` / `seasonScore.js`.
+**Cached vs recomputed:** each season file is *fully shaped* (days/stories/rail/
+cutline), so nothing is recomputed at request time — the reader only selects
+the teamId, trims to the `asOf` cutoff, paginates, and degrades to an empty
+state before a file exists or on any error. Each season file is cached
+in-memory once fetched (indefinitely for a `final: true` season, once-a-day for
+the live one), same lifecycle as `rehab.js` / `seasonScore.js`.
 
 ## Non-goals (this scope)
 
@@ -274,31 +319,45 @@ as `rehab.js` / `seasonScore.js`.
 - **MLB orgs only in phase 1.** Affiliate-assigned rows bucket up to the parent
   org, but a MiLB-affiliate team page gets no transactions card yet.
 - **No editorial flavor copy.** The wireframe's polished connectives ("to open a
-  40-man spot", "to make room") are human prose; auto-generation targets plainer
-  templated sentences unless open question 3 approves richer templating.
+  40-man spot", "to make room") are human prose; auto-generation targets
+  plainer templated sentences for phase 1 (see Decisions, #3).
 
-## Approval requested
+## Decisions (approved by the maintainer)
 
-Approve or revise before implementation starts:
-
-1. **File shape:** one all-teams `public/data/team-transactions.json` keyed by
-   teamId (vs. 30 per-team files). Recommended: single file.
-2. **Window length:** rolling **45 days** (recommended) vs. season-to-date vs.
-   "last N stories." How far back should the feed scroll?
-3. **Cutline fidelity:** accept plainer auto-generated prose built from templates
-   + the feed's own descriptions (dropping "to open a 40-man spot"–style flavor),
-   vs. investing in richer per-pattern templates. Recommended: plainer for phase 1.
-4. **Pairing heuristic:** approve the roster-balance greedy algorithm of §3
-   (priority: same-player double → trade+clear → IL+replacement → churn cluster →
-   signing → transfer) as canonical, accepting it won't always match a human
+1. **File shape:** chunked by season — `public/data/team-transactions/{season}.json`,
+   each keyed by teamId — not one all-teams-all-history file, and not 30
+   per-team files. See §1.
+2. **Window/history:** full season-to-date, permanently accumulating —
+   nothing is ever pruned going forward. Chunking by season (decision 1) is
+   what keeps this affordable: each file is bounded to one season's worth of
+   stories, and a completed season's file is frozen (`final: true`) and never
+   rewritten. The client defaults to loading only the current season and
+   pages further back 45 days at a time on request (see §1 and §5's
+   `loadMoreTeamTransactions`) — full history exists on disk, but nothing
+   beyond what's asked for is ever downloaded.
+3. **Cutline fidelity:** plainer auto-generated prose built from templates +
+   the feed's own descriptions for phase 1 (dropping "to open a 40-man
+   spot"–style hand-authored flavor from the wireframe).
+4. **Pairing heuristic:** the roster-balance greedy algorithm of §3 (priority:
+   same-player double → trade+clear → IL+replacement → churn cluster →
+   signing → transfer) is canonical, accepting it won't always match a human
    editor's intuition on which OUT "belongs" to which IN.
-5. **Scope:** MLB orgs only for phase 1, bucketing affiliate signings to the
-   parent org; no MiLB-affiliate card yet.
-6. **Leftover transfers:** a rail-less IL-to-IL transfer (Woodruff) as its **own**
-   story (recommended default), vs. folding it into a neighboring story's cutline
-   as an "also transferred …" clause (what the wireframe hand-authored).
-7. **Verify-against-live / minor calls:** (a) confirm whether the `/transactions`
-   `id` field is reliably present (affects §2 Pass A's key) and whether a
-   `teamId=` query is org-scoped or club-scoped (affects §5 bucketing — the plan
-   uses a league-wide fetch + own bucketing to sidestep this); (b) keep or drop
-   `SU` suspensions as stories.
+5. **Scope:** MLB orgs only for phase 1, bucketing affiliate signings up to
+   the parent org; no MiLB-affiliate transactions card yet.
+6. **Leftover transfers:** a rail-less IL-to-IL transfer (Woodruff) gets its
+   **own** story rather than folding into a neighboring story's cutline.
+7. **Suspensions:** `SU` stays as its own story, matching `person.js`'s
+   existing treatment on the player-page timeline.
+
+## Remaining before implementation (verify against the live API, not a design call)
+
+- Confirm whether the `/transactions` `id` field is reliably present (affects
+  §2 Pass A's dedupe key — the composite fallback covers its absence, but
+  worth confirming how often it's actually populated).
+- Confirm whether a `teamId=` query param on `/transactions` is org-scoped or
+  club-scoped either way, the plan sidesteps this with a league-wide fetch +
+  its own §4 bucketing, so this only affects whether that workaround is
+  strictly necessary or a simplification.
+- Confirm how to reliably determine a season's Opening Day (`seasonStart`)
+  and "has this season ended" (`final`) from the schedule API — needed by
+  §5's generator.
