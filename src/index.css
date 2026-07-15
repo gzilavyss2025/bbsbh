@@ -7561,6 +7561,38 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+/* Horizontal deck variant (TeamPage's own compact FEATURED_CATEGORIES set
+   only — see the `horizontal` prop doc in TeamLeaders.jsx) — the same
+   full-bleed swipeable idiom .txcard__scroll uses for Team Transactions, so
+   the page's two card decks read as one consistent pattern. Equal
+   specificity to the plain .tlead__grid rules above (including inside the
+   560px media query), so this must stay textually AFTER them to win by
+   source order at every width. */
+.tlead__grid--horizontal {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.tlead__grid--horizontal::-webkit-scrollbar {
+  display: none;
+}
+.tlead__grid--horizontal .tlead__cat {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 280px;
+}
 .tlead__cat {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);

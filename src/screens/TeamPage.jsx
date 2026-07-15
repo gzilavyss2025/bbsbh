@@ -765,6 +765,7 @@ export function TeamPage({ id, asOf, sportId }) {
           onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
           showTeamAbbr={false}
           injuredIds={injuredIds}
+          horizontal
         />
 
         {/* Org-wide leaders across the club's whole farm system — the MLB club
