@@ -455,6 +455,34 @@ const CONFIG = {
       { xMin: 245, headingMaxX: 260, columnMaxX: 458, topCutoff: 740, bottomCutoff: 200 },
     ],
   },
+  // White Sox — page 1, two clean narrative columns (no embedded stat table
+  // within either column, unlike CLE/NYY/ARI — the whole right-side stat
+  // sidebar sits well past both columns' real content, excluded by
+  // columnMaxX alone) plus a shared topCutoff/bottomCutoff for the masthead
+  // above and an accolades banner ("World Series Champions: 1906, 1917,
+  // 2005…") below. Heads are Impact (CALIBRATION.md's note that the generic
+  // bold-detection regex misses this club — it isn't a "Bold" family at all);
+  // titles: WHITE SOX AT A GLANCE, TODAY'S STORYLINES, ROSTER MOVES, LAST
+  // NIGHT'S RECAP, CYCLING THE BASES, THE SOX ARE ON THE CLOCK! (column 1),
+  // WHITE SOX VS. ATHLETICS, ALL-STAR MUNE [sic — the source PDF's own text
+  // cuts off mid-word; not a parsing bug, verified byte-for-byte against the
+  // raw PDF item], ALUMNI HOME RUN DERBY, AT THE GATE, HOME SWEET HOME, HEY
+  // NOW YOU'RE AN ALL-STAR (column 2). Bullet points are a Wingdings glyph
+  // that extracts as a literal "u" character (folded into bodyFont so the
+  // rest of the bulleted line isn't lost) rather than a "•" like most clubs.
+  145: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT|Wingdings-Regular/,
+    headFont: /Impact/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 780,
+    bottomCutoff: 45,
+    columns: [
+      { xMin: 0, headingMaxX: 45, columnMaxX: 238 },
+      { xMin: 240, headingMaxX: 255, columnMaxX: 445 },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
