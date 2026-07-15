@@ -97,7 +97,7 @@ const byTeamId = {}
 for (const orgId of orgIds) {
   const bucketed = bucketToOrg(raw, orgId, affilToOrg)
   const deduped = dedupeTransactions(bucketed)
-  const kept = filterStoryworthy(deduped)
+  const kept = filterStoryworthy(deduped, { orgId })
   const days = groupIntoStories(kept, { positions, orgId })
   if (days.length) byTeamId[orgId] = { days }
 }

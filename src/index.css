@@ -10380,11 +10380,16 @@ body {
 #root .txstory__cutline {
   text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
 }
-/* #root * also matches the PlayerLink <button> INSIDE the cutline directly
-   (not just via inheritance), so it needs its own equally-specific override
-   to actually inherit the sentence case above it rather than re-shouting. */
-#root .txstory__cutline .plink {
-  text-transform: inherit; /* caps-exempt: same natural-sentence cutline prose */
+/* A player's name inside the cutline stays bold + all-caps (the app's
+   default #root * uppercase already applies to this <button> — no override
+   needed) even though the sentence around it reads natural-case, so the name
+   reads as the "headline" word in an otherwise ordinary sentence. The link
+   wraps just the bare name — the position abbreviation stays in the
+   surrounding plain prose (see teamTransactions.js: the emphasized/linked
+   span is built from the player's name alone, never "{POS} {Name}"). */
+.txstory__cutline .plink {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
 
 /* Same full-width "load more" affordance as .pshistory__more /
@@ -10412,6 +10417,19 @@ body {
 .txcard__more:disabled {
   cursor: default;
   opacity: 0.7;
+}
+
+/* .screen widens to 960px at this breakpoint (see the WIDE LAYOUT block
+   above), and unlike the compact tile rows in .team-score/.postseason-odds,
+   this card is headshots + prose — stretching it edge to edge reads like an
+   unfinished two-column page with nothing in the second column. Cap it to a
+   comfortable reading width instead (matches the original wireframe's own
+   ~460px desktop cap in .scratch/team-transactions/scope.md) rather than
+   attempting a two-column layout with no defined partner content yet. */
+@media (min-width: 740px) {
+  .txcard {
+    max-width: 460px;
+  }
 }
 
 .team-hub__manager {

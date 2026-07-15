@@ -220,14 +220,33 @@ test('filterStoryworthy keeps IL placement/activation/transfer SC rows but drops
     person: { id: 682842, fullName: 'Abner Uribe' }, toTeam: BREWERS,
     description: 'Milwaukee Brewers activated RHP Abner Uribe.', // no "injured list" — a reinstatement, not an IL move
   }
-  const kept = filterStoryworthy([placement, transfer, plainActivation])
+  const kept = filterStoryworthy([placement, transfer, plainActivation], { orgId: 158 })
   assert.deepEqual(kept.map((t) => t.id), [placement.id, transfer.id])
+})
+
+test('filterStoryworthy drops a MiLB affiliate\'s own IL placement even though it buckets to the org', () => {
+  // A minor leaguer placed on HIS OWN affiliate's injured list — toTeam is
+  // Nashville Sounds (556), never the Brewers' MLB club (158) directly.
+  // bucketToOrg keeps it (556 maps to org 158 via affilToOrg), but it never
+  // touched the MLB roster, so it must not become a team-transactions story.
+  const milbPlacement = {
+    id: 777, typeCode: 'SC', date: '2026-06-20', effectiveDate: '2026-06-20',
+    person: { id: 999001, fullName: 'Akil Baddoo' }, toTeam: NASHVILLE,
+    description: 'Nashville Sounds placed OF Akil Baddoo on the 7-day injured list.',
+  }
+  const mlbPlacement = JUL07.find((t) => t.person?.fullName === 'David Hamilton') // toTeam 158
+  const withOrgGate = filterStoryworthy([milbPlacement, mlbPlacement], { orgId: 158 })
+  assert.deepEqual(withOrgGate.map((t) => t.id), [mlbPlacement.id])
+  // No orgId given (e.g. a caller that hasn't been updated) keeps both —
+  // documents that the gate is opt-in via ctx, not a hardcoded assumption.
+  const withoutGate = filterStoryworthy([milbPlacement, mlbPlacement])
+  assert.equal(withoutGate.length, 2)
 })
 
 test('filterStoryworthy keeps every whitelisted typeCode and drops an unlisted one', () => {
   const trade = JUL12.find((t) => t.typeCode === 'TR')
   const unlisted = { ...trade, id: 12345, typeCode: 'NC', description: 'New contract stuff.' }
-  const kept = filterStoryworthy([trade, unlisted])
+  const kept = filterStoryworthy([trade, unlisted], { orgId: 158 })
   assert.deepEqual(kept.map((t) => t.id), [trade.id])
 })
 
@@ -249,7 +268,7 @@ test('bucketToOrg keeps rows touching the org directly or via its own affiliate,
 // ---------------------------------------------------------------------------
 
 function storiesFor(rawRows) {
-  const kept = filterStoryworthy(dedupeTransactions(rawRows))
+  const kept = filterStoryworthy(dedupeTransactions(rawRows), { orgId: 158 })
   return groupIntoStories(kept, { positions: {}, orgId: 158 })
 }
 
@@ -357,7 +376,7 @@ test('buildCutline: a pure trade-away pulls no secondary clause', () => {
   const segs = buildCutline({ storyType: 'trade', rows: [{ row, role: 'out' }] }, { orgId: 158 })
   assert.equal(segs.map((s) => s.text).join(''), 'Traded RHP Easton McGee to the Royals for cash.')
   const emphasized = segs.find((s) => s.emphasis === 'primary')
-  assert.equal(emphasized.text, 'RHP Easton McGee')
+  assert.equal(emphasized.text, 'Easton McGee')
   assert.equal(emphasized.playerId, 668834)
 })
 

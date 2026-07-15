@@ -147,9 +147,18 @@ const STORY_WORTHY_CODES = new Set([
   'CLW', 'PUR', 'WA', 'RET', 'SU',
 ])
 
-export function filterStoryworthy(rows) {
+// `ctx.orgId`, when given, gates the IL branch to placements/activations/
+// transfers happening AT the MLB club directly (`toTeam.id === orgId`) —
+// otherwise a MiLB affiliate's OWN internal IL move (e.g. "Nashville Sounds
+// placed SS X on the 7-day injured list", `toTeam` the affiliate, never the
+// MLB club) rides in on bucketToOrg's affiliate mapping and reads as this
+// org's news, even though the player's never touched the MLB roster. Every
+// other whitelisted code (CU/OPT/SE/TR/…) is inherently anchored to the MLB
+// club by its own definition, so this gate is scoped to the SC/IL branch only.
+export function filterStoryworthy(rows, ctx = {}) {
   return (rows ?? []).filter((t) => {
     if (t.typeCode === 'SC') {
+      if (ctx.orgId != null && t.toTeam?.id !== ctx.orgId) return false
       return isIlPlacementTxn(t) || isIlEndingTxn(t) || isIlTransferTxn(t)
     }
     return STORY_WORTHY_CODES.has(t.typeCode)
@@ -187,10 +196,16 @@ function resolvePosition(row, ctx) {
   const pid = row.person?.id
   return (pid != null && ctx?.positions?.[pid]) || ''
 }
-function labelFor(row, ctx) {
-  const pos = resolvePosition(row, ctx)
-  const name = row.person?.fullName || ''
-  return pos ? `${pos} ${name}` : name
+function nameFor(row) {
+  return row.person?.fullName || ''
+}
+// A plain "{POS} " prefix for the custom trade/injured-list leads below,
+// which build their opening clause from scratch rather than searching an
+// existing raw clause — the position stays in the sentence (e.g. "Acquired
+// RHP Easton McGee…"), just as a plain segment ahead of the player's name,
+// which is the only part that gets linked/emphasized.
+function posPrefix(pos) {
+  return pos ? `${pos} ` : ''
 }
 // First-space split, same convention as person.js's splitDisplayName (a small
 // mirrored copy, not an import — see the module header).
@@ -234,9 +249,10 @@ function soloText(row) {
   return upperFirst(stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name]))
 }
 
-// Wraps the substring of `text` matching `label` ("{POS} {Name}") in an
-// emphasis segment, splitting the surrounding text into plain segments either
-// side — the cutline segment shape the component renders as <b>/<i>/plain.
+// Wraps the substring of `text` matching a player's name in an emphasis
+// segment, splitting the surrounding text into plain segments either side —
+// the cutline segment shape the component renders as an all-caps, bold,
+// linked player name plus plain surrounding prose.
 function emphasizeClause(text, label, emphasis, playerId) {
   if (!label) return [{ text }]
   const idx = text.indexOf(label)
@@ -485,21 +501,22 @@ function cutlineTrade(story, ctx) {
   const primary = story.rows[0]
   const secondary = story.rows[1]
   const row = primary.row
-  const label = labelFor(row, ctx)
+  const name = nameFor(row)
+  const pos = resolvePosition(row, ctx)
   const otherTeam = primary.role === 'in' ? row.fromTeam : row.toTeam
   const nick = teamNickname(otherTeam?.name || '')
   const returnDetail = (row.description || '').match(/\bfor\s+(.+?)\.?$/i)?.[1]
-  const lead = primary.role === 'in' ? 'Acquired ' : 'Traded '
+  const lead = (primary.role === 'in' ? 'Acquired ' : 'Traded ') + posPrefix(pos)
   const mid = primary.role === 'in' ? ` from the ${nick}` : ` to the ${nick}`
-  const segs = [{ text: lead }, ...emphasizeLabel(label, 'primary', row.person?.id), { text: mid }]
+  const segs = [{ text: lead }, ...emphasizeLabel(name, 'primary', row.person?.id), { text: mid }]
   if (returnDetail) segs.push({ text: ` for ${stripPeriod(returnDetail)}` })
   if (secondary) {
-    const sLabel = labelFor(secondary.row, ctx)
+    const sName = nameFor(secondary.row)
     const sClause = stripPeriod(lowerFirst(
       stripLeadingClub(secondary.row.description, [secondary.row.fromTeam?.name, secondary.row.toTeam?.name]),
     ))
     segs.push({ text: '; ' })
-    segs.push(...emphasizeClause(sClause, sLabel, 'secondary', secondary.row.person?.id))
+    segs.push(...emphasizeClause(sClause, sName, 'secondary', secondary.row.person?.id))
   }
   segs.push({ text: '.' })
   return segs
@@ -509,44 +526,45 @@ function cutlineInjuredList(story, ctx) {
   const placed = story.rows.find((r) => r.role === 'out')
   const replacement = story.rows.find((r) => r.role === 'in')
   const row = placed.row
-  const label = labelFor(row, ctx)
+  const name = nameFor(row)
+  const pos = resolvePosition(row, ctx)
   const days = (row.description || '').match(/(\d+)-day injured list/i)?.[1]
   const reason = ilReason(row.description)
   const segs = [
-    { text: 'Placed ' },
-    ...emphasizeLabel(label, 'primary', row.person?.id),
+    { text: 'Placed ' + posPrefix(pos) },
+    ...emphasizeLabel(name, 'primary', row.person?.id),
     { text: days ? ` on the ${days}-day injured list` : ' on the injured list' },
   ]
   if (reason) segs.push({ text: ` (${lowerFirst(stripPeriod(reason))})` })
   if (replacement) {
-    const rLabel = labelFor(replacement.row, ctx)
+    const rName = nameFor(replacement.row)
     const rClause = stripPeriod(lowerFirst(
       stripLeadingClub(replacement.row.description, [replacement.row.fromTeam?.name, replacement.row.toTeam?.name]),
     ))
     segs.push({ text: '; ' })
-    segs.push(...emphasizeClause(rClause, rLabel, 'secondary', replacement.row.person?.id))
+    segs.push(...emphasizeClause(rClause, rName, 'secondary', replacement.row.person?.id))
   }
   segs.push({ text: '.' })
   return segs
 }
 
-function cutlineDouble(story, ctx) {
+function cutlineDouble(story) {
   const inRow = story.rows.find((r) => r.role === 'in').row
   const outRow = story.rows.find((r) => r.role === 'out').row
-  const label = labelFor(inRow, ctx)
+  const name = nameFor(inRow)
   const inClause = stripPeriod(soloText(inRow))
   const outClause = stripPeriod(lowerFirst(
     stripLeadingClub(outRow.description, [outRow.fromTeam?.name, outRow.toTeam?.name]),
   ))
   return [
-    ...emphasizeClause(inClause, label, 'primary', inRow.person?.id),
+    ...emphasizeClause(inClause, name, 'primary', inRow.person?.id),
     { text: '; ' },
-    ...emphasizeClause(outClause, label, 'secondary', outRow.person?.id),
+    ...emphasizeClause(outClause, name, 'secondary', outRow.person?.id),
     { text: '.' },
   ]
 }
 
-function cutlineShuffle(story, ctx) {
+function cutlineShuffle(story) {
   const ordered = [
     ...story.rows.filter((r) => r.role === 'in'),
     ...story.rows.filter((r) => r.role === 'out'),
@@ -554,10 +572,10 @@ function cutlineShuffle(story, ctx) {
   const segs = []
   ordered.forEach((r, i) => {
     if (i > 0) segs.push({ text: '; ' })
-    const label = labelFor(r.row, ctx)
+    const name = nameFor(r.row)
     const raw = stripLeadingClub(r.row.description, [r.row.fromTeam?.name, r.row.toTeam?.name])
     const clause = stripPeriod(i === 0 ? upperFirst(raw) : lowerFirst(raw))
-    segs.push(...emphasizeClause(clause, label, r.role === 'in' ? 'primary' : 'secondary', r.row.person?.id))
+    segs.push(...emphasizeClause(clause, name, r.role === 'in' ? 'primary' : 'secondary', r.row.person?.id))
   })
   segs.push({ text: '.' })
   return segs
@@ -565,8 +583,8 @@ function cutlineShuffle(story, ctx) {
 
 function cutlineSingle(story, ctx, emphasis) {
   const { row } = story.rows[0]
-  const label = labelFor(row, ctx)
-  return emphasizeClause(soloText(row), label, emphasis, row.person?.id)
+  const name = nameFor(row)
+  return emphasizeClause(soloText(row), name, emphasis, row.person?.id)
 }
 
 // One story draft -> its cutline segment array. Exported standalone (per the
