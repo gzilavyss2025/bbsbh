@@ -11338,6 +11338,12 @@ body {
   .psbracket .seedrow__name {
     display: none;
   }
+  /* .seedrow__name is what normally flex:1's the win count to the card's
+     right edge (see .seedrow__name below) — with it gone, push wins there
+     directly instead of leaving it hugging the logo. */
+  .psbracket .seedrow__wins {
+    margin-left: auto;
+  }
   .psbracket .teamlogo {
     width: 30px !important;
     height: 30px !important;
