@@ -283,16 +283,18 @@ function gameTimes(feed) {
   }
 }
 
-// The four umpire assignments (HP/1B/2B/3B) the scorebook lists in its header.
-// The feed carries them as one run-together "Umpires" info string
-// ("HP: Name. 1B: Name. 2B: Name. 3B: Name."); split it back into slots.
-// Each name runs until the NEXT assignment label (or the end), not until the
-// first period — "Quinn Wolcott Jr." must not truncate at the "Jr." dot.
+// The umpire assignments the scorebook lists in its header — HP/1B/2B/3B
+// always, plus LF/RF on the six-man All-Star/postseason crews (see
+// selectOfficials in select.js). The feed carries them as one run-together
+// "Umpires" info string ("HP: Name. 1B: Name. 2B: Name. 3B: Name."); split it
+// back into slots. Each name runs until the NEXT assignment label (or the
+// end), not until the first period — "Quinn Wolcott Jr." must not truncate at
+// the "Jr." dot.
 function parseUmpires(value) {
   if (!value) return null
   const grab = (key) => {
     const m = value.match(
-      new RegExp(`${key}:\\s*(.+?)\\s*(?=(?:HP|1B|2B|3B):|\\.?\\s*$)`),
+      new RegExp(`${key}:\\s*(.+?)\\s*(?=(?:HP|1B|2B|3B|LF|RF):|\\.?\\s*$)`),
     )
     return m ? m[1].replace(/\.$/, '').trim() : ''
   }
@@ -301,8 +303,10 @@ function parseUmpires(value) {
     first: grab('1B'),
     second: grab('2B'),
     third: grab('3B'),
+    left: grab('LF'),
+    right: grab('RF'),
   }
-  return u.hp || u.first || u.second || u.third ? u : null
+  return u.hp || u.first || u.second || u.third || u.left || u.right ? u : null
 }
 
 // Info-block rows already shown structured elsewhere in the box score (the

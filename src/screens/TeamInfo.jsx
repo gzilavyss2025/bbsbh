@@ -297,10 +297,16 @@ function Umpires({ officials }) {
   const [modalId, setModalId] = useState(null)
 
   if (officials.length === 0) return null
+  // A six-man crew (All-Star Game / postseason, LF + RF added — see
+  // selectOfficials) needs its own desktop/ipad layout: two rows of three
+  // rather than the auto-fit grid's crowded row of four plus a stray row of
+  // two (see .umps__list--six in index.css). Four-and-under crews keep the
+  // existing auto-fit flow untouched.
+  const sixMan = officials.length === 6
   return (
     <section className="umps">
       <h3 className="section__title">Umpires</h3>
-      <ul className="umps__list">
+      <ul className={`umps__list${sixMan ? ' umps__list--six' : ''}`}>
         {officials.map((o) => (
           <li key={o.role}>
             <span className="umps__role">{o.role}</span>

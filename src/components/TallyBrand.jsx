@@ -20,6 +20,27 @@ export function TallyWordmark({ height = 20, title = 'Tally', ...rest }) {
   )
 }
 
+// The full lockup — baseball mark to the left of the wordmark, sized so the
+// mark reads at roughly 1.3x the wordmark's cap height (a plain equal-height
+// pairing left the mark looking undersized next to the wordmark's own
+// baked-in padding). The mark carries no accessible name of its own — the
+// wordmark's alt text is the pairing's one label — and hides on a narrow
+// phone via .tally-lockup (see index.css), leaving just the mark as the
+// compact home button.
+export function TallyLockup({ height = 22, className = '', title = 'Tally', ...rest }) {
+  return (
+    <span className={`tally-lockup ${className}`.trim()} {...rest}>
+      <TallyBaseballMark
+        size={Math.round(height * 1.3)}
+        title=""
+        aria-hidden="true"
+        className="tally-lockup__mark"
+      />
+      <TallyWordmark height={height} title={title} className="tally-lockup__wordmark" />
+    </span>
+  )
+}
+
 export function TallyBaseballMark({ size = 24, title = 'Tally Baseball', ...rest }) {
   const gradientId = `tally-mark-clay-${useId().replace(/:/g, '')}`
 
