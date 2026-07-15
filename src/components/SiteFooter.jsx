@@ -107,7 +107,7 @@ export function SiteFooter({
           className="sitefooter__action"
           onClick={() => navigate('/all-star-rosters')}
         >
-          All-Star Rosters
+          All Star Game
         </button>
         <button
           type="button"

@@ -215,7 +215,7 @@ function RosterYear({ year, roster, score, mvp, venue, card, navigate, effective
 // (1990), not incremental paging; seasons older than that aren't reachable
 // from this page yet.
 export function AllStarRostersPage() {
-  useDocumentTitle('All-Star Rosters')
+  useDocumentTitle('All Star Game')
   const navigate = useNav()
   const { favoriteTeamId } = useFavoriteTeam()
   const [filterTeamId, setFilterTeamId] = useState(null)
@@ -246,7 +246,7 @@ export function AllStarRostersPage() {
     <div className="screen">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">All-Star Rosters</h1>
+        <h1 className="topbar__title">All-Star Rosters and Results</h1>
       </header>
 
       <AsyncStatus
@@ -260,11 +260,6 @@ export function AllStarRostersPage() {
 
       {seasons.length > 0 && (
         <>
-          <p className="hint">
-            Every player named to an All-Star squad — including one who was
-            selected but never played, replaced by an injury or a starter who
-            pitched the Sunday before.
-          </p>
           <AllStarTeamFilter selectedTeamId={filterTeamId} onSelect={setFilterTeamId} />
           <div className="allstarrosters__list">
             {visibleSeasons.map((year) => {
