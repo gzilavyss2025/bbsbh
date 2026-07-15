@@ -174,10 +174,20 @@ function BracketGrid({ season, onOpenSeries }) {
       <BracketColumn side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
       <BracketColumn side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <div className="psbracket__col psbracket__col--ws">
-        <p className="psbracket__collabel psbracket__collabel--ws">World Series</p>
+        <p className="psbracket__collabel psbracket__collabel--ws">
+          <img
+            src="/brand/world-series-trophy-icon.png"
+            alt=""
+            className="psbracket__roundtrophy"
+            width={12}
+            height={12}
+            aria-hidden="true"
+          />
+          World Series
+        </p>
         <div className="psbracket__lanes">
           {ws && (
-            <button type="button" className="pswscard" onClick={() => onOpenSeries(ws)}>
+            <button type="button" className="pswscard" onClick={() => onOpenSeries({ ...ws, isWorldSeries: true })}>
               {[ws.teamA, ws.teamB].map((t) => (
                 <SeedRow
                   key={t.teamId}
@@ -243,9 +253,19 @@ function BracketStack({ season, onOpenSeries }) {
       <StackRound side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
       <StackRound side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
       <StackRound side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
-      <p className="psstack__roundlabel psstack__roundlabel--ws">World Series</p>
+      <p className="psstack__roundlabel psstack__roundlabel--ws">
+        <img
+          src="/brand/world-series-trophy-icon.png"
+          alt=""
+          className="psbracket__roundtrophy"
+          width={12}
+          height={12}
+          aria-hidden="true"
+        />
+        World Series
+      </p>
       {ws && (
-        <button type="button" className="pswscard pswscard--stack" onClick={() => onOpenSeries(ws)}>
+        <button type="button" className="pswscard pswscard--stack" onClick={() => onOpenSeries({ ...ws, isWorldSeries: true })}>
           {[ws.teamA, ws.teamB].map((t) => (
             <SeedRow
               key={t.teamId}
@@ -278,7 +298,17 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
             size={28}
           />
           <span className="pshistory__championname">{teamFullName(season.championTeamId)}</span>
-          <span className="pshistory__championtag">World Series Champion</span>
+          <span className="pshistory__championtag">
+            <img
+              src="/brand/world-series-trophy-icon.png"
+              alt=""
+              className="pshistory__championtrophy"
+              width={14}
+              height={14}
+              aria-hidden="true"
+            />
+            World Series Champion
+          </span>
         </TeamLink>
       </div>
 

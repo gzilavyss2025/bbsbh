@@ -46,8 +46,14 @@
        quiet factor glosses `.gsfactor__note`, and the example lines
        `.gsexample__line` (the shouted group subheadings + bold factor labels
        stay uppercase)
+     - the Team Score modal's headline + explainer paragraphs —
+       `.tscoremodal__title`, `.tscoremodal__body p` (+ inline children) —
+       the figures table and section sub-kicker stay shouted
      - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
        `.hint__link` button)
+     - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
+       (the blurb title above it stays uppercase, same shouted-heading/
+       natural-case-body split as the Game Score modal above)
      - `.buzz__text` (Bluesky posts keep their authors' original casing) */
 #root * {
   text-transform: uppercase;
@@ -3579,6 +3585,14 @@ body {
   color: var(--text-muted);
 }
 
+/* The shared bat/ball loader, same choreography as every other cold-load
+   wait in the app (see Loader.jsx) — replaces a bare "reading…" line with
+   continuous motion instead of a static one, same craft/consistency idea as
+   the rest of the app's loading states. */
+.brewsheet__loader {
+  margin: 10px 0 4px;
+}
+
 .brewsheet__list {
   list-style: none;
   margin: 12px 0 4px;
@@ -3608,6 +3622,13 @@ body {
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-body);
+}
+
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .brewblurb__body selector can't outrank #root * and would be
+   silently ignored. */
+#root .brewblurb__body {
+  text-transform: none; /* caps-exempt: Game Notes prose is several sentences long — shouted caps make a real paragraph much harder to scan than the app's short chrome labels; the blurb title above stays uppercase */
 }
 
 .brewsheet__pdf {
@@ -9924,65 +9945,162 @@ body {
   font-weight: var(--w-regular);
   letter-spacing: 0;
 }
-.team-score__values {
+.team-score__row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding-bottom: 8px;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
 }
-.team-score__value {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  padding: 4px 7px;
+.team-score__row:last-of-type {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.team-score__rowtop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-sm);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 140ms ease, transform 140ms cubic-bezier(.23, 1, .32, 1);
 }
-.team-score__value + .team-score__value {
-  border-left: var(--bw-hair) solid var(--border-rule);
-}
-.team-score__value.is-active {
-  background: var(--bg-page);
-}
-@media (hover: hover) and (pointer: fine) {
-  .team-score__value:hover {
-    background: var(--bg-page);
-  }
-}
-.team-score__value:active {
-  transform: scale(.98);
-}
-.team-score__value:focus-visible {
+.team-score__rowtop:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }
-.team-score__value > span {
-  color: var(--text-caption);
+.team-score__label {
+  color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  text-transform: uppercase;
 }
-.team-score__value strong {
+.team-score__rowright {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.team-score__rank {
+  color: var(--seal-hatch);
+  background: color-mix(in srgb, var(--seal) 16%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--w-semibold);
+  padding: 2px 6px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.team-score__score {
   color: var(--text-heading);
   font-family: var(--font-mono);
   font-size: 25px;
   font-variant-numeric: tabular-nums;
   line-height: .95;
 }
-.team-score__value em {
+.team-score__meta {
   overflow: hidden;
   color: var(--graphite-soft);
   font-family: var(--font-mono);
   font-size: 10px;
-  font-style: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* The league-distribution rail: every other team as a small dot at its own
+   score, ours as the larger marker — rank made visual instead of just a
+   number to read. */
+.team-score__track {
+  position: relative;
+  height: 44px;
+  margin: 2px 1px 0;
+}
+.team-score__track-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 21px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--rule-soft);
+}
+.team-score__track-mid {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  width: 1px;
+  height: 16px;
+  background: var(--rule);
+}
+.team-score__dot {
+  position: absolute;
+  top: 17px;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--graphite-soft);
+  opacity: .6;
+  cursor: pointer;
+  transition: opacity 120ms ease, box-shadow 120ms ease;
+}
+/* No transform on hover/focus — scaling a dot grows its hit-tested visual
+   box into densely-packed neighbors (30 teams over one 0–10 rail put many
+   dots within a few px of each other), which can steal the hover it's meant
+   to show. A box-shadow ring reads as emphasis without resizing anything. */
+.team-score__dot:hover,
+.team-score__dot:focus-visible {
+  opacity: 1;
+  background: var(--ink-2, var(--text-heading));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-heading) 20%, transparent);
+  outline: none;
+}
+.team-score__dot--us {
+  top: 17px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  background: var(--text-heading);
+  border: 2px solid var(--surface-card);
+  box-shadow: 0 0 0 1px var(--text-heading);
+  opacity: 1;
+  cursor: default;
+}
+.team-score__tooltip {
+  position: absolute;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  padding: 3px 7px;
+  background: var(--text-heading);
+  color: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  white-space: nowrap;
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 1;
+}
+.team-score__howlink {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
+  cursor: pointer;
+}
+.team-score__howlink:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 .team-score__detail {
   border-top: var(--bw-hair) solid var(--rule-soft);
@@ -10021,15 +10139,12 @@ body {
   text-align: right;
 }
 @media (max-width: 420px) {
-  .team-score__value {
-    padding-inline: 5px;
-  }
-  .team-score__value strong {
+  .team-score__score {
     font-size: 22px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .team-score__value,
+  .team-score__dot,
   .team-score__detail {
     transition: none;
   }
@@ -11642,12 +11757,19 @@ body {
   color: var(--text-heading);
 }
 .pshistory__championtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-family: var(--font-display);
   font-size: 9.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--accent-primary);
+}
+.pshistory__championtrophy {
+  flex: none;
+  display: block;
 }
 
 /* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
@@ -11750,8 +11872,20 @@ body {
 .psbracket__collabel--nl {
   color: var(--accent-positive);
 }
+/* The World Series column/round label carries the same trophy mark as the
+   champion banner (.pshistory__championtrophy) — inline-flex so the icon
+   sits beside the centered text instead of the plain block treatment the
+   AL/NL labels use. */
 .psbracket__collabel--ws {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   color: var(--seal-ink);
+}
+.psbracket__roundtrophy {
+  flex: none;
+  display: block;
 }
 .psbracket__lanes {
   flex: 1;
@@ -12089,6 +12223,12 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+.psmodal__trophy {
+  display: block;
+  margin: 0 auto;
+  height: 56px;
+  width: auto;
 }
 .psmodal__result {
   display: flex;
@@ -13554,6 +13694,119 @@ body {
 #root .gsfactor__note,
 #root .gsexample__line {
   text-transform: none; /* caps-exempt: Game Score modal's explainer prose + factor glosses read as natural sentences */
+}
+
+/* ------------------------------------------------------- team score modal
+   "How this is calculated" sheet, opened from the Team Score card's footer
+   link (TeamScoreCard.jsx). Same .scrim/.sheet dialog contract as the Game
+   Score modal, centered rather than docked (scrim--center) since this is a
+   read, not a quick reference — the editorial column treatment (drop cap,
+   pull quote, Newsreader body) leans into the "beat writer" voice the copy
+   is written in. */
+.tscoremodal {
+  max-height: min(88vh, 640px);
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.tscoremodal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tscoremodal__kicker {
+  margin: 0;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.tscoremodal__title {
+  font-family: var(--font-read);
+  font-size: 19px;
+  font-weight: var(--w-semibold);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+#root .tscoremodal__title {
+  text-transform: none; /* caps-exempt: Team Score modal's headline reads as a natural sentence, like the Game Score modal's body */
+}
+.tscoremodal__body {
+  font-family: var(--font-read);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.tscoremodal__body p {
+  margin: 0 0 13px;
+}
+.tscoremodal__body p:first-of-type::first-letter {
+  float: left;
+  font-size: 2.4em;
+  line-height: .85;
+  font-weight: var(--w-semibold);
+  padding: .03em .06em 0 0;
+  color: var(--seal-hatch);
+}
+.tscoremodal__pull {
+  margin: 16px 0 !important;
+  padding-left: 12px;
+  border-left: 3px solid var(--seal);
+  color: var(--ink-2);
+  font-style: italic;
+}
+.tscoremodal__subkicker {
+  margin: 18px 0 8px !important;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.tscoremodal__figs {
+  display: grid;
+  gap: 0;
+  margin: 4px 0 16px;
+  padding: 8px 0;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.tscoremodal__figs div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+.tscoremodal__figs dt {
+  color: var(--text-caption);
+}
+.tscoremodal__figs dd {
+  margin: 0;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-align: right;
+}
+.tscoremodal__foot {
+  margin: 4px 0 0 !important;
+  color: var(--graphite-soft);
+  font-size: 11px;
+}
+/* Only the prose paragraphs (and inline strong/em within them) read as
+   natural sentences; the figures table (.tscoremodal__figs dt/dd) stays
+   shouted like every other card detail, and the section sub-kicker stays
+   shouted like the top kicker — same split gsmodal draws between its
+   explainer body and its still-shouted factor table. */
+#root .tscoremodal__body p,
+#root .tscoremodal__body p * {
+  text-transform: none; /* caps-exempt: Team Score modal's explainer paragraphs read as natural sentences, same treatment as the Game Score modal */
+}
+#root .tscoremodal__body p.tscoremodal__subkicker {
+  text-transform: uppercase;
 }
 
 /* ---------------------------------------------------------- highlight sheet

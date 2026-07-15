@@ -14,20 +14,20 @@ test('quality score is neutral for a .500-quality ten-game sample and damped ear
   assert.ok(qualityScoreFromGames({ wins: 10, games: 10, runsScored: 60, runsAllowed: 20 }).score < 9)
 })
 
-test('snapshots retain season quality and a last-30 form window', () => {
-  const games = Array.from({ length: 31 }, (_, index) => ({
+test('snapshots retain season quality and a last-10 form window', () => {
+  const games = Array.from({ length: 11 }, (_, index) => ({
     gamePk: index + 1,
     date: `2026-04-${String(index + 1).padStart(2, '0')}`,
     homeId: 1,
     awayId: 2,
-    homeRuns: index < 20 ? 5 : 2,
-    awayRuns: index < 20 ? 2 : 5,
+    homeRuns: index < 5 ? 5 : 2,
+    awayRuns: index < 5 ? 2 : 5,
   }))
   const snapshots = buildTeamScoreSnapshots({ games, asOf: '2026-05-01' })
-  assert.equal(snapshots[1].season.games, 31)
-  assert.equal(snapshots[1].currentForm.games, 30)
-  assert.equal(snapshots[1].season.wins, 20)
-  assert.equal(snapshots[1].currentForm.wins, 19)
+  assert.equal(snapshots[1].season.games, 11)
+  assert.equal(snapshots[1].currentForm.games, 10)
+  assert.equal(snapshots[1].season.wins, 5)
+  assert.equal(snapshots[1].currentForm.wins, 4)
 })
 
 test('reader never looks ahead of the Team Page cutoff', () => {

@@ -1,19 +1,21 @@
 // Regenerates public/data/team-score.json — MLB's date-keyed Season Score and
 // Current Form. Both are team-quality measures: 60% actual wins and 40%
 // Pythagorean run quality, centered on .500 and damped for small samples.
-// Season Surprise remains in season-score.json as a separate diagnostic.
+// Season Surprise remains in season-score.json as a separate diagnostic. The
+// formula itself lives in src/api/teamScoreFormula.js (pure, no node
+// imports) so the team page's "how this is calculated" explainer can run the
+// same math client-side — re-exported here so this script stays the
+// existing import site for test/team-score.test.js.
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { pythagoreanPct, qualityScoreFromGames, CURRENT_FORM_GAMES } from '../src/api/teamScoreFormula.js'
+
+export { pythagoreanPct, qualityScoreFromGames }
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'team-score.json')
 const BASE = 'https://statsapi.mlb.com'
-const MIN_GAMES = 10
-const PythagoreanExponent = 1.83
-
-const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
-const round1 = (n) => Math.round(n * 10) / 10
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {
   const d = new Date(`${date}T00:00:00Z`)
@@ -35,29 +37,6 @@ function parseArgs(argv) {
     if (match) args[match[1]] = match[2] ?? true
   }
   return args
-}
-
-export function pythagoreanPct(runsScored, runsAllowed) {
-  if (runsScored + runsAllowed <= 0) return 0.5
-  const rs = runsScored ** PythagoreanExponent
-  const ra = runsAllowed ** PythagoreanExponent
-  return rs / (rs + ra)
-}
-
-export function qualityScoreFromGames({ wins, games, runsScored, runsAllowed }) {
-  if (!games || games < MIN_GAMES) return null
-  const pythagPct = pythagoreanPct(runsScored, runsAllowed)
-  const pythagWins = games * pythagPct
-  const weightedWins = 0.6 * wins + 0.4 * pythagWins
-  const weightedWinsAbove500 = weightedWins - 0.5 * games
-  const effectiveZ = weightedWinsAbove500 / Math.sqrt(0.25 * games + 9)
-  return {
-    score: round1(clamp(5 + 4.5 * Math.tanh(effectiveZ / 2), 0, 10)),
-    pythagPct: round1(pythagPct * 100) / 100,
-    pythagWins: round1(pythagWins),
-    weightedWins: round1(weightedWins),
-    weightedWinsAbove500: round1(weightedWinsAbove500),
-  }
 }
 
 function summarize(games) {
@@ -121,7 +100,7 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
     snapshots[teamId] = {
       asOf,
       season: summarize(ordered),
-      currentForm: summarize(ordered.slice(-30)),
+      currentForm: summarize(ordered.slice(-CURRENT_FORM_GAMES)),
     }
   }
   return snapshots
