@@ -11,6 +11,7 @@
 //   '/rehab'                            -> { name: 'rehab' }
 //   '/milestones'                       -> { name: 'milestones' }
 //   '/awards'                           -> { name: 'awards-history' }
+//   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/standings'                        -> { name: 'standings' }
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
@@ -54,6 +55,8 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
   if (parts.length === 1 && parts[0] === 'milestones') return { name: 'milestones' }
   if (parts.length === 1 && parts[0] === 'awards') return { name: 'awards-history' }
+  if (parts.length === 1 && parts[0] === 'all-star-rosters')
+    return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
   if (parts.length === 1 && parts[0] === 'top-games') return { name: 'top-games' }
