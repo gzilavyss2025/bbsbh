@@ -10272,13 +10272,21 @@ body {
   scroll-snap-type: x proximity;
   margin: 0 calc(-1 * var(--app-gutter));
   padding: 2px var(--app-gutter) 6px;
-  scrollbar-width: thin;
+  /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it entirely
+     and fall back to a full-size native horizontal scrollbar, which reads as
+     a stray gray bar under a touch-first swipe deck. The ::-webkit-scrollbar
+     rule below is what actually hides it in Chromium/WebKit. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   -webkit-mask-image: linear-gradient(
     to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
   );
   mask-image: linear-gradient(
     to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
   );
+}
+.txcard__scroll::-webkit-scrollbar {
+  display: none;
 }
 .txcard__sentinel {
   flex: 0 0 auto;
