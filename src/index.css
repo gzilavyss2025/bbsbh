@@ -10421,9 +10421,14 @@ body {
   /* A bare <button> is inline-block by default, which keeps its whole text
      content as one unbreakable unit — "Lance McCullers Jr." would jump to
      the next line as a whole rather than wrapping normally like the plain
-     prose around it. display:inline lets a long name wrap same as any
-     other text. */
+     prose around it. display:inline alone tests fine in Chromium (the only
+     engine this repo's e2e harness can drive), but some engines' UA
+     stylesheet also sets a button's internal text to nowrap-like handling
+     that survives an author's display override — white-space/overflow-wrap
+     belt-and-suspenders the fix so a long name wraps regardless of engine. */
   display: inline;
+  white-space: normal;
+  overflow-wrap: break-word;
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
