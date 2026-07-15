@@ -3782,11 +3782,15 @@ body {
 }
 
 /* ABS (Automated Ball-Strike) challenges — the card's third row (see
-   StatBox's AbsRow). One row per club: the abbreviation, then how many
-   challenges are left as used/open pips (UsagePips, shared with the
-   mound-visit notice) — a challenge only spends a pip when it FAILS, so a
-   club that keeps winning its challenges always shows its full starting
-   count. */
+   StatBox's AbsRow). One club per row inside a single inset panel that matches
+   the R/H/E and pitch-stat cells above, so ABS reads as another row of the
+   card rather than orphaned text. The club logo anchors each row on the left;
+   the pips then narrate that club's challenge history left-to-right — one pip
+   per challenge MADE, colored by outcome (overturned = won, stood = lost) —
+   followed by any still-unused challenges in kraft brown. A right-aligned
+   record + remaining readout carries the same information as digits for anyone
+   who'd rather not decode the dots. (Unlike the mound-visit UsagePips, this is
+   an outcome history, not a plain remaining count, so it uses its own pips.) */
 .abs {
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
@@ -3801,38 +3805,71 @@ body {
   color: var(--text-caption);
   margin-bottom: 8px;
 }
-/* One inset cell per club, two-up to fill the card width — same paper-2 cell
-   treatment as the R/H/E and pitch-stat rows above, so ABS reads as another
-   row of the card and not orphaned text. Abbreviation anchored left, the
-   used/open pips anchored right. */
 .abs__rows {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.abs__row {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  flex-direction: column;
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
+  overflow: hidden;
 }
-/* Hairline divider between the club and its pips, so abbr and gauge read as
-   one labeled unit rather than two floated ends. */
-.abs__row .abs__team {
-  border-right: var(--bw-hair) solid var(--border-rule);
-  padding-right: 10px;
+.abs__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px;
+}
+.abs__row + .abs__row {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+/* The club mark — sized like the app's other inline club logos. Falls back to
+   the abbreviation (.abs__team) when the art is missing (MiLB / load error). */
+.abs__logo {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 .abs__team {
   flex: 0 0 auto;
+  min-width: 24px;
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
+}
+.abs__pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.abs__pip {
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.abs__pip--won {
+  background: var(--accent-positive);
+}
+.abs__pip--lost {
+  background: var(--accent-negative);
+}
+.abs__pip--open {
+  background: var(--seal);
+}
+/* Record (won–lost) + what's still in the bank, right-aligned as tabular
+   figures — the same numbers the pips encode, for a scorer who wants the count. */
+.abs__rec {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: 11px;
+  color: var(--text-caption);
 }
 
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
