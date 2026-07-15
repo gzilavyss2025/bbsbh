@@ -187,7 +187,7 @@ function BracketGrid({ season, onOpenSeries }) {
         </p>
         <div className="psbracket__lanes">
           {ws && (
-            <button type="button" className="pswscard" onClick={() => onOpenSeries(ws)}>
+            <button type="button" className="pswscard" onClick={() => onOpenSeries({ ...ws, isWorldSeries: true })}>
               {[ws.teamA, ws.teamB].map((t) => (
                 <SeedRow
                   key={t.teamId}
@@ -265,7 +265,7 @@ function BracketStack({ season, onOpenSeries }) {
         World Series
       </p>
       {ws && (
-        <button type="button" className="pswscard pswscard--stack" onClick={() => onOpenSeries(ws)}>
+        <button type="button" className="pswscard pswscard--stack" onClick={() => onOpenSeries({ ...ws, isWorldSeries: true })}>
           {[ws.teamA, ws.teamB].map((t) => (
             <SeedRow
               key={t.teamId}
