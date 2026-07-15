@@ -1,11 +1,12 @@
+import { useState } from 'react'
 import { selectPrePitchChanges } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
+import { teamLogoUrl } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
-import { UsagePips } from './UsagePips.jsx'
 
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
@@ -88,8 +89,16 @@ export function StatBox({
                 <div className="abs">
                   <span className="abs__title">ABS challenges</span>
                   <div className="abs__rows">
-                    <AbsRow abbr={awayAbbr || 'AWAY'} outcomes={challenges.away.outcomes} />
-                    <AbsRow abbr={homeAbbr || 'HOME'} outcomes={challenges.home.outcomes} />
+                    <AbsRow
+                      teamId={challenges.away.teamId}
+                      abbr={awayAbbr || 'AWAY'}
+                      outcomes={challenges.away.outcomes}
+                    />
+                    <AbsRow
+                      teamId={challenges.home.teamId}
+                      abbr={homeAbbr || 'HOME'}
+                      outcomes={challenges.home.outcomes}
+                    />
                   </div>
                 </div>
               )}
@@ -140,23 +149,48 @@ export function StatBox({
   )
 }
 
-// One club's ABS challenges: the club abbreviation, then how many are left as
-// used/open pips — a challenge is only SPENT when it fails (a success is
-// retained, per the real rule — see api/challenges.js), so a club that keeps
-// winning its challenges always shows its full starting count, and a pip only
-// fills in once a challenge has actually been lost. Extra-inning bonus
-// challenges (see api/challenges.js) aren't tracked precisely here — the
-// max() below just guarantees the pip row never shows fewer challenges than
-// the fails on record prove the club actually had.
-function AbsRow({ abbr, outcomes }) {
+// One club's ABS challenges: the club logo, then a pip per challenge the club
+// MADE — colored by outcome (overturned = won, stood = lost, in the order they
+// happened) — followed by any still-unused challenges as kraft-brown pips. A
+// success is RETAINED and a failure SPENDS one (the real rule — see
+// api/challenges.js), so a club that keeps winning shows a long green run and
+// still has its full bank. Remaining is `START_CHALLENGES − fails`, floored at
+// 0: extra-inning bonus challenges (see api/challenges.js) aren't tracked
+// precisely, so the unused count is a conservative lower bound rather than an
+// overstated bank. The logo falls back to the abbreviation for a club with no
+// mark (never for MLB, where ABS lives, but keeps the row robust).
+function AbsRow({ teamId, abbr, outcomes }) {
+  const [logoBroken, setLogoBroken] = useState(false)
   const failed = outcomes.filter((o) => o === 'fail').length
-  const allowed = Math.max(START_CHALLENGES, failed)
-  const remaining = allowed - failed
-  const label = `${abbr}: ${remaining} ABS challenge${remaining === 1 ? '' : 's'} remaining`
+  const won = outcomes.length - failed
+  const remaining = Math.max(START_CHALLENGES - failed, 0)
+  const logo = teamId != null ? teamLogoUrl(teamId) : null
+  const left = remaining === 0 ? 'none left' : `${remaining} left`
+  const label = `${abbr}: ${won} of ${outcomes.length} challenge${
+    outcomes.length === 1 ? '' : 's'
+  } overturned, ${left}`
   return (
     <div className="abs__row">
-      <span className="abs__team">{abbr}</span>
-      <UsagePips allowed={allowed} used={failed} label={label} />
+      {logo && !logoBroken ? (
+        <img className="abs__logo" src={logo} alt={abbr} onError={() => setLogoBroken(true)} />
+      ) : (
+        <span className="abs__team">{abbr}</span>
+      )}
+      <span className="abs__pips" role="img" aria-label={label}>
+        {outcomes.map((o, i) => (
+          <span
+            key={i}
+            className={`abs__pip abs__pip--${o === 'success' ? 'won' : 'lost'}`}
+            aria-hidden="true"
+          />
+        ))}
+        {Array.from({ length: remaining }, (_, i) => (
+          <span key={`open-${i}`} className="abs__pip abs__pip--open" aria-hidden="true" />
+        ))}
+      </span>
+      <span className="abs__rec" aria-hidden="true">
+        {won}–{failed} · {left}
+      </span>
     </div>
   )
 }
