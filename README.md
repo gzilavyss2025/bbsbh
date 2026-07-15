@@ -155,6 +155,29 @@ It updates itself; just reopen it to get the latest version.
 
 ---
 
+## Local development quick start
+
+```bash
+npm install
+npm run dev       # http://localhost:5173
+```
+
+Running more than one dev server at once (e.g. multiple Claude Code agents/
+worktrees on this repo)? `5173`/`4173` (dev/preview) are `strictPort`, so a
+second server on the same port fails instead of silently colliding. Grab the
+next free numbered slot instead:
+
+```bash
+npm run dev:2     # 5172 — if 5173 is taken
+npm run dev:3     # 5171
+npm run dev:4     # 5170
+npm run dev:5     # 5169
+```
+
+Same pattern for `preview:2..5` → `4172..4169`.
+
+---
+
 ## A note on the minor leagues
 
 Minor-league games don't always publish as much information as the majors —
