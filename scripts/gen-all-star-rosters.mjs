@@ -67,7 +67,14 @@
 // MVP: GET /api/v1/awards/ASMVP/recipients?season=YYYY (the "Ted Williams
 // All-Star MVP" award, instituted 1962 — earlier seasons simply come back
 // empty, same graceful-degradation as everywhere else in this file), one
-// extra call per season, stored as `mvp[season] = { playerId, name, teamId }`.
+// extra call per season. His game LINE (position played + batting/pitching
+// stat, "3-4, HR, 4 RBI" style) is read straight off the same boxscore
+// already fetched for the roster sections above, reusing boxscore.js's own
+// pure formatters (`findBoxscorePlayer`/`positionLabel`/`battingStat`/
+// `pitchingStat` — no DOM deps, same convention as gen-milestones.mjs
+// importing person.js's projection math) so this card's stat line can never
+// drift from the real box score's formatting. Stored as
+// `mvp[season] = { playerId, name, teamId, pos, stat }`.
 //
 // VENUE / HOST TEAM: the same schedule row's `venue` field gives the
 // ballpark's id + name for free. To show the host club's logo alongside it,
@@ -84,6 +91,7 @@
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { findBoxscorePlayer, positionLabel, battingStat, pitchingStat } from '../src/api/boxscore.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'all-star-rosters.json')
@@ -340,14 +348,33 @@ const games = {}
 const scores = {}
 const mvps = {}
 const venues = {}
+
+// The MVP's own game line — position played + batting/pitching stat — read
+// off the same boxscore already fetched for the roster sections. Mirrors
+// boxscore.js's own starLine() (not exported, so replicated here from its
+// exported pieces): pitched a real out -> his pitching line, else batting.
+function mvpGameLine(box, playerId) {
+  const found = box ? findBoxscorePlayer(box, playerId) : null
+  if (!found) return null
+  const { player: bp } = found
+  const pit = bp.stats?.pitching ?? {}
+  const bat = bp.stats?.batting ?? {}
+  const pitched = (pit.outs ?? 0) > 0
+  return {
+    pos: pitched ? 'P' : positionLabel(bp),
+    stat: pitched ? pitchingStat(pit) : battingStat(bat),
+  }
+}
+
 for (const job of seasonJobs) {
   if (!job) continue
+  const box = boxscoreByGamePk.get(job.gamePk)
   if (job.recipients.length > 0) {
     const withNames = job.recipients.map((r) => ({
       ...r,
       teamName: r.teamId ? teamNames.get(`${r.teamId}:${job.season}`) || '' : '',
     }))
-    const boxInfo = buildBoxscoreInfo(boxscoreByGamePk.get(job.gamePk))
+    const boxInfo = buildBoxscoreInfo(box)
     const al = withNames.filter((r) => r.league === 'AL')
     const nl = withNames.filter((r) => r.league === 'NL')
     rosters[job.season] = {
@@ -357,7 +384,10 @@ for (const job of seasonJobs) {
   }
   if (job.gamePk) games[job.season] = job.gamePk
   if (job.score) scores[job.season] = job.score
-  if (job.mvp) mvps[job.season] = job.mvp
+  if (job.mvp) {
+    const line = mvpGameLine(box, job.mvp.playerId)
+    mvps[job.season] = { ...job.mvp, pos: line?.pos ?? '', stat: line?.stat ?? '' }
+  }
   if (job.venue) venues[job.season] = job.venue
 }
 
