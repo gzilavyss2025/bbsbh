@@ -11597,60 +11597,184 @@ body {
   color: var(--accent-primary);
 }
 
+/* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
+   (the box score's "Show N more insights" button). */
+.pshistory__more {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.pshistory__more:hover {
+  color: var(--text-body);
+}
+
+/* Room for the 7-column bracket to actually breathe on a wide screen rather
+   than horizontal-scrolling inside the app's ordinary 440px phone column —
+   same widen-the-page-column idea as .screen.standings-screen. */
+@media (min-width: 740px) {
+  .screen.psh-screen {
+    max-width: 1200px;
+  }
+}
+
+/* ---------------------------------------------------------- postseason
+   bracket. Wide layout: 7 columns — AL Wild Card→Division→Championship
+   converging from the left, the World Series fixed center, NL rounds
+   mirroring back out to the right (see BracketGrid in
+   PostseasonHistoryPage.jsx). AL/NL column labels borrow the app's own
+   negative/positive accent pair as a wayfinding tint (not a status color
+   here) so the eye can tell which side of the World Series a column
+   belongs to at a glance. Connector lines are deliberately simple
+   horizontal stubs rather than full elbow/tree joins — legible at this row
+   height and the one treatment that also condenses cleanly to the phone
+   stack below. */
 .psbracket {
-  display: flex;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 1fr) minmax(150px, 1fr) minmax(160px, 1.05fr) minmax(150px, 1.15fr)
+    minmax(160px, 1.05fr) minmax(150px, 1fr) minmax(150px, 1fr);
+  gap: 0 var(--space-3);
   overflow-x: auto;
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
-.psbracket__round {
-  flex: 0 0 auto;
-  width: 220px;
+.psbracket__col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  min-width: 148px;
 }
-.psbracket__roundlabel {
-  margin: 0;
+
+/* Between the wide breakpoint and the point .screen actually reaches its
+   1200px cap (~1280px viewport), 7 columns of seed+logo+CLUB NAME+wins
+   don't fit without .psbracket's own overflow-x scrollbar kicking in. Drop
+   the name and size the logo up in its place instead — TeamLogo's `size`
+   prop is an inline px style, so overriding it needs !important (an
+   established pattern elsewhere in this file) rather than a plain rule. */
+@media (min-width: 740px) and (max-width: 1279px) {
+  .psbracket {
+    grid-template-columns: repeat(7, minmax(84px, 1fr));
+  }
+  .psbracket__col {
+    min-width: 84px;
+  }
+  .psbracket .seedrow__name {
+    display: none;
+  }
+  /* .seedrow__name is what normally flex:1's the win count to the card's
+     right edge (see .seedrow__name below) — with it gone, push wins there
+     directly instead of leaving it hugging the logo. */
+  .psbracket .seedrow__wins {
+    margin-left: auto;
+  }
+  .psbracket .teamlogo {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}
+.psbracket__collabel {
+  margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+  text-align: center;
 }
-.psbracket__list {
+.psbracket__collabel--al {
+  color: var(--accent-negative);
+}
+.psbracket__collabel--nl {
+  color: var(--accent-positive);
+}
+.psbracket__collabel--ws {
+  color: var(--seal-ink);
+}
+.psbracket__lanes {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: space-around;
+  gap: 10px;
+}
+.psbracket__col--al .psbracket__lanes {
+  position: relative;
+}
+.psbracket__col--al .seedcard::after,
+.psbracket__col--al .seedcard--bye::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -13px;
+  width: 12px;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+.psbracket__col--nl .seedcard::before,
+.psbracket__col--nl .seedcard--bye::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -13px;
+  width: 12px;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+.psbracket__col--al:last-of-type .seedcard::after,
+.psbracket__col--al:last-of-type .seedcard--bye::after,
+.psbracket__col--nl:last-of-type .seedcard::before,
+.psbracket__col--nl:last-of-type .seedcard--bye::before {
+  display: none;
 }
 
-.psseries {
+.seedcard {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 5px 8px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--surface-card);
   text-align: left;
   cursor: pointer;
 }
-.psseries:focus-visible {
+.seedcard:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.psseries__label {
+.seedcard--bye {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-style: dashed;
+  background: transparent;
+  opacity: 0.6;
+  cursor: default;
+}
+.seedcard__byetag {
   font-family: var(--font-display);
   font-size: 9px;
-  font-weight: var(--w-bold);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-caption);
+  flex: none;
 }
-.psseries__team {
+
+.seedrow {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -11658,21 +11782,214 @@ body {
   font-size: 12.5px;
   color: var(--text-muted);
 }
-.psseries__team--winner {
-  color: var(--text-heading);
-  font-weight: var(--w-bold);
+.seedrow__seed {
+  flex: none;
+  width: 13px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  text-align: center;
 }
-.psseries__teamname {
+.seedrow__name {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.psseries__wins {
+.seedrow__wins {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+.seedrow--winner {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.seedrow--faded {
+  opacity: 0.7;
+}
+
+.pswscard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border: 1.5px solid var(--seal);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  text-align: left;
+  cursor: pointer;
+}
+.pswscard:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.pswscard .seedrow {
+  font-size: 13.5px;
+}
+.pswscard--stack {
+  margin-bottom: 4px;
+}
+
+/* World Series MVP, wide layout only (BracketGrid — the phone stack's
+   .pswscard--stack never gets this, there's no room to spare there).
+   Same --shot-2xs + bottom-left position-pill mount as
+   .milestonewatch-page__mug/__pos, sitting below the team/score rows
+   behind a hairline divider. */
+.pswscard__mvp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.pswscard__mug {
+  position: relative;
+  flex: none;
+}
+/* 25% past the standard --shot-2xs rung — this card's the one place a WS
+   MVP photo is the whole point of the row, so it gets to run a size larger
+   than the modal's own (unrelated) MVP mention. */
+.shot.pswscard__shot {
+  display: block;
+  width: calc(var(--shot-2xs-w) * 1.25);
+  height: calc(var(--shot-2xs-h) * 1.25);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.pswscard__shot.shot--fallback {
+  font-size: 20px;
+}
+.pswscard__pos {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--paper-0);
+  background: var(--accent-primary);
+  border-top-right-radius: var(--radius-xs);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.pswscard__mvpinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pswscard__mvptag {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.pswscard__mvpname {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+
+/* Condensed phone layout: the same AL→WS→NL reading order flowed vertically
+   in one column instead of across seven (see BracketStack). Round labels
+   become thin dividers rather than a column header. */
+.psstack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.psstack__roundlabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 2px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.psstack__roundlabel::after {
+  content: '';
+  flex: 1;
+  height: var(--bw-hair);
+  background: var(--rule-grid);
+}
+.psstack__roundlabel:first-child {
+  margin-top: 0;
+}
+.psstack__roundlabel--al {
+  color: var(--accent-negative);
+}
+.psstack__roundlabel--nl {
+  color: var(--accent-positive);
+}
+.psstack__roundlabel--ws {
+  color: var(--seal-ink);
+}
+
+/* Fixed bottom year stepper — phone only, same shape as .inningnav /
+   .standings-daynav (Back/label/Next row pinned off the bottom). See
+   .psyear-screen below for the page's matching bottom clearance. */
+.psyearnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  max-width: 440px;
+  margin-inline: auto;
+  padding: 10px var(--app-gutter) calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    var(--bg-canvas) 55%,
+    color-mix(in srgb, var(--bg-canvas) 0%, transparent)
+  );
+}
+.psyearnav button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+.psyearnav button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+.psyearnav__label {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Room so the single-season stack clears the fixed .psyearnav bar. */
+.psyear-screen {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
 
 /* ---------------------------------------------------------- postseason series
@@ -11761,25 +12078,42 @@ body {
   flex-direction: column;
   gap: 6px;
 }
+/* A button, not a plain row — tapping a game jumps straight to that game's
+   own box score (resolved from its gamePk, see PostseasonSeriesModal's
+   fetchGameCardsByPk call). Disabled (unclickable, dimmed) until that
+   resolves, rather than a dead click that silently does nothing. */
 .psmodal__game {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 8px;
   padding: 6px 8px;
+  border: none;
   border-radius: var(--radius-xs);
   background: var(--surface-card);
+  font-family: inherit;
   font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.psmodal__game:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.psmodal__game:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .psmodal__gamenum {
   flex: none;
-  width: 34px;
+  width: 50px;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .psmodal__gamedate {
   flex: none;
-  width: 44px;
+  width: 76px;
   color: var(--text-muted);
 }
 .psmodal__gameline {
@@ -11804,13 +12138,18 @@ body {
   color: var(--text-muted);
   font-size: 10px;
 }
+/* Tier-1 kraft-amber notification card, same family as .pitchernotice--pbp
+   (the play-by-play "now pitching" card) — a flat tinted fill rather than
+   the diagonal-hatch --seal-texture weave the spoiler covers use, so an MVP
+   badge doesn't read as a sealed/hidden value. */
 .psmodal__mvp {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--seal-hatch);
   border-radius: var(--radius-md);
-  background: var(--seal-texture);
+  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
 }
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
    outranks the base .shot sizing, same convention as .tlead__shot. */
