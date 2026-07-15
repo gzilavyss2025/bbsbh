@@ -205,8 +205,18 @@ Re-run only to fold in a new season.
   `(teamId, season)` via the season-scoped `GET /api/v1/teams/{id}?season=YYYY` (not
   the app's current-team table) so a historical pick reads under the name he actually
   played under (a 1933 Washington Senator, not a Minnesota Twin) — deduped across the
-  whole run so the same team only costs one extra call per season it's named in. App
-  reads it via `src/api/allStarRosters.js`.
+  whole run so the same team only costs one extra call per season it's named in.
+  ONE more call per season, `GET /api/v1/game/{gamePk}/boxscore`, classifies every
+  recipient into a precomputed `{ starters, bullpen, substitutes }` bucket per league
+  (same `battingOrder`-multiple-of-100 convention as `select.js`'s `selectLineup`,
+  plus `team.pitchers[0]` for the starting pitcher) so the page needs no client-side
+  grouping/sorting; a recipient who can't be matched (fetch failure, thin old data)
+  falls back to pitcher-or-not. Also stores `mvps[season]` (the Ted Williams
+  All-Star MVP award, `GET /api/v1/awards/ASMVP/recipients?season=YYYY`, absent
+  before 1962) and `venues[season]` (the venue name off the same schedule row, plus
+  a best-effort host-team id resolved against a ONE-TIME fetch of the 30 current
+  MLB teams' home parks — an older/relocated venue just carries no team match).
+  App reads it via `src/api/allStarRosters.js`.
 - `gen-milb-history.mjs` → `public/data/milb-history.json` — per-season parent-org +
   club-name history for every AAA/AA/A+/A affiliate. Sweeps statsapi's season-scoped
   team snapshots for 2005+ (where its affiliate data is clean) and merges a small

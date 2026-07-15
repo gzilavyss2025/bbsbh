@@ -24,13 +24,55 @@ export const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 
 // A team's slug-safe abbreviation, derived from a schedule/roster payload's
 // own team object. Some hydrations omit `abbreviation` (thin MiLB rows,
-// hydration outages); an empty one would build a broken/ambiguous matchup
-// slug or stat-split label, so fall back to the first letters of the name.
+// hydration outages, or a raw stats-split row's embedded team object — see
+// statsLevels.js's combineToPool) — for those, prefer the real abbreviation
+// from TEAM_ABBR (the 30 current MLB clubs) over guessing from the name,
+// since a naive first-three-letters slice mangles multi-word cities (San
+// Francisco -> "SAN" instead of "SF", Arizona -> "ARI" instead of "AZ", New
+// York -> "NEW" for both the Mets and Yankees). Only MiLB/unrecognized ids
+// fall through to that truncation.
 export function teamAbbr(team) {
   return (
     team?.abbreviation ||
+    TEAM_ABBR[team?.id] ||
     (team?.teamName || team?.name || '').replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase()
   )
+}
+
+// The 30 current MLB clubs' real abbreviations (verified against
+// public/data/teams.json, itself sourced from statsapi's own `abbreviation`
+// field via gen-teams.mjs) — same id set/shape as TEAM_COLORS below.
+const TEAM_ABBR = {
+  108: 'LAA',
+  109: 'AZ',
+  110: 'BAL',
+  111: 'BOS',
+  112: 'CHC',
+  113: 'CIN',
+  114: 'CLE',
+  115: 'COL',
+  116: 'DET',
+  117: 'HOU',
+  118: 'KC',
+  119: 'LAD',
+  120: 'WSH',
+  121: 'NYM',
+  133: 'ATH',
+  134: 'PIT',
+  135: 'SD',
+  136: 'SEA',
+  137: 'SF',
+  138: 'STL',
+  139: 'TB',
+  140: 'TEX',
+  141: 'TOR',
+  142: 'MIN',
+  143: 'PHI',
+  144: 'ATL',
+  145: 'CWS',
+  146: 'MIA',
+  147: 'NYY',
+  158: 'MIL',
 }
 
 // The level toggle, in display order — one definition for every screen that

@@ -11593,65 +11593,96 @@ body {
   min-width: 0;
 }
 .allstarrosters__game {
-  max-width: 360px;
+  width: 100%;
 }
 .allstarrosters__leagues {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-}
-.allstarrosters__league {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  gap: var(--space-3);
   min-width: 0;
 }
-.allstarrosters__leaguetag {
-  flex: none;
+/* Each league reuses the Team Page's "roster super-section" card
+   (.roster-super/.roster-super__row/__col, .roster-sub/__title — see
+   TeamPage.jsx's Preferred Lineup) instead of a loose flex-wrap of inline
+   names — Starting Lineup / Bullpen / Substitutes each get their OWN column
+   (not two sections stacked in one tall column), so a short and a long
+   section sitting side by side don't leave a visible block of blank card
+   behind the shorter one. Scoped overrides (not touching the shared rule,
+   which the Team Page also uses) let the three columns wrap to 2-then-1 at
+   an iPad-ish width instead of squeezing into three narrow slivers. */
+.allstarrosters__leagues .roster-super__row {
+  flex-wrap: wrap;
+}
+.allstarrosters__leagues .roster-super__col {
+  flex: 1 1 220px;
+}
+/* Full-width, colored league header bled to the card's edges — red for the
+   American League, the app's existing "All-Star blue" banner color (see
+   TrophyCase's All-Star medal) for the National League. */
+.allstarrosters__leaguehead {
+  margin: -14px -12px 12px;
+  padding: 8px 14px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-on-ink);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
-.allstarrosters__recipients {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+.allstarrosters__leaguehead--al {
+  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
 }
-.allstarrosters__recipient {
-  display: inline-flex;
+.allstarrosters__leaguehead--nl {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+/* One roster section's row list — same bordered-card convention as the Team
+   Page's .thub-roster. */
+.allstarrosters__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+}
+.allstarrosters__row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
   align-items: center;
-  gap: 5px;
-  min-width: 0;
+  gap: 8px;
+  padding: 6px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
   font-size: 13px;
-  border-radius: var(--radius-xs);
+}
+.allstarrosters__rows li:first-child {
+  border-top: none;
 }
 /* Same favorite-team highlight as .awardhistory__recipient--fav — a
-   selectee who played for the user's favorite club (by franchise id, stable
-   across a relocation/rename) jumps out among the rest of the season. */
-.allstarrosters__recipient--fav {
+   selectee who played for the highlighted club (either the team filter's
+   pick, or absent a filter, the user's favorite team — see
+   AllStarRostersPage's effectiveTeamId) jumps out among the rest of the
+   season. Franchise id is stable across a relocation/rename, so this still
+   lights up an old team's picks under a since-renamed club. */
+.allstarrosters__row--fav {
   background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
-  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
-  padding: 1px 4px 1px 5px;
-  margin: -1px -4px -1px -5px;
+}
+/* The team filter's "everyone else" treatment — dulled, not hidden, so the
+   section structure stays intact while one club's picks are singled out
+   (see AllStarTeamFilter + RecipientRow's `filtering` prop). */
+.allstarrosters__row--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
 }
 .allstarrosters__teamlink {
-  flex: none;
   display: inline-flex;
 }
 .allstarrosters__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.allstarrosters__team {
-  flex: none;
-  font-size: 11px;
-  color: var(--text-muted);
 }
 .allstarrosters__pos {
   flex: none;
@@ -11661,7 +11692,30 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
-  font-style: normal;
+}
+/* "Load more" — a single flat jump back to LOAD_MORE_CUTOFF, not
+   incremental paging (see AllStarRostersPage). Plain text-button styling,
+   matching the app's other "reveal more" affordances rather than a heavy
+   bordered button. */
+.allstarrosters__more {
+  align-self: center;
+  margin: var(--space-2) auto 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  display: block;
+}
+.allstarrosters__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 @media (max-width: 520px) {
   .allstarrosters__year {
@@ -11671,6 +11725,186 @@ body {
   .allstarrosters__yearnum {
     width: auto;
   }
+}
+
+/* ------------------------------------------------------- All-Star game result
+   card (AllStarGameResult) — this page's one deliberate exception to the
+   "never print a score" spoiler invariant; see ADR-0019. Three regions:
+   date+score+box-score-button (left), MVP headshot/line/stat (middle), host
+   ballpark (right). Wraps to a stacked read on narrow widths. */
+.allstargame {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.allstargame__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.allstargame__scorecol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none;
+}
+.allstargame__scorerow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.allstargame__date {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstargame__side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.6;
+}
+.allstargame__side--winner {
+  opacity: 1;
+}
+.allstargame__label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.allstargame__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.allstargame__sep {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+/* A smaller, secondary-feeling press of the app's standard primary button
+   (.btn.btn--next — the same one GameResultFace's box score button uses),
+   sized down and un-stretched to sit under the score rather than spanning
+   the card. */
+.allstargame__boxbtn {
+  align-self: flex-start;
+  width: auto;
+  min-width: 96px;
+  min-height: 30px;
+  margin-top: 0;
+  padding: 0 12px;
+  font-size: 12px;
+}
+/* MVP — headshot beside a stacked label/name+position/stat-line block. */
+.allstargame__mvpcol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 160px;
+  min-width: 140px;
+  justify-content: center;
+}
+.shot.allstargame__mvpshot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.allstargame__mvpshot.shot--fallback {
+  font-size: 22px;
+}
+.allstargame__mvptext {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.allstargame__mvplabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstargame__mvpline {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+.allstargame__mvpname {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.allstargame__mvppos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+.allstargame__mvpstat {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+/* Host ballpark, right-aligned — the club logo when the generator could
+   match the venue to a current team's home park, else the generic league
+   mark (see AllStarGameResult's header comment). A hyperlink into the same
+   BallparkModal the live lineup page's game facts use, when the park's on
+   file (src/lib/ballparkData.js); otherwise plain text, same
+   graceful-degradation rule TeamInfo.jsx's BallparkFact follows. */
+.allstargame__venue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  max-width: 160px;
+}
+.allstargame__venuelogo {
+  display: block;
+  object-fit: contain;
+}
+/* .allstargame__venuelink pairs with the shared .plink class (same rest-state-
+   plain, dotted-underline-on-hover/focus convention as PlayerLink/TeamLink) —
+   only the layout/color here, .plink itself supplies the interactive states. */
+.allstargame__venuename,
+.allstargame__venuelink {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------- All-Star team filter
+   (AllStarTeamFilter) — reuses SplitsVsTeam's .vsteam__tray/__strip/__team
+   scroller as-is; this class only adds the page-level spacing around it. */
+.allstarfilter {
+  margin: var(--space-2) 0;
+}
+.allstarfilter__mlblogo {
+  display: block;
+  object-fit: contain;
 }
 
 /* ---------------------------------------------------------------- umpire page */
