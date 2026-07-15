@@ -206,20 +206,22 @@ for each generator; the reader modules:
   MiLB and any date with no note. Spoiler-free in-app (renders only a link), but the
   PDF recaps prior results, so it opens in a new tab as a user-initiated jump.
   Kept OUT of the PWA precache (grows each game day).
-- `whatsBrewing.js` — for CALIBRATED clubs (a `CONFIG` map keyed by teamId; Brewers
-  + Pirates so far), the Game notes button opens an in-app modal
+- `whatsBrewing.js` — for CALIBRATED clubs (a `CONFIG` map keyed by teamId; all
+  30 MLB clubs as of this writing), the Game notes button opens an in-app modal
   (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF. Parses
   client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off the
   main bundle — see `vite.config.js`) rather than in the cron, because tonight's
   note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
   template needs its own calibration, so `CONFIG` carries a `layout` per club —
-  `column` (Brewers' narrow-column sheet) or `flow` (league-standard full-width,
-  e.g. Pirates) — plus font/geometry tunables. `hasWhatsBrewing`/
+  `column` (Brewers' narrow-column sheet) or `flow-bold`/`flow` (league-standard
+  full-width, most other clubs) — plus font/geometry tunables (single zone or a
+  `columns:` array for multi-column pages). `hasWhatsBrewing`/
   `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
   teamId→title map) rather than here, so `TeamInfo.jsx`'s gate check can import
   them statically without pulling this whole parser out of its lazy chunk; add a
   club = add a `CONFIG` entry here + a title there (not a new parser). See
-  `docs/whats-brewing.md` for parsing details + the Node harness
+  `.scratch/game-notes/CALIBRATION.md` for the per-club calibration methodology
+  and `docs/whats-brewing.md` for parsing details + the Node harness
   (`extractForTeam`).
 - `minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
   `public/data/minors-leaders.json`. Cost-driven: a league-wide four-level board is

@@ -8,7 +8,12 @@ Everything was read off each club's `{ABBR}-latest.pdf` in this folder with
 `page-scan.mjs` (which page carries the narrative). All sheets are **US Legal,
 612 × 1008 pt**.
 
-Done already (not here): **Brewers (158)** `column`, **Pirates (134)** `flow`.
+**All 30 MLB clubs are now calibrated** — Brewers (158) `column`, Pirates (134)
+`flow`, all 12 GREEN, all 11 YELLOW, and all 5 originally-RED clubs (ATL, CIN,
+TB, TEX, TOR all turned out tractable once profiled against their real
+game-day PDF). See each club's `CONFIG` entry in `whatsBrewing.js` for the
+calibrated geometry; this file is kept as historical reference for the
+font/geometry read-off methodology.
 
 > **Running this from the repo (incl. Claude Code cloud):** the PDFs are **not**
 > committed (large + the "latest" one changes daily). Fetch a club's current PDF by
@@ -79,9 +84,9 @@ exclusion the Pirates entry already models. See `flowbold-test.mjs` in this fold
 
 | Tier | Clubs | Why |
 | ---- | ----- | --- |
-| 🟢 **GREEN** (12) | BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC, LAA, SEA, MIN, NYY | Clean single left column, unambiguous Regular/Bold split, punny content. Straight `flow-bold` config + geometry tuning. |
-| 🟡 **YELLOW** (11) | DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL | Doable but one wrinkle each (split body, multi-column, italic body, substituted fonts, or blander content). |
-| 🔴 **RED** (5) | TB, TEX, TOR, ATL, CIN | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or bulleted-no-headings. Do last / maybe skip. |
+| 🟢 **GREEN** (12) | BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC, LAA, SEA, MIN, NYY | Clean single left column, unambiguous Regular/Bold split, punny content. Straight `flow-bold` config + geometry tuning. **All 12 calibrated.** |
+| 🟡 **YELLOW** (11) | DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL | Doable but one wrinkle each (split body, multi-column, italic body, substituted fonts, or blander content). **All 11 calibrated.** |
+| 🔴 **RED** (5, all done) | ~~ATL~~, ~~CIN~~, ~~TB~~, ~~TEX~~, ~~TOR~~ | Every RED-tier club turned out tractable once profiled against its actual game-day PDF (most of the original reads described a different day's PAGE-2 starter-notes layout instead of the real page-1 narrative). See each club's `CONFIG` entry in `whatsBrewing.js`. |
 
 Recommended path: land finding #1 (`page` in CONFIG) + finding #2 (`flow-bold`
 variant) as one small parser change, calibrate **BOS + NYM** as pilots (cleanest),
@@ -127,10 +132,16 @@ ALL-CAPS unless noted.
 - Titles: ABOUT THE A'S · KURODA-GRAUER · BEFORE THE BREAK · ALL-STARS · STARTING PITCHING · HOME AND AWAY · HOME AND AWAY SPLITS
 - `ProximaNova-Bold` (non-italic) is a *different* role (right-column table) — do NOT use it as the head test; use `-BoldIt`.
 
-### HOU — Astros (117) · page 1
-- **body** `/Colfax-Regular/`  **head** `/Colfax-Bold/`  · headingMaxX ≈ 55, columnMaxX ≈ 150
-- Titles: ABOUT THE RECORD · ASTROS VS. NATIONALS (2025) · ASTROS VS. NATIONALS (ALL-TIME) · TODAY'S MEDIA AVAILABILITY · THIS DATE IN ASTROS HISTORY · UPCOMING SCHEDULE…
-- Several "titles" are vs-table / history-box headers — add them to `skipTitle`.
+### ~~HOU — Astros (117) · page 1~~ — RECALIBRATED (was single-zone, boilerplate only)
+- The original single left zone (x<150, headingMaxX≈55/columnMaxX≈150) never
+  actually surfaced real narrative — every "title" it found (ABOUT THE
+  RECORD, ASTROS VS. …, TODAY'S MEDIA AVAILABILITY, THIS DATE IN ASTROS
+  HISTORY, UPCOMING SCHEDULE) was boilerplate, correctly skipTitle'd, leaving
+  either nothing or (before an allCapsOnly fix) a mistitled fragment of the
+  "this date in history" trivia box. The real punny narrative sits in TWO
+  columns further right (x=181.8, x=384.9) — same shape as ARI/ATL/TEX — now
+  covered by a `columns:` config that skips the left boilerplate zone
+  outright. See the `117:` entry in `whatsBrewing.js`.
 
 ### KC — Royals (118) · page 1
 - **body** `/Gotham-Book/`  **head** `/Gotham-Bold/`  · headingMaxX ≈ 60 (titles at x≈14), columnMaxX ≈ 150
@@ -217,20 +228,62 @@ ALL-CAPS unless noted.
 
 ## 🔴 RED (hard / low-payoff — do last or skip)
 
-### TB — Rays (139) · page 2 · multi-column + multi-font
-- Page 2 body `AvenirNextCondensed-Regular`, heads `AvenirNextCondensed-DemiBold` (but NOT left-margin — leftMargin=2), plus heavy `Aleo` (serif) and `Industry-BlackItalic` banners. The starter page is a **multi-column** grid with banner titles in a different family. Titles exist (TODAY'S START, BRONX TO THE BAY, INSIDE THE NUMBERS, ON TOP AT THE TROP) but need column-band + multi-face handling. Hard.
+ATL and CIN were originally in this tier but turned out tractable. ATL is the
+same two-narrative-column shape as NYY/ARI plus a third narrow zone; see its
+`CONFIG` entry (teamId 144) in `whatsBrewing.js`. CIN's "bulleted, no
+headings" read below was off a different day's PDF — its real template DOES
+have colon-terminated ALL-CAPS titles in a two-column layout (teamId 113);
+see its `CONFIG` entry, which also prompted a shared-parser fix (`dropRects`
+now excludes words before heading detection, not just from the body — needed
+because CIN embeds a stat grid whose bold labels share the heading font and
+were being promoted as bogus titles). TB, TEX, TOR are the genuinely
+still-open RED clubs.
 
-### TEX — Rangers (140) · page 2 · multi-column Arial
-- Page 2 body `ArialMT`, heads `Arial-BoldMT` (206), body also has lots of `Arial-ItalicMT`. Titles (LAST TIME OUT, AGAINST THE ASTROS, HOME AND ROAD, STARTER AND RELIEVER, TEXAS TENURE) sit inside a **multi-column** layout, not a single left margin. Needs column-band detection.
+### ~~TB — Rays (139) · page 2 · multi-column + multi-font~~ — CALIBRATED (as page 1)
+- This read described a DIFFERENT day's page-2 starter-notes column. The real
+  game-day narrative is on **page 1** and is actually ONE wide serif (Aleo)
+  column (x~126-486), not multi-column — flanked by two dot-leader stat
+  sidebars ("BY THE NUMB3RS" left, "SERIES BREAKDOWN" right) in
+  Industry-BlackItalic/AvenirNextCondensed, which self-exclude by font. See
+  the `139:` entry in `whatsBrewing.js`. Surfaced a real shared-parser bug:
+  the narrative's line cadence and the sidebars' independent cadence
+  occasionally land on the EXACT same y (no lineTol can separate that), so
+  a body-content-only zone (xMin/columnMaxX excluding both sidebars by x, not
+  just relying on line-tolerance) is the correct fix for any future club with
+  this shape.
 
-### TOR — Blue Jays (141) · page 2 · multi-column, heads not left-margin
-- Page 2 body `ArialMT`, heads `Arial-BoldMT` (71) but leftMargin=0 — headings are inside columns. Titles (TODAY'S GAME, 2026 HIGHLIGHTS, VS. THE GIANTS) present but the layout duplicates each run twice in the stream ("TODAY'S GAME:TODAY'S GAME:") — a de-dupe quirk plus multi-column. Hard.
+### ~~TEX — Rangers (140) · page 2 · multi-column Arial~~ — CALIBRATED (as page 1)
+- This read described a different day's page-2 starter-notes layout. The
+  real game-day narrative is on **page 1**: two genuine narrative columns
+  (x=142.9 and x=363.2) beside a left stats sidebar to ignore, straightforward
+  `columns:` config same shape as ARI/ATL/NYY — no cross-baseline collision
+  risk since each zone's xMin/columnMaxX cleanly excludes the other. See the
+  `140:` entry in `whatsBrewing.js`.
 
-### ATL — Braves (144) · bespoke serif broadsheet
-- Body `BemboMTPro-Regular` (a **serif** text face), heads `AGaramondPro-Bold` + a script face `ScriptA` — an elegant, bespoke non-standard template. Headings are NOT at the left margin (0–1 found on page 1; page 2 sparse: "Today's Game", "Awards"). No colon-headed left-column narrative to latch onto. Would need a bespoke layout function; lowest priority.
+### ~~TOR — Blue Jays (141) · page 2 · multi-column, heads not left-margin~~ — CALIBRATED (as page 1)
+- This read described a different day's page-2 starter-notes layout (which
+  does have the stream-duplication quirk noted). The real game-day narrative
+  is on **page 1** and has neither the duplication nor the leftMargin=0
+  problem: two ordinary narrative columns (x=173.3, x=378.8) beside a left
+  stats sidebar to ignore, same shape as TEX. One wrinkle: the last blurb's
+  title ("VS. THE PADRES:") is set in `Arial-BoldItalicMT`, a different
+  weight from the rest of the page's `Arial-BoldMT` — headFont unions both.
+  See the `141:` entry in `whatsBrewing.js`.
 
-### CIN — Reds (113) · page 1 · bulleted, no headings
-- Body `ArialMT`, but the notes are a **bullet list** (`•` in a `Redlegs`/`SimpleType` dingbat font) with no colon-titled blurbs — the title/body model doesn't map. `ArialNarrow-Bold` marks some sub-labels. Page 2 is player bios. Would need bullet-segmentation instead of title→body; low payoff.
+### ~~ATL — Braves (144) · bespoke serif broadsheet~~ — CALIBRATED
+- Turned out tractable: two narrative columns (like NYY/ARI) plus a third narrow
+  left zone. Body `BemboMTPro-Regular` + `ScriptA-Regular` (a decorative bullet
+  glyph, not a heading), heads `AGaramondPro-Bold`. See the `144:` entry in
+  `whatsBrewing.js` for the full geometry + the two column-specific quirks
+  (mixed-case titles in the narrow zone, a "Braves Breakdown" stat sidebar
+  dropped via `skipTitle`).
+
+### ~~CIN — Reds (113) · page 1 · bulleted, no headings~~ — CALIBRATED
+- This read was off a day's PDF that happened to lack punny sections. The
+  real template DOES have colon-terminated ALL-CAPS titles ("SERIES NOTES:",
+  "ELLY MAKING HISTORY:", "TOUGH SLEDDING:", …), two-column like NYY/ARI/ATL.
+  `Redlegs` is a real (if oddly-named) head-weight font, not a dingbat.
+  See the `113:` entry in `whatsBrewing.js` for the full geometry.
 
 ---
 
