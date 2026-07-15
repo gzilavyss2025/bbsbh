@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Loader } from './Loader.jsx'
 
 // What's Brewing — a bottom-sheet modal that surfaces the narrative blurbs from
 // the Brewers' pre-game Game Notes PDF (Hulk Logan, Don't Pitch to Mitch, …) as
@@ -64,7 +65,7 @@ export function WhatsBrewingModal({ notes, teamId, title = 'Game Notes', onClose
         </div>
 
         {loading ? (
-          <p className="brewsheet__status">Reading the game notes…</p>
+          <Loader size="inline" message="Reading the game notes…" className="brewsheet__loader" />
         ) : blurbs.length === 0 ? (
           <p className="brewsheet__status">
             Couldn&apos;t pull the notes text — open the full PDF below.

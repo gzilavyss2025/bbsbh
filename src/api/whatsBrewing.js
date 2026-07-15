@@ -108,12 +108,17 @@ const CONFIG = {
   // Mets — the lead row is the night's opponent/standings line ("{City} {Club}
   // (W-L)"), not a blurb — matched structurally (ends in a win-loss record) so
   // it drops regardless of which opponent the Mets are playing that night.
+  // columnMaxX widened (150 -> 310, just under the already-configured
+  // rightTableMinX/320): a confirmed real second column recurs at ~310+, but
+  // 150 was cutting sentences short of even that — once, mid-WORD ("Mets d |
+  // ropped the opening game…" split across two PDF items with a ~0.1pt gap,
+  // the second half past the old cutoff, producing "Mets d their…").
   121: {
     layout: 'flow-bold',
     bodyFont: /Grift-Regular/,
     headFont: /Grift-Bold/,
     headingMaxX: 55,
-    columnMaxX: 150,
+    columnMaxX: 310,
     rightTableMinX: 320,
     tableLeader: /\.(\s*\.){7,}/,
     skipTitle: /^(New York Mets|Vs\. )|\(\d+-\d+\)$/i,
@@ -121,12 +126,19 @@ const CONFIG = {
   // Marlins — UPCOMING SCHEDULE banner top-right + bottom DATE box dropped by
   // geometry/skipTitle; allCapsOnly drops bold player-name recap lead-ins
   // ("Kyle Stowers", "Otto Lopez") that share the heading font but aren't titles.
+  // columnMaxX widened just enough (150 -> 300) to stop chopping wrapped
+  // bold names (e.g. "SS Otto Lopez (16 SB)" in a list) short of a genuine
+  // recurring second column confirmed starting ~310pt (a geometry scan
+  // clustered 9 separate lines there) — stays below that, unlike
+  // rightTableMinX/440 which guards a DIFFERENT, further-right box and
+  // isn't a safe columnMaxX (it let a body-font stat sidebar with no
+  // ALL-CAPS marker on every row bleed into two blurbs).
   146: {
     layout: 'flow-bold',
     bodyFont: /GothamXNarrow-Book/,
     headFont: /GothamXNarrow-Bold/,
     headingMaxX: 55,
-    columnMaxX: 150,
+    columnMaxX: 300,
     rightTableMinX: 440,
     tableLeader: /\.(\s*\.){7,}/,
     bottomCutoff: 90,
@@ -136,6 +148,12 @@ const CONFIG = {
   // Phillies — very clean single column; allCapsOnly avoids bold player-name
   // lead-ins ("Wheeler", "Cristopher Sánchez") being mistaken for titles.
   // bottomCutoff drops the "Score First:"/"DATE" boxes at the page foot.
+  // columnMaxX stays tight: this page ALSO carries a large day-by-day pitcher
+  // stat table (own ALL-CAPS row labels, e.g. "CRISTOPHER SÁNCHEZ") that a
+  // wider columnMaxX pulls in wholesale — its labels pass allCapsOnly and get
+  // wrongly promoted as blurb titles, swallowing the whole table as "body".
+  // 150 incidentally keeps that table out; some very wide-wrapping narrative
+  // lines still get chopped, a smaller loss than that leakage.
   143: {
     layout: 'flow-bold',
     bodyFont: /Tahoma$/,
@@ -150,12 +168,20 @@ const CONFIG = {
   },
   // Dodgers — small tidy sheet, tighter left margin than most; allCapsOnly
   // avoids bold player-name lead-ins ("Wrobleski", "Betts") as titles.
+  // columnMaxX widened past the old 150, then again past a too-conservative
+  // 300 (still chopped a hyphen at a line-wrap: "…will at" + a SEPARATE "-"
+  // item at x=432.77, with the actual word-continuing text on the next
+  // physical line — losing the hyphen meant the two halves joined with a
+  // bare space instead of tidy()'s hyphen-rejoin, producing "at tend)"
+  // instead of "attend)"). A geometry scan confirmed the real second column
+  // doesn't start until ~x440, so 438 is the genuine safe ceiling here; the
+  // marker-based per-line cutoff still keeps that column out regardless.
   119: {
     layout: 'flow-bold',
     bodyFont: /ArticulatCF-Regular/,
     headFont: /ArticulatCF-Bold/,
     headingMaxX: 40,
-    columnMaxX: 150,
+    columnMaxX: 438,
     tableLeader: /\.(\s*\.){7,}/,
     allCapsOnly: true,
     skipTitle: /^Date\/Time/i,
@@ -188,13 +214,16 @@ const CONFIG = {
   },
   // Royals — body is Gotham too, so the head test must key on -Bold specifically;
   // masthead + bold player names are also Gotham-Bold, gated by allCapsOnly.
-  // bottomCutoff drops the UPCOMING GAMES box + broadcast footer.
+  // bottomCutoff drops the UPCOMING GAMES box + broadcast footer. columnMaxX
+  // widened just enough (150 -> 215) to stop chopping a wrapped bold name
+  // ("...including starting shortstop Bobby Witt Jr. and pitcher Michael
+  // Wacha") short of a genuine recurring second column starting ~220-230pt.
   118: {
     layout: 'flow-bold',
     bodyFont: /Gotham-Book/,
     headFont: /Gotham-Bold/,
     headingMaxX: 60,
-    columnMaxX: 150,
+    columnMaxX: 215,
     tableLeader: /\.(\s*\.){7,}/,
     titleMaxLen: 40,
     allCapsOnly: true,
@@ -203,13 +232,20 @@ const CONFIG = {
   // Angels — bold player-name lead-ins ("Adell") gated out by allCapsOnly; the
   // numbered ALL-TIME leaderboard boxes ("LEAGUE LEADER", "MOST CAREER…") are
   // ALL-CAPS too, so they're dropped by skipTitle instead. Bottom DATE/schedule
-  // box dropped by geometry.
+  // box dropped by geometry. columnMaxX widened just enough (150 -> 238) to
+  // stop chopping real wrapped names short of a same-baseline "IN THE
+  // DUGOUT:" sidebar ("...Cal Ripken Jr. (BAL – 17) and George Brett (KC –
+  // 11)"); the marker-based per-line cutoff excludes that sidebar directly,
+  // but the page also has a genuine recurring second column starting ~240pt
+  // (confirmed via a geometry scan — 9 separate lines cluster there with no
+  // ALL-CAPS marker on every row), so this stays well under that to avoid
+  // pulling it in wholesale.
   108: {
     layout: 'flow-bold',
     bodyFont: /QuietSans-Regular/,
     headFont: /QuietSans-Bold/,
     headingMaxX: 55,
-    columnMaxX: 150,
+    columnMaxX: 238,
     tableLeader: /\.(\s*\.){7,}/,
     titleMaxLen: 40,
     allCapsOnly: true,
@@ -231,24 +267,41 @@ const CONFIG = {
     allCapsOnly: true,
     topCutoff: 780,
   },
-  // Twins — page 2 (starter notes); page 1 is the season-splits table. The
-  // starter's bio box (height/weight, a game-by-game log that gains a row
-  // every month) sits above the narrative — topCutoffAfter anchors the cutoff
-  // to the game log's own last row ("…CAREER TOTALS") rather than a fixed y,
-  // so it keeps working as that table grows through the season (a plain
-  // topCutoff, tuned against one date's PDF, clipped the real first heading
-  // on a later date once the table had gained rows).
+  // Twins — the real narrative is on PAGE 1, not page 2 (page 2 is just the
+  // starting pitcher's own day-by-day box, a narrower feature — an earlier
+  // pass here miscalibrated on that page because page 1's bold-left-margin
+  // scan surfaced only its stat-table labels, not this column). Page 1's
+  // narrative sits in its OWN column (x~163-450) wedged between TWO stat
+  // tables sharing its exact body/head font pair and even its baselines — a
+  // left "SEASON AT A GLANCE"/streaks column ending ~x145, a right "Last N
+  // games"/"All-Time" column starting ~x459 — so xMin + columnMaxX isolate
+  // it rather than a single-sided cutoff. skipTitle drops the bare year
+  // headers ("2022:", "2023:"...) inside an embedded 5-season stat grid
+  // midway through one blurb ("THESE ARE THE BREAKS:") so they don't
+  // fragment into their own mini-titles; dropIfBodyMatches then drops that
+  // WHOLE blurb (prose glued to a wall of per-season numbers, no clean way
+  // to split them) rather than showing it half-garbled. topCutoff drops the
+  // matchup masthead + probable-pitchers schedule above the narrative;
+  // bottomCutoff drops the UPCOMING MILESTONES footer below it.
   142: {
     layout: 'flow-bold',
-    page: 2,
     bodyFont: /TradeGothicLTStd-Cn18/,
     headFont: /TradeGothicLTStd-BdCn20/,
-    headingMaxX: 55,
-    columnMaxX: 150,
+    xMin: 155,
+    headingMaxX: 175,
+    columnMaxX: 450,
     tableLeader: /\.(\s*\.){7,}/,
-    topCutoffAfter: /CAREER TOTALS/,
+    topCutoff: 805,
+    bottomCutoff: 78,
+    titleMaxLen: 40,
     allCapsOnly: true,
-    skipTitle: /^PITCH \(AVG/i,
+    skipTitle: /^\d{4}$/,
+    // skipTitle already swallows each year row's own numbers (they land as
+    // that heading's leadWords, discarded along with it) — what's left in
+    // "THESE ARE THE BREAKS:" is just its lead-in sentence plus the table's
+    // column-header row ("AVG R H 2B 3B HR RBI BB K OBP SLG OPS"), a run of
+    // 6+ short all-caps/numeric tokens no real sentence produces.
+    dropIfBodyMatches: /(?:\b[A-Z0-9]{1,4}\b[ ,]+){6,}\b[A-Z0-9]{1,4}\b/,
   },
   // Yankees — page 1, NOT page 2 (page 2 is the starting pitcher's own
   // breakdown, a different feature). Page 1's real narrative is easy to miss:
@@ -351,6 +404,14 @@ export function extractBlurbs(items, realName, cfg) {
 export function extractForTeam(items, realName, teamId) {
   const cfg = CONFIG[teamId]
   return cfg ? extractBlurbs(items, realName, cfg) : []
+}
+
+// The calibrated layout for a club ('column' | 'flow' | 'flow-bold'), or null
+// for an un-calibrated club — CONFIG itself stays private (its tunables are
+// internal detail), but the layout shape is useful to surface (e.g. a QA page
+// listing every club's calibration status) without duplicating the CONFIG map.
+export function whatsBrewingLayout(teamId) {
+  return CONFIG[teamId]?.layout ?? null
 }
 
 // ---------------------------------------------------------------------------
@@ -554,8 +615,39 @@ function extractFlowBoldZone(items, realName, cfg) {
   }
   const words = allWords.filter((w) => w.x >= xMin && w.y < topCutoff && w.y > bottomCutoff)
   if (!words.length) return []
+  snapSuperscriptOrdinals(words)
 
   const isHead = (w) => cfg.headFont.test(w.font)
+
+  // cfg.columnMaxX is a per-club OUTER bound, not the real column edge on
+  // every line: a genuinely separate box/column can sit on the SAME baseline
+  // as a wrapped narrative line (LAA: "…joining Hall of Famers Cal Ripken
+  // Jr. (BAL – 17) and George Brett (KC – 11)" shares a baseline with an
+  // unrelated "IN THE DUGOUT:" sidebar a bit further right), so a single
+  // fixed x cutoff either truncates real prose (bold names past a tight
+  // bound) or lets a sidebar bleed in (past a loose one). Instead, find each
+  // baseline's OWN cutoff: the x of a genuine second-column marker sharing
+  // that line — a head-font run that is (up to its colon) ALL-CAPS, e.g.
+  // "IN THE DUGOUT:", "ERROR MESSAGE:", vs. a plain bold player name like
+  // "George Brett" or "Bobby Witt Jr.", which is mixed-case and so never
+  // trips this test and survives out to cfg.columnMaxX.
+  const rawLines = []
+  for (const w of words) {
+    let l = rawLines.find((l) => Math.abs(l.y - w.y) < tol)
+    if (!l) { l = { y: w.y, words: [] }; rawLines.push(l) }
+    l.words.push(w)
+  }
+  // Stamp each word with its own line's cutoff directly, rather than
+  // re-deriving "which line is this word on" via a second fuzzy y lookup
+  // later — two baselines can legitimately sit within `tol` of EACH OTHER
+  // without being the same line, and an independent per-word .find() can
+  // silently match the wrong one, applying a neighboring line's (tighter)
+  // cutoff to words that never had a marker of their own.
+  for (const l of rawLines) {
+    l.words.sort((a, b) => a.x - b.x)
+    const cutoff = lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
+    for (const w of l.words) w.cutoff = cutoff
+  }
 
   // Section headings: head-font runs at the left margin, grouped by baseline.
   // headingMaxX anchors which BASELINES qualify (the line's first word starts
@@ -568,7 +660,7 @@ function extractFlowBoldZone(items, realName, cfg) {
   // IS one contiguous head-font run and must not be truncated at headingMaxX.
   const lineWords = []
   for (const w of words) {
-    if (w.x >= cfg.columnMaxX) continue
+    if (w.x >= w.cutoff) continue
     let l = lineWords.find((l) => Math.abs(l.y - w.y) < tol)
     if (!l) { l = { y: w.y, words: [] }; lineWords.push(l) }
     l.words.push(w)
@@ -649,7 +741,7 @@ function extractFlowBoldZone(items, realName, cfg) {
     (w) =>
       isContent(w) &&
       !w.consumed &&
-      w.x < cfg.columnMaxX &&
+      w.x < w.cutoff &&
       !cfg.tableLeader.test(w.str) &&
       !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
   )
@@ -680,6 +772,81 @@ function extractFlowBoldZone(items, realName, cfg) {
       ),
     }))
     .filter((b) => b.body)
+    // A blurb whose title is real prose but whose OWN body run straight into
+    // a stat table with no sub-heading of its own to key off (MIN: "THESE
+    // ARE THE BREAKS:" narrates a sentence, then a bare 5-season AVG/R/H/…
+    // grid follows in the same column, same font, no dotted leader) can't be
+    // cleanly split — better to drop the whole note than show prose glued to
+    // a wall of numbers.
+    .filter((b) => !(cfg.dropIfBodyMatches && cfg.dropIfBodyMatches.test(b.body)))
+}
+
+// Finds the x where a GENUINE second-column marker starts on a shared
+// baseline, if any — a head-font run whose text (up to its own colon, if it
+// has one) is ALL-CAPS, e.g. "IN THE DUGOUT:", "ERROR MESSAGE:". Skips past
+// any leading decoration (PHI marks every wrapped line with its own margin
+// bullet, in a third font that's neither head nor body) to the line's own
+// first head-font run; that run is skipped WITHOUT testing only when it's
+// actually anchored near the left margin (x < headingMaxX) — the same bar
+// the real title-detection logic uses, so it's treated the same way here: a
+// genuine title candidate, never a marker for itself. A head-font run that
+// starts further right, with nothing but plain body text ahead of it on the
+// line (LAA: "...joining Hall THIS DATE IN ANGELS HISTORY"), was never a
+// real title and still gets tested. A plain bold player name ("George
+// Brett", "Bobby Witt Jr.") is mixed-case and never matches, so it stays
+// part of the line's body past cfg.columnMaxX up to whatever real marker (or
+// the outer bound) comes next. Requires a genuine multi-word OR longish run
+// — a bare box-score abbreviation ("ND", "L", "HR", "ERA", "IP") is ALSO
+// bold + ALL-CAPS but must never trip this (PHI bolds these inline
+// constantly; treating them as markers collapsed every line to nothing).
+function lineMarkerCutoff(sortedWords, isHead, headingMaxX, defaultCutoff) {
+  let i = 0
+  while (i < sortedWords.length && !isHead(sortedWords[i])) i++
+  if (i < sortedWords.length && sortedWords[i].x < headingMaxX) {
+    while (i < sortedWords.length && isHead(sortedWords[i])) i++
+  }
+  while (i < sortedWords.length) {
+    if (!isHead(sortedWords[i])) { i++; continue }
+    let j = i
+    while (j < sortedWords.length && isHead(sortedWords[j])) j++
+    const runText = joinWords(sortedWords.slice(i, j)).trim()
+    const beforeColon = runText.split(':')[0].trim()
+    const looksLikeMarker = /\s/.test(beforeColon) || beforeColon.length >= 6
+    if (looksLikeMarker && isAllCaps(beforeColon)) {
+      return Math.min(defaultCutoff, sortedWords[i].x)
+    }
+    i = j
+  }
+  return defaultCutoff
+}
+
+// Ordinal suffixes ("2nd", "3rd", "96th") are often set as a true typographic
+// superscript — the "nd"/"rd"/"th" glyphs sit a couple pt ABOVE their number's
+// baseline. That's enough to clear the line-grouping tolerance, so the suffix
+// forms its own one-word "line" that then gets sorted (by y, independently of
+// its number) into the wrong spot when lines are joined — e.g. "since nd
+// ranks T-2" instead of "ranks T-2nd". Snap each such suffix onto its nearest
+// immediate-left neighbor's baseline before any line-grouping happens, so it
+// rejoins the same line right after the number it modifies. Searches by Y
+// LOCALITY first (candidates within a small y-band), not a page-wide x-sort —
+// a page-wide sort puts same-x words from unrelated lines next to each other
+// (this repeats a left margin constantly), so a naive "nearest in x order"
+// scan can snap an ordinal onto a totally different line's word.
+function snapSuperscriptOrdinals(words) {
+  for (const w of words) {
+    if (!/^(st|nd|rd|th)$/i.test(w.str)) continue
+    let best = null
+    let bestGap = Infinity
+    for (const p of words) {
+      if (p === w) continue
+      const dy = Math.abs(w.y - p.y)
+      if (dy <= 0.5 || dy > 6) continue
+      const gap = w.x - (p.x + (p.w || 0))
+      if (gap < -2 || gap > 6) continue
+      if (gap < bestGap) { bestGap = gap; best = p }
+    }
+    if (best) w.y = best.y
+  }
 }
 
 // ALL-CAPS check for cfg.allCapsOnly, tolerant of the "Mc" surname convention

@@ -51,6 +51,9 @@
        the figures table and section sub-kicker stay shouted
      - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
        `.hint__link` button)
+     - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
+       (the blurb title above it stays uppercase, same shouted-heading/
+       natural-case-body split as the Game Score modal above)
      - `.buzz__text` (Bluesky posts keep their authors' original casing) */
 #root * {
   text-transform: uppercase;
@@ -3582,6 +3585,14 @@ body {
   color: var(--text-muted);
 }
 
+/* The shared bat/ball loader, same choreography as every other cold-load
+   wait in the app (see Loader.jsx) — replaces a bare "reading…" line with
+   continuous motion instead of a static one, same craft/consistency idea as
+   the rest of the app's loading states. */
+.brewsheet__loader {
+  margin: 10px 0 4px;
+}
+
 .brewsheet__list {
   list-style: none;
   margin: 12px 0 4px;
@@ -3611,6 +3622,13 @@ body {
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-body);
+}
+
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .brewblurb__body selector can't outrank #root * and would be
+   silently ignored. */
+#root .brewblurb__body {
+  text-transform: none; /* caps-exempt: Game Notes prose is several sentences long — shouted caps make a real paragraph much harder to scan than the app's short chrome labels; the blurb title above stays uppercase */
 }
 
 .brewsheet__pdf {
