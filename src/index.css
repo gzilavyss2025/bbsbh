@@ -3794,28 +3794,42 @@ body {
 .abs__title {
   display: block;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+/* One inset cell per club, two-up to fill the card width — same paper-2 cell
+   treatment as the R/H/E and pitch-stat rows above, so ABS reads as another
+   row of the card and not orphaned text. Abbreviation anchored left, the
+   used/open pips anchored right. */
 .abs__rows {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 .abs__row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+/* Hairline divider between the club and its pips, so abbr and gauge read as
+   one labeled unit rather than two floated ends. */
+.abs__row .abs__team {
+  border-right: var(--bw-hair) solid var(--border-rule);
+  padding-right: 10px;
 }
 .abs__team {
   flex: 0 0 auto;
-  min-width: 34px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
