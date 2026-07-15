@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchSchedule, fetchAllStarInfo } from '../api/schedule.js'
+import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate } from '../api/schedule.js'
 import { fetchScheduleUniforms } from '../api/uniforms.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -131,6 +131,23 @@ export function GameSelect({ onPick, onShowLogos }) {
     () => allStarBreakWindow(allStarInfo.data, dateStr),
     [allStarInfo.data, dateStr],
   )
+  const showAllStarBanner = Boolean(breakWindow) && !breakWindow.isDerbyDay
+
+  // Generic "Off Day" banner — any level (MLB included, for the rare non-break
+  // day every club is idle) whose slate came back empty and isn't already
+  // covered by the All-Star break window above (that window claims BOTH the
+  // Derby night, via DerbyCard, and the break days, via the banner below).
+  // Gated off while the MLB break check is still in flight so a Derby/break
+  // day doesn't flash "Off Day" first.
+  const isEmptyDay = !loading && !error && sorted.length === 0
+  const allStarPending = sportId === SPORT_IDS.MLB && isEmptyDay && allStarInfo.loading
+  const needsOffDayLookup = isEmptyDay && !breakWindow && !allStarPending
+  const offDayLookup = useAsync(
+    () => (needsOffDayLookup ? fetchNextGameDate(sportId, dateStr) : Promise.resolve(null)),
+    [needsOffDayLookup, sportId, dateStr],
+  )
+  const offDayPending = needsOffDayLookup && offDayLookup.loading
+  const showOffDayBanner = needsOffDayLookup && !offDayLookup.loading && !!offDayLookup.data
 
   // Games with a Top Performers box to reveal — any that have started, on
   // today or a past date. A future date, or today before first pitch, has
@@ -274,16 +291,32 @@ export function GameSelect({ onPick, onShowLogos }) {
         hasData={sorted.length > 0}
         errorMessage="Couldn’t load games. Check your connection and try again."
         onRetry={slate.reload}
-        // Suppressed for a day the break window will claim (below) — briefly
-        // while allStarInfo is still in flight too, so a Derby night doesn't
-        // flash "No games scheduled." before the fetch resolves.
-        emptyMessage={allStarInfo.loading || breakWindow ? null : 'No games scheduled.'}
+        // Suppressed for a day the break window or Off Day banner will claim
+        // (below) — briefly while either lookup is still in flight too, so
+        // neither flashes "No games scheduled." before the fetch resolves.
+        emptyMessage={
+          allStarInfo.loading || breakWindow || offDayPending || showOffDayBanner
+            ? null
+            : 'No games scheduled.'
+        }
       />
 
-      {sorted.length === 0 && breakWindow && !breakWindow.isDerbyDay && (
-        <p className="hint">
-          All-Star Break — next game {humanDate(breakWindow.resumeDate)}
-        </p>
+      {showAllStarBanner && (
+        <div className="break-banner" role="note">
+          <span className="break-banner__text">All-Star Break</span>
+          <span className="break-banner__detail">
+            Games resume {humanDate(breakWindow.resumeDate)}
+          </span>
+        </div>
+      )}
+
+      {showOffDayBanner && (
+        <div className="offday-banner" role="note">
+          <span className="offday-banner__text">Off Day</span>
+          <span className="offday-banner__detail">
+            Games resume {humanDate(offDayLookup.data)}
+          </span>
+        </div>
       )}
 
       {finals.length > 0 && !revealedAll && (

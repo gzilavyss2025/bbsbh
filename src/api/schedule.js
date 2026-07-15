@@ -138,6 +138,26 @@ export async function fetchAllStarGame(season) {
   }
 }
 
+// The next date (YYYY-MM-DD) a level has ANY game scheduled, for the empty-
+// slate "Off Day" banner's "resumes {date}" line — a generic, level-agnostic
+// counterpart to fetchAllStarInfo's MLB-only break window. Scans forward day
+// by day (bounded) rather than a range query since statsapi has no "next date
+// with games" endpoint; sequential so the common one-day-off case (a Monday
+// MiLB off day) resolves on the first hop instead of firing the whole window.
+// Returns null if nothing turns up within the window (e.g. off-season).
+export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10) {
+  const [y, m, d] = fromDateStr.split('-').map(Number)
+  const from = new Date(y, m - 1, d)
+  for (let i = 1; i <= maxDays; i++) {
+    const copy = new Date(from)
+    copy.setDate(copy.getDate() + i)
+    const dateStr = `${copy.getFullYear()}-${String(copy.getMonth() + 1).padStart(2, '0')}-${String(copy.getDate()).padStart(2, '0')}`
+    const games = await fetchSchedule(dateStr, sportId, 'team')
+    if (games.length > 0) return dateStr
+  }
+  return null
+}
+
 // Every active club at a level, independent of any date's schedule — used by
 // the logo sheet's level browser so it can show a league's full set of marks
 // rather than just the teams playing today, and by the footer's team
