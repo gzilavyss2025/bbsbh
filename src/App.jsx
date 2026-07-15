@@ -52,6 +52,10 @@ const UmpireRankingsPage = lazyNamed(
 )
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const TopGamesPage = lazyNamed(() => import('./screens/TopGamesPage.jsx'), 'TopGamesPage')
+const GameNotesDebugPage = lazyNamed(
+  () => import('./screens/GameNotesDebugPage.jsx'),
+  'GameNotesDebugPage',
+)
 // Scorecard Lab deliberately contains full-reveal code. It is available only
 // in development and is omitted from the production module graph.
 const ScorecardLab = import.meta.env.DEV
@@ -135,6 +139,8 @@ export default function App() {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'top-games') {
     content = <TopGamesPage />
+  } else if (route.name === 'game-notes-debug') {
+    content = <GameNotesDebugPage />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
   } else if (route.name === 'team-leaders') {
