@@ -20,7 +20,31 @@
 //
 // Only teamId is stored (mirrors gen-awards-history.mjs) — names/logos
 // resolve client-side from the app's own src/lib/teams.js so this file can't
-// drift from the rest of the app's team identity.
+// drift from the rest of the app's team identity. `leagueId` per series is
+// the one exception: it's bracket TOPOLOGY (which side of the World Series a
+// round belongs on), not team identity, so it's stored the same way `level`/
+// `gameType` tags ride along in umpires.json/game-score.json rather than
+// forcing the client to hardcode a 30-team AL/NL map that would drift on the
+// next realignment.
+//
+// SEEDING (1-6 per league): statsapi carries no "seed" field anywhere —
+// verified live against schedule/feed/standings for a 2024 gamePk. Derived
+// instead from two things the API DOES carry, per league per season:
+//   GET /api/v1/standings?leagueId={103|104}&season=YYYY&standingsTypes=regularSeason
+//   for each team's `divisionChamp` flag (exactly 3 true per league) and
+//   `leagueRecord.pct` (tiebreak only — see below), plus the Wild Card
+//   round's own schedule already fetched above.
+// Only the top 2 seeds get a bye (2022+ format); seed 3 (the weakest
+// division champ) plays in the Wild Card round same as the 3 wildcards, so
+// "did this division champ appear in a Wild Card series" cleanly separates
+// seeds 1-2 (byes) from seed 3 — no standings tiebreak needed there. Within
+// the Wild Card round, the higher seed always hosts game 1 of its series
+// (verified live: 2024 HOU, the AL's #3 seed, hosted DET; BAL, the #4 seed,
+// hosted KC) — that fixes seed 3 vs. 6 and seed 4 vs. 5 deterministically
+// from the schedule alone. The ONE place `pct` actually breaks a tie is
+// ordering the two seed 1/2 byes against each other (no game between them
+// decides it) — a genuine record tie there is rare and, if hit, only swaps
+// which bye box reads "1" vs. "2".
 //
 // Run by hand: node scripts/gen-postseason-history.mjs
 import { writeFile, mkdir } from 'node:fs/promises'
@@ -73,6 +97,54 @@ async function fetchMvp(awardId, season) {
 function seriesKeyFor(game) {
   const ids = [game.teams.away.team.id, game.teams.home.team.id].sort((a, b) => a - b)
   return `${game.gameType}|${game.seriesDescription}|${ids.join('-')}`
+}
+
+// Seeds (1-6) for one league in one season — see the SEEDING header comment
+// for the derivation. `wcSeries`/`allSeries` are this league's own series
+// (each `{ teamA: {teamId}, teamB: {teamId}, games: [...] }`), already built
+// by buildSeason before this runs.
+async function seedsForLeague(leagueId, season, wcSeries, allSeries) {
+  const standings = await getJson(
+    `/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason`,
+  )
+  const rows = (standings.records ?? []).flatMap((r) => r.teamRecords ?? [])
+  const pctById = new Map(rows.map((r) => [r.team.id, parseFloat(r.leagueRecord?.pct) || 0]))
+  const champById = new Map(rows.map((r) => [r.team.id, !!r.divisionChamp]))
+
+  const allTeamIds = new Set()
+  for (const s of allSeries) {
+    allTeamIds.add(s.teamA.teamId)
+    allTeamIds.add(s.teamB.teamId)
+  }
+  const wcTeamIds = new Set(wcSeries.flatMap((s) => [s.teamA.teamId, s.teamB.teamId]))
+
+  const champs = [...allTeamIds].filter((id) => champById.get(id))
+  const wildcards = [...allTeamIds].filter((id) => !champById.get(id))
+
+  const byeChamps = champs
+    .filter((id) => !wcTeamIds.has(id))
+    .sort((a, b) => (pctById.get(b) ?? 0) - (pctById.get(a) ?? 0))
+  const wcChamp = champs.find((id) => wcTeamIds.has(id)) ?? null
+
+  const seeds = new Map()
+  byeChamps.forEach((id, i) => seeds.set(id, i + 1))
+  let nextSeed = byeChamps.length + 1
+  if (wcChamp != null) seeds.set(wcChamp, nextSeed++)
+
+  // The Wild Card series with neither team a division champ is the pure
+  // wildcard-vs-wildcard matchup — its game-1 home team is the higher seed.
+  const pureWcSeries = wcSeries.filter(
+    (s) => !champById.get(s.teamA.teamId) && !champById.get(s.teamB.teamId),
+  )
+  const ordered = pureWcSeries.flatMap((s) => [s.games[0].homeTeamId, s.games[0].awayTeamId])
+  const leftover = wildcards
+    .filter((id) => !seeds.has(id) && !ordered.includes(id))
+    .sort((a, b) => (pctById.get(b) ?? 0) - (pctById.get(a) ?? 0))
+  for (const id of [...ordered, ...leftover]) {
+    if (!seeds.has(id)) seeds.set(id, nextSeed++)
+  }
+
+  return seeds
 }
 
 async function buildSeason(year) {
@@ -128,6 +200,7 @@ async function buildSeason(year) {
     seriesByRound.get(series.round.key).push({
       id: `${year}-${series.round.key}-${teamA}-${teamB}`,
       label: series.label,
+      leagueId: series.leagueId,
       teamA: { teamId: teamA, wins: wins.get(teamA) ?? 0 },
       teamB: { teamId: teamB, wins: wins.get(teamB) ?? 0 },
       winnerTeamId,
@@ -135,6 +208,43 @@ async function buildSeason(year) {
       mvp,
       games: series.games,
     })
+  }
+
+  // Seed every non-World-Series team (the World Series merges both leagues,
+  // so it carries whichever seed the team already earned in its own league's
+  // rounds instead of computing a fresh one).
+  const leagueIds = [...new Set([...seriesByRound.values()].flat().map((s) => s.leagueId))].filter(
+    Boolean,
+  )
+  const seedsByLeague = new Map()
+  for (const leagueId of leagueIds) {
+    const allSeries = [...seriesByRound.values()].flat().filter((s) => s.leagueId === leagueId)
+    const wcSeries = (seriesByRound.get('wildcard') ?? []).filter((s) => s.leagueId === leagueId)
+    seedsByLeague.set(leagueId, await seedsForLeague(leagueId, year, wcSeries, allSeries))
+  }
+  const seedFor = (teamId, leagueId) => seedsByLeague.get(leagueId)?.get(teamId) ?? null
+  const worldSeries = seriesByRound.get('worldseries') ?? []
+  const seedForAnyLeague = (teamId) => {
+    for (const seeds of seedsByLeague.values()) {
+      if (seeds.has(teamId)) return seeds.get(teamId)
+    }
+    return null
+  }
+  for (const s of seriesByRound.get('wildcard') ?? []) {
+    s.teamA.seed = seedFor(s.teamA.teamId, s.leagueId)
+    s.teamB.seed = seedFor(s.teamB.teamId, s.leagueId)
+  }
+  for (const s of seriesByRound.get('division') ?? []) {
+    s.teamA.seed = seedFor(s.teamA.teamId, s.leagueId)
+    s.teamB.seed = seedFor(s.teamB.teamId, s.leagueId)
+  }
+  for (const s of seriesByRound.get('lcs') ?? []) {
+    s.teamA.seed = seedFor(s.teamA.teamId, s.leagueId)
+    s.teamB.seed = seedFor(s.teamB.teamId, s.leagueId)
+  }
+  for (const s of worldSeries) {
+    s.teamA.seed = seedForAnyLeague(s.teamA.teamId)
+    s.teamB.seed = seedForAnyLeague(s.teamB.teamId)
   }
 
   const rounds = ROUNDS.map((r) => ({
