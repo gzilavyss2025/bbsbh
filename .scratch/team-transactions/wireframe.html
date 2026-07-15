@@ -1,0 +1,762 @@
+<title>Transactions Card — Wireframe</title>
+<style>
+/* ---- Tally Baseball tokens (mirrored from src/tokens/*.css) ---- */
+:root{
+  --paper-0:#F6EFDC; --paper-1:#F3ECD8; --paper-2:#FBF6E9; --paper-3:#FFFDF6;
+  --ink-0:#16222F; --ink-1:#1B2A3A; --ink-2:#3C4A5A;
+  --graphite:#6B6558; --graphite-soft:#938C7C;
+  --rule:#CBC1A7; --rule-soft:#DED6C0; --rule-grid:#EDE6D1;
+  --field:#2F6E4F; --field-deep:#255740; --field-soft:#E3EDE2;
+  --clay:#B4453A; --clay-deep:#8E332B; --clay-soft:#F3E0DB;
+  --navy:#1B2A3A;
+  --seal:#B5824A; --seal-hatch:#A9743C; --seal-ink:#1E1405;
+
+  --bg-canvas:var(--paper-0); --bg-page:var(--paper-1);
+  --surface-card:var(--paper-2); --surface-inset:var(--paper-3);
+  --text-heading:var(--ink-0); --text-body:var(--ink-1);
+  --text-muted:var(--ink-2); --text-caption:var(--graphite);
+  --border-rule:var(--rule); --border-hairline:var(--rule-soft);
+  --accent-positive:var(--field); --accent-negative:var(--clay);
+
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
+  --font-read:"Newsreader",Georgia,"Times New Roman",serif;
+
+  --fs-label:13px; --fs-caption:11px; --ls-label:0.09em;
+
+  --radius-sm:6px; --radius-md:10px;
+  --shadow-card:0 1px 2px rgba(22,34,47,0.08), 0 4px 12px rgba(22,34,47,0.06);
+  --bw-hair:1px;
+
+  --page-bg:var(--bg-canvas);
+  --note-bg:var(--paper-1);
+  --ink-photo:var(--ink-1);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper-0:#181C16; --paper-1:#1E231C; --paper-2:#242A20; --paper-3:#2B3225;
+    --ink-0:#F3EFE2; --ink-1:#E9E4D3; --ink-2:#C9C2AC;
+    --graphite:#B4AB90; --graphite-soft:#8D8570;
+    --rule:#463F2E; --rule-soft:#3A3527; --rule-grid:#2A2619;
+    --field:#6FBF95; --field-deep:#9BDCB8; --field-soft:#28352A;
+    --clay:#E48B7C; --clay-deep:#F2AFA2; --clay-soft:#3A2621;
+    --seal:#C79553; --seal-hatch:#B5834A; --seal-ink:#120C02;
+    --note-bg:#20251A;
+    --ink-photo:#0F1310;
+  }
+}
+:root[data-theme="dark"]{
+  --paper-0:#181C16; --paper-1:#1E231C; --paper-2:#242A20; --paper-3:#2B3225;
+  --ink-0:#F3EFE2; --ink-1:#E9E4D3; --ink-2:#C9C2AC;
+  --graphite:#B4AB90; --graphite-soft:#8D8570;
+  --rule:#463F2E; --rule-soft:#3A3527; --rule-grid:#2A2619;
+  --field:#6FBF95; --field-deep:#9BDCB8; --field-soft:#28352A;
+  --clay:#E48B7C; --clay-deep:#F2AFA2; --clay-soft:#3A2621;
+  --seal:#C79553; --seal-hatch:#B5834A; --seal-ink:#120C02;
+  --note-bg:#20251A;
+  --ink-photo:#0F1310;
+}
+:root[data-theme="light"]{
+  --paper-0:#F6EFDC; --paper-1:#F3ECD8; --paper-2:#FBF6E9; --paper-3:#FFFDF6;
+  --ink-0:#16222F; --ink-1:#1B2A3A; --ink-2:#3C4A5A;
+  --graphite:#6B6558; --graphite-soft:#938C7C;
+  --rule:#CBC1A7; --rule-soft:#DED6C0; --rule-grid:#EDE6D1;
+  --field:#2F6E4F; --field-deep:#255740; --field-soft:#E3EDE2;
+  --clay:#B4453A; --clay-deep:#8E332B; --clay-soft:#F3E0DB;
+  --seal:#B5824A; --seal-hatch:#A9743C; --seal-ink:#1E1405;
+  --note-bg:#F3ECD8;
+  --ink-photo:var(--ink-1);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--page-bg);
+  background-image:
+    linear-gradient(var(--rule-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  color:var(--text-body);
+  font-family:var(--font-body);
+  display:flex; justify-content:center;
+  padding:32px 16px 64px;
+}
+
+.stage{
+  width:100%;
+  max-width:900px;
+  display:flex;
+  flex-direction:column;
+  gap:40px;
+}
+
+.intro{ max-width:640px; }
+.intro h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:0.01em;
+  color:var(--text-heading);
+  margin:0 0 8px;
+}
+.intro p{
+  font-size:14px;
+  line-height:1.55;
+  color:var(--text-muted);
+  margin:0 0 6px;
+}
+.intro code{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  background:var(--surface-inset);
+  border:var(--bw-hair) solid var(--border-hairline);
+  border-radius:4px;
+  padding:1px 5px;
+}
+
+/* ---------- app-frame chrome, sized per viewport ---------- */
+.frame{
+  max-width:100%;
+  background:var(--bg-page);
+  border:var(--bw-hair) solid var(--border-hairline);
+  border-radius:20px;
+  padding:18px 14px 24px;
+  box-shadow:var(--shadow-card);
+  /* Brewers gold — teamTintColor(158) at its default 0.22 alpha, same wash
+     every Headshot on this team page already carries */
+  --photo-tint:rgba(255,197,47,0.22);
+}
+.frame--mobile{ width:390px; }
+.frame--tablet{ width:600px; border-radius:12px; }
+.frame--desktop{ width:460px; border-radius:12px; }
+
+/* section flag — double rule like a newspaper section masthead */
+.flag{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin:0 0 3px;
+  padding-bottom:4px;
+  border-bottom:2px solid var(--text-heading);
+}
+.flag span:first-child{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:15px;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  color:var(--text-heading);
+}
+
+/* ---------- viewport comparison rig ---------- */
+.viewports{
+  display:flex;
+  gap:28px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.viewport__label{
+  margin:0 0 10px;
+  font-family:var(--font-display);
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:var(--ls-label);
+  color:var(--text-caption);
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+}
+.viewport__label .px{
+  font-family:var(--font-mono);
+  font-weight:400;
+  color:var(--graphite-soft);
+  text-transform:none;
+  letter-spacing:0;
+}
+.viewport--desktop .canvas{
+  width:720px;
+  max-width:100%;
+  background:
+    repeating-linear-gradient(45deg, var(--rule-grid) 0 1px, transparent 1px 12px);
+  border:var(--bw-hair) dashed var(--border-hairline);
+  border-radius:8px;
+  padding:20px;
+  display:flex;
+  justify-content:center;
+}
+
+/* ---------- the card ---------- */
+.txcard{
+  background:var(--surface-card);
+  border:var(--bw-hair) solid var(--border-rule);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+}
+
+/* a day-group — one full dateline ("Wednesday, June 24"), one or more
+   stories under it (real feeds routinely log 2-8 transactions on one date,
+   so the byline runs once and the stories underneath share it) */
+.txday:first-child .txday__date{ border-top:none; }
+.txday__date{
+  padding:14px 14px 4px;
+  border-top:var(--bw-hair) solid var(--border-rule);
+  font-family:var(--font-display);
+  font-size:12.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--text-heading);
+}
+
+.txstory{
+  padding:7px 14px 12px;
+  /* new block-formatting context, so the floated rail is contained here
+     rather than bleeding past this story into the next one's rule/spacing */
+  display:flow-root;
+}
+.txstory + .txstory{
+  border-top:var(--bw-hair) dotted var(--border-hairline);
+  padding-top:10px;
+}
+
+/* the rail floats top-right and the type pill + cutline both run as normal
+   text flow after it, so the pill sits flush with its top edge and the
+   cutline sentence wraps around it rather than dropping to its own row */
+.photorail{
+  float:right;
+  display:flex;
+  gap:6px;
+  margin:0 0 6px 10px;
+}
+
+.txstory__type{
+  display:block;
+  margin-bottom:4px;
+  font-family:var(--font-display);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.07em;
+  text-transform:uppercase;
+  color:var(--graphite);
+}
+.photorail__slot{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  width:38px;
+}
+
+.banner{
+  font-family:var(--font-display);
+  font-size:8.5px;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding:1px 5px;
+  color:var(--paper-2);
+  background:var(--text-heading);
+}
+.banner--in{ background:var(--field-deep); }
+.banner--out{ background:var(--clay-deep); }
+.banner--move{ background:var(--graphite); }
+
+.photo{
+  position:relative;
+  width:38px;
+  height:50px;
+  overflow:hidden;
+  border:1px solid var(--text-heading);
+  /* soft wash of the club's brand color behind the cutout — the same
+     teamTintColor() convention every other headshot in the app already uses,
+     not a one-off for this card */
+  background-color:var(--photo-tint, var(--surface-inset));
+}
+.photo svg{ width:100%; height:100%; display:block; position:relative; z-index:0; }
+/* halftone dot screen — sells "wire photo", replaces the old grayscale-duo trick */
+.photo::after{
+  content:'';
+  position:absolute; inset:0;
+  background-image:radial-gradient(rgba(0,0,0,0.55) 0.55px, transparent 0.6px);
+  background-size:2.4px 2.4px;
+  mix-blend-mode:multiply;
+  opacity:0.5;
+}
+.photo__cap{
+  font-family:var(--font-mono);
+  font-size:8.5px;
+  color:var(--graphite-soft);
+  text-align:center;
+  line-height:1.15;
+  text-transform:uppercase;
+  letter-spacing:0.02em;
+}
+
+.txstory__cutline{
+  margin:6px 0 0;
+  font-family:var(--font-read);
+  font-size:14.5px;
+  line-height:1.42;
+  text-align:left;
+  color:var(--text-body);
+}
+.txstory__cutline b{ font-weight:600; color:var(--text-heading); }
+.txstory__cutline i{ color:var(--text-muted); font-style:italic; }
+
+/* ---------- annotations ---------- */
+.annotate{
+  max-width:900px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+  gap:16px;
+}
+.note{
+  background:var(--note-bg);
+  border:var(--bw-hair) solid var(--border-hairline);
+  border-left:2px solid var(--seal);
+  border-radius:4px;
+  padding:10px 12px;
+}
+.note h4{
+  margin:0 0 4px;
+  font-family:var(--font-display);
+  font-size:11.5px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--text-heading);
+}
+.note p{
+  margin:0;
+  font-size:12.5px;
+  line-height:1.5;
+  color:var(--text-muted);
+}
+.note code{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  background:var(--surface-inset);
+  border:var(--bw-hair) solid var(--border-hairline);
+  border-radius:3px;
+  padding:0 4px;
+}
+</style>
+
+<div class="stage">
+
+  <div class="intro">
+    <h1>Team Transactions — card wireframe, v7</h1>
+    <p>Each day now headers as a full dateline — "Sunday, July 12" — instead
+    of a month row plus an abbreviated "Jul 12" underneath. The type pill
+    (Trade, Roster shuffle, …) and the <b>IN</b> / <b>OUT</b> headshot rail
+    share one top edge, and the cutline sentence wraps around the headshots
+    the way a magazine caption wraps a floated photo. Each headshot carries
+    a soft wash of the club's brand color (Brewers gold here, the same
+    <code>teamTintColor()</code> every other headshot in the app already
+    uses) under the uniform halftone dot screen. Content is pulled from the
+    Brewers' real June/July 2026 transaction log. Below: the same card at
+    mobile, iPad, and desktop widths.</p>
+  </div>
+
+  <div class="viewports">
+    <div class="viewport viewport--mobile">
+      <p class="viewport__label">Mobile <span class="px">390px</span></p>
+  <div class="frame frame--mobile">
+    <div class="flag"><span>Transactions</span></div>
+
+    <div class="txcard">
+
+      <div class="txday">
+        <div class="txday__date">Sunday, July 12</div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">In</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Shewmake</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Out</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Jones</span>
+              </div>
+            </div>
+          <span class="txstory__type">Trade</span>
+          <p class="txstory__cutline">Acquired <b>SS Braden Shewmake</b> from the Astros for
+              cash; <i>designated LF Greg Jones for assignment</i> to open a 40-man spot.</p>
+        </div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--move">Up/Down</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Crow</span>
+              </div>
+            </div>
+          <span class="txstory__type">Roster move</span>
+          <p class="txstory__cutline">Activated <b>RHP Coleman Crow</b> from the 15-day injured list and
+              immediately <i>optioned him back to Nashville</i>; also transferred RHP Brandon Woodruff
+              from the 15- to the 60-day injured list.</p>
+        </div>
+
+      </div>
+
+      <div class="txday">
+        <div class="txday__date">Tuesday, July 7</div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Gasser</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Lara</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Down</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Perkins</span>
+              </div>
+            </div>
+          <span class="txstory__type">Roster shuffle</span>
+          <p class="txstory__cutline">Recalled <b>RHP Robert Gasser</b> and <b>CF Luis Lara</b>;
+              <i>optioned CF Blake Perkins to Nashville</i> to make room.</p>
+        </div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Jones</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Il-10</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Hamilton</span>
+              </div>
+            </div>
+          <span class="txstory__type">Injured list</span>
+          <p class="txstory__cutline">Placed <b>3B David Hamilton</b> on the 10-day IL (strained hamstring);
+              <i>selected the contract of LF Greg Jones</i> from Nashville to fill the spot.</p>
+        </div>
+
+      </div>
+
+      <div class="txday">
+        <div class="txday__date">Wednesday, June 24</div>
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">In</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Strzelecki</span>
+              </div>
+            </div>
+          <span class="txstory__type">Signing</span>
+          <p class="txstory__cutline">Signed free agent <b>RHP Peter Strzelecki</b> to a minor-league contract.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+    </div>
+
+    <div class="viewport viewport--tablet">
+      <p class="viewport__label">iPad <span class="px">600px column</span></p>
+  <div class="frame frame--tablet">
+    <div class="flag"><span>Transactions</span></div>
+
+    <div class="txcard">
+
+      <div class="txday">
+        <div class="txday__date">Sunday, July 12</div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">In</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Shewmake</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Out</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Jones</span>
+              </div>
+            </div>
+          <span class="txstory__type">Trade</span>
+          <p class="txstory__cutline">Acquired <b>SS Braden Shewmake</b> from the Astros for
+              cash; <i>designated LF Greg Jones for assignment</i> to open a 40-man spot.</p>
+        </div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--move">Up/Down</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Crow</span>
+              </div>
+            </div>
+          <span class="txstory__type">Roster move</span>
+          <p class="txstory__cutline">Activated <b>RHP Coleman Crow</b> from the 15-day injured list and
+              immediately <i>optioned him back to Nashville</i>; also transferred RHP Brandon Woodruff
+              from the 15- to the 60-day injured list.</p>
+        </div>
+
+      </div>
+
+      <div class="txday">
+        <div class="txday__date">Tuesday, July 7</div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Gasser</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Lara</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Down</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Perkins</span>
+              </div>
+            </div>
+          <span class="txstory__type">Roster shuffle</span>
+          <p class="txstory__cutline">Recalled <b>RHP Robert Gasser</b> and <b>CF Luis Lara</b>;
+              <i>optioned CF Blake Perkins to Nashville</i> to make room.</p>
+        </div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Jones</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Il-10</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Hamilton</span>
+              </div>
+            </div>
+          <span class="txstory__type">Injured list</span>
+          <p class="txstory__cutline">Placed <b>3B David Hamilton</b> on the 10-day IL (strained hamstring);
+              <i>selected the contract of LF Greg Jones</i> from Nashville to fill the spot.</p>
+        </div>
+
+      </div>
+
+      <div class="txday">
+        <div class="txday__date">Wednesday, June 24</div>
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">In</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Strzelecki</span>
+              </div>
+            </div>
+          <span class="txstory__type">Signing</span>
+          <p class="txstory__cutline">Signed free agent <b>RHP Peter Strzelecki</b> to a minor-league contract.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+    </div>
+
+    <div class="viewport viewport--desktop">
+      <p class="viewport__label">Desktop <span class="px">capped at 460px, not stretched</span></p>
+      <div class="canvas">
+  <div class="frame frame--desktop">
+    <div class="flag"><span>Transactions</span></div>
+
+    <div class="txcard">
+
+      <div class="txday">
+        <div class="txday__date">Sunday, July 12</div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">In</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Shewmake</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Out</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Jones</span>
+              </div>
+            </div>
+          <span class="txstory__type">Trade</span>
+          <p class="txstory__cutline">Acquired <b>SS Braden Shewmake</b> from the Astros for
+              cash; <i>designated LF Greg Jones for assignment</i> to open a 40-man spot.</p>
+        </div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--move">Up/Down</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Crow</span>
+              </div>
+            </div>
+          <span class="txstory__type">Roster move</span>
+          <p class="txstory__cutline">Activated <b>RHP Coleman Crow</b> from the 15-day injured list and
+              immediately <i>optioned him back to Nashville</i>; also transferred RHP Brandon Woodruff
+              from the 15- to the 60-day injured list.</p>
+        </div>
+
+      </div>
+
+      <div class="txday">
+        <div class="txday__date">Tuesday, July 7</div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Gasser</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Lara</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Down</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Perkins</span>
+              </div>
+            </div>
+          <span class="txstory__type">Roster shuffle</span>
+          <p class="txstory__cutline">Recalled <b>RHP Robert Gasser</b> and <b>CF Luis Lara</b>;
+              <i>optioned CF Blake Perkins to Nashville</i> to make room.</p>
+        </div>
+
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">Up</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Jones</span>
+              </div>
+              <div class="photorail__slot">
+                <span class="banner banner--out">Il-10</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Hamilton</span>
+              </div>
+            </div>
+          <span class="txstory__type">Injured list</span>
+          <p class="txstory__cutline">Placed <b>3B David Hamilton</b> on the 10-day IL (strained hamstring);
+              <i>selected the contract of LF Greg Jones</i> from Nashville to fill the spot.</p>
+        </div>
+
+      </div>
+
+      <div class="txday">
+        <div class="txday__date">Wednesday, June 24</div>
+        <div class="txstory">
+          <div class="photorail">
+              <div class="photorail__slot">
+                <span class="banner banner--in">In</span>
+                <div class="photo"><svg viewBox="0 0 44 58"><circle cx="22" cy="22" r="10" fill="#1B2A3A"/><path d="M4 56c2-13 11-20 18-20s16 7 18 20z" fill="#1B2A3A"/></svg></div>
+                <span class="photo__cap">Strzelecki</span>
+              </div>
+            </div>
+          <span class="txstory__type">Signing</span>
+          <p class="txstory__cutline">Signed free agent <b>RHP Peter Strzelecki</b> to a minor-league contract.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="annotate">
+    <div class="note">
+      <h4>Rail floats, text wraps</h4>
+      <p>The IN/OUT rail is a real CSS float now, not a grid column — the
+      type pill sits flush with its top edge and the cutline sentence wraps
+      around it, closing back to full width once the sentence runs past the
+      photos, the way a magazine wraps body text around a floated photo.</p>
+    </div>
+    <div class="note">
+      <h4>Still no overlap</h4>
+      <p>Each headshot keeps its own plain, non-overlapping frame in the
+      rail — just side by side and narrower than before, not stacked.</p>
+    </div>
+    <div class="note">
+      <h4>Halftone instead of grayscale-vs-color</h4>
+      <p>Every photo still gets the same dot-screen treatment — that's what
+      reads as "newspaper," rather than color-coding one side. In/Out is
+      carried by the small kicker banner over each headshot instead.</p>
+    </div>
+    <div class="note">
+      <h4>Double-rule section flag</h4>
+      <p>The heavy rule under "Transactions" borrows a section-masthead cue
+      (like a sports-page flag) instead of the plain caption-style
+      <code>.section__title</code> used elsewhere — worth checking this
+      doesn't fight the rest of the team page's header rhythm.</p>
+    </div>
+    <div class="note">
+      <h4>One-sided stories still work</h4>
+      <p>A plain signing (bottom row) just leaves one slot in the rail rather
+      than forcing a pair — most transactions won't have a clean corollary.</p>
+    </div>
+    <div class="note">
+      <h4>Multi-move days are the norm, not the edge case</h4>
+      <p>Pulling the real feed for the Brewers' past three weeks turned up
+      6 transactions on Jul 12 and 8 on Jul 7 — so the date now headers a
+      <code>.txday</code> group and each transaction underneath is its own
+      compact story, rather than repeating the date per story.</p>
+    </div>
+    <div class="note">
+      <h4>Not every move is a clean 2-player pair</h4>
+      <p>Jul 7's roster shuffle is 3 players (2 up, 1 down) in one
+      transaction — the rail just grows another slot. Jul 12 also has a
+      same-player double-move (activated off the IL, then optioned right
+      back down) and a pure IL-to-IL transfer with no active-roster photo
+      at all — that one gets no rail, just the sentence.</p>
+    </div>
+    <div class="note">
+      <h4>Real feeds duplicate records</h4>
+      <p>The raw statsapi transactions endpoint logged the same Logan
+      Henderson rehab assignment 3 times and the same trade twice (once per
+      team). The real generator will need to de-dupe by description+date
+      before grouping into stories — not a UI concern, but worth flagging
+      now so the data pipeline accounts for it.</p>
+    </div>
+    <div class="note">
+      <h4>Desktop doesn't stretch the card</h4>
+      <p>Same single-column structure at every width — this is a second-screen
+      companion, not a dashboard. iPad just gives the cutline/rail more room
+      to breathe (600px column); desktop caps the card at a comfortable
+      ~460px reading width rather than stretching it to fill a widescreen,
+      shown here on a dashed canvas so the unused space reads as
+      deliberate, not missing.</p>
+    </div>
+  </div>
+
+</div>
