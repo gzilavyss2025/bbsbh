@@ -389,7 +389,7 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
   ])
   assert.equal(
     trade.cutline.map((s) => s.text).join(''),
-    'Acquired SS Braden Shewmake from the Astros; designated LF Greg Jones for assignment.',
+    'Acquired SS Braden Shewmake from the Houston Astros; designated LF Greg Jones for assignment.',
   )
 
   const doubleMove = stories[1]
@@ -486,7 +486,7 @@ test('Jul 14: the two-perspective trade mirror de-dupes to one trade-away story'
   }])
   assert.equal(
     stories[0].cutline.map((s) => s.text).join(''),
-    'Traded RHP Easton McGee to the Royals for cash.',
+    'Traded RHP Easton McGee to the Kansas City Royals for cash.',
   )
 })
 
@@ -506,7 +506,7 @@ test('Jul 15: a real 2-for-1 (plus cash) trade merges into ONE story, not three'
   ])
   assert.equal(
     stories[0].cutline.map((s) => s.text).join(''),
-    'Acquired LHP Colton Gordon and RHP Lance McCullers Jr. from the Astros for OF Jadyn Fielder.',
+    'Acquired LHP Colton Gordon and RHP Lance McCullers Jr. from the Houston Astros for OF Jadyn Fielder.',
   )
   // Fielder's own name must NOT appear in his own "for" clause (the
   // self-reference bug the real fixture originally exposed).
@@ -526,7 +526,7 @@ test('days sort newest first, and multiple fixture days combine correctly', () =
 test('buildCutline: a pure trade-away pulls no secondary clause', () => {
   const row = JUL14_MCGEE_MIRROR[0]
   const segs = buildCutline({ storyType: 'trade', rows: [{ row, role: 'out' }] }, { orgId: 158 })
-  assert.equal(segs.map((s) => s.text).join(''), 'Traded RHP Easton McGee to the Royals for cash.')
+  assert.equal(segs.map((s) => s.text).join(''), 'Traded RHP Easton McGee to the Kansas City Royals for cash.')
   const emphasized = segs.find((s) => s.emphasis === 'primary')
   assert.equal(emphasized.text, 'Easton McGee')
   assert.equal(emphasized.playerId, 668834)

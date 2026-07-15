@@ -234,12 +234,6 @@ function surnameOf(fullName) {
   const i = s.indexOf(' ')
   return i === -1 ? s : s.slice(i + 1)
 }
-// "Houston Astros" -> "Astros" — last word of the full team name.
-function teamNickname(name) {
-  const n = (name || '').trim()
-  return n ? n.split(/\s+/).slice(-1)[0] : ''
-}
-
 // Every statsapi transaction description reads "{ActingClub} {verb}…" (or, for
 // a trade, "{OtherClub} traded … to {ThisClub}"), so stripping whichever club
 // name actually leads the string yields a clause that already reads correctly
@@ -582,10 +576,10 @@ function cutlineTrade(story, ctx) {
 
   const segs = []
   if (inPlayers.length) {
-    const nick = teamNickname(inPlayers[0].row.fromTeam?.name || '')
+    const otherTeam = inPlayers[0].row.fromTeam?.name || ''
     segs.push({ text: 'Acquired ' })
     segs.push(...playersClause(inPlayers, 'primary'))
-    segs.push({ text: ` from the ${nick}` })
+    segs.push({ text: ` from the ${otherTeam}` })
     if (outPlayers.length) {
       segs.push({ text: ' for ' })
       segs.push(...playersClause(outPlayers, 'secondary'))
@@ -594,10 +588,10 @@ function cutlineTrade(story, ctx) {
       if (detail) segs.push({ text: ` for ${detail}` })
     }
   } else {
-    const nick = teamNickname(outPlayers[0].row.toTeam?.name || '')
+    const otherTeam = outPlayers[0].row.toTeam?.name || ''
     segs.push({ text: 'Traded ' })
     segs.push(...playersClause(outPlayers, 'primary'))
-    segs.push({ text: ` to the ${nick}` })
+    segs.push({ text: ` to the ${otherTeam}` })
     const detail = returnDetailFor(outPlayers[0].row, outPlayers.map((p) => p.name))
     if (detail) segs.push({ text: ` for ${detail}` })
   }
