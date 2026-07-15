@@ -19,12 +19,58 @@ function monthDay(iso) {
   return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
 }
 
+// Wraps every Division/Championship series into the uniform "lane" shape
+// the columns render (see wildCardLanes below for the Wild Card round's
+// mixed bye/series lanes).
+function seriesLanes(list) {
+  return list.map((s) => ({ type: 'series', key: s.id, series: s }))
+}
+
+// Orders the Wild Card round's lanes (2 byes + 2 matchups, the 2022+
+// format) so each one sits in the SAME top/bottom slot as the team it
+// becomes in its Division Series card — a bye lines up with wherever its
+// seed reads on the DS card (teamA/top or teamB/bottom), and a Wild Card
+// matchup lines up with wherever its eventual winner reads there. DS team
+// order itself comes straight off the schedule (whichever club was away in
+// that series' game 1), so there's no seed-based rule to lean on here —
+// this reads the actual DS card and mirrors it, rather than assuming seed
+// order. Falls back to seed order (byes first) for any shape other than
+// the exact 2-bye/2-series case (the pre-2022 3-bye/1-game format, or
+// anything unexpected).
+function wildCardLanes(byes, wc, ds) {
+  if (byes.length !== 2 || wc.length !== 2 || ds.length !== 2) {
+    return [
+      ...byes.map((b) => ({ type: 'bye', key: `bye-${b.teamId}`, bye: b })),
+      ...wc.map((s) => ({ type: 'series', key: s.id, series: s })),
+    ]
+  }
+
+  const items = [
+    ...byes.map((b) => ({ type: 'bye', key: `bye-${b.teamId}`, bye: b, teamId: b.teamId })),
+    ...wc.map((s) => ({ type: 'series', key: s.id, series: s, teamId: s.winnerTeamId })),
+  ]
+
+  // Which DS series a team ends up in, and whether it reads top (teamA) or
+  // bottom (teamB) on that card.
+  const dsSlot = (teamId) => {
+    for (let i = 0; i < ds.length; i++) {
+      if (ds[i].teamA.teamId === teamId) return { dsIndex: i, pos: 0 }
+      if (ds[i].teamB.teamId === teamId) return { dsIndex: i, pos: 1 }
+    }
+    return { dsIndex: ds.length, pos: 0 }
+  }
+
+  return items
+    .map((item) => ({ item, slot: dsSlot(item.teamId) }))
+    .sort((a, b) => a.slot.dsIndex - b.slot.dsIndex || a.slot.pos - b.slot.pos)
+    .map(({ item }) => item)
+}
+
 // Shapes one league's rounds within a season into what a bracket column
 // needs. A bye (seed 1/2, or 1-3 in the pre-2022 single-game Wild Card
 // format) is never itself a series in the data — it's reconstructed here as
 // "a seeded team that never appears in this league's Wild Card round" — so
-// the column still shows every seed, not just the ones with a game. Ordered
-// by seed so each column reads strongest-to-weakest top to bottom.
+// the column still shows every seed, not just the ones with a game.
 function leagueBracket(season, leagueId) {
   const byKey = Object.fromEntries(season.rounds.map((r) => [r.key, r]))
   const wc = (byKey.wildcard?.series ?? []).filter((s) => s.leagueId === leagueId)
@@ -42,11 +88,11 @@ function leagueBracket(season, leagueId) {
     .sort((a, b) => a[1] - b[1])
     .map(([teamId, seed]) => ({ teamId, seed }))
 
-  const wcSorted = [...wc].sort(
-    (a, b) => Math.min(a.teamA.seed, a.teamB.seed) - Math.min(b.teamA.seed, b.teamB.seed),
-  )
-
-  return { byes, wc: wcSorted, ds, cs }
+  return {
+    wcLanes: wildCardLanes(byes, wc, ds),
+    dsLanes: seriesLanes(ds),
+    csLanes: seriesLanes(cs),
+  }
 }
 
 // One team's line inside a bracket card — seed chip, logo, club name, win
@@ -93,16 +139,21 @@ function MatchupCard({ series, onOpen }) {
   )
 }
 
-function BracketColumn({ side, label, byes = [], series, onOpenSeries }) {
+function Lane({ lane, onOpenSeries }) {
+  return lane.type === 'bye' ? (
+    <ByeCard teamId={lane.bye.teamId} seed={lane.bye.seed} />
+  ) : (
+    <MatchupCard series={lane.series} onOpen={onOpenSeries} />
+  )
+}
+
+function BracketColumn({ side, label, lanes, onOpenSeries }) {
   return (
     <div className={`psbracket__col psbracket__col--${side}`}>
       <p className={`psbracket__collabel psbracket__collabel--${side}`}>{label}</p>
       <div className="psbracket__lanes">
-        {byes.map((b) => (
-          <ByeCard key={b.teamId} teamId={b.teamId} seed={b.seed} />
-        ))}
-        {series.map((s) => (
-          <MatchupCard key={s.id} series={s} onOpen={onOpenSeries} />
+        {lanes.map((lane) => (
+          <Lane key={lane.key} lane={lane} onOpenSeries={onOpenSeries} />
         ))}
       </div>
     </div>
@@ -119,9 +170,9 @@ function BracketGrid({ season, onOpenSeries }) {
 
   return (
     <div className="psbracket">
-      <BracketColumn side="al" label="AL Wild Card" byes={al.byes} series={al.wc} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="al" label="AL Division Series" series={al.ds} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="al" label="AL Championship" series={al.cs} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <div className="psbracket__col psbracket__col--ws">
         <p className="psbracket__collabel psbracket__collabel--ws">World Series</p>
         <div className="psbracket__lanes">
@@ -142,22 +193,19 @@ function BracketGrid({ season, onOpenSeries }) {
           )}
         </div>
       </div>
-      <BracketColumn side="nl" label="NL Championship" series={nl.cs} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="nl" label="NL Division Series" series={nl.ds} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="nl" label="NL Wild Card" byes={nl.byes} series={nl.wc} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="nl" label="NL Championship" lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="nl" label="NL Division Series" lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
+      <BracketColumn side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
     </div>
   )
 }
 
-function StackRound({ side, label, byes = [], series, onOpenSeries }) {
+function StackRound({ side, label, lanes, onOpenSeries }) {
   return (
     <>
       <p className={`psstack__roundlabel psstack__roundlabel--${side}`}>{label}</p>
-      {byes.map((b) => (
-        <ByeCard key={b.teamId} teamId={b.teamId} seed={b.seed} />
-      ))}
-      {series.map((s) => (
-        <MatchupCard key={s.id} series={s} onOpen={onOpenSeries} />
+      {lanes.map((lane) => (
+        <Lane key={lane.key} lane={lane} onOpenSeries={onOpenSeries} />
       ))}
     </>
   )
@@ -175,9 +223,9 @@ function BracketStack({ season, onOpenSeries }) {
 
   return (
     <div className="psstack">
-      <StackRound side="al" label="AL Wild Card" byes={al.byes} series={al.wc} onOpenSeries={onOpenSeries} />
-      <StackRound side="al" label="AL Division Series" series={al.ds} onOpenSeries={onOpenSeries} />
-      <StackRound side="al" label="AL Championship" series={al.cs} onOpenSeries={onOpenSeries} />
+      <StackRound side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <p className="psstack__roundlabel psstack__roundlabel--ws">World Series</p>
       {ws && (
         <button type="button" className="pswscard pswscard--stack" onClick={() => onOpenSeries(ws)}>
@@ -194,9 +242,9 @@ function BracketStack({ season, onOpenSeries }) {
           ))}
         </button>
       )}
-      <StackRound side="nl" label="NL Championship" series={nl.cs} onOpenSeries={onOpenSeries} />
-      <StackRound side="nl" label="NL Division Series" series={nl.ds} onOpenSeries={onOpenSeries} />
-      <StackRound side="nl" label="NL Wild Card" byes={nl.byes} series={nl.wc} onOpenSeries={onOpenSeries} />
+      <StackRound side="nl" label="NL Championship" lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="nl" label="NL Division Series" lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
+      <StackRound side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
     </div>
   )
 }
