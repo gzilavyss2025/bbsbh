@@ -2,34 +2,31 @@ import { TeamLogo } from './TeamLogo.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
 import { splitName } from '../lib/teamSplits.js'
-import {
-  teamClubName,
-  teamClubNameShort,
-  teamFullName,
-  favoriteAccentColor,
-} from '../lib/teams.js'
+import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 
 // The clubs NOT playing on the slate's date, shown below the games as small
 // gameday-styled cards — same framed, overscaled logo tile the slate matchup
 // cards use (see .gamecard__logobox), scaled down. Tapping a card opens that
 // team's page, carrying the date/level as the spoiler-safe cutoff (teamPath's
-// `d`/`s`) just like every other in-app team link. MLB only, and the caller
-// only renders it when the slate actually has games (an empty All-Star-break
-// day isn't an "off day" for all 30 clubs). Sits above the Day Recap on a past
-// day, below the games on a current one — its one fixed home in the list.
-export function OffDaySection({ teamIds, favoriteTeamId, dateStr, sportId }) {
+// `d`/`s`) just like every other in-app team link. Any level — each `team`
+// carries its own name/mascot straight from statsapi (see fetchTeams), so
+// this needs no MLB-only static id map. The caller only renders it when the
+// slate actually has games (an empty All-Star-break day isn't an "off day"
+// for a whole league). Sits above the Day Recap on a past day, below the
+// games on a current one — its one fixed home in the list.
+export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, dateStr, sportId }) {
   const navigate = useNav()
-  if (!teamIds?.length) return null
+  if (!teams?.length) return null
   return (
     <section className="offday" aria-label="Teams with an off day">
       <h2 className="offday__banner">Off Day</h2>
       <ul className="offday__grid">
-        {teamIds.map((id) => (
-          <li key={id}>
+        {teams.map((team) => (
+          <li key={team.id}>
             <OffDayCard
-              id={id}
-              pinned={id === favoriteTeamId}
-              onOpen={() => navigate(teamPath(id, { d: dateStr, s: sportId }))}
+              team={team}
+              pinned={team.id === favoriteTeamId || !!favoriteAffiliateIds?.has(team.id)}
+              onOpen={() => navigate(teamPath(team.id, { d: dateStr, s: sportId }))}
             />
           </li>
         ))}
@@ -41,17 +38,22 @@ export function OffDaySection({ teamIds, favoriteTeamId, dateStr, sportId }) {
 // One club's off-day tile: the framed logo over its location/mascot name, the
 // same two-line treatment as a slate card's team. The favorite team's tile
 // gets the pinned accent (border tint + star) via the --pin-accent inline var,
-// exactly like .gamecard--pinned.
-function OffDayCard({ id, pinned, onOpen }) {
-  const full = teamFullName(id)
-  // Same hand-maintained splits the slate cards use, so the Athletics render as
-  // "It's Just / Athletics" rather than the API's duplicated "Athletics / Athletics".
-  const { location, mascot } = splitName(full, teamClubName(id))
+// exactly like .gamecard--pinned. favoriteAccentColor is MLB-only and returns
+// null for a MiLB id — the CSS var then just falls back to the default
+// pinned tint (see .offdaycard--pinned's color-mix fallback).
+function OffDayCard({ team, pinned, onOpen }) {
+  const { id, name: full } = team
+  // Same hand-maintained splits the slate cards use, so the Athletics render
+  // as "It's Just / Athletics" rather than the API's duplicated
+  // "Athletics / Athletics"; any team missing from that table falls back to
+  // stripping `teamName` (the mascot) off the end of the full name.
+  const { location, mascot } = splitName(full, team.teamName)
   // The mascot line uses the brand-approved short form where a nickname would
-  // otherwise wrap on the tight tile (Arizona -> "D-backs"); the logo alt below
-  // keeps the full mascot.
-  const shortMascot = teamClubNameShort(id)
-  const style = pinned ? { '--pin-accent': favoriteAccentColor(id) } : undefined
+  // otherwise wrap on the tight tile (Arizona -> "D-backs", MLB only); every
+  // other club — including all of MiLB — falls back to the split mascot.
+  const shortMascot = teamClubNameShort(id) || mascot
+  const accent = pinned ? favoriteAccentColor(id) : null
+  const style = accent ? { '--pin-accent': accent } : undefined
   return (
     <button
       type="button"

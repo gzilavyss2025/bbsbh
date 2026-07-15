@@ -9449,18 +9449,19 @@ body {
 
 /* ---- Slate empty-day banners — the same tape-banner recipe as the player
    page's All-Star/rehab banners above, for GameSelect's empty-slate spot.
-   break-banner reuses the celebratory All-Star blue (it IS the All-Star break);
-   offday-banner is the neutral graphite/ink counterpart for a level's ordinary
-   day off (a Monday MiLB off day, a rare all-30-idle MLB day outside the
-   break). Both stack a caps label over a plain-case "resumes {date}" line
-   rather than the All-Star banner's single centered line, since this spot
-   needs to carry a date. ---- */
+   break-banner reuses the celebratory All-Star blue (every level goes dark
+   the same week — it's not an MLB-only concept here); offday-banner is the
+   neutral graphite/ink counterpart for a level's own ordinary day off (a
+   Monday MiLB off day, a rare all-30-idle MLB day outside the break). One
+   line, label + "resumes {date}" side by side; wraps to two lines only if a
+   narrow viewport can't fit both. ---- */
 .break-banner,
 .offday-banner {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
   margin: 4px 0 var(--space-3);
   padding: 10px 16px;
   border-radius: var(--radius-md);

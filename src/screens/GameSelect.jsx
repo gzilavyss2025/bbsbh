@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate } from '../api/schedule.js'
+import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchScheduleUniforms } from '../api/uniforms.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -8,7 +8,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { useGameScoreVisible } from '../hooks/useGameScoreVisible.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
-import { SPORT_IDS, LEVELS, ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
+import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { fetchGameScores, gameScoreFor } from '../api/gameScore.js'
 import { GameCard } from '../components/GameCard.jsx'
@@ -99,55 +99,71 @@ export function GameSelect({ onPick, onShowLogos }) {
     [data, favoriteTeamId, favoriteAffiliateIds],
   )
 
-  // The 30-team MLB league minus whoever's on today's slate = the clubs with an
-  // off day, favorite first then alphabetical. MLB only (the name/enumeration
-  // helpers are MLB-only, and off-days are a clean concept for a fixed league).
-  // When NONE of the 30 clubs are playing this comes back as all 30 — an empty
-  // break day, or All-Star Game day (whose lone "AL @ NL All-Stars" row carries
-  // squad ids that aren't any of the 30). That all-30 case is kept ON PURPOSE:
-  // the break has no club games, so the full grid gives the slate something to
-  // browse instead of a bare "No games scheduled."
-  const offDayTeamIds = useMemo(() => {
-    if (sportId !== SPORT_IDS.MLB) return []
+  // Every active club at this level (see fetchTeams), independent of the
+  // date — so it barely ever refetches as the user pages day to day.
+  const levelTeams = useAsync(() => fetchTeams(sportId), [sportId])
+
+  // This level's full league minus whoever's on today's slate = the clubs
+  // with an off day, favorite (or its affiliate, on a MiLB level — see
+  // sortGames below) first then alphabetical. Works at every level: MLB's
+  // fixed 30, or a MiLB league's own current roster. When NONE of a level's
+  // clubs are playing this comes back as the WHOLE league — an empty break
+  // day, or (MLB only) All-Star Game day (whose lone "AL @ NL All-Stars" row
+  // carries squad ids no club owns). That all-league case is kept ON PURPOSE:
+  // the break has no club games, so the full grid gives the slate something
+  // to browse instead of a bare "No games scheduled."
+  const offDayTeams = useMemo(() => {
+    const all = levelTeams.data ?? []
+    if (!all.length) return []
     const playing = new Set(sorted.flatMap((g) => [g.away.id, g.home.id]))
-    return ALL_MLB_TEAM_IDS.filter((id) => !playing.has(id)).sort((a, b) => {
-      if (a === favoriteTeamId) return -1
-      if (b === favoriteTeamId) return 1
-      return teamFullName(a).localeCompare(teamFullName(b))
-    })
-  }, [sorted, sportId, favoriteTeamId])
+    return all
+      .filter((t) => !playing.has(t.id))
+      .sort((a, b) => {
+        const pa = isPinnedTeam(a.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
+        const pb = isPinnedTeam(b.id, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
+        if (pa !== pb) return pa - pb
+        return (a.name ?? '').localeCompare(b.name ?? '')
+      })
+  }, [levelTeams.data, sorted, favoriteTeamId, favoriteAffiliateIds])
 
   // All-Star break detection — only worth a fetch once the MLB slate has
   // already come back empty (every other day, this never fires). Turns a
   // bare "No games scheduled." into the Derby hand-off card on Derby night,
   // or a plain break notice on the rest of the gameless week.
-  const isEmptyMlbDay =
-    sportId === SPORT_IDS.MLB && !loading && !error && sorted.length === 0
+  // The break window is a date range, not an MLB-only concept — every level
+  // goes dark the same week — so the lookup is gated on ANY level's slate
+  // coming back empty, not just MLB's.
+  const isEmptyDay = !loading && !error && sorted.length === 0
   const allStarInfo = useAsync(
-    () => (isEmptyMlbDay ? fetchAllStarInfo(season) : Promise.resolve(null)),
-    [isEmptyMlbDay, season],
+    () => (isEmptyDay ? fetchAllStarInfo(season) : Promise.resolve(null)),
+    [isEmptyDay, season],
   )
   const breakWindow = useMemo(
     () => allStarBreakWindow(allStarInfo.data, dateStr),
     [allStarInfo.data, dateStr],
   )
-  const showAllStarBanner = Boolean(breakWindow) && !breakWindow.isDerbyDay
+  // The Derby itself is an MLB-only event (DerbyCard below) — a MiLB slate on
+  // that same date still gets the plain All-Star Break banner, not the card.
+  const isDerbyDay = sportId === SPORT_IDS.MLB && Boolean(breakWindow?.isDerbyDay)
+  const isBreakWindow = Boolean(breakWindow) && !isDerbyDay
+  const allStarPending = isEmptyDay && allStarInfo.loading
 
-  // Generic "Off Day" banner — any level (MLB included, for the rare non-break
-  // day every club is idle) whose slate came back empty and isn't already
-  // covered by the All-Star break window above (that window claims BOTH the
-  // Derby night, via DerbyCard, and the break days, via the banner below).
-  // Gated off while the MLB break check is still in flight so a Derby/break
-  // day doesn't flash "Off Day" first.
-  const isEmptyDay = !loading && !error && sorted.length === 0
-  const allStarPending = sportId === SPORT_IDS.MLB && isEmptyDay && allStarInfo.loading
-  const needsOffDayLookup = isEmptyDay && !breakWindow && !allStarPending
-  const offDayLookup = useAsync(
-    () => (needsOffDayLookup ? fetchNextGameDate(sportId, dateStr) : Promise.resolve(null)),
-    [needsOffDayLookup, sportId, dateStr],
+  // The banner's date always comes from an actual forward schedule scan
+  // (fetchNextGameDate), never straight from statsapi's firstDate2ndHalf —
+  // verified live that field can be well past the real next game (e.g. it
+  // says the 19th when a single game already lands the 16th and the full
+  // slate is back the 17th), so it only bounds the break WINDOW here, never
+  // supplies the date text. Same lookup covers the generic "Off Day" case
+  // (a level's own single day off, e.g. a MiLB Monday) outside any break.
+  const needsResumeLookup = isEmptyDay && !isDerbyDay && !allStarPending
+  const resumeLookup = useAsync(
+    () => (needsResumeLookup ? fetchNextGameDate(sportId, dateStr) : Promise.resolve(null)),
+    [needsResumeLookup, sportId, dateStr],
   )
-  const offDayPending = needsOffDayLookup && offDayLookup.loading
-  const showOffDayBanner = needsOffDayLookup && !offDayLookup.loading && !!offDayLookup.data
+  const resumeLookupPending = needsResumeLookup && resumeLookup.loading
+  const resumeDate = resumeLookup.data
+  const showBreakBanner = isBreakWindow && !!resumeDate
+  const showOffDayBanner = needsResumeLookup && !isBreakWindow && !!resumeDate
 
   // Games with a Top Performers box to reveal — any that have started, on
   // today or a past date. A future date, or today before first pitch, has
@@ -295,27 +311,23 @@ export function GameSelect({ onPick, onShowLogos }) {
         // (below) — briefly while either lookup is still in flight too, so
         // neither flashes "No games scheduled." before the fetch resolves.
         emptyMessage={
-          allStarInfo.loading || breakWindow || offDayPending || showOffDayBanner
+          allStarInfo.loading || breakWindow || resumeLookupPending || showOffDayBanner
             ? null
             : 'No games scheduled.'
         }
       />
 
-      {showAllStarBanner && (
+      {showBreakBanner && (
         <div className="break-banner" role="note">
           <span className="break-banner__text">All-Star Break</span>
-          <span className="break-banner__detail">
-            Games resume {humanDate(breakWindow.resumeDate)}
-          </span>
+          <span className="break-banner__detail">Games resume {humanDate(resumeDate)}</span>
         </div>
       )}
 
       {showOffDayBanner && (
         <div className="offday-banner" role="note">
           <span className="offday-banner__text">Off Day</span>
-          <span className="offday-banner__detail">
-            Games resume {humanDate(offDayLookup.data)}
-          </span>
+          <span className="offday-banner__detail">Games resume {humanDate(resumeDate)}</span>
         </div>
       )}
 
@@ -325,7 +337,7 @@ export function GameSelect({ onPick, onShowLogos }) {
 
       <div className={finals.length > 0 ? 'slate-body' : undefined}>
         <ul className="gamelist">
-          {sorted.length === 0 && breakWindow?.isDerbyDay && (
+          {sorted.length === 0 && isDerbyDay && (
             <li>
               <DerbyCard />
             </li>
@@ -370,13 +382,14 @@ export function GameSelect({ onPick, onShowLogos }) {
           })}
         </ul>
 
-        {/* Any idle club — including the all-30 case on an All-Star break or
-            All-Star Game day, where there are no club games and the full grid
-            is the point (something to browse). */}
-        {offDayTeamIds.length > 0 && (
+        {/* Any idle club — including the whole-league case on an All-Star
+            break or (MLB) All-Star Game day, where there are no club games
+            and the full grid is the point (something to browse). */}
+        {offDayTeams.length > 0 && (
           <OffDaySection
-            teamIds={offDayTeamIds}
+            teams={offDayTeams}
             favoriteTeamId={favoriteTeamId}
+            favoriteAffiliateIds={favoriteAffiliateIds}
             dateStr={dateStr}
             sportId={sportId}
           />
@@ -459,6 +472,12 @@ function isPinned(game, favoriteTeamId, favoriteAffiliateIds) {
     !!favoriteAffiliateIds?.has(game.away.id) ||
     !!favoriteAffiliateIds?.has(game.home.id)
   )
+}
+
+// Same favorite-or-its-affiliate check as isPinned, for a single team id
+// rather than a game's away/home pair — the off-day grid's sort/highlight.
+function isPinnedTeam(id, favoriteTeamId, favoriteAffiliateIds) {
+  return id === favoriteTeamId || !!favoriteAffiliateIds?.has(id)
 }
 
 // Soonest → latest by first pitch; the favorite team's game (or, on a MiLB

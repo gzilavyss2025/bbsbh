@@ -160,24 +160,27 @@ export async function fetchNextGameDate(sportId, fromDateStr, maxDays = 10) {
 
 // Every active club at a level, independent of any date's schedule — used by
 // the logo sheet's level browser so it can show a league's full set of marks
-// rather than just the teams playing today, and by the footer's team
-// directory (see search.js's fetchTeamDirectory) for cross-level name search.
-// Team identity barely ever changes mid-season, so this reads the static
-// weekly snapshot (see teams-static.js) first and only falls back to the live
+// rather than just the teams playing today, by the footer's team directory
+// (see search.js's fetchTeamDirectory) for cross-level name search, and by
+// GameSelect's off-day grid (any level, not just MLB — `teamName` (the bare
+// mascot, e.g. "Mud Hens") rides along so a caller can split off the location
+// with `splitName` (teamSplits.js) without an MLB-only static id map). Team
+// identity barely ever changes mid-season, so this reads the static weekly
+// snapshot (see teams-static.js) first and only falls back to the live
 // endpoint if that file is missing, unparseable, or lacks this sportId.
 export async function fetchTeams(sportId) {
   const staticTeams = await fetchStaticTeams()
   const bucket = staticTeams?.bySportId?.[sportId]
   if (bucket) {
     return bucket
-      .map((t) => ({ id: t.id, name: t.name, sportId, abbreviation: teamAbbr(t) }))
+      .map((t) => ({ id: t.id, name: t.name, teamName: t.teamName, sportId, abbreviation: teamAbbr(t) }))
       .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
   }
   const data = await getJson(`/api/v1/teams?sportId=${sportId}&activeStatus=Y`)
   const teams = data.teams ?? []
   return teams
     .filter((t) => t.active)
-    .map((t) => ({ id: t.id, name: t.name, sportId, abbreviation: teamAbbr(t) }))
+    .map((t) => ({ id: t.id, name: t.name, teamName: t.teamName, sportId, abbreviation: teamAbbr(t) }))
     .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''))
 }
 
