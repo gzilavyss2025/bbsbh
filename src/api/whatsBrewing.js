@@ -168,16 +168,20 @@ const CONFIG = {
   },
   // Dodgers — small tidy sheet, tighter left margin than most; allCapsOnly
   // avoids bold player-name lead-ins ("Wrobleski", "Betts") as titles.
-  // columnMaxX widened past the old 150 — real sentences legitimately wrap
-  // wider than that (e.g. a bolded "Shohei Ohtani"/"Yoshinobu Yamamoto"
-  // mid-list was getting chopped); the marker-based per-line cutoff still
-  // keeps a genuine adjacent box out.
+  // columnMaxX widened past the old 150, then again past a too-conservative
+  // 300 (still chopped a hyphen at a line-wrap: "…will at" + a SEPARATE "-"
+  // item at x=432.77, with the actual word-continuing text on the next
+  // physical line — losing the hyphen meant the two halves joined with a
+  // bare space instead of tidy()'s hyphen-rejoin, producing "at tend)"
+  // instead of "attend)"). A geometry scan confirmed the real second column
+  // doesn't start until ~x440, so 438 is the genuine safe ceiling here; the
+  // marker-based per-line cutoff still keeps that column out regardless.
   119: {
     layout: 'flow-bold',
     bodyFont: /ArticulatCF-Regular/,
     headFont: /ArticulatCF-Bold/,
     headingMaxX: 40,
-    columnMaxX: 300,
+    columnMaxX: 438,
     tableLeader: /\.(\s*\.){7,}/,
     allCapsOnly: true,
     skipTitle: /^Date\/Time/i,
