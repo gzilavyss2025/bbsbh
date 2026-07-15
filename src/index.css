@@ -11706,13 +11706,13 @@ body {
 
 /* ------------------------------------------------------- All-Star game result
    card (AllStarGameResult) — this page's one deliberate exception to the
-   "never print a score" spoiler invariant; see ADR-0019. Full width, both
-   leagues' marks either side of the score, a plain "Box score ›" link. */
+   "never print a score" spoiler invariant; see ADR-0019. Score left-aligned,
+   the host ballpark right-aligned, with the MVP-over-"Box score"-button block
+   nested between the two. Wraps to a stacked read on narrow widths. */
 .allstargame {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  gap: 6px;
   width: 100%;
   padding: var(--space-2) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
@@ -11720,6 +11720,7 @@ body {
   background: var(--surface-card);
 }
 .allstargame__date {
+  align-self: center;
   font-family: var(--font-display);
   font-size: 9px;
   font-weight: var(--w-bold);
@@ -11727,15 +11728,23 @@ body {
   text-transform: uppercase;
   color: var(--text-muted);
 }
-.allstargame__teams {
+.allstargame__main {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.allstargame__score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
 }
 .allstargame__side {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   opacity: 0.6;
 }
 .allstargame__side--winner {
@@ -11748,10 +11757,10 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
 }
-.allstargame__score {
+.allstargame__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -11759,21 +11768,63 @@ body {
   font-family: var(--font-mono);
   color: var(--text-muted);
 }
-.allstargame__box {
+/* MVP-over-box-score-button — nested next to the score, between it and the
+   venue block. */
+.allstargame__mvpbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 0 1 auto;
+}
+.allstargame__mvp {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 12px;
+}
+.allstargame__mvplabel {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 9px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--accent-primary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px 4px;
+  color: var(--text-muted);
 }
-.allstargame__box:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+.allstargame__mvpname {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.allstargame__boxbtn {
+  width: auto;
+  min-width: 116px;
+  min-height: 34px;
+  margin-top: 0;
+  padding: 0 14px;
+  font-size: 13px;
+}
+/* Host ballpark, right-aligned — the club logo when the generator could
+   match the venue to a current team's home park, else the generic league
+   mark (see AllStarGameResult's header comment). */
+.allstargame__venue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  max-width: 160px;
+}
+.allstargame__venuelogo {
+  display: block;
+  object-fit: contain;
+}
+.allstargame__venuename {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ------------------------------------------------------- All-Star team filter

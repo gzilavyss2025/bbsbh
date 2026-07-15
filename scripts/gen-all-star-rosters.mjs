@@ -64,6 +64,22 @@
 // docs/adr/0019-all-star-rosters-shows-final-scores.md for why that's safe
 // here specifically.
 //
+// MVP: GET /api/v1/awards/ASMVP/recipients?season=YYYY (the "Ted Williams
+// All-Star MVP" award, instituted 1962 — earlier seasons simply come back
+// empty, same graceful-degradation as everywhere else in this file), one
+// extra call per season, stored as `mvp[season] = { playerId, name, teamId }`.
+//
+// VENUE / HOST TEAM: the same schedule row's `venue` field gives the
+// ballpark's id + name for free. To show the host club's logo alongside it,
+// this file fetches the CURRENT 30 MLB teams once (GET /api/v1/teams?
+// sportId=1&activeStatus=Y) and builds a venue-id -> team-id map from their
+// present-day home parks. That only resolves a host team when the ASG was
+// played at a park a current team still calls home (recent-ish eras, or a
+// park whose tenant hasn't moved); an older or since-demolished ballpark
+// simply has no match and `teamId` stays null — the venue NAME is always
+// stored regardless, so the screen can fall back to a generic mark. Stored
+// as `venues[season] = { name, teamId }`.
+//
 // Run by hand: node scripts/gen-all-star-rosters.mjs
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -120,13 +136,26 @@ const SCOREBOOK_RANK = Object.fromEntries(SCOREBOOK_ORDER.map((p, i) => [p, i]))
 
 const PITCHER_POSITIONS = new Set(['P', 'SP', 'RP', 'CP'])
 
+console.log('Resolving current teams’ home ballparks…')
+const venueIdToTeamId = new Map()
+try {
+  const data = await getJson('/api/v1/teams?sportId=1&activeStatus=Y')
+  for (const t of data.teams ?? []) {
+    if (t.venue?.id) venueIdToTeamId.set(t.venue.id, t.id)
+  }
+} catch {
+  // A failed lookup just means every venue falls back to no host-team match
+  // below (the venue NAME still comes through) — not fatal.
+}
+
 console.log(`Fetching ${seasons.length} seasons of All-Star selections + games…`)
 
 const seasonJobs = await mapConcurrent(seasons, 8, async (season) => {
-  const [al, nl, sched] = await Promise.all([
+  const [al, nl, sched, asMvp] = await Promise.all([
     getJson(`/api/v1/awards/ALAS/recipients?sportId=1&season=${season}`).catch(() => null),
     getJson(`/api/v1/awards/NLAS/recipients?sportId=1&season=${season}`).catch(() => null),
     getJson(`/api/v1/schedule?sportId=1&season=${season}&gameType=A`).catch(() => null),
+    getJson(`/api/v1/awards/ASMVP/recipients?season=${season}`).catch(() => null),
   ])
   // 1959-1962 played two All-Star Games a year, and the recipients endpoint
   // returns the same season's roster once per game — dedup by (league,
@@ -163,7 +192,21 @@ const seasonJobs = await mapConcurrent(seasons, 8, async (season) => {
     if (t?.team?.id === 160 && typeof t.score === 'number') nlScore = t.score
   }
   const score = alScore != null && nlScore != null ? { al: alScore, nl: nlScore } : null
-  return { season, recipients, gamePk, score }
+
+  const mvpAward = asMvp?.awards?.[0] ?? null
+  const mvp = mvpAward?.player?.id
+    ? {
+        playerId: mvpAward.player.id,
+        name: mvpAward.player.nameFirstLast || '',
+        teamId: mvpAward.team?.id ?? null,
+      }
+    : null
+
+  const venue = game?.venue?.name
+    ? { name: game.venue.name, teamId: venueIdToTeamId.get(game.venue.id) ?? null }
+    : null
+
+  return { season, recipients, gamePk, score, mvp, venue }
 })
 
 // Dedup (teamId, season) pairs across every season before resolving names —
@@ -295,6 +338,8 @@ function classifyRecipients(recipients, boxInfo) {
 const rosters = {}
 const games = {}
 const scores = {}
+const mvps = {}
+const venues = {}
 for (const job of seasonJobs) {
   if (!job) continue
   if (job.recipients.length > 0) {
@@ -312,6 +357,8 @@ for (const job of seasonJobs) {
   }
   if (job.gamePk) games[job.season] = job.gamePk
   if (job.score) scores[job.season] = job.score
+  if (job.mvp) mvps[job.season] = job.mvp
+  if (job.venue) venues[job.season] = job.venue
 }
 
 const seasonsOut = Object.keys(rosters)
@@ -321,7 +368,15 @@ const seasonsOut = Object.keys(rosters)
 await mkdir(dirname(out), { recursive: true })
 await writeFile(
   out,
-  JSON.stringify({ generatedAt: new Date().toISOString(), seasons: seasonsOut, rosters, games, scores }),
+  JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    seasons: seasonsOut,
+    rosters,
+    games,
+    scores,
+    mvps,
+    venues,
+  }),
 )
 console.log(
   `wrote ${out} (${seasonsOut.length} seasons, ${seasonsOut[seasonsOut.length - 1]}–${seasonsOut[0]})`,

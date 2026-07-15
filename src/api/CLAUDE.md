@@ -244,8 +244,11 @@ for each generator; the reader modules:
   full-width result card, not `GameCard`) — a deliberate, narrowly-scoped
   exception to the spoiler rule's "never print a score" invariant, since an
   All-Star Game's result is decades-settled and carries no individual game's
-  stakes; see ADR-0019. Kept OUT of the PWA precache (~650 KB) and fetched at
-  runtime, like `war-history.json`.
+  stakes; see ADR-0019. The same card also shows `mvps[season]` (absent before
+  1962) and `venues[season]` (a name always, plus a best-effort host-team id
+  the generator resolves against the CURRENT 30 teams' home parks — an older
+  or relocated venue falls back to name-only). Kept OUT of the PWA precache
+  (~650 KB) and fetched at runtime, like `war-history.json`.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run

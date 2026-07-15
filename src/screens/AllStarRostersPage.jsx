@@ -159,7 +159,7 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
 // the date + the real club abbreviations the box-score link needs; the score
 // itself comes straight from the static file (data.scores[year]), so the
 // card still renders even in the rare case `card` hasn't resolved yet.
-function RosterYear({ year, roster, score, card, navigate, effectiveTeamId, filtering }) {
+function RosterYear({ year, roster, score, mvp, venue, card, navigate, effectiveTeamId, filtering }) {
   return (
     <section className="allstarrosters__year">
       <span className="allstarrosters__yearnum">{year}</span>
@@ -168,6 +168,8 @@ function RosterYear({ year, roster, score, card, navigate, effectiveTeamId, filt
           <div className="allstarrosters__game">
             <AllStarGameResult
               score={score}
+              mvp={mvp}
+              venue={venue}
               dateLabel={card ? humanDate(card.officialDate) : null}
               onBoxScore={
                 card
@@ -223,6 +225,8 @@ export function AllStarRostersPage() {
   const rosters = data?.rosters ?? {}
   const games = data?.games ?? {}
   const scores = data?.scores ?? {}
+  const mvps = data?.mvps ?? {}
+  const venues = data?.venues ?? {}
   const updated = monthDay(data?.generatedAt?.slice(0, 10))
 
   const visibleSeasons = expanded
@@ -272,6 +276,8 @@ export function AllStarRostersPage() {
                   year={year}
                   roster={rosters[year]}
                   score={scores[year]}
+                  mvp={mvps[year]}
+                  venue={venues[year]}
                   card={card}
                   navigate={navigate}
                   effectiveTeamId={effectiveTeamId}

@@ -21,9 +21,15 @@
 // Awards History/League Leaders/WAR — so this file needs no spoiler cutoff.
 // `scores[season]` is `{ al, nl }`, the game's final score straight off the
 // schedule row the generator already fetches for `games` — see ADR-0019 for
-// why this page (uniquely) shows a final score plainly. Degrades to an empty
-// list before the file exists or on any failure. Cached in-memory for the
-// session since the file only changes on a hand-run regenerate.
+// why this page (uniquely) shows a final score plainly. `mvps[season]` is
+// `{ playerId, name, teamId }` (the Ted Williams All-Star MVP award, absent
+// before 1962 or if simply not yet recorded). `venues[season]` is
+// `{ name, teamId }` — `teamId` is only set when the generator could match
+// the ballpark to one of the 30 CURRENT MLB teams' home park, so an older or
+// since-demolished venue still carries a name with no team match. Degrades
+// to an empty list before the file exists or on any failure. Cached
+// in-memory for the session since the file only changes on a hand-run
+// regenerate.
 let cached = null
 
 export async function loadAllStarRosters() {
@@ -37,10 +43,12 @@ export async function loadAllStarRosters() {
       rosters: data.rosters ?? {},
       games: data.games ?? {},
       scores: data.scores ?? {},
+      mvps: data.mvps ?? {},
+      venues: data.venues ?? {},
       generatedAt: data.generatedAt ?? null,
     }
   } catch {
-    cached = { seasons: [], rosters: {}, games: {}, scores: {}, generatedAt: null }
+    cached = { seasons: [], rosters: {}, games: {}, scores: {}, mvps: {}, venues: {}, generatedAt: null }
   }
   return cached
 }
