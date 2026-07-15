@@ -130,15 +130,16 @@ the harness itself and survives across turns. If the maintainer reports the page
 "stopped working," it's almost always this — just restart with
 `run_in_background: true` again.
 
-## Remaining scope (per `CALIBRATION.md`, not started)
+## Remaining scope (per `CALIBRATION.md`)
 
-Once the GREEN-tier (12 `flow-bold` + Brewers `column` + Pirates `flow` = 14
-clubs) review is fully done, the next phase is the **YELLOW tier** (11 clubs:
-DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL) then **RED** (5: TB, TEX,
-TOR, ATL, CIN, harder templates, do last/maybe skip). `CALIBRATION.md` has the
-per-club font/geometry read-off already done for those. Don't start that until
-the maintainer says the GREEN-tier review is done — this session's whole focus
-has been fixing what was already "shipped" before extending further.
+Since this handoff was written, the YELLOW tier (11 clubs: DET, ARI, CLE, CWS,
+BAL, SF, COL, SD, CHC, WSH, STL) and **ATL** (originally RED, turned out
+tractable) all landed on `main` via other agents' PRs. Only **4 RED-tier clubs
+remain: TB, TEX, TOR, CIN** — genuinely harder templates (multi-column starter
+pages or, for CIN, a bulleted layout with no colon-titled blurbs at all).
+`CALIBRATION.md` has the per-club font/geometry read-off already done for
+those. The GREEN-tier manual review described above may still be worth
+finishing/checking with the maintainer, independent of this.
 
 **ARI (Diamondbacks, 109) jumped the queue** — the maintainer asked to check it
 out mid-review, so it's now calibrated (out of YELLOW-tier order, ahead of the
