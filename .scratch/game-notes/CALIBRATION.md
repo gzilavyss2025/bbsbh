@@ -83,7 +83,7 @@ exclusion the Pirates entry already models. See `flowbold-test.mjs` in this fold
 | ---- | ----- | --- |
 | 🟢 **GREEN** (12) | BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC, LAA, SEA, MIN, NYY | Clean single left column, unambiguous Regular/Bold split, punny content. Straight `flow-bold` config + geometry tuning. **All 12 calibrated.** |
 | 🟡 **YELLOW** (11) | DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL | Doable but one wrinkle each (split body, multi-column, italic body, substituted fonts, or blander content). **All 11 calibrated.** |
-| 🔴 **RED** (5, 1 done) | ~~ATL~~ (done), TB, TEX, TOR, CIN | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or bulleted-no-headings. ATL turned out tractable (two-narrative-column + a third narrow zone, same shape as NYY/ARI) and is calibrated; see its `CONFIG` entry in `whatsBrewing.js`. **TB, TEX, TOR, CIN remain** — do last / maybe skip (CIN especially: no colon-titled blurbs at all). |
+| 🔴 **RED** (5, 2 done) | ~~ATL~~, ~~CIN~~ (done), TB, TEX, TOR | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or (mis-tiered) two-column narrative. ATL and CIN both turned out tractable — see their `CONFIG` entries in `whatsBrewing.js`. **TB, TEX, TOR remain.** |
 
 Recommended path: land finding #1 (`page` in CONFIG) + finding #2 (`flow-bold`
 variant) as one small parser change, calibrate **BOS + NYM** as pilots (cleanest),
@@ -219,10 +219,16 @@ ALL-CAPS unless noted.
 
 ## 🔴 RED (hard / low-payoff — do last or skip)
 
-ATL was originally in this tier but turned out tractable — same two-narrative-
-column shape as NYY/ARI plus a third narrow zone; see its `CONFIG` entry (teamId
-144) in `whatsBrewing.js` for the calibrated geometry. The four below are the
-genuinely still-open RED clubs.
+ATL and CIN were originally in this tier but turned out tractable. ATL is the
+same two-narrative-column shape as NYY/ARI plus a third narrow zone; see its
+`CONFIG` entry (teamId 144) in `whatsBrewing.js`. CIN's "bulleted, no
+headings" read below was off a different day's PDF — its real template DOES
+have colon-terminated ALL-CAPS titles in a two-column layout (teamId 113);
+see its `CONFIG` entry, which also prompted a shared-parser fix (`dropRects`
+now excludes words before heading detection, not just from the body — needed
+because CIN embeds a stat grid whose bold labels share the heading font and
+were being promoted as bogus titles). TB, TEX, TOR are the genuinely
+still-open RED clubs.
 
 ### TB — Rays (139) · page 2 · multi-column + multi-font
 - Page 2 body `AvenirNextCondensed-Regular`, heads `AvenirNextCondensed-DemiBold` (but NOT left-margin — leftMargin=2), plus heavy `Aleo` (serif) and `Industry-BlackItalic` banners. The starter page is a **multi-column** grid with banner titles in a different family. Titles exist (TODAY'S START, BRONX TO THE BAY, INSIDE THE NUMBERS, ON TOP AT THE TROP) but need column-band + multi-face handling. Hard.
@@ -241,8 +247,12 @@ genuinely still-open RED clubs.
   (mixed-case titles in the narrow zone, a "Braves Breakdown" stat sidebar
   dropped via `skipTitle`).
 
-### CIN — Reds (113) · page 1 · bulleted, no headings
-- Body `ArialMT`, but the notes are a **bullet list** (`•` in a `Redlegs`/`SimpleType` dingbat font) with no colon-titled blurbs — the title/body model doesn't map. `ArialNarrow-Bold` marks some sub-labels. Page 2 is player bios. Would need bullet-segmentation instead of title→body; low payoff.
+### ~~CIN — Reds (113) · page 1 · bulleted, no headings~~ — CALIBRATED
+- This read was off a day's PDF that happened to lack punny sections. The
+  real template DOES have colon-terminated ALL-CAPS titles ("SERIES NOTES:",
+  "ELLY MAKING HISTORY:", "TOUGH SLEDDING:", …), two-column like NYY/ARI/ATL.
+  `Redlegs` is a real (if oddly-named) head-weight font, not a dingbat.
+  See the `113:` entry in `whatsBrewing.js` for the full geometry.
 
 ---
 

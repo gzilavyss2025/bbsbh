@@ -699,6 +699,57 @@ const CONFIG = {
     // is the last blurb on the page, nothing else is lost by cutting here.
     bottomCutoff: 305,
   },
+  // Reds — page 1, contra CALIBRATION.md's "bulleted, no headings" read (that
+  // was off a different day's PDF that happened to lack the punny sections —
+  // this template DOES have real colon-terminated ALL-CAPS titles, just in a
+  // two-column layout like NYY/ARI/ATL). Head font is "Redlegs" (a real
+  // PostScript name, not a dingbat despite the name) UNIONED with
+  // Arial-BoldMT — the same weight covers genuine section titles ("SERIES
+  // NOTES:", "TODAY'S GAME:") AND inline bold player names/asides
+  // ("RHP Chase Burns", "Wrigley Field") mid-sentence, so a title like
+  // "ALL-STARS: RHP Chase Burns and INF Sal Stewart have been named to the…"
+  // relies on the same colon-mid-line split as KC's "THE RIGHT LANE: Lane
+  // Thomas". Column 1 (TODAY'S GAME, LODOLO TO INJURED LIST, ALL-STARS) runs
+  // x~31-300; topCutoff drops the matchup/broadcast masthead above it.
+  // Column 2 (SERIES NOTES, ELLY MAKING HISTORY, BRING 'EM ON, STRUGGLING
+  // AGAINST PEERS, TOUGH SLEDDING, ANTONE'S BOOK AVAILABLE JULY 17) runs
+  // x~312-580; its own topCutoff drops a head-to-head record table + two
+  // small All-Star bio boxes ("CHASE BURNS", "SAL STEWART" — same Redlegs
+  // font, standalone one-word lines) sitting above the narrative. A shared
+  // bottomCutoff drops the "UPCOMING PROBABLE STARTING PITCHERS & BROADCAST
+  // SCHEDULE" table below both columns.
+  //
+  // A two-player All-Star comparison stat grid ("2026 REDS ALL-STARS" title,
+  // "RHP Chase Burns"/"INF Sal Stewart" column heads, then AVG/OBP/OPS/…
+  // rows) sits mid-column INSIDE the ALL-STARS blurb's own y-range at
+  // x<300 — same body/head fonts as the narrative around it (no third
+  // decorative font to self-exclude), and its bold stat abbreviations
+  // ("AVG", "SLG", "QS") sit at the left margin, so without the dropRect
+  // below they'd each wrongly register as their own bogus title. A lone
+  // "SAL STEWART" a bit further down is a section-divider label (switching
+  // the bullets that follow from Burns's to Stewart's) with no table under
+  // it, same fix.
+  113: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT|Arial-ItalicMT/,
+    headFont: /Redlegs|Arial-BoldMT/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    bottomCutoff: 105,
+    columns: [
+      {
+        xMin: 0,
+        headingMaxX: 65,
+        columnMaxX: 300,
+        topCutoff: 815,
+        dropRects: [
+          { xMin: 0, yMax: 650, yMin: 545 }, // Burns/Stewart comparison grid
+          { xMin: 0, yMax: 330, yMin: 322 }, // "SAL STEWART" divider label
+        ],
+      },
+      { xMin: 300, headingMaxX: 330, columnMaxX: 595, topCutoff: 550 },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
@@ -979,7 +1030,17 @@ function extractFlowBoldZone(items, realName, cfg) {
     const marks = allWords.filter((w) => cfg.topCutoffAfter.test(w.str) && w.x >= xMin && w.x < cfg.columnMaxX)
     if (marks.length) topCutoff = Math.min(topCutoff, Math.max(...marks.map((w) => w.y)))
   }
-  const words = allWords.filter((w) => w.x >= xMin && w.y < topCutoff && w.y > bottomCutoff)
+  // cfg.dropRects excludes words entirely at this stage — not just from the
+  // eventual body — because a small embedded box whose OWN labels happen to
+  // share the head font (CIN: bold stat abbreviations "AVG"/"SLG"/"QS" sitting
+  // at the left margin inside a mid-column comparison grid) would otherwise
+  // get promoted as their own bogus headings, which then steals ownership of
+  // the real prose immediately below them. Every other club's dropRects usage
+  // (SF, SD) only ever needed to hide body-font DATA rows, so this earlier cut
+  // is behavior-identical for them and only changes anything for a club whose
+  // dropped region also contains head-font text.
+  const inDropRect = (w) => (cfg.dropRects ?? []).some((r) => w.x >= r.xMin && w.y <= r.yMax && w.y >= r.yMin)
+  const words = allWords.filter((w) => w.x >= xMin && w.y < topCutoff && w.y > bottomCutoff && !inDropRect(w))
   if (!words.length) return []
   snapSuperscriptOrdinals(words)
 
@@ -1156,22 +1217,22 @@ function extractFlowBoldZone(items, realName, cfg) {
   // PHI marks every wrapped body LINE with its own margin bullet in one such
   // font, which would otherwise leak into running text mid-sentence.
   const isContent = (w) => cfg.bodyFont.test(w.font) || isHead(w)
-  // cfg.dropRects: rightTableMinX is a full-height cut — wrong when a small
-  // embedded box (its own header in a third decorative font, so THAT
-  // self-excludes, but body/head-font data rows like "Games 5") sits at an x
-  // that a legitimate inline aside also uses elsewhere on the page (SF:
-  // "Stats, LLC," at x≈448, a "C Joey Bart" name at x≈479; SD: a catcher's
-  // slash-line callout mid-column). A rect bounds the exclusion to the box's
-  // own small y-range instead of the whole column height.
-  const inDropRect = (w) => (cfg.dropRects ?? []).some((r) => w.x >= r.xMin && w.y <= r.yMax && w.y >= r.yMin)
+  // dropRects is already applied above (words is pre-filtered), so no need to
+  // re-check it here — rightTableMinX is a full-height cut, still applied here
+  // since it wasn't folded into the earlier pass: wrong when a small embedded
+  // box (its own header in a third decorative font, so THAT self-excludes,
+  // but body/head-font data rows like "Games 5") sits at an x that a
+  // legitimate inline aside also uses elsewhere on the page (SF: "Stats,
+  // LLC," at x≈448, a "C Joey Bart" name at x≈479; SD: a catcher's slash-line
+  // callout mid-column) — rightTableMinX alone can't distinguish those, which
+  // is exactly why dropRects (bounded to the box's own small y-range) exists.
   const body = words.filter(
     (w) =>
       isContent(w) &&
       !w.consumed &&
       w.x < w.cutoff &&
       !cfg.tableLeader.test(w.str) &&
-      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX) &&
-      !inDropRect(w),
+      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
   )
 
   const lines = [...foldedBackLines]
