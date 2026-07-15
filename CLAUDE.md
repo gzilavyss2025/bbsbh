@@ -59,6 +59,14 @@ npm run lint       # eslint . && check-caps.mjs && check-claude-md.mjs
 npm run e2e        # playwright test — verification harness, not a CI suite
 ```
 
+**Reserved dev ports (multi-agent safe).** `dev`/`preview` stay on
+`5173`/`4173` (`strictPort: true`, deliberately — no silent port
+auto-increment). If that's taken by another concurrent agent/worktree, use
+the next free numbered slot instead of guessing a port: `npm run dev:2`
+(`5172`) → `dev:3` (`5171`) → `dev:4` (`5170`) → `dev:5` (`5169`), same
+pattern for `preview:2..5` → `4172..4169`. This repo's band doesn't overlap
+sibling repo tally-nfl's reserved `5174-5178`/`4174-4178`.
+
 The `node scripts/gen-*.mjs` data generators (WAR, rehab, umpires, callouts,
 vs-team-splits, game-notes, minors-leaders, milb-history, …) are documented in
 `scripts/CLAUDE.md`. There is no CI-enforced *test* suite; verify by running

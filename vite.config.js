@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
+// Multi-agent dev ports: 5173/4173 stay the default (other tooling may
+// reference them) and 5169-5172/4169-4172 are reserved exclusively for this
+// repo's numbered `dev:2..5` / `preview:2..5` scripts (package.json) — the
+// sibling repo tally-nfl owns 5174-5178/4174-4178 instead, see its
+// CLAUDE.md's "Reserved dev ports" section. strictPort stays on
+// deliberately: with several agents/worktrees possibly running dev servers
+// on this repo at once, a silent auto-increment would let one agent quietly
+// reuse a port another agent is already bound to instead of failing loudly.
 export default defineConfig({
   server: {
     port: 5173,
