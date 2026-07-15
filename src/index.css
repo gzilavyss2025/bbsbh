@@ -11578,12 +11578,13 @@ body {
   gap: var(--space-3);
   min-width: 0;
 }
-.allstarrosters__league {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
+/* Each league reuses the Team Page's "roster super-section" card
+   (.roster-super/.roster-super__row/__col, .roster-sub/__title — see
+   TeamPage.jsx's Preferred Lineup) instead of a loose flex-wrap of inline
+   names: Starting Lineup in one column, Bullpen + Substitutes stacked in the
+   other, each section a bordered row-list — the same "columns of sub-cards"
+   shape used there, so a 30+ name roster reads as compact rows rather than
+   wrapped whitespace. */
 .allstarrosters__leaguetag {
   flex: none;
   font-family: var(--font-display);
@@ -11593,35 +11594,29 @@ body {
   text-transform: uppercase;
   color: var(--text-muted);
 }
-.allstarrosters__section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding-left: 6px;
+/* One roster section's row list — same bordered-card convention as the Team
+   Page's .thub-roster. */
+.allstarrosters__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
 }
-.allstarrosters__sectionlabel {
-  font-family: var(--font-display);
-  font-size: 9px;
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-faint, var(--text-muted));
-  margin-top: 2px;
-}
-.allstarrosters__recipients {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.allstarrosters__recipient {
-  display: inline-flex;
+.allstarrosters__row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
   align-items: center;
-  gap: 5px;
-  min-width: 0;
+  gap: 8px;
+  padding: 6px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
   font-size: 13px;
-  border-radius: var(--radius-xs);
+}
+.allstarrosters__rows li:first-child {
+  border-top: none;
 }
 /* Same favorite-team highlight as .awardhistory__recipient--fav — a
    selectee who played for the highlighted club (either the team filter's
@@ -11629,29 +11624,17 @@ body {
    AllStarRostersPage's effectiveTeamId) jumps out among the rest of the
    season. Franchise id is stable across a relocation/rename, so this still
    lights up an old team's picks under a since-renamed club. */
-.allstarrosters__recipient--fav {
+.allstarrosters__row--fav {
   background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
-  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
-  padding: 1px 4px 1px 5px;
-  margin: -1px -4px -1px -5px;
 }
 /* The team filter's "everyone else" treatment — dulled, not hidden, so the
-   year/section structure stays intact while one club's picks are singled
-   out (see AllStarTeamFilter + RecipientRow's `filtering` prop). */
-.allstarrosters__recipient--dim {
+   section structure stays intact while one club's picks are singled out
+   (see AllStarTeamFilter + RecipientRow's `filtering` prop). */
+.allstarrosters__row--dim {
   opacity: 0.35;
   filter: grayscale(60%);
 }
-/* Bullpen/Substitutes are pre-grouped by team (gen-all-star-rosters.mjs's
-   groupByTeam) — a hairline above each new club's run makes that grouping
-   legible without repeating a team-name label per player. */
-.allstarrosters__recipient--groupstart {
-  margin-top: 3px;
-  padding-top: 3px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
-}
 .allstarrosters__teamlink {
-  flex: none;
   display: inline-flex;
 }
 .allstarrosters__name {
@@ -11667,7 +11650,30 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
-  font-style: normal;
+}
+/* "Load more" — a single flat jump back to LOAD_MORE_CUTOFF, not
+   incremental paging (see AllStarRostersPage). Plain text-button styling,
+   matching the app's other "reveal more" affordances rather than a heavy
+   bordered button. */
+.allstarrosters__more {
+  align-self: center;
+  margin: var(--space-2) auto 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  display: block;
+}
+.allstarrosters__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 @media (max-width: 520px) {
   .allstarrosters__year {

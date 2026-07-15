@@ -22,6 +22,13 @@ function monthDay(iso) {
   return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
 }
 
+// How many most-recent seasons show by default, and how far back "Load
+// more" reaches in one press — a flat cutoff rather than incremental
+// paging, since 1990-and-earlier All-Star history is a much colder path
+// than the last decade.
+const DEFAULT_SEASON_COUNT = 10
+const LOAD_MORE_CUTOFF = 1990
+
 // AL first, then NL — a fixed order so a season's row always reads the same
 // way regardless of what order the source recipients arrived in (same
 // convention as AwardsHistoryPage's groupByLeague).
@@ -31,48 +38,69 @@ const LEAGUE_ORDER = ['AL', 'NL']
 // display order — the starting lineup (pitcher, DH, and every defensive
 // spot, already scorebook-sorted by the generator), then the bullpen, then
 // the bench. No client-side grouping/sorting needed for any of the three.
-const SECTIONS = [
-  { key: 'starters', label: 'Starting Lineup' },
+// Starting Lineup gets its own column (see RosterLeagues); Bullpen and
+// Substitutes stack in the second column, same two-column split as the Team
+// Page's Preferred Lineup super-section (.roster-super).
+const SECOND_COLUMN = [
   { key: 'bullpen', label: 'Bullpen' },
   { key: 'substitutes', label: 'Substitutes' },
 ]
 
-// One recipient row. `effectiveTeamId` is the team currently highlighted —
-// either the picked team filter or, absent a filter, the user's favorite
-// team (see AllStarRostersPage). `filtering` is true only when an explicit
-// team is picked, in which case every OTHER recipient dims rather than being
-// removed — the year/section structure stays intact, just visually muted.
-function RecipientRow({ r, effectiveTeamId, filtering, groupStart }) {
+// One recipient row, styled like the Team Page's roster rows (.thub-row) —
+// a bordered list card instead of loose inline spans, so a season with a
+// full 30+ name roster reads as compact rows rather than wrapped whitespace.
+// `effectiveTeamId` is the team currently highlighted — either the picked
+// team filter or, absent a filter, the user's favorite team (see
+// AllStarRostersPage). `filtering` is true only when an explicit team is
+// picked, in which case every OTHER recipient dims rather than being
+// removed — the section structure stays intact, just visually muted.
+function RecipientRow({ r, effectiveTeamId, filtering }) {
   const isHighlight = effectiveTeamId != null && r.teamId === effectiveTeamId
   const isDimmed = filtering && r.teamId !== effectiveTeamId
   const favStyle = isHighlight ? { '--fav-accent': favoriteAccentColor(r.teamId) } : undefined
   const classes = [
-    'allstarrosters__recipient',
-    isHighlight && 'allstarrosters__recipient--fav',
-    isDimmed && 'allstarrosters__recipient--dim',
-    groupStart && 'allstarrosters__recipient--groupstart',
+    'allstarrosters__row',
+    isHighlight && 'allstarrosters__row--fav',
+    isDimmed && 'allstarrosters__row--dim',
   ]
     .filter(Boolean)
     .join(' ')
   return (
-    <span className={classes} style={favStyle}>
+    <li className={classes} style={favStyle}>
       {r.teamId ? (
         <TeamLink id={r.teamId} className="allstarrosters__teamlink">
-          <TeamLogo teamId={r.teamId} name={r.teamName} size={16} />
+          <TeamLogo teamId={r.teamId} name={r.teamName} size={18} />
         </TeamLink>
       ) : (
-        <TeamLogo teamId={r.teamId} name={r.teamName} size={16} />
+        <TeamLogo teamId={r.teamId} name={r.teamName} size={18} />
       )}
       <PlayerLink id={r.playerId} className="allstarrosters__name">
         {r.name}
       </PlayerLink>
-      {r.position && <em className="allstarrosters__pos">{r.position}</em>}
-    </span>
+      {r.position && <span className="allstarrosters__pos">{r.position}</span>}
+    </li>
+  )
+}
+
+// A bordered card list — one per roster section — mirroring the Team Page's
+// .thub-roster convention. Returns null for an empty bucket so a caller can
+// render it unconditionally.
+function RosterCard({ recipients, effectiveTeamId, filtering }) {
+  if (!recipients.length) return null
+  return (
+    <ul className="allstarrosters__rows">
+      {recipients.map((r) => (
+        <RecipientRow key={r.playerId} r={r} effectiveTeamId={effectiveTeamId} filtering={filtering} />
+      ))}
+    </ul>
   )
 }
 
 // A season's full roster, AL then NL, each broken into its three precomputed
-// sections. `teamName` (unused for display now that the logo carries team
+// sections and laid out in the same two-column "super-section" shape as the
+// Team Page's Preferred Lineup (.roster-super/.roster-super__row/__col) —
+// Starting Lineup on its own in column one, Bullpen + Substitutes stacked in
+// column two. `teamName` (unused for display now that the logo carries team
 // identity — see TeamLink/TeamLogo above) is still the club's name AS OF that
 // season (a season-scoped lookup in the generator, not the app's current-team
 // table) — a 1933 Washington Senators pick reads as a Senator, not a Twin,
@@ -85,38 +113,38 @@ function RosterLeagues({ roster, effectiveTeamId, filtering }) {
       {leagues.map((league) => {
         const bucket = roster[league]
         return (
-          <div className="allstarrosters__league" key={league}>
+          <div className="roster-super" key={league}>
             <span className="allstarrosters__leaguetag">{league}</span>
-            {SECTIONS.map(({ key, label }) => {
-              const recipients = bucket[key] ?? []
-              if (!recipients.length) return null
-              // Bullpen/Substitutes are pre-grouped by team (see the
-              // generator's groupByTeam); mark each run's first row so the
-              // CSS can add a hairline between clubs. Starting Lineup is
-              // sorted by scorebook position instead, so no grouping cue
-              // applies there even if two same-club rows land adjacent.
-              let prevTeamId = null
-              return (
-                <div className="allstarrosters__section" key={key}>
-                  <span className="allstarrosters__sectionlabel">{label}</span>
-                  <div className="allstarrosters__recipients">
-                    {recipients.map((r, i) => {
-                      const groupStart = key !== 'starters' && i > 0 && r.teamId !== prevTeamId
-                      prevTeamId = r.teamId
-                      return (
-                        <RecipientRow
-                          key={r.playerId}
-                          r={r}
-                          effectiveTeamId={effectiveTeamId}
-                          filtering={filtering}
-                          groupStart={groupStart}
-                        />
-                      )
-                    })}
-                  </div>
-                </div>
-              )
-            })}
+            <div className="roster-super__row">
+              <div className="roster-super__col">
+                {bucket.starters?.length > 0 && (
+                  <section className="roster-sub">
+                    <h4 className="roster-sub__title">Starting Lineup</h4>
+                    <RosterCard
+                      recipients={bucket.starters}
+                      effectiveTeamId={effectiveTeamId}
+                      filtering={filtering}
+                    />
+                  </section>
+                )}
+              </div>
+              <div className="roster-super__col">
+                {SECOND_COLUMN.map(({ key, label }) => {
+                  const recipients = bucket[key] ?? []
+                  if (!recipients.length) return null
+                  return (
+                    <section className="roster-sub" key={key}>
+                      <h4 className="roster-sub__title">{label}</h4>
+                      <RosterCard
+                        recipients={recipients}
+                        effectiveTeamId={effectiveTeamId}
+                        filtering={filtering}
+                      />
+                    </section>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         )
       })}
@@ -178,17 +206,29 @@ function RosterYear({ year, roster, score, card, navigate, effectiveTeamId, filt
 // EVERY season at once, overriding the ordinary favorite-team highlight
 // while active — `effectiveTeamId` below is the filter pick, falling back to
 // favoriteTeamId only when no filter is picked (the default "MLB" entry).
+//
+// Only the most recent DEFAULT_SEASON_COUNT seasons render up front — ~90
+// years of full rosters in one DOM tree is the bulk of what made this page
+// feel slow. "Load more" is a single flat jump back to LOAD_MORE_CUTOFF
+// (1990), not incremental paging; seasons older than that aren't reachable
+// from this page yet.
 export function AllStarRostersPage() {
   useDocumentTitle('All-Star Rosters')
   const navigate = useNav()
   const { favoriteTeamId } = useFavoriteTeam()
   const [filterTeamId, setFilterTeamId] = useState(null)
+  const [expanded, setExpanded] = useState(false)
   const { loading, error, data } = useAsync(() => loadAllStarRosters(), [])
   const seasons = data?.seasons ?? []
   const rosters = data?.rosters ?? {}
   const games = data?.games ?? {}
   const scores = data?.scores ?? {}
   const updated = monthDay(data?.generatedAt?.slice(0, 10))
+
+  const visibleSeasons = expanded
+    ? seasons.filter((y) => y >= LOAD_MORE_CUTOFF)
+    : seasons.slice(0, DEFAULT_SEASON_COUNT)
+  const canLoadMore = !expanded && seasons.length > DEFAULT_SEASON_COUNT
 
   const gamePks = Object.values(games)
   const gamePksKey = gamePks.join(',')
@@ -223,7 +263,7 @@ export function AllStarRostersPage() {
           </p>
           <AllStarTeamFilter selectedTeamId={filterTeamId} onSelect={setFilterTeamId} />
           <div className="allstarrosters__list">
-            {seasons.map((year) => {
+            {visibleSeasons.map((year) => {
               const gamePk = games[year]
               const card = gamePk ? cards[gamePk] : null
               return (
@@ -240,6 +280,15 @@ export function AllStarRostersPage() {
               )
             })}
           </div>
+          {canLoadMore && (
+            <button
+              type="button"
+              className="allstarrosters__more"
+              onClick={() => setExpanded(true)}
+            >
+              Load more (back to {LOAD_MORE_CUTOFF})
+            </button>
+          )}
           {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
         </>
       )}
