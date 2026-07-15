@@ -11278,12 +11278,19 @@ body {
   color: var(--text-heading);
 }
 .pshistory__championtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-family: var(--font-display);
   font-size: 9.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--accent-primary);
+}
+.pshistory__championtrophy {
+  flex: none;
+  display: block;
 }
 
 .psbracket {
@@ -11301,6 +11308,9 @@ body {
   gap: 8px;
 }
 .psbracket__roundlabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin: 0;
   font-family: var(--font-display);
   font-size: 10.5px;
@@ -11308,6 +11318,10 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+.psbracket__roundtrophy {
+  flex: none;
+  display: block;
 }
 .psbracket__list {
   display: flex;
@@ -11408,6 +11422,12 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+.psmodal__trophy {
+  display: block;
+  margin: 0 auto;
+  height: 56px;
+  width: auto;
 }
 .psmodal__result {
   display: flex;

@@ -53,17 +53,43 @@ function SeasonBracket({ season, onOpenSeries }) {
             size={28}
           />
           <span className="pshistory__championname">{teamFullName(season.championTeamId)}</span>
-          <span className="pshistory__championtag">World Series Champion</span>
+          <span className="pshistory__championtag">
+            <img
+              src="/brand/world-series-trophy-icon.png"
+              alt=""
+              className="pshistory__championtrophy"
+              width={14}
+              height={14}
+              aria-hidden="true"
+            />
+            World Series Champion
+          </span>
         </TeamLink>
       </div>
 
       <div className="psbracket">
         {season.rounds.map((round) => (
           <div className="psbracket__round" key={round.key}>
-            <p className="psbracket__roundlabel">{round.label}</p>
+            <p className="psbracket__roundlabel">
+              {round.key === 'worldseries' && (
+                <img
+                  src="/brand/world-series-trophy-icon.png"
+                  alt=""
+                  className="psbracket__roundtrophy"
+                  width={12}
+                  height={12}
+                  aria-hidden="true"
+                />
+              )}
+              {round.label}
+            </p>
             <div className="psbracket__list">
               {round.series.map((series) => (
-                <SeriesTile key={series.id} series={series} onOpen={onOpenSeries} />
+                <SeriesTile
+                  key={series.id}
+                  series={round.key === 'worldseries' ? { ...series, isWorldSeries: true } : series}
+                  onOpen={onOpenSeries}
+                />
               ))}
             </div>
           </div>
