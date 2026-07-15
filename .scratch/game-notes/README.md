@@ -1,11 +1,16 @@
-# Game Notes → What's Brewing: extend the parser to the other 28 clubs
+# Game Notes → What's Brewing: parser calibration (all 30 clubs done)
 
 The lineup page's **Game notes** button opens an in-app modal of the punny
 narrative blurbs parsed out of a club's pre-game Game Notes PDF — but only for
-**calibrated** clubs. Done so far: Brewers (158, `column`), Pirates (134, `flow`),
-and the 12 **GREEN**-tier `flow-bold` clubs (BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC,
-LAA, SEA, MIN, NYY). Every other club still just links out to the raw PDF. Goal:
-calibrate the remaining **YELLOW** (11) and **RED** (5) tiers — see `CALIBRATION.md`.
+**calibrated** clubs. **All 30 MLB clubs are calibrated** as of this writing:
+Brewers (158, `column`), Pirates (134, `flow`), all 12 GREEN-tier and 11
+YELLOW-tier `flow-bold` clubs, and all 5 originally-RED clubs (ATL, CIN, TB,
+TEX, TOR — each turned out tractable once profiled against its real game-day
+PDF; several of RED tier's original "hard" reads had actually described a
+different day's page-2 starter-notes layout rather than the real page-1
+narrative). This file + `CALIBRATION.md` are kept as reference for the
+calibration methodology and tooling below, useful if a club's template
+changes or a parsing bug is reported.
 
 - Parser + per-club `CONFIG`: `src/api/whatsBrewing.js`
 - How the parse works / three layouts / Node harness: `docs/whats-brewing.md`

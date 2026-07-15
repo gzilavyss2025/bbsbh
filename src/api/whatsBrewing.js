@@ -818,6 +818,43 @@ const CONFIG = {
       { xMin: 355, headingMaxX: 380, columnMaxX: 610 },
     ],
   },
+  // Blue Jays — page 1 (CALIBRATION.md's "page 2, duplicated stream, leftMargin
+  // 0" read described a different day's starter-notes page; the game-day
+  // narrative is on page 1 and has neither quirk). Same three-zone shape as
+  // TEX: a left "2026 AT A GLANCE" stats sidebar (x<165, ignored) beside two
+  // real narrative columns at x=173.3 (THE LATEST, DOING VLAD THINGS, CLASE
+  // CLOSED, CAPTAIN KIRK, ERN-DOG) and x=378.8 (ON THE ROAD AGAIN, GOING THE
+  // EXTRA MILE, FRAME THIS). The masthead above both columns (team records,
+  // matchup banner) uses entirely different display fonts (BlueJaysSolid-Bold,
+  // HelveticaNeueCondensed*, BritannicBold) that self-exclude regardless of
+  // topCutoff. bottomCutoff drops the "UPCOMING PROBABLE PITCHING MATCHUPS"
+  // schedule table below both columns.
+  141: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT/,
+    // The right column's last blurb, "VS. THE PADRES:", is titled in
+    // Arial-BoldItalicMT — a different weight from the rest of the page's
+    // Arial-BoldMT titles — so headFont unions both; its own head-to-head
+    // record grid ("2026: 1-1 Road: 8-6", "Road: 1-1 Petco Park: 8-6") sits
+    // on two baselines directly below the title, in plain Arial-BoldMT at the
+    // same x as real titles, so a dropRect (bounded to just those two rows,
+    // between the title's own baseline and where the real prose resumes)
+    // keeps them from being promoted as their own bogus "2026"/"Road" titles.
+    headFont: /Arial-BoldMT|Arial-BoldItalicMT/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 815,
+    bottomCutoff: 65,
+    columns: [
+      { xMin: 168, headingMaxX: 190, columnMaxX: 375 },
+      {
+        xMin: 375,
+        headingMaxX: 395,
+        columnMaxX: 610,
+        dropRects: [{ xMin: 375, yMax: 400, yMin: 375 }],
+      },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and

@@ -40,6 +40,7 @@ const TITLES = {
   113: 'Reds Game Notes',
   139: 'Rays Game Notes',
   140: 'Rangers Game Notes',
+  141: 'Blue Jays Game Notes',
 }
 
 // True when this club's Game Notes template is calibrated — the caller opens the

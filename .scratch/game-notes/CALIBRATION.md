@@ -8,9 +8,12 @@ Everything was read off each club's `{ABBR}-latest.pdf` in this folder with
 `page-scan.mjs` (which page carries the narrative). All sheets are **US Legal,
 612 × 1008 pt**.
 
-Done already (not here): **Brewers (158)** `column`, **Pirates (134)** `flow`, all
-12 GREEN clubs, all 11 YELLOW clubs, and **ATL** (moved out of RED — see below).
-Remaining: **TB, TEX, TOR, CIN** (RED tier).
+**All 30 MLB clubs are now calibrated** — Brewers (158) `column`, Pirates (134)
+`flow`, all 12 GREEN, all 11 YELLOW, and all 5 originally-RED clubs (ATL, CIN,
+TB, TEX, TOR all turned out tractable once profiled against their real
+game-day PDF). See each club's `CONFIG` entry in `whatsBrewing.js` for the
+calibrated geometry; this file is kept as historical reference for the
+font/geometry read-off methodology.
 
 > **Running this from the repo (incl. Claude Code cloud):** the PDFs are **not**
 > committed (large + the "latest" one changes daily). Fetch a club's current PDF by
@@ -83,7 +86,7 @@ exclusion the Pirates entry already models. See `flowbold-test.mjs` in this fold
 | ---- | ----- | --- |
 | 🟢 **GREEN** (12) | BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC, LAA, SEA, MIN, NYY | Clean single left column, unambiguous Regular/Bold split, punny content. Straight `flow-bold` config + geometry tuning. **All 12 calibrated.** |
 | 🟡 **YELLOW** (11) | DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL | Doable but one wrinkle each (split body, multi-column, italic body, substituted fonts, or blander content). **All 11 calibrated.** |
-| 🔴 **RED** (5, 4 done) | ~~ATL~~, ~~CIN~~, ~~TB~~, ~~TEX~~ (done), TOR | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or (mis-tiered) two-column/single-wide-column narrative. ATL, CIN, TB, and TEX all turned out tractable — see their `CONFIG` entries in `whatsBrewing.js`. **TOR remains.** |
+| 🔴 **RED** (5, all done) | ~~ATL~~, ~~CIN~~, ~~TB~~, ~~TEX~~, ~~TOR~~ | Every RED-tier club turned out tractable once profiled against its actual game-day PDF (most of the original reads described a different day's PAGE-2 starter-notes layout instead of the real page-1 narrative). See each club's `CONFIG` entry in `whatsBrewing.js`. |
 
 Recommended path: land finding #1 (`page` in CONFIG) + finding #2 (`flow-bold`
 variant) as one small parser change, calibrate **BOS + NYM** as pilots (cleanest),
@@ -251,8 +254,15 @@ still-open RED clubs.
   risk since each zone's xMin/columnMaxX cleanly excludes the other. See the
   `140:` entry in `whatsBrewing.js`.
 
-### TOR — Blue Jays (141) · page 2 · multi-column, heads not left-margin
-- Page 2 body `ArialMT`, heads `Arial-BoldMT` (71) but leftMargin=0 — headings are inside columns. Titles (TODAY'S GAME, 2026 HIGHLIGHTS, VS. THE GIANTS) present but the layout duplicates each run twice in the stream ("TODAY'S GAME:TODAY'S GAME:") — a de-dupe quirk plus multi-column. Hard.
+### ~~TOR — Blue Jays (141) · page 2 · multi-column, heads not left-margin~~ — CALIBRATED (as page 1)
+- This read described a different day's page-2 starter-notes layout (which
+  does have the stream-duplication quirk noted). The real game-day narrative
+  is on **page 1** and has neither the duplication nor the leftMargin=0
+  problem: two ordinary narrative columns (x=173.3, x=378.8) beside a left
+  stats sidebar to ignore, same shape as TEX. One wrinkle: the last blurb's
+  title ("VS. THE PADRES:") is set in `Arial-BoldItalicMT`, a different
+  weight from the rest of the page's `Arial-BoldMT` — headFont unions both.
+  See the `141:` entry in `whatsBrewing.js`.
 
 ### ~~ATL — Braves (144) · bespoke serif broadsheet~~ — CALIBRATED
 - Turned out tractable: two narrative columns (like NYY/ARI) plus a third narrow
