@@ -50,55 +50,44 @@ export function GameScoreModal({ thresholds, onClose }) {
         </div>
 
         <p className="sheet__body">
-          Game Score rates how <em>memorable</em> a finished game was, on a
-          0&ndash;10 scale &mdash; a quick way to pick which of the day&rsquo;s
-          games is worth your scoring time. It&rsquo;s never the final score
-          itself, just the drama.
+          Game Score rates a finished game from 0 to 10 on a single question:{' '}
+          <em>was it worth scoring?</em> Run down yesterday&rsquo;s slate, find
+          the big number, and that&rsquo;s the game to sit down with. It&rsquo;s
+          never the final score, and it won&rsquo;t hint at one &mdash; it
+          measures the drama, not the result.
         </p>
         <p className="sheet__body">
-          Every game starts with a couple of points just for being played, then
-          earns more across a few categories. A one-sided blowout gives a little
-          back. The total lands on the 0&ndash;10 scale &mdash; and there are
-          many different ways to reach a 10.
+          Every finished game starts with a couple of points just for getting
+          played. The rest is earned, item by item, down the list below, and a
+          blowout hands some back. There&rsquo;s more than one road to a 10: a
+          walk-off can get you there, and so can a one-hitter, a slugfest, or one
+          hitter who refuses to make an out.
         </p>
 
         <div className="gsgroups">
-          <GsGroup title="Drama — how tense it got">
-            <GsFactor label="Lead changes &amp; ties" note="every flip is a page-turn" />
-            <GsFactor label="A big comeback" note="a rally packs dense, consequential innings" />
-            <GsFactor label="Nail-biter finish" note="one run apart late, every pitch counts" />
-            <GsFactor label="Extra innings" note="bonus baseball, guaranteed tension" />
-            <GsFactor label="Walk-off" note="the single best ending in the sport" />
-            <GsFactor label="Low-scoring duel" note="a 1–0 grips even with no lead change" />
+          <GsGroup title="Drama — how late it stayed in doubt">
+            <GsFactor label="Lead changes &amp; ties" note="the game keeps changing its mind" />
+            <GsFactor label="Big comeback" note="a rally loads the late innings" />
+            <GsFactor label="Nail-biter finish" note="one run late, every pitch counts" />
+            <GsFactor label="Extra innings" note="free baseball, tension included" />
+            <GsFactor label="Walk-off" note="nothing in the sport ends better" />
+            <GsFactor label="Low-scoring duel" note="a 1–0 can grip all night" />
           </GsGroup>
 
-          <GsGroup title="Action — how much happened">
-            <GsFactor label="Runs, on both sides" note="more to write down, both dugouts alive" />
-            <GsFactor label="Scoring spread out" note="runs sprinkled beats one big inning" />
-            <GsFactor label="Home runs" note="late tying/go-ahead shots, a cycle, a slam" />
+          <GsGroup title="Action — how busy your pencil got">
+            <GsFactor label="Runs, both sides" note="both dugouts keep you writing" />
+            <GsFactor label="Scoring spread out" note="sprinkled runs beat one crooked number" />
+            <GsFactor label="Home runs" note="extra for the ones that matter late" />
           </GsGroup>
 
-          <GsGroup title="A standout performance">
-            <GsFactor
-              label="A dominant pitching line"
-              note="a near no-hitter or a strikeout gem carries a quiet game"
-            />
-            <GsFactor
-              label="A monster night at the plate"
-              note="multi-homer, a cycle, huge total bases"
-            />
-            <GsFactor
-              label="Debut or twilight bonus"
-              note="a rookie’s first gem or a 40-year-old’s counts extra"
-            />
+          <GsGroup title="The standout — one player carries the night">
+            <GsFactor label="Pitching gem" note="a near no-no lifts a quiet game" />
+            <GsFactor label="Monster night" note="two homers, a cycle, that kind of night" />
+            <GsFactor label="Debut or twilight" note="a first career gem, or a 40-year-old’s" />
           </GsGroup>
 
-          <GsGroup title="What pulls it down">
-            <GsFactor
-              label="A lopsided blowout"
-              note="a laugher subtracts — but a gem cancels it out"
-              negative
-            />
+          <GsGroup title="Deductions — where a game gives points back">
+            <GsFactor label="Blowout" note="a laugher subtracts, unless a gem saves it" negative />
           </GsGroup>
         </div>
 
@@ -106,33 +95,33 @@ export function GameScoreModal({ thresholds, onClose }) {
           <h3 className="gsexamples__title">A few example games</h3>
           <GsExample
             score="9.8"
-            line="Down 3–0, tied it in the 9th, won it on an 11th-inning walk-off single. Drama, saturated."
+            line="Down 3–0, tied in the ninth, walk-off single in the eleventh. You’d frame the scorecard."
           />
           <GsExample
             score="8.4"
-            line="A complete-game one-hitter with 14 strikeouts. Barely any scoring — one pitcher’s gem carries it."
+            line="A one-hitter with 14 strikeouts and almost nothing else on the page. One pitcher is plenty."
           />
           <GsExample
             score="7.1"
-            line="A rookie’s big-league debut: six hitless innings before a cramp pulled him. Electric, and the debut bonus lifts it."
+            line="A rookie’s debut: six no-hit innings until a cramp got him. Electric while it lasted, and the debut bonus does the rest."
           />
           <GsExample
             score="5.0"
-            line="An ordinary 5–3. One lead change, some scoring, never quite a nail-biter — a fine night."
+            line="A 5–3 with one lead change and no late sweat. A fine night, nothing more."
           />
           <GsExample
             score="2.6"
-            line="A 12–2 laugher. Near-zero on every axis, and the blowout subtracts."
+            line="A 12–2 laugher, decided early. The blowout deduction takes its cut."
           />
         </div>
 
         {thresholds && (
           <p className="sheet__body gsmodal__tiers">
-            The colored tiers on the list are set relative to the games showing,
-            not an even split: Elite is {fmt(thresholds.eliteMin)}+, Good is{' '}
+            The color tiers grade on a curve against the games showing now:
+            Elite is {fmt(thresholds.eliteMin)} and up, Good is{' '}
             {fmt(thresholds.goodMin)}–{fmt(thresholds.eliteMin)}, Average is{' '}
-            {fmt(thresholds.averageMin)}–{fmt(thresholds.goodMin)}, and Below
-            Average is under {fmt(thresholds.averageMin)}.
+            {fmt(thresholds.averageMin)}–{fmt(thresholds.goodMin)}, and under{' '}
+            {fmt(thresholds.averageMin)} is Below Average.
           </p>
         )}
       </div>

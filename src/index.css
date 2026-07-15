@@ -42,9 +42,10 @@
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
      - the About page body copy — `.aboutpage .caps-exempt`
-     - the Game Score modal's explainer paragraphs — `.gsmodal .sheet__body`
-       and its example lines `.gsexample__line` (the shouted group
-       subheadings + per-factor table stay uppercase)
+     - the Game Score modal's explainer prose — `.gsmodal .sheet__body`, the
+       quiet factor glosses `.gsfactor__note`, and the example lines
+       `.gsexample__line` (the shouted group subheadings + bold factor labels
+       stay uppercase)
      - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
        `.hint__link` button)
      - `.buzz__text` (Bluesky posts keep their authors' original casing) */
@@ -12566,21 +12567,28 @@ body {
 .gsgroup__factors {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 9px;
   margin: 0;
 }
 
+/* Each factor reads as one wrapping line: a shouted label, a middot, then a
+   quiet natural-case gloss. Running the eye down the bold caps labels scans
+   the whole list at a glance; the gloss is there when you want it. (The old
+   left-label / right-aligned-note split read as a run-on wall.) */
 .gsfactor {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .gsfactor__label {
-  font-size: 13px;
+  display: inline;
   font-weight: var(--w-semibold);
   color: var(--text-body);
+}
+.gsfactor__label::after {
+  content: " · ";
+  font-weight: normal;
+  color: var(--text-caption);
 }
 
 .gsfactor--negative .gsfactor__label {
@@ -12588,10 +12596,9 @@ body {
 }
 
 .gsfactor__note {
+  display: inline;
   margin: 0;
-  font-size: 12px;
   color: var(--text-caption);
-  text-align: right;
 }
 
 /* Made-up example games: a big Game Score chip on the left, a one-line plain-
@@ -12645,15 +12652,17 @@ body {
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
-/* Explainer prose (intro paragraphs, example lines, tier readout) reads as
-   natural sentences; the shouted subheadings + factor table stay uppercase
-   like the rest of the app chrome. The descendant selector keeps inline
-   emphasis (`<em>`) from being re-shouted by the global `#root *` rule, which
-   otherwise matches the child directly and beats the parent's inherited value. */
+/* Explainer prose reads as natural sentences — the intro paragraphs, the
+   quiet factor glosses, the example lines, and the tier readout. Only the
+   shouted chrome (group subheadings + the bold factor labels themselves) stays
+   uppercase. The `.sheet__body *` descendant selector keeps inline emphasis
+   (`<em>`) from being re-shouted by the global `#root *` rule, which otherwise
+   matches the child directly and beats the parent's inherited value. */
 #root .gsmodal .sheet__body,
 #root .gsmodal .sheet__body *,
+#root .gsfactor__note,
 #root .gsexample__line {
-  text-transform: none; /* caps-exempt: Game Score modal's explainer paragraphs + example lines read as natural sentences */
+  text-transform: none; /* caps-exempt: Game Score modal's explainer prose + factor glosses read as natural sentences */
 }
 
 /* ---------------------------------------------------------- highlight sheet
