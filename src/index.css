@@ -7526,6 +7526,14 @@ body {
   margin: -4px -6px;
   padding: 4px 6px;
 }
+/* The team filter's "everyone else" treatment (LeadersPage's TeamFilterStrip)
+   — dulled, not hidden, so a picked club's leaders stand out without the
+   board's overall category structure disappearing. Never set alongside
+   --fav, since a pick always supersedes the favorite-team tint. */
+.tlead__featured--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
+}
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
    outranks the base .shot sizing, same reason as .topperf__shot. Sized well
    past that shared 52px baseline — the leader card is this component's one
@@ -7648,6 +7656,11 @@ body {
   border-radius: var(--radius-xs);
   margin: 0 -6px;
   padding: 1px 6px;
+}
+/* Same team-filter dim treatment as .tlead__featured--dim, for a chaser row. */
+.tlead__row--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
 }
 .tlead__rank {
   flex: none;
@@ -8836,6 +8849,16 @@ body {
   .vsteam__team:not(.is-active):hover .teamlogo {
     opacity: 0.7;
   }
+}
+/* TeamFilterStrip — the same vsteam__tray strip, spanning the full content
+   width as a team highlight picker (League Leaders, All-Star Rosters)
+   rather than the player-page opponent picker's narrower card. */
+.teamfilterstrip {
+  margin: var(--space-2) 0;
+}
+.teamfilterstrip__mlblogo {
+  display: block;
+  object-fit: contain;
 }
 .vsteam__grid {
   margin-top: 2px;
