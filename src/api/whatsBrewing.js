@@ -333,6 +333,34 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Cubs — page 1, single narrative column sitting in the page's MIDDLE
+  // (x~177-451) rather than at the left margin — a leaderboard/milestones
+  // sidebar occupies the true left margin (x<65) and a team stat box sits to
+  // the right (x>463), both excluded by xMin/columnMaxX the same way a thin
+  // left sidebar is excluded elsewhere (NYY). Titles are colon-terminated
+  // ALL-CAPS ("HELLO CINCY:", "THE DOG DAYS OF SUMMER:", "TRENT-ING
+  // UPWARDS:", "20/20 VISION:", "DEVOTED TO DEFFENSE:" [sic], "WEBB-LOCK:").
+  112: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /DINNextLTPro-Regular/,
+    headFont: /DINNextLTPro-Bold/,
+    xMin: 170,
+    headingMaxX: 185,
+    columnMaxX: 460,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    // "THE DOG DAYS OF SUMMER:" ends with a lead-in sentence, then an
+    // embedded stat-splits table (DATE/W-L/AVG/OPS/…) rendered inline as
+    // ordinary bold/body text, no dot-leader — its own column-header row is
+    // ALL-CAPS (ignoring punctuation) and would otherwise read as a real
+    // title of its own. titleMaxLen (comfortably above the longest genuine
+    // title, "THE DOG DAYS OF SUMMER" at 22 chars) rejects it so it folds
+    // back into that blurb's body instead, keeping the table as part of the
+    // narrative rather than splitting it into its own bogus blurb.
+    titleMaxLen: 25,
+    bottomCutoff: 75,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
