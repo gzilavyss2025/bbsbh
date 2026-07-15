@@ -144,6 +144,28 @@ const JUL12 = [
   },
 ]
 
+// 2026-07-10: an unrelated same-day DFA, option, and free-agent signing —
+// a signing should still cluster into a shuffle with other same-day churn
+// (a DES + an OPT is both an add-less "out" pair; the SFA is the day's only
+// "in", so all three combine into one shuffle).
+const JUL10 = [
+  {
+    id: 926755, typeCode: 'DES', date: '2026-07-10', effectiveDate: '2026-07-10',
+    person: { id: 668834, fullName: 'Easton McGee' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers designated RHP Easton McGee for assignment.',
+  },
+  {
+    id: 926753, typeCode: 'SFA', date: '2026-07-10', effectiveDate: '2026-07-10',
+    person: { id: 669060, fullName: 'Bryse Wilson' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers signed free agent RHP Bryse Wilson.',
+  },
+  {
+    id: 926754, typeCode: 'OPT', date: '2026-07-10', effectiveDate: '2026-07-10',
+    person: { id: 680723, fullName: 'Drew Rom' }, fromTeam: BREWERS, toTeam: NASHVILLE,
+    description: 'Milwaukee Brewers optioned LHP Drew Rom to Nashville Sounds.',
+  },
+]
+
 // 2026-07-14: the Easton McGee trade logged twice, once per team's
 // perspective — the second copy missing `person` entirely.
 const JUL14_MCGEE_MIRROR = [
@@ -243,6 +265,28 @@ test('filterStoryworthy drops a MiLB affiliate\'s own IL placement even though i
   assert.equal(withoutGate.length, 2)
 })
 
+test('filterStoryworthy drops REL/SU rows logged entirely at a single affiliate', () => {
+  // Real rows, verified live 2026-07-15 against the league-wide feed: a
+  // release or suspension can be logged with NO fromTeam and a toTeam that's
+  // only ever the affiliate itself — these never carry the MLB org id on
+  // either side, unlike a trade/call-up/option, which always name the MLB
+  // club on one side. REL/SU are in the typeCode whitelist, so without the
+  // org-touch gate these would incorrectly become this org's stories.
+  const affiliateRelease = {
+    id: 1001, typeCode: 'REL', date: '2026-07-08', effectiveDate: '2026-07-08',
+    person: { id: 999002, fullName: 'Melvin Hernandez' }, toTeam: { id: 249, name: 'Wilson Warbirds' },
+    description: 'Wilson Warbirds released RHP Melvin Hernandez.',
+  }
+  const affiliateSuspension = {
+    id: 1002, typeCode: 'SU', date: '2026-06-16', effectiveDate: '2026-06-16',
+    person: { id: 999003, fullName: 'Marco Dinges' }, toTeam: { id: 572, name: 'Wisconsin Timber Rattlers' },
+    description: 'C Marco Dinges suspended.',
+  }
+  const mlbRelease = { ...affiliateRelease, id: 1003, toTeam: BREWERS, description: 'Milwaukee Brewers released RHP Melvin Hernandez.' }
+  const kept = filterStoryworthy([affiliateRelease, affiliateSuspension, mlbRelease], { orgId: 158 })
+  assert.deepEqual(kept.map((t) => t.id), [mlbRelease.id])
+})
+
 test('filterStoryworthy keeps every whitelisted typeCode and drops an unlisted one', () => {
   const trade = JUL12.find((t) => t.typeCode === 'TR')
   const unlisted = { ...trade, id: 12345, typeCode: 'NC', description: 'New contract stuff.' }
@@ -272,13 +316,13 @@ function storiesFor(rawRows) {
   return groupIntoStories(kept, { positions: {}, orgId: 158 })
 }
 
-test('Jul 12: trade+clear, same-player double-move, solo option, rail-less transfer — in that order', () => {
+test('Jul 12: trade+clear, same-player double-move, solo option, transfer with its own photo — in that order', () => {
   const days = storiesFor(JUL12)
   assert.equal(days.length, 1)
   const { stories } = days[0]
   assert.deepEqual(
     stories.map((s) => [s.type, s.rail.length]),
-    [['trade', 2], ['roster-move', 1], ['roster-move', 1], ['roster-move', 0]],
+    [['trade', 2], ['roster-move', 1], ['roster-move', 1], ['roster-move', 1]],
   )
 
   const trade = stories[0]
@@ -302,14 +346,17 @@ test('Jul 12: trade+clear, same-player double-move, solo option, rail-less trans
   })
 
   const transfer = stories[3]
-  assert.deepEqual(transfer.rail, [])
+  assert.deepEqual(transfer.rail, [{
+    role: 'move', banner: 'IL-60', playerId: 605540, name: 'Brandon Woodruff',
+    surname: 'Woodruff', pos: 'RHP', tintTeamId: 158,
+  }])
   assert.equal(
     transfer.cutline.map((s) => s.text).join(''),
     'Transferred RHP Brandon Woodruff from the 15-day injured list to the 60-day injured list. Right shoulder inflammation.',
   )
 })
 
-test('Jul 7: injured-list+replacement, 3-player shuffle, rail-less transfer', () => {
+test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own photo', () => {
   const days = storiesFor(JUL07)
   assert.equal(days.length, 1)
   const { stories } = days[0]
@@ -329,8 +376,25 @@ test('Jul 7: injured-list+replacement, 3-player shuffle, rail-less transfer', ()
   ])
 
   const transfer = stories[2]
-  assert.deepEqual(transfer.rail, [])
+  assert.deepEqual(transfer.rail.map((r) => [r.role, r.banner, r.surname]), [['move', 'IL-60', 'Lockridge']])
   assert.match(transfer.cutline.map((s) => s.text).join(''), /Brandon Lockridge/)
+})
+
+test('Jul 10: a same-day DFA + option + signing cluster into one shuffle', () => {
+  const days = storiesFor(JUL10)
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'shuffle')
+  assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
+    ['in', 'Up', 'Wilson'],
+    ['out', 'Down', 'McGee'],
+    ['out', 'Down', 'Rom'],
+  ])
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Signed free agent RHP Bryse Wilson; designated RHP Easton McGee for assignment; optioned LHP Drew Rom to Nashville Sounds.',
+  )
 })
 
 test('Jun 24: a solo signing and a solo suspension, not merged into one story', () => {

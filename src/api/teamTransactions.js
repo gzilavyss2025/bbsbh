@@ -147,18 +147,20 @@ const STORY_WORTHY_CODES = new Set([
   'CLW', 'PUR', 'WA', 'RET', 'SU',
 ])
 
-// `ctx.orgId`, when given, gates the IL branch to placements/activations/
-// transfers happening AT the MLB club directly (`toTeam.id === orgId`) —
-// otherwise a MiLB affiliate's OWN internal IL move (e.g. "Nashville Sounds
-// placed SS X on the 7-day injured list", `toTeam` the affiliate, never the
-// MLB club) rides in on bucketToOrg's affiliate mapping and reads as this
-// org's news, even though the player's never touched the MLB roster. Every
-// other whitelisted code (CU/OPT/SE/TR/…) is inherently anchored to the MLB
-// club by its own definition, so this gate is scoped to the SC/IL branch only.
+// `ctx.orgId`, when given, requires a row to touch the MLB club DIRECTLY
+// (fromTeam.id or toTeam.id === orgId), not merely an affiliate bucketToOrg
+// mapped up to this org. Verified against the live feed: a release or
+// suspension can be logged entirely at a single affiliate (e.g. "Wilson
+// Warbirds released RHP Melvin Hernandez," toTeam the Single-A club, no
+// fromTeam, never touching the MLB roster at all) — REL/SU/SFA/SGN/IFA are
+// NOT inherently MLB-anchored the way a trade or a call-up/option is (those
+// always name the MLB club on one side, confirmed against the live feed —
+// see the module header). Rather than special-case which codes can leak,
+// every row must clear this gate.
 export function filterStoryworthy(rows, ctx = {}) {
   return (rows ?? []).filter((t) => {
+    if (ctx.orgId != null && t.fromTeam?.id !== ctx.orgId && t.toTeam?.id !== ctx.orgId) return false
     if (t.typeCode === 'SC') {
-      if (ctx.orgId != null && t.toTeam?.id !== ctx.orgId) return false
       return isIlPlacementTxn(t) || isIlEndingTxn(t) || isIlTransferTxn(t)
     }
     return STORY_WORTHY_CODES.has(t.typeCode)
@@ -391,13 +393,12 @@ function buildDayStories(dayRows, ctx) {
   }
 
   // Step 4: leftover churn — cluster into ONE shuffle when ≥2 remain with both
-  // an add and a subtract; otherwise each leftover is its own solo roster-move.
-  // Signings never participate here (see step 5): a free-agent signing has no
-  // 40-man-clearing corollary in the way a recall/option pair does, so it
-  // always resolves as its own "signing" story regardless of same-day churn.
-  const churn = remaining().filter(
-    (c) => (c.dir === 'in' || c.dir === 'out') && !SIGNING_CODES.has(c.row.typeCode),
-  )
+  // an add and a subtract; otherwise each leftover is its own solo story.
+  // Signings DO participate here (e.g. a same-day option clearing a spot for
+  // an unrelated signing reads as one shuffle) — a signing that ends up alone
+  // still resolves as its own "signing" story rather than a generic
+  // "roster-move," it just isn't excluded from clustering up front.
+  const churn = remaining().filter((c) => c.dir === 'in' || c.dir === 'out')
   const hasAdd = churn.some((c) => c.dir === 'in')
   const hasSubtract = churn.some((c) => c.dir === 'out')
   if (churn.length >= 2 && hasAdd && hasSubtract) {
@@ -408,19 +409,20 @@ function buildDayStories(dayRows, ctx) {
     remove(churn.map((c) => c.row))
   } else {
     for (const c of churn) {
-      drafts.push({ storyType: 'roster-move', subtype: 'solo', rows: [{ row: c.row, role: c.dir }] })
+      const isSigning = SIGNING_CODES.has(c.row.typeCode)
+      drafts.push({
+        storyType: isSigning ? 'signing' : 'roster-move',
+        subtype: isSigning ? undefined : 'solo',
+        rows: [{ row: c.row, role: c.dir }],
+      })
       remove([c.row])
     }
   }
 
-  // Step 5: signings with no corollary.
-  const signings = remaining().filter((c) => SIGNING_CODES.has(c.row.typeCode))
-  for (const s of signings) {
-    drafts.push({ storyType: 'signing', rows: [{ row: s.row, role: 'in' }] })
-    remove([s.row])
-  }
-
-  // Step 6: leftover transfers — their own rail-less story, never folded in.
+  // Step 5: leftover transfers — their own story, never folded into a
+  // neighbor's cutline. Still shows a rail slot (the destination IL length as
+  // its banner) — a rail-less transfer read as if the player had no photo on
+  // file at all, which wasn't the intent.
   const transfers = remaining().filter((c) => c.dir === 'transfer')
   for (const t of transfers) {
     drafts.push({
@@ -452,8 +454,14 @@ const TYPE_LABELS = {
   suspension: 'Suspension',
 }
 
+// The destination day-count for an IL placement OR an IL-to-IL transfer —
+// takes the LAST "{N}-day injured list" mention in the description, which is
+// the only one on a placement row ("placed … on the 10-day injured list")
+// and the destination on a transfer row ("from the 15-day … to the 60-day
+// injured list").
 function ilBanner(row) {
-  const days = (row.description || '').match(/(\d+)-day injured list/i)?.[1]
+  const matches = [...(row.description || '').matchAll(/(\d+)-day injured list/gi)]
+  const days = matches[matches.length - 1]?.[1]
   return days ? `IL-${days}` : 'IL'
 }
 function bannerFor(storyType, role, row) {
@@ -461,32 +469,32 @@ function bannerFor(storyType, role, row) {
   if (storyType === 'signing') return 'In'
   if (storyType === 'suspension') return 'Out'
   if (storyType === 'injured-list') return role === 'out' ? ilBanner(row) : 'Up'
+  if (role === 'transfer') return ilBanner(row)
   return role === 'in' ? 'Up' : 'Down'
 }
 
-function buildRail(draft, ctx) {
-  if (draft.storyType === 'roster-move' && draft.subtype === 'transfer') return []
-  if (draft.storyType === 'roster-move' && draft.subtype === 'double') {
-    const row = draft.rows[0].row
-    return [{
-      role: 'move',
-      banner: 'Up/Down',
-      playerId: row.person?.id ?? null,
-      name: row.person?.fullName ?? '',
-      surname: surnameOf(row.person?.fullName ?? ''),
-      pos: resolvePosition(row, ctx),
-      tintTeamId: ctx.orgId,
-    }]
-  }
-  const slots = draft.rows.map(({ row, role }) => ({
+function railSlot(row, role, banner, ctx) {
+  return {
     role,
-    banner: bannerFor(draft.storyType, role, row),
+    banner,
     playerId: row.person?.id ?? null,
     name: row.person?.fullName ?? '',
     surname: surnameOf(row.person?.fullName ?? ''),
     pos: resolvePosition(row, ctx),
     tintTeamId: ctx.orgId,
-  }))
+  }
+}
+
+function buildRail(draft, ctx) {
+  if (draft.storyType === 'roster-move' && draft.subtype === 'transfer') {
+    const row = draft.rows[0].row
+    return [railSlot(row, 'move', ilBanner(row), ctx)]
+  }
+  if (draft.storyType === 'roster-move' && draft.subtype === 'double') {
+    const row = draft.rows[0].row
+    return [railSlot(row, 'move', 'Up/Down', ctx)]
+  }
+  const slots = draft.rows.map(({ row, role }) => railSlot(row, role, bannerFor(draft.storyType, role, row), ctx))
   const railOrder = { in: 0, out: 1 }
   return slots.sort((a, b) => (railOrder[a.role] ?? 0) - (railOrder[b.role] ?? 0))
 }
