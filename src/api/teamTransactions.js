@@ -157,9 +157,27 @@ const STORY_WORTHY_CODES = new Set([
 // always name the MLB club on one side, confirmed against the live feed —
 // see the module header). Rather than special-case which codes can leak,
 // every row must clear this gate.
+// A signing (SFA/SGN/IFA) is the one whitelisted family with no other signal
+// separating a real roster move from anonymous org-filler — a mass minor-
+// league-camp signing spree reads identically to a notable NRI in the raw
+// feed, and (unlike REL/SU) it legitimately carries the MLB club as `toTeam`
+// even when the player is purely organizational depth. `ctx.debutedIds`, when
+// given (a Set of personIds who've appeared in an MLB game — see
+// gen-team-transactions.mjs), is the 80/20 proxy: a signing is suppressed
+// unless its personId is IN the set — a genuinely undebuted signee and a
+// personId this generator run simply couldn't resolve land the same way
+// (suppressed), since there's no way to tell those two apart from a plain Set.
+const SIGNING_CODE_SET = new Set(['SFA', 'SGN', 'IFA'])
+function isUndebutedSigning(t, debutedIds) {
+  if (!debutedIds || !SIGNING_CODE_SET.has(t.typeCode)) return false
+  const pid = t.person?.id
+  return pid != null && !debutedIds.has(pid)
+}
+
 export function filterStoryworthy(rows, ctx = {}) {
   return (rows ?? []).filter((t) => {
     if (ctx.orgId != null && t.fromTeam?.id !== ctx.orgId && t.toTeam?.id !== ctx.orgId) return false
+    if (isUndebutedSigning(t, ctx.debutedIds)) return false
     if (t.typeCode === 'SC') {
       return isIlPlacementTxn(t) || isIlEndingTxn(t) || isIlTransferTxn(t)
     }
@@ -364,15 +382,26 @@ function buildDayStories(dayRows, ctx) {
     }
   }
 
-  // Step 2: trades — each TR seeds a story; a net add pulls ONE clearing move.
-  const trades = remaining().filter((c) => c.row.typeCode === 'TR')
-  for (const tr of trades) {
-    const storyRows = [{ row: tr.row, role: tr.dir === 'out' ? 'out' : 'in' }]
-    remove([tr.row])
-    if (tr.dir === 'in') {
+  // Step 2: trades — every TR row on the day sharing the same (unordered)
+  // club pair is ONE trade, however many players are on either side (a real
+  // 2-for-1 stays one story, not three) — grouped by the same clubPairKey the
+  // dedupe pass already uses. A net add pulls ONE clearing move, tagged
+  // role:'clear' (not 'out') so the cutline can tell "a player we actually
+  // traded away" from "an unrelated roster spot we cleared to make room".
+  const tradeRows = remaining().filter((c) => c.row.typeCode === 'TR')
+  const tradeGroups = new Map()
+  for (const c of tradeRows) {
+    const key = clubPairKey(c.row)
+    if (!tradeGroups.has(key)) tradeGroups.set(key, [])
+    tradeGroups.get(key).push(c)
+  }
+  for (const group of tradeGroups.values()) {
+    const storyRows = group.map((c) => ({ row: c.row, role: c.dir === 'out' ? 'out' : 'in' }))
+    remove(group.map((c) => c.row))
+    if (group.some((c) => c.dir === 'in')) {
       const pick = pickPreferred(remaining().filter((c) => c.dir === 'out'), ['DES', 'OUT', 'REL'])
       if (pick) {
-        storyRows.push({ row: pick.row, role: 'out' })
+        storyRows.push({ row: pick.row, role: 'clear' })
         remove([pick.row])
       }
     }
@@ -491,10 +520,18 @@ function buildRail(draft, ctx) {
     return [railSlot(row, 'move', ilBanner(row), ctx)]
   }
   if (draft.storyType === 'roster-move' && draft.subtype === 'double') {
-    const row = draft.rows[0].row
-    return [railSlot(row, 'move', 'Up/Down', ctx)]
+    // The IL activation is transactional bookkeeping for the option that
+    // follows (see cutlineDouble) — the banner reads "Down" like any other
+    // option, not a neutral "Up/Down".
+    const row = draft.rows.find((r) => r.role === 'out').row
+    return [railSlot(row, 'out', 'Down', ctx)]
   }
-  const slots = draft.rows.map(({ row, role }) => railSlot(row, role, bannerFor(draft.storyType, role, row), ctx))
+  // A trade's pulled 'clear' row (see step 2) renders identically to a real
+  // traded-away player in the rail — the distinction only matters to the
+  // cutline, which reads draft.rows directly.
+  const slots = draft.rows.map(({ row, role }) =>
+    railSlot(row, role === 'clear' ? 'out' : role, bannerFor(draft.storyType, role, row), ctx),
+  )
   const railOrder = { in: 0, out: 1 }
   return slots.sort((a, b) => (railOrder[a.role] ?? 0) - (railOrder[b.role] ?? 0))
 }
@@ -505,26 +542,72 @@ function buildRail(draft, ctx) {
 // day's grouping).
 // ---------------------------------------------------------------------------
 
+// {pos, name, playerId} for each row, joined into one clause ("RHP X, LHP Y
+// and OF Z") — a trade can involve more than one player per side, unlike
+// every other story type's single-player clauses.
+function playersClause(players, emphasis) {
+  const segs = []
+  players.forEach(({ pos, name, playerId }, i) => {
+    if (i > 0) segs.push({ text: i === players.length - 1 ? ' and ' : ', ' })
+    segs.push({ text: posPrefix(pos) })
+    segs.push({ text: name, emphasis, playerId })
+  })
+  return segs
+}
+// A trade's own "for {return}" tail (cash, a PTBNL, …) — only when it's NOT
+// simply restating one of the very players this clause already names. A
+// multi-player trade's raw description is written from the OTHER team's
+// perspective ("… to Milwaukee Brewers for OF Jadyn Fielder"), so Fielder's
+// own outgoing row would otherwise self-reference: "Traded OF Jadyn Fielder
+// … for OF Jadyn Fielder."
+function returnDetailFor(row, ownNames) {
+  const detail = (row.description || '').match(/\bfor\s+(.+?)\.?$/i)?.[1]
+  if (!detail) return null
+  if (ownNames.some((n) => detail.includes(n))) return null
+  return stripPeriod(detail)
+}
+
+// A trade story: every TR row sharing the same day + club pair (§3 step 2),
+// however many players are on either side — a real 2-for-1 reads as one
+// story, not three. `role: 'clear'` (the pulled 40-man-clearing move, if
+// any) is a separate trailing clause, never folded into the "for" list.
 function cutlineTrade(story, ctx) {
-  const primary = story.rows[0]
-  const secondary = story.rows[1]
-  const row = primary.row
-  const name = nameFor(row)
-  const pos = resolvePosition(row, ctx)
-  const otherTeam = primary.role === 'in' ? row.fromTeam : row.toTeam
-  const nick = teamNickname(otherTeam?.name || '')
-  const returnDetail = (row.description || '').match(/\bfor\s+(.+?)\.?$/i)?.[1]
-  const lead = (primary.role === 'in' ? 'Acquired ' : 'Traded ') + posPrefix(pos)
-  const mid = primary.role === 'in' ? ` from the ${nick}` : ` to the ${nick}`
-  const segs = [{ text: lead }, ...emphasizeLabel(name, 'primary', row.person?.id), { text: mid }]
-  if (returnDetail) segs.push({ text: ` for ${stripPeriod(returnDetail)}` })
-  if (secondary) {
-    const sName = nameFor(secondary.row)
-    const sClause = stripPeriod(lowerFirst(
-      stripLeadingClub(secondary.row.description, [secondary.row.fromTeam?.name, secondary.row.toTeam?.name]),
+  const inPlayers = story.rows
+    .filter((r) => r.role === 'in')
+    .map((r) => ({ pos: resolvePosition(r.row, ctx), name: nameFor(r.row), playerId: r.row.person?.id, row: r.row }))
+  const outPlayers = story.rows
+    .filter((r) => r.role === 'out')
+    .map((r) => ({ pos: resolvePosition(r.row, ctx), name: nameFor(r.row), playerId: r.row.person?.id, row: r.row }))
+  const clearRow = story.rows.find((r) => r.role === 'clear')?.row
+
+  const segs = []
+  if (inPlayers.length) {
+    const nick = teamNickname(inPlayers[0].row.fromTeam?.name || '')
+    segs.push({ text: 'Acquired ' })
+    segs.push(...playersClause(inPlayers, 'primary'))
+    segs.push({ text: ` from the ${nick}` })
+    if (outPlayers.length) {
+      segs.push({ text: ' for ' })
+      segs.push(...playersClause(outPlayers, 'secondary'))
+    } else {
+      const detail = returnDetailFor(inPlayers[0].row, inPlayers.map((p) => p.name))
+      if (detail) segs.push({ text: ` for ${detail}` })
+    }
+  } else {
+    const nick = teamNickname(outPlayers[0].row.toTeam?.name || '')
+    segs.push({ text: 'Traded ' })
+    segs.push(...playersClause(outPlayers, 'primary'))
+    segs.push({ text: ` to the ${nick}` })
+    const detail = returnDetailFor(outPlayers[0].row, outPlayers.map((p) => p.name))
+    if (detail) segs.push({ text: ` for ${detail}` })
+  }
+  if (clearRow) {
+    const cName = nameFor(clearRow)
+    const cClause = stripPeriod(lowerFirst(
+      stripLeadingClub(clearRow.description, [clearRow.fromTeam?.name, clearRow.toTeam?.name]),
     ))
     segs.push({ text: '; ' })
-    segs.push(...emphasizeClause(sClause, sName, 'secondary', secondary.row.person?.id))
+    segs.push(...emphasizeClause(cClause, cName, 'secondary', clearRow.person?.id))
   }
   segs.push({ text: '.' })
   return segs
@@ -556,20 +639,22 @@ function cutlineInjuredList(story, ctx) {
   return segs
 }
 
+// Same-player double-move (the Crow case): the IL activation is purely
+// transactional bookkeeping to clear the way for the option that follows it
+// the same day — the option is the real news (see bannerFor's role: 'out'
+// treatment below). Leads with the option, names the player ONCE, and folds
+// the activation in as a trailing parenthetical rather than repeating his
+// name in a second clause.
 function cutlineDouble(story) {
   const inRow = story.rows.find((r) => r.role === 'in').row
   const outRow = story.rows.find((r) => r.role === 'out').row
-  const name = nameFor(inRow)
-  const inClause = stripPeriod(soloText(inRow))
-  const outClause = stripPeriod(lowerFirst(
-    stripLeadingClub(outRow.description, [outRow.fromTeam?.name, outRow.toTeam?.name]),
-  ))
-  return [
-    ...emphasizeClause(inClause, name, 'primary', inRow.person?.id),
-    { text: '; ' },
-    ...emphasizeClause(outClause, name, 'secondary', outRow.person?.id),
-    { text: '.' },
-  ]
+  const name = nameFor(outRow)
+  const outClause = stripPeriod(soloText(outRow))
+  const fromFragment = (inRow.description || '').match(/\bfrom the .*?injured list\b/i)?.[0]
+  const segs = [...emphasizeClause(outClause, name, 'primary', outRow.person?.id)]
+  if (fromFragment) segs.push({ text: ` (activated ${fromFragment} first)` })
+  segs.push({ text: '.' })
+  return segs
 }
 
 function cutlineShuffle(story) {

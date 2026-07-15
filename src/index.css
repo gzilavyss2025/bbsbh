@@ -10221,19 +10221,18 @@ body {
   }
 }
 /* ---------------------------------------------------- team transactions
-   The team page's day-grouped roster-move feed (see .scratch/team-transactions/
-   for the full design). Same bordered-card shell + __head band as
-   .team-score/.postseason-odds above — NOT the wireframe's bespoke
-   double-rule "newspaper flag," which its own annotation flagged as
-   possibly fighting this page's header rhythm; this matches the page's
-   other self-contained cards instead. */
+   The team page's roster-move feed, one story per swipeable card in a
+   horizontal deck (see .scratch/team-transactions/ for the original locked
+   design; reworked into a horizontal scroller per feedback — see
+   .txcard__scroll below). The deck full-bleeds to the SCREEN's own edges
+   (the negative --app-gutter margin, same breakout .slatehead already uses
+   for its rule), so no outer bordered "card" shell wraps it — a bordered box
+   whose own content escapes past its border reads as broken, not deliberate.
+   The section label (.txcard__head) stays inset like any other section
+   caption; only the card deck below it bleeds. */
 .txcard {
   display: grid;
   margin: 14px 0 14px;
-  padding: 9px 10px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
 }
 .txcard__head {
   display: flex;
@@ -10257,33 +10256,58 @@ body {
   letter-spacing: 0;
 }
 
-/* One dateline ("Sunday, July 12") per day, one or more compact stories
-   underneath — real feeds routinely log several moves on one date, so the
-   dateline runs once rather than repeating per story. */
-.txday + .txday {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: var(--bw-hair) solid var(--rule-soft);
+/* A horizontally swipeable deck of story cards, full-bleed to the screen's
+   edges regardless of viewport width — an "infinite scroll" of cards reads
+   oddly boxed into a reading column. Native scroll-snap + an edge mask, the
+   same idiom .vsteam__team already uses for the splits-vs-team club picker,
+   so this reads as a familiar "flip through" gesture, not a new one-off
+   interaction. TeamTransactionsCard.jsx lazy-reveals more cards
+   (already-fetched days first, then a fresh loadMoreTeamTransactions page)
+   as a trailing sentinel nears the visible edge. */
+.txcard__scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 6px;
+  scrollbar-width: thin;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
 }
-.txday__date {
+.txcard__sentinel {
+  flex: 0 0 auto;
+  width: 1px;
+}
+
+/* Each story is its own bordered card — wider than the deck's first cut
+   (a 3-photo rail, a real 2-for-1 trade, needs the room so the cutline
+   doesn't crowd into a narrow wrap). */
+.txstory {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 320px;
+  padding: 10px 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  /* A new block-formatting context, so the floated rail is contained here
+     rather than bleeding past this card's own border. */
+  display: flow-root;
+}
+.txstory__date {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 11.5px;
+  font-size: 9.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-heading);
-}
-
-.txstory {
-  /* A new block-formatting context, so the floated rail is contained here
-     rather than bleeding into the next story's rule/spacing. */
-  display: flow-root;
-}
-.txstory + .txstory {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: var(--bw-hair) dotted var(--rule-soft);
+  color: var(--text-caption);
 }
 
 /* The rail floats top-right; the type pill + cutline run as normal text flow
@@ -10390,46 +10414,6 @@ body {
 .txstory__cutline .plink {
   font-weight: var(--w-bold);
   color: var(--text-heading);
-}
-
-/* Same full-width "load more" affordance as .pshistory__more /
-   .teammates__more / .bs__noteMore — the one difference is this one triggers
-   a real network fetch rather than revealing already-loaded rows, hence the
-   disabled/"Loading…" state those don't need. */
-.txcard__more {
-  display: block;
-  width: 100%;
-  margin: 10px 0 0;
-  padding: 9px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: var(--w-semibold);
-  text-align: center;
-  cursor: pointer;
-}
-.txcard__more:hover {
-  color: var(--text-body);
-}
-.txcard__more:disabled {
-  cursor: default;
-  opacity: 0.7;
-}
-
-/* .screen widens to 960px at this breakpoint (see the WIDE LAYOUT block
-   above), and unlike the compact tile rows in .team-score/.postseason-odds,
-   this card is headshots + prose — stretching it edge to edge reads like an
-   unfinished two-column page with nothing in the second column. Cap it to a
-   comfortable reading width instead (matches the original wireframe's own
-   ~460px desktop cap in .scratch/team-transactions/scope.md) rather than
-   attempting a two-column layout with no defined partner content yet. */
-@media (min-width: 740px) {
-  .txcard {
-    max-width: 460px;
-  }
 }
 
 .team-hub__manager {

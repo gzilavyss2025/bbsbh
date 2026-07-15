@@ -46,19 +46,27 @@ async function fetchAffiliateParentMap(orgIds, season) {
   return map
 }
 
-// Batched position fallback for players whose position can't be parsed out of
-// their own transaction description (see teamTransactions.js's
-// extractPosFromDescription) — cheap, and avoids a per-player fetch.
-async function fetchPositions(personIds) {
+// One batched /people pass covering two needs: the position fallback for
+// players whose position can't be parsed out of their own transaction
+// description (see teamTransactions.js's extractPosFromDescription), and
+// which personIds have ever appeared in an MLB game (`mlbDebutDate` — rides
+// along on the same response, no extra fetch) — the signal
+// filterStoryworthy's undebuted-signing suppression uses (see its own
+// comment for why that's scoped to signings only).
+async function fetchPositionsAndDebuts(personIds) {
   const list = [...new Set(personIds.filter(Boolean))]
-  const out = {}
+  const positions = {}
+  const debutedIds = new Set()
   for (let i = 0; i < list.length; i += 100) {
     const batch = list.slice(i, i + 100)
     if (!batch.length) continue
     const data = await getJson(`/api/v1/people?personIds=${batch.join(',')}`)
-    for (const p of data.people ?? []) out[p.id] = p.primaryPosition?.abbreviation || ''
+    for (const p of data.people ?? []) {
+      positions[p.id] = p.primaryPosition?.abbreviation || ''
+      if (p.mlbDebutDate) debutedIds.add(p.id)
+    }
   }
-  return out
+  return { positions, debutedIds }
 }
 
 const arg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null
@@ -91,13 +99,13 @@ const raw = (
   await getJson(`/api/v1/transactions?startDate=${seasonStart}&endDate=${isoToday()}`)
 ).transactions ?? []
 
-const positions = await fetchPositions(raw.map((t) => t.person?.id))
+const { positions, debutedIds } = await fetchPositionsAndDebuts(raw.map((t) => t.person?.id))
 
 const byTeamId = {}
 for (const orgId of orgIds) {
   const bucketed = bucketToOrg(raw, orgId, affilToOrg)
   const deduped = dedupeTransactions(bucketed)
-  const kept = filterStoryworthy(deduped, { orgId })
+  const kept = filterStoryworthy(deduped, { orgId, debutedIds })
   const days = groupIntoStories(kept, { positions, orgId })
   if (days.length) byTeamId[orgId] = { days }
 }

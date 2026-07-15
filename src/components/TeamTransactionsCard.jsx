@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
@@ -63,10 +63,13 @@ function Cutline({ segments }) {
   )
 }
 
+// One swipeable card — its own dateline (consecutive cards can span
+// different days once the day-header is gone), rail, type pill, cutline.
 function TxStory({ story }) {
   const tone = TYPE_TONE[story.type] ?? 'move'
   return (
     <div className="txstory">
+      <div className="txstory__date">{dateline(story.date)}</div>
       {story.rail.length > 0 && (
         <div className="photorail">
           {story.rail.map((slot, i) => (
@@ -80,35 +83,85 @@ function TxStory({ story }) {
   )
 }
 
-// The team profile's Team Transactions card — a day-grouped, story-paired
-// read of the club's roster-move feed (see .scratch/team-transactions/ for
-// the full design). Spoiler-free (roster moves carry no score), so no
-// SealBox is involved; `asOf` is purely temporal hygiene, matching
-// TeamScoreCard/PostseasonOddsCard's own "through {asOf}" convention.
+// How many story cards render up front, and how many more each lazy-load
+// batch reveals — either from days already fetched (just widen the visible
+// slice) or, once that's exhausted, from a fresh loadMoreTeamTransactions
+// page. Both comfortably inside a phone's initial paint either way.
+const INITIAL_CARDS = 12
+const REVEAL_BATCH = 8
+
+// The team profile's Team Transactions card — a horizontally swipeable strip
+// of story cards (see .scratch/team-transactions/ for the original day-
+// grouped design; reworked into a horizontal scroller per feedback so it
+// reads as a deck to flip through on a touchscreen and uses the full card
+// width at every viewport, rather than a vertical list capped to a reading
+// column). Spoiler-free (roster moves carry no score), so no SealBox is
+// involved; `asOf` is purely temporal hygiene, matching TeamScoreCard/
+// PostseasonOddsCard's own "through {asOf}" convention.
 //
 // `initialDays`/`initialCursor`/`initialHasMore` come from the page's own
 // loadTeam() (the first loadMoreTeamTransactions page, fetched alongside
 // everything else); the caller remounts this component on team/asOf change
 // (key={`${teamId}-${asOf ?? ''}`}, the same technique TeamPage already uses
-// for SeriesStrip) rather than syncing props via an effect. "Load more" pages
-// further back on demand — the one place this card does its own fetching.
+// for SeriesStrip) rather than syncing props via an effect.
 export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor, initialHasMore }) {
   const [days, setDays] = useState(initialDays)
   const [cursor, setCursor] = useState(initialCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(INITIAL_CARDS)
 
-  if (!days.length) return null
+  // The day-grouped pages flattened into one chronological story sequence —
+  // each card carries its own date now that there's no shared day header.
+  const flatStories = useMemo(
+    () => days.flatMap((day) => day.stories.map((story) => ({ ...story, date: day.date }))),
+    [days],
+  )
+  const visibleStories = flatStories.slice(0, visibleCount)
 
-  async function handleLoadMore() {
+  const scrollRef = useRef(null)
+  const sentinelRef = useRef(null)
+
+  // Widens the visible slice (already-fetched days may hold more than's
+  // currently shown) or, once that buffer is exhausted, fetches another
+  // page of days. Re-created each render (see the effect below) so it never
+  // closes over stale days/cursor/hasMore.
+  async function revealMore() {
     if (loadingMore) return
+    if (visibleCount < flatStories.length) {
+      setVisibleCount((n) => n + REVEAL_BATCH)
+      return
+    }
+    if (!hasMore) return
     setLoadingMore(true)
     const page = await loadMoreTeamTransactions(teamId, cursor, asOf)
     setDays((prev) => [...prev, ...page.days])
     setCursor(page.cursor)
     setHasMore(page.hasMore)
+    setVisibleCount((n) => n + REVEAL_BATCH)
     setLoadingMore(false)
   }
+
+  // A trailing sentinel inside the scroll row triggers revealMore once it's
+  // within reach — a horizontal rootMargin lookahead so more cards are ready
+  // before the user physically swipes to the end. Runs after every render
+  // (no deps) so the observer's callback always closes over current state;
+  // re-creating an IntersectionObserver for a deck this size is cheap.
+  useEffect(() => {
+    const root = scrollRef.current
+    const target = sentinelRef.current
+    if (!root || !target) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) revealMore()
+      },
+      { root, rootMargin: '0px 320px 0px 0px' },
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+  })
+
+  if (!flatStories.length) return null
 
   return (
     <section className="txcard" aria-label="Team Transactions">
@@ -116,19 +169,12 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
         <span>Transactions</span>
         {asOf && <em>through {asOf}</em>}
       </div>
-      {days.map((day) => (
-        <div className="txday" key={day.date}>
-          <div className="txday__date">{dateline(day.date)}</div>
-          {day.stories.map((story) => (
-            <TxStory key={story.id} story={story} />
-          ))}
-        </div>
-      ))}
-      {hasMore && (
-        <button type="button" className="txcard__more" onClick={handleLoadMore} disabled={loadingMore}>
-          {loadingMore ? 'Loading…' : 'Load more'}
-        </button>
-      )}
+      <div className="txcard__scroll" ref={scrollRef}>
+        {visibleStories.map((story) => (
+          <TxStory key={story.id} story={story} />
+        ))}
+        <div className="txcard__sentinel" ref={sentinelRef} aria-hidden="true" />
+      </div>
     </section>
   )
 }

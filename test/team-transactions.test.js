@@ -168,6 +168,33 @@ const JUL10 = [
 
 // 2026-07-14: the Easton McGee trade logged twice, once per team's
 // perspective — the second copy missing `person` entirely.
+// 2026-07-15: a real 2-for-1 (plus cash) trade — verified live. Each of the
+// three named players gets his own raw row (all sharing one description,
+// written from the Astros' side), plus a 4th person-less mirror copy that
+// Pass B's dedupe drops.
+const JUL15_MULTI_PLAYER = [
+  {
+    id: 930001, typeCode: 'TR', date: '2026-07-15', effectiveDate: '2026-07-15',
+    person: { id: 700501, fullName: 'Jadyn Fielder' }, fromTeam: BREWERS, toTeam: ASTROS,
+    description: 'Houston Astros traded RHP Lance McCullers Jr., LHP Colton Gordon and cash to Milwaukee Brewers for OF Jadyn Fielder.',
+  },
+  {
+    id: 930002, typeCode: 'TR', date: '2026-07-15', effectiveDate: '2026-07-15',
+    fromTeam: ASTROS, toTeam: BREWERS,
+    description: 'Houston Astros traded RHP Lance McCullers Jr., LHP Colton Gordon and cash to Milwaukee Brewers for OF Jadyn Fielder.',
+  },
+  {
+    id: 930003, typeCode: 'TR', date: '2026-07-15', effectiveDate: '2026-07-15',
+    person: { id: 700502, fullName: 'Colton Gordon' }, fromTeam: ASTROS, toTeam: BREWERS,
+    description: 'Houston Astros traded RHP Lance McCullers Jr., LHP Colton Gordon and cash to Milwaukee Brewers for OF Jadyn Fielder.',
+  },
+  {
+    id: 930004, typeCode: 'TR', date: '2026-07-15', effectiveDate: '2026-07-15',
+    person: { id: 700503, fullName: 'Lance McCullers Jr.' }, fromTeam: ASTROS, toTeam: BREWERS,
+    description: 'Houston Astros traded RHP Lance McCullers Jr., LHP Colton Gordon and cash to Milwaukee Brewers for OF Jadyn Fielder.',
+  },
+]
+
 const JUL14_MCGEE_MIRROR = [
   {
     id: 927453, typeCode: 'TR', date: '2026-07-14', effectiveDate: '2026-07-14',
@@ -287,6 +314,36 @@ test('filterStoryworthy drops REL/SU rows logged entirely at a single affiliate'
   assert.deepEqual(kept.map((t) => t.id), [mlbRelease.id])
 })
 
+test('filterStoryworthy suppresses an undebuted free-agent signing but keeps a debuted one', () => {
+  // Real rows, verified live 2026-05-28: an org-depth minor-league signing —
+  // no structural difference from a real NRI signing in the raw feed (it
+  // legitimately carries toTeam=158), so debut status (ctx.debutedIds, a
+  // plain personId Set — absence means "not known to have debuted," whether
+  // genuinely undebuted or simply not resolved this run) is the only signal.
+  const undebuted = {
+    id: 2001, typeCode: 'SFA', date: '2026-05-28', effectiveDate: '2026-05-28',
+    person: { id: 999010, fullName: 'Deivy Gonzalez' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers signed free agent RHP Deivy Gonzalez to a minor league contract.',
+  }
+  const debuted = {
+    id: 2002, typeCode: 'SFA', date: '2026-05-28', effectiveDate: '2026-05-28',
+    person: { id: 668834, fullName: 'Easton McGee' }, toTeam: BREWERS, // a real MLB arm, per JUL10/JUL14 fixtures
+    description: 'Milwaukee Brewers signed free agent RHP Easton McGee to a major league contract.',
+  }
+  const debutedIds = new Set([668834])
+  const kept = filterStoryworthy([undebuted, debuted], { orgId: 158, debutedIds })
+  assert.deepEqual(kept.map((t) => t.id), [debuted.id])
+
+  // Every other typeCode is unaffected by debutedIds, even for an undebuted
+  // player — a call-up/selection IS the debut (or immediately precedes it).
+  const recall = {
+    id: 2004, typeCode: 'CU', date: '2026-05-28', effectiveDate: '2026-05-28',
+    person: { id: 999012, fullName: 'Debut Day Rookie' }, fromTeam: NASHVILLE, toTeam: BREWERS,
+    description: 'Milwaukee Brewers recalled RHP Debut Day Rookie from Nashville Sounds.',
+  }
+  assert.deepEqual(filterStoryworthy([recall], { orgId: 158, debutedIds }).map((t) => t.id), [recall.id])
+})
+
 test('filterStoryworthy keeps every whitelisted typeCode and drops an unlisted one', () => {
   const trade = JUL12.find((t) => t.typeCode === 'TR')
   const unlisted = { ...trade, id: 12345, typeCode: 'NC', description: 'New contract stuff.' }
@@ -336,8 +393,15 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
   )
 
   const doubleMove = stories[1]
-  assert.equal(doubleMove.rail[0].banner, 'Up/Down')
-  assert.equal(doubleMove.rail[0].surname, 'Crow')
+  assert.deepEqual(doubleMove.rail[0], {
+    role: 'out', banner: 'Down', playerId: 689441, name: 'Coleman Crow',
+    surname: 'Crow', pos: 'RHP', tintTeamId: 158,
+  })
+  assert.equal(
+    doubleMove.cutline.map((s) => s.text).join(''),
+    'Optioned RHP Coleman Crow to Nashville Sounds (activated from the 15-day injured list first).',
+  )
+  assert.equal(doubleMove.cutline.filter((s) => s.playerId === 689441).length, 1)
 
   const soloOption = stories[2]
   assert.deepEqual(soloOption.rail[0], {
@@ -424,6 +488,30 @@ test('Jul 14: the two-perspective trade mirror de-dupes to one trade-away story'
     stories[0].cutline.map((s) => s.text).join(''),
     'Traded RHP Easton McGee to the Royals for cash.',
   )
+})
+
+test('Jul 15: a real 2-for-1 (plus cash) trade merges into ONE story, not three', () => {
+  const days = storiesFor(JUL15_MULTI_PLAYER)
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'trade')
+  // Rail/cutline order follows the raw feed's own row order (Gordon's row
+  // precedes McCullers Jr.'s — verified live), not the description's naming
+  // order.
+  assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
+    ['in', 'In', 'Gordon'],
+    ['in', 'In', 'McCullers Jr.'],
+    ['out', 'Out', 'Fielder'],
+  ])
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Acquired LHP Colton Gordon and RHP Lance McCullers Jr. from the Astros for OF Jadyn Fielder.',
+  )
+  // Fielder's own name must NOT appear in his own "for" clause (the
+  // self-reference bug the real fixture originally exposed).
+  const fielderMentions = stories[0].cutline.filter((s) => s.playerId === 700501)
+  assert.equal(fielderMentions.length, 1)
 })
 
 test('days sort newest first, and multiple fixture days combine correctly', () => {
