@@ -814,7 +814,7 @@ function stintCaption(stints, group, shown = 3) {
   return text
 }
 
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSeason, currentSportId, careerStat, warByYear = {} }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSeason, currentSportId, careerStat, warByYear = {}, transactions = [] }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -853,6 +853,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     }
   }
   if (!stints.length) return null
+  const presentYears = new Set(stints.map((s) => s.year))
 
   // Classify. MLB is always a full row. A minor-league stint in the ascent
   // (pre-debut, or the debut year itself) is a full row too — every level the
@@ -932,7 +933,19 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     ? ['G', 'GS', showSaves ? 'SV' : 'W–L', 'ERA', 'IP', 'K', 'BB', 'WHIP']
     : ['G', 'AB', 'AVG', 'HR', 'RBI']
   const columns = showWar ? [...baseColumns, 'WAR'] : baseColumns
-  return { columns, rows, totals, footnote: stintCaption(foot, group) }
+
+  // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
+  // real rows rather than a separate section — a missed season reads most
+  // clearly inline, between the years on either side of it.
+  const gapRows = debutYear
+    ? missingSeasonRows(presentYears, debutYear, cur, transactions).map((g) => ({
+        ...g,
+        cells: columns.map(() => DASH),
+      }))
+    : []
+  const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
+
+  return { columns, rows: allRows, totals, footnote: stintCaption(foot, group) }
 }
 
 // A one-line "converted to pitcher" note for a debuted pitcher who has a real
@@ -1551,6 +1564,36 @@ function isIlEndingTxn(t) {
   )
 }
 
+// A career-register year between debut and now with literally no stat row
+// anywhere (MLB or MiLB) otherwise just vanishes from the table — reading as
+// "out of baseball" even when the real reason is a season-long injury (e.g.
+// Tommy John recovery). Cross-referencing the transaction feed for a
+// same-year IL placement is the one signal available with no new fetch (the
+// player page already pulls full career transactions, see fetchTransactions)
+// that separates "hurt all year" from a genuine gap (unsigned, holdout,
+// retired-then-returned) the app has no data to explain.
+function missingSeasonRows(presentYears, debutYear, currentSeason, transactions) {
+  const rows = []
+  for (let yr = debutYear; yr < currentSeason; yr++) {
+    if (presentYears.has(yr)) continue
+    const injured = (transactions ?? []).some(
+      (t) => isIlPlacementTxn(t) && txnDate(t)?.slice(0, 4) === String(yr),
+    )
+    rows.push({
+      key: `${yr}-gap`,
+      year: String(yr),
+      tier: 'gap',
+      level: '',
+      sportId: null,
+      pill: '',
+      teamIds: [],
+      gap: true,
+      note: injured ? 'Injured — missed season' : 'Did not play',
+    })
+  }
+  return rows
+}
+
 // The player's CURRENT injured-list stint, or null. Takes the most recent IL
 // placement and treats it as active unless a later transaction closes it. The day
 // count ('7'|'10'|'15'|'60') is parsed from the placement description; a placement
@@ -1643,7 +1686,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, logTagLevel = false, warByYear = {} }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, logTagLevel = false, warByYear = {}, transactions = [] }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles AND stands in for the register's current-season
   // row (see careerRegisterView), so that row can't move mid-game. `tileStat`
@@ -1689,6 +1732,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     register: careerRegisterView({
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
       currentStat: tile, currentSeason, currentSportId, careerStat: career, warByYear,
+      transactions,
     }),
     milestones: milestoneWatchView(milestoneStat, group),
   }
