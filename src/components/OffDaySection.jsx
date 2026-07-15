@@ -1,4 +1,5 @@
 import { TeamLogo } from './TeamLogo.jsx'
+import { BreakableLocation } from './BreakableLocation.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
 import { splitName } from '../lib/teamSplits.js'
@@ -66,7 +67,7 @@ function OffDayCard({ team, pinned, onOpen }) {
         <TeamLogo teamId={id} name={mascot || full} size={40} />
       </span>
       <span className="offdaycard__name">
-        {location && <span className="offdaycard__loc">{location}</span>}
+        {location && <BreakableLocation text={location} className="offdaycard__loc" />}
         <span className="offdaycard__mascot">{shortMascot || full}</span>
       </span>
       {pinned && (
