@@ -30,3 +30,6 @@ pnpm-debug.log*
 
 # vercel
 .vercel
+
+# fetched Game Notes PDFs (large, re-fetch fresh per session — see .scratch/game-notes/README.md)
+.scratch/game-notes/pdfs/
