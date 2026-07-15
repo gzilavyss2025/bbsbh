@@ -19,6 +19,14 @@
 //    they show up as non-pitch entries inside a play's own `playEvents[]`
 //    (details.eventType 'mound_visit' / 'pitching_substitution'), usually at
 //    the start of whichever batter's plate appearance follows the stoppage.
+//    Verified live (July 15 2026 All-Star Game, gamePk 823443): a stoppage
+//    can also land trailing in the playEvents of the PA that just ended,
+//    rather than leading the next one. Either way it's nested, not its own
+//    top-level play — but mid-poll the live feed can transiently surface it
+//    AS one anyway, with `matchup.batter` carrying over the previous batter
+//    and `result.description` holding the substitution prose instead of a
+//    real result. `result.type` distinguishes a genuine plate appearance
+//    ('atBat') from this kind of transient/action entry — see `isRealPA`.
 //  - A handful of eventTypes (caught stealing, pickoffs, wild pitches...)
 //    describe a baserunning event with no batting result for whoever is
 //    currently up — those don't get their own card, but their runners[] is
@@ -621,7 +629,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     }
 
     const batterId = play.matchup?.batter?.id
-    const isRealPA = batterId != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
+    // `result.type === 'atBat'` is required, not just a truthy eventType — mid-
+    // inning stoppages (pitching changes, defensive subs) can transiently surface
+    // as their OWN top-level play before the feed folds them into the next real
+    // PA's playEvents (see the header comment above); such a play carries the
+    // PREVIOUS batter's stale matchup.batter with a substitution's prose as its
+    // description, which would otherwise be mistaken for that batter's own card.
+    // Same guard `pitchers.js` uses for batters-faced counts.
+    const isRealPA =
+      play.result?.type === 'atBat' && batterId != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
     const runners = play.runners ?? []
 
     if (isRealPA) {
