@@ -200,7 +200,10 @@ function BracketGrid({ season, onOpenSeries }) {
                     />
                     {ws.mvp.position && <span className="pswscard__pos">{ws.mvp.position}</span>}
                   </span>
-                  <span className="pswscard__mvpname">{ws.mvp.name}</span>
+                  <span className="pswscard__mvpinfo">
+                    <span className="pswscard__mvptag">Series MVP</span>
+                    <span className="pswscard__mvpname">{ws.mvp.name}</span>
+                  </span>
                 </div>
               )}
             </button>

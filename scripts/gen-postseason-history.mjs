@@ -21,7 +21,11 @@
 // grouped into a series by (gameType, seriesDescription, sorted team-id
 // pair) — a team can play at most one series per label in a given
 // postseason, so that triple is a stable series identity across whichever
-// mix of home/away games it played.
+// mix of home/away games it played. Each game also carries its `gamePk` —
+// same footing as gen-all-star-rosters.mjs's stored gamePk: the app
+// resolves live team-abbreviation/date info from it via
+// `fetchGameCardsByPk` (`src/api/schedule.js`) rather than this file
+// storing an abbreviation that could go stale on a rename.
 //
 // Only teamId is stored (mirrors gen-awards-history.mjs) — names/logos
 // resolve client-side from the app's own src/lib/teams.js so this file can't
@@ -189,6 +193,7 @@ async function buildSeason(year) {
     series.games.push({
       gameNumber: g.seriesGameNumber ?? series.games.length + 1,
       date: g.officialDate,
+      gamePk: g.gamePk,
       awayTeamId: g.teams.away.team.id,
       awayScore: g.teams.away.score ?? null,
       homeTeamId: g.teams.home.team.id,
