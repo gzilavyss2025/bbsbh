@@ -132,10 +132,16 @@ ALL-CAPS unless noted.
 - Titles: ABOUT THE A'S · KURODA-GRAUER · BEFORE THE BREAK · ALL-STARS · STARTING PITCHING · HOME AND AWAY · HOME AND AWAY SPLITS
 - `ProximaNova-Bold` (non-italic) is a *different* role (right-column table) — do NOT use it as the head test; use `-BoldIt`.
 
-### HOU — Astros (117) · page 1
-- **body** `/Colfax-Regular/`  **head** `/Colfax-Bold/`  · headingMaxX ≈ 55, columnMaxX ≈ 150
-- Titles: ABOUT THE RECORD · ASTROS VS. NATIONALS (2025) · ASTROS VS. NATIONALS (ALL-TIME) · TODAY'S MEDIA AVAILABILITY · THIS DATE IN ASTROS HISTORY · UPCOMING SCHEDULE…
-- Several "titles" are vs-table / history-box headers — add them to `skipTitle`.
+### ~~HOU — Astros (117) · page 1~~ — RECALIBRATED (was single-zone, boilerplate only)
+- The original single left zone (x<150, headingMaxX≈55/columnMaxX≈150) never
+  actually surfaced real narrative — every "title" it found (ABOUT THE
+  RECORD, ASTROS VS. …, TODAY'S MEDIA AVAILABILITY, THIS DATE IN ASTROS
+  HISTORY, UPCOMING SCHEDULE) was boilerplate, correctly skipTitle'd, leaving
+  either nothing or (before an allCapsOnly fix) a mistitled fragment of the
+  "this date in history" trivia box. The real punny narrative sits in TWO
+  columns further right (x=181.8, x=384.9) — same shape as ARI/ATL/TEX — now
+  covered by a `columns:` config that skips the left boilerplate zone
+  outright. See the `117:` entry in `whatsBrewing.js`.
 
 ### KC — Royals (118) · page 1
 - **body** `/Gotham-Book/`  **head** `/Gotham-Bold/`  · headingMaxX ≈ 60 (titles at x≈14), columnMaxX ≈ 150

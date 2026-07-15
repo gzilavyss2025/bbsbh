@@ -197,20 +197,57 @@ const CONFIG = {
     tableLeader: /\.(\s*\.){7,}/,
     bottomCutoff: 95,
   },
-  // Astros — several "titles" are vs-table / history-box headers, plus a
-  // record-summary colon-table with no dotted leader to key off of — drop them
-  // all by skipTitle so their bodies fall through as ownerless (a dropped
-  // heading's own body is simply unclaimed, not reattached, when nothing
-  // survives above it).
+  // Astros — the previously-calibrated single left zone (x<150) turns out to
+  // be ALL boilerplate on every day checked (game #, opponent record tables,
+  // media-availability notice, a "this date in history" trivia box, the
+  // schedule table) — never real narrative, which lives entirely in TWO
+  // columns further right (like ARI/ATL/TEX): x=181.8 (TONIGHT'S GAME, RIDING
+  // THE LAMBO, THE SILVER BOOT SERIES, THE SLOW TURNAROUND, ROAD WARRIORS,
+  // WINNING THE CLOSE CALLS, TONIGHT'S TELECASTS, DRAFT DAY 1, ABOUT LAST
+  // NIGHT) and x=384.9 (ASTROS AYA ALL-STARS, ALL-STAR ALVAREZ, MVP-CALIBER,
+  // THE LONG BALL LIST, SECOND HOME, BEST IN TEXAS, WHAT A RELIEF, TOMORROW'S
+  // FUTURES GAME). The old single-zone config only ever surfaced a
+  // mistitled fragment of the left column's "this date in history" trivia
+  // (its bare bold year, "2021", and an inline bold name a line below,
+  // "Jose Altuve", both got misread as section titles without allCapsOnly —
+  // a bare year passes isAllCaps trivially, no lowercase to fail it) —
+  // simply excluding the left column outright (xMin starts past it) is both
+  // simpler and more correct than trying to skipTitle every boilerplate
+  // section in it.
+  //
+  // xMin=175 on the middle zone (titles start 181.8) also clears a handful
+  // of stray bold glyphs bleeding in from the left column's own tables at
+  // x≈167-168 (lone digits from a win-pct standings list, wrap-hyphens) that
+  // would otherwise register as bogus one-character titles (isAllCaps("-")
+  // is trivially true, same as a bare year). The right zone's "leaderboards
+  // vs. TEX below:" mini-table (ALL-CAPS sub-headers "HR VS. TEX (#5-7)" /
+  // "HITS VS. TEX (#6-8)" at x≈392/488, close enough to the real titles'
+  // x=384.9 that headingMaxX position alone can't separate them) is dropped
+  // by TEXT pattern via skipTitle, not a y-bounded dropRect — this box's own
+  // y-position drifts day to day with how much text precedes it (verified: a
+  // fixed dropRect calibrated against one day's box position wrongly ate a
+  // whole "OUT ON ASSIGNMENT" rehab bullet on a different day, whose content
+  // happened to land in that same y band instead). Another stat box just
+  // above it ("All-time Homers in Astros History" + ranked HR totals) needs
+  // no such handling: its own header is mixed-case, so allCapsOnly already
+  // keeps it from being promoted.
   117: {
     layout: 'flow-bold',
     bodyFont: /Colfax-Regular/,
     headFont: /Colfax-Bold/,
-    headingMaxX: 55,
-    columnMaxX: 150,
     tableLeader: /\.(\s*\.){7,}/,
-    skipTitle: /^(GAME #\d|ABOUT THE RECORD|ASTROS VS\.|TODAY'S MEDIA AVAILABILITY|UPCOMING SCHEDULE|DATE$|pada$)/i,
-    bottomCutoff: 135,
+    allCapsOnly: true,
+    topCutoff: 845,
+    bottomCutoff: 110,
+    columns: [
+      { xMin: 175, headingMaxX: 200, columnMaxX: 380 },
+      {
+        xMin: 384,
+        headingMaxX: 400,
+        columnMaxX: 610,
+        skipTitle: /VS\.\s+[A-Z]{2,4}\s*\(#/,
+      },
+    ],
   },
   // Royals — body is Gotham too, so the head test must key on -Bold specifically;
   // masthead + bold player names are also Gotham-Bold, gated by allCapsOnly.
