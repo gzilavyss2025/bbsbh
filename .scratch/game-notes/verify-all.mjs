@@ -8,7 +8,7 @@ import fs from 'node:fs'
 const CLUBS = {
   158: 'MIL', 134: 'PIT', 111: 'BOS', 121: 'NYM', 146: 'MIA', 143: 'PHI',
   119: 'LAD', 133: 'ATH', 117: 'HOU', 118: 'KC', 108: 'LAA', 136: 'SEA',
-  142: 'MIN', 147: 'NYY',
+  142: 'MIN', 147: 'NYY', 138: 'STL',
 }
 
 for (const [teamId, abbr] of Object.entries(CLUBS)) {

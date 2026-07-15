@@ -333,6 +333,48 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Cardinals — page 1, narrative in a middle column (x~151-590), left of it
+  // a dot-leader season-stat sidebar (x<130). The bold face name has no
+  // hyphen (CardsHelveticaCondensedBold vs. body's CardsHelveticaCondensed),
+  // CALIBRATION.md's noted "custom weight names" quirk that made the generic
+  // family-heuristic profiler miss this club entirely — matched by name here
+  // instead. Titles: BIRD WATCHING, FLIGHT PATTERN, BLAME IT ON THE RAIN,
+  // HERRERA JOINS NATIONAL LEAGUE ALL-STARS, TWO FOR WON, CARDINALS SELECT
+  // CONDON WITH FIRST ROUND PICK, LIB-BING IT UP, A BRAVE NEW WORLD,
+  // WALK-AND-ROLL.
+  138: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /CardsHelveticaCondensed$/,
+    headFont: /CardsHelveticaCondensedBold/,
+    xMin: 140,
+    headingMaxX: 160,
+    columnMaxX: 595,
+    rightTableMinX: 405,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    // The left dot-leader stat sidebar's own row cadence runs independently
+    // of the narrative column's line spacing, so occasionally a sidebar row
+    // and a narrative line land within the default 3pt line-grouping
+    // tolerance of each other despite being unrelated baselines. When that
+    // happens the two get merged into one "line," and — since a folded-back
+    // non-title line is dropped whole if its combined text matches
+    // tableLeader — the sidebar row's dot leader silently took the real
+    // narrative line down with it. Baselines here are stable enough that a
+    // tighter tolerance still groups genuine same-line runs (a title + its
+    // inline lead-in) while no longer bridging the two columns' independent
+    // cadences.
+    lineTol: 2,
+    // The last blurb, WALK-AND-ROLL, has a clean lead paragraph but then
+    // gives way to a two-column trivia grid of short Cardinals/Braves-history
+    // facts (a genuinely different shape from the single-column narrative
+    // above it — many short items sharing baselines, not one flowing
+    // paragraph) followed by an upcoming-game/broadcast footer. Neither
+    // parses cleanly as prose, so bottomCutoff ends the narrative at the
+    // lead paragraph rather than show a jumbled trivia-grid tail; since this
+    // is the last blurb on the page, nothing else is lost by cutting here.
+    bottomCutoff: 305,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
