@@ -11570,17 +11570,18 @@ body {
   min-width: 0;
 }
 .allstarrosters__game {
-  max-width: 360px;
+  width: 100%;
 }
 .allstarrosters__leagues {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
 }
 .allstarrosters__league {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
 .allstarrosters__leaguetag {
@@ -11591,6 +11592,21 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+.allstarrosters__section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 6px;
+}
+.allstarrosters__sectionlabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-faint, var(--text-muted));
+  margin-top: 2px;
 }
 .allstarrosters__recipients {
   display: flex;
@@ -11608,13 +11624,31 @@ body {
   border-radius: var(--radius-xs);
 }
 /* Same favorite-team highlight as .awardhistory__recipient--fav — a
-   selectee who played for the user's favorite club (by franchise id, stable
-   across a relocation/rename) jumps out among the rest of the season. */
+   selectee who played for the highlighted club (either the team filter's
+   pick, or absent a filter, the user's favorite team — see
+   AllStarRostersPage's effectiveTeamId) jumps out among the rest of the
+   season. Franchise id is stable across a relocation/rename, so this still
+   lights up an old team's picks under a since-renamed club. */
 .allstarrosters__recipient--fav {
   background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
   box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
   padding: 1px 4px 1px 5px;
   margin: -1px -4px -1px -5px;
+}
+/* The team filter's "everyone else" treatment — dulled, not hidden, so the
+   year/section structure stays intact while one club's picks are singled
+   out (see AllStarTeamFilter + RecipientRow's `filtering` prop). */
+.allstarrosters__recipient--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
+}
+/* Bullpen/Substitutes are pre-grouped by team (gen-all-star-rosters.mjs's
+   groupByTeam) — a hairline above each new club's run makes that grouping
+   legible without repeating a team-name label per player. */
+.allstarrosters__recipient--groupstart {
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
 }
 .allstarrosters__teamlink {
   flex: none;
@@ -11624,11 +11658,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.allstarrosters__team {
-  flex: none;
-  font-size: 11px;
-  color: var(--text-muted);
 }
 .allstarrosters__pos {
   flex: none;
@@ -11648,6 +11677,89 @@ body {
   .allstarrosters__yearnum {
     width: auto;
   }
+}
+
+/* ------------------------------------------------------- All-Star game result
+   card (AllStarGameResult) — this page's one deliberate exception to the
+   "never print a score" spoiler invariant; see ADR-0019. Full width, both
+   leagues' marks either side of the score, a plain "Box score ›" link. */
+.allstargame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.allstargame__date {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstargame__teams {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.allstargame__side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.6;
+}
+.allstargame__side--winner {
+  opacity: 1;
+}
+.allstargame__label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.allstargame__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.allstargame__sep {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+.allstargame__box {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.allstargame__box:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------- All-Star team filter
+   (AllStarTeamFilter) — reuses SplitsVsTeam's .vsteam__tray/__strip/__team
+   scroller as-is; this class only adds the page-level spacing around it. */
+.allstarfilter {
+  margin: var(--space-2) 0;
+}
+.allstarfilter__mlblogo {
+  display: block;
+  object-fit: contain;
 }
 
 /* ---------------------------------------------------------------- umpire page */
