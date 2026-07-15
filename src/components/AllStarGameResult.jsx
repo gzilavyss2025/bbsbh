@@ -7,13 +7,15 @@ import { leagueLogoUrl } from '../lib/teams.js'
 import { ballparkFor } from '../lib/ballparkData.js'
 
 // The All-Star Rosters page's one game-result card. Layout: the date sits
-// left-aligned on the same row as the score (AL/NL marks + runs), with a
-// smaller "Box score" button underneath; the MVP — headshot, name, the
-// position he played that game, and his game stat line — sits in a middle
-// column; the host ballpark (a hyperlink into the same BallparkModal the
-// live lineup page's game facts use, when the park's on file) sits
-// right-aligned. This is a DELIBERATE, narrow exception to the "never print
-// a score" spoiler invariant: see
+// left-aligned on its own line, the score (AL/NL marks + runs) on the line
+// below it, then a smaller "Box score" button underneath that; the MVP —
+// headshot, name, the position he played that game, and his game stat line
+// — sits in a middle column; the host ballpark (a link into the same
+// BallparkModal the live lineup page's game facts use, when the park's on
+// file — same plain/dotted-on-hover convention as PlayerLink/TeamLink's
+// `.plink`, not a solid underline) sits right-aligned. This is a
+// DELIBERATE, narrow exception to the "never print a score" spoiler
+// invariant: see
 // docs/adr/0019-all-star-rosters-shows-final-scores.md for why that's safe
 // here specifically (roster membership already carries no individual game's
 // stakes, and an All-Star Game is exhibition). Every other game surface in
@@ -38,8 +40,8 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
     <div className="allstargame">
       <div className="allstargame__main">
         <div className="allstargame__scorecol">
+          {dateLabel && <span className="allstargame__date">{dateLabel}</span>}
           <div className="allstargame__scorerow">
-            {dateLabel && <span className="allstargame__date">{dateLabel}</span>}
             <span
               className={`allstargame__side${winner === 'al' ? ' allstargame__side--winner' : ''}`}
             >
@@ -107,7 +109,7 @@ export function AllStarGameResult({ score, mvp, venue, dateLabel, onBoxScore }) 
             {hasBallpark ? (
               <button
                 type="button"
-                className="allstargame__venuelink"
+                className="plink allstargame__venuelink"
                 onClick={() => setBallparkOpen(true)}
               >
                 {venue.name}

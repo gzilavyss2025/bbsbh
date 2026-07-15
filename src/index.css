@@ -11859,30 +11859,18 @@ body {
   display: block;
   object-fit: contain;
 }
+/* .allstargame__venuelink pairs with the shared .plink class (same rest-state-
+   plain, dotted-underline-on-hover/focus convention as PlayerLink/TeamLink) —
+   only the layout/color here, .plink itself supplies the interactive states. */
 .allstargame__venuename,
 .allstargame__venuelink {
   font-family: var(--font-body);
   font-size: 11px;
+  color: var(--text-muted);
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.allstargame__venuename {
-  color: var(--text-muted);
-}
-.allstargame__venuelink {
-  color: var(--accent-primary);
-  font-weight: var(--w-semibold);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline;
-}
-.allstargame__venuelink:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
 }
 
 /* ------------------------------------------------------- All-Star team filter
