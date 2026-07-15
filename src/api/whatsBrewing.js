@@ -333,6 +333,39 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Giants — the real narrative is on PAGE 1, not page 2 (page 2 is the
+  // starting pitcher's own separate deep-dive column, a different feature —
+  // CALIBRATION.md's original page-1 font profile missed the narrative
+  // because its titles sit well right of the page's true left margin). A
+  // narrow left sidebar (x<180: head-to-head win/loss splits, a game log)
+  // sits left of where the real narrative starts (~189); xMin excludes it
+  // rather than a title-position filter, same idea as NYY's thin sidebar.
+  // Two small stat boxes are embedded to the right of the narrative and
+  // share baselines with it ("HOMESTAND BREAKDOWN," a "Top-5 Picks in MLB
+  // Draft" table) — their own headers are a third, decorative font
+  // (BebasNeuePro) so they self-exclude, but their DATA rows are in plain
+  // body/head font like the narrative itself, with no ALL-CAPS marker to
+  // catch them (a row like "Games 5" or "Will Clark 1985 2" is mixed-case,
+  // same as this club's inline bold names). A flat rightTableMinX can't work
+  // here — both boxes' data columns overlap the exact x-range of legitimate
+  // inline asides elsewhere in the SAME narrative ("Stats, LLC," at x≈448,
+  // "C Joey Bart" at x≈479), so cfg.dropRects bounds each box's exclusion to
+  // its own small y-range instead of cutting that whole x band page-wide.
+  137: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /URWDIN-Light|URWDIN-LightItalic/,
+    headFont: /URWDIN-Bold/,
+    xMin: 180,
+    headingMaxX: 200,
+    columnMaxX: 585,
+    dropRects: [
+      { xMin: 480, yMax: 736, yMin: 580 }, // HOMESTAND BREAKDOWN box
+      { xMin: 425, yMax: 195, yMin: 135 }, // Giants Top-5 Picks in MLB Draft box
+    ],
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
@@ -676,7 +709,12 @@ function extractFlowBoldZone(items, realName, cfg) {
     let i = start
     while (i < l.words.length && isHead(l.words[i])) i++
     const titleWords = l.words.slice(start, i)
-    const leadWords = l.words.slice(i)
+    // A third, neither-body-nor-head decorative font sharing this baseline
+    // (SF: a "HOMESTAND BREAKDOWN" stat-box header sitting a couple pt off
+    // the title's own baseline, close enough to fall in the same grouped
+    // line) is not a real lead-in — only body/head words count as the
+    // inline text that follows a "TITLE: lead-in" title on the same line.
+    const leadWords = l.words.slice(i).filter((w) => cfg.bodyFont.test(w.font) || isHead(w))
     headings.push({ y: l.y, allWords: l.words, titleWords, leadWords })
   }
   for (const h of headings) {
@@ -737,13 +775,22 @@ function extractFlowBoldZone(items, realName, cfg) {
   // PHI marks every wrapped body LINE with its own margin bullet in one such
   // font, which would otherwise leak into running text mid-sentence.
   const isContent = (w) => cfg.bodyFont.test(w.font) || isHead(w)
+  // cfg.dropRects (SF): rightTableMinX is a full-height cut — wrong when a
+  // small embedded box (its own header in a third decorative font, so THAT
+  // self-excludes, but body/head-font data rows like "Games 5") sits at an x
+  // that a legitimate inline aside also uses elsewhere on the page ("Stats,
+  // LLC," at x≈448, a "C Joey Bart" name at x≈479 — both past where two
+  // separate boxes' data starts). A rect bounds the exclusion to the box's
+  // own small y-range instead of the whole column height.
+  const inDropRect = (w) => (cfg.dropRects ?? []).some((r) => w.x >= r.xMin && w.y <= r.yMax && w.y >= r.yMin)
   const body = words.filter(
     (w) =>
       isContent(w) &&
       !w.consumed &&
       w.x < w.cutoff &&
       !cfg.tableLeader.test(w.str) &&
-      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
+      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX) &&
+      !inDropRect(w),
   )
 
   const lines = [...foldedBackLines]
