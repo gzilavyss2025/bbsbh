@@ -54,7 +54,8 @@
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Game Score modal above)
-     - `.buzz__text` (Bluesky posts keep their authors' original casing) */
+     - `.buzz__text` (Bluesky posts keep their authors' original casing)
+     - the Team Transactions card's cutline prose — `.txstory__cutline` */
 #root * {
   text-transform: uppercase;
 }
@@ -7560,6 +7561,38 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+/* Horizontal deck variant (TeamPage's own compact FEATURED_CATEGORIES set
+   only — see the `horizontal` prop doc in TeamLeaders.jsx) — the same
+   full-bleed swipeable idiom .txcard__scroll uses for Team Transactions, so
+   the page's two card decks read as one consistent pattern. Equal
+   specificity to the plain .tlead__grid rules above (including inside the
+   560px media query), so this must stay textually AFTER them to win by
+   source order at every width. */
+.tlead__grid--horizontal {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.tlead__grid--horizontal::-webkit-scrollbar {
+  display: none;
+}
+.tlead__grid--horizontal .tlead__cat {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 280px;
+}
 .tlead__cat {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -10219,6 +10252,234 @@ body {
     font-size: 19px;
   }
 }
+/* ---------------------------------------------------- team transactions
+   The team page's roster-move feed, one story per swipeable card in a
+   horizontal deck (see .scratch/team-transactions/ for the original locked
+   design; reworked into a horizontal scroller per feedback — see
+   .txcard__scroll below). The deck full-bleeds to the SCREEN's own edges
+   (the negative --app-gutter margin, same breakout .slatehead already uses
+   for its rule), so no outer bordered "card" shell wraps it — a bordered box
+   whose own content escapes past its border reads as broken, not deliberate.
+   The section label (.txcard__head) stays inset like any other section
+   caption; only the card deck below it bleeds. */
+.txcard {
+  display: grid;
+  margin: 14px 0 14px;
+}
+.txcard__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.txcard__head em {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: var(--w-regular);
+  letter-spacing: 0;
+}
+
+/* A horizontally swipeable deck of story cards, full-bleed to the screen's
+   edges regardless of viewport width — an "infinite scroll" of cards reads
+   oddly boxed into a reading column. Native scroll-snap + an edge mask, the
+   same idiom .vsteam__team already uses for the splits-vs-team club picker,
+   so this reads as a familiar "flip through" gesture, not a new one-off
+   interaction. TeamTransactionsCard.jsx lazy-reveals more cards
+   (already-fetched days first, then a fresh loadMoreTeamTransactions page)
+   as a trailing sentinel nears the visible edge. */
+.txcard__scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 6px;
+  /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it entirely
+     and fall back to a full-size native horizontal scrollbar, which reads as
+     a stray gray bar under a touch-first swipe deck. The ::-webkit-scrollbar
+     rule below is what actually hides it in Chromium/WebKit. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.txcard__scroll::-webkit-scrollbar {
+  display: none;
+}
+.txcard__sentinel {
+  flex: 0 0 auto;
+  width: 1px;
+}
+
+/* Each story is its own bordered card — wider than the deck's first cut
+   (a 3-photo rail, a real 2-for-1 trade, needs the room so the cutline
+   doesn't crowd into a narrow wrap). */
+.txstory {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 320px;
+  padding: 10px 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  /* A new block-formatting context, so the floated rail is contained here
+     rather than bleeding past this card's own border. */
+  display: flow-root;
+}
+/* A 3-headshot rail (a shuffle, a multi-player trade) still gets a bit more
+   room than the base width — now that a player's name wraps properly
+   (.txstory__cutline .plink's display:contents above), the card no longer
+   needs to be this wide just to dodge an awkward name break, but the
+   floated rail itself is still wider with a 3rd photo. See the wide flag in
+   TeamTransactionsCard.jsx. */
+.txstory--wide {
+  width: 360px;
+}
+.txstory__date {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The rail floats top-right; the type pill + cutline run as normal text flow
+   after it, so the pill sits flush with the rail's top edge and the cutline
+   sentence wraps around it — a magazine caption wrapping a floated photo. */
+.photorail {
+  float: right;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 6px 10px;
+}
+.photorail__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: var(--shot-sm-w);
+}
+
+/* Plain headshot treatment — the same `.shot` base every other card in the
+   app uses (Headshot.jsx already applies the club-tint wash itself), not a
+   one-off halftone/dot-screen texture. */
+.shot.txstory__shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.txstory__shot.shot--fallback {
+  font-size: 26px;
+}
+
+/* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
+   light text is the app's existing convention for a colored badge on a photo
+   (see .favteamsheet__prefToggle.is-on / .sstrip__cell--win), reused here
+   rather than the softer outline-chip look .txntl__chip uses on the player
+   page's own transaction timeline (this card is deliberately a different
+   visual language from that component — see scope.md). */
+.banner {
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 1px 5px;
+  color: var(--surface-card);
+  background: var(--graphite);
+}
+.banner--in { background: var(--accent-positive); }
+.banner--out { background: var(--accent-negative); }
+.banner--move { background: var(--graphite); }
+
+.photo__cap {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--graphite-soft);
+  text-align: center;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+.txstory__type {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+/* Same three-tone system as .txntl__chip--add/--out/--move, mapped per story
+   type (see TYPE_TONE in TeamTransactionsCard.jsx) rather than per row. */
+.txstory__type--add { color: var(--field-deep); }
+.txstory__type--out { color: var(--clay-deep); }
+.txstory__type--move { color: var(--text-muted); }
+
+/* The serif cutline register — same --font-read (Newsreader) the app already
+   uses for box-score-notes / in-game notification copy, distinct from the
+   plainer Plex Sans .txntl__desc uses on the player page's timeline. Reads
+   as an ordinary sentence rather than shouted app chrome (sanctioned
+   exception to the ALL-CAPS INVARIANT, see that block comment up top) — no
+   bold/italic emphasis; a player's name is a plain PlayerLink instead. */
+.txstory__cutline {
+  margin: 0;
+  font-family: var(--font-read);
+  font-size: 14.5px;
+  line-height: 1.42;
+  color: var(--text-body);
+}
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .txstory__cutline selector can't outrank #root * and would be
+   silently ignored (see .brewblurb__body above for the same technique). */
+#root .txstory__cutline {
+  text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
+}
+/* Both a player's name (PlayerLink) and a club's name (TeamLink) inside the
+   cutline share the .plink base class — a bare <button> keeps its own box
+   even with display:inline set, some part of its native rendering can still
+   hold the text together as one unbreakable run ("Lance McCullers Jr." or
+   "Kansas City Royals" jumping to the next line as a whole rather than
+   wrapping mid-name like the plain prose around it), confirmed still
+   happening in real Chrome even after a display:inline override.
+   display:contents removes the button's own box from layout entirely, so its
+   text becomes a plain part of the paragraph's flow — no button-box quirk
+   left to fight. The click handler and focusability live on the <button>
+   element itself, unaffected by its own box disappearing. */
+.txstory__cutline .plink {
+  display: contents;
+}
+/* A player's name additionally stays bold + all-caps (the app's default
+   #root * uppercase already applies to this <button> — no override needed)
+   even though the sentence around it reads natural-case, so the name reads
+   as the "headline" word in an otherwise ordinary sentence — a club name
+   stays a plain link, so it doesn't compete with the player for emphasis.
+   The link wraps just the bare name — the position abbreviation stays in
+   the surrounding plain prose (see teamTransactions.js: the emphasized/
+   linked span is built from the player's name alone, never "{POS} {Name}"). */
+.txstory__cutline .txstory__namelink {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
 .team-hub__manager {
   margin: 4px 0 0;
   font-size: 13px;
