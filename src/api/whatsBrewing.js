@@ -1186,7 +1186,27 @@ function extractFlowBoldZone(items, realName, cfg) {
     // columnMaxX boundary with no embedded table sharing a baseline within
     // a single zone (unlike LAA, which relies on the marker to split one
     // wide zone at a variable point).
-    const cutoff = cfg.noLineMarkers ? cfg.columnMaxX : lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
+    let cutoff = cfg.noLineMarkers ? cfg.columnMaxX : lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
+    // cfg.rightTableMinX also catches a table row that shares a baseline with
+    // real prose but carries NO usable marker: same body font as the
+    // narrative (no head-font ALL-CAPS run to trip lineMarkerCutoff) and a
+    // dot leader too short to match cfg.tableLeader (STL: "...." — 4 dots,
+    // under tableLeader's 8-dot floor — next to "Day .......... 16-19",
+    // whose 13-dot run WOULD match). What's reliable regardless of dot count
+    // is the GAP: real wrapped prose has ordinary word-spacing (~3-5pt in
+    // this condensed font) between consecutive items, while a table row
+    // splicing in from an unrelated sidebar column leaves a large jump (STL:
+    // 22.5pt between the narrative's trailing hyphen and "at Milwaukee
+    // County Stadium"). Cut at the first such gap that also lands past
+    // rightTableMinX, so genuinely wide prose with normal spacing (no table
+    // sharing that particular baseline) is left alone.
+    if (cfg.rightTableMinX != null) {
+      let prevRight = -Infinity
+      for (const w of l.words) {
+        if (w.x >= cfg.rightTableMinX && w.x - prevRight > 12) { cutoff = Math.min(cutoff, w.x); break }
+        prevRight = w.x + w.w
+      }
+    }
     for (const w of l.words) w.cutoff = cutoff
   }
 
@@ -1248,7 +1268,18 @@ function extractFlowBoldZone(items, realName, cfg) {
     // the title's own baseline, close enough to fall in the same grouped
     // line) is not a real lead-in — only body/head words count as the
     // inline text that follows a "TITLE: lead-in" title on the same line.
-    const leadWords = l.words.slice(i).filter((w) => cfg.bodyFont.test(w.font) || isHead(w))
+    // Still needs the SAME table exclusions as the body filter below (STL:
+    // "FLIGHT PATTERN:"'s own lead-in sentence shares a baseline with a
+    // right-side dot-leader sidebar row IN THE SAME body font — no head-font
+    // marker for lineMarkerCutoff to truncate at, and its dot leader is too
+    // short to match cfg.tableLeader — the per-line rightTableMinX gap
+    // detection above already caught this (w.cutoff excludes it before it
+    // ever reaches l.words here), so leadWords just needs the ordinary
+    // tableLeader check for any longer dot-leader row that DOES match it.
+    const leadWords = l.words
+      .slice(i)
+      .filter((w) => cfg.bodyFont.test(w.font) || isHead(w))
+      .filter((w) => !cfg.tableLeader.test(w.str))
     headings.push({ y: l.y, allWords: l.words, titleWords, leadWords })
   }
   for (const h of headings) {
@@ -1323,22 +1354,20 @@ function extractFlowBoldZone(items, realName, cfg) {
   // font, which would otherwise leak into running text mid-sentence.
   const isContent = (w) => cfg.bodyFont.test(w.font) || isHead(w)
   // dropRects is already applied above (words is pre-filtered), so no need to
-  // re-check it here — rightTableMinX is a full-height cut, still applied here
-  // since it wasn't folded into the earlier pass: wrong when a small embedded
-  // box (its own header in a third decorative font, so THAT self-excludes,
-  // but body/head-font data rows like "Games 5") sits at an x that a
-  // legitimate inline aside also uses elsewhere on the page (SF: "Stats,
-  // LLC," at x≈448, a "C Joey Bart" name at x≈479; SD: a catcher's slash-line
-  // callout mid-column) — rightTableMinX alone can't distinguish those, which
-  // is exactly why dropRects (bounded to the box's own small y-range) exists.
-  const body = words.filter(
-    (w) =>
-      isContent(w) &&
-      !w.consumed &&
-      w.x < w.cutoff &&
-      !cfg.tableLeader.test(w.str) &&
-      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
-  )
+  // re-check it here. rightTableMinX is folded into w.cutoff (the per-line
+  // pass above) rather than re-applied as a blanket per-word x check here —
+  // a genuinely persistent full-height sidebar clears every line's cutoff
+  // fine either way, but a STATIC per-word check is wrong the moment ANY
+  // line's real prose legitimately wraps past rightTableMinX with nothing
+  // beside it (STL: "…the event was Albert Pujols in Los Angeles in 2022.
+  // St." wraps out past x=446 on an ordinary continuation line, no table on
+  // that baseline at all — a blanket check silently truncated the sentence
+  // there). w.cutoff already accounts for rightTableMinX PLUS the same
+  // gap-detection used for leadWords, so it's a strict improvement over the
+  // old static check, not a behavior change for clubs whose sidebar really
+  // is full-height with no legitimate wide-wrapping line to false-positive
+  // on.
+  const body = words.filter((w) => isContent(w) && !w.consumed && w.x < w.cutoff && !cfg.tableLeader.test(w.str))
 
   const lines = [...foldedBackLines]
   for (const w of body) {
