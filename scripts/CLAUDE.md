@@ -192,6 +192,21 @@ Re-run only to fold in a new season.
   hardware) × season through `GET /api/v1/awards/{awardId}/recipients?season=YYYY`.
   The in-progress current season simply comes back empty per award until decided —
   no special-casing needed. App reads it via `src/api/awardsHistory.js`.
+- `gen-all-star-rosters.mjs` → `public/data/all-star-rosters.json` — every MLB
+  All-Star Game roster, year over year back to 1933. Loops
+  `GET /api/v1/awards/{ALAS,NLAS}/recipients?sportId=1&season=YYYY` — the same
+  authoritative-selections endpoint `fetchAllStarRosterIds` (`src/api/person-fetch.js`)
+  already uses, which still names a player who was picked but withdrew (injury, or
+  pitched the Sunday before) and never played. Each season's game is looked up via
+  `GET /api/v1/schedule?sportId=1&season=YYYY&gameType=A`, but the file stores only
+  the `gamePk` — the app resolves team/date info live via `fetchGameCardsByPk`
+  (`src/api/schedule.js`), same as the Top Games page, so a franchise rename never
+  goes stale in this file. Team NAMES in the roster itself are resolved per
+  `(teamId, season)` via the season-scoped `GET /api/v1/teams/{id}?season=YYYY` (not
+  the app's current-team table) so a historical pick reads under the name he actually
+  played under (a 1933 Washington Senator, not a Minnesota Twin) — deduped across the
+  whole run so the same team only costs one extra call per season it's named in. App
+  reads it via `src/api/allStarRosters.js`.
 - `gen-milb-history.mjs` → `public/data/milb-history.json` — per-season parent-org +
   club-name history for every AAA/AA/A+/A affiliate. Sweeps statsapi's season-scoped
   team snapshots for 2005+ (where its affiliate data is clean) and merges a small

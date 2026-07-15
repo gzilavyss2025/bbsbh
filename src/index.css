@@ -11497,6 +11497,122 @@ body {
   color: var(--seal-ink);
 }
 
+/* ------------------------------------------------------------ all-star rosters
+   One section per season, newest-first: the ordinary GameCard for that
+   year's game (when it resolved), then the roster split into AL/NL columns —
+   same visual language as .awardhistory__* (a season row, a league column,
+   a recipient line), since both pages answer "who, grouped by season". */
+.allstarrosters__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.allstarrosters__year {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.allstarrosters__yearnum {
+  flex: none;
+  width: 40px;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 14px;
+  color: var(--text-heading);
+}
+.allstarrosters__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+.allstarrosters__game {
+  max-width: 360px;
+}
+.allstarrosters__leagues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.allstarrosters__league {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.allstarrosters__leaguetag {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstarrosters__recipients {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.allstarrosters__recipient {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border-radius: var(--radius-xs);
+}
+/* Same favorite-team highlight as .awardhistory__recipient--fav — a
+   selectee who played for the user's favorite club (by franchise id, stable
+   across a relocation/rename) jumps out among the rest of the season. */
+.allstarrosters__recipient--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  padding: 1px 4px 1px 5px;
+  margin: -1px -4px -1px -5px;
+}
+.allstarrosters__teamlink {
+  flex: none;
+  display: inline-flex;
+}
+.allstarrosters__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.allstarrosters__team {
+  flex: none;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.allstarrosters__pos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-style: normal;
+}
+@media (max-width: 520px) {
+  .allstarrosters__year {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .allstarrosters__yearnum {
+    width: auto;
+  }
+}
+
 /* ---------------------------------------------------------------- umpire page */
 .umpage__head {
   margin: 6px 0 14px;
