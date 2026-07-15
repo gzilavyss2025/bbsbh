@@ -333,6 +333,27 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Tigers — page 1, single left column like BOS/LAA; a MyriadPro masthead
+  // sits above and a right-column stat sidebar sits beside the narrative, but
+  // neither needs explicit handling: the masthead has no real heading above
+  // it to own it (dropped by the ordinary "unowned line" rule), and the
+  // sidebar's own section headers ("TIGERS STREAKS," "AL LEADERS...") sit
+  // past columnMaxX so they're excluded by the plain x cutoff before ever
+  // reaching the marker/heading logic — no rightTableMinX needed. bottomCutoff
+  // drops a "What's Next" schedule box that shares the narrative column's own
+  // x-range below the last blurb. Body is split across two Calibri subsets
+  // (CALIBRATION.md finding #2) — bodyFont matches bare "Calibri" (anchored
+  // so it doesn't also match "Calibri-Bold").
+  116: {
+    layout: 'flow-bold',
+    bodyFont: /Calibri$/,
+    headFont: /Calibri-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 400,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    bottomCutoff: 125,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
