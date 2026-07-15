@@ -333,6 +333,26 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Rockies — page 2 (page 1 is a table front), the starting pitcher's own
+  // notes column, full-width single column (no right sidebar — the page's
+  // ONLY other content is the game-log/career-splits table at the very top).
+  // pdfjs reports the embedded fonts as the GNU-substitute names
+  // FreeSans/FreeSansBold rather than real PostScript names (CALIBRATION.md's
+  // noted quirk) — matched the same way regardless. topCutoff drops that
+  // whole game-log table, whose own column-header row ("GAME RESULT GS ERA
+  // IP...") is bold and ALL-CAPS at the left margin — indistinguishable from
+  // a real title by the usual tests, so it's excluded by geometry instead.
+  115: {
+    layout: 'flow-bold',
+    page: 2,
+    bodyFont: /FreeSans$/,
+    headFont: /FreeSansBold/,
+    headingMaxX: 30,
+    columnMaxX: 600,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 736,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
