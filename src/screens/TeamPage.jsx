@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -14,6 +14,7 @@ import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
+import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor } from '../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js'
@@ -22,6 +23,7 @@ import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { fetchRookiesData, isActiveRookie } from '../api/rookies.js'
+import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -44,12 +46,15 @@ import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { InjuredMark } from '../components/InjuredMark.jsx'
 import { RookiePill } from '../components/RookiePill.jsx'
 import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
+import { TeamTransactionsCard } from '../components/TeamTransactionsCard.jsx'
 import { PostseasonOddsCard } from '../components/PostseasonOddsCard.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
 
 const DASH = '—'
+// Org prospect list starts collapsed to the top 10, expandable to the full ~30.
+const PROSPECTS_PREVIEW_COUNT = 10
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
 // Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
 const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
@@ -179,7 +184,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -221,6 +226,12 @@ async function loadTeam(id, asOf) {
       // try/catch) — the header line below simply hides.
       fetchManager(id, season),
       fetchRookiesData(),
+      // MLB orgs only in phase 1 (see data-layer-scope.md) — a MiLB affiliate
+      // page gets no card. Just the first 45-day page; "Load more" pages
+      // further back on demand from inside the card itself.
+      sportId === 1
+        ? loadMoreTeamTransactions(id, null, asOf)
+        : Promise.resolve({ days: [], cursor: null, hasMore: false }),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -605,6 +616,7 @@ async function loadTeam(id, asOf) {
     leagueSeasonScores,
     leagueFormScores,
     postseasonOdds,
+    transactionsPage,
     standings: standingsRows,
     batting, pitching, position, pitchers, injured,
     preferredLineup, substitutes, startingPitchers, bullpen,
@@ -613,17 +625,41 @@ async function loadTeam(id, asOf) {
   }
 }
 
+// The club's most recent official press-notes PDF — a direct link-out (never
+// the What's Brewing in-app modal the lineup page's Game Notes button opens
+// for calibrated clubs; the team hub always jumps straight to the PDF, since
+// there's no single game's blurbs to parse). No gameDate, so resolveGameNotes
+// falls through to the newest note on file rather than one tied to tonight's
+// game. MLB only — see gameNotes.js.
+function GameNotesLink({ teamId }) {
+  const { data: notes } = useAsync(() => resolveGameNotes(teamId), [teamId])
+  if (!notes?.url) return null
+  return (
+    <a
+      className="notesbtn"
+      href={notes.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`${notes.title} — the club's official press notes (PDF), opens in a new tab`}
+    >
+      Game Notes
+      <span className="notesbtn__ext" aria-hidden="true">↗</span>
+    </a>
+  )
+}
+
 export function TeamPage({ id, asOf, sportId }) {
   const teamId = Number(id)
   const navigate = useNav()
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
   useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
+  const [showAllProspects, setShowAllProspects] = useState(false)
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, seasonScore, teamScore, leagueSeasonScores, leagueFormScores, postseasonOdds, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager } = data
+  const { team, season, record, seasonScore, teamScore, leagueSeasonScores, leagueFormScores, postseasonOdds, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -683,6 +719,7 @@ export function TeamPage({ id, asOf, sportId }) {
               <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={45} />
             </TeamLink>
           )}
+          {!isMilb && <GameNotesLink teamId={team.id} />}
         </header>
 
         {teamScore?.season?.score != null && (
@@ -756,6 +793,7 @@ export function TeamPage({ id, asOf, sportId }) {
           onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
           showTeamAbbr={false}
           injuredIds={injuredIds}
+          horizontal
         />
 
         {/* Org-wide leaders across the club's whole farm system — the MLB club
@@ -885,6 +923,17 @@ export function TeamPage({ id, asOf, sportId }) {
           </>
         )}
 
+        {transactionsPage.days.length > 0 && (
+          <TeamTransactionsCard
+            key={`${team.id}-${asOf ?? ''}`}
+            teamId={team.id}
+            asOf={asOf}
+            initialDays={transactionsPage.days}
+            initialCursor={transactionsPage.cursor}
+            initialHasMore={transactionsPage.hasMore}
+          />
+        )}
+
         {isMilb && affiliationHistory.length > 0 && (
           <CareerTimeline entries={affiliationHistory} title="Affiliation history" />
         )}
@@ -923,7 +972,7 @@ export function TeamPage({ id, asOf, sportId }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {prospects.map((p) => {
+                  {(showAllProspects ? prospects : prospects.slice(0, PROSPECTS_PREVIEW_COUNT)).map((p) => {
                     const isTop = p.topRank != null
                     return (
                       <tr key={p.playerId}>
@@ -944,6 +993,11 @@ export function TeamPage({ id, asOf, sportId }) {
                   })}
                 </tbody>
               </table>
+              {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
+                <button type="button" className="pshistory__more" onClick={() => setShowAllProspects(true)}>
+                  Show all {prospects.length} prospects
+                </button>
+              )}
             </div>
           </>
         )}

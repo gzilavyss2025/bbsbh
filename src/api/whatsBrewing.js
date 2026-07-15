@@ -147,13 +147,21 @@ const CONFIG = {
   },
   // Phillies — very clean single column; allCapsOnly avoids bold player-name
   // lead-ins ("Wheeler", "Cristopher Sánchez") being mistaken for titles.
-  // bottomCutoff drops the "Score First:"/"DATE" boxes at the page foot.
-  // columnMaxX stays tight: this page ALSO carries a large day-by-day pitcher
-  // stat table (own ALL-CAPS row labels, e.g. "CRISTOPHER SÁNCHEZ") that a
-  // wider columnMaxX pulls in wholesale — its labels pass allCapsOnly and get
-  // wrongly promoted as blurb titles, swallowing the whole table as "body".
-  // 150 incidentally keeps that table out; some very wide-wrapping narrative
-  // lines still get chopped, a smaller loss than that leakage.
+  // columnMaxX stays tight (150): this page ALSO carries a large day-by-day
+  // pitcher stat table (mixed-case player-name row headers, e.g. "Zack
+  // Wheeler", at x≈457 — no ALL-CAPS marker, no reliable gap before it
+  // either) that a wider columnMaxX pulls in wholesale as noise scattered
+  // across MANY blurbs ("Record:", "Series Record:", "Current Streak:",
+  // etc.) if the marker-search's fallback is widened past 150 to catch
+  // it — tried and reverted; the tradeoff (some very wide marker-less
+  // narrative lines get silently chopped instead, e.g. "Kyle Schwarber
+  // launched his MLB-best 32nd homer of the season – in") is real but
+  // smaller than that leakage, per SESSION-HANDOFF.md. bottomCutoff
+  // (125, not 110) drops a DIFFERENT footer box — a season-cumulative
+  // situational-record table ("Score First: 40-15 Lead After 6: 37-1…") in
+  // plain body font with no marker and ordinary word-spacing, at y≈112-120 —
+  // 110 left it just above the cutoff, leaking into whichever blurb sat
+  // above it.
   143: {
     layout: 'flow-bold',
     bodyFont: /Tahoma$/,
@@ -164,7 +172,7 @@ const CONFIG = {
     tableLeader: /\.(\s*\.){7,}/,
     titleMaxLen: 40,
     allCapsOnly: true,
-    bottomCutoff: 110,
+    bottomCutoff: 125,
   },
   // Dodgers — small tidy sheet, tighter left margin than most; allCapsOnly
   // avoids bold player-name lead-ins ("Wrobleski", "Betts") as titles.
@@ -276,10 +284,14 @@ const CONFIG = {
   // but the page also has a genuine recurring second column starting ~240pt
   // (confirmed via a geometry scan — 9 separate lines cluster there with no
   // ALL-CAPS marker on every row), so this stays well under that to avoid
-  // pulling it in wholesale.
+  // pulling it in wholesale. bodyFont also covers QuietSans-Italic — used for
+  // legitimate mid-sentence prose asides ("…joining Frank Tanana (1975-77)
+  // and Chuck Finley (1994 & 1998)"), not just a table/decoration — matching
+  // only Regular silently dropped those clauses whole (isContent tests
+  // bodyFont OR head, and italic matched neither).
   108: {
     layout: 'flow-bold',
-    bodyFont: /QuietSans-Regular/,
+    bodyFont: /QuietSans-Regular|QuietSans-Italic/,
     headFont: /QuietSans-Bold/,
     headingMaxX: 55,
     columnMaxX: 238,
@@ -844,12 +856,21 @@ const CONFIG = {
   // drops the "UPCOMING PROBABLES, TIMES & BROADCASTS" schedule table below.
   140: {
     layout: 'flow-bold',
-    bodyFont: /ArialMT/,
+    // bodyFont also covers Arial-ItalicMT — used for genuine mid-sentence
+    // asides (a rhetorical "last instance of 3+ HR in 3 [games] straight?
+    // 8/4-6/23" aside, "…against the Astros in the same series this
+    // year…"), not just decoration; matching only ArialMT silently dropped
+    // those clauses (they matched neither body nor head).
+    bodyFont: /ArialMT|Arial-ItalicMT/,
     headFont: /Arial-BoldMT/,
     tableLeader: /\.(\s*\.){7,}/,
     allCapsOnly: true,
     topCutoff: 800,
-    bottomCutoff: 45,
+    // 45 (the schedule table's own data row) left its "UPCOMING PROBABLES,
+    // TIMES & BROADCASTS" header + column labels (y=55-66) just above the
+    // cutoff, leaking "Pitchers - Texas vs. Opponent TBA vs. TBA" onto the
+    // end of the last real blurb.
+    bottomCutoff: 68,
     columns: [
       { xMin: 135, headingMaxX: 160, columnMaxX: 355 },
       { xMin: 355, headingMaxX: 380, columnMaxX: 610 },
@@ -1362,6 +1383,15 @@ function extractFlowBoldZone(items, realName, cfg) {
   for (const h of headings) {
     const isRealTitle =
       h.title &&
+      // A bare number is never a real section title — it's always a stray
+      // bold digit run wrapped alone onto its own line, splitting the real
+      // sentence around it into two bogus blurbs (NYY: "…needs one win to
+      // reach" / [750] / "…his 749 wins rank seventh…" — isAllCaps("750")
+      // passes trivially, no lowercase to fail it, same root cause as
+      // WSH/HOU/CIN's bare-year bug). Folding it back — not skipTitle,
+      // which would drop the real sentence that follows it along with the
+      // bogus title — keeps the sentence whole under its actual title.
+      !/^\d+$/.test(h.title) &&
       (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
       (!cfg.allCapsOnly || isAllCaps(h.title)) &&
       (!cfg.titleAloneOnLine || h.leadWords.length === 0)

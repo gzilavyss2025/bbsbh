@@ -215,6 +215,12 @@ function LeaderCategory({
 // with the same ✚ mark as the
 // player page's il-banner — TeamPage passes its own already-fetched IL list
 // (see loadTeam's `injured`); null everywhere else (see InjuredMark above).
+// `horizontal`: swipeable full-bleed card deck (same idiom as the Team
+// Transactions card) instead of the responsive wrap grid — opt-in, TeamPage's
+// own small fixed-size FEATURED_CATEGORIES set only. TeamLeadersPage/
+// LeadersPage share this component too but show many more categories at
+// once (limit=10, ALL_CATEGORIES), where a long horizontal deck would be
+// worse than the page's own vertical scroll, so they leave this off.
 export function TeamLeaders({
   pool,
   categories,
@@ -229,6 +235,7 @@ export function TeamLeaders({
   filtering = false,
   showTeamAbbr = true,
   injuredIds = null,
+  horizontal = false,
 }) {
   const ranked = useMemo(
     () =>
@@ -259,7 +266,7 @@ export function TeamLeaders({
           ) : null
         }
       />
-      <div className="tlead__grid">
+      <div className={`tlead__grid${horizontal ? ' tlead__grid--horizontal' : ''}`}>
         {ranked.map(({ category, entries }) => (
           <LeaderCategory
             key={category.key}
