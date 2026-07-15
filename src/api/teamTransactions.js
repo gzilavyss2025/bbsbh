@@ -674,26 +674,78 @@ function cutlineSingle(story, ctx, emphasis) {
   return emphasizeClause(soloText(row), name, emphasis, row.person?.id)
 }
 
+// Every distinct club named on any row in the story (a trade partner, an
+// affiliate a player was optioned to/recalled from, …), longest name first
+// so a shorter name that happens to be another's substring never wins the
+// match first (no real case today, just a defensive ordering).
+function teamCandidatesFor(story) {
+  const seen = new Map()
+  for (const r of story.rows) {
+    for (const t of [r.row.fromTeam, r.row.toTeam]) {
+      if (t?.id != null && t?.name && !seen.has(t.id)) seen.set(t.id, t)
+    }
+  }
+  return [...seen.values()].sort((a, b) => b.name.length - a.name.length)
+}
+
+// Wraps any occurrence of a candidate team's name in plain (not-yet-linked)
+// segments with a teamId — a single post-processing pass over the whole
+// cutline rather than threading team-link logic through every clause
+// builder above, since a club name can turn up in custom-built leads
+// ("from the {team}") just as easily as inside a raw feed clause ("...to
+// Nashville Sounds."). Segments already carrying a playerId are left alone.
+function linkifyTeamsInSegments(segments, teams) {
+  let result = segments
+  for (const team of teams) {
+    const next = []
+    for (const seg of result) {
+      if (seg.playerId || seg.teamId) {
+        next.push(seg)
+        continue
+      }
+      const idx = seg.text.indexOf(team.name)
+      if (idx === -1) {
+        next.push(seg)
+        continue
+      }
+      if (idx > 0) next.push({ text: seg.text.slice(0, idx) })
+      next.push({ text: team.name, teamId: team.id })
+      const rest = seg.text.slice(idx + team.name.length)
+      if (rest) next.push({ text: rest })
+    }
+    result = next
+  }
+  return result
+}
+
 // One story draft -> its cutline segment array. Exported standalone (per the
 // data-layer scope's reader shape) so cutline prose unit-tests independently
 // of the day-grouping walk above.
 export function buildCutline(story, ctx = {}) {
+  let segs
   switch (story.storyType) {
     case 'trade':
-      return cutlineTrade(story, ctx)
+      segs = cutlineTrade(story, ctx)
+      break
     case 'injured-list':
-      return cutlineInjuredList(story, ctx)
+      segs = cutlineInjuredList(story, ctx)
+      break
     case 'shuffle':
-      return cutlineShuffle(story, ctx)
+      segs = cutlineShuffle(story)
+      break
     case 'roster-move':
-      if (story.subtype === 'double') return cutlineDouble(story, ctx)
-      return cutlineSingle(story, ctx, story.rows[0].role === 'in' ? 'primary' : undefined)
+      segs = story.subtype === 'double'
+        ? cutlineDouble(story)
+        : cutlineSingle(story, ctx, story.rows[0].role === 'in' ? 'primary' : undefined)
+      break
     case 'signing':
     case 'suspension':
-      return cutlineSingle(story, ctx, 'primary')
+      segs = cutlineSingle(story, ctx, 'primary')
+      break
     default:
-      return []
+      segs = []
   }
+  return linkifyTeamsInSegments(segs, teamCandidatesFor(story))
 }
 
 function shapeStory(draft, ctx) {

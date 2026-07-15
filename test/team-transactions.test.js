@@ -391,6 +391,8 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
     trade.cutline.map((s) => s.text).join(''),
     'Acquired SS Braden Shewmake from the Houston Astros; designated LF Greg Jones for assignment.',
   )
+  const astrosSeg = trade.cutline.find((s) => s.text === 'Houston Astros')
+  assert.equal(astrosSeg.teamId, 117)
 
   const doubleMove = stories[1]
   assert.deepEqual(doubleMove.rail[0], {
@@ -402,6 +404,8 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
     'Optioned RHP Coleman Crow to Nashville Sounds (activated from the 15-day injured list first).',
   )
   assert.equal(doubleMove.cutline.filter((s) => s.playerId === 689441).length, 1)
+  const nashvilleSeg = doubleMove.cutline.find((s) => s.text === 'Nashville Sounds')
+  assert.equal(nashvilleSeg.teamId, 556)
 
   const soloOption = stories[2]
   assert.deepEqual(soloOption.rail[0], {
@@ -438,6 +442,14 @@ test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own p
     ['in', 'Up', 'Lara'],
     ['out', 'Down', 'Perkins'],
   ])
+  // Two different affiliates in one story (Gasser from ACL Brewers, Lara from
+  // and Perkins to Nashville Sounds) — every mention gets its own team link.
+  const aclSegs = shuffle.cutline.filter((s) => s.text === 'ACL Brewers')
+  const nashvilleSegs = shuffle.cutline.filter((s) => s.text === 'Nashville Sounds')
+  assert.equal(aclSegs.length, 1)
+  assert.equal(aclSegs[0].teamId, 406)
+  assert.equal(nashvilleSegs.length, 2)
+  assert.deepEqual(nashvilleSegs.map((s) => s.teamId), [556, 556])
 
   const transfer = stories[2]
   assert.deepEqual(transfer.rail.map((r) => [r.role, r.banner, r.surname]), [['move', 'IL-60', 'Lockridge']])

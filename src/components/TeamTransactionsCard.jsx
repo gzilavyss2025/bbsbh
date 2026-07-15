@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { TeamLink } from './TeamLink.jsx'
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTHS = [
@@ -46,19 +47,23 @@ function RailSlot({ slot }) {
 }
 
 // A cutline's segment array — plain sentence text, with any segment carrying
-// a playerId linked to that player's page (same PlayerLink treatment as the
-// rail caption and TransactionTimeline's own linkifyNames). No bold/italic
-// emphasis — every segment reads as ordinary sentence prose.
+// a playerId or teamId linked to that player's/team's page (same PlayerLink/
+// TeamLink treatment used elsewhere, e.g. TransactionTimeline's own
+// linkifyNames). Only a player's name gets the bold "headline word"
+// treatment (txstory__namelink, styled in index.css) — a team name is a
+// plain link, so it doesn't compete with the player for emphasis.
 function Cutline({ segments }) {
   return (
     <p className="txstory__cutline">
-      {segments.map((seg, i) =>
-        seg.playerId ? (
-          <PlayerLink key={i} id={seg.playerId}>{seg.text}</PlayerLink>
-        ) : (
-          <Fragment key={i}>{seg.text}</Fragment>
-        ),
-      )}
+      {segments.map((seg, i) => {
+        if (seg.playerId) {
+          return <PlayerLink key={i} id={seg.playerId} className="txstory__namelink">{seg.text}</PlayerLink>
+        }
+        if (seg.teamId) {
+          return <TeamLink key={i} id={seg.teamId}>{seg.text}</TeamLink>
+        }
+        return <Fragment key={i}>{seg.text}</Fragment>
+      })}
     </p>
   )
 }
