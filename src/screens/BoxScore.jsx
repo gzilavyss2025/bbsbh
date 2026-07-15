@@ -182,6 +182,10 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
     { label: '1B Umpire', value: u.first },
     { label: '2B Umpire', value: u.second },
     { label: '3B Umpire', value: u.third },
+    // Six-man crew only (All-Star Game / postseason) — hidden entirely for
+    // the regular-season four-man crew, same as the lineup page's Umpires card.
+    ...(u.left ? [{ label: 'LF Umpire', value: u.left }] : []),
+    ...(u.right ? [{ label: 'RF Umpire', value: u.right }] : []),
     { label: 'First Pitch', value: box.times.firstPitch, wide: true },
   ]
   const homeFields = [
