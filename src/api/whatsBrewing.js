@@ -625,6 +625,38 @@ const CONFIG = {
     titleMaxLen: 25,
     bottomCutoff: 75,
   },
+  // Nationals — page 1, narrative sits in a MIDDLE column (x~113-440), not
+  // the left margin — CALIBRATION.md's "heads not at left margin" note.
+  // A left sidebar (x<105: a dot-leader season-stat table) and a right
+  // sidebar (x>445: several stat-callout boxes, e.g. "CAREER HIGH GUYS,"
+  // "OFFENSIVE RANKS") are excluded by xMin/columnMaxX. Same body family as
+  // MIA (GothamXNarrow) but the head face is a DIFFERENT family entirely
+  // (plain Gotham-Bold, not GothamXNarrow-Bold) — inline bold names use
+  // GothamXNarrow-Bold instead, folded into bodyFont so they aren't dropped
+  // (matches neither the head nor body regex otherwise). Titles: DISTRICT
+  // DINGERS VS. BRONX BOMBERS, 2026 MLB FIRST-YEAR PLAYER DRAFT, WHERE
+  // THINGS STAND, ALL STARS!, POP FROM THE TOP, NOT ON THE LIST? SORRY.,
+  // LUIS! LUIS!
+  120: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /GothamXNarrow-(Book|Bold|BookItalic)/,
+    headFont: /Gotham-Bold/,
+    xMin: 105,
+    headingMaxX: 125,
+    columnMaxX: 445,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    // A schedule-table header row ("D.C. TIME D.C. TV D.C. RADIO NATIONALS
+    // STARTER OPPONENTS STARTER") below the narrative is ALL-CAPS just like
+    // a real title; titleMaxLen (comfortably above the longest genuine
+    // title, "2026 MLB FIRST-YEAR PLAYER DRAFT" at 33 chars) rejects it so
+    // its schedule rows fold back into the last real blurb instead of
+    // forming their own bogus one — bottomCutoff drops that whole table
+    // (title text included) below the narrative instead.
+    titleMaxLen: 40,
+    bottomCutoff: 65,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
