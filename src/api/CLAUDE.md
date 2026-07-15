@@ -229,6 +229,19 @@ for each generator; the reader modules:
   rather than the raw pool — keeps the file ~150KB and bakes in the leader-relative
   qualifier's playing-time floor. `LeadersPage` reads it for the `minors` scope and
   hands rows to `TeamLeaders`'s `precomputed` path.
+- `allStarRosters.js` — the All-Star Rosters page, from
+  `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
+  season's roster is decided once and never changes. Every named selectee,
+  including one who withdrew and never played, since the source is the official
+  ALAS/NLAS selections endpoint, not a boxscore scan (same source
+  `fetchAllStarRosterIds` in `person-fetch.js` uses). Stores each season's
+  `gamePk` only; the screen resolves live team/date info via `fetchGameCardsByPk`
+  (`schedule.js`), same pattern as the Top Games page — and, like every other
+  game surface, never prints the final score as bare text: `GameCard` (reused
+  as-is) stays silent on the score even for a Final, so the year's result is one
+  tap into the ordinary sealed box score, not an exception carved out for old
+  games. Kept OUT of the PWA precache (~650 KB) and fetched at runtime, like
+  `war-history.json`.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run

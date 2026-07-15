@@ -13,6 +13,8 @@ const MENU_ITEMS = [
   { label: 'Umpire Rankings', path: '/umpires' },
   { label: 'Milestone Watch', path: '/milestones' },
   { label: 'Awards History', path: '/awards' },
+  { label: 'Postseason History', path: '/postseason-history' },
+  { label: 'All-Star Rosters', path: '/all-star-rosters' },
   { label: 'Logo Sheet', path: '/logos' },
   { label: 'About', path: '/about' },
 ]

@@ -30,6 +30,14 @@ const AwardsHistoryPage = lazyNamed(
   () => import('./screens/AwardsHistoryPage.jsx'),
   'AwardsHistoryPage',
 )
+const PostseasonHistoryPage = lazyNamed(
+  () => import('./screens/PostseasonHistoryPage.jsx'),
+  'PostseasonHistoryPage',
+)
+const AllStarRostersPage = lazyNamed(
+  () => import('./screens/AllStarRostersPage.jsx'),
+  'AllStarRostersPage',
+)
 const StandingsPage = lazyNamed(() => import('./screens/StandingsPage.jsx'), 'StandingsPage')
 const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
 const TeamLeadersPage = lazyNamed(
@@ -109,6 +117,10 @@ export default function App() {
     content = <MilestoneWatchPage />
   } else if (route.name === 'awards-history') {
     content = <AwardsHistoryPage />
+  } else if (route.name === 'postseason-history') {
+    content = <PostseasonHistoryPage />
+  } else if (route.name === 'all-star-rosters') {
+    content = <AllStarRostersPage />
   } else if (route.name === 'standings') {
     content = <StandingsPage />
   } else if (route.name === 'player') {

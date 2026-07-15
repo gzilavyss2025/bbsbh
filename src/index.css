@@ -2653,12 +2653,6 @@ body {
   flex: none;
 }
 
-.teaminfo__toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin: 0 0 8px;
-}
-
 .teaminfo__title {
   display: flex;
   align-items: center;
@@ -3800,28 +3794,42 @@ body {
 .abs__title {
   display: block;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+/* One inset cell per club, two-up to fill the card width — same paper-2 cell
+   treatment as the R/H/E and pitch-stat rows above, so ABS reads as another
+   row of the card and not orphaned text. Abbreviation anchored left, the
+   used/open pips anchored right. */
 .abs__rows {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 .abs__row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+/* Hairline divider between the club and its pips, so abbr and gauge read as
+   one labeled unit rather than two floated ends. */
+.abs__row .abs__team {
+  border-right: var(--bw-hair) solid var(--border-rule);
+  padding-right: 10px;
 }
 .abs__team {
   flex: 0 0 auto;
-  min-width: 34px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
@@ -4170,6 +4178,18 @@ body {
 }
 .usagepips__pip--open {
   border: 1.3px solid var(--graphite-soft);
+}
+/* Mound-visit card: the pips stand alone as the card's one figure (no ABS
+   pass/fail count beside them like StatBox's row), so they read at 2x size. */
+.pitchernotice--mv .usagepips {
+  gap: 8px;
+}
+.pitchernotice--mv .usagepips__pip {
+  width: 14px;
+  height: 14px;
+}
+.pitchernotice--mv .usagepips__pip--open {
+  border-width: 2.6px;
 }
 /* An ejection/event card's sentence — same natural-case prose treatment as
    .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
@@ -5198,6 +5218,7 @@ body {
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
+  white-space: nowrap;
   cursor: pointer;
 }
 .pbp__hlicon {
@@ -8215,6 +8236,12 @@ body {
   .pbp__zonebtn {
     display: none;
   }
+  /* No zone icon button to sit beside at this breakpoint (see above) — drop
+     the indent that used to space it away from that icon, since the card
+     column is narrow here (38fr) and the button needs the room. */
+  .pbp__hlbtn {
+    margin-left: 0;
+  }
   .pbp__zonecell {
     display: flex;
     gap: 14px;
@@ -11168,6 +11195,422 @@ body {
   text-transform: uppercase;
   color: var(--text-muted);
   font-style: normal;
+}
+
+/* ------------------------------------------------------------- postseason
+   history. One section per season, newest first: a champion banner, then
+   each round (Wild Card/Division/Championship/World Series) as its own
+   column so the whole thing scrolls left-to-right like a bracket. Series
+   tiles are buttons; tapping one opens .psmodal (below), the animated
+   "card slides over" detail view. */
+.pshistory__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.pshistory__season {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.pshistory__seasonhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.pshistory__year {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 20px;
+  color: var(--text-heading);
+}
+.pshistory__champion {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px 5px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+.pshistory__championname {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  color: var(--text-heading);
+}
+.pshistory__championtag {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+.psbracket {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.psbracket__round {
+  flex: 0 0 auto;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.psbracket__roundlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.psbracket__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.psseries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 8px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  text-align: left;
+  cursor: pointer;
+}
+.psseries:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.psseries__label {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.psseries__team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.psseries__team--winner {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.psseries__teamname {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.psseries__wins {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------- postseason series
+   modal. The animated card a series tap slides over — same centered-scrim +
+   slideup treatment as .logomodal (the team-page logo sketch), just a
+   scorebook-style game list instead of an oversized logo. */
+.psmodal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: calc(100% - 32px);
+  max-width: 380px;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 24px 18px 18px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  animation: slideup var(--dur-slow) var(--ease-out);
+}
+.psmodal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+.psmodal__label {
+  margin: 0;
+  padding-right: 30px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.psmodal__result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.psmodal__winner,
+.psmodal__loser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: var(--w-bold);
+  text-align: center;
+  max-width: 96px;
+}
+.psmodal__winner {
+  color: var(--text-heading);
+}
+.psmodal__loser {
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+.psmodal__score {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.psmodal__games {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.psmodal__game {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  font-size: 12px;
+}
+.psmodal__gamenum {
+  flex: none;
+  width: 34px;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.psmodal__gamedate {
+  flex: none;
+  width: 44px;
+  color: var(--text-muted);
+}
+.psmodal__gameline {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+.psmodal__gameline--awaywon .psmodal__gamescore:first-of-type {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.psmodal__gameline:not(.psmodal__gameline--awaywon) .psmodal__gamescore:last-of-type {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.psmodal__at {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+.psmodal__mvp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: var(--seal-texture);
+}
+/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
+   outranks the base .shot sizing, same convention as .tlead__shot. */
+.shot.psmodal__mvpshot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.psmodal__mvpshot.shot--fallback {
+  font-size: 18px;
+}
+.psmodal__mvpinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.psmodal__mvptag {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-ink);
+}
+.psmodal__mvpname {
+  font-family: var(--font-body);
+  font-weight: var(--w-bold);
+  font-size: 14px;
+  color: var(--seal-ink);
+}
+
+/* ------------------------------------------------------------ all-star rosters
+   One section per season, newest-first: the ordinary GameCard for that
+   year's game (when it resolved), then the roster split into AL/NL columns —
+   same visual language as .awardhistory__* (a season row, a league column,
+   a recipient line), since both pages answer "who, grouped by season". */
+.allstarrosters__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.allstarrosters__year {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.allstarrosters__yearnum {
+  flex: none;
+  width: 40px;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: 14px;
+  color: var(--text-heading);
+}
+.allstarrosters__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+.allstarrosters__game {
+  max-width: 360px;
+}
+.allstarrosters__leagues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.allstarrosters__league {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.allstarrosters__leaguetag {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstarrosters__recipients {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.allstarrosters__recipient {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border-radius: var(--radius-xs);
+}
+/* Same favorite-team highlight as .awardhistory__recipient--fav — a
+   selectee who played for the user's favorite club (by franchise id, stable
+   across a relocation/rename) jumps out among the rest of the season. */
+.allstarrosters__recipient--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  padding: 1px 4px 1px 5px;
+  margin: -1px -4px -1px -5px;
+}
+.allstarrosters__teamlink {
+  flex: none;
+  display: inline-flex;
+}
+.allstarrosters__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.allstarrosters__team {
+  flex: none;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.allstarrosters__pos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-style: normal;
+}
+@media (max-width: 520px) {
+  .allstarrosters__year {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .allstarrosters__yearnum {
+    width: auto;
+  }
 }
 
 /* ---------------------------------------------------------------- umpire page */

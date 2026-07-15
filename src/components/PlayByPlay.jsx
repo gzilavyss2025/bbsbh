@@ -280,18 +280,19 @@ function EventNote({ entry }) {
 }
 
 // A mound visit: the same kraft-amber notification card as a substitution —
-// no headshot to show (it's a team-level event, not a person), so the code
-// ("MV") sits beside the visiting club's own mark instead. The useful bit is
-// how many visits the club has left (MLB caps them — see moundVisitsAllowed),
-// drawn as used/open pips (UsagePips) — the same shared component StatBox.jsx's
-// ABS challenge row uses.
+// no headshot to show (it's a team-level event, not a person), so the visiting
+// club's own mark sits up front instead of a code (the "Mound visit" label
+// already says what this is). The useful bit is how many visits the club has
+// left (MLB caps them — see moundVisitsAllowed), drawn as used/open pips
+// (UsagePips) — the same shared component StatBox.jsx's ABS challenge row
+// uses, sized up here (pitchernotice--mv) since this card has no other figure
+// competing for attention.
 function MoundVisitBar({ team, teamId, remaining, allowed }) {
   const used = remaining != null && allowed != null ? Math.max(0, allowed - remaining) : null
   const label =
     used != null ? `${used} of ${allowed} mound visits used, ${remaining} left` : undefined
   return (
-    <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
-      <span className="pitchernotice__code">MV</span>
+    <div className="pitchernotice pitchernotice--pbp pitchernotice--event pitchernotice--mv">
       <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
       <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
       <span className="pitchernotice__spacer" />

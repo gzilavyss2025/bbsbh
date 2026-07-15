@@ -98,6 +98,20 @@ export function SiteFooter({
         <button
           type="button"
           className="sitefooter__action"
+          onClick={() => navigate('/postseason-history')}
+        >
+          Postseason History
+        </button>
+        <button
+          type="button"
+          className="sitefooter__action"
+          onClick={() => navigate('/all-star-rosters')}
+        >
+          All-Star Rosters
+        </button>
+        <button
+          type="button"
+          className="sitefooter__action"
           onClick={() => navigate('/top-games')}
         >
           Top Games

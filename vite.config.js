@@ -82,6 +82,9 @@ export default defineConfig({
           '**/data/top-prospects.json',
           '**/data/war-history.json',
           '**/data/minors-leaders.json',
+          // Every named All-Star since 1933 (~650 KB) — only read from the
+          // All-Star Rosters page, see scripts/gen-all-star-rosters.mjs.
+          '**/data/all-star-rosters.json',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -96,7 +99,7 @@ export default defineConfig({
             // precache. NetworkFirst keeps them fresh online and usable after
             // a successful visit when the user is offline at the park.
             urlPattern: ({ url }) =>
-              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders)\.json$/.test(
+              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters)\.json$/.test(
                 url.pathname,
               ),
             handler: 'NetworkFirst',
