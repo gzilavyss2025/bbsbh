@@ -2653,12 +2653,6 @@ body {
   flex: none;
 }
 
-.teaminfo__toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin: 0 0 8px;
-}
-
 .teaminfo__title {
   display: flex;
   align-items: center;
