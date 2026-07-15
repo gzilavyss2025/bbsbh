@@ -123,7 +123,11 @@ export function GameView({ game, section, onSection }) {
   ) : null
 
   return (
-    <LinkScope asOf={officialDate} sportId={game.sportId}>
+    // Before first pitch there's nothing yet to spoil, so a link out of a
+    // Preview game's lineups should show live/current stats rather than
+    // freezing to "entering today" (that framing only makes sense once the
+    // game — and the spoiler risk — has actually started).
+    <LinkScope asOf={started ? officialDate : null} sportId={game.sportId}>
     <div className="screen">
       <SiteHeader />
 
