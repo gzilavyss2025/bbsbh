@@ -333,6 +333,43 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Padres — the real narrative is on PAGE 1 (CALIBRATION.md's claim that
+  // page 1 is "CID-encoded, unreadable" turned out to be wrong — pdfjs's
+  // text extraction works fine via the embedded ToUnicode map; the font
+  // NAMES just come through as generic "CIDFont+Fn" subset labels instead of
+  // real PostScript names, matched positionally the same way FreeSans is for
+  // COL/CHC). Two narrative columns like the Yankees/Diamondbacks/Braves/
+  // Guardians. Titles are lowercase song-lyric puns ("My Madre don't like
+  // you & she likes everyone," "Life is worth living," "He got his peaches
+  // out in Georgia"), never ALL-CAPS, so allCapsOnly can't gate real titles
+  // vs. inline bold player names the way it does elsewhere — titleAloneOnLine
+  // does that job instead (a real title is the only thing on its line; an
+  // inline name like "Luis Campusano" always has body-font text trailing
+  // after it on the same line, e.g. "is slashing .318/.416/.606…"). headFont
+  // covers both the title face and the inline-name face so a bold name is
+  // still captured as body content when it fails the title test, same as
+  // every other club's inline-name handling.
+  135: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /CIDFont\+F2/,
+    headFont: /CIDFont\+F1|CIDFont\+F3/,
+    tableLeader: /\.(\s*\.){7,}/,
+    titleAloneOnLine: true,
+    joinWrappedTitles: true,
+    columns: [
+      { xMin: 0, headingMaxX: 30, columnMaxX: 230 },
+      {
+        xMin: 235,
+        headingMaxX: 260,
+        columnMaxX: 450,
+        // A catcher's slash-line callout box (AVG/OBP/SLG/OPS/wRC+/wOBA,
+        // each "(1st) .318" etc.) sits mid-column in the same body font as
+        // the narrative around it — bounded to just its own small y-range.
+        dropRects: [{ xMin: 385, yMax: 725, yMin: 680 }],
+      },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
@@ -665,6 +702,32 @@ function extractFlowBoldZone(items, realName, cfg) {
     if (!l) { l = { y: w.y, words: [] }; lineWords.push(l) }
     l.words.push(w)
   }
+  // cfg.joinWrappedTitles (SD): most clubs' titles are short enough to fit
+  // one baseline, but a long one here wraps to a second line ("My Madre
+  // don't like you & she likes" / "everyone") — two consecutive lines with
+  // NOTHING but head-font words on either. A body paragraph line is never
+  // entirely head-font, so that combination is safe to treat as one title
+  // spanning both baselines rather than a real title followed by a bogus
+  // one-word title stealing the real title's body.
+  if (cfg.joinWrappedTitles) {
+    lineWords.sort((a, b) => b.y - a.y)
+    for (let idx = lineWords.length - 1; idx > 0; idx--) {
+      const cur = lineWords[idx]
+      const prev = lineWords[idx - 1]
+      const allHead = (l) => l.words.length && l.words.every((w) => isHead(w))
+      if (allHead(cur) && allHead(prev)) {
+        // Both lines keep their own x (0-~600), so a plain x-sort of the
+        // combined words would interleave them by column position rather
+        // than reading order — shift the wrapped (lower) line's words into
+        // their own x band, entirely to the right of anything on a real
+        // line, so the eventual x-sort keeps line order intact and the
+        // resulting large gap makes joinWords insert the word-break space.
+        for (const w of cur.words) w.x += 100000
+        prev.words = [...prev.words, ...cur.words]
+        lineWords.splice(idx, 1)
+      }
+    }
+  }
   const headings = []
   for (const l of lineWords) {
     l.words.sort((a, b) => a.x - b.x)
@@ -676,7 +739,10 @@ function extractFlowBoldZone(items, realName, cfg) {
     let i = start
     while (i < l.words.length && isHead(l.words[i])) i++
     const titleWords = l.words.slice(start, i)
-    const leadWords = l.words.slice(i)
+    // A third, neither-body-nor-head decorative font sharing this baseline
+    // is not a real lead-in — only body/head words count as the inline text
+    // that follows a "TITLE: lead-in" title on the same line.
+    const leadWords = l.words.slice(i).filter((w) => cfg.bodyFont.test(w.font) || isHead(w))
     headings.push({ y: l.y, allWords: l.words, titleWords, leadWords })
   }
   for (const h of headings) {
@@ -711,7 +777,10 @@ function extractFlowBoldZone(items, realName, cfg) {
   const foldedBackLines = []
   for (const h of headings) {
     const isRealTitle =
-      h.title && (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) && (!cfg.allCapsOnly || isAllCaps(h.title))
+      h.title &&
+      (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
+      (!cfg.allCapsOnly || isAllCaps(h.title)) &&
+      (!cfg.titleAloneOnLine || h.leadWords.length === 0)
     if (isRealTitle) {
       titled.push(h)
       for (const w of h.titleWords) w.consumed = true
@@ -737,13 +806,19 @@ function extractFlowBoldZone(items, realName, cfg) {
   // PHI marks every wrapped body LINE with its own margin bullet in one such
   // font, which would otherwise leak into running text mid-sentence.
   const isContent = (w) => cfg.bodyFont.test(w.font) || isHead(w)
+  // cfg.dropRects: a small embedded stat box in body font sharing the
+  // narrative's own x-range (SD: a catcher's slash-line callout mid-column)
+  // — rightTableMinX would cut it but would also cut real prose beside it,
+  // so a rect bounds the exclusion to just the box's own small y-range.
+  const inDropRect = (w) => (cfg.dropRects ?? []).some((r) => w.x >= r.xMin && w.y <= r.yMax && w.y >= r.yMin)
   const body = words.filter(
     (w) =>
       isContent(w) &&
       !w.consumed &&
       w.x < w.cutoff &&
       !cfg.tableLeader.test(w.str) &&
-      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
+      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX) &&
+      !inDropRect(w),
   )
 
   const lines = [...foldedBackLines]
