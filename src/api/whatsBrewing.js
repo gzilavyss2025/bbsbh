@@ -333,6 +333,30 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Orioles — page 2 (page 1 is a splits-table front), the starting pitcher's
+  // own punny notes column, single left column like BOS/LAA/DET. The right
+  // side isn't a compact sidebar like those clubs — it's a page-long, multi-
+  // section scouting report (game log, splits, career highs) that runs the
+  // full height of the page, but it's all safely past columnMaxX regardless.
+  // topCutoff drops a "PITCH TYPE" stat table sharing the column's own left
+  // margin above the first real title (same shape as CLE's scouting-report
+  // preamble). Body prose is split across two Calibri subsets like DET
+  // (CALIBRATION.md finding #2). Bullet points use an icon font (`fontello`)
+  // whose glyph extracts as a raw, non-printable control character rather
+  // than a real "•" — left OUT of bodyFont (unlike ATL's ScriptA or CWS's
+  // Wingdings bullets) so that byte doesn't end up embedded in the text;
+  // the rest of each bulleted line still comes through untouched.
+  110: {
+    layout: 'flow-bold',
+    page: 2,
+    bodyFont: /Calibri$/,
+    headFont: /Calibri-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 250,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 800,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
