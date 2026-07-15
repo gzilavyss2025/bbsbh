@@ -10300,11 +10300,14 @@ body {
      rather than bleeding past this card's own border. */
   display: flow-root;
 }
-/* A 3-headshot rail (a shuffle, a multi-player trade) needs more room beside
-   the floated photos before the cutline is forced into an awkward narrow
-   wrap — see the wide flag in TeamTransactionsCard.jsx. */
+/* A 3-headshot rail (a shuffle, a multi-player trade) still gets a bit more
+   room than the base width — now that a player's name wraps properly
+   (.txstory__cutline .plink's display:contents above), the card no longer
+   needs to be this wide just to dodge an awkward name break, but the
+   floated rail itself is still wider with a 3rd photo. See the wide flag in
+   TeamTransactionsCard.jsx. */
 .txstory--wide {
-  width: 430px;
+  width: 360px;
 }
 .txstory__date {
   margin: 0 0 4px;
@@ -10418,17 +10421,16 @@ body {
    surrounding plain prose (see teamTransactions.js: the emphasized/linked
    span is built from the player's name alone, never "{POS} {Name}"). */
 .txstory__cutline .plink {
-  /* A bare <button> is inline-block by default, which keeps its whole text
-     content as one unbreakable unit — "Lance McCullers Jr." would jump to
-     the next line as a whole rather than wrapping normally like the plain
-     prose around it. display:inline alone tests fine in Chromium (the only
-     engine this repo's e2e harness can drive), but some engines' UA
-     stylesheet also sets a button's internal text to nowrap-like handling
-     that survives an author's display override — white-space/overflow-wrap
-     belt-and-suspenders the fix so a long name wraps regardless of engine. */
-  display: inline;
-  white-space: normal;
-  overflow-wrap: break-word;
+  /* A bare <button> keeps its own box even with display:inline set — some
+     part of its native rendering can still hold the text together as one
+     unbreakable run ("Lance McCullers Jr." jumping to the next line as a
+     whole rather than wrapping mid-name like the plain prose around it),
+     confirmed still happening in real Chrome even after that override.
+     display:contents removes the button's own box from layout entirely, so
+     its text becomes a plain part of the paragraph's flow — no button-box
+     quirk left to fight. The click handler and focusability live on the
+     <button> element itself, unaffected by its own box disappearing. */
+  display: contents;
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
