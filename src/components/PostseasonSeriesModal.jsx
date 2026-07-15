@@ -45,7 +45,7 @@ export function PostseasonSeriesModal({ series, onClose }) {
     }
   }, [])
 
-  const { teamA, teamB, games, mvp, label, winnerTeamId } = series
+  const { teamA, teamB, games, mvp, label, winnerTeamId, isWorldSeries } = series
   const winner = winnerTeamId === teamA.teamId ? teamA : teamB
   const loser = winnerTeamId === teamA.teamId ? teamB : teamA
 
@@ -80,6 +80,14 @@ export function PostseasonSeriesModal({ series, onClose }) {
         </button>
 
         <p className="psmodal__label">{label}</p>
+        {isWorldSeries && (
+          <img
+            src="/brand/world-series-trophy.png"
+            alt=""
+            className="psmodal__trophy"
+            aria-hidden="true"
+          />
+        )}
         <div className="psmodal__result">
           <TeamLink id={winner.teamId} className="psmodal__winner">
             <TeamLogo teamId={winner.teamId} name={teamClubNameShort(winner.teamId)} size={34} />

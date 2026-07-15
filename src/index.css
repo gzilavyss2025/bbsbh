@@ -11757,12 +11757,19 @@ body {
   color: var(--text-heading);
 }
 .pshistory__championtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-family: var(--font-display);
   font-size: 9.5px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--accent-primary);
+}
+.pshistory__championtrophy {
+  flex: none;
+  display: block;
 }
 
 /* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
@@ -11865,8 +11872,20 @@ body {
 .psbracket__collabel--nl {
   color: var(--accent-positive);
 }
+/* The World Series column/round label carries the same trophy mark as the
+   champion banner (.pshistory__championtrophy) — inline-flex so the icon
+   sits beside the centered text instead of the plain block treatment the
+   AL/NL labels use. */
 .psbracket__collabel--ws {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   color: var(--seal-ink);
+}
+.psbracket__roundtrophy {
+  flex: none;
+  display: block;
 }
 .psbracket__lanes {
   flex: 1;
@@ -12204,6 +12223,12 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+}
+.psmodal__trophy {
+  display: block;
+  margin: 0 auto;
+  height: 56px;
+  width: auto;
 }
 .psmodal__result {
   display: flex;
