@@ -254,3 +254,16 @@ export function splitName(name = '', mascot = '') {
   }
   return { location: '', mascot: full }
 }
+
+// Splits a slash-joined location ("Scranton/Wilkes-Barre") into segments to
+// join with a forced line break, so a narrow card wraps right after the "/"
+// instead of the browser's greedy fill picking a LATER break opportunity (the
+// hyphen in "Wilkes-Barre") and cutting a word in half. Returns [name]
+// unchanged when there's no slash. Pure string splitting — see
+// BreakableLocation (components/BreakableLocation.jsx) for the JSX that
+// renders these segments with a <br/> between them.
+export function slashBreakSegments(name = '') {
+  const parts = name.split('/')
+  if (parts.length < 2) return [name]
+  return parts.map((part, i) => (i < parts.length - 1 ? `${part}/` : part))
+}

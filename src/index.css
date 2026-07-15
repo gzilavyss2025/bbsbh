@@ -9516,6 +9516,47 @@ body {
   line-height: 1;
 }
 
+/* ---- Slate empty-day banners — the same tape-banner recipe as the player
+   page's All-Star/rehab banners above, for GameSelect's empty-slate spot.
+   break-banner reuses the celebratory All-Star blue (every level goes dark
+   the same week — it's not an MLB-only concept here); offday-banner is the
+   neutral graphite/ink counterpart for a level's own ordinary day off (a
+   Monday MiLB off day, a rare all-30-idle MLB day outside the break). One
+   line, label + "resumes {date}" side by side; wraps to two lines only if a
+   narrow viewport can't fit both. ---- */
+.break-banner,
+.offday-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.break-banner {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+.offday-banner {
+  background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink-0) 100%);
+}
+.break-banner__text,
+.offday-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 15px;
+  color: #fff;
+}
+.break-banner__detail,
+.offday-banner__detail {
+  font-size: var(--fs-label);
+  color: rgba(255, 255, 255, 0.82);
+}
+
 /* ---- rehab-assignment banner — an actual strip of kraft-amber tape: the same
    diagonal-hatch weave (--seal-texture) as the spoiler seals and the reveal
    button, so a player's status reads as tape stuck onto the scorebook page. The
