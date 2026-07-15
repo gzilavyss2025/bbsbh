@@ -10300,6 +10300,12 @@ body {
      rather than bleeding past this card's own border. */
   display: flow-root;
 }
+/* A 3-headshot rail (a shuffle, a multi-player trade) needs more room beside
+   the floated photos before the cutline is forced into an awkward narrow
+   wrap — see the wide flag in TeamTransactionsCard.jsx. */
+.txstory--wide {
+  width: 430px;
+}
 .txstory__date {
   margin: 0 0 4px;
   font-family: var(--font-display);

@@ -67,8 +67,11 @@ function Cutline({ segments }) {
 // different days once the day-header is gone), rail, type pill, cutline.
 function TxStory({ story }) {
   const tone = TYPE_TONE[story.type] ?? 'move'
+  // A 3-headshot rail (a shuffle, a multi-player trade) crowds the base
+  // width's cutline wrap — a wider card for those specifically.
+  const wide = story.rail.length >= 3
   return (
-    <div className="txstory">
+    <div className={`txstory${wide ? ' txstory--wide' : ''}`}>
       <div className="txstory__date">{dateline(story.date)}</div>
       {story.rail.length > 0 && (
         <div className="photorail">
