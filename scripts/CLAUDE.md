@@ -197,6 +197,16 @@ Re-run only to fold in a new season.
   team snapshots for 2005+ (where its affiliate data is clean) and merges a small
   hand-verified seed (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the
   SEED, never the output.** See the generator header for the 2005-floor rationale.
+- `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
+  completed bracket (who played, who won, how many games) for the last 5 MLB
+  postseasons, plus the round MVP where one exists (LCS/World Series only —
+  Wild Card/Division Series carry no official MVP award). Sweeps
+  `/api/v1/schedule?...&gameType=F,D,L,W&hydrate=team,seriesStatus` per
+  season, grouping games into a series by (gameType, seriesDescription,
+  sorted team-id pair), then `/api/v1/awards/{ALCSMVP,NLCSMVP,WSMVP}/recipients`
+  for the MVP. Walks backward from the current year, skipping any season
+  whose postseason hasn't finished. App reads it via
+  `src/api/postseasonHistory.js`.
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before
   `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB
