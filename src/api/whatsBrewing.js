@@ -333,6 +333,40 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Diamondbacks — page 1, a genuine two-column narrative like the Yankees
+  // above. A masthead/broadcast-info block, a decorative accolades banner, and
+  // a couple of stray table headers ("AROUND THE HORN") sit above and between
+  // both columns, but they self-exclude: their all-caps head-font runs aren't
+  // near either column's left margin, so lineMarkerCutoff (see its comment
+  // below) treats them as second-column markers and cuts them off at their
+  // own x with nothing left on the line. Column 1 ("HERE'S THE STORY", "LAST
+  // GAME", "RADIO UPDATE", "IT STARTS WITH STARTING PITCHING", "TROY TAKING
+  // TO NL WEST", "GARCIA HANGING ZEROES", "LOÁISIGA BLANKING FOES",
+  // "FIRST-INNING TALLIES") runs x~18-236; its bottomCutoff drops the
+  // "PROBABLE PITCHERS & BROADCAST INFO" schedule table below it. Column 2
+  // ("CARROLL SWIPING BAGS", "WIN THE SERIES", "VS. NL WEST", "EL PIKE VS. NL
+  // WEST", "MORENO'S ON-BASE STREAK", "GABI ON THE ROAD", "ALL-STAR FACTS",
+  // "VS. DODGERS") runs x~254-471; its bottomCutoff drops a head-to-head
+  // record mini-table + "NEXT STARTER" box embedded right under "VS.
+  // DODGERS" — that table's own header ("2026 All-Time Last 10 Streak") is
+  // head-font but mixed-case, so unlike the stray runs above it does NOT
+  // self-exclude and would otherwise leak into that blurb's body. headFont
+  // covers both the section-header weight (BoldCond) and the inline-bold-name
+  // weight (Bold, e.g. "Corbin Carroll" mid-sentence) — the same union LAA/KC
+  // use so a bold name isn't silently dropped; mixed-case bold runs away from
+  // the margin fail the allCapsOnly title test and fold back into the body
+  // rather than becoming a heading.
+  109: {
+    layout: 'flow-bold',
+    bodyFont: /MyriadPro-(Regular|Cond)/,
+    headFont: /MyriadPro-(BoldCond|Bold)/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    columns: [
+      { xMin: 0, headingMaxX: 30, columnMaxX: 245, bottomCutoff: 90 },
+      { xMin: 245, headingMaxX: 265, columnMaxX: 478, bottomCutoff: 197 },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
