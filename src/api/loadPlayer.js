@@ -247,6 +247,7 @@ export async function loadPlayer(id, asOf) {
           currentSeason: season, currentSportId: tileSportId, debutYear, tileStat,
           logTagLevel: onRehab,
           warByYear: warByYearFor(id, group, warCurrent, warHistory),
+          transactions: txns,
         })
         // Pure passthrough lookup, not a derivation — attached here rather
         // than threaded into buildBlock's (pure-shaping) signature.

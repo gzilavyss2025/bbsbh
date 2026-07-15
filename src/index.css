@@ -9162,6 +9162,18 @@ body {
 .ledger tfoot tr.reg-milb td {
   color: var(--graphite);
 }
+/* A missed season (see missingSeasonRows in api/person.js) — dashes fill the
+   stat cells same as any thin row, but the note replacing the team cell reads
+   as an aside, not a stat line: italic graphite, no bold weight. */
+.reg-gap td {
+  color: var(--graphite);
+}
+.reg-gap .yr {
+  color: var(--graphite);
+}
+.reg-gap__note {
+  font-style: italic;
+}
 /* The career register's secondary columns (a pitcher's GS, K, BB) fold away on
    a phone so the essentials stay legible; they return at the 740px "wide"
    breakpoint. The Ledger tags those cells with col-narrow-hide (see hideNarrow). */

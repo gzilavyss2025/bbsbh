@@ -405,19 +405,24 @@ function CareerRegister({ register }) {
 
   const ledgerRows = rows.map((r) => ({
     key: r.key,
-    className: r.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
+    className: r.tier === 'mlb' ? 'reg-mlb' : r.tier === 'gap' ? 'reg-gap' : 'reg-milb',
     allStar: r.allStar,
     cells: [
       <>
         {r.year}
         {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
       </>,
-      // The MiLB level badge rides the team, not the year — the level is a fact
-      // about where he played, and it reads cleanly beside the short abbrevs.
-      <>
-        {r.team || DASH}
-        {r.pill && <span className="reg-pill">{r.pill}</span>}
-      </>,
+      // A gap year (see missingSeasonRows) has no team to show — its note
+      // ("Injured — missed season" / "Did not play") takes that cell instead,
+      // so the row still reads as an explained absence, not a blank line.
+      r.gap ? (
+        <span className="reg-gap__note">{r.note}</span>
+      ) : (
+        <>
+          {r.team || DASH}
+          {r.pill && <span className="reg-pill">{r.pill}</span>}
+        </>
+      ),
       ...r.cells,
     ],
   }))
