@@ -83,7 +83,7 @@ exclusion the Pirates entry already models. See `flowbold-test.mjs` in this fold
 | ---- | ----- | --- |
 | 🟢 **GREEN** (12) | BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC, LAA, SEA, MIN, NYY | Clean single left column, unambiguous Regular/Bold split, punny content. Straight `flow-bold` config + geometry tuning. **All 12 calibrated.** |
 | 🟡 **YELLOW** (11) | DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL | Doable but one wrinkle each (split body, multi-column, italic body, substituted fonts, or blander content). **All 11 calibrated.** |
-| 🔴 **RED** (5, 3 done) | ~~ATL~~, ~~CIN~~, ~~TB~~ (done), TEX, TOR | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or (mis-tiered) two-column/single-wide-column narrative. ATL, CIN, and TB all turned out tractable — see their `CONFIG` entries in `whatsBrewing.js`. **TEX, TOR remain.** |
+| 🔴 **RED** (5, 4 done) | ~~ATL~~, ~~CIN~~, ~~TB~~, ~~TEX~~ (done), TOR | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or (mis-tiered) two-column/single-wide-column narrative. ATL, CIN, TB, and TEX all turned out tractable — see their `CONFIG` entries in `whatsBrewing.js`. **TOR remains.** |
 
 Recommended path: land finding #1 (`page` in CONFIG) + finding #2 (`flow-bold`
 variant) as one small parser change, calibrate **BOS + NYM** as pilots (cleanest),
@@ -243,8 +243,13 @@ still-open RED clubs.
   just relying on line-tolerance) is the correct fix for any future club with
   this shape.
 
-### TEX — Rangers (140) · page 2 · multi-column Arial
-- Page 2 body `ArialMT`, heads `Arial-BoldMT` (206), body also has lots of `Arial-ItalicMT`. Titles (LAST TIME OUT, AGAINST THE ASTROS, HOME AND ROAD, STARTER AND RELIEVER, TEXAS TENURE) sit inside a **multi-column** layout, not a single left margin. Needs column-band detection.
+### ~~TEX — Rangers (140) · page 2 · multi-column Arial~~ — CALIBRATED (as page 1)
+- This read described a different day's page-2 starter-notes layout. The
+  real game-day narrative is on **page 1**: two genuine narrative columns
+  (x=142.9 and x=363.2) beside a left stats sidebar to ignore, straightforward
+  `columns:` config same shape as ARI/ATL/NYY — no cross-baseline collision
+  risk since each zone's xMin/columnMaxX cleanly excludes the other. See the
+  `140:` entry in `whatsBrewing.js`.
 
 ### TOR — Blue Jays (141) · page 2 · multi-column, heads not left-margin
 - Page 2 body `ArialMT`, heads `Arial-BoldMT` (71) but leftMargin=0 — headings are inside columns. Titles (TODAY'S GAME, 2026 HIGHLIGHTS, VS. THE GIANTS) present but the layout duplicates each run twice in the stream ("TODAY'S GAME:TODAY'S GAME:") — a de-dupe quirk plus multi-column. Hard.

@@ -789,6 +789,35 @@ const CONFIG = {
     topCutoff: 840,
     bottomCutoff: 70,
   },
+  // Rangers — page 1, THREE zones sharing baselines across the full page
+  // width: a left stats sidebar ("RANGERS AT A GLANCE", x<130, ignored
+  // entirely — never even reaches the narrative extraction) plus two real
+  // narrative columns at x=142.9 (WINS AND LOSSES, THE FINALE, AT HOME,
+  // STANDINGS, SERIES STUFF, SILVER BOOT SERIES) and x=363.2 (LATZ IN
+  // PHILLY, THE HALF OF IT, THE SHORT OF IT, ZEKE AND THE LONG BALL, WE HAVE
+  // LIFTOFF, GO AHEAD MAKE MY DAY, SHORTS). Unlike TB, this is safe as two
+  // ordinary `columns:` zones (not a single wide one) — xMin/columnMaxX per
+  // zone excludes the OTHER column's x-range entirely, so there's no
+  // cross-baseline collision risk to guard against. A "BEST RECORDS IN MLB
+  // SINCE MAY 29" mini-table sits inline mid-blurb inside WINS AND LOSSES,
+  // same bold font as the narrative around it; its labels/values all sit past
+  // headingMaxX so they never register as titles and fold into that blurb's
+  // body as plain text, matching the source PDF's own inline table shape.
+  // topCutoff drops the matchup masthead above both columns; bottomCutoff
+  // drops the "UPCOMING PROBABLES, TIMES & BROADCASTS" schedule table below.
+  140: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT/,
+    headFont: /Arial-BoldMT/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 800,
+    bottomCutoff: 45,
+    columns: [
+      { xMin: 135, headingMaxX: 160, columnMaxX: 355 },
+      { xMin: 355, headingMaxX: 380, columnMaxX: 610 },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
