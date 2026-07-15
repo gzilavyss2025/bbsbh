@@ -1,6 +1,6 @@
 # Team Transactions — data layer
 
-**Status:** data-layer design approved; a few live-API details to verify before implementation (see bottom)
+**Status:** data-layer design approved and verified against the live API — ready for implementation
 **Slug:** team-transactions
 **Relationship to prior work:** The visual/product design is locked in
 `scope.md` + `wireframe.html` in this directory — this document does NOT revisit
@@ -50,7 +50,8 @@ season in progress, so the client only pays for what it actually loads.
   "version": 1,
   "season": 2026,
   "generatedAt": "2026-07-15T09:12:00Z",
-  "seasonStart": "2026-03-26",          // this season's Opening Day; fixed once known
+  "seasonStart": "2026-03-25",          // this season's Opening Day (regularSeasonStartDate,
+                                         // GET /api/v1/seasons/2026?sportId=1); fixed once known
   "final": false,                       // true once the season has ended and
                                          // this file stops being rewritten
   "byTeamId": {
@@ -237,12 +238,17 @@ never touched again once written with `final: true`):
 ~~~text
 main:
   season      = currentSeasonYear()
-  seasonStart = openingDayFor(season)      // fixed once known; from schedule API
+  seasonMeta  = getJson(`/api/v1/seasons/${season}?sportId=1`)   // verified: one row, one call
+  seasonStart = seasonMeta.regularSeasonStartDate                // Opening Day
+  final       = today > seasonMeta.seasonEndDate                 // past the World Series window
   orgs        = fetchMlbTeamIds()          // sportId=1, 30 clubs (as gen-rehab)
   affilToOrg  = fetchAffiliateParentMap()  // affiliate teamId → parent org id
   raw         = getJson(`/api/v1/transactions?startDate=${seasonStart}&endDate=${today}`)
                                            // ONE league-wide fetch per run, like gen-rehab —
-                                           // always season-start-to-today, not a rolling window
+                                           // always season-start-to-today, not a rolling window.
+                                           // Verified: teamId= is club-scoped (misses affiliate-
+                                           // only rows), so this stays league-wide + own bucketing,
+                                           // not a per-org teamId= loop.
   positions   = fetchPositions(personIds)  // batch /people, pos fallback (gen-rehab helper)
   byTeamId = {}
   for each org O in orgs:
@@ -252,7 +258,7 @@ main:
     days      = groupIntoStories(kept, { positions }) // §3 (imported shaper) → shaped days
     if days.length: byTeamId[O] = { days }
   write to public/data/team-transactions/{season}.json:
-    { version, season, generatedAt, seasonStart, final: seasonHasEnded(season), byTeamId }
+    { version, season, generatedAt, seasonStart, final, byTeamId }
 ~~~
 
 Nothing reads or merges a *previous* run's output — each run recomputes the
@@ -349,15 +355,30 @@ the live one), same lifecycle as `rehab.js` / `seasonScore.js`.
 7. **Suspensions:** `SU` stays as its own story, matching `person.js`'s
    existing treatment on the player-page timeline.
 
-## Remaining before implementation (verify against the live API, not a design call)
+## Verified against the live API
 
-- Confirm whether the `/transactions` `id` field is reliably present (affects
-  §2 Pass A's dedupe key — the composite fallback covers its absence, but
-  worth confirming how often it's actually populated).
-- Confirm whether a `teamId=` query param on `/transactions` is org-scoped or
-  club-scoped either way, the plan sidesteps this with a league-wide fetch +
-  its own §4 bucketing, so this only affects whether that workaround is
-  strictly necessary or a simplification.
-- Confirm how to reliably determine a season's Opening Day (`seasonStart`)
-  and "has this season ended" (`final`) from the schedule API — needed by
-  §5's generator.
+All three items resolved by hitting `statsapi.mlb.com` directly (2026-07-15):
+
+- **`id` field presence:** confirmed reliably present. Re-pulled the Brewers'
+  2026-06-24→07-15 transactions (43 rows, the same fixture in `scope.md`) —
+  every row had a non-null `id`. §2 Pass A's dedupe key can lead with `id`
+  as the primary case, not just a fallback path to exercise defensively; the
+  composite signature stays only as a belt-and-suspenders fallback for the
+  rare/older row that might lack one.
+- **`teamId=` scope: confirmed club-scoped, not org-scoped.** Every one of
+  those 43 rows had `fromTeam.id` or `toTeam.id` equal to `158` (the Brewers'
+  MLB club) directly — none were a pure affiliate-to-affiliate row (e.g. an
+  AA↔AAA lateral) that only an org-scoped query would include. This confirms
+  §5's league-wide fetch + own affiliate→parent-org bucketing (§4) is
+  *necessary*, not just a defensive simplification — a per-team `teamId=`
+  query would silently miss affiliate call-up/option rows whose `fromTeam`/
+  `toTeam` is the Triple-A club, not the MLB club itself.
+- **Season boundaries: `GET /api/v1/seasons/{year}?sportId=1`.** Returns
+  `regularSeasonStartDate` (Opening Day — `"2026-03-25"` for 2026, one day
+  earlier than an earlier draft's placeholder date — now corrected in §1's
+  example) and `regularSeasonEndDate`/`seasonEndDate` (`final` can
+  flip to `true` once `today > seasonEndDate`, i.e. after the World Series
+  window closes — using `seasonEndDate`, not `regularSeasonEndDate`, so a
+  late-October trade during the postseason still lands before the file
+  freezes). One cheap extra call per generator run, cached same as
+  everything else.
