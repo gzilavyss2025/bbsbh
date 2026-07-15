@@ -165,10 +165,6 @@ export function LineupSpread({
 
   return (
     <div className="teaminfo teaminfo--spread">
-      <div className="teaminfo__toolbar">
-        <RefreshButton onReload={onReload} loading={loading} />
-      </div>
-
       <dl className="factgrid factgrid--game">
         <GameFacts
           info={info}
@@ -206,7 +202,8 @@ export function LineupSpread({
       />
       <OrgTies ties={orgTies} />
 
-      <div className="pagenav">
+      <div className="pagenav pagenav--innings">
+        <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
         <button className="btn btn--next" onClick={onNext}>
           Innings ›
         </button>
