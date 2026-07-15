@@ -83,7 +83,7 @@ exclusion the Pirates entry already models. See `flowbold-test.mjs` in this fold
 | ---- | ----- | --- |
 | 🟢 **GREEN** (12) | BOS, NYM, MIA, PHI, LAD, ATH, HOU, KC, LAA, SEA, MIN, NYY | Clean single left column, unambiguous Regular/Bold split, punny content. Straight `flow-bold` config + geometry tuning. **All 12 calibrated.** |
 | 🟡 **YELLOW** (11) | DET, ARI, CLE, CWS, BAL, SF, COL, SD, CHC, WSH, STL | Doable but one wrinkle each (split body, multi-column, italic body, substituted fonts, or blander content). **All 11 calibrated.** |
-| 🔴 **RED** (5, 2 done) | ~~ATL~~, ~~CIN~~ (done), TB, TEX, TOR | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or (mis-tiered) two-column narrative. ATL and CIN both turned out tractable — see their `CONFIG` entries in `whatsBrewing.js`. **TB, TEX, TOR remain.** |
+| 🔴 **RED** (5, 3 done) | ~~ATL~~, ~~CIN~~, ~~TB~~ (done), TEX, TOR | Genuinely hard: multi-column starter pages, bespoke serif broadsheet, or (mis-tiered) two-column/single-wide-column narrative. ATL, CIN, and TB all turned out tractable — see their `CONFIG` entries in `whatsBrewing.js`. **TEX, TOR remain.** |
 
 Recommended path: land finding #1 (`page` in CONFIG) + finding #2 (`flow-bold`
 variant) as one small parser change, calibrate **BOS + NYM** as pilots (cleanest),
@@ -230,8 +230,18 @@ because CIN embeds a stat grid whose bold labels share the heading font and
 were being promoted as bogus titles). TB, TEX, TOR are the genuinely
 still-open RED clubs.
 
-### TB — Rays (139) · page 2 · multi-column + multi-font
-- Page 2 body `AvenirNextCondensed-Regular`, heads `AvenirNextCondensed-DemiBold` (but NOT left-margin — leftMargin=2), plus heavy `Aleo` (serif) and `Industry-BlackItalic` banners. The starter page is a **multi-column** grid with banner titles in a different family. Titles exist (TODAY'S START, BRONX TO THE BAY, INSIDE THE NUMBERS, ON TOP AT THE TROP) but need column-band + multi-face handling. Hard.
+### ~~TB — Rays (139) · page 2 · multi-column + multi-font~~ — CALIBRATED (as page 1)
+- This read described a DIFFERENT day's page-2 starter-notes column. The real
+  game-day narrative is on **page 1** and is actually ONE wide serif (Aleo)
+  column (x~126-486), not multi-column — flanked by two dot-leader stat
+  sidebars ("BY THE NUMB3RS" left, "SERIES BREAKDOWN" right) in
+  Industry-BlackItalic/AvenirNextCondensed, which self-exclude by font. See
+  the `139:` entry in `whatsBrewing.js`. Surfaced a real shared-parser bug:
+  the narrative's line cadence and the sidebars' independent cadence
+  occasionally land on the EXACT same y (no lineTol can separate that), so
+  a body-content-only zone (xMin/columnMaxX excluding both sidebars by x, not
+  just relying on line-tolerance) is the correct fix for any future club with
+  this shape.
 
 ### TEX — Rangers (140) · page 2 · multi-column Arial
 - Page 2 body `ArialMT`, heads `Arial-BoldMT` (206), body also has lots of `Arial-ItalicMT`. Titles (LAST TIME OUT, AGAINST THE ASTROS, HOME AND ROAD, STARTER AND RELIEVER, TEXAS TENURE) sit inside a **multi-column** layout, not a single left margin. Needs column-band detection.

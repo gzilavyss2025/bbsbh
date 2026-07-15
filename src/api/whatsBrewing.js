@@ -750,6 +750,45 @@ const CONFIG = {
       { xMin: 300, headingMaxX: 330, columnMaxX: 595, topCutoff: 550 },
     ],
   },
+  // Rays — page 1, a bespoke serif template (Aleo body/heads) — CALIBRATION.md
+  // flagged this as multi-column, but it's actually ONE wide narrative column
+  // (x~126-610, nearly full page width per line) flanked by two dot-leader
+  // stat sidebars ("BY THE NUMB3RS" left, "SERIES BREAKDOWN" right) in
+  // entirely different display fonts (Industry-BlackItalic titles,
+  // AvenirNextCondensed data rows) that self-exclude regardless of position —
+  // no columns/rightTableMinX/dropRects needed. Titles: RAY REPORT, WHAT'S AT
+  // STAKE, FOR3VER A RAY, SEE MORE SEYMOUR, GET OUT BALL, GENERATION NEXT,
+  // HEY NOW, YOU'RE AN ALL-STAR, HEY NOW, YOU'RE A FUTURE STAR — all real
+  // titles land at the exact same x=126.0 as several inline bold player names
+  // that wrap to a fresh line ("Jackie Robinson", "Bobby Witt Jr.", "3B
+  // Junior Caminero"), so headingMaxX alone can't tell them apart —
+  // allCapsOnly does that job (every real title is ALL-CAPS, "3" standing in
+  // for "E" in a couple of them; every inline name is mixed-case). Bullet
+  // points use an icon font (`fontello`, two glyphs per bullet) left OUT of
+  // bodyFont so its control characters don't end up embedded, same choice as
+  // BAL's icon-font bullets.
+  139: {
+    layout: 'flow-bold',
+    bodyFont: /Aleo-Regular/,
+    headFont: /Aleo-Bold/,
+    // The narrative's own ~6.4-6.5pt line cadence and the two dot-leader
+    // sidebars' independent ~7.2-7.5pt cadences drift arbitrarily close to
+    // each other over the page — close enough that at one point they land on
+    // the EXACT same y, which no lineTol value can tell apart (verified: a
+    // whole clause between "No. 42" and "Star selections" in FOR3VER A RAY
+    // silently vanished, swallowed into a sidebar row's "line", before this
+    // fix). xMin/columnMaxX scope this zone to ONLY the narrative's own x
+    // range — the widest any narrative text item's right edge reaches is
+    // x≈486, well short of the right sidebar's x≈493 start — so sidebar words
+    // never enter this zone's word set at all, upstream of any y-grouping.
+    xMin: 120,
+    headingMaxX: 140,
+    columnMaxX: 490,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 840,
+    bottomCutoff: 70,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
