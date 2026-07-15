@@ -16,10 +16,11 @@ import { GameScoreModal } from '../components/GameScoreModal.jsx'
 
 const LIMIT = 25
 
-// The level filter row: MLB/MiLB/AAA/AA/A+/A alongside an "All" default —
+// The level filter row: an "All" option alongside MLB/MiLB/AAA/AA/A+/A —
 // unlike the slate's LevelNav (which always shows exactly one level, so it
-// has no "all" state), Top Games ranks across every level by default and
-// these narrow the POOL, not just the visible list.
+// has no "all" state), Top Games can rank across every level at once, and
+// these narrow the POOL, not just the visible list. Defaults to MLB (the
+// level almost everyone lands here for); "All" is one tap away.
 const LEVEL_FILTERS = [
   { key: 'all', label: 'All' },
   { key: 'mlb', label: 'MLB' },
@@ -54,7 +55,7 @@ export function TopGamesPage() {
   useDocumentTitle('Top Games')
   const navigate = useNav()
   const { favoriteTeamId } = useFavoriteTeam()
-  const [levelFilter, setLevelFilter] = useState('all')
+  const [levelFilter, setLevelFilter] = useState('mlb')
   const [favoriteOnly, setFavoriteOnly] = useState(false)
   const [showFormula, setShowFormula] = useState(false)
 
@@ -136,17 +137,27 @@ export function TopGamesPage() {
 
       {top.length > 0 && (
         <ul className="gamelist">
-          {top.map((g) => {
+          {top.map((g, i) => {
             const game = cards[g.gamePk]
             if (!game) return null
             return (
               <li key={g.gamePk} className="topgames__row">
-                <span className="topgames__tier">
-                  <TierPill tier={g.tier} />
-                </span>
+                {/* Row header: the rank (this is a ranking, not just a pile of
+                    cards), the statistical tier pill, and the Game Score itself
+                    surfaced big — the whole point of this page. The score is
+                    pulled OUT of the GameCard's meta line (gameScore left null
+                    below) so it isn't shown twice. */}
+                <div className="topgames__rowhead">
+                  <span className="topgames__rank">#{i + 1}</span>
+                  <TierPill tier={g.tier} className="topgames__tier" />
+                  <span className="topgames__score">
+                    <span className="topgames__scorenum">{fmt(g.score)}</span>
+                    <span className="topgames__scorelabel">Game Score</span>
+                  </span>
+                </div>
                 <GameCard
                   game={game}
-                  gameScore={fmt(g.score)}
+                  gameScore={null}
                   dateLabel={humanDate(game.officialDate)}
                   onSelect={() =>
                     navigate(
