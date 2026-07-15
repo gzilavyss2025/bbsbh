@@ -11286,6 +11286,27 @@ body {
   color: var(--accent-primary);
 }
 
+/* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
+   (the box score's "Show N more insights" button). */
+.pshistory__more {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.pshistory__more:hover {
+  color: var(--text-body);
+}
+
 /* Room for the 7-column bracket to actually breathe on a wide screen rather
    than horizontal-scrolling inside the app's ordinary 440px phone column —
    same widen-the-page-column idea as .screen.standings-screen. */
@@ -11503,6 +11524,56 @@ body {
   margin-bottom: 4px;
 }
 
+/* World Series MVP, wide layout only (BracketGrid — the phone stack's
+   .pswscard--stack never gets this, there's no room to spare there).
+   Same --shot-2xs + bottom-left position-pill mount as
+   .milestonewatch-page__mug/__pos, sitting below the team/score rows
+   behind a hairline divider. */
+.pswscard__mvp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.pswscard__mug {
+  position: relative;
+  flex: none;
+}
+.shot.pswscard__shot {
+  display: block;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.pswscard__shot.shot--fallback {
+  font-size: 16px;
+}
+.pswscard__pos {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--paper-0);
+  background: var(--accent-primary);
+  border-top-right-radius: var(--radius-xs);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.pswscard__mvpname {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+
 /* Condensed phone layout: the same AL→WS→NL reading order flowed vertically
    in one column instead of across seven (see BracketStack). Round labels
    become thin dividers rather than a column header. */
@@ -11692,14 +11763,14 @@ body {
 }
 .psmodal__gamenum {
   flex: none;
-  width: 34px;
+  width: 50px;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .psmodal__gamedate {
   flex: none;
-  width: 44px;
+  width: 76px;
   color: var(--text-muted);
 }
 .psmodal__gameline {

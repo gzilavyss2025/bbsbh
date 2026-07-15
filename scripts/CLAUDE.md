@@ -213,14 +213,22 @@ Re-run only to fold in a new season.
   hand-verified seed (`scripts/milb-history-seed.json`) for pre-2005 eras. **Edit the
   SEED, never the output.** See the generator header for the 2005-floor rationale.
 - `gen-postseason-history.mjs` → `public/data/postseason-history.json` — the
-  completed bracket (who played, who won, how many games) for the last 5 MLB
-  postseasons, plus the round MVP where one exists (LCS/World Series only —
-  Wild Card/Division Series carry no official MVP award). Sweeps
+  completed bracket (who played, who won, how many games, each team's 1-6
+  seed) for every MLB postseason back to 2000 (`EARLIEST_YEAR`), plus the
+  round MVP where one exists (LCS/World Series only — Wild Card/Division
+  Series carry no official MVP award). Sweeps
   `/api/v1/schedule?...&gameType=F,D,L,W&hydrate=team,seriesStatus` per
   season, grouping games into a series by (gameType, seriesDescription,
   sorted team-id pair), then `/api/v1/awards/{ALCSMVP,NLCSMVP,WSMVP}/recipients`
-  for the MVP. Walks backward from the current year, skipping any season
-  whose postseason hasn't finished. App reads it via
+  for the MVP. Seeding has no statsapi field of its own — derived per league
+  from `/api/v1/standings`' `divisionChamp` flag plus the Wild Card round's
+  own game-1 home/away (the higher seed always hosts), which degrades
+  correctly through all three Wild Card formats this range spans (see the
+  generator header). Walks backward from the current year, skipping any
+  season whose postseason hasn't finished. The app's own UI
+  (`PostseasonHistoryPage.jsx`) shows 2020-present eagerly and gates
+  2000-2019 behind a "Load more" — that's a UI cutoff, not a generator one;
+  this file always carries the full range. App reads it via
   `src/api/postseasonHistory.js`.
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before

@@ -5,6 +5,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { Headshot } from '../components/Headshot.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { PostseasonSeriesModal } from '../components/PostseasonSeriesModal.jsx'
@@ -13,11 +14,10 @@ import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 const AL = 103
 const NL = 104
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
+// Seasons at/after this year show eagerly; older ones (the data goes back
+// to 2000 — see gen-postseason-history.mjs) sit behind "Load more" so the
+// wide layout's default view isn't 26 stacked full brackets.
+const DEFAULT_CUTOFF_YEAR = 2020
 
 // Wraps every Division/Championship series into the uniform "lane" shape
 // the columns render (see wildCardLanes below for the Wild Card round's
@@ -189,6 +189,20 @@ function BracketGrid({ season, onOpenSeries }) {
                   iconSize={22}
                 />
               ))}
+              {ws.mvp && (
+                <div className="pswscard__mvp">
+                  <span className="pswscard__mug">
+                    <Headshot
+                      personId={ws.mvp.playerId}
+                      name={ws.mvp.name}
+                      teamId={ws.mvp.teamId}
+                      className="pswscard__shot"
+                    />
+                    {ws.mvp.position && <span className="pswscard__pos">{ws.mvp.position}</span>}
+                  </span>
+                  <span className="pswscard__mvpname">{ws.mvp.name}</span>
+                </div>
+              )}
             </button>
           )}
         </div>
@@ -275,30 +289,37 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
 }
 
 // Postseason History: the completed bracket (who advanced, how many games
-// each series went, and each team's seed) for the last several MLB
-// postseasons. Tablet/desktop shows every season stacked, each one a real
-// 7-column bracket (AL converging from the left, NL from the right, World
-// Series centered — see BracketGrid). A phone can't fit that bracket
-// sideways, so below the app's one wide-layout breakpoint (useMediaQuery/
-// WIDE_QUERY, shared with GameView's lineup-page swap) it shows ONE season
-// at a time, condensed to a single vertical column (BracketStack), with a
-// fixed bottom stepper — same shape as InningViewer's half-inning navigator
-// and StandingsPage's day stepper — to page Older/Newer. Tapping any
-// matchup (bye slots excepted — they carry no series) opens the same
-// animated PostseasonSeriesModal at every width. Data comes from
-// scripts/gen-postseason-history.mjs, a hand-run precompute (a finished
-// postseason's results are immutable, same footing as war-history.json/
-// awards-history.json) — no SealBox needed, same as those pages: a past
-// series' score carries no LIVE game's spoiler risk.
+// each series went, and each team's seed) for every MLB postseason back to
+// 2000. Tablet/desktop shows every season from DEFAULT_CUTOFF_YEAR on
+// stacked, each one a real 7-column bracket (AL converging from the left,
+// NL from the right, World Series centered — see BracketGrid), with a
+// "Load more" button to reveal the older seasons rather than stacking 26
+// full brackets by default. A phone can't fit that bracket sideways, so
+// below the app's one wide-layout breakpoint (useMediaQuery/WIDE_QUERY,
+// shared with GameView's lineup-page swap) it shows ONE season at a time,
+// condensed to a single vertical column (BracketStack), with a fixed
+// bottom stepper — same shape as InningViewer's half-inning navigator and
+// StandingsPage's day stepper — to page Older/Newer across the FULL
+// history (the stepper only ever renders one season, so there's no "load
+// more" wall to hit there). Tapping any matchup (bye slots excepted — they
+// carry no series) opens the same animated PostseasonSeriesModal at every
+// width. Data comes from scripts/gen-postseason-history.mjs, a hand-run
+// precompute (a finished postseason's results are immutable, same footing
+// as war-history.json/awards-history.json) — no SealBox needed, same as
+// those pages: a past series' score carries no LIVE game's spoiler risk.
 export function PostseasonHistoryPage() {
   useDocumentTitle('Postseason History')
   const { loading, error, data } = useAsync(() => loadPostseasonHistory(), [])
   const [activeSeries, setActiveSeries] = useState(null)
   const [yearIndex, setYearIndex] = useState(0)
+  const [showAllYears, setShowAllYears] = useState(false)
   const wide = useMediaQuery(WIDE_QUERY)
   const seasons = data?.seasons ?? []
-  const updated = monthDay(data?.generatedAt?.slice(0, 10))
   const currentYearSeason = seasons[Math.min(yearIndex, seasons.length - 1)]
+  const visibleSeasons = showAllYears
+    ? seasons
+    : seasons.filter((s) => s.year >= DEFAULT_CUTOFF_YEAR)
+  const hasMoreYears = !showAllYears && visibleSeasons.length < seasons.length
 
   return (
     <div className={`screen psh-screen${!wide ? ' psyear-screen' : ''}`}>
@@ -317,14 +338,16 @@ export function PostseasonHistoryPage() {
       />
 
       {seasons.length > 0 && wide && (
-        <>
-          <div className="pshistory__list">
-            {seasons.map((season) => (
-              <SeasonBracket key={season.year} season={season} onOpenSeries={setActiveSeries} wide />
-            ))}
-          </div>
-          {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
-        </>
+        <div className="pshistory__list">
+          {visibleSeasons.map((season) => (
+            <SeasonBracket key={season.year} season={season} onOpenSeries={setActiveSeries} wide />
+          ))}
+          {hasMoreYears && (
+            <button type="button" className="pshistory__more" onClick={() => setShowAllYears(true)}>
+              Load postseasons before {DEFAULT_CUTOFF_YEAR}
+            </button>
+          )}
+        </div>
       )}
 
       {seasons.length > 0 && !wide && currentYearSeason && (
@@ -332,7 +355,6 @@ export function PostseasonHistoryPage() {
           <div className="pshistory__list">
             <SeasonBracket season={currentYearSeason} onOpenSeries={setActiveSeries} wide={false} />
           </div>
-          {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
 
           <nav className="psyearnav" aria-label="Postseason year stepper">
             <button

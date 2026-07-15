@@ -1,7 +1,12 @@
 // Regenerates public/data/postseason-history.json — the completed bracket
-// (who played, who won, how many games) for each of the last several MLB
-// postseasons, plus the round MVP where one exists (LCS + World Series only
-// — Wild Card/Division Series carry no official MVP award).
+// (who played, who won, how many games) for every MLB postseason back to
+// 2000 (EARLIEST_YEAR below), plus the round MVP where one exists (LCS +
+// World Series only — Wild Card/Division Series carry no official MVP
+// award). Covers three different Wild Card formats across that span —
+// straight-to-Division-Series (2000-2011), a single Wild Card game
+// (2012-2019, plus the pandemic-expanded 8-team-per-league field in 2020),
+// and the current best-of-3 round (2022+) — see the SEEDING comment below
+// for how each shape degrades gracefully through the same seeding logic.
 //
 // A finished postseason's results are immutable, so like
 // gen-awards-history.mjs / gen-milb-history.mjs this is a HAND-RUN
@@ -55,7 +60,10 @@ const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'postseason-history.json')
 const BASE = 'https://statsapi.mlb.com'
 
-const SEASON_COUNT = 5
+// The app's own UI shows 2020-present eagerly and gates 2000-2019 behind a
+// "Load more" button (PostseasonHistoryPage.jsx) — EARLIEST_YEAR is the
+// generator's own floor, independent of that UI cutoff.
+const EARLIEST_YEAR = 2000
 const CURRENT_YEAR = new Date().getUTCFullYear()
 
 async function getJson(path) {
@@ -91,6 +99,7 @@ async function fetchMvp(awardId, season) {
     playerId: award.player.id,
     name: award.player.nameFirstLast || '',
     teamId: award.team?.id ?? null,
+    position: award.player.primaryPosition?.abbreviation ?? null,
   }
 }
 
@@ -124,12 +133,19 @@ async function seedsForLeague(leagueId, season, wcSeries, allSeries) {
   const byeChamps = champs
     .filter((id) => !wcTeamIds.has(id))
     .sort((a, b) => (pctById.get(b) ?? 0) - (pctById.get(a) ?? 0))
-  const wcChamp = champs.find((id) => wcTeamIds.has(id)) ?? null
+  // Normally at most one division champ plays in the Wild Card round (the
+  // #3 seed, 2022+ format). 2020's pandemic-expanded 8-team-per-league
+  // field is the one exception — every team played a Wild Card series that
+  // year, so this can be more than one; sort by pct same as the byes since
+  // there's no game between them to settle it either.
+  const wcChamps = champs
+    .filter((id) => wcTeamIds.has(id))
+    .sort((a, b) => (pctById.get(b) ?? 0) - (pctById.get(a) ?? 0))
 
   const seeds = new Map()
   byeChamps.forEach((id, i) => seeds.set(id, i + 1))
   let nextSeed = byeChamps.length + 1
-  if (wcChamp != null) seeds.set(wcChamp, nextSeed++)
+  wcChamps.forEach((id) => seeds.set(id, nextSeed++))
 
   // The Wild Card series with neither team a division champ is the pure
   // wildcard-vs-wildcard matchup — its game-1 home team is the higher seed.
@@ -200,7 +216,12 @@ async function buildSeason(year) {
     seriesByRound.get(series.round.key).push({
       id: `${year}-${series.round.key}-${teamA}-${teamB}`,
       label: series.label,
-      leagueId: series.leagueId,
+      // The World Series merges both leagues — `series.leagueId` is really
+      // just the game-1 home team's league (an artifact of how it's
+      // computed above), not this series' actual topology, so it's null
+      // here rather than a misleading single value. Everywhere else it's a
+      // real single-league round.
+      leagueId: series.round.key === 'worldseries' ? null : series.leagueId,
       teamA: { teamId: teamA, wins: wins.get(teamA) ?? 0 },
       teamB: { teamId: teamB, wins: wins.get(teamB) ?? 0 },
       winnerTeamId,
@@ -212,13 +233,20 @@ async function buildSeason(year) {
 
   // Seed every non-World-Series team (the World Series merges both leagues,
   // so it carries whichever seed the team already earned in its own league's
-  // rounds instead of computing a fresh one).
-  const leagueIds = [...new Set([...seriesByRound.values()].flat().map((s) => s.leagueId))].filter(
-    Boolean,
-  )
+  // rounds instead of computing a fresh one). Scoped to ONLY the
+  // single-league rounds (Wild Card/Division/Championship) — the World
+  // Series' own (null) leagueId would otherwise never match here, but an
+  // earlier version matched it against whichever league happened to be
+  // first in the Set, silently pulling the other league's WS team into that
+  // league's seed pool and inflating seeds past 6 (e.g. 2025 NL champion
+  // Dodgers reading seed "7" on the WS card because the AL side's team
+  // count included them). Keep it explicit rather than relying on `null`
+  // being falsy and hoping nothing re-introduces a real value there.
+  const singleLeagueSeries = ['wildcard', 'division', 'lcs'].flatMap((k) => seriesByRound.get(k) ?? [])
+  const leagueIds = [...new Set(singleLeagueSeries.map((s) => s.leagueId))].filter(Boolean)
   const seedsByLeague = new Map()
   for (const leagueId of leagueIds) {
-    const allSeries = [...seriesByRound.values()].flat().filter((s) => s.leagueId === leagueId)
+    const allSeries = singleLeagueSeries.filter((s) => s.leagueId === leagueId)
     const wcSeries = (seriesByRound.get('wildcard') ?? []).filter((s) => s.leagueId === leagueId)
     seedsByLeague.set(leagueId, await seedsForLeague(leagueId, year, wcSeries, allSeries))
   }
@@ -257,7 +285,7 @@ async function buildSeason(year) {
 }
 
 const seasons = []
-for (let year = CURRENT_YEAR; seasons.length < SEASON_COUNT && year > CURRENT_YEAR - 10; year--) {
+for (let year = CURRENT_YEAR; year >= EARLIEST_YEAR; year--) {
   const season = await buildSeason(year)
   if (season) seasons.push(season)
 }

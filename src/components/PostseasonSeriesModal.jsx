@@ -6,9 +6,9 @@ import { Headshot } from './Headshot.jsx'
 import { teamClubNameShort } from '../lib/teams.js'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-function monthDay(iso) {
-  const [, m, d] = (iso || '').split('-')
-  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
+function monthDayYear(iso) {
+  const [y, m, d] = (iso || '').split('-')
+  return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
 }
 
 // The animated card a tap on a bracket series slides over the page: the
@@ -80,8 +80,8 @@ export function PostseasonSeriesModal({ series, onClose }) {
             const awayWon = g.awayScore > g.homeScore
             return (
               <li className="psmodal__game" key={g.gameNumber}>
-                <span className="psmodal__gamenum">Gm {g.gameNumber}</span>
-                <span className="psmodal__gamedate">{monthDay(g.date)}</span>
+                <span className="psmodal__gamenum">Game {g.gameNumber}</span>
+                <span className="psmodal__gamedate">{monthDayYear(g.date)}</span>
                 <span className={`psmodal__gameline${awayWon ? ' psmodal__gameline--awaywon' : ''}`}>
                   <TeamLogo teamId={g.awayTeamId} name="" size={16} />
                   <span className="psmodal__gamescore">{g.awayScore}</span>
