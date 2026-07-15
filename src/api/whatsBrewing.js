@@ -333,6 +333,41 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Braves — page 1, a bespoke serif template (Bembo body, Adobe Garamond
+  // heads, a script-face bullet glyph) but the SAME two-narrative-column shape
+  // as the Yankees/Diamondbacks above, plus a THIRD narrow zone at the very
+  // left margin. Column 2 ("TODAY'S GAME", "REYNALDO LÓPEZ", "BEFORE THE
+  // BREAK") runs x~170-376; column 3 ("MLB DRAFT", "RILEY IN ST. LOUIS",
+  // "FACING LEFTIES") runs x~383-591; both share topCutoff (drops the
+  // matchup masthead + a head-to-head mini-table sitting above the
+  // narrative) and bottomCutoff (drops the Upcoming Schedule table below
+  // it). The narrow left zone (x~24-155) is a genuine third narrative slot —
+  // a short blurb ("Top of the Order," about the team's top-of-order hitters
+  // going hitless) sits directly ABOVE a full-season stats sidebar headed
+  // "Braves Breakdown" — but BOTH of those headings are mixed-case, not
+  // ALL-CAPS like every other title on the page, so this zone turns
+  // allCapsOnly OFF (letting both register as real titles) and uses
+  // skipTitle to drop "Braves Breakdown" specifically: its dot-leader stat
+  // ROWS are already filtered by tableLeader, but the bare label/value pairs
+  // either side of each leader ("Overall", "54-39") are plain body-font text
+  // with nothing to catch them otherwise, so leaving that blurb in would
+  // dump a wall of standings lines into the body. bodyFont folds in the
+  // ScriptA script face — purely a decorative "•" bullet glyph marking
+  // sub-points within a blurb, a different font from the body prose it
+  // introduces (unlike every other calibrated club, where the bullet is
+  // plain body font) but never a heading candidate itself.
+  144: {
+    layout: 'flow-bold',
+    bodyFont: /BemboMTPro-Regular|ScriptA-Regular/,
+    headFont: /AGaramondPro-Bold/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    columns: [
+      { xMin: 0, headingMaxX: 60, columnMaxX: 160, topCutoff: 800, allCapsOnly: false, skipTitle: /^Braves Breakdown$/i },
+      { xMin: 165, headingMaxX: 178, columnMaxX: 380, topCutoff: 805, bottomCutoff: 90 },
+      { xMin: 380, headingMaxX: 395, columnMaxX: 612, topCutoff: 805, bottomCutoff: 90 },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
