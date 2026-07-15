@@ -85,6 +85,10 @@ export default defineConfig({
           // Every named All-Star since 1933 (~650 KB) — only read from the
           // All-Star Rosters page, see scripts/gen-all-star-rosters.mjs.
           '**/data/all-star-rosters.json',
+          // One season-chunked Team Transactions file per season (~2.5 MB,
+          // all 30 orgs — see scripts/gen-team-transactions.mjs), only ever
+          // read a season at a time from one team's page.
+          '**/data/team-transactions/*.json',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -101,7 +105,7 @@ export default defineConfig({
             urlPattern: ({ url }) =>
               /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters)\.json$/.test(
                 url.pathname,
-              ),
+              ) || /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
             options: {
