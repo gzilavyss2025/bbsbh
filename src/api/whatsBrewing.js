@@ -423,6 +423,38 @@ const CONFIG = {
     allCapsOnly: true,
     bottomCutoff: 125,
   },
+  // Guardians — page 1, two narrative columns (like the Yankees/Diamondbacks/
+  // Braves above), plus a right-side stat sidebar. Head is a DIFFERENT family
+  // name from body (`Arial-BoldMT` vs `ArialMT`, not just a different weight
+  // suffix of the same name — CALIBRATION.md's "Arial family quirk"), and a
+  // parenthetical aside is set in `Arial-BoldItalicMT`, a real body-prose
+  // font despite the name (folded into bodyFont, never headFont, so it's
+  // never mistaken for a heading). Column 1 ("ANOTHER NARROW W TO START
+  // SERIES," "TAKING OUR TALENTS TO SOUTH BEACH," "CHECKING IN(TERLEAGUE),"
+  // "ROAD WOES," "DELAUTER IS DE MAN," "HEARD IT THRU THE HEDGES," "PUTTIN'
+  // OUT FIRES," "THE CADE CRUSADER," "A SWING AND A DRIVE!," "START ME UP!")
+  // runs x~36-242; bottomCutoff drops a probable-pitchers schedule table
+  // below it. Column 2 is a starting-pitcher scouting report: its first ~120pt
+  // is TWO stat tables ("TODAY'S STARTER," "BIBEE ON THE ROAD") at the SAME
+  // left margin as the column's real titles, so position alone can't tell
+  // them apart — topCutoff drops that whole preamble, starting narrative
+  // extraction at "TANNER TIME" (the first genuine blurb: "LAST TIME OUT,"
+  // "#28 IN THE 305," "A NOT-SO-CRUEL SUMMER," "FINISHING THE FIRST HALF,"
+  // "BRINGING THE HEAT"); its own bottomCutoff drops an unheaded head-to-head
+  // comparison table beneath the last blurb.
+  114: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT|Arial-BoldItalicMT/,
+    headFont: /Arial-BoldMT/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    titleAloneOnLine: true,
+    noLineMarkers: true,
+    columns: [
+      { xMin: 0, headingMaxX: 50, columnMaxX: 245, bottomCutoff: 90 },
+      { xMin: 245, headingMaxX: 260, columnMaxX: 458, topCutoff: 740, bottomCutoff: 200 },
+    ],
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
@@ -735,7 +767,16 @@ function extractFlowBoldZone(items, realName, cfg) {
   // cutoff to words that never had a marker of their own.
   for (const l of rawLines) {
     l.words.sort((a, b) => a.x - b.x)
-    const cutoff = lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
+    // cfg.noLineMarkers (CLE): the marker heuristic assumes a bold ALL-CAPS
+    // run away from the margin is always a genuine second-column heading —
+    // false for a club that also bolds ALL-CAPS player surnames inline
+    // ("PATRICK BAILEY (.242) have combined…"), which reads exactly like a
+    // marker and would wrongly truncate the rest of that sentence. Safe to
+    // skip entirely when cfg.columns already gives each zone a hard xMin/
+    // columnMaxX boundary with no embedded table sharing a baseline within
+    // a single zone (unlike LAA, which relies on the marker to split one
+    // wide zone at a variable point).
+    const cutoff = cfg.noLineMarkers ? cfg.columnMaxX : lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
     for (const w of l.words) w.cutoff = cutoff
   }
 
@@ -797,11 +838,24 @@ function extractFlowBoldZone(items, realName, cfg) {
   // non-narrative box: a leaderboard, a schedule grid) — it still owns its
   // body for ownership purposes, so that body doesn't leak into a neighboring
   // blurb, but the whole thing is dropped at output time, not folded back in.
+  //
+  // cfg.titleAloneOnLine (CLE): unlike NYY/ARI/ATL's "TITLE: lead-in text"
+  // shape, CLE's real titles occupy their WHOLE line with nothing else on the
+  // same baseline — but CLE also styles player SURNAMES in bold ALL-CAPS
+  // ("ROCCHIO," "BIBEE"), and a wrapped sentence can coincidentally land one
+  // at the left margin on its own line, indistinguishable from a real title
+  // by position/case/length alone. The tell is what follows on that baseline:
+  // a real title has nothing after it (leadWords is empty); a wrapped bold
+  // surname always has the rest of its sentence trailing in body font on the
+  // very same line.
   const titled = []
   const foldedBackLines = []
   for (const h of headings) {
     const isRealTitle =
-      h.title && (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) && (!cfg.allCapsOnly || isAllCaps(h.title))
+      h.title &&
+      (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
+      (!cfg.allCapsOnly || isAllCaps(h.title)) &&
+      (!cfg.titleAloneOnLine || h.leadWords.length === 0)
     if (isRealTitle) {
       titled.push(h)
       for (const w of h.titleWords) w.consumed = true
