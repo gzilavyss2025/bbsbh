@@ -4171,6 +4171,18 @@ body {
 .usagepips__pip--open {
   border: 1.3px solid var(--graphite-soft);
 }
+/* Mound-visit card: the pips stand alone as the card's one figure (no ABS
+   pass/fail count beside them like StatBox's row), so they read at 2x size. */
+.pitchernotice--mv .usagepips {
+  gap: 8px;
+}
+.pitchernotice--mv .usagepips__pip {
+  width: 14px;
+  height: 14px;
+}
+.pitchernotice--mv .usagepips__pip--open {
+  border-width: 2.6px;
+}
 /* An ejection/event card's sentence — same natural-case prose treatment as
    .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
    sentence straight from the feed, not a caps token. */
@@ -5198,6 +5210,7 @@ body {
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
+  white-space: nowrap;
   cursor: pointer;
 }
 .pbp__hlicon {
@@ -8214,6 +8227,12 @@ body {
   }
   .pbp__zonebtn {
     display: none;
+  }
+  /* No zone icon button to sit beside at this breakpoint (see above) — drop
+     the indent that used to space it away from that icon, since the card
+     column is narrow here (38fr) and the button needs the room. */
+  .pbp__hlbtn {
+    margin-left: 0;
   }
   .pbp__zonecell {
     display: flex;
