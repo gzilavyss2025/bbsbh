@@ -333,6 +333,372 @@ const CONFIG = {
       { xMin: 372, headingMaxX: 385, columnMaxX: 620, rightTableMinX: 485 },
     ],
   },
+  // Diamondbacks — page 1, a genuine two-column narrative like the Yankees
+  // above. A masthead/broadcast-info block, a decorative accolades banner, and
+  // a couple of stray table headers ("AROUND THE HORN") sit above and between
+  // both columns, but they self-exclude: their all-caps head-font runs aren't
+  // near either column's left margin, so lineMarkerCutoff (see its comment
+  // below) treats them as second-column markers and cuts them off at their
+  // own x with nothing left on the line. Column 1 ("HERE'S THE STORY", "LAST
+  // GAME", "RADIO UPDATE", "IT STARTS WITH STARTING PITCHING", "TROY TAKING
+  // TO NL WEST", "GARCIA HANGING ZEROES", "LOÁISIGA BLANKING FOES",
+  // "FIRST-INNING TALLIES") runs x~18-236; its bottomCutoff drops the
+  // "PROBABLE PITCHERS & BROADCAST INFO" schedule table below it. Column 2
+  // ("CARROLL SWIPING BAGS", "WIN THE SERIES", "VS. NL WEST", "EL PIKE VS. NL
+  // WEST", "MORENO'S ON-BASE STREAK", "GABI ON THE ROAD", "ALL-STAR FACTS",
+  // "VS. DODGERS") runs x~254-471; its bottomCutoff drops a head-to-head
+  // record mini-table + "NEXT STARTER" box embedded right under "VS.
+  // DODGERS" — that table's own header ("2026 All-Time Last 10 Streak") is
+  // head-font but mixed-case, so unlike the stray runs above it does NOT
+  // self-exclude and would otherwise leak into that blurb's body. headFont
+  // covers both the section-header weight (BoldCond) and the inline-bold-name
+  // weight (Bold, e.g. "Corbin Carroll" mid-sentence) — the same union LAA/KC
+  // use so a bold name isn't silently dropped; mixed-case bold runs away from
+  // the margin fail the allCapsOnly title test and fold back into the body
+  // rather than becoming a heading.
+  109: {
+    layout: 'flow-bold',
+    bodyFont: /MyriadPro-(Regular|Cond)/,
+    headFont: /MyriadPro-(BoldCond|Bold)/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    columns: [
+      { xMin: 0, headingMaxX: 30, columnMaxX: 245, bottomCutoff: 90 },
+      { xMin: 245, headingMaxX: 265, columnMaxX: 478, bottomCutoff: 197 },
+    ],
+  },
+  // Braves — page 1, a bespoke serif template (Bembo body, Adobe Garamond
+  // heads, a script-face bullet glyph) but the SAME two-narrative-column shape
+  // as the Yankees/Diamondbacks above, plus a THIRD narrow zone at the very
+  // left margin. Column 2 ("TODAY'S GAME", "REYNALDO LÓPEZ", "BEFORE THE
+  // BREAK") runs x~170-376; column 3 ("MLB DRAFT", "RILEY IN ST. LOUIS",
+  // "FACING LEFTIES") runs x~383-591; both share topCutoff (drops the
+  // matchup masthead + a head-to-head mini-table sitting above the
+  // narrative) and bottomCutoff (drops the Upcoming Schedule table below
+  // it). The narrow left zone (x~24-155) is a genuine third narrative slot —
+  // a short blurb ("Top of the Order," about the team's top-of-order hitters
+  // going hitless) sits directly ABOVE a full-season stats sidebar headed
+  // "Braves Breakdown" — but BOTH of those headings are mixed-case, not
+  // ALL-CAPS like every other title on the page, so this zone turns
+  // allCapsOnly OFF (letting both register as real titles) and uses
+  // skipTitle to drop "Braves Breakdown" specifically: its dot-leader stat
+  // ROWS are already filtered by tableLeader, but the bare label/value pairs
+  // either side of each leader ("Overall", "54-39") are plain body-font text
+  // with nothing to catch them otherwise, so leaving that blurb in would
+  // dump a wall of standings lines into the body. bodyFont folds in the
+  // ScriptA script face — purely a decorative "•" bullet glyph marking
+  // sub-points within a blurb, a different font from the body prose it
+  // introduces (unlike every other calibrated club, where the bullet is
+  // plain body font) but never a heading candidate itself.
+  144: {
+    layout: 'flow-bold',
+    bodyFont: /BemboMTPro-Regular|ScriptA-Regular/,
+    headFont: /AGaramondPro-Bold/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    columns: [
+      { xMin: 0, headingMaxX: 60, columnMaxX: 160, topCutoff: 800, allCapsOnly: false, skipTitle: /^Braves Breakdown$/i },
+      { xMin: 165, headingMaxX: 178, columnMaxX: 380, topCutoff: 805, bottomCutoff: 90 },
+      { xMin: 380, headingMaxX: 395, columnMaxX: 612, topCutoff: 805, bottomCutoff: 90 },
+    ],
+  },
+  // Tigers — page 1, single left column like BOS/LAA; a MyriadPro masthead
+  // sits above and a right-column stat sidebar sits beside the narrative, but
+  // neither needs explicit handling: the masthead has no real heading above
+  // it to own it (dropped by the ordinary "unowned line" rule), and the
+  // sidebar's own section headers ("TIGERS STREAKS," "AL LEADERS...") sit
+  // past columnMaxX so they're excluded by the plain x cutoff before ever
+  // reaching the marker/heading logic — no rightTableMinX needed. bottomCutoff
+  // drops a "What's Next" schedule box that shares the narrative column's own
+  // x-range below the last blurb. Body is split across two Calibri subsets
+  // (CALIBRATION.md finding #2) — bodyFont matches bare "Calibri" (anchored
+  // so it doesn't also match "Calibri-Bold").
+  116: {
+    layout: 'flow-bold',
+    bodyFont: /Calibri$/,
+    headFont: /Calibri-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 400,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    bottomCutoff: 125,
+  },
+  // Guardians — page 1, two narrative columns (like the Yankees/Diamondbacks/
+  // Braves above), plus a right-side stat sidebar. Head is a DIFFERENT family
+  // name from body (`Arial-BoldMT` vs `ArialMT`, not just a different weight
+  // suffix of the same name — CALIBRATION.md's "Arial family quirk"), and a
+  // parenthetical aside is set in `Arial-BoldItalicMT`, a real body-prose
+  // font despite the name (folded into bodyFont, never headFont, so it's
+  // never mistaken for a heading). Column 1 ("ANOTHER NARROW W TO START
+  // SERIES," "TAKING OUR TALENTS TO SOUTH BEACH," "CHECKING IN(TERLEAGUE),"
+  // "ROAD WOES," "DELAUTER IS DE MAN," "HEARD IT THRU THE HEDGES," "PUTTIN'
+  // OUT FIRES," "THE CADE CRUSADER," "A SWING AND A DRIVE!," "START ME UP!")
+  // runs x~36-242; bottomCutoff drops a probable-pitchers schedule table
+  // below it. Column 2 is a starting-pitcher scouting report: its first ~120pt
+  // is TWO stat tables ("TODAY'S STARTER," "BIBEE ON THE ROAD") at the SAME
+  // left margin as the column's real titles, so position alone can't tell
+  // them apart — topCutoff drops that whole preamble, starting narrative
+  // extraction at "TANNER TIME" (the first genuine blurb: "LAST TIME OUT,"
+  // "#28 IN THE 305," "A NOT-SO-CRUEL SUMMER," "FINISHING THE FIRST HALF,"
+  // "BRINGING THE HEAT"); its own bottomCutoff drops an unheaded head-to-head
+  // comparison table beneath the last blurb.
+  114: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT|Arial-BoldItalicMT/,
+    headFont: /Arial-BoldMT/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    titleAloneOnLine: true,
+    noLineMarkers: true,
+    columns: [
+      { xMin: 0, headingMaxX: 50, columnMaxX: 245, bottomCutoff: 90 },
+      { xMin: 245, headingMaxX: 260, columnMaxX: 458, topCutoff: 740, bottomCutoff: 200 },
+    ],
+  },
+  // White Sox — page 1, two clean narrative columns (no embedded stat table
+  // within either column, unlike CLE/NYY/ARI — the whole right-side stat
+  // sidebar sits well past both columns' real content, excluded by
+  // columnMaxX alone) plus a shared topCutoff/bottomCutoff for the masthead
+  // above and an accolades banner ("World Series Champions: 1906, 1917,
+  // 2005…") below. Heads are Impact (CALIBRATION.md's note that the generic
+  // bold-detection regex misses this club — it isn't a "Bold" family at all);
+  // titles: WHITE SOX AT A GLANCE, TODAY'S STORYLINES, ROSTER MOVES, LAST
+  // NIGHT'S RECAP, CYCLING THE BASES, THE SOX ARE ON THE CLOCK! (column 1),
+  // WHITE SOX VS. ATHLETICS, ALL-STAR MUNE [sic — the source PDF's own text
+  // cuts off mid-word; not a parsing bug, verified byte-for-byte against the
+  // raw PDF item], ALUMNI HOME RUN DERBY, AT THE GATE, HOME SWEET HOME, HEY
+  // NOW YOU'RE AN ALL-STAR (column 2). Bullet points are a Wingdings glyph
+  // that extracts as a literal "u" character (folded into bodyFont so the
+  // rest of the bulleted line isn't lost) rather than a "•" like most clubs.
+  145: {
+    layout: 'flow-bold',
+    bodyFont: /ArialMT|Wingdings-Regular/,
+    headFont: /Impact/,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 780,
+    bottomCutoff: 45,
+    columns: [
+      { xMin: 0, headingMaxX: 45, columnMaxX: 238 },
+      { xMin: 240, headingMaxX: 255, columnMaxX: 445 },
+    ],
+  },
+  // Orioles — page 2 (page 1 is a splits-table front), the starting pitcher's
+  // own punny notes column, single left column like BOS/LAA/DET. The right
+  // side isn't a compact sidebar like those clubs — it's a page-long, multi-
+  // section scouting report (game log, splits, career highs) that runs the
+  // full height of the page, but it's all safely past columnMaxX regardless.
+  // topCutoff drops a "PITCH TYPE" stat table sharing the column's own left
+  // margin above the first real title (same shape as CLE's scouting-report
+  // preamble). Body prose is split across two Calibri subsets like DET
+  // (CALIBRATION.md finding #2). Bullet points use an icon font (`fontello`)
+  // whose glyph extracts as a raw, non-printable control character rather
+  // than a real "•" — left OUT of bodyFont (unlike ATL's ScriptA or CWS's
+  // Wingdings bullets) so that byte doesn't end up embedded in the text;
+  // the rest of each bulleted line still comes through untouched.
+  110: {
+    layout: 'flow-bold',
+    page: 2,
+    bodyFont: /Calibri$/,
+    headFont: /Calibri-Bold/,
+    headingMaxX: 55,
+    columnMaxX: 250,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 800,
+  },
+  // Giants — the real narrative is on PAGE 1, not page 2 (page 2 is the
+  // starting pitcher's own separate deep-dive column, a different feature —
+  // CALIBRATION.md's original page-1 font profile missed the narrative
+  // because its titles sit well right of the page's true left margin). A
+  // narrow left sidebar (x<180: head-to-head win/loss splits, a game log)
+  // sits left of where the real narrative starts (~189); xMin excludes it
+  // rather than a title-position filter, same idea as NYY's thin sidebar.
+  // Two small stat boxes are embedded to the right of the narrative and
+  // share baselines with it ("HOMESTAND BREAKDOWN," a "Top-5 Picks in MLB
+  // Draft" table) — their own headers are a third, decorative font
+  // (BebasNeuePro) so they self-exclude, but their DATA rows are in plain
+  // body/head font like the narrative itself, with no ALL-CAPS marker to
+  // catch them (a row like "Games 5" or "Will Clark 1985 2" is mixed-case,
+  // same as this club's inline bold names). A flat rightTableMinX can't work
+  // here — both boxes' data columns overlap the exact x-range of legitimate
+  // inline asides elsewhere in the SAME narrative ("Stats, LLC," at x≈448,
+  // "C Joey Bart" at x≈479), so cfg.dropRects bounds each box's exclusion to
+  // its own small y-range instead of cutting that whole x band page-wide.
+  137: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /URWDIN-Light|URWDIN-LightItalic/,
+    headFont: /URWDIN-Bold/,
+    xMin: 180,
+    headingMaxX: 200,
+    columnMaxX: 585,
+    dropRects: [
+      { xMin: 480, yMax: 736, yMin: 580 }, // HOMESTAND BREAKDOWN box
+      { xMin: 425, yMax: 195, yMin: 135 }, // Giants Top-5 Picks in MLB Draft box
+    ],
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+  },
+  // Rockies — page 2 (page 1 is a table front), the starting pitcher's own
+  // notes column, full-width single column (no right sidebar — the page's
+  // ONLY other content is the game-log/career-splits table at the very top).
+  // pdfjs reports the embedded fonts as the GNU-substitute names
+  // FreeSans/FreeSansBold rather than real PostScript names (CALIBRATION.md's
+  // noted quirk) — matched the same way regardless. topCutoff drops that
+  // whole game-log table, whose own column-header row ("GAME RESULT GS ERA
+  // IP...") is bold and ALL-CAPS at the left margin — indistinguishable from
+  // a real title by the usual tests, so it's excluded by geometry instead.
+  115: {
+    layout: 'flow-bold',
+    page: 2,
+    bodyFont: /FreeSans$/,
+    headFont: /FreeSansBold/,
+    headingMaxX: 30,
+    columnMaxX: 600,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    topCutoff: 736,
+  },
+  // Padres — the real narrative is on PAGE 1 (CALIBRATION.md's claim that
+  // page 1 is "CID-encoded, unreadable" turned out to be wrong — pdfjs's
+  // text extraction works fine via the embedded ToUnicode map; the font
+  // NAMES just come through as generic "CIDFont+Fn" subset labels instead of
+  // real PostScript names, matched positionally the same way FreeSans is for
+  // COL/CHC). Two narrative columns like the Yankees/Diamondbacks/Braves/
+  // Guardians. Titles are lowercase song-lyric puns ("My Madre don't like
+  // you & she likes everyone," "Life is worth living," "He got his peaches
+  // out in Georgia"), never ALL-CAPS, so allCapsOnly can't gate real titles
+  // vs. inline bold player names the way it does elsewhere — titleAloneOnLine
+  // does that job instead (a real title is the only thing on its line; an
+  // inline name like "Luis Campusano" always has body-font text trailing
+  // after it on the same line, e.g. "is slashing .318/.416/.606…"). headFont
+  // covers both the title face and the inline-name face so a bold name is
+  // still captured as body content when it fails the title test, same as
+  // every other club's inline-name handling.
+  135: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /CIDFont\+F2/,
+    headFont: /CIDFont\+F1|CIDFont\+F3/,
+    tableLeader: /\.(\s*\.){7,}/,
+    titleAloneOnLine: true,
+    joinWrappedTitles: true,
+    columns: [
+      { xMin: 0, headingMaxX: 30, columnMaxX: 230 },
+      {
+        xMin: 235,
+        headingMaxX: 260,
+        columnMaxX: 450,
+        // A catcher's slash-line callout box (AVG/OBP/SLG/OPS/wRC+/wOBA,
+        // each "(1st) .318" etc.) sits mid-column in the same body font as
+        // the narrative around it — bounded to just its own small y-range.
+        dropRects: [{ xMin: 385, yMax: 725, yMin: 680 }],
+      },
+    ],
+  },
+  // Cubs — page 1, single narrative column sitting in the page's MIDDLE
+  // (x~177-451) rather than at the left margin — a leaderboard/milestones
+  // sidebar occupies the true left margin (x<65) and a team stat box sits to
+  // the right (x>463), both excluded by xMin/columnMaxX the same way a thin
+  // left sidebar is excluded elsewhere (NYY). Titles are colon-terminated
+  // ALL-CAPS ("HELLO CINCY:", "THE DOG DAYS OF SUMMER:", "TRENT-ING
+  // UPWARDS:", "20/20 VISION:", "DEVOTED TO DEFFENSE:" [sic], "WEBB-LOCK:").
+  112: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /DINNextLTPro-Regular/,
+    headFont: /DINNextLTPro-Bold/,
+    xMin: 170,
+    headingMaxX: 185,
+    columnMaxX: 460,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    // "THE DOG DAYS OF SUMMER:" ends with a lead-in sentence, then an
+    // embedded stat-splits table (DATE/W-L/AVG/OPS/…) rendered inline as
+    // ordinary bold/body text, no dot-leader — its own column-header row is
+    // ALL-CAPS (ignoring punctuation) and would otherwise read as a real
+    // title of its own. titleMaxLen (comfortably above the longest genuine
+    // title, "THE DOG DAYS OF SUMMER" at 22 chars) rejects it so it folds
+    // back into that blurb's body instead, keeping the table as part of the
+    // narrative rather than splitting it into its own bogus blurb.
+    titleMaxLen: 25,
+    bottomCutoff: 75,
+  },
+  // Nationals — page 1, narrative sits in a MIDDLE column (x~113-440), not
+  // the left margin — CALIBRATION.md's "heads not at left margin" note.
+  // A left sidebar (x<105: a dot-leader season-stat table) and a right
+  // sidebar (x>445: several stat-callout boxes, e.g. "CAREER HIGH GUYS,"
+  // "OFFENSIVE RANKS") are excluded by xMin/columnMaxX. Same body family as
+  // MIA (GothamXNarrow) but the head face is a DIFFERENT family entirely
+  // (plain Gotham-Bold, not GothamXNarrow-Bold) — inline bold names use
+  // GothamXNarrow-Bold instead, folded into bodyFont so they aren't dropped
+  // (matches neither the head nor body regex otherwise). Titles: DISTRICT
+  // DINGERS VS. BRONX BOMBERS, 2026 MLB FIRST-YEAR PLAYER DRAFT, WHERE
+  // THINGS STAND, ALL STARS!, POP FROM THE TOP, NOT ON THE LIST? SORRY.,
+  // LUIS! LUIS!
+  120: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /GothamXNarrow-(Book|Bold|BookItalic)/,
+    headFont: /Gotham-Bold/,
+    xMin: 105,
+    headingMaxX: 125,
+    columnMaxX: 445,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    // A schedule-table header row ("D.C. TIME D.C. TV D.C. RADIO NATIONALS
+    // STARTER OPPONENTS STARTER") below the narrative is ALL-CAPS just like
+    // a real title; titleMaxLen (comfortably above the longest genuine
+    // title, "2026 MLB FIRST-YEAR PLAYER DRAFT" at 33 chars) rejects it so
+    // its schedule rows fold back into the last real blurb instead of
+    // forming their own bogus one — bottomCutoff drops that whole table
+    // (title text included) below the narrative instead.
+    titleMaxLen: 40,
+    bottomCutoff: 65,
+  },
+  // Cardinals — page 1, narrative in a middle column (x~151-590), left of it
+  // a dot-leader season-stat sidebar (x<130). The bold face name has no
+  // hyphen (CardsHelveticaCondensedBold vs. body's CardsHelveticaCondensed),
+  // CALIBRATION.md's noted "custom weight names" quirk that made the generic
+  // family-heuristic profiler miss this club entirely — matched by name here
+  // instead. Titles: BIRD WATCHING, FLIGHT PATTERN, BLAME IT ON THE RAIN,
+  // HERRERA JOINS NATIONAL LEAGUE ALL-STARS, TWO FOR WON, CARDINALS SELECT
+  // CONDON WITH FIRST ROUND PICK, LIB-BING IT UP, A BRAVE NEW WORLD,
+  // WALK-AND-ROLL.
+  138: {
+    layout: 'flow-bold',
+    page: 1,
+    bodyFont: /CardsHelveticaCondensed$/,
+    headFont: /CardsHelveticaCondensedBold/,
+    xMin: 140,
+    headingMaxX: 160,
+    columnMaxX: 595,
+    rightTableMinX: 405,
+    tableLeader: /\.(\s*\.){7,}/,
+    allCapsOnly: true,
+    // The left dot-leader stat sidebar's own row cadence runs independently
+    // of the narrative column's line spacing, so occasionally a sidebar row
+    // and a narrative line land within the default 3pt line-grouping
+    // tolerance of each other despite being unrelated baselines. When that
+    // happens the two get merged into one "line," and — since a folded-back
+    // non-title line is dropped whole if its combined text matches
+    // tableLeader — the sidebar row's dot leader silently took the real
+    // narrative line down with it. Baselines here are stable enough that a
+    // tighter tolerance still groups genuine same-line runs (a title + its
+    // inline lead-in) while no longer bridging the two columns' independent
+    // cadences.
+    lineTol: 2,
+    // The last blurb, WALK-AND-ROLL, has a clean lead paragraph but then
+    // gives way to a two-column trivia grid of short Cardinals/Braves-history
+    // facts (a genuinely different shape from the single-column narrative
+    // above it — many short items sharing baselines, not one flowing
+    // paragraph) followed by an upcoming-game/broadcast footer. Neither
+    // parses cleanly as prose, so bottomCutoff ends the narrative at the
+    // lead paragraph rather than show a jumbled trivia-grid tail; since this
+    // is the last blurb on the page, nothing else is lost by cutting here.
+    bottomCutoff: 305,
+  },
 }
 
 // A per-url cache so reopening the modal for the same note doesn't refetch and
@@ -645,7 +1011,16 @@ function extractFlowBoldZone(items, realName, cfg) {
   // cutoff to words that never had a marker of their own.
   for (const l of rawLines) {
     l.words.sort((a, b) => a.x - b.x)
-    const cutoff = lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
+    // cfg.noLineMarkers (CLE): the marker heuristic assumes a bold ALL-CAPS
+    // run away from the margin is always a genuine second-column heading —
+    // false for a club that also bolds ALL-CAPS player surnames inline
+    // ("PATRICK BAILEY (.242) have combined…"), which reads exactly like a
+    // marker and would wrongly truncate the rest of that sentence. Safe to
+    // skip entirely when cfg.columns already gives each zone a hard xMin/
+    // columnMaxX boundary with no embedded table sharing a baseline within
+    // a single zone (unlike LAA, which relies on the marker to split one
+    // wide zone at a variable point).
+    const cutoff = cfg.noLineMarkers ? cfg.columnMaxX : lineMarkerCutoff(l.words, isHead, cfg.headingMaxX, cfg.columnMaxX)
     for (const w of l.words) w.cutoff = cutoff
   }
 
@@ -665,6 +1040,32 @@ function extractFlowBoldZone(items, realName, cfg) {
     if (!l) { l = { y: w.y, words: [] }; lineWords.push(l) }
     l.words.push(w)
   }
+  // cfg.joinWrappedTitles (SD): most clubs' titles are short enough to fit
+  // one baseline, but a long one here wraps to a second line ("My Madre
+  // don't like you & she likes" / "everyone") — two consecutive lines with
+  // NOTHING but head-font words on either. A body paragraph line is never
+  // entirely head-font, so that combination is safe to treat as one title
+  // spanning both baselines rather than a real title followed by a bogus
+  // one-word title stealing the real title's body.
+  if (cfg.joinWrappedTitles) {
+    lineWords.sort((a, b) => b.y - a.y)
+    for (let idx = lineWords.length - 1; idx > 0; idx--) {
+      const cur = lineWords[idx]
+      const prev = lineWords[idx - 1]
+      const allHead = (l) => l.words.length && l.words.every((w) => isHead(w))
+      if (allHead(cur) && allHead(prev)) {
+        // Both lines keep their own x (0-~600), so a plain x-sort of the
+        // combined words would interleave them by column position rather
+        // than reading order — shift the wrapped (lower) line's words into
+        // their own x band, entirely to the right of anything on a real
+        // line, so the eventual x-sort keeps line order intact and the
+        // resulting large gap makes joinWords insert the word-break space.
+        for (const w of cur.words) w.x += 100000
+        prev.words = [...prev.words, ...cur.words]
+        lineWords.splice(idx, 1)
+      }
+    }
+  }
   const headings = []
   for (const l of lineWords) {
     l.words.sort((a, b) => a.x - b.x)
@@ -676,7 +1077,12 @@ function extractFlowBoldZone(items, realName, cfg) {
     let i = start
     while (i < l.words.length && isHead(l.words[i])) i++
     const titleWords = l.words.slice(start, i)
-    const leadWords = l.words.slice(i)
+    // A third, neither-body-nor-head decorative font sharing this baseline
+    // (SF: a "HOMESTAND BREAKDOWN" stat-box header sitting a couple pt off
+    // the title's own baseline, close enough to fall in the same grouped
+    // line) is not a real lead-in — only body/head words count as the
+    // inline text that follows a "TITLE: lead-in" title on the same line.
+    const leadWords = l.words.slice(i).filter((w) => cfg.bodyFont.test(w.font) || isHead(w))
     headings.push({ y: l.y, allWords: l.words, titleWords, leadWords })
   }
   for (const h of headings) {
@@ -707,11 +1113,24 @@ function extractFlowBoldZone(items, realName, cfg) {
   // non-narrative box: a leaderboard, a schedule grid) — it still owns its
   // body for ownership purposes, so that body doesn't leak into a neighboring
   // blurb, but the whole thing is dropped at output time, not folded back in.
+  //
+  // cfg.titleAloneOnLine (CLE): unlike NYY/ARI/ATL's "TITLE: lead-in text"
+  // shape, CLE's real titles occupy their WHOLE line with nothing else on the
+  // same baseline — but CLE also styles player SURNAMES in bold ALL-CAPS
+  // ("ROCCHIO," "BIBEE"), and a wrapped sentence can coincidentally land one
+  // at the left margin on its own line, indistinguishable from a real title
+  // by position/case/length alone. The tell is what follows on that baseline:
+  // a real title has nothing after it (leadWords is empty); a wrapped bold
+  // surname always has the rest of its sentence trailing in body font on the
+  // very same line.
   const titled = []
   const foldedBackLines = []
   for (const h of headings) {
     const isRealTitle =
-      h.title && (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) && (!cfg.allCapsOnly || isAllCaps(h.title))
+      h.title &&
+      (!cfg.titleMaxLen || h.title.length <= cfg.titleMaxLen) &&
+      (!cfg.allCapsOnly || isAllCaps(h.title)) &&
+      (!cfg.titleAloneOnLine || h.leadWords.length === 0)
     if (isRealTitle) {
       titled.push(h)
       for (const w of h.titleWords) w.consumed = true
@@ -737,13 +1156,22 @@ function extractFlowBoldZone(items, realName, cfg) {
   // PHI marks every wrapped body LINE with its own margin bullet in one such
   // font, which would otherwise leak into running text mid-sentence.
   const isContent = (w) => cfg.bodyFont.test(w.font) || isHead(w)
+  // cfg.dropRects: rightTableMinX is a full-height cut — wrong when a small
+  // embedded box (its own header in a third decorative font, so THAT
+  // self-excludes, but body/head-font data rows like "Games 5") sits at an x
+  // that a legitimate inline aside also uses elsewhere on the page (SF:
+  // "Stats, LLC," at x≈448, a "C Joey Bart" name at x≈479; SD: a catcher's
+  // slash-line callout mid-column). A rect bounds the exclusion to the box's
+  // own small y-range instead of the whole column height.
+  const inDropRect = (w) => (cfg.dropRects ?? []).some((r) => w.x >= r.xMin && w.y <= r.yMax && w.y >= r.yMin)
   const body = words.filter(
     (w) =>
       isContent(w) &&
       !w.consumed &&
       w.x < w.cutoff &&
       !cfg.tableLeader.test(w.str) &&
-      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX),
+      !(cfg.rightTableMinX != null && w.x >= cfg.rightTableMinX) &&
+      !inDropRect(w),
   )
 
   const lines = [...foldedBackLines]

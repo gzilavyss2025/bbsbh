@@ -25,6 +25,18 @@ const TITLES = {
   136: 'Mariners Game Notes',
   142: 'Twins Game Notes',
   147: 'Yankees Game Notes',
+  109: 'D-backs Game Notes',
+  144: 'Braves Game Notes',
+  116: 'Tigers Game Notes',
+  114: 'Guardians Game Notes',
+  145: 'White Sox Game Notes',
+  110: 'Orioles Game Notes',
+  137: 'Giants Game Notes',
+  115: 'Rockies Game Notes',
+  135: 'Padres Game Notes',
+  112: 'Cubs Game Notes',
+  120: 'Nationals Game Notes',
+  138: 'Cardinals Game Notes',
 }
 
 // True when this club's Game Notes template is calibrated — the caller opens the

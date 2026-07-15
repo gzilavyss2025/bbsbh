@@ -139,3 +139,24 @@ TOR, ATL, CIN, harder templates, do last/maybe skip). `CALIBRATION.md` has the
 per-club font/geometry read-off already done for those. Don't start that until
 the maintainer says the GREEN-tier review is done — this session's whole focus
 has been fixing what was already "shipped" before extending further.
+
+**ARI (Diamondbacks, 109) jumped the queue** — the maintainer asked to check it
+out mid-review, so it's now calibrated (out of YELLOW-tier order, ahead of the
+other 10). It's a genuine two-column page-1 layout (`cfg.columns`, same shape
+as NYY): col 1 x~18-236 (`HERE'S THE STORY`, `LAST GAME`, `RADIO UPDATE`, `IT
+STARTS WITH STARTING PITCHING`, `TROY TAKING TO NL WEST`, `GARCIA HANGING
+ZEROES`, `LOÁISIGA BLANKING FOES`, `FIRST-INNING TALLIES`), col 2 x~254-471
+(`CARROLL SWIPING BAGS`, `WIN THE SERIES`, `VS. NL WEST`, `EL PIKE VS. NL
+WEST`, `MORENO'S ON-BASE STREAK`, `GABI ON THE ROAD`, `ALL-STAR FACTS`, `VS.
+DODGERS`). One new wrinkle worth remembering for the rest of YELLOW: a mixed-
+case multi-word head-font run away from the margin (col 2's embedded
+head-to-head table, headed "2026 All-Time Last 10 Streak") does NOT
+self-exclude via `lineMarkerCutoff` the way an ALL-CAPS stray run does (that
+function's marker test requires `isAllCaps`) — it needs an explicit
+`bottomCutoff` instead. Verified against a fresh PDF via `verify-one.mjs
+pdfs/109.pdf 109 1` and folded into `verify-all.mjs`'s regression set (now 15
+clubs). A remaining, unexplored cosmetic quirk: ARI's raw PDF text already
+contains a literal space inside a couple of "fi" ligatures ("fi rst", "fi
+fth") — confirmed via `dump-near.mjs` to be baked into the source `str`, not
+introduced by `joinWords` or `tidy()` — left as-is, same call as the hyphen
+tradeoff above.
