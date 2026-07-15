@@ -12,6 +12,10 @@ calibrate the remaining **YELLOW** (11) and **RED** (5) tiers — see `CALIBRATI
 - Modal: `src/components/WhatsBrewingModal.jsx`; button: `GameNotesButton` in
   `src/screens/TeamInfo.jsx` (gated on `hasWhatsBrewing(teamId)`)
 
+**Mid-review right now?** Read `SESSION-HANDOFF.md` first — it has the exact
+state of an in-progress GREEN-tier QA pass (PR #174), which clubs are fixed vs.
+still-known-broken, and the bug-class playbook, so you don't re-derive any of it.
+
 ## GREEN tier gotcha: a fixed `columnMaxX` word-cutoff is fragile
 
 `extractFlowBoldZone` used to drop any word past a flat per-club `columnMaxX` —
