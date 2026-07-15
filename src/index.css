@@ -10418,6 +10418,12 @@ body {
    surrounding plain prose (see teamTransactions.js: the emphasized/linked
    span is built from the player's name alone, never "{POS} {Name}"). */
 .txstory__cutline .plink {
+  /* A bare <button> is inline-block by default, which keeps its whole text
+     content as one unbreakable unit — "Lance McCullers Jr." would jump to
+     the next line as a whole rather than wrapping normally like the plain
+     prose around it. display:inline lets a long name wrap same as any
+     other text. */
+  display: inline;
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
