@@ -40,7 +40,7 @@ work. To keep that cheap to untangle:
 - Prefer merging/closing promptly over letting several `claude/*` branches sit open
   in parallel — the longer one lives, the more likely another session's PR conflicts
   with it.
-- `claude/*` branches don't get their own Vercel preview deployment (see
+- No branch other than `main` gets its own Vercel preview deployment (see
   `git.deploymentEnabled` below) — verify locally (`npm run dev` / `npm run e2e`)
   before opening the PR rather than expecting a preview URL on the PR check.
 
@@ -68,13 +68,14 @@ This is only the **interactive** flow. The autonomous multi-agent `claude/*` PR 
 ## Deployment
 
 Hosted on Vercel, auto-deploying `main` to production on every push. Two things in
-`vercel.json` exist specifically because concurrent-agent activity was burning
-through Vercel Hobby's 100-deployments/day cap (every push to every branch is its own
-deployment, so a `claude/*` branch push *and* its later merge to `main` cost two):
+`vercel.json` exist specifically because concurrent-agent (and concurrent-branch)
+activity was burning through Vercel Hobby's 100-deployments/day cap (every push to
+every branch is its own deployment, so a feature-branch push *and* its later merge
+to `main` cost two) — this is a Hobby-plan account, so every deployment counts:
 
-- `git.deploymentEnabled: { "claude/*": false }` — skips deployments entirely for
-  agent branches; only `main` (and any branch not matching that pattern) deploys.
-  Preview a `claude/*` branch locally instead (see above).
+- `git.deploymentEnabled: { "main": true, "*": false }` — skips deployments
+  entirely for every branch except `main`. Preview any other branch locally
+  instead (see above); nothing but `main` ever gets a Vercel URL.
 - `ignoreCommand: scripts/vercel-ignore-build.sh` — Vercel's Ignored Build Step;
   skips a deployment when the push touched only docs/scripts/workflow files with no
   effect on the deployed app (diffs against `VERCEL_GIT_PREVIOUS_SHA`, the last commit

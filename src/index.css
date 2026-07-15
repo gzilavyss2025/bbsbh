@@ -42,8 +42,10 @@
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
      - the About page body copy — `.aboutpage .caps-exempt`
-     - the Game Score modal's explainer paragraphs — `.gsmodal .sheet__body`,
-       `.gsmodal__foot` (the per-factor table stays shouted)
+     - the Game Score modal's explainer prose — `.gsmodal .sheet__body`, the
+       quiet factor glosses `.gsfactor__note`, and the example lines
+       `.gsexample__line` (the shouted group subheadings + bold factor labels
+       stay uppercase)
      - the Top Games page's boxed hint — `.topgames__hint` (+ its embedded
        `.hint__link` button)
      - `.buzz__text` (Bluesky posts keep their authors' original casing) */
@@ -1055,15 +1057,59 @@ body {
   gap: 10px;
 }
 
-/* Top Games page: each card's row gets its statistical tier pill above it
-   (see TierPill.jsx) — the ordinary slate's <li> has no such wrapper. */
+/* Top Games page: each card's row is topped by a header line carrying the
+   rank, the statistical tier pill (see TierPill.jsx), and the Game Score
+   itself surfaced large — the ordinary slate's <li> has no such wrapper. */
 .topgames__row {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
+/* Rank + tier on the left, the big Game Score readout pushed to the right.
+   Baseline-aligned so the "#1", the pill, and the score number all sit on the
+   same line above the card. */
+.topgames__rowhead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 2px;
+}
+.topgames__rank {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
 .topgames__tier {
-  align-self: flex-start;
+  flex: 0 0 auto;
+}
+/* The Game Score, the reason this page exists — the number reads big and
+   inky with a small condensed label under it, right-aligned so the eye can
+   scan the ranked column of scores straight down. */
+.topgames__score {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+}
+.topgames__scorenum {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-primary);
+}
+.topgames__scorelabel {
+  margin-top: 3px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 /* Level filter row — reuses the .levelnav toggle look (same convention as
@@ -7526,6 +7572,14 @@ body {
   margin: -4px -6px;
   padding: 4px 6px;
 }
+/* The team filter's "everyone else" treatment (LeadersPage's TeamFilterStrip)
+   — dulled, not hidden, so a picked club's leaders stand out without the
+   board's overall category structure disappearing. Never set alongside
+   --fav, since a pick always supersedes the favorite-team tint. */
+.tlead__featured--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
+}
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
    outranks the base .shot sizing, same reason as .topperf__shot. Sized well
    past that shared 52px baseline — the leader card is this component's one
@@ -7648,6 +7702,11 @@ body {
   border-radius: var(--radius-xs);
   margin: 0 -6px;
   padding: 1px 6px;
+}
+/* Same team-filter dim treatment as .tlead__featured--dim, for a chaser row. */
+.tlead__row--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
 }
 .tlead__rank {
   flex: none;
@@ -8837,6 +8896,16 @@ body {
     opacity: 0.7;
   }
 }
+/* TeamFilterStrip — the same vsteam__tray strip, spanning the full content
+   width as a team highlight picker (League Leaders, All-Star Rosters)
+   rather than the player-page opponent picker's narrower card. */
+.teamfilterstrip {
+  margin: var(--space-2) 0;
+}
+.teamfilterstrip__mlblogo {
+  display: block;
+  object-fit: contain;
+}
 .vsteam__grid {
   margin-top: 2px;
 }
@@ -9445,6 +9514,47 @@ body {
   color: #fff;
   font-size: 14px;
   line-height: 1;
+}
+
+/* ---- Slate empty-day banners — the same tape-banner recipe as the player
+   page's All-Star/rehab banners above, for GameSelect's empty-slate spot.
+   break-banner reuses the celebratory All-Star blue (every level goes dark
+   the same week — it's not an MLB-only concept here); offday-banner is the
+   neutral graphite/ink counterpart for a level's own ordinary day off (a
+   Monday MiLB off day, a rare all-30-idle MLB day outside the break). One
+   line, label + "resumes {date}" side by side; wraps to two lines only if a
+   narrow viewport can't fit both. ---- */
+.break-banner,
+.offday-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.break-banner {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+.offday-banner {
+  background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink-0) 100%);
+}
+.break-banner__text,
+.offday-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: 15px;
+  color: #fff;
+}
+.break-banner__detail,
+.offday-banner__detail {
+  font-size: var(--fs-label);
+  color: rgba(255, 255, 255, 0.82);
 }
 
 /* ---- rehab-assignment banner — an actual strip of kraft-amber tape: the same
@@ -11134,104 +11244,346 @@ body {
 
 /* ------------------------------------------------------------ awards history
    One section per award family (MVP, Cy Young, ...), each a stack of season
-   rows newest-first. A season row splits into AL/NL columns (or one plain
-   column for the MLB-wide awards); a family with more than one recipient per
-   league per year (Silver Slugger, Gold Glove) tags each name with its
-   position so the row still reads as one glance instead of a wall of names. */
+   rows newest-first. A season row's year sits in a narrow rail on the left
+   (.awardhistory__seasonyear) rather than its own full-width row, so the year
+   costs vertical rail space, not horizontal card space. Recipients render as
+   .playercard tiles — the app's own headshot idiom (position badge floated on
+   the headshot's bottom-left corner, same as Top Performers/Day Highlights;
+   see PastDayRecapBox.jsx's PerformerCard) rather than a bespoke avatar.
+   Three card treatments, by what a group actually has to show:
+     - MVP/Cy Young/Rookie of the Year (one recipient per league, a stat
+       line) render full-width (.awardhistory__cards--base).
+     - Platinum Glove/Reliever of the Year/Comeback Player/Hank Aaron/Roberto
+       Clemente (one recipient, no stat line) get a BIGGER headshot instead
+       (.awardhistory__cards--full) — a bare name+team card would otherwise
+       read as half-empty next to a stat-line card.
+     - Silver Slugger/Gold Glove (up to ~9 recipients per league) drop to a
+       dense 2-up grid, with the name broken onto two lines at the first/last
+       boundary (.awardhistory__namebreak) and shrunk for a long name part
+       (.awardhistory__name--small/--tiny) so "Pete Crow-Armstrong" still
+       fits a card half the width of a full one. All-MLB Team columns
+       (.awardhistory__cards--compact) match this same headshot size —
+       they're both "a roster of names" tiles, just a different grid shape.
+   In the "By Award" view, a league-split award's American League/National
+   League banner (red for AL, blue for NL — .awardhistory__leaguetag--al/-nl)
+   shows ONCE at the top of its column (AwardFamilySplit/LeagueRows in
+   AwardsHistoryPage.jsx), with every season stacked underneath, rather than
+   repeating per season. The "By Year" view does the same per award instead
+   of per season (AwardYearSplit) — a league banner never repeats down the
+   page in either view. */
 .awardhistory__award {
   margin-top: var(--space-2);
 }
 .awardhistory__years {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
 }
-.awardhistory__year {
+/* Year rail (left) + content (right). Only ever has one child when the year
+   isn't shown (the "By Year" view already names it in a SectionTitle) — the
+   row layout is harmless there since a lone flex item just fills the width. */
+.awardhistory__season {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
+  align-items: flex-start;
+  gap: 10px;
 }
-.awardhistory__yearnum {
+.awardhistory__season > :last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Zebra stripe every other year — "By Award" view only (.awardhistory__list
+   only carries --zebra there; "By Year" has just one season row per section,
+   nothing to alternate). Scoped to each direct season list
+   (.awardhistory__years for a non-split award, .awardhistory__leagueyears
+   per league column for a split one) so the stripe count restarts at each
+   award/column rather than running continuously down the whole page. */
+.awardhistory__list--zebra .awardhistory__season {
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+}
+.awardhistory__list--zebra .awardhistory__years > .awardhistory__season:nth-child(even),
+.awardhistory__list--zebra .awardhistory__leagueyears > .awardhistory__season:nth-child(even) {
+  background: var(--surface-inset);
+}
+/* Stretches to the row's full height (align-self overrides the row's own
+   align-items: flex-start) so the rotated year number below can center
+   along the whole row rather than pinning to its top. */
+.awardhistory__seasonyear {
   flex: none;
-  width: 40px;
+  align-self: stretch;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Rotated 90° so it reads bottom-to-top, like a spine label — text-orientation:
+   sideways is needed alongside writing-mode (its default, "mixed", would keep
+   digits upright and stack them instead of rotating the whole run). */
+.awardhistory__yearnum {
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+  transform: rotate(180deg);
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
   color: var(--text-heading);
 }
-.awardhistory__leagues {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  flex: 1;
-  min-width: 0;
-}
-.awardhistory__league {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-}
+/* Full banner spelling out the league name, red for American League and blue
+   for National League (kraft-clay / allstar-blue) — same treatment at every
+   viewport, not just wide, so a phone gets the same banner instead of a
+   small pill. */
 .awardhistory__leaguetag {
-  flex: none;
+  display: block;
+  align-self: stretch;
+  text-align: center;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
 }
-.awardhistory__recipients {
+.awardhistory__leaguetag--al {
+  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
+}
+.awardhistory__leaguetag--nl {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+.awardhistory__leaguetag-short {
+  display: none;
+}
+
+/* One recipient card. .awardhistory__card only carries the favorite-team
+   highlight below — sizing/layout is the shared .playercard (index.css
+   ~L7256). Compound (.playercard.awardhistory__card) so this can't drift
+   from the base tile if .playercard itself changes. */
+.awardhistory__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+  gap: 8px;
 }
-.awardhistory__recipient {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  font-family: var(--font-body);
-  font-size: 13px;
-  border-radius: var(--radius-xs);
+/* MVP/Cy Young/Rookie of the Year — the base tile, at the plain
+   .playercard size (no override needed). */
+.awardhistory__cards--base {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Multi-recipient groups (Silver Slugger/Gold Glove) — 2-up, up to ~9
+   recipients per league. The headshot still gets real size (--shot-md, the
+   same tile used for roster/leader/recap cards elsewhere) rather than
+   shrinking to fit — the name wraps onto two lines instead (see
+   .awardhistory__namebreak/-name--small/-tiny). */
+.awardhistory__cards--dense {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.awardhistory__cards--dense .shot.playercard__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+.awardhistory__cards--dense .playercard__name {
+  font-size: 12.5px;
+  line-height: 1.2;
+}
+.awardhistory__cards--dense .playercard__stat {
+  font-size: 10px;
+}
+.awardhistory__namebreak {
+  display: block;
+}
+.awardhistory__name--small .playercard__name {
+  font-size: 11px;
+}
+.awardhistory__name--tiny .playercard__name {
+  font-size: 9.5px;
+}
+/* A recipient the stats endpoint had nothing for (an incomplete/malformed
+   season row — see gen-awards-history.mjs) falls back to this bigger,
+   "fuller" headshot instead of a stat line, so a bare name+team card doesn't
+   read as half-empty next to every other card's stat line. */
+.awardhistory__cards--full .playercard {
+  padding: 10px;
+  gap: 12px;
+}
+.awardhistory__cards--full .shot.playercard__shot {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+}
+.awardhistory__cards--full .playercard__name {
+  font-size: 17px;
+}
+.awardhistory__cards--full .playercard__team {
+  font-size: 11px;
+}
+/* All-MLB Team columns — same headshot size as Silver Slugger/Gold Glove's
+   dense tile (both are "a roster of names," just First/Second Team's own
+   two-column grid instead of .awardhistory__cards--dense's), a bit tighter
+   on padding so two full rosters still sit side by side on a phone. */
+.awardhistory__cards--compact .playercard {
+  padding: 6px;
+  gap: 8px;
+}
+.awardhistory__cards--compact .shot.playercard__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+.awardhistory__cards--compact .playercard__name {
+  font-size: 14px;
+}
+.awardhistory__cards--compact .playercard__team {
+  font-size: 11px;
+}
+.awardhistory__cards--compact .playercard__stat {
+  font-size: 10px;
 }
 /* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
    from favoriteAccentColor()) — a recipient who played for the user's
    favorite club jumps out among the rest of a season's winners. */
-.awardhistory__recipient--fav {
-  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
-  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
-  padding: 1px 4px 1px 5px;
-  margin: -1px -4px -1px -5px;
+.awardhistory__card--fav {
+  border-color: var(--fav-accent, var(--accent-primary));
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
 }
 .awardhistory__teamlink {
-  flex: none;
   display: inline-flex;
 }
-.awardhistory__name {
+/* The team logo docks to its own column at the right edge of the CARD (not
+   just the end of the text) — the base .playercard__body has no flex-grow of
+   its own (it shrink-wraps to its content on every other .playercard surface,
+   which is what those want), so without this override .playercard__team's
+   space-between only had the width of the longest line to work with and the
+   logo landed right next to the name instead of at the card's edge.
+   .awardhistory__teamname's `order: -1` pulls the name text ahead of the
+   logo, so the row reads "name ⟶ logo" left to right. Logo size fits each
+   card tier (bigger on the roomier base/full cards, a touch smaller on the
+   tighter dense/compact grids) rather than one fixed size everywhere — it's
+   an inline size on TeamLogo's own <img>, so overriding it needs
+   !important, same pattern as .player__herologo > .teamlogo. */
+.awardhistory__card .playercard__body {
+  flex: 1 1 auto;
+}
+.awardhistory__card .playercard__team {
+  justify-content: space-between;
+}
+.awardhistory__card .awardhistory__teamname {
+  order: -1;
+}
+.awardhistory__cards--base .teamlogo,
+.awardhistory__cards--full .teamlogo {
+  width: 28px !important;
+  height: 28px !important;
+}
+.awardhistory__cards--dense .teamlogo,
+.awardhistory__cards--compact .teamlogo {
+  width: 24px !important;
+  height: 24px !important;
+}
+.awardhistory__teamname {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.awardhistory__team {
-  flex: none;
-  font-size: 11px;
-  color: var(--text-muted);
+
+/* All-MLB Teams — First/Second Team stacked side by side rather than as two
+   separate award rows (see AwardsHistoryPage's AllMlbYear). Always 2-up
+   (even on a phone) — the compact card size above is sized for exactly that. */
+.awardhistory__allmlb {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
-.awardhistory__pos {
-  flex: none;
+.awardhistory__allmlbcol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.awardhistory__allmlbhead {
   font-family: var(--font-display);
-  font-size: 9.5px;
   font-weight: var(--w-bold);
+  font-size: 11px;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
-  font-style: normal;
+  color: var(--award-ink);
+  background: var(--award-soft);
+  border: var(--bw-hair) solid var(--award-line);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  text-align: center;
+}
+
+/* A league-split award family in the "By Award" view: American League and
+   National League each get their own column, one banner at the top, every
+   season's winners stacked underneath (AwardsHistoryPage's
+   AwardFamilySplit/LeagueColumn). Phone stacks AL above NL — same shape as
+   .awardhistory__years otherwise; the two-column split (below) only kicks in
+   once there's the width a full-size card needs. */
+.awardhistory__familysplit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.awardhistory__leaguecol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.awardhistory__leagueyears {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Wide viewport (iPad/desktop) — same 740px breakpoint as the rest of the app
+   (see the WIDE LAYOUT section). A league-split family's two columns
+   (.awardhistory__familysplit, used by both AwardFamilySplit and
+   AwardYearSplit) go side by side — same width structure as
+   .awardhistory__allmlb; a phone stacks AL above NL instead. */
+@media (min-width: 740px) {
+  .awardhistory__familysplit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
+/* "By Year" grouping — one award label per nested block, in place of the
+   award family's own SectionTitle. */
+.awardhistory__yearaward {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.awardhistory__yearawardlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 11px;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The By Award / By Year toggle — reuses the slate's .levelnav segmented
+   control look rather than a bespoke switch, right-aligned beside the page
+   title on the same row (same convention as .topbar--slate's level toggle). */
+.awardhistory__grouptoggle {
+  flex: 0 0 auto;
+  margin: 0;
+}
+.awardhistory__grouptoggle .levelnav__btn {
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 11px;
 }
 
 /* ------------------------------------------------------------- postseason
@@ -11286,60 +11638,184 @@ body {
   color: var(--accent-primary);
 }
 
+/* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
+   (the box score's "Show N more insights" button). */
+.pshistory__more {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.pshistory__more:hover {
+  color: var(--text-body);
+}
+
+/* Room for the 7-column bracket to actually breathe on a wide screen rather
+   than horizontal-scrolling inside the app's ordinary 440px phone column —
+   same widen-the-page-column idea as .screen.standings-screen. */
+@media (min-width: 740px) {
+  .screen.psh-screen {
+    max-width: 1200px;
+  }
+}
+
+/* ---------------------------------------------------------- postseason
+   bracket. Wide layout: 7 columns — AL Wild Card→Division→Championship
+   converging from the left, the World Series fixed center, NL rounds
+   mirroring back out to the right (see BracketGrid in
+   PostseasonHistoryPage.jsx). AL/NL column labels borrow the app's own
+   negative/positive accent pair as a wayfinding tint (not a status color
+   here) so the eye can tell which side of the World Series a column
+   belongs to at a glance. Connector lines are deliberately simple
+   horizontal stubs rather than full elbow/tree joins — legible at this row
+   height and the one treatment that also condenses cleanly to the phone
+   stack below. */
 .psbracket {
-  display: flex;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 1fr) minmax(150px, 1fr) minmax(160px, 1.05fr) minmax(150px, 1.15fr)
+    minmax(160px, 1.05fr) minmax(150px, 1fr) minmax(150px, 1fr);
+  gap: 0 var(--space-3);
   overflow-x: auto;
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
-.psbracket__round {
-  flex: 0 0 auto;
-  width: 220px;
+.psbracket__col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  min-width: 148px;
 }
-.psbracket__roundlabel {
-  margin: 0;
+
+/* Between the wide breakpoint and the point .screen actually reaches its
+   1200px cap (~1280px viewport), 7 columns of seed+logo+CLUB NAME+wins
+   don't fit without .psbracket's own overflow-x scrollbar kicking in. Drop
+   the name and size the logo up in its place instead — TeamLogo's `size`
+   prop is an inline px style, so overriding it needs !important (an
+   established pattern elsewhere in this file) rather than a plain rule. */
+@media (min-width: 740px) and (max-width: 1279px) {
+  .psbracket {
+    grid-template-columns: repeat(7, minmax(84px, 1fr));
+  }
+  .psbracket__col {
+    min-width: 84px;
+  }
+  .psbracket .seedrow__name {
+    display: none;
+  }
+  /* .seedrow__name is what normally flex:1's the win count to the card's
+     right edge (see .seedrow__name below) — with it gone, push wins there
+     directly instead of leaving it hugging the logo. */
+  .psbracket .seedrow__wins {
+    margin-left: auto;
+  }
+  .psbracket .teamlogo {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}
+.psbracket__collabel {
+  margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
+  text-align: center;
 }
-.psbracket__list {
+.psbracket__collabel--al {
+  color: var(--accent-negative);
+}
+.psbracket__collabel--nl {
+  color: var(--accent-positive);
+}
+.psbracket__collabel--ws {
+  color: var(--seal-ink);
+}
+.psbracket__lanes {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: space-around;
+  gap: 10px;
+}
+.psbracket__col--al .psbracket__lanes {
+  position: relative;
+}
+.psbracket__col--al .seedcard::after,
+.psbracket__col--al .seedcard--bye::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -13px;
+  width: 12px;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+.psbracket__col--nl .seedcard::before,
+.psbracket__col--nl .seedcard--bye::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -13px;
+  width: 12px;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+.psbracket__col--al:last-of-type .seedcard::after,
+.psbracket__col--al:last-of-type .seedcard--bye::after,
+.psbracket__col--nl:last-of-type .seedcard::before,
+.psbracket__col--nl:last-of-type .seedcard--bye::before {
+  display: none;
 }
 
-.psseries {
+.seedcard {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 5px 8px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--surface-card);
   text-align: left;
   cursor: pointer;
 }
-.psseries:focus-visible {
+.seedcard:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.psseries__label {
+.seedcard--bye {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-style: dashed;
+  background: transparent;
+  opacity: 0.6;
+  cursor: default;
+}
+.seedcard__byetag {
   font-family: var(--font-display);
   font-size: 9px;
-  font-weight: var(--w-bold);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-caption);
+  flex: none;
 }
-.psseries__team {
+
+.seedrow {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -11347,21 +11823,214 @@ body {
   font-size: 12.5px;
   color: var(--text-muted);
 }
-.psseries__team--winner {
-  color: var(--text-heading);
-  font-weight: var(--w-bold);
+.seedrow__seed {
+  flex: none;
+  width: 13px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  text-align: center;
 }
-.psseries__teamname {
+.seedrow__name {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.psseries__wins {
+.seedrow__wins {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+.seedrow--winner {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.seedrow--faded {
+  opacity: 0.7;
+}
+
+.pswscard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 10px;
+  border: 1.5px solid var(--seal);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  text-align: left;
+  cursor: pointer;
+}
+.pswscard:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.pswscard .seedrow {
+  font-size: 13.5px;
+}
+.pswscard--stack {
+  margin-bottom: 4px;
+}
+
+/* World Series MVP, wide layout only (BracketGrid — the phone stack's
+   .pswscard--stack never gets this, there's no room to spare there).
+   Same --shot-2xs + bottom-left position-pill mount as
+   .milestonewatch-page__mug/__pos, sitting below the team/score rows
+   behind a hairline divider. */
+.pswscard__mvp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.pswscard__mug {
+  position: relative;
+  flex: none;
+}
+/* 25% past the standard --shot-2xs rung — this card's the one place a WS
+   MVP photo is the whole point of the row, so it gets to run a size larger
+   than the modal's own (unrelated) MVP mention. */
+.shot.pswscard__shot {
+  display: block;
+  width: calc(var(--shot-2xs-w) * 1.25);
+  height: calc(var(--shot-2xs-h) * 1.25);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.pswscard__shot.shot--fallback {
+  font-size: 20px;
+}
+.pswscard__pos {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  font-family: var(--font-display);
+  font-size: 8.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--paper-0);
+  background: var(--accent-primary);
+  border-top-right-radius: var(--radius-xs);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.pswscard__mvpinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pswscard__mvptag {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.pswscard__mvpname {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 13px;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+
+/* Condensed phone layout: the same AL→WS→NL reading order flowed vertically
+   in one column instead of across seven (see BracketStack). Round labels
+   become thin dividers rather than a column header. */
+.psstack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.psstack__roundlabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 2px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.psstack__roundlabel::after {
+  content: '';
+  flex: 1;
+  height: var(--bw-hair);
+  background: var(--rule-grid);
+}
+.psstack__roundlabel:first-child {
+  margin-top: 0;
+}
+.psstack__roundlabel--al {
+  color: var(--accent-negative);
+}
+.psstack__roundlabel--nl {
+  color: var(--accent-positive);
+}
+.psstack__roundlabel--ws {
+  color: var(--seal-ink);
+}
+
+/* Fixed bottom year stepper — phone only, same shape as .inningnav /
+   .standings-daynav (Back/label/Next row pinned off the bottom). See
+   .psyear-screen below for the page's matching bottom clearance. */
+.psyearnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  max-width: 440px;
+  margin-inline: auto;
+  padding: 10px var(--app-gutter) calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    var(--bg-canvas) 55%,
+    color-mix(in srgb, var(--bg-canvas) 0%, transparent)
+  );
+}
+.psyearnav button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+.psyearnav button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+.psyearnav__label {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Room so the single-season stack clears the fixed .psyearnav bar. */
+.psyear-screen {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
 
 /* ---------------------------------------------------------- postseason series
@@ -11450,25 +12119,42 @@ body {
   flex-direction: column;
   gap: 6px;
 }
+/* A button, not a plain row — tapping a game jumps straight to that game's
+   own box score (resolved from its gamePk, see PostseasonSeriesModal's
+   fetchGameCardsByPk call). Disabled (unclickable, dimmed) until that
+   resolves, rather than a dead click that silently does nothing. */
 .psmodal__game {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 8px;
   padding: 6px 8px;
+  border: none;
   border-radius: var(--radius-xs);
   background: var(--surface-card);
+  font-family: inherit;
   font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.psmodal__game:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.psmodal__game:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .psmodal__gamenum {
   flex: none;
-  width: 34px;
+  width: 50px;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .psmodal__gamedate {
   flex: none;
-  width: 44px;
+  width: 76px;
   color: var(--text-muted);
 }
 .psmodal__gameline {
@@ -11493,13 +12179,18 @@ body {
   color: var(--text-muted);
   font-size: 10px;
 }
+/* Tier-1 kraft-amber notification card, same family as .pitchernotice--pbp
+   (the play-by-play "now pitching" card) — a flat tinted fill rather than
+   the diagonal-hatch --seal-texture weave the spoiler covers use, so an MVP
+   badge doesn't read as a sealed/hidden value. */
 .psmodal__mvp {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--seal-hatch);
   border-radius: var(--radius-md);
-  background: var(--seal-texture);
+  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
 }
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
    outranks the base .shot sizing, same convention as .tlead__shot. */
@@ -11570,65 +12261,96 @@ body {
   min-width: 0;
 }
 .allstarrosters__game {
-  max-width: 360px;
+  width: 100%;
 }
 .allstarrosters__leagues {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-}
-.allstarrosters__league {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  gap: var(--space-3);
   min-width: 0;
 }
-.allstarrosters__leaguetag {
-  flex: none;
+/* Each league reuses the Team Page's "roster super-section" card
+   (.roster-super/.roster-super__row/__col, .roster-sub/__title — see
+   TeamPage.jsx's Preferred Lineup) instead of a loose flex-wrap of inline
+   names — Starting Lineup / Bullpen / Substitutes each get their OWN column
+   (not two sections stacked in one tall column), so a short and a long
+   section sitting side by side don't leave a visible block of blank card
+   behind the shorter one. Scoped overrides (not touching the shared rule,
+   which the Team Page also uses) let the three columns wrap to 2-then-1 at
+   an iPad-ish width instead of squeezing into three narrow slivers. */
+.allstarrosters__leagues .roster-super__row {
+  flex-wrap: wrap;
+}
+.allstarrosters__leagues .roster-super__col {
+  flex: 1 1 220px;
+}
+/* Full-width, colored league header bled to the card's edges — red for the
+   American League, the app's existing "All-Star blue" banner color (see
+   TrophyCase's All-Star medal) for the National League. */
+.allstarrosters__leaguehead {
+  margin: -14px -12px 12px;
+  padding: 8px 14px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-on-ink);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
-.allstarrosters__recipients {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+.allstarrosters__leaguehead--al {
+  background: linear-gradient(180deg, var(--clay) 0%, var(--clay-deep) 100%);
 }
-.allstarrosters__recipient {
-  display: inline-flex;
+.allstarrosters__leaguehead--nl {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+/* One roster section's row list — same bordered-card convention as the Team
+   Page's .thub-roster. */
+.allstarrosters__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+}
+.allstarrosters__row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
   align-items: center;
-  gap: 5px;
-  min-width: 0;
+  gap: 8px;
+  padding: 6px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
   font-size: 13px;
-  border-radius: var(--radius-xs);
 }
-/* Same favorite-team highlight as .awardhistory__recipient--fav — a
-   selectee who played for the user's favorite club (by franchise id, stable
-   across a relocation/rename) jumps out among the rest of the season. */
-.allstarrosters__recipient--fav {
+.allstarrosters__rows li:first-child {
+  border-top: none;
+}
+/* Same favorite-team highlight as .awardhistory__card--fav — a
+   selectee who played for the highlighted club (either the team filter's
+   pick, or absent a filter, the user's favorite team — see
+   AllStarRostersPage's effectiveTeamId) jumps out among the rest of the
+   season. Franchise id is stable across a relocation/rename, so this still
+   lights up an old team's picks under a since-renamed club. */
+.allstarrosters__row--fav {
   background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, transparent);
-  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
-  padding: 1px 4px 1px 5px;
-  margin: -1px -4px -1px -5px;
+}
+/* The team filter's "everyone else" treatment — dulled, not hidden, so the
+   section structure stays intact while one club's picks are singled out
+   (see AllStarTeamFilter + RecipientRow's `filtering` prop). */
+.allstarrosters__row--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
 }
 .allstarrosters__teamlink {
-  flex: none;
   display: inline-flex;
 }
 .allstarrosters__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.allstarrosters__team {
-  flex: none;
-  font-size: 11px;
-  color: var(--text-muted);
 }
 .allstarrosters__pos {
   flex: none;
@@ -11638,7 +12360,30 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
-  font-style: normal;
+}
+/* "Load more" — a single flat jump back to LOAD_MORE_CUTOFF, not
+   incremental paging (see AllStarRostersPage). Plain text-button styling,
+   matching the app's other "reveal more" affordances rather than a heavy
+   bordered button. */
+.allstarrosters__more {
+  align-self: center;
+  margin: var(--space-2) auto 0;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  display: block;
+}
+.allstarrosters__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 @media (max-width: 520px) {
   .allstarrosters__year {
@@ -11648,6 +12393,186 @@ body {
   .allstarrosters__yearnum {
     width: auto;
   }
+}
+
+/* ------------------------------------------------------- All-Star game result
+   card (AllStarGameResult) — this page's one deliberate exception to the
+   "never print a score" spoiler invariant; see ADR-0019. Three regions:
+   date+score+box-score-button (left), MVP headshot/line/stat (middle), host
+   ballpark (right). Wraps to a stacked read on narrow widths. */
+.allstargame {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.allstargame__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.allstargame__scorecol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none;
+}
+.allstargame__scorerow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.allstargame__date {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstargame__side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.6;
+}
+.allstargame__side--winner {
+  opacity: 1;
+}
+.allstargame__label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.allstargame__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.allstargame__sep {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+/* A smaller, secondary-feeling press of the app's standard primary button
+   (.btn.btn--next — the same one GameResultFace's box score button uses),
+   sized down and un-stretched to sit under the score rather than spanning
+   the card. */
+.allstargame__boxbtn {
+  align-self: flex-start;
+  width: auto;
+  min-width: 96px;
+  min-height: 30px;
+  margin-top: 0;
+  padding: 0 12px;
+  font-size: 12px;
+}
+/* MVP — headshot beside a stacked label/name+position/stat-line block. */
+.allstargame__mvpcol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 160px;
+  min-width: 140px;
+  justify-content: center;
+}
+.shot.allstargame__mvpshot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.allstargame__mvpshot.shot--fallback {
+  font-size: 22px;
+}
+.allstargame__mvptext {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.allstargame__mvplabel {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.allstargame__mvpline {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+.allstargame__mvpname {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.allstargame__mvppos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+.allstargame__mvpstat {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+/* Host ballpark, right-aligned — the club logo when the generator could
+   match the venue to a current team's home park, else the generic league
+   mark (see AllStarGameResult's header comment). A hyperlink into the same
+   BallparkModal the live lineup page's game facts use, when the park's on
+   file (src/lib/ballparkData.js); otherwise plain text, same
+   graceful-degradation rule TeamInfo.jsx's BallparkFact follows. */
+.allstargame__venue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  max-width: 160px;
+}
+.allstargame__venuelogo {
+  display: block;
+  object-fit: contain;
+}
+/* .allstargame__venuelink pairs with the shared .plink class (same rest-state-
+   plain, dotted-underline-on-hover/focus convention as PlayerLink/TeamLink) —
+   only the layout/color here, .plink itself supplies the interactive states. */
+.allstargame__venuename,
+.allstargame__venuelink {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------- All-Star team filter
+   (AllStarTeamFilter) — reuses SplitsVsTeam's .vsteam__tray/__strip/__team
+   scroller as-is; this class only adds the page-level spacing around it. */
+.allstarfilter {
+  margin: var(--space-2) 0;
+}
+.allstarfilter__mlblogo {
+  display: block;
+  object-fit: contain;
 }
 
 /* ---------------------------------------------------------------- umpire page */
@@ -12498,26 +13423,51 @@ body {
   cursor: pointer;
 }
 
-.gsmodal__factors {
+/* The four plain-language factor groups (drama / action / standout / dud),
+   each a small shouted subheading over its own list of factor rows. */
+.gsgroups {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   margin: 0 0 16px;
-  padding: 12px 0 0;
+  padding: 14px 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
-.gsfactor {
+.gsgroup__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+.gsgroup__factors {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+}
+
+/* Each factor reads as one wrapping line: a shouted label, a middot, then a
+   quiet natural-case gloss. Running the eye down the bold caps labels scans
+   the whole list at a glance; the gloss is there when you want it. (The old
+   left-label / right-aligned-note split read as a run-on wall.) */
+.gsfactor {
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .gsfactor__label {
-  font-size: 13px;
+  display: inline;
   font-weight: var(--w-semibold);
   color: var(--text-body);
+}
+.gsfactor__label::after {
+  content: " · ";
+  font-weight: normal;
+  color: var(--text-caption);
 }
 
 .gsfactor--negative .gsfactor__label {
@@ -12525,10 +13475,55 @@ body {
 }
 
 .gsfactor__note {
+  display: inline;
   margin: 0;
-  font-size: 12px;
   color: var(--text-caption);
-  text-align: right;
+}
+
+/* Made-up example games: a big Game Score chip on the left, a one-line plain-
+   language reason on the right — the calibration anchors, shown not told. */
+.gsexamples {
+  margin: 0 0 16px;
+  padding: 14px 0 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.gsexamples__title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+.gsexample {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.gsexample:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.gsexample__score {
+  flex: 0 0 auto;
+  min-width: 3ch;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-primary);
+}
+
+.gsexample__line {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-body);
 }
 
 .gsmodal__tiers {
@@ -12536,18 +13531,17 @@ body {
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
-.gsmodal__foot {
-  margin: 4px 0 0;
-  font-size: 11px;
-  color: var(--graphite-soft);
-  text-align: center;
-}
-
-/* Explainer prose reads as natural sentences; the per-factor table below it
-   (.gsfactor__label/__note) stays shouted like the rest of the app chrome. */
+/* Explainer prose reads as natural sentences — the intro paragraphs, the
+   quiet factor glosses, the example lines, and the tier readout. Only the
+   shouted chrome (group subheadings + the bold factor labels themselves) stays
+   uppercase. The `.sheet__body *` descendant selector keeps inline emphasis
+   (`<em>`) from being re-shouted by the global `#root *` rule, which otherwise
+   matches the child directly and beats the parent's inherited value. */
 #root .gsmodal .sheet__body,
-#root .gsmodal__foot {
-  text-transform: none; /* caps-exempt: Game Score modal's explainer paragraphs read as natural sentences */
+#root .gsmodal .sheet__body *,
+#root .gsfactor__note,
+#root .gsexample__line {
+  text-transform: none; /* caps-exempt: Game Score modal's explainer prose + factor glosses read as natural sentences */
 }
 
 /* ---------------------------------------------------------- highlight sheet

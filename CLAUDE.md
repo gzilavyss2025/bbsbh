@@ -70,7 +70,8 @@ the loop.
 
 This is the whole point of the app. **Do not let it drift.** The rule: a
 score-revealing value must never exist in the DOM until the user reveals it —
-there is no fetched-then-hidden node to leak. `CONTEXT.md` defines the vocabulary
+there is no fetched-then-hidden node to leak, with one narrow, explicit
+exception (All-Star Rosters shows final scores plainly — see ADR-0019). `CONTEXT.md` defines the vocabulary
 (Seal, SealBox, reveal-only module, spoiler-free selector, revealedThrough,
 half-inning, regulation/extra innings, Pitchers table, primary position);
 `docs/adr/` records *why* each mechanism is shaped as it is — read the linked ADR

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { fetchTeam } from '../api/team.js'
 import { loadLeaderPool, LEADER_SCOPES, scopeMeta, isMilbScope, isMultiLevelScope } from '../api/leaders.js'
 import { fetchMinorsLeaders } from '../api/minorsLeaders.js'
@@ -15,6 +16,7 @@ import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10)
@@ -71,6 +73,7 @@ function ScopeNav({ scope, asOf, sportId, navigate }) {
 export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
   const navigate = useNav()
   const { favoriteTeamId } = useFavoriteTeam()
+  const [filterTeamId, setFilterTeamId] = useState(null)
   const { loading, error, data } = useAsync(
     () => loadLeaders(scope, orgId, asOf),
     [scope, orgId, asOf],
@@ -87,6 +90,14 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
   const { pool, snapshot, precomputed } = data
   const isOrg = scope === 'org'
   const hasLeaders = precomputed ? Object.keys(precomputed).length > 0 : pool.length > 0
+  // The team filter picks one club to highlight across the whole board,
+  // overriding the ordinary favorite-team highlight while active — same
+  // "MLB" default + supersede convention as the All-Star Rosters page's
+  // TeamFilterStrip. Not offered on the org scope: every row already plays
+  // for the one club the page is about, so there's no "stranger" to filter
+  // out from.
+  const effectiveTeamId = isOrg ? null : filterTeamId ?? favoriteTeamId
+  const filtering = !isOrg && filterTeamId != null
 
   return (
     <LinkScope asOf={asOf} sportId={sportId ?? null}>
@@ -110,6 +121,14 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
 
         <ScopeNav scope={scope} asOf={asOf} sportId={sportId} navigate={navigate} />
 
+        {!isOrg && (
+          <TeamFilterStrip
+            selectedTeamId={filterTeamId}
+            onSelect={setFilterTeamId}
+            ariaLabel="Highlight a team's leaders"
+          />
+        )}
+
         {!hasLeaders ? (
           <p className="hint hint--prose">
             No leaders to show here yet — season stats aren’t posted for this scope.
@@ -124,7 +143,8 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
             showLevel={isMultiLevelScope(scope)}
             prospectSnapshot={snapshot}
             qualifier="leader-relative"
-            favoriteTeamId={isOrg ? null : favoriteTeamId}
+            favoriteTeamId={effectiveTeamId}
+            filtering={filtering}
           />
         )}
       </div>

@@ -1,4 +1,5 @@
 import { TeamLogo } from './TeamLogo.jsx'
+import { BreakableLocation } from './BreakableLocation.jsx'
 import { splitName } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
@@ -185,7 +186,7 @@ function TeamName({ team, side }) {
   const { location, mascot } = splitName(team.name, team.teamName)
   return (
     <span className={`gamecard__name gamecard__name--${side}`}>
-      {location && <span className="gamecard__loc">{location}</span>}
+      {location && <BreakableLocation text={location} className="gamecard__loc" />}
       <span className="gamecard__mascot">{mascot}</span>
     </span>
   )

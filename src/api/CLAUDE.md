@@ -236,12 +236,19 @@ for each generator; the reader modules:
   ALAS/NLAS selections endpoint, not a boxscore scan (same source
   `fetchAllStarRosterIds` in `person-fetch.js` uses). Stores each season's
   `gamePk` only; the screen resolves live team/date info via `fetchGameCardsByPk`
-  (`schedule.js`), same pattern as the Top Games page — and, like every other
-  game surface, never prints the final score as bare text: `GameCard` (reused
-  as-is) stays silent on the score even for a Final, so the year's result is one
-  tap into the ordinary sealed box score, not an exception carved out for old
-  games. Kept OUT of the PWA precache (~650 KB) and fetched at runtime, like
-  `war-history.json`.
+  (`schedule.js`), same pattern as the Top Games page. `rosters[season]` is
+  `{ AL, NL }`, each precomputed into `{ starters, bullpen, substitutes }` by the
+  generator (one extra boxscore fetch per season resolves who actually started)
+  so the page renders the sections directly with no client-side grouping. This
+  is the one game surface that DOES show the final score plainly (a small
+  full-width result card, not `GameCard`) — a deliberate, narrowly-scoped
+  exception to the spoiler rule's "never print a score" invariant, since an
+  All-Star Game's result is decades-settled and carries no individual game's
+  stakes; see ADR-0019. The same card also shows `mvps[season]` (absent before
+  1962) and `venues[season]` (a name always, plus a best-effort host-team id
+  the generator resolves against the CURRENT 30 teams' home parks — an older
+  or relocated venue falls back to name-only). Kept OUT of the PWA precache
+  (~650 KB) and fetched at runtime, like `war-history.json`.
 - `milbHistory.js` — historical MiLB affiliate/franchise data, from
   `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
   **not on a cron** — affiliate history is near-immutable, so it's a hand-run

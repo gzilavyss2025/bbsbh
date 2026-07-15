@@ -52,14 +52,34 @@ function LeaderBadges({ entry, showLevel, prospectSnapshot }) {
 //
 // `favoriteTeamId` (league/level leader pages only — see TeamLeaders) tints
 // the row in that club's own accent when the leader plays for it, so a fan's
-// team jumps out on a board otherwise full of strangers.
-function FeaturedLeader({ entry, category, showLevel, prospectSnapshot, favoriteTeamId, showTeamAbbr, injuredIds }) {
+// team jumps out on a board otherwise full of strangers. `filtering` (set
+// only once the League Leaders page's TeamFilterStrip has an explicit pick,
+// not the default "MLB" entry) dulls every OTHER leader instead — the pick
+// supersedes the favorite-team tint while active.
+function FeaturedLeader({
+  entry,
+  category,
+  showLevel,
+  prospectSnapshot,
+  favoriteTeamId,
+  filtering,
+  showTeamAbbr,
+  injuredIds,
+}) {
   const teamId = entry.displayTeamId ?? entry.teamId
   const teamAbbr = entry.displayTeamAbbr ?? entry.teamAbbr
   const isFavorite = favoriteTeamId != null && teamId === favoriteTeamId
+  const isDimmed = filtering && !isFavorite
   const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined
+  const classes = [
+    'tlead__featured',
+    isFavorite && 'tlead__featured--fav',
+    isDimmed && 'tlead__featured--dim',
+  ]
+    .filter(Boolean)
+    .join(' ')
   return (
-    <div className={`tlead__featured${isFavorite ? ' tlead__featured--fav' : ''}`} style={favStyle}>
+    <div className={classes} style={favStyle}>
       <Headshot personId={entry.id} name={entry.name} teamId={teamId} className="tlead__shot" />
       {teamId && (
         <div className="tlead__teamtag">
@@ -106,7 +126,16 @@ function displayRanks(entries) {
   })
 }
 
-function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favoriteTeamId, showTeamAbbr, injuredIds }) {
+function LeaderCategory({
+  category,
+  entries,
+  showLevel,
+  prospectSnapshot,
+  favoriteTeamId,
+  filtering,
+  showTeamAbbr,
+  injuredIds,
+}) {
   const [leader, ...rest] = entries
   const ranks = displayRanks(entries)
   return (
@@ -118,6 +147,7 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
         showLevel={showLevel}
         prospectSnapshot={prospectSnapshot}
         favoriteTeamId={favoriteTeamId}
+        filtering={filtering}
         showTeamAbbr={showTeamAbbr}
         injuredIds={injuredIds}
       />
@@ -127,13 +157,17 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
             const teamId = e.displayTeamId ?? e.teamId
             const teamAbbr = e.displayTeamAbbr ?? e.teamAbbr
             const isFavorite = favoriteTeamId != null && teamId === favoriteTeamId
+            const isDimmed = filtering && !isFavorite
             const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined
+            const classes = [
+              'tlead__row',
+              isFavorite && 'tlead__row--fav',
+              isDimmed && 'tlead__row--dim',
+            ]
+              .filter(Boolean)
+              .join(' ')
             return (
-              <li
-                key={e.id}
-                className={`tlead__row${isFavorite ? ' tlead__row--fav' : ''}`}
-                style={favStyle}
-              >
+              <li key={e.id} className={classes} style={favStyle}>
                 <span className="tlead__rank">{ranks[i + 1].text}</span>
                 <PlayerLink id={e.id} className="tlead__rowname">
                   {e.name}
@@ -168,8 +202,12 @@ function LeaderCategory({ category, entries, showLevel, prospectSnapshot, favori
 // whose leader plays for that club — LeadersPage passes it for the league/
 // level scopes only (not 'org', not the single-team pages), since a team's
 // own leaders page has no "stranger" rows to pick the favorite out from.
-// `showTeamAbbr`: shows the club abbreviation under the featured leader's
-// logo, and inline next to each chaser's name — on by default for the
+// `filtering`: true once LeadersPage's TeamFilterStrip has an explicit team
+// picked (not the default "MLB" entry) — dulls every OTHER leader instead of
+// removing it, so the picked club's rows stand out without losing the
+// board's category structure. `showTeamAbbr`: shows the club abbreviation
+// under the featured leader's logo, and inline next to each chaser's
+// name — on by default for the
 // multi-team boards (league/level/org) where it's the only way to tell whose
 // row is whose; the single-team pages (TeamPage, TeamLeadersPage) pass false
 // since every row already shares the one team the page is about. `injuredIds`:
@@ -188,6 +226,7 @@ export function TeamLeaders({
   qualifier = 'roster',
   precomputed = null,
   favoriteTeamId = null,
+  filtering = false,
   showTeamAbbr = true,
   injuredIds = null,
 }) {
@@ -229,6 +268,7 @@ export function TeamLeaders({
             showLevel={showLevel}
             prospectSnapshot={prospectSnapshot}
             favoriteTeamId={favoriteTeamId}
+            filtering={filtering}
             showTeamAbbr={showTeamAbbr}
             injuredIds={injuredIds}
           />
