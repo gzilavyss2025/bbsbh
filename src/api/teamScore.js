@@ -1,3 +1,5 @@
+import { seasonGradeFor } from './seasonGradeFormula.js'
+
 // Daily MLB team-quality snapshots. Like seasonScoreFor, this reader selects
 // only the latest snapshot at or before a Team Page's spoiler-safe cutoff.
 let cached = null
@@ -34,6 +36,23 @@ export function leagueScoresFor(data, season, cutoff, statKey) {
   for (const [teamId, snapshots] of Object.entries(byTeamId)) {
     const score = latestAt(snapshots, cutoff)?.[statKey]?.score
     if (score != null) rows.push({ teamId: Number(teamId), score })
+  }
+  return rows
+}
+
+// Every team's Season Grade at one shared spoiler-safe cutoff. Quality and
+// Surprise live in separate generated files, so rows only enter the comparison
+// pool when both same-date-safe readers can provide a value.
+export function leagueSeasonGradesFor(teamData, surpriseData, season, cutoff) {
+  const byTeamId = teamData?.seasons?.[season]?.byTeamId
+  if (!byTeamId) return []
+  const rows = []
+  for (const [teamId, snapshots] of Object.entries(byTeamId)) {
+    const quality = latestAt(snapshots, cutoff)?.season
+    const surpriseSnapshots = surpriseData?.seasons?.[season]?.byTeamId?.[teamId]
+    const surprise = surpriseSnapshots ? latestAt(surpriseSnapshots, cutoff) : null
+    const grade = seasonGradeFor(quality, surprise)
+    if (grade) rows.push({ teamId: Number(teamId), score: grade.score })
   }
   return rows
 }

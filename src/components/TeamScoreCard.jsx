@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ordinal } from '../api/person.js'
 import { leagueRank } from '../api/teamScore.js'
 import { qualityScoreFromGames, CURRENT_FORM_GAMES } from '../api/teamScoreFormula.js'
+import { seasonGradeFor } from '../api/seasonGradeFormula.js'
 import { teamClubName } from '../lib/teams.js'
 
 const DASH = '—'
@@ -16,13 +17,6 @@ const FORM_CEILING = qualityScoreFromGames({
 const FORM_FLOOR = qualityScoreFromGames({
   wins: 0, games: CURRENT_FORM_GAMES, runsScored: 5, runsAllowed: 80,
 })
-// The 1998 Yankees (114-48, +309 run differential) — a real, widely-known
-// dominant season, run through the formula as the Season grade's contrasting
-// ceiling (it isn't boxed in the way the fixed 10-game Current Form window is).
-const DOMINANT_SEASON = qualityScoreFromGames({
-  wins: 114, games: 162, runsScored: 965, runsAllowed: 656,
-})
-
 function scoreValue(summary) {
   return summary?.score == null ? DASH : summary.score.toFixed(1)
 }
@@ -36,67 +30,138 @@ function meta(summary) {
   return `${record(summary)} · ${signed(summary.runDifferential)} run differential`
 }
 
-export function TeamScoreCard({ snapshot, surprise, teamId, leagueSeasonScores = [], leagueFormScores = [] }) {
+function gradeLabel(score) {
+  if (score >= 9) return 'Exceptional'
+  if (score >= 8) return 'Elite'
+  if (score >= 7) return 'Strong'
+  if (score >= 6) return 'Above average'
+  if (score >= 4.5) return 'Average'
+  if (score >= 3) return 'Below average'
+  if (score >= 2) return 'Poor'
+  return 'Dismal'
+}
+
+export function TeamScoreCard({
+  snapshot,
+  surprise,
+  teamId,
+  leagueGradeScores = [],
+  leagueSeasonScores = [],
+  leagueSurpriseScores = [],
+  leagueFormScores = [],
+}) {
   const [open, setOpen] = useState(null)
   const [showHow, setShowHow] = useState(false)
-  const detail = open === 'season' ? snapshot.season : open === 'form' ? snapshot.currentForm : null
   const toggle = (next) => setOpen((current) => (current === next ? null : next))
-  const seasonRank = leagueRank(leagueSeasonScores, teamId)
+  const grade = seasonGradeFor(snapshot.season, surprise)
+  const gradeSummary = grade ? { ...snapshot.season, score: grade.score } : null
+  const gradeRank = leagueRank(leagueGradeScores, teamId)
+  const qualityRank = leagueRank(leagueSeasonScores, teamId)
+  const surpriseRank = leagueRank(leagueSurpriseScores, teamId)
   const formRank = leagueRank(leagueFormScores, teamId)
 
   return (
-    <section className={`team-score${open ? ' is-open' : ''}`} aria-label={`Team scores through ${snapshot.asOf}`}>
+    <section className={`team-score${open ? ' is-open' : ''}`} aria-label={`Season Grade through ${snapshot.asOf}`}>
       <div className="team-score__head">
-        <span>Team Scores</span>
+        <span>Season Grade</span>
         <em>through {snapshot.asOf}</em>
       </div>
 
       <ScoreRow
-        label="Season"
-        summary={snapshot.season}
-        rank={seasonRank}
-        league={leagueSeasonScores}
+        label={grade ? gradeLabel(grade.score) : 'Season Grade'}
+        summary={gradeSummary}
+        rank={gradeRank}
+        league={leagueGradeScores}
         teamId={teamId}
-        isOpen={open === 'season'}
-        onToggle={() => toggle('season')}
+        metaText={grade ? `Quality ${scoreValue(snapshot.season)} · Vs. expectation ${scoreValue(surprise)}` : ''}
+        isOpen={open === 'grade'}
+        onToggle={() => toggle('grade')}
+        hero
       />
+
+      <div className="team-score__drivers" aria-label="Season Grade drivers">
+        <ScoreRow
+          label="Quality"
+          summary={snapshot.season}
+          rank={qualityRank}
+          league={leagueSeasonScores}
+          teamId={teamId}
+          metaText={meta(snapshot.season)}
+          isOpen={open === 'quality'}
+          onToggle={() => toggle('quality')}
+        />
+        <ScoreRow
+          label="Vs. expectation"
+          summary={surprise}
+          rank={surpriseRank}
+          league={leagueSurpriseScores}
+          teamId={teamId}
+          metaText={surprise ? `${signed(surprise.residualWins)} wins vs. expected` : ''}
+          isOpen={open === 'surprise'}
+          onToggle={() => toggle('surprise')}
+        />
+      </div>
+
       <ScoreRow
-        label={`Last ${snapshot.currentForm?.games ?? CURRENT_FORM_GAMES}`}
+        label={`Current form · Last ${snapshot.currentForm?.games ?? CURRENT_FORM_GAMES}`}
         summary={snapshot.currentForm}
         rank={formRank}
         league={leagueFormScores}
         teamId={teamId}
+        metaText={meta(snapshot.currentForm)}
         isOpen={open === 'form'}
         onToggle={() => toggle('form')}
+        compact
       />
 
-      {detail && (
-        <div id="team-score-detail" className="team-score__detail">
-          <dl>
-            <div><dt>Record</dt><dd>{record(detail)}</dd></div>
-            <div><dt>Run differential</dt><dd>{signed(detail.runDifferential)}</dd></div>
-            <div><dt>Expected wins from run differential</dt><dd>{detail.pythagWins.toFixed(1)}</dd></div>
-            {open === 'season' && surprise && (
-              <div><dt>Season Surprise</dt><dd>{signed(surprise.residualWins)} wins</dd></div>
-            )}
-          </dl>
-        </div>
-      )}
+      {open && <ScoreDetail kind={open} grade={grade} quality={snapshot.season} surprise={surprise} form={snapshot.currentForm} />}
 
       <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
         How this is calculated
       </button>
 
       {showHow && (
-        <TeamScoreExplainer snapshot={snapshot} onClose={() => setShowHow(false)} />
+        <TeamScoreExplainer snapshot={snapshot} surprise={surprise} grade={grade} onClose={() => setShowHow(false)} />
       )}
     </section>
   )
 }
 
-function ScoreRow({ label, summary, rank, league, teamId, isOpen, onToggle }) {
+function ScoreDetail({ kind, grade, quality, surprise, form }) {
+  const detail = kind === 'form' ? form : quality
   return (
-    <div className="team-score__row">
+    <div id="team-score-detail" className="team-score__detail">
+      <dl>
+        {kind === 'grade' && grade && (
+          <>
+            <div><dt>Quality foundation</dt><dd>{grade.quality.toFixed(1)}</dd></div>
+            <div><dt>Expectation adjustment</dt><dd>{signed(grade.adjustment)}</dd></div>
+            <div><dt>Season Grade</dt><dd>{grade.score.toFixed(1)}</dd></div>
+          </>
+        )}
+        {(kind === 'quality' || kind === 'form') && detail && (
+          <>
+            <div><dt>Record</dt><dd>{record(detail)}</dd></div>
+            <div><dt>Run differential</dt><dd>{signed(detail.runDifferential)}</dd></div>
+            <div><dt>Expected wins from run differential</dt><dd>{detail.pythagWins.toFixed(1)}</dd></div>
+          </>
+        )}
+        {kind === 'surprise' && surprise && (
+          <>
+            <div><dt>Preseason expectation{surprise.baselineKind === 'marcel' ? ' (model)' : ''}</dt><dd>{surprise.baselineWins.toFixed(1)} wins</dd></div>
+            <div><dt>Expected through this date</dt><dd>{surprise.expectedWinsToDate.toFixed(1)}</dd></div>
+            <div><dt>Actual record</dt><dd>{surprise.wins}–{surprise.losses}</dd></div>
+            <div><dt>Above/below expectation</dt><dd>{signed(surprise.residualWins)} wins</dd></div>
+          </>
+        )}
+      </dl>
+    </div>
+  )
+}
+
+function ScoreRow({ label, summary, rank, league, teamId, metaText, isOpen, onToggle, hero = false, compact = false }) {
+  return (
+    <div className={`team-score__row${hero ? ' team-score__row--hero' : ''}${compact ? ' team-score__row--compact' : ''}`}>
       <button
         type="button"
         className={`team-score__rowtop${isOpen ? ' is-active' : ''}`}
@@ -110,10 +175,10 @@ function ScoreRow({ label, summary, rank, league, teamId, isOpen, onToggle }) {
           <span className="team-score__score">{scoreValue(summary)}</span>
         </span>
       </button>
-      {summary?.score != null && league.length > 0 && (
+      {!compact && summary?.score != null && league.length > 0 && (
         <LeagueTrack league={league} ownScore={summary.score} teamId={teamId} />
       )}
-      <span className="team-score__meta">{meta(summary)}</span>
+      {metaText && <span className="team-score__meta">{metaText}</span>}
     </div>
   )
 }
@@ -209,7 +274,7 @@ function LeagueTrack({ league, ownScore, teamId }) {
 // formula dump, opened from the card's footer link. Same .scrim/.sheet dialog
 // contract as GameScoreModal (Escape + backdrop-tap close, focus moves to the
 // close button and back to the trigger on close).
-function TeamScoreExplainer({ snapshot, onClose }) {
+function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -226,101 +291,87 @@ function TeamScoreExplainer({ snapshot, onClose }) {
   }, [])
 
   const season = snapshot.season
-  const form = snapshot.currentForm
 
   return (
     <div className="scrim scrim--center" onClick={(e) => e.target.classList.contains('scrim') && onClose()}>
-      <div className="sheet tscoremodal" role="dialog" aria-modal="true" aria-label="How the Team Score is calculated">
+      <div className="sheet tscoremodal" role="dialog" aria-modal="true" aria-label="How the Season Grade is calculated">
         <div className="tscoremodal__head">
           <p className="tscoremodal__kicker">How We Score It</p>
           <button ref={closeRef} type="button" className="gsmodal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <h2 className="sheet__title tscoremodal__title">
-          Record tells you what happened. Run differential tells you what should have.
+          How good have they been — and how much have they exceeded the assignment?
         </h2>
 
         <div className="sheet__body tscoremodal__body">
           <p>
-            Every front office in baseball has argued some version of this at the trade
-            deadline: is a team its record, or is it its process? A club can win a lot of
-            close games on timely hits and a shaky bullpen holding on; another can lose a
-            string of one-run games while outscoring everybody by a wide margin. Ask which
-            team is actually better, and “check the standings” isn’t a full answer. That’s
-            the question this grade is trying to settle.
+            Season Grade is a verdict on the season a club is having, not a forecast of what
+            happens next. It starts with Quality — how strong the team has actually played —
+            then gives credit or blame for performing differently from its preseason
+            expectation. The two ingredients stay visible because they answer different
+            baseball questions.
           </p>
+
+          <p className="tscoremodal__subkicker">Quality is the foundation</p>
           <p>
-            So it splits the difference on purpose. Sixty percent of the number is just the
-            record — wins are wins, and pretending otherwise is its own kind of dishonesty.
-            The other forty percent comes from run differential, run through a formula
-            that’s been reliable since Bill James started tinkering with it decades ago:
-            score X runs, allow Y, and it estimates how many games a team like that “should”
-            win over a long season. Outscore people by a lot and lose anyway, and this grade
-            notices before the standings do.
+            Quality gives 60 percent of the weight to actual wins and 40 percent to the wins
+            suggested by run differential. That keeps the standings in charge while noticing
+            when a pile of close wins or losses makes the record look stronger or weaker than
+            the club&apos;s overall play.
           </p>
           {season && (
             <dl className="tscoremodal__figs">
               <div><dt>Record</dt><dd>{record(season)}</dd></div>
               <div><dt>Run differential</dt><dd>{signed(season.runDifferential)}</dd></div>
               <div><dt>“Should-have” wins from runs</dt><dd>{season.pythagWins.toFixed(1)}</dd></div>
-              <div><dt>Blended grade</dt><dd>{scoreValue(season)} / 10</dd></div>
+              <div><dt>Quality</dt><dd>{scoreValue(season)} / 10</dd></div>
             </dl>
           )}
+
+          <p className="tscoremodal__subkicker">Expectation measures the assignment</p>
           <p>
-            From there it’s just translation. Both numbers get folded together and measured
-            against .500 — a perfectly average club — so 5.0 is a coin flip, not a bad
-            score. Climb from there and the air gets thinner on purpose: an 8 is a real
-            contender, and a 9-plus is the kind of number a small handful of all-time teams
-            post over a full season. Nobody backs into one on a hot week.
+            Before Opening Day, every club gets a baseline from the consensus market win
+            total; when that is unavailable, a regressed three-year record supplies a
+            clearly labeled fallback. Each game then carries a schedule-adjusted expectation
+            based on the two teams and the venue. Actual wins above or below that running
+            total become the Vs. expectation score: 5.0 means the club is exactly on assignment.
           </p>
+          {surprise && (
+            <dl className="tscoremodal__figs">
+              <div><dt>Preseason expectation{surprise.baselineKind === 'marcel' ? ' (model)' : ''}</dt><dd>{surprise.baselineWins.toFixed(1)} wins</dd></div>
+              <div><dt>Expected through this date</dt><dd>{surprise.expectedWinsToDate.toFixed(1)}</dd></div>
+              <div><dt>Actual wins</dt><dd>{surprise.wins}</dd></div>
+              <div><dt>Vs. expectation</dt><dd>{scoreValue(surprise)} · {signed(surprise.residualWins)} wins</dd></div>
+            </dl>
+          )}
+
+          <p className="tscoremodal__subkicker">The adjustment respects baseball quality</p>
+          <p>
+            Surprise does not get averaged straight into Quality. Instead, it adjusts only
+            the room between Quality and the top or bottom of the scale. That means a major
+            overachievement can elevate an average-quality season, but it cannot casually
+            push that team past a genuinely dominant club. Underachievement works the same
+            way in the other direction.
+          </p>
+          {grade && (
+            <dl className="tscoremodal__figs">
+              <div><dt>Quality foundation</dt><dd>{grade.quality.toFixed(1)}</dd></div>
+              <div><dt>Expectation adjustment</dt><dd>{signed(grade.adjustment)}</dd></div>
+              <div><dt>Season Grade</dt><dd>{grade.score.toFixed(1)} / 10</dd></div>
+            </dl>
+          )}
+
           <p className="tscoremodal__pull">
-            “Give it ten games before you trust it” is the honest caveat here — small
-            samples lie, and this grade knows it.
-          </p>
-          <p>
-            A club doesn’t get graded at all until it’s played ten games, and even past
-            that, the model stays a little skeptical of a short track record. That’s not
-            the model hedging; that’s the model doing exactly what a good scout does before
-            he files a report.
+            A 5.0 is neutral: average quality, or exactly meeting expectation. The farther
+            a score moves from five, the stronger the evidence behind the verdict.
           </p>
 
-          <p className="tscoremodal__subkicker">And About That “Last {CURRENT_FORM_GAMES}” Number</p>
+          <p className="tscoremodal__subkicker">Current form stays a diagnostic</p>
           <p>
-            Here’s the part worth sitting with: Last {CURRENT_FORM_GAMES} runs through the
-            exact same math as Season — same 60/40 blend, same run-differential formula,
-            same .500 center point. Nothing about the recipe changes. What’s different is
-            that Season gets a whole season’s worth of games to work with, while Last{' '}
-            {CURRENT_FORM_GAMES} is locked to the smallest sample the model considers
-            trustworthy at all, and never gets to grow past it.
-          </p>
-          <p>
-            That has a real consequence, and it’s a useful one: the number is structurally
-            boxed in. Run the math on a team that wins all {CURRENT_FORM_GAMES} of its last
-            games, blowing teams out combined — the kind of stretch that would lead every
-            broadcast in the country — and the grade still only reaches{' '}
-            <strong>{FORM_CEILING.score.toFixed(1)}</strong>. Lose all {CURRENT_FORM_GAMES}{' '}
-            just as lopsidedly and it bottoms out at <strong>{FORM_FLOOR.score.toFixed(1)}</strong>.
-            It physically cannot go higher or lower than that, because {CURRENT_FORM_GAMES}{' '}
-            games isn’t enough evidence for the model to declare a team either historically
-            great or completely finished. Season, by contrast, can climb toward{' '}
-            {DOMINANT_SEASON.score.toFixed(1)} with a full year of sustained dominance — the
-            1998 Yankees’ number, run through this same formula.
-          </p>
-          {form && (
-            <dl className="tscoremodal__figs">
-              <div><dt>Best possible {CURRENT_FORM_GAMES}-game stretch</dt><dd>{FORM_CEILING.score.toFixed(1)}</dd></div>
-              <div><dt>Worst possible {CURRENT_FORM_GAMES}-game stretch</dt><dd>{FORM_FLOOR.score.toFixed(1)}</dd></div>
-              <div><dt>A historically dominant full season*</dt><dd>{DOMINANT_SEASON.score.toFixed(1)}</dd></div>
-              <div><dt>Your last {CURRENT_FORM_GAMES}</dt><dd>{record(form)} · {scoreValue(form)}</dd></div>
-            </dl>
-          )}
-          <p>
-            So read “Last {CURRENT_FORM_GAMES}” for what it’s built to tell you — is the
-            team hot or cold right now, relative to itself — and leave the verdict on who
-            the team actually is to Season, which has earned the right to swing wider
-            because it’s seen more games to back it up.
-          </p>
-          <p className="tscoremodal__foot">
-            * The 1998 Yankees went 114–48 with a +309 run differential.
+            Last {CURRENT_FORM_GAMES} uses the same Quality recipe over only the most recent
+            games. Even a perfect stretch is intentionally damped to {FORM_CEILING.score.toFixed(1)},
+            and a winless one bottoms out at {FORM_FLOOR.score.toFixed(1)}. It can explain
+            how the club arrived here, but it does not secretly change the Season Grade.
           </p>
         </div>
       </div>

@@ -9948,9 +9948,9 @@ body {
   flex: none;
 }
 
-/* Team-quality summary — two equal-weight entry points. A small expandable
-   ledger keeps the header focused on the two numbers rather than a paragraph
-   of methodology. */
+/* Season Grade leads with one verdict, then keeps its two inputs visible and
+   independently inspectable. Current Form is deliberately subordinate: it is
+   context for the season story, not a hidden ingredient in the verdict. */
 .team-score {
   display: grid;
   gap: 8px;
@@ -9987,6 +9987,31 @@ body {
 .team-score__row:last-of-type {
   padding-bottom: 0;
   border-bottom: 0;
+}
+.team-score__row--hero {
+  padding: 3px 0 10px;
+}
+.team-score__row--hero .team-score__label {
+  font-size: 15px;
+}
+.team-score__row--hero .team-score__score {
+  font-size: 34px;
+  font-weight: var(--w-semibold);
+}
+.team-score__drivers {
+  display: grid;
+  gap: 8px;
+}
+.team-score__row--compact {
+  padding: 3px 0 0;
+  border-bottom: 0;
+}
+.team-score__row--compact .team-score__label,
+.team-score__row--compact .team-score__meta {
+  color: var(--text-caption);
+}
+.team-score__row--compact .team-score__score {
+  font-size: 18px;
 }
 .team-score__rowtop {
   display: flex;
