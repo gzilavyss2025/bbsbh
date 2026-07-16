@@ -3959,7 +3959,10 @@ body {
 }
 
 /* Plate umpire consistency + favor through the half — a compact sibling to
-   .abs, same title treatment, no pips (just the two stat chips). */
+   .abs (same title treatment), rendering its figures as StatcastCard tiles
+   (.statcast below) so it reads as the same "notable figure this half"
+   language as the superlatives row directly under it, rather than its own
+   one-off chip style. */
 .umpfavor {
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
@@ -3974,21 +3977,12 @@ body {
   color: var(--text-caption);
   margin-bottom: 8px;
 }
-.umpfavor__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.umpfavor__stat {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-compact);
-  color: var(--text-heading);
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  padding: 4px 9px;
+/* Nested reuse of .statcast's tile grid — reset its own top rule/spacing
+   since .umpfavor already supplies one. */
+.umpfavor .statcast {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
@@ -13549,14 +13543,19 @@ body {
   font-weight: var(--w-semibold);
 }
 
-/* Plate-accuracy summary card: the headline figure/rank tiles + zone map. */
+/* Plate-accuracy summary card: the headline figure/rank tiles + zone map.
+   Up to 4 tiles now (accuracy, rank, consistency, favor) — flex-wrap + a
+   min-width basis lets 2–3 sit in one full-width row like before, while 4
+   wraps to a 2×2 grid on a phone-width card rather than squeezing every
+   tile down to an unreadable sliver. */
 .umpage__accrow {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
 }
 .umpage__acctile {
-  flex: 1;
+  flex: 1 1 120px;
   display: flex;
   flex-direction: column;
   align-items: center;

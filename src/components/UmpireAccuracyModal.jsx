@@ -23,7 +23,7 @@ const pct1 = (x) => (x == null ? '' : `${(x * 100).toFixed(1)}%`)
 function consistencyFavorLabel(season) {
   const parts = []
   if (season?.consistency != null) parts.push(`${pct1(season.consistency)} consistent`)
-  if (season?.favorPerGame != null) parts.push(`${season.favorPerGame.toFixed(2)} runs of favor/game`)
+  if (season?.favorPerGame != null) parts.push(`${season.favorPerGame.toFixed(1)} runs/game impact`)
   return parts.length ? parts.join(' · ') : null
 }
 

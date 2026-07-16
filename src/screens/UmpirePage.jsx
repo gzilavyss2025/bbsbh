@@ -122,16 +122,17 @@ function PlateAccuracyCard({ accuracy, rank, zoneCells, title = 'Plate accuracy'
             <span className="umpage__acctilelabel">Consistent</span>
           </div>
         )}
+        {s.favorPerGame != null && (
+          <div className="umpage__acctile">
+            <span className="umpage__accpct">{s.favorPerGame.toFixed(1)}</span>
+            <span className="umpage__acctilelabel">Runs/game impact</span>
+          </div>
+        )}
       </div>
       <p className="umpage__acclabel">
         {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches
         {s.games > 0 && ` · ${s.games} ${s.games === 1 ? 'game' : 'games'} behind the plate`}
       </p>
-      {s.favorPerGame != null && (
-        <p className="umpage__acclabel">
-          {s.favorPerGame.toFixed(2)} runs of missed-call impact per game
-        </p>
-      )}
       {zoneCells && (
         <div className="umpage__acczone">
           <UmpireZoneMap cells={zoneCells} />

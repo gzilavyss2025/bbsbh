@@ -206,29 +206,35 @@ function AbsRow({ teamId, abbr, outcomes }) {
 // The plate umpire's consistency (how well his calls agree with his OWN
 // established zone this game — see lib/euz.js) and favor (the net
 // run-expectancy swing his misses have handed one side so far — see
-// lib/runExpectancy.js) through the half being viewed. Renders nothing until
-// at least one called pitch has been revealed, and each stat degrades
-// independently — a thin-sample game shows favor with no consistency %, an
-// unbuilt run-expectancy table shows consistency with no favor line, and both
+// lib/runExpectancy.js) through the half being viewed. Same title treatment
+// as the ABS row above it, but the figures themselves render as StatcastCard
+// tiles — the same "measure / value+unit / who" language as the Statcast
+// superlatives row just below, since both are "a notable figure from this
+// half" in the same register. Renders nothing until at least one called
+// pitch has been revealed, and each stat degrades independently — a
+// thin-sample game shows a favor tile with no consistency tile, an unbuilt
+// run-expectancy table shows consistency with no favor tile, and both
 // missing renders nothing at all (never an empty shell).
 function UmpireFavorRow({ data, awayAbbr, homeAbbr }) {
   if (!data) return null
   const { consistency, favorAway, favorHome } = data
   const pct = consistency ? Math.round((consistency.consistent / consistency.called) * 100) : null
   const net = favorAway != null && favorHome != null ? favorAway - favorHome : null
-  const favorLabel =
-    net == null
-      ? null
-      : Math.abs(net) < 0.05
-        ? 'No net favor either way'
-        : `${net > 0 ? '+' : '−'}${Math.abs(net).toFixed(1)} runs to ${net > 0 ? awayAbbr : homeAbbr}`
-  if (pct == null && favorLabel == null) return null
+  const hasFavor = net != null
+  if (pct == null && !hasFavor) return null
   return (
     <div className="umpfavor">
       <span className="umpfavor__title">Plate umpire</span>
-      <div className="umpfavor__row">
-        {pct != null && <span className="umpfavor__stat">{pct}% consistent</span>}
-        {favorLabel && <span className="umpfavor__stat">{favorLabel}</span>}
+      <div className="statcast">
+        {pct != null && <StatcastCard label="Consistent" value={pct} unit="%" />}
+        {hasFavor && (
+          <StatcastCard
+            label="Favor"
+            value={Math.abs(net) < 0.05 ? '0.0' : `${net > 0 ? '+' : '−'}${Math.abs(net).toFixed(1)}`}
+            unit="RUNS"
+            who={Math.abs(net) < 0.05 ? 'Even so far' : `to ${net > 0 ? awayAbbr : homeAbbr}`}
+          />
+        )}
       </div>
     </div>
   )
