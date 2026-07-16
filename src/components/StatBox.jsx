@@ -230,7 +230,13 @@ function UmpireFavorRow({ data, awayAbbr, homeAbbr }) {
         {hasFavor && (
           <StatcastCard
             label="Favor"
-            value={Math.abs(net) < 0.05 ? '0.0' : `${net > 0 ? '+' : '−'}${Math.abs(net).toFixed(1)}`}
+            // The "who" line already carries the direction (to AWAY/HOME), so
+            // the value is always the plain magnitude of THAT side's edge —
+            // pairing a signed number with a "to X" label would double up on
+            // direction and, worse, contradict it for the losing side (a
+            // negative number reading "to PIT" implies PIT is down, when a
+            // negative `net` actually means PIT is the one ahead).
+            value={Math.abs(net) < 0.05 ? '0.0' : `+${Math.abs(net).toFixed(1)}`}
             unit="RUNS"
             who={Math.abs(net) < 0.05 ? 'Even so far' : `to ${net > 0 ? awayAbbr : homeAbbr}`}
           />
