@@ -220,15 +220,17 @@ function AbsRow({ teamId, abbr, outcomes }) {
 // established zone this game — see lib/euz.js) and favor (the net
 // run-expectancy swing his misses have handed one side so far — see
 // lib/runExpectancy.js) through the half being viewed. Same title treatment
-// as the ABS row above it. Consistency renders as a StatcastCard tile (the
-// same "measure / value+unit" language as the Statcast superlatives row just
-// below); favor gets its own FavorMeter — a two-club lean bar, since "which
-// side" is the whole point of that figure and a bare tile buried it in a
-// "to X" caption easy to misread (see the sign-fix commit). Renders nothing
-// until at least one called pitch has been revealed, and each stat degrades
-// independently — a thin-sample game shows favor with no consistency tile,
-// an unbuilt run-expectancy table shows consistency with no favor meter, and
-// both missing renders nothing at all (never an empty shell).
+// as the ABS row above it. Both figures sit in the SAME .statcast grid as
+// siblings — consistency as a plain StatcastCard tile, favor as its own
+// FavorMeter card (a two-club lean bar, since "which side" is the whole
+// point of that figure) — so the auto-fit grid splits them 50/50 when both
+// are present, full-width when only one is, matching the rest of this row's
+// sizing behavior rather than stacking favor as its own full-width block.
+// Renders nothing until at least one called pitch has been revealed, and
+// each stat degrades independently — a thin-sample game shows favor with no
+// consistency tile, an unbuilt run-expectancy table shows consistency with
+// no favor meter, and both missing renders nothing at all (never an empty
+// shell).
 function UmpireFavorRow({ data, awayId, homeId, awayName, homeName }) {
   if (!data) return null
   const { consistency, favorAway, favorHome } = data
@@ -238,40 +240,61 @@ function UmpireFavorRow({ data, awayId, homeId, awayName, homeName }) {
   return (
     <div className="umpfavor">
       <span className="umpfavor__title">Plate umpire</span>
-      {pct != null && (
-        <div className="statcast umpfavor__consistency">
-          <StatcastCard label="Consistent" value={pct} unit="%" />
-        </div>
-      )}
-      <FavorMeter net={net} awayId={awayId} homeId={homeId} awayName={awayName} homeName={homeName} />
+      <div className="statcast">
+        {pct != null && <StatcastCard label="Consistent" value={pct} unit="%" />}
+        <FavorMeter net={net} awayId={awayId} homeId={homeId} awayName={awayName} homeName={homeName} />
+      </div>
     </div>
   )
 }
 
 // A diverging lean bar between the two clubs' logos — the fill grows from
-// center toward whichever side missed calls have added value to, sized by
-// magnitude (capped at FAVOR_SCALE_RUNS, since a whole game's NET swing is
-// usually well under a run; individual misses partially cancel out, unlike
-// the season's favorMagnitude, which sums every miss's |favor| rather than
-// netting them). Reuses WinProbChart's away/soft-clay · home/soft-navy
-// palette — the same "which side" visual language already on this page.
-// `net` is favorAway - favorHome (see api/umpireFavor.js): positive favors
-// away, negative favors home. Renders nothing without a built run-expectancy
+// center toward whichever side missed calls have added value to, plus a
+// tier caption ("more than a typical game", "among the biggest swings of
+// the season") so the raw runs figure has real context, not just a bare
+// number. Reuses WinProbChart's away/soft-clay · home/soft-navy palette —
+// the same "which side" visual language already on this page. `net` is
+// favorAway - favorHome (see api/umpireFavor.js): positive favors away,
+// negative favors home. Renders nothing without a built run-expectancy
 // table (net null).
-const FAVOR_SCALE_RUNS = 1
+//
+// SCALE + TIER BENCHMARKS are empirical, not arbitrary — pulled from the
+// real per-game NET favor across the 2,822-game backfill on file as of this
+// writing (2026-03-25 through 2026-07-16, MLB + AAA): median |net| ≈ 0.36
+// runs, 90th percentile ≈ 1.0, largest on file ≈ 3.9. The track's full
+// half-width is scaled to roughly the 95th percentile (≈1.3) so the fill
+// reads as "how far toward a genuinely lopsided night," not a bar pinned to
+// an arbitrary 1.0 cap. Revisit if a later re-sweep shifts these meaningfully
+// (see .scratch/umpire-accuracy/consistency-favor-scope.md).
+const FAVOR_MEDIAN_RUNS = 0.36
+const FAVOR_P90_RUNS = 1.0
+const FAVOR_SCALE_RUNS = 1.3
 const FAVOR_EVEN_FLOOR = 0.05
+
+function favorTier(magnitude) {
+  if (magnitude < FAVOR_MEDIAN_RUNS) return "Within a typical game's variance"
+  if (magnitude < FAVOR_P90_RUNS) return 'More than a typical game'
+  return 'Among the biggest swings of the season'
+}
 
 function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   if (net == null) return null
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
   const fillPct = Math.min(Math.abs(net) / FAVOR_SCALE_RUNS, 1) * 50
+  const medianTickPct = (FAVOR_MEDIAN_RUNS / FAVOR_SCALE_RUNS) * 50
   return (
     <div className="favormeter">
       <div className="favormeter__track-row">
-        <TeamLogo teamId={awayId} name={awayName} size={32} />
+        <TeamLogo teamId={awayId} name={awayName} size={22} />
         <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayName, homeName)}>
           <span className="favormeter__mid" aria-hidden="true" />
+          {/* Median-game reference ticks, one on each side of center — a
+              typical night's swing lands about here regardless of which
+              team it favors, giving the fill something to be measured
+              against besides the track's bare edges. */}
+          <span className="favormeter__reftick" style={{ left: `${50 - medianTickPct}%` }} aria-hidden="true" />
+          <span className="favormeter__reftick" style={{ left: `${50 + medianTickPct}%` }} aria-hidden="true" />
           {!even && (
             <span
               className={`favormeter__fill favormeter__fill--${towardAway ? 'away' : 'home'}`}
@@ -280,7 +303,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
             />
           )}
         </div>
-        <TeamLogo teamId={homeId} name={homeName} size={32} />
+        <TeamLogo teamId={homeId} name={homeName} size={22} />
       </div>
       <div className="favormeter__caption" aria-hidden="true">
         {even ? (
@@ -292,6 +315,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
               +{Math.abs(net).toFixed(1)} <span className="favormeter__unit">runs</span>
             </strong>
             <span className="favormeter__label">for {towardAway ? awayName : homeName}</span>
+            <span className="favormeter__tier">{favorTier(Math.abs(net))}</span>
           </>
         )}
       </div>
@@ -301,7 +325,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
 
 function favorMeterLabel(net, awayName, homeName) {
   if (Math.abs(net) < FAVOR_EVEN_FLOOR) return 'Missed calls have been even so far'
-  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayName : homeName}`
+  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayName : homeName} — ${favorTier(Math.abs(net))}`
 }
 
 function Stat({ k, v, unit, tone, big, small }) {

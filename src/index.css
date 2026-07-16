@@ -3959,10 +3959,10 @@ body {
 }
 
 /* Plate umpire consistency + favor through the half — a compact sibling to
-   .abs (same title treatment). Consistency renders as a StatcastCard tile
-   (.statcast below, "notable figure this half" language shared with the
-   superlatives row under it); favor is its own lean-bar meter — see
-   .favormeter below. */
+   .abs (same title treatment). Both figures are siblings in ONE .statcast
+   grid (consistency a plain tile, favor its own card — see .favormeter
+   below), so the shared auto-fit grid splits them 50/50 when both exist,
+   same as the Statcast superlatives row's own tiles. */
 .umpfavor {
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
@@ -3984,24 +3984,36 @@ body {
   padding-top: 0;
   border-top: none;
 }
-.umpfavor__consistency {
-  margin-bottom: 10px;
-}
 
 /* The favor lean-bar: two club logos flanking a track whose fill grows from
    center toward whichever side missed calls have added value to, plus a
-   plain-English caption underneath. Away/home fill colors reuse
-   WinProbChart's own soft-clay/soft-navy pair — the same "which side" visual
-   language already on this page (see --winprob-away/--winprob-home). */
+   plain-English caption underneath. Same card treatment as .statcast__card
+   (it's a grid sibling of one) — background/border/radius/shadow — so the
+   two read as one consistent row rather than a tile next to a bare block.
+   Away/home fill colors reuse WinProbChart's own soft-clay/soft-navy pair —
+   the same "which side" visual language already on this page (see
+   --winprob-away/--winprob-home). */
+.favormeter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
 .favormeter__track-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  width: 100%;
 }
 .favormeter__track {
   position: relative;
   flex: 1;
-  height: 12px;
+  height: 10px;
   border-radius: 999px;
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -4014,6 +4026,17 @@ body {
   left: 50%;
   width: var(--bw-hair);
   background: var(--border-rule);
+}
+/* The median-game reference ticks (FAVOR_MEDIAN_RUNS) — shorter and fainter
+   than the center rule so they read as "here's roughly typical" without
+   competing with it. */
+.favormeter__reftick {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: var(--bw-hair);
+  background: var(--graphite-soft);
+  opacity: 0.6;
 }
 .favormeter__fill {
   position: absolute;
@@ -4033,7 +4056,6 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  margin-top: 10px;
   text-align: center;
 }
 .favormeter__label {
@@ -4047,7 +4069,9 @@ body {
 .favormeter__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-h2);
+  /* Same size StatcastCard uses for its own value (.statcast__value) — this
+     card is its grid sibling, so the headline figures should match. */
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
   color: var(--text-heading);
@@ -4059,6 +4083,17 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   opacity: 0.7;
+}
+/* The tier phrase (favorTier) — smaller and softer than the main caption
+   lines above it, since it's supporting context ("how notable is this"),
+   not the headline fact. */
+.favormeter__tier {
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-style: italic;
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
 }
 
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
