@@ -116,6 +116,18 @@ function PlateAccuracyCard({ accuracy, rank, zoneCells, title = 'Plate accuracy'
             <span className="umpage__acctilelabel">of {rank.total} plate umpires</span>
           </div>
         )}
+        {s.consistency != null && (
+          <div className="umpage__acctile">
+            <span className="umpage__accpct">{(s.consistency * 100).toFixed(1)}%</span>
+            <span className="umpage__acctilelabel">Consistent</span>
+          </div>
+        )}
+        {s.favorPerGame != null && (
+          <div className="umpage__acctile">
+            <span className="umpage__accpct">{s.favorPerGame.toFixed(1)}</span>
+            <span className="umpage__acctilelabel">Runs/game impact</span>
+          </div>
+        )}
       </div>
       <p className="umpage__acclabel">
         {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches

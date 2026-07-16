@@ -48,13 +48,48 @@
 // accuracy is immutable, re-fetching the existing level's feeds is pure waste,
 // so `--since=… --sports=11` backfills AAA alone and leaves the MLB rows (which
 // default to level MLB) untouched.
+//
+// CONSISTENCY + FAVOR (see .scratch/umpire-accuracy/consistency-favor-scope.md).
+// Two more per-game figures, computed alongside accuracy from the same feed
+// walk, both degrading to null on any missing input rather than skewing a
+// game's other numbers:
+//   - `consistent`/`consistentCalled` — how many of the game's called pitches
+//     agree with the umpire's OWN fitted zone that game (src/lib/euz.js's
+//     kernel-density Estimated Umpire Zone), not the rulebook zone. Null
+//     below euz.js's MIN_CONSISTENCY_SAMPLE (too few called pitches to fit a
+//     zone at all).
+//   - `favorAway`/`favorHome` (signed runs, this game only) and
+//     `favorMagnitude` (sum of |favor| — the season aggregate's version,
+//     since "away/home" isn't a stable identity across games) — the
+//     run-expectancy swing (src/lib/runExpectancy.js's pitchFavor, reading
+//     the historical RE288 table gen-run-expectancy.mjs builds) each missed
+//     call handed the batting team. Needs the pre-pitch (base, outs, count)
+//     state, which the existing per-play loop below didn't track — this file
+//     now also walks runner movement across plays (same walk verified in
+//     gen-run-expectancy.mjs) to reconstruct it. Null/0 when
+//     public/data/run-expectancy.json hasn't been built yet (hand-run, not
+//     nightly) — favor is a bonus figure on top of accuracy, never blocking.
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { estimateGameConsistency } from '../src/lib/euz.js'
+import { pitchFavor } from '../src/lib/runExpectancy.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'umpire-accuracy.json')
+const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 const BASE = 'https://statsapi.mlb.com'
+
+// Loaded once at startup; null (favor degrades to 0/null everywhere) until
+// scripts/gen-run-expectancy.mjs has been hand-run at least once.
+let reTable = null
+try {
+  reTable = JSON.parse(await readFile(reTablePath, 'utf8'))
+} catch {
+  console.log('run-expectancy.json not found — favor will be 0/null this run')
+}
+
+const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
 
 // Zone geometry, in feet. HALF_PLATE = half of the 17" plate; BALL_R = a
 // baseball's radius (~2.9" diameter). A pitch is a strike if it's within the
@@ -152,11 +187,37 @@ function computeGameAccuracy(feed) {
   const cellCalled = Array(9).fill(0)
   const cellStrikeCall = Array(9).fill(0)
   const cellMiss = Array(9).fill(0)
+  const consistencyPitches = [] // { pX, pZ, strikeCall } — every called judgment, for euz.js
+  let favorAway = 0
+  let favorHome = 0
+  let favorMagnitude = 0
+
+  // Base/outs walk for favor's pre-pitch state (§ header comment above) — same
+  // walk verified in gen-run-expectancy.mjs against a real 5–14 game (runs-per-
+  // half matched linescore exactly). Reset at each new half-inning.
+  let bases = [null, null, null]
+  let outs = 0
+  let curHalfKey = null
 
   for (const p of plays) {
+    const halfKey = `${p.about?.inning}-${p.about?.halfInning}`
+    if (halfKey !== curHalfKey) {
+      bases = [null, null, null]
+      outs = 0
+      curHalfKey = halfKey
+    }
+    const preBaseMask = (bases[0] ? 1 : 0) | (bases[1] ? 2 : 0) | (bases[2] ? 4 : 0)
+    const preOuts = Math.min(outs, 2) // a 3rd-out state is never a pre-pitch state
+    // 'top' bats away, 'bottom' bats home — same convention as the rest of the app.
+    const battingAway = p.about?.halfInning === 'top'
+
     const batSide = p.matchup?.batSide?.code ?? 'R'
+    let prevCount = { balls: 0, strikes: 0 } // resets per play — see the header's documented edge case
     for (const ev of p.playEvents ?? []) {
       if (!ev.isPitch) continue
+      const preCount = prevCount
+      prevCount = { balls: ev.count?.balls ?? preCount.balls, strikes: ev.count?.strikes ?? preCount.strikes }
+
       const code = ev.details?.code
       const strikeCall = code === 'C'
       const ballCall = code === 'B' || code === '*B'
@@ -175,6 +236,7 @@ function computeGameAccuracy(feed) {
       called++
       cellCalled[cell]++
       if (strikeCall) cellStrikeCall[cell]++
+      consistencyPitches.push({ pX: c.pX, pZ: c.pZ, strikeCall })
       if (actualStrike === strikeCall) {
         correct++
         continue
@@ -183,11 +245,49 @@ function computeGameAccuracy(feed) {
       else squeezed++
       region[missRegion(c.pX, c.pZ, top, bot, batSide)]++
       cellMiss[cell]++
+
+      // A pre-pitch count outside 0–3 balls / 0–2 strikes is corrupted feed
+      // data (a 4th ball ends the plate appearance) — rare, see
+      // gen-run-expectancy.mjs's header — skip favor for that one pitch
+      // rather than feed pitchFavor a state that shouldn't exist.
+      if (reTable && preCount.balls <= 3 && preCount.strikes <= 2) {
+        const favor = pitchFavor(reTable, preBaseMask, preOuts, preCount.balls, preCount.strikes, actualStrike)
+        if (battingAway) favorAway += favor
+        else favorHome += favor
+        favorMagnitude += Math.abs(favor)
+      }
+    }
+
+    // Apply this play's runner movements for the NEXT play's base/out state —
+    // identical logic to gen-run-expectancy.mjs's accumulateGame.
+    for (const r of p.runners ?? []) {
+      const rid = r.details?.runner?.id
+      const startBase = BASE_NUM[r.movement?.start]
+      const endBase = BASE_NUM[r.movement?.end]
+      const isOut = r.movement?.isOut
+      if (startBase) bases[startBase - 1] = null
+      if (isOut) outs = Math.min(outs + 1, 3)
+      else if (endBase) bases[endBase - 1] = rid
     }
   }
 
   if (called === 0) return null
-  return { called, correct, expanded, squeezed, ...region, cellCalled, cellStrikeCall, cellMiss }
+  const consistency = estimateGameConsistency(consistencyPitches)
+  return {
+    called,
+    correct,
+    expanded,
+    squeezed,
+    ...region,
+    cellCalled,
+    cellStrikeCall,
+    cellMiss,
+    consistent: consistency?.consistent ?? null,
+    consistentCalled: consistency?.called ?? null,
+    favorAway: reTable ? favorAway : null,
+    favorHome: reTable ? favorHome : null,
+    favorMagnitude: reTable ? favorMagnitude : null,
+  }
 }
 
 // --- season aggregate from a umpire's game rows -------------------------------
@@ -196,6 +296,14 @@ function aggregate(games) {
   const cellCalled = Array(9).fill(0)
   const cellStrikeCall = Array(9).fill(0)
   const cellMiss = Array(9).fill(0)
+  // Consistency/favor sum over only the games that carry them — an older row
+  // (swept before these schemas shipped) or a thin-sample game (consistent
+  // null, favorMagnitude null) simply contributes nothing, same degrade as
+  // the cell-grid arrays above.
+  let consistentSum = 0
+  let consistentCalledSum = 0
+  let favorMagnitudeSum = 0
+  let favorGames = 0
   for (const g of games) {
     sum.called += g.called
     sum.correct += g.correct
@@ -212,11 +320,22 @@ function aggregate(games) {
       cellStrikeCall[i] += g.cellStrikeCall?.[i] ?? 0
       cellMiss[i] += g.cellMiss?.[i] ?? 0
     }
+    if (g.consistent != null && g.consistentCalled != null) {
+      consistentSum += g.consistent
+      consistentCalledSum += g.consistentCalled
+    }
+    if (g.favorMagnitude != null) {
+      favorMagnitudeSum += g.favorMagnitude
+      favorGames++
+    }
   }
   sum.accuracy = sum.called ? sum.correct / sum.called : null
   sum.cellCalled = cellCalled
   sum.cellStrikeCall = cellStrikeCall
   sum.cellMiss = cellMiss
+  sum.consistency = consistentCalledSum ? consistentSum / consistentCalledSum : null
+  sum.favorMagnitude = favorGames ? favorMagnitudeSum : null
+  sum.favorPerGame = favorGames ? favorMagnitudeSum / favorGames : null
   return sum
 }
 
