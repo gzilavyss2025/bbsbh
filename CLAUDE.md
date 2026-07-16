@@ -31,22 +31,24 @@ cap.
 
 ## Workflow & deployment
 
-Two working modes land in this repo's history — know which you're in
-(full detail in `docs/development.md`):
+**All sessions use task branches and pull requests. Never push directly to `main`
+or invoke a Vercel deployment.** This is a Vercel Hobby project, so keep
+work-in-progress off `main`, batch related changes, and reduce deployment-triggering
+merges ruthlessly. Non-`main` previews are disabled; verify locally instead.
 
-- **Interactive CLI session** (maintainer at a terminal): work on `main`, commit
-  and push each self-contained change straight to `origin/main` (Vercel
-  auto-deploys to production). No branches, no PRs.
-- **Autonomous/remote session** (web, GitHub-triggered, background): pushed to a
-  `claude/<slug>` branch and required to open a draft PR by the launching harness.
-  Don't force a direct `main` push; open the PR and let the maintainer merge.
+Multiple agents may be active at once. Treat unfamiliar changes as another agent's
+work, inspect status/diffs before editing, isolate work by branch/worktree, and stop
+to coordinate any overlapping files. Never reset, stash, overwrite, or reformat
+someone else's work.
 
-Always run `npm run lint` / `npm run build` before pushing so `main` stays green
-(the direct-to-prod loop makes a red `main` a live-site problem). `claude/*`
-branches don't get a Vercel preview, so verify locally (`npm run dev` /
-`npm run e2e`). Screenshots are unreliable here — the sandbox usually can't reach
-`statsapi.mlb.com`. See `docs/development.md` for concurrent-agent guidance and the
-`vercel.json` deploy-cap setup.
+In a fresh context, fetch and inventory worktrees/open PRs before choosing a base.
+Independent work starts from current `origin/main`; work that needs an unmerged PR
+must name and intentionally base on that PR branch. Record branch/worktree/PR state
+in the final handoff so the next context can resume safely.
+
+For user-visible changes, start the first free reserved localhost dev server,
+verify the exact changed route, keep it running, and include that clickable local
+URL in the final handoff. See `docs/development.md` for the full workflow.
 
 ## Commands
 
