@@ -214,11 +214,6 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
 
   return (
     <div className="bs">
-      {/* Standalone, full-width — how tonight's game rated for excitement
-          against the rest of this level's season, in the same visual family
-          as the Team Page's Season Grade card. Renders nothing until the
-          10-minute Game Score cron has scored this game. */}
-      <GameScoreCard feed={feed} />
       {/* The duo/col wrappers are transparent on a phone (display: contents —
           everything keeps stacking in this order on .bs's own gap) and become
           two-up grids at the wide breakpoint: the left column runs totals
@@ -238,6 +233,12 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
             homeAbbr={box.home.abbreviation}
           />
           <Decisions decisions={box.decisions} />
+          {/* Nested under the decisions rather than full-width up top — how
+              tonight's game rated for excitement against the rest of the
+              day's slate at this level, in the same visual family as the
+              Team Page's Season Grade card. Renders nothing until the
+              10-minute Game Score cron has scored this game. */}
+          <GameScoreCard feed={feed} />
         </div>
         <div className="bs__col">
           <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />

@@ -1,17 +1,20 @@
 import { useState } from 'react'
 import { fetchGameScores, gameScoreIndex } from '../api/gameScore.js'
+import { fetchSchedule } from '../api/schedule.js'
 import { ordinal } from '../api/person.js'
+import { humanDate } from '../lib/dates.js'
 import { TIER_LABELS } from '../lib/statTiers.js'
 import { beeswarmRows, sampleForDisplay } from '../lib/beeswarm.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { GameScoreModal } from './GameScoreModal.jsx'
 
-// Where tonight's game landed among the whole level's season, visually
-// matching the Team Page's Season Grade card (TeamScoreCard) — a hero score
-// over a dot-plot rail of the full pool, with this game marked as the larger
-// navy dot. Reuses that card's `.team-score` CSS wholesale (same section,
-// grade-hero, and track classes) so the two "how good/exciting was this"
-// cards read as one family, just scoped to a game instead of a team-season.
+// Where tonight's game landed among the day's other games at the same level,
+// visually matching the Team Page's Season Grade card (TeamScoreCard) — a
+// hero score over a dot-plot rail of the pool, with this game marked as the
+// larger navy dot. Reuses that card's `.team-score` CSS wholesale (same
+// section, grade-hero, and track classes) so the two "how good/exciting was
+// this" cards read as one family, just scoped to a game instead of a
+// team-season.
 //
 // SPOILER RULE: not a new exposure. Game Score is the one score-derived
 // number the app renders outside a SealBox (ADR-0015) — its safety comes
@@ -19,23 +22,31 @@ import { GameScoreModal } from './GameScoreModal.jsx'
 // it's shown. This card only ever mounts inside BoxScore's already-sealed
 // reveal render, same footing as everything else there.
 //
-// Filtered to this game's own level (MLB vs. a specific MiLB level) rather
-// than the whole game-score.json pool, mirroring the Top Games page's level
-// filter — "how did this game compare to other games at this level," not a
-// cross-level mix where an AAA duel and an MLB slugfest share one scale.
+// Scoped to this game's own DATE + level (a day's schedule, same sportId)
+// rather than the whole game-score.json pool — "how did tonight's game
+// compare to the rest of tonight's slate," not the whole season. The day's
+// schedule (spoiler-free — dates/gamePks carry no score) resolves the small
+// set of gamePks that pool gets filtered down to.
 export function GameScoreCard({ feed }) {
   const [showHow, setShowHow] = useState(false)
   const gamePk = feed?.gamePk
   const sportId = feed?.gameData?.teams?.home?.sport?.id ?? feed?.gameData?.teams?.away?.sport?.id
+  const dateStr = feed?.gameData?.datetime?.officialDate
 
   const scoresAsync = useAsync(() => fetchGameScores(), [])
+  const scheduleAsync = useAsync(
+    () => (dateStr && sportId != null ? fetchSchedule(dateStr, sportId, 'team') : Promise.resolve([])),
+    [dateStr, sportId],
+  )
   const raw = scoresAsync.data
+  const daySchedule = scheduleAsync.data
 
-  if (!raw || gamePk == null || sportId == null) return null
+  if (!raw || !daySchedule || gamePk == null || sportId == null) return null
 
+  const dayGamePks = new Set(daySchedule.map((g) => String(g.gamePk)))
   const pool = {}
   for (const [pk, v] of Object.entries(raw)) {
-    if (v?.sportId === sportId) pool[pk] = v
+    if (v?.sportId === sportId && dayGamePks.has(String(pk))) pool[pk] = v
   }
   const index = gameScoreIndex(pool)
   const rankIdx = index.ranked.findIndex((r) => String(r.gamePk) === String(gamePk))
@@ -48,7 +59,7 @@ export function GameScoreCard({ feed }) {
     <section className="team-score" aria-label="Game Score">
       <div className="team-score__head">
         <span>Game Score</span>
-        <em>{index.n} games scored</em>
+        <em>{humanDate(dateStr)}</em>
       </div>
 
       <div className="team-score__grade">
@@ -77,11 +88,11 @@ export function GameScoreCard({ feed }) {
   )
 }
 
-// A season's worth of games (1,000+ for MLB) would overflow the rail
-// dot-for-dot no matter how tightly packed, unlike TeamScoreCard's 30-team
-// pool — so the rail shows a fixed-size, evenly-sampled-by-rank stand-in for
-// the full pool (see sampleForDisplay) rather than one dot per game. The
-// "N games scored" / "Xth of N" text above still reflects the true pool.
+// A day's slate is usually small (a dozen-ish MLB games), so this rarely
+// samples anything away — but a combined day (postseason doubleheaders,
+// a "same level" pool spanning several rounds) could still exceed a
+// fixed-height rail dot-for-dot, so cap it the same way TeamScoreCard never
+// has to (its pool is a fixed 30 teams). See sampleForDisplay.
 const TRACK_SAMPLE_SIZE = 36
 
 // The rail itself: a representative sample of other scored games at this
