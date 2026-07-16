@@ -57,5 +57,15 @@ moved. Large, stable, non-joining files (`vs-team-splits.json`,
 pure risk for no payoff. A follow-up decision, not yet made, is whether to
 retain fired-callout history as a small ledger table (today's raw callout
 fuel is deliberately pruned after ~10 days, a code comment only —
-`scripts/gen-callouts.mjs`) and whether the shelved Game Notes Insights spike
-lands directly in this schema rather than as another bespoke JSON file.
+`scripts/gen-callouts.mjs`). **Not** a small tweak to `gen-callouts.mjs`
+itself: `callout-notes.js`'s scoring functions take an actual at-bat/play as
+input alongside the precomputed bundle, and `gen-callouts.mjs` runs *before*
+that night's games are played — a real ledger needs its own post-game
+generator (structurally like `gen-game-score.mjs`: its own cron, fetches
+each newly-Final game's completed feed, replays it through the scoring
+functions). Deferred as its own decision, not started here.
+
+The shelved Game Notes Insights spike (`.scratch/game-notes/
+INSIGHTS-EXPLORATION.md`, draft PR #196) lands directly in this schema
+(`game_notes_insights`) rather than as another bespoke JSON file — see the
+Phase 2 follow-up.
