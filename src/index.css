@@ -149,10 +149,10 @@ body {
   align-items: center;
   gap: 8px;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: var(--fs-h1);
   font-weight: var(--w-bold);
   margin: 0;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   text-transform: uppercase;
   color: var(--text-heading);
 }
@@ -207,7 +207,7 @@ body {
 }
 
 .topbar--slate .topbar__title {
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
   gap: 6px;
 }
 
@@ -239,7 +239,7 @@ body {
 .topbar--slate .levelnav__btn {
   min-height: 30px;
   padding: 0 6px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 /* Two-class selector so this actually beats .sitesearch-btn/.sitemenu-btn's
@@ -260,7 +260,7 @@ body {
   background: none;
   border: none;
   color: var(--field);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   padding: 8px 2px;
   min-height: var(--tap-min);
@@ -272,7 +272,7 @@ body {
   flex: 1 1 auto;
   text-align: center;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -299,8 +299,8 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--text-body);
-  font-size: 20px;
-  line-height: 1;
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
   cursor: pointer;
   box-shadow: var(--shadow-card);
   transition: transform var(--dur-fast) var(--ease-standard);
@@ -313,7 +313,7 @@ body {
 .datenav__label {
   min-width: 92px;
   text-align: center;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -340,7 +340,7 @@ body {
 .datenav--row button {
   min-width: 32px;
   min-height: 32px;
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 
 .datenav--row .datenav__label {
@@ -351,7 +351,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 
 /* One-tap return to today once the date has been paged away from. Kept small —
@@ -364,7 +364,7 @@ body {
   background: var(--surface-card);
   color: var(--field);
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -394,9 +394,9 @@ body {
 
 .sitebar__word {
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: var(--fs-h1);
   font-weight: var(--w-bold);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   text-transform: uppercase;
   color: var(--text-heading);
 }
@@ -445,7 +445,7 @@ body {
   box-shadow: var(--shadow-card);
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -479,7 +479,7 @@ body {
 
 .masthead__date {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -523,9 +523,25 @@ body {
 }
 
 .watchbtn__ext {
-  font-size: 12px;
-  line-height: 1;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
   color: var(--text-on-ink);
+}
+
+/* At the narrowest supported phone width, the date is already present in the
+   navigator and the detail card below. Removing this duplicate keeps the two
+   club marks and MLB.TV action legible without shrinking any text below the
+   caption floor. */
+@media (max-width: 350px) {
+  .masthead {
+    gap: 10px;
+  }
+  .masthead__teams {
+    gap: 12px;
+  }
+  .masthead__date {
+    display: none;
+  }
 }
 
 .masthead__logo {
@@ -533,7 +549,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  line-height: 0;
+  line-height: var(--lh-zero);
   border-radius: var(--radius-xs);
 }
 
@@ -561,7 +577,7 @@ body {
   background: var(--surface-card);
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -583,8 +599,8 @@ body {
 
 .masthead__at {
   font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
 
@@ -606,7 +622,7 @@ body {
   background: var(--surface-card);
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -664,7 +680,7 @@ body {
 
 .careertl__years {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
   text-align: center;
   white-space: nowrap;
@@ -734,7 +750,7 @@ body {
   align-self: start;
   padding-top: 3px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
   text-align: right;
@@ -756,7 +772,7 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -783,7 +799,7 @@ body {
 }
 .txntl__desc {
   margin: 3px 0 0;
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-body);
 }
@@ -802,7 +818,7 @@ body {
   padding: 1px 6px;
   background: var(--bg-canvas);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-muted);
 }
@@ -874,14 +890,14 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
 }
 
 .levelprog__detail {
   display: block;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -889,7 +905,7 @@ body {
 /* ---------------------------------------------------------------- hints */
 .hint {
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   line-height: var(--lh-body);
   padding: 12px 2px;
 }
@@ -898,12 +914,12 @@ body {
   color: var(--clay);
 }
 
-/* Full-sentence status/caveat copy (not the short "Loading…"/"Retry" hints
-   that share .hint) — the high-legibility serif reads better as all-caps prose. */
+/* Status/caveat copy is interface text. Reserve the reading serif for
+   natural-case narrative rather than all-caps app chrome. */
 .hint--prose {
-  font-family: var(--font-read);
+  font-family: var(--font-body);
   font-weight: var(--w-semibold);
-  letter-spacing: 0.015em;
+  letter-spacing: var(--ls-text);
 }
 
 /* An inline text-link riding inside a .hint paragraph (e.g. "How's this
@@ -985,11 +1001,11 @@ body {
 }
 
 .loader__label {
-  font-family: var(--font-read);
+  font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-muted);
-  letter-spacing: 0.02em;
-  font-size: 15px;
+  letter-spacing: var(--ls-title);
+  font-size: var(--fs-body);
   line-height: var(--lh-body);
 }
 
@@ -1015,7 +1031,7 @@ body {
   left: 60px;
 }
 .loader--inline .loader__label {
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 
 /* Slate copy reads in scorebook all-caps (see .screen--slate .hint above);
@@ -1084,7 +1100,7 @@ body {
 }
 .topgames__rank {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
@@ -1101,11 +1117,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  line-height: 1;
+  line-height: var(--lh-solid);
 }
 .topgames__scorenum {
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
   color: var(--accent-primary);
@@ -1113,7 +1129,7 @@ body {
 .topgames__scorelabel {
   margin-top: 3px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -1145,7 +1161,7 @@ body {
   background: var(--surface-card);
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1202,7 +1218,7 @@ body {
   margin: -14px -16px 0;
   padding: 5px 16px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1238,7 +1254,7 @@ body {
   background: var(--paper-1);
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -1263,7 +1279,7 @@ body {
 }
 .derbycard__eyebrow {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -1283,16 +1299,16 @@ body {
   align-items: center;
   gap: 6px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: var(--fs-h3);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .derbycard__ext {
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--accent-primary);
 }
 .derbycard__sub {
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -1323,7 +1339,7 @@ body {
   background: var(--clay, #c0392b);
   color: #fff4f1;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1355,7 +1371,7 @@ body {
   background: var(--seal);
   color: var(--seal-ink);
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1399,8 +1415,8 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--w-bold);
-  font-size: 13px;
-  line-height: 1;
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
   color: var(--seal-ink);
   padding: 4px 9px 3px;
   /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
@@ -1430,8 +1446,8 @@ body {
 }
 .postponed__makeup {
   font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
 
@@ -1509,8 +1525,8 @@ body {
   grid-column: 2;
   grid-row: 1;
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
 .gamecard__logobox--home {
@@ -1562,7 +1578,7 @@ body {
   border: none;
   background: none;
   transform: none;
-  font-size: 40px;
+  font-size: var(--fs-display-lg);
 }
 
 .gamecard__name {
@@ -1570,13 +1586,13 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  line-height: 1.15;
+  line-height: var(--lh-compact);
   min-width: 0;
 }
 
 .gamecard__loc {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -1584,10 +1600,10 @@ body {
 }
 
 .gamecard__mascot {
-  font-size: 17px;
+  font-size: var(--fs-h3);
   font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
 
@@ -1603,7 +1619,7 @@ body {
 .offday__banner {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -1659,14 +1675,14 @@ body {
   border: none;
   background: none;
   transform: none;
-  font-size: 28px;
+  font-size: var(--fs-hero-sm);
 }
 .offdaycard__name {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  line-height: 1.12;
+  line-height: var(--lh-title);
   min-width: 0;
   /* A long single-word mascot (DIAMONDBACKS) must wrap within the narrow card
      rather than overflow its border. */
@@ -1675,17 +1691,17 @@ body {
 }
 .offdaycard__loc {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
 }
 .offdaycard__mascot {
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
 /* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
@@ -1701,7 +1717,7 @@ body {
   position: absolute;
   top: 4px;
   right: 6px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--pin-accent, var(--field));
 }
 
@@ -1746,14 +1762,14 @@ body {
   border-radius: var(--radius-xs);
   /* Scale the monogram down from the box so it never touches the edges. */
   font-size: 0.62em;
-  line-height: 1;
+  line-height: var(--lh-solid);
 }
 
 .gamecard__meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 
@@ -1849,7 +1865,7 @@ body {
   align-items: center;
   gap: 3px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -1862,8 +1878,8 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  font-size: 8px;
-  line-height: 1;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
   color: var(--text-on-ink);
 }
 
@@ -1890,7 +1906,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
@@ -1991,7 +2007,7 @@ body {
 
 .searchbox__label {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -2006,7 +2022,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--fs-body);
   width: 100%;
 }
 
@@ -2053,19 +2069,19 @@ body {
 }
 
 .searchbox__name {
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
 
 .searchbox__sub {
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 
 .searchbox__hint {
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -2079,7 +2095,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--field-deep);
 }
@@ -2090,8 +2106,8 @@ body {
   border: none;
   background: none;
   color: var(--field-deep);
-  font-size: 20px;
-  line-height: 1;
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
   cursor: pointer;
 }
 
@@ -2106,7 +2122,7 @@ body {
   flex: 0 0 auto;
   padding-bottom: 12px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -2122,7 +2138,7 @@ body {
 
 .gamefinder__season label {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -2137,7 +2153,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 
 .gamefinder__results {
@@ -2158,7 +2174,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2200,10 +2216,10 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
-  line-height: 1.15;
+  line-height: var(--lh-compact);
   text-transform: uppercase;
   text-align: center;
   cursor: pointer;
@@ -2247,7 +2263,7 @@ body {
   border: none;
   background: none;
   color: var(--text-caption);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   cursor: pointer;
   border-radius: var(--radius-pill);
 }
@@ -2282,7 +2298,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 
 .sitesearchsheet__input::placeholder {
@@ -2301,7 +2317,7 @@ body {
   border: none;
   background: none;
   color: var(--text-caption);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   cursor: pointer;
   border-radius: var(--radius-pill);
 }
@@ -2318,7 +2334,7 @@ body {
   margin: 0 0 4px;
   padding: 0 2px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -2328,7 +2344,7 @@ body {
 .sitesearchsheet__hint {
   margin: 0;
   padding: 8px 2px;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
@@ -2372,7 +2388,7 @@ body {
 }
 
 .sitemenusheet__item {
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
 }
 
@@ -2428,7 +2444,7 @@ body {
   border: none;
   background: none;
   color: var(--text-caption);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   cursor: pointer;
   border-radius: var(--radius-pill);
 }
@@ -2440,7 +2456,7 @@ body {
 .favteamsheet__subtitle {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -2460,7 +2476,7 @@ body {
 .favteamsheet__sectionTitle {
   margin: 0 0 var(--space-2);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -2499,13 +2515,13 @@ body {
 }
 .favteamsheet__prefLabel {
   font-family: var(--font-display);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
 .favteamsheet__prefHint {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
 }
 .favteamsheet__prefToggle {
   flex: 0 0 auto;
@@ -2517,7 +2533,7 @@ body {
   background: var(--surface-inset);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -2532,7 +2548,7 @@ body {
 /* --------------------------------------------------------------- legal */
 .sitefooter__legal {
   padding-bottom: var(--space-4);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   line-height: var(--lh-body);
   color: var(--text-caption);
 }
@@ -2553,7 +2569,7 @@ body {
 }
 
 .sitefooter__brand > span {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-label);
 }
 
@@ -2595,15 +2611,15 @@ body {
   margin: 0;
   max-width: 12ch;
   font-family: var(--font-display);
-  font-size: 34px;
-  line-height: 0.95;
-  letter-spacing: 0;
+  font-size: var(--fs-display);
+  line-height: var(--lh-score);
+  letter-spacing: var(--ls-none);
   color: var(--text-heading);
 }
 
 .aboutpage__lede {
   margin: var(--space-3) 0 0;
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   line-height: var(--lh-body);
   color: var(--text-body);
 }
@@ -2632,7 +2648,7 @@ body {
 .aboutpage__principle h3 {
   margin: 0 0 5px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
@@ -2640,7 +2656,7 @@ body {
 .aboutpage__principle p,
 .aboutpage__note p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   line-height: var(--lh-body);
   color: var(--text-body);
 }
@@ -2657,7 +2673,7 @@ body {
 .aboutpage__list li {
   padding: 11px 0;
   border-bottom: var(--bw-hair) solid var(--border-rule);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   line-height: var(--lh-tight);
   color: var(--text-body);
 }
@@ -2719,13 +2735,13 @@ body {
   font-weight: var(--w-bold);
   margin: 0;
   min-width: 0;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
 
 .teaminfo__side {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -2752,7 +2768,7 @@ body {
 
 .fact__label {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -2760,11 +2776,11 @@ body {
 
 .fact__value {
   margin: 3px 0 0;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
 }
 
 .fact__na {
@@ -2789,7 +2805,7 @@ body {
 }
 
 .fact__note {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   font-weight: var(--w-regular);
 }
@@ -2825,18 +2841,18 @@ body {
 
 .umps__role {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
 
 .umps__name {
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
 }
 
 .umps__namerow {
@@ -2855,7 +2871,7 @@ body {
   padding: 0;
   margin: 0;
   cursor: pointer;
-  line-height: 0;
+  line-height: var(--lh-zero);
 }
 .umps__tierbtn:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -2875,11 +2891,11 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
-  line-height: 1;
+  line-height: var(--lh-solid);
   white-space: nowrap;
   color: var(--graphite);
 }
@@ -2925,7 +2941,7 @@ body {
   padding: 10px 12px;
   background: var(--surface-card);
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 
 /* Batting order: slot / name / jersey / position — jersey sits by the pos. */
@@ -2984,7 +3000,7 @@ body {
 .roster__pos {
   font-family: var(--font-display);
   color: var(--field);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -2994,8 +3010,8 @@ body {
    BirthdayCake), sitting in the namewrap after the prospect pill. A small
    emoji flourish — its own color, no ink token needed. */
 .name-cake {
-  font-size: 12px;
-  line-height: 1;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
 }
 
 /* -------------------------------------------------- opposing pitcher/defense */
@@ -3009,7 +3025,7 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 
 .opp__name {
@@ -3023,7 +3039,7 @@ body {
 .opp__hand {
   font-family: var(--font-display);
   color: var(--field);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
 }
@@ -3034,7 +3050,7 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
   padding-top: 4px;
   border-top: var(--bw-hair) dashed var(--border-hairline);
@@ -3058,7 +3074,7 @@ body {
   gap: var(--space-2);
   padding: 9px 12px;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 
 .opp__defense li:first-child {
@@ -3073,7 +3089,7 @@ body {
 .opp__defpos {
   font-family: var(--font-display);
   color: var(--field);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -3151,7 +3167,7 @@ body {
   background: var(--surface-inset);
   color: var(--text-caption);
   font-family: inherit;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-align: center;
   cursor: pointer;
@@ -3171,9 +3187,9 @@ body {
   border-radius: var(--radius-sm);
   background: var(--accent-positive);
   color: var(--surface-card);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  letter-spacing: 0.03em;
+  letter-spacing: var(--ls-emphasis);
   text-align: center;
 }
 
@@ -3185,7 +3201,7 @@ body {
   margin-top: 4px;
   padding-top: 6px;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-align: center;
 }
@@ -3211,7 +3227,7 @@ body {
 }
 
 .shot.teammatecard__shot.shot--fallback {
-  font-size: 24px;
+  font-size: var(--fs-title-lg);
 }
 
 /* The player's roster position, floated on the headshot's bottom-left corner
@@ -3228,9 +3244,9 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  line-height: 1.3;
+  line-height: var(--lh-ui);
   text-align: center;
 }
 
@@ -3243,8 +3259,8 @@ body {
 
 .teammatecard__name-first {
   font-weight: var(--w-semibold);
-  font-size: 10px;
-  line-height: 1.2;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
   color: var(--text-caption);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3253,8 +3269,8 @@ body {
 
 .teammatecard__name-last {
   font-weight: var(--w-bold);
-  font-size: 13px;
-  line-height: 1.15;
+  font-size: var(--fs-small);
+  line-height: var(--lh-compact);
   color: var(--text-body);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3278,7 +3294,7 @@ body {
 .teammatecard__years {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   white-space: nowrap;
 }
@@ -3293,7 +3309,7 @@ body {
   background: var(--surface-inset);
   color: var(--text-caption);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   text-align: center;
   cursor: pointer;
@@ -3341,7 +3357,7 @@ body {
 
 /* The surname sits on its writing line, like penciling above the rule. */
 .defdiamond__name {
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   border-bottom: var(--bw-hair) solid var(--rule);
@@ -3380,13 +3396,13 @@ body {
 }
 
 .defdiamond__name .ilmark {
-  font-size: 9px;
+  font-size: var(--fs-caption);
   margin-left: 1px;
 }
 .defdiamond__num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 
@@ -3399,7 +3415,7 @@ body {
   margin: 6px 0 0;
   padding-top: 6px;
   border-top: var(--bw-hair) dashed var(--border-hairline);
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 
 .defdiamond__dhpos {
@@ -3449,10 +3465,10 @@ body {
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
-  line-height: 1.4;
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 .innings__extras-icon {
@@ -3474,7 +3490,7 @@ body {
   background: var(--surface-card);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -3494,8 +3510,8 @@ body {
 }
 
 .refreshbtn__icon {
-  font-size: 14px;
-  line-height: 1;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
 }
 
 /* Game Notes button (lineup page) — a compact pill riding in the team head,
@@ -3514,7 +3530,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -3534,8 +3550,8 @@ body {
 }
 
 .notesbtn__ext {
-  font-size: 13px;
-  line-height: 1;
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
   color: var(--text-caption);
 }
 
@@ -3569,8 +3585,8 @@ body {
   padding: 4px;
   margin: -4px -4px 0 0;
   color: var(--text-caption);
-  font-size: 16px;
-  line-height: 1;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
   cursor: pointer;
 }
 
@@ -3582,7 +3598,7 @@ body {
 
 .brewsheet__status {
   margin: 14px 0 4px;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--text-muted);
 }
 
@@ -3611,7 +3627,7 @@ body {
 .brewblurb__title {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -3620,8 +3636,8 @@ body {
 
 .brewblurb__body {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
   color: var(--text-body);
 }
 
@@ -3639,7 +3655,7 @@ body {
   align-self: flex-start;
   margin-top: 16px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -3654,8 +3670,8 @@ body {
 }
 
 .brewsheet__ext {
-  font-size: 13px;
-  line-height: 1;
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
   color: var(--text-caption);
 }
 
@@ -3675,7 +3691,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   cursor: pointer;
   box-shadow: var(--shadow-card);
@@ -3688,7 +3704,7 @@ body {
 
 .inningnav__label {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -3697,7 +3713,7 @@ body {
 
 .inningnav__of {
   color: var(--text-caption);
-  font-weight: var(--w-medium);
+  font-weight: var(--w-semibold);
 }
 
 .inning {
@@ -3722,7 +3738,7 @@ body {
   margin: 0;
   padding: 10px 14px;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -3732,8 +3748,8 @@ body {
 
 .half__team {
   font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -3775,23 +3791,23 @@ body {
 }
 
 .cover__lock {
-  font-size: 24px;
-  line-height: 1;
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-solid);
 }
 
 .cover__main {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--seal-ink);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--ls-xwide);
   text-transform: uppercase;
 }
 
 .cover__sub {
   font-family: var(--font-body);
-  font-size: 11.5px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
   color: var(--seal-ink);
   opacity: 0.82;
 }
@@ -3809,10 +3825,10 @@ body {
   border-radius: var(--radius-md);
 }
 .sealbox--compact .cover__lock {
-  font-size: 15px;
+  font-size: var(--fs-body);
 }
 .sealbox--compact .cover__main {
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 
 .statgrid {
@@ -3866,7 +3882,7 @@ body {
 .abs__title {
   display: block;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -3903,7 +3919,7 @@ body {
   flex: 0 0 auto;
   min-width: 24px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
@@ -3936,7 +3952,7 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 
@@ -3968,7 +3984,7 @@ body {
 
 .statcast__label {
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -3977,27 +3993,27 @@ body {
 .statcast__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
-  line-height: 1;
+  line-height: var(--lh-solid);
   color: var(--text-heading);
 }
 
 .statcast__unit {
   font-style: normal;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   opacity: 0.7;
 }
 
 .statcast__who {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  line-height: 1.2;
+  line-height: var(--lh-compact);
 }
 
 /* Pre-pitch subs/pitching changes for the half about to be revealed, shown
@@ -4043,7 +4059,7 @@ body {
   overflow: hidden;
 }
 .shot.prehalf__shot.shot--fallback {
-  font-size: 24px;
+  font-size: var(--fs-title-lg);
 }
 .prehalf__body {
   display: flex;
@@ -4053,7 +4069,7 @@ body {
 }
 .prehalf__who {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -4061,16 +4077,16 @@ body {
   display: flex;
   gap: 6px;
   font-family: var(--font-read);
-  font-size: 12px;
-  font-weight: var(--w-medium);
-  letter-spacing: 0.01em;
-  line-height: 1.4;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 .prehalf__mark {
   flex: none;
   color: var(--seal-deep);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 /* The pre-half callout cards read as natural-case sentences — the player's own
@@ -4099,7 +4115,7 @@ body {
 
 .prepitch__item {
   padding: 4px 8px;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-body);
 }
 
@@ -4108,7 +4124,7 @@ body {
 .prepitch__pitching {
   display: block;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
 }
@@ -4236,8 +4252,8 @@ body {
 .pitchernotice__code {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 12.5px;
-  letter-spacing: 0.02em;
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-title);
   color: var(--ink-1);
   flex: none;
 }
@@ -4251,7 +4267,7 @@ body {
 }
 .pitchernotice__label {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
@@ -4301,9 +4317,9 @@ body {
    sentence straight from the feed, not a caps token. */
 .pitchernotice__eventtext {
   font-family: var(--font-read);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
-  letter-spacing: 0.015em;
+  letter-spacing: var(--ls-text);
   color: var(--text-heading);
   min-width: 0;
 }
@@ -4333,8 +4349,8 @@ body {
 .pitchernotice__shot--fallback {
   display: grid;
   place-items: center;
-  font-size: 26px;
-  line-height: 1;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-solid);
   background: var(--surface-inset);
 }
 
@@ -4347,7 +4363,7 @@ body {
 
 .pitchernotice__now {
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -4356,7 +4372,7 @@ body {
 
 .pitchernotice__pitcher {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
   overflow-wrap: anywhere;
@@ -4392,7 +4408,7 @@ body {
   margin: 0 0 8px;
   padding: 4px 8px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-body);
   text-transform: uppercase;
@@ -4417,7 +4433,7 @@ body {
 .lineupcard__slot {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   min-width: 12px;
   text-align: right;
@@ -4435,7 +4451,7 @@ body {
 }
 
 .lineupcard__name {
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
@@ -4479,21 +4495,21 @@ body {
 .lineupcard__jersey {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--clay);
 }
 
 .lineupcard__bar {
   color: var(--text-caption);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 .lineupcard__pos {
   min-width: 20px;
   text-align: right;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--field);
   text-transform: uppercase;
@@ -4513,7 +4529,7 @@ body {
   margin: 0 0 8px;
   padding: 4px 8px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-caption);
   text-transform: uppercase;
@@ -4534,14 +4550,14 @@ body {
 }
 
 .stat__v {
-  font-size: 20px;
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
-  line-height: 1;
+  line-height: var(--lh-solid);
   color: var(--text-heading);
 }
 
 .stat--big .stat__v {
-  font-size: 26px;
+  font-size: var(--fs-h1);
 }
 
 .stat--run .stat__v {
@@ -4550,15 +4566,15 @@ body {
 
 .stat__k {
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
 
 .stat--small .stat__k {
-  font-size: 9.5px;
-  line-height: 1.2;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
 }
 
 .stat__unit {
@@ -4591,15 +4607,15 @@ body {
      treatment as .pbp__desc: the high-legibility serif in natural case (the
      caps exception is the #root rule below). */
   font-family: var(--font-read);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
-  letter-spacing: 0.015em;
+  letter-spacing: var(--ls-text);
   color: var(--text-caption);
 }
 
 .pbp__noteicon {
   font-style: normal;
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
 /* The note's text as one wrapping flex item (so its player deep-links flow
@@ -4653,8 +4669,8 @@ body {
 .pbp__code {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 13px;
-  letter-spacing: 0.02em;
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-title);
   color: var(--ink-1);
 }
 
@@ -4679,7 +4695,7 @@ body {
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--clay-deep);
   background: var(--clay-soft);
   border: 2px solid var(--clay);
@@ -4690,12 +4706,12 @@ body {
 .pbp__advance {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   fill: var(--graphite);
 }
 
 .pbp__advslot {
-  font-size: 7px;
+  font-size: var(--fs-caption);
   fill: var(--ink-2);
 }
 
@@ -4704,15 +4720,15 @@ body {
    ("CS 2-4", "PK 3-1") rather than a bare "CS". */
 .pbp__advance--out {
   fill: var(--clay-deep);
-  font-size: 8px;
+  font-size: var(--fs-caption);
 }
 
 /* Red "PR" penciled just above the base a pinch runner took over at. */
 .pbp__pr {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 10px;
-  letter-spacing: 0.02em;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-title);
   fill: var(--clay-deep);
 }
 
@@ -4731,9 +4747,9 @@ body {
   gap: 2px;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
 
@@ -4757,7 +4773,7 @@ body {
 }
 
 .pbp__pos {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-family: var(--font-body);
   font-weight: var(--w-regular);
   color: var(--graphite-soft);
@@ -4766,7 +4782,7 @@ body {
 
 .pbp__rbi {
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--field-deep);
@@ -4809,7 +4825,7 @@ body {
 .pbp__ladderhead {
   align-self: stretch;
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -4830,7 +4846,7 @@ body {
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 
 .pbp__laddercol--ball .pbp__cell {
@@ -4851,10 +4867,10 @@ body {
      exception below) so it reads as a real sentence. See --font-read in
      tokens/typography.css. */
   font-family: var(--font-read);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-regular);
-  letter-spacing: 0.015em;
-  line-height: 1.4;
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 
@@ -4888,10 +4904,10 @@ body {
   padding-left: 7px;
   border-left: 2px solid var(--border-rule);
   font-family: var(--font-read);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-regular);
-  letter-spacing: 0.015em;
-  line-height: 1.35;
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-ui);
   color: var(--text-caption);
 }
 
@@ -4914,16 +4930,16 @@ body {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: var(--surface-inset);
   font-family: var(--font-read);
-  font-size: 10px;
-  font-weight: var(--w-medium);
-  letter-spacing: 0.01em;
-  line-height: 1.35;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-ui);
   color: var(--text-body);
 }
 .pbp__calloutmark {
   flex: none;
   color: var(--seal-deep);
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 
 /* ---------------------------------------------------------------- roster */
@@ -4946,7 +4962,7 @@ body {
   border: none;
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -4976,7 +4992,7 @@ body {
 
 .roster__group {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -5003,7 +5019,7 @@ body {
   padding: 8px 14px;
   min-height: 36px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -5086,7 +5102,7 @@ body {
 }
 .strikezone__num {
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   fill: var(--paper-3);
   text-anchor: middle;
@@ -5117,7 +5133,7 @@ body {
   gap: 7px;
   align-items: baseline;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
 }
 .pitchlist__num {
@@ -5127,7 +5143,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--paper-3);
 }
@@ -5158,7 +5174,7 @@ body {
   align-items: center;
   gap: 6px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -5195,11 +5211,11 @@ body {
   background: var(--surface-inset);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  line-height: 1;
+  line-height: var(--lh-solid);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -5241,16 +5257,16 @@ body {
 .pcmodal__ttl {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 15px;
+  font-size: var(--fs-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
 .pcmodal__hint {
   margin: 0 0 12px;
-  font-family: var(--font-read);
-  font-size: 11.5px;
-  line-height: 1.4;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
   color: var(--text-muted);
 }
 .pcmodal__list {
@@ -5266,7 +5282,7 @@ body {
   align-items: center;
   gap: 10px;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -5319,7 +5335,7 @@ body {
   background: var(--seal);
   border: var(--bw-hair) solid var(--seal-hatch);
   color: var(--seal-ink);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -5327,7 +5343,7 @@ body {
   cursor: pointer;
 }
 .pbp__hlicon {
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 
 /* Strike-zone modal — reuses the .scrim backdrop (see below), a centered card
@@ -5358,7 +5374,7 @@ body {
 }
 .szmodal__eyebrow {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -5367,13 +5383,13 @@ body {
 .szmodal__name {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 15px;
+  font-size: var(--fs-body);
   text-transform: uppercase;
   color: var(--text-heading);
 }
 .szmodal__vs {
-  font-family: var(--font-read);
-  font-size: 11px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
   color: var(--text-muted);
 }
 .szmodal__close {
@@ -5384,8 +5400,8 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-inset);
   color: var(--text-muted);
-  font-size: 15px;
-  line-height: 1;
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
   cursor: pointer;
 }
 /* Phone modal: zone on top, the pitch list full-width beneath it — side by
@@ -5400,13 +5416,13 @@ body {
   width: 100%;
 }
 .szmodal__body .pitchlist__row {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .szmodal__body .pitchlist__type {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 
 /* ── Umpire zone map ─────────────────────────────────────────────────────────
@@ -5471,7 +5487,7 @@ body {
 }
 .umpmodal__eyebrow {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -5480,20 +5496,20 @@ body {
 .umpmodal__name {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 15px;
+  font-size: var(--fs-body);
   text-transform: uppercase;
   color: var(--text-heading);
 }
 .umpmodal__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--award-ink);
 }
 .umpmodal__hint {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 .umpmodal__zone {
@@ -5505,15 +5521,15 @@ body {
 }
 .umpmodal__zonecap {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: var(--lh-ui);
   text-align: center;
 }
 .umpmodal__gtitle {
   margin: 0 0 6px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -5536,12 +5552,12 @@ body {
   border-top: none;
 }
 .umpmodal__gdate {
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 .umpmodal__gmatch {
   justify-self: start;
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--accent-primary);
@@ -5549,7 +5565,7 @@ body {
 .umpmodal__gacc {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 /* .btn--next handles sizing/color; this just tightens the modal-local gap. */
@@ -5604,14 +5620,14 @@ body {
   font-size: var(--fs-h2);
   font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   color: var(--text-heading);
 }
 
 .sheet__body {
   margin: 0 0 18px;
-  font-size: 14px;
-  line-height: 1.55;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
   color: var(--text-muted);
 }
 
@@ -5677,10 +5693,10 @@ body {
 }
 
 .logotile__name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
   color: var(--text-body);
-  line-height: 1.25;
+  line-height: var(--lh-snug);
 }
 
 /* -------------------------------------------------------------- logo sketch
@@ -5692,7 +5708,7 @@ body {
   background: none;
   cursor: pointer;
   border-radius: var(--radius-xs);
-  line-height: 0;
+  line-height: var(--lh-zero);
 }
 .teaminfo__logobtn:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -5778,7 +5794,7 @@ body {
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   color: var(--text-caption);
   border-radius: var(--radius-pill);
 }
@@ -5819,7 +5835,7 @@ body {
   padding: 6px 0;
   min-width: 24px;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-small);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
@@ -5831,7 +5847,7 @@ body {
 }
 
 .rolling__grid thead th {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -5885,7 +5901,7 @@ body {
   background: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-body);
   cursor: pointer;
 }
@@ -5955,7 +5971,7 @@ body {
   gap: 10px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 
 .winprob__team {
@@ -6036,12 +6052,12 @@ body {
 .winprob__ylabel,
 .winprob__inninglabel {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   fill: var(--text-caption);
 }
 
 .winprob__inningarrow {
-  font-size: 7px;
+  font-size: var(--fs-caption);
 }
 
 /* -------------------------------------------------------------- pitcher lines
@@ -6073,7 +6089,7 @@ body {
 .pitchers__teamname {
   margin: 14px 0 4px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6095,15 +6111,15 @@ body {
 .pitchers__grid td {
   padding: 6px 1px;
   text-align: center;
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .pitchers__grid thead th {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   color: var(--text-caption);
 }
 
@@ -6150,13 +6166,14 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
-  line-height: 1.2;
+  line-height: var(--lh-compact);
 }
 
 .pitchers__num {
@@ -6209,7 +6226,7 @@ body {
 .boxscore__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-h2, 20px);
+  font-size: var(--fs-h2);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -6244,7 +6261,7 @@ body {
 .buzz__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -6252,8 +6269,8 @@ body {
 }
 
 .buzz__note {
-  font-size: 11px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -6294,14 +6311,14 @@ body {
 .buzz__handle {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   color: var(--accent-primary);
   text-decoration: none;
 }
 
 .buzz__time,
 .buzz__eng {
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   font-variant-numeric: tabular-nums;
 }
@@ -6317,7 +6334,7 @@ body {
      chrome. The casing opt-out itself is the #root-scoped rule below (a plain
      class can't outweigh the global `#root *` uppercase). */
   font-family: var(--font-read);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-regular);
   line-height: var(--lh-body);
   color: var(--text-body);
@@ -6385,16 +6402,16 @@ body {
 .bs__grid td {
   padding: 5px 2px;
   text-align: center;
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   white-space: nowrap;
   border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
 .bs__grid thead th {
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   color: var(--text-caption);
 }
 
@@ -6417,7 +6434,7 @@ body {
 
 .bs__pname {
   font-family: var(--font-body);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
@@ -6437,7 +6454,7 @@ body {
 /* Position(s) after the batter's name, and the pitcher's decision tag. */
 .bs__pos {
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -6445,7 +6462,7 @@ body {
 
 .bs__dec {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--accent-negative);
 }
@@ -6507,7 +6524,7 @@ body {
 /* Footnote marker ("a", "b"…) next to a sub and in the footnote list. */
 .bs__mark {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
@@ -6517,7 +6534,7 @@ body {
 }
 .bs__ps {
   color: var(--text-muted);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
 }
 
 .bs__totals td {
@@ -6537,8 +6554,8 @@ body {
   gap: 2px;
 }
 .bs__footnotes li {
-  font-size: 11.5px;
-  line-height: 1.35;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-ui);
   color: var(--text-body);
 }
 .bs__footnotes .bs__mark {
@@ -6551,7 +6568,7 @@ body {
 .bs__notesTitle {
   margin: 0 0 3px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6559,8 +6576,8 @@ body {
 }
 .bs__note {
   margin: 2px 0;
-  font-size: 11.5px;
-  line-height: 1.4;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 .bs__noteLabel {
@@ -6588,7 +6605,7 @@ body {
 .bs__decisionK {
   min-width: 34px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6615,7 +6632,7 @@ body {
 .bs__potgTitle {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6639,7 +6656,7 @@ body {
   overflow: hidden;
 }
 .shot.bs__potgShot.shot--fallback {
-  font-size: 28px;
+  font-size: var(--fs-hero-sm);
 }
 .bs__potgMain {
   display: flex;
@@ -6656,14 +6673,14 @@ body {
 /* Compound to beat .plink's `font: inherit`, same as .topperf__name. */
 .bs__potgWho .bs__potgName {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   color: var(--text-heading);
 }
 .bs__potgMeta {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6672,8 +6689,8 @@ body {
 .bs__potgDesc {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
   color: var(--text-heading);
   /* Approved exception to the ALL-CAPS INVARIANT, scoped to this one
      narrative: title case reads better for a play-of-the-game sentence than
@@ -6717,7 +6734,7 @@ body {
 .bs__insightsTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6735,10 +6752,10 @@ body {
    play they belong to), but standing alone in this card they're worth a size
    bump for readability. */
 .bs__insights .statcast__label {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .bs__insights .statcast__who {
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 
 /* The call-out notes grid — one card per player/club (see InsightNoteCard,
@@ -6794,7 +6811,7 @@ body {
   overflow: hidden;
 }
 .shot.bs__noteShot.shot--fallback {
-  font-size: 16px;
+  font-size: var(--fs-num-md);
 }
 .bs__noteLogos {
   display: flex;
@@ -6809,7 +6826,7 @@ body {
 }
 .bs__noteWho {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -6821,8 +6838,8 @@ body {
   padding: 0;
   border-left: none;
   background: none;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
 }
 
 /* Show-more for the ranked note grid — the notes arrive most-impactful-first
@@ -6838,7 +6855,7 @@ body {
   background: var(--surface-inset);
   color: var(--text-caption);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   text-align: center;
   cursor: pointer;
@@ -6860,7 +6877,7 @@ body {
 .bs__starsTitle {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6884,9 +6901,9 @@ body {
 .bs__starMarks {
   flex: none;
   min-width: 30px;
-  font-size: 13px;
-  line-height: 1.35;
-  letter-spacing: 1px;
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
   color: var(--seal);
 }
 /* Compound with .shot/.shot--fallback so this outranks the base .shot sizing,
@@ -6900,7 +6917,7 @@ body {
   overflow: hidden;
 }
 .shot.bs__starShot.shot--fallback {
-  font-size: 16px;
+  font-size: var(--fs-num-md);
 }
 .bs__starWho {
   display: flex;
@@ -6922,7 +6939,7 @@ body {
 }
 .bs__starMeta {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -6930,7 +6947,7 @@ body {
 }
 .bs__starStat {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
 }
 
@@ -6947,7 +6964,7 @@ body {
 .topperf__banner {
   margin: 0 0 6px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -6967,7 +6984,7 @@ body {
 .topperf__title {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7003,7 +7020,7 @@ body {
   overflow: hidden;
 }
 .shot.topperf__shot.shot--fallback {
-  font-size: 20px;
+  font-size: var(--fs-title-md);
 }
 .topperf__logo {
   flex: none;
@@ -7027,14 +7044,14 @@ body {
    reset these sizes — so both are written as compound selectors to outrank it. */
 .topperf__head .topperf__name {
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
 }
 .topperf__pos {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7042,13 +7059,13 @@ body {
 }
 .topperf__stat {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 .topperf__who .topperf__score {
   align-self: flex-start;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
 }
 .topperf__state {
@@ -7090,7 +7107,7 @@ body {
 .revealall__top,
 .pagenav--revealall .btn {
   font-family: var(--font-display);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--ls-xwide);
 }
 .pagenav--revealall {
   /* .pagenav already positions/backgrounds the floating bar; nothing else
@@ -7175,7 +7192,7 @@ body {
 .flipback__lsCol {
   text-align: center;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -7189,7 +7206,7 @@ body {
   gap: 8px;
   font-family: var(--font-display);
   /* 1.5x the original 13px, on every viewport (not gated to wide layout). */
-  font-size: 19.5px;
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
@@ -7210,7 +7227,7 @@ body {
   margin-top: 2px;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 .flipback__decision b {
@@ -7222,13 +7239,13 @@ body {
 }
 .flipback__potg {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-body);
 }
 .flipback__potgLabel {
   display: block;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7288,7 +7305,7 @@ body {
 .dayhl__title {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7301,7 +7318,7 @@ body {
 .playercard__bucket {
   margin: 0 0 6px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7355,9 +7372,9 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  line-height: 1.3;
+  line-height: var(--lh-ui);
   text-align: center;
 }
 .playercard__body {
@@ -7376,7 +7393,7 @@ body {
   align-items: baseline;
   flex-wrap: wrap;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
@@ -7388,14 +7405,14 @@ body {
   align-items: center;
   gap: 4px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
 .playercard__stat {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
 }
 .dayhl__list {
@@ -7414,8 +7431,8 @@ body {
   background: var(--paper-1);
   color: var(--text-body);
   padding: 8px 10px;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
 }
@@ -7496,8 +7513,8 @@ body {
   padding: 0;
   color: var(--text-body);
   font-family: var(--font-read);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
   cursor: pointer;
 }
 #root .dayhl__rowHeadlineBtn {
@@ -7512,16 +7529,16 @@ body {
   flex-wrap: wrap;
   gap: 4px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
 .dayhl__rowSub {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-regular);
-  letter-spacing: 0;
+  letter-spacing: var(--ls-none);
   color: var(--text-muted);
 }
 #root .dayhl__rowSub {
@@ -7544,7 +7561,7 @@ body {
   padding: 0;
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -7603,7 +7620,7 @@ body {
 .tlead__cat-title {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7646,7 +7663,7 @@ body {
   overflow: hidden;
 }
 .shot.tlead__shot.shot--fallback {
-  font-size: 32px;
+  font-size: var(--fs-hero-lg);
 }
 /* Team tag — logo over abbreviation, stacked compactly between the headshot
    and the name/stat stack. Always names the club the leader plays FOR (see
@@ -7663,7 +7680,7 @@ body {
 }
 .tlead__teamabbr {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -7684,7 +7701,7 @@ body {
 /* Compound to beat .plink's `font: inherit`, same as .topperf__name. */
 .tlead__head .tlead__name {
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
@@ -7696,17 +7713,17 @@ body {
   flex: none;
   color: var(--accent-negative);
   font-weight: var(--w-bold);
-  line-height: 1;
+  line-height: var(--lh-solid);
 }
 .tlead__head .ilmark {
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 .tlead__row .ilmark {
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 .tlead__pos {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7721,13 +7738,13 @@ body {
 .tlead__statval {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
 .tlead__statlabel {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7767,7 +7784,7 @@ body {
   width: 14px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-align: right;
 }
@@ -7775,7 +7792,7 @@ body {
   flex: 1;
   min-width: 0;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-body);
   white-space: nowrap;
   overflow: hidden;
@@ -7785,7 +7802,7 @@ body {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 /* Chaser-row team tag — same typography as .tlead__teamabbr (the featured
@@ -7794,7 +7811,7 @@ body {
 .tlead__rowteam {
   flex: none;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -7815,7 +7832,7 @@ body {
 .tlead__level {
   flex: none;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -7827,7 +7844,7 @@ body {
 /* On a chaser row the pill/level sit small and inline before the value. */
 .tlead__row .prospectpill {
   flex: none;
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   padding: 1px 6px;
 }
 
@@ -7841,7 +7858,7 @@ body {
   padding: 0;
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -7866,7 +7883,7 @@ body {
 .leaders__sub {
   margin: 2px 0 0;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7884,7 +7901,7 @@ body {
 .bs__infoDate {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -7892,15 +7909,15 @@ body {
 }
 .bs__infoRow {
   margin: 3px 0;
-  font-size: 11.5px;
-  line-height: 1.4;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 .bs__infoLabel {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   color: var(--text-heading);
 }
 
@@ -7930,16 +7947,16 @@ body {
 .bs__grid--totals td {
   width: 20%;
   padding: 8px 4px;
-  font-size: 24px;
+  font-size: var(--fs-title-lg);
 }
 .bs__grid--totals thead th {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .bs__grid--totals .bs__nameCol {
   width: 20%;
 }
 .bs__grid--totals .bs__pname {
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
 }
 .bs__grid--totals .bs__totCell {
   font-weight: var(--w-bold);
@@ -7963,7 +7980,7 @@ body {
   text-align: left !important;
   padding: 5px 10px 5px 0 !important;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -8022,17 +8039,17 @@ body {
 }
 .bs__fieldLabel {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
 .bs__fieldValue {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-body);
   overflow-wrap: anywhere;
 }
@@ -8171,14 +8188,14 @@ body {
   .playercard__name {
     flex-direction: column;
     align-items: flex-start;
-    font-size: 13px;
+    font-size: var(--fs-small);
   }
 
   /* ---- Top Performers box: batters/pitchers side by side instead of stacked —
      there's room for two columns once the sheet is this wide. The headshots keep
      the portrait-matched-to-text sizing from the base rule above. */
   .shot.topperf__shot.shot--fallback {
-    font-size: 16px;
+    font-size: var(--fs-num-md);
   }
   .topperf__sections {
     flex-direction: row;
@@ -8451,21 +8468,21 @@ body {
     height: 224px;
   }
   .shot--fallback {
-    font-size: 64px;
+    font-size: var(--fs-hero-2xl);
   }
   .player__name-first {
-    font-size: 26px;
+    font-size: var(--fs-h1);
   }
   .player__name-last {
-    font-size: 56px;
+    font-size: var(--fs-hero-xl);
   }
   .player__num {
-    font-size: 28px;
+    font-size: var(--fs-hero-sm);
     margin-left: 8px;
   }
   .player__meta {
     margin-top: 10px;
-    font-size: 16px;
+    font-size: var(--fs-num-md);
   }
   .player__herologo > .teamlogo {
     width: 96px !important;
@@ -8521,7 +8538,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
@@ -8554,7 +8571,7 @@ body {
 .team-hub .section__title em {
   font-style: normal;
   color: var(--graphite-soft);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-caps);
 }
 /* All copy on these pages is forced uppercase (the "scorebook all-caps"
@@ -8623,7 +8640,7 @@ body {
   place-items: center;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 40px;
+  font-size: var(--fs-display-lg);
   color: var(--graphite-soft);
   /* No cutout art here — restore the filled inset chip the transparent base
      rule drops, so the empty-state monogram still reads as a mounted card. */
@@ -8660,13 +8677,13 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   color: var(--text-heading);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   min-width: 0;
 }
 .player__name-first {
   font-weight: var(--w-semibold);
-  font-size: 17px;
-  line-height: 1.2;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-compact);
   color: var(--text-caption);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -8675,7 +8692,7 @@ body {
 .player__name-last {
   font-weight: var(--w-bold);
   font-size: clamp(20px, 7vw, 32px);
-  line-height: 0.98;
+  line-height: var(--lh-score);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -8685,14 +8702,14 @@ body {
   font-variant-numeric: tabular-nums;
   color: var(--clay);
   font-weight: var(--w-bold);
-  font-size: 19px;
+  font-size: var(--fs-title-md);
   margin-left: 5px;
 }
 .player__meta {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: var(--lh-prose);
   text-transform: uppercase;
 }
 .player__pos {
@@ -8725,14 +8742,14 @@ body {
 .player__statgrid .stat__v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
 }
 
 .player__blocktitle {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   font-weight: var(--w-bold);
   color: var(--text-heading);
   margin: 22px 0 0;
@@ -8744,7 +8761,7 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
-  font-size: 13.5px;
+  font-size: var(--fs-ui);
   color: var(--text-body);
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);
@@ -8752,7 +8769,7 @@ body {
   box-shadow: var(--inset-cell);
   padding: 11px 12px;
   margin: 0;
-  line-height: 1.5;
+  line-height: var(--lh-body);
 }
 .player__caveat {
   margin-top: var(--space-5);
@@ -8775,7 +8792,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 /* Phone (base): stack the date over its description so the date gets the card's
@@ -8792,14 +8809,14 @@ body {
 .split__v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .split__sub {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 @media (min-width: 740px) {
@@ -8861,8 +8878,8 @@ body {
 .statcast__def {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 10.5px;
-  line-height: 1.35;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
   color: var(--text-body);
 }
 
@@ -8984,7 +9001,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-caption);
   margin-bottom: 5px;
@@ -8999,7 +9016,7 @@ body {
 .vsteam__last-meta {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-heading);
   text-transform: uppercase;
@@ -9012,7 +9029,7 @@ body {
 .vsteam__last-line {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   color: var(--text-body);
 }
 
@@ -9049,13 +9066,13 @@ body {
 .gamelog__date {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .gamelog__opp {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
@@ -9069,7 +9086,7 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: 8.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
@@ -9078,8 +9095,8 @@ body {
 .gamelog__line {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12.5px;
-  line-height: 1.45;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
   color: var(--text-body);
   text-align: right;
 }
@@ -9123,7 +9140,7 @@ body {
 .ledger th,
 .ledger td {
   padding: 7px 8px;
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
   /* Data cells are single tokens; keep them on one line so a value like the
@@ -9137,7 +9154,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   font-weight: var(--w-semibold);
 }
@@ -9166,7 +9183,7 @@ body {
 .ledger__allstar {
   color: var(--clay);
   margin-left: 3px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 /* Career total — the ledger footer, set off with a heavier rule + a tinted row
    so it reads as the sum of everything above it. */
@@ -9182,7 +9199,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 
@@ -9205,7 +9222,7 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
   font-family: var(--font-display);
-  font-size: 8.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--graphite);
@@ -9247,13 +9264,13 @@ body {
    the "converted to pitcher" note that sits above the stat blocks. */
 .reg-footnote {
   margin: 8px 2px 0;
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   font-style: italic;
   color: var(--graphite);
 }
 .reg-convert {
   margin: 0 2px 14px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-style: italic;
   color: var(--graphite);
 }
@@ -9273,7 +9290,7 @@ body {
 .milestonewatch__title {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -9285,12 +9302,12 @@ body {
   align-items: baseline;
   gap: 4px 8px;
   margin: 3px 0;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
 }
 .milestonewatch__eta {
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -9323,7 +9340,7 @@ body {
 .trophycase__grouplabel {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--graphite);
@@ -9353,7 +9370,7 @@ body {
 .trophybadge__name {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   line-height: var(--lh-snug);
   color: var(--text-body);
@@ -9361,14 +9378,14 @@ body {
 .trophybadge__sub {
   margin: 2px 0 0;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-num);
   color: var(--award-ink);
 }
 .trophybadge__detail {
   margin: 1px 0 0;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   color: var(--graphite);
 }
 
@@ -9393,7 +9410,7 @@ body {
   background: var(--surface-card);
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -9477,7 +9494,7 @@ body {
 
 .posinn__pos {
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -9491,7 +9508,7 @@ body {
 .posinn__innings {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
@@ -9514,7 +9531,7 @@ body {
   margin: 6px 0 0;
   padding-top: 6px;
   border-top: var(--bw-hair) dashed var(--border-hairline);
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 
 .posinn__dhpos {
@@ -9550,7 +9567,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-muted);
   margin-left: 3px;
@@ -9573,13 +9590,13 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--w-bold);
-  font-size: 15px;
+  font-size: var(--fs-body);
   color: #fff;
 }
 .allstar-banner__star {
   color: #fff;
-  font-size: 14px;
-  line-height: 1;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
 }
 
 /* ---- Slate empty-day banners — the same tape-banner recipe as the player
@@ -9614,7 +9631,7 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--w-bold);
-  font-size: 15px;
+  font-size: var(--fs-body);
   color: #fff;
 }
 .break-banner__detail,
@@ -9651,8 +9668,8 @@ body {
 }
 .rehab-banner__mark {
   color: var(--seal-ink);
-  font-size: 14px;
-  line-height: 1;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
 }
 
 /* ---- injured-list banner — the clay/seam-red sibling of the amber rehab tape,
@@ -9681,8 +9698,8 @@ body {
 }
 .il-banner__mark {
   color: #fff;
-  font-size: 14px;
-  line-height: 1;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
 }
 
 /* ---- game-status banner — flat kraft-amber strip flagging a delayed,
@@ -9758,7 +9775,7 @@ body {
 }
 .delaycard__detail {
   font-family: var(--font-read);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 .delaycard__detail b {
@@ -9895,7 +9912,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-muted);
   background: var(--surface-inset);
@@ -9908,13 +9925,13 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   font-weight: var(--w-bold);
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   color: var(--text-heading);
-  line-height: 1.05;
+  line-height: var(--lh-tight);
 }
 .team-hub__rec {
   margin: 5px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
   display: flex;
   flex-wrap: wrap;
@@ -9929,14 +9946,14 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--field-deep);
   font-weight: var(--w-bold);
 }
 .team-hub__rec em {
   font-style: normal;
   color: var(--graphite-soft);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 .sitebar__wordmark,
@@ -9966,17 +9983,17 @@ body {
   gap: 8px;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
 .team-score__head em {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-style: normal;
   font-weight: var(--w-regular);
-  letter-spacing: 0;
+  letter-spacing: var(--ls-none);
 }
 .team-score__row {
   display: grid;
@@ -10008,7 +10025,7 @@ body {
 .team-score__label {
   color: var(--text-heading);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
@@ -10021,7 +10038,7 @@ body {
   color: var(--seal-hatch);
   background: color-mix(in srgb, var(--seal) 16%, transparent);
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   padding: 2px 6px;
   border-radius: 20px;
@@ -10030,15 +10047,15 @@ body {
 .team-score__score {
   color: var(--text-heading);
   font-family: var(--font-mono);
-  font-size: 25px;
+  font-size: var(--fs-title-lg);
   font-variant-numeric: tabular-nums;
-  line-height: .95;
+  line-height: var(--lh-score);
 }
 .team-score__meta {
   overflow: hidden;
   color: var(--graphite-soft);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -10112,7 +10129,7 @@ body {
   background: var(--text-heading);
   color: var(--surface-card);
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   white-space: nowrap;
   border-radius: 5px;
   pointer-events: none;
@@ -10125,7 +10142,7 @@ body {
   background: transparent;
   color: var(--seal-hatch);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
@@ -10160,20 +10177,20 @@ body {
 }
 .team-score__detail dt {
   color: var(--text-caption);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .team-score__detail dd {
   margin: 0;
   color: var(--text-heading);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 @media (max-width: 420px) {
   .team-score__score {
-    font-size: 22px;
+    font-size: var(--fs-num-lg);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -10197,17 +10214,17 @@ body {
   gap: 8px;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
 .postseason-odds__head em {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-style: normal;
   font-weight: var(--w-regular);
-  letter-spacing: 0;
+  letter-spacing: var(--ls-none);
 }
 .postseason-odds__values {
   display: grid;
@@ -10225,7 +10242,7 @@ body {
 .postseason-odds__value > span {
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -10233,23 +10250,23 @@ body {
 .postseason-odds__value strong {
   color: var(--text-heading);
   font-family: var(--font-mono);
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   font-variant-numeric: tabular-nums;
-  line-height: .95;
+  line-height: var(--lh-score);
 }
 .postseason-odds__meta {
   border-top: var(--bw-hair) solid var(--rule-soft);
   padding-top: 7px;
   color: var(--graphite-soft);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 @media (max-width: 420px) {
   .postseason-odds__value {
     padding-inline: 5px;
   }
   .postseason-odds__value strong {
-    font-size: 19px;
+    font-size: var(--fs-title-md);
   }
 }
 /* ---------------------------------------------------- team transactions
@@ -10275,17 +10292,17 @@ body {
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
 .txcard__head em {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-style: normal;
   font-weight: var(--w-regular);
-  letter-spacing: 0;
+  letter-spacing: var(--ls-none);
 }
 
 /* A horizontally swipeable deck of story cards, full-bleed to the screen's
@@ -10374,7 +10391,7 @@ body {
 .txstory__date {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -10408,7 +10425,7 @@ body {
   overflow: hidden;
 }
 .shot.txstory__shot.shot--fallback {
-  font-size: 26px;
+  font-size: var(--fs-h1);
 }
 
 /* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
@@ -10419,7 +10436,7 @@ body {
    visual language from that component — see scope.md). */
 .banner {
   font-family: var(--font-display);
-  font-size: 8.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -10433,18 +10450,18 @@ body {
 
 .photo__cap {
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: var(--fs-caption);
   color: var(--graphite-soft);
   text-align: center;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-title);
 }
 
 .txstory__type {
   display: block;
   margin-bottom: 4px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -10465,8 +10482,8 @@ body {
 .txstory__cutline {
   margin: 0;
   font-family: var(--font-read);
-  font-size: 14.5px;
-  line-height: 1.42;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 /* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
@@ -10504,7 +10521,7 @@ body {
 
 .team-hub__manager {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 .team-hub__manager .plink {
@@ -10513,7 +10530,7 @@ body {
 }
 .team-hub__manager-interim {
   color: var(--graphite-soft);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 /* team-hub schedule strip — one block per series (run of consecutive games
@@ -10548,7 +10565,7 @@ body {
 }
 .sstrip__opplabel {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
@@ -10616,7 +10633,7 @@ body {
 .standings th,
 .standings td {
   padding: 7px 8px;
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   text-align: right;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
@@ -10626,7 +10643,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 .standings td {
@@ -10714,13 +10731,13 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-weight: var(--w-bold);
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-heading);
 }
 .standings-ctrl__detail {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 /* Date quick-jumps as flat scorebook index tabs — hairline-ruled, no drop
@@ -10739,7 +10756,7 @@ body {
   background: transparent;
   color: var(--text-caption);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -10772,7 +10789,7 @@ body {
   background: var(--seal-cover);
   color: var(--seal-cover-ink);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -10827,7 +10844,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -10843,8 +10860,8 @@ body {
 .standings-daynav__label {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
 
@@ -10861,7 +10878,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-bold);
   color: var(--text-heading);
   margin: 0 0 10px;
@@ -10875,7 +10892,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   margin: 0 0 6px;
@@ -10890,7 +10907,7 @@ body {
 .standings--full th,
 .standings--full td {
   padding: 6px 6px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 .standings--full .st-ext {
   display: none;
@@ -10928,7 +10945,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   background: var(--bg-page);
@@ -10942,8 +10959,8 @@ body {
    left of which division a row belongs to). */
 .wc-div {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
 /* The cutoff line after the last team AT or tied-into the 3rd wild-card
@@ -10967,7 +10984,7 @@ body {
   .standings--full th,
   .standings--full td {
     padding: 8px 9px;
-    font-size: 13px;
+    font-size: var(--fs-small);
   }
 }
 
@@ -11007,22 +11024,22 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10.5px;
-  line-height: 1.1;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
   color: var(--text-caption);
   min-width: 0;
 }
 .tstatrow__v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .tstatrow__r {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   min-width: 2.6ch;
@@ -11060,7 +11077,7 @@ body {
 .rankchip {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   padding: 2px 7px;
   border-radius: var(--radius-pill);
@@ -11087,7 +11104,7 @@ body {
   align-items: center;
   gap: 4px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -11110,7 +11127,7 @@ body {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -11128,7 +11145,7 @@ body {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -11171,7 +11188,7 @@ body {
   gap: 10px;
   padding: 10px 12px;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 .thub-roster li:first-child {
   border-top: none;
@@ -11198,7 +11215,7 @@ body {
   letter-spacing: var(--ls-caps);
 }
 .thub-namewrap .ilmark {
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 /* Kraft-tape amber, deliberately NOT the clay red the IL cross (.ilmark) uses:
    an All-Star who's also hurt would otherwise show a red star and a red cross
@@ -11207,26 +11224,26 @@ body {
 .thub-allstar {
   color: var(--seal);
   margin-left: 4px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 .thub-pos {
   font-family: var(--font-display);
   color: var(--field);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
 }
 .thub-chev {
   color: var(--graphite-soft);
-  font-size: 15px;
-  line-height: 1;
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
 }
 .rolechip {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   padding: 2px 6px;
   border-radius: var(--radius-xs);
@@ -11291,7 +11308,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
@@ -11320,7 +11337,7 @@ body {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   padding: 2px 6px;
   border-radius: var(--radius-xs);
@@ -11353,7 +11370,7 @@ body {
   top: 6px;
   right: 6px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-muted);
@@ -11363,16 +11380,16 @@ body {
   padding: 1px 6px;
 }
 .thub-affiliate__name {
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-body);
-  line-height: 1.25;
+  line-height: var(--lh-snug);
 }
 .thub-affiliate__loc {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 
@@ -11392,7 +11409,7 @@ body {
 .prospecttable__top {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--clay-deep);
   background: var(--clay-soft);
@@ -11407,7 +11424,7 @@ body {
   white-space: nowrap;
 }
 .prospecttable__line {
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   white-space: nowrap;
 }
 
@@ -11448,7 +11465,7 @@ body {
    the tap target carries no underline. */
 .rehabcard__portrait {
   display: block;
-  line-height: 0;
+  line-height: var(--lh-zero);
 }
 .shot.rehabcard__shot {
   width: var(--shot-lg-w);
@@ -11456,24 +11473,24 @@ body {
   border-radius: var(--radius-sm);
 }
 .shot.rehabcard__shot.shot--fallback {
-  font-size: 30px;
+  font-size: var(--fs-hero-md);
 }
 
 /* Name (display caps, wraps within the card) + position caption. Compounded to
    beat .plink's `font: inherit`. */
 .rehabcard__name.rehabcard__name {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   text-transform: uppercase;
   color: var(--text-heading);
-  line-height: 1.15;
+  line-height: var(--lh-compact);
 }
 .rehabcard__pos {
   margin: -2px 0 2px;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -11489,11 +11506,11 @@ body {
 }
 .rehabcard__team {
   display: inline-flex;
-  line-height: 0;
+  line-height: var(--lh-zero);
 }
 .rehabcard__arrow {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   font-weight: var(--w-bold);
   color: var(--text-caption);
 }
@@ -11508,13 +11525,13 @@ body {
 }
 .rehabcard__clubname.rehabcard__clubname {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-body);
 }
 .rehabcard__since {
   margin: 2px 0 0;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -11574,7 +11591,7 @@ body {
   box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
 }
 .shot.milestonewatch-page__shot.shot--fallback {
-  font-size: 30px;
+  font-size: var(--fs-hero-md);
 }
 /* Primary position as a jersey-tag pill anchored to the photo's bottom-left,
    navy ink on paper so it stays legible over any headshot. */
@@ -11584,7 +11601,7 @@ body {
   bottom: 0;
   padding: 1px 4px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -11606,16 +11623,16 @@ body {
   align-items: flex-start;
   gap: 2px;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-bold);
-  line-height: 1.15;
+  line-height: var(--lh-compact);
 }
 .milestonewatch-page__team {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-regular);
   color: var(--text-muted);
 }
@@ -11636,16 +11653,16 @@ body {
   flex: 1 0 100%;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--text-heading);
 }
 .milestonewatch-page__progress {
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 .milestonewatch-page__eta {
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -11735,8 +11752,8 @@ body {
   transform: rotate(180deg);
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 13px;
-  letter-spacing: 0.03em;
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-emphasis);
   color: var(--text-heading);
 }
 /* Full banner spelling out the league name, red for American League and blue
@@ -11748,7 +11765,7 @@ body {
   align-self: stretch;
   text-align: center;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -11799,20 +11816,20 @@ body {
   height: var(--shot-md-h);
 }
 .awardhistory__cards--dense .playercard__name {
-  font-size: 12.5px;
-  line-height: 1.2;
+  font-size: var(--fs-small);
+  line-height: var(--lh-compact);
 }
 .awardhistory__cards--dense .playercard__stat {
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 .awardhistory__namebreak {
   display: block;
 }
 .awardhistory__name--small .playercard__name {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .awardhistory__name--tiny .playercard__name {
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
 }
 /* A recipient the stats endpoint had nothing for (an incomplete/malformed
    season row — see gen-awards-history.mjs) falls back to this bigger,
@@ -11827,10 +11844,10 @@ body {
   height: var(--shot-lg-h);
 }
 .awardhistory__cards--full .playercard__name {
-  font-size: 17px;
+  font-size: var(--fs-h3);
 }
 .awardhistory__cards--full .playercard__team {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 /* All-MLB Team columns — same headshot size as Silver Slugger/Gold Glove's
    dense tile (both are "a roster of names," just First/Second Team's own
@@ -11845,13 +11862,13 @@ body {
   height: var(--shot-md-h);
 }
 .awardhistory__cards--compact .playercard__name {
-  font-size: 14px;
+  font-size: var(--fs-ui);
 }
 .awardhistory__cards--compact .playercard__team {
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .awardhistory__cards--compact .playercard__stat {
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 /* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
    from favoriteAccentColor()) — a recipient who played for the user's
@@ -11917,7 +11934,7 @@ body {
 .awardhistory__allmlbhead {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--award-ink);
@@ -11976,7 +11993,7 @@ body {
   margin: 0;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);
@@ -11993,7 +12010,7 @@ body {
   flex: 0 0 auto;
   min-height: 30px;
   padding: 0 10px;
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 
 /* ------------------------------------------------------------- postseason
@@ -12021,7 +12038,7 @@ body {
 .pshistory__year {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 20px;
+  font-size: var(--fs-title-md);
   color: var(--text-heading);
 }
 .pshistory__champion {
@@ -12036,7 +12053,7 @@ body {
 .pshistory__championname {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-heading);
 }
 .pshistory__championtag {
@@ -12044,7 +12061,7 @@ body {
   align-items: center;
   gap: 3px;
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12067,7 +12084,7 @@ body {
   background: var(--surface-inset);
   color: var(--text-caption);
   font-family: inherit;
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   text-align: center;
   cursor: pointer;
@@ -12142,7 +12159,7 @@ body {
 .psbracket__collabel {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12236,7 +12253,7 @@ body {
 }
 .seedcard__byetag {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12249,14 +12266,14 @@ body {
   align-items: center;
   gap: 6px;
   font-family: var(--font-body);
-  font-size: 12.5px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 .seedrow__seed {
   flex: none;
   width: 13px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
   text-align: center;
@@ -12299,7 +12316,7 @@ body {
   outline-offset: 2px;
 }
 .pswscard .seedrow {
-  font-size: 13.5px;
+  font-size: var(--fs-ui);
 }
 .pswscard--stack {
   margin-bottom: 4px;
@@ -12333,7 +12350,7 @@ body {
   overflow: hidden;
 }
 .shot.pswscard__shot.shot--fallback {
-  font-size: 20px;
+  font-size: var(--fs-title-md);
 }
 .pswscard__pos {
   position: absolute;
@@ -12341,7 +12358,7 @@ body {
   bottom: 0;
   padding: 1px 4px;
   font-family: var(--font-display);
-  font-size: 8.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--paper-0);
@@ -12357,7 +12374,7 @@ body {
 }
 .pswscard__mvptag {
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
@@ -12365,7 +12382,7 @@ body {
 .pswscard__mvpname {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-heading);
   overflow-wrap: anywhere;
 }
@@ -12384,7 +12401,7 @@ body {
   gap: 8px;
   margin: 12px 0 2px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12439,7 +12456,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -12453,7 +12470,7 @@ body {
 .psyearnav__label {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -12494,14 +12511,14 @@ body {
   border: none;
   background: none;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: var(--fs-num-md);
   cursor: pointer;
 }
 .psmodal__label {
   margin: 0;
   padding-right: 30px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12526,7 +12543,7 @@ body {
   align-items: center;
   gap: 4px;
   font-family: var(--font-display);
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-align: center;
   max-width: 96px;
@@ -12542,7 +12559,7 @@ body {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -12568,7 +12585,7 @@ body {
   border-radius: var(--radius-xs);
   background: var(--surface-card);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   text-align: left;
   cursor: pointer;
 }
@@ -12612,7 +12629,7 @@ body {
 }
 .psmodal__at {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: var(--fs-caption);
 }
 /* Tier-1 kraft-amber notification card, same family as .pitchernotice--pbp
    (the play-by-play "now pitching" card) — a flat tinted fill rather than
@@ -12637,7 +12654,7 @@ body {
   overflow: hidden;
 }
 .shot.psmodal__mvpshot.shot--fallback {
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
 }
 .psmodal__mvpinfo {
   display: flex;
@@ -12647,7 +12664,7 @@ body {
 }
 .psmodal__mvptag {
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12656,7 +12673,7 @@ body {
 .psmodal__mvpname {
   font-family: var(--font-body);
   font-weight: var(--w-bold);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--seal-ink);
 }
 
@@ -12685,7 +12702,7 @@ body {
   width: 40px;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--text-heading);
 }
 .allstarrosters__body {
@@ -12726,7 +12743,7 @@ body {
   margin: -14px -12px 12px;
   padding: 8px 14px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12758,7 +12775,7 @@ body {
   padding: 6px 10px;
   border-top: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 .allstarrosters__rows li:first-child {
   border-top: none;
@@ -12790,7 +12807,7 @@ body {
 .allstarrosters__pos {
   flex: none;
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12804,7 +12821,7 @@ body {
   align-self: center;
   margin: var(--space-2) auto 0;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12862,7 +12879,7 @@ body {
 }
 .allstargame__date {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12879,7 +12896,7 @@ body {
 }
 .allstargame__label {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-heading);
@@ -12887,7 +12904,7 @@ body {
 .allstargame__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 20px;
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -12906,7 +12923,7 @@ body {
   min-height: 30px;
   margin-top: 0;
   padding: 0 12px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 /* MVP — headshot beside a stacked label/name+position/stat-line block. */
 .allstargame__mvpcol {
@@ -12925,7 +12942,7 @@ body {
   overflow: hidden;
 }
 .shot.allstargame__mvpshot.shot--fallback {
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
 }
 .allstargame__mvptext {
   display: flex;
@@ -12935,7 +12952,7 @@ body {
 }
 .allstargame__mvplabel {
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -12957,7 +12974,7 @@ body {
 .allstargame__mvppos {
   flex: none;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
@@ -12965,7 +12982,7 @@ body {
 .allstargame__mvpstat {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
 }
 /* Host ballpark, right-aligned — the club logo when the generator could
@@ -12991,7 +13008,7 @@ body {
 .allstargame__venuename,
 .allstargame__venuelink {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
   text-align: right;
   overflow: hidden;
@@ -13023,15 +13040,15 @@ body {
 .umpage__name {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
 .umpage__sub {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
@@ -13050,7 +13067,7 @@ body {
 .umpage__cardtitle {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -13081,7 +13098,7 @@ body {
 .umpage__teamcount {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
@@ -13112,14 +13129,14 @@ body {
   width: 14px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-caption);
   text-align: right;
 }
 .umpage__venuename {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-body);
   white-space: nowrap;
   overflow: hidden;
@@ -13129,7 +13146,7 @@ body {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 /* Level tag on AAA rows (game log + ballparks). MLB is the implicit default, so
@@ -13141,7 +13158,7 @@ body {
   border: 1px solid var(--border-hairline);
   border-radius: 4px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--seal-ink);
@@ -13156,7 +13173,7 @@ body {
   padding: 0 5px;
   border-radius: 4px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--text-on-ink);
@@ -13166,7 +13183,7 @@ body {
 /* Sub-line under an accuracy card title (e.g. the postseason "not ranked" note). */
 .umpage__cardsub {
   margin: -2px 0 10px;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 /* "Show all" toggle under a truncated ballparks/team-records list. */
@@ -13174,7 +13191,7 @@ body {
   display: block;
   margin-top: 10px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -13194,7 +13211,7 @@ body {
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -13237,19 +13254,19 @@ body {
 }
 .umpage__role {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
 .umpage__date {
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 .umpage__matchup {
   justify-self: start;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
@@ -13259,7 +13276,7 @@ body {
   justify-self: end;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 /* The "Accurate strike zone" label riding the per-game % — spelled out only
@@ -13268,7 +13285,7 @@ body {
 .umpage__rowacclabel {
   display: none;
   font-family: var(--font-body);
-  font-weight: var(--w-medium);
+  font-weight: var(--w-semibold);
 }
 
 /* Plate-accuracy summary card: the headline figure/rank tiles + zone map. */
@@ -13291,14 +13308,14 @@ body {
 .umpage__accpct {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 26px;
+  font-size: var(--fs-h1);
   font-weight: var(--w-bold);
-  line-height: 1;
+  line-height: var(--lh-solid);
   color: var(--text-body);
 }
 .umpage__acctilelabel {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -13306,7 +13323,7 @@ body {
 }
 .umpage__acclabel {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
   text-align: center;
 }
@@ -13320,9 +13337,9 @@ body {
 }
 .umpage__acczonecap {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: var(--lh-ui);
   text-align: center;
 }
 
@@ -13341,7 +13358,7 @@ body {
 .umprank__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
   min-width: 1.4em;
 }
@@ -13367,15 +13384,15 @@ body {
 .mgrpage__name {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
 .mgrpage__sub {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
@@ -13389,7 +13406,7 @@ body {
 .mgrpage__cardtitle {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -13414,11 +13431,11 @@ body {
   width: 3.4em;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 .mgrpage__awardname {
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
@@ -13437,7 +13454,7 @@ body {
 .mgrpage__statgrid .stat__v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 17px;
+  font-size: var(--fs-h3);
 }
 
 .mgrpage__recordlist {
@@ -13467,7 +13484,7 @@ body {
   min-width: 0;
 }
 .mgrpage__recordteamname {
-  font-size: 13px;
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   text-transform: uppercase;
@@ -13476,14 +13493,14 @@ body {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 .mgrpage__recordwl {
   margin-left: auto;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -13491,12 +13508,12 @@ body {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-muted);
 }
 .mgrpage__recordcaveat {
   margin-left: auto;
-  font-size: 11.5px;
+  font-size: var(--fs-compact);
   font-style: italic;
   color: var(--text-muted);
 }
@@ -13506,7 +13523,7 @@ body {
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
@@ -13537,13 +13554,13 @@ body {
   width: 3em;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 .mgrpage__timelineteam {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -13551,7 +13568,7 @@ body {
 }
 .mgrpage__timelinejob {
   flex: none;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
 }
 /* That season's own W-L, next to the job label — only Manager/Interim
@@ -13563,7 +13580,7 @@ body {
   margin-left: auto;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -13588,7 +13605,7 @@ body {
   padding: 0;
   font: inherit;
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: var(--ls-num);
   color: var(--accent-primary);
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -13628,8 +13645,8 @@ body {
   padding: 4px;
   margin: -4px -4px 0 0;
   color: var(--text-caption);
-  font-size: 16px;
-  line-height: 1;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
   cursor: pointer;
 }
 
@@ -13695,7 +13712,7 @@ body {
 .bpdiagram__dist {
   fill: var(--text-body);
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-semibold);
   text-anchor: middle;
   dominant-baseline: middle;
@@ -13704,7 +13721,7 @@ body {
 .bpdiagram__wallh {
   fill: var(--accent-primary);
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   text-anchor: middle;
   dominant-baseline: middle;
 }
@@ -13726,8 +13743,8 @@ body {
 .bpfact__label {
   margin: 0;
   font-family: var(--font-condensed, var(--font-mono));
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--text-caption);
 }
@@ -13735,7 +13752,7 @@ body {
 .bpfact__value {
   margin: 3px 0 0;
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
@@ -13755,8 +13772,8 @@ body {
 
 .rankgrp__title {
   margin: 0 0 6px;
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--text-caption);
 }
@@ -13781,13 +13798,13 @@ body {
 }
 
 .rankrow__label {
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
 .rankrow__value {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
   font-variant-numeric: tabular-nums;
@@ -13795,7 +13812,7 @@ body {
 
 .rankrow__rank {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-compact);
   color: var(--text-caption);
   font-variant-numeric: tabular-nums;
   min-width: 62px;
@@ -13818,7 +13835,7 @@ body {
 
 .bpsheet__foot {
   margin: 16px 0 0;
-  font-size: 11px;
+  font-size: var(--fs-caption);
   color: var(--graphite-soft);
   text-align: center;
 }
@@ -13853,8 +13870,8 @@ body {
   padding: 4px;
   margin: -4px -4px 0 0;
   color: var(--text-caption);
-  font-size: 16px;
-  line-height: 1;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
   cursor: pointer;
 }
 
@@ -13872,7 +13889,7 @@ body {
 .gsgroup__title {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--accent-primary);
@@ -13890,8 +13907,8 @@ body {
    the whole list at a glance; the gloss is there when you want it. (The old
    left-label / right-aligned-note split read as a run-on wall.) */
 .gsfactor {
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
 }
 
 .gsfactor__label {
@@ -13901,7 +13918,7 @@ body {
 }
 .gsfactor__label::after {
   content: " · ";
-  font-weight: normal;
+  font-weight: var(--w-regular);
   color: var(--text-caption);
 }
 
@@ -13926,7 +13943,7 @@ body {
 .gsexamples__title {
   margin: 0 0 10px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   color: var(--accent-primary);
@@ -13949,15 +13966,15 @@ body {
   min-width: 3ch;
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
   color: var(--accent-primary);
 }
 
 .gsexample__line {
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
   color: var(--text-body);
 }
 
@@ -14004,15 +14021,15 @@ body {
   margin: 0;
   color: var(--seal-hatch);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
 .tscoremodal__title {
   font-family: var(--font-read);
-  font-size: 19px;
+  font-size: var(--fs-title-md);
   font-weight: var(--w-semibold);
-  line-height: 1.25;
+  line-height: var(--lh-snug);
   text-wrap: balance;
 }
 #root .tscoremodal__title {
@@ -14020,8 +14037,8 @@ body {
 }
 .tscoremodal__body {
   font-family: var(--font-read);
-  font-size: 14.5px;
-  line-height: 1.6;
+  font-size: var(--fs-body);
+  line-height: var(--lh-loose);
 }
 .tscoremodal__body p {
   margin: 0 0 13px;
@@ -14029,7 +14046,7 @@ body {
 .tscoremodal__body p:first-of-type::first-letter {
   float: left;
   font-size: 2.4em;
-  line-height: .85;
+  line-height: var(--lh-hero);
   font-weight: var(--w-semibold);
   padding: .03em .06em 0 0;
   color: var(--seal-hatch);
@@ -14045,7 +14062,7 @@ body {
   margin: 18px 0 8px !important;
   color: var(--seal-hatch);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
 }
@@ -14057,7 +14074,7 @@ body {
   border-top: var(--bw-hair) solid var(--rule-soft);
   border-bottom: var(--bw-hair) solid var(--rule-soft);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-compact);
 }
 .tscoremodal__figs div {
   display: flex;
@@ -14077,7 +14094,7 @@ body {
 .tscoremodal__foot {
   margin: 4px 0 0 !important;
   color: var(--graphite-soft);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 /* Only the prose paragraphs (and inline strong/em within them) read as
    natural sentences; the figures table (.tscoremodal__figs dt/dd) stays
@@ -14123,8 +14140,8 @@ body {
   padding: 4px;
   margin: -4px -4px 0 0;
   color: var(--text-caption);
-  font-size: 16px;
-  line-height: 1;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
   cursor: pointer;
 }
 
@@ -14151,7 +14168,7 @@ body {
   margin: 12px 0 0;
   padding: 32px 12px;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-muted);
   background: var(--surface-card);
   border-radius: var(--radius-sm);
@@ -14159,8 +14176,8 @@ body {
 
 .hlsheet__desc {
   margin: 12px 0 0;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
   color: var(--text-muted);
 }
 
@@ -14263,7 +14280,7 @@ body {
   align-items: flex-end;
   border-bottom: var(--bw-hair) solid var(--border-rule);
   font-size: var(--fs-caption);
-  line-height: 1.3;
+  line-height: var(--lh-ui);
   color: var(--text-body);
   white-space: nowrap;
   overflow: hidden;
@@ -14320,7 +14337,7 @@ body {
   background: var(--surface-card);
   text-align: center;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-caption);
 }
 .sc-sheet__name {
   position: sticky;
@@ -14332,8 +14349,8 @@ body {
   background: var(--surface-card);
   text-align: left;
   font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: var(--w-medium);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
 /* The corner cells sit at both sticky intersections, so they outrank both. */
@@ -14418,7 +14435,7 @@ body {
   border: var(--bw-hair) solid var(--rule-grid);
   border-radius: var(--radius-xs);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-body);
 }
@@ -14455,9 +14472,9 @@ body {
   font-family: var(--font-mono);
   /* Sized to nearly span the diamond — the fielding chain is the dominant mark
      in the box, penciled big the way a scorer fills the middle of the diamond. */
-  font-size: 17px;
+  font-size: var(--fs-h3);
   font-weight: var(--w-bold);
-  line-height: 1;
+  line-height: var(--lh-solid);
   white-space: nowrap;
 }
 .sc-ab__center--out {
@@ -14479,7 +14496,7 @@ body {
   border: 1.5px solid var(--graphite);
   background: var(--surface-card);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   color: var(--text-body);
 }
 /* Nothing to ring when there was no out on the box — hide the empty circle. */
@@ -14509,8 +14526,8 @@ body {
 /* One pitch mark — its 1-based place in the at-bat, or an X for a ball in play. */
 .sc-ab__pip {
   font-family: var(--font-mono);
-  font-size: 8px;
-  line-height: 1.1;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
   color: var(--text-body);
 }
 
@@ -14565,9 +14582,9 @@ body {
 }
 .sc-scoreboard thead th {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ls-title);
   color: var(--text-caption);
 }
 .sc-scoreboard__team {

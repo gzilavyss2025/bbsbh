@@ -95,7 +95,7 @@ export function PitchersSection({ teams, bundle }) {
 // the rendered text (scrollWidth) fits, or we hit the floor. A ResizeObserver
 // re-fits when the column width changes (extra innings unlocking, rotation).
 const NAME_MAX_PX = 12
-const NAME_MIN_PX = 8
+const NAME_MIN_PX = 11
 function PitcherName({ id, last, first }) {
   const ref = useRef(null)
   const navigate = useNav()

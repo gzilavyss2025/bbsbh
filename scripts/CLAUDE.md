@@ -280,6 +280,9 @@ Re-run only to fold in a new season.
   component calls `.toUpperCase()`/`.toLowerCase()` on rendered text (redundant
   with the CSS invariant, and can drift from it on real Unicode names) without
   a `caps-js-exempt` marker comment on the same line. See ADR-0017.
+- `check-typography.mjs` — rejects ad hoc size, weight, line-height, and tracking
+  declarations in `src/index.css`; add or reuse the semantic roles in
+  `src/tokens/typography.css` instead.
 - `check-claude-md.mjs` — guards the CLAUDE.md leanness rule: fails if the root
   `CLAUDE.md` exceeds `MAX_LINES` (200). Keeps subsystem detail in the nested
   `CLAUDE.md` files (this one, `src/CLAUDE.md`, `src/api/CLAUDE.md`) that load only

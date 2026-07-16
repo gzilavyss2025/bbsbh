@@ -16,34 +16,69 @@
   --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
   --font-read:    "Newsreader", Georgia, "Times New Roman", serif;
 
-  /* Weights */
+  /* Weights — three deliberate levels; 500 previously blurred the boundary
+     between ordinary copy and emphasized UI. */
   --w-regular: 400;
-  --w-medium:  500;
-  --w-semibold:600;
+  --w-semibold: 600;
   --w-bold:    700;
 
-  /* Type scale (px) — compact, second-screen mobile first */
+  /* Type scale — compact, second-screen mobile first. Components consume
+     these roles rather than inventing local half-pixel steps. */
   --fs-display: 34px;   /* screen titles / big scores */
+  --fs-display-md: 36px;
+  --fs-display-lg: 40px;
   --fs-h1:      26px;
+  --fs-title-lg: 24px;
   --fs-h2:      21px;
+  --fs-title-md: 20px;
+  --fs-title-sm: 18px;
   --fs-h3:      17px;
-  --fs-label:   13px;   /* condensed uppercase section labels */
+  --fs-label:   12px;   /* condensed uppercase section labels */
   --fs-body:    15px;
+  --fs-ui:      14px;
   --fs-small:   13px;
+  --fs-compact: 12px;
   --fs-caption: 11px;
   --fs-num-xl:  40px;   /* revealed final score */
+  --fs-score-md: 42px;
+  --fs-score-lg: 46px;
   --fs-num-lg:  22px;
   --fs-num-md:  16px;
+  --fs-hero-sm: 28px;
+  --fs-hero-md: 30px;
+  --fs-hero-lg: 32px;
+  --fs-hero-xl: 56px;
+  --fs-hero-2xl: 64px;
 
   /* Line heights */
+  --lh-zero:   0;
+  --lh-hero:   0.85;
+  --lh-display:0.9;
+  --lh-score:  0.95;
+  --lh-solid:  1;
   --lh-tight:  1.05;
+  --lh-title:  1.1;
+  --lh-compact:1.2;
   --lh-snug:   1.25;
+  --lh-ui:     1.35;
+  --lh-prose:  1.45;
   --lh-body:   1.5;
+  --lh-loose:  1.6;
 
   /* Letter spacing */
+  --ls-tight-display: -0.045em;
+  --ls-tight-score: -0.06em;
+  --ls-none:   0;
+  --ls-text:   0.015em;
+  --ls-title:  0.02em;
+  --ls-emphasis: 0.03em;
   --ls-label:  0.09em;   /* uppercase condensed labels */
   --ls-caps:   0.05em;
+  --ls-wide:   0.06em;
+  --ls-xwide:  0.1em;
+  --ls-display:0.18em;
   --ls-num:    0.01em;
+  --ls-fixed:  1px;
 
   /* ---- Semantic text roles ---- */
   --text-display-font: var(--font-display);
@@ -51,7 +86,32 @@
   --text-body-font:    var(--font-body);
 }
 
-/* Reusable type helpers */
+/* Reusable semantic roles. Most component rules also carry layout/color, so
+   these can be used directly or mirrored through the same variables. */
+.t-page-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.t-section-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-snug);
+}
+.t-body {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-body);
+}
+.t-prose {
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-body);
+}
 .t-label {
   font-family: var(--font-display);
   font-weight: var(--w-semibold);

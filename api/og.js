@@ -68,10 +68,10 @@ async function loadGoogleFont(spec, text) {
 async function loadFonts(cardText) {
   const text = BASE_GLYPHS + (cardText || '').toUpperCase() + (cardText || '')
   try {
-    const [cond6, cond7, sans5] = await Promise.all([
+    const [cond6, cond7, sans6] = await Promise.all([
       loadGoogleFont('IBM Plex Sans Condensed:wght@600', text),
       loadGoogleFont('IBM Plex Sans Condensed:wght@700', text),
-      loadGoogleFont('IBM Plex Sans:wght@500', text),
+      loadGoogleFont('IBM Plex Sans:wght@600', text),
     ])
     return {
       head: 'IBM Plex Sans Condensed',
@@ -79,7 +79,7 @@ async function loadFonts(cardText) {
       fonts: [
         { name: 'IBM Plex Sans Condensed', data: cond6, weight: 600, style: 'normal' },
         { name: 'IBM Plex Sans Condensed', data: cond7, weight: 700, style: 'normal' },
-        { name: 'IBM Plex Sans', data: sans5, weight: 500, style: 'normal' },
+        { name: 'IBM Plex Sans', data: sans6, weight: 600, style: 'normal' },
       ],
     }
   } catch {
@@ -242,7 +242,7 @@ async function playerCard(p, F) {
     { display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1, gap: '20px' },
     [
       el('div', { display: 'flex', fontFamily: F.head, fontSize: p.name.length > 18 ? '74px' : '90px', fontWeight: 700, lineHeight: 1.0, color: C.navy }, p.name),
-      p.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 500, color: C.ink2 }, p.sub) : null,
+      p.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 600, color: C.ink2 }, p.sub) : null,
     ].filter(Boolean),
   )
   return frame(
@@ -302,7 +302,7 @@ async function gameCard(g, F) {
             [away, home],
           ),
           el('div', { display: 'flex', fontFamily: F.head, fontSize: `${fs}px`, fontWeight: 700, color: C.navy, lineHeight: 1.0 }, line),
-          g.date ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '38px', fontWeight: 500, color: C.ink2 }, g.date) : null,
+          g.date ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '38px', fontWeight: 600, color: C.ink2 }, g.date) : null,
         ].filter(Boolean),
       ),
     ],
@@ -318,7 +318,7 @@ async function teamCard(t, F) {
     [
       t.eyebrow ? eyebrow(t.eyebrow, F) : null,
       el('div', { display: 'flex', fontFamily: F.head, fontSize: t.name.length > 20 ? '70px' : '86px', fontWeight: 700, lineHeight: 1.02, color: C.navy }, t.name),
-      t.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 500, color: C.ink2 }, t.sub) : null,
+      t.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 600, color: C.ink2 }, t.sub) : null,
     ].filter(Boolean),
   )
   return frame(
@@ -342,7 +342,7 @@ function genericCard(gc, F) {
         [
           gc.eyebrow ? eyebrow(gc.eyebrow, F) : null,
           el('div', { display: 'flex', fontFamily: F.head, fontSize: '92px', fontWeight: 700, lineHeight: 1.0, color: C.navy }, gc.title || 'Tally Baseball'),
-          gc.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 500, color: C.ink2, maxWidth: '880px' }, gc.sub) : null,
+          gc.sub ? el('div', { display: 'flex', fontFamily: F.body, fontSize: '40px', fontWeight: 600, color: C.ink2, maxWidth: '880px' }, gc.sub) : null,
         ].filter(Boolean),
       ),
     ],
