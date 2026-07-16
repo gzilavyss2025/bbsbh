@@ -1769,6 +1769,7 @@ body {
 
 .gamecard__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   font-size: var(--fs-compact);
@@ -1805,19 +1806,16 @@ body {
   color: var(--text-muted);
 }
 
-/* "N Prospects on this roster" chip — same pill as level/dh, plus a small
-   league mark since it's not tied to either club's own logo. */
+/* "N Prospects on this roster" — a bonus fact, not a functional tag like
+   level/dh, so unlike those it carries no pill chrome (no border/background/
+   bold) — same "plain text, no box" treatment as .gamecard__pin, just with
+   the small league mark since it's not tied to either club's own logo. */
 .gamecard__prospects {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--paper-1);
-  border: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
+  letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -1839,11 +1837,16 @@ body {
   margin-left: auto;
 }
 
+/* The one thing on this row someone actually needs at a glance — given the
+   most typographic weight of anything in .gamecard__meta (no pill needed,
+   just ink), rather than the plain caption-weight text it used to share with
+   the bonus badges around it. */
 .gamecard__status {
   font-family: var(--font-display);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
-  color: var(--text-caption);
+  color: var(--text-heading);
 }
 
 /* Park-local start time trailing the viewer's local time, dialed down so the

@@ -66,7 +66,13 @@ export function GameCard({
         </div>
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
-          {game.sportLabel && game.sportLabel !== 'MLB' && (
+          {/* Only shown in a cross-level list (Top Games, All-Star Rosters —
+              the callers that also pass dateLabel, since a single date-per-
+              page assumption doesn't hold there either). The ordinary slate
+              never passes dateLabel: the level toggle already scopes the
+              whole page to one level, so repeating it on every card would
+              just be noise. */}
+          {dateLabel && game.sportLabel && game.sportLabel !== 'MLB' && (
             <span className="gamecard__level">{game.sportLabel}</span>
           )}
           {dhLabel && <span className="gamecard__dh">{dhLabel}</span>}
