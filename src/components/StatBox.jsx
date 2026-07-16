@@ -299,14 +299,19 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   // team with no known color pair.
   const stripe = !even ? teamStripeGradient(towardAway ? awayId : homeId) : null
   return (
-    <div className="favormeter">
+    <div className={`favormeter ${tier ? `favormeter--${tier}` : ''}`}>
       {tier && (
         <span className={`favormeter__tierpill favormeter__tierpill--${tier}`} aria-hidden="true">
           {FAVOR_TIERS[tier]}
         </span>
       )}
       <div className="favormeter__track-row">
-        <TeamLogo teamId={awayId} name={awayName} size={22} />
+        {/* The non-favored club's logo desaturates — the same .teamlogo--bw
+            grayscale treatment UmpirePage already uses for an unworked team
+            — so the colored mark unambiguously points at who the lean
+            favors, on top of the fill's own direction/color. Neither dims
+            when it's an even split. */}
+        <TeamLogo teamId={awayId} name={awayName} size={22} bw={!even && !towardAway} />
         <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayName, homeName)}>
           <span className="favormeter__mid" aria-hidden="true" />
           {!even && (
@@ -317,7 +322,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
             />
           )}
         </div>
-        <TeamLogo teamId={homeId} name={homeName} size={22} />
+        <TeamLogo teamId={homeId} name={homeName} size={22} bw={!even && towardAway} />
       </div>
       <div className="favormeter__caption" aria-hidden="true">
         {even ? (

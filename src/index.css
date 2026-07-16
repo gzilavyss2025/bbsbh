@@ -3997,7 +3997,6 @@ body {
    inline style usually overrides that with the favored club's real
    primary/secondary stripe (see lib/teams.js's teamStripeGradient). */
 .favormeter {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4008,15 +4007,30 @@ body {
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
 }
+/* The whole card picks up a soft wash of its own tier color, not just the
+   pill — routine stays the plain card treatment above (nothing to escalate),
+   standout tints toward the medal-amber "honors" family, outlier toward the
+   highlighter "watch flag" marker, both via the same color-mix() pattern
+   already used elsewhere in this file (e.g. .pin-card). */
+.favormeter--standout {
+  background: color-mix(in srgb, var(--award-line) 10%, var(--paper-2));
+  border-color: var(--award-line);
+}
+.favormeter--outlier {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--marker) 60%, var(--border-hairline));
+}
 /* The tier badge (favorTier) — routine/standout/outlier, escalating in
    visual weight rather than a single flat color: routine blends into the
    card, standout borrows the medal-amber "honors" treatment already used on
    the transaction timeline, outlier borrows the highlighter "watch flag"
-   marker color so a truly lopsided night visually demands a second look. */
+   marker color so a truly lopsided night visually demands a second look.
+   A normal flex child (own row, right-aligned via align-self), NOT
+   position:absolute — an overlay here collided with the track-row right
+   below it at this card's narrow 50%-column width, hiding the home club's
+   logo under the pill. */
 .favormeter__tierpill {
-  position: absolute;
-  top: 6px;
-  right: 6px;
+  align-self: flex-end;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -4046,7 +4060,10 @@ body {
 .favormeter__track {
   position: relative;
   flex: 1;
-  height: 10px;
+  /* Taller than a typical hairline meter specifically so the diagonal
+     team-color stripe (teamStripeGradient) reads as a clean woven texture
+     rather than a muddy sliver at this card's narrow 50%-column width. */
+  height: 18px;
   border-radius: 999px;
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-hairline);

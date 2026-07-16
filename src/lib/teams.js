@@ -465,7 +465,10 @@ export function teamStripeGradient(teamId) {
   const pair = TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]]
   if (!pair) return null
   const [a, b] = pair
-  return `repeating-linear-gradient(45deg, ${a} 0px, ${a} 6px, ${b} 6px, ${b} 12px)`
+  // 3px bands (6px per repeat) — fine enough to read as a woven zebra
+  // texture rather than a couple of wide diagonal blocks at the compact bar
+  // sizes this is actually used at (StatBox.jsx's favor meter).
+  return `repeating-linear-gradient(45deg, ${a} 0px, ${a} 3px, ${b} 3px, ${b} 6px)`
 }
 
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed
