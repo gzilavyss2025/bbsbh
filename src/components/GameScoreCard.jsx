@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { fetchGameScores, gameScoreIndex } from '../api/gameScore.js'
 import { fetchSchedule } from '../api/schedule.js'
 import { ordinal } from '../api/person.js'
-import { humanDate } from '../lib/dates.js'
 import { TIER_LABELS } from '../lib/statTiers.js'
 import { beeswarmRows, sampleForDisplay } from '../lib/beeswarm.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -57,9 +56,13 @@ export function GameScoreCard({ feed }) {
 
   return (
     <section className="team-score" aria-label="Game Score">
+      {/* No date here — the box score's own title (and the masthead above
+          it) already carry this game's date; TeamScoreCard, the other
+          .team-score consumer, still needs its own (no adjacent masthead on
+          the Team Page), so the date stays a per-caller choice rather than
+          baked into the shared head markup. */}
       <div className="team-score__head">
         <span>Game Score</span>
-        <em>{humanDate(dateStr)}</em>
       </div>
 
       <div className="team-score__grade">

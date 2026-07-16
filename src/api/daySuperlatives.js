@@ -14,7 +14,7 @@
 // superlatives — which keep only the player's NAME — this keeps the
 // batter/pitcher personId so the card can show his headshot + position pill,
 // resolved through the feed's own boxscore the same way topPerformers does.
-import { findBoxscorePlayer, positionLabel } from './boxscore.js'
+import { resolveCardPlayer } from './boxscore.js'
 
 // The result.eventType strings we bucket on (same vocabulary playbyplay.js and
 // person-fetch.js use): a "base hit" is any of the four hit types; a strikeout
@@ -22,36 +22,13 @@ import { findBoxscorePlayer, positionLabel } from './boxscore.js'
 const HIT_EVENTS = new Set(['single', 'double', 'triple', 'home_run'])
 const STRIKEOUT_EVENTS = new Set(['strikeout', 'strikeout_double_play'])
 
-// Resolve a personId within ONE game's feed to the fields a PerformerCard
-// consumes. The player sits on whichever boxscore side findBoxscorePlayer finds
-// him; his team identity comes from that side's gameData.teams entry — the same
-// resolution topPerformers' resolveEntry does, minus the stat line (we supply
-// our own metric string instead).
-function resolvePlayer(feed, personId) {
-  const found = findBoxscorePlayer(feed?.liveData?.boxscore, personId)
-  if (!found) return null
-  const { side, player: bp } = found
-  const team = feed?.gameData?.teams?.[side]
-  const gd = feed?.gameData?.players?.[`ID${personId}`]
-  return {
-    id: personId,
-    name: bp.person?.fullName ?? gd?.fullName ?? '',
-    teamId: team?.id ?? null,
-    teamAbbr: team?.abbreviation ?? '',
-    // A MiLB player's parent MLB org id (his own team for an MLB player) — the
-    // headshot's fallback team-logo tint, matching topPerformers' resolveEntry.
-    parentOrgId: bp.parentTeamId ?? team?.id ?? null,
-    position: positionLabel(bp),
-  }
-}
-
 // Fold a winning (feed, personId, value) candidate into a resolved card, or
 // null when the player can't be resolved / no candidate was found (an all-MiLB
 // slate with no tracking data leaves every field null, and the caller hides the
 // card rather than showing an empty one).
 function buildCard(best, stat) {
-  if (!best || best.personId == null) return null
-  const player = resolvePlayer(best.feed, best.personId)
+  if (!best) return null
+  const player = resolveCardPlayer(best.feed, best.personId)
   if (!player) return null
   return { ...player, stat: stat(best) }
 }

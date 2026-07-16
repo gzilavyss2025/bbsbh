@@ -28,13 +28,27 @@ export function lastFirst(person) {
 // a comma in boxscoreName (it's "Guerrero Jr.", not "Guerrero, Jr."), so this
 // can't clip one. Exported as the one name-shortening rule; boxscore.js
 // shares it rather than growing a twin.
+//
+// The fullName fallback (thin records with neither boxscoreName nor
+// lastFirstName — e.g. a box.person stub) needs its own suffix guard: a bare
+// last-token split turns "Michael Harris II" into "II". Same generational
+// suffixes and cut logic as game.js's toLastFirst.
+const GENERATIONAL_SUFFIX = /^(Jr\.?|Sr\.?|II|III|IV)$/i
+
+function surnameWithSuffix(fullName) {
+  const words = fullName.trim().split(/\s+/)
+  let cut = words.length - 1
+  if (GENERATIONAL_SUFFIX.test(words[cut]) && cut > 0) cut -= 1
+  return words.slice(cut).join(' ')
+}
+
 export function lastName(person) {
   const raw = person?.boxscoreName
     ? person.boxscoreName
     : person?.lastFirstName
       ? person.lastFirstName
       : person?.fullName
-        ? person.fullName.split(' ').slice(-1)[0]
+        ? surnameWithSuffix(person.fullName)
         : ''
   return raw.split(',')[0].trim()
 }
@@ -536,6 +550,13 @@ export function selectInningCount(feed) {
 export function selectHasStarted(feed) {
   const abstract = feed?.gameData?.status?.abstractGameState
   return abstract === 'Live' || abstract === 'Final'
+}
+
+// Whether the game is over — structural status, not a score, so safe to read
+// outside a SealBox (same footing as selectHasStarted above). Used to drop
+// the box score's Refresh control once there's nothing left to refresh.
+export function selectIsFinal(feed) {
+  return feed?.gameData?.status?.abstractGameState === 'Final'
 }
 
 // Coarse game-state flags for the delayed/suspended/postponed banner.
