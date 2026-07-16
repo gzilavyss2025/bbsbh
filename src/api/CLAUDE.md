@@ -292,6 +292,11 @@ for each generator; the reader modules:
   `seasonScoreFor` selects the latest snapshot at or before the Team Page's
   standings cutoff. The static reader degrades to no badge before the first
   generated file exists. See `docs/season-score.md` and ADR-0018.
+- `teamScore.js` + `seasonGradeFormula.js` — dated Quality/Current Form readers
+  and the Team Page's headroom-aware Season Grade. Grade combines Quality with
+  the same-cutoff Season Surprise snapshot; both drivers remain visible and a
+  club enters the league Grade pool only when both exist. See
+  `docs/season-grade.md` and ADR-0020.
 
 ## Leader boards (live)
 

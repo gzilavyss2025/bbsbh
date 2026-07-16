@@ -1,7 +1,9 @@
-// Regenerates public/data/team-score.json — MLB's date-keyed Season Score and
+// Regenerates public/data/team-score.json — MLB's date-keyed Quality and
 // Current Form. Both are team-quality measures: 60% actual wins and 40%
 // Pythagorean run quality, centered on .500 and damped for small samples.
-// Season Surprise remains in season-score.json as a separate diagnostic. The
+// Season Surprise remains in season-score.json as the Grade's separate,
+// visible Vs. expectation driver. The composite Season Grade is derived in
+// src/api/seasonGradeFormula.js from same-cutoff snapshots. The
 // formula itself lives in src/api/teamScoreFormula.js (pure, no node
 // imports) so the team page's "how this is calculated" explainer can run the
 // same math client-side — re-exported here so this script stays the

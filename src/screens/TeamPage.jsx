@@ -15,8 +15,8 @@ import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
-import { fetchSeasonScores, seasonScoreFor } from '../api/seasonScore.js'
-import { fetchTeamScores, teamScoreFor, leagueScoresFor } from '../api/teamScore.js'
+import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../api/seasonScore.js'
+import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
@@ -328,7 +328,9 @@ async function loadTeam(id, asOf) {
   const scoreCutoff = asOf ? dayBefore(asOf) : dayBefore(isoToday())
   const seasonScore = sportId === 1 ? seasonScoreFor(seasonScores, id, season, scoreCutoff) : null
   const teamScore = sportId === 1 ? teamScoreFor(teamScores, id, season, scoreCutoff) : null
+  const leagueGradeScores = sportId === 1 ? leagueSeasonGradesFor(teamScores, seasonScores, season, scoreCutoff) : []
   const leagueSeasonScores = sportId === 1 ? leagueScoresFor(teamScores, season, scoreCutoff, 'season') : []
+  const leagueSurpriseScores = sportId === 1 ? leagueSurpriseScoresFor(seasonScores, season, scoreCutoff) : []
   const leagueFormScores = sportId === 1 ? leagueScoresFor(teamScores, season, scoreCutoff, 'currentForm') : []
   const postseasonOdds = sportId === 1 ? postseasonOddsFor(postseasonOddsData, id, season, scoreCutoff) : null
   const standingsRows = (div?.teamRecords ?? []).map((t) => ({
@@ -613,7 +615,9 @@ async function loadTeam(id, asOf) {
       : null,
     seasonScore,
     teamScore,
+    leagueGradeScores,
     leagueSeasonScores,
+    leagueSurpriseScores,
     leagueFormScores,
     postseasonOdds,
     transactionsPage,
@@ -663,7 +667,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, seasonScore, teamScore, leagueSeasonScores, leagueFormScores, postseasonOdds, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
+  const { team, season, record, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -731,7 +735,9 @@ export function TeamPage({ id, asOf, sportId }) {
             snapshot={teamScore}
             surprise={seasonScore}
             teamId={team.id}
+            leagueGradeScores={leagueGradeScores}
             leagueSeasonScores={leagueSeasonScores}
+            leagueSurpriseScores={leagueSurpriseScores}
             leagueFormScores={leagueFormScores}
           />
         )}
