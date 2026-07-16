@@ -1,21 +1,24 @@
-// Reveal-only, cumulative-through-the-revealed-half plate-umpire consistency +
-// favor for the box score's StatBox card — a per-game companion to the season
-// aggregate in umpires.js. Mirrors challenges.js's pattern exactly: computed
-// only inside a SealBox's reveal render function, clamped to the reached half
-// via halfOrder, so a later half's missed calls / favor never reach the DOM —
+// Reveal-only, cumulative-through-the-revealed-half plate-umpire favor (net
+// run-expectancy swing) and its single worst missed call so far, for the box
+// score's StatBox card — a per-game companion to the season aggregate in
+// umpires.js. Mirrors challenges.js's pattern exactly: computed only inside a
+// SealBox's reveal render function, clamped to the reached half via
+// halfOrder, so a later half's missed calls / favor never reach the DOM —
 // see .scratch/umpire-accuracy/consistency-favor-scope.md §3 for why this
 // needs the same gating as ABS challenges rather than the free-standing
 // season card (a per-half favor figure is derived from THIS game's own
 // ball/strike calls up to the current point, which is score-adjacent in-game
-// state, same as a challenge that can flip a called third strike).
+// state, same as a challenge that can flip a called third strike). Naming a
+// specific worstCall play only surfaces what's already visible once its half
+// is revealed — no new spoiler surface, just more specific than the net
+// figure alone.
 //
 // The run-expectancy TABLE itself (public/data/run-expectancy.json) is a
 // static, same-origin, league-wide file with no game or score information —
 // safe to fetch eagerly, same footing as vsTeamSplits.js/highlights.js's raw
 // fetch. Only the SELECTOR that combines it with this game's own plays is
 // reveal-only.
-import { estimateGameConsistency } from '../lib/euz.js'
-import { pitchFavor } from '../lib/runExpectancy.js'
+import { pitchFavor, stateAfterBall, stateAfterStrike } from '../lib/runExpectancy.js'
 
 const HALF_PLATE = 8.5 / 12
 const BALL_R = 1.45 / 12
@@ -48,12 +51,39 @@ function halfOrder(inning, half) {
   return half === 'bottom' ? inning * 2 : inning * 2 - 1
 }
 
-// Cumulative plate-umpire consistency + favor through (throughInning,
-// throughHalf) inclusive. `table` is the (possibly null) result of
-// fetchRunExpectancy() — favor degrades to null when it hasn't loaded or
-// public/data/run-expectancy.json hasn't been built yet, but consistency
-// still works (it needs no external table). Returns null before any called
-// pitch has been revealed.
+// Attribute one missed call to a single zone edge — the boundary it's most on
+// the wrong side of (expanded misses, clearance < 0) or nearest to (squeezed
+// misses, clearance > 0 but smallest) — plus how far off that edge it was, in
+// inches. Deliberately mirrors gen-umpire-accuracy.mjs's missRegion exactly
+// (same formula, same batter-oriented horizontal flip) so the live "worst
+// call" edge and the season zone-map tendency never disagree about which
+// edge a given pitch belongs to.
+function missEdge(pX, pZ, top, bot, batSide) {
+  const bx = batSide === 'L' ? -pX : pX
+  const clearances = {
+    high: top + BALL_R - pZ, // <0 ⇒ above the zone
+    low: pZ - (bot - BALL_R), // <0 ⇒ below the zone
+    inside: HALF_PLATE + BALL_R - bx, // <0 ⇒ too far inside
+    outside: bx + (HALF_PLATE + BALL_R), // <0 ⇒ too far outside
+  }
+  let edge = 'high'
+  let min = Infinity
+  for (const [k, v] of Object.entries(clearances)) {
+    if (v < min) {
+      min = v
+      edge = k
+    }
+  }
+  return { edge, inches: Math.abs(min) * 12 }
+}
+
+// Cumulative plate-umpire favor through (throughInning, throughHalf)
+// inclusive, plus the single biggest missed call by |favor| seen along the
+// way. `table` is the (possibly null) result of fetchRunExpectancy() — both
+// favor and worstCall degrade to null when it hasn't loaded or
+// public/data/run-expectancy.json hasn't been built yet (neither can be
+// computed without it). Returns null before any called pitch has been
+// revealed.
 export function selectUmpireFavor(feed, table, throughInning, throughHalf) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const limit = halfOrder(throughInning, throughHalf)
@@ -61,10 +91,11 @@ export function selectUmpireFavor(feed, table, throughInning, throughHalf) {
   let bases = [null, null, null]
   let outs = 0
   let curHalfKey = null
-  const consistencyPitches = []
+  let calledAny = false
   let favorAway = 0
   let favorHome = 0
   let hasFavor = false
+  let worstCall = null
 
   for (const p of plays) {
     const inning = p.about?.inning
@@ -81,6 +112,8 @@ export function selectUmpireFavor(feed, table, throughInning, throughHalf) {
     const preBaseMask = (bases[0] ? 1 : 0) | (bases[1] ? 2 : 0) | (bases[2] ? 4 : 0)
     const preOuts = Math.min(outs, 2)
     const battingAway = half === 'top' // top bats away, bottom bats home
+    const batter = p.matchup?.batter ?? null
+    const batSide = p.matchup?.batSide?.code ?? 'R'
 
     let prevCount = { balls: 0, strikes: 0 } // resets per play — see gen-run-expectancy.mjs's documented edge case
     for (const ev of p.playEvents ?? []) {
@@ -101,8 +134,7 @@ export function selectUmpireFavor(feed, table, throughInning, throughHalf) {
       const inX = Math.abs(c.pX) <= HALF_PLATE + BALL_R
       const inZ = c.pZ <= top + BALL_R && c.pZ >= bot - BALL_R
       const actualStrike = inX && inZ
-
-      consistencyPitches.push({ pX: c.pX, pZ: c.pZ, strikeCall })
+      calledAny = true
 
       // A pre-pitch count outside 0–3 balls / 0–2 strikes is corrupted feed
       // data (a 4th ball ends the plate appearance) — rare, see
@@ -112,6 +144,39 @@ export function selectUmpireFavor(feed, table, throughInning, throughHalf) {
         const favor = pitchFavor(table, preBaseMask, preOuts, preCount.balls, preCount.strikes, actualStrike)
         if (battingAway) favorAway += favor
         else favorHome += favor
+
+        if (worstCall == null || Math.abs(favor) > Math.abs(worstCall.favor)) {
+          const { edge, inches } = missEdge(c.pX, c.pZ, top, bot, batSide)
+          // The scorebook code this pitch itself produced, if it ended the
+          // plate appearance (strike three / ball four) — otherwise just the
+          // count it left behind. Mirrors stateAfterStrike/stateAfterBall's
+          // own reset-to-0 branch, so it never disagrees with the run-value
+          // math pitchFavor just did above.
+          const afterLabel =
+            strikeCall && preCount.strikes === 2
+              ? 'K'
+              : !strikeCall && preCount.balls === 3
+                ? 'BB'
+                : (() => {
+                    const after = strikeCall
+                      ? stateAfterStrike(preBaseMask, preOuts, preCount.balls, preCount.strikes)
+                      : stateAfterBall(preBaseMask, preOuts, preCount.balls, preCount.strikes)
+                    return `${after.balls}-${after.strikes}`
+                  })()
+          worstCall = {
+            inning,
+            half,
+            batterId: batter?.id ?? null,
+            batterName: batter?.fullName ?? '',
+            strikeCall, // what the ump called — true = strike, false = ball
+            edge, // 'high' | 'low' | 'inside' | 'outside'
+            inches,
+            favor,
+            preBalls: preCount.balls,
+            preStrikes: preCount.strikes,
+            afterLabel,
+          }
+        }
       }
     }
 
@@ -128,11 +193,10 @@ export function selectUmpireFavor(feed, table, throughInning, throughHalf) {
     }
   }
 
-  if (!consistencyPitches.length) return null
+  if (!calledAny) return null
   return {
-    called: consistencyPitches.length,
-    consistency: estimateGameConsistency(consistencyPitches), // { consistent, called } or null (thin sample)
     favorAway: hasFavor ? favorAway : null,
     favorHome: hasFavor ? favorHome : null,
+    worstCall,
   }
 }

@@ -3685,18 +3685,29 @@ body {
   margin: 4px 0 10px;
 }
 
+/* Same button language as .stepnav__btn (the Lineups/Innings/Box row this
+   sits beside on the shared iPad/desktop chrome row, min-width:740px) —
+   condensed uppercase display type at a matching height, not the taller
+   sentence-case body-font button this used to be. */
 .inningnav button {
-  min-height: var(--tap-min);
+  min-height: 34px;
   padding: 0 14px;
   border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--text-body);
-  font-family: var(--font-body);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-semibold);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   cursor: pointer;
   box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.inningnav button:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 .inningnav button:disabled {
@@ -3958,14 +3969,29 @@ body {
   color: var(--text-caption);
 }
 
-/* Plate umpire consistency + favor through the half — a compact sibling to
-   .abs (same title treatment). Both figures are siblings in ONE .statcast
-   grid (consistency a plain tile, favor its own card — see .favormeter
-   below), so the shared auto-fit grid splits them 50/50 when both exist,
-   same as the Statcast superlatives row's own tiles. */
+/* Plate umpire: the worst missed call so far, then the net favor it's part of
+   — a compact sibling to .abs (same title treatment). */
 .umpfavor {
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+}
+/* .umpfavor__row: same idea as .bs__duo/.bs__col (BoxScore.jsx) — a column
+   on a phone (each card its own natural height), a real two-up grid at the
+   app's shared min-width:740px breakpoint (iPad/desktop) where the two cards
+   sit side by side AND match height — grid's default align-items: stretch
+   (unset here, so it applies) stretches the shorter card to the row's full
+   height instead of leaving the two top-aligned at their own heights. */
+.umpfavor__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (min-width: 740px) {
+  .umpfavor__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 .umpfavor__title {
   display: block;
@@ -3975,14 +4001,176 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-  margin-bottom: 8px;
 }
-/* Nested reuse of .statcast's tile grid — reset its own top rule/spacing
-   since .umpfavor already supplies one. */
-.umpfavor .statcast {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
+
+/* The worst-call card: label, a fixed-scale zone diagram beside the call
+   pills, a batter/inning locator, and the before→after count blink. Same
+   card chrome as .statcast__card/.favormeter (paper-2 fill, hairline border,
+   inset shadow) so it reads as their sibling. */
+.wcall {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+.wcall__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wcall__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.wcall__body {
+  display: grid;
+  grid-template-columns: 124px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.wcall__diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.wcall__svg {
+  width: 100%;
+  max-width: 124px;
+  display: block;
+}
+/* The zone rectangle: a fixed illustrative shape (schematic, not to-scale per
+   batter — same footing as UmpireZoneMap's 3×3 grid), NOT the crossed edge —
+   see wcallGeometry in StatBox.jsx for why the frame never rescales per
+   pitch. */
+.wcall__zone {
+  fill: var(--surface-inset);
+  stroke: var(--border-hairline);
+  stroke-width: 1.5;
+}
+.wcall__edgeline {
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.wcall__bracket {
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+}
+.wcall__ball {
+  fill: var(--surface-inset);
+  stroke-width: 1.6;
+}
+.wcall__ink--clay { stroke: var(--clay); fill: var(--clay); }
+.wcall__ink--field { stroke: var(--field); fill: var(--field); }
+.wcall__edgeword {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+.wcall__side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wcall__calls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-family: var(--font-display);
+}
+.wcall__pill {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.wcall__pill--wrong {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.wcall__pill--right {
+  background: var(--field-soft);
+  color: var(--field);
+}
+.wcall__arrow {
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+.wcall__locator {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.wcall__locator b {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+
+/* The before→after count blink — see CountBlink in StatBox.jsx. Fires once
+   per mount, never loops; --marker is the app's existing highlighter-yellow
+   "watch this" flag (used elsewhere for the same "pay attention" job), not a
+   new color. */
+.wcall__count {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+}
+.wcall__count-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  margin-right: 1px;
+}
+.wcall__count-old {
+  color: var(--graphite-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  animation: wcall-count-old var(--dur-slow) var(--ease-out) 1;
+}
+.wcall__count-arrow {
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+.wcall__count-new {
+  padding: 0 4px;
+  border-radius: var(--radius-xs);
+  color: var(--text-heading);
+  animation: wcall-count-new 1.6s var(--ease-out) 1;
+}
+@keyframes wcall-count-old {
+  0% { opacity: 1; }
+  100% { opacity: 0.55; }
+}
+@keyframes wcall-count-new {
+  0% { background: var(--marker); }
+  100% { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wcall__count-old, .wcall__count-new { animation: none; }
+  .wcall__count-old { opacity: 0.55; }
 }
 
 /* The favor lean-bar: two club logos flanking a track whose fill grows from
@@ -4000,6 +4188,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* No-op at its own natural height; centers the track/caption when the
+     iPad/desktop .umpfavor__row grid stretches this card to match a taller
+     worst-call card beside it. */
+  justify-content: center;
   gap: 8px;
   padding: 10px 8px;
   background: var(--paper-2);
