@@ -565,13 +565,14 @@ export function selectIsFinal(feed) {
   return feed?.gameData?.status?.abstractGameState === 'Final'
 }
 
-// Coarse game-state flags for the delayed/suspended/postponed banner.
+// Coarse game-state flags for the delayed/suspended/postponed/warmup banner.
 // Structural metadata, not a score — safe to render unconditionally, same as
 // selectHasStarted above. `detailedState` carries MLB's specific phrasing
-// ("Delayed Start: Rain", "Suspended: Rain", "Postponed"); `reason` is the
-// separate free-text cause field the feed sometimes also carries. Works from
-// either a full live feed (`feed.gameData.status`) or a slate row already
-// normalized by schedule.js's normalizeGame (same field names, flattened).
+// ("Delayed Start: Rain", "Suspended: Rain", "Postponed", "Warmup"); `reason`
+// is the separate free-text cause field the feed sometimes also carries.
+// Works from either a full live feed (`feed.gameData.status`) or a slate row
+// already normalized by schedule.js's normalizeGame (same field names,
+// flattened).
 export function selectGameStatus(source) {
   const status = source?.gameData?.status ?? source ?? {}
   const detailedState = status.detailedState ?? ''
@@ -580,11 +581,26 @@ export function selectGameStatus(source) {
   const isPostponed = lower.includes('postponed')
   const isSuspended = lower.includes('suspended')
   const isDelayed = lower.includes('delayed')
+  // Exact match, not a substring test — "Warmup" is the literal detailedState
+  // MLB posts between "Pre-Game" and "In Progress" while the teams take the
+  // field, mirrored by the placeholder "Game Advisory" play
+  // computeHalfInningFeed excludes from the play-by-play (see
+  // GAME_ADVISORY_EVENT_TYPE in api/playbyplay.js) so it never surfaces there
+  // as a bogus at-bat card.
+  const isWarmup = lower === 'warmup'
   // Coarsest-first badge label, or null for a normal game. Postponed beats
-  // suspended beats delayed, matching how MLB's own detailedState phrasing
-  // nests them (a postponed game is never also "delayed").
-  const label = isPostponed ? 'Postponed' : isSuspended ? 'Suspended' : isDelayed ? 'Delayed' : null
-  return { detailedState, reason, isDelayed, isSuspended, isPostponed, label }
+  // suspended beats delayed beats warmup, matching how MLB's own detailedState
+  // phrasing nests them (a postponed game is never also "delayed").
+  const label = isPostponed
+    ? 'Postponed'
+    : isSuspended
+      ? 'Suspended'
+      : isDelayed
+        ? 'Delayed'
+        : isWarmup
+          ? 'Warmups'
+          : null
+  return { detailedState, reason, isDelayed, isSuspended, isPostponed, isWarmup, label }
 }
 
 // In-game delays (rain, etc.) for the between-half-innings notice (see

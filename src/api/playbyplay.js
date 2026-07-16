@@ -53,6 +53,17 @@ export const NON_PA_EVENT_TYPES = new Set([
   'wild_pitch', 'passed_ball', 'balk',
 ])
 
+// A placeholder top-level play the feed uses to log pregame/mid-game status
+// transitions (Pre-Game -> Warmup -> In Progress, or a delay's own "Status
+// Change" advisories) as nested "Game Advisory" playEvents. It carries a real
+// matchup (whoever is next due up to bat/pitch) but is never an actual plate
+// appearance, so it's checked alongside NON_PA_EVENT_TYPES anywhere a play's
+// eventType decides PA/BF counting — otherwise it renders as a bogus at-bat
+// card with an empty diamond (verified live, gamePk 823440, the half hour
+// before first pitch). See api/select.js's selectGameStatus (`isWarmup`) for
+// the structural, spoiler-free notice built from the same detailedState.
+export const GAME_ADVISORY_EVENT_TYPE = 'game_advisory'
+
 // Non-pitch playEvents that get their own interstitial note in the feed: mound
 // visits, pitching changes, ejections, and the fielding-side moves (a fresh
 // defender, or a player who stays in the game at a new position — 'X remains
@@ -453,7 +464,12 @@ export function firstPAIndexByBatter(feed) {
   const first = new Map()
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const bid = p.matchup?.batter?.id
-    if (bid == null || NON_PA_EVENT_TYPES.has(p.result?.eventType)) continue
+    if (
+      bid == null ||
+      NON_PA_EVENT_TYPES.has(p.result?.eventType) ||
+      p.result?.eventType === GAME_ADVISORY_EVENT_TYPE
+    )
+      continue
     if (!first.has(bid)) first.set(bid, p.about?.atBatIndex ?? null)
   }
   return first
@@ -635,9 +651,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // PA's playEvents (see the header comment above); such a play carries the
     // PREVIOUS batter's stale matchup.batter with a substitution's prose as its
     // description, which would otherwise be mistaken for that batter's own card.
-    // Same guard `pitchers.js` uses for batters-faced counts.
+    // The pregame/mid-game "Game Advisory" placeholder (GAME_ADVISORY_EVENT_TYPE)
+    // is excluded the same way — it carries the NEXT batter's matchup instead of
+    // a stale one, but is just as much not a real plate appearance. Same guard
+    // `pitchers.js` uses for batters-faced counts.
     const isRealPA =
-      play.result?.type === 'atBat' && batterId != null && !NON_PA_EVENT_TYPES.has(play.result?.eventType)
+      play.result?.type === 'atBat' &&
+      batterId != null &&
+      !NON_PA_EVENT_TYPES.has(play.result?.eventType) &&
+      play.result?.eventType !== GAME_ADVISORY_EVENT_TYPE
     const runners = play.runners ?? []
 
     if (isRealPA) {
