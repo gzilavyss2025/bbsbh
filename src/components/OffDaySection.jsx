@@ -8,14 +8,16 @@ import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 // The clubs NOT playing on the slate's date, shown below the games as small
 // gameday-styled cards — same framed, overscaled logo tile the slate matchup
 // cards use (see .gamecard__logobox), scaled down. Tapping a card opens that
-// team's page, carrying the date/level as the spoiler-safe cutoff (teamPath's
-// `d`/`s`) just like every other in-app team link. Any level — each `team`
-// carries its own name/mascot straight from statsapi (see fetchTeams), so
-// this needs no MLB-only static id map. The caller only renders it when the
-// slate actually has games (an empty All-Star-break day isn't an "off day"
-// for a whole league). Sits above the Day Recap on a past day, below the
-// games on a current one — its one fixed home in the list.
-export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, dateStr, sportId }) {
+// team's page with NO spoiler cutoff: teamPath's `d`/`s` hint exists to
+// protect a game you followed the link from, but a club on this list has no
+// game on `dateStr` — there's nothing here for a cutoff to protect, so
+// passing one anyway just shows a "stats frozen" banner over nothing. Any
+// level — each `team` carries its own name/mascot straight from statsapi (see
+// fetchTeams), so this needs no MLB-only static id map. The caller only
+// renders it when the slate actually has games (an empty All-Star-break day
+// isn't an "off day" for a whole league). Sits above the Day Recap on a past
+// day, below the games on a current one — its one fixed home in the list.
+export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds }) {
   const navigate = useNav()
   if (!teams?.length) return null
   return (
@@ -27,7 +29,7 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds, dat
             <OffDayCard
               team={team}
               pinned={team.id === favoriteTeamId || !!favoriteAffiliateIds?.has(team.id)}
-              onOpen={() => navigate(teamPath(team.id, { d: dateStr, s: sportId }))}
+              onOpen={() => navigate(teamPath(team.id))}
             />
           </li>
         ))}
