@@ -8,10 +8,11 @@
 // imports) so the team page's "how this is calculated" explainer can run the
 // same math client-side — re-exported here so this script stays the
 // existing import site for test/team-score.test.js.
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { pythagoreanPct, qualityScoreFromGames, CURRENT_FORM_GAMES } from '../src/api/teamScoreFormula.js'
+import { openDb, dumpGroup } from './lib/db.js'
 
 export { pythagoreanPct, qualityScoreFromGames }
 
@@ -125,12 +126,34 @@ async function fetchCompletedGames(asOf) {
   return games
 }
 
-async function loadOutput() {
-  try {
-    return JSON.parse(await readFile(out, 'utf8'))
-  } catch {
-    return { version: 1, generatedAt: null, seasons: {} }
+const upsertSnapshot = (db) =>
+  db.prepare(
+    `INSERT INTO team_snapshots (season, team_id, date, metric, payload_json)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(season, team_id, date, metric) DO UPDATE SET payload_json = excluded.payload_json`,
+  )
+
+// Reconstructs public/data/team-score.json's original nested shape —
+// { seasons: { <year>: { byTeamId: { <teamId>: { <date>: { asOf, season, currentForm } } } } } } —
+// from the flat team_snapshots table (docs/adr/0021). `asOf` comes back from
+// the table's own `date` column rather than being duplicated in payload_json.
+function exportJson(db) {
+  const rows = db
+    .prepare(
+      `SELECT * FROM team_snapshots WHERE metric IN ('quality', 'current_form')
+       ORDER BY season, team_id, date, metric DESC`, // DESC: 'quality' sorts before 'current_form'
+    )
+    .all()
+  const seasons = {}
+  for (const row of rows) {
+    const season = (seasons[row.season] ??= { byTeamId: {} })
+    const byDate = (season.byTeamId[row.team_id] ??= {})
+    const entry = (byDate[row.date] ??= { asOf: row.date })
+    const payload = JSON.parse(row.payload_json)
+    if (row.metric === 'quality') entry.season = payload
+    else entry.currentForm = payload
   }
+  return { version: 1, generatedAt: new Date().toISOString(), seasons }
 }
 
 function datesFromArgs(args) {
@@ -147,23 +170,23 @@ function datesFromArgs(args) {
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   const dates = datesFromArgs(args)
-  const existing = await loadOutput()
-  const seasons = { ...(existing.seasons ?? {}) }
+  const db = await openDb()
+  const insert = upsertSnapshot(db)
   for (const asOf of dates) {
     const games = await fetchCompletedGames(asOf)
     const season = Number(asOf.slice(0, 4))
     const snapshots = buildTeamScoreSnapshots({ games, asOf })
-    const oldSeason = seasons[season] ?? { byTeamId: {} }
-    const byTeamId = { ...oldSeason.byTeamId }
     for (const [teamId, snapshot] of Object.entries(snapshots)) {
-      byTeamId[teamId] = { ...(byTeamId[teamId] ?? {}), [asOf]: snapshot }
+      insert.run(season, Number(teamId), asOf, 'quality', JSON.stringify(snapshot.season))
+      insert.run(season, Number(teamId), asOf, 'current_form', JSON.stringify(snapshot.currentForm))
     }
-    seasons[season] = { byTeamId }
     console.log(`${asOf}: ${Object.keys(snapshots).length} MLB team-score snapshots`)
   }
+  await dumpGroup(db, 'team-snapshots')
   await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), seasons }))
+  await writeFile(out, JSON.stringify(exportJson(db)))
   console.log(`wrote ${out}`)
+  db.close()
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()

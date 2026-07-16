@@ -26,6 +26,27 @@ exercising the game-select → team-info → innings flow against a live or rece
 etc.). `.claude/skills/run.md` documents this loop end to end. `e2e/smoke.spec.js` is
 the one long-lived example spec; write and delete throwaway specs alongside it.
 
+## The SQLite data layer (`lib/schema.sql`, `lib/db.js`)
+
+`gen-game-score.mjs`, `gen-team-score.mjs`, and `gen-season-score.mjs` write into
+a shared SQLite database instead of hand-rolling their own JSON read-merge-write
+cycle, then export the same JSON shapes the reader modules already expect — see
+`docs/adr/0021`. `openDb()` reconstitutes an in-memory database from committed TEXT
+dumps (`scripts/data/*.sql`, plain `INSERT` statements — never a binary `.db`, so
+PR diffs stay reviewable); `dumpGroup(db, name)` re-dumps only the table-group a
+generator owns. **Dumps are split one file per group, not shared**, because
+`game_scores` and `team_snapshots` are written by generators on independently
+scheduled crons (every 10 minutes vs. once nightly) — a shared file would let
+whichever workflow pushes second silently clobber the other's table with a stale
+copy. Add a new table = add a new group in `db.js` + extend `schema.sql`; a new
+generator that needs to join against existing tables is the reason this layer
+exists, so wire it in rather than adding another bespoke JSON merge. Uses
+`node:sqlite` (Node ≥22.5, stable since Node 26) rather than `better-sqlite3` —
+the workflows run generators with no `npm install` step, and a built-in avoids
+adding install latency to the 10-minute game-score cron. `migrate-json-to-sqlite.mjs`
+is the one-time backfill that seeded the dumps from the pre-migration JSON files;
+it's not part of any cron.
+
 ## Nightly-cron generators (`update-nightly-data.yml`)
 
 Precomputed because they're too heavy (COST) to build on a page load. Normally you
@@ -143,12 +164,16 @@ don't run these by hand.
   cutoff, stores actual-vs-expected as the headline, and keeps earned pace plus
   last-30 form as diagnostics. Market baselines live in the hand-curated
   `season-expectations-seed.json`; incomplete seasons fall back to Marcel. See
-  `docs/season-score.md` and ADR-0018.
+  `docs/season-score.md` and ADR-0018. Backed by the SQLite layer above
+  (`team_snapshots`, `metric='surprise'`); `public/data/season-score.json` is
+  exported from the table, byte-for-byte the same reader shape.
 - `gen-team-score.mjs` → `public/data/team-score.json` — date-keyed MLB Quality
   plus a last-10 Current Form diagnostic. Quality blends 60% actual wins with
   40% Pythagorean wins. The browser combines same-cutoff Quality and Season
   Surprise into the headroom-aware Season Grade; see `docs/season-grade.md` and
-  ADR-0020.
+  ADR-0020. Backed by the SQLite layer above (`team_snapshots`,
+  `metric='quality'`/`'current_form'`); `public/data/team-score.json` is
+  exported from the table.
 - `gen-team-transactions.mjs` → `public/data/team-transactions/{season}.json` —
   an MLB-only, season-chunked roster-move story feed for all 30 organizations.
   The nightly job rebuilds only the current season; once the season file is
@@ -183,7 +208,9 @@ don't run these by hand.
   recomputed otherwise) is a hand-run **`--rescore`**: re-scores every gamePk
   already in the file plus the trailing window, checkpointing every 200 so a
   long run resumes cleanly. `computeGameScore` is exported and the sweep is
-  entry-point-guarded, so the formula is importable for tests.
+  entry-point-guarded, so the formula is importable for tests. Backed by the
+  SQLite layer above (`game_scores`); `public/data/game-score.json` is
+  exported from the table.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 

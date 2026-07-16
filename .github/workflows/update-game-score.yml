@@ -33,7 +33,7 @@ jobs:
           token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 26 # node:sqlite ships stable here (docs/adr/0021)
 
       - name: Game score
         run: node scripts/gen-game-score.mjs
@@ -42,13 +42,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-score.json
+          git add public/data/game-score.json scripts/data/game-scores.sql
           git diff --cached --quiet && exit 0
           git commit -m "Update game score"
           # This cron's :00 minute collides with update-nightly-data.yml's
           # 11:00 UTC run once a day — retry with a rebase on a push race
           # instead of silently dropping this run's scores (see that
           # workflow's header for the collision this same push shape once hit).
+          # scripts/data/game-scores.sql is this workflow's own dump file
+          # (docs/adr/0021, scripts/lib/db.js) — the nightly workflow never
+          # touches it, so the rebase always replays clean, same as the JSON.
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin "$(git rev-parse --abbrev-ref HEAD)"

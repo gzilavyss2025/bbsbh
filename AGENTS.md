@@ -24,3 +24,8 @@ These rules apply to every agent and every session in this repository.
 - If a change has no user-visible surface, state that a localhost example is not applicable instead of implying that one exists.
 
 See `docs/development.md` for the expanded workflow and reserved ports.
+
+## Architecture docs
+
+- This repo's architecture decisions live in `CLAUDE.md` (root + nested `src/CLAUDE.md`, `src/api/CLAUDE.md`, `scripts/CLAUDE.md`) and `docs/adr/`. Read the relevant one before touching the data layer, generators, or spoiler-reveal logic — don't infer architecture from a single file's diff.
+- As of `docs/adr/0021-sqlite-data-layer.md`: `gen-game-score.mjs`, `gen-team-score.mjs`, and `gen-season-score.mjs` now author their `public/data/*.json` output through a shared SQLite layer (`scripts/lib/schema.sql`, `scripts/lib/db.js`) instead of hand-rolled JSON merges, so cross-file joins (e.g. Season Grade) don't need another one-off merge function. The committed source of truth is TEXT dumps (`scripts/data/*.sql`), never a binary `.db` — see the ADR before adding a new table or generator to this layer.
