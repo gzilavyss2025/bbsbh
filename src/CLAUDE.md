@@ -90,7 +90,9 @@ typography, spacing, effects, fonts). The visual metaphor is a paper scorebook:
 manila paper, navy ink, pencil graphite, kraft-tape amber for seals. Use the
 semantic CSS variables (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.)
 rather than raw hex. Numbers render as mono tabular figures; structural labels are
-condensed uppercase. The global ALL-CAPS invariant (see the block comment in
+condensed uppercase. Type size, weight, leading, and tracking must use the semantic
+roles in `tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc
+values in `index.css`. The global ALL-CAPS invariant (see the block comment in
 `src/index.css`) is guarded by `scripts/check-caps.mjs` (the CSS half) and
 `scripts/check-name-casing.mjs` (the JS half — no per-component
 `.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via

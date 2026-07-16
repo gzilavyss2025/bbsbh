@@ -63,51 +63,48 @@ export function TeamScoreCard({
   return (
     <section className={`team-score${open ? ' is-open' : ''}`} aria-label={`Season Grade through ${snapshot.asOf}`}>
       <div className="team-score__head">
-        <span>Season Grade</span>
+        <span>Season report</span>
         <em>through {snapshot.asOf}</em>
       </div>
 
-      <ScoreRow
-        label={grade ? gradeLabel(grade.score) : 'Season Grade'}
+      <GradeHero
+        grade={grade}
         summary={gradeSummary}
         rank={gradeRank}
         league={leagueGradeScores}
         teamId={teamId}
-        metaText={grade ? `Quality ${scoreValue(snapshot.season)} · Vs. expectation ${scoreValue(surprise)}` : ''}
         isOpen={open === 'grade'}
         onToggle={() => toggle('grade')}
-        hero
       />
 
-      <div className="team-score__drivers" aria-label="Season Grade drivers">
-        <ScoreRow
-          label="Quality"
-          summary={snapshot.season}
-          rank={qualityRank}
-          league={leagueSeasonScores}
-          teamId={teamId}
-          metaText={meta(snapshot.season)}
-          isOpen={open === 'quality'}
-          onToggle={() => toggle('quality')}
-        />
-        <ScoreRow
-          label="Vs. expectation"
-          summary={surprise}
-          rank={surpriseRank}
-          league={leagueSurpriseScores}
-          teamId={teamId}
-          metaText={surprise ? `${signed(surprise.residualWins)} wins vs. expected` : ''}
-          isOpen={open === 'surprise'}
-          onToggle={() => toggle('surprise')}
-        />
+      <div className="team-score__driver-group">
+        <span className="team-score__driver-heading">What built the grade</span>
+        <div className="team-score__drivers" aria-label="Season Grade drivers">
+          <ScoreRow
+            label="Quality"
+            summary={snapshot.season}
+            rank={qualityRank}
+            metaText={meta(snapshot.season)}
+            isOpen={open === 'quality'}
+            onToggle={() => toggle('quality')}
+            driver
+          />
+          <ScoreRow
+            label="Vs. expectation"
+            summary={surprise}
+            rank={surpriseRank}
+            metaText={surprise ? `${signed(surprise.residualWins)} wins vs. expected` : ''}
+            isOpen={open === 'surprise'}
+            onToggle={() => toggle('surprise')}
+            driver
+          />
+        </div>
       </div>
 
       <ScoreRow
         label={`Current form · Last ${snapshot.currentForm?.games ?? CURRENT_FORM_GAMES}`}
         summary={snapshot.currentForm}
         rank={formRank}
-        league={leagueFormScores}
-        teamId={teamId}
         metaText={meta(snapshot.currentForm)}
         isOpen={open === 'form'}
         onToggle={() => toggle('form')}
@@ -127,10 +124,47 @@ export function TeamScoreCard({
   )
 }
 
+function GradeHero({ grade, summary, rank, league, teamId, isOpen, onToggle }) {
+  return (
+    <div className={`team-score__grade${isOpen ? ' is-active' : ''}`}>
+      <button
+        type="button"
+        className="team-score__grade-button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? 'team-score-detail' : undefined}
+      >
+        <span className="team-score__grade-copy">
+          <span className="team-score__grade-kicker">Season Grade</span>
+          <strong>{grade ? gradeLabel(grade.score) : 'Not yet graded'}</strong>
+          <span>Quality, adjusted for the assignment</span>
+        </span>
+        <span className="team-score__grade-result">
+          {rank && <span className="team-score__rank">{ordinal(rank.rank)} of {rank.of}</span>}
+          <span className="team-score__grade-score">
+            {scoreValue(summary)}<small>/10</small>
+          </span>
+          <span className="team-score__breakdown">{isOpen ? 'Close breakdown' : 'See breakdown'}</span>
+        </span>
+      </button>
+      {summary?.score != null && league.length > 0 && (
+        <LeagueTrack league={league} ownScore={summary.score} teamId={teamId} />
+      )}
+    </div>
+  )
+}
+
 function ScoreDetail({ kind, grade, quality, surprise, form }) {
   const detail = kind === 'form' ? form : quality
+  const title = {
+    grade: 'Season Grade breakdown',
+    quality: 'Quality breakdown',
+    surprise: 'Vs. expectation breakdown',
+    form: 'Current form breakdown',
+  }[kind]
   return (
     <div id="team-score-detail" className="team-score__detail">
+      <p className="team-score__detail-title">{title}</p>
       <dl>
         {kind === 'grade' && grade && (
           <>
@@ -159,9 +193,9 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
   )
 }
 
-function ScoreRow({ label, summary, rank, league, teamId, metaText, isOpen, onToggle, hero = false, compact = false }) {
+function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, driver = false, compact = false }) {
   return (
-    <div className={`team-score__row${hero ? ' team-score__row--hero' : ''}${compact ? ' team-score__row--compact' : ''}`}>
+    <div className={`team-score__row${driver ? ' team-score__row--driver' : ''}${compact ? ' team-score__row--compact' : ''}${isOpen ? ' is-active' : ''}`}>
       <button
         type="button"
         className={`team-score__rowtop${isOpen ? ' is-active' : ''}`}
@@ -175,8 +209,10 @@ function ScoreRow({ label, summary, rank, league, teamId, metaText, isOpen, onTo
           <span className="team-score__score">{scoreValue(summary)}</span>
         </span>
       </button>
-      {!compact && summary?.score != null && league.length > 0 && (
-        <LeagueTrack league={league} ownScore={summary.score} teamId={teamId} />
+      {driver && summary?.score != null && (
+        <span className="team-score__meter" aria-hidden="true">
+          <span style={{ width: `${summary.score * 10}%` }} />
+        </span>
       )}
       {metaText && <span className="team-score__meta">{metaText}</span>}
     </div>
