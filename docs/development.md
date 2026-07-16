@@ -3,36 +3,33 @@
 How changes land in this repo, and why the deploy setup is shaped the way it is.
 The root `CLAUDE.md` carries a short summary and points here for the detail.
 
-## Two working modes
+## One working mode: branch and pull request
 
-The maintainer is the sole human developer here and wants a fast, direct loop —
-but in practice two different modes of working end up in this repo's history, and
-it's worth knowing which one you're in:
+Every local, interactive, autonomous, and remote agent session follows the same
+workflow:
 
-- **A local/interactive Claude Code CLI session** (the maintainer at a terminal,
-  driving directly): **work on `main`, commit and push after every change** — no
-  feature branches, no pull requests, no waiting for approval to push. Land each
-  self-contained change as its own commit with a clear message and push it straight
-  to `origin/main`. Still run `npm run lint` / `npm run build` before pushing so
-  `main` stays green.
-- **An autonomous or remote session** (Claude Code on the web, a GitHub-triggered
-  agent, or anything else running unattended/in the background): these are put on a
-  `claude/<slug>` branch and required to open a (draft) pull request by the harness
-  that launched them — this is enforced outside this repo, so it applies even though
-  it contradicts the bullet above. Don't fight it or try to force a direct push to
-  `main` from one of these; open the PR and let the maintainer merge it. This is
-  *why* the git log has a visible mix of direct `main` commits and `claude/*`
-  branch-then-merge commits — both are correct for the session that made them.
+1. Work on a task-specific branch, preferably in a dedicated worktree when several
+   agents are active.
+2. Keep work-in-progress on that branch and validate it locally.
+3. Push the branch only when useful for review or backup; avoid micro-pushes.
+4. Open a pull request and let the maintainer decide when to merge it.
+
+Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc preview
+without explicit maintainer authorization. Merging to `main` is the production
+deployment trigger and is intentionally controlled by the maintainer.
 
 ## Concurrent agents
 
-The maintainer sometimes runs several agent sessions at once, each getting its own
-`claude/*` branch — good for isolation, but they can still collide at merge time if
-two sessions touch the same files/lines while neither can see the other's in-flight
-work. To keep that cheap to untangle:
+The maintainer often runs several agents at once. Branches isolate commits, but
+agents sharing a checkout can still see and overwrite each other's uncommitted
+files. Treat isolation as a hard requirement:
 
-- Pull/rebase onto the latest `main` before starting; don't assume the base you
-  branched from is still current.
+- Before editing, inspect `git status`, the current branch, and relevant diffs.
+  Assume unfamiliar changes belong to another active agent.
+- Use a dedicated task branch and, when available, a dedicated worktree. Never
+  reset, stash, overwrite, reformat, or clean another agent's changes.
+- Check for file ownership overlap before touching a dirty file. If tasks overlap,
+  stop and coordinate rather than editing through the other change.
 - Keep each session's change scoped to the one task it was given rather than
   opportunistically touching unrelated files — smaller diffs collide less.
 - Say in the PR description which files you touched, so the maintainer can spot
@@ -44,34 +41,27 @@ work. To keep that cheap to untangle:
   `git.deploymentEnabled` below) — verify locally (`npm run dev` / `npm run e2e`)
   before opening the PR rather than expecting a preview URL on the PR check.
 
-## Shipping interactive changes (push straight to `main`)
+## Local visual handoff
 
-Interactive sessions with the maintainer push **straight to `main`** — commit each
-self-contained change and push it to `origin/main`, which Vercel auto-deploys to
-production. No `preview` branch, no look-before-you-ship staging step, no waiting
-for a "ship it." The maintainer has opted for the direct loop over the deploy-count
-savings a preview branch bought.
+For every user-visible change:
 
-- Still run `npm run lint` / `npm run build` before pushing so `main` stays green —
-  the direct-to-prod loop makes a red `main` a live-site problem.
-- Accumulate a few related edits into one meaningful commit rather than pushing after
-  every micro-tweak; each push is a production deploy counting against Vercel Hobby's
-  100/day cap (see Deployment below), so don't burn deploys on work-in-progress.
-- Screenshots from a Claude session are unreliable for this app — the sandbox
-  generally can't reach `statsapi.mlb.com`, so a screenshot shows broken/loading
-  state, not the real page. Verify locally (`npm run dev` / `npm run e2e`) before
-  pushing; the maintainer eyeballs visual changes on the live site after the deploy.
+- Run the relevant checks and start the first free reserved server: `npm run dev`,
+  then `npm run dev:2` through `dev:5` if another agent owns the earlier port.
+- Verify the exact route that demonstrates the change. Keep the server running so
+  the maintainer can inspect it after the handoff.
+- End the final message with a clickable example URL, not merely the server root;
+  for example, `http://localhost:5172/team/158` for a Brewers team-page change.
 
-This is only the **interactive** flow. The autonomous multi-agent `claude/*` PR flow
-(above) is unchanged — those branches still open PRs and don't deploy.
+For docs, scripts, or other changes with no visual surface, say explicitly that a
+localhost example is not applicable.
 
 ## Deployment
 
-Hosted on Vercel, auto-deploying `main` to production on every push. Two things in
-`vercel.json` exist specifically because concurrent-agent (and concurrent-branch)
-activity was burning through Vercel Hobby's 100-deployments/day cap (every push to
-every branch is its own deployment, so a feature-branch push *and* its later merge
-to `main` cost two) — this is a Hobby-plan account, so every deployment counts:
+Hosted on Vercel, auto-deploying `main` to production on every push. This is a
+Hobby-plan account, so production deployments are scarce. Agents must reduce them
+ruthlessly: keep work on PR branches, combine related changes, avoid unnecessary
+push/merge cycles, and leave the final merge timing to the maintainer. Two settings
+in `vercel.json` enforce part of that policy:
 
 - `git.deploymentEnabled: { "main": true, "*": false }` — skips deployments
   entirely for every branch except `main`. Preview any other branch locally
