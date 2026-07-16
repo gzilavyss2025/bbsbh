@@ -4,7 +4,7 @@ import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
 import { selectUmpireFavor, hasPitchTracking } from '../api/umpireFavor.js'
-import { teamLogoUrl } from '../lib/teams.js'
+import { teamLogoUrl, teamStripeGradient } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
@@ -282,6 +282,12 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
   const fillPct = Math.min(Math.abs(net) / FAVOR_SCALE_RUNS, 1) * 50
+  // The favored club's own primary/secondary colors, at full brightness, so
+  // the lean reads unmistakably as "that team's colors" rather than a
+  // generic accent — see lib/teams.js's teamStripeGradient. Falls back to
+  // the flat --winprob-away/--winprob-home pair (CSS) for an unmapped MiLB
+  // team with no known color pair.
+  const stripe = !even ? teamStripeGradient(towardAway ? awayId : homeId) : null
   return (
     <div className="favormeter">
       <div className="favormeter__track-row">
@@ -291,7 +297,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
           {!even && (
             <span
               className={`favormeter__fill favormeter__fill--${towardAway ? 'away' : 'home'}`}
-              style={{ width: `${fillPct}%` }}
+              style={{ width: `${fillPct}%`, ...(stripe ? { background: stripe } : {}) }}
               aria-hidden="true"
             />
           )}

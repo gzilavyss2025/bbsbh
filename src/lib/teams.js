@@ -413,6 +413,61 @@ export function teamTintColor(teamId, alpha = 0.22) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
+// Each MLB club's REAL primary + secondary brand colors — distinct from
+// TEAM_COLORS above, which deliberately picks ONE rival-distinguishing accent
+// (sometimes skipping a club's actual navy/blue on purpose). This pair is for
+// contexts that want a club's genuine two-tone identity at full brightness
+// (e.g. the box score's favor lean-bar diagonal stripe — StatBox.jsx), not a
+// subtle single-hue tint. Verified against teamcolorcodes.com/mlb-color-codes
+// (2026-07-16), not picked from memory — every other color in this file is
+// hand-picked for a DIFFERENT purpose (distinctiveness), so this couldn't
+// reuse that data even if it wanted to.
+const TEAM_COLOR_PAIRS = {
+  108: ['#003263', '#BA0021'], // Angels
+  109: ['#A71930', '#E3D4AD'], // Diamondbacks
+  110: ['#DF4601', '#000000'], // Orioles
+  111: ['#BD3039', '#0C2340'], // Red Sox
+  112: ['#0E3386', '#CC3433'], // Cubs
+  113: ['#C6011F', '#000000'], // Reds
+  114: ['#00385D', '#E50022'], // Guardians
+  115: ['#333366', '#C4CED4'], // Rockies
+  116: ['#0C2340', '#FA4616'], // Tigers
+  117: ['#002D62', '#EB6E1F'], // Astros
+  118: ['#004687', '#BD9B60'], // Royals
+  119: ['#005A9C', '#EF3E42'], // Dodgers
+  120: ['#AB0003', '#14225A'], // Nationals
+  121: ['#002D72', '#FF5910'], // Mets
+  133: ['#003831', '#EFB21E'], // Athletics
+  134: ['#27251F', '#FDB827'], // Pirates
+  135: ['#2F241D', '#FFC425'], // Padres
+  136: ['#0C2C56', '#005C5C'], // Mariners
+  137: ['#FD5A1E', '#27251F'], // Giants
+  138: ['#C41E3A', '#0C2340'], // Cardinals
+  139: ['#092C5C', '#8FBCE6'], // Rays
+  140: ['#003278', '#C0111F'], // Rangers
+  141: ['#134A8E', '#1D2D5C'], // Blue Jays
+  142: ['#002B5C', '#D31145'], // Twins
+  143: ['#E81828', '#002D72'], // Phillies
+  144: ['#CE1141', '#13274F'], // Braves
+  145: ['#27251F', '#C4CED4'], // White Sox
+  146: ['#00A3E0', '#EF3340'], // Marlins
+  147: ['#003087', '#E4002C'], // Yankees
+  158: ['#12284B', '#FFC52F'], // Brewers
+}
+
+// A diagonal, 100%-opacity two-tone stripe for `teamId` (MLB club or MiLB
+// affiliate, resolved to its parent org's pair via MILB_PARENT_ORG, same
+// fallback teamTintColor uses) — a plain CSS `background` value, ready to
+// drop on any element via inline style. Returns null for a team with no
+// known pair (an unaffiliated/complex-league MiLB id), so callers can fall
+// back to a flat color rather than render nothing.
+export function teamStripeGradient(teamId) {
+  const pair = TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]]
+  if (!pair) return null
+  const [a, b] = pair
+  return `repeating-linear-gradient(45deg, ${a} 0px, ${a} 6px, ${b} 6px, ${b} 12px)`
+}
+
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed
 // by the team id carried everywhere in the app. statsapi does expose these
 // (locationName / teamName), but every surface that wants a name already has
