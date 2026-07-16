@@ -230,7 +230,7 @@ async function loadTeam(id, asOf) {
       // page gets no card. Just the first 45-day page; "Load more" pages
       // further back on demand from inside the card itself.
       sportId === 1
-        ? loadMoreTeamTransactions(id, null, asOf)
+        ? loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false }))
         : Promise.resolve({ days: [], cursor: null, hasMore: false }),
     ])
 
@@ -654,7 +654,11 @@ export function TeamPage({ id, asOf, sportId }) {
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
   useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
-  const [showAllProspects, setShowAllProspects] = useState(false)
+  // Store which team's list was expanded rather than a free-floating boolean,
+  // so client-side navigation naturally starts every newly visited club at
+  // the top-10 preview without a prop-syncing effect.
+  const [expandedProspectsTeamId, setExpandedProspectsTeamId] = useState(null)
+  const showAllProspects = expandedProspectsTeamId === teamId
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
@@ -994,7 +998,7 @@ export function TeamPage({ id, asOf, sportId }) {
                 </tbody>
               </table>
               {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
-                <button type="button" className="pshistory__more" onClick={() => setShowAllProspects(true)}>
+                <button type="button" className="pshistory__more" onClick={() => setExpandedProspectsTeamId(teamId)}>
                   Show all {prospects.length} prospects
                 </button>
               )}

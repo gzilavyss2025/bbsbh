@@ -785,20 +785,27 @@ export function groupIntoStories(rows, ctx = {}) {
 const PAGE_DAYS = 45
 const seasonCache = new Map()
 
-// Fetches one season's file, session-cached (success AND a 404/error both
-// cache — a season that doesn't exist for this team never changes that
-// answer, same lifecycle as rehab.js). Degrades to null rather than throwing.
+// Fetches one season's file, session-caching successful reads and confirmed
+// 404s for completed seasons. Current-season 404s, server failures, malformed
+// JSON, and network errors are evicted and rethrown so the caller can keep a
+// retry affordance visible. A confirmed historical 404 alone resolves null.
 async function loadSeasonFile(season) {
   if (seasonCache.has(season)) return seasonCache.get(season)
-  const promise = (async () => {
-    try {
+  const promise = Promise.resolve()
+    .then(async () => {
       const res = await fetch(`/data/team-transactions/${season}.json`)
-      if (!res.ok) return null
+      if (!res.ok) {
+        if (res.status === 404 && season < currentYear()) return null
+        throw new Error(`team transactions ${res.status}`)
+      }
       return await res.json()
-    } catch {
-      return null
-    }
-  })()
+    })
+    .catch((error) => {
+      // Only evict if this is still the active request for the season; a
+      // future retry may already have installed its own promise.
+      if (seasonCache.get(season) === promise) seasonCache.delete(season)
+      throw error
+    })
   seasonCache.set(season, promise)
   return promise
 }

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
@@ -117,6 +117,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
   const [cursor, setCursor] = useState(initialCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [visibleCount, setVisibleCount] = useState(INITIAL_CARDS)
 
   // The day-grouped pages flattened into one chronological story sequence —
@@ -129,36 +130,45 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
 
   const scrollRef = useRef(null)
   const sentinelRef = useRef(null)
+  const loadingMoreRef = useRef(false)
 
   // Widens the visible slice (already-fetched days may hold more than's
   // currently shown) or, once that buffer is exhausted, fetches another
-  // page of days. Re-created each render (see the effect below) so it never
-  // closes over stale days/cursor/hasMore.
-  async function revealMore() {
-    if (loadingMore) return
+  // page of days. The ref closes the small gap before React commits the
+  // loading state, preventing duplicate observer/button requests.
+  const revealMore = useCallback(async () => {
+    if (loadingMoreRef.current) return
     if (visibleCount < flatStories.length) {
       setVisibleCount((n) => n + REVEAL_BATCH)
+      setLoadError(false)
       return
     }
     if (!hasMore) return
+    loadingMoreRef.current = true
     setLoadingMore(true)
-    const page = await loadMoreTeamTransactions(teamId, cursor, asOf)
-    setDays((prev) => [...prev, ...page.days])
-    setCursor(page.cursor)
-    setHasMore(page.hasMore)
-    setVisibleCount((n) => n + REVEAL_BATCH)
-    setLoadingMore(false)
-  }
+    setLoadError(false)
+    try {
+      const page = await loadMoreTeamTransactions(teamId, cursor, asOf)
+      setDays((prev) => [...prev, ...page.days])
+      setCursor(page.cursor)
+      setHasMore(page.hasMore)
+      setVisibleCount((n) => n + REVEAL_BATCH)
+    } catch {
+      setLoadError(true)
+    } finally {
+      loadingMoreRef.current = false
+      setLoadingMore(false)
+    }
+  }, [asOf, cursor, flatStories.length, hasMore, teamId, visibleCount])
 
   // A trailing sentinel inside the scroll row triggers revealMore once it's
   // within reach — a horizontal rootMargin lookahead so more cards are ready
-  // before the user physically swipes to the end. Runs after every render
-  // (no deps) so the observer's callback always closes over current state;
-  // re-creating an IntersectionObserver for a deck this size is cheap.
+  // before the user physically swipes to the end. The button rendered beside
+  // it remains a keyboard-accessible fallback when the API is unavailable.
   useEffect(() => {
     const root = scrollRef.current
     const target = sentinelRef.current
-    if (!root || !target) return
+    if (!root || !target || typeof IntersectionObserver === 'undefined') return
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) revealMore()
@@ -167,7 +177,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
     )
     observer.observe(target)
     return () => observer.disconnect()
-  })
+  }, [revealMore])
 
   if (!flatStories.length) return null
 
@@ -177,10 +187,27 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
         <span>Transactions</span>
         {asOf && <em>through {asOf}</em>}
       </div>
-      <div className="txcard__scroll" ref={scrollRef}>
+      <div
+        className="txcard__scroll"
+        ref={scrollRef}
+        role="region"
+        aria-label="Team transaction stories"
+        tabIndex={0}
+      >
         {visibleStories.map((story) => (
           <TxStory key={story.id} story={story} />
         ))}
+        {(visibleCount < flatStories.length || hasMore) && (
+          <button
+            type="button"
+            className="txcard__more"
+            onClick={revealMore}
+            disabled={loadingMore}
+            aria-live="polite"
+          >
+            {loadingMore ? 'Loading transactions…' : loadError ? 'Try loading again' : 'Load more transactions'}
+          </button>
+        )}
         <div className="txcard__sentinel" ref={sentinelRef} aria-hidden="true" />
       </div>
     </section>

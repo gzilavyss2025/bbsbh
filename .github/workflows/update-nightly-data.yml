@@ -2,7 +2,7 @@ name: Update nightly data
 
 # Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
 # umpire plate accuracy, minor-league leaders, game call-outs, former
-# teammates, vs-team splits, and milestone watch (each documented at the top
+# teammates, vs-team splits, milestone watch, and team transactions (each documented at the top
 # of its own scripts/gen-*.mjs) in ONE workflow
 # with a SINGLE commit+push, instead of eight separate crons each triggering
 # its own Vercel deployment. Consolidated 2026-07-11 after two of the eight
@@ -89,12 +89,16 @@ jobs:
         id: team-score
         continue-on-error: true
         run: node scripts/gen-team-score.mjs
+      - name: Team transactions
+        id: team-transactions
+        continue-on-error: true
+        run: node scripts/gen-team-transactions.mjs
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Update nightly data"
           git push
 
@@ -113,7 +117,8 @@ jobs:
           steps.milestones.outcome == 'failure' ||
           steps.rookies.outcome == 'failure' ||
           steps.season-score.outcome == 'failure' ||
-          steps.team-score.outcome == 'failure'
+          steps.team-score.outcome == 'failure' ||
+          steps.team-transactions.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1

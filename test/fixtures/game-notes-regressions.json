@@ -1,0 +1,46 @@
+[
+  {
+    "name": "CIN excludes an embedded bold comparison grid without stealing the following prose",
+    "teamId": 113,
+    "fonts": { "head": "Redlegs", "body": "ArialMT" },
+    "items": [
+      { "str": "TODAY'S GAME:", "fontName": "head", "transform": [1, 0, 0, 1, 31, 700], "width": 92 },
+      { "str": "Opening text.", "fontName": "body", "transform": [1, 0, 0, 1, 31, 680], "width": 70 },
+      { "str": "AVG", "fontName": "head", "transform": [1, 0, 0, 1, 31, 600], "width": 20 },
+      { "str": ".300", "fontName": "body", "transform": [1, 0, 0, 1, 90, 600], "width": 24 },
+      { "str": "Continues cleanly.", "fontName": "body", "transform": [1, 0, 0, 1, 31, 520], "width": 92 }
+    ],
+    "expected": [
+      { "title": "TODAY'S GAME", "body": "Opening text. Continues cleanly." }
+    ]
+  },
+  {
+    "name": "STL removes a same-baseline sidebar but preserves naturally wide prose",
+    "teamId": 138,
+    "fonts": { "head": "CardsHelveticaCondensedBold", "body": "CardsHelveticaCondensed" },
+    "items": [
+      { "str": "FLIGHT PATTERN:", "fontName": "head", "transform": [1, 0, 0, 1, 151, 700], "width": 95 },
+      { "str": "Narrative starts", "fontName": "body", "transform": [1, 0, 0, 1, 250, 700], "width": 100 },
+      { "str": "at Milwaukee County Stadium ....", "fontName": "body", "transform": [1, 0, 0, 1, 430, 700], "width": 150 },
+      { "str": "A wide sentence", "fontName": "body", "transform": [1, 0, 0, 1, 151, 680], "width": 250 },
+      { "str": "continues.", "fontName": "body", "transform": [1, 0, 0, 1, 406, 680], "width": 55 }
+    ],
+    "expected": [
+      { "title": "FLIGHT PATTERN", "body": "Narrative starts A wide sentence continues." }
+    ]
+  },
+  {
+    "name": "NYY folds a bare-number pseudo-heading back into its real sentence",
+    "teamId": 147,
+    "fonts": { "head": "MyriadPro-Bold", "body": "MyriadPro-Regular" },
+    "items": [
+      { "str": "AT A GLANCE:", "fontName": "head", "transform": [1, 0, 0, 1, 145, 700], "width": 82 },
+      { "str": "Needs one win to reach", "fontName": "body", "transform": [1, 0, 0, 1, 145, 680], "width": 120 },
+      { "str": "750", "fontName": "head", "transform": [1, 0, 0, 1, 145, 660], "width": 18 },
+      { "str": "His 749 wins rank seventh.", "fontName": "body", "transform": [1, 0, 0, 1, 145, 640], "width": 145 }
+    ],
+    "expected": [
+      { "title": "AT A GLANCE", "body": "Needs one win to reach 750 His 749 wins rank seventh." }
+    ]
+  }
+]

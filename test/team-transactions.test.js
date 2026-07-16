@@ -633,12 +633,40 @@ test('loadMoreTeamTransactions crosses into the prior season once the current on
 test('loadMoreTeamTransactions reports hasMore:false once a season file 404s (no earlier history)', async () => {
   const originalFetch = globalThis.fetch
   globalThis.fetch = mockFetch({
-    9301: { byTeamId: { 158: { days: [{ date: '2026-04-01', stories: [] }] } } },
+    2026: { byTeamId: { 158: { days: [{ date: '2026-04-01', stories: [] }] } } },
   })
   try {
-    const page = await loadMoreTeamTransactions(158, { season: 9300, index: 0 }, null)
+    const page = await loadMoreTeamTransactions(158, { season: 2025, index: 0 }, null)
     assert.deepEqual(page.days, [])
     assert.equal(page.hasMore, false)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('loadMoreTeamTransactions retries a transient season-file failure in the same session', async () => {
+  const originalFetch = globalThis.fetch
+  let currentSeasonCalls = 0
+  globalThis.fetch = async (url) => {
+    const season = Number(String(url).match(/team-transactions\/(\d+)\.json/)?.[1])
+    if (season === 2026) {
+      currentSeasonCalls += 1
+      if (currentSeasonCalls === 1) return { ok: false, status: 503 }
+      return {
+        ok: true,
+        json: async () => ({
+          byTeamId: { 158: { days: [{ date: '2026-07-15', stories: [] }] } },
+        }),
+      }
+    }
+    return { ok: false, status: 404 }
+  }
+  try {
+    await assert.rejects(loadMoreTeamTransactions(158, { season: 2026, index: 0 }, null))
+
+    const retried = await loadMoreTeamTransactions(158, { season: 2026, index: 0 }, null)
+    assert.deepEqual(retried.days.map((d) => d.date), ['2026-07-15'])
+    assert.equal(currentSeasonCalls, 2)
   } finally {
     globalThis.fetch = originalFetch
   }
