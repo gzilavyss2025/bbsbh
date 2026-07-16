@@ -22,3 +22,15 @@ export function seasonScoreFor(data, teamId, season, cutoff) {
   const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()
   return eligible.length ? snapshots[eligible[eligible.length - 1]] : null
 }
+
+export function leagueSurpriseScoresFor(data, season, cutoff) {
+  const byTeamId = data?.seasons?.[season]?.byTeamId
+  if (!byTeamId) return []
+  const rows = []
+  for (const [teamId, snapshots] of Object.entries(byTeamId)) {
+    const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()
+    const score = eligible.length ? snapshots[eligible[eligible.length - 1]]?.score : null
+    if (score != null) rows.push({ teamId: Number(teamId), score })
+  }
+  return rows
+}

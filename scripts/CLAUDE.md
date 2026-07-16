@@ -144,6 +144,11 @@ don't run these by hand.
   last-30 form as diagnostics. Market baselines live in the hand-curated
   `season-expectations-seed.json`; incomplete seasons fall back to Marcel. See
   `docs/season-score.md` and ADR-0018.
+- `gen-team-score.mjs` → `public/data/team-score.json` — date-keyed MLB Quality
+  plus a last-10 Current Form diagnostic. Quality blends 60% actual wins with
+  40% Pythagorean wins. The browser combines same-cutoff Quality and Season
+  Surprise into the headroom-aware Season Grade; see `docs/season-grade.md` and
+  ADR-0020.
 - `gen-team-transactions.mjs` → `public/data/team-transactions/{season}.json` —
   an MLB-only, season-chunked roster-move story feed for all 30 organizations.
   The nightly job rebuilds only the current season; once the season file is

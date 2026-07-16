@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '../scripts/gen-team-score.mjs'
-import { teamScoreFor } from '../src/api/teamScore.js'
+import { leagueSeasonGradesFor, teamScoreFor } from '../src/api/teamScore.js'
+import { seasonGradeFromScores, seasonGradeFor } from '../src/api/seasonGradeFormula.js'
 
 test('Pythagorean quality is neutral with equal runs and rewards a run advantage', () => {
   assert.equal(pythagoreanPct(20, 20), 0.5)
@@ -34,4 +35,33 @@ test('reader never looks ahead of the Team Page cutoff', () => {
   const data = { seasons: { 2026: { byTeamId: { 158: { '2026-07-10': { season: { score: 6.2 } }, '2026-07-12': { season: { score: 7.4 } } } } } } }
   assert.equal(teamScoreFor(data, 158, 2026, '2026-07-11').season.score, 6.2)
   assert.equal(teamScoreFor(data, 158, 2026, '2026-07-09'), null)
+})
+
+test('Season Grade preserves quality at expectation and uses bounded headroom', () => {
+  assert.deepEqual(seasonGradeFromScores(6.1, 8.5), {
+    score: 7.7,
+    adjustment: 1.6,
+    quality: 6.1,
+    surprise: 8.5,
+  })
+  assert.equal(seasonGradeFromScores(8.7, 4.1).score, 7.8)
+  assert.equal(seasonGradeFromScores(7.4, 5).score, 7.4)
+  assert.equal(seasonGradeFor({ score: 8 }, null), null)
+})
+
+test('league Season Grades require both inputs and never look past the cutoff', () => {
+  const quality = { seasons: { 2026: { byTeamId: {
+    1: { '2026-07-10': { season: { score: 6 } }, '2026-07-12': { season: { score: 9 } } },
+    2: { '2026-07-10': { season: { score: 7 } } },
+    3: { '2026-07-10': { season: { score: 8 } } },
+  } } } }
+  const surprise = { seasons: { 2026: { byTeamId: {
+    1: { '2026-07-10': { score: 8 }, '2026-07-12': { score: 1 } },
+    2: { '2026-07-10': { score: 5 } },
+  } } } }
+
+  assert.deepEqual(leagueSeasonGradesFor(quality, surprise, 2026, '2026-07-11'), [
+    { teamId: 1, score: 7.4 },
+    { teamId: 2, score: 7 },
+  ])
 })
