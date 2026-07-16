@@ -41,6 +41,11 @@ work, inspect status/diffs before editing, isolate work by branch/worktree, and 
 to coordinate any overlapping files. Never reset, stash, overwrite, or reformat
 someone else's work.
 
+In a fresh context, fetch and inventory worktrees/open PRs before choosing a base.
+Independent work starts from current `origin/main`; work that needs an unmerged PR
+must name and intentionally base on that PR branch. Record branch/worktree/PR state
+in the final handoff so the next context can resume safely.
+
 For user-visible changes, start the first free reserved localhost dev server,
 verify the exact changed route, keep it running, and include that clickable local
 URL in the final handoff. See `docs/development.md` for the full workflow.

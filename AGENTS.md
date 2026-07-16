@@ -10,8 +10,11 @@ These rules apply to every agent and every session in this repository.
 
 ## Concurrent-agent isolation
 
+- At the start of every fresh context, run `git fetch origin --prune`, `git worktree list`, `git status --short --branch`, and inspect open PRs before choosing a checkout. Do not start editing in whichever directory happened to open.
+- For an independent task, create a new worktree and branch from current `origin/main`. If the task depends on an unmerged PR, identify that exact PR branch and base the new work on it intentionally; open PRs and old worktrees are not automatically part of the latest code.
 - Assume uncommitted or unfamiliar changes belong to another active agent. Inspect `git status` and relevant diffs before editing, and do not overwrite, reset, stash, reformat, or otherwise disturb them.
 - Keep each task on its own branch and, when separate checkouts are available, its own worktree. Touch only files required for the assigned task. If ownership overlaps, stop and coordinate rather than editing through another agent's work.
+- End every task with a handoff that names the branch, worktree path, PR, dependency branch (if any), validation status, and whether the worktree is safe to remove. Never remove a dirty worktree or one whose PR is still active.
 - In the PR description, list the files or subsystems changed and flag likely overlap with other active work.
 
 ## Local visual handoff

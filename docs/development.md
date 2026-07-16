@@ -18,6 +18,45 @@ Never push directly to `main`, invoke `vercel deploy`, or enable an ad hoc previ
 without explicit maintainer authorization. Merging to `main` is the production
 deployment trigger and is intentionally controlled by the maintainer.
 
+## Fresh-context startup checklist
+
+A new Claude or Codex context must not assume that the directory it opened is the
+right checkout or that the local `main` branch is current. Before editing:
+
+```bash
+git fetch origin --prune
+git worktree list
+git status --short --branch
+gh pr list --state open
+```
+
+Then classify the task:
+
+- **Independent task:** create a new worktree and task branch from the freshly
+  fetched `origin/main`, which is the canonical set of merged code. For example:
+
+  ```bash
+  git worktree add ../bbsbh-score-card -b codex/score-card origin/main
+  ```
+
+  Claude-created branches may use `claude/<slug>`; Codex-created branches use
+  `codex/<slug>`. Use a unique, descriptive worktree directory.
+- **Task that depends on an open PR:** identify the exact PR and head branch first.
+  Base the new branch on `origin/<that-head-branch>` only when the dependency is
+  intentional, and record that dependency in the new PR and final handoff. Do not
+  treat every open PR as part of "latest."
+- **Resume an existing task:** enter the exact worktree named in its previous
+  handoff, confirm that its branch and PR still match, and inspect its dirty state
+  before running any pull, rebase, cleanup, or generator.
+
+`origin/main` means **latest merged code**. An open PR is newer only for work that
+explicitly depends on it. A worktree merely proves that a checkout exists; it does
+not prove that its branch is active, reviewed, clean, or safe to reuse.
+
+If branch ownership, dependency, or dirty-file ownership is unclear, stop and ask.
+Never solve ambiguity by copying files between worktrees, rebasing someone else's
+active branch, or starting edits in the shared primary checkout.
+
 ## Concurrent agents
 
 The maintainer often runs several agents at once. Branches isolate commits, but
@@ -40,6 +79,43 @@ files. Treat isolation as a hard requirement:
 - No branch other than `main` gets its own Vercel preview deployment (see
   `git.deploymentEnabled` below) — verify locally (`npm run dev` / `npm run e2e`)
   before opening the PR rather than expecting a preview URL on the PR check.
+
+## End-of-task handoff and cleanup
+
+Every final task message should leave enough state for a fresh context to continue
+without guessing:
+
+```text
+Branch: codex/score-card
+Worktree: C:\Users\...\bbsbh-score-card
+PR: #123 / URL (or "not opened")
+Based on: origin/main at <short SHA>, or dependency PR #<number>
+State: clean and pushed / dirty with named files
+Validation: commands and result
+Local example: http://localhost:<port>/<exact-route>, or not applicable
+Cleanup: safe after PR merges / do not remove yet
+```
+
+Do not remove a worktree merely because its context window was closed. It is safe
+to remove only when its files are clean and its work is merged, intentionally
+abandoned, or preserved on a pushed branch. Before cleanup, confirm both:
+
+```bash
+git -C <worktree-path> status --short --branch
+gh pr view <number> --json state,mergedAt,headRefName
+```
+
+After confirming it is safe, remove the worktree from another checkout, delete the
+merged local branch, and refresh remote references:
+
+```bash
+git worktree remove <worktree-path>
+git branch -d <branch>
+git fetch origin --prune
+```
+
+Never use forced removal for a dirty worktree and never delete a branch whose
+unmerged work has not been pushed or explicitly abandoned by the maintainer.
 
 ## Local visual handoff
 
