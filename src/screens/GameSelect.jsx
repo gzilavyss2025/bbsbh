@@ -396,8 +396,6 @@ export function GameSelect({ onPick, onShowLogos }) {
               teams={offDayTeams}
               favoriteTeamId={favoriteTeamId}
               favoriteAffiliateIds={favoriteAffiliateIds}
-              dateStr={dateStr}
-              sportId={sportId}
             />
           )}
         </div>
