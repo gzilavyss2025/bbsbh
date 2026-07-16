@@ -336,64 +336,71 @@ export function GameSelect({ onPick, onShowLogos }) {
       )}
 
       <div className={finals.length > 0 ? 'slate-body' : undefined}>
-        <ul className="gamelist">
-          {sorted.length === 0 && isDerbyDay && (
-            <li>
-              <DerbyCard />
-            </li>
-          )}
-          {sorted.map((g) => {
-            const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
-              ? favoriteTeamId
-              : null
-            const uReady = !!uniformsReady[g.gamePk]
-            const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
-            const isPastFinal =
-              showPastDayTreatment &&
-              g.abstractState === 'Final' &&
-              !selectGameStatus(g).isPostponed
-            return (
-              <li key={`${g.sportId}-${g.gamePk}`}>
-                {isPastFinal ? (
-                  <PastGameFlipCard
-                    game={g}
-                    dateStr={dateStr}
-                    revealed={revealedAll}
-                    pinnedTeamId={pinnedTeamId}
-                    uniformsReady={uReady}
-                    prospectCount={pCount}
-                    gameScore={scoreFor(g.gamePk)}
-                    onSelect={() => onPick(g, dateStr)}
-                    onBoxScore={() => onPick(g, dateStr, 'boxscore')}
-                  />
-                ) : (
-                  <GameCard
-                    game={g}
-                    pinnedTeamId={pinnedTeamId}
-                    uniformsReady={uReady}
-                    prospectCount={pCount}
-                    gameScore={scoreFor(g.gamePk)}
-                    onSelect={() => onPick(g, dateStr)}
-                    onBoxScore={null}
-                  />
-                )}
+        {/* One grid child, so the desktop two-column split below (game grid +
+            Day Recap rail — see .slate-body in index.css) auto-places just
+            the two columns it was built for. Off Day stacks here rather than
+            as a third sibling, or it lands in the rail meant for
+            PastDayRecapBox instead. */}
+        <div className="slate-main">
+          <ul className="gamelist">
+            {sorted.length === 0 && isDerbyDay && (
+              <li>
+                <DerbyCard />
               </li>
-            )
-          })}
-        </ul>
+            )}
+            {sorted.map((g) => {
+              const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+                ? favoriteTeamId
+                : null
+              const uReady = !!uniformsReady[g.gamePk]
+              const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+              const isPastFinal =
+                showPastDayTreatment &&
+                g.abstractState === 'Final' &&
+                !selectGameStatus(g).isPostponed
+              return (
+                <li key={`${g.sportId}-${g.gamePk}`}>
+                  {isPastFinal ? (
+                    <PastGameFlipCard
+                      game={g}
+                      dateStr={dateStr}
+                      revealed={revealedAll}
+                      pinnedTeamId={pinnedTeamId}
+                      uniformsReady={uReady}
+                      prospectCount={pCount}
+                      gameScore={scoreFor(g.gamePk)}
+                      onSelect={() => onPick(g, dateStr)}
+                      onBoxScore={() => onPick(g, dateStr, 'boxscore')}
+                    />
+                  ) : (
+                    <GameCard
+                      game={g}
+                      pinnedTeamId={pinnedTeamId}
+                      uniformsReady={uReady}
+                      prospectCount={pCount}
+                      gameScore={scoreFor(g.gamePk)}
+                      onSelect={() => onPick(g, dateStr)}
+                      onBoxScore={null}
+                    />
+                  )}
+                </li>
+              )
+            })}
+          </ul>
 
-        {/* Any idle club — including the whole-league case on an All-Star
-            break or (MLB) All-Star Game day, where there are no club games
-            and the full grid is the point (something to browse). */}
-        {offDayTeams.length > 0 && (
-          <OffDaySection
-            teams={offDayTeams}
-            favoriteTeamId={favoriteTeamId}
-            favoriteAffiliateIds={favoriteAffiliateIds}
-            dateStr={dateStr}
-            sportId={sportId}
-          />
-        )}
+          {/* Any idle club — including the whole-league case on an All-Star
+              break or (MLB) All-Star Game day, where there are no club games
+              and the full grid is the point (something to browse). */}
+          {offDayTeams.length > 0 && (
+            <OffDaySection
+              teams={offDayTeams}
+              favoriteTeamId={favoriteTeamId}
+              favoriteAffiliateIds={favoriteAffiliateIds}
+              dateStr={dateStr}
+              sportId={sportId}
+            />
+          )}
+        </div>
 
         {finals.length > 0 && (
           <PastDayRecapBox
