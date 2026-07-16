@@ -34,8 +34,8 @@ export function StatBox({
   pitchingName,
   awayAbbr,
   homeAbbr,
-  awayName,
-  homeName,
+  awayLocation,
+  homeLocation,
   isNextToReveal = false,
   runExpectancy = null,
 }) {
@@ -120,8 +120,8 @@ export function StatBox({
                 data={umpireFavor}
                 awayId={awayId}
                 homeId={homeId}
-                awayName={awayName || awayAbbr || 'Away'}
-                homeName={homeName || homeAbbr || 'Home'}
+                awayLocation={awayLocation || awayAbbr || 'Away'}
+                homeLocation={homeLocation || homeAbbr || 'Home'}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball) — sat below the play-by-play
@@ -231,7 +231,7 @@ function AbsRow({ teamId, abbr, outcomes }) {
 // consistency tile, an unbuilt run-expectancy table shows consistency with
 // no favor meter, and both missing renders nothing at all (never an empty
 // shell).
-function UmpireFavorRow({ data, awayId, homeId, awayName, homeName }) {
+function UmpireFavorRow({ data, awayId, homeId, awayLocation, homeLocation }) {
   if (!data) return null
   const { consistency, favorAway, favorHome } = data
   const pct = consistency ? Math.round((consistency.consistent / consistency.called) * 100) : null
@@ -242,7 +242,7 @@ function UmpireFavorRow({ data, awayId, homeId, awayName, homeName }) {
       <span className="umpfavor__title">Plate umpire</span>
       <div className="statcast">
         {pct != null && <StatcastCard label="Consistent" value={pct} unit="%" />}
-        <FavorMeter net={net} awayId={awayId} homeId={homeId} awayName={awayName} homeName={homeName} />
+        <FavorMeter net={net} awayId={awayId} homeId={homeId} awayLocation={awayLocation} homeLocation={homeLocation} />
       </div>
     </div>
   )
@@ -286,7 +286,7 @@ function favorTier(magnitude) {
   return 'outlier'
 }
 
-function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
+function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation }) {
   if (net == null) return null
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
@@ -311,8 +311,8 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
             — so the colored mark unambiguously points at who the lean
             favors, on top of the fill's own direction/color. Neither dims
             when it's an even split. */}
-        <TeamLogo teamId={awayId} name={awayName} size={22} bw={!even && !towardAway} />
-        <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayName, homeName)}>
+        <TeamLogo teamId={awayId} name={awayLocation} size={22} bw={!even && !towardAway} />
+        <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayLocation, homeLocation)}>
           <span className="favormeter__mid" aria-hidden="true" />
           {!even && (
             <span
@@ -322,7 +322,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
             />
           )}
         </div>
-        <TeamLogo teamId={homeId} name={homeName} size={22} bw={!even && towardAway} />
+        <TeamLogo teamId={homeId} name={homeLocation} size={22} bw={!even && towardAway} />
       </div>
       <div className="favormeter__caption" aria-hidden="true">
         {even ? (
@@ -333,7 +333,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
             <strong className="favormeter__value">
               +{Math.abs(net).toFixed(1)} <span className="favormeter__unit">runs</span>
             </strong>
-            <span className="favormeter__label">for {towardAway ? awayName : homeName}</span>
+            <span className="favormeter__label">for {towardAway ? awayLocation : homeLocation}</span>
           </>
         )}
       </div>
@@ -341,10 +341,10 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   )
 }
 
-function favorMeterLabel(net, awayName, homeName) {
+function favorMeterLabel(net, awayLocation, homeLocation) {
   if (Math.abs(net) < FAVOR_EVEN_FLOOR) return 'Missed calls have been even so far'
   const tierLabel = FAVOR_TIERS[favorTier(Math.abs(net))]
-  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayName : homeName} — ${tierLabel}`
+  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayLocation : homeLocation} — ${tierLabel}`
 }
 
 function Stat({ k, v, unit, tone, big, small }) {

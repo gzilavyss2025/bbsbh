@@ -271,8 +271,8 @@ export function InningViewer({
             pitchingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
             awayAbbr={meta.away.abbreviation}
             homeAbbr={meta.home.abbreviation}
-            awayName={meta.away.clubName || meta.away.abbreviation}
-            homeName={meta.home.clubName || meta.home.abbreviation}
+            awayLocation={meta.away.locationName || meta.away.abbreviation}
+            homeLocation={meta.home.locationName || meta.home.abbreviation}
             getDerived={getDerived}
             revealed={curIdx <= revealedThrough}
             isNextToReveal={curIdx === revealedThrough + 1}
