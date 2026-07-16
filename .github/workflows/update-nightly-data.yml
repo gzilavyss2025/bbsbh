@@ -29,6 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # main requires the lint-and-build status check, which the default
+          # GITHUB_TOKEN can never satisfy on a bare push (no PR = no check
+          # run for that commit) — every run since 2026-07-13 had its commit
+          # silently rejected at the final push, discarding that night's
+          # generator output. GH_BOT_TOKEN is the same fine-grained PAT
+          # update-game-score.yml already uses to bypass this.
+          token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 26 # node:sqlite ships stable here (docs/adr/0021) — gen-team-score.mjs/gen-season-score.mjs need it
@@ -99,8 +107,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions scripts/data/team-snapshots.sql 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "Update nightly data"
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -m "Update nightly data"
+          # Retry with a rebase on a push race, same shape as
+          # update-game-score.yml — this workflow's 11:00 UTC run can
+          # collide with that one's every-10-minutes cron.
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            git fetch origin "$(git rev-parse --abbrev-ref HEAD)"
+            git rebase "origin/$(git rev-parse --abbrev-ref HEAD)"
+            sleep $((RANDOM % 10 + 1))
+          done
+          echo "push failed after retries" >&2
+          exit 1
 
       - name: Fail if any generator errored
         if: |
