@@ -7569,6 +7569,40 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
 }
+/* Groups DeckNudge alongside "See all ›" in the header's right slot when
+   TeamLeaders renders horizontal. */
+.tlead__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* DeckNudge — the desktop "‹ ›" step control shared by TeamLeaders'
+   horizontal deck and TeamTransactionsCard. Bare text, same quiet register
+   as .tlead__seeall/.inningnav's chevron labels, not a floating icon button:
+   no border, no background, no shadow. Mouse/trackpad only — a deck you can
+   swipe never needs a click alternative, so this only exists where hover is
+   possible at all. */
+.decknudge {
+  display: none;
+  align-items: center;
+  gap: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .decknudge {
+    display: inline-flex;
+  }
+}
+.decknudge__btn {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--accent-link);
+  line-height: var(--lh-solid);
+}
 /* Responsive card grid — one column on a phone, filling out as width allows. */
 .tlead__grid {
   display: grid;
@@ -10522,6 +10556,13 @@ body {
   font-style: normal;
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
+}
+/* Groups DeckNudge alongside the "through {asOf}" dateline in the header's
+   right slot. */
+.txcard__headright {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* A horizontally swipeable deck of story cards, full-bleed to the screen's
