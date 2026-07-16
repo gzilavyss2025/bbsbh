@@ -3,6 +3,13 @@ import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
+import { DeckNudge } from './DeckNudge.jsx'
+
+// The deck's per-card scroll step (card width + gap, both from .txcard__scroll
+// / .txstory in index.css) — DeckNudge's click target. Most cards are 320px
+// (360px for a --wide 3-headshot rail), so this lands a click short of a
+// full card on those; the deck's own scroll-snap settles the rest.
+const CARD_STEP = 330
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTHS = [
@@ -185,7 +192,10 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
     <section className="txcard" aria-label="Team Transactions">
       <div className="txcard__head">
         <span>Transactions</span>
-        {asOf && <em>through {asOf}</em>}
+        <span className="txcard__headright">
+          <DeckNudge scrollRef={scrollRef} cardStep={CARD_STEP} label="team transactions" />
+          {asOf && <em>through {asOf}</em>}
+        </span>
       </div>
       <div
         className="txcard__scroll"

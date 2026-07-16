@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { computeLeaders } from '../api/teamLeaders.js'
 import { prospectBadge } from '../api/prospects.js'
 import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
@@ -8,6 +8,11 @@ import { TeamLogo } from './TeamLogo.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
 import { InjuredMark } from './InjuredMark.jsx'
+import { DeckNudge } from './DeckNudge.jsx'
+
+// The horizontal deck's per-card scroll step (card width + gap, both from
+// .tlead__grid--horizontal in index.css) — DeckNudge's click target.
+const HORIZONTAL_CARD_STEP = 290
 
 // TEAM LEADERS — per-category season leaderboards for a team. Each category
 // features its leader as a headshot card (styled like the slate's Top Performers
@@ -252,6 +257,8 @@ export function TeamLeaders({
     [pool, categories, limit, qualifier, precomputed],
   )
 
+  const scrollRef = useRef(null)
+
   if (ranked.length === 0) return null
 
   return (
@@ -259,14 +266,24 @@ export function TeamLeaders({
       <SectionTitle
         title={title}
         action={
-          onSeeAll ? (
-            <button type="button" className="tlead__seeall" onClick={onSeeAll}>
-              See all ›
-            </button>
+          horizontal || onSeeAll ? (
+            <span className="tlead__actions">
+              {horizontal && (
+                <DeckNudge scrollRef={scrollRef} cardStep={HORIZONTAL_CARD_STEP} label="team leaders" />
+              )}
+              {onSeeAll && (
+                <button type="button" className="tlead__seeall" onClick={onSeeAll}>
+                  See all ›
+                </button>
+              )}
+            </span>
           ) : null
         }
       />
-      <div className={`tlead__grid${horizontal ? ' tlead__grid--horizontal' : ''}`}>
+      <div
+        className={`tlead__grid${horizontal ? ' tlead__grid--horizontal' : ''}`}
+        ref={scrollRef}
+      >
         {ranked.map(({ category, entries }) => (
           <LeaderCategory
             key={category.key}
