@@ -39,32 +39,6 @@ export async function fetchGameUniforms(gamePk, options) {
   }
 }
 
-// Slate-wide uniform readiness: given the day's gamePks, return a map
-// gamePk -> boolean of whether BOTH clubs' uniforms are posted yet. The
-// /uniforms/game endpoint takes a comma-separated gamePks list, so the whole
-// slate resolves in ONE request rather than one per card. Spoiler-free (a
-// uniform assignment reveals no score) and, like the per-game fetch, empty
-// until ~first pitch and absent for MiLB — so a missing/errored game just maps
-// to `false` (the card's uniform chip stays red until the assignment lands).
-export async function fetchScheduleUniforms(gamePks) {
-  const list = (gamePks ?? []).filter(Boolean)
-  if (list.length === 0) return {}
-  try {
-    const data = await getJson(
-      `/api/v1/uniforms/game?gamePks=${list.join(',')}`,
-    )
-    const posted = (side) =>
-      (side?.uniformAssets ?? []).some((a) => a.uniformAssetText)
-    const out = {}
-    for (const u of data.uniforms ?? []) {
-      out[u.gamePk] = posted(u.away) && posted(u.home)
-    }
-    return out
-  } catch {
-    return {}
-  }
-}
-
 // One printable uniform line — "Alt 2 Navy Blue jersey · Road Grey pants ·
 // Alt Yellow Front hat". Asset labels arrive as "<Club> <desc> <Piece>"
 // ("Brewers Alt 2 Navy Blue Jersey"); the club name is redundant next to a

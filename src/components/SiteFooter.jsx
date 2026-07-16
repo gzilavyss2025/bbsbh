@@ -15,6 +15,14 @@ const YEAR = new Date().getFullYear()
 // the slate. Nothing here is score-revealing — the favorite-team pick
 // surfaces identity and schedule only, same as every other spoiler-free
 // selector.
+//
+// Bordered-button chrome is reserved for the three things you actually DO on
+// this screen (open Settings, look up a past matchup, print the logo sheet);
+// the ten reference/browse pages below them are plain links instead, grouped
+// under one "More" label — matching the standard footer convention (buttons
+// for primary actions, plain text for the rest of a sitemap-style list) —
+// rather than all thirteen sharing one identical bold uppercase box regardless
+// of how often anyone actually taps it.
 export function SiteFooter({
   onShowLogos,
   favoriteTeamId,
@@ -46,76 +54,49 @@ export function SiteFooter({
         <button type="button" className="sitefooter__action" onClick={onShowLogos}>
           Logo sheet
         </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/standings')}
-        >
-          Standings
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/leaders')}
-        >
-          League Leaders
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/prospects')}
-        >
-          Top MLB Prospects
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/rehab')}
-        >
-          Rehab assignments
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/umpires')}
-        >
-          Umpire Rankings
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/milestones')}
-        >
-          Milestone Watch
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/awards')}
-        >
-          Awards History
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/postseason-history')}
-        >
-          Postseason History
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/all-star-rosters')}
-        >
-          All Star Game
-        </button>
-        <button
-          type="button"
-          className="sitefooter__action"
-          onClick={() => navigate('/top-games')}
-        >
-          Top Games
-        </button>
+      </div>
+
+      <div className="sitefooter__more">
+        {/* Roughly "current-season and busiest first, archival/meta last":
+            standings/leaders/Top Games (what's happening now) → player-
+            trajectory pages (prospects/rehab/milestones) → the deeper-cut
+            umpire stats → season-culminating history → About, always last. */}
+        <p className="sitefooter__more-label">More Baseball</p>
+        <nav className="sitefooter__links" aria-label="More pages">
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/standings')}>
+            Standings
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/leaders')}>
+            League Leaders
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/top-games')}>
+            Top Games
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/prospects')}>
+            Top MLB Prospects
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/rehab')}>
+            Rehab assignments
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/milestones')}>
+            Milestone Watch
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/umpires')}>
+            Umpire Rankings
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/awards')}>
+            Awards History
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/postseason-history')}>
+            Postseason History
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/all-star-rosters')}>
+            All Star Game
+          </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/about')}>
+            About
+          </button>
+        </nav>
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}
@@ -138,16 +119,7 @@ export function SiteFooter({
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
         <p>Built for keeping score by hand. Game results stay sealed until opened.</p>
-        <p>
-          <button
-            type="button"
-            className="sitefooter__about"
-            onClick={() => navigate('/about')}
-          >
-            About
-          </button>
-          {' · '}© {YEAR}
-        </p>
+        <p>© {YEAR}</p>
       </div>
     </footer>
   )

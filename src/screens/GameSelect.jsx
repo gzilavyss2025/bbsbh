@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
-import { fetchScheduleUniforms } from '../api/uniforms.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -203,19 +202,6 @@ export function GameSelect({ onPick, onShowLogos }) {
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
 
-  // What each club is wearing isn't in the schedule payload, so it rides a
-  // separate one-shot request keyed on the slate's gamePks (posted ~first
-  // pitch, so it re-fetches as the games go live via the same reload seam).
-  const pkKey = useMemo(
-    () => sorted.map((g) => g.gamePk).join(','),
-    [sorted],
-  )
-  const uniforms = useAsync(
-    () => fetchScheduleUniforms(pkKey ? pkKey.split(',') : []),
-    [pkKey],
-  )
-  const uniformsReady = uniforms.data ?? {}
-
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
   // card on screen at once). Rosters are fetched per team on the current
@@ -352,7 +338,6 @@ export function GameSelect({ onPick, onShowLogos }) {
               const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
                 ? favoriteTeamId
                 : null
-              const uReady = !!uniformsReady[g.gamePk]
               const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
               const isPastFinal =
                 showPastDayTreatment &&
@@ -366,7 +351,6 @@ export function GameSelect({ onPick, onShowLogos }) {
                       dateStr={dateStr}
                       revealed={revealedAll}
                       pinnedTeamId={pinnedTeamId}
-                      uniformsReady={uReady}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
                       onSelect={() => onPick(g, dateStr)}
@@ -376,7 +360,6 @@ export function GameSelect({ onPick, onShowLogos }) {
                     <GameCard
                       game={g}
                       pinnedTeamId={pinnedTeamId}
-                      uniformsReady={uReady}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
                       onSelect={() => onPick(g, dateStr)}
