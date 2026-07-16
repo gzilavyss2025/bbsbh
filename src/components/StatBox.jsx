@@ -8,6 +8,7 @@ import { teamLogoUrl } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
+import { TeamLogo } from './TeamLogo.jsx'
 
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
@@ -33,6 +34,8 @@ export function StatBox({
   pitchingName,
   awayAbbr,
   homeAbbr,
+  awayName,
+  homeName,
   isNextToReveal = false,
   runExpectancy = null,
 }) {
@@ -74,6 +77,10 @@ export function StatBox({
           const umpireFavor = hasPitchTracking(feed)
             ? selectUmpireFavor(feed, runExpectancy, inning, half)
             : null
+          // Structural (no score) — same footing as the abbreviations/logo
+          // already used for the ABS row above.
+          const awayId = feed?.gameData?.teams?.away?.id ?? null
+          const homeId = feed?.gameData?.teams?.home?.id ?? null
           return (
             <>
               <div className="rhe">
@@ -109,7 +116,13 @@ export function StatBox({
                   </div>
                 </div>
               )}
-              <UmpireFavorRow data={umpireFavor} awayAbbr={awayAbbr || 'AWAY'} homeAbbr={homeAbbr || 'HOME'} />
+              <UmpireFavorRow
+                data={umpireFavor}
+                awayId={awayId}
+                homeId={homeId}
+                awayName={awayName || awayAbbr || 'Away'}
+                homeName={homeName || homeAbbr || 'Home'}
+              />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball) — sat below the play-by-play
                   feed until moved here, right under the ABS row, so they're at the
@@ -207,43 +220,88 @@ function AbsRow({ teamId, abbr, outcomes }) {
 // established zone this game — see lib/euz.js) and favor (the net
 // run-expectancy swing his misses have handed one side so far — see
 // lib/runExpectancy.js) through the half being viewed. Same title treatment
-// as the ABS row above it, but the figures themselves render as StatcastCard
-// tiles — the same "measure / value+unit / who" language as the Statcast
-// superlatives row just below, since both are "a notable figure from this
-// half" in the same register. Renders nothing until at least one called
-// pitch has been revealed, and each stat degrades independently — a
-// thin-sample game shows a favor tile with no consistency tile, an unbuilt
-// run-expectancy table shows consistency with no favor tile, and both
-// missing renders nothing at all (never an empty shell).
-function UmpireFavorRow({ data, awayAbbr, homeAbbr }) {
+// as the ABS row above it. Consistency renders as a StatcastCard tile (the
+// same "measure / value+unit" language as the Statcast superlatives row just
+// below); favor gets its own FavorMeter — a two-club lean bar, since "which
+// side" is the whole point of that figure and a bare tile buried it in a
+// "to X" caption easy to misread (see the sign-fix commit). Renders nothing
+// until at least one called pitch has been revealed, and each stat degrades
+// independently — a thin-sample game shows favor with no consistency tile,
+// an unbuilt run-expectancy table shows consistency with no favor meter, and
+// both missing renders nothing at all (never an empty shell).
+function UmpireFavorRow({ data, awayId, homeId, awayName, homeName }) {
   if (!data) return null
   const { consistency, favorAway, favorHome } = data
   const pct = consistency ? Math.round((consistency.consistent / consistency.called) * 100) : null
   const net = favorAway != null && favorHome != null ? favorAway - favorHome : null
-  const hasFavor = net != null
-  if (pct == null && !hasFavor) return null
+  if (pct == null && net == null) return null
   return (
     <div className="umpfavor">
       <span className="umpfavor__title">Plate umpire</span>
-      <div className="statcast">
-        {pct != null && <StatcastCard label="Consistent" value={pct} unit="%" />}
-        {hasFavor && (
-          <StatcastCard
-            label="Favor"
-            // The "who" line already carries the direction (to AWAY/HOME), so
-            // the value is always the plain magnitude of THAT side's edge —
-            // pairing a signed number with a "to X" label would double up on
-            // direction and, worse, contradict it for the losing side (a
-            // negative number reading "to PIT" implies PIT is down, when a
-            // negative `net` actually means PIT is the one ahead).
-            value={Math.abs(net) < 0.05 ? '0.0' : `+${Math.abs(net).toFixed(1)}`}
-            unit="RUNS"
-            who={Math.abs(net) < 0.05 ? 'Even so far' : `to ${net > 0 ? awayAbbr : homeAbbr}`}
-          />
+      {pct != null && (
+        <div className="statcast umpfavor__consistency">
+          <StatcastCard label="Consistent" value={pct} unit="%" />
+        </div>
+      )}
+      <FavorMeter net={net} awayId={awayId} homeId={homeId} awayName={awayName} homeName={homeName} />
+    </div>
+  )
+}
+
+// A diverging lean bar between the two clubs' logos — the fill grows from
+// center toward whichever side missed calls have added value to, sized by
+// magnitude (capped at FAVOR_SCALE_RUNS, since a whole game's NET swing is
+// usually well under a run; individual misses partially cancel out, unlike
+// the season's favorMagnitude, which sums every miss's |favor| rather than
+// netting them). Reuses WinProbChart's away/soft-clay · home/soft-navy
+// palette — the same "which side" visual language already on this page.
+// `net` is favorAway - favorHome (see api/umpireFavor.js): positive favors
+// away, negative favors home. Renders nothing without a built run-expectancy
+// table (net null).
+const FAVOR_SCALE_RUNS = 1
+const FAVOR_EVEN_FLOOR = 0.05
+
+function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
+  if (net == null) return null
+  const even = Math.abs(net) < FAVOR_EVEN_FLOOR
+  const towardAway = net > 0
+  const fillPct = Math.min(Math.abs(net) / FAVOR_SCALE_RUNS, 1) * 50
+  return (
+    <div className="favormeter">
+      <div className="favormeter__track-row">
+        <TeamLogo teamId={awayId} name={awayName} size={32} />
+        <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayName, homeName)}>
+          <span className="favormeter__mid" aria-hidden="true" />
+          {!even && (
+            <span
+              className={`favormeter__fill favormeter__fill--${towardAway ? 'away' : 'home'}`}
+              style={{ width: `${fillPct}%` }}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+        <TeamLogo teamId={homeId} name={homeName} size={32} />
+      </div>
+      <div className="favormeter__caption" aria-hidden="true">
+        {even ? (
+          <span className="favormeter__label">Missed calls have been even so far</span>
+        ) : (
+          <>
+            <span className="favormeter__label">Missed calls have added</span>
+            <strong className="favormeter__value">
+              +{Math.abs(net).toFixed(1)} <span className="favormeter__unit">runs</span>
+            </strong>
+            <span className="favormeter__label">for {towardAway ? awayName : homeName}</span>
+          </>
         )}
       </div>
     </div>
   )
+}
+
+function favorMeterLabel(net, awayName, homeName) {
+  if (Math.abs(net) < FAVOR_EVEN_FLOOR) return 'Missed calls have been even so far'
+  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayName : homeName}`
 }
 
 function Stat({ k, v, unit, tone, big, small }) {

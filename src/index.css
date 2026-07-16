@@ -3959,10 +3959,10 @@ body {
 }
 
 /* Plate umpire consistency + favor through the half — a compact sibling to
-   .abs (same title treatment), rendering its figures as StatcastCard tiles
-   (.statcast below) so it reads as the same "notable figure this half"
-   language as the superlatives row directly under it, rather than its own
-   one-off chip style. */
+   .abs (same title treatment). Consistency renders as a StatcastCard tile
+   (.statcast below, "notable figure this half" language shared with the
+   superlatives row under it); favor is its own lean-bar meter — see
+   .favormeter below. */
 .umpfavor {
   padding-top: 10px;
   border-top: var(--bw-hair) dashed var(--border-rule);
@@ -3983,6 +3983,82 @@ body {
   margin-top: 0;
   padding-top: 0;
   border-top: none;
+}
+.umpfavor__consistency {
+  margin-bottom: 10px;
+}
+
+/* The favor lean-bar: two club logos flanking a track whose fill grows from
+   center toward whichever side missed calls have added value to, plus a
+   plain-English caption underneath. Away/home fill colors reuse
+   WinProbChart's own soft-clay/soft-navy pair — the same "which side" visual
+   language already on this page (see --winprob-away/--winprob-home). */
+.favormeter__track-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.favormeter__track {
+  position: relative;
+  flex: 1;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  overflow: hidden;
+}
+.favormeter__mid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--bw-hair);
+  background: var(--border-rule);
+}
+.favormeter__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.favormeter__fill--away {
+  right: 50%;
+  background: var(--winprob-away);
+}
+.favormeter__fill--home {
+  left: 50%;
+  background: var(--winprob-home);
+}
+.favormeter__caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 10px;
+  text-align: center;
+}
+.favormeter__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.favormeter__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.favormeter__unit {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  opacity: 0.7;
 }
 
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
