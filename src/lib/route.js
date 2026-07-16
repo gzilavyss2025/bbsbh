@@ -22,6 +22,7 @@
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
+//   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
@@ -71,6 +72,9 @@ export function parseRoute(url) {
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')
     return { name: 'game-notes-debug' }
+  // Personal scorebook archive, reached from the site menu or a direct link.
+  if (parts.length === 1 && parts[0] === 'first-scorebook')
+    return { name: 'first-scorebook' }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
