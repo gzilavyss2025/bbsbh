@@ -735,19 +735,29 @@ function leaderTonightText(n, teamName, word) {
 }
 
 // Cumulative runs each side has scored through each inning, stopping at the
-// first inning whose bottom half never happened (a walk-off, or a truncated/
-// suspended game) — "through inning N" isn't well-defined past that point.
+// first inning whose bottom half never completed (a walk-off, or a
+// truncated/suspended game) — "through inning N" isn't well-defined past
+// that point. A trailing home team's skipped bottom half is genuinely absent
+// from the linescore (caught by the missing-value check below), but a
+// walk-off's bottom half is NOT — statsapi reports the runs actually scored
+// in that partial frame, so it must be detected from the play data instead:
+// the game's last play, in the bottom half, with fewer than 3 outs recorded.
 // Shared by every whole-game, checkpoint-based note below, and by the
 // pre-half strip's "leading after the 8th" note (prehalf-callouts.js), whose
 // caller-gating contract is what keeps THAT read spoiler-safe.
 export function cumulativeInnings(feed) {
+  const plays = feed?.liveData?.plays?.allPlays ?? []
+  const lastPlay = plays[plays.length - 1]
+  const walkoffInning =
+    lastPlay?.about?.halfInning === 'bottom' && lastPlay.count?.outs < 3 ? lastPlay.about.inning : null
+
   let cumAway = 0
   let cumHome = 0
   const rows = [] // { inning, cumAway, cumHome }
   for (const inn of feed?.liveData?.linescore?.innings ?? []) {
     const aR = inn.away?.runs
     const hR = inn.home?.runs
-    if (typeof aR !== 'number' || typeof hR !== 'number') break
+    if (typeof aR !== 'number' || typeof hR !== 'number' || inn.num === walkoffInning) break
     cumAway += aR
     cumHome += hR
     rows.push({ inning: inn.num, cumAway, cumHome })

@@ -376,10 +376,39 @@ async function fetchSplitRecords() {
 // SAME full-season schedule + per-inning linescore sweep (one fetch covers
 // both families). Who scored first = the first inning (top before bottom) in
 // which either side put up a run; leading-after-N walks the innings in order,
-// stopping at the first one whose bottom half never happened (a walk-off, or
-// a suspended/truncated game) since "leading after N" isn't well-defined past
-// that point. W/L from the club's own isWinner. Cut off at `asOf` so a slate
-// scored later never folds tonight's result into either record.
+// stopping at the first one whose bottom half never happened (a suspended/
+// truncated game) since "leading after N" isn't well-defined past that
+// point. A walk-off's bottom half does NOT go missing the same way — the
+// linescore still reports the runs actually scored in that partial frame —
+// so it's excluded separately by `walkoffInningOf` below. W/L from the
+// club's own isWinner. Cut off at `asOf` so a slate scored later never folds
+// tonight's result into either record.
+function walkoffInningOf(innings) {
+  let cumAway = 0,
+    cumHome = 0,
+    prevAway = 0,
+    prevHome = 0,
+    lastInning = null
+  for (const inn of innings ?? []) {
+    const aR = inn.away?.runs,
+      hR = inn.home?.runs
+    if (typeof aR !== 'number' || typeof hR !== 'number') break
+    prevAway = cumAway
+    prevHome = cumHome
+    cumAway += aR
+    cumHome += hR
+    lastInning = { num: inn.num, prevAway, prevHome, cumAway, cumHome }
+  }
+  // A home win's decisive at-bat ends the instant it takes the lead, so only
+  // the game's FINAL recorded inning can be a walk-off, and only if the home
+  // team wasn't already leading entering it (an already-leading home team's
+  // bottom half is skipped outright, caught by the missing-value break above).
+  if (!lastInning) return null
+  return lastInning.prevHome <= lastInning.prevAway && lastInning.cumHome > lastInning.cumAway
+    ? lastInning.num
+    : null
+}
+
 async function scoringRecord(teamId, sportId) {
   // Bounded to games through `asOf` (startDate/endDate — NOT `season=`, which the
   // API rejects alongside endDate) and pruned to this sweep's exact read-set, so a
@@ -420,6 +449,7 @@ async function scoringRecord(teamId, sportId) {
     let firstScorer = null // 'away' | 'home'
     let cumAway = 0, cumHome = 0
     let minDeficit = 0 // most negative (meRuns - oppRuns) reached, 0 if never trailed
+    const walkoffInning = walkoffInningOf(g.linescore?.innings)
     for (const inn of g.linescore?.innings ?? []) {
       const aR = inn.away?.runs, hR = inn.home?.runs
       if (!firstScorer) {
@@ -445,10 +475,17 @@ async function scoringRecord(teamId, sportId) {
       const meRuns = isHome ? cumHome : cumAway
       const oppRuns = isHome ? cumAway : cumHome
       minDeficit = Math.min(minDeficit, meRuns - oppRuns)
-      const bucket = leadTally[inn.num]
-      if (bucket && meRuns > oppRuns) won ? bucket.w++ : bucket.l++
-      const raBucket = raTally[inn.num]
-      if (raBucket && oppRuns >= RUNS_ALLOWED_THRESHOLD) won ? raBucket.w++ : raBucket.l++
+      // Skip the checkpoint tallies for the walk-off inning itself — "leading
+      // after N" isn't well-defined for the frame that decided the game
+      // mid-at-bat (see walkoffInningOf above). minDeficit above stays
+      // unconditional: a real in-game deficit is a real in-game deficit
+      // whether or not the inning that erased it also ended the game.
+      if (inn.num !== walkoffInning) {
+        const bucket = leadTally[inn.num]
+        if (bucket && meRuns > oppRuns) won ? bucket.w++ : bucket.l++
+        const raBucket = raTally[inn.num]
+        if (raBucket && oppRuns >= RUNS_ALLOWED_THRESHOLD) won ? raBucket.w++ : raBucket.l++
+      }
     }
 
     if (minDeficit <= -COMEBACK_DEFICIT) won ? cbW++ : cbL++
