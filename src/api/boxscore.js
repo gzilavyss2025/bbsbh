@@ -20,6 +20,13 @@ import { lastName as shortName } from './select.js'
 // Context-neutral half of the three-stars blend (ADR-0013).
 import { contextNeutralPoints } from './performanceScore.js'
 
+// The linescore/pitching-line primitives every other reveal-only surface
+// (RollingLine, StatBox, PitchersSection) already reads — sourced once here
+// too instead of this module re-deriving the same liveData fields a second
+// way. See revealTotals/revealInning and computePitcherLines below.
+import { revealTotals, revealInning } from './linescore.js'
+import { computePitcherLines } from './pitchers.js'
+
 // "Cooper Pratt" — first name ahead of the shortened surname, for the three
 // stars' full-name style (the batting/pitching tables use the LAST, First
 // order instead — see lastFirst below). Reuses shortName so
@@ -108,17 +115,24 @@ function battingTotals(feed, side) {
 }
 
 // One side's pitching table, in order of appearance, each line tagged with its
-// decision (W/L/S) when it earned one.
-function pitchingRows(feed, side, decisions) {
+// decision (W/L/S) when it earned one. The IP/P/BF/H/R/ER/BB/K numbers come
+// from `pitcherLines` (computePitcherLines(feed, Infinity), computed once in
+// selectBoxscore) — the same per-pitcher accumulator PitchersSection reads
+// mid-game — rather than this function re-deriving them a second way from
+// box.stats.pitching. Only the box-score-specific display (the disambiguated
+// "Last, First" name, jersey number, decision tag) stays local.
+function pitchingRows(feed, side, decisions, pitcherLines) {
   const team = feed?.liveData?.boxscore?.teams?.[side]
   const gdPlayers = feed?.gameData?.players ?? {}
   const boxPlayers = team?.players ?? {}
   const order = team?.pitchers ?? []
+  const lineById = new Map((pitcherLines?.[side] ?? []).map((p) => [p.id, p]))
+  const emptyLine = { ip: '0.0', pitches: 0, bf: 0, h: 0, r: 0, er: 0, bb: 0, k: 0 }
 
   return order.map((id) => {
     const box = boxPlayers[`ID${id}`] ?? {}
     const gd = gdPlayers[`ID${id}`] ?? box.person ?? {}
-    const s = box.stats?.pitching ?? {}
+    const s = lineById.get(id) ?? emptyLine
     let dec = ''
     if (id === decisions.winId) dec = 'W'
     else if (id === decisions.lossId) dec = 'L'
@@ -128,17 +142,17 @@ function pitchingRows(feed, side, decisions) {
       name: lastFirst(gd),
       num: box.jerseyNumber ?? gd.primaryNumber ?? '',
       dec,
-      // Throwing hand (R/L) and batters faced (BF) are #22-scorebook columns the
-      // MLB.com box score omits; both come straight from the feed.
+      // Throwing hand (R/L) is a #22-scorebook column the MLB.com box score
+      // omits; comes straight from the feed (pitcherLines has no use for it).
       hand: gd.pitchHand?.code ?? '',
-      ip: s.inningsPitched ?? '0.0',
-      pitches: s.numberOfPitches ?? s.pitchesThrown ?? 0,
-      bf: s.battersFaced ?? 0,
-      h: s.hits ?? 0,
-      r: s.runs ?? 0,
-      er: s.earnedRuns ?? 0,
-      bb: s.baseOnBalls ?? 0,
-      so: s.strikeOuts ?? 0,
+      ip: s.ip,
+      pitches: s.pitches,
+      bf: s.bf,
+      h: s.h,
+      r: s.r,
+      er: s.er,
+      bb: s.bb,
+      so: s.k,
     }
   })
 }
@@ -157,10 +171,11 @@ function pitchingTotals(feed, side) {
 }
 
 // Final R/H/E/LOB for one side, the numbers that fill the #22 scorebook's
-// scoreboard strip. Pulled from the same linescore this module already gates
-// behind reveal.
+// scoreboard strip. `revealTotals` (linescore.js) is the one place that reads
+// liveData.linescore.teams[side] — also used by the printable scorecard — so
+// this module doesn't keep its own second copy of that read.
 function teamLine(feed, side) {
-  const t = feed?.liveData?.linescore?.teams?.[side] ?? {}
+  const t = revealTotals(feed, side) ?? {}
   return {
     r: t.runs ?? 0,
     h: t.hits ?? 0,
@@ -171,17 +186,18 @@ function teamLine(feed, side) {
 
 // Runs by inning for the scoreboard strip — one entry per inning played,
 // including extras (the full box score is a complete reveal, so there's no
-// extras-spoiler concern here the way there is in the innings navigator). A half
-// the team never batted (a won-at-home bottom of the last inning) carries no
-// runs number in the feed, so it shows 'X' the way a printed line score does.
+// extras-spoiler concern here the way there is in the innings navigator).
+// Built on `revealInning` (linescore.js) — the same per-half reader
+// RollingLine/StatBox use — rather than a second walk of
+// liveData.linescore.innings[]. A half the team never batted (a won-at-home
+// bottom of the last inning) has no linescore entry at all, so revealInning
+// returns null and this shows 'X' the way a printed line score does.
 function scoreboardInnings(feed) {
   const innings = feed?.liveData?.linescore?.innings ?? []
-  const runsOf = (half) =>
-    half && typeof half.runs === 'number' ? half.runs : 'X'
   return innings.map((i) => ({
     num: i.num,
-    away: runsOf(i.away),
-    home: runsOf(i.home),
+    away: revealInning(feed, i.num, 'away')?.runs ?? 'X',
+    home: revealInning(feed, i.num, 'home')?.runs ?? 'X',
   }))
 }
 
@@ -459,7 +475,7 @@ function footnotes(feed, side) {
   )
 }
 
-function oneSide(feed, side, decisions, pitchNotes) {
+function oneSide(feed, side, decisions, pitchNotes, pitcherLines) {
   const meta =
     feed?.gameData?.teams?.[side] ??
     feed?.liveData?.boxscore?.teams?.[side]?.team ??
@@ -473,7 +489,7 @@ function oneSide(feed, side, decisions, pitchNotes) {
     abbreviation: meta.abbreviation ?? '',
     batters: battingRows(feed, side),
     batTotals: battingTotals(feed, side),
-    pitchers: pitchingRows(feed, side, decisions),
+    pitchers: pitchingRows(feed, side, decisions, pitcherLines),
     pitchTotals: pitchingTotals(feed, side),
     line: teamLine(feed, side),
     notes: teamNoteGroups(feed, side),
@@ -485,9 +501,8 @@ function oneSide(feed, side, decisions, pitchNotes) {
 }
 
 // The complete box score. `gameInfo` are the label/value rows at the foot
-// (Pitches-strikes, Umpires, Weather, T, Att…); `dateLabel` is the lone
-// date row the feed appends with no value; `decisions` are the pitchers of
-// record with their short names.
+// (Pitches-strikes, Umpires, Weather, T, Att…); `decisions` are the pitchers
+// of record with their short names.
 export function selectBoxscore(feed) {
   const d = feed?.liveData?.decisions ?? {}
   const decisions = {
@@ -512,12 +527,17 @@ export function selectBoxscore(feed) {
     infoRows.find((r) => r.label === 'Umpires')?.value,
   )
   const gameInfo = infoRows.filter((r) => r.label && r.value)
-  const dateRow = infoRows.find((r) => r.label && r.value == null)
   const gameNotes = splitGameNotes(feed)
+  // The same per-pitcher accumulator PitchersSection reads mid-game
+  // (src/api/pitchers.js), computed once here at full reveal — Infinity as
+  // "the whole game", same sentinel defenseEntering uses for the box score's
+  // whole-game defensive alignment — and shared by both sides' pitchingRows
+  // instead of each re-deriving its own numbers from the boxscore stats.
+  const pitcherLines = computePitcherLines(feed, Infinity)
 
   return {
-    away: oneSide(feed, 'away', decisions, gameNotes.away),
-    home: oneSide(feed, 'home', decisions, gameNotes.home),
+    away: oneSide(feed, 'away', decisions, gameNotes.away, pitcherLines),
+    home: oneSide(feed, 'home', decisions, gameNotes.home, pitcherLines),
     innings: scoreboardInnings(feed),
     decisions,
     umpires,
@@ -527,7 +547,6 @@ export function selectBoxscore(feed) {
     // plus any per-pitcher entry splitGameNotes couldn't match to a roster
     // name — kept here, under their original label, so nothing is lost.
     footNotes: gameNotes.shared,
-    dateLabel: dateRow?.label ?? '',
   }
 }
 
@@ -661,6 +680,31 @@ export function findBoxscorePlayer(boxscore, id) {
     if (player) return { side, player }
   }
   return null
+}
+
+// A player's identity fields a "baseball card" tile needs — headshot,
+// team, position — resolved from his personId within one game's feed. Shared
+// by the box score's own Insights card (Statcast superlatives) and
+// daySuperlatives.js's day-recap tiles, so the two PerformerCard surfaces
+// can't drift on how a player's team/position get resolved. Caller adds its
+// own `stat` line (the two surfaces format that differently).
+export function resolveCardPlayer(feed, personId) {
+  if (personId == null) return null
+  const found = findBoxscorePlayer(feed?.liveData?.boxscore, personId)
+  if (!found) return null
+  const { side, player: bp } = found
+  const team = feed?.gameData?.teams?.[side]
+  const gd = feed?.gameData?.players?.[`ID${personId}`]
+  return {
+    id: personId,
+    name: bp.person?.fullName ?? gd?.fullName ?? '',
+    teamId: team?.id ?? null,
+    teamAbbr: team?.abbreviation ?? '',
+    // A MiLB player's parent MLB org id (his own team for an MLB player) — the
+    // headshot's fallback team-logo tint, matching topPerformers' resolveEntry.
+    parentOrgId: bp.parentTeamId ?? team?.id ?? null,
+    position: positionLabel(bp),
+  }
 }
 
 // A star's identity + one-line game stat, found by scanning both boxscores.

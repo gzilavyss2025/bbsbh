@@ -17,7 +17,9 @@ export function revealInning(feed, inningNum, side) {
   }
 }
 
-// Full-game R / H / E totals for the global reveal.
+// Full-game R / H / E / LOB totals for the global reveal — the box score's
+// LineTotals card reads this directly rather than re-deriving the same
+// liveData.linescore.teams[side] fields itself (see boxscore.js's teamLine).
 export function revealTotals(feed, side) {
   const t = feed?.liveData?.linescore?.teams?.[side]
   if (!t) return null
@@ -25,5 +27,6 @@ export function revealTotals(feed, side) {
     runs: t.runs ?? 0,
     hits: t.hits ?? 0,
     errors: t.errors ?? 0,
+    leftOnBase: t.leftOnBase ?? 0,
   }
 }

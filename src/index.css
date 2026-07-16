@@ -6224,6 +6224,12 @@ body {
   align-items: center;
   gap: var(--space-3);
 }
+/* Refresh (when the game isn't Final — see BoxScore.jsx) rides here inline
+   once there's room; on a phone it hides in favor of the floating pill
+   (.pagenav--boxscore below), same split as .revealall__top/.pagenav--revealall. */
+.boxscore__headright .refreshbtn {
+  display: none;
+}
 
 .boxscore__title {
   margin: 0;
@@ -6234,16 +6240,10 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--text-heading);
 }
-/* The game's calendar date, trailing "BOX SCORE |" — quieter weight/color so
-   the title itself still leads. */
-.boxscore__titleDate {
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-}
 
 /* ---------------------------------------------------------------- game buzz */
-/* The night's Bluesky posts — a second, independently sealed card under the box
-   score, to crib storytelling numbers into the paper's GAME NOTES box. */
+/* The night's Bluesky posts — the last card inside the box score's own seal,
+   to crib storytelling numbers into the paper's GAME NOTES box. */
 .buzz {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
@@ -6258,6 +6258,13 @@ body {
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+/* The revealed posts/loader/error state, now rendered directly (no SealBox
+   .statgrid wrapper — see GameBuzz.jsx) — this is the one place that gives
+   that content its own breathing room on all 4 sides. */
+.buzz__body {
+  padding: 0 var(--space-3) var(--space-3);
 }
 
 .buzz__title {
@@ -6276,13 +6283,6 @@ body {
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-}
-
-/* Restore padding the boxscore's statgrid reset strips off (see .boxscore
-   .statgrid); higher specificity so it wins wherever it sits in the file. */
-.boxscore .buzz .statgrid {
-  padding: var(--space-3);
-  background: none;
 }
 
 .buzz__list {
@@ -6724,7 +6724,7 @@ body {
    leader/streak/situational-record call-out that fired somewhere in the game
    (see computeGameCalloutNotes — the same .pbp__callout notes shown one at a
    time in the innings view, rolled up here). Sits last inside the sealed box
-   score, directly above the separately-sealed GameBuzzCard. */
+   score, directly above the Game Buzz card, which shares this same seal. */
 .bs__insights {
   padding: 12px 14px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -6742,22 +6742,31 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* The innings view's .statcast expects to sit under a play-by-play feed
-   (margin/border-top to separate from it above); here it's the card's own
-   full content, so drop that top rule. */
-.bs__insights .statcast {
+/* The box score's own Statcast Leaders card — its own full-width row
+   between the linescore/Game Score column and the two team cards (see
+   BoxScoreBody), each superlative rendered as a .playercard__bucket +
+   .playercard__list, the same "baseball card" tile (headshot, team, stat
+   line) the past-day recap's Top Performers/Statcast Leaders use (see
+   PastDayRecapBox.jsx's PerformerCard) — so this card reads as the same
+   idiom as that daily digest rather than its own small tiles. Matches the
+   frame of .bs__insights/.bs__stars beside it. */
+.bs__statcastCard {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+}
+/* Phone: the three superlatives stack, same as any other playercard list.
+   Desktop/ipad: one row, three columns wide (see the wide-layout block). */
+.bs__statcastRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 8px;
-  padding-top: 0;
-  border-top: none;
 }
-/* The Statcast tiles read fine small in the innings view (right under the
-   play they belong to), but standing alone in this card they're worth a size
-   bump for readability. */
-.bs__insights .statcast__label {
-  font-size: var(--fs-caption);
-}
-.bs__insights .statcast__who {
-  font-size: var(--fs-compact);
+.bs__statcastCol {
+  min-width: 0;
 }
 
 /* The call-out notes grid — one card per player/club (see InsightNoteCard,
@@ -6767,17 +6776,10 @@ body {
    flows into the shortest column instead of every row stretching to its
    tallest member, keeping the same gap between cards without the excess
    whitespace a fixed-row grid leaves behind. `column-width` lets the browser
-   pick the column count itself, same auto-fit intent as the old grid. When
-   Statcast cards sit above it, a dashed rule (matching .statcast's own)
-   separates the two sections instead of them running together. */
+   pick the column count itself, same auto-fit intent as the old grid. */
 .bs__noteGrid {
   column-width: 240px;
   column-gap: 8px;
-}
-.bs__noteGrid--divided {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
 /* One call-out note card: a headshot (or team logo(s), for a note about a
@@ -7934,15 +7936,6 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
-.bs__infoDate {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .bs__infoRow {
   margin: 3px 0;
   font-size: var(--fs-compact);
@@ -8203,6 +8196,16 @@ body {
     display: inline-flex;
   }
   .pagenav--revealall {
+    display: none;
+  }
+
+  /* Same split for the box score's Refresh control (not Final games, which
+     drop it entirely — see BoxScore.jsx): inline in the header once there's
+     room, the mobile floating pill hides here. */
+  .boxscore__headright .refreshbtn {
+    display: inline-flex;
+  }
+  .pagenav--boxscore {
     display: none;
   }
 
@@ -8489,6 +8492,15 @@ body {
     flex-direction: column;
     gap: var(--space-4);
     min-width: 0;
+  }
+
+  /* The Statcast Leaders card's three tiles: stacked on phone (the base
+     rule), one row of three columns from here up. */
+  .bs__statcastRow {
+    flex-direction: row;
+  }
+  .bs__statcastCol {
+    flex: 1 1 0;
   }
 
   /* ---- player hero: a wide sheet has room to let the name lead, so the

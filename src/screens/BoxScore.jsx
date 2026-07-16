@@ -1,17 +1,18 @@
 import { useMemo, useState } from 'react'
-import { selectBoxscore, computeThreeStars, computePlayOfTheGame } from '../api/boxscore.js'
+import { selectBoxscore, computeThreeStars, computePlayOfTheGame, resolveCardPlayer } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
 import { computeGameSuperlatives } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
-import { selectOfficials } from '../api/select.js'
+import { selectOfficials, selectIsFinal } from '../api/select.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
-import { longDate } from '../lib/dates.js'
+import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
-import { StatcastCard } from '../components/StatcastCard.jsx'
+import { AbsRow } from '../components/StatBox.jsx'
+import { PerformerCard } from '../components/PastDayRecapBox.jsx'
 import { CalloutNote } from '../components/CalloutNote.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
 import { Headshot } from '../components/Headshot.jsx'
@@ -21,21 +22,28 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { UmpireLink } from '../components/UmpireLink.jsx'
+import { ManagerLink } from '../components/ManagerLink.jsx'
 import { GameScoreCard } from '../components/GameScoreCard.jsx'
 import { RefreshButton } from './TeamInfo.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
-// number is inked red like every uniform number on the box score.
+// number is inked red like every uniform number on the box score. Wrapped in
+// ManagerLink (degrades to plain text when the coaches endpoint had no
+// personId — see that component) so the whole fill-in value is tappable,
+// same as the lineup page's own Manager fact.
 function managerValue(mgr) {
   const label = managerLabel(mgr)
   if (!label) return ''
-  if (!mgr.jersey) return label
-  return (
+  const body = !mgr.jersey ? (
+    label
+  ) : (
     <>
       {label} · <span className="bs__unum">{mgr.jersey}</span>
     </>
   )
+  return <ManagerLink id={mgr.personId}>{body}</ManagerLink>
 }
 
 // A player's uniform number and position after his name — "21 | SS" — the
@@ -73,35 +81,30 @@ export function BoxScore({
   winProbability,
   callouts,
   vsTeam,
-  onInnings,
   onReload,
   loading,
 }) {
-  // The game's calendar date — spoiler-free (officialDate carries no score),
-  // so it's read straight off the feed outside the seal, same as the lineup
-  // pages' own date fact.
-  const dateLabel = longDate(feed?.gameData?.datetime?.officialDate)
+  // The masthead above every section (GameView.jsx) already carries this
+  // game's date, so the title itself just says "Box score" — no second date
+  // a few pixels below the first.
+  //
+  // Structural status, not a score — spoiler-free, read outside the seal
+  // (same footing as the date). A final game has nothing left to refresh, so
+  // Refresh drops entirely rather than sitting there disabled-looking or,
+  // worse, inviting a pointless re-fetch. The Innings nav button is gone too
+  // — MIL/STL/INNINGS/BOX in the section tabs right above this header
+  // already goes there, live or final.
+  const isFinal = selectIsFinal(feed)
 
   return (
     <div className="boxscore">
       <div className="boxscore__head">
-        <h2 className="boxscore__title">
-          Box score
-          {dateLabel && (
-            <>
-              {' '}
-              <span className="boxscore__titleDate">| {dateLabel}</span>
-            </>
-          )}
-        </h2>
-        <div className="boxscore__headright">
-          <RefreshButton onReload={onReload} loading={loading} />
-          {onInnings && (
-            <button type="button" className="btn btn--ghost" onClick={onInnings}>
-              ‹ Innings
-            </button>
-          )}
-        </div>
+        <h2 className="boxscore__title">Box score</h2>
+        {!isFinal && (
+          <div className="boxscore__headright">
+            <RefreshButton onReload={onReload} loading={loading} />
+          </div>
+        )}
       </div>
 
       <SealBox label="Tap to reveal the box score">
@@ -136,10 +139,16 @@ export function BoxScore({
         }}
       </SealBox>
 
-      {/* A second, independent seal: the night's Bluesky buzz to seed GAME
-          NOTES. Separately sealed because it too reveals the score, and its
-          fetch is deferred until its own tap. */}
-      <GameBuzzCard feed={feed} />
+      {/* Mobile-only: Refresh moves down here as a floating pill, same
+          placement as the Innings page's own mobile Refresh (see
+          .refreshbtn--float), instead of sitting in the header — the wide
+          layout keeps it inline up top (see the boxscore__headright rule in
+          index.css). Never shown once the game is Final. */}
+      {!isFinal && (
+        <div className="pagenav pagenav--boxscore">
+          <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
+        </div>
+      )}
     </div>
   )
 }
@@ -154,18 +163,27 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
 
-  // The HP umpire's accuracy tier, as a tappable badge riding the "HP Umpire"
-  // fill-in field — same tier badge + modal as the lineup page's Umpires card
-  // (see TeamInfo.jsx), just fetched here since the box score doesn't share
-  // that component. `selectOfficials` (spoiler-free — umpire assignments carry
-  // no score) supplies the id `box.umpires` doesn't carry (it's parsed from
-  // free text with no id).
-  const hpId = useMemo(() => selectOfficials(feed).find((o) => o.role === 'HP')?.id ?? null, [feed])
+  // Each crew member's id, by role — `selectOfficials` (spoiler-free; umpire
+  // assignments carry no score) is the one place with ids, since box.umpires
+  // above is parsed from the feed's free-text "Umpires" info string, which
+  // carries none. Same lookup TeamInfo.jsx's Umpires card uses, just keyed
+  // here so every UmpireLink below (not only HP) can find its id.
+  const officialIdByRole = useMemo(() => {
+    const byRole = {}
+    for (const o of selectOfficials(feed)) byRole[o.role] = o.id
+    return byRole
+  }, [feed])
+  const hpId = officialIdByRole.HP ?? null
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)
+  // An umpire fill-in field's value, linked to their page when the crew list
+  // resolved an id for that role (degrades to plain text otherwise — see
+  // UmpireLink). '' passes through so InfoCard's '—' fallback still shows for
+  // a role the feed didn't post.
+  const umpValue = (role, name) => (name ? <UmpireLink id={officialIdByRole[role]}>{name}</UmpireLink> : '')
   const hpUmpireValue = u.hp ? (
     <>
-      {u.hp}
+      <UmpireLink id={hpId}>{u.hp}</UmpireLink>
       {hpAccuracy?.tier && (
         <button type="button" className="umps__tierbtn bs__tierbtn" onClick={() => setModalId(hpId)}>
           <UmpireTierPill tier={hpAccuracy.tier} />
@@ -180,13 +198,13 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
     // What they wore (jersey · pants · cap) — spoiler-free, posted ~game time.
     { label: 'Uniform', value: uniforms?.away, wide: true },
     { label: 'HP Umpire', value: hpUmpireValue },
-    { label: '1B Umpire', value: u.first },
-    { label: '2B Umpire', value: u.second },
-    { label: '3B Umpire', value: u.third },
+    { label: '1B Umpire', value: umpValue('1B', u.first) },
+    { label: '2B Umpire', value: umpValue('2B', u.second) },
+    { label: '3B Umpire', value: umpValue('3B', u.third) },
     // Six-man crew only (All-Star Game / postseason) — hidden entirely for
     // the regular-season four-man crew, same as the lineup page's Umpires card.
-    ...(u.left ? [{ label: 'LF Umpire', value: u.left }] : []),
-    ...(u.right ? [{ label: 'RF Umpire', value: u.right }] : []),
+    ...(u.left ? [{ label: 'LF Umpire', value: umpValue('LF', u.left) }] : []),
+    ...(u.right ? [{ label: 'RF Umpire', value: umpValue('RF', u.right) }] : []),
     { label: 'First Pitch', value: box.times.firstPitch, wide: true },
   ]
   const homeFields = [
@@ -246,6 +264,10 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
           <Scoreboard away={box.away} home={box.home} innings={box.innings} />
         </div>
       </div>
+      {/* Its own full-width row between the linescore/Game Score column and
+          the two team cards — three tiles across on desktop/ipad, stacked on
+          phone (see .bs__statcastRow's wide-breakpoint override). */}
+      <StatcastLeadersCard feed={feed} insights={insights} />
       <div className="bs__duo">
         <div className="bs__col">
           <InfoCard fields={awayFields} />
@@ -256,11 +278,12 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
           <TeamBlock side={box.home} feed={feed} sideKey="home" />
         </div>
       </div>
-      <GameInfo rows={box.footNotes} dateLabel={box.dateLabel} />
-      {/* Last thing in the sealed box score, so it lands directly above the
-          separately-sealed GameBuzzCard below — the catch-all for whatever
-          the game turned up as notable, ahead of the crowd's own reaction. */}
-      <InsightsCard insights={insights} calloutNotes={calloutNotes} />
+      <GameInfo rows={box.footNotes} />
+      {/* The catch-all for whatever the game turned up as notable, ahead of
+          the crowd's own reaction in Game Buzz right below it — both now
+          share this one reveal instead of asking for a second tap. */}
+      <InsightsCard calloutNotes={calloutNotes} />
+      <GameBuzzCard feed={feed} />
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>
   )
@@ -303,53 +326,82 @@ function groupCalloutNotes(notes) {
   return groups
 }
 
-// Whole-game Statcast superlatives (see computeGameSuperlatives) — the
-// catch-all "what stood out tonight" card: the fastest pitch, the hardest-hit
-// ball, the longest ball, whoever owns each. Hidden entirely when the feed
+// The three Statcast superlatives (see computeGameSuperlatives), each
+// resolved to the "baseball card" shape PerformerCard renders — same
+// resolveCardPlayer lookup daySuperlatives.js uses for the day-recap's own
+// Statcast Leaders tiles. Filters out any superlative whose value or player
+// couldn't be resolved (most MiLB parks carry no tracking data at all).
+function statcastCards(feed, insights) {
+  const {
+    maxVelo, maxVeloType, maxVeloPlayerId,
+    hardestHit, hardestHitPlayerId,
+    longestHit, longestHitPlayerId,
+  } = insights ?? {}
+  return [
+    maxVelo != null && {
+      label: 'Fastest pitch',
+      player: resolveCardPlayer(feed, maxVeloPlayerId),
+      stat: `${maxVelo.toFixed(1)} MPH${maxVeloType ? ` · ${maxVeloType}` : ''}`,
+    },
+    hardestHit != null && {
+      label: 'Hardest hit',
+      player: resolveCardPlayer(feed, hardestHitPlayerId),
+      stat: `${hardestHit.toFixed(1)} MPH`,
+    },
+    longestHit != null && {
+      label: 'Longest ball',
+      player: resolveCardPlayer(feed, longestHitPlayerId),
+      stat: `${Math.round(longestHit)} FT`,
+    },
+  ]
+    .filter(Boolean)
+    .filter((c) => c.player)
+    .map((c) => ({ label: c.label, entry: { ...c.player, stat: c.stat } }))
+}
+
+// Whole-game Statcast superlatives — the fastest pitch, the hardest-hit
+// ball, the longest ball, whoever owns each — rendered as the same
+// PerformerCard "baseball card" tile the past-day recap's Top
+// Performers/Statcast Leaders use (headshot, team, stat line). Its own
+// full-width card between the linescore/Game Score column and the two team
+// cards (see BoxScoreBody) rather than folded into the Insights card below,
+// so the three tiles can lay out as their own row instead of competing with
+// the callout-notes waterfall for width. Hidden entirely when the feed
 // carried no tracking data (most MiLB parks), same graceful-degrade as the
-// per-half Statcast row in the innings view.
-function InsightsCard({ insights, calloutNotes }) {
+// per-half Statcast row in the innings view (which keeps its own plain-text
+// StatcastCard — no boxscore to resolve a headshot against mid-game).
+function StatcastLeadersCard({ feed, insights }) {
+  const cards = statcastCards(feed, insights)
+  if (cards.length === 0) return null
+  return (
+    <section className="bs__statcastCard">
+      <h3 className="bs__insightsTitle">Statcast Leaders</h3>
+      <div className="bs__statcastRow">
+        {cards.map(({ label, entry }) => (
+          <div className="bs__statcastCol" key={label}>
+            <h4 className="playercard__bucket">{label}</h4>
+            <ul className="playercard__list">
+              <PerformerCard entry={entry} />
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// Every leader/streak/situational-record note that fired somewhere in the
+// game (see computeGameCalloutNotes). Hidden entirely when nothing fired.
+function InsightsCard({ calloutNotes }) {
   const [showAll, setShowAll] = useState(false)
-  const { maxVelo, maxVeloType, maxVeloPlayer, hardestHit, hardestHitPlayer, longestHit, longestHitPlayer } =
-    insights ?? {}
-  const hasStatcast = maxVelo != null || hardestHit != null || longestHit != null
   const hasNotes = calloutNotes && calloutNotes.length > 0
-  if (!hasStatcast && !hasNotes) return null
-  const groups = hasNotes ? groupCalloutNotes(calloutNotes) : []
+  if (!hasNotes) return null
+  const groups = groupCalloutNotes(calloutNotes)
   const shownGroups = showAll ? groups : groups.slice(0, INSIGHTS_SHOWN)
   const hiddenCount = groups.length - shownGroups.length
   return (
     <section className="bs__insights">
       <h3 className="bs__insightsTitle">Insights</h3>
-      {hasStatcast && (
-        <div className="statcast">
-          {maxVelo != null && (
-            <StatcastCard
-              label="Fastest pitch"
-              value={maxVelo.toFixed(1)}
-              unit="MPH"
-              who={maxVeloPlayer}
-              detail={maxVeloType}
-            />
-          )}
-          {hardestHit != null && (
-            <StatcastCard
-              label="Hardest hit"
-              value={hardestHit.toFixed(1)}
-              unit="MPH"
-              who={hardestHitPlayer}
-            />
-          )}
-          {longestHit != null && (
-            <StatcastCard
-              label="Longest ball"
-              value={Math.round(longestHit)}
-              unit="FT"
-              who={longestHitPlayer}
-            />
-          )}
-        </div>
-      )}
       {/* Every leader/streak/situational-record note that fired somewhere in
           the game (see computeGameCalloutNotes) — the same notes shown one at
           a time on the play they belong to in the innings view, rolled up
@@ -360,13 +412,11 @@ function InsightsCard({ insights, calloutNotes }) {
           variable-height cards tightly instead of stretching every row to its
           tallest card. Ranked most-impactful-first by the shared worthiness
           score; the tail waits behind Show more. */}
-      {hasNotes && (
-        <div className={`bs__noteGrid${hasStatcast ? ' bs__noteGrid--divided' : ''}`}>
-          {shownGroups.map((group, i) => (
-            <InsightNoteCard key={i} group={group} />
-          ))}
-        </div>
-      )}
+      <div className="bs__noteGrid">
+        {shownGroups.map((group, i) => (
+          <InsightNoteCard key={i} group={group} />
+        ))}
+      </div>
       {hiddenCount > 0 && (
         <button type="button" className="bs__noteMore" onClick={() => setShowAll(true)}>
           Show {hiddenCount} more {hiddenCount === 1 ? 'insight' : 'insights'}
@@ -576,8 +626,30 @@ function TeamBlock({ side, feed, sideKey }) {
         </div>
       )}
 
+      <BoxAbs feed={feed} sideKey={sideKey} abbr={side.abbreviation} />
       <BoxDefense feed={feed} sideKey={sideKey} />
     </section>
+  )
+}
+
+// This club's whole-game ABS (Automated Ball-Strike) challenge tally — the
+// same AbsRow StatBox shows one half at a time (src/api/challenges.js),
+// walked through the whole game (Infinity — same "entering a half that never
+// comes" sentinel BoxDefense uses below) since the box score is already
+// behind its own seal. Previously this data only reached the page as raw
+// feed text buried in the Pitching notes ("ABS Challenge: ATL 1-2…"); this is
+// the same StatBox pip row instead of a second copy of it. MLB only —
+// gameHasAbs is false at every MiLB park.
+function BoxAbs({ feed, sideKey, abbr }) {
+  if (!gameHasAbs(feed)) return null
+  const side = selectChallengeState(feed, Infinity, 'bottom')[sideKey]
+  return (
+    <div className="abs">
+      <span className="abs__title">ABS Challenges</span>
+      <div className="abs__rows">
+        <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} />
+      </div>
+    </div>
   )
 }
 
@@ -698,19 +770,27 @@ function Scoreboard({ away, home, innings }) {
 // parens — (W-L) for the win and loss, (saves) for the save — the way a printed
 // box score writes the decisions.
 function Decisions({ decisions }) {
-  const withRec = (name, rec) => (rec ? `${name} (${rec})` : name)
+  // The name links to his player page (PlayerLink degrades to plain text if
+  // the feed carried no id — never a dead link); the season record stays
+  // plain text outside the link, same split as every batting/pitching row.
+  const withRec = (id, name, rec) => (
+    <>
+      <PlayerLink id={id}>{name}</PlayerLink>
+      {rec ? ` (${rec})` : ''}
+    </>
+  )
   const parts = [
     decisions.win && {
       k: 'Win',
-      v: withRec(decisions.win, decisions.winRecord),
+      v: withRec(decisions.winId, decisions.win, decisions.winRecord),
     },
     decisions.loss && {
       k: 'Loss',
-      v: withRec(decisions.loss, decisions.lossRecord),
+      v: withRec(decisions.lossId, decisions.loss, decisions.lossRecord),
     },
     decisions.save && {
       k: 'Save',
-      v: withRec(decisions.save, decisions.saveRecord),
+      v: withRec(decisions.saveId, decisions.save, decisions.saveRecord),
     },
   ].filter(Boolean)
   if (parts.length === 0) return null
@@ -825,11 +905,10 @@ function ThreeStars({ stars }) {
 // first pitch, duration) and splits every per-pitcher row onto its own team's
 // TeamBlock (see `pitchNotes` there): whole-game fields with no team owner,
 // plus any entry that couldn't be matched to a roster name.
-function GameInfo({ rows, dateLabel }) {
-  if (rows.length === 0 && !dateLabel) return null
+function GameInfo({ rows }) {
+  if (rows.length === 0) return null
   return (
     <div className="bs__info">
-      {dateLabel && <p className="bs__infoDate">{dateLabel}</p>}
       {rows.map((r, i) => (
         <p className="bs__infoRow" key={i}>
           <span className="bs__infoLabel">{r.label}:</span> {r.value}

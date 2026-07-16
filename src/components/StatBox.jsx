@@ -159,7 +159,9 @@ export function StatBox({
 // precisely, so the unused count is a conservative lower bound rather than an
 // overstated bank. The logo falls back to the abbreviation for a club with no
 // mark (never for MLB, where ABS lives, but keeps the row robust).
-function AbsRow({ teamId, abbr, outcomes }) {
+// Exported: the box score's pitching-notes area reuses this exact row for the
+// whole-game challenge tally instead of growing a second copy.
+export function AbsRow({ teamId, abbr, outcomes }) {
   const [logoBroken, setLogoBroken] = useState(false)
   const failed = outcomes.filter((o) => o === 'fail').length
   const won = outcomes.length - failed
