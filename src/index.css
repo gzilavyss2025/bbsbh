@@ -9970,17 +9970,19 @@ body {
    context for the season story, not a hidden ingredient in the verdict. */
 .team-score {
   display: grid;
-  gap: 8px;
+  gap: 12px;
   margin: 8px 0 14px;
-  padding: 9px 10px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
 .team-score__head {
   display: flex;
   justify-content: space-between;
   gap: 8px;
+  padding: 10px 12px 0;
   color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -9995,40 +9997,187 @@ body {
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
 }
-.team-score__row {
+.team-score__grade {
+  margin: 0 10px;
+  padding: 12px 12px 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+.team-score__grade.is-active {
+  border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
+}
+.team-score__grade-button {
   display: grid;
-  gap: 5px;
-  padding-bottom: 8px;
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
 }
-.team-score__row:last-of-type {
-  padding-bottom: 0;
-  border-bottom: 0;
+.team-score__grade-button:active {
+  transform: scale(.985);
 }
-.team-score__row--hero {
-  padding: 3px 0 10px;
+.team-score__grade-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
-.team-score__row--hero .team-score__label {
-  font-size: 15px;
+.team-score__grade-copy,
+.team-score__grade-result {
+  display: flex;
+  flex-direction: column;
 }
-.team-score__row--hero .team-score__score {
-  font-size: 34px;
+.team-score__grade-copy {
+  align-self: stretch;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+.team-score__grade-kicker {
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__grade-copy strong {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-tight);
+}
+.team-score__grade-copy > span:last-child {
+  margin-top: 4px;
+  color: var(--graphite-soft);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+.team-score__grade-result {
+  align-items: flex-end;
+  gap: 4px;
+}
+.team-score__grade-score {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-score-lg);
   font-weight: var(--w-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-display);
+}
+.team-score__grade-score small {
+  margin-left: 3px;
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+}
+.team-score__breakdown {
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__driver-group {
+  display: grid;
+  gap: 6px;
+  padding: 0 10px;
+}
+.team-score__driver-heading {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }
 .team-score__drivers {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.team-score__row {
+  display: grid;
+  gap: 5px;
+}
+.team-score__row--driver {
+  min-width: 0;
+  padding: 9px;
+  border: var(--bw-hair) solid var(--rule-soft);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-inset) 62%, var(--surface-card));
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.team-score__row--driver.is-active {
+  border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
+  background: color-mix(in srgb, var(--seal) 9%, var(--surface-inset));
+}
+.team-score__row--driver .team-score__rowtop {
+  display: grid;
+  gap: 4px;
+}
+.team-score__row--driver .team-score__rowright {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+.team-score__row--driver .team-score__score {
+  font-size: var(--fs-hero-sm);
+}
+.team-score__row--driver .team-score__rank {
+  padding: 2px 5px;
+  font-size: var(--fs-caption);
+}
+.team-score__row--driver .team-score__meta {
+  min-height: 2.5em;
+  line-height: var(--lh-snug);
+  text-overflow: unset;
+  white-space: normal;
+}
+.team-score__meter {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--rule-soft);
+}
+.team-score__meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--seal-hatch);
 }
 .team-score__row--compact {
-  padding: 3px 0 0;
-  border-bottom: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 9px 12px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  background: color-mix(in srgb, var(--surface-inset) 42%, transparent);
+}
+.team-score__row--compact .team-score__rowtop {
+  grid-column: 1 / -1;
 }
 .team-score__row--compact .team-score__label,
 .team-score__row--compact .team-score__meta {
   color: var(--text-caption);
 }
 .team-score__row--compact .team-score__score {
-  font-size: 18px;
+  font-size: var(--fs-title-sm);
 }
 .team-score__rowtop {
   display: flex;
@@ -10042,6 +10191,10 @@ body {
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.team-score__rowtop:active {
+  transform: scale(.98);
 }
 .team-score__rowtop:focus-visible {
   outline: none;
@@ -10090,7 +10243,7 @@ body {
 .team-score__track {
   position: relative;
   height: 44px;
-  margin: 2px 1px 0;
+  margin: 4px 1px 0;
 }
 .team-score__track-base {
   position: absolute;
@@ -10140,7 +10293,7 @@ body {
   height: 10px;
   margin-left: -5px;
   background: var(--text-heading);
-  border: 2px solid var(--surface-card);
+  border: 2px solid var(--surface-inset);
   box-shadow: 0 0 0 1px var(--text-heading);
   opacity: 1;
   cursor: default;
@@ -10162,6 +10315,7 @@ body {
 }
 .team-score__howlink {
   justify-self: start;
+  margin: -3px 12px 11px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -10178,7 +10332,11 @@ body {
   box-shadow: var(--ring);
 }
 .team-score__detail {
+  margin: -2px 10px 0;
+  padding: 9px 10px 8px;
   border-top: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  background: color-mix(in srgb, var(--surface-inset) 55%, transparent);
   opacity: 1;
   transform: translateY(0);
   transition: opacity 160ms ease, transform 180ms cubic-bezier(.23, 1, .32, 1);
@@ -10192,7 +10350,16 @@ body {
 .team-score__detail dl {
   display: grid;
   gap: 0;
-  margin: 7px 0 0;
+  margin: 3px 0 0;
+}
+.team-score__detail-title {
+  margin: 0;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }
 .team-score__detail dl > div {
   display: flex;
@@ -10214,8 +10381,25 @@ body {
   text-align: right;
 }
 @media (max-width: 420px) {
-  .team-score__score {
-    font-size: var(--fs-num-lg);
+  .team-score__grade-score {
+    font-size: var(--fs-score-md);
+  }
+}
+@media (max-width: 350px) {
+  .team-score__grade-button {
+    gap: 6px;
+  }
+  .team-score__grade-copy strong {
+    font-size: var(--fs-title-sm);
+  }
+  .team-score__grade-score {
+    font-size: var(--fs-display-lg);
+  }
+  .team-score__drivers {
+    grid-template-columns: 1fr;
+  }
+  .team-score__row--driver .team-score__meta {
+    min-height: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
