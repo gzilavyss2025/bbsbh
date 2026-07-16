@@ -13,7 +13,7 @@ const PRINCIPLES = [
   },
   {
     label: 'Reference-friendly',
-    text: 'Player pages, team pages, standings, leaders, prospects, awards, and umpire data make it useful even when you are not scoring a game.',
+    text: 'Player pages, team pages, standings, leaders, prospects, rehab, awards, and umpire data make it useful even when you are not scoring a game.',
   },
 ]
 
@@ -42,15 +42,14 @@ export function AboutPage({ onBack }) {
           <TallyWordmark height={25} />
         </div>
         <h2 id="about-title" className="aboutpage__title">
-          A baseball companion for scorekeeping, delayed watching, and research.
+          A baseball companion for scorekeeping, delayed watching, and reference.
         </h2>
         <p className="aboutpage__lede caps-exempt">
-          Tally Baseball started as a tool for people who keep score by hand and
-          want the practical context a live data feed can provide. It is also for
-          watching a game after it happened without having the score spoiled, or
-          for looking up baseball information in a quieter, game-centered way.
-          It keeps the page quiet: no autoplay highlights, no final-score
-          shortcuts, and no outcome copy unless you deliberately reveal it.
+          Tally Baseball is a companion for people who keep score by hand, watch
+          games after they happen, or just want to look something up about
+          baseball without spoiling today&apos;s results. The page stays quiet until
+          you ask it not to — no autoplay highlights, no final-score shortcuts,
+          no outcome copy unless you deliberately reveal it.
         </p>
       </section>
 
@@ -83,7 +82,7 @@ export function AboutPage({ onBack }) {
 
       <section className="aboutpage__note caps-exempt" aria-label="Data note">
         <p>
-          Game, roster, standings, and player data come from public MLB Stats API
+          Game, roster, player, and statistical data come from public MLB Stats API
           endpoints and related public baseball data sources. Tally Baseball is an
           independent project and is not affiliated with MLB, MiLB, or any club.
         </p>
