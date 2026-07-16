@@ -271,10 +271,19 @@ const FAVOR_P90_RUNS = 1.0
 const FAVOR_SCALE_RUNS = 1.3
 const FAVOR_EVEN_FLOOR = 0.05
 
+// Three broadcast-toned buckets for the corner pill, in place of a spelled-
+// out caption sentence — same three thresholds as before (FAVOR_MEDIAN_RUNS/
+// FAVOR_P90_RUNS), just a short badge instead of a sentence.
+const FAVOR_TIERS = {
+  routine: 'Routine',
+  standout: 'Standout',
+  outlier: 'Outlier',
+}
+
 function favorTier(magnitude) {
-  if (magnitude < FAVOR_MEDIAN_RUNS) return "Within a typical game's variance"
-  if (magnitude < FAVOR_P90_RUNS) return 'More than a typical game'
-  return 'Among the biggest swings of the season'
+  if (magnitude < FAVOR_MEDIAN_RUNS) return 'routine'
+  if (magnitude < FAVOR_P90_RUNS) return 'standout'
+  return 'outlier'
 }
 
 function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
@@ -282,6 +291,7 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
   const fillPct = Math.min(Math.abs(net) / FAVOR_SCALE_RUNS, 1) * 50
+  const tier = even ? null : favorTier(Math.abs(net))
   // The favored club's own primary/secondary colors, at full brightness, so
   // the lean reads unmistakably as "that team's colors" rather than a
   // generic accent — see lib/teams.js's teamStripeGradient. Falls back to
@@ -290,6 +300,11 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   const stripe = !even ? teamStripeGradient(towardAway ? awayId : homeId) : null
   return (
     <div className="favormeter">
+      {tier && (
+        <span className={`favormeter__tierpill favormeter__tierpill--${tier}`} aria-hidden="true">
+          {FAVOR_TIERS[tier]}
+        </span>
+      )}
       <div className="favormeter__track-row">
         <TeamLogo teamId={awayId} name={awayName} size={22} />
         <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayName, homeName)}>
@@ -314,7 +329,6 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
               +{Math.abs(net).toFixed(1)} <span className="favormeter__unit">runs</span>
             </strong>
             <span className="favormeter__label">for {towardAway ? awayName : homeName}</span>
-            <span className="favormeter__tier">{favorTier(Math.abs(net))}</span>
           </>
         )}
       </div>
@@ -324,7 +338,8 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
 
 function favorMeterLabel(net, awayName, homeName) {
   if (Math.abs(net) < FAVOR_EVEN_FLOOR) return 'Missed calls have been even so far'
-  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayName : homeName} — ${favorTier(Math.abs(net))}`
+  const tierLabel = FAVOR_TIERS[favorTier(Math.abs(net))]
+  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayName : homeName} — ${tierLabel}`
 }
 
 function Stat({ k, v, unit, tone, big, small }) {

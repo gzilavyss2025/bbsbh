@@ -3986,14 +3986,18 @@ body {
 }
 
 /* The favor lean-bar: two club logos flanking a track whose fill grows from
-   center toward whichever side missed calls have added value to, plus a
-   plain-English caption underneath. Same card treatment as .statcast__card
-   (it's a grid sibling of one) — background/border/radius/shadow — so the
-   two read as one consistent row rather than a tile next to a bare block.
-   Away/home fill colors reuse WinProbChart's own soft-clay/soft-navy pair —
-   the same "which side" visual language already on this page (see
-   --winprob-away/--winprob-home). */
+   center toward whichever side missed calls have added value to, a
+   plain-English caption underneath, and a routine/standout/outlier tier
+   badge in the top-right corner (favorTier — see .favormeter__tierpill
+   below). Same card treatment as .statcast__card (it's a grid sibling of
+   one) — background/border/radius/shadow — so the two read as one
+   consistent row rather than a tile next to a bare block. Away/home fill
+   colors default to WinProbChart's own soft-clay/soft-navy pair — the same
+   "which side" visual language already on this page — but the fill's own
+   inline style usually overrides that with the favored club's real
+   primary/secondary stripe (see lib/teams.js's teamStripeGradient). */
 .favormeter {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4003,6 +4007,35 @@ body {
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   box-shadow: var(--inset-cell);
+}
+/* The tier badge (favorTier) — routine/standout/outlier, escalating in
+   visual weight rather than a single flat color: routine blends into the
+   card, standout borrows the medal-amber "honors" treatment already used on
+   the transaction timeline, outlier borrows the highlighter "watch flag"
+   marker color so a truly lopsided night visually demands a second look. */
+.favormeter__tierpill {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.favormeter__tierpill--routine {
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-caption);
+}
+.favormeter__tierpill--standout {
+  background: var(--award-soft);
+  color: var(--award-ink);
+}
+.favormeter__tierpill--outlier {
+  background: var(--marker);
+  color: var(--ink-0);
 }
 .favormeter__track-row {
   display: flex;
