@@ -19,7 +19,10 @@
 // MiLB levels, fetches the live feed for every newly-Final gamePk not already
 // in the output file, scores it, and MERGES it in (deduped by gamePk). A
 // Final game's score never changes, so an already-scored game is never
-// refetched. Runs on a tight cron (.github/workflows/update-game-score.yml,
+// refetched. The source of truth is now the shared SQLite layer
+// (scripts/lib/db.js, docs/adr/0021) — this script writes to the game_scores
+// table and exports this JSON from it, byte-for-byte the same reader shape.
+// Runs on a tight cron (.github/workflows/update-game-score.yml,
 // every 10 minutes) — deliberately NOT the once-nightly batch — so a score is
 // usually available within minutes of a game going Final. MLB + MiLB (no
 // winProbability dependency, which is MLB-only — see game.js — so this works
@@ -31,14 +34,16 @@
 //   node scripts/gen-game-score.mjs --days=7
 //
 // One-time season backfill (e.g. folding in a new season, or the gap before
-// this generator existed): delete public/data/game-score.json first so every
-// entry gets rebuilt in the current schema, then run with `--days` covering
-// from the earliest sportId's regularSeasonStartDate (see
+// this generator existed): delete the game_scores rows from
+// scripts/data/bbsbh.sql first (or --rescore, if the whole table should be
+// rebuilt) so every entry gets rebuilt in the current schema, then run with
+// `--days` covering from the earliest sportId's regularSeasonStartDate (see
 // /api/v1/seasons?sportId={id}&season={year}) through today.
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { selectRegulationInnings } from '../src/api/select.js'
+import { openDb, dumpGroup } from './lib/db.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'game-score.json')
@@ -330,34 +335,56 @@ export function computeGameScore(feed) {
 }
 
 // --- sweep + merge -----------------------------------------------------------
-async function loadExisting() {
-  try {
-    const raw = await readFile(out, 'utf8')
-    return JSON.parse(raw)
-  } catch {
-    return { generatedAt: null, scores: {} }
+// Exports the game_scores table to the exact reader shape src/api/gameScore.js
+// expects: { generatedAt, scores: { <gamePk>: { score, sportId, homeId, awayId } } }.
+function exportJson(db) {
+  const rows = db.prepare('SELECT * FROM game_scores ORDER BY game_pk').all()
+  const scores = {}
+  for (const row of rows) {
+    scores[row.game_pk] = {
+      score: row.score,
+      sportId: row.sport_id,
+      homeId: row.home_id,
+      awayId: row.away_id,
+    }
   }
+  return { generatedAt: new Date().toISOString(), scores }
 }
 
 // Checkpointed every CHECKPOINT_EVERY games, not just at the very end — a
 // large one-time backfill (thousands of gamePks, each its own feed fetch) can
 // run long enough to get interrupted, and this loop is otherwise all-or-
-// nothing. A checkpoint write is safe mid-run: `scores` is only ever added to,
-// never rewritten, so a resumed run's `scores[g.gamePk] != null` skip check
-// picks up exactly where the last checkpoint left off.
+// nothing. A checkpoint write (dump the DB + export the JSON) is safe
+// mid-run: rows are only ever inserted/replaced, never deleted, so a resumed
+// run's "already in game_scores" skip check picks up exactly where the last
+// checkpoint left off.
 const CHECKPOINT_EVERY = 200
 
+const upsertScore = (db) =>
+  db.prepare(
+    `INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(game_pk) DO UPDATE SET
+       score = excluded.score, sport_id = excluded.sport_id,
+       home_id = excluded.home_id, away_id = excluded.away_id,
+       updated_at = excluded.updated_at`,
+  )
+
 // Normal run sweeps a trailing window of newly-Final games not yet scored.
-// `--rescore` re-scores every gamePk already in the file too — the one-time
+// `--rescore` re-scores every gamePk already in the table too — the one-time
 // backfill after a formula change (a Final game is otherwise never recomputed).
 async function main() {
   const rescore = args.rescore != null
-  const existing = await loadExisting()
-  const scores = { ...existing.scores }
+  const db = await openDb()
+  const existingIds = new Set(
+    db.prepare('SELECT game_pk FROM game_scores').all().map((r) => String(r.game_pk)),
+  )
+  const insert = upsertScore(db)
 
   const writeOut = async () => {
+    await dumpGroup(db, 'game-scores')
     await mkdir(dirname(out), { recursive: true })
-    await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), scores }))
+    await writeFile(out, JSON.stringify(exportJson(db)))
   }
 
   const today = new Date()
@@ -368,7 +395,7 @@ async function main() {
     dates.push(isoDay(d))
   }
 
-  const candidates = new Set(rescore ? Object.keys(existing.scores) : [])
+  const candidates = new Set(rescore ? existingIds : [])
   for (const dateStr of dates) {
     const slate = await getJson(
       `/api/v1/schedule?sportId=${SWEPT_SPORT_IDS.join(',')}&date=${dateStr}`,
@@ -378,7 +405,7 @@ async function main() {
       if (g.status?.abstractGameState !== 'Final') continue
       if (g.status?.detailedState === 'Postponed') continue
       if (g.gameType !== 'R') continue
-      if (!rescore && scores[g.gamePk] != null) continue
+      if (!rescore && existingIds.has(String(g.gamePk))) continue
       candidates.add(String(g.gamePk))
     }
   }
@@ -398,28 +425,32 @@ async function main() {
         continue
       }
       const teams = feed?.gameData?.teams
-      scores[gamePk] = {
+      insert.run(
+        Number(gamePk),
         score,
-        sportId: teams?.home?.sport?.id ?? null,
-        homeId: teams?.home?.id ?? null,
-        awayId: teams?.away?.id ?? null,
-      }
+        teams?.home?.sport?.id ?? null,
+        teams?.home?.id ?? null,
+        teams?.away?.id ?? null,
+        new Date().toISOString(),
+      )
       scored++
       if (scored % CHECKPOINT_EVERY === 0) {
         await writeOut()
-        console.log(`checkpoint: ${scored} scored so far (${Object.keys(scores).length} total)`)
+        console.log(`checkpoint: ${scored} scored so far`)
       }
     } catch (err) {
       console.error(`gamePk ${gamePk}: ${err.message}`)
     }
   }
 
+  const total = db.prepare('SELECT COUNT(*) AS n FROM game_scores').get().n
   if (scored > 0) {
     await writeOut()
-    console.log(`wrote ${out} (${scored} scored, ${skipped} skipped, ${Object.keys(scores).length} total)`)
+    console.log(`wrote ${out} (${scored} scored, ${skipped} skipped, ${total} total)`)
   } else {
-    console.log(`no changes (${skipped} skipped, ${Object.keys(scores).length} total)`)
+    console.log(`no changes (${skipped} skipped, ${total} total)`)
   }
+  db.close()
 }
 
 // Only sweep when run as a script — keeps computeGameScore importable for tests

@@ -12,6 +12,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { openDb, dumpGroup } from './lib/db.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'season-score.json')
@@ -175,12 +176,29 @@ async function loadSeed() {
   }
 }
 
-async function loadOutput() {
-  try {
-    return JSON.parse(await readFile(out, 'utf8'))
-  } catch {
-    return { version: 1, generatedAt: null, seasons: {} }
+const upsertSnapshot = (db) =>
+  db.prepare(
+    `INSERT INTO team_snapshots (season, team_id, date, metric, payload_json)
+     VALUES (?, ?, ?, 'surprise', ?)
+     ON CONFLICT(season, team_id, date, metric) DO UPDATE SET payload_json = excluded.payload_json`,
+  )
+
+// Reconstructs public/data/season-score.json's original nested shape —
+// { seasons: { <year>: { byTeamId: { <teamId>: { <date>: snapshot } } } } } —
+// from the flat team_snapshots table (docs/adr/0021). Unlike team-score's
+// split quality/current_form metrics, a 'surprise' row's payload IS the
+// whole snapshot (it already carries its own `asOf`), so no reassembly.
+function exportJson(db) {
+  const rows = db
+    .prepare(`SELECT * FROM team_snapshots WHERE metric = 'surprise' ORDER BY season, team_id, date`)
+    .all()
+  const seasons = {}
+  for (const row of rows) {
+    const season = (seasons[row.season] ??= { byTeamId: {} })
+    const byDate = (season.byTeamId[row.team_id] ??= {})
+    byDate[row.date] = JSON.parse(row.payload_json)
   }
+  return { version: 1, generatedAt: new Date().toISOString(), seasons }
 }
 
 async function fetchStandingRows(season, date) {
@@ -257,21 +275,20 @@ async function buildDate(asOf, seed) {
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   const dates = datesFromArgs(args)
-  const [seed, existing] = await Promise.all([loadSeed(), loadOutput()])
-  const seasons = { ...(existing.seasons ?? {}) }
+  const [seed, db] = await Promise.all([loadSeed(), openDb()])
+  const insert = upsertSnapshot(db)
   for (const date of dates) {
     const { season, snapshots } = await buildDate(date, seed)
-    const oldSeason = seasons[season] ?? { byTeamId: {} }
-    const byTeamId = { ...oldSeason.byTeamId }
     for (const [teamId, snapshot] of Object.entries(snapshots)) {
-      byTeamId[teamId] = { ...(byTeamId[teamId] ?? {}), [date]: snapshot }
+      insert.run(season, Number(teamId), date, JSON.stringify(snapshot))
     }
-    seasons[season] = { byTeamId }
     console.log(`${date}: ${Object.keys(snapshots).length} MLB season-score snapshots`)
   }
+  await dumpGroup(db, 'team-snapshots')
   await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), seasons }))
+  await writeFile(out, JSON.stringify(exportJson(db)))
   console.log(`wrote ${out}`)
+  db.close()
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

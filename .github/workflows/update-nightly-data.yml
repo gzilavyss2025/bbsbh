@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 26 # node:sqlite ships stable here (docs/adr/0021) — gen-team-score.mjs/gen-season-score.mjs need it
 
       - name: Game notes
         id: game-notes
@@ -98,7 +98,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions scripts/data/team-snapshots.sql 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Update nightly data"
           git push
 
