@@ -263,7 +263,6 @@ export function GameView({ game, section, onSection }) {
           winProbability={winProb.data}
           callouts={gameCallouts}
           vsTeam={vsTeamSplitsData}
-          onInnings={() => onSection(lastInningSection.current)}
           onReload={feedState.reload}
           loading={feedState.loading}
         />

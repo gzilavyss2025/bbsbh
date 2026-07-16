@@ -41,10 +41,13 @@ export function computeDerivedByInning(feed) {
       maxVelo: null, // fastest pitch, mph
       maxVeloType: '', // its pitch type ("Four-Seam Fastball")
       maxVeloPlayer: '', // the pitcher who threw it
+      maxVeloPlayerId: null, // his personId — the box score's Insights card headshot
       hardestHit: null, // top exit velocity, mph
       hardestHitPlayer: '', // the batter who hit it
+      hardestHitPlayerId: null,
       longestHit: null, // longest tracked batted ball, ft
       longestHitPlayer: '', // the batter who hit it
+      longestHitPlayerId: null,
     })
 
   for (const play of plays) {
@@ -76,16 +79,19 @@ export function computeDerivedByInning(feed) {
         b.maxVelo = velo
         b.maxVeloType = e.details?.type?.description ?? ''
         b.maxVeloPlayer = play.matchup?.pitcher?.fullName ?? ''
+        b.maxVeloPlayerId = play.matchup?.pitcher?.id ?? null
       }
       const ev = e.hitData?.launchSpeed
       if (typeof ev === 'number' && ev > (b.hardestHit ?? -Infinity)) {
         b.hardestHit = ev
         b.hardestHitPlayer = play.matchup?.batter?.fullName ?? ''
+        b.hardestHitPlayerId = play.matchup?.batter?.id ?? null
       }
       const dist = e.hitData?.totalDistance
       if (typeof dist === 'number' && dist > (b.longestHit ?? -Infinity)) {
         b.longestHit = dist
         b.longestHitPlayer = play.matchup?.batter?.fullName ?? ''
+        b.longestHitPlayerId = play.matchup?.batter?.id ?? null
       }
     }
 
@@ -115,10 +121,13 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
       maxVelo: null,
       maxVeloType: '',
       maxVeloPlayer: '',
+      maxVeloPlayerId: null,
       hardestHit: null,
       hardestHitPlayer: '',
+      hardestHitPlayerId: null,
       longestHit: null,
       longestHitPlayer: '',
+      longestHitPlayerId: null,
     }
   )
 }
@@ -134,24 +143,30 @@ export function computeGameSuperlatives(feed) {
     maxVelo: null,
     maxVeloType: '',
     maxVeloPlayer: '',
+    maxVeloPlayerId: null,
     hardestHit: null,
     hardestHitPlayer: '',
+    hardestHitPlayerId: null,
     longestHit: null,
     longestHitPlayer: '',
+    longestHitPlayerId: null,
   }
   for (const b of Object.values(map)) {
     if (b.maxVelo != null && b.maxVelo > (best.maxVelo ?? -Infinity)) {
       best.maxVelo = b.maxVelo
       best.maxVeloType = b.maxVeloType
       best.maxVeloPlayer = b.maxVeloPlayer
+      best.maxVeloPlayerId = b.maxVeloPlayerId
     }
     if (b.hardestHit != null && b.hardestHit > (best.hardestHit ?? -Infinity)) {
       best.hardestHit = b.hardestHit
       best.hardestHitPlayer = b.hardestHitPlayer
+      best.hardestHitPlayerId = b.hardestHitPlayerId
     }
     if (b.longestHit != null && b.longestHit > (best.longestHit ?? -Infinity)) {
       best.longestHit = b.longestHit
       best.longestHitPlayer = b.longestHitPlayer
+      best.longestHitPlayerId = b.longestHitPlayerId
     }
   }
   return best

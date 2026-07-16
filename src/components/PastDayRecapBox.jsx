@@ -86,8 +86,10 @@ function splitFirstLast(full) {
 // One "baseball card" tile: headshot (with position floated on it as a small
 // badge, same idiom as the former-teammates cards' .teammatecard__posbadge),
 // name (a clickable PlayerLink), team logo + abbreviation, stat line
-// underneath.
-function PerformerCard({ entry }) {
+// underneath. Exported: the box score's Insights card reuses this exact tile
+// for its own Statcast superlatives (fastest pitch/hardest hit/longest ball)
+// rather than growing a second "baseball card" style.
+export function PerformerCard({ entry }) {
   const [first, last] = splitFirstLast(entry.name)
   return (
     <li className="playercard">

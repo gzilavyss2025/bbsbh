@@ -4,6 +4,7 @@ import { leagueRank } from '../api/teamScore.js'
 import { qualityScoreFromGames, CURRENT_FORM_GAMES } from '../api/teamScoreFormula.js'
 import { seasonGradeFor } from '../api/seasonGradeFormula.js'
 import { teamClubName } from '../lib/teams.js'
+import { beeswarmRows } from '../lib/beeswarm.js'
 
 const DASH = '—'
 const signed = (n) => `${n >= 0 ? '+' : ''}${n}`
@@ -217,39 +218,6 @@ function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, driver = f
       {metaText && <span className="team-score__meta">{metaText}</span>}
     </div>
   )
-}
-
-// 30 teams' scores cluster heavily (Current Form especially bunches near
-// .500), so dots land well within a dot-width of each other even when their
-// scores differ — not just exact ties. Left uncorrected, whichever dot
-// paints last simply steals every pointer event in that stretch of the rail.
-// A small beeswarm packer fixes it: walk scores low to high, and give each
-// dot the first vertical row whose last-placed dot is far enough away
-// horizontally, opening a new row only when every existing one is still too
-// close. MIN_GAP_PCT is a percent-of-track-width stand-in for the dot's own
-// ~5px footprint (the track has no fixed pixel width to measure against).
-const MIN_GAP_PCT = 1.6
-const ROW_STEP_PX = 5
-
-function beeswarmRows(rows) {
-  const sorted = [...rows].sort((a, b) => a.score - b.score)
-  const rowEdges = []
-  return sorted.map((r) => {
-    const pct = (r.score / 10) * 100
-    let rowIndex = rowEdges.findIndex((edge) => pct - edge >= MIN_GAP_PCT)
-    if (rowIndex === -1) {
-      rowIndex = rowEdges.length
-      rowEdges.push(pct)
-    } else {
-      rowEdges[rowIndex] = pct
-    }
-    // Row 0 stays on the rail; rows 1, 2, 3... alternate below/above it at
-    // growing distance, so a small cluster only nudges slightly off-center
-    // and a big one fans out symmetrically rather than stacking one-sided.
-    const magnitude = Math.ceil(rowIndex / 2) * ROW_STEP_PX
-    const rowOffset = rowIndex === 0 ? 0 : rowIndex % 2 === 1 ? magnitude : -magnitude
-    return { ...r, rowOffset }
-  })
 }
 
 // A bullet-chart rail: every other team in the league pool as a small dot at
