@@ -55,7 +55,9 @@
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Game Score modal above)
      - `.buzz__text` (Bluesky posts keep their authors' original casing)
-     - the Team Transactions card's cutline prose — `.txstory__cutline` */
+     - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
+       within it, the club-name link specifically — `.txstory__cutline .plink`
+       (a player's `.txstory__namelink` stays uppercase on purpose) */
 #root * {
   text-transform: uppercase;
 }
@@ -10726,6 +10728,17 @@ body {
 .txstory__cutline .txstory__namelink {
   font-weight: var(--w-bold);
   color: var(--text-heading);
+}
+/* A club name (TeamLink, no .txstory__namelink) is just the plain link
+   described above — unlike .txstory__namelink, it has no override to keep
+   #root *'s uppercase, so it would otherwise shout "HOUSTON ASTROS" against
+   the natural-case sentence around it. Reads in the cutline's own case even
+   though it's still a hyperlink, same as the surrounding prose. #root prefix
+   ties the ID component of #root *'s specificity, same technique as
+   #root .txstory__cutline above — a plain .txstory__cutline .plink selector
+   would lose to #root * and be silently ignored. */
+#root .txstory__cutline .plink:not(.txstory__namelink) {
+  text-transform: none; /* caps-exempt: team-name link matches the cutline's natural-case prose */
 }
 
 .team-hub__manager {
