@@ -3,6 +3,7 @@ import { selectPrePitchChanges } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
+import { selectUmpireFavor, hasPitchTracking } from '../api/umpireFavor.js'
 import { teamLogoUrl } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
@@ -33,6 +34,7 @@ export function StatBox({
   awayAbbr,
   homeAbbr,
   isNextToReveal = false,
+  runExpectancy = null,
 }) {
   if (!revealed && placeholder) {
     const pitcherChange = isNextToReveal
@@ -67,6 +69,11 @@ export function StatBox({
           // ABS challenge history through this half (reveal-only, clamped to the
           // reached half — see api/challenges.js). MLB only.
           const challenges = gameHasAbs(feed) ? selectChallengeState(feed, inning, half) : null
+          // Plate-umpire consistency + favor through this half (reveal-only,
+          // clamped — see api/umpireFavor.js). MLB + AAA only (pitch tracking).
+          const umpireFavor = hasPitchTracking(feed)
+            ? selectUmpireFavor(feed, runExpectancy, inning, half)
+            : null
           return (
             <>
               <div className="rhe">
@@ -102,6 +109,7 @@ export function StatBox({
                   </div>
                 </div>
               )}
+              <UmpireFavorRow data={umpireFavor} awayAbbr={awayAbbr || 'AWAY'} homeAbbr={homeAbbr || 'HOME'} />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball) — sat below the play-by-play
                   feed until moved here, right under the ABS row, so they're at the
@@ -191,6 +199,37 @@ function AbsRow({ teamId, abbr, outcomes }) {
       <span className="abs__rec" aria-hidden="true">
         {won}–{failed} · {left}
       </span>
+    </div>
+  )
+}
+
+// The plate umpire's consistency (how well his calls agree with his OWN
+// established zone this game — see lib/euz.js) and favor (the net
+// run-expectancy swing his misses have handed one side so far — see
+// lib/runExpectancy.js) through the half being viewed. Renders nothing until
+// at least one called pitch has been revealed, and each stat degrades
+// independently — a thin-sample game shows favor with no consistency %, an
+// unbuilt run-expectancy table shows consistency with no favor line, and both
+// missing renders nothing at all (never an empty shell).
+function UmpireFavorRow({ data, awayAbbr, homeAbbr }) {
+  if (!data) return null
+  const { consistency, favorAway, favorHome } = data
+  const pct = consistency ? Math.round((consistency.consistent / consistency.called) * 100) : null
+  const net = favorAway != null && favorHome != null ? favorAway - favorHome : null
+  const favorLabel =
+    net == null
+      ? null
+      : Math.abs(net) < 0.05
+        ? 'No net favor either way'
+        : `${net > 0 ? '+' : '−'}${Math.abs(net).toFixed(1)} runs to ${net > 0 ? awayAbbr : homeAbbr}`
+  if (pct == null && favorLabel == null) return null
+  return (
+    <div className="umpfavor">
+      <span className="umpfavor__title">Plate umpire</span>
+      <div className="umpfavor__row">
+        {pct != null && <span className="umpfavor__stat">{pct}% consistent</span>}
+        {favorLabel && <span className="umpfavor__stat">{favorLabel}</span>}
+      </div>
     </div>
   )
 }

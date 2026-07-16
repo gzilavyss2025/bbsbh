@@ -17,6 +17,7 @@ import { fetchRookiesData } from '../api/rookies.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
+import { fetchRunExpectancy } from '../api/umpireFavor.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
 import { apiDateToUrl } from '../lib/route.js'
@@ -281,6 +282,18 @@ export function useGameData(game) {
   )
   const rookiesData = rookies.data ?? null
 
+  // The league-wide run-expectancy (RE288) table — a static, same-origin,
+  // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
+  // information of its own, so it's safe to fetch eagerly like
+  // vsTeamSplits/formerTeammates. Only StatBox's reveal-only selector
+  // (api/umpireFavor.js's selectUmpireFavor) combines it with this game's own
+  // plays — see .scratch/umpire-accuracy/consistency-favor-scope.md §3.
+  const runExpectancy = useAsync(
+    () => (enrichmentReady ? fetchRunExpectancy() : Promise.resolve(null)),
+    [enrichmentReady],
+  )
+  const runExpectancyData = runExpectancy.data ?? null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   return {
@@ -300,6 +313,7 @@ export function useGameData(game) {
     formerTeammatesData,
     vsTeamSplitsData,
     highlightsData: highlights.data ?? null,
+    runExpectancyData,
     started,
   }
 }

@@ -3958,6 +3958,39 @@ body {
   color: var(--text-caption);
 }
 
+/* Plate umpire consistency + favor through the half — a compact sibling to
+   .abs, same title treatment, no pips (just the two stat chips). */
+.umpfavor {
+  padding-top: 10px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.umpfavor__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 8px;
+}
+.umpfavor__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.umpfavor__stat {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-heading);
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 4px 9px;
+}
+
 /* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
    below the play-by-play feed. Each card reads top-to-bottom: the measure, the
    value with its unit trailing small, then who did it. Only rendered when the
@@ -5508,6 +5541,12 @@ body {
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--award-ink);
+}
+.umpmodal__extra {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
 }
 .umpmodal__hint {
   margin: 4px 0 0;

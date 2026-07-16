@@ -14,6 +14,19 @@ function monthDay(iso) {
 
 const pct1 = (x) => (x == null ? '' : `${(x * 100).toFixed(1)}%`)
 
+// The modal header's secondary line: consistency (agreement with his own
+// game-by-game zone — see lib/euz.js) and favor (average runs of missed-call
+// impact per game — see lib/runExpectancy.js), whichever are available. Both
+// null renders nothing (a thin-sample umpire, or before
+// gen-run-expectancy.mjs has been hand-run — see aggregate() in
+// gen-umpire-accuracy.mjs).
+function consistencyFavorLabel(season) {
+  const parts = []
+  if (season?.consistency != null) parts.push(`${pct1(season.consistency)} consistent`)
+  if (season?.favorPerGame != null) parts.push(`${season.favorPerGame.toFixed(2)} runs of favor/game`)
+  return parts.length ? parts.join(' · ') : null
+}
+
 // The modal header's rank line: "#7 of 82 · 94.1%", degrading to just the
 // percentage when he's below the ranking floor (rank null).
 function accuracyRankLabel(rank, accuracy) {
@@ -134,6 +147,9 @@ export function UmpireAccuracyModal({ id, onClose }) {
             <span className="umpmodal__name">{data?.name ?? '…'}</span>
             {season && (
               <span className="umpmodal__rank">{accuracyRankLabel(data.rank, season.accuracy)}</span>
+            )}
+            {season && consistencyFavorLabel(season) && (
+              <span className="umpmodal__extra">{consistencyFavorLabel(season)}</span>
             )}
           </div>
           <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">

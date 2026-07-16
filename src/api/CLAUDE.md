@@ -69,6 +69,19 @@ spoiler-free only when restricted to the half the user has reached
   club's success/fail outcome list from the pitch-event `reviewDetails`
   (`isOverturned` + `challengeTeamId`); MLB only (`gameHasAbs`). See ADR/`docs`
   research on the retain-on-success rule + extra-inning bonus challenges.
+- `umpireFavor.js` — reveal-only, cumulative-through-the-revealed-half plate-
+  umpire consistency + favor, same `StatBox` row tier and half-clamp pattern as
+  `challenges.js` — a per-game companion to `umpires.js`'s season aggregate.
+  `selectUmpireFavor(feed, table, inning, half)` walks base occupancy/outs the
+  same way `gen-run-expectancy.mjs`/`gen-umpire-accuracy.mjs` do, then calls
+  `src/lib/euz.js`'s `estimateGameConsistency` and `src/lib/runExpectancy.js`'s
+  `pitchFavor`. `fetchRunExpectancy()` (the static `run-expectancy.json` table)
+  is safe to fetch EAGERLY like `vsTeamSplits.js`/`highlights.js` — it carries no
+  game/score info of its own — wired into `useGameData`'s deferred
+  `enrichmentReady` tier and threaded down to `StatBox` as a prop; only the
+  selector combining it with this game's plays runs inside the `SealBox` reveal.
+  `hasPitchTracking(feed)` gates to MLB + AAA. See
+  `.scratch/umpire-accuracy/consistency-favor-scope.md` §3.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
   hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
@@ -186,7 +199,12 @@ for each generator; the reader modules:
   The summary, modal, and rankings page stay MLB-only (they front an MLB game).
   Still no `SealBox` — accuracy counts ball/strike JUDGMENTS, not runs or hits, and
   the lineup rank aggregates Final games only, so it can't leak tonight's result.
-  Umps below AAA / with no data degrade to absent.
+  Umps below AAA / with no data degrade to absent. Each `season`/`seasonAAA`
+  aggregate also carries `consistency` (proportion, agreement with the umpire's OWN
+  game-fitted zone) and `favorMagnitude`/`favorPerGame` (runs of missed-call
+  impact) — same spoiler footing as accuracy (season sums over Final games only);
+  `umpireAccuracySummary`/`UmpireAccuracyModal` surface both alongside the
+  accuracy rank. See `umpireFavor.js` above for the LIVE per-game companion.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card (career line vs each
   opposing club + last meeting's line, per MLB active-roster player), from
   `public/data/vs-team-splits.json`. Cost-driven: the API's vs-team split types

@@ -52,6 +52,7 @@ export function InningViewer({
   callouts,
   vsTeam,
   highlights,
+  runExpectancy,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -273,6 +274,7 @@ export function InningViewer({
             getDerived={getDerived}
             revealed={curIdx <= revealedThrough}
             isNextToReveal={curIdx === revealedThrough + 1}
+            runExpectancy={runExpectancy}
           />
           <WinProbChart
             points={winProbPoints}

@@ -69,8 +69,30 @@ don't run these by hand.
   Also splits by game CONTEXT (`gameType=R,F,D,L,W,A`): only regular-season rows feed
   the ranked `season`/`seasonAAA`; postseason (F/D/L/W) rolls up into a separate
   unranked `seasonPost`; the All-Star Game (A) counts toward no aggregate (per-game
-  figure only). App reads it via `src/api/umpires.js`. Full write-up:
-  `.scratch/umpire-accuracy/plan.md`.
+  figure only). Each row also carries `consistent`/`consistentCalled` (agreement with
+  the umpire's OWN game-fitted zone — `src/lib/euz.js`'s kernel-density Estimated
+  Umpire Zone) and `favorAway`/`favorHome`/season `favorMagnitude` (run-expectancy
+  swing of each missed call — `src/lib/runExpectancy.js`, reading the table
+  `gen-run-expectancy.mjs` builds; degrades to null before that table exists). App
+  reads it via `src/api/umpires.js`. Full write-up: `.scratch/umpire-accuracy/plan.md`
+  + `.scratch/umpire-accuracy/consistency-favor-scope.md`.
+- `gen-run-expectancy.mjs` → `public/data/run-expectancy.json` — a base(8)×outs(3)×
+  count(12) = 288-state run-expectancy table (RE288), averaged over real MLB
+  regular-season play-by-play. **Hand-run, NOT on the nightly cron** (run expectancy
+  is a slow-moving league constant, unlike per-game accuracy): `node
+  scripts/gen-run-expectancy.mjs --seasons=2024,2025` (defaults to the last 2
+  complete seasons). Walks each Final game's `liveData.plays.allPlays` — including
+  the top-level stolen-base/caught-stealing/pickoff/wild-pitch/passed-ball/balk plays
+  interleaved with real plate appearances — to reconstruct base occupancy + outs,
+  verified against a real 5–14 game (runs-per-half matched `linescore.innings[]`
+  exactly on all 17 halves). Each pitch tags its PRE-pitch `(baseMask, outs, balls,
+  strikes)` state (note: `playEvents[].count` is the count AFTER that pitch, an
+  off-by-one caught during verification) with the half-inning's remaining runs.
+  Writes both the 288-bucket table and a 24-bucket base/out-only RE24 fallback for
+  thin per-count buckets (`src/lib/runExpectancy.js`'s `lookupRE`). Consumed by
+  `gen-umpire-accuracy.mjs` (nightly season favor) and, live, `src/api/umpireFavor.js`
+  (the box score's reveal-only per-game favor card). Full write-up:
+  `.scratch/umpire-accuracy/consistency-favor-scope.md` §2.
 - `gen-minors-leaders.mjs` → `public/data/minors-leaders.json` — the combined
   ALL-MINORS leaderboard (every farmhand's totals SUMMED across levels). Eight
   full-level stat pulls (~4,700 players). Stores PRE-RANKED top rows per category, so

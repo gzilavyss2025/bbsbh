@@ -250,10 +250,13 @@ export async function loadUmpire(id) {
 }
 
 // Just the one-line fact for tonight's plate ump — { season, accuracy,
-// tendency, rank, total, tier } — or null when there's no accuracy data for
-// this umpire (MiLB games, or the file hasn't caught up). `rank`/`total`/`tier`
-// are null when he's below the ranking floor. Keeps TeamInfo from needing the
-// whole game list.
+// tendency, rank, total, tier, consistency, favorPerGame } — or null when
+// there's no accuracy data for this umpire (MiLB games, or the file hasn't
+// caught up). `rank`/`total`/`tier` are null when he's below the ranking
+// floor; `consistency`/`favorPerGame` are null on the same degrade as the
+// season aggregate itself (see gen-umpire-accuracy.mjs's aggregate()) — a
+// thin-sample umpire or a run before gen-run-expectancy.mjs has been built.
+// Keeps TeamInfo from needing the whole game list.
 export async function umpireAccuracySummary(id) {
   if (id == null) return null
   const [acc, idx] = await Promise.all([loadAccuracy(), accuracyIndex()])
@@ -267,6 +270,8 @@ export async function umpireAccuracySummary(id) {
     rank: rank?.rank ?? null,
     total: rank?.total ?? null,
     tier: rank?.tier ?? null,
+    consistency: rec.season.consistency ?? null,
+    favorPerGame: rec.season.favorPerGame ?? null,
   }
 }
 
