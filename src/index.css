@@ -1827,8 +1827,19 @@ body {
   display: block;
 }
 
-.gamecard__status {
+/* Groups the ready pill + start time at the far right of the meta row (the
+   level/dh/prospect tags + pin star stay left), regardless of whether the
+   pill is even rendered (postponed/Final games skip it) — the margin lives
+   on this wrapper, not on .gamecard__status itself, so the time still lands
+   at the right edge on its own. */
+.gamecard__metaright {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-left: auto;
+}
+
+.gamecard__status {
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -1850,53 +1861,68 @@ body {
   font-weight: var(--w-bold);
 }
 
-/* Scorebook-readiness chips: four tiny red/green flags under the matchup that
-   say whether the basics you'd pencil in pre-game (each team's lineup, the
-   umpires, both starters) are posted yet. Intentionally small (~9px) — a glance
-   cue, not a headline. Green ✓ = posted, red ✗ = not yet; the glyph carries the
-   state alongside color so it reads without relying on hue alone. */
-.gamecard__ready {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-top: 10px;
-}
-
-.ready {
+/* Scorebook-readiness pill: four small checkbox pips for whether the basics
+   you'd pencil in pre-game (each team's lineup, the umpires, both starters)
+   are posted yet, in a fixed left-to-right order — unlabeled, since pip
+   position is learned once you've seen it. Bare (no chrome) while any are
+   still outstanding: each pip already draws its own checkbox border, so the
+   row reads as a deliberate checklist with no wrapper needed, and a not-yet-
+   posted pip is a hollow paper box, never red — nothing here reads as an
+   alarm for the hours before any of this could actually be wrong. Only once
+   all four post does `--complete` add the "Ready" word and the pill chrome
+   (same shape as .gamecard__level/.gamecard__dh, tinted field-green) — a
+   tinted "good status" background around a still-incomplete checklist would
+   claim a state that isn't true yet. Deliberately NOT bold even complete —
+   it sits on the same line as .gamecard__status (the start time) and matches
+   that line's regular weight rather than the loud bold badges, since it's a
+   quiet status, not a headline. */
+.gamecard__readypill {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 6px;
+}
+
+.gamecard__readypill--complete {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  background: var(--field-soft);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
+  letter-spacing: var(--ls-caps);
   text-transform: uppercase;
-}
-
-.ready__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-solid);
-  color: var(--text-on-ink);
-}
-
-.ready--ok {
   color: var(--field-deep);
 }
-.ready--ok .ready__mark {
-  background: var(--accent-positive);
+
+.gamecard__readypill-pips {
+  display: flex;
+  gap: 4px;
 }
 
-.ready--no {
-  color: var(--clay-deep);
+.pip {
+  display: inline-flex;
 }
-.ready--no .ready__mark {
-  background: var(--accent-negative);
+
+.pip rect {
+  fill: var(--paper-1);
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.pip__tick {
+  fill: none;
+  stroke: var(--paper-3);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.pip--on rect {
+  fill: var(--field);
+  stroke: var(--field-deep);
+}
+.pip--on .pip__tick {
+  opacity: 1;
 }
 
 /* ---------------------------------------------------------------- buttons */

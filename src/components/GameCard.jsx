@@ -16,7 +16,6 @@ import { humanDate } from '../lib/dates.js'
 export function GameCard({
   game,
   pinnedTeamId,
-  uniformsReady,
   prospectCount = 0,
   gameScore = null,
   dateLabel = null,
@@ -66,9 +65,6 @@ export function GameCard({
           <TeamName team={game.home} side="home" />
         </div>
         {postponed && <PostponedBanner game={game} status={status} />}
-        {!postponed && game.abstractState !== 'Final' && (
-          <ReadyStrip game={game} uniformsReady={uniformsReady} />
-        )}
         <div className="gamecard__meta">
           {game.sportLabel && game.sportLabel !== 'MLB' && (
             <span className="gamecard__level">{game.sportLabel}</span>
@@ -81,7 +77,12 @@ export function GameCard({
             </span>
           )}
           {pinned && <span className="gamecard__pin">★</span>}
-          <StatusText game={game} gameScore={gameScore} />
+          <span className="gamecard__metaright">
+            {!postponed && game.abstractState !== 'Final' && (
+              <ReadyPill game={game} />
+            )}
+            <StatusText game={game} gameScore={gameScore} />
+          </span>
         </div>
       </button>
       {onBoxScore && !postponed && (
@@ -130,37 +131,55 @@ function rescheduleLabel(game) {
   return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
-// Scorebook-readiness strip: four tiny red/green chips under the matchup telling
-// you at a glance whether the basics you'd pencil in pre-game are posted yet —
-// each team's batting order, the umpire crew, both starting pitchers, and
-// whether each club's uniforms have been posted. Green (✓) = posted, red (✗) =
-// not yet. Spoiler-free; none of these reveal a score. The lineup chips carry
-// the team abbreviation so it's clear which side is set. (Uniforms land latest —
-// around first pitch — so that chip stays red longest.)
-function ReadyStrip({ game, uniformsReady }) {
+// Scorebook-readiness pill: four small checkbox pips, in a fixed order (each
+// team's batting order, the umpire crew, both starting pitchers), telling you
+// at a glance whether the basics you'd pencil in pre-game are posted yet. The
+// green pill chrome (background/border) and the "Ready" word both only show
+// up once all four have posted — `--complete` below — since a tinted "good
+// status" background around a still-incomplete checklist would claim a state
+// that isn't true yet, the same problem as the old red-while-idle chips.
+// While incomplete it's just the bare pips: each one already draws its own
+// checkbox border, so the row still reads as a deliberate checklist with no
+// outer chrome needed. Deliberately unlabeled beyond "Ready" — the pip
+// position is the label, learned once, since it never changes card to card —
+// so a not-yet-posted item is just a hollow box, not a red ✗. Rides the same
+// line as the game's start time (`.gamecard__metaright` in GameCard) rather
+// than its own row, at that line's regular weight — a status, not a
+// headline. Spoiler-free; none of these reveal a score. Uniforms used to
+// ride along as a fifth pip, but that data never posts until first pitch, so
+// it carried no pre-game signal — dropped rather than shown red for the
+// entire wait.
+function ReadyPill({ game }) {
   const r = game.readiness ?? {}
   const items = [
-    { ok: !!r.awayLineup, label: `${game.away.abbreviation || 'Away'} Lineup` },
-    { ok: !!r.homeLineup, label: `${game.home.abbreviation || 'Home'} Lineup` },
-    { ok: !!r.umpires, label: 'Umps' },
-    { ok: !!r.pitchers, label: 'SP' },
-    { ok: !!uniformsReady, label: 'Unis' },
+    { ok: !!r.awayLineup, label: `${game.away.abbreviation || 'Away'} lineup` },
+    { ok: !!r.homeLineup, label: `${game.home.abbreviation || 'Home'} lineup` },
+    { ok: !!r.umpires, label: 'Umpires' },
+    { ok: !!r.pitchers, label: 'Starting pitchers' },
   ]
+  const readyCount = items.filter((it) => it.ok).length
+  const allReady = readyCount === items.length
   return (
-    <div className="gamecard__ready" aria-label="Scorebook readiness">
-      {items.map((it) => (
-        <span
-          key={it.label}
-          className={`ready ${it.ok ? 'ready--ok' : 'ready--no'}`}
-          title={`${it.label}: ${it.ok ? 'posted' : 'not posted yet'}`}
-        >
-          <span className="ready__mark" aria-hidden="true">
-            {it.ok ? '✓' : '✗'}
+    <span
+      className={`gamecard__readypill ${allReady ? 'gamecard__readypill--complete' : ''}`}
+      aria-label={`Scorebook readiness, ${readyCount} of ${items.length} posted`}
+    >
+      {allReady && 'Ready'}
+      <span className="gamecard__readypill-pips">
+        {items.map((it) => (
+          <span
+            key={it.label}
+            className={`pip ${it.ok ? 'pip--on' : 'pip--off'}`}
+            title={`${it.label}: ${it.ok ? 'posted' : 'not posted yet'}`}
+          >
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="13" height="13" rx="3" />
+              <path className="pip__tick" d="M4 8.5l2.5 2.5L12 5.5" />
+            </svg>
           </span>
-          {it.label}
-        </span>
-      ))}
-    </div>
+        ))}
+      </span>
+    </span>
   )
 }
 

@@ -18,7 +18,6 @@ export function PastGameFlipCard({
   dateStr,
   revealed,
   pinnedTeamId,
-  uniformsReady,
   prospectCount,
   gameScore = null,
   onSelect,
@@ -59,7 +58,6 @@ export function PastGameFlipCard({
         <GameCard
           game={game}
           pinnedTeamId={pinnedTeamId}
-          uniformsReady={uniformsReady}
           prospectCount={prospectCount}
           gameScore={gameScore}
           onSelect={onSelect}
