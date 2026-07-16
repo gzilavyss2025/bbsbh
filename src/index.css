@@ -2611,7 +2611,7 @@ body {
 
 .aboutpage__title {
   margin: 0;
-  max-width: 12ch;
+  max-width: 32ch;
   font-family: var(--font-display);
   font-size: var(--fs-display);
   line-height: var(--lh-score);
