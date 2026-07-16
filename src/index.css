@@ -4027,17 +4027,6 @@ body {
   width: var(--bw-hair);
   background: var(--border-rule);
 }
-/* The median-game reference ticks (FAVOR_MEDIAN_RUNS) — shorter and fainter
-   than the center rule so they read as "here's roughly typical" without
-   competing with it. */
-.favormeter__reftick {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  width: var(--bw-hair);
-  background: var(--graphite-soft);
-  opacity: 0.6;
-}
 .favormeter__fill {
   position: absolute;
   top: 0;

@@ -282,19 +282,12 @@ function FavorMeter({ net, awayId, homeId, awayName, homeName }) {
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
   const fillPct = Math.min(Math.abs(net) / FAVOR_SCALE_RUNS, 1) * 50
-  const medianTickPct = (FAVOR_MEDIAN_RUNS / FAVOR_SCALE_RUNS) * 50
   return (
     <div className="favormeter">
       <div className="favormeter__track-row">
         <TeamLogo teamId={awayId} name={awayName} size={22} />
         <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayName, homeName)}>
           <span className="favormeter__mid" aria-hidden="true" />
-          {/* Median-game reference ticks, one on each side of center — a
-              typical night's swing lands about here regardless of which
-              team it favors, giving the fill something to be measured
-              against besides the track's bare edges. */}
-          <span className="favormeter__reftick" style={{ left: `${50 - medianTickPct}%` }} aria-hidden="true" />
-          <span className="favormeter__reftick" style={{ left: `${50 + medianTickPct}%` }} aria-hidden="true" />
           {!even && (
             <span
               className={`favormeter__fill favormeter__fill--${towardAway ? 'away' : 'home'}`}
