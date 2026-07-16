@@ -1632,7 +1632,10 @@ body {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  /* Wide enough that an ordinary 9-10 letter mascot (CARDINALS, ROCKHOUNDS)
+     fits on one line — a truly long one (DIAMONDBACKS) still wraps, which
+     .offdaycard__name already handles cleanly (see overflow-wrap below). */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: var(--space-2);
 }
 .offdaycard {
@@ -1700,7 +1703,7 @@ body {
   color: var(--text-caption);
 }
 .offdaycard__mascot {
-  font-size: var(--fs-small);
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-num);
