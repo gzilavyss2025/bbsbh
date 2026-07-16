@@ -93,5 +93,15 @@ export function pitchFavor(table, baseMask, outs, balls, strikes, actualStrike) 
     correct.immediateRuns + lookupRE(table, correct.baseMask, correct.outs, correct.balls, correct.strikes)
   const actualValue =
     actual.immediateRuns + lookupRE(table, actual.baseMask, actual.outs, actual.balls, actual.strikes)
-  return correctValue - actualValue
+  // actualValue MINUS correctValue, not the other way — this is the swing
+  // FROM the batting team's perspective: actualValue is the run value of
+  // what really happened to them, correctValue is what should have. A call
+  // that hands them a gifted walk (actualValue high) instead of a correct
+  // strikeout (correctValue low) is a swing IN their favor → positive. A
+  // call that hands them a phantom strikeout (actualValue low) instead of a
+  // correct walk (correctValue high) COSTS them → negative. (correctValue -
+  // actualValue, the first version of this, had it backwards — verified by
+  // hand: a blown ball-4-into-strikeout with bases loaded that robs the
+  // batting team of a forced run read as "helped the batter.")
+  return actualValue - correctValue
 }
