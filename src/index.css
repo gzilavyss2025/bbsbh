@@ -10034,6 +10034,14 @@ body {
   outline: none;
   box-shadow: var(--ring);
 }
+/* GameScoreCard's hero has no toggle behind it (one game, nothing to expand)
+   — same layout, without implying it's clickable. */
+.team-score__grade-button--static {
+  cursor: default;
+}
+.team-score__grade-button--static:active {
+  transform: none;
+}
 .team-score__grade-copy,
 .team-score__grade-result {
   display: flex;

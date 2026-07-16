@@ -21,6 +21,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { GameScoreCard } from '../components/GameScoreCard.jsx'
 import { RefreshButton } from './TeamInfo.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
@@ -232,6 +233,12 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
             homeAbbr={box.home.abbreviation}
           />
           <Decisions decisions={box.decisions} />
+          {/* Nested under the decisions rather than full-width up top — how
+              tonight's game rated for excitement against the rest of the
+              day's slate at this level, in the same visual family as the
+              Team Page's Season Grade card. Renders nothing until the
+              10-minute Game Score cron has scored this game. */}
+          <GameScoreCard feed={feed} />
         </div>
         <div className="bs__col">
           <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
