@@ -144,6 +144,10 @@ don't run these by hand.
   last-30 form as diagnostics. Market baselines live in the hand-curated
   `season-expectations-seed.json`; incomplete seasons fall back to Marcel. See
   `docs/season-score.md` and ADR-0018.
+- `gen-team-transactions.mjs` → `public/data/team-transactions/{season}.json` —
+  an MLB-only, season-chunked roster-move story feed for all 30 organizations.
+  The nightly job rebuilds only the current season; once the season file is
+  marked `final`, later runs leave it immutable unless explicitly forced.
 
 ## Own-cadence generators (not the nightly batch)
 

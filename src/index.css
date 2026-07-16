@@ -10324,6 +10324,28 @@ body {
   flex: 0 0 auto;
   width: 1px;
 }
+.txcard__more {
+  flex: 0 0 160px;
+  align-self: stretch;
+  scroll-snap-align: start;
+  padding: 12px;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font: inherit;
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+.txcard__more:hover:not(:disabled),
+.txcard__more:focus-visible {
+  color: var(--text-body);
+  border-style: solid;
+}
+.txcard__more:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
 
 /* Each story is its own bordered card — wider than the deck's first cut
    (a 3-photo rail, a real 2-for-1 trade, needs the room so the cutline
