@@ -2270,6 +2270,63 @@ body {
   box-shadow: var(--ring);
 }
 
+.sitefooter__more-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.sitefooter__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--space-4);
+}
+
+/* Plain links, not buttons — these are browse/reference pages, not actions on
+   this screen, so they skip the bordered-box chrome above entirely (see the
+   comment atop this file). Padding still gives each one a real tap target
+   without adding visible bulk; unlike .sitefooter__action these deliberately
+   don't reach --tap-min, since a wrapped inline list of ten forced to 44px
+   each would bring back the very bulk this split exists to remove.
+   Idle reads as a pencil sketch (dotted underline, graphite ink) — hovering
+   resolves it solid and darkens to full ink, like tracing over the sketch;
+   pressing adds the same small tap-down every other button in the app uses,
+   plus a brief dip into field-green (the app's "confirmed/on" accent — see
+   the ready pill) rather than just letting the click pass silently. */
+.sitefooter__link {
+  padding: 6px 2px;
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+}
+
+.sitefooter__link:hover {
+  color: var(--text-heading);
+  text-decoration-style: solid;
+}
+
+.sitefooter__link:active {
+  transform: translateY(1px);
+  color: var(--field-deep);
+}
+
+.sitefooter__link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-xs);
+}
+
 /* -------------------------------------------------- past-matchup sheet
    GameFinderModal's dialog chrome; the finder itself is unstyled beyond
    .gamefinder's own row/results rules above. */
@@ -2605,17 +2662,6 @@ body {
 .sitefooter__brand > span {
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-label);
-}
-
-.sitefooter__about {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--text-caption);
-  font: inherit;
-  text-decoration: underline dotted;
-  text-underline-offset: 2px;
-  cursor: pointer;
 }
 
 /* ---------------------------------------------------------------- about page */
