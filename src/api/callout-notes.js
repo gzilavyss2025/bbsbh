@@ -31,6 +31,7 @@
 import {
   firstRunPlay,
   firstPAIndexByBatter,
+  firstRispPAIndexByBatter,
   NON_PA_EVENT_TYPES,
 } from './playbyplay.js'
 import { personNameParts, dayWordFor, dayWord, selectPrePitchChanges } from './select.js'
@@ -400,7 +401,7 @@ function scoringFirstNote(recStr, side, teamName, opponentScored) {
 
 export function buildCallouts(
   entry,
-  { bundle, firstRun, firstPA, battingSide, vsTeam, progress } = {},
+  { bundle, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress } = {},
 ) {
   if (!bundle) return []
   const notes = []
@@ -549,6 +550,29 @@ export function buildCallouts(
     })
   }
 
+  // Season situational splits (RISP, vs-L/vs-R), read once up front — RISP
+  // gates on its OWN first-live-situation index below (a season rate is a
+  // non sequitur on a bases-empty PA), while vs-L/vs-R stays on the general
+  // first-PA gate right below (a pitcher's throwing hand is live on every
+  // single PA, so there's no "irrelevant situation" case to gate out).
+  const sit = situational[entry.batterId]
+
+  // He's actually facing a runner in scoring position for the first time
+  // this game — see firstRispPAIndexByBatter (playbyplay.js) for why this
+  // is its own gate rather than riding the general first-PA one below.
+  const isFirstRispPA =
+    firstRispPA && entry.atBatIndex != null && firstRispPA.get(entry.batterId) === entry.atBatIndex
+  if (isFirstRispPA && sit?.risp) {
+    notes.push({
+      text: `Hitting ${sit.risp.avg} with RISP this season`,
+      personId: entry.batterId,
+      side: battingSide,
+      kind: 'risp',
+      dedupeKey: `risp-${entry.batterId}`,
+      score: clampScore(SCORE_BASE.risp),
+    })
+  }
+
   // Coming into today — a streak, shown once per game (on his first PA).
   const isFirstPA = firstPA && entry.atBatIndex != null && firstPA.get(entry.batterId) === entry.atBatIndex
   if (isFirstPA) {
@@ -574,21 +598,6 @@ export function buildCallouts(
       })
     }
 
-    // Season situational splits (RISP, vs-L/vs-R) — also shown once, on his
-    // first PA, same as the streaks above: these describe the season, not
-    // whatever's actually on base (or who's on the mound) for this specific
-    // at-bat, so there's no per-play base-state tracking to gate them on.
-    const sit = situational[entry.batterId]
-    if (sit?.risp) {
-      notes.push({
-        text: `Hitting ${sit.risp.avg} with RISP this season`,
-        personId: entry.batterId,
-        side: battingSide,
-        kind: 'risp',
-        dedupeKey: `risp-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.risp),
-      })
-    }
     const platoon = entry.pitcher?.hand === 'L' ? sit?.vl : entry.pitcher?.hand === 'R' ? sit?.vr : null
     if (platoon) {
       const arm = entry.pitcher.hand === 'L' ? 'lefties' : 'righties'
@@ -1252,6 +1261,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   const result = gameResult(feed)
   const firstRun = firstRunPlay(feed)
   const firstPA = firstPAIndexByBatter(feed)
+  const firstRispPA = firstRispPAIndexByBatter(feed)
   const progress = computeCalloutProgress(feed)
   // "today" for a day game, "tonight" for a night game — every result-aware
   // rewrite below (all of them fold in what happened THIS game) uses this
@@ -1295,7 +1305,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
       baserunningNotes,
     }
     for (const note of buildCallouts(entry, {
-      bundle, firstRun, firstPA, battingSide, vsTeam, progress,
+      bundle, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress,
     })) {
       add(note)
     }
