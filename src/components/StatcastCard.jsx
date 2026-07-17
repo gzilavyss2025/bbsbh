@@ -1,7 +1,9 @@
 // One Statcast superlative: the measure up top (FASTEST PITCH), the value with
 // its unit trailing in a smaller face (95.2 MPH), then who did it beneath — a
-// pitcher's card also names the pitch type (MAY (SINKER)). Shared by the
-// innings view's per-half row and the box score's whole-game Insights card.
+// pitcher's card also names the pitch type (MAY (SINKER)). Used by the player
+// page's season-percentile grid (StatcastPercentiles.jsx); the innings view's
+// per-half superlatives and the box score's whole-game ones use the headshot
+// PerformerCard tile instead (src/components/PastDayRecapBox.jsx).
 export function StatcastCard({ label, value, unit, who, detail }) {
   return (
     <div className="statcast__card">

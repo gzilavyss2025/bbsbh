@@ -4,12 +4,42 @@ import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
 import { selectUmpireFavor, hasPitchTracking } from '../api/umpireFavor.js'
+import { resolveCardPlayer } from '../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
-import { StatcastCard } from './StatcastCard.jsx'
+import { PerformerCard } from './PastDayRecapBox.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
+
+// The half's three Statcast superlatives, resolved to the "baseball card"
+// shape PerformerCard renders — same resolveCardPlayer lookup the box score's
+// whole-game superlatives and the day recap's Statcast Leaders use, so a
+// player with no boxscore entry (shouldn't happen; matchup.pitcher/batter are
+// always real game participants) degrades the same way theirs does: dropped
+// rather than shown with no name/headshot.
+function halfStatcastCards(feed, d) {
+  return [
+    d.maxVelo != null && {
+      label: 'Fastest pitch',
+      player: resolveCardPlayer(feed, d.maxVeloPlayerId),
+      stat: `${d.maxVelo.toFixed(1)} MPH${d.maxVeloType ? ` · ${d.maxVeloType}` : ''}`,
+    },
+    d.hardestHit != null && {
+      label: 'Hardest hit',
+      player: resolveCardPlayer(feed, d.hardestHitPlayerId),
+      stat: `${d.hardestHit.toFixed(1)} MPH`,
+    },
+    d.longestHit != null && {
+      label: 'Longest ball',
+      player: resolveCardPlayer(feed, d.longestHitPlayerId),
+      stat: `${Math.round(d.longestHit)} FT`,
+    },
+  ]
+    .filter(Boolean)
+    .filter((c) => c.player)
+    .map((c) => ({ label: c.label, entry: { ...c.player, stat: c.stat } }))
+}
 
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
@@ -79,21 +109,15 @@ export function StatBox({
           const homeId = feed?.gameData?.teams?.home?.id ?? null
           return (
             <>
-              <div className="rhe">
-                <Stat k="R" v={line?.runs ?? 0} tone="run" big />
-                <Stat k="H" v={line?.hits ?? 0} big />
-                <Stat k="E" v={fieldLine?.errors ?? 0} big />
-                <Stat k="LOB" v={line?.leftOnBase ?? 0} big />
-              </div>
-              <div className="pitchgrid">
+              <div className="statline">
+                <Stat k="R" v={line?.runs ?? 0} tone="run" />
+                <Stat k="H" v={line?.hits ?? 0} />
+                <Stat k="E" v={fieldLine?.errors ?? 0} />
+                <Stat k="LOB" v={line?.leftOnBase ?? 0} />
                 <Stat k="Pitches" v={d.pitches} />
-                <Stat k="Total pitches" v={rolling} unit="rolling" />
+                <Stat k="Total pitches" v={rolling} />
                 <Stat k="Whiffs" v={d.whiffs} />
-                <Stat
-                  k="1st-pitch strikes"
-                  v={`${d.firstPitchStrikes}/${d.plateAppearances}`}
-                  small
-                />
+                <Stat k="1st-pitch strikes" v={`${d.firstPitchStrikes}/${d.plateAppearances}`} />
               </div>
               {challenges && (
                 <div className="abs">
@@ -129,36 +153,27 @@ export function StatBox({
                   carried it. Same reveal path as everything else in this card —
                   and since this whole block only runs once SealBox has actually
                   revealed (never mid-step, see HalfInning.jsx/PlayByPlay.jsx's
-                  stepping gate), it can't leak plays not yet shown. */}
-              {(d.maxVelo != null || d.hardestHit != null || d.longestHit != null) && (
-                <div className="statcast">
-                  {d.maxVelo != null && (
-                    <StatcastCard
-                      label="Fastest pitch"
-                      value={d.maxVelo.toFixed(1)}
-                      unit="MPH"
-                      who={d.maxVeloPlayer}
-                      detail={d.maxVeloType}
-                    />
-                  )}
-                  {d.hardestHit != null && (
-                    <StatcastCard
-                      label="Hardest hit"
-                      value={d.hardestHit.toFixed(1)}
-                      unit="MPH"
-                      who={d.hardestHitPlayer}
-                    />
-                  )}
-                  {d.longestHit != null && (
-                    <StatcastCard
-                      label="Longest ball"
-                      value={Math.round(d.longestHit)}
-                      unit="FT"
-                      who={d.longestHitPlayer}
-                    />
-                  )}
-                </div>
-              )}
+                  stepping gate), it can't leak plays not yet shown. Same
+                  headshot PerformerCard tile (+ resolveCardPlayer lookup) the
+                  day recap's Statcast Leaders and the box score's whole-game
+                  superlatives already use, so "who did it" reads as a face
+                  and a name rather than plain text. */}
+              {(() => {
+                const cards = halfStatcastCards(feed, d)
+                if (!cards.length) return null
+                return (
+                  <div className="halfcast">
+                    {cards.map(({ label, entry }) => (
+                      <div className="halfcast__row" key={label}>
+                        <span className="halfcast__label">{label}</span>
+                        <ul className="playercard__list">
+                          <PerformerCard entry={entry} />
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
             </>
           )
         }}
@@ -470,18 +485,11 @@ function favorMeterLabel(net, awayLocation, homeLocation) {
   return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayLocation : homeLocation} — ${tierLabel}`
 }
 
-function Stat({ k, v, unit, tone, big, small }) {
+function Stat({ k, v, tone }) {
   return (
-    <div
-      className={`stat ${big ? 'stat--big' : ''} ${small ? 'stat--small' : ''} ${
-        tone ? `stat--${tone}` : ''
-      }`}
-    >
+    <div className={`stat ${tone ? `stat--${tone}` : ''}`}>
       <span className="stat__v">{v}</span>
-      <span className="stat__k">
-        {k}
-        {unit ? <em className="stat__unit"> {unit}</em> : null}
-      </span>
+      <span className="stat__k">{k}</span>
     </div>
   )
 }

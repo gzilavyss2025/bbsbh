@@ -3687,11 +3687,16 @@ body {
   color: var(--text-caption);
 }
 
-/* The DH bats but never takes the field — one line under the diamond. */
+/* The DH bats but never takes the field — one line under the diamond.
+   width:100% + text-align:center back up justify-content:center explicitly
+   (rather than relying solely on flex's default stretch) so this stays
+   centered under the diamond regardless of container context. */
 .defdiamond__dh {
   display: flex;
   align-items: baseline;
   justify-content: center;
+  width: 100%;
+  text-align: center;
   gap: 8px;
   margin: 6px 0 0;
   padding-top: 6px;
@@ -4143,18 +4148,30 @@ body {
   }
 }
 
-.rhe {
+/* R/H/E/LOB and the four pitch stats as one 4-column, 2-row seamless grid —
+   same recipe as .factgrid/.umps__list, just with .stat's own --inset-cell
+   shadow (not --shadow-card) since this already sits inside .statbox's own
+   bordered card rather than floating on the page directly. The 1px gap
+   reveals the hairline rule beneath; individual .stat cells (below)
+   contribute only their background, not a border/radius/shadow of their own.
+   All eight cells share one font size (see .stat, no more --big/--small
+   variants here) so the two rows read as one consistent stat line rather
+   than a "hero" row over a secondary one. */
+.statline {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--inset-cell);
 }
 
-.pitchgrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
-  padding-top: 10px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
+.statline .stat {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* ABS (Automated Ball-Strike) challenges — the card's third row (see
@@ -4168,8 +4185,7 @@ body {
    who'd rather not decode the dots. (Unlike the mound-visit UsagePips, this is
    an outcome history, not a plain remaining count, so it uses its own pips.) */
 .abs {
-  padding-top: 10px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  margin-top: 10px;
 }
 .abs__title {
   display: block;
@@ -4606,10 +4622,10 @@ body {
   color: var(--text-muted);
 }
 
-/* Statcast superlatives (fastest pitch / hardest hit / longest ball), sat
-   below the play-by-play feed. Each card reads top-to-bottom: the measure, the
-   value with its unit trailing small, then who did it. Only rendered when the
-   feed carried tracking data. */
+/* Statcast tile base (see StatcastCard.jsx) — the player page's season-
+   percentile grid (.statcast-section below) is the only remaining user; each
+   card reads top-to-bottom: the measure, the value with its unit trailing
+   small, then who did it. */
 .statcast {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -4850,6 +4866,69 @@ body {
   background: none;
 }
 
+/* The half's Statcast superlatives — now the same headshot "baseball card"
+   tile the day recap's Statcast Leaders and the box score's Insights card
+   use (PerformerCard, src/components/PastDayRecapBox.jsx), read via the same
+   resolveCardPlayer lookup, rather than the plain label/value/who tile
+   StatcastCard.jsx still renders for the player-page percentile grid. A
+   seamless list, same recipe as .abs__rows just below (paper-2 background,
+   one hairline divider between rows instead of a border per card) rather
+   than each PerformerCard floating in its own bordered tile like it does in
+   those other two spots — .playercard's own border/radius/background are
+   stripped inside this scope only. */
+.halfcast {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.halfcast__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+}
+.halfcast__row + .halfcast__row {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.halfcast__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.halfcast .playercard__list {
+  margin: 0;
+}
+.halfcast .playercard {
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+}
+
+/* Wide layout (.screen widens to 960px from here up — see the 740px media
+   query further down): the 1-3 superlatives go three across in one row
+   instead of stacking, same auto-fit-evenly idea as the base .statcast grid;
+   the divider between them switches from a horizontal rule to a vertical
+   one. */
+@media (min-width: 740px) {
+  .halfcast {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+  .halfcast__row + .halfcast__row {
+    border-top: none;
+    border-left: var(--bw-hair) solid var(--border-rule);
+  }
+}
+
 /* A pitcher entering the game, filling row 2's stat-box slot before the
    current half is revealed (StatBox renders nothing there otherwise, to keep
    the row from costing space on a half the scorer hasn't reached yet) — a
@@ -5025,15 +5104,28 @@ body {
 }
 
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
-   side by side from the wide breakpoint up (see media query below). */
+   side by side from the wide breakpoint up (see media query below).
+   margin-top only below the wide breakpoint: .innings__grid itself supplies
+   the gap between rows there (see its own media-query rule), but on a phone
+   .innings__grid is plain block flow with no gap of its own, so without this
+   the card directly above (.inning — either just the play-by-play, or that
+   plus the standalone .halfentering reference once a half starts revealing)
+   would butt straight up against this one with no seam between their two
+   borders. */
 .innings__row2 {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  margin-top: var(--space-3);
   margin-bottom: var(--space-4);
 }
 .innings__row2 > .winprob {
   margin-bottom: 0;
+}
+@media (min-width: 740px) {
+  .innings__row2 {
+    margin-top: 0;
+  }
 }
 
 .lineupcard {
@@ -5219,10 +5311,6 @@ body {
   color: var(--text-heading);
 }
 
-.stat--big .stat__v {
-  font-size: var(--fs-h1);
-}
-
 .stat--run .stat__v {
   color: var(--field-deep);
 }
@@ -5233,11 +5321,6 @@ body {
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-}
-
-.stat--small .stat__k {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-compact);
 }
 
 .stat__unit {
@@ -9206,9 +9289,26 @@ body {
     gap: 0 var(--space-6);
     align-items: start;
   }
+  /* Reset to line the Pitchers card's own top edge up with the Lineups
+     card's on its right — .pitchers' margin-top is sized for the phone flow
+     (stacked below the running content above it), but here it's the left
+     column's first element with nothing above it to space from. */
+  .innings__ref-left .pitchers {
+    margin-top: 0;
+  }
   .innings__ref-defense {
     display: block;
     margin-top: var(--space-3);
+  }
+  /* The defense diamond already carries its own full card border/shadow at
+     this width (see .halfdefense's own comment) unlike the phone copy, so
+     its dashed top divider — meant to separate it from the entering-lineups
+     list sharing .half's single card there — is a redundant second seam
+     between it and the Pitchers card above. */
+  .innings__ref-defense .halfdefense {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
   }
   .innings__ref-lineups {
     display: block;
@@ -9684,14 +9784,11 @@ body {
 }
 
 /* ---- Statcast percentile cards ----
-   Each metric is a small StatcastCard tile (the same one the innings view
-   and box score use for per-half superlatives), not a bar mimicking
-   Baseball Savant's own chart. `.statcast` here is the same grid rule used
-   there (see the "Statcast superlatives" block above); this override just
-   drops the play-by-play-feed divider (nothing sits above it on the player
-   page) and gives the grid a real minimum column width so 6-7 cards wrap
-   instead of squeezing onto one row (the shared rule's own minmax(0, 1fr)
-   only works for the 3-card superlative row). */
+   Each metric is a small StatcastCard tile, not a bar mimicking Baseball
+   Savant's own chart. This override drops the base rule's top divider
+   (nothing sits above it on the player page) and gives the grid a real
+   minimum column width so 6-7 cards wrap instead of squeezing onto one row
+   (the base rule's own minmax(0, 1fr) is sized for a 3-card row). */
 .statcast-section .statcast {
   grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
   margin-top: 8px;
