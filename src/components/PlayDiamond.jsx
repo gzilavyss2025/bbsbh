@@ -14,6 +14,12 @@ const THIRD = [20, 50]
 // 4 = home again (a run scored).
 const BASES = [HOME, FIRST, SECOND, THIRD, HOME]
 
+// An error-driven leg notation (E8, E5…, or a bare "E") inks red like every
+// other error mark in the app (.pbp__code--error, .sc-ab__type--error) — "E"
+// is never a prefix any other advance code uses (see ADVANCE_CODES in
+// api/playbyplay.js), so this is unambiguous.
+const isErrorCode = (code) => /^E\d*$/.test(code ?? '')
+
 // Where each base's notation sits, just outside that base. Third base hugs the
 // diamond's left edge (x=20); its label is anchored to END right against it so
 // a two-char code with a superscript slot ("2B⁵") grows leftward into the
@@ -146,7 +152,7 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, ou
       {Object.entries(legNotations).map(([base, n]) => (
         <text
           key={base}
-          className="pbp__advance"
+          className={`pbp__advance ${isErrorCode(n.code) ? 'pbp__advance--error' : ''}`}
           x={LABELS[base].x}
           y={LABELS[base].y}
           textAnchor={LABELS[base].anchor}

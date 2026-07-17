@@ -431,12 +431,8 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
         <div className="pbp__play">
-          {calledLooking ? (
-            <span className="pbp__code pbp__klooking" aria-label="strikeout looking">
-              K
-            </span>
-          ) : (
-            code && <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
+          {codeKind !== 'out' && code && (
+            <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
           )}
           <PlayDiamond
             reached={reached}
@@ -446,6 +442,14 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
             outCode={outCode}
             prBase={prBase}
           />
+          {codeKind === 'out' &&
+            (calledLooking ? (
+              <span className="pbp__code pbp__code--center pbp__klooking" aria-label="strikeout looking">
+                K
+              </span>
+            ) : (
+              code && <span className="pbp__code pbp__code--center pbp__code--out">{code}</span>
+            ))}
           {outNumber != null && (
             <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
               {outNumber}

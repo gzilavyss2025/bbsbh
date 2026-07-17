@@ -21,12 +21,16 @@ export function gameHasAbs(feed) {
   return feed?.gameData?.teams?.away?.sport?.id === 1
 }
 
-// An ABS challenge is a review that sits on a PITCH (a ball/strike call). A
-// manager replay review rides a non-pitch play (a pickoff, a boundary call) and
-// is NOT an ABS challenge — exclude it by requiring the review to be on a pitch
-// and to name the challenging club.
-function isAbsChallenge(ev) {
-  return Boolean(ev?.isPitch && ev.reviewDetails && ev.reviewDetails.challengeTeamId != null)
+// An ABS challenge review sits on the PLAY itself (`play.reviewDetails`), not
+// on an individual pitch event — verified against gamePk 823036's two real
+// challenges (Frelick's failed challenge, top 2nd; Mitchell's successful one,
+// top 8th), where neither pitch event carried a `reviewDetails` of its own.
+// `challengeTeamId` is only set when a specific club's player actually
+// challenged (as opposed to some other, non-challenge review), so requiring
+// it is what tells an ABS challenge apart from anything else that might set
+// `play.reviewDetails`.
+function isAbsChallenge(review) {
+  return Boolean(review && review.challengeTeamId != null)
 }
 
 // 1-based half order (top 1 = 1, bottom 1 = 2, top 2 = 3, …), for clamping to
@@ -48,13 +52,11 @@ export function selectChallengeState(feed, throughInning, throughHalf) {
     const half = p.about?.halfInning
     if (inning == null || half == null) continue
     if (halfOrder(inning, half) > limit) break
-    for (const ev of p.playEvents ?? []) {
-      if (!isAbsChallenge(ev)) continue
-      const teamId = ev.reviewDetails.challengeTeamId
-      const side = teamId === awayId ? 'away' : teamId === homeId ? 'home' : null
-      if (!side) continue
-      outcomes[side].push(ev.reviewDetails.isOverturned ? 'success' : 'fail')
-    }
+    const review = p.reviewDetails
+    if (!isAbsChallenge(review)) continue
+    const side = review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
+    if (!side) continue
+    outcomes[side].push(review.isOverturned ? 'success' : 'fail')
   }
   return {
     away: { teamId: awayId, outcomes: outcomes.away },

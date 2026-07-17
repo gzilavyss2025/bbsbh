@@ -5128,6 +5128,58 @@ body {
   }
 }
 
+/* Phone-only: once a half starts revealing, promote row 2 (the R/H/E/LOB +
+   pitching + Statcast stat card, paired with the win-probability chart)
+   above the lineups/defense reference card (.halfentering) instead of
+   trailing it — the stat line reads as part of "what just happened," right
+   under the play-by-play, with the entering-lineups reference (staging for
+   the NEXT half) following it. .inning goes display:contents so its two
+   children (.half, and .halfentering once it exists) become direct items of
+   this flex column alongside .innings__row2/.innings__ref/.innings__rosters,
+   orderable independently of their source order. That makes .innings__grid
+   itself a flex container here too, which drops the block-flow margin
+   collapsing the phone layout was leaning on — so the items' own top/bottom
+   margins that used to supply inter-card spacing are reset to 0 and
+   .innings__grid's own gap takes over instead, same fix the wide-breakpoint
+   media query above already applies to .innings__row2/.pitchers for the
+   identical reason. */
+@media (max-width: 739.98px) {
+  .innings__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .inning {
+    display: contents;
+  }
+  .rolling {
+    margin-bottom: 0;
+  }
+  .half {
+    order: 1;
+  }
+  .innings__row2 {
+    order: 2;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .halfentering {
+    order: 3;
+  }
+  .innings__ref {
+    order: 4;
+  }
+  .innings__ref-left .pitchers {
+    margin-top: 0;
+  }
+  .innings__rosters {
+    order: 5;
+  }
+  .innings__rosters > .roster:first-child {
+    margin-top: 0;
+  }
+}
+
 .lineupcard {
   margin-top: 12px;
   padding-top: 12px;
@@ -5406,9 +5458,12 @@ body {
   flex: 0 0 auto;
 }
 
-/* Scorebook denotation stacked over the diamond: the result code (1B / F8 /
-   6-3) on top, then the base diamond. The out marker is a red circle overlaid
-   on the diamond's bottom-left corner. */
+/* Scorebook denotation over the diamond. A reach code (1B / F8 / BB) sits
+   above the diamond same as ever; an OUT's fielding chain (6-3, F7, K…)
+   instead goes dead center on the diamond itself, penciled big — the same
+   "middle of the diamond" placement the scorecard sheet uses (see
+   .sc-ab__center) and how a scorer actually notes an out on paper. The out
+   marker is a red circle overlaid on the diamond's bottom-left corner. */
 .pbp__play {
   position: relative;
   display: flex;
@@ -5436,6 +5491,27 @@ body {
   color: var(--clay-deep);
 }
 
+/* An out's fielding chain, penciled dead center on the diamond instead of
+   above it — bigger than the reach codes since it's the dominant mark on
+   the card. Mirrors .sc-ab__center's placement on the scorecard sheet, minus
+   its paper chip backing — this diamond's outline is sparse enough at the
+   center that the bare code reads fine directly over it. */
+.pbp__code--center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+}
+
+/* The backwards-K still needs its mirror flip, combined with the centering
+   transform above (equal specificity would otherwise let whichever rule
+   comes later silently win and drop the other transform). */
+.pbp__code--center.pbp__klooking {
+  transform: translate(-50%, -50%) scaleX(-1);
+}
+
 .pbp__outcircle {
   position: absolute;
   left: 0;
@@ -5461,6 +5537,13 @@ body {
   font-weight: var(--w-bold);
   font-size: var(--fs-caption);
   fill: var(--graphite);
+}
+
+/* An error-driven leg notation (E8, E5…) inks red like every other error mark
+   in the app (.pbp__code--error, .sc-ab__type--error) — a bobbled ball is
+   worth calling out the same way wherever it shows up on the card. */
+.pbp__advance--error {
+  fill: var(--clay-deep);
 }
 
 .pbp__advslot {
