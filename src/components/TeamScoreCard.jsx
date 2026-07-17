@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ordinal } from '../api/person.js'
 import { leagueRank, leagueRankNoTies, rankedNoTies } from '../api/teamScore.js'
-import { qualityScoreFromGames, CURRENT_FORM_GAMES } from '../api/teamScoreFormula.js'
+import { currentFormScoreFromGames, CURRENT_FORM_GAMES } from '../api/teamScoreFormula.js'
 import { seasonGradeFor } from '../api/seasonGradeFormula.js'
 import { teamClubName } from '../lib/teams.js'
 import { beeswarmRows } from '../lib/beeswarm.js'
@@ -18,10 +18,10 @@ const signed = (n) => `${n >= 0 ? '+' : ''}${n}`
 // Illustrative anchors for the "How this is calculated" modal — run through
 // the same formula the app scores real teams with (see teamScoreFormula.js),
 // not hand-typed numbers, so they can't drift if the formula ever changes.
-const FORM_CEILING = qualityScoreFromGames({
+const FORM_CEILING = currentFormScoreFromGames({
   wins: CURRENT_FORM_GAMES, games: CURRENT_FORM_GAMES, runsScored: 80, runsAllowed: 5,
 })
-const FORM_FLOOR = qualityScoreFromGames({
+const FORM_FLOOR = currentFormScoreFromGames({
   wins: 0, games: CURRENT_FORM_GAMES, runsScored: 5, runsAllowed: 80,
 })
 function scoreValue(summary) {
