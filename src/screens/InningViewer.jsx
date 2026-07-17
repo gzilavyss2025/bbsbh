@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -23,6 +23,15 @@ import { PitchersSection } from '../components/PitchersSection.jsx'
 import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
 import { RosterPanel } from '../components/RosterPanel.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
+import { isClerkEnabled } from '../lib/clerkConfig.js'
+
+// RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
+// dynamically imported (and only then does that SDK ever reach a user's
+// device) when a deploy actually configures Clerk — see main.jsx's matching
+// dynamic import and clerkConfig.js.
+const RevealCloudSync = isClerkEnabled
+  ? lazy(() => import('../components/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
+  : null
 
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
 // then the bottom of the 1st, …), a single SealBox whose one tap reveals that
@@ -60,8 +69,23 @@ export function InningViewer({
   // Reveal high-water mark, extras-unlock state, and the feed-keyed derived
   // cache — see useRevealProgress. The running line and Pitchers section both
   // read from `revealedThrough`; any half at or below it renders unsealed.
-  const { revealedThrough, revealTo, unlocked, getDerived, atBatCountFor, revealAtBat } =
+  const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat } =
     useRevealProgress(feed, regulation, actualCount)
+
+  // Only mounted when multi-device sync is configured (see clerkConfig.js) —
+  // a conditionally-rendered component rather than a conditionally-called
+  // hook, since Clerk's hooks require a ClerkProvider ancestor that only
+  // exists when this flag is true (see main.jsx). Renders nothing; see
+  // RevealCloudSync.jsx for what it does.
+  const cloudSync = RevealCloudSync && (
+    <Suspense fallback={null}>
+      <RevealCloudSync
+        gamePk={feed?.gamePk}
+        revealedThrough={revealedThrough}
+        mergeRevealedThrough={mergeRevealedThrough}
+      />
+    </Suspense>
+  )
 
   const meta = useMemo(
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
@@ -171,6 +195,7 @@ export function InningViewer({
   if (!started) {
     return (
       <div className="innings">
+        {cloudSync}
         <p className="hint hint--prose">
           This game hasn’t started yet. Lineups and info are on the previous
           pages; inning totals appear once first pitch is thrown.
@@ -182,6 +207,7 @@ export function InningViewer({
 
   return (
     <div className="innings">
+      {cloudSync}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
           stacked on a phone. Refresh no longer sits up here — it moved to the

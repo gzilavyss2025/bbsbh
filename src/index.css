@@ -433,6 +433,35 @@ body {
   background: var(--surface-inset);
 }
 
+/* AccountButton (sign-in / Clerk's UserButton) — only rendered when
+   multi-device reveal sync is configured (see lib/clerkConfig.js), so it
+   rides at the end of the same action row rather than needing its own
+   layout slot. */
+.accountbtn {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+}
+.accountbtn__signin {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.accountbtn__signin:active {
+  background: var(--surface-inset);
+}
+
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
    sub-page (lineups, innings) so the sealed full box score is always one tap
    away without walking back through the sections. */

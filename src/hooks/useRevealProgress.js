@@ -66,13 +66,24 @@ export function useRevealProgress(feed, regulation, actualCount) {
     [atBatMark],
   )
 
-  const revealTo = useCallback((n, half) => {
-    const idx = halfIndex(n, half)
+  // The one ratchet: revealedThrough only ever moves forward, from any
+  // source (a tap, another tab's storage event, or a signed-in device's
+  // cloud sync — see useRevealCloudSync.js). Exposed as mergeRevealedThrough
+  // so every caller pushing in an externally-sourced value goes through the
+  // same one-directional guarantee instead of re-implementing it.
+  const mergeRevealedThrough = useCallback((idx) => {
     setRevealedThrough((prev) => (idx > prev ? idx : prev))
-    // Whatever was mid-step just got fully committed — clear it so a later
-    // half doesn't inherit a stale count.
-    setAtBatMark({ halfIdx: -1, count: 0 })
   }, [])
+
+  const revealTo = useCallback(
+    (n, half) => {
+      mergeRevealedThrough(halfIndex(n, half))
+      // Whatever was mid-step just got fully committed — clear it so a later
+      // half doesn't inherit a stale count.
+      setAtBatMark({ halfIdx: -1, count: 0 })
+    },
+    [mergeRevealedThrough],
+  )
 
   const revealAtBat = useCallback((n, half, count) => {
     setAtBatMark({ halfIdx: halfIndex(n, half), count })
@@ -96,13 +107,11 @@ export function useRevealProgress(feed, regulation, actualCount) {
     function onStorage(e) {
       if (e.key !== storageKey) return
       const n = e.newValue == null ? -1 : Number(e.newValue)
-      if (Number.isInteger(n) && n >= 0) {
-        setRevealedThrough((prev) => (n > prev ? n : prev))
-      }
+      if (Number.isInteger(n) && n >= 0) mergeRevealedThrough(n)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
-  }, [storageKey])
+  }, [storageKey, mergeRevealedThrough])
 
   useEffect(() => {
     if (!atBatStorageKey) return
@@ -139,5 +148,13 @@ export function useRevealProgress(feed, regulation, actualCount) {
     return derivedRef.current.map
   }
 
-  return { revealedThrough, revealTo, unlocked, getDerived, atBatCountFor, revealAtBat }
+  return {
+    revealedThrough,
+    revealTo,
+    mergeRevealedThrough,
+    unlocked,
+    getDerived,
+    atBatCountFor,
+    revealAtBat,
+  }
 }

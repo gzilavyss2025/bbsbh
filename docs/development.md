@@ -149,6 +149,17 @@ in `vercel.json` enforce part of that policy:
   building whenever it can't confidently tell — a missed skip just costs one
   deployment; a wrong skip is a silent non-deploy.
 
+## Optional environment variables
+
+Everything works with none of these set — each feature they gate degrades to
+"not configured, quietly absent" (see the relevant ADR for the exact fallback):
+
+- `VITE_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` — multi-device reveal sync
+  (ADR-0022). Unset, no sign-in UI renders at all.
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — the reveal-sync
+  backing store (ADR-0022); `api/reveal.js` returns `501` without these even if
+  Clerk is configured.
+
 ## CI
 
 `.github/workflows/ci.yml` runs `npm run lint` + `npm run build` on every PR and

@@ -119,17 +119,20 @@ spoil** — only `regulation` innings show up front, extras unlock one at a time
 
 ## Architecture (map)
 
-**No backend.** Every device queries `https://statsapi.mlb.com` directly. The one
-thing persisted between sessions is each game's reveal high-water mark
-(`revealedThrough`), in `localStorage` under `bbsbh:reveal:{gamePk}` — only that
-half-index, never a score, so the spoiler rule still holds on return.
+**No backend, by default.** Every device queries `https://statsapi.mlb.com`
+directly. Each game's reveal high-water mark (`revealedThrough`) persists in
+`localStorage` under `bbsbh:reveal:{gamePk}` — only that half-index, never a
+score, so the spoiler rule still holds on return; a same-device tab picks up
+another tab's reveal via a `storage` listener in `useRevealProgress.js`.
 
-**The one exception — link previews (`api/`).** Dynamic Open Graph / Twitter cards
-for shared deep links can't be done statically (crawlers don't run our JS), so a
-thin Vercel edge layer renders them: `api/og.js` (the 1200×630 image), `api/preview.js`
-(swaps `og:*` tags into `index.html`), `api/_lib/cards.js` (the only server-side
-statsapi calls). Crawler-only, fails safe to the static default card, never
-renders/fetches a score — see ADR-0012.
+**Two narrow, opt-in exceptions (`api/`).** Link previews: a thin Vercel edge
+layer (`api/og.js`, `api/preview.js`, `api/_lib/cards.js`) renders dynamic Open
+Graph cards for shared deep links, since crawlers don't run our JS.
+Crawler-only, fails safe to the static default card, never renders/fetches a
+score — see ADR-0012. Multi-device reveal sync: signing in (Clerk, off unless
+`VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
+own devices via `api/reveal.js` + Upstash Redis — never a score, ratcheted
+server- and client-side, inert if unconfigured — see ADR-0022.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
