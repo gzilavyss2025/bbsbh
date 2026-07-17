@@ -55,6 +55,7 @@
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Game Score modal above)
      - `.buzz__text` (Bluesky posts keep their authors' original casing)
+     - `.gamestory__headline` (a real MLB.com headline, same idiom)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose) */
@@ -6843,20 +6844,41 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
+.gamestory__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-3) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
 .gamestory__link {
-  display: block;
-  margin: 0 var(--space-3) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding: var(--space-3);
   border: var(--bw-rule) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
-  color: var(--accent-primary);
+  color: var(--text-body);
   font-family: var(--font-body);
   font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   text-decoration: none;
-  text-align: center;
   transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.gamestory__logo {
+  flex-shrink: 0;
+}
+
+.gamestory__headline {
+  flex: 1;
+}
+
+#root .gamestory__headline {
+  text-transform: none; /* caps-exempt: a real MLB.com headline reads as a natural sentence, same idiom as .buzz__text */
 }
 
 .gamestory__link:active {
