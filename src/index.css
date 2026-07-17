@@ -1606,9 +1606,12 @@ body {
 /* Two explicit rows: the framed marks on top, the names beneath — splitting
    them means the names line up with each other regardless of how tall each
    mark or name runs. `position: relative` roots the '@' watermark below
-   (.gamecard__atmark-*), which paints behind both marks. */
+   (.gamecard__atmark-*), which paints behind both marks; `overflow: hidden`
+   clips the watermark's own 158px glyph box to this container on a narrow
+   card, same idea as .gamecard__logobox clipping its own overscaled mark. */
 .gamecard__teams {
   position: relative;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;

@@ -15,6 +15,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
+import { scorePairsLine } from './GameResultFace.jsx'
 
 // Final dates normally read one precomputed day-recap artifact. The per-game
 // signal path remains as a fallback for dates not yet generated, and shares the
@@ -100,7 +101,10 @@ function GameScoreLink({ game }) {
       className="plink playercard__score"
       onClick={() => navigate(game.boxScorePath)}
     >
-      {game.awayAbbr} {game.awayScore}, {game.homeAbbr} {game.homeScore}
+      {scorePairsLine([
+        [game.awayAbbr, game.awayScore],
+        [game.homeAbbr, game.homeScore],
+      ])}
     </button>
   )
 }

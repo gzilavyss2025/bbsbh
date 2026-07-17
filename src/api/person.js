@@ -12,6 +12,7 @@
 // a stat at a level OTHER than the game being scored, never that game's own line.
 
 import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
+import { monthDay } from '../lib/dates.js'
 import {
   ipToOuts,
   meetsWorkload,
@@ -390,7 +391,7 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
     .slice(0, limit)
     .map((s) => {
       const st = s.stat ?? {}
-      const md = (s.date || '').slice(5).replace('-', '/').replace(/^0/, '')
+      const md = monthDay(s.date)
       return {
         date: md,
         home: s.isHome,

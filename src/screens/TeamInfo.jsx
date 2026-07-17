@@ -21,7 +21,7 @@ import { isActiveRookie } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { scorebookDate } from '../lib/dates.js'
+import { scorebookDate, monthDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
@@ -664,8 +664,8 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
               <span className="startercard__stats">
                 {[
                   pitcherLine.era && `${pitcherLine.era} ERA`,
-                  `${pitcherLine.wins}-${pitcherLine.losses}`,
-                  `${pitcherLine.strikeOuts} K`,
+                  pitcherLine.wins != null && `${pitcherLine.wins}-${pitcherLine.losses}`,
+                  pitcherLine.strikeOuts != null && `${pitcherLine.strikeOuts} K`,
                   pitcherLine.inningsPitched && `${pitcherLine.inningsPitched} IP`,
                 ]
                   .filter(Boolean)
@@ -691,7 +691,7 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
 // "LAST: 7/12 AT BOS (AAA) — 6.0 IP · 5 H · 2 ER · 6 K" — the compact line
 // under .startercard__last's dotted divider (see fetchPitcherLastGame).
 function lastGameLine(g) {
-  const md = (g.date || '').slice(5).replace('-', '/').replace(/^0/, '')
+  const md = monthDay(g.date)
   const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
   const stat = [
     g.inningsPitched && `${g.inningsPitched} IP`,

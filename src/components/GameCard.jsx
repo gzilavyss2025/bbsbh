@@ -45,7 +45,7 @@ export function GameCard({
           card needs its own day, unlike the slate (one date heads the whole
           page). Absent on every ordinary slate card. */}
       {dateLabel && <div className="gamecard__datebanner">{dateLabel}</div>}
-      {pinned && <span className="gamecard__pinbadge" aria-hidden="true">★</span>}
+      {pinned && <span className="gamecard__pinbadge" aria-label="Pinned team">★</span>}
       {postponed ? null : status.label ? (
         <span className="gamecard__delay" title={status.reason || undefined}>
           {status.label}
@@ -203,13 +203,13 @@ function ReadyPill({ game }) {
 // logo sheet) the marks stay grayscale. Sits in the top grid row.
 //
 // A per-team tinted tile fill was tried here (first a teamTintColor soft
-// wash, then a hand-picked solid color — gameCardTileColor, lib/teams.js) and
-// reverted: a dense/large club mark (the Yankees' interlocking NY, at
-// minimum) reads as if it colored the whole tile even against a light fill,
-// needing a design pass before it's worth shipping. See
-// .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md. The tile
-// stays the plain neutral paper fill (.gamecard__logobox's own `background`)
-// until that's resolved.
+// wash, then a hand-picked solid color) and reverted: a dense/large club
+// mark (the Yankees' interlocking NY, at minimum) reads as if it colored the
+// whole tile even against a light fill, needing a design pass before it's
+// worth shipping. The hand-picked color list is preserved in
+// .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md so revisiting
+// this doesn't mean re-deriving it. The tile stays the plain neutral paper
+// fill (.gamecard__logobox's own `background`) until that's resolved.
 function TeamMark({ team, side }) {
   return (
     <div className={`gamecard__logobox gamecard__logobox--${side}`}>
