@@ -315,6 +315,19 @@ for each generator; the reader modules:
   the same-cutoff Season Surprise snapshot; both drivers remain visible and a
   club enters the league Grade pool only when both exist. See
   `docs/season-grade.md` and ADR-0020.
+- `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
+  prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
+  opinion, deliberately NOT a callout family (see docs/callouts.md's
+  worthiness rubric and `gen-fever-radar.mjs`'s header for why: every callout
+  is a fact bbsbh derives and can reconcile against the official record,
+  Fever's `overlay` score is a third-party model output it can't reconcile
+  the same way) — surfaced only via the attributed `RadarPill`, wired onto
+  the batting-order rows in `TeamInfo.jsx` next to `MilestonePill`/
+  `RookiePill`. MLB hitters only (there's no MLB pitcher board), so it never
+  appears on the opposing-pitcher card. Backed by the SQLite layer above
+  (`player_snapshots`); each exported row's `movement` is a self-join against
+  the nearest prior snapshot bbsbh itself recorded, not Fever's own
+  `/api/data/movers` feed.
 
 ## Leader boards (live)
 
