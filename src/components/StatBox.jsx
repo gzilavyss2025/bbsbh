@@ -14,15 +14,13 @@ import { TeamLogo } from './TeamLogo.jsx'
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
 // reveal flag as the rest of the half (nothing computed until revealed — the
-// spoiler guard is unchanged). Before reveal, `placeholder` swaps in a sealed
-// hint card rather than an empty slot — UNLESS a new pitcher is entering this
-// half, in which case that takes over the slot as a notification card instead
-// (a pitching change is pre-pitch/spoiler-free info, same as
-// HalfInning.jsx's PrePitchChanges, and more worth a scorer's attention here
-// than the generic "seal until you reveal" hint). Only checked for the
-// IMMEDIATE next half to reveal (`isNextToReveal`) — same gate
-// selectPrePitchChanges relies on elsewhere — so a further-out sealed half
-// never leaks its subs.
+// spoiler guard is unchanged). Before reveal, `placeholder` renders nothing —
+// UNLESS a new pitcher is entering this half, in which case that takes over
+// the slot as a notification card instead (a pitching change is
+// pre-pitch/spoiler-free info, same as HalfInning.jsx's PrePitchChanges, and
+// worth a scorer's attention here). Only checked for the IMMEDIATE next half
+// to reveal (`isNextToReveal`) — same gate selectPrePitchChanges relies on
+// elsewhere — so a further-out sealed half never leaks its subs.
 export function StatBox({
   feed,
   inning,
@@ -53,11 +51,7 @@ export function StatBox({
         />
       )
     }
-    return (
-      <div className={`statbox statbox--sealed ${className}`} aria-hidden="true">
-        <span className="statbox__hint">Totals seal until you reveal this half</span>
-      </div>
-    )
+    return null
   }
   return (
     <div className={`statbox ${className}`} key={`${inning}-${half}`}>

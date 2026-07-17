@@ -34,131 +34,138 @@ export function HalfInning({
   onHalfSteppedThrough,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
-  // appearance at a time (the floating bar's "Reveal next at-bat" button) has
+  // appearance at a time (the floating bar's "Next at-bat" button) has
   // revealedAtBatCount > 0 before it's fully committed. An already-committed
   // half (revealed) always shows everything regardless.
   const stepping = !revealed && revealedAtBatCount > 0
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
-  // state: ABOVE the seal while the half is still sealed (stage the sheet before
-  // tapping), then BELOW the play-by-play once revealed (out of the way of the
-  // results). Only for a half the user has reached; a half further out stays
-  // fully sealed — its "entering" state would leak the intervening subs, and
-  // defenseEntering/lineupEntering (called inside EnteringReference, given
-  // revealedThrough below) enforce that themselves now rather than relying
-  // solely on the !revealed && isNextToReveal / revealed checks below, which
-  // remain only to choose ABOVE vs BELOW the seal. On the wide layout this
-  // inline copy is hidden (.half__entering) and the same reference rides its
-  // own card in the right column instead.
-  const enteringCards = (
-    <div className="half__entering">
-      <EnteringReference
-        feed={feed}
-        revealedThrough={revealedThrough}
-        inning={inning}
-        half={half}
-        battingSide={battingSide}
-        awayName={awayName}
-        homeName={homeName}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
-      />
-    </div>
+  // state: ABOVE the seal (staged inside the SAME card as the play-by-play,
+  // ahead of tapping to reveal) while the half is still sealed, then in its
+  // OWN separate card BELOW the play-by-play's card once revealed — the
+  // just-scored at-bats read as their own distinct unit rather than sharing a
+  // card with the staging reference. Only for a half the user has reached; a
+  // half further out stays fully sealed — its "entering" state would leak the
+  // intervening subs, and defenseEntering/lineupEntering (called inside
+  // EnteringReference, given revealedThrough below) enforce that themselves
+  // now rather than relying solely on the !revealed && isNextToReveal /
+  // revealed checks below, which remain only to choose where it renders. On
+  // the wide layout both inline copies are hidden (.half__entering /
+  // .halfentering) and the same reference rides its own card in the right
+  // column instead.
+  const enteringReference = (
+    <EnteringReference
+      feed={feed}
+      revealedThrough={revealedThrough}
+      inning={inning}
+      half={half}
+      battingSide={battingSide}
+      awayName={awayName}
+      homeName={homeName}
+      prospectsData={prospectsData}
+      rookiesData={rookiesData}
+    />
   )
 
   return (
-    <section className="half">
-      <h3 className="half__title">
-        <span className="half__titlemain">
-          {label} {ordinal(inning)}
-        </span>
-        <span className="half__meta">
-          <span className="half__team">
-            {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
-            <span className="half__dot" aria-hidden="true">•</span>{' '}
-            {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+    <>
+      <section className="half">
+        <h3 className="half__title">
+          <span className="half__titlemain">
+            {label} {ordinal(inning)}
           </span>
-          <PitchColorsKey className="half__pitchkey" />
-        </span>
-      </h3>
+          <span className="half__meta">
+            <span className="half__team">
+              {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
+              <span className="half__dot" aria-hidden="true">•</span>{' '}
+              {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+            </span>
+            <PitchColorsKey className="half__pitchkey" />
+          </span>
+        </h3>
 
-      {/* The pre-half callout strip — the "entering this half" season-context
-          cards (starter team record, leading-after checkpoint, inning run
-          differential; see api/prehalf-callouts.js). Above the seal like the
-          pre-pitch list, and it STAYS above the results once revealed (it
-          reads as staging either way). Gated to a reached half, same contract
-          as the entering cards below; the note that reads tonight's score
-          gates itself further on revealedThrough inside the builder. */}
-      {(revealed || isNextToReveal) && (
-        <PreHalfCallouts
-          feed={feed}
-          bundle={callouts}
-          inning={inning}
-          half={half}
-          revealedThrough={revealedThrough}
-        />
-      )}
-
-      {/* Reached but still sealed: the lineups/defense sit ABOVE the seal, with
-          the pre-pitch change list, so the scorer stages the half before
-          tapping to reveal the results. See selectPrePitchChanges for why the
-          pre-pitch list is spoiler-free, and only for the immediate next half. */}
-      {!revealed && isNextToReveal && (
-        <>
-          <PrePitchChanges
+        {/* The pre-half callout strip — the "entering this half" season-context
+            cards (starter team record, leading-after checkpoint, inning run
+            differential; see api/prehalf-callouts.js). Above the seal like the
+            pre-pitch list, and it STAYS above the results once revealed (it
+            reads as staging either way). Gated to a reached half, same contract
+            as the entering cards below; the note that reads tonight's score
+            gates itself further on revealedThrough inside the builder. */}
+        {(revealed || isNextToReveal) && (
+          <PreHalfCallouts
             feed={feed}
+            bundle={callouts}
             inning={inning}
             half={half}
-            pitchingName={battingSide === 'away' ? homeName : awayName}
+            revealedThrough={revealedThrough}
           />
-          {enteringCards}
-        </>
-      )}
+        )}
 
-      <SealBox
-        forceRevealed={revealed || revealedAtBatCount > 0}
-        onReveal={stepping ? undefined : () => onReveal(inning, half)}
-        coverless
-      >
-        {() => {
-          // guid -> highlight clip lookup (see api/highlights.js), built here
-          // rather than by the caller so it stays reveal-only in the same
-          // textual sense as the rest of this render function — never at
-          // render top-level or in an eager useMemo (ADR-0001).
-          const highlightsMap = highlightsByPlayId(highlights)
-          return (
-            // The pitch-color key now lives behind the "Pitch colors" button
-            // in this half's header (see PitchColorsKey), not inline here.
-            // Statcast superlatives (fastest pitch, hardest/longest ball) used
-            // to sit below this feed; they now render in StatBox.jsx, right
-            // under the ABS row, so they're at the top of the half's content
-            // with the rest of the totals instead of wherever the feed
-            // happened to end.
-            <PlayByPlay
+        {/* Reached but still sealed: the lineups/defense sit ABOVE the seal, with
+            the pre-pitch change list, so the scorer stages the half before
+            tapping to reveal the results. See selectPrePitchChanges for why the
+            pre-pitch list is spoiler-free, and only for the immediate next half. */}
+        {!revealed && isNextToReveal && (
+          <>
+            <PrePitchChanges
               feed={feed}
               inning={inning}
               half={half}
-              battingSide={battingSide}
               pitchingName={battingSide === 'away' ? homeName : awayName}
-              pitchingTeamId={battingSide === 'away' ? homeId : awayId}
-              battingName={battingSide === 'away' ? awayName : homeName}
-              callouts={callouts}
-              vsTeam={vsTeam}
-              highlightsMap={highlightsMap}
-              stepCap={stepping ? revealedAtBatCount : null}
-              onStepInfo={onStepInfo}
-              onStepComplete={() => {
-                onReveal(inning, half)
-                onHalfSteppedThrough?.()
-              }}
             />
-          )
-        }}
-      </SealBox>
+            <div className="half__entering">{enteringReference}</div>
+          </>
+        )}
 
-      {/* Revealed: the same cards drop BELOW the play-by-play (see enteringCards). */}
-      {revealed && enteringCards}
-    </section>
+        <SealBox
+          forceRevealed={revealed || revealedAtBatCount > 0}
+          onReveal={stepping ? undefined : () => onReveal(inning, half)}
+          coverless
+        >
+          {() => {
+            // guid -> highlight clip lookup (see api/highlights.js), built here
+            // rather than by the caller so it stays reveal-only in the same
+            // textual sense as the rest of this render function — never at
+            // render top-level or in an eager useMemo (ADR-0001).
+            const highlightsMap = highlightsByPlayId(highlights)
+            return (
+              // The pitch-color key now lives behind the "Pitch colors" button
+              // in this half's header (see PitchColorsKey), not inline here.
+              // Statcast superlatives (fastest pitch, hardest/longest ball) used
+              // to sit below this feed; they now render in StatBox.jsx, right
+              // under the ABS row, so they're at the top of the half's content
+              // with the rest of the totals instead of wherever the feed
+              // happened to end.
+              <PlayByPlay
+                feed={feed}
+                inning={inning}
+                half={half}
+                battingSide={battingSide}
+                pitchingName={battingSide === 'away' ? homeName : awayName}
+                pitchingTeamId={battingSide === 'away' ? homeId : awayId}
+                battingName={battingSide === 'away' ? awayName : homeName}
+                callouts={callouts}
+                vsTeam={vsTeam}
+                highlightsMap={highlightsMap}
+                stepCap={stepping ? revealedAtBatCount : null}
+                onStepInfo={onStepInfo}
+                onStepComplete={() => {
+                  onReveal(inning, half)
+                  onHalfSteppedThrough?.()
+                }}
+              />
+            )
+          }}
+        </SealBox>
+      </section>
+
+      {/* Revealed: the lineups/defense move into their OWN card below the
+          play-by-play's card (see enteringReference above) — hidden at the
+          wide breakpoint, where the right-column reference band
+          (.innings__ref-lineups / .innings__ref-defense) already covers this
+          same content. */}
+      {revealed && <section className="half halfentering">{enteringReference}</section>}
+    </>
   )
 }
 

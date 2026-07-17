@@ -1999,10 +1999,16 @@ body {
   flex: 1 1 0;
   margin-top: 0;
   min-width: 0;
-  padding: 0 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* A true phone column only gives each of these two buttons ~half of
+     .revealsplit's already-narrow max-width — "Reveal next at-bat" /
+     "Reveal whole {half}" don't fit on one line at that width, so this wraps
+     the label onto a second line (min-height is a floor, not a fixed height,
+     so the button grows to fit) rather than truncating it with an ellipsis.
+     The 780px-wide override below gives them enough room to stay one line. */
+  padding: 8px 10px;
+  white-space: normal;
+  text-align: center;
+  line-height: var(--lh-snug);
 }
 
 .btn--ghost {
@@ -4790,12 +4796,28 @@ body {
    jersey number │ fielding position right-aligned on a shared column; a
    substituted starter is struck through, the seam-red incomer tagged with the
    inning he entered (shared with the defense diamond's writing-line styling). */
-/* The lineups & defense reference renders in two places for two layouts. On a
-   phone the inline copy inside the half-inning shows (this wrapper is a
-   transparent box so its cards stage around the seal exactly as before), and
-   the right-column card is hidden; the wide breakpoint flips both. */
+/* The lineups & defense reference, sealed half (staged inside the SAME card as
+   the play-by-play, ahead of tapping to reveal): this wrapper is a
+   transparent box so its cards stage around the seal exactly as before. Wide
+   layout hides this and shows the right-column card instead (see below). */
 .half__entering {
   display: contents;
+}
+
+/* Same reference, once the half is revealed: its OWN standalone card below
+   the play-by-play's card (see HalfInning.jsx) rather than sharing it, so the
+   just-scored at-bats read as their own distinct unit. .half has no padding
+   of its own (children supply their own insets — see .lineupteam__name/
+   .halfdefense__title), so this card needs it directly; .lineupcard's own
+   top divider is then redundant (nothing above it to divide from within this
+   card), same reset .innings__ref-lineups already applies to its copy. */
+.halfentering {
+  padding: 12px 14px;
+}
+.halfentering .lineupcard {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .innings__reference {
@@ -4828,32 +4850,12 @@ body {
   background: none;
 }
 
-/* The sealed placeholder shown in the stat-box slot before the current half is
-   revealed, so row 2 isn't left with an empty gap. */
-.statbox--sealed {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 96px;
-  padding: 14px;
-  border-style: dashed;
-}
-.statbox__hint {
-  max-width: 20ch;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  text-align: center;
-}
-
-/* A pitcher entering the game, filling the same row-2 slot as the sealed
-   "Totals" hint above — a kraft/seal-amber notification card (the app's
-   attention color for "something just happened," same family as the seal
-   cover) rather than the plain dashed hint, since a pitching change is worth
-   noticing before the scorer even reveals the half. */
+/* A pitcher entering the game, filling row 2's stat-box slot before the
+   current half is revealed (StatBox renders nothing there otherwise, to keep
+   the row from costing space on a half the scorer hasn't reached yet) — a
+   kraft/seal-amber notification card (the app's attention color for
+   "something just happened," same family as the seal cover), since a
+   pitching change is worth noticing before the scorer even reveals the half. */
 /* Shared inner layout for the "now pitching" card (see PitcherNotice), used in
    both the row-2 stat slot and the play-by-play feed; the card chrome is added
    by the context class beside it. */
@@ -5084,12 +5086,16 @@ body {
 }
 
 /* The name stack grows to fill the row so the number/position column is pushed
-   to the right edge; a substitution stack wraps within it. */
+   to the right edge; a substitution stack wraps within it. center, not
+   baseline: a bordered/padded pill (RookiePill/ProspectPill) needs more room
+   above its own baseline than plain text does, so baseline alignment was
+   inflating the whole row's height just to fit one pill — same fix already
+   used by .lineup__namewrap elsewhere. */
 .lineupcard__names {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -5124,9 +5130,9 @@ body {
   font-weight: var(--w-bold);
 }
 
-/* Right-aligned number │ position for the slot's standing occupant: jersey in
-   clay (like the roster cards), a muted bar, then the fielding position in
-   field green. Held on one line, flush to the row's right edge. */
+/* Right-aligned number + position for the slot's standing occupant: jersey in
+   clay (like the roster cards), then the fielding position in field green.
+   Held on one line, flush to the row's right edge. */
 .lineupcard__meta {
   margin-left: auto;
   flex: 0 0 auto;
@@ -5142,11 +5148,6 @@ body {
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--clay);
-}
-
-.lineupcard__bar {
-  color: var(--text-caption);
-  font-size: var(--fs-caption);
 }
 
 .lineupcard__pos {
@@ -5178,6 +5179,24 @@ body {
   color: var(--text-caption);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+}
+
+/* On a phone, .halfdefense (and the diamond inside it) sits INSIDE .half's own
+   bordered/shadowed card (the pre-reveal reference band staged above the seal
+   — see HalfInning.jsx) — the diamond's own card border there just doubles
+   against .half's, right at the bottom edge. The wide layout's copy
+   (.innings__ref-defense) stands alone with no outer card, so it keeps the
+   diamond's normal border/shadow; only the nested phone copy drops them,
+   relying on .halfdefense's dashed divider above for separation instead.
+   Horizontal inset matches its siblings' own 8px (.lineupteam__name,
+   .halfdefense__title); the bottom keeps real padding since — unlike the
+   removed border — this is the LAST thing in the card, and the DH line needs
+   room to breathe before .half's own bottom edge. */
+.half .defdiamond {
+  border: none;
+  box-shadow: none;
+  background: none;
+  padding: 0 var(--space-2) var(--space-4);
 }
 
 .stat {
@@ -9101,10 +9120,11 @@ body {
   /* The base .pagenav .btn rule caps every floating-bar button to the phone
      column's width (calc(440px - 2*gutter)) — fine for a single Next/Box
      score button, but the reveal-split pair's longer "Reveal next at-bat" /
-     "Reveal whole {half}" labels truncate with an ellipsis at that width once
-     there's actually 780px of column (.inningchrome's own measure) to give
-     them. Both rules share this selector's specificity with the base one, so
-     source order here (after it) is what makes this win. */
+     "Reveal whole {half}" labels wrap onto a second line at that width (see
+     .revealsplit__btn) when there's actually 780px of column (.inningchrome's
+     own measure) to give them and keep it to one line instead. Both rules
+     share this selector's specificity with the base one, so source order
+     here (after it) is what makes this win. */
   .pagenav--innings .btn,
   .pagenav--innings .revealsplit {
     max-width: 780px;
@@ -9137,7 +9157,7 @@ body {
   }
 
   /* The grid is a plain flex column — source order already matches the row
-     layout (linescore, stat card + win-prob, play-by-play, reference band,
+     layout (linescore, play-by-play, stat card + win-prob, reference band,
      rosters), so no reordering is needed here. */
   .innings__grid {
     display: flex;
@@ -9157,10 +9177,12 @@ body {
   }
 
   /* Reference band: pitchers + fielding defense on the left, both lineups on
-     the right. The inline entering copy staged around the seal is hidden here
+     the right. Both inline entering copies (staged around the seal, and the
+     revealed half's own standalone card — see .halfentering) are hidden here
      (see InningViewer / ADR-0010); the -defense / -lineups blocks — hidden on a
      phone — carry it instead. */
-  .half__entering {
+  .half__entering,
+  .halfentering {
     display: none;
   }
   .innings__ref {
