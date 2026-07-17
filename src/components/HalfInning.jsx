@@ -105,11 +105,17 @@ export function HalfInning({
           />
         )}
 
-        {/* Reached but still sealed: the sub-announced list stages the half
-            before tapping to reveal the results, same as ever. See
+        {/* Reached but nothing revealed yet: the sub-announced list stages the
+            half before tapping to reveal the results. Same startedRevealing
+            gate as the entering reference just below — once stepping begins,
+            a defensive change in this list also starts showing up as its own
+            FielderNotice in the live feed (PlayByPlay.jsx), so leaving this
+            gated on bare `!revealed` (true for the whole stepping window, not
+            just before the first tap) duplicated it: the same "now playing"
+            card twice, once staged here and once for real in the feed. See
             selectPrePitchChanges for why the pre-pitch list is spoiler-free,
             and only for the immediate next half. */}
-        {!revealed && isNextToReveal && (
+        {!startedRevealing && isNextToReveal && (
           <PrePitchChanges
             feed={feed}
             inning={inning}
