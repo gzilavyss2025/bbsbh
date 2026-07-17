@@ -3016,7 +3016,12 @@ body {
 .roster__row {
   display: grid;
   grid-template-columns: 24px 44px 1fr auto;
-  align-items: center;
+  /* start, not center: when a namewrap child (RadarPill's note) wraps the
+     row onto extra lines, order/jersey/pos must stay pinned level with the
+     name — centering them re-centers into the row's new full height and
+     overlaps the expanded note (see the radar-glyph prototype). Identical
+     to center for a normal single-line row, so nothing else shifts. */
+  align-items: start;
   gap: var(--space-2);
   padding: 10px 12px;
   background: var(--surface-card);
@@ -11906,27 +11911,132 @@ body {
   }
 }
 
-/* Fever Baseball radar pill — sibling shape/weight to .prospectpill (neutral,
-   not a bbsbh-authored judgment) rather than the accent-inked .milestonepill:
-   this is an outside model's opinion, so it stays visually distinct from
-   bbsbh's own reconciled-fact pills and always names its source inline. */
-.radarpill {
+/* PROTOTYPE (claude/radar-glyph-prototype) — Fever Baseball radar as a tap
+   glyph, not upfront jargon: a small magnifying glass sits quietly in the
+   row; tapping it presses like a scout's stamp (reuses .postponed's
+   stamp-press) and unfolds a plain-language note. The glyph and card shell
+   stay ink/graphite (never the kraft-seal amber — that's reserved for score
+   covers, see CLAUDE.md's spoiler rule); green/clay-red is spent in exactly
+   one place, the note's own up/down tag, not as decorative chrome bolted
+   onto the card. The glyph and the note are direct siblings in the row's
+   namewrap flex-wrap (RadarPill.jsx returns a Fragment, not a wrapping
+   span) — namewrap's own flex-wrap puts the note on its own line via
+   flex-basis: 100%, so the glyph never shares a line, and therefore never a
+   cross-axis center, with the note's height. */
+.radarpill__glyph {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  /* border-box: pressed's thicker white ring must not grow the button past
+     this fixed 21px — same size/position tapped or not. */
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+  color: var(--graphite);
+  cursor: pointer;
+  transform: rotate(-4deg);
+  transition: border-color 120ms var(--ease-out), color 120ms var(--ease-out),
+    background-color 120ms var(--ease-out);
+}
+.radarpill__glyph:hover {
+  border-color: var(--graphite-soft);
+  color: var(--ink-2);
+}
+.radarpill__glyph--pressed {
+  /* --radar-team-color is set inline per-player (RadarPill.jsx, from
+     teamPrimaryColor) when the club has a known brand color; falls back to
+     plain ink for MiLB teams with none. Full-strength fill + a white ring,
+     deliberately loud — this is the one state meant to grab the eye. */
+  background: var(--radar-team-color, var(--ink-1));
+  border-width: 2px;
+  border-color: #fff;
+  color: #fff;
+  animation: stamp-press 300ms var(--ease-out) both;
+}
+.radarpill__glyph--pressed:hover {
+  /* Hovering an already-open glyph previews what tapping it will do — a
+     visibly team-colored wash (not the max-saturation fill it shows at
+     rest, not a bare ring either) as a "this is about to close" cue. */
+  background: color-mix(in srgb, var(--radar-team-color, var(--ink-1)) 55%, var(--bg-page));
+  border-width: 2px;
+  border-color: var(--radar-team-color, var(--graphite));
+  color: var(--radar-team-color, var(--ink-1));
+}
+.radarpill__note {
+  /* Basis 100% inside namewrap's own flex-wrap forces this onto its own
+     line, below name/pills/glyph — see the block comment above. */
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.radarpill__note-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-page);
-  color: var(--text-muted);
-  border: var(--bw-hair) solid var(--border-hairline);
 }
-.radarpill__source {
+.radarpill__note-tag--up {
+  color: var(--accent-positive);
+}
+.radarpill__note-tag--down {
+  color: var(--accent-negative);
+}
+.radarpill__note-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* Meter: exit velocity vs. the real qualified league (Savant percentile),
+   not Fever's own raw mph — a track + team-colored fill IS the comparison,
+   the label is a direct read of the same number, no legend/hover needed for
+   one value against a benchmark (dataviz skill's "meter" form). */
+.radarpill__meter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.radarpill__meter-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--border-hairline);
+  overflow: hidden;
+}
+.radarpill__meter-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--radar-team-color, var(--ink-1));
+}
+.radarpill__meter-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
   color: var(--text-caption);
-  font-weight: var(--w-regular);
+}
+.radarpill__note-source {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+@media (prefers-reduced-motion: reduce) {
+  .radarpill__glyph--pressed,
+  .radarpill__note {
+    animation: none;
+  }
 }
 
 /* team-hub roster (own classes — the .roster panel is a different component) */

@@ -29,6 +29,15 @@ export function savantPercentilesFor(data, personId, group) {
   return data?.[key]?.[personId] ?? null
 }
 
+// How many qualified players a group's percentiles are ranked against — lets
+// a caller turn "4th percentile" into "harder than only ~22 other hitters"
+// (RadarPill's EvMeter), a real count from this same file rather than an
+// invented one. 0 before the file loads.
+export function qualifiedCount(data, group) {
+  const key = group === 'pitching' ? 'pit' : 'bat'
+  return Object.keys(data?.[key] ?? {}).length
+}
+
 // Metric display order + labels for the percentile cards — kept here so the
 // component doesn't hard-code JSX per metric. `def` is the plain-language
 // gloss shown on a card's flipped-open back face (StatcastPercentiles.jsx).

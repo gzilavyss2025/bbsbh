@@ -46,6 +46,7 @@ export function GameView({ game, section, onSection }) {
     prospectsData,
     rookiesData,
     feverRadarData,
+    savantPercentilesData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
@@ -187,6 +188,7 @@ export function GameView({ game, section, onSection }) {
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}
+          savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
@@ -208,6 +210,7 @@ export function GameView({ game, section, onSection }) {
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}
+          savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
@@ -229,6 +232,7 @@ export function GameView({ game, section, onSection }) {
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}
+          savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
