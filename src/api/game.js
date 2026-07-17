@@ -227,6 +227,7 @@ export async function fetchPitcherLastGame(personId, season, cutoffDate) {
       hits: st.hits ?? 0,
       earnedRuns: st.earnedRuns ?? 0,
       strikeOuts: st.strikeOuts ?? 0,
+      baseOnBalls: st.baseOnBalls ?? 0,
     }
   }
   return null

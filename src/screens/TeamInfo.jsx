@@ -692,16 +692,17 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
 // under .startercard__last's dotted divider (see fetchPitcherLastGame).
 function lastGameLine(g) {
   const md = (g.date || '').slice(5).replace('-', '/').replace(/^0/, '')
-  const where = g.opponent ? `${g.home ? 'vs' : 'at'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
+  const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
   const stat = [
     g.inningsPitched && `${g.inningsPitched} IP`,
     `${g.hits} H`,
     `${g.earnedRuns} ER`,
     `${g.strikeOuts} K`,
+    `${g.baseOnBalls} BB`,
   ]
     .filter(Boolean)
-    .join(' · ')
-  return `Last: ${[md, where].filter(Boolean).join(' ')} — ${stat}`
+    .join(', ')
+  return `${[md, where].filter(Boolean).join(' ')}: ${stat}`
 }
 
 // Show only the first handful up front — a heavy shared history (two rosters
