@@ -85,3 +85,14 @@
   font-weight: 600;
   font-display: swap;
 }
+
+/* One weight, one use: the slate card's '@' watermark (.gamecard__atmark in
+   index.css) — a face modeled on Chicago stadium signage, not part of the
+   app's ordinary type system, so it's not aliased to a --font-* token. */
+@font-face {
+  font-family: "Big Shoulders Display";
+  src: url("@fontsource/big-shoulders-display/files/big-shoulders-display-latin-900-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}

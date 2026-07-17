@@ -202,6 +202,12 @@ export function GameSelect({ onPick, onShowLogos }) {
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
 
+  // Whether the live Top Performers box has anything to show — mutually
+  // exclusive with the past-day Day Recap rail (finals.length > 0): a day
+  // either hasn't gone final yet (this) or already has (that), never both.
+  // Both share the same `.slate-body` rail slot below.
+  const showTopPerformers = finals.length === 0 && offset <= 0 && eligibleGames.length > 0
+
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
   // card on screen at once). Rosters are fetched per team on the current
@@ -276,15 +282,6 @@ export function GameSelect({ onPick, onShowLogos }) {
             ›
           </button>
         </div>
-
-        {finals.length === 0 && offset <= 0 && eligibleGames.length > 0 && (
-          <TopPerformersBox
-            dateStr={dateStr}
-            sportId={sportId}
-            games={eligibleGames}
-            prospectsData={prospects.data}
-          />
-        )}
       </div>
 
       <AsyncStatus
@@ -321,12 +318,24 @@ export function GameSelect({ onPick, onShowLogos }) {
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
-      <div className={finals.length > 0 ? 'slate-body' : undefined}>
-        {/* One grid child, so the desktop two-column split below (game grid +
-            Day Recap rail — see .slate-body in index.css) auto-places just
-            the two columns it was built for. Off Day stacks here rather than
-            as a third sibling, or it lands in the rail meant for
-            PastDayRecapBox instead. */}
+      <div className={finals.length > 0 || showTopPerformers ? 'slate-body' : undefined}>
+        {/* The rail — live Top Performers or past-day Day Recap, never both
+            (see showTopPerformers above) — renders BEFORE .slate-main so a
+            phone-width slate (plain block flow, no grid) stacks it above the
+            game list, its original spot; the desktop grid (.slate-body in
+            index.css) repositions it to the right via a named area regardless
+            of this DOM order. Exactly one rail child today; a real second
+            sibling would need its own named area added there too, rather
+            than falling through to an implicit auto-placed cell. */}
+        {showTopPerformers && (
+          <TopPerformersBox
+            dateStr={dateStr}
+            sportId={sportId}
+            games={eligibleGames}
+            prospectsData={prospects.data}
+          />
+        )}
+
         <div className="slate-main">
           <ul className="gamelist">
             {sorted.length === 0 && isDerbyDay && (
@@ -469,9 +478,18 @@ function isPinnedTeam(id, favoriteTeamId, favoriteAffiliateIds) {
 }
 
 // Soonest → latest by first pitch; the favorite team's game (or, on a MiLB
-// level, its affiliate's game) floats to the top.
+// level, its affiliate's game) floats to the top. A Final game (including a
+// postponed one, which also reports abstractGameState 'Final' — see the
+// showPastDayTreatment comment above) sinks to the bottom FIRST, ahead of the
+// pin — nothing left to watch there, so it shouldn't crowd the still-playing
+// games off the top of a day that's still in progress. The favorite's game
+// still leads once it lands in that bottom group, rather than getting lost
+// in start-time order among the rest of the day's finals.
 function sortGames(games, favoriteTeamId, favoriteAffiliateIds) {
   return [...games].sort((a, b) => {
+    const fa = a.abstractState === 'Final' ? 1 : 0
+    const fb = b.abstractState === 'Final' ? 1 : 0
+    if (fa !== fb) return fa - fb
     const pa = isPinned(a, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
     const pb = isPinned(b, favoriteTeamId, favoriteAffiliateIds) ? 0 : 1
     if (pa !== pb) return pa - pb

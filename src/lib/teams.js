@@ -486,6 +486,61 @@ export function teamPrimaryColor(teamId) {
   return resolveTeamColorPair(teamId)?.[0] ?? null
 }
 
+// DRAFT — not wired into TeamMark yet, see
+// .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md. A hand-picked
+// SOLID (no-alpha) per-team logo-tile fill for GameCard.jsx, tried in place of
+// the teamTintColor soft wash below and reverted: at least one dense/large
+// club mark (the Yankees' interlocking NY) reads as if it colored the whole
+// tile even against a light fill, so this needs a design pass (shrink the
+// mark for dense logos? reconsider some colors? an inset ring so the fill
+// still peeks through?) before it's worth shipping. Kept here, unused, so
+// picking this back up doesn't mean re-deriving the color list — hand-
+// specified per club (not derived from TEAM_COLORS/TEAM_COLOR_PAIRS above,
+// though several happen to match): full brightness, no alpha, distinct from
+// every other per-team color map in this file, all of which are either a
+// rival-distinguishing accent or a tint alpha rather than a flat fill. MLB
+// only, deliberately no MiLB affiliate fallback (unlike teamTintColor/
+// teamPrimaryColor) — an unlisted id (every MiLB club) would return null and
+// TeamMark would fall back to teamTintColor, same as it does today.
+const GAMECARD_TILE_COLORS = {
+  108: '#003263', // Angels — blue
+  109: '#000000', // Diamondbacks — black
+  110: '#000000', // Orioles — black
+  111: '#0C2340', // Red Sox — blue
+  112: '#CC3433', // Cubs — red
+  113: '#000000', // Reds — black
+  114: '#E50022', // Guardians — red
+  115: '#333366', // Rockies — purple
+  116: '#FA4616', // Tigers — orange
+  117: '#EB6E1F', // Astros — orange
+  118: '#FFFFFF', // Royals — white
+  119: '#FFFFFF', // Dodgers — white
+  120: '#14225A', // Nationals — blue
+  121: '#002D72', // Mets — blue
+  133: '#EFB21E', // Athletics — yellow
+  134: '#27251F', // Pirates — black
+  135: '#FFC425', // Padres — yellow
+  136: '#0C2C56', // Mariners — blue
+  137: '#27251F', // Giants — black
+  138: '#0C2340', // Cardinals — blue
+  139: '#F5D130', // Rays — yellow
+  140: '#FFFFFF', // Rangers — white
+  141: '#E8291C', // Blue Jays — red
+  142: '#FFFFFF', // Twins — white
+  143: '#002D72', // Phillies — blue
+  144: '#FFFFFF', // Braves — white
+  145: '#FFFFFF', // White Sox — white
+  146: '#00A3E0', // Marlins — light blue
+  147: '#FFFFFF', // Yankees — white
+  158: '#12284B', // Brewers — navy blue
+}
+
+// Returns a hex string, or null for a team with no entry (any MiLB id —
+// callers should fall back to teamTintColor, not render nothing).
+export function gameCardTileColor(teamId) {
+  return GAMECARD_TILE_COLORS[teamId] ?? null
+}
+
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed
 // by the team id carried everywhere in the app. statsapi does expose these
 // (locationName / teamName), but every surface that wants a name already has
