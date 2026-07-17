@@ -4416,12 +4416,16 @@ body {
    value with its unit trailing small, then who did it. Only rendered when the
    feed carried tracking data. */
 .statcast {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: 12px;
   padding-top: 12px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.statcast > * {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .statcast__card {
@@ -9337,6 +9341,12 @@ body {
 .player__meta .sep {
   color: var(--graphite-soft);
 }
+/* "Bats L / Throws R" as one unbreakable chunk — plain text let a two-way
+   player's longer meta line (position · hand · team) wrap mid-phrase,
+   splitting "Throws" from "R" and stranding the separator before the team. */
+.player__hand {
+  white-space: nowrap;
+}
 .player__team {
   color: var(--navy);
   font-weight: var(--w-semibold);
@@ -9345,13 +9355,25 @@ body {
   margin-top: var(--space-4);
 }
 
-/* ---- 5-tile season row (reuses .stat) ---- */
+/* ---- 5-tile season row (reuses .stat) ----
+   Same edge-to-edge hairline-ruled container as .factgrid/.player__splits —
+   also covers SplitsVsTeam's career line, which reuses this class
+   (.player__statgrid vsteam__grid) rather than styling its own grid. */
 .player__statgrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 .player__statgrid .stat {
+  background: var(--surface-card);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   padding: 11px 3px;
 }
 .player__statgrid .stat__v {
@@ -9390,18 +9412,30 @@ body {
   margin-top: var(--space-5);
 }
 
-/* ---- splits ---- */
+/* ---- splits ----
+   Same edge-to-edge grid treatment as .factgrid (the bio card above it):
+   a single hairline-ruled container rather than a gap of separately
+   bordered/shadowed cards. */
 .player__splits {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 .split {
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
   padding: 10px 12px;
+  margin: 0;
+}
+/* An odd item count (e.g. a pitcher's 5-item Firsts) leaves the last card
+   alone in column 1 with nothing in column 2 — stretch it across both so the
+   container's own hairline background never shows through as a bare block. */
+.player__splits > .split:nth-child(2n + 1):last-child {
+  grid-column: 1 / -1;
 }
 .split__k {
   font-family: var(--font-display);
@@ -9419,20 +9453,19 @@ body {
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  margin-top: 6px;
+  margin-top: 3px;
 }
 .split__v {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
 }
 .split__sub {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
 }
 @media (min-width: 740px) {
   .split__row {
@@ -9446,17 +9479,21 @@ body {
 /* ---- Statcast percentile cards ----
    Each metric is a small StatcastCard tile (the same one the innings view
    and box score use for per-half superlatives), not a bar mimicking
-   Baseball Savant's own chart. `.statcast` here is the same grid rule used
-   there (see the "Statcast superlatives" block above); this override just
-   drops the play-by-play-feed divider (nothing sits above it on the player
-   page) and gives the grid a real minimum column width so 6-7 cards wrap
-   instead of squeezing onto one row (the shared rule's own minmax(0, 1fr)
-   only works for the 3-card superlative row). */
+   Baseball Savant's own chart. `.statcast` here is the same flex-wrap rule
+   used there (see the "Statcast superlatives" block above); this override
+   just drops the play-by-play-feed divider (nothing sits above it on the
+   player page) and gives each tile a real minimum width so 6-7 cards wrap
+   across rows — an 84px floor with flex-grow (not a fixed column count)
+   means an incomplete last row (e.g. a pitcher's 7th, "Hard-hit %") stretches
+   to fill the row instead of sitting alone at its floor width. */
 .statcast-section .statcast {
-  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
   margin-top: 8px;
   padding-top: 0;
   border-top: none;
+}
+.statcast-section .statcast > * {
+  flex: 1 1 84px;
+  min-width: 84px;
 }
 
 /* The button wrapping each FlipCard — reset to a plain pressable card (see
@@ -9691,7 +9728,10 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
-  white-space: nowrap;
+  /* A long club name (e.g. "Diamondbacks") in the fixed 96px meta column
+     must be free to wrap onto a second line — `nowrap` let it overflow
+     past the column edge and visually collide with the stat line beside it. */
+  min-width: 0;
 }
 /* Level pill on a combined MLB + rehab game log (see gameLogView's tagLevel) —
    tells apart a rehabbing big leaguer's MLB rows from his MiLB rehab rows. */
@@ -9848,9 +9888,9 @@ body {
 .ledger tfoot tr.reg-milb td {
   color: var(--graphite);
 }
-/* A missed season (see missingSeasonRows in api/person.js) — dashes fill the
-   stat cells same as any thin row, but the note replacing the team cell reads
-   as an aside, not a stat line: italic graphite, no bold weight. */
+/* A missed season (see missingSeasonRows in api/person.js) — the note
+   replacing the team + stat cells reads as an aside, not a stat line: italic
+   graphite, no bold weight. */
 .reg-gap td {
   color: var(--graphite);
 }
@@ -9859,6 +9899,12 @@ body {
 }
 .reg-gap__note {
   font-style: italic;
+}
+/* The note spans the rest of the row (see Ledger's spanCell) instead of
+   sitting `nowrap` beside a run of dashes — let it wrap within the table's
+   width rather than forcing the whole ledger into horizontal scroll. */
+.ledger td.ledger__span {
+  white-space: normal;
 }
 /* The career register's secondary columns (a pitcher's GS, K, BB) fold away on
    a phone so the essentials stay legible; they return at the 740px "wide"

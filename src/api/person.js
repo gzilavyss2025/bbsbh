@@ -937,12 +937,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
-  const gapRows = debutYear
-    ? missingSeasonRows(presentYears, debutYear, cur, transactions).map((g) => ({
-        ...g,
-        cells: columns.map(() => DASH),
-      }))
-    : []
+  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions) : []
   const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
 
   return { columns, rows: allRows, totals, footnote: stintCaption(foot, group) }
