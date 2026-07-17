@@ -5249,14 +5249,21 @@ body {
    Per-plate-appearance feed shown below the pitch-summary row once a half is
    revealed (api/playbyplay.js — reveal-only, same rule as linescore.js). One
    card per batter, first-at-bat first, with mound-visit / pitching-change
-   notes interleaved between cards. */
+   notes interleaved between cards. No border-top divider before the first
+   record — nothing above it in the card needs dividing from anymore. */
 .pbp {
   margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: var(--bw-hair) dashed var(--border-rule);
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* The "Pitch colors" button at the foot of the play-by-play card (moved down
+   from the header — see HalfInning.jsx) — left-aligned like the zone/
+   highlight buttons above it, with the card's own 14px horizontal inset
+   (.half has no padding of its own; see .half__title's matching padding). */
+.half__pitchkeyfoot {
+  margin: var(--space-3) 14px 12px;
 }
 
 .pbp__note {
@@ -5861,9 +5868,9 @@ body {
   border: 2.5px solid var(--accent-positive);
 }
 
-/* The "Pitch colors" button in the half header (see PitchColorsKey) — a compact
-   pill whose icon is the five pitch swatches in a row, opening the key in a
-   modal. Sits beside the "X bats • Y pitches" line, so keep it small/quiet. */
+/* The "Pitch colors" button (see PitchColorsKey) — a compact pill whose icon
+   is the five pitch swatches in a row, opening the key in a modal. Keep it
+   small/quiet wherever it rides. */
 .pitchkeybtn {
   display: inline-flex;
   align-items: center;
@@ -5958,10 +5965,16 @@ body {
 
 /* The phone icon button, tucked into the card's bottom-left whitespace. Hidden
    from the wide breakpoint up, where the zone rides inline (see the media
-   query). */
+   query). display: flex (block-level), not inline-flex: .pbp__main is plain
+   block flow, so an inline-flex button here would try to sit on the SAME
+   line as .pbp__hlbtn when there's room and only wrap to its own line when
+   there isn't — meaning its left edge would drift depending on available
+   width instead of always lining up with the zone button above it. Forcing
+   its own line (with width: fit-content so it doesn't stretch full width)
+   keeps it flush left every time. */
 .pbp__zonebtn {
   margin-top: 7px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -5982,14 +5995,16 @@ body {
   display: none;
 }
 
-/* "Watch highlight" — sits in the same bottom-left whitespace as the zone
-   icon button, generic text label only (never the clip's own title, which
-   would spoil the play — see PlayByPlay.jsx). Present only on the small
-   fraction of plays with a matched clip. */
+/* "Watch highlight" — sits directly below the zone icon button (own line,
+   same reasoning as .pbp__zonebtn above), generic text label only (never the
+   clip's own title, which would spoil the play — see PlayByPlay.jsx).
+   Present only on the small fraction of plays with a matched clip. Always
+   flush left, whether or not a zone button precedes it, so it lines up with
+   the zone button on cards that have both. */
 .pbp__hlbtn {
   margin-top: 7px;
-  margin-left: 8px;
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 5px;
   height: 32px;
@@ -9239,12 +9254,6 @@ body {
   }
   .pbp__zonebtn {
     display: none;
-  }
-  /* No zone icon button to sit beside at this breakpoint (see above) — drop
-     the indent that used to space it away from that icon, since the card
-     column is narrow here (38fr) and the button needs the room. */
-  .pbp__hlbtn {
-    margin-left: 0;
   }
   .pbp__zonecell {
     display: flex;
