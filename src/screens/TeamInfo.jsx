@@ -390,14 +390,19 @@ function rosterFallbackGroups(roster) {
   return { batters, starters, bullpen }
 }
 
-// The ids of every player in TONIGHT's starting lineups, both clubs — used to
-// pin/badge a former-teammate pair who are about to face each other for real,
-// pitch by pitch, on the user's own scoresheet (see FormerTeammates). Lineups
-// are spoiler-free pregame, so this is safe outside any seal.
+// The ids of every player in TONIGHT's starting lineups, both clubs, plus both
+// probable starting pitchers — used to pin/badge a former-teammate pair who are
+// about to face each other for real, pitch by pitch, on the user's own
+// scoresheet (see FormerTeammates). Under the universal DH a starting pitcher
+// never has a battingOrder slot, so selectLineup alone would never catch him.
+// Lineups + probable pitchers are both spoiler-free pregame, so this is safe
+// outside any seal.
 function startingIdsFor(feed) {
   const ids = new Set()
   for (const side of ['away', 'home']) {
     for (const p of selectLineup(feed, side)) ids.add(p.id)
+    const pitcher = selectTeamMeta(feed, side).probablePitcher
+    if (pitcher?.id) ids.add(pitcher.id)
   }
   return ids
 }
