@@ -17844,6 +17844,42 @@ body {
 .scorebookstory__leaderrow small { grid-column: 2; margin-top: -3px; color: var(--text-caption); font-size: var(--fs-caption); }
 .scorebookstory__leaderrow > span:not(:first-child), .scorebookstory__leaderhead > span:not(:first-child) { padding-right: 8px; }
 
+.scorebookstory__nuggets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.scorebookstory__nugget {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+.scorebookstory__nuggetstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  color: var(--accent-positive);
+}
+.scorebookstory__nuggetstat small {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.scorebookstory__nugget strong { display: block; margin-bottom: 4px; font-family: var(--font-display); font-size: var(--fs-title-sm); color: var(--text-heading); }
+.scorebookstory__nugget p { margin: 0; font-family: var(--font-read); font-size: var(--fs-body); line-height: var(--lh-prose); color: var(--text-muted); }
+
 .scorebookstory__records {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -17931,7 +17967,7 @@ body {
   .scorebookstory__section { margin-top: 58px; }
   .scorebookstory__sectionhead { grid-template-columns: 1fr; }
   .scorebookstory__sectionhead > span { grid-row: auto; margin-bottom: 6px; }
-  .scorebookstory__gamegrid, .scorebookstory__performers, .scorebookstory__leaderboards { grid-template-columns: 1fr; }
+  .scorebookstory__gamegrid, .scorebookstory__performers, .scorebookstory__leaderboards, .scorebookstory__nuggets { grid-template-columns: 1fr; }
   .scorebookstory__moment { grid-template-columns: 1fr auto; gap: 8px var(--space-3); }
   .scorebookstory__moment p { grid-column: 1 / -1; grid-row: 2; }
   .scorebookstory__moment > strong { grid-column: 2; grid-row: 1; }

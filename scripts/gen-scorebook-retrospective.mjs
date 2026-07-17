@@ -114,6 +114,7 @@ async function main() {
   const performances = []
   const moments = []
   const teamRecords = new Map()
+  const brewersStarts = []
 
   const games = resolved.map((listed, index) => {
     const feed = feeds[index]
@@ -151,6 +152,45 @@ async function main() {
         if (appearedBatting) performances.push({ type: 'batting', score, gamePk: listed.gamePk, date: listed.date, name: bp.person.fullName, playerId: id, team: team.abbreviation, teamId: team.id, line: lineForBatter(batting) })
         if (appearedPitching) performances.push({ type: 'pitching', score, gamePk: listed.gamePk, date: listed.date, name: bp.person.fullName, playerId: id, team: team.abbreviation, teamId: team.id, line: lineForPitcher(pitching), pitcherGameScore: pitcherGameScore(pitching) })
       }
+    }
+
+    for (const side of ['away', 'home']) {
+      const team = gd.teams[side]
+      if (team.id !== 158) continue
+      const starter = Object.values(box.teams[side].players ?? {}).find((bp) => bp.stats?.pitching?.gamesStarted === 1)
+      if (!starter) continue
+      const s = starter.stats.pitching
+      const oppSide = side === 'away' ? 'home' : 'away'
+      const opponent = gd.teams[oppSide]
+      const teamRuns = side === 'away' ? awayRuns : homeRuns
+      const oppRuns = side === 'away' ? homeRuns : awayRuns
+      const decisionWinnerId = feed.liveData.decisions?.winner?.id
+      const decisionLoserId = feed.liveData.decisions?.loser?.id
+      const decision = starter.person.id === decisionWinnerId ? 'W' : starter.person.id === decisionLoserId ? 'L' : 'ND'
+      brewersStarts.push({
+        playerId: starter.person.id,
+        name: starter.person.fullName,
+        gamePk: listed.gamePk,
+        date: listed.date,
+        opponent: opponent.clubName ?? opponent.name,
+        opponentId: opponent.id,
+        opponentAbbr: opponent.abbreviation,
+        ip: s.inningsPitched ?? '0.0',
+        outs: ipOuts(s.inningsPitched),
+        h: s.hits ?? 0,
+        r: s.runs ?? 0,
+        er: s.earnedRuns ?? 0,
+        bb: s.baseOnBalls ?? 0,
+        k: s.strikeOuts ?? 0,
+        hr: s.homeRuns ?? 0,
+        decision,
+        teamRuns,
+        oppRuns,
+        teamWin: winnerId === 158,
+        gameScore: pitcherGameScore(s),
+        completeGame: (s.completeGames ?? 0) > 0,
+        shutout: (s.shutouts ?? 0) > 0,
+      })
     }
 
     const wp = winProbs[index] ?? []
@@ -219,6 +259,7 @@ async function main() {
     moments: moments.filter((m) => m.description).sort((a, b) => b.swing - a.swing).slice(0, 12),
     battingLeaders: battingLeaders.slice(0, 12),
     pitchingLeaders: pitchingLeaders.slice(0, 12),
+    brewersStarts: brewersStarts.sort((a, b) => a.date.localeCompare(b.date)),
   }
   await mkdir(dirname(OUT), { recursive: true })
   await writeFile(OUT, `${JSON.stringify(output)}\n`)
