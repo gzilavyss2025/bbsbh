@@ -30,6 +30,22 @@ CREATE TABLE IF NOT EXISTS team_snapshots (
   PRIMARY KEY (season, team_id, date, metric)
 );
 
+-- One dated row per (player, board) on an external prospect/scouting board —
+-- currently Fever Baseball's breakout/fade radar (gen-fever-radar.mjs).
+-- `payload_json` carries that source's own fields verbatim (rank, metrics)
+-- so a source's schema tweak never needs a migration here, same convention
+-- as team_snapshots. Its own group (not folded into team_snapshots) because
+-- it's keyed by PLAYER, not team, and `source` leaves room for a second
+-- outside board later without a new table.
+CREATE TABLE IF NOT EXISTS player_snapshots (
+  date         TEXT NOT NULL,
+  player_id    INTEGER NOT NULL,
+  board        TEXT NOT NULL,
+  source       TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  PRIMARY KEY (date, player_id, board, source)
+);
+
 -- Available for future generation-time features that want a Quality+Surprise
 -- pair without hand-rolling the lookup. Deliberately NOT wired in to replace
 -- src/api/teamScore.js's leagueSeasonGradesFor: that function computes the

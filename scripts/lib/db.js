@@ -42,6 +42,7 @@ const dataDir = join(here, '..', 'data')
 export const GROUPS = {
   'game-scores': { file: join(dataDir, 'game-scores.sql'), tables: ['game_scores'] },
   'team-snapshots': { file: join(dataDir, 'team-snapshots.sql'), tables: ['team_snapshots'] },
+  'player-snapshots': { file: join(dataDir, 'player-snapshots.sql'), tables: ['player_snapshots'] },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay

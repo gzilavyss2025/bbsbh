@@ -45,6 +45,7 @@ export function GameView({ game, section, onSection }) {
     pitcherRoles,
     prospectsData,
     rookiesData,
+    feverRadarData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
@@ -185,6 +186,7 @@ export function GameView({ game, section, onSection }) {
           starterLines={starterLines.data}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
+          feverRadarData={feverRadarData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
@@ -205,6 +207,7 @@ export function GameView({ game, section, onSection }) {
           oppPitcherLine={starterLines.data?.home}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
+          feverRadarData={feverRadarData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
@@ -225,6 +228,7 @@ export function GameView({ game, section, onSection }) {
           oppPitcherLine={starterLines.data?.away}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
+          feverRadarData={feverRadarData}
           formerTeammatesData={formerTeammatesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}

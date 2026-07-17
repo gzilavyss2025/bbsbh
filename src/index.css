@@ -11906,6 +11906,29 @@ body {
   }
 }
 
+/* Fever Baseball radar pill — sibling shape/weight to .prospectpill (neutral,
+   not a bbsbh-authored judgment) rather than the accent-inked .milestonepill:
+   this is an outside model's opinion, so it stays visually distinct from
+   bbsbh's own reconciled-fact pills and always names its source inline. */
+.radarpill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.radarpill__source {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+
 /* team-hub roster (own classes — the .roster panel is a different component) */
 .thub-roster {
   list-style: none;

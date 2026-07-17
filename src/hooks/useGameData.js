@@ -14,6 +14,7 @@ import { selectHasStarted } from '../api/select.js'
 import { rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData } from '../api/rookies.js'
+import { fetchFeverRadar } from '../api/feverRadar.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -282,6 +283,20 @@ export function useGameData(game) {
   )
   const rookiesData = rookies.data ?? null
 
+  // Fever Baseball's breakout/fade radar (see RadarPill / feverRadar.js) —
+  // an outside model's opinion, not a bbsbh callout, so it's kept off the
+  // callouts worthiness table entirely (see gen-fever-radar.mjs's header).
+  // MLB-only like rookies/vsTeamSplits: there is no MLB pitcher board and
+  // the AAA boards aren't wired to any surface yet.
+  const feverRadar = useAsync(
+    () =>
+      enrichmentReady && game.sportId === SPORT_IDS.MLB
+        ? fetchFeverRadar()
+        : Promise.resolve(null),
+    [enrichmentReady, game.sportId],
+  )
+  const feverRadarData = feverRadar.data ?? null
+
   // The league-wide run-expectancy (RE288) table — a static, same-origin,
   // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
   // information of its own, so it's safe to fetch eagerly like
@@ -308,6 +323,7 @@ export function useGameData(game) {
     pitcherRoles,
     prospectsData,
     rookiesData,
+    feverRadarData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
