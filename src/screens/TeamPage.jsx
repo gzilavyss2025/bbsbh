@@ -739,19 +739,6 @@ export function TeamPage({ id, asOf, sportId }) {
           {!isMilb && <GameNotesLink teamId={team.id} />}
         </header>
 
-        {teamScore?.season?.score != null && (
-          <TeamScoreCard
-            snapshot={teamScore}
-            surprise={seasonScore}
-            teamId={team.id}
-            leagueGradeScores={leagueGradeScores}
-            leagueSeasonScores={leagueSeasonScores}
-            leagueSurpriseScores={leagueSurpriseScores}
-            leagueFormScores={leagueFormScores}
-          />
-        )}
-        {postseasonOdds && <PostseasonOddsCard snapshot={postseasonOdds} />}
-
         {standings.length > 0 && (
           <>
             <SectionTitle title={team.division?.name || 'Standings'} note={asOf ? 'entering today' : ''} />
@@ -789,6 +776,18 @@ export function TeamPage({ id, asOf, sportId }) {
               </table>
             </div>
           </>
+        )}
+
+        {teamScore?.season?.score != null && (
+          <TeamScoreCard
+            snapshot={teamScore}
+            surprise={seasonScore}
+            teamId={team.id}
+            leagueGradeScores={leagueGradeScores}
+            leagueSeasonScores={leagueSeasonScores}
+            leagueSurpriseScores={leagueSurpriseScores}
+            leagueFormScores={leagueFormScores}
+          />
         )}
 
         {transactionsPage.days.length > 0 && (
@@ -844,6 +843,8 @@ export function TeamPage({ id, asOf, sportId }) {
             )
           }
         />
+
+        {postseasonOdds && <PostseasonOddsCard snapshot={postseasonOdds} />}
 
         {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
           <>
