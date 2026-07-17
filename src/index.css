@@ -13727,6 +13727,17 @@ body {
   align-items: center;
   gap: 8px;
 }
+/* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
+   from favoriteAccentColor()) — a fan's own franchise or an MVP who played
+   for it jumps out of the rank list. */
+.psleaders__teamrow--fav,
+.psleaders__mvprow--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-xs);
+  margin: 0 -6px;
+  padding: 1px 6px;
+}
 .psleaders__rank {
   flex: none;
   width: 1.4em;

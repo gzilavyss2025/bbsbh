@@ -5,6 +5,7 @@ import {
 } from '../api/postseasonLeaders.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
@@ -13,27 +14,38 @@ import { SectionTitle } from '../components/SectionTitle.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
-import { teamClubNameShort } from '../lib/teams.js'
+import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 
 // One franchise leaderboard (Titles/Pennants/Appearances) — rank, logo, club
 // name, count. A team-keyed leaderboard, so it doesn't reuse TeamLeaders
 // (built around a PLAYER-keyed pool); the batting/pitching sections below do.
-function TeamCountBoard({ title, entries }) {
+// `favoriteTeamId` gets the same --fav-accent highlight as the rest of the
+// app (AwardsHistoryPage, TeamLeaders) — a fan's own franchise jumps out of
+// the rank list.
+function TeamCountBoard({ title, entries, favoriteTeamId }) {
   if (!entries.length) return null
   return (
     <section className="psleaders__teamboard">
       <SectionTitle title={title} />
       <ol className="psleaders__teamlist">
-        {entries.map((e, i) => (
-          <li key={e.teamId} className="psleaders__teamrow">
-            <span className="psleaders__rank">{i + 1}</span>
-            <TeamLink id={e.teamId} className="psleaders__teamlink">
-              <TeamLogo teamId={e.teamId} name={teamClubNameShort(e.teamId)} size={22} />
-              <span className="psleaders__teamname">{teamClubNameShort(e.teamId)}</span>
-            </TeamLink>
-            <span className="psleaders__count">{e.count}</span>
-          </li>
-        ))}
+        {entries.map((e, i) => {
+          const isFavorite = favoriteTeamId != null && e.teamId === favoriteTeamId
+          const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(e.teamId) } : undefined
+          return (
+            <li
+              key={e.teamId}
+              className={`psleaders__teamrow${isFavorite ? ' psleaders__teamrow--fav' : ''}`}
+              style={favStyle}
+            >
+              <span className="psleaders__rank">{i + 1}</span>
+              <TeamLink id={e.teamId} className="psleaders__teamlink">
+                <TeamLogo teamId={e.teamId} name={teamClubNameShort(e.teamId)} size={22} />
+                <span className="psleaders__teamname">{teamClubNameShort(e.teamId)}</span>
+              </TeamLink>
+              <span className="psleaders__count">{e.count}</span>
+            </li>
+          )
+        })}
       </ol>
     </section>
   )
@@ -44,25 +56,33 @@ function TeamCountBoard({ title, entries }) {
 // field, no extra fetch. Filtered to repeat winners at generation time
 // (gen-postseason-leaders.mjs) so this reads as a highlight reel, not a long
 // tail of everyone who's won it exactly once.
-function MvpAwardsBoard({ entries }) {
+function MvpAwardsBoard({ entries, favoriteTeamId }) {
   if (!entries.length) return null
   return (
     <section className="psleaders__teamboard">
       <SectionTitle title="Multiple Series MVP Awards" />
       <ol className="psleaders__mvplist">
-        {entries.map((e, i) => (
-          <li key={e.playerId} className="psleaders__mvprow">
-            <span className="psleaders__rank">{i + 1}</span>
-            <Headshot personId={e.playerId} name={e.name} teamId={e.teamId} className="psleaders__mvpshot" />
-            <span className="psleaders__mvpwho">
-              <PlayerLink id={e.playerId} className="psleaders__mvpname">
-                {e.name}
-              </PlayerLink>
-              {e.position && <span className="psleaders__mvppos">{e.position}</span>}
-            </span>
-            <span className="psleaders__count">{e.count}×</span>
-          </li>
-        ))}
+        {entries.map((e, i) => {
+          const isFavorite = favoriteTeamId != null && e.teamId === favoriteTeamId
+          const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(e.teamId) } : undefined
+          return (
+            <li
+              key={e.playerId}
+              className={`psleaders__mvprow${isFavorite ? ' psleaders__mvprow--fav' : ''}`}
+              style={favStyle}
+            >
+              <span className="psleaders__rank">{i + 1}</span>
+              <Headshot personId={e.playerId} name={e.name} teamId={e.teamId} className="psleaders__mvpshot" />
+              <span className="psleaders__mvpwho">
+                <PlayerLink id={e.playerId} className="psleaders__mvpname">
+                  {e.name}
+                </PlayerLink>
+                {e.position && <span className="psleaders__mvppos">{e.position}</span>}
+              </span>
+              <span className="psleaders__count">{e.count}×</span>
+            </li>
+          )
+        })}
       </ol>
     </section>
   )
@@ -90,6 +110,7 @@ function MvpAwardsBoard({ entries }) {
 // spoiler risk (same footing as Awards History/WAR) — no SealBox needed.
 export function PostseasonLeadersPage() {
   useDocumentTitle('Postseason Leaders')
+  const { favoriteTeamId } = useFavoriteTeam()
   const { loading, error, data } = useAsync(() => loadPostseasonLeaders(), [])
 
   const teams = data?.teams ?? { titles: [], pennants: [], appearances: [] }
@@ -120,13 +141,17 @@ export function PostseasonLeadersPage() {
 
       {hasTeamLeaders && (
         <div className="psleaders__teamsrow">
-          <TeamCountBoard title="Most World Series Titles" entries={teams.titles} />
-          <TeamCountBoard title="Most Pennants" entries={teams.pennants} />
-          <TeamCountBoard title="Most Postseason Appearances" entries={teams.appearances} />
+          <TeamCountBoard title="Most World Series Titles" entries={teams.titles} favoriteTeamId={favoriteTeamId} />
+          <TeamCountBoard title="Most Pennants" entries={teams.pennants} favoriteTeamId={favoriteTeamId} />
+          <TeamCountBoard
+            title="Most Postseason Appearances"
+            entries={teams.appearances}
+            favoriteTeamId={favoriteTeamId}
+          />
         </div>
       )}
 
-      <MvpAwardsBoard entries={mvpAwards} />
+      <MvpAwardsBoard entries={mvpAwards} favoriteTeamId={favoriteTeamId} />
 
       {hasBatting && (
         <TeamLeaders
@@ -136,6 +161,7 @@ export function PostseasonLeadersPage() {
           limit={10}
           title="Batting leaders"
           showTeamAbbr={false}
+          favoriteTeamId={favoriteTeamId}
         />
       )}
 
@@ -147,6 +173,7 @@ export function PostseasonLeadersPage() {
           limit={10}
           title="Pitching leaders"
           showTeamAbbr={false}
+          favoriteTeamId={favoriteTeamId}
         />
       )}
     </div>
