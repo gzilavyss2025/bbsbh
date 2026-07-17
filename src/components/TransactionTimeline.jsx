@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { TeamLogo } from './TeamLogo.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 
@@ -41,15 +41,23 @@ function linkifyNames(text, links) {
 // other players in a trade linked to their pages). A year label sits on the
 // rail wherever the year turns over.
 // Degrades to nothing when no moves survived curation (common off MLB / for a
-// raw rookie who's only ever been signed).
+// raw rookie who's only ever been signed). A long career's full ledger can run
+// dozens of rows deep, so it opens collapsed to the most recent VISIBLE_LIMIT
+// with a real "show all" action — never an always-open list dominating the
+// bottom of the page (same convention as Trophy Case's dense-career collapse).
+const VISIBLE_LIMIT = 5
+
 export function TransactionTimeline({ rows }) {
+  const [expanded, setExpanded] = useState(false)
   if (!rows?.length) return null
+  const dense = rows.length > VISIBLE_LIMIT
+  const visible = dense && !expanded ? rows.slice(0, VISIBLE_LIMIT) : rows
   let lastYear = null
   return (
     <section className="txntl">
       <h3 className="section__title"><span>Transactions</span></h3>
       <ol className="txntl__track">
-        {rows.map((r, i) => {
+        {visible.map((r, i) => {
           const showYear = r.year !== lastYear
           lastYear = r.year
           return (
@@ -75,6 +83,15 @@ export function TransactionTimeline({ rows }) {
           )
         })}
       </ol>
+      {dense && (expanded ? (
+        <button type="button" className="txntl-collapse" onClick={() => setExpanded(false)}>
+          Show fewer
+        </button>
+      ) : (
+        <button type="button" className="txntl-expand" onClick={() => setExpanded(true)}>
+          Show all {rows.length} transactions
+        </button>
+      ))}
     </section>
   )
 }

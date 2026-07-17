@@ -649,12 +649,18 @@ body {
    stops, each the club's logo floated on a pale wash of its own colors (set
    inline per team from the logo art — see fetchTeamLogoTint), with the
    season(s) below. The wash is chosen to carry the mark on its own, so there is
-   deliberately NO border or drop shadow on the badge. Stops wrap onto as many
-   rows as needed rather than scrolling sideways — the row is not padded out to
-   fill its width. */
+   deliberately NO border or drop shadow on the badge. A CSS grid, not
+   flex-wrap — the column count (--careertl-cols, set inline by
+   CareerTimeline.jsx's balancedColumns) is chosen per career length so a
+   trailing row never strands just one or two stops under a full row above
+   it; each column still sizes to its own widest stop (a multi-year
+   "2021–2023" caption) rather than clipping at a fixed width. `max-content`,
+   not `auto` — an `auto`-sized track absorbs the grid container's leftover
+   space, which spread the badges out edge-to-edge instead of packing them
+   tight against each other the way flex-wrap's items naturally did. */
 .careertl__track {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(var(--careertl-cols, 5), minmax(58px, max-content));
   gap: var(--space-2);
   list-style: none;
   /* Zero BOTH margin and the <ol>'s default padding-inline-start so the strip
@@ -664,7 +670,6 @@ body {
 }
 
 .careertl__stop {
-  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -825,6 +830,58 @@ body {
   color: var(--text-muted);
 }
 
+/* ---- collapsed-career expand/collapse — same "real show-all action, never
+   a dead-end +N more" convention as .ledger-expand/.ledger-collapse, but in
+   neutral ink rather than those two's medal-amber (this ledger is roster
+   moves, not honors, so the award tint would misread as a Trophy Case tie-in). ---- */
+.txntl-expand {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.txntl-expand:hover {
+  background: var(--border-rule);
+  color: var(--paper-2);
+}
+.txntl-expand:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.txntl-collapse {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.txntl-collapse:hover {
+  color: var(--text-body);
+}
+.txntl-collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------- level progression card
    "Path to the Majors" chevron strip on a pre-debut player's page: one rung
    per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
@@ -864,9 +921,15 @@ body {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
 }
 
+/* Dims via TEXT color, not element opacity — `--surface-card`/`--border-rule`
+   are already a subtle near-paper fill and a "faded pencil" rule (see their
+   definitions), so fading the whole box on top of that washed the chevron
+   out to nothing against the page background instead of reading as dimmed. */
 .levelprog__step.is-unreached {
-  opacity: 0.45;
   box-shadow: none;
+}
+.levelprog__step.is-unreached .levelprog__label {
+  color: var(--text-muted);
 }
 
 .levelprog__step.is-current {
