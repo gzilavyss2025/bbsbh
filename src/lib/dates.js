@@ -14,6 +14,15 @@ export function addDays(date, n) {
   return copy
 }
 
+// "7/5" — compact month/day for a game-log row, no leading zeros on either
+// side. Takes a YYYY-MM-DD string directly (not a Date) since callers already
+// have the raw statsapi date and a game-log row doesn't need to round-trip
+// through a Date object. Returns '' for a missing/garbled date.
+export function monthDay(apiDate) {
+  const m = /^\d{4}-(\d{2})-(\d{2})/.exec(apiDate ?? '')
+  return m ? `${Number(m[1])}/${Number(m[2])}` : ''
+}
+
 // "Fri, Jul 5" style label for the slate header.
 export function humanDate(apiDate) {
   const [y, m, d] = apiDate.split('-').map(Number)

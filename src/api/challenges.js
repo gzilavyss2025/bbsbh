@@ -60,12 +60,15 @@ export function selectChallengeState(feed, throughInning, throughHalf) {
     const half = p.about?.halfInning
     if (inning == null || half == null) continue
     if (halfOrder(inning, half) > limit) break
+    // A play carries AT MOST one ABS challenge, which can sit at either
+    // location (see isAbsChallenge above) — sometimes mirrored at both. Take
+    // the first match only, so a mirrored review can't count twice for the
+    // same play.
     const candidates = [p.reviewDetails, ...(p.playEvents ?? []).map((pe) => pe.reviewDetails)]
-    for (const review of candidates) {
-      if (!isAbsChallenge(review)) continue
+    const review = candidates.find(isAbsChallenge)
+    if (review) {
       const side = review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
-      if (!side) continue
-      outcomes[side].push(review.isOverturned ? 'success' : 'fail')
+      if (side) outcomes[side].push(review.isOverturned ? 'success' : 'fail')
     }
   }
   return {

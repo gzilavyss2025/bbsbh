@@ -851,15 +851,24 @@ export function buildLeadingAfterNote(bundle, side, inning) {
 // CALLER-GATED like buildLeadingAfterNote: it reads plate appearances from
 // this side's PREVIOUS halves to count who has faced the pitcher how often, so
 // the caller (prehalf-callouts.js) must not invoke it until those halves are
-// revealed. It also reads the STAGED half's own pre-pitch changes via
-// selectPrePitchChanges — safe here for the same reason: the caller already
-// restricts this to halfIndex(inning, half) <= revealedThrough + 1, the exact
-// condition that selector requires (ADR-0003/0010). Fires only while the
-// side's own STARTER is still pitching entering the staged half — the pitcher
-// of record from the side's previous halves must still be the one taking the
-// mound now, not someone a between-innings pitching change swapped in — since
-// a reliever's 3rd trip is vanishingly rare and the bundle's split belongs to
-// starters anyway.
+// revealed. It also reads the STAGED half's own pre-pitch changes AND its
+// leadoff batter via plain feed plays — safe here for the same reason: the
+// caller already restricts this to halfIndex(inning, half) <= revealedThrough
+// + 1, the exact condition ADR-0003/0010's caller-gated selectors require, and
+// neither who's leading off nor who's on the mound is score-revealing. Fires
+// only while the side's own STARTER is still pitching entering the staged
+// half — the pitcher of record from the side's previous halves must still be
+// the one taking the mound now, not someone a between-innings pitching change
+// swapped in — since a reliever's 3rd trip is vanishingly rare and the
+// bundle's split belongs to starters anyway.
+//
+// The trip count is keyed to the batter ACTUALLY leading off the staged half,
+// not the side's most-exposed batter to date: with uneven inning lengths, the
+// batter who has faced the pitcher the most times overall is often skipped
+// over in a short inning, so crediting his trip count to a half he isn't even
+// due up in previously produced an inflated, off-batter trip number (e.g.
+// "3rd time" the half after only the leadoff man's 2nd look, because some
+// other spot in the order happened to bat in three separate quick innings).
 const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
 export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   const battingSide = half === 'top' ? 'away' : 'home'
@@ -896,13 +905,18 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
     .pop()
   if (entering && entering.pitcher.id !== lastPitcher) return null
 
-  let maxTrips = 0
-  for (const [key, innings] of inningsFaced) {
-    if (key.endsWith(`-${lastPitcher}`) && innings.size > maxTrips) maxTrips = innings.size
-  }
-  if (maxTrips < 2) return null // the order hasn't turned over twice yet
+  // The batter actually due up first in the staged half — the order "turning
+  // over" is defined by his trip count, not whoever has faced the pitcher the
+  // most times across the whole game so far.
+  const leadoff = (feed?.liveData?.plays?.allPlays ?? []).find(
+    (p) => p.about?.inning === inning && p.about?.halfInning === half,
+  )?.matchup?.batter?.id
+  if (leadoff == null) return null // the half hasn't actually started yet
 
-  const trip = maxTrips + 1 // the look the top of the order is now getting
+  const priorTrips = inningsFaced.get(`${leadoff}-${lastPitcher}`)?.size ?? 0
+  if (priorTrips < 2) return null // the order hasn't turned over twice yet
+
+  const trip = priorTrips + 1 // the look the top of the order is now getting
   const { last } = personNameParts(feed?.gameData?.players?.[`ID${lastPitcher}`] ?? {})
   const who = last || 'the starter'
   const tto = bundle?.starterRecords?.[lastPitcher]?.tto
