@@ -937,12 +937,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
-  const gapRows = debutYear
-    ? missingSeasonRows(presentYears, debutYear, cur, transactions).map((g) => ({
-        ...g,
-        cells: columns.map(() => DASH),
-      }))
-    : []
+  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions) : []
   const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
 
   return { columns, rows: allRows, totals, footnote: stintCaption(foot, group) }
@@ -1247,92 +1242,204 @@ function awardMonthYear(iso) {
   return m ? `${AWARD_MONTHS[Number(m) - 1]} ${y}` : ''
 }
 
-// A badge's detail line stays short even for a heavily-decorated veteran (an
-// 11-time Player of the Week is real): capped to the MOST RECENT few, oldest
-// dropped, "+N more" standing in for the rest.
-const MAX_BADGE_DETAIL = 4
-function badgeDetail(itemsDesc) {
-  if (itemsDesc.length <= 1) return null
-  if (itemsDesc.length <= MAX_BADGE_DETAIL) return itemsDesc.join(', ')
-  return `${itemsDesc.slice(0, MAX_BADGE_DETAIL).join(', ')} +${itemsDesc.length - MAX_BADGE_DETAIL} more`
+// The league a league-partitioned award's id belongs to (its own AL*/NL*
+// prefix) — null for an MLB-wide award (MLBRC, MLBAFIRST, MLBSECOND) with
+// no league split at the source. Every occurrence of a label is either
+// all-set or all-null (it comes from the id prefix, never mixed), which is
+// what lets labelWithLeague below fold a single league in with no ambiguity.
+function leagueOf(id) {
+  if (id.startsWith('AL')) return 'AL'
+  if (id.startsWith('NL')) return 'NL'
+  return null
 }
 
-// One badge's worth of {count, sub, detail} from its raw instance list —
-// `sub` is the one-line count/year a badge always shows, `detail` is the
-// optional second line naming which ones (only when there's more than one).
-function badgeFields(instancesAsc, formatOne) {
-  const count = instancesAsc.length
-  const desc = instancesAsc.slice().reverse()
+// Broadcast convention: "AL MVP" / "NL Cy Young" is how these are actually
+// said. Folded into the row's label when every occurrence agrees (the
+// common case — a player who's only ever won something in one league) —
+// left as the plain base label, with a per-date league tag instead, only
+// once a trade actually splits a repeat award across leagues.
+function labelWithLeague(baseLabel, entriesDesc) {
+  const leagues = new Set(entriesDesc.map((e) => e.league).filter(Boolean))
+  return leagues.size === 1 ? `${[...leagues][0]} ${baseLabel}` : baseLabel
+}
+
+// Two Player of the Week awards can land in the same month — formatOne's
+// month granularity then renders the same token twice in a row, which
+// reads as a duplicate-content bug rather than "this happened twice."
+// Collapses adjacent equal tokens (the list is already most-recent-first,
+// so same-month awards are always adjacent) into one with a "×N" suffix —
+// still uncapped, still every occurrence accounted for, just not printed
+// as if it were copy-pasted.
+function collapseRepeatedTokens(tokens) {
+  const out = []
+  for (const t of tokens) {
+    const last = out[out.length - 1]
+    if (last && last.text === t) last.count += 1
+    else out.push({ text: t, count: 1 })
+  }
+  return out.map((o) => (o.count > 1 ? `${o.text} ×${o.count}` : o.text))
+}
+
+// Every date a player earned an honor, most recent first — uncapped (a
+// heavily-decorated veteran's 11-time Player of the Week is real, and
+// truncating it behind a "+N more" hides real information the card exists
+// to show). Each date only carries its OWN league tag when the row's label
+// couldn't already say it for all of them.
+function dateStrings(entriesAsc, formatOne) {
+  const desc = entriesAsc.slice().reverse()
+  const leagues = new Set(desc.map((e) => e.league).filter(Boolean))
+  const tagEach = leagues.size > 1
+  const tokens = desc.map((e) => (tagEach && e.league ? `${formatOne(e.value)} ${e.league}` : formatOne(e.value)))
+  return collapseRepeatedTokens(tokens)
+}
+
+// One row's worth of shape from its raw {value, league} instances —
+// `label` already carries any folded league prefix, `dates` is the full
+// formatted, most-recent-first list a ledger row or the marquee renders
+// directly, and `count` is the raw occurrence count (used to size the
+// collapsed tally and to rank the in-season hero).
+function badgeRow(label, entriesAsc, formatOne) {
   return {
-    count,
-    sub: count > 1 ? `${count}×` : formatOne(instancesAsc[0]),
-    detail: badgeDetail(desc.map(formatOne)),
+    key: label,
+    label: labelWithLeague(label, entriesAsc.slice().reverse()),
+    count: entriesAsc.length,
+    dates: dateStrings(entriesAsc, formatOne),
   }
 }
 
-// Trophy Case — the player page's career-honors card, grouped into three
-// tiers: major hardware (MVP, Cy Young, Silver Slugger, ...), All-Star
-// selections, and in-season honors (Player of the Week/Month, ...). Each
-// group collapses repeats into one badge (a count + which years/months, most
-// recent first) rather than one badge per instance. `awards` is the same raw
-// per-player awards feed the transaction timeline used to carry a single
-// buried chip from — that row type is retired in favor of this dedicated
-// card. `endDate` is the same spoiler cutoff every other date-bound section
-// of the player page respects ("entering today" for a game-scoped view) —
-// an award dated after it hasn't happened yet from the page's vantage point,
-// so it's excluded same as a too-late transaction row used to be. Returns
-// null when the player has none of the three, so the card can skip
-// rendering entirely rather than show an empty case.
+// Hero rank — the single most prestigious honor, promoted to the Trophy
+// Case's marquee. Keyed on the UNLABELED base name (before any league
+// fold). An award missing from this list (MAJOR_AWARDS grew a new entry
+// nobody updated this for) ranks LAST, never first, rather than jumping
+// the queue via a stray Array.indexOf === -1.
+const HERO_RANK = [
+  'MVP', 'Cy Young', 'Rookie of the Year', 'Platinum Glove', 'Hank Aaron Award',
+  'All-MLB First Team', 'Gold Glove', 'Silver Slugger', 'Reliever of the Year',
+  'Comeback Player', 'Roberto Clemente Award', 'All-MLB Second Team',
+]
+function heroRank(key) {
+  const i = HERO_RANK.indexOf(key)
+  return i === -1 ? Infinity : i
+}
+// The top half of HERO_RANK — season-defining, single-winner honors (MVP
+// through All-MLB First Team) — get the marquee's full typographic
+// treatment; the rest (Gold Glove down through All-MLB Second Team) are
+// real honors but not career-defining the same way, so the marquee renders
+// them smaller (see TrophyCase.jsx's Marquee). Keeps the demotion in sync
+// with HERO_RANK's own ordering rather than a second hand-curated list.
+const PREMIER_HERO_RANK_CUTOFF = 6
+
+// The single most prestigious honor a player has — major hardware outranks
+// an All-Star selection outranks the in-season honor won most often (a
+// player with neither hardware nor All-Star still gets a marquee, built
+// from whichever in-season honor repeats most). `row` is a REFERENCE into
+// the same array groupRows below filters against, so identity comparison
+// (`r === hero.row`) is what pulls it out of its own tier's ledger group.
+function pickHero(hardwareRows, allStarRow, inSeasonRows) {
+  if (hardwareRows.length) {
+    const sorted = hardwareRows.slice().sort((a, b) => heroRank(a.key) - heroRank(b.key))
+    const premier = heroRank(sorted[0].key) < PREMIER_HERO_RANK_CUTOFF
+    return { kind: 'hardware', row: sorted[0], premier }
+  }
+  if (allStarRow) return { kind: 'allstar', row: allStarRow }
+  if (inSeasonRows.length) {
+    const sorted = inSeasonRows.slice().sort((a, b) => b.count - a.count)
+    return { kind: 'inseason', row: sorted[0] }
+  }
+  return null
+}
+
+// Groups the user asked for, in order: in-season honors (won DURING the
+// year), Year-End Awards (decided AFTER it — MVP, Cy Young, Gold Glove, ...;
+// named for when it's announced, not "Hardware," and deliberately not
+// "Postseason Honors" — those are regular-season awards, not playoff ones),
+// then All-Star, since a mid-season selection is neither. Whichever row
+// became the hero is pulled out of its tier so it isn't shown twice; each
+// group carries its own occurrence COUNT for the collapsed tally.
+function buildGroups(hardwareRows, allStarRow, inSeasonRows, hero) {
+  const groups = []
+
+  const isRows = inSeasonRows.filter((r) => !(hero.kind === 'inseason' && r === hero.row))
+  if (isRows.length) {
+    groups.push({ key: 'inSeason', label: 'In-season honors', count: isRows.reduce((n, r) => n + r.count, 0), rows: isRows })
+  }
+
+  const hwRows = hardwareRows.filter((r) => !(hero.kind === 'hardware' && r === hero.row))
+  if (hwRows.length) {
+    groups.push({ key: 'yearEnd', label: 'Year-End Awards', count: hwRows.reduce((n, r) => n + r.count, 0), rows: hwRows })
+  }
+
+  if (allStarRow && hero.kind !== 'allstar') {
+    groups.push({ key: 'allStar', label: 'All-Star', count: allStarRow.count, rows: [allStarRow] })
+  }
+
+  return groups
+}
+
+// Trophy Case — the player page's career-honors card: a marquee for the
+// single most prestigious honor (`hero`), then everything else in ledger
+// `groups` below it. `awards` is the same raw per-player awards feed the
+// transaction timeline used to carry a single buried chip from — that row
+// type is retired in favor of this dedicated card. `endDate` is the same
+// spoiler cutoff every other date-bound section of the player page respects
+// ("entering today" for a game-scoped view) — an award dated after it
+// hasn't happened yet from the page's vantage point, so it's excluded same
+// as a too-late transaction row used to be. Returns null when the player
+// has none of the three tiers, so the card can skip rendering entirely
+// rather than show an empty case.
 export function trophyCaseView(awards, endDate = null) {
-  const hardwareByLabel = new Map()
-  const inSeasonByLabel = new Map()
-  const allStarYears = new Set()
+  const hardwareByLabel = new Map() // label -> Map<year, league>
+  const inSeasonByLabel = new Map() // label -> [{ value: date, league }]
+  const allStarByYear = new Map() // year -> league
 
   for (const a of awards ?? []) {
     // Every tier keys off the award's own date — required to enforce the
     // cutoff above, so an award with no date can't be graded either way.
     if (!a.season || !a.date) continue
     if (endDate && a.date > endDate) continue
+    const league = leagueOf(a.id)
     if (a.id === 'ALAS' || a.id === 'NLAS') {
-      allStarYears.add(Number(a.season))
+      allStarByYear.set(Number(a.season), league)
       continue
     }
     const hw = MAJOR_AWARDS[a.id]
     if (hw) {
-      if (!hardwareByLabel.has(hw)) hardwareByLabel.set(hw, new Set())
-      hardwareByLabel.get(hw).add(Number(a.season))
+      if (!hardwareByLabel.has(hw)) hardwareByLabel.set(hw, new Map())
+      hardwareByLabel.get(hw).set(Number(a.season), league)
       continue
     }
     const label = INSEASON_AWARDS[a.id]
     if (label) {
       if (!inSeasonByLabel.has(label)) inSeasonByLabel.set(label, [])
-      inSeasonByLabel.get(label).push(a.date)
+      inSeasonByLabel.get(label).push({ value: a.date, league })
     }
   }
 
-  // Badge grid order stays chronological-by-first-won (a career reads left to
-  // right the way it happened); it's only the detail LINE inside a badge that
-  // flips to most-recent-first, so a long run of repeats truncates the stale
-  // end rather than the current one.
-  const hardware = [...hardwareByLabel.entries()]
-    .map(([label, years]) => [label, [...years].sort((a, b) => a - b)])
-    .sort((a, b) => a[1][0] - b[1][0])
-    .map(([label, yearsAsc]) => ({ key: label, label, ...badgeFields(yearsAsc, String) }))
-
-  const inSeason = [...inSeasonByLabel.entries()]
-    .map(([label, dates]) => ({
-      key: label,
+  // Row order stays chronological-by-first-won (a career reads left to
+  // right the way it happened); it's only the DATES inside a row that are
+  // most-recent-first.
+  const hardwareRows = [...hardwareByLabel.entries()]
+    .map(([label, yearMap]) => [
       label,
-      ...badgeFields(dates.slice().sort(), awardMonthYear),
-    }))
-    .sort((a, b) => b.count - a.count)
+      [...yearMap.entries()].map(([year, league]) => ({ value: year, league })).sort((a, b) => a.value - b.value),
+    ])
+    .sort((a, b) => a[1][0].value - b[1][0].value)
+    .map(([label, entriesAsc]) => badgeRow(label, entriesAsc, String))
 
-  const allStar = allStarYears.size
-    ? badgeFields([...allStarYears].sort((a, b) => a - b), String)
-    : null
+  const inSeasonRows = [...inSeasonByLabel.entries()]
+    .map(([label, entries]) => [label, entries.slice().sort((a, b) => (a.value < b.value ? -1 : a.value > b.value ? 1 : 0))])
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([label, entriesAsc]) => badgeRow(label, entriesAsc, awardMonthYear))
 
-  if (!hardware.length && !allStar && !inSeason.length) return null
-  return { hardware, allStar, inSeason }
+  const allStarEntriesAsc = [...allStarByYear.entries()]
+    .map(([year, league]) => ({ value: year, league }))
+    .sort((a, b) => a.value - b.value)
+  const allStarRow = allStarEntriesAsc.length ? badgeRow('All-Star', allStarEntriesAsc, String) : null
+
+  if (!hardwareRows.length && !allStarRow && !inSeasonRows.length) return null
+
+  const hero = pickHero(hardwareRows, allStarRow, inSeasonRows)
+  return { hero, groups: buildGroups(hardwareRows, allStarRow, inSeasonRows, hero) }
 }
 
 // MLB Draft first-round (Day 1) dates — the API carries no draft date anywhere
@@ -1724,7 +1831,6 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     }),
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits, group),
-    splitsLabel: group === 'pitching' ? 'opp. batter' : '',
     gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8, { tagLevel: logTagLevel }),
     // The unified MLB + MiLB career table. `career` (the API's MLB career line
     // for a debuted player) foots the MLB total; the current-season row uses

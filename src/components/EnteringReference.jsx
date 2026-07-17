@@ -81,7 +81,7 @@ export function LineupSection({ feed, inning, half, awayName, homeName, prospect
 
 // One team's lineup column: the club name spelled out, then a numbered list of
 // its nine batting slots. Each row reads name(s) on the left and the standing
-// occupant's jersey number │ fielding position right-aligned on a shared column.
+// occupant's jersey number + fielding position right-aligned on a shared column.
 // An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
 // than shown as a bare header.
 function LineupTeam({ name, slots, prospectsData, rookiesData }) {
@@ -104,12 +104,7 @@ function LineupTeam({ name, slots, prospectsData, rookiesData }) {
               </span>
               <span className="lineupcard__meta">
                 {cur.jersey ? (
-                  <span className="lineupcard__jersey">#{cur.jersey}</span>
-                ) : null}
-                {cur.jersey && cur.position ? (
-                  <span className="lineupcard__bar" aria-hidden="true">
-                    |
-                  </span>
+                  <span className="lineupcard__jersey">{cur.jersey}</span>
                 ) : null}
                 {cur.position ? (
                   <span className="lineupcard__pos">{cur.position}</span>

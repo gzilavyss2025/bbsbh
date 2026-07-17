@@ -283,6 +283,30 @@ for each generator; the reader modules:
   deliberately thin, so most (team, year) pairs fall through unchanged. A parallel
   `historicalClubName()` covers renames/relocations but isn't wired into any screen
   yet (no historical logo art; see `docs/milb-historical-logos.md`).
+- `postseasonHistory.js` — the Postseason History page's completed bracket
+  (who played, who won, series length, each team's 1-6 seed, round MVP) for
+  every MLB postseason back to 2000, from `public/data/postseason-history.json`.
+  Hand-run (`gen-postseason-history.mjs`) — a finished postseason's results are
+  immutable, same footing as `awards-history.json`/`milb-history.json`. Only
+  `teamId`s and each game's `gamePk` are stored (never a score-bearing
+  abbreviation or a live-resolvable field) — team names/logos resolve
+  client-side via `src/lib/teams.js` so this file can't drift from the rest of
+  the app's team identity.
+- `postseasonLeaders.js` — the Postseason Leaders page's since-2000 career
+  batting/pitching leaderboards plus franchise/award leaders, from
+  `public/data/postseason-leaders.json`. Hand-run (`gen-postseason-leaders.mjs`,
+  same immutable-history footing as `postseasonHistory.js` above) — batting/
+  pitching need per-game boxscore lines `postseasonHistory.js`'s own generator
+  never fetches, so this is the one file backed by the shared SQLite layer's
+  `postseason_batting_totals`/`postseason_pitching_totals` (scripts/lib/
+  schema.sql, docs/adr/0021) — the genuine cross-game aggregation case that ADR
+  calls out, storing CAREER totals rather than a per-game ledger to keep the
+  committed dump lean. Entries are pre-shaped into `teamLeaders.js`'s
+  `precomputed` category-map contract so `PostseasonLeadersPage.jsx` reuses
+  `TeamLeaders` (Featured-leader/chasers layout) for the batting/pitching
+  sections, same as `minorsLeaders.js` does for the all-minors board; the
+  franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
+  player-keyed pool `TeamLeaders` expects).
 
 - `gameScore.js` — the slate card's `FINAL · 7.5` badge, from
   `public/data/game-score.json`. Unlike every file above, this ISN'T on the

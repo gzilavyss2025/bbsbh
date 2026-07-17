@@ -3,6 +3,7 @@ import { loadUmpire } from '../api/umpires.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath, umpirePath } from '../lib/route.js'
+import { TierPill } from './TierPill.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const HP_GAMES_LIMIT = 5
@@ -14,25 +15,13 @@ function monthDay(iso) {
 
 const pct1 = (x) => (x == null ? '' : `${(x * 100).toFixed(1)}%`)
 
-// The modal header's secondary line: consistency (agreement with his own
-// game-by-game zone — see lib/euz.js) and favor (average runs of missed-call
-// impact per game — see lib/runExpectancy.js), whichever are available. Both
-// null renders nothing (a thin-sample umpire, or before
-// gen-run-expectancy.mjs has been hand-run — see aggregate() in
-// gen-umpire-accuracy.mjs).
-function consistencyFavorLabel(season) {
-  const parts = []
-  if (season?.consistency != null) parts.push(`${pct1(season.consistency)} consistent`)
-  if (season?.favorPerGame != null) parts.push(`${season.favorPerGame.toFixed(1)} runs/game impact`)
-  return parts.length ? parts.join(' · ') : null
-}
-
-// The modal header's rank line: "#7 of 82 · 94.1%", degrading to just the
-// percentage when he's below the ranking floor (rank null).
-function accuracyRankLabel(rank, accuracy) {
+// The modal header's accuracy line, on its own row below the rank (no "#" —
+// bare "78 of 89", matching the ranking convention elsewhere in the app):
+// "94.1% accuracy", degrading to "94.1% plate accuracy" when he's below the
+// ranking floor (rank null) and the rank row doesn't render at all.
+function accuracyPctLabel(rank, accuracy) {
   const p = pct1(accuracy)
-  if (!rank) return `${p} plate accuracy`
-  return `#${rank.rank} of ${rank.total} · ${p} accuracy`
+  return rank ? `${p} accuracy` : `${p} plate accuracy`
 }
 
 // The 3×3 zone map, shared by the modal and UmpirePage. Any cell where the
@@ -123,10 +112,24 @@ export function UmpireAccuracyModal({ id, onClose }) {
   }, [])
 
   const season = data?.accuracy?.season ?? null
+  // A plate game's row lives in whichever level's byGamePk map covers it —
+  // data.accuracy (MLB) or data.accuracyAAA (AAA), see loadUmpire in
+  // api/umpires.js. Checking both (rather than trusting this game row's own
+  // `level` tag to match) means a call-up ump's AAA plate games still show
+  // their per-game accuracy here instead of a blanket "—".
   const hpGames = (data?.games ?? [])
     .filter((g) => g.role === 'HP')
-    .map((g) => ({ ...g, row: data.accuracy?.byGamePk?.[g.gamePk] ?? null }))
+    .map((g) => ({
+      ...g,
+      row: data.accuracy?.byGamePk?.[g.gamePk] ?? data.accuracyAAA?.byGamePk?.[g.gamePk] ?? null,
+    }))
     .slice(0, HP_GAMES_LIMIT)
+
+  // Tag AAA rows with a small level pill, but only when this list actually
+  // mixes levels — a call-up ump's log otherwise stays unlabeled since every
+  // row is implicitly MLB (or, less often, entirely AAA).
+  const hasMixedLevels =
+    hpGames.some((g) => (g.level ?? 'MLB') === 'AAA') && hpGames.some((g) => (g.level ?? 'MLB') !== 'AAA')
 
   const openGame = (g) => {
     onClose()
@@ -145,11 +148,14 @@ export function UmpireAccuracyModal({ id, onClose }) {
           <div className="umpmodal__ttl">
             <span className="umpmodal__eyebrow">Plate accuracy</span>
             <span className="umpmodal__name">{data?.name ?? '…'}</span>
-            {season && (
-              <span className="umpmodal__rank">{accuracyRankLabel(data.rank, season.accuracy)}</span>
+            {data?.rank && (
+              <span className="umpmodal__rankrow">
+                <span className="umpmodal__rank">{data.rank.rank} of {data.rank.total}</span>
+                <TierPill tier={data.rank.tier} />
+              </span>
             )}
-            {season && consistencyFavorLabel(season) && (
-              <span className="umpmodal__extra">{consistencyFavorLabel(season)}</span>
+            {season && (
+              <span className="umpmodal__rank">{accuracyPctLabel(data.rank, season.accuracy)}</span>
             )}
           </div>
           <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
@@ -178,9 +184,14 @@ export function UmpireAccuracyModal({ id, onClose }) {
               {hpGames.map((g) => (
                 <li key={`${g.gamePk}-${g.gameNumber}`} className="umpmodal__grow">
                   <span className="umpmodal__gdate">{monthDay(g.date)}</span>
-                  <button type="button" className="plink umpmodal__gmatch" onClick={() => openGame(g)}>
-                    {g.awayAbbr} @ {g.homeAbbr}
-                  </button>
+                  <span className="umpmodal__gmatchrow">
+                    <button type="button" className="plink umpmodal__gmatch" onClick={() => openGame(g)}>
+                      {g.awayAbbr} @ {g.homeAbbr}
+                    </button>
+                    {hasMixedLevels && (g.level ?? 'MLB') === 'AAA' && (
+                      <span className="umpmodal__glevel">AAA</span>
+                    )}
+                  </span>
                   <span className="umpmodal__gacc">
                     {g.row?.called ? pct1(g.row.correct / g.row.called) : '—'}
                   </span>

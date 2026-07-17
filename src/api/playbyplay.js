@@ -365,10 +365,20 @@ function scorebookCode(play, batterRunner) {
     if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
     return { code: 'K', codeKind: 'out' }
   }
-  if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  return { code: chain.join('-'), codeKind: 'out' }
+  // A ball caught for the out in FOUL territory gets an "F" penciled in front
+  // of its normal code (a foul pop out to 1st is FP3, a foul fly to left is
+  // FF7) — MLB's description names it explicitly ("… in foul territory").
+  const foul = /in foul territory/i.test(desc) ? 'F' : ''
+  if (/lines? (out|into)/i.test(desc)) return { code: `${foul}L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  // A pop out (P) is its own scorebook code, distinct from a fly out (F) —
+  // both come back from MLB as "pops out"/"flies out" in the description.
+  if (/pops? (out|into)/i.test(desc)) return { code: `${foul}P${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/flies? (out|into)/i.test(desc)) return { code: `${foul}F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  // A single-fielder chain (no throw — he fielded it and recorded the putout
+  // himself) is the scorebook's "unassisted" play: 3U, 6U, etc, not a bare
+  // position number.
+  const code = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
+  return { code, codeKind: 'out' }
 }
 
 // Short code for how a runner ADVANCED to a base on a given play — written by
@@ -380,7 +390,7 @@ const ADVANCE_CODES = {
   sac_fly: 'SF', sac_bunt: 'SAC',
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
-  field_error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
+  field_error: 'E', error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
 }
 
 function advanceCode(play) {
@@ -388,6 +398,48 @@ function advanceCode(play) {
   if (ADVANCE_CODES[et]) return ADVANCE_CODES[et]
   if (/(flies|fly ball|pops|lines|line drive|sacrifice fly)/i.test(play.result?.description ?? '')) return 'FO'
   return 'GO'
+}
+
+// A runner's leg-advance code, preferring the position-specific error code
+// (E8, E5…) straight off THIS movement's own error credit — a plain "E" (the
+// ADVANCE_CODES/advanceCode fallback) doesn't say who bobbled it, and the
+// runner-level eventType the feed uses for an error-driven advance ("error")
+// doesn't match ADVANCE_CODES' "field_error" key (that one's the BATTER's own
+// reach-on-error, from scorebookCode) — verified against gamePk 823036's top
+// 2nd (Bauers 2nd->3rd on a CF fielding error).
+function legAdvanceCode(play, r) {
+  const errCred = (r.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
+  if (errCred) return `E${errCred.position?.code ?? ''}`
+  const rEt = r.details?.eventType
+  if (rEt && ADVANCE_CODES[rEt]) return ADVANCE_CODES[rEt]
+  return advanceCode(play)
+}
+
+// The base a batter's OWN reach code (scorebookCode's REACH_CODES) already
+// implies he's on — so his diamond only needs a FURTHER leg notation when he
+// advances past it on the SAME play (e.g. a single plus a fielding error that
+// lets him take an extra 90 feet), never for the base his own hit already
+// names (a double's "2B" up top already explains 2nd; it doesn't also need
+// "2B" penciled at the base itself).
+const NATURAL_BASE = {
+  single: 1, double: 2, triple: 3, home_run: 4,
+  walk: 1, intent_walk: 1, hit_by_pitch: 1,
+  fielders_choice: 1, fielders_choice_out: 1, catcher_interf: 1, field_error: 1,
+}
+
+// The fielder charged with an error anywhere on this play (Error position,
+// scorebook-style E-code) — used to attribute a BATTER's own bonus base to
+// the same misplay even when the feed's error credit landed on a different
+// runner's movement entry than his (see gamePk 823036: the CF's fielding
+// error credit sits on the trailing runner's leg, not the batter's own
+// 1st->2nd leg, even though the same misplay is what let the batter move up
+// too). Null when the play carries no error at all — its usual case.
+function playErrorCredit(play) {
+  for (const r of play.runners ?? []) {
+    const errCred = (r.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
+    if (errCred) return `E${errCred.position?.code ?? ''}`
+  }
+  return null
 }
 
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3, '4B': 4, score: 4 }
@@ -821,11 +873,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // bases he legged out — filled solid when he came around to score. Also
     // record, per base, HOW he got there (BB, GO, 2B…), for the notations
     // drawn along the base paths — with the lineup slot of the hitter who
-    // drove him over — but only for advancement on OTHER plays; the leg(s) he
-    // reached on his own PA are already labeled by the code above the
-    // diamond. Only a plate appearance credits a hitter; steals/wild pitches
-    // advance a runner on their own, so those carry no slot. An out on the
-    // bases doesn't advance him.
+    // drove him over — but for the BATTER's own trip only the base BEYOND
+    // what his own reach code already implies gets a notation (see
+    // NATURAL_BASE below) — a double's "2B" up top already explains 2nd; it's
+    // only a further, same-play bonus base (a single plus a fielding error
+    // that lets him take an extra 90 feet) that needs its own leg label. Only
+    // a plate appearance credits a hitter; steals/wild pitches advance a
+    // runner on their own, so those carry no slot. An out on the bases
+    // doesn't advance him.
     const batterSlot = isRealPA ? battingSlot(feed, battingSide, batterId) : null
     // The feed can split one runner's multi-base move on a single play into
     // separate legs (2nd→3rd, 3rd→home). Keep only the furthest destination
@@ -847,15 +902,30 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         const canon = rootRunner(rid)
         if (base <= (endBase.get(canon)?.base ?? 0)) continue
         const rEt = r.details?.eventType
-        const code = rEt && ADVANCE_CODES[rEt] ? ADVANCE_CODES[rEt] : advanceCode(play)
+        const code = legAdvanceCode(play, r)
         const slot = rEt && NON_PA_EVENT_TYPES.has(rEt) ? null : batterSlot
         endBase.set(canon, { base, code, slot })
       }
+      // The batter's own natural reach base (his top-of-diamond code already
+      // explains it) — a further base on this same play only gets a leg
+      // notation once he's past it.
+      const naturalBase = NATURAL_BASE[play.result?.eventType] ?? 1
       for (const [rid, info] of endBase) {
         if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
         if (rid !== batterId) {
           const m = legs.get(rid) ?? {}
           m[info.base] = { code: info.code, slot: info.slot }
+          legs.set(rid, m)
+        } else if (info.base > naturalBase) {
+          // A bonus base on the batter's own trip — attribute it to this
+          // play's error (the fielder who's actually charged, even if the
+          // feed's own error credit landed on a different runner's leg —
+          // see playErrorCredit) when there is one, else fall back to the
+          // same code his fellow baserunners would get for this play. No
+          // slot superscript here — that notes which TEAMMATE's at-bat
+          // drove a runner over, and a batter can't drive himself.
+          const m = legs.get(rid) ?? {}
+          m[info.base] = { code: playErrorCredit(play) ?? info.code, slot: null }
           legs.set(rid, m)
         }
       }

@@ -23,17 +23,24 @@ const POSITION_NAME = {
   P: 'Pitcher',
 }
 
-// Same percent layout as DefenseDiamond.SPOTS — duplicated locally so this
-// file stays self-contained (see file header).
+// Same x's and relative row spacing as DefenseDiamond.SPOTS (duplicated
+// locally so this file stays self-contained — see file header), but shifted
+// +8 on y: DefenseDiamond hangs a label BELOW its anchor point
+// (`translateX(-50%)` only), while this file centers a whole box ON its
+// anchor (`translate(-50%, -50%)`, see PositionSpot) — applied to
+// DefenseDiamond's un-shifted numbers, CF's box (y:3) would extend above
+// the field's own top edge before the diamond card's border even starts,
+// while C's (y:79) would float with excess empty field below it. The shift
+// centers that same relative layout lower in the box, balancing both.
 const SPOTS = {
-  LF: { x: 17, y: 10 },
-  CF: { x: 50, y: 3 },
-  RF: { x: 83, y: 10 },
-  SS: { x: 29, y: 33 },
-  '2B': { x: 71, y: 33 },
-  '3B': { x: 13, y: 57 },
-  '1B': { x: 87, y: 57 },
-  C: { x: 50, y: 79 },
+  LF: { x: 17, y: 18 },
+  CF: { x: 50, y: 11 },
+  RF: { x: 83, y: 18 },
+  SS: { x: 29, y: 41 },
+  '2B': { x: 71, y: 41 },
+  '3B': { x: 13, y: 65 },
+  '1B': { x: 87, y: 65 },
+  C: { x: 50, y: 87 },
 }
 
 // The mound sits at the diamond's true center — same point as the pencil-ring

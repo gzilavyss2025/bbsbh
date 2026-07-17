@@ -1,5 +1,5 @@
 // Regenerates public/data/postseason-odds.json — MLB's date-keyed postseason
-// odds (playoff / division-winner / #1-seed-bye probability + projected wins),
+// odds (playoff / division-winner / bye probability + projected wins),
 // via a Monte Carlo simulation of the rest of each season. Team strength comes
 // from team-score.json (60% actual wins / 40% Pythagorean, already computed by
 // gen-team-score.mjs) rather than a separate projection system, so the odds
@@ -95,11 +95,12 @@ function buildLeagueStructure(standings) {
   return { divisions, leagueDivisions, leagueTeams }
 }
 
-// Current (2022+) 6-team-per-league field: the 3 division winners (seeded by
-// record, best seed gets the lone bye) plus the next-3-best records league-wide
-// as wild cards. Ties are broken by a random shuffle before comparing wins —
-// an approximation of real tiebreaker games/rules, acceptable for odds that are
-// already an average over thousands of simulated seasons.
+// Current 6-team-per-league field: the 3 division winners (seeded 1-3 by
+// record, top 2 seeds get the bye into the Division Series) plus the
+// next-3-best records league-wide as wild cards (seeded 4-6, playing the
+// Wild Card round). Ties are broken by a random shuffle before comparing
+// wins — an approximation of real tiebreaker games/rules, acceptable for
+// odds that are already an average over thousands of simulated seasons.
 export function classifyPlayoffs(wins, structure) {
   const result = {}
   for (const [leagueId, divisionIds] of structure.leagueDivisions) {
@@ -112,9 +113,9 @@ export function classifyPlayoffs(wins, structure) {
     const wildCardField = shuffle(structure.leagueTeams.get(leagueId).filter((id) => !winnerSet.has(id)))
     wildCardField.sort((a, b) => wins[b] - wins[a])
     const wildcards = wildCardField.slice(0, 3)
-    const shuffledWinners = shuffle(winners)
-    const topSeed = shuffledWinners.reduce((best, id) => (wins[id] > wins[best] ? id : best), shuffledWinners[0])
-    for (const id of winners) result[id] = { playoffs: true, divisionWinner: true, bye: id === topSeed }
+    const seededWinners = shuffle(winners).sort((a, b) => wins[b] - wins[a])
+    const byeSeeds = new Set(seededWinners.slice(0, 2))
+    for (const id of winners) result[id] = { playoffs: true, divisionWinner: true, bye: byeSeeds.has(id) }
     for (const id of wildcards) result[id] = { playoffs: true, divisionWinner: false, bye: false }
     for (const id of wildCardField) if (!result[id]) result[id] = { playoffs: false, divisionWinner: false, bye: false }
   }

@@ -412,26 +412,27 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
         )}
         {/* Generic label only — never the clip's own title/description, which
             would spoil the play for anyone glancing at the card before
-            reading the prose above it (see HighlightSheet's spoiler note). */}
+            reading the prose above it (see HighlightSheet's spoiler note).
+            Just "Watch" + the play icon, not "Watch highlight" — the wide
+            breakpoint's card column is only 38fr of the row (see
+            .pbp__atbat), too narrow for the longer label. The full context
+            still reaches screen readers via aria-label. */}
         {highlight && (
           <button
             type="button"
             className="pbp__hlbtn"
             onClick={() => setHighlightOpen(true)}
+            aria-label={`Watch highlight for ${batter.last}`}
           >
-            <span className="pbp__hlicon" aria-hidden="true">▶</span> Watch highlight
+            <span className="pbp__hlicon" aria-hidden="true">▶</span> Watch
           </button>
         )}
       </div>
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
         <div className="pbp__play">
-          {calledLooking ? (
-            <span className="pbp__code pbp__klooking" aria-label="strikeout looking">
-              K
-            </span>
-          ) : (
-            code && <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
+          {codeKind !== 'out' && code && (
+            <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
           )}
           <PlayDiamond
             reached={reached}
@@ -441,6 +442,14 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
             outCode={outCode}
             prBase={prBase}
           />
+          {codeKind === 'out' &&
+            (calledLooking ? (
+              <span className="pbp__code pbp__code--center pbp__klooking" aria-label="strikeout looking">
+                K
+              </span>
+            ) : (
+              code && <span className="pbp__code pbp__code--center pbp__code--out">{code}</span>
+            ))}
           {outNumber != null && (
             <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
               {outNumber}

@@ -21,12 +21,24 @@ export function gameHasAbs(feed) {
   return feed?.gameData?.teams?.away?.sport?.id === 1
 }
 
-// An ABS challenge is a review that sits on a PITCH (a ball/strike call). A
-// manager replay review rides a non-pitch play (a pickoff, a boundary call) and
-// is NOT an ABS challenge — exclude it by requiring the review to be on a pitch
-// and to name the challenging club.
-function isAbsChallenge(ev) {
-  return Boolean(ev?.isPitch && ev.reviewDetails && ev.reviewDetails.challengeTeamId != null)
+// An ABS challenge review can sit at EITHER the play level (`play.reviewDetails`)
+// or on the specific challenged pitch event (`play.playEvents[].reviewDetails`),
+// depending on whether the challenged pitch was the at-bat's deciding pitch —
+// verified against gamePk 823036, which has four real ABS challenges: two on
+// the play itself (Frelick's failed challenge, top 2nd; Mitchell's successful
+// one, top 8th) and two on a `type:"pitch"` playEvent instead (Fermín's failed
+// challenge, bottom 3rd; Contreras's failed challenge, bottom 8th). Both
+// locations must be scanned, or real challenges get missed.
+//
+// `challengeTeamId` alone isn't enough to identify one: the same game also has
+// a `reviewDetails` from MLB's older, unrelated manager's-replay-challenge
+// system (e.g. a pickoff-attempt review) that also sets `challengeTeamId`.
+// `reviewType` tells the two apart — every genuine ABS ball-strike challenge in
+// this game carries `"MJ"`; the manager's-replay review carries `"MA"` and only
+// ever appears on a non-`pitch` event. Requiring `reviewType === 'MJ'` is what
+// excludes it.
+function isAbsChallenge(review) {
+  return Boolean(review && review.challengeTeamId != null && review.reviewType === 'MJ')
 }
 
 // 1-based half order (top 1 = 1, bottom 1 = 2, top 2 = 3, …), for clamping to
@@ -48,12 +60,12 @@ export function selectChallengeState(feed, throughInning, throughHalf) {
     const half = p.about?.halfInning
     if (inning == null || half == null) continue
     if (halfOrder(inning, half) > limit) break
-    for (const ev of p.playEvents ?? []) {
-      if (!isAbsChallenge(ev)) continue
-      const teamId = ev.reviewDetails.challengeTeamId
-      const side = teamId === awayId ? 'away' : teamId === homeId ? 'home' : null
+    const candidates = [p.reviewDetails, ...(p.playEvents ?? []).map((pe) => pe.reviewDetails)]
+    for (const review of candidates) {
+      if (!isAbsChallenge(review)) continue
+      const side = review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
       if (!side) continue
-      outcomes[side].push(ev.reviewDetails.isOverturned ? 'success' : 'fail')
+      outcomes[side].push(review.isOverturned ? 'success' : 'fail')
     }
   }
   return {

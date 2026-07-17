@@ -43,6 +43,14 @@ export const GROUPS = {
   'game-scores': { file: join(dataDir, 'game-scores.sql'), tables: ['game_scores'] },
   'team-snapshots': { file: join(dataDir, 'team-snapshots.sql'), tables: ['team_snapshots'] },
   'player-snapshots': { file: join(dataDir, 'player-snapshots.sql'), tables: ['player_snapshots'] },
+  // Both tables are written by the SAME single hand-run script
+  // (gen-postseason-leaders.mjs) — unlike game-scores/team-snapshots'
+  // split, there's no cross-cron collision risk to isolate here, so one
+  // group covers both.
+  'postseason-player-stats': {
+    file: join(dataDir, 'postseason-player-stats.sql'),
+    tables: ['postseason_ingested_games', 'postseason_batting_totals', 'postseason_pitching_totals'],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay

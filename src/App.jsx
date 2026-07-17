@@ -34,6 +34,14 @@ const PostseasonHistoryPage = lazyNamed(
   () => import('./screens/PostseasonHistoryPage.jsx'),
   'PostseasonHistoryPage',
 )
+const PostseasonLeadersPage = lazyNamed(
+  () => import('./screens/PostseasonLeadersPage.jsx'),
+  'PostseasonLeadersPage',
+)
+const PostseasonSeriesPage = lazyNamed(
+  () => import('./screens/PostseasonSeriesPage.jsx'),
+  'PostseasonSeriesPage',
+)
 const AllStarRostersPage = lazyNamed(
   () => import('./screens/AllStarRostersPage.jsx'),
   'AllStarRostersPage',
@@ -131,6 +139,10 @@ export default function App() {
     content = <AwardsHistoryPage />
   } else if (route.name === 'postseason-history') {
     content = <PostseasonHistoryPage />
+  } else if (route.name === 'postseason-leaders') {
+    content = <PostseasonLeadersPage />
+  } else if (route.name === 'postseason-series') {
+    content = <PostseasonSeriesPage seriesId={route.seriesId} />
   } else if (route.name === 'all-star-rosters') {
     content = <AllStarRostersPage />
   } else if (route.name === 'all-star-legacy') {

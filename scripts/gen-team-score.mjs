@@ -11,10 +11,17 @@
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { pythagoreanPct, qualityScoreFromGames, CURRENT_FORM_GAMES } from '../src/api/teamScoreFormula.js'
+import {
+  pythagoreanPct,
+  qualityScoreFromGames,
+  currentFormScoreFromGames,
+  lateGameAdjustment,
+  CURRENT_FORM_GAMES,
+} from '../src/api/teamScoreFormula.js'
+import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import { openDb, dumpGroup } from './lib/db.js'
 
-export { pythagoreanPct, qualityScoreFromGames }
+export { pythagoreanPct, qualityScoreFromGames, currentFormScoreFromGames }
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'team-score.json')
@@ -42,7 +49,7 @@ function parseArgs(argv) {
   return args
 }
 
-function summarize(games) {
+function summarize(games, scoreFn = qualityScoreFromGames, scoreExtras = {}) {
   const wins = games.filter((game) => game.won).length
   const runsScored = games.reduce((sum, game) => sum + game.runsFor, 0)
   const runsAllowed = games.reduce((sum, game) => sum + game.runsAllowed, 0)
@@ -53,7 +60,7 @@ function summarize(games) {
     runsScored,
     runsAllowed,
     runDifferential: runsScored - runsAllowed,
-    ...qualityScoreFromGames({ wins, games: games.length, runsScored, runsAllowed }),
+    ...scoreFn({ wins, games: games.length, runsScored, runsAllowed, ...scoreExtras }),
   }
   return result
 }
@@ -70,6 +77,7 @@ function gameOutcome(game) {
     awayId: away.team.id,
     homeRuns: home.score,
     awayRuns: away.score,
+    innings: game.linescore?.innings ?? [],
   }
 }
 
@@ -81,12 +89,14 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
   }
 
   for (const game of games) {
+    const late = classifyLateGame({ innings: game.innings, homeRuns: game.homeRuns, awayRuns: game.awayRuns })
     ensure(game.homeId).push({
       gamePk: game.gamePk,
       date: game.date,
       won: game.homeRuns > game.awayRuns,
       runsFor: game.homeRuns,
       runsAllowed: game.awayRuns,
+      late: late.home,
     })
     ensure(game.awayId).push({
       gamePk: game.gamePk,
@@ -94,16 +104,23 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
       won: game.awayRuns > game.homeRuns,
       runsFor: game.awayRuns,
       runsAllowed: game.homeRuns,
+      late: late.away,
     })
   }
 
   const snapshots = {}
   for (const [teamId, teamGames] of byTeam) {
     const ordered = [...teamGames].sort((a, b) => a.date.localeCompare(b.date) || a.gamePk - b.gamePk)
+    const formGames = ordered.slice(-CURRENT_FORM_GAMES)
+    const currentForm = summarize(formGames, currentFormScoreFromGames, {
+      lateSwingAdjustment: lateGameAdjustment(formGames.map((g) => g.late)),
+    })
+    currentForm.blownLeads = formGames.filter((g) => g.late.blownLead).length
+    currentForm.clutchWins = formGames.filter((g) => g.late.clutchWin).length
     snapshots[teamId] = {
       asOf,
       season: summarize(ordered),
-      currentForm: summarize(ordered.slice(-CURRENT_FORM_GAMES)),
+      currentForm,
     }
   }
   return snapshots
@@ -112,7 +129,7 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
 async function fetchCompletedGames(asOf) {
   const season = Number(asOf.slice(0, 4))
   const data = await getJson(
-    `/api/v1/schedule?sportId=1&gameType=R&startDate=${season}-03-01&endDate=${asOf}`,
+    `/api/v1/schedule?sportId=1&gameType=R&startDate=${season}-03-01&endDate=${asOf}&hydrate=linescore`,
   )
   const seen = new Set()
   const games = []

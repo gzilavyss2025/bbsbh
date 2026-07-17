@@ -111,8 +111,8 @@ const REVEAL_BATCH = 8
 // reads as a deck to flip through on a touchscreen and uses the full card
 // width at every viewport, rather than a vertical list capped to a reading
 // column). Spoiler-free (roster moves carry no score), so no SealBox is
-// involved; `asOf` is purely temporal hygiene, matching TeamScoreCard/
-// PostseasonOddsCard's own "through {asOf}" convention.
+// involved; `asOf` only scopes which transactions load (see
+// loadMoreTeamTransactions), it isn't displayed.
 //
 // `initialDays`/`initialCursor`/`initialHasMore` come from the page's own
 // loadTeam() (the first loadMoreTeamTransactions page, fetched alongside
@@ -192,10 +192,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
     <section className="txcard" aria-label="Team Transactions">
       <div className="txcard__head">
         <span>Transactions</span>
-        <span className="txcard__headright">
-          <DeckNudge scrollRef={scrollRef} cardStep={CARD_STEP} label="team transactions" />
-          {asOf && <em>through {asOf}</em>}
-        </span>
+        <DeckNudge scrollRef={scrollRef} cardStep={CARD_STEP} label="team transactions" />
       </div>
       <div
         className="txcard__scroll"
