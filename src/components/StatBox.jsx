@@ -50,7 +50,14 @@ function halfStatcastCards(feed, d) {
 // pre-pitch/spoiler-free info, same as HalfInning.jsx's PrePitchChanges, and
 // worth a scorer's attention here). Only checked for the IMMEDIATE next half
 // to reveal (`isNextToReveal`) — same gate selectPrePitchChanges relies on
-// elsewhere — so a further-out sealed half never leaks its subs.
+// elsewhere — so a further-out sealed half never leaks its subs. The teaser
+// itself is gated on `startedRevealing`, not the coarser `revealed` (whole
+// half fully committed) — at-bat stepping (ADR-0016) can start revealing this
+// half's OWN feed while `revealed` is still false, and once it does, a
+// between-halves pitching change already has its own live PitcherNotice card
+// in that feed; leaving this on `!revealed` duplicated it for the entire
+// stepping window instead of just before the first tap (same bug/fix as
+// HalfInning.jsx's PrePitchChanges).
 export function StatBox({
   feed,
   inning,
@@ -58,6 +65,7 @@ export function StatBox({
   battingSide,
   getDerived,
   revealed,
+  startedRevealing = revealed,
   className = '',
   placeholder = false,
   pitchingName,
@@ -69,9 +77,10 @@ export function StatBox({
   runExpectancy = null,
 }) {
   if (!revealed && placeholder) {
-    const pitcherChange = isNextToReveal
-      ? selectPrePitchChanges(feed, inning, half).find((c) => c.eventType === 'pitching_substitution')
-      : null
+    const pitcherChange =
+      isNextToReveal && !startedRevealing
+        ? selectPrePitchChanges(feed, inning, half).find((c) => c.eventType === 'pitching_substitution')
+        : null
     if (pitcherChange?.pitcher) {
       return (
         <PitcherNotice

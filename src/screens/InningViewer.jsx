@@ -126,6 +126,12 @@ export function InningViewer({
   // reveal frontier — RollingLine and direct links both let a user jump
   // straight to any unlocked half.
   const curAtBatCount = atBatCountFor(effInning, effHalf)
+  // Whether the half being shown has started revealing at all — full commit
+  // or mid-step (ADR-0016) — same definition as HalfInning.jsx's own
+  // startedRevealing for this same half; StatBox needs it to stop showing its
+  // pre-reveal pitcher-change teaser once that teaser's own real card has
+  // already appeared in the live feed (see StatBox.jsx).
+  const curStartedRevealing = curIdx <= revealedThrough || curAtBatCount > 0
   const revealWholeHalf = () => revealTo(effInning, effHalf)
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
@@ -293,6 +299,7 @@ export function InningViewer({
             homeLocation={meta.home.locationName || meta.home.abbreviation}
             getDerived={getDerived}
             revealed={curIdx <= revealedThrough}
+            startedRevealing={curStartedRevealing}
             isNextToReveal={curIdx === revealedThrough + 1}
             runExpectancy={runExpectancy}
           />

@@ -365,9 +365,15 @@ function scorebookCode(play, batterRunner) {
     if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
     return { code: 'K', codeKind: 'out' }
   }
-  if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  // A ball caught for the out in FOUL territory gets an "F" penciled in front
+  // of its normal code (a foul pop out to 1st is FP3, a foul fly to left is
+  // FF7) — MLB's description names it explicitly ("… in foul territory").
+  const foul = /in foul territory/i.test(desc) ? 'F' : ''
+  if (/lines? (out|into)/i.test(desc)) return { code: `${foul}L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  // A pop out (P) is its own scorebook code, distinct from a fly out (F) —
+  // both come back from MLB as "pops out"/"flies out" in the description.
+  if (/pops? (out|into)/i.test(desc)) return { code: `${foul}P${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/flies? (out|into)/i.test(desc)) return { code: `${foul}F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   // A single-fielder chain (no throw — he fielded it and recorded the putout
   // himself) is the scorebook's "unassisted" play: 3U, 6U, etc, not a bare
   // position number.
