@@ -129,6 +129,7 @@ export function PostseasonLeadersPage() {
         <h1 className="topbar__title">Postseason Leaders</h1>
       </header>
       {data?.since && <p className="hint psleaders__subtitle">Since {data.since}</p>}
+      <p className="hint psleaders__subtitle">Your favorite team, and players who played for it, are highlighted below.</p>
 
       <AsyncStatus
         loading={loading}
