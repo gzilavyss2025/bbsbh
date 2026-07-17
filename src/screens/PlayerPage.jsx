@@ -44,10 +44,13 @@ const FIRSTS_ORDER = ['debut', 'start', 'hit', 'xbh', 'hr', 'run', 'so']
 // an outing can go, ending with the first punch-out.
 const PITCHER_FIRSTS_ORDER = ['debut', 'start', 'win', 'loss', 'save', 'so']
 
-function draftLabel(draft) {
-  if (!draft || !draft.year) return DASH
-  if (!draft.round) return String(draft.year)
-  return `${draft.year} · Rd ${draft.round}${draft.overall ? ` #${draft.overall}` : ''}`
+function draftLabel(draft, signedYear) {
+  if (draft && draft.year) {
+    if (!draft.round) return String(draft.year)
+    return `${draft.year} · Rd ${draft.round}${draft.overall ? ` #${draft.overall}` : ''}`
+  }
+  if (signedYear) return `Signed ${signedYear}`
+  return DASH
 }
 
 export function PlayerPage({ id, asOf, sportId }) {
@@ -175,7 +178,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             }
           />
           <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
-          <Fact label="Draft" value={draftLabel(bio.draft)} />
+          <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} />
         </div>
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}

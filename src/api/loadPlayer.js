@@ -35,6 +35,7 @@ import { fetchSavantPercentiles, savantPercentilesFor } from './savantPercentile
 import { fetchRookiesData, rookieRecordFor } from './rookies.js'
 import {
   personBio,
+  signedFallback,
   personSportId,
   aggregateSplits,
   pitcherRole,
@@ -152,6 +153,9 @@ export async function loadPlayer(id, asOf) {
   ])
   if (!person) return null
   const bio = personBio(person)
+  // Draft fact fallback for undrafted/international signees (see
+  // signedFallback) — cheap, txns is already fetched above.
+  bio.signedYear = bio.draft?.year ? null : signedFallback(txns)
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
   // Where he's playing RIGHT NOW (a big leaguer's is MLB; a demoted or
   // now-a-lifer minor leaguer's is his current MiLB level).
