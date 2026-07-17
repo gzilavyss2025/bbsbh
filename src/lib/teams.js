@@ -473,8 +473,9 @@ export function teamStripeGradient(teamId) {
 
 // A club's single primary brand color (the first of TEAM_COLOR_PAIRS), for
 // contexts that want one team-identity hex rather than a two-tone stripe
-// (e.g. RadarPill's pressed-glyph state). Same MiLB-affiliate fallback as
-// teamStripeGradient; returns null for a team with no known pair.
+// (e.g. RadarPill's pressed-glyph state, or a solid hover fill). Same
+// MiLB-affiliate fallback as teamStripeGradient; returns null for a team
+// with no known pair.
 export function teamPrimaryColor(teamId) {
   const pair = TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]]
   return pair ? pair[0] : null

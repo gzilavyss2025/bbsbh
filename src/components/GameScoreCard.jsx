@@ -60,9 +60,11 @@ export function GameScoreCard({ feed }) {
           it) already carry this game's date; TeamScoreCard, the other
           .team-score consumer, still needs its own (no adjacent masthead on
           the Team Page), so the date stays a per-caller choice rather than
-          baked into the shared head markup. */}
+          baked into the shared head markup. Echoes the modal's own framing
+          ("was it worth scoring?" — GameScoreModal) rather than repeating
+          "Game Score" twice on one small card. */}
       <div className="team-score__head">
-        <span>Game Score</span>
+        <span>Worth scoring?</span>
       </div>
 
       <div className="team-score__grade">
@@ -70,7 +72,7 @@ export function GameScoreCard({ feed }) {
           <span className="team-score__grade-copy">
             <span className="team-score__grade-kicker">Game Score</span>
             <strong>{TIER_LABELS[mine.tier]}</strong>
-            <span>How exciting the game was to watch</span>
+            <span>Measures the drama, not the result</span>
           </span>
           <span className="team-score__grade-result">
             <span className="team-score__rank">{ordinal(rankIdx + 1)} of {index.n}</span>

@@ -54,7 +54,7 @@
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Game Score modal above)
-     - `.buzz__text` (Bluesky posts keep their authors' original casing)
+     - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose) */
@@ -6699,10 +6699,7 @@ body {
   color: var(--text-heading);
 }
 
-/* ---------------------------------------------------------------- game buzz */
-/* The night's Bluesky posts — the last card inside the box score's own seal,
-   to crib storytelling numbers into the paper's GAME NOTES box. */
-.buzz {
+.gamestory {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -6710,7 +6707,7 @@ body {
   overflow: hidden;
 }
 
-.buzz__head {
+.gamestory__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -6718,14 +6715,7 @@ body {
   padding: var(--space-3) var(--space-3) var(--space-2);
 }
 
-/* The revealed posts/loader/error state, now rendered directly (no SealBox
-   .statgrid wrapper — see GameBuzz.jsx) — this is the one place that gives
-   that content its own breathing room on all 4 sides. */
-.buzz__body {
-  padding: 0 var(--space-3) var(--space-3);
-}
-
-.buzz__title {
+.gamestory__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-ui);
@@ -6735,7 +6725,7 @@ body {
   color: var(--text-heading);
 }
 
-.buzz__note {
+.gamestory__note {
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
@@ -6743,81 +6733,99 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
-.buzz__list {
+.gamestory__list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--space-3) var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-}
-
-.buzz__post {
-  padding-bottom: var(--space-3);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
-}
-.buzz__post:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.buzz__meta {
-  display: flex;
-  align-items: baseline;
   gap: var(--space-2);
-  margin-bottom: 3px;
 }
 
-.buzz__handle {
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  color: var(--accent-primary);
-  text-decoration: none;
-}
-
-.buzz__time,
-.buzz__eng {
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  font-variant-numeric: tabular-nums;
-}
-.buzz__eng {
-  margin-left: auto;
-}
-
-.buzz__text {
-  margin: 0;
-  /* Social-post prose — the ONE place we deliberately break the all-caps
-     house rule: posts keep their authors' original casing, set in plain
-     regular-weight Newsreader so they read as quoted voices rather than app
-     chrome. The casing opt-out itself is the #root-scoped rule below (a plain
-     class can't outweigh the global `#root *` uppercase). */
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  font-weight: var(--w-regular);
-  line-height: var(--lh-body);
-  color: var(--text-body);
-}
-
-/* The sanctioned exception to the ALL-CAPS INVARIANT. `#root .buzz__text`
-   (1 id + 1 class) outweighs the global `#root *` uppercase so the posts render
-   in their authors' own casing. The `caps-exempt` marker tells the check-caps
-   guard this `none` is deliberate — the only one allowed in the codebase. */
-#root .buzz__text {
-  text-transform: none; /* caps-exempt: Bluesky posts keep their original casing */
-}
-
-.buzz__state {
+.gamestory__link {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-decoration: none;
+  transition:
+    transform var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+/* On a device with a real pointer, the row fills with that team's own real
+   brand color at full brightness (--team-color, set inline per row — see
+   GameStoryCard.jsx) with the headline flipping to white for contrast, and
+   the logo recoloring to match (brightness(0) invert(1) turns any opaque
+   pixel white regardless of the mark's own colors — a plain CSS trick, no
+   second white-on-dark logo asset needed). Skipped on touch (hover:none) so
+   a tap doesn't leave the row stuck in its "hovered" color until the next
+   tap elsewhere. Falls through to the plain card look for a team
+   teamPrimaryColor doesn't know (--team-color unset). */
+@media (hover: hover) and (pointer: fine) {
+  .gamestory__link:hover {
+    background: var(--team-color, var(--surface-inset));
+    border-color: var(--team-color, var(--border-rule));
+    color: #fff;
+  }
+  .gamestory__link:hover .gamestory__logo {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.gamestory__logo {
+  flex-shrink: 0;
+  transition: filter var(--dur-fast) var(--ease-standard);
+}
+
+.gamestory__headline {
+  flex: 1;
+}
+
+#root .gamestory__headline {
+  text-transform: none; /* caps-exempt: a real MLB.com headline reads as a natural sentence, same idiom as .buzz__text */
+}
+
+.gamestory__link:active {
+  transform: scale(0.98);
+}
+
+.gamestory__link:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .bs {
   display: flex;
   flex-direction: column;
+  gap: var(--space-5);
+}
+
+.bs__section {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
+}
+
+.bs__sectionTitle {
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
 }
 
 .bs__team {
@@ -7326,9 +7334,11 @@ body {
   color: var(--text-body);
 }
 
-/* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
-   marks descending 3→1; each name over its game line in smaller mono type. Card
-   matches the decisions block above it. */
+/* Three stars of the game — WPA leaders under the decisions. Card matches
+   the decisions block above it. The top mover gets the Game Score card's
+   hero treatment (an inset gradient panel — see .stars3__hero below,
+   modeled on .team-score__grade); #2/#3 fall into compact rows underneath,
+   same idiom as .team-score__row--compact. */
 .bs__stars {
   padding: 12px 14px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -7345,61 +7355,54 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.bs__starList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.bs__star {
+
+.stars3__hero {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    var(--surface-inset);
+  box-shadow: var(--inset-cell);
 }
-/* Fixed to the star-mark column's own width so all three rows' headshots
-   line up regardless of how many marks a row carries. */
-.bs__starMarks {
+/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing
+   — the "player-of-game" scale, same size as .stars3__rowShot below so all
+   three stars' headshots line up at one size; only the surrounding
+   panel/copy marks this row as the top mover. */
+.shot.stars3__heroShot {
   flex: none;
-  min-width: 30px;
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-  letter-spacing: var(--ls-fixed);
-  color: var(--seal);
-}
-/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing,
-   same pattern as .bs__potgShot/.topperf__shot — a good, legible size next to
-   the name/position without dwarfing the row. */
-.shot.bs__starShot {
-  flex: none;
-  width: var(--shot-2xs-w);
-  height: var(--shot-2xs-h);
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.shot.bs__starShot.shot--fallback {
-  font-size: var(--fs-num-md);
+.shot.stars3__heroShot.shot--fallback {
+  font-size: var(--fs-num-lg);
 }
-.bs__starWho {
+.stars3__heroCopy {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
+  flex: 1;
 }
-.bs__starHead {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
+.stars3__heroKicker {
+  color: var(--seal);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
 }
-.bs__starName {
+.stars3__heroName {
   font-family: var(--font-body);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
 }
-.bs__starMeta {
+.stars3__heroMeta {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -7407,7 +7410,70 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.bs__starStat {
+.stars3__heroStat {
+  flex: none;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stars3__list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.stars3__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 2px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+}
+/* Sits above the name inside .stars3__rowWho's column stack — same position
+   as .stars3__heroKicker above the hero's name — instead of a separate
+   fixed-width column to the left of the headshot. */
+.stars3__rowMarks {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
+  color: var(--seal);
+}
+.shot.stars3__rowShot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.stars3__rowShot.shot--fallback {
+  font-size: var(--fs-num-lg);
+}
+.stars3__rowWho {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.stars3__rowName {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.stars3__rowMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.stars3__rowStat {
+  flex: none;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
@@ -8459,42 +8525,70 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
-/* Club nickname hard against the innings — shrink-to-fit so there's no dead gap
-   between the name and inning 1, set in full-caps display like a printed score. */
+/* The club's logo, hard against the innings — shrink-to-fit so there's no
+   dead gap between it and inning 1. Linked (TeamLink) to the team page. */
 .bs__boardName {
   width: 1%;
   white-space: nowrap;
   text-align: left !important;
-  padding: 5px 10px 5px 0 !important;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+  padding: 3px 10px 3px 0 !important;
+}
+.bs__boardLogo {
+  display: inline-flex;
 }
 /* Each half-inning a fixed, equal-width bordered box regardless of the digits in
-   it; a half that scored is inked bold seam-red. */
+   it; a half that scored is inked bold seam-red. Sized up from the base
+   .bs__grid td font (the header row's inning numbers stay that base size —
+   see .bs__grid--board thead th below — only the run counts themselves grow). */
 .bs__boardInn {
-  width: 22px;
+  width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
+  font-size: var(--fs-title-sm);
+}
+.bs__grid--board thead th.bs__boardInn {
+  font-size: var(--fs-caption);
 }
 .bs__boardInn--scored {
   font-weight: var(--w-bold);
   color: var(--accent-negative);
 }
+/* A played half (a real run count, 0 included) is a button straight to that
+   half-inning in the Innings view — filling the cell so the whole box is the
+   tap target, not just the digit. 'X' (never batted) stays plain text. */
+.bs__boardCellBtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.bs__boardCellBtn:active {
+  transform: scale(0.92);
+}
+.bs__boardCellBtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
 /* R/H/E totals to the right — the same equal-width bordered boxes as the innings
    so the whole line reads as one grid, but on a subtly darker fill and bold to
-   mark them as the final tallies rather than an inning. */
+   mark them as the final tallies rather than an inning. Not a nav target (no
+   single half-inning to point at), so plain text, same bigger scale as the
+   inning cells beside them. */
 .bs__grid--board .bs__boardFinal {
-  width: 22px;
+  width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   background: var(--paper-1);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .bs__grid--board thead .bs__boardFinal {
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 

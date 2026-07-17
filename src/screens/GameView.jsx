@@ -273,6 +273,7 @@ export function GameView({ game, section, onSection }) {
           vsTeam={vsTeamSplitsData}
           onReload={feedState.reload}
           loading={feedState.loading}
+          onSection={onSection}
         />
       )}
     </div>
