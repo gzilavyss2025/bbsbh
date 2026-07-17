@@ -63,12 +63,21 @@ export function meetsStintCap(stat, group) {
 // --- rehab transaction-scan helpers -------------------------------------------
 // When a rehab stint STARTS (an "Assigned" row whose description says "rehab")
 // and the move types that CLOSE ONE OUT — a return to the majors (recall,
-// contract selection), a real option down, a release/retirement, any non-rehab
-// reassignment, or an activation off the injured list. Shared by the player
-// page's single-player detector (person.js), the league-wide Rehab Assignments
-// generator (gen-rehab.mjs), and gen-former-teammates.mjs so all three agree on
-// when a rehab is over.
-export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET'])
+// contract selection), a real option down, a release/retirement, a TRADE (the
+// assigning org no longer controls him, so a stint tagged to the pre-trade org
+// is stale even if his new club later sends him back out — that shows up as a
+// fresh rehab-start row, not a continuation), any non-rehab reassignment, or
+// any injured-list move (placed, transferred between ILs, or activated off
+// one) — not just an activation. A setback (Rob Zastryzny, Brewers, moved
+// straight from an active Nashville rehab assignment to the 60-day IL on
+// 2026-07-15 with no return-to-action in between) closes the rehab the same
+// way an activation does: the club has made a new roster decision, so if
+// he's still — or later — rehabbing, that shows up as a fresh rehab-start
+// row, not a continuation of the one already being tracked. Shared by the
+// player page's single-player detector (person.js), the league-wide Rehab
+// Assignments generator (gen-rehab.mjs), and gen-former-teammates.mjs so all
+// three agree on when a rehab is over.
+export const REHAB_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'TR'])
 
 export function txnDate(t) {
   return t.effectiveDate || t.date || ''
@@ -82,5 +91,5 @@ export function isRehabEndingTxn(t) {
   const c = t.typeCode
   if (REHAB_END_CODES.has(c)) return true
   if (c === 'ASG' && !isRehabTxn(t)) return true
-  return c === 'SC' && /activat/i.test(t.description || '') && /injured list/i.test(t.description || '')
+  return c === 'SC' && /injured list/i.test(t.description || '')
 }
