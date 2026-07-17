@@ -13575,8 +13575,9 @@ body {
 }
 .psseries__gamehead {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   padding: 0 2px;
 }
 .psseries__gametitle {
@@ -13592,6 +13593,8 @@ body {
   color: var(--text-muted);
 }
 .psseries__gamestatus {
+  flex: none;
+  text-align: right;
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
   font-size: var(--fs-ui);
