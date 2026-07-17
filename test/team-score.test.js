@@ -116,17 +116,26 @@ test('Season Grade preserves quality at expectation and uses bounded headroom', 
 
 test('league Season Grades require both inputs and never look past the cutoff', () => {
   const quality = { seasons: { 2026: { byTeamId: {
-    1: { '2026-07-10': { season: { score: 6 } }, '2026-07-12': { season: { score: 9 } } },
-    2: { '2026-07-10': { season: { score: 7 } } },
-    3: { '2026-07-10': { season: { score: 8 } } },
+    1: {
+      '2026-07-10': { season: { score: 6, weightedWinsAbove500: 3.2 } },
+      '2026-07-12': { season: { score: 9, weightedWinsAbove500: 9.9 } },
+    },
+    2: { '2026-07-10': { season: { score: 7, weightedWinsAbove500: -1.5 } } },
+    3: { '2026-07-10': { season: { score: 8, weightedWinsAbove500: 4.4 } } },
   } } } }
   const surprise = { seasons: { 2026: { byTeamId: {
-    1: { '2026-07-10': { score: 8 }, '2026-07-12': { score: 1 } },
-    2: { '2026-07-10': { score: 5 } },
+    1: {
+      '2026-07-10': { score: 8, residualWins: 2.1 },
+      '2026-07-12': { score: 1, residualWins: 8.8 },
+    },
+    2: { '2026-07-10': { score: 5, residualWins: -0.6 } },
   } } } }
 
+  // The 07-12 snapshots (weightedWinsAbove500: 9.9, residualWins: 8.8) sit
+  // past the cutoff and must never leak into team 1's tiebreak — only the
+  // 07-10 pair is eligible.
   assert.deepEqual(leagueSeasonGradesFor(quality, surprise, 2026, '2026-07-11'), [
-    { teamId: 1, score: 7.4, tiebreak: [undefined, undefined] },
-    { teamId: 2, score: 7, tiebreak: [undefined, undefined] },
+    { teamId: 1, score: 7.4, tiebreak: [3.2, 2.1] },
+    { teamId: 2, score: 7, tiebreak: [-1.5, -0.6] },
   ])
 })

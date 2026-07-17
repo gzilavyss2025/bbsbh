@@ -31,6 +31,7 @@ export function HalfInning({
   highlights,
   revealedAtBatCount,
   onStepInfo,
+  onSteppedThrough,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -166,7 +167,16 @@ export function HalfInning({
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
                 onStepInfo={onStepInfo}
-                onStepComplete={() => onReveal(inning, half)}
+                onStepComplete={() => {
+                  onReveal(inning, half)
+                  // Only fires for an actual at-bat-by-at-bat finish (see
+                  // PlayByPlay's onStepComplete doc) — a direct "Rest of
+                  // half" tap commits via onReveal alone and never steps, so
+                  // it never lands here. Distinct from onReveal because the
+                  // caller uses it to scroll to the totals the user just
+                  // finished stepping toward, not every commit path.
+                  onSteppedThrough?.()
+                }}
               />
             )
           }}
