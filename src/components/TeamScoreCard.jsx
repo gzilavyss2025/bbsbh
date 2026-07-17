@@ -56,25 +56,44 @@ function trajectoryTier(score) {
 }
 
 const SEASON_STORYLINES = {
-  'high-high': ['Crushing it', 'Playing lights-out', 'Peaking on schedule'],
-  'high-mid': ['The real deal', 'Playing to their talent', 'Locked in'],
-  'high-low': ['Talented, underdelivering', 'Not living up to the roster yet', 'Leaving wins on the table'],
-  'mid-high': ['Punching above their weight', 'Surprising everyone', 'Overachieving'],
-  'mid-mid': ['Playing to form', 'Right on pace', 'About as expected'],
-  'mid-low': ['Falling short', 'Treading water', 'Stuck in neutral'],
-  'low-high': ['Beating the odds', 'Overachieving a thin roster', 'Scrapping above their talent'],
-  'low-mid': ['About where they were expected to be', 'On pace with the roster', 'No surprises here'],
-  'low-low': ['Struggling', 'In a rough stretch', 'Bottoming out'],
+  'high-high': ["Nobody's catching them", 'Making it look easy', 'The class of the league'],
+  'high-mid': ['Elite and unsurprising', 'The good kind of predictable', 'No drama, just wins'],
+  'high-low': ['Too good to be this frustrating', 'A juggernaut stuck in neutral', 'The record undersells them'],
+  'mid-high': ['Doing more with less', 'Winning ugly and loving it', 'Outplaying the roster on paper'],
+  'mid-mid': ['Right down the middle', 'The forecast came true', 'Comfortably unremarkable'],
+  'mid-low': ['A step behind schedule', 'A modest bar, missed anyway', 'Underachieving, no excuses'],
+  'low-high': ['Nobody gave them a chance', 'Punching above their weight', 'Winning above their pay grade'],
+  'low-mid': ['A rebuild on schedule', 'Meeting a bar that was set low', 'Nothing unexpected here'],
+  'low-low': ['A season that lost the plot', 'Bottoming out and still falling', 'Nowhere to go but up — not yet'],
 }
 
 const FORM_STORYLINES = {
-  high: ['Rolling', 'Red hot', 'Playing great ball lately'],
-  mid: ['Middling lately', 'Mixed bag lately', 'Nothing special lately'],
-  low: ['Ice cold', 'In a funk', 'Scuffling lately'],
+  high: ["Can't lose right now", 'Nobody wants to see them right now', 'On one of those runs'],
+  mid: ['The last 10 in a nutshell: fine', "A stretch that's hard to read", 'Treading water, not sinking'],
+  low: ["Can't buy a win right now", 'Cold as it gets', 'Stuck in the mud'],
+}
+
+function isoToday() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+// Deterministic per (day, team) index rather than a real RNG — same team
+// shows the same phrase across every visit within a UTC day (no re-roll on
+// refresh), then reshuffles at midnight so a long stretch in one storyline
+// tier doesn't feel stuck on the same line for weeks. FNV-1a-style hash over
+// the day+team key spreads evenly enough for these small (3-option) pools.
+function dailyIndex(teamId, length) {
+  const key = `${isoToday()}:${teamId}`
+  let hash = 0x811c9dc5
+  for (let i = 0; i < key.length; i++) {
+    hash ^= key.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return Math.abs(hash) % length
 }
 
 function pick(options, teamId) {
-  return options[teamId % options.length]
+  return options[dailyIndex(teamId, options.length)]
 }
 
 function seasonStoryline(grade, teamId) {
