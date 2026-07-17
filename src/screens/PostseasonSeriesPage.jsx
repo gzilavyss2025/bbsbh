@@ -256,6 +256,15 @@ function RosterCard({ teamId, roster }) {
   )
 }
 
+// Same bordered-card/hairline-divided row list as the Team page's Current
+// Roster (.thub-roster/.thub-row — see RosterList in TeamPage.jsx): jersey
+// number, name, a position badge, and a trailing chevron affordance. Kept as
+// its own scoped `psseries__roster*` class family rather than importing
+// TeamPage's classes directly (same convention AllStarRostersPage's
+// `.allstarrosters__rows` already follows — a shared visual idiom, not a
+// shared stylesheet dependency), since this row carries none of the Current
+// Roster's live-context badges (WAR, All-Star star, injured mark, prospect/
+// rookie pills) — none of that applies to a decades-old completed series.
 function RosterGroup({ title, rows }) {
   return (
     <div className="psseries__rostergroup">
@@ -268,6 +277,7 @@ function RosterGroup({ title, rows }) {
               {p.name}
             </PlayerLink>
             <span className="psseries__rosterpos">{p.position}</span>
+            <span className="psseries__rosterchev">›</span>
           </li>
         ))}
       </ul>

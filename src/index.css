@@ -13691,49 +13691,71 @@ body {
 .psseries__rostergroup + .psseries__rostergroup {
   margin-top: var(--space-2);
 }
+/* Same role as the Team page's .roster-sub__title, above its own
+   .thub-roster list. */
 .psseries__rostergrouptitle {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-caption);
 }
+/* Same bordered/hairline-divided row-list idiom as the Team page's
+   .thub-roster (RosterList in TeamPage.jsx) — no box-shadow here since this
+   list already sits inside .psseries__rostercard's own elevated card. */
 .psseries__rosterlist {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-inset);
 }
 .psseries__rosterrow {
-  display: flex;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto;
+  align-items: center;
   gap: 8px;
+  padding: 7px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-small);
+}
+.psseries__rosterlist li:first-child {
+  border-top: none;
 }
 .psseries__rosternum {
-  flex: none;
-  width: 1.8em;
   font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  color: var(--clay);
+  font-weight: var(--w-bold);
   text-align: right;
 }
 .psseries__rostername {
-  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
+  font-weight: var(--w-semibold);
   color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
 }
 .psseries__rosterpos {
-  flex: none;
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.psseries__rosterchev {
+  color: var(--graphite-soft);
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
 }
 
 /* ------------------------------------------------------------ postseason leaders
