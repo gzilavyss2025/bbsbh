@@ -720,7 +720,7 @@ function starLine(feed, id) {
   return {
     id,
     name: firstLast(gd),
-    teamAbbr: feed?.gameData?.teams?.[side]?.abbreviation ?? '',
+    teamName: feed?.gameData?.teams?.[side]?.teamName ?? '',
     teamId: feed?.gameData?.teams?.[side]?.id ?? null,
     pos: pitched ? 'P' : positionLabel(bp),
     stat: pitched ? pitchingStat(pit) : battingStat(bat),

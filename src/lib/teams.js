@@ -471,6 +471,15 @@ export function teamStripeGradient(teamId) {
   return `repeating-linear-gradient(45deg, ${a} 0px, ${a} 3px, ${b} 3px, ${b} 6px)`
 }
 
+// `teamId`'s real primary brand color at full brightness (the first of
+// TEAM_COLOR_PAIRS, same MiLB->parent-org fallback as teamStripeGradient) —
+// for a solid full-bleed treatment (a hover fill, e.g.), not a tint or a
+// stripe. Returns null for a team with no known pair.
+export function teamPrimaryColor(teamId) {
+  const pair = TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]]
+  return pair ? pair[0] : null
+}
+
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed
 // by the team id carried everywhere in the app. statsapi does expose these
 // (locationName / teamName), but every surface that wants a name already has

@@ -81,9 +81,8 @@ the half you're on. It never reveals anything about the score.
 **The full box score, when you want it.** One button opens a complete,
 MLB-style box score — sealed until you tap. Inside: the line score, pitchers of
 record, the three stars, both teams' batting and pitching lines with all the
-substitutions, the defensive alignment, and the full game-info footer. There's
-even a sealed "game buzz" card with the night's best posts about the game, in
-case you want to jot a note in the margin.
+substitutions, the defensive alignment, and the full game-info footer — plus
+each team's own game-story write-ups, linked out from MLB.com.
 
 ---
 
