@@ -4268,7 +4268,6 @@ body {
    — a compact sibling to .abs (same title treatment). */
 .umpfavor {
   padding-top: 10px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
 }
 /* .umpfavor__row: same idea as .bs__duo/.bs__col (BoxScore.jsx) — a column
    on a phone (each card its own natural height), a real two-up grid at the

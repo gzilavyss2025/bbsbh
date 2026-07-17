@@ -368,7 +368,11 @@ function scorebookCode(play, batterRunner) {
   if (/lines? (out|into)/i.test(desc)) return { code: `L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   if (/pops? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   if (/flies? (out|into)/i.test(desc)) return { code: `F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  return { code: chain.join('-'), codeKind: 'out' }
+  // A single-fielder chain (no throw — he fielded it and recorded the putout
+  // himself) is the scorebook's "unassisted" play: 3U, 6U, etc, not a bare
+  // position number.
+  const code = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
+  return { code, codeKind: 'out' }
 }
 
 // Short code for how a runner ADVANCED to a base on a given play — written by
