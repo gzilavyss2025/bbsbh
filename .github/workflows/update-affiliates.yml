@@ -18,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # main requires the lint-and-build status check, which the default
+          # GITHUB_TOKEN can never satisfy on a bare push — see
+          # update-game-score.yml's checkout step for the full explanation.
+          token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
