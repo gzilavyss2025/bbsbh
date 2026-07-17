@@ -12995,8 +12995,8 @@ body {
    history. One section per season, newest first: a champion banner, then
    each round (Wild Card/Division/Championship/World Series) as its own
    column so the whole thing scrolls left-to-right like a bracket. Series
-   tiles are buttons; tapping one opens .psmodal (below), the animated
-   "card slides over" detail view. */
+   tiles are buttons; tapping one navigates to the dedicated
+   PostseasonSeriesPage (.psseries__*, below). */
 .pshistory__list {
   display: flex;
   flex-direction: column;
@@ -13488,82 +13488,57 @@ body {
 }
 
 /* ---------------------------------------------------------- postseason series
-   modal. The animated card a series tap slides over — same centered-scrim +
-   slideup treatment as .logomodal (the team-page logo sketch), just a
-   scorebook-style game list instead of an oversized logo. */
-.psmodal {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: calc(100% - 32px);
-  max-width: 380px;
-  max-height: calc(100vh - 64px);
-  overflow-y: auto;
-  padding: 24px 18px 18px;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-raised);
-  animation: slideup var(--dur-slow) var(--ease-out);
-}
-.psmodal__close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: var(--tap-min);
-  height: var(--tap-min);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-size: var(--fs-num-md);
-  cursor: pointer;
-}
-.psmodal__label {
-  margin: 0;
-  padding-right: 30px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.psmodal__trophy {
+   page (PostseasonSeriesPage, /postseason/{seriesId}) — a series' final
+   result, game-by-game list, MVP, and (below, via TeamLeaders) its
+   batting/pitching leaders. Reached by navigating straight from a bracket
+   tap (PostseasonHistoryPage) rather than a modal, so these are ordinary
+   page sections, not a floating scrim card. */
+.psseries__trophy {
   display: block;
   margin: 0 auto;
   height: 56px;
   width: auto;
 }
-.psmodal__result {
+.psseries__result {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
+  margin: var(--space-2) 0;
 }
-.psmodal__winner,
-.psmodal__loser {
+.psseries__team {
+  border-radius: var(--radius-xs);
+}
+.psseries__teamlink {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  padding: 4px 8px;
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-align: center;
-  max-width: 96px;
+  max-width: 110px;
 }
-.psmodal__winner {
+.psseries__team--winner .psseries__teamlink {
   color: var(--text-heading);
 }
-.psmodal__loser {
+.psseries__team--loser .psseries__teamlink {
   color: var(--text-muted);
   opacity: 0.75;
 }
-.psmodal__score {
+/* Same favorite-team highlight as .psleaders__teamrow--fav (--fav-accent,
+   set inline from favoriteAccentColor()) — only lit when the user's own
+   team actually played in this series. */
+.psseries__team--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
+  box-shadow: inset 0 -2px 0 var(--fav-accent, var(--accent-primary));
+}
+.psseries__team--fav .psseries__teamlink {
+  opacity: 1;
+}
+.psseries__score {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -13571,19 +13546,19 @@ body {
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.psmodal__games {
+.psseries__games {
   list-style: none;
-  margin: 0;
+  margin: var(--space-2) 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 /* A button, not a plain row — tapping a game jumps straight to that game's
-   own box score (resolved from its gamePk, see PostseasonSeriesModal's
-   fetchGameCardsByPk call). Disabled (unclickable, dimmed) until that
-   resolves, rather than a dead click that silently does nothing. */
-.psmodal__game {
+   own box score (resolved from its gamePk via fetchGameCardsByPk). Disabled
+   (unclickable, dimmed) until that resolves, rather than a dead click that
+   silently does nothing. */
+.psseries__game {
   display: flex;
   align-items: center;
   width: 100%;
@@ -13597,27 +13572,27 @@ body {
   text-align: left;
   cursor: pointer;
 }
-.psmodal__game:disabled {
+.psseries__game:disabled {
   opacity: 0.6;
   cursor: default;
 }
-.psmodal__game:focus-visible {
+.psseries__game:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-.psmodal__gamenum {
+.psseries__gamenum {
   flex: none;
   width: 50px;
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.psmodal__gamedate {
+.psseries__gamedate {
   flex: none;
   width: 76px;
   color: var(--text-muted);
 }
-.psmodal__gameline {
+.psseries__gameline {
   flex: 1;
   display: flex;
   align-items: center;
@@ -13627,15 +13602,15 @@ body {
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
 }
-.psmodal__gameline--awaywon .psmodal__gamescore:first-of-type {
+.psseries__gameline--awaywon .psseries__gamescore:first-of-type {
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
-.psmodal__gameline:not(.psmodal__gameline--awaywon) .psmodal__gamescore:last-of-type {
+.psseries__gameline:not(.psseries__gameline--awaywon) .psseries__gamescore:last-of-type {
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
-.psmodal__at {
+.psseries__at {
   color: var(--text-muted);
   font-size: var(--fs-caption);
 }
@@ -13643,34 +13618,35 @@ body {
    (the play-by-play "now pitching" card) — a flat tinted fill rather than
    the diagonal-hatch --seal-texture weave the spoiler covers use, so an MVP
    badge doesn't read as a sealed/hidden value. */
-.psmodal__mvp {
+.psseries__mvp {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
+  margin-bottom: var(--space-2);
   border: var(--bw-hair) solid var(--seal-hatch);
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
 }
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
    outranks the base .shot sizing, same convention as .tlead__shot. */
-.shot.psmodal__mvpshot {
+.shot.psseries__mvpshot {
   flex: none;
   width: var(--shot-2xs-w);
   height: var(--shot-2xs-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.shot.psmodal__mvpshot.shot--fallback {
+.shot.psseries__mvpshot.shot--fallback {
   font-size: var(--fs-title-sm);
 }
-.psmodal__mvpinfo {
+.psseries__mvpinfo {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
-.psmodal__mvptag {
+.psseries__mvptag {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -13678,7 +13654,7 @@ body {
   text-transform: uppercase;
   color: var(--seal-ink);
 }
-.psmodal__mvpname {
+.psseries__mvpname {
   font-family: var(--font-body);
   font-weight: var(--w-bold);
   font-size: var(--fs-ui);
