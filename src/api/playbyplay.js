@@ -540,6 +540,48 @@ export function firstPAIndexByBatter(feed) {
   return first
 }
 
+// atBatIndex of each batter's FIRST plate appearance with a runner actually
+// on 2nd or 3rd as he stepped in — the RISP call-out (api/callout-notes.js)
+// describes a season rate, but firing it on a batter's literal first PA
+// regardless of who's on base (as firstPAIndexByBatter does for the streak/
+// platoon/birthday notes) reads as a non sequitur when he leads off an inning
+// with the bases empty. A plain re-walk of `runners[]` per play, base
+// occupancy reset at each half-inning boundary — same idiom as
+// umpireFavor.js's `bases`/`BASE_NUM` walk, just at play (not pitch)
+// granularity. Reveal-only, like the rest of this module.
+export function firstRispPAIndexByBatter(feed) {
+  const first = new Map()
+  const bases = [null, null, null]
+  let curHalfKey = null
+  for (const p of feed?.liveData?.plays?.allPlays ?? []) {
+    const inning = p.about?.inning
+    const half = p.about?.halfInning
+    if (inning == null || half == null) continue
+    const halfKey = `${inning}-${half}`
+    if (halfKey !== curHalfKey) {
+      bases[0] = bases[1] = bases[2] = null
+      curHalfKey = halfKey
+    }
+
+    const bid = p.matchup?.batter?.id
+    const isRealPA =
+      bid != null &&
+      !NON_PA_EVENT_TYPES.has(p.result?.eventType) &&
+      p.result?.eventType !== GAME_ADVISORY_EVENT_TYPE
+    if (isRealPA && (bases[1] || bases[2]) && !first.has(bid)) {
+      first.set(bid, p.about?.atBatIndex ?? null)
+    }
+
+    for (const r of p.runners ?? []) {
+      const startBase = BASE_NUM[r.movement?.start]
+      const endBase = BASE_NUM[r.movement?.end]
+      if (startBase && startBase <= 3) bases[startBase - 1] = null
+      if (!r.movement?.isOut && endBase && endBase <= 3) bases[endBase - 1] = r.details?.runner?.id ?? null
+    }
+  }
+  return first
+}
+
 // (Times-through-the-order counting used to live here as a per-PA map; the
 // per-play note it fed was replaced by the pre-half strip's single persistent
 // card, which does its own prior-halves walk — see buildThirdTimeThroughNote
