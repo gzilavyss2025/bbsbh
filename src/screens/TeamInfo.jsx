@@ -293,7 +293,7 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
       {!scorebookWeatherLoading && !scorebookWeather?.text && (
         <Fact label="Box weather" value={info.weather} />
       )}
-      <Fact label="Attendance" value={info.attendance} />
+      <AttendanceFact venue={info.venue} attendance={info.attendance} />
       {/* TV/streaming network (see api/broadcast.js, ESPN-sourced). Its
           presence right after Attendance also keeps the fact count a multiple
           of three in the common case, so Attendance no longer stretches
@@ -1027,6 +1027,61 @@ function Fact({ label, value }) {
     <div className="fact">
       <dt className="fact__label">{label}</dt>
       <dd className="fact__value">{value || <span className="fact__na">—</span>}</dd>
+    </div>
+  )
+}
+
+// The kraft "i" info glyph itself, drawn as an SVG dot-over-bar rather than a
+// literal "i" character — the global ALL-CAPS invariant forces all rendered
+// text uppercase (see index.css / check-caps.mjs), which would flatten a
+// literal letter into a capital I, so a vector shape is the same move
+// UmpireTierGlyph's home-plate icon already makes.
+function InfoIcon() {
+  return (
+    <svg viewBox="0 0 20 20" width="10" height="10" aria-hidden="true">
+      <circle cx="10" cy="5.5" r="1.8" fill="currentColor" />
+      <rect x="8.2" y="9" width="3.6" height="8" rx="1.2" fill="currentColor" />
+    </svg>
+  )
+}
+
+// The Attendance fact. When the park's capacity is on file (the 30 MLB
+// parks — see ballparkData.js) and tonight's attendance parses to a number, a
+// kraft "i" glyph sits next to the figure and unfolds a small note with the
+// percent full + the park's capacity — same tap-glyph-unfolds-in-place idiom
+// as the Umpires card's tier glyph (UmpireTierGlyph), just without a further
+// "full breakdown" modal since there's nothing more to show. MiLB parks and
+// any venue not on file, or an attendance value that won't parse, degrade to
+// the plain read-only Fact, per the app's graceful-degradation rule.
+function AttendanceFact({ venue, attendance }) {
+  const [open, setOpen] = useState(false)
+  const park = ballparkFor(venue)
+  const count = attendance ? Number(attendance.replace(/,/g, '')) : null
+  const pctFull = park?.capacity && count ? Math.round((count / park.capacity) * 100) : null
+
+  if (!pctFull) return <Fact label="Attendance" value={attendance} />
+
+  return (
+    <div className="fact">
+      <dt className="fact__label">Attendance</dt>
+      <dd className="fact__value attendance__value">
+        {attendance}
+        <button
+          type="button"
+          className={`attendance__glyph${open ? ' attendance__glyph--open' : ''}`}
+          onClick={() => setOpen((was) => !was)}
+          aria-expanded={open}
+          aria-label="How full is the stadium"
+        >
+          <InfoIcon />
+        </button>
+      </dd>
+      {open && (
+        <p className="attendance__note">
+          <span className="attendance__note-pct">{pctFull}% full</span>
+          <span className="attendance__note-cap">{park.capacity.toLocaleString()} capacity</span>
+        </p>
+      )}
     </div>
   )
 }

@@ -2892,6 +2892,72 @@ body {
   font-weight: var(--w-regular);
 }
 
+/* Attendance's "i" glyph + the unfold note it opens — same tap-glyph idiom
+   as the Umpires card's .umptier__glyph, but deliberately quiet at rest
+   (just background info, not a tier read worth a loud fill): the card's own
+   surface + rule color, with only the icon tinted kraft as a small tap hint.
+   Tapping it open switches to the kraft fill, same look the tier glyph uses
+   for its own open state. */
+.attendance__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.attendance__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--seal);
+  cursor: pointer;
+}
+.attendance__glyph:hover {
+  box-shadow: 0 0 0 1px var(--border-rule);
+}
+.attendance__glyph--open {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--seal-ink);
+}
+.attendance__glyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.attendance__note {
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.attendance__note-pct {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+.attendance__note-cap {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+@media (prefers-reduced-motion: reduce) {
+  .attendance__note {
+    animation: none;
+  }
+}
+
 .section__title {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -3136,15 +3202,32 @@ body {
   color: var(--text-caption);
   font-weight: var(--w-bold);
   text-align: center;
+  /* .lineup__row/.roster__row keep align-items: start (see above) so these
+     stay pinned to the name's first line when a namewrap pill note wraps the
+     row taller; a normal single-line row is shorter than that edge case
+     accounts for, and start alignment there reads as sitting a hair high
+     against the namewrap content's own centered line — align-self here
+     re-centers this column within its actual row-track height. */
+  align-self: center;
 }
 
-/* Jersey number sits between name and pos/hand, in seam red. */
+/* Jersey number sits between name and pos/hand, in seam red — matched to
+   pos/hand's --fs-compact so the two line up as one size, not the row's
+   larger --fs-ui leaking in unset. */
 .lineup__jersey,
 .roster__jersey,
 .opp__jersey {
   color: var(--clay);
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-align: right;
+}
+/* .opp__pitcher (below) already centers its whole row, so only the lineup/
+   roster rows (align-items: start — see .lineup__row/.roster__row) need the
+   re-center override; see .lineup__order's comment above for why. */
+.lineup__jersey,
+.roster__jersey {
+  align-self: center;
 }
 
 .lineup__name,
@@ -3181,6 +3264,21 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
+  align-self: center;
+}
+
+/* The one thing that actually wraps a lineup/roster row taller is an open
+   RadarPill note (Breakout/Cooling — see radarpill__note's flex: 1 0 100%
+   trick). In that expanded state, revert order/jersey/pos from the center
+   override above back to start, pinned level with the name's first line
+   rather than drifting toward the middle of the now-taller row. */
+.lineup__row:has(.radarpill__note) .lineup__order,
+.lineup__row:has(.radarpill__note) .lineup__jersey,
+.lineup__row:has(.radarpill__note) .lineup__pos,
+.roster__row:has(.radarpill__note) .roster__order,
+.roster__row:has(.radarpill__note) .roster__jersey,
+.roster__row:has(.radarpill__note) .roster__pos {
+  align-self: start;
 }
 
 /* Birthday cake beside a name on the staging sheet (see TeamInfo's
