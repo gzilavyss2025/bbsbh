@@ -13,7 +13,11 @@ import { useState } from 'react'
 // COLLAPSE_THRESHOLD) open the ledger collapsed to a one-line-per-group
 // tally with a real "show everything" action, so a 40-honor case doesn't
 // dominate the page by default the way an always-open list would. Renders
-// nothing when the player has neither a hero nor any groups.
+// nothing when the player has neither a hero nor any groups. The section
+// title sits OUTSIDE the bordered card, like every other multi-row section
+// (Career, Game log, Statcast, Season splits) — Trophy Case used to bake
+// it in like the smaller Milestone Watch widget, but it's card-shaped and
+// content-rich like those, not a compact single-fact card like that one.
 const COLLAPSE_THRESHOLD = 16
 
 export function TrophyCase({ trophyCase }) {
@@ -25,24 +29,26 @@ export function TrophyCase({ trophyCase }) {
   const dense = remaining > COLLAPSE_THRESHOLD
 
   return (
-    <div className="trophycase">
+    <>
       <h3 className="section__title"><span>Trophy Case</span></h3>
-      <Marquee hero={hero} />
-      {dense && !expanded ? (
-        <Tally groups={groups} remaining={remaining} onExpand={() => setExpanded(true)} />
-      ) : (
-        <>
-          {groups.map((g) => (
-            <Group key={g.key} group={g} />
-          ))}
-          {dense && (
-            <button type="button" className="ledger-collapse" onClick={() => setExpanded(false)}>
-              Show fewer
-            </button>
-          )}
-        </>
-      )}
-    </div>
+      <div className="trophycase">
+        <Marquee hero={hero} />
+        {dense && !expanded ? (
+          <Tally groups={groups} remaining={remaining} onExpand={() => setExpanded(true)} />
+        ) : (
+          <>
+            {groups.map((g) => (
+              <Group key={g.key} group={g} />
+            ))}
+            {dense && (
+              <button type="button" className="ledger-collapse" onClick={() => setExpanded(false)}>
+                Show fewer
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -56,10 +62,15 @@ function Marquee({ hero }) {
   // "nothing else to compare it to" case.
   const eyebrow = hero.kind === 'inseason' && hero.row.count > 1 ? 'Most frequent honor' : 'Career-defining honor'
   const name = hero.kind === 'allstar' ? `★ ${hero.row.label}` : hero.row.label
+  // Hardware only gradates by prestige (see PREMIER_HERO_RANK_CUTOFF in
+  // person.js) — an All-Star or in-season hero has nothing to gradate
+  // against (there's no "which All-Star nod was bigger"), so both default
+  // to the full-size treatment.
+  const premier = hero.kind !== 'hardware' || hero.premier
   return (
     <div className="plaque">
       <p className={`plaque-eyebrow tier-${tier}`}>{eyebrow}</p>
-      <p className="plaque-name">{name}</p>
+      <p className={`plaque-name${premier ? '' : ' plaque-name--lesser'}`}>{name}</p>
       <span className={`plaque-rule tier-${tier}`} aria-hidden="true" />
       <p className="plaque-years">{hero.row.dates.join(', ')}</p>
     </div>

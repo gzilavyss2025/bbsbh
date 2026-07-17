@@ -2899,6 +2899,14 @@ body {
   color: var(--text-caption);
   margin: 18px 0 8px;
 }
+/* "Current season" is the player page's primary mid-game glance — every
+   other SectionTitle reads as an equal, generic label, so this one alone
+   gets bumped a size and inked in the accent color to read as the page's
+   headline stat block, not just another section among many. */
+.section__title--primary {
+  font-size: var(--fs-h2);
+  color: var(--accent-primary);
+}
 
 .umps__list {
   list-style: none;
@@ -9989,14 +9997,11 @@ body {
    .ledger-row.is-allstar), the same mechanism the career register already
    uses for its own All-Star rows, not a rail or a badge. */
 .trophycase {
-  margin: 8px 2px 0;
+  margin: 0 2px;
   padding: 10px 12px 12px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
-}
-.trophycase .section__title {
-  margin-top: 0;
 }
 
 /* ---- marquee: the single hero honor, no enclosing shape ---- */
@@ -10029,6 +10034,15 @@ body {
   font-size: var(--fs-title-sm);
   line-height: var(--lh-tight);
   color: var(--text-heading);
+}
+/* A hardware honor outside the top of HERO_RANK (person.js) — Gold Glove
+   down through All-MLB Second Team — is real, but not career-defining the
+   way an MVP or Cy Young is; the marquee says so by rendering smaller and
+   lighter, not just via the (identical) tier-hw color every hardware honor
+   already shares. */
+.plaque-name--lesser {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
 }
 .plaque-rule {
   display: block;

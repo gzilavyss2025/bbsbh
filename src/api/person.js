@@ -1321,6 +1321,13 @@ function heroRank(key) {
   const i = HERO_RANK.indexOf(key)
   return i === -1 ? Infinity : i
 }
+// The top half of HERO_RANK — season-defining, single-winner honors (MVP
+// through All-MLB First Team) — get the marquee's full typographic
+// treatment; the rest (Gold Glove down through All-MLB Second Team) are
+// real honors but not career-defining the same way, so the marquee renders
+// them smaller (see TrophyCase.jsx's Marquee). Keeps the demotion in sync
+// with HERO_RANK's own ordering rather than a second hand-curated list.
+const PREMIER_HERO_RANK_CUTOFF = 6
 
 // The single most prestigious honor a player has — major hardware outranks
 // an All-Star selection outranks the in-season honor won most often (a
@@ -1331,7 +1338,8 @@ function heroRank(key) {
 function pickHero(hardwareRows, allStarRow, inSeasonRows) {
   if (hardwareRows.length) {
     const sorted = hardwareRows.slice().sort((a, b) => heroRank(a.key) - heroRank(b.key))
-    return { kind: 'hardware', row: sorted[0] }
+    const premier = heroRank(sorted[0].key) < PREMIER_HERO_RANK_CUTOFF
+    return { kind: 'hardware', row: sorted[0], premier }
   }
   if (allStarRow) return { kind: 'allstar', row: allStarRow }
   if (inSeasonRows.length) {

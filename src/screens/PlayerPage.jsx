@@ -206,13 +206,17 @@ export function PlayerPage({ id, asOf, sportId }) {
           <section key={block.group}>
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
-            <SectionTitle title="Current season" note={
-              [
-                liveLevel,
-                block.group === 'pitching' && block.role ? roleWord(block.role) : null,
-                enteringLabel,
-              ].filter(Boolean).join(' · ')
-            } />
+            <SectionTitle
+              title="Current season"
+              primary
+              note={
+                [
+                  liveLevel,
+                  block.group === 'pitching' && block.role ? roleWord(block.role) : null,
+                  enteringLabel,
+                ].filter(Boolean).join(' · ')
+              }
+            />
             <StatGrid tiles={block.tiles} />
 
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
@@ -509,9 +513,9 @@ function StatGrid({ tiles }) {
   )
 }
 
-function SectionTitle({ title, note }) {
+function SectionTitle({ title, note, primary = false }) {
   return (
-    <h3 className="section__title">
+    <h3 className={`section__title${primary ? ' section__title--primary' : ''}`}>
       <span>{title}</span>
       {note && <em>{note}</em>}
     </h3>
