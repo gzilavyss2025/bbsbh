@@ -1,107 +1,109 @@
+import { useState } from 'react'
+
 // Trophy Case — the player page's career-honors card (api/person.js's
-// trophyCaseView): major hardware, All-Star selections, and in-season honors
-// (Player of the Week/Month, Rookie/Reliever of the Month, ...), each
-// collapsed into one badge per label with a count + the years/months it
-// happened, rather than one badge per instance — a decorated veteran can rack
-// up a dozen Player of the Week nods. Three glyphs, not one per award: a
-// laurel medal for hardware, the same All-Star blue as the hero banner/career
-// register for All-Star, a ribbon for in-season honors. Renders nothing when
-// the player has none of the three, so a rookie's page just skips the card.
+// trophyCaseView): a marquee for the single most prestigious honor
+// (`hero`), then everything else — in-season honors, Year-End Awards,
+// All-Star — as ledger groups below it. No per-award icon: a lettered
+// badge reads as a generic avatar no matter which two letters go inside
+// it, so the marquee is pure typographic hierarchy (an eyebrow, the
+// headline, a short tier-coloured rule, then the honor's own dates); a
+// ledger row's tier reads from a background tint, not an icon or a rail.
+// Every date renders, uncapped — a decorated veteran's dates are real
+// information, never hidden behind a "+N more". Dense careers (see
+// COLLAPSE_THRESHOLD) open the ledger collapsed to a one-line-per-group
+// tally with a real "show everything" action, so a 40-honor case doesn't
+// dominate the page by default the way an always-open list would. Renders
+// nothing when the player has neither a hero nor any groups.
+const COLLAPSE_THRESHOLD = 16
+
 export function TrophyCase({ trophyCase }) {
-  if (!trophyCase) return null
-  const { hardware, allStar, inSeason } = trophyCase
+  const [expanded, setExpanded] = useState(false)
+  if (!trophyCase?.hero) return null
+  const { hero, groups } = trophyCase
+
+  const remaining = groups.reduce((n, g) => n + g.count, 0)
+  const dense = remaining > COLLAPSE_THRESHOLD
 
   return (
     <div className="trophycase">
       <h3 className="section__title"><span>Trophy Case</span></h3>
-
-      {hardware.length > 0 && (
-        <Group label="Hardware">
-          {hardware.map((h) => (
-            <Badge key={h.key} icon={<HardwareIcon />} name={h.label} sub={h.sub} detail={h.detail} />
+      <Marquee hero={hero} />
+      {dense && !expanded ? (
+        <Tally groups={groups} remaining={remaining} onExpand={() => setExpanded(true)} />
+      ) : (
+        <>
+          {groups.map((g) => (
+            <Group key={g.key} group={g} />
           ))}
-        </Group>
-      )}
-
-      {allStar && (
-        <Group label="All-Star">
-          <Badge icon={<AllStarIcon />} name="All-Star" sub={allStar.sub} detail={allStar.detail} />
-        </Group>
-      )}
-
-      {inSeason.length > 0 && (
-        <Group label="In-season honors">
-          {inSeason.map((h) => (
-            <Badge key={h.key} icon={<InSeasonIcon />} name={h.label} sub={h.sub} detail={h.detail} />
-          ))}
-        </Group>
+          {dense && (
+            <button type="button" className="ledger-collapse" onClick={() => setExpanded(false)}>
+              Show fewer
+            </button>
+          )}
+        </>
       )}
     </div>
   )
 }
 
-function Group({ label, children }) {
+const HERO_TIER = { hardware: 'hw', allstar: 'as', inseason: 'is' }
+
+function Marquee({ hero }) {
+  const tier = HERO_TIER[hero.kind]
+  // "Most frequent" only means something once there's a second honor to
+  // have lost the comparison — a lone Player of the Week is this player's
+  // ONE honor so far, same footing as a lone Gold Glove, not a special
+  // "nothing else to compare it to" case.
+  const eyebrow = hero.kind === 'inseason' && hero.row.count > 1 ? 'Most frequent honor' : 'Career-defining honor'
+  const name = hero.kind === 'allstar' ? `★ ${hero.row.label}` : hero.row.label
   return (
-    <div className="trophycase__group">
-      <p className="trophycase__grouplabel">{label}</p>
-      <div className="trophycase__row">{children}</div>
+    <div className="plaque">
+      <p className={`plaque-eyebrow tier-${tier}`}>{eyebrow}</p>
+      <p className="plaque-name">{name}</p>
+      <span className={`plaque-rule tier-${tier}`} aria-hidden="true" />
+      <p className="plaque-years">{hero.row.dates.join(', ')}</p>
     </div>
   )
 }
 
-function Badge({ icon, name, sub, detail }) {
+function Tally({ groups, remaining, onExpand }) {
   return (
-    <div className="trophybadge">
-      <div className="trophybadge__icon">{icon}</div>
-      <p className="trophybadge__name">{name}</p>
-      {sub && <p className="trophybadge__sub">{sub}</p>}
-      {detail && <p className="trophybadge__detail">{detail}</p>}
+    <>
+      <div className="ledger-tally">
+        {groups.map((g) => (
+          <div className="ledger-tally__row" key={g.key}>
+            <span>{g.label}</span>
+            <b>{g.count}</b>
+          </div>
+        ))}
+      </div>
+      <button type="button" className="ledger-expand" onClick={onExpand}>
+        Show full trophy case — {remaining} honors
+      </button>
+    </>
+  )
+}
+
+function Group({ group }) {
+  return (
+    <div className="ledger-group">
+      <p className="ledger-taglabel">{group.label}</p>
+      <div className="ledger-rows">
+        {group.rows.map((r) => (
+          <Row key={r.key} row={r} isAllStar={group.key === 'allStar'} />
+        ))}
+      </div>
     </div>
   )
 }
 
-function HardwareIcon() {
+function Row({ row, isAllStar }) {
+  const multi = row.dates.length > 1
+  const cls = ['ledger-row', multi ? 'multi' : 'single', isAllStar && 'is-allstar'].filter(Boolean).join(' ')
   return (
-    <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true">
-      <circle cx="24" cy="19" r="15" fill="var(--award-soft)" stroke="var(--award-line)" strokeWidth="2" />
-      <path
-        d="M24 8 L26.6 15.2 34.2 15.5 28.1 20.1 30.3 27.3 24 23 17.7 27.3 19.9 20.1 13.8 15.5 21.4 15.2 Z"
-        fill="var(--award-ink)"
-      />
-      <path d="M15 33 L24 38 33 33 33 46 24 42 15 46 Z" fill="var(--award-line)" />
-    </svg>
-  )
-}
-
-function AllStarIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true">
-      <circle cx="24" cy="24" r="17" fill="var(--paper-2)" stroke="var(--allstar-blue)" strokeWidth="2" />
-      <path
-        d="M24 12 L27.1 20.6 36 21 28.9 26.6 31.5 35.4 24 30.2 16.5 35.4 19.1 26.6 12 21 20.9 20.6 Z"
-        fill="var(--allstar-blue)"
-      />
-    </svg>
-  )
-}
-
-function InSeasonIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 48 48" aria-hidden="true">
-      <path
-        d="M24 6 L40 14 V26 C40 35 33 41 24 43 C15 41 8 35 8 26 V14 Z"
-        fill="var(--award-soft)"
-        stroke="var(--award-line)"
-        strokeWidth="2"
-      />
-      <path
-        d="M17 24 L22 29 31 18"
-        fill="none"
-        stroke="var(--award-ink)"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div className={cls}>
+      <span className="lbl">{row.label}</span>
+      <span className="val">{row.dates.join(', ')}</span>
+    </div>
   )
 }

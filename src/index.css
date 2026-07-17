@@ -9929,13 +9929,19 @@ body {
   color: var(--accent-primary);
 }
 
-/* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): major
-   hardware, All-Star selections, and in-season honors (Player of the
-   Week/Month, ...), each grouped into one badge per label with a count
-   rather than one per instance. Sits in the achievements zone alongside
+/* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): a
+   marquee (.plaque) for the single most prestigious honor, then everything
+   else as ledger groups below it. Sits in the achievements zone alongside
    Milestone Watch and Firsts, right after the fact grid — same bordered-card
-   treatment as .milestonewatch so the two read as siblings. Group labels
-   reuse the same small uppercase caption as .milestonewatch__title. */
+   treatment as .milestonewatch so the two read as siblings.
+
+   No per-award icon: a lettered badge in a ring reads as a generic avatar
+   no matter which two letters go inside it, so the marquee is pure
+   typographic hierarchy — an eyebrow, the headline, a short tier-coloured
+   rule (a divider, not an icon standing in for one), then the honor's own
+   dates. A ledger row's tier reads from a background tint (see
+   .ledger-row.is-allstar), the same mechanism the career register already
+   uses for its own All-Star rows, not a rail or a badge. */
 .trophycase {
   margin: 8px 2px 0;
   padding: 10px 12px 12px;
@@ -9946,62 +9952,212 @@ body {
 .trophycase .section__title {
   margin-top: 0;
 }
-.trophycase__group {
-  margin-top: 12px;
+
+/* ---- marquee: the single hero honor, no enclosing shape ---- */
+.plaque {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-.trophycase__group:first-of-type {
-  margin-top: 6px;
+.plaque-eyebrow {
+  margin: 0 0 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }
-.trophycase__grouplabel {
-  margin: 0 0 8px;
+.plaque-eyebrow.tier-hw {
+  color: var(--award-ink);
+}
+.plaque-eyebrow.tier-as {
+  color: var(--allstar-blue);
+}
+.plaque-eyebrow.tier-is {
+  color: var(--graphite);
+}
+.plaque-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+.plaque-rule {
+  display: block;
+  width: 30px;
+  height: 3px;
+  margin: 9px 0 8px;
+  border-radius: var(--radius-xs);
+}
+.plaque-rule.tier-hw {
+  background: var(--award-line);
+}
+.plaque-rule.tier-as {
+  background: var(--allstar-blue);
+}
+.plaque-rule.tier-is {
+  background: var(--graphite-soft);
+}
+.plaque-years {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+}
+
+/* ---- ledger: flex rows, not a rigid table — a date list needs to wrap,
+   not truncate to fit a table cell. Every row shows ALL of its honor's
+   dates, uncapped — a row with more than one grows onto its own line and
+   wraps rather than hiding a "+N more". ---- */
+.ledger-group {
+  margin-top: 14px;
+}
+.plaque + .ledger-group {
+  padding-top: 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.ledger-taglabel {
+  margin: 0 0 6px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   color: var(--graphite);
 }
-.trophycase__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
+.ledger-rows {
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
-.trophybadge {
-  width: 84px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+.ledger-row {
+  padding: 7px 9px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
-.trophybadge__icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 4px;
+.ledger-row:first-child {
+  border-top: none;
 }
-.trophybadge__icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.trophybadge__name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  line-height: var(--lh-snug);
+.ledger-row .lbl {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
   color: var(--text-body);
 }
-.trophybadge__sub {
-  margin: 2px 0 0;
+.ledger-row .val {
+  display: block;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+}
+/* One date: label + date share the line, date pinned right. */
+.ledger-row.single {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ledger-row.single .val {
+  text-align: right;
+  white-space: nowrap;
+}
+/* Several dates: label gets its own line, the full list wraps beneath it
+   across as many lines as it needs — the card grows, nothing truncates. */
+.ledger-row.multi .lbl {
+  display: block;
+  margin-bottom: 3px;
+}
+.ledger-row.multi .val {
+  line-height: var(--lh-loose);
+}
+.ledger-row.is-allstar {
+  background: color-mix(in srgb, var(--allstar-blue) 8%, var(--surface-inset));
+}
+.ledger-row.is-allstar .val {
+  color: var(--allstar-blue-deep);
+  font-weight: var(--w-semibold);
+}
+
+/* ---- collapsed tally + expand — dense careers (see COLLAPSE_THRESHOLD in
+   TrophyCase.jsx) open the ledger collapsed to one line per group instead
+   of the full list, with a real "show everything" action, never a
+   dead-end "+N more". ---- */
+.ledger-tally {
+  margin-top: 14px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.ledger-tally__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-num);
-  color: var(--award-ink);
+  color: var(--graphite);
 }
-.trophybadge__detail {
-  margin: 1px 0 0;
+.ledger-tally__row:first-child {
+  border-top: none;
+}
+.ledger-tally__row b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.ledger-expand {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--award-line);
+  border-radius: var(--radius-sm);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.ledger-expand:hover {
+  background: var(--award-line);
+  color: var(--paper-2);
+}
+.ledger-expand:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.ledger-collapse {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ledger-collapse:hover {
+  color: var(--text-body);
+}
+.ledger-collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* ---------------------------------------------------------------- posinn
