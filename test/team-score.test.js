@@ -126,7 +126,7 @@ test('league Season Grades require both inputs and never look past the cutoff', 
   } } } }
 
   assert.deepEqual(leagueSeasonGradesFor(quality, surprise, 2026, '2026-07-11'), [
-    { teamId: 1, score: 7.4 },
-    { teamId: 2, score: 7 },
+    { teamId: 1, score: 7.4, tiebreak: [undefined, undefined] },
+    { teamId: 2, score: 7, tiebreak: [undefined, undefined] },
   ])
 })
