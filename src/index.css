@@ -7886,23 +7886,6 @@ body {
   padding: 1px 6px;
 }
 
-/* Org-wide leaders link on the team page — a standalone affordance under the
-   team's own leaders cross-section (styled like .tlead__seeall). */
-.tlead__orglink {
-  display: inline-block;
-  margin-top: 12px;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-link);
-}
-
 /* Leaders page (league/level/org). Reuses the .levelnav toggle look for its
    scope switcher, just centered + allowed to wrap onto a second line on a
    phone (seven scopes vs. the slate's five). */
@@ -11900,10 +11883,12 @@ body {
 }
 
 /* MLB team page's farm-system section — one card per full-season affiliate
-   (AAA/AA/A+/A), each a plain link to that club's own team page. */
+   (AAA/AA/A+/A), each a plain link to that club's own team page. Fixed at
+   two columns (not auto-fill) so four cards always fill two full rows
+   rather than an orphaned single card stranded on a third row. */
 .thub-affiliates {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 .thub-affiliate {
@@ -11945,6 +11930,92 @@ body {
   letter-spacing: var(--ls-caps);
   font-size: var(--fs-caption);
   color: var(--text-caption);
+}
+
+/* Prospect showcase — headshot spotlight strip above the ranked table,
+   spotlighting only the very top of the org list (see PROSPECT_SHOWCASE_COUNT
+   in TeamPage.jsx). Fixed column counts (not auto-fill) so the strip always
+   reads as one full row rather than wrapping an odd card onto its own line;
+   the row grows from 3 to 5 cards as the viewport (and .screen's own
+   max-width) widens, so a phone shows fewer, wider faces and the desktop
+   .screen width (960px, see the 740px breakpoint above) shows the whole
+   top-5 at once. Extra cards beyond the current column count are rendered
+   but hidden rather than unmounted, so no layout shift on resize. */
+.prospectshowcase {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.prospectshowcase__card:nth-child(n + 4) {
+  display: none;
+}
+@media (min-width: 420px) {
+  .prospectshowcase {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .prospectshowcase__card:nth-child(n + 4) {
+    display: flex;
+  }
+  .prospectshowcase__card:nth-child(n + 5) {
+    display: none;
+  }
+}
+@media (min-width: 740px) {
+  .prospectshowcase {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .prospectshowcase__card:nth-child(n + 5) {
+    display: flex;
+  }
+}
+.prospectshowcase__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+.prospectshowcase__shotwrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+.shot.prospectshowcase__shot {
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--shot-md-w) / var(--shot-md-h);
+}
+.shot.prospectshowcase__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.prospectshowcase__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-align: center;
+  line-height: var(--lh-ui);
+}
+.prospectshowcase__name {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  line-height: var(--lh-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 /* Team-page prospect table — an org's farm-system leaderboard, shown only on

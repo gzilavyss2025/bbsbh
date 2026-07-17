@@ -31,6 +31,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { Headshot } from '../components/Headshot.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { ManagerLink } from '../components/ManagerLink.jsx'
@@ -55,6 +56,10 @@ import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
 const DASH = '—'
 // Org prospect list starts collapsed to the top 10, expandable to the full ~30.
 const PROSPECTS_PREVIEW_COUNT = 10
+// Headshot spotlight strip above the ranked table shows only the very top of
+// the list; how many of these actually render is viewport-width-driven (see
+// .prospectshowcase in index.css), this is just the outer cap.
+const PROSPECT_SHOWCASE_COUNT = 5
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
 // Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
 const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
@@ -663,6 +668,10 @@ export function TeamPage({ id, asOf, sportId }) {
   // the top-10 preview without a prop-syncing effect.
   const [expandedProspectsTeamId, setExpandedProspectsTeamId] = useState(null)
   const showAllProspects = expandedProspectsTeamId === teamId
+  // Injured List starts fully collapsed (0 rows) on every club, same
+  // team-keyed pattern as the prospects preview above.
+  const [expandedInjuredTeamId, setExpandedInjuredTeamId] = useState(null)
+  const showInjured = expandedInjuredTeamId === teamId
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
@@ -782,6 +791,17 @@ export function TeamPage({ id, asOf, sportId }) {
           </>
         )}
 
+        {transactionsPage.days.length > 0 && (
+          <TeamTransactionsCard
+            key={`${team.id}-${asOf ?? ''}`}
+            teamId={team.id}
+            asOf={asOf}
+            initialDays={transactionsPage.days}
+            initialCursor={transactionsPage.cursor}
+            initialHasMore={transactionsPage.hasMore}
+          />
+        )}
+
         {schedule.length > 0 && (
           <>
             <SectionTitle title="Schedule" />
@@ -804,25 +824,26 @@ export function TeamPage({ id, asOf, sportId }) {
           showTeamAbbr={false}
           injuredIds={injuredIds}
           horizontal
+          // Org-wide leaders across the club's whole farm system — the MLB club
+          // uses its own id, a MiLB affiliate its parent org's. Keys off the
+          // team's real level (isMilb), not the sportId prop, which is null on a
+          // bare /team/{id} link (it only carries a game's spoiler cutoff).
+          secondaryAction={
+            (!isMilb || team.parentOrgId) && (
+              <button
+                type="button"
+                className="tlead__seeall"
+                onClick={() =>
+                  navigate(
+                    orgLeadersPath(isMilb ? team.parentOrgId : teamId, { d: asOf, s: sportId }),
+                  )
+                }
+              >
+                Org leaders ›
+              </button>
+            )
+          }
         />
-
-        {/* Org-wide leaders across the club's whole farm system — the MLB club
-            uses its own id, a MiLB affiliate its parent org's. Keys off the
-            team's real level (isMilb), not the sportId prop, which is null on a
-            bare /team/{id} link (it only carries a game's spoiler cutoff). */}
-        {(!isMilb || team.parentOrgId) && (
-          <button
-            type="button"
-            className="tlead__orglink"
-            onClick={() =>
-              navigate(
-                orgLeadersPath(isMilb ? team.parentOrgId : teamId, { d: asOf, s: sportId }),
-              )
-            }
-          >
-            Organization leaders ›
-          </button>
-        )}
 
         {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
           <>
@@ -925,23 +946,18 @@ export function TeamPage({ id, asOf, sportId }) {
         {injured.length > 0 && (
           <>
             <SectionTitle title="Injured List" />
-            <RosterList
-              season={season}
-              showProspect={false}
-              rows={injured.map((p) => ({ ...p, badge: p.ilLabel, badgeClass: 'ilchip', war: undefined }))}
-            />
+            {showInjured ? (
+              <RosterList
+                season={season}
+                showProspect={false}
+                rows={injured.map((p) => ({ ...p, badge: p.ilLabel, badgeClass: 'ilchip', war: undefined }))}
+              />
+            ) : (
+              <button type="button" className="pshistory__more" onClick={() => setExpandedInjuredTeamId(teamId)}>
+                Show {injured.length} injured
+              </button>
+            )}
           </>
-        )}
-
-        {transactionsPage.days.length > 0 && (
-          <TeamTransactionsCard
-            key={`${team.id}-${asOf ?? ''}`}
-            teamId={team.id}
-            asOf={asOf}
-            initialDays={transactionsPage.days}
-            initialCursor={transactionsPage.cursor}
-            initialHasMore={transactionsPage.hasMore}
-          />
         )}
 
         {isMilb && affiliationHistory.length > 0 && (
@@ -971,6 +987,17 @@ export function TeamPage({ id, asOf, sportId }) {
         {!isMilb && prospects.length > 0 && (
           <>
             <SectionTitle title="Prospects" note="org rank" />
+            <div className="prospectshowcase">
+              {prospects.slice(0, PROSPECT_SHOWCASE_COUNT).map((p) => (
+                <PlayerLink key={p.playerId} id={p.playerId} className="prospectshowcase__card">
+                  <span className="prospectshowcase__shotwrap">
+                    <Headshot personId={p.playerId} name={p.name} teamId={p.affiliateTeamId} className="prospectshowcase__shot" />
+                    {p.position && <span className="prospectshowcase__posbadge">{p.position}</span>}
+                  </span>
+                  <span className="prospectshowcase__name">{p.name}</span>
+                </PlayerLink>
+              ))}
+            </div>
             <div className="ledger-wrap">
               <table className="ledger prospecttable">
                 <thead>
