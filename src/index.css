@@ -13418,16 +13418,34 @@ body {
   min-width: 0;
   text-align: center;
 }
+/* The frame's height comes from the ::before spacer's padding-top (a
+   percentage of shotwrap's own width) rather than `aspect-ratio` on .shot
+   directly — a source photo's real pixel dimensions can otherwise leak
+   through as a min-content contribution in this flex/grid ancestry and
+   inflate the card past its intended size (seen live: a MiLB prospect whose
+   milb-context photo is a much taller portrait than the usual silo cutout
+   blew its card out to nearly double height). Taking .shot out of flow with
+   `position: absolute` severs that path entirely — its size comes from
+   `inset: 0` against the already-sized shotwrap, never from its own content,
+   so any future photo (right, wrong, or oddly shaped) is powerless to resize
+   the card. */
 .prospectshowcase__shotwrap {
   position: relative;
   display: block;
   width: 100%;
   border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.prospectshowcase__shotwrap::before {
+  content: '';
+  display: block;
+  padding-top: calc(var(--shot-md-h) / var(--shot-md-w) * 100%);
 }
 .shot.prospectshowcase__shot {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  aspect-ratio: var(--shot-md-w) / var(--shot-md-h);
+  height: 100%;
 }
 .shot.prospectshowcase__shot.shot--fallback {
   font-size: var(--fs-title-lg);
