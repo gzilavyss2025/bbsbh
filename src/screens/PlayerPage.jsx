@@ -219,6 +219,28 @@ export function PlayerPage({ id, asOf, sportId }) {
             />
             <StatGrid tiles={block.tiles} />
 
+            {/* No header — sitting right beneath Current season's tiles,
+                a vs-LHP/RHP (or vs-LHB/RHB) breakdown of the same season
+                is self-explanatory without its own "Season splits" label.
+                .player__seasonsplits just gives it breathing room off the
+                stat grid above — neither carries its own margin, so with
+                no SectionTitle between them the two cards would touch. */}
+            {block.splits && (
+              <div className="player__seasonsplits">
+                <Ledger
+                  leftCols={1}
+                  head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                  rows={[
+                    { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
+                    { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
+                  ].map(({ key, label, side }) => ({
+                    key,
+                    cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
+                  }))}
+                />
+              </div>
+            )}
+
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
                 leaguer's AAA line) — promoted beside the main tiles instead of
                 buried in the register footnote. Full-season figures, so labeled
@@ -298,23 +320,6 @@ export function PlayerPage({ id, asOf, sportId }) {
             />
 
             {block.register && <CareerRegister register={block.register} />}
-
-            {block.splits && (
-              <>
-                <SectionTitle title="Season splits" note={block.splitsLabel} />
-                <Ledger
-                  leftCols={1}
-                  head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
-                  rows={[
-                    { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
-                    { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
-                  ].map(({ key, label, side }) => ({
-                    key,
-                    cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
-                  }))}
-                />
-              </>
-            )}
           </section>
           )
         })}

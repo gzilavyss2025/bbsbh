@@ -9390,6 +9390,13 @@ body {
   font-size: var(--fs-title-sm);
 }
 
+/* The header-less vs-LHP/RHP split ledger sitting directly under the stat
+   grid above (see PlayerPage.jsx) — neither card carries its own margin,
+   so without a SectionTitle between them they'd otherwise touch. */
+.player__seasonsplits {
+  margin-top: 10px;
+}
+
 .player__blocktitle {
   font-family: var(--font-display);
   text-transform: uppercase;

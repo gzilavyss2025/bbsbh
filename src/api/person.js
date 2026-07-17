@@ -1831,7 +1831,6 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     }),
     arsenal: group === 'pitching' ? arsenalView(arsenalSplits) : null,
     splits: splitsView(lrSplits, group),
-    splitsLabel: group === 'pitching' ? 'opp. batter' : '',
     gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8, { tagLevel: logTagLevel }),
     // The unified MLB + MiLB career table. `career` (the API's MLB career line
     // for a debuted player) foots the MLB total; the current-season row uses
