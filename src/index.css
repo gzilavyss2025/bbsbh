@@ -9190,11 +9190,29 @@ body {
   padding: 7px 8px;
   font-size: var(--fs-small);
   text-align: right;
-  border-top: var(--bw-hair) solid var(--border-hairline);
   /* Data cells are single tokens; keep them on one line so a value like the
      pitcher W–L ("10–7") never wraps at its en-dash onto a second row. The
      wrap lives on .ledger-wrap (horizontal scroll) instead. */
   white-space: nowrap;
+}
+/* Row dividers as ONE full-width line per row (a background gradient owned by
+   the row) rather than a per-cell `border-top`. These are auto-layout tables,
+   and a row that carries a logo cell (the prospect tables' team/level columns)
+   gets a fractional intrinsic height; the browser then rounds that odd cell's
+   border box a device pixel off its text-only neighbors, so a per-cell top
+   border steps the hairline at that one seam (visible under BOTH `collapse`
+   and `separate` — it's a fractional-row-height artifact, not a collapse one).
+   A single line owned by the whole row snaps to device pixels exactly once, so
+   it stays flat across every column seam. thead has no rule; tfoot keeps its
+   own heavier one below. */
+.ledger tbody td {
+  border-top: none;
+}
+.ledger tbody tr {
+  background-image: linear-gradient(var(--border-hairline), var(--border-hairline));
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 100% var(--bw-hair);
 }
 .ledger thead th {
   border-top: none;
