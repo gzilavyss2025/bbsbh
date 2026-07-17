@@ -15,6 +15,7 @@ import { AbsRow } from '../components/StatBox.jsx'
 import { PerformerCard } from '../components/PastDayRecapBox.jsx'
 import { CalloutNote } from '../components/CalloutNote.jsx'
 import { GameBuzzCard } from '../components/GameBuzz.jsx'
+import { GameStoryCard } from '../components/GameStoryCard.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -283,6 +284,7 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
           the crowd's own reaction in Game Buzz right below it — both now
           share this one reveal instead of asking for a second tap. */}
       <InsightsCard calloutNotes={calloutNotes} />
+      <GameStoryCard feed={feed} />
       <GameBuzzCard feed={feed} />
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>
