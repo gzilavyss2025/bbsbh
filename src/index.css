@@ -13493,43 +13493,77 @@ body {
    batting/pitching leaders. Reached by navigating straight from a bracket
    tap (PostseasonHistoryPage) rather than a modal, so these are ordinary
    page sections, not a floating scrim card. */
-.psseries__trophy {
-  display: block;
-  margin: 0 auto;
-  height: 56px;
-  width: auto;
-}
-/* The final result — bumped up from the original compact row to an actual
-   hero banner (card chrome, --fs-num-xl "revealed final score" role, bigger
-   logos matching the slate's own biggest mark size — see .gamecard__logobox)
-   since it's the page's headline fact, not a footnote next to the title. */
+/* The series-result hero — a navy "pennant band" headline (the ink-filled
+   band idiom the BOX SCORE button already establishes, promoted to a
+   declaration: "Brewers win in 5") over a two-row scorebook LEDGER. Each
+   club's row reads like a series linescore: crest + name at left, one small
+   grid cell per game (inked navy = that club took that game, so the series'
+   arc — who won which games — is legible at a glance), and the series-wins
+   total as the big mono figure on the right, exactly where a linescore's R
+   column sits. Replaces the old floating logos + centered "3–2", which had
+   no structure to hold the space it claimed. */
 .psseries__result {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(12px, 5vw, 28px);
   margin: var(--space-3) 0;
-  padding: 20px 12px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-lg);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.psseries__banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: 10px var(--space-4);
+  background: var(--accent-primary);
+  /* Medal-amber seam under the band — championship trim. */
+  border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+.psseries__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-tight);
+  color: var(--text-on-ink);
+}
+/* The World Series trophy sits inside the band, not floating above the card. */
+.psseries__trophy {
+  flex: none;
+  height: 44px;
+  width: auto;
+}
+.psseries__ledger {
+  padding: var(--space-2) var(--space-3);
 }
 .psseries__team {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-2);
   border-radius: var(--radius-sm);
+}
+.psseries__team + .psseries__team {
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .psseries__teamlink {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 6px 4px;
+  gap: 10px;
+  min-width: 0;
   font-family: var(--font-display);
   font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-title);
-  text-align: center;
-  max-width: 120px;
+}
+.psseries__teamname {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .psseries__team--winner .psseries__teamlink {
   color: var(--text-heading);
@@ -13540,21 +13574,81 @@ body {
 }
 /* Same favorite-team highlight as .psleaders__teamrow--fav (--fav-accent,
    set inline from favoriteAccentColor()) — only lit when the user's own
-   team actually played in this series. */
+   team actually played in this series. Reads as a tinted ledger row with
+   an accent spine on the left edge. */
 .psseries__team--fav {
   background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
-  box-shadow: inset 0 -2px 0 var(--fav-accent, var(--accent-primary));
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
 }
 .psseries__team--fav .psseries__teamlink {
   opacity: 1;
 }
-.psseries__score {
-  flex: none;
+/* Per-game win cells — scorebook frames. An inked cell is a game that club
+   won; an empty pressed-paper cell is one it dropped. Numbered by game so
+   the winner's row shows WHERE in the series the games were taken. */
+.psseries__cells {
+  display: flex;
+  gap: 4px;
+}
+.psseries__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--bg-page);
+  box-shadow: var(--inset-cell);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-xl);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.psseries__cell--won {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: none;
+  color: var(--text-on-ink);
   font-weight: var(--w-bold);
+}
+/* Series wins — the ledger's "R column": big tabular mono at the row's end. */
+.psseries__wins {
+  min-width: 34px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
   color: var(--text-heading);
+}
+.psseries__team--loser .psseries__wins {
+  color: var(--text-muted);
+}
+@media (min-width: 740px) {
+  .psseries__headline {
+    font-size: var(--fs-hero-lg);
+  }
+  .psseries__banner {
+    min-height: 60px;
+    padding: 12px var(--space-5);
+  }
+  .psseries__trophy {
+    height: 52px;
+  }
+  .psseries__ledger {
+    padding: var(--space-3) var(--space-4);
+  }
+  .psseries__cell {
+    width: 26px;
+    height: 26px;
+    font-size: var(--fs-compact);
+  }
+  .psseries__wins {
+    font-size: var(--fs-num-xl);
+    min-width: 44px;
+  }
 }
 /* Each game renders as the same "revealed" result card the slate's past-day
    flip cards show (GameResultFace: final line, decisions, play of the game)

@@ -121,6 +121,9 @@ export function PostseasonSeriesPage({ seriesId }) {
   const favStyle = (teamId) => (isFav(teamId) ? { '--fav-accent': favoriteAccentColor(teamId) } : undefined)
   const hasBatting = Object.values(stats.batting).some((v) => v.length > 0)
   const hasPitching = Object.values(stats.pitching).some((v) => v.length > 0)
+  // Who took each game, in order — feeds the hero ledger's per-game win cells.
+  // Same away/home score comparison seriesStatusAfterGame already relies on.
+  const gameWinnerIds = games.map((g) => (g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId))
 
   return (
     <div className="screen psseries">
@@ -133,32 +136,63 @@ export function PostseasonSeriesPage({ seriesId }) {
         </h1>
       </header>
 
-      {isWorldSeries && (
-        <img
-          src="/brand/world-series-trophy.png"
-          alt=""
-          className="psseries__trophy"
-          aria-hidden="true"
-        />
-      )}
-
-      <div className="psseries__result">
-        <div className={`psseries__team psseries__team--winner${isFav(winner.teamId) ? ' psseries__team--fav' : ''}`} style={favStyle(winner.teamId)}>
-          <TeamLink id={winner.teamId} className="psseries__teamlink">
-            <TeamLogo teamId={winner.teamId} name={teamClubNameShort(winner.teamId)} size={64} />
-            <span className="psseries__teamname">{teamClubNameShort(winner.teamId)}</span>
-          </TeamLink>
+      {/* The series-result hero: a navy pennant band declaring the outcome
+          ("Brewers win in 5" — the clincher count IS games.length, since the
+          history file only ever stores games actually played), over a
+          scorebook ledger — one row per club, per-game win cells (an inked
+          cell = that club took that game, so the row scans like a series
+          linescore), and the series-wins total as the big right-hand figure.
+          The World Series trophy folds into the band instead of floating
+          above the card. */}
+      <section className="psseries__result">
+        <div className="psseries__banner">
+          <h2 className="psseries__headline">
+            {teamClubNameShort(winner.teamId)} win in {games.length}
+          </h2>
+          {isWorldSeries && (
+            <img
+              src="/brand/world-series-trophy.png"
+              alt=""
+              className="psseries__trophy"
+              aria-hidden="true"
+            />
+          )}
         </div>
-        <span className="psseries__score">
-          {winner.wins}–{loser.wins}
-        </span>
-        <div className={`psseries__team psseries__team--loser${isFav(loser.teamId) ? ' psseries__team--fav' : ''}`} style={favStyle(loser.teamId)}>
-          <TeamLink id={loser.teamId} className="psseries__teamlink">
-            <TeamLogo teamId={loser.teamId} name={teamClubNameShort(loser.teamId)} size={64} />
-            <span className="psseries__teamname">{teamClubNameShort(loser.teamId)}</span>
-          </TeamLink>
+        <div className="psseries__ledger">
+          {[winner, loser].map((team) => {
+            const wonSeries = team.teamId === winner.teamId
+            return (
+              <div
+                key={team.teamId}
+                className={`psseries__team psseries__team--${wonSeries ? 'winner' : 'loser'}${isFav(team.teamId) ? ' psseries__team--fav' : ''}`}
+                style={favStyle(team.teamId)}
+              >
+                <TeamLink id={team.teamId} className="psseries__teamlink">
+                  <TeamLogo teamId={team.teamId} name={teamClubNameShort(team.teamId)} size={36} />
+                  <span className="psseries__teamname">{teamClubNameShort(team.teamId)}</span>
+                </TeamLink>
+                {/* Decorative game-by-game trace — the row's series-wins figure
+                    and the banner headline already carry the result for
+                    assistive tech. */}
+                <div className="psseries__cells" aria-hidden="true">
+                  {games.map((g, i) => {
+                    const wonGame = gameWinnerIds[i] === team.teamId
+                    return (
+                      <span
+                        key={g.gameNumber}
+                        className={`psseries__cell${wonGame ? ' psseries__cell--won' : ''}`}
+                      >
+                        {wonGame ? g.gameNumber : ''}
+                      </span>
+                    )
+                  })}
+                </div>
+                <span className="psseries__wins">{team.wins}</span>
+              </div>
+            )
+          })}
         </div>
-      </div>
+      </section>
 
       <div className="psseries__games">
         {games.map((g, i) => {
