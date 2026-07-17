@@ -15,6 +15,7 @@ const MENU_ITEMS = [
   { label: 'Awards History', path: '/awards' },
   { label: 'Postseason History', path: '/postseason-history' },
   { label: 'All Star Game', path: '/all-star-rosters' },
+  { label: 'All-Star Legacy', path: '/all-star-legacy' },
   { label: 'My First Scorebook', path: '/first-scorebook' },
   { label: 'Logo Sheet', path: '/logos' },
   { label: 'About', path: '/about' },

@@ -16091,3 +16091,312 @@ body {
   .scorebookstory__filters { overflow-x: auto; }
   .scorebookstory__filters button { flex: none; }
 }
+
+/* --------------------------------------------------------- all-star legacy page
+   Two sections: a header grid of the all-time appearance leaders among ACTIVE
+   players (see AllStarLegacyPage.jsx), then one card per current MLB club with
+   every All-Star it's ever produced. Both reuse the milestone-watch page's
+   portrait-card shape (.milestonewatch-page__card) in spirit, but as plain CSS
+   grids rather than measured masonry columns — every leader card is close to
+   the same height (no variable milestone stack to accommodate), and the team
+   cards vary only in list length, which the per-card "Show all" expand already
+   bounds. */
+.allstarlegacy__section {
+  margin-top: var(--space-5);
+}
+.allstarlegacy__sectiontitle {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* Leader grid — the top-10 active All-Star card row. */
+.allstarlegacy__leadergrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+.allstarlegacy__leadercard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--inset-cell);
+}
+.allstarlegacy__leadermug {
+  flex: none;
+}
+.shot.allstarlegacy__leadershot {
+  display: block;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
+}
+.shot.allstarlegacy__leadershot.shot--fallback {
+  font-size: var(--fs-hero-md);
+}
+.allstarlegacy__leaderbody {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.allstarlegacy__leaderwho {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+}
+.allstarlegacy__leaderteam {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
+}
+.allstarlegacy__leadercount {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--accent-primary);
+}
+.allstarlegacy__leaderyears {
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+
+/* Team grid — one card per current MLB club. Wider min column than the
+   leader grid above (320 vs 240) to give the bigger honoree headshots below
+   room to breathe. */
+.allstarlegacy__teamgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+.allstarlegacy__teamcard {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--inset-cell);
+}
+.allstarlegacy__teamhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+/* This card's rank (1 = most current All-Stars) — a small ink-on-paper
+   number chip, same idea as the position pill below but square/neutral
+   rather than accent-colored, since it's orientation, not a jersey tag. */
+.allstarlegacy__teamrank {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+.allstarlegacy__teamname {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+}
+.allstarlegacy__teamtotal {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+/* Same divided-row idiom as .allstarrosters__rows/.thub-roster's hairline
+   separators and tight padding — but WITHOUT their own outer border/
+   background, since this list already lives inside the team card's own
+   bordered box (a nested second border/box read as a "card within a card").
+   Rows just fill that card's content area edge to edge, only separated by a
+   solid hairline. */
+.allstarlegacy__honorees {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.allstarlegacy__honoree {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.allstarlegacy__honorees li:first-child {
+  border-top: none;
+}
+.allstarlegacy__honoreemug {
+  position: relative;
+  flex: none;
+}
+/* Sized down from the leader grid's --shot-md to --shot-sm — tall enough to
+   read a face clearly, short enough that a two-line name+years block doesn't
+   leave a visible band of empty space above/below it inside a taller photo. */
+.shot.allstarlegacy__honoreeshot {
+  display: block;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
+}
+.shot.allstarlegacy__honoreeshot.shot--fallback {
+  font-size: var(--fs-hero-sm);
+}
+/* Primary position as a jersey-tag pill anchored to the photo's bottom-left,
+   same convention as .milestonewatch-page__pos. */
+.allstarlegacy__honoreepos {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--paper-0);
+  background: var(--accent-primary);
+  border-top-right-radius: var(--radius-xs);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.allstarlegacy__honoreebody {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.allstarlegacy__honoreename {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+  overflow-wrap: break-word;
+}
+.allstarlegacy__honoreeyears {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+  /* Balances the wrap across lines (a long-tenured All-Star's year list
+     otherwise stranded just "2025, 2026" alone on a near-empty last line) —
+     same convention as .tscoremodal__title. */
+  text-wrap: balance;
+}
+.allstarlegacy__more {
+  align-self: center;
+  display: block;
+  margin: var(--space-3) auto 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+}
+.allstarlegacy__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Floating rank rail — a fixed vertical track along the viewport's right
+   edge (10vh to 90vh, so it never sits flush against the top or bottom),
+   with a small badge that TRAVELS along it: near the top at rank 1, near the
+   bottom at the last rank, sliding as the scroll-spy IntersectionObserver
+   updates "current rank" (see AllStarLegacyPage.jsx). Fixed to the VIEWPORT,
+   not the (possibly narrower, centered) .screen column, same convention as
+   .pagenav's fixed bottom bar. The wrap establishes one positioning context
+   spanning the full viewport height so the track and the badge — sized
+   differently — can both center on the same vertical line with no manual
+   pixel math between them. */
+.allstarlegacy__rankrail-wrap {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 6px;
+  width: 30px;
+  z-index: 15;
+  pointer-events: none;
+}
+.allstarlegacy__rankrail-track {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 10vh;
+  bottom: 10vh;
+  width: 2px;
+  background: var(--border-rule);
+}
+.allstarlegacy__rankrail {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 5px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--inset-cell);
+  transition: top 0.15s ease-out;
+}
+.allstarlegacy__rankrail-num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--accent-primary);
+}
+.allstarlegacy__rankrail-of {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+@media (max-width: 420px) {
+  .allstarlegacy__leadergrid,
+  .allstarlegacy__teamgrid {
+    grid-template-columns: 1fr;
+  }
+}
