@@ -37,7 +37,7 @@
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
        notification cards), `.bs__potgDesc`, `.flipback__potg`,
-       `.dayhl__rowBtn`
+       `.psseries__potgDesc`, `.dayhl__rowBtn`
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
@@ -13572,17 +13572,6 @@ body {
   color: var(--text-muted);
   opacity: 0.75;
 }
-/* Same favorite-team highlight as .psleaders__teamrow--fav (--fav-accent,
-   set inline from favoriteAccentColor()) — only lit when the user's own
-   team actually played in this series. Reads as a tinted ledger row with
-   an accent spine on the left edge. */
-.psseries__team--fav {
-  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
-  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
-}
-.psseries__team--fav .psseries__teamlink {
-  opacity: 1;
-}
 /* Per-game win cells — scorebook frames. An inked cell is a game that club
    won; an empty pressed-paper cell is one it dropped. Numbered by game so
    the winner's row shows WHERE in the series the games were taken. */
@@ -13784,34 +13773,113 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
 }
-/* Wide layout (the ≥740px 960px column): a full-width single-column entry
-   turns into acres of empty paper between the team names and their R/H/E
-   figures — so each entry's face splits into two ledger columns instead:
-   line score + decisions + the box-score button at left, the play of the
-   game reading alongside at right behind a vertical hairline. The log stays
-   one continuous column (a ledger is a column); only the lines within an
-   entry re-flow. */
+/* Headshot-led Play of the Game (SeriesPlayOfTheGame) — same idea as the full
+   box score's own .bs__potg* (BoxScore.jsx), scoped to its own psseries__potg*
+   family rather than shared classes (same convention as .psseries__roster*
+   below), and sized up a tier (--shot-md vs. that page's --shot-sm) since
+   this is exactly the wide, otherwise-empty column it's built to fill. Below
+   740px it just stacks under .psseries__facewrap at full width. */
+.psseries__potg {
+  padding-top: var(--space-2);
+}
+.psseries__potgTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.psseries__potgBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.shot.psseries__potgShot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.psseries__potgShot.shot--fallback {
+  font-size: var(--fs-hero-sm);
+}
+.psseries__potgMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.psseries__potgWho {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.psseries__potgName {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.psseries__potgMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Approved exception to the ALL-CAPS INVARIANT, same idiom as .bs__potgDesc —
+   a play-by-play-style description reads as a natural sentence, not shouted
+   chrome. The nested .psseries__potgWhen/.psseries__potgScore aren't
+   affected: #root * still matches them directly and wins over this rule's
+   inherited value. */
+.psseries__potgDesc {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-heading);
+  text-transform: capitalize; /* caps-exempt: approved title case for the series page's play-of-the-game narrative, same convention as .bs__potgDesc */
+}
+.psseries__potgWhen {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
+}
+.psseries__potgScore {
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+
+/* Wide layout (the ≥740px column): a full-width single-column entry turns
+   into acres of empty paper between the team names and their R/H/E figures
+   — so the entry itself splits into two ledger columns instead: line score +
+   decisions + the box-score button at left (.psseries__facewrap, GameResultFace
+   with hidePlayOfGame so it doesn't ALSO render its own compact version), the
+   headshot-led Play of the Game (.psseries__potg, SeriesPlayOfTheGame) filling
+   the wide column alongside at right behind a vertical hairline — replacing
+   what used to be mostly-empty whitespace. The header spans both columns. The
+   log stays one continuous column (a ledger is a column); only the lines
+   within an entry re-flow. */
 @media (min-width: 740px) {
-  .psseries__facewrap .flipback {
+  .psseries__entry {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: var(--space-5);
   }
-  .psseries__facewrap .flipback__linescore {
-    grid-column: 1;
+  .psseries__entryhead {
+    grid-column: 1 / -1;
   }
-  .psseries__facewrap .flipback__decisions {
-    grid-column: 1;
+  .psseries__entry .hint--error {
+    grid-column: 1 / -1;
   }
-  .psseries__facewrap .flipback__full {
-    grid-column: 1;
-    justify-self: start;
-    margin-top: var(--space-2);
-  }
-  .psseries__facewrap .flipback__potgWrap {
+  .psseries__potg {
     grid-column: 2;
-    grid-row: 1 / span 3;
-    padding-top: 0;
     padding-left: var(--space-5);
     border-left: var(--bw-hair) solid var(--border-hairline);
   }
@@ -13954,22 +14022,19 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  /* Padding + equal negative margin so the --fav tint can bleed a little
-     past the text without shifting the leader line's alignment. */
-  padding: 2px 6px;
-  margin: -2px -6px;
-  border-radius: var(--radius-xs);
 }
+/* Same weight/color/size as .psseries__rostername below — a leader is still
+   just a name off this series' roster, not a different typographic voice. */
 .psseries__lname {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  font-weight: var(--w-bold);
-  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-small);
   letter-spacing: var(--ls-caps);
-  color: var(--text-heading);
+  color: var(--text-body);
 }
 /* The leader's figure — the row's "R column", same mono-bold voice as
    .psseries__wins one size down. */
@@ -14000,6 +14065,8 @@ body {
   gap: 4px;
   min-width: 0;
 }
+/* Same weight/color as .psseries__rostername — only the font-size (inherited
+   from .psseries__lchase's fs-small) already matched. */
 .psseries__lchasername {
   min-width: 0;
   overflow: hidden;
@@ -14007,7 +14074,7 @@ body {
   white-space: nowrap;
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
-  color: var(--text-muted);
+  color: var(--text-body);
 }
 .psseries__lchaserval {
   font-family: var(--font-mono);
@@ -14018,24 +14085,6 @@ body {
 }
 .psseries__ldot {
   color: var(--graphite-soft);
-}
-/* Favorite-team highlight, same --fav-accent device as .psseries__team--fav
-   above: the leader line gets the tinted-row-with-spine treatment; a
-   runner-up gets only a quiet accent underline on the name — when the
-   favorite club played this series, HALF the agate is its players, so a
-   louder per-name treatment would drown the leader rows that should pop. */
-.psseries__ltop--fav {
-  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
-  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
-  padding-left: 9px;
-  margin-left: -9px;
-}
-/* An inset bar rather than text-decoration: the name is an ellipsized
-   overflow:hidden box, which clips a real underline at this offset on some
-   subpixel layouts; an inset shadow always paints within the box, and the
-   all-caps name has no descenders for it to collide with. */
-.psseries__lchaser--fav .psseries__lchasername {
-  box-shadow: inset 0 calc(-1 * var(--bw-heavy)) 0 var(--fav-accent, var(--accent-primary));
 }
 
 /* Both teams' series rosters, at the very bottom of the page — a reference
@@ -14117,16 +14166,6 @@ body {
   font-weight: var(--w-bold);
   text-align: right;
 }
-/* Wraps the name with its optional series-leader badge, same pairing role as
-   the Team page's .thub-namewrap (name + WAR/rookie/prospect pills) — lets
-   the badge sit right next to the name without adding a fifth grid column
-   that every other row would have to reserve space for. */
-.psseries__rosternamewrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
 .psseries__rostername {
   min-width: 0;
   overflow: hidden;
@@ -14137,26 +14176,6 @@ body {
   color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-}
-/* Ties a row back to the Series batting/pitching leader boards above this
-   section (buildRosterLeaderBadges) — e.g. "HR" on the row of a player who
-   also leads the series in home runs. --accent-positive is the same
-   token/hex as the position badge's --field, but used here for its
-   "notable" semantic role (see src/CLAUDE.md's ADR-0017 note on the
-   --accent-positive/--accent-negative pairing) rather than --field's
-   position-badge meaning, so the two badge kinds stay visually distinct in
-   intent even though they share a color. */
-.psseries__rosterbadge {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-positive);
-  border: var(--bw-hair) solid var(--accent-positive);
-  border-radius: var(--radius-sm);
-  padding: 0 5px;
-  line-height: var(--lh-solid);
 }
 .psseries__rosterpos {
   font-family: var(--font-display);
@@ -14171,37 +14190,6 @@ body {
   font-size: var(--fs-body);
   line-height: var(--lh-solid);
 }
-/* The "Show all N" / "Show fewer" row (RosterGroup) — a long roster (up to
-   26 players) previews leaders-first plus a handful more, collapsing the
-   rest behind this control so the page doesn't dump two full rosters' worth
-   of scrolling by default. Same expand/collapse affordance as
-   RosterPanel.jsx's .roster__toggle, reusing this list's own row padding
-   instead of that component's styling. */
-.psseries__rosterrow--toggle {
-  display: block;
-  padding: 0;
-}
-.psseries__rostertoggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 7px 10px;
-  border: none;
-  background: none;
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-compact);
-  letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-  cursor: pointer;
-}
-.psseries__rostertoggle:hover,
-.psseries__rostertoggle:focus-visible {
-  color: var(--text-body);
-}
-
 /* ------------------------------------------------------------ postseason leaders
    Franchise (titles/pennants/appearances) and repeat-MVP boards — a plain
    rank list (team-keyed, not the player-keyed pool TeamLeaders/.tlead is

@@ -15,17 +15,37 @@
 // live there against gamePk 263172) — summed over just this series' games
 // instead of folded into the career SQLite totals.
 import { getJson } from './statsapi.js'
-import { BATTING_CATEGORIES, PITCHING_CATEGORIES } from './postseasonLeaders.js'
+import { BATTING_CATEGORIES } from './postseasonLeaders.js'
 
-export { BATTING_CATEGORIES, PITCHING_CATEGORIES }
+export { BATTING_CATEGORIES }
+
+// The career board's pitching categories end in a rate stat (ERA), but a
+// 3-7 game series is too thin a sample for a rate to read as meaningful — so
+// this page swaps it for the two counting stats a rate is built from, each
+// its own most-to-least ranked row like every other category here (see
+// rankPitching below): innings pitched (the workhorse) and earned runs
+// (who got hit hardest — most series would otherwise just surface a string
+// of mop-up arms who allowed zero runs in an inning or two).
+export const SERIES_PITCHING_CATEGORIES = [
+  { key: 'wins', label: 'Wins', short: 'W' },
+  { key: 'strikeouts', label: 'Strikeouts', short: 'SO' },
+  { key: 'saves', label: 'Saves', short: 'SV' },
+  { key: 'inningsPitched', label: 'Innings pitched', short: 'IP' },
+  { key: 'earnedRuns', label: 'Earned runs', short: 'ER' },
+]
 
 // A single series' sample is far too thin for the career board's qualifier
-// floors (40 AB / 15 IP) — nearly everyone who played would get filtered out.
-// These scale the same "don't let a single pinch-hit AB or mop-up inning top
-// a rate-stat board" idea down to what 3-7 games can actually supply.
+// floor (40 AB) — nearly everyone who played would get filtered out. This
+// scales the same "don't let a single pinch-hit AB top a rate-stat board"
+// idea down to what 3-7 games can actually supply.
 const SERIES_MIN_AB_FOR_AVG = 6
-const SERIES_MIN_OUTS_FOR_ERA = 6 // 2 innings
 const SERIES_LIMIT = 5
+// For the categories only a handful of players ever touch at all (HR, W, SV,
+// ER — most series see just a few homers, decisions, or save chances total),
+// truncating to SERIES_LIMIT can drop someone for no real reason when the
+// whole qualifying pool is barely bigger than the cap itself. If the pool is
+// at most this many, show everyone instead of cutting it to SERIES_LIMIT.
+const SERIES_UNCAPPED_FLOOR = 8
 
 // postseason-history.json has no top-level series index, so finding one by id
 // means scanning every season's rounds. Attaches the season year + round key +
@@ -59,13 +79,16 @@ const int = (v) => String(v)
 // ".317" — three decimals, no leading zero (same convention as
 // postseasonLeaders.js's career board).
 const rate3 = (v) => v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1')
-const num2 = (v) => v.toFixed(2)
+// "6.2" — box score innings-pitched notation (whole innings + outs left over).
+const ipFormat = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
 
-function topBy(rows, key, format) {
-  return rows
-    .filter((r) => r[key] > 0)
-    .sort((a, b) => b[key] - a[key])
-    .slice(0, SERIES_LIMIT)
+// `uncapped: true` (HR, W, SV, ER — see SERIES_UNCAPPED_FLOOR) lifts the
+// SERIES_LIMIT cut when the whole qualifying pool is barely bigger than it.
+function topBy(rows, key, format, { uncapped = false } = {}) {
+  const qualifying = rows.filter((r) => r[key] > 0).sort((a, b) => b[key] - a[key])
+  const limit = uncapped && qualifying.length <= SERIES_UNCAPPED_FLOOR ? qualifying.length : SERIES_LIMIT
+  return qualifying
+    .slice(0, limit)
     .map((r) => ({ id: r.id, name: r.name, teamId: r.teamId, display: format(r[key]), value: r[key] }))
 }
 
@@ -78,7 +101,7 @@ function rankBatting(map) {
     .slice(0, SERIES_LIMIT)
     .map((r) => ({ ...r, display: rate3(r.value) }))
   return {
-    homeRuns: topBy(rows, 'homeRuns', int),
+    homeRuns: topBy(rows, 'homeRuns', int, { uncapped: true }),
     rbi: topBy(rows, 'rbi', int),
     hits: topBy(rows, 'hits', int),
     avg: avgRows,
@@ -88,17 +111,16 @@ function rankBatting(map) {
 
 function rankPitching(map) {
   const rows = [...map.entries()].map(([id, e]) => ({ id, ...e }))
-  const eraRows = rows
-    .filter((r) => r.outs >= SERIES_MIN_OUTS_FOR_ERA)
-    .map((r) => ({ id: r.id, name: r.name, teamId: r.teamId, value: Number(((r.earnedRuns * 27) / r.outs).toFixed(2)) }))
-    .sort((a, b) => a.value - b.value)
-    .slice(0, SERIES_LIMIT)
-    .map((r) => ({ ...r, display: num2(r.value) }))
+  // Most-to-least, same counting-stat convention as wins/strikeouts/saves —
+  // a series is too thin a sample for "fewest earned runs" to single out
+  // anyone but a string of mop-up guys who each faced a batter or two, so
+  // this instead surfaces who actually got hit hard.
   return {
-    wins: topBy(rows, 'wins', int),
+    wins: topBy(rows, 'wins', int, { uncapped: true }),
     strikeouts: topBy(rows, 'strikeOuts', int),
-    saves: topBy(rows, 'saves', int),
-    era: eraRows,
+    saves: topBy(rows, 'saves', int, { uncapped: true }),
+    inningsPitched: topBy(rows, 'outs', ipFormat),
+    earnedRuns: topBy(rows, 'earnedRuns', int, { uncapped: true }),
   }
 }
 
@@ -119,13 +141,25 @@ function rosterEntry(p, teamId) {
   }
 }
 
+// Scorebook defensive order (2 through 9), DH tacked on at the end since it
+// carries no defensive number; anything else a box score might list a
+// substitute under (PH, PR, IF, OF, …) falls back to last, alphabetical
+// among itself.
+const POSITION_ORDER = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
+function positionRank(position) {
+  const idx = POSITION_ORDER.indexOf(position)
+  return idx === -1 ? POSITION_ORDER.length : idx
+}
+
 function buildRosters(rosterByTeam) {
   const out = {}
   for (const [teamId, players] of rosterByTeam.entries()) {
-    const all = [...players.values()].sort((a, b) => a.name.localeCompare(b.name))
+    const all = [...players.values()]
     out[teamId] = {
-      positionPlayers: all.filter((p) => p.position !== 'P'),
-      pitchers: all.filter((p) => p.position === 'P'),
+      positionPlayers: all
+        .filter((p) => p.position !== 'P')
+        .sort((a, b) => positionRank(a.position) - positionRank(b.position) || a.name.localeCompare(b.name)),
+      pitchers: all.filter((p) => p.position === 'P').sort((a, b) => a.name.localeCompare(b.name)),
     }
   }
   return out
@@ -137,7 +171,7 @@ function buildRosters(rosterByTeam) {
 // display, value } per category key) — same contract postseasonLeaders.js
 // uses, so the page can reuse TeamLeaders' Featured-leader/chasers layout. A
 // category with no qualifying player (e.g. no saves in this series, or too
-// thin a sample for the AVG/ERA floor) comes back as an empty array —
+// thin a sample for the AVG floor) comes back as an empty array —
 // TeamLeaders already hides those rather than rendering an empty section.
 // Also returns each team's series roster (see rosterEntry/buildRosters
 // above), keyed by teamId.

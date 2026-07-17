@@ -10,8 +10,12 @@ import { TeamLogo } from './TeamLogo.jsx'
 // link through to the complete page for anyone who wants more. `feed`/
 // `winProb` are only ever passed in once the game has been revealed, so
 // selectBoxscore/computePlayOfTheGame (both reveal-only, see boxscore.js's
-// header) are safe to call directly here.
-export function GameResultFace({ feed, winProb, boxScorePath }) {
+// header) are safe to call directly here. `hidePlayOfGame` lets a caller with
+// its own, roomier Play of the Game treatment (the Postseason Series page's
+// per-game ledger entry builds a headshot-led version from the same
+// computePlayOfTheGame call) suppress this compact text-only one instead of
+// showing both — the flip card itself keeps rendering it by default.
+export function GameResultFace({ feed, winProb, boxScorePath, hidePlayOfGame = false }) {
   const navigate = useNav()
   const box = selectBoxscore(feed)
   const potg = computePlayOfTheGame(winProb, feed)
@@ -34,7 +38,7 @@ export function GameResultFace({ feed, winProb, boxScorePath }) {
         <TeamLine side={box.home} />
       </div>
       <Decisions decisions={box.decisions} />
-      {potg?.desc && <PlayOfTheGame potg={potg} box={box} />}
+      {potg?.desc && !hidePlayOfGame && <PlayOfTheGame potg={potg} box={box} />}
       <button
         type="button"
         className="btn btn--next flipback__full"
