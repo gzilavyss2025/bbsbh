@@ -27,7 +27,7 @@ export function PostseasonOddsCard({ snapshot }) {
           <strong>{pct(snapshot.divisionPct)}</strong>
         </div>
         <div className="postseason-odds__value">
-          <span>#1 Seed / Bye</span>
+          <span>Bye (Top 2 Seed)</span>
           <strong>{pct(snapshot.byePct)}</strong>
         </div>
       </div>
