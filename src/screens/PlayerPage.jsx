@@ -61,7 +61,7 @@ export function PlayerPage({ id, asOf, sportId }) {
 
   const { bio, blocks } = data
   const pitchBlock = blocks.find((b) => b.group === 'pitching')
-  const heroPos = (bio.isPitcher && pitchBlock?.role) || bio.posAbbr || ''
+  const heroPos = bio.twoWay ? 'DH/P' : (bio.isPitcher && pitchBlock?.role) || bio.posAbbr || ''
   const hand = bio.isPitcher && !bio.twoWay
     ? bio.throws ? `Throws ${bio.throws}` : ''
     : [bio.bats && `Bats ${bio.bats}`, bio.throws && `Throws ${bio.throws}`].filter(Boolean).join(' / ')
