@@ -5885,6 +5885,20 @@ body {
 }
 
 /* ---------------------------------------------------------------- roster */
+/* The lineup-not-posted caveat sitting between the section title and the
+   roster card. Sized/colored as a caption, same family as .roster__group's
+   Batters/Bullpen/Starters labels below it, rather than the larger loose
+   .hint paragraph treatment — this is a one-line aside, not prose. */
+.roster__notice {
+  margin: 2px 2px 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
 .roster {
   margin-top: 10px;
   border: var(--bw-hair) solid var(--border-rule);

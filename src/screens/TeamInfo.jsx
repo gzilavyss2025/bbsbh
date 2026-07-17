@@ -522,8 +522,8 @@ function TeamSections({
           </ol>
         ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
           <>
-            <p className="hint">
-              Lineup not final{info.scheduledTime ? ` — usually posts close to first pitch (${info.scheduledTime})` : ' yet'}. Active roster below:
+            <p className="roster__notice">
+              Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
             </p>
             <div className="roster">
               {roster.batters.length > 0 && (
@@ -598,8 +598,8 @@ function TeamSections({
             </div>
           </>
         ) : (
-          <p className="hint">
-            Lineup not final{info.scheduledTime ? ` — usually posts close to first pitch (${info.scheduledTime})` : ' yet'}.
+          <p className="roster__notice">
+            Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
           </p>
         )}
       </section>
