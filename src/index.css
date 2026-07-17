@@ -10028,7 +10028,7 @@ body {
 }
 .team-score__head {
   display: flex;
-  justify-content: space-between;
+  align-items: baseline;
   gap: 8px;
   padding: 10px 12px 0;
   color: var(--text-caption);
@@ -10038,14 +10038,8 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
 }
-.team-score__head em {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-style: normal;
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
-}
 .team-score__grade {
+  min-width: 0;
   margin: 0 10px;
   padding: 12px 12px 2px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -10169,6 +10163,7 @@ body {
 .team-score__row {
   display: grid;
   gap: 5px;
+  min-width: 0;
 }
 .team-score__row--driver {
   min-width: 0;
@@ -10392,22 +10387,44 @@ body {
   flex: 0 0 auto;
 }
 /* The distribution track (LeagueTrack, .team-score__track) and the rank
-   strip both answer "where does this team stand," so they share one row
-   instead of stacking as two — the track gives the shape of the whole
-   league, the strip names the neighbors. The track takes whatever width is
-   left; the strip stays its own five-chip size regardless of how wide the
-   card is, so it's never a stray full-width row with empty space trailing
-   off the end of it. */
+   strip both answer "where does this team stand," but on a phone-width card
+   there isn't room to do that side by side and still show more than a
+   couple of rank chips — each gets its own full-width row instead, so the
+   strip can show however many chips fit rather than a cramped fixed count.
+   Tablet/desktop has the width to spare, so from the WIDE_QUERY breakpoint
+   up they go back to sharing one row (see the override below) — the track
+   takes whatever width is left, the strip stays its own five-chip size. */
 .team-score__trackrow {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   margin-top: 4px;
+  width: 100%;
+  min-width: 0;
 }
 .team-score__trackrow .team-score__track {
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 0 0 auto;
   margin: 0;
+  min-width: 0;
+}
+.team-score__trackrow .rankstrip {
+  width: 100%;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  .team-score__trackrow {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .team-score__trackrow .team-score__track {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .team-score__trackrow .rankstrip {
+    width: auto;
+  }
 }
 .team-score__track--compact {
   height: 26px;
@@ -10431,6 +10448,19 @@ body {
 }
 .rankstrip__track {
   position: relative;
+  width: 100%;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  /* Below this, the track fills its full-width row above (however many
+     chips fit). At/above it, the strip shares a row with the distribution
+     track (see .team-score__trackrow), so it reverts to a fixed
+     --rankstrip-track-width (set inline per render, exactly five
+     chip-widths) rather than a stray full-width row with empty space
+     trailing off the end of it. */
+  .rankstrip__track {
+    width: var(--rankstrip-track-width);
+  }
 }
 .rankstrip__rail {
   display: flex;
@@ -10440,9 +10470,6 @@ body {
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 13px 0 0;
-  /* Width is set inline per RankStrip render to exactly five chip-widths —
-     what's visible before any scrolling is literally five teams, not
-     however many happen to fit the card. */
 }
 .rankstrip__rail::-webkit-scrollbar {
   display: none;
@@ -10610,8 +10637,7 @@ body {
 }
 
 .team-score__howlink {
-  justify-self: start;
-  margin: -3px 12px 11px;
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -10715,7 +10741,6 @@ body {
 }
 .postseason-odds__head {
   display: flex;
-  justify-content: space-between;
   gap: 8px;
   color: var(--text-caption);
   font-family: var(--font-display);
@@ -10723,13 +10748,6 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-}
-.postseason-odds__head em {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-style: normal;
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
 }
 .postseason-odds__values {
   display: grid;
@@ -10801,20 +10819,6 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-}
-.txcard__head em {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-style: normal;
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
-}
-/* Groups DeckNudge alongside the "through {asOf}" dateline in the header's
-   right slot. */
-.txcard__headright {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 /* A horizontally swipeable deck of story cards, full-bleed to the screen's

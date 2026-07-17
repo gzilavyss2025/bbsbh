@@ -13,10 +13,9 @@ function pct(n) {
 
 export function PostseasonOddsCard({ snapshot }) {
   return (
-    <section className="postseason-odds" aria-label={`Postseason odds through ${snapshot.asOf}`}>
+    <section className="postseason-odds" aria-label="Postseason odds">
       <div className="postseason-odds__head">
         <span>Postseason Odds</span>
-        <em>through {snapshot.asOf}</em>
       </div>
       <div className="postseason-odds__values">
         <div className="postseason-odds__value">

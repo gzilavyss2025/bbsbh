@@ -8,7 +8,6 @@ import { beeswarmRows } from '../lib/beeswarm.js'
 import { useNav, useLinkScope } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
 import { TeamLogo } from './TeamLogo.jsx'
-import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 
 const DASH = '—'
 const RANKSTRIP_VISIBLE = 5
@@ -68,20 +67,20 @@ export function TeamScoreCard({
   const surpriseRank = leagueRank(leagueSurpriseScores, teamId)
   const formRank = leagueRank(leagueFormScores, teamId)
 
-  // Tablet/desktop has the vertical room to spare, but "What built the
-  // grade" and the Current Form record line still fold away until the row
-  // that explains them is opened (same `open` accordion the numeric
-  // breakdown already uses, not a second piece of state) — a phone keeps
-  // everything visible up front, same as before.
-  const isWide = useMediaQuery(WIDE_QUERY)
-  const showDrivers = !isWide || open === 'grade' || open === 'quality' || open === 'surprise'
-  const showFormMeta = !isWide || open === 'form'
+  // "What built the grade" and the Current Form record line fold away until
+  // the row that explains them is opened (same `open` accordion the numeric
+  // breakdown already uses, not a second piece of state) — same behavior at
+  // every viewport.
+  const showDrivers = open === 'grade' || open === 'quality' || open === 'surprise'
+  const showFormMeta = open === 'form'
 
   return (
-    <section className={`team-score${open ? ' is-open' : ''}`} aria-label={`Season Grade through ${snapshot.asOf}`}>
+    <section className={`team-score${open ? ' is-open' : ''}`} aria-label="Season Grade">
       <div className="team-score__head">
-        <span>Season report</span>
-        <em>through {snapshot.asOf}</em>
+        Season report
+        <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
+          How this is calculated
+        </button>
       </div>
 
       <GradeHero
@@ -133,10 +132,6 @@ export function TeamScoreCard({
       />
 
       {open && <ScoreDetail kind={open} grade={grade} quality={snapshot.season} surprise={surprise} form={snapshot.currentForm} />}
-
-      <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
-        How this is calculated
-      </button>
 
       {showHow && (
         <TeamScoreExplainer snapshot={snapshot} surprise={surprise} grade={grade} onClose={() => setShowHow(false)} />
@@ -324,7 +319,7 @@ function RankStrip({ league, teamId, compact = false }) {
         disabled={!edge.l}
         onClick={() => nudge(-1)}
       />
-      <div className="rankstrip__track" style={{ width: step * width }}>
+      <div className="rankstrip__track" style={{ '--rankstrip-track-width': `${step * width}px` }}>
         <div
           className="rankstrip__rail"
           ref={railRef}
