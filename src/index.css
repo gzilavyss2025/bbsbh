@@ -650,12 +650,18 @@ body {
    stops, each the club's logo floated on a pale wash of its own colors (set
    inline per team from the logo art — see fetchTeamLogoTint), with the
    season(s) below. The wash is chosen to carry the mark on its own, so there is
-   deliberately NO border or drop shadow on the badge. Stops wrap onto as many
-   rows as needed rather than scrolling sideways — the row is not padded out to
-   fill its width. */
+   deliberately NO border or drop shadow on the badge. A CSS grid, not
+   flex-wrap — the column count (--careertl-cols, set inline by
+   CareerTimeline.jsx's balancedColumns) is chosen per career length so a
+   trailing row never strands just one or two stops under a full row above
+   it; each column still sizes to its own widest stop (a multi-year
+   "2021–2023" caption) rather than clipping at a fixed width. `max-content`,
+   not `auto` — an `auto`-sized track absorbs the grid container's leftover
+   space, which spread the badges out edge-to-edge instead of packing them
+   tight against each other the way flex-wrap's items naturally did. */
 .careertl__track {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(var(--careertl-cols, 5), minmax(58px, max-content));
   gap: var(--space-2);
   list-style: none;
   /* Zero BOTH margin and the <ol>'s default padding-inline-start so the strip
@@ -665,7 +671,6 @@ body {
 }
 
 .careertl__stop {
-  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -826,6 +831,58 @@ body {
   color: var(--text-muted);
 }
 
+/* ---- collapsed-career expand/collapse — same "real show-all action, never
+   a dead-end +N more" convention as .ledger-expand/.ledger-collapse, but in
+   neutral ink rather than those two's medal-amber (this ledger is roster
+   moves, not honors, so the award tint would misread as a Trophy Case tie-in). ---- */
+.txntl-expand {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.txntl-expand:hover {
+  background: var(--border-rule);
+  color: var(--paper-2);
+}
+.txntl-expand:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.txntl-collapse {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.txntl-collapse:hover {
+  color: var(--text-body);
+}
+.txntl-collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------- level progression card
    "Path to the Majors" chevron strip on a pre-debut player's page: one rung
    per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
@@ -865,9 +922,15 @@ body {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
 }
 
+/* Dims via TEXT color, not element opacity — `--surface-card`/`--border-rule`
+   are already a subtle near-paper fill and a "faded pencil" rule (see their
+   definitions), so fading the whole box on top of that washed the chevron
+   out to nothing against the page background instead of reading as dimmed. */
 .levelprog__step.is-unreached {
-  opacity: 0.45;
   box-shadow: none;
+}
+.levelprog__step.is-unreached .levelprog__label {
+  color: var(--text-muted);
 }
 
 .levelprog__step.is-current {
@@ -2972,6 +3035,14 @@ body {
   color: var(--text-caption);
   margin: 18px 0 8px;
 }
+/* "Current season" is the player page's primary mid-game glance — every
+   other SectionTitle reads as an equal, generic label, so this one alone
+   gets bumped a size and inked in the accent color to read as the page's
+   headline stat block, not just another section among many. */
+.section__title--primary {
+  font-size: var(--fs-h2);
+  color: var(--accent-primary);
+}
 
 .umps__list {
   list-style: none;
@@ -4626,12 +4697,16 @@ body {
    card reads top-to-bottom: the measure, the value with its unit trailing
    small, then who did it. */
 .statcast {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: 12px;
   padding-top: 12px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.statcast > * {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .statcast__card {
@@ -9742,6 +9817,12 @@ body {
 .player__meta .sep {
   color: var(--graphite-soft);
 }
+/* "Bats L / Throws R" as one unbreakable chunk — plain text let a two-way
+   player's longer meta line (position · hand · team) wrap mid-phrase,
+   splitting "Throws" from "R" and stranding the separator before the team. */
+.player__hand {
+  white-space: nowrap;
+}
 .player__team {
   color: var(--navy);
   font-weight: var(--w-semibold);
@@ -9750,19 +9831,38 @@ body {
   margin-top: var(--space-4);
 }
 
-/* ---- 5-tile season row (reuses .stat) ---- */
+/* ---- 5-tile season row (reuses .stat) ----
+   Same edge-to-edge hairline-ruled container as .factgrid/.player__splits —
+   also covers SplitsVsTeam's career line, which reuses this class
+   (.player__statgrid vsteam__grid) rather than styling its own grid. */
 .player__statgrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 .player__statgrid .stat {
+  background: var(--surface-card);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   padding: 11px 3px;
 }
 .player__statgrid .stat__v {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-title-sm);
+}
+
+/* The header-less vs-LHP/RHP split ledger sitting directly under the stat
+   grid above (see PlayerPage.jsx) — neither card carries its own margin,
+   so without a SectionTitle between them they'd otherwise touch. */
+.player__seasonsplits {
+  margin-top: 10px;
 }
 
 .player__blocktitle {
@@ -9795,18 +9895,30 @@ body {
   margin-top: var(--space-5);
 }
 
-/* ---- splits ---- */
+/* ---- splits ----
+   Same edge-to-edge grid treatment as .factgrid (the bio card above it):
+   a single hairline-ruled container rather than a gap of separately
+   bordered/shadowed cards. */
 .player__splits {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 .split {
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
   padding: 10px 12px;
+  margin: 0;
+}
+/* An odd item count (e.g. a pitcher's 5-item Firsts) leaves the last card
+   alone in column 1 with nothing in column 2 — stretch it across both so the
+   container's own hairline background never shows through as a bare block. */
+.player__splits > .split:nth-child(2n + 1):last-child {
+  grid-column: 1 / -1;
 }
 .split__k {
   font-family: var(--font-display);
@@ -9824,20 +9936,19 @@ body {
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  margin-top: 6px;
+  margin-top: 3px;
 }
 .split__v {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
 }
 .split__sub {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
 }
 @media (min-width: 740px) {
   .split__row {
@@ -9849,16 +9960,23 @@ body {
 }
 
 /* ---- Statcast percentile cards ----
-   Each metric is a small StatcastCard tile, not a bar mimicking Baseball
-   Savant's own chart. This override drops the base rule's top divider
-   (nothing sits above it on the player page) and gives the grid a real
-   minimum column width so 6-7 cards wrap instead of squeezing onto one row
-   (the base rule's own minmax(0, 1fr) is sized for a 3-card row). */
+   Each metric is a small StatcastCard tile (the same one the innings view
+   and box score use for per-half superlatives), not a bar mimicking
+   Baseball Savant's own chart. `.statcast` here is the same flex-wrap rule
+   used there (see the "Statcast superlatives" block above); this override
+   just drops the play-by-play-feed divider (nothing sits above it on the
+   player page) and gives each tile a real minimum width so 6-7 cards wrap
+   across rows — an 84px floor with flex-grow (not a fixed column count)
+   means an incomplete last row (e.g. a pitcher's 7th, "Hard-hit %") stretches
+   to fill the row instead of sitting alone at its floor width. */
 .statcast-section .statcast {
-  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
   margin-top: 8px;
   padding-top: 0;
   border-top: none;
+}
+.statcast-section .statcast > * {
+  flex: 1 1 84px;
+  min-width: 84px;
 }
 
 /* The button wrapping each FlipCard — reset to a plain pressable card (see
@@ -10065,7 +10183,11 @@ body {
 }
 .gamelog__row {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  /* max-content, not a fixed px: sized to the widest date+opponent across
+     every row in THIS log, so a long nickname ("Diamondbacks") never wraps
+     just because some fixed guess undershot it — the stat-line column has
+     room to give since most lines are far short of the card's full width. */
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: baseline;
   column-gap: 12px;
   padding: 8px 12px;
@@ -10093,7 +10215,12 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
-  white-space: nowrap;
+  /* .gamelog__row's max-content meta column already sizes to fit the
+     widest date+opponent in the log, so no nickname needs to wrap in
+     practice — this is just the flex-item safety net: a plain flex child
+     defaults to min-width:auto, which would refuse to shrink at all on a
+     viewport too narrow even for that (rather than wrapping gracefully). */
+  min-width: 0;
 }
 /* Level pill on a combined MLB + rehab game log (see gameLogView's tagLevel) —
    tells apart a rehabbing big leaguer's MLB rows from his MiLB rehab rows. */
@@ -10268,9 +10395,9 @@ body {
 .ledger tfoot tr.reg-milb td {
   color: var(--graphite);
 }
-/* A missed season (see missingSeasonRows in api/person.js) — dashes fill the
-   stat cells same as any thin row, but the note replacing the team cell reads
-   as an aside, not a stat line: italic graphite, no bold weight. */
+/* A missed season (see missingSeasonRows in api/person.js) — the note
+   replacing the team + stat cells reads as an aside, not a stat line: italic
+   graphite, no bold weight. */
 .reg-gap td {
   color: var(--graphite);
 }
@@ -10279,6 +10406,12 @@ body {
 }
 .reg-gap__note {
   font-style: italic;
+}
+/* The note spans the rest of the row (see Ledger's spanCell) instead of
+   sitting `nowrap` beside a run of dashes — let it wrap within the table's
+   width rather than forcing the whole ledger into horizontal scroll. */
+.ledger td.ledger__span {
+  white-space: normal;
 }
 /* The career register's secondary columns (a pitcher's GS, K, BB) fold away on
    a phone so the essentials stay legible; they return at the 740px "wide"
@@ -10349,79 +10482,241 @@ body {
   color: var(--accent-primary);
 }
 
-/* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): major
-   hardware, All-Star selections, and in-season honors (Player of the
-   Week/Month, ...), each grouped into one badge per label with a count
-   rather than one per instance. Sits in the achievements zone alongside
+/* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): a
+   marquee (.plaque) for the single most prestigious honor, then everything
+   else as ledger groups below it. Sits in the achievements zone alongside
    Milestone Watch and Firsts, right after the fact grid — same bordered-card
-   treatment as .milestonewatch so the two read as siblings. Group labels
-   reuse the same small uppercase caption as .milestonewatch__title. */
+   treatment as .milestonewatch so the two read as siblings.
+
+   No per-award icon: a lettered badge in a ring reads as a generic avatar
+   no matter which two letters go inside it, so the marquee is pure
+   typographic hierarchy — an eyebrow, the headline, a short tier-coloured
+   rule (a divider, not an icon standing in for one), then the honor's own
+   dates. A ledger row's tier reads from a background tint (see
+   .ledger-row.is-allstar), the same mechanism the career register already
+   uses for its own All-Star rows, not a rail or a badge. */
 .trophycase {
-  margin: 8px 2px 0;
+  margin: 0 2px;
   padding: 10px 12px 12px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
 }
-.trophycase .section__title {
-  margin-top: 0;
+
+/* ---- marquee: the single hero honor, no enclosing shape ---- */
+.plaque {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-.trophycase__group {
-  margin-top: 12px;
+.plaque-eyebrow {
+  margin: 0 0 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
 }
-.trophycase__group:first-of-type {
-  margin-top: 6px;
+.plaque-eyebrow.tier-hw {
+  color: var(--award-ink);
 }
-.trophycase__grouplabel {
-  margin: 0 0 8px;
+.plaque-eyebrow.tier-as {
+  color: var(--allstar-blue);
+}
+.plaque-eyebrow.tier-is {
+  color: var(--graphite);
+}
+.plaque-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+/* A hardware honor outside the top of HERO_RANK (person.js) — Gold Glove
+   down through All-MLB Second Team — is real, but not career-defining the
+   way an MVP or Cy Young is; the marquee says so by rendering smaller and
+   lighter, not just via the (identical) tier-hw color every hardware honor
+   already shares. */
+.plaque-name--lesser {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
+}
+.plaque-rule {
+  display: block;
+  width: 30px;
+  height: 3px;
+  margin: 9px 0 8px;
+  border-radius: var(--radius-xs);
+}
+.plaque-rule.tier-hw {
+  background: var(--award-line);
+}
+.plaque-rule.tier-as {
+  background: var(--allstar-blue);
+}
+.plaque-rule.tier-is {
+  background: var(--graphite-soft);
+}
+.plaque-years {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+}
+
+/* ---- ledger: flex rows, not a rigid table — a date list needs to wrap,
+   not truncate to fit a table cell. Every row shows ALL of its honor's
+   dates, uncapped — a row with more than one grows onto its own line and
+   wraps rather than hiding a "+N more". ---- */
+.ledger-group {
+  margin-top: 14px;
+}
+.plaque + .ledger-group {
+  padding-top: 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.ledger-taglabel {
+  margin: 0 0 6px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
+  text-transform: uppercase;
   color: var(--graphite);
 }
-.trophycase__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
+.ledger-rows {
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
-.trophybadge {
-  width: 84px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+.ledger-row {
+  padding: 7px 9px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
-.trophybadge__icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 4px;
+.ledger-row:first-child {
+  border-top: none;
 }
-.trophybadge__icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.trophybadge__name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  line-height: var(--lh-snug);
+.ledger-row .lbl {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
   color: var(--text-body);
 }
-.trophybadge__sub {
-  margin: 2px 0 0;
+.ledger-row .val {
+  display: block;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+}
+/* One date: label + date share the line, date pinned right. */
+.ledger-row.single {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ledger-row.single .val {
+  text-align: right;
+  white-space: nowrap;
+}
+/* Several dates: label gets its own line, the full list wraps beneath it
+   across as many lines as it needs — the card grows, nothing truncates. */
+.ledger-row.multi .lbl {
+  display: block;
+  margin-bottom: 3px;
+}
+.ledger-row.multi .val {
+  line-height: var(--lh-loose);
+}
+.ledger-row.is-allstar {
+  background: color-mix(in srgb, var(--allstar-blue) 8%, var(--surface-inset));
+}
+.ledger-row.is-allstar .val {
+  color: var(--allstar-blue-deep);
+  font-weight: var(--w-semibold);
+}
+
+/* ---- collapsed tally + expand — dense careers (see COLLAPSE_THRESHOLD in
+   TrophyCase.jsx) open the ledger collapsed to one line per group instead
+   of the full list, with a real "show everything" action, never a
+   dead-end "+N more". ---- */
+.ledger-tally {
+  margin-top: 14px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.ledger-tally__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-num);
-  color: var(--award-ink);
+  color: var(--graphite);
 }
-.trophybadge__detail {
-  margin: 1px 0 0;
+.ledger-tally__row:first-child {
+  border-top: none;
+}
+.ledger-tally__row b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.ledger-expand {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--award-line);
+  border-radius: var(--radius-sm);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.ledger-expand:hover {
+  background: var(--award-line);
+  color: var(--paper-2);
+}
+.ledger-expand:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.ledger-collapse {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ledger-collapse:hover {
+  color: var(--text-body);
+}
+.ledger-collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* ---------------------------------------------------------------- posinn

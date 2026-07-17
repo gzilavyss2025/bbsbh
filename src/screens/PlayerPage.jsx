@@ -15,7 +15,7 @@ import { TrophyCase } from '../components/TrophyCase.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TransactionTimeline } from '../components/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
-import { Ledger } from '../components/Ledger.jsx'
+import { Ledger, spanCell } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
@@ -110,7 +110,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             </h1>
             <p className="player__meta">
               {heroPos && <span className="player__pos">{heroPos}</span>}
-              {hand && <> <span className="sep">·</span> {hand}</>}
+              {hand && <> <span className="sep">·</span> <span className="player__hand">{hand}</span></>}
               {bio.team && (
                 <> <span className="sep">·</span>{' '}
                   <TeamLink id={bio.team.id} className="player__team">{bio.team.name}</TeamLink>
@@ -180,51 +180,16 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
-        {/* Achievements zone — everything that answers "what has he done", both
-            backward-looking (Trophy Case, Firsts) and forward-looking
-            (Milestone Watch), grouped right after the bio facts and ahead of
-            the stat tables. A player with none of the three renders nothing
-            here and the page falls straight through into stats. */}
+        {/* Trophy Case stays here as identity — "who is this guy" — ahead of
+            the stat tables; a player with none renders nothing and the page
+            falls straight through into stats. Milestone Watch and Firsts used
+            to sit in this zone too, but neither is backward-looking the way
+            Trophy Case is: Milestone Watch is a forward-looking pace fact
+            that previews the Career register's totals row (now sits between
+            Game log and the register, below), and Firsts is a set of dated
+            origin-story events that reads better beside Team History / Path
+            to the Majors / Transactions (now opens that archive, below). */}
         <TrophyCase trophyCase={data.trophyCase} />
-        {blocks.map((block) => (
-          <MilestoneWatchCard
-            key={block.group}
-            playerId={bio.id}
-            asOf={asOf}
-            milestones={block.milestones}
-            groupLabel={blocks.length > 1 ? block.title : null}
-          />
-        ))}
-        {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
-          <section>
-            <SectionTitle title="Firsts" />
-            <div className="player__splits">
-              {(bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).map((key) => {
-                const f = data.firsts[key]
-                if (!f) return null
-                return (
-                  <div className="split" key={key}>
-                    <div className="split__k">{f.label}</div>
-                    <div className="split__row">
-                      <GameLink path={f.path} className="split__v">
-                        {debutLabel(f.date)}
-                      </GameLink>
-                      <span className="split__sub">
-                        {f.batter ? (
-                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
-                        ) : f.pitcher ? (
-                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
-                        ) : (
-                          f.oppName || f.oppAbbr
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-        )}
 
         {blocks.map((block) => {
           // A debuted player whose current-season tiles are at a MiLB level (an
@@ -241,14 +206,40 @@ export function PlayerPage({ id, asOf, sportId }) {
           <section key={block.group}>
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
-            <SectionTitle title="Current season" note={
-              [
-                liveLevel,
-                block.group === 'pitching' && block.role ? roleWord(block.role) : null,
-                enteringLabel,
-              ].filter(Boolean).join(' · ')
-            } />
+            <SectionTitle
+              title="Current season"
+              primary
+              note={
+                [
+                  liveLevel,
+                  block.group === 'pitching' && block.role ? roleWord(block.role) : null,
+                  enteringLabel,
+                ].filter(Boolean).join(' · ')
+              }
+            />
             <StatGrid tiles={block.tiles} />
+
+            {/* No header — sitting right beneath Current season's tiles,
+                a vs-LHP/RHP (or vs-LHB/RHB) breakdown of the same season
+                is self-explanatory without its own "Season splits" label.
+                .player__seasonsplits just gives it breathing room off the
+                stat grid above — neither carries its own margin, so with
+                no SectionTitle between them the two cards would touch. */}
+            {block.splits && (
+              <div className="player__seasonsplits">
+                <Ledger
+                  leftCols={1}
+                  head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                  rows={[
+                    { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
+                    { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
+                  ].map(({ key, label, side }) => ({
+                    key,
+                    cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
+                  }))}
+                />
+              </div>
+            )}
 
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
                 leaguer's AAA line) — promoted beside the main tiles instead of
@@ -267,16 +258,17 @@ export function PlayerPage({ id, asOf, sportId }) {
               </div>
             ))}
 
-            <StatcastPercentiles savant={block.savant} group={block.group} />
-
             {/* Career splits vs the club this player's team is next facing (a
-                finger-scrollable strip to pick a different opponent). Rendered in
-                the primary stat block only — between "Current season" and the
-                Pitches table (pitchers) / Game log (hitters), per the card's
-                spec. */}
+                finger-scrollable strip to pick a different opponent), ahead of
+                Statcast's season-long percentiles — "how's he done against
+                tonight's opponent" is the more second-screen-shaped question
+                than a percentile chip that won't move start to start.
+                Rendered in the primary stat block only, per the card's spec. */}
             {data.vsTeam && block.group === data.vsTeam.group && (
               <SplitsVsTeam vsTeam={data.vsTeam} season={data.season} asOf={asOf} />
             )}
+
+            <StatcastPercentiles savant={block.savant} group={block.group} />
 
             {block.arsenal && (
               <>
@@ -317,24 +309,17 @@ export function PlayerPage({ id, asOf, sportId }) {
               </>
             )}
 
-            {block.register && <CareerRegister register={block.register} />}
+            {/* A bridge between current pace (Game log, just above) and career
+                totals (the Career register, just below) — "X shy of Y" reads
+                as a caption for the totals row it now sits above. */}
+            <MilestoneWatchCard
+              playerId={bio.id}
+              asOf={asOf}
+              milestones={block.milestones}
+              groupLabel={blocks.length > 1 ? block.title : null}
+            />
 
-            {block.splits && (
-              <>
-                <SectionTitle title="Season splits" note={block.splitsLabel} />
-                <Ledger
-                  leftCols={1}
-                  head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
-                  rows={[
-                    { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
-                    { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
-                  ].map(({ key, label, side }) => ({
-                    key,
-                    cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
-                  }))}
-                />
-              </>
-            )}
+            {block.register && <CareerRegister register={block.register} />}
           </section>
           )
         })}
@@ -343,7 +328,40 @@ export function PlayerPage({ id, asOf, sportId }) {
           <PositionInningsCard pi={data.positionInnings} playerId={bio.id} />
         )}
 
-        {data.timeline && bio.debut && <CareerTimeline entries={data.timeline.entries} />}
+        {/* The biographical archive: dated origin-story events (Firsts) open
+            it, then Path to the Majors' compact summary before Team History's
+            expanded logo detail — summary before detail — then Transactions,
+            the longest and most archival section, last. */}
+        {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
+          <section>
+            <SectionTitle title="Firsts" />
+            <div className="player__splits">
+              {(bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).map((key) => {
+                const f = data.firsts[key]
+                if (!f) return null
+                return (
+                  <div className="split" key={key}>
+                    <div className="split__k">{f.label}</div>
+                    <div className="split__row">
+                      <GameLink path={f.path} className="split__v">
+                        {debutLabel(f.date)}
+                      </GameLink>
+                      <span className="split__sub">
+                        {f.batter ? (
+                          <PlayerLink id={f.batter.id}>{f.batter.fullName}</PlayerLink>
+                        ) : f.pitcher ? (
+                          <PlayerLink id={f.pitcher.id}>{f.pitcher.fullName}</PlayerLink>
+                        ) : (
+                          f.oppName || f.oppAbbr
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         {data.progression && bio.debut && (
           <LevelProgressionCard
@@ -351,6 +369,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             debutYear={Number(bio.debut.slice(0, 4))}
           />
         )}
+
+        {data.timeline && bio.debut && <CareerTimeline entries={data.timeline.entries} />}
 
         {data.transactions && <TransactionTimeline rows={data.transactions.rows} />}
 
@@ -407,24 +427,27 @@ function CareerRegister({ register }) {
     key: r.key,
     className: r.tier === 'mlb' ? 'reg-mlb' : r.tier === 'gap' ? 'reg-gap' : 'reg-milb',
     allStar: r.allStar,
-    cells: [
-      <>
-        {r.year}
-        {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
-      </>,
-      // A gap year (see missingSeasonRows) has no team to show — its note
-      // ("Injured — missed season" / "Did not play") takes that cell instead,
-      // so the row still reads as an explained absence, not a blank line.
-      r.gap ? (
-        <span className="reg-gap__note">{r.note}</span>
-      ) : (
-        <>
-          {r.team || DASH}
-          {r.pill && <span className="reg-pill">{r.pill}</span>}
-        </>
-      ),
-      ...r.cells,
-    ],
+    cells: r.gap
+      ? [
+          <>{r.year}</>,
+          // A gap year (see missingSeasonRows) has no team or stat line — its
+          // note ("Injured — missed season" / "Did not play") spans the rest
+          // of the row (spanCell) instead of sitting in one `nowrap` cell
+          // beside a run of dashes, so the sentence wraps within the table's
+          // width rather than forcing horizontal scroll on a phone.
+          spanCell(<span className="reg-gap__note">{r.note}</span>),
+        ]
+      : [
+          <>
+            {r.year}
+            {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
+          </>,
+          <>
+            {r.team || DASH}
+            {r.pill && <span className="reg-pill">{r.pill}</span>}
+          </>,
+          ...r.cells,
+        ],
   }))
 
   return (
@@ -495,9 +518,9 @@ function StatGrid({ tiles }) {
   )
 }
 
-function SectionTitle({ title, note }) {
+function SectionTitle({ title, note, primary = false }) {
   return (
-    <h3 className="section__title">
+    <h3 className={`section__title${primary ? ' section__title--primary' : ''}`}>
       <span>{title}</span>
       {note && <em>{note}</em>}
     </h3>

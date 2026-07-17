@@ -7,6 +7,16 @@
 // `hideNarrow` is a set of whole-row column indices (matching `head`) that
 // collapse on a phone via CSS — the secondary stat columns the career register
 // sheds on a small screen.
+
+// Wraps a cell's content so it renders as a single <td> spanning every
+// remaining column instead of one-per-column — the career register's missed-
+// season note (see person.js's missingSeasonRows) uses this so the sentence
+// can wrap within the row's width rather than sitting `nowrap` in one narrow
+// column and forcing the whole table into horizontal scroll on a phone.
+export function spanCell(value) {
+  return { __ledgerSpan: true, value }
+}
+
 export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '', totals = null, hideNarrow = [] }) {
   const hide = new Set(hideNarrow)
   const narrow = (i) => (hide.has(i) ? 'col-narrow-hide' : '')
@@ -26,9 +36,18 @@ export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = ''
         <tbody>
           {rows.map((r) => (
             <tr key={r.key} className={[r.allStar && 'is-allstar', r.className].filter(Boolean).join(' ')}>
-              {r.cells.map((c, i) => (
-                <td key={i} className={cellClass(i)}>{c}</td>
-              ))}
+              {r.cells.map((c, i) => {
+                const span = c && typeof c === 'object' && c.__ledgerSpan
+                return (
+                  <td
+                    key={i}
+                    className={span ? `${cellClass(i)} ledger__span`.trim() : cellClass(i)}
+                    colSpan={span ? head.length - i : undefined}
+                  >
+                    {span ? c.value : c}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>
