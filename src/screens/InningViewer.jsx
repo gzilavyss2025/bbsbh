@@ -135,19 +135,6 @@ export function InningViewer({
   const revealNextAtBat = () =>
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (stepInfo?.nextCap ?? curAtBatCount + 1))
 
-  // Stepping through at-bats one at a time keeps scrolling the newest card
-  // into view (see PlayByPlay.jsx); once the LAST tap finishes the half, that
-  // leaves the reader wherever the last at-bat happened to sit rather than
-  // carrying them on to the R/H/E/LOB totals every half settles into (now
-  // BELOW the play-by-play — see innings__grid's order). Only fires on the
-  // step-through path (HalfInning's onStepComplete) — tapping "Reveal whole
-  // half" already shows everything at once with no mid-half scroll to undo.
-  const scrollToStatBoxAfterStepping = () => {
-    setTimeout(() => {
-      document.querySelector('.innings__statbox')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
-  }
-
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
   // Back never revisits the bogus address. Without this the URL, the stepnav's
@@ -286,7 +273,6 @@ export function InningViewer({
             highlights={highlights}
             revealedAtBatCount={curAtBatCount}
             onStepInfo={setStepInfo}
-            onHalfSteppedThrough={scrollToStatBoxAfterStepping}
           />
         </div>
 
