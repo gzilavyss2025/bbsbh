@@ -110,7 +110,7 @@ body {
 .datenav__label,
 .lineup__jersey,
 .roster__jersey,
-.opp__jersey,
+.startercard__jersey,
 .inningnav__chip {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -3310,16 +3310,12 @@ body {
    pos/hand's --fs-compact so the two line up as one size, not the row's
    larger --fs-ui leaking in unset. */
 .lineup__jersey,
-.roster__jersey,
-.opp__jersey {
+.roster__jersey {
   color: var(--clay);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   text-align: right;
 }
-/* .opp__pitcher (below) already centers its whole row, so only the lineup/
-   roster rows (align-items: start — see .lineup__row/.roster__row) need the
-   re-center override; see .lineup__order's comment above for why. */
 .lineup__jersey,
 .roster__jersey {
   align-self: center;
@@ -3342,7 +3338,6 @@ body {
    instead of fighting the row's fixed jersey/position columns for width. */
 .lineup__namewrap,
 .roster__namewrap,
-.opp__namewrap,
 .thub-namewrap {
   display: flex;
   align-items: center;
@@ -3384,39 +3379,79 @@ body {
   line-height: var(--lh-solid);
 }
 
-/* -------------------------------------------------- opposing pitcher/defense */
-.opp__pitcher {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+/* ---------------------------------------------- opposing starter/defense */
+/* The opposing starter's headshot card — leads the page ahead of the
+   batting order, since it's the one useful fact on hand before the lineup
+   posts. Same card chrome as .opp__defense below; the headshot anchors a
+   name/handedness/jersey column, with the season line as its own row. */
+.startercard__body {
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   padding: 10px 12px;
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
-  font-size: var(--fs-ui);
 }
 
-.opp__name {
-  font-weight: var(--w-semibold);
+.shot.startercard__shot {
+  flex: none;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.startercard__shot.shot--fallback {
+  font-size: var(--fs-hero-md);
+}
+
+.startercard__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.startercard__namewrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.startercard__name {
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
   color: var(--text-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.opp__hand {
+.startercard__badges {
+  display: flex;
+  gap: 10px;
   font-family: var(--font-display);
-  color: var(--field);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.startercard__jersey {
+  color: var(--clay);
+}
+.startercard__hand {
+  color: var(--field);
 }
 
-/* The starter's season line, a second row spanning the pitcher card. */
-.opp__season {
-  grid-column: 1 / -1;
+/* The starter's season line, then — same treatment, its own dashed divider —
+   his most recent appearance, so the card reads as a stack of dated facts
+   (badges, season-to-date, last time out) rather than one lump. */
+.startercard__stats,
+.startercard__last {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
@@ -5871,6 +5906,20 @@ body {
 }
 
 /* ---------------------------------------------------------------- roster */
+/* The lineup-not-posted caveat sitting between the section title and the
+   roster card. Sized/colored as a caption, same family as .roster__group's
+   Batters/Bullpen/Starters labels below it, rather than the larger loose
+   .hint paragraph treatment — this is a one-line aside, not prose. */
+.roster__notice {
+  margin: 2px 2px 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
 .roster {
   margin-top: 10px;
   border: var(--bw-hair) solid var(--border-rule);

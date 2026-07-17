@@ -3,6 +3,7 @@ import {
   fetchGameFeed,
   fetchManager,
   fetchPitcherSeasonLine,
+  fetchPitcherLastGame,
   fetchWinProbability,
 } from '../api/game.js'
 import { fetchHighlights } from '../api/highlights.js'
@@ -131,19 +132,24 @@ export function useGameData(game) {
   // the feed object — see useAsyncOnFeed.
   const weather = useAsyncOnFeed(feed, generateScorebookWeather, [game.gamePk])
 
-  // Each probable starter's season line (ERA/W-L/K), penciled next to the
-  // opposing-pitcher row while staging. Season aggregates only — never this
-  // game's line.
+  // Each probable starter's season line (ERA/W-L/K) plus his most recent
+  // appearance (see fetchPitcherLastGame — MLB or MiLB, whichever came last),
+  // penciled next to the opposing-pitcher card while staging. Season
+  // aggregates + a past outing's already-final box line, never this game's.
   const starterLines = useAsyncOnFeed(
     feed,
     async (f) => {
       const season = f.gameData?.game?.season
+      const officialDate = f.gameData?.datetime?.officialDate
       const probables = f.gameData?.probablePitchers ?? {}
-      const [away, home] = await Promise.all([
+      const [awaySeason, homeSeason, awayLast, homeLast] = await Promise.all([
         fetchPitcherSeasonLine(probables.away?.id, season, game.sportId),
         fetchPitcherSeasonLine(probables.home?.id, season, game.sportId),
+        fetchPitcherLastGame(probables.away?.id, season, officialDate),
+        fetchPitcherLastGame(probables.home?.id, season, officialDate),
       ])
-      return { away, home }
+      const withLast = (line, lastGame) => (line || lastGame ? { ...(line ?? {}), lastGame } : null)
+      return { away: withLast(awaySeason, awayLast), home: withLast(homeSeason, homeLast) }
     },
     [game.gamePk],
   )

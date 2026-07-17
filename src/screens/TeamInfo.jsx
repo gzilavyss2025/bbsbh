@@ -464,7 +464,8 @@ function TeamSections({
     showTeammates,
     feed,
   ])
-  const dayNight = feed?.gameData?.datetime?.dayNight ?? ''
+  const info = useMemo(() => selectGameInfo(feed), [feed])
+  const dayNight = info.dayNight
 
   // Lineups don't post until close to first pitch. Until then, stage the
   // team's full active roster (batters + pitchers) in the same spot rather
@@ -483,6 +484,15 @@ function TeamSections({
 
   return (
     <>
+      <OpposingStarterCard
+        pitcher={oppPitcher}
+        pitcherLine={oppPitcherLine}
+        teamId={oppMeta.id}
+        prospectsData={prospectsData}
+        rookiesData={rookiesData}
+        callouts={callouts}
+      />
+
       <section className="lineup">
         <h3 className="section__title">Batting order</h3>
         {lineup.length > 0 ? (
@@ -512,7 +522,9 @@ function TeamSections({
           </ol>
         ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
           <>
-            <p className="hint">Lineup not posted yet — full roster:</p>
+            <p className="roster__notice">
+              Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
+            </p>
             <div className="roster">
               {roster.batters.length > 0 && (
                 <>
@@ -586,42 +598,9 @@ function TeamSections({
             </div>
           </>
         ) : (
-          <p className="hint">Lineup not posted yet.</p>
-        )}
-      </section>
-
-      <section className="opp">
-        <h3 className="section__title">Opposing pitcher</h3>
-        {oppPitcher ? (
-          <div className="opp__pitcher">
-            <span className="opp__namewrap">
-              <PlayerLink id={oppPitcher.id} className="opp__name">
-                {oppPitcher.nameLastFirst}
-              </PlayerLink>
-              <ProspectPill {...prospectBadge(prospectsData, oppPitcher.id)} />
-              <MilestonePill text={milestoneTextFor(callouts, oppPitcher.id)} />
-              <RookiePill active={isActiveRookie(rookiesData, oppPitcher.id)} />
-            </span>
-            <span className="opp__jersey">{oppPitcher.jersey || ''}</span>
-            <span className="opp__hand">{oppPitcher.hand}</span>
-            {/* Season line (aggregates only, never this game's) — the numbers
-                you pencil next to the starter while staging. */}
-            {oppPitcherLine && (
-              <span className="opp__season">
-                {[
-                  oppPitcherLine.era && `${oppPitcherLine.era} ERA`,
-                  `${oppPitcherLine.wins}-${oppPitcherLine.losses}`,
-                  `${oppPitcherLine.strikeOuts} K`,
-                  oppPitcherLine.inningsPitched &&
-                    `${oppPitcherLine.inningsPitched} IP`,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </span>
-            )}
-          </div>
-        ) : (
-          <p className="hint">Not posted yet.</p>
+          <p className="roster__notice">
+            Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
+          </p>
         )}
       </section>
 
@@ -646,6 +625,84 @@ function TeamSections({
       {showTeammates && <OrgTies ties={orgTies} />}
     </>
   )
+}
+
+// The starter this club's lineup is about to face, staged as its own
+// headshot card ahead of the batting order — the single most useful thing on
+// the page before the lineup posts, so it leads rather than waiting behind
+// the roster fallback. Same underlying data the old plain-text "Opposing
+// pitcher" row used (selectOpposingPitcher + the season line fetched
+// alongside it); this replaces that row rather than duplicating it.
+function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rookiesData, callouts }) {
+  return (
+    <section className="startercard">
+      <h3 className="section__title">Opposing starter</h3>
+      {pitcher ? (
+        <div className="startercard__body">
+          <Headshot
+            personId={pitcher.id}
+            name={pitcher.name}
+            teamId={teamId}
+            className="startercard__shot"
+          />
+          <div className="startercard__info">
+            <span className="startercard__namewrap">
+              <PlayerLink id={pitcher.id} className="startercard__name">
+                {pitcher.nameLastFirst}
+              </PlayerLink>
+              <ProspectPill {...prospectBadge(prospectsData, pitcher.id)} />
+              <MilestonePill text={milestoneTextFor(callouts, pitcher.id)} />
+              <RookiePill active={isActiveRookie(rookiesData, pitcher.id)} />
+            </span>
+            <span className="startercard__badges">
+              {pitcher.jersey && <span className="startercard__jersey">#{pitcher.jersey}</span>}
+              {pitcher.hand && <span className="startercard__hand">{pitcher.hand}HP</span>}
+            </span>
+            {/* Season line (aggregates only, never this game's) — the numbers
+                you pencil next to the starter while staging. */}
+            {pitcherLine && (
+              <span className="startercard__stats">
+                {[
+                  pitcherLine.era && `${pitcherLine.era} ERA`,
+                  `${pitcherLine.wins}-${pitcherLine.losses}`,
+                  `${pitcherLine.strikeOuts} K`,
+                  pitcherLine.inningsPitched && `${pitcherLine.inningsPitched} IP`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            )}
+            {/* His most recent appearance, whatever level it came at (see
+                fetchPitcherLastGame) — an already-final box line from a past
+                game, so it's staging-safe the same way the season line above
+                is; never this game's. */}
+            {pitcherLine?.lastGame && (
+              <span className="startercard__last">{lastGameLine(pitcherLine.lastGame)}</span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <p className="hint">Not posted yet.</p>
+      )}
+    </section>
+  )
+}
+
+// "LAST: 7/12 AT BOS (AAA) — 6.0 IP · 5 H · 2 ER · 6 K" — the compact line
+// under .startercard__last's dotted divider (see fetchPitcherLastGame).
+function lastGameLine(g) {
+  const md = (g.date || '').slice(5).replace('-', '/').replace(/^0/, '')
+  const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
+  const stat = [
+    g.inningsPitched && `${g.inningsPitched} IP`,
+    `${g.hits} H`,
+    `${g.earnedRuns} ER`,
+    `${g.strikeOuts} K`,
+    `${g.baseOnBalls} BB`,
+  ]
+    .filter(Boolean)
+    .join(', ')
+  return `${[md, where].filter(Boolean).join(' ')}: ${stat}`
 }
 
 // Show only the first handful up front — a heavy shared history (two rosters
