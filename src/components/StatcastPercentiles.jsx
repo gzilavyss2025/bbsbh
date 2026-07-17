@@ -4,9 +4,8 @@ import { FlipCard } from './FlipCard.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
 
 // STATCAST — season percentile ranks (Baseball Savant), one small card per
-// metric rather than a bar chart mimicking Savant's own — reuses the exact
-// StatcastCard tile the innings view and box score already use for per-half
-// superlatives, so "Statcast" reads as one visual family across the app.
+// metric rather than a bar chart mimicking Savant's own — reuses the
+// StatcastCard tile so "Statcast" reads as one visual family across the app.
 // Savant computes the percentiles AND their own qualification floor (see
 // api/savantPercentiles.js) — this is a pure presentational read of whatever
 // it hands back. Season aggregates are spoiler-free and, unlike

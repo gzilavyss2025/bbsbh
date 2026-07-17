@@ -120,13 +120,18 @@ export function InningViewer({
   // scroll or focus jump (the results appear above the button, which flips to
   // Next right under the thumb).
   const currentSealed = curIdx > revealedThrough
-  const curHalfLabel = `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`
   // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
   // as two side-by-side choices — reveal just the next plate appearance, or
   // the whole half at once. Keyed on the half actually being shown, not a
   // reveal frontier — RollingLine and direct links both let a user jump
   // straight to any unlocked half.
   const curAtBatCount = atBatCountFor(effInning, effHalf)
+  // Whether the half being shown has started revealing at all — full commit
+  // or mid-step (ADR-0016) — same definition as HalfInning.jsx's own
+  // startedRevealing for this same half; StatBox needs it to stop showing its
+  // pre-reveal pitcher-change teaser once that teaser's own real card has
+  // already appeared in the live feed (see StatBox.jsx).
+  const curStartedRevealing = curIdx <= revealedThrough || curAtBatCount > 0
   const revealWholeHalf = () => revealTo(effInning, effHalf)
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
@@ -135,18 +140,6 @@ export function InningViewer({
   useEffect(() => setStepInfo(null), [curIdx])
   const revealNextAtBat = () =>
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (stepInfo?.nextCap ?? curAtBatCount + 1))
-
-  // Stepping through at-bats one at a time keeps scrolling the newest card
-  // into view (see PlayByPlay.jsx); once the LAST tap finishes the half, that
-  // leaves the reader wherever the last at-bat happened to sit rather than at
-  // the R/H/E/LOB totals every half starts with. Only fires on the
-  // step-through path (HalfInning's onStepComplete) — tapping "Reveal whole
-  // half" already shows everything at once with no mid-half scroll to undo.
-  const scrollToStatBoxAfterStepping = () => {
-    setTimeout(() => {
-      document.querySelector('.innings__statbox')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
-  }
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
@@ -240,8 +233,9 @@ export function InningViewer({
         ))}
 
       {/* On a phone these wrappers are inert divs and everything stacks in the
-          same row order as ever: linescore, then the stat card + WPA chart,
-          then the play-by-play (with its strike zones), then the pitchers /
+          same row order as ever: linescore, then the play-by-play (with its
+          strike zones) — the most important thing on the page as the scorer
+          progresses — then the stat card + WPA chart, then the pitchers /
           lineups / defense reference band, then rosters. From the wide
           breakpoint up the stat card and WPA chart sit side by side. */}
       <div className="innings__grid">
@@ -258,35 +252,7 @@ export function InningViewer({
           onSelect={goTo}
         />
 
-        {/* Row 2: the R/H/E/LOB + pitch-stat card for the half being viewed,
-            beside the win-probability chart. */}
-        <div className="innings__row2">
-          <StatBox
-            className="innings__statbox"
-            placeholder
-            feed={feed}
-            inning={effInning}
-            half={effHalf}
-            battingSide={effHalf === 'top' ? 'away' : 'home'}
-            pitchingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            awayLocation={meta.away.locationName || meta.away.abbreviation}
-            homeLocation={meta.home.locationName || meta.home.abbreviation}
-            getDerived={getDerived}
-            revealed={curIdx <= revealedThrough}
-            isNextToReveal={curIdx === revealedThrough + 1}
-            runExpectancy={runExpectancy}
-          />
-          <WinProbChart
-            points={winProbPoints}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            partial
-          />
-        </div>
-
-        {/* Row 3: the half's play-by-play (paired with its strike zone on the
+        {/* Row 2: the half's play-by-play (paired with its strike zone on the
             wide layout). key on inning+half → fresh mount; a box at/under the
             reveal mark stays open. */}
         <div className="inning" key={`${effInning}-${effHalf}`}>
@@ -313,7 +279,35 @@ export function InningViewer({
             highlights={highlights}
             revealedAtBatCount={curAtBatCount}
             onStepInfo={setStepInfo}
-            onHalfSteppedThrough={scrollToStatBoxAfterStepping}
+          />
+        </div>
+
+        {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
+            beside the win-probability chart. */}
+        <div className="innings__row2">
+          <StatBox
+            className="innings__statbox"
+            placeholder
+            feed={feed}
+            inning={effInning}
+            half={effHalf}
+            battingSide={effHalf === 'top' ? 'away' : 'home'}
+            pitchingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
+            awayAbbr={meta.away.abbreviation}
+            homeAbbr={meta.home.abbreviation}
+            awayLocation={meta.away.locationName || meta.away.abbreviation}
+            homeLocation={meta.home.locationName || meta.home.abbreviation}
+            getDerived={getDerived}
+            revealed={curIdx <= revealedThrough}
+            startedRevealing={curStartedRevealing}
+            isNextToReveal={curIdx === revealedThrough + 1}
+            runExpectancy={runExpectancy}
+          />
+          <WinProbChart
+            points={winProbPoints}
+            awayAbbr={meta.away.abbreviation}
+            homeAbbr={meta.home.abbreviation}
+            partial
           />
         </div>
 
@@ -409,15 +403,15 @@ export function InningViewer({
               onClick={revealNextAtBat}
               aria-label={`Reveal the next at-bat in the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
             >
-              <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal next at-bat
+              Next at-bat
             </button>
             <button
               type="button"
               className="btn btn--reveal revealsplit__btn"
               onClick={revealWholeHalf}
-              aria-label={`Reveal the whole ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
+              aria-label={`Reveal the rest of half — the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
             >
-              <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal whole {curHalfLabel}
+              Rest of half
             </button>
           </div>
         ) : nextIdx != null ? (

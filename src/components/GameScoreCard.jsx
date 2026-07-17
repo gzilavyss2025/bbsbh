@@ -7,6 +7,60 @@ import { beeswarmRows, sampleForDisplay } from '../lib/beeswarm.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { GameScoreModal } from './GameScoreModal.jsx'
 
+// Interchangeable per-tier commentary on how much drama the game actually
+// had, in the same spirit as TeamScoreCard's Season Grade/Last 10 storyline
+// pools — several options per tier so the card doesn't repeat the same line
+// for every game that lands in a tier, picked deterministically (see
+// gamePhraseIndex below) rather than shown at random on every render.
+const DRAMA_PHRASES = {
+  elite: [
+    'One of the best games of the night',
+    'Every half inning had something on the line',
+    'The kind of night that earns a recap',
+    'Tension from the first pitch to the last',
+    'A game worth re-living, pitch by pitch',
+  ],
+  good: [
+    'A genuinely entertaining nine innings',
+    'Plenty of moments worth marking down',
+    'More drama than the average night',
+    'Held its shape as a good watch',
+    'A solid one to have scored',
+  ],
+  average: [
+    'A fairly ordinary night at the park',
+    'Nothing dramatic, nothing wasted either',
+    'About as eventful as most nights',
+    'A middle-of-the-pack night for drama',
+    'Steady, unremarkable baseball',
+  ],
+  below: [
+    'A quiet night, drama-wise',
+    'Short on moments worth marking down',
+    'Not much tension to speak of',
+    'One of the calmer nights on the slate',
+    'Light on drama from start to finish',
+  ],
+}
+
+// A completed game's score never changes, so — unlike TeamScoreCard's daily
+// reshuffle — this picks once per gamePk and stays that way forever.
+// FNV-1a-style hash, same technique as the Season Grade/Last 10 picker.
+function gamePhraseIndex(gamePk, length) {
+  let hash = 0x811c9dc5
+  const key = String(gamePk)
+  for (let i = 0; i < key.length; i++) {
+    hash ^= key.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return Math.abs(hash) % length
+}
+
+function dramaPhrase(tier, gamePk) {
+  const options = DRAMA_PHRASES[tier] ?? DRAMA_PHRASES.average
+  return options[gamePhraseIndex(gamePk, options.length)]
+}
+
 // Where tonight's game landed among the day's other games at the same level,
 // visually matching the Team Page's Season Grade card (TeamScoreCard) — a
 // hero score over a dot-plot rail of the pool, with this game marked as the
@@ -60,19 +114,25 @@ export function GameScoreCard({ feed }) {
           it) already carry this game's date; TeamScoreCard, the other
           .team-score consumer, still needs its own (no adjacent masthead on
           the Team Page), so the date stays a per-caller choice rather than
-          baked into the shared head markup. Echoes the modal's own framing
-          ("was it worth scoring?" — GameScoreModal) rather than repeating
-          "Game Score" twice on one small card. */}
+          baked into the shared head markup. */}
       <div className="team-score__head">
-        <span>Worth scoring?</span>
+        <span className="team-score__head-title">
+          Game Score
+          <button
+            type="button"
+            className="team-score__howlink team-score__howlink--inline"
+            onClick={() => setShowHow(true)}
+          >
+            How this is calculated
+          </button>
+        </span>
       </div>
 
       <div className="team-score__grade">
         <div className="team-score__grade-button team-score__grade-button--static">
           <span className="team-score__grade-copy">
-            <span className="team-score__grade-kicker">Game Score</span>
             <strong>{TIER_LABELS[mine.tier]}</strong>
-            <span>Measures the drama, not the result</span>
+            <span>{dramaPhrase(mine.tier, gamePk)}</span>
           </span>
           <span className="team-score__grade-result">
             <span className="team-score__rank">{ordinal(rankIdx + 1)} of {index.n}</span>
@@ -83,10 +143,6 @@ export function GameScoreCard({ feed }) {
         </div>
         <GameScoreTrack ranked={index.ranked} gamePk={gamePk} />
       </div>
-
-      <button type="button" className="team-score__howlink" onClick={() => setShowHow(true)}>
-        How this is calculated
-      </button>
 
       {showHow && <GameScoreModal thresholds={index.thresholds} onClose={() => setShowHow(false)} />}
     </section>
