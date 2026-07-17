@@ -10094,7 +10094,7 @@ body {
   min-width: 0;
 }
 .team-score__grade-kicker {
-  color: var(--seal-hatch);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -10105,6 +10105,7 @@ body {
   color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
   line-height: var(--lh-tight);
 }
 .team-score__grade-copy > span:last-child {
@@ -10269,6 +10270,14 @@ body {
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
+}
+.team-score__label-phrase {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
 }
 .team-score__rowright {
   display: flex;

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ordinal } from '../api/person.js'
-import { leagueRank } from '../api/teamScore.js'
+import { leagueRank, leagueRankNoTies, rankedNoTies } from '../api/teamScore.js'
 import { qualityScoreFromGames, CURRENT_FORM_GAMES } from '../api/teamScoreFormula.js'
 import { seasonGradeFor } from '../api/seasonGradeFormula.js'
 import { teamClubName } from '../lib/teams.js'
@@ -37,15 +37,55 @@ function meta(summary) {
   return `${record(summary)} · ${signed(summary.runDifferential)} run differential`
 }
 
-function gradeLabel(score) {
-  if (score >= 9) return 'Exceptional'
-  if (score >= 8) return 'Elite'
-  if (score >= 7) return 'Strong'
-  if (score >= 6) return 'Above average'
-  if (score >= 4.5) return 'Average'
-  if (score >= 3) return 'Below average'
-  if (score >= 2) return 'Poor'
-  return 'Dismal'
+// The hero verdict is a quadrant read rather than a single blended-score
+// label: Quality (how good) and Vs. expectation (over/under the preseason
+// assignment) each land in a high/mid/low tier, and each of the nine cells
+// carries a few equivalent phrases so two teams in the same cell don't read
+// as copy-pasted — picked deterministically by teamId so a given team's
+// wording is stable across visits rather than flickering on reload.
+function qualityTier(score) {
+  if (score >= 6.5) return 'high'
+  if (score <= 3.5) return 'low'
+  return 'mid'
+}
+
+function trajectoryTier(score) {
+  if (score >= 6) return 'high'
+  if (score <= 4) return 'low'
+  return 'mid'
+}
+
+const SEASON_STORYLINES = {
+  'high-high': ['Crushing it', 'Playing lights-out', 'Peaking on schedule'],
+  'high-mid': ['The real deal', 'Playing to their talent', 'Locked in'],
+  'high-low': ['Talented, underdelivering', 'Not living up to the roster yet', 'Leaving wins on the table'],
+  'mid-high': ['Punching above their weight', 'Surprising everyone', 'Overachieving'],
+  'mid-mid': ['Playing to form', 'Right on pace', 'About as expected'],
+  'mid-low': ['Falling short', 'Treading water', 'Stuck in neutral'],
+  'low-high': ['Beating the odds', 'Overachieving a thin roster', 'Scrapping above their talent'],
+  'low-mid': ['About where they were expected to be', 'On pace with the roster', 'No surprises here'],
+  'low-low': ['Struggling', 'In a rough stretch', 'Bottoming out'],
+}
+
+const FORM_STORYLINES = {
+  high: ['Rolling', 'Red hot', 'Playing great ball lately'],
+  mid: ['Middling lately', 'Mixed bag lately', 'Nothing special lately'],
+  low: ['Ice cold', 'In a funk', 'Scuffling lately'],
+}
+
+function pick(options, teamId) {
+  return options[teamId % options.length]
+}
+
+function seasonStoryline(grade, teamId) {
+  if (!grade) return null
+  const key = `${qualityTier(grade.quality)}-${trajectoryTier(grade.surprise)}`
+  return pick(SEASON_STORYLINES[key], teamId)
+}
+
+function formStoryline(score, teamId) {
+  if (score == null) return null
+  return pick(FORM_STORYLINES[qualityTier(score)], teamId)
 }
 
 export function TeamScoreCard({
@@ -62,10 +102,12 @@ export function TeamScoreCard({
   const toggle = (next) => setOpen((current) => (current === next ? null : next))
   const grade = seasonGradeFor(snapshot.season, surprise)
   const gradeSummary = grade ? { ...snapshot.season, score: grade.score } : null
-  const gradeRank = leagueRank(leagueGradeScores, teamId)
+  const gradeRank = leagueRankNoTies(leagueGradeScores, teamId)
   const qualityRank = leagueRank(leagueSeasonScores, teamId)
   const surpriseRank = leagueRank(leagueSurpriseScores, teamId)
-  const formRank = leagueRank(leagueFormScores, teamId)
+  const formRank = leagueRankNoTies(leagueFormScores, teamId)
+  const formPhrase = formStoryline(snapshot.currentForm?.score, teamId)
+  const formLabel = `Last ${snapshot.currentForm?.games ?? CURRENT_FORM_GAMES}`
 
   // "What built the grade" and the Current Form record line fold away until
   // the row that explains them is opened (same `open` accordion the numeric
@@ -120,7 +162,8 @@ export function TeamScoreCard({
       )}
 
       <ScoreRow
-        label={`Current form · Last ${snapshot.currentForm?.games ?? CURRENT_FORM_GAMES}`}
+        label={formLabel}
+        phrase={formPhrase}
         summary={snapshot.currentForm}
         rank={formRank}
         metaText={showFormMeta ? meta(snapshot.currentForm) : ''}
@@ -152,8 +195,7 @@ function GradeHero({ grade, summary, rank, league, teamId, isOpen, onToggle }) {
       >
         <span className="team-score__grade-copy">
           <span className="team-score__grade-kicker">Season Grade</span>
-          <strong>{grade ? gradeLabel(grade.score) : 'Not yet graded'}</strong>
-          <span>Quality, adjusted for the assignment</span>
+          <strong>{grade ? seasonStoryline(grade, teamId) : 'Not yet graded'}</strong>
         </span>
         <span className="team-score__grade-result">
           {rank && <span className="team-score__rank">{ordinal(rank.rank)} of {rank.of}</span>}
@@ -212,7 +254,7 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
   )
 }
 
-function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, league, teamId, driver = false, compact = false }) {
+function ScoreRow({ label, phrase, summary, rank, metaText, isOpen, onToggle, league, teamId, driver = false, compact = false }) {
   return (
     <div className={`team-score__row${driver ? ' team-score__row--driver' : ''}${compact ? ' team-score__row--compact' : ''}${isOpen ? ' is-active' : ''}`}>
       <button
@@ -222,7 +264,10 @@ function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, league, te
         aria-expanded={isOpen}
         aria-controls={isOpen ? 'team-score-detail' : undefined}
       >
-        <span className="team-score__label">{label}</span>
+        <span className="team-score__label">
+          {label}
+          {phrase && <span className="team-score__label-phrase">{phrase}</span>}
+        </span>
         <span className="team-score__rowright">
           {rank && <span className="team-score__rank">{ordinal(rank.rank)} of {rank.of}</span>}
           <span className="team-score__score">{scoreValue(summary)}</span>
@@ -251,20 +296,6 @@ function rankWindowStart(rank, of, width) {
   return Math.min(Math.max(rank - Math.floor(width / 2), 1), Math.max(of - width + 1, 1))
 }
 
-// Same competition-ranking convention as leagueRank (teamScore.js): a tie
-// shares a rank rather than getting consecutive numbers. Needed so a chip's
-// printed number can never disagree with the "Nth of 30" pill sitting right
-// next to it — a plain array-index label would show e.g. 14 on the self chip
-// while the pill (computed via leagueRank) says 13th for a score tied with
-// the team ahead of it.
-function tieAwareRanks(sorted) {
-  let rank = 1
-  return sorted.map((r, i) => {
-    if (i > 0 && sorted[i - 1].score !== r.score) rank = i + 1
-    return { ...r, rank }
-  })
-}
-
 // The rank pill's neighborhood: five teams around the club's own rank as
 // small logo chips, own team in color, the rest grayscale — the same
 // picked-vs-unpicked treatment .vsteam__team already uses elsewhere. Teams
@@ -278,15 +309,15 @@ function RankStrip({ league, teamId, compact = false }) {
   const [edge, setEdge] = useState({ l: false, r: false })
 
   // Worst-to-best, left to right, so #1 lands on the right — reading order
-  // ends at the goal rather than starting there. Rank numbers (tie-aware,
-  // computed on the best-first order below) travel with each team either way.
-  const ranked = tieAwareRanks([...league].sort((a, b) => b.score - a.score)).reverse()
+  // ends at the goal rather than starting there. Rank numbers (strict,
+  // tiebreak-resolved — see rankedNoTies) travel with each team either way.
+  const ranked = rankedNoTies(league).reverse()
   const of = ranked.length
   const ownIndex = ranked.findIndex((r) => r.teamId === teamId)
   const width = Math.min(RANKSTRIP_VISIBLE, of)
   const step = compact ? RANKSTRIP_STEP_COMPACT : RANKSTRIP_STEP
-  // Windowing scrolls by list position (ties still occupy distinct chips);
-  // only the printed number below each chip uses the tie-aware rank.
+  // rankedNoTies gives every team a strict, gapless rank, so list position
+  // and the printed rank always agree — no separate tie-aware lookup needed.
   const start = ownIndex >= 0 ? rankWindowStart(ownIndex + 1, of, width) : 1
 
   const updateEdge = () => {
