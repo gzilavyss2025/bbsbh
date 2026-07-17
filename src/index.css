@@ -13499,27 +13499,37 @@ body {
   height: 56px;
   width: auto;
 }
+/* The final result — bumped up from the original compact row to an actual
+   hero banner (card chrome, --fs-num-xl "revealed final score" role, bigger
+   logos matching the slate's own biggest mark size — see .gamecard__logobox)
+   since it's the page's headline fact, not a footnote next to the title. */
 .psseries__result {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin: var(--space-2) 0;
+  gap: clamp(12px, 5vw, 28px);
+  margin: var(--space-3) 0;
+  padding: 20px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 .psseries__team {
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
 }
 .psseries__teamlink {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
+  gap: 8px;
+  padding: 6px 4px;
   font-family: var(--font-display);
-  font-size: var(--fs-compact);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
   text-align: center;
-  max-width: 110px;
+  max-width: 120px;
 }
 .psseries__team--winner .psseries__teamlink {
   color: var(--text-heading);
@@ -13542,15 +13552,16 @@ body {
   flex: none;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-lg);
+  font-size: var(--fs-num-xl);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 /* Each game renders as the same "revealed" result card the slate's past-day
    flip cards show (GameResultFace: final line, decisions, play of the game)
-   — this page never seals it (see PostseasonSeriesPage's loadSeries comment),
-   just a small "Game N · date" head above each card, same idea as the
-   scoreboard's own linescore header. */
+   — this page never seals it (see PostseasonSeriesPage's loadSeries comment).
+   The head above each card is now a real header (not a caption line): "Game
+   N" + date on top, the series record AS OF that game underneath in a
+   smaller subheading role (seriesStatusAfterGame). */
 .psseries__games {
   display: flex;
   flex-direction: column;
@@ -13564,21 +13575,28 @@ body {
 }
 .psseries__gamehead {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
   padding: 0 2px;
 }
-.psseries__gamenum {
+.psseries__gametitle {
   font-family: var(--font-display);
   font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-muted);
+  font-size: var(--fs-title-sm);
+  color: var(--text-heading);
 }
 .psseries__gamedate {
-  font-size: var(--fs-caption);
+  margin-left: 6px;
+  font-size: var(--fs-small);
+  font-weight: var(--w-regular);
   color: var(--text-muted);
+}
+.psseries__gamestatus {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
 }
 /* GameResultFace's .flipback assumes the flip card's fixed-height face
    (width/height: 100%) — embedded here in normal page flow instead, so its

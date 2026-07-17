@@ -28,6 +28,37 @@ function monthDayYear(iso) {
   return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}` : ''
 }
 
+// "Brewers lead 3-2" / "Series tied 2-2" / "Brewers win series 3-2" — the
+// series record as of THIS game, not the final one (a game 3 mid-series
+// still reads "tied", not the series' eventual outcome). `games` is already
+// gameNumber-ordered (see gen-postseason-history.mjs), so tallying wins
+// through `gameIndex` gives an exact running score. The postseason data only
+// ever stores games actually played — a series stops the moment someone
+// clinches — so the LAST game in the array is always the clinching game,
+// with no best-of-N threshold to know per round (Division/Wild
+// Card/Championship all differ). Rendered in normal case: the app's global
+// ALL-CAPS invariant (see index.css) displays it as caps via CSS, not a
+// manual .toUpperCase() here.
+function seriesStatusAfterGame(games, gameIndex, teamAId, teamBId) {
+  let aWins = 0
+  let bWins = 0
+  for (let i = 0; i <= gameIndex; i++) {
+    const g = games[i]
+    const winnerId = g.awayScore > g.homeScore ? g.awayTeamId : g.homeTeamId
+    if (winnerId === teamAId) aWins += 1
+    else if (winnerId === teamBId) bWins += 1
+  }
+  const leadWins = Math.max(aWins, bWins)
+  const trailWins = Math.min(aWins, bWins)
+  if (gameIndex === games.length - 1) {
+    const winnerId = aWins > bWins ? teamAId : teamBId
+    return `${teamClubNameShort(winnerId)} win series ${leadWins}-${trailWins}`
+  }
+  if (aWins === bWins) return `Series tied ${aWins}-${bWins}`
+  const leaderId = aWins > bWins ? teamAId : teamBId
+  return `${teamClubNameShort(leaderId)} lead ${leadWins}-${trailWins}`
+}
+
 // Resolves the URL's seriesId against postseason-history.json (cached
 // in-memory, same fetch PostseasonHistoryPage/the old bracket modal already
 // use), then sweeps that series' handful of games for batting/pitching
@@ -114,7 +145,7 @@ export function PostseasonSeriesPage({ seriesId }) {
       <div className="psseries__result">
         <div className={`psseries__team psseries__team--winner${isFav(winner.teamId) ? ' psseries__team--fav' : ''}`} style={favStyle(winner.teamId)}>
           <TeamLink id={winner.teamId} className="psseries__teamlink">
-            <TeamLogo teamId={winner.teamId} name={teamClubNameShort(winner.teamId)} size={40} />
+            <TeamLogo teamId={winner.teamId} name={teamClubNameShort(winner.teamId)} size={64} />
             <span className="psseries__teamname">{teamClubNameShort(winner.teamId)}</span>
           </TeamLink>
         </div>
@@ -123,14 +154,14 @@ export function PostseasonSeriesPage({ seriesId }) {
         </span>
         <div className={`psseries__team psseries__team--loser${isFav(loser.teamId) ? ' psseries__team--fav' : ''}`} style={favStyle(loser.teamId)}>
           <TeamLink id={loser.teamId} className="psseries__teamlink">
-            <TeamLogo teamId={loser.teamId} name={teamClubNameShort(loser.teamId)} size={40} />
+            <TeamLogo teamId={loser.teamId} name={teamClubNameShort(loser.teamId)} size={64} />
             <span className="psseries__teamname">{teamClubNameShort(loser.teamId)}</span>
           </TeamLink>
         </div>
       </div>
 
       <div className="psseries__games">
-        {games.map((g) => {
+        {games.map((g, i) => {
           const card = cardsByPk?.[g.gamePk]
           const signals = gameSignals?.[g.gamePk]
           const boxScorePath = card
@@ -139,8 +170,12 @@ export function PostseasonSeriesPage({ seriesId }) {
           return (
             <div key={g.gameNumber} className="psseries__gamewrap">
               <div className="psseries__gamehead">
-                <span className="psseries__gamenum">Game {g.gameNumber}</span>
-                <span className="psseries__gamedate">{monthDayYear(g.date)}</span>
+                <span className="psseries__gametitle">
+                  Game {g.gameNumber} <span className="psseries__gamedate">{monthDayYear(g.date)}</span>
+                </span>
+                <span className="psseries__gamestatus">
+                  {seriesStatusAfterGame(games, i, teamA.teamId, teamB.teamId)}
+                </span>
               </div>
               {signals && boxScorePath ? (
                 <div className="psseries__facewrap">
