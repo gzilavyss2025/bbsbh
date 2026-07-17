@@ -9708,7 +9708,11 @@ body {
 }
 .gamelog__row {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  /* max-content, not a fixed px: sized to the widest date+opponent across
+     every row in THIS log, so a long nickname ("Diamondbacks") never wraps
+     just because some fixed guess undershot it — the stat-line column has
+     room to give since most lines are far short of the card's full width. */
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: baseline;
   column-gap: 12px;
   padding: 8px 12px;
@@ -9736,9 +9740,11 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-muted);
-  /* A long club name (e.g. "Diamondbacks") in the fixed 96px meta column
-     must be free to wrap onto a second line — `nowrap` let it overflow
-     past the column edge and visually collide with the stat line beside it. */
+  /* .gamelog__row's max-content meta column already sizes to fit the
+     widest date+opponent in the log, so no nickname needs to wrap in
+     practice — this is just the flex-item safety net: a plain flex child
+     defaults to min-width:auto, which would refuse to shrink at all on a
+     viewport too narrow even for that (rather than wrapping gracefully). */
   min-width: 0;
 }
 /* Level pill on a combined MLB + rehab game log (see gameLogView's tagLevel) —
