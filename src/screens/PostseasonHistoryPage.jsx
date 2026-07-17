@@ -3,12 +3,13 @@ import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
+import { useNav } from '../lib/nav.js'
+import { postseasonSeriesPath } from '../lib/route.js'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { PostseasonSeriesModal } from '../components/PostseasonSeriesModal.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 
 const AL = 103
@@ -160,17 +161,59 @@ function BracketColumn({ side, label, lanes, onOpenSeries }) {
   )
 }
 
+// The World Series card's Series MVP row. A real headshot keeps the
+// position as a small pill anchored to the photo's corner (pswscard__pos);
+// when there's no real photo on file, the mug slot shows the MVP's own team
+// crest (a clean TeamLogo, not Headshot's boxed/clipped fallback treatment —
+// hideFallback keeps Headshot from rendering that itself) and the position
+// reads as plain text after the name instead.
+function SeriesMvp({ mvp }) {
+  const [hasPhoto, setHasPhoto] = useState(true)
+  return (
+    <div className="pswscard__mvp">
+      <span className="pswscard__mug">
+        <Headshot
+          personId={mvp.playerId}
+          name={mvp.name}
+          teamId={mvp.teamId}
+          className="pswscard__shot"
+          hideFallback
+          onFallback={(mode) => setHasPhoto(mode == null)}
+        />
+        {!hasPhoto && (
+          <TeamLogo teamId={mvp.teamId} name={teamClubNameShort(mvp.teamId)} size={40} className="pswscard__mvplogo" />
+        )}
+        {hasPhoto && mvp.position && <span className="pswscard__pos">{mvp.position}</span>}
+      </span>
+      <span className="pswscard__mvpinfo">
+        <span className="pswscard__mvptag">Series MVP</span>
+        <span className="pswscard__mvpname">
+          {mvp.name}
+          {!hasPhoto && mvp.position && <span className="pswscard__mvppos"> {mvp.position}</span>}
+        </span>
+      </span>
+    </div>
+  )
+}
+
 // Full-width bracket: 7 columns — AL Wild Card → Division → Championship
 // converging from the left, the World Series fixed center, NL rounds
-// mirroring back out to the right.
+// mirroring back out to the right. Seasons before the Wild Card round
+// existed (2000-2011 — straight from Division Series) carry no 'wildcard'
+// entry in season.rounds at all, so both Wild Card columns are dropped
+// (psbracket--no-wc collapses the grid to 5 tracks) rather than rendering
+// a column of fake "Bye" cards for every Division Series team.
 function BracketGrid({ season, onOpenSeries }) {
   const al = leagueBracket(season, AL)
   const nl = leagueBracket(season, NL)
   const ws = season.rounds.find((r) => r.key === 'worldseries')?.series?.[0] ?? null
+  const hasWildCard = season.rounds.some((r) => r.key === 'wildcard')
 
   return (
-    <div className="psbracket">
-      <BracketColumn side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+    <div className={`psbracket${hasWildCard ? '' : ' psbracket--no-wc'}`}>
+      {hasWildCard && (
+        <BracketColumn side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+      )}
       <BracketColumn side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
       <BracketColumn side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <div className="psbracket__col psbracket__col--ws">
@@ -179,8 +222,6 @@ function BracketGrid({ season, onOpenSeries }) {
             src="/brand/world-series-trophy-icon.png"
             alt=""
             className="psbracket__roundtrophy"
-            width={12}
-            height={12}
             aria-hidden="true"
           />
           World Series
@@ -199,30 +240,16 @@ function BracketGrid({ season, onOpenSeries }) {
                   iconSize={22}
                 />
               ))}
-              {ws.mvp && (
-                <div className="pswscard__mvp">
-                  <span className="pswscard__mug">
-                    <Headshot
-                      personId={ws.mvp.playerId}
-                      name={ws.mvp.name}
-                      teamId={ws.mvp.teamId}
-                      className="pswscard__shot"
-                    />
-                    {ws.mvp.position && <span className="pswscard__pos">{ws.mvp.position}</span>}
-                  </span>
-                  <span className="pswscard__mvpinfo">
-                    <span className="pswscard__mvptag">Series MVP</span>
-                    <span className="pswscard__mvpname">{ws.mvp.name}</span>
-                  </span>
-                </div>
-              )}
+              {ws.mvp && <SeriesMvp mvp={ws.mvp} />}
             </button>
           )}
         </div>
       </div>
       <BracketColumn side="nl" label="NL Championship" lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
       <BracketColumn side="nl" label="NL Division Series" lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
-      <BracketColumn side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
+      {hasWildCard && (
+        <BracketColumn side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
+      )}
     </div>
   )
 }
@@ -247,10 +274,13 @@ function BracketStack({ season, onOpenSeries }) {
   const al = leagueBracket(season, AL)
   const nl = leagueBracket(season, NL)
   const ws = season.rounds.find((r) => r.key === 'worldseries')?.series?.[0] ?? null
+  const hasWildCard = season.rounds.some((r) => r.key === 'wildcard')
 
   return (
     <div className="psstack">
-      <StackRound side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+      {hasWildCard && (
+        <StackRound side="al" label="AL Wild Card" lanes={al.wcLanes} onOpenSeries={onOpenSeries} />
+      )}
       <StackRound side="al" label="AL Division Series" lanes={al.dsLanes} onOpenSeries={onOpenSeries} />
       <StackRound side="al" label="AL Championship" lanes={al.csLanes} onOpenSeries={onOpenSeries} />
       <p className="psstack__roundlabel psstack__roundlabel--ws">
@@ -258,8 +288,6 @@ function BracketStack({ season, onOpenSeries }) {
           src="/brand/world-series-trophy-icon.png"
           alt=""
           className="psbracket__roundtrophy"
-          width={12}
-          height={12}
           aria-hidden="true"
         />
         World Series
@@ -281,7 +309,9 @@ function BracketStack({ season, onOpenSeries }) {
       )}
       <StackRound side="nl" label="NL Championship" lanes={nl.csLanes} onOpenSeries={onOpenSeries} />
       <StackRound side="nl" label="NL Division Series" lanes={nl.dsLanes} onOpenSeries={onOpenSeries} />
-      <StackRound side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
+      {hasWildCard && (
+        <StackRound side="nl" label="NL Wild Card" lanes={nl.wcLanes} onOpenSeries={onOpenSeries} />
+      )}
     </div>
   )
 }
@@ -303,8 +333,6 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
               src="/brand/world-series-trophy-icon.png"
               alt=""
               className="pshistory__championtrophy"
-              width={14}
-              height={14}
               aria-hidden="true"
             />
             World Series Champion
@@ -335,18 +363,21 @@ function SeasonBracket({ season, onOpenSeries, wide }) {
 // StandingsPage's day stepper — to page Older/Newer across the FULL
 // history (the stepper only ever renders one season, so there's no "load
 // more" wall to hit there). Tapping any matchup (bye slots excepted — they
-// carry no series) opens the same animated PostseasonSeriesModal at every
-// width. Data comes from scripts/gen-postseason-history.mjs, a hand-run
+// carry no series) navigates to the dedicated PostseasonSeriesPage
+// (/postseason/{seriesId}) at every width — game-by-game scores, MVP, and
+// series-scoped batting/pitching leaders. Data comes from
+// scripts/gen-postseason-history.mjs, a hand-run
 // precompute (a finished postseason's results are immutable, same footing
 // as war-history.json/awards-history.json) — no SealBox needed, same as
 // those pages: a past series' score carries no LIVE game's spoiler risk.
 export function PostseasonHistoryPage() {
   useDocumentTitle('Postseason History')
   const { loading, error, data } = useAsync(() => loadPostseasonHistory(), [])
-  const [activeSeries, setActiveSeries] = useState(null)
   const [yearIndex, setYearIndex] = useState(0)
   const [showAllYears, setShowAllYears] = useState(false)
   const wide = useMediaQuery(WIDE_QUERY)
+  const navigate = useNav()
+  const openSeries = (series) => navigate(postseasonSeriesPath(series.id))
   const seasons = data?.seasons ?? []
   const currentYearSeason = seasons[Math.min(yearIndex, seasons.length - 1)]
   const visibleSeasons = showAllYears
@@ -373,7 +404,7 @@ export function PostseasonHistoryPage() {
       {seasons.length > 0 && wide && (
         <div className="pshistory__list">
           {visibleSeasons.map((season) => (
-            <SeasonBracket key={season.year} season={season} onOpenSeries={setActiveSeries} wide />
+            <SeasonBracket key={season.year} season={season} onOpenSeries={openSeries} wide />
           ))}
           {hasMoreYears && (
             <button type="button" className="pshistory__more" onClick={() => setShowAllYears(true)}>
@@ -386,7 +417,7 @@ export function PostseasonHistoryPage() {
       {seasons.length > 0 && !wide && currentYearSeason && (
         <>
           <div className="pshistory__list">
-            <SeasonBracket season={currentYearSeason} onOpenSeries={setActiveSeries} wide={false} />
+            <SeasonBracket season={currentYearSeason} onOpenSeries={openSeries} wide={false} />
           </div>
 
           <nav className="psyearnav" aria-label="Postseason year stepper">
@@ -409,10 +440,6 @@ export function PostseasonHistoryPage() {
             </button>
           </nav>
         </>
-      )}
-
-      {activeSeries && (
-        <PostseasonSeriesModal series={activeSeries} onClose={() => setActiveSeries(null)} />
       )}
     </div>
   )

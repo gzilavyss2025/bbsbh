@@ -190,7 +190,7 @@ async function buildSeason(year) {
       })
     }
     const series = seriesMap.get(key)
-    series.games.push({
+    const entry = {
       gameNumber: g.seriesGameNumber ?? series.games.length + 1,
       date: g.officialDate,
       gamePk: g.gamePk,
@@ -198,7 +198,21 @@ async function buildSeason(year) {
       awayScore: g.teams.away.score ?? null,
       homeTeamId: g.teams.home.team.id,
       homeScore: g.teams.home.score ?? null,
-    })
+    }
+    // A rain-suspended/resumed game can appear TWICE in the schedule pull
+    // under the same gamePk — an unfinished placeholder row (null scores,
+    // occasionally even the wrong seriesGameNumber) alongside the real
+    // completed record. Keep only the scored row per gamePk, or the wins
+    // tally double-counts it (verified: 2009 ALCS Game 6 + 22 other
+    // suspended games across 2004-2022 — `awayScore > homeScore` on a
+    // null/null placeholder resolves to false, silently crediting the
+    // home team a phantom extra win).
+    const dupIndex = series.games.findIndex((existing) => existing.gamePk === entry.gamePk)
+    if (dupIndex === -1) {
+      series.games.push(entry)
+    } else if (series.games[dupIndex].awayScore == null && entry.awayScore != null) {
+      series.games[dupIndex] = entry
+    }
   }
 
   const seriesByRound = new Map(ROUNDS.map((r) => [r.key, []]))

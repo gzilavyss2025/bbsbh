@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   realHeadshotUrl,
   milbHeadshotUrl,
@@ -36,7 +36,15 @@ import {
 // color, so it degrades to the transparent frame. The tint is dropped on the
 // monogram fallback, whose graphite letter needs the light inset chip for
 // contrast.
-export function Headshot({ personId, name, teamId = null, coach = false, className = '' }) {
+export function Headshot({
+  personId,
+  name,
+  teamId = null,
+  coach = false,
+  className = '',
+  onFallback,
+  hideFallback = false,
+}) {
   // Ordered photo-source builders for this person; we advance one rung per
   // 404/error via `rung`, then fall through to logo/monogram below.
   const sources = coach ? [coachHeadshotUrl] : [realHeadshotUrl, milbHeadshotUrl]
@@ -52,9 +60,23 @@ export function Headshot({ personId, name, teamId = null, coach = false, classNa
   const builder = personId ? sources[rung] : null
   const photoUrl = builder ? builder(personId) : null
   const bg = teamTintColor(teamId)
+  const logoUrl = !photoUrl && teamId && !logoFailed ? teamLogoUrl(teamId) : null
+
+  // Optional: lets a caller react to "no real photo" — e.g. moving a detail
+  // normally anchored to the photo (a position tag) into plain text instead
+  // once we're down to the logo/monogram. Read via a ref so a fresh inline
+  // arrow function passed every parent render doesn't retrigger the effect.
+  const onFallbackRef = useRef(onFallback)
+  onFallbackRef.current = onFallback
+  useEffect(() => {
+    onFallbackRef.current?.(photoUrl ? null : logoUrl ? 'logo' : 'monogram')
+  }, [photoUrl, logoUrl])
 
   if (!photoUrl) {
-    const logoUrl = teamId && !logoFailed ? teamLogoUrl(teamId) : null
+    // The caller has its own plan for a missing photo (e.g. a clean full
+    // TeamLogo instead of this boxed/clipped one) — still report via
+    // onFallback above, just render nothing of our own.
+    if (hideFallback) return null
     if (logoUrl) {
       return (
         <span

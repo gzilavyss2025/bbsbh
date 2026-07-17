@@ -28,10 +28,11 @@ the one long-lived example spec; write and delete throwaway specs alongside it.
 
 ## The SQLite data layer (`lib/schema.sql`, `lib/db.js`)
 
-`gen-game-score.mjs`, `gen-team-score.mjs`, and `gen-season-score.mjs` write into
-a shared SQLite database instead of hand-rolling their own JSON read-merge-write
-cycle, then export the same JSON shapes the reader modules already expect — see
-`docs/adr/0021`. `openDb()` reconstitutes an in-memory database from committed TEXT
+`gen-game-score.mjs`, `gen-team-score.mjs`, `gen-season-score.mjs`, and
+`gen-postseason-leaders.mjs` write into a shared SQLite database instead of
+hand-rolling their own JSON read-merge-write cycle, then export the same JSON
+shapes the reader modules already expect — see `docs/adr/0021`. `openDb()`
+reconstitutes an in-memory database from committed TEXT
 dumps (`scripts/data/*.sql`, plain `INSERT` statements — never a binary `.db`, so
 PR diffs stay reviewable); `dumpGroup(db, name)` re-dumps only the table-group a
 generator owns. **Dumps are split one file per group, not shared**, because
@@ -298,6 +299,26 @@ Re-run only to fold in a new season.
   2000-2019 behind a "Load more" — that's a UI cutoff, not a generator one;
   this file always carries the full range. App reads it via
   `src/api/postseasonHistory.js`.
+- `gen-postseason-leaders.mjs` → `public/data/postseason-leaders.json` — since-
+  2000 career postseason batting/pitching leaderboards, plus franchise
+  (titles/pennants/appearances) and repeat-Series-MVP leaders computed
+  straight from `postseason-history.json` (no extra fetch). Batting/pitching
+  need per-game boxscore stat lines that file never carries, so this script
+  sweeps every gamePk in it (`GET /api/v1/game/{gamePk}/boxscore`, verified
+  live — batting/pitching stats are direct fields, no separate decision
+  lookup for W/L/SV) and folds each game into a running CAREER TOTAL per
+  player via an incrementing upsert into the SQLite layer's
+  `postseason_batting_totals`/`postseason_pitching_totals` (scripts/lib/
+  schema.sql) — not one row per game, which would be ~30x more rows for value
+  this page doesn't need (see the schema file's own comment: a full re-sweep
+  of every postseason game since 2000 takes under a minute, so there's no
+  real cost to re-deriving it fresh over keeping a bulky per-game ledger in
+  git). `postseason_ingested_games` is the idempotency guard, so a resumed or
+  re-run sweep never double-counts a game. RUN gen-postseason-history.mjs
+  FIRST — this script reads its gamePk list, never re-walks the schedule API
+  itself. AVG/ERA carry a minimum-AB/IP qualifier (same idea as the live
+  leader boards' floor) so a single pinch-hit or mop-up inning can't top a
+  rate-stat board. App reads it via `src/api/postseasonLeaders.js`.
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before
   `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB

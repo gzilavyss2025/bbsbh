@@ -37,7 +37,7 @@
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
        notification cards), `.bs__potgDesc`, `.flipback__potg`,
-       `.dayhl__rowBtn`
+       `.psseries__potgDesc`, `.dayhl__rowBtn`
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`
@@ -13788,8 +13788,8 @@ body {
    history. One section per season, newest first: a champion banner, then
    each round (Wild Card/Division/Championship/World Series) as its own
    column so the whole thing scrolls left-to-right like a bracket. Series
-   tiles are buttons; tapping one opens .psmodal (below), the animated
-   "card slides over" detail view. */
+   tiles are buttons; tapping one navigates to the dedicated
+   PostseasonSeriesPage (.psseries__*, below). */
 .pshistory__list {
   display: flex;
   flex-direction: column;
@@ -13841,6 +13841,8 @@ body {
 .pshistory__championtrophy {
   flex: none;
   display: block;
+  height: 22px;
+  width: auto;
 }
 
 /* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
@@ -13894,6 +13896,15 @@ body {
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
+/* Seasons with no Wild Card round (2000-2011) drop both Wild Card columns
+   (see PostseasonHistoryPage.jsx's hasWildCard) — collapse to 5 tracks so
+   the World Series stays centered instead of leaving two empty columns on
+   the right. */
+.psbracket--no-wc {
+  grid-template-columns:
+    minmax(150px, 1fr) minmax(160px, 1.05fr) minmax(150px, 1.15fr)
+    minmax(160px, 1.05fr) minmax(150px, 1fr);
+}
 .psbracket__col {
   display: flex;
   flex-direction: column;
@@ -13909,6 +13920,9 @@ body {
 @media (min-width: 740px) and (max-width: 1279px) {
   .psbracket {
     grid-template-columns: repeat(7, minmax(84px, 1fr));
+  }
+  .psbracket--no-wc {
+    grid-template-columns: repeat(5, minmax(84px, 1fr));
   }
   .psbracket__col {
     min-width: 84px;
@@ -13957,6 +13971,8 @@ body {
 .psbracket__roundtrophy {
   flex: none;
   display: block;
+  height: 20px;
+  width: auto;
 }
 .psbracket__lanes {
   flex: 1;
@@ -14100,14 +14116,19 @@ body {
    behind a hairline divider. */
 .pswscard__mvp {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-top: 4px;
   padding-top: 8px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+  text-align: center;
 }
 .pswscard__mug {
   position: relative;
+  flex: none;
+}
+.pswscard__mvplogo {
   flex: none;
 }
 /* 25% past the standard --shot-2xs rung — this card's the one place a WS
@@ -14140,7 +14161,9 @@ body {
 .pswscard__mvpinfo {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
+  width: 100%;
   min-width: 0;
 }
 .pswscard__mvptag {
@@ -14155,7 +14178,14 @@ body {
   font-weight: var(--w-bold);
   font-size: var(--fs-small);
   color: var(--text-heading);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+/* Position, read as plain text after the name when Headshot has no real
+   photo to anchor the usual corner pill to (see SeriesMvp). */
+.pswscard__mvppos {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
 }
 
 /* Condensed phone layout: the same AL→WS→NL reading order flowed vertically
@@ -14251,201 +14281,831 @@ body {
 }
 
 /* ---------------------------------------------------------- postseason series
-   modal. The animated card a series tap slides over — same centered-scrim +
-   slideup treatment as .logomodal (the team-page logo sketch), just a
-   scorebook-style game list instead of an oversized logo. */
-.psmodal {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: calc(100% - 32px);
-  max-width: 380px;
-  max-height: calc(100vh - 64px);
-  overflow-y: auto;
-  padding: 24px 18px 18px;
-  background: var(--surface-inset);
+   page (PostseasonSeriesPage, /postseason/{seriesId}) — a series' final
+   result, game-by-game list, MVP, and (below, via TeamLeaders) its
+   batting/pitching leaders. Reached by navigating straight from a bracket
+   tap (PostseasonHistoryPage) rather than a modal, so these are ordinary
+   page sections, not a floating scrim card. */
+/* The series-result hero — a navy "pennant band" headline (the ink-filled
+   band idiom the BOX SCORE button already establishes, promoted to a
+   declaration: "Brewers win in 5") over a two-row scorebook LEDGER. Each
+   club's row reads like a series linescore: crest + name at left, one small
+   grid cell per game (inked navy = that club took that game, so the series'
+   arc — who won which games — is legible at a glance), and the series-wins
+   total as the big mono figure on the right, exactly where a linescore's R
+   column sits. Replaces the old floating logos + centered "3–2", which had
+   no structure to hold the space it claimed. */
+.psseries__result {
+  margin: var(--space-3) 0;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-raised);
-  animation: slideup var(--dur-slow) var(--ease-out);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
-.psmodal__close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: var(--tap-min);
-  height: var(--tap-min);
+.psseries__banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: 10px var(--space-4);
+  background: var(--accent-primary);
+  /* Medal-amber seam under the band — championship trim. */
+  border-bottom: var(--bw-heavy) solid var(--award-line);
+}
+.psseries__headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-tight);
+  color: var(--text-on-ink);
+}
+/* The World Series trophy sits inside the band, not floating above the card. */
+.psseries__trophy {
+  flex: none;
+  height: 44px;
+  width: auto;
+}
+.psseries__ledger {
+  padding: var(--space-2) var(--space-3);
+}
+.psseries__team {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.psseries__team + .psseries__team {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.psseries__teamlink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+}
+.psseries__teamname {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.psseries__team--winner .psseries__teamlink {
+  color: var(--text-heading);
+}
+.psseries__team--loser .psseries__teamlink {
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+/* Per-game win cells — scorebook frames. An inked cell is a game that club
+   won; an empty pressed-paper cell is one it dropped. Numbered by game so
+   the winner's row shows WHERE in the series the games were taken. */
+.psseries__cells {
+  display: flex;
+  gap: 4px;
+}
+.psseries__cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-size: var(--fs-num-md);
-  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--bg-page);
+  box-shadow: var(--inset-cell);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
 }
-.psmodal__label {
+.psseries__cell--won {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: none;
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
+}
+/* Series wins — the ledger's "R column": big tabular mono at the row's end. */
+.psseries__wins {
+  min-width: 34px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.psseries__team--loser .psseries__wins {
+  color: var(--text-muted);
+}
+@media (min-width: 740px) {
+  .psseries__headline {
+    font-size: var(--fs-hero-lg);
+  }
+  .psseries__banner {
+    min-height: 60px;
+    padding: 12px var(--space-5);
+  }
+  .psseries__trophy {
+    height: 52px;
+  }
+  .psseries__ledger {
+    padding: var(--space-3) var(--space-4);
+  }
+  .psseries__cell {
+    width: 26px;
+    height: 26px;
+    font-size: var(--fs-compact);
+  }
+  .psseries__wins {
+    font-size: var(--fs-num-xl);
+    min-width: 44px;
+  }
+}
+/* Game-by-game log — the series as ONE continuous scorebook ledger card
+   (not a stack of separate captioned cards): a double clay margin rule runs
+   down the left like the red margin line of a paper ledger, and each game is
+   an entry stamped with the same inked number-cell idiom the result banner's
+   win trace uses, so the banner's cells double as this log's index. Inside
+   each entry, GameResultFace (the slate's "revealed" past-game card: final
+   line, decisions, play of the game — this page never seals it, see
+   PostseasonSeriesPage's loadSeries comment) is de-chromed by the
+   .psseries__facewrap overrides below so it reads as lines written IN the
+   ledger rather than a card sitting ON it. */
+.psseries__games {
+  margin: 0 0 var(--space-3);
+}
+.psseries__log {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.psseries__logbody {
+  position: relative;
+}
+/* The ledger's double margin rule — two clay hairlines, softened with
+   color-mix so they print like ruled stationery, not an alert. The 45% clay
+   tint matches the leader agate's margin rule below, so the two ledger
+   sections rule their paper the same way. Spans the entries only: it stops
+   where the MVP award band (outside .psseries__logbody) closes the book. */
+.psseries__logbody::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 27px;
+  width: 3px;
+  border-left: var(--bw-hair) solid color-mix(in srgb, var(--clay) 45%, transparent);
+  border-right: var(--bw-hair) solid color-mix(in srgb, var(--clay) 45%, transparent);
+  pointer-events: none;
+}
+.psseries__entry {
+  position: relative;
+  padding: var(--space-3) var(--space-3) var(--space-4) 50px;
+}
+.psseries__entry + .psseries__entry {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+/* The entry's index stamp — same inked-cell idiom as .psseries__cell--won in
+   the banner's win trace (deliberately its own class: the banner is a
+   separate, approved composition), sitting centered ON the margin rule. */
+.psseries__gamenum {
+  position: absolute;
+  top: var(--space-3);
+  left: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-xs);
+  background: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+}
+/* Date at left, the series record AS OF this game at right — min-height keeps
+   the baseline row vertically centered against the 24px index stamp. */
+.psseries__entryhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 24px;
+}
+.psseries__gamedate {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.psseries__gamestatus {
+  flex: none;
+  text-align: right;
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+/* The clincher's status line ("… win series 3-2") inks in medal amber — the
+   moment the banner's headline actually happened, trimmed in the same award
+   family as the banner's seam. */
+.psseries__gamestatus--final {
+  font-weight: var(--w-bold);
+  color: var(--award-ink);
+}
+/* GameResultFace assumes the flip card's fixed-height chromed face
+   (width/height: 100%, own border/shadow) — embedded in the ledger instead:
+   height from content, chrome stripped so only the log card's paper shows. */
+.psseries__facewrap .flipback {
+  height: auto;
+  padding: var(--space-2) 0 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+/* Slate-card team names are sized for a standalone card; a step down keeps
+   the ledger's line-score subordinate to the banner above. */
+.psseries__facewrap .flipback__abbr {
+  font-size: var(--fs-title-sm);
+}
+/* Same demotion for the "10 INNINGS" extras marker — a headline on the slate
+   card, a margin note in a ledger of five-plus games. */
+.psseries__facewrap .flipback__extras {
+  font-size: var(--fs-num-md);
+}
+/* One navy band per entry (the slate card's full-width BOX SCORE bar) would
+   fight the pennant band above five to seven times over — quiet it to a
+   compact secondary button, left-aligned like a ledger's margin note. */
+.psseries__facewrap .flipback__full {
+  align-self: flex-start;
+  width: auto;
+  margin-top: var(--space-1);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+/* Headshot-led Play of the Game (SeriesPlayOfTheGame) — same idea as the full
+   box score's own .bs__potg* (BoxScore.jsx), scoped to its own psseries__potg*
+   family rather than shared classes (same convention as .psseries__roster*
+   below), and sized up a tier (--shot-md vs. that page's --shot-sm) since
+   this is exactly the wide, otherwise-empty column it's built to fill. Below
+   740px it just stacks under .psseries__facewrap at full width. */
+.psseries__potg {
+  padding-top: var(--space-2);
+}
+.psseries__potgTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.psseries__potgBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.shot.psseries__potgShot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.psseries__potgShot.shot--fallback {
+  font-size: var(--fs-hero-sm);
+}
+.psseries__potgMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.psseries__potgWho {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.psseries__potgName {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.psseries__potgMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Approved exception to the ALL-CAPS INVARIANT, same idiom as .bs__potgDesc —
+   a play-by-play-style description reads as a natural sentence, not shouted
+   chrome. The nested .psseries__potgWhen/.psseries__potgScore aren't
+   affected: #root * still matches them directly and wins over this rule's
+   inherited value. */
+.psseries__potgDesc {
   margin: 0;
-  padding-right: 30px;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-heading);
+  text-transform: capitalize; /* caps-exempt: approved title case for the series page's play-of-the-game narrative, same convention as .bs__potgDesc */
+}
+.psseries__potgWhen {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
+}
+.psseries__potgScore {
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+
+/* Wide layout (the ≥740px column): a full-width single-column entry turns
+   into acres of empty paper between the team names and their R/H/E figures
+   — so the entry itself splits into two ledger columns instead: line score +
+   decisions + the box-score button at left (.psseries__facewrap, GameResultFace
+   with hidePlayOfGame so it doesn't ALSO render its own compact version), the
+   headshot-led Play of the Game (.psseries__potg, SeriesPlayOfTheGame) filling
+   the wide column alongside at right behind a vertical hairline — replacing
+   what used to be mostly-empty whitespace. The header spans both columns. The
+   log stays one continuous column (a ledger is a column); only the lines
+   within an entry re-flow. */
+@media (min-width: 740px) {
+  .psseries__entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--space-5);
+  }
+  .psseries__entryhead {
+    grid-column: 1 / -1;
+  }
+  .psseries__entry .hint--error {
+    grid-column: 1 / -1;
+  }
+  .psseries__potg {
+    grid-column: 2;
+    padding-left: var(--space-5);
+    border-left: var(--bw-hair) solid var(--border-hairline);
+  }
+}
+/* Series MVP — closes the log as a medal-amber award line under the clinching
+   entry (LCS/World Series only; the band simply doesn't render for rounds
+   with no official MVP). Award tokens, not kraft seal amber: this is an
+   honor, same --award-line family as the banner's championship seam — and
+   nothing here should read as sealed/hidden. */
+.psseries__mvp {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-3) 10px 50px;
+  border-top: var(--bw-heavy) solid var(--award-line);
+  background: var(--award-soft);
+}
+/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
+   outranks the base .shot sizing, same convention as .tlead__shot. */
+.shot.psseries__mvpshot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--award-line);
+  overflow: hidden;
+}
+.shot.psseries__mvpshot.shot--fallback {
+  font-size: var(--fs-title-sm);
+}
+.psseries__mvpinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.psseries__mvptag {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--award-ink);
 }
-.psmodal__trophy {
-  display: block;
-  margin: 0 auto;
-  height: 56px;
-  width: auto;
+.psseries__mvpname {
+  font-family: var(--font-body);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  color: var(--text-heading);
 }
-.psmodal__result {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+
+/* Series leader agate (SeriesLeaderBoard/SeriesLeaderLine in
+   PostseasonSeriesPage.jsx). Bespoke to this page — NOT the shared .tlead
+   featured-card board, since every name here comes from the two clubs that
+   played this one series (see the component's own header comment). Styled
+   as a page of ledger paper inside the card: each stat's scorer code hangs
+   in a left rail against a clay margin rule — the red rule of a paper
+   ledger, the same 45% clay tint the game log's margin rule uses — with the
+   series leader's line inked to its right (big mono figure in the same
+   right-hand "R column" position as .psseries__wins) and the runners-up as a
+   run-in agate line beneath. */
+.psseries__leaders {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: start;
+  margin: var(--space-3) 0;
 }
-.psmodal__winner,
-.psmodal__loser {
+/* Batting and pitching side by side once there's room — same breakpoint as
+   the two-up .psseries__rosters below, so the page's paired cards all
+   reflow together. */
+@media (min-width: 560px) {
+  .psseries__leaders {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* Same elevated-card shell as .psseries__rostercard — one card family. */
+.psseries__lboard {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+/* Board titles share the .section__title overline with "Game by game" above
+   and the base TeamLeaders board this replaced; the card's own 12px padding
+   supplies the top gap, so cancel section__title's default top margin (same
+   override .psleaders__teamboard uses on the sibling Postseason Leaders
+   page). */
+.psseries__lboard > .section__title:first-child {
+  margin-top: 0;
+}
+/* The ledger page itself: brightest inset paper, rows butted together so
+   the clay margin rule runs unbroken from top to bottom. */
+.psseries__lrows {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-inset);
+}
+.psseries__lcat {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.psseries__lcat:first-child {
+  border-top: none;
+}
+/* The scorer's stat code, right-aligned against the clay margin rule —
+   same clay-mono accent family as .psseries__rosternum's jersey numbers. */
+.psseries__lkey {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 11px 7px 0 4px;
+  border-right: var(--bw-rule) solid
+    color-mix(in srgb, var(--clay) 45%, transparent);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--clay);
+}
+/* "tied" as a scorer's margin note under the stat code — why a matched
+   value still sits second (see SeriesLeaderLine). */
+.psseries__ltied {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.psseries__lmain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px 9px;
+}
+.psseries__ltop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Same weight/color/size as .psseries__rostername below — a leader is still
+   just a name off this series' roster, not a different typographic voice. */
+.psseries__lname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+/* The leader's figure — the row's "R column", same mono-bold voice as
+   .psseries__wins one size down. */
+.psseries__lval {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+/* Runners-up as run-in agate — every entry keeps its figure, so ties read
+   straight off the line. */
+.psseries__lchase {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  font-size: var(--fs-small);
+  line-height: var(--lh-compact);
+  color: var(--text-muted);
+}
+.psseries__lchaser {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
+}
+/* Same weight/color as .psseries__rostername — only the font-size (inherited
+   from .psseries__lchase's fs-small) already matched. */
+.psseries__lchasername {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+.psseries__lchaserval {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.psseries__ldot {
+  color: var(--graphite-soft);
+}
+
+/* Both teams' series rosters, at the very bottom of the page — a reference
+   list of who dressed for the series (loadSeriesStats/rosterEntry), NOT a
+   ranked/comparative board, so unlike the result banner and leader sections
+   above it this deliberately carries no favoriteTeamId highlight. */
+.psseries__rosters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: var(--space-3);
+}
+@media (min-width: 560px) {
+  .psseries__rosters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.psseries__rostercard {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+.psseries__rosterhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-2);
+}
+.psseries__rosterteam {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+.psseries__rostergroup + .psseries__rostergroup {
+  margin-top: var(--space-2);
+}
+/* Same role as the Team page's .roster-sub__title, above its own
+   .thub-roster list. */
+.psseries__rostergrouptitle {
+  margin: 0 0 8px;
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
-  text-align: center;
-  max-width: 96px;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
-.psmodal__winner {
-  color: var(--text-heading);
+/* Same bordered/hairline-divided row-list idiom as the Team page's
+   .thub-roster (RosterList in TeamPage.jsx) — no box-shadow here since this
+   list already sits inside .psseries__rostercard's own elevated card. */
+.psseries__rosterlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-inset);
 }
-.psmodal__loser {
-  color: var(--text-muted);
-  opacity: 0.75;
+.psseries__rosterrow {
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-small);
 }
-.psmodal__score {
-  flex: none;
+.psseries__rosterlist li:first-child {
+  border-top: none;
+}
+.psseries__rosternum {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-lg);
+  color: var(--clay);
   font-weight: var(--w-bold);
-  color: var(--text-heading);
+  text-align: right;
 }
-.psmodal__games {
+.psseries__rostername {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.psseries__rosterpos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.psseries__rosterchev {
+  color: var(--graphite-soft);
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
+}
+/* ------------------------------------------------------------ postseason leaders
+   Franchise (titles/pennants/appearances) and repeat-MVP boards — a plain
+   rank list (team-keyed, not the player-keyed pool TeamLeaders/.tlead is
+   built around), styled as the same card idiom as .tlead__cat so this
+   section reads as one family with the batting/pitching TeamLeaders section
+   below it on the same page. */
+.psleaders__subtitle {
+  margin: 2px 0 var(--space-2);
+}
+.psleaders__teamsrow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: var(--space-3);
+}
+@media (min-width: 560px) {
+  .psleaders__teamsrow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.psleaders__teamboard {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+/* .section__title's default 18px top margin assumes it follows other page
+   content; here it's the card's first child sitting on top of the card's
+   own 12px padding, so the two stack into a lopsided gap above the heading
+   vs. below it. */
+.psleaders__teamboard > .section__title:first-child {
+  margin-top: 0;
+}
+.psleaders__teamlist,
+.psleaders__mvplist {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
-/* A button, not a plain row — tapping a game jumps straight to that game's
-   own box score (resolved from its gamePk, see PostseasonSeriesModal's
-   fetchGameCardsByPk call). Disabled (unclickable, dimmed) until that
-   resolves, rather than a dead click that silently does nothing. */
-.psmodal__game {
+.psleaders__teamrow,
+.psleaders__mvprow {
   display: flex;
   align-items: center;
-  width: 100%;
   gap: 8px;
-  padding: 6px 8px;
-  border: none;
+}
+/* Same favorite-team highlight as .tlead__row--fav (--fav-accent, set inline
+   from favoriteAccentColor()) — a fan's own franchise or an MVP who played
+   for it jumps out of the rank list. */
+.psleaders__teamrow--fav,
+.psleaders__mvprow--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
   border-radius: var(--radius-xs);
-  background: var(--surface-card);
-  font-family: inherit;
-  font-size: var(--fs-compact);
-  text-align: left;
-  cursor: pointer;
+  margin: 0 -6px;
+  padding: 1px 6px;
 }
-.psmodal__game:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.psmodal__game:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.psmodal__gamenum {
+.psleaders__rank {
   flex: none;
-  width: 50px;
+  width: 1.4em;
   font-family: var(--font-mono);
+  font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.psmodal__gamedate {
-  flex: none;
-  width: 76px;
   color: var(--text-muted);
+  text-align: right;
 }
-.psmodal__gameline {
+.psleaders__teamlink {
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
+  gap: 8px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.psleaders__teamname {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.psleaders__count {
+  flex: none;
   font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
-}
-.psmodal__gameline--awaywon .psmodal__gamescore:first-of-type {
-  color: var(--text-heading);
   font-weight: var(--w-bold);
-}
-.psmodal__gameline:not(.psmodal__gameline--awaywon) .psmodal__gamescore:last-of-type {
   color: var(--text-heading);
-  font-weight: var(--w-bold);
 }
-.psmodal__at {
-  color: var(--text-muted);
-  font-size: var(--fs-caption);
-}
-/* Tier-1 kraft-amber notification card, same family as .pitchernotice--pbp
-   (the play-by-play "now pitching" card) — a flat tinted fill rather than
-   the diagonal-hatch --seal-texture weave the spoiler covers use, so an MVP
-   badge doesn't read as a sealed/hidden value. */
-.psmodal__mvp {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: var(--bw-hair) solid var(--seal-hatch);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
-}
-/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same convention as .tlead__shot. */
-.shot.psmodal__mvpshot {
+.shot.psleaders__mvpshot {
   flex: none;
   width: var(--shot-2xs-w);
   height: var(--shot-2xs-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.shot.psmodal__mvpshot.shot--fallback {
+.shot.psleaders__mvpshot.shot--fallback {
   font-size: var(--fs-title-sm);
 }
-.psmodal__mvpinfo {
+.psleaders__mvpwho {
+  flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
 }
-.psmodal__mvptag {
+.psleaders__mvpname {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.psleaders__mvppos {
+  flex: none;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--seal-ink);
-}
-.psmodal__mvpname {
-  font-family: var(--font-body);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-ui);
-  color: var(--seal-ink);
+  color: var(--text-muted);
 }
 
 /* ------------------------------------------------------------ all-star rosters

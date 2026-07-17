@@ -90,6 +90,9 @@ export function SiteFooter({
           <button type="button" className="sitefooter__link" onClick={() => navigate('/postseason-history')}>
             Postseason History
           </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/postseason-leaders')}>
+            Postseason Leaders
+          </button>
           <button type="button" className="sitefooter__link" onClick={() => navigate('/all-star-rosters')}>
             All Star Game
           </button>

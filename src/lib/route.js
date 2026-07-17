@@ -12,6 +12,8 @@
 //   '/milestones'                       -> { name: 'milestones' }
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
+//   '/postseason-leaders'               -> { name: 'postseason-leaders' }
+//   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
@@ -61,6 +63,8 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'awards') return { name: 'awards-history' }
   if (parts.length === 1 && parts[0] === 'postseason-history')
     return { name: 'postseason-history' }
+  if (parts.length === 1 && parts[0] === 'postseason-leaders')
+    return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
@@ -82,6 +86,10 @@ export function parseRoute(url) {
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
     return { name: 'team', id: parts[1], asOf, sportId }
+  // A series id (e.g. '2025-division-112-158') already matches
+  // postseason-history.json's own `series.id` 1:1 — no separate slug scheme.
+  if (parts.length === 2 && parts[0] === 'postseason')
+    return { name: 'postseason-series', seriesId: parts[1] }
   // Umpires carry no spoiler-cutoff hint: assignments/dates are never
   // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
   if (parts.length === 2 && parts[0] === 'umpire')
@@ -172,6 +180,9 @@ export function playerPath(id, opts = {}) {
 }
 export function teamPath(id, opts = {}) {
   return `/team/${id}${linkQuery(opts)}`
+}
+export function postseasonSeriesPath(seriesId) {
+  return `/postseason/${seriesId}`
 }
 export function umpirePath(id) {
   return `/umpire/${id}`
