@@ -78,13 +78,16 @@ const MLB_SLUG = {
   158: 'brewers',
 }
 
+// &amp; decodes LAST — decoding it first would turn a source string that
+// legitimately contains the literal text "&lt;" (encoded as "&amp;lt;") into
+// "<" instead of "&lt;", an over-decode CodeQL flags as double-unescaping.
 function decodeEntities(s) {
   return String(s ?? '')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
     .trim()
 }
 
