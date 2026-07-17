@@ -937,7 +937,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // Gap years (see missingSeasonRows) slot into the same sorted ledger as the
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
-  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions) : []
+  const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group) : []
   const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
 
   return { columns, rows: allRows, totals, footnote: stintCaption(foot, group) }
@@ -1679,7 +1679,7 @@ function isIlEndingTxn(t) {
 // player page already pulls full career transactions, see fetchTransactions)
 // that separates "hurt all year" from a genuine gap (unsigned, holdout,
 // retired-then-returned) the app has no data to explain.
-function missingSeasonRows(presentYears, debutYear, currentSeason, transactions) {
+function missingSeasonRows(presentYears, debutYear, currentSeason, transactions, group) {
   const rows = []
   for (let yr = debutYear; yr < currentSeason; yr++) {
     if (presentYears.has(yr)) continue
@@ -1695,7 +1695,11 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions)
       pill: '',
       teamIds: [],
       gap: true,
-      note: injured ? 'Injured — missed season' : 'Did not play',
+      note: injured
+        ? 'Injured — missed season'
+        : group === 'pitching'
+          ? 'Did not pitch'
+          : 'Did not play',
     })
   }
   return rows
