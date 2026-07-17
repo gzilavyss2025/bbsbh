@@ -1384,12 +1384,15 @@ body {
    comes AFTER this badge in DOM order, so without an explicit z-index here
    the logo paints on top of the badge despite the badge being position:
    absolute — see .gamecard__delay below for the sibling badge this also
-   applies to. */
+   applies to. Pinned above .gamecard__logobox's own z-index: 1 (the tile
+   itself is positioned now too, for the '@' watermark behind it — see
+   .gamecard__atmark-* above), not just equal to it, so DOM order can't flip
+   which one wins. */
 .gamecard__live {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1;
+  z-index: 2;
   /* Hide this badge's own back face too: on a flipped past-game card (see
      FlipCard) the front face is rotated away, but iOS Safari would still paint
      an absolutely-positioned, z-indexed child through it — mirrored. The face's
@@ -1427,7 +1430,7 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1;
+  z-index: 2;
   backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
   -webkit-backface-visibility: hidden;
   display: inline-flex;
@@ -1441,6 +1444,35 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
+}
+
+/* Favorite-team star, mirrored to the top-LEFT corner — same badge idiom as
+   .gamecard__live/.gamecard__delay's top-right pill, just a round coin
+   instead of a text pill (a single glyph doesn't need the label's width).
+   Used to sit inline in .gamecard__meta at the bottom of the card; moved up
+   here so it reads as a corner marker at a glance, the way the live/delay
+   status does on the opposite corner. A small opaque backing (rather than
+   bare colored text) keeps the star legible now that .gamecard__logobox's
+   fill is tinted per-team rather than a flat neutral paper. */
+.gamecard__pinbadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--paper-3);
+  box-shadow: var(--shadow-card);
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  color: var(--pin-accent, var(--field));
 }
 
 .gamecard__open:active {
@@ -1571,12 +1603,14 @@ body {
   );
 }
 
-/* Two explicit rows: the framed marks (with the '@' between) on top, the names
-   beneath. Splitting them means the '@' aligns to the marks' centers and the
-   names line up with each other regardless of how tall each mark or name runs. */
+/* Two explicit rows: the framed marks on top, the names beneath — splitting
+   them means the names line up with each other regardless of how tall each
+   mark or name runs. `position: relative` roots the '@' watermark below
+   (.gamecard__atmark-*), which paints behind both marks. */
 .gamecard__teams {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
   column-gap: var(--space-3);
   row-gap: 8px;
@@ -1587,16 +1621,8 @@ body {
   grid-column: 1;
   grid-row: 1;
 }
-.gamecard__at {
-  grid-column: 2;
-  grid-row: 1;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-}
 .gamecard__logobox--home {
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 1;
 }
 .gamecard__name--away {
@@ -1604,15 +1630,56 @@ body {
   grid-row: 2;
 }
 .gamecard__name--home {
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 2;
 }
 
-/* A uniform framed tile for each club mark: a paper-filled square with a hairline
-   border and rounded corners. The mark is contained but slightly overscaled and
-   the tile clips overflow, so it just reaches the frame — a gentle crop that
-   makes mismatched source logos read at one consistent size. */
+/* The '@' mark: a screen-print-style watermark behind both logo tiles rather
+   than a small glyph between them (GameCard.jsx's .gamecard__atmark span,
+   decorative/aria-hidden). Big Shoulders Display — a face modeled on Chicago
+   stadium signage, not part of the app's ordinary type system, see
+   tokens/fonts.css — printed twice, a couple px out of register in
+   kraft-amber + navy, the misregistration real ballpark-program print runs
+   have. Faint enough (well under .topperf__pos-level caption contrast) to
+   read as texture on the paper, not a shout. */
+.gamecard__atmark {
+  display: contents;
+}
+.gamecard__atmark-ghost,
+.gamecard__atmark-ink {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-weight: var(--w-black);
+  font-size: var(--fs-watermark);
+  line-height: var(--lh-solid);
+  pointer-events: none;
+  transform: translate(-50%, -50%) skewX(-8deg) rotate(-2deg);
+}
+.gamecard__atmark-ghost {
+  color: var(--seal);
+  opacity: 0.1;
+  transform: translate(calc(-50% + 2px), calc(-50% + 1px)) skewX(-8deg) rotate(-2deg);
+}
+.gamecard__atmark-ink {
+  color: var(--navy);
+  opacity: 0.07;
+}
+
+/* A uniform framed tile for each club mark: a paper-filled square with a
+   hairline border and rounded corners. The mark is contained but slightly
+   overscaled and the tile clips overflow, so it just reaches the frame — a
+   gentle crop that makes mismatched source logos read at one consistent
+   size. `position: relative` + a z-index above the '@' watermark's 0 (see
+   .gamecard__atmark-* above) keeps the tile's own opaque fill painting over
+   the watermark rather than under it. (A per-team tinted fill was tried and
+   reverted here — see TeamMark's comment in GameCard.jsx and
+   .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md.) */
 .gamecard__logobox {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 108px;
   aspect-ratio: 1 / 1;
@@ -1853,10 +1920,6 @@ body {
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-muted);
-}
-
-.gamecard__pin {
-  color: var(--pin-accent, var(--field));
 }
 
 /* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
@@ -7669,7 +7732,7 @@ body {
 }
 /* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
    this reliably outranks the base .shot sizing — same pattern as
-   .topperf__shot above. Sized up from the three-stars/insight-note headshots
+   .playercard__shot below. Sized up from the three-stars/insight-note headshots
    (52px/26px) so the card's lead player reads as the card's focal point,
    matching the slate's Top Performers card treatment. */
 .shot.bs__potgShot {
@@ -7694,7 +7757,7 @@ body {
   flex-wrap: wrap;
   gap: 8px;
 }
-/* Compound to beat .plink's `font: inherit`, same as .topperf__name. */
+/* Compound to beat .plink's `font: inherit`, same as .playercard__score. */
 .bs__potgWho .bs__potgName {
   font-family: var(--font-body);
   font-size: var(--fs-ui);
@@ -8036,9 +8099,13 @@ body {
 }
 
 /* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
-   (src/components/TopPerformersBox.jsx). Sits in .slatehead, sealed like any
-   other spoiler content; row layout mirrors .bs__star* (headshot + logo added
-   ahead of the name/stat column). */
+   (src/components/TopPerformersBox.jsx). A desktop-width slate sits it in the
+   .slate-body rail beside the game grid (see .slate-body > .topperfbox
+   below), same spot + same non-sticky treatment as the past-day recap's rail;
+   a phone-width slate keeps it stacked above the game grid instead (DOM order
+   — see GameSelect.jsx). Rows render the shared .playercard tile (PerformerCard,
+   PastDayRecapBox.jsx) — the same "baseball card" idiom as the past-day
+   recap's Winners/Losers and the box score's Insights card. */
 .topperfbox {
   margin-top: 10px;
 }
@@ -8060,6 +8127,9 @@ body {
   background: transparent;
   padding: 12px 0 0;
 }
+/* Top Batters/Top Pitchers always stack (never side by side) — the rail is
+   too narrow to split a .playercard tile's headshot + text into two columns;
+   see .dayhl__section's own vertical stack for the same reasoning. */
 .topperf__sections {
   display: flex;
   flex-direction: column;
@@ -8073,84 +8143,6 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-}
-.topperf__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.topperf__row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* Frame the headshot at 3:4 rather than cropping it to a square — the frame
-   stretches to the height of the row's text block and its width follows the
-   aspect ratio, so the top-center cover crop reads at full size without
-   clipping the head. */
-/* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
-   this reliably outranks the base .shot's own width/height/font-size, which
-   otherwise wins by source order alone (same 0-1-0 specificity, declared
-   later in the file). */
-.shot.topperf__shot {
-  flex: none;
-  /* --shot-xs height ≈ the row's stacked text lines (name + stat + score) */
-  width: var(--shot-xs-w);
-  height: var(--shot-xs-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.shot.topperf__shot.shot--fallback {
-  font-size: var(--fs-title-md);
-}
-.topperf__logo {
-  flex: none;
-}
-.topperf__who {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.topperf__head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-/* Type cascades big → small down the row: the name leads, the line of what they
-   did sits under it, and the game score / position / prospect rank are the
-   quiet footnotes. The name and score are PlayerLink/score <button>s carrying
-   `.plink`, whose `font: inherit` (declared later in the file) would otherwise
-   reset these sizes — so both are written as compound selectors to outrank it. */
-.topperf__head .topperf__name {
-  font-family: var(--font-body);
-  font-size: var(--fs-body);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-.topperf__pos {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.topperf__stat {
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  color: var(--text-muted);
-}
-.topperf__who .topperf__score {
-  align-self: flex-start;
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
 }
 .topperf__state {
   display: flex;
@@ -8484,9 +8476,14 @@ body {
 .playercard__namebreak {
   display: none;
 }
+/* flex-wrap: wrap so the Top Performers rail's optional ProspectPill (see
+   PerformerCard, PastDayRecapBox.jsx) can drop to its own line rather than
+   overflowing the card — every other .playercard caller never fills this row
+   enough to wrap. */
 .playercard__team {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -8495,6 +8492,16 @@ body {
   color: var(--text-caption);
 }
 .playercard__stat {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+/* The live Top Performers box's optional game-score line (GameScoreLink,
+   PastDayRecapBox.jsx) — same quiet-footnote treatment the old .topperf__score
+   row had. Compound to beat .plink's `font: inherit` (declared later in this
+   file), same reason .playercard__name compounds against PlayerLink. */
+.playercard__body .playercard__score {
+  align-self: flex-start;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
@@ -8632,8 +8639,10 @@ body {
 /* ---------------------------------------------------------------------------
    TEAM LEADERS — per-category season leaderboards on the team page + the
    dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
-   slate's Top Performers row; the parallel `.tlead__*` classes keep that
-   spoiler-gated component's own `.topperf__*` rules untouched.
+   slate's Top Performers card in spirit (headshot + logo ahead of a name/stat
+   column); the parallel `.tlead__*` classes keep this always-visible board's
+   own markup from coupling to `.playercard`, which the spoiler-gated Top
+   Performers/Day Recap/Insights cards share.
    --------------------------------------------------------------------------- */
 .tlead {
   margin-top: 4px;
@@ -8770,7 +8779,7 @@ body {
   filter: grayscale(60%);
 }
 /* Compound with .shot/.shot--fallback (both always set by Headshot) so this
-   outranks the base .shot sizing, same reason as .topperf__shot. Sized well
+   outranks the base .shot sizing, same reason as .playercard__shot. Sized well
    past that shared 52px baseline — the leader card is this component's one
    hero image, so it earns a bigger, more readable frame. */
 .shot.tlead__shot {
@@ -8816,7 +8825,7 @@ body {
   flex-wrap: wrap;
   gap: 6px;
 }
-/* Compound to beat .plink's `font: inherit`, same as .topperf__name. */
+/* Compound to beat .plink's `font: inherit`, same as .playercard__score. */
 .tlead__head .tlead__name {
   font-family: var(--font-body);
   font-size: var(--fs-body);
@@ -9263,11 +9272,14 @@ body {
     gap: 12px;
   }
 
-  /* ---- past-day slate body: game grid + Day Recap rail side by side (see
-     PastPreview.jsx / PastDayRecapBox.jsx). The grid drops to ONE column here
-     (rather than keeping the 2-up rule above) — a past-day flip card's back
-     face carries more content (R/H/E, decisions, play of the game) than the
-     plain spoiler-free card, and the ~300px rail leaves less width to share. */
+  /* ---- slate body: game grid + a rail side by side, either the live day's
+     Top Performers box (TopPerformersBox.jsx) or a past day's Day Recap
+     (PastDayRecapBox.jsx) — GameSelect.jsx renders at most one of the two,
+     never both. The grid drops to ONE column here (rather than keeping the
+     2-up rule above) — a past-day flip card's back face carries more content
+     (R/H/E, decisions, play of the game) than the plain spoiler-free card,
+     and either way the ~300px rail leaves less width to share than the bare
+     2-up grid assumes. */
   .slate-body {
     display: grid;
     grid-template-columns: 1fr 300px;
@@ -9279,16 +9291,18 @@ body {
     grid-template-columns: 1fr;
   }
   /* Named areas, not bare column/row numbers: the game column (Off Day grid
-     nested under it) goes in "main", the Day Recap rail in "recap" — each
-     pinned there by name regardless of DOM order, so nothing can silently
-     land in the other's cell via row-major auto-flow. GameSelect.jsx renders
-     exactly these two children today (see its own wrapper comment); a real
+     nested under it) goes in "main", the rail in "recap" — pinned there by
+     name regardless of DOM order (TopPerformersBox is rendered BEFORE
+     .slate-main in the JSX, so a phone-width slate — no grid, plain block
+     flow — still stacks it above the game list, its original spot; the named
+     area is what moves it to the right at this breakpoint instead). A real
      third sibling would need its own named area added here too, rather than
      falling through to an implicit, easy-to-miss auto-placed cell. */
   .slate-body > .slate-main {
     grid-area: main;
   }
-  .slate-body > .pastdayrecap {
+  .slate-body > .pastdayrecap,
+  .slate-body > .topperfbox {
     grid-area: recap;
   }
   /* Deliberately NOT sticky — a pinned rail read as disconnected from the
@@ -9335,19 +9349,27 @@ body {
     font-size: var(--fs-small);
   }
 
-  /* ---- Top Performers box: batters/pitchers side by side instead of stacked —
-     there's room for two columns once the sheet is this wide. The headshots keep
-     the portrait-matched-to-text sizing from the base rule above. */
-  .shot.topperf__shot.shot--fallback {
-    font-size: var(--fs-num-md);
-  }
-  .topperf__sections {
+  /* The slate rail (Top Performers/Day Recap — .topperfbox/.pastdayrecap,
+     ~300px, see .slate-body above) has more text-column room than the
+     two-line stack above assumes: even a long name ("Masataka Yoshida")
+     fits on one line at this width, so keep it single-line here (same
+     treatment as phone, just outranking the two-line rule above via the
+     extra specificity) and spend the freed line on a bigger, easier-to-read
+     stat line instead. flex-wrap stays on as a safety net for the rare name
+     that doesn't fit — it soft-wraps rather than overflowing the card. */
+  .topperfbox .playercard__name,
+  .pastdayrecap .playercard__name {
     flex-direction: row;
-    gap: 24px;
+    align-items: baseline;
+    font-size: var(--fs-body);
   }
-  .topperf__section {
-    flex: 1 1 0;
-    min-width: 0;
+  .topperfbox .playercard__namebreak,
+  .pastdayrecap .playercard__namebreak {
+    display: none;
+  }
+  .topperfbox .playercard__stat,
+  .pastdayrecap .playercard__stat {
+    font-size: var(--fs-small);
   }
 
   /* ---- slate footer: the action grid stays compact rather than stretching
