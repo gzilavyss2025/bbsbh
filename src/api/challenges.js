@@ -21,16 +21,24 @@ export function gameHasAbs(feed) {
   return feed?.gameData?.teams?.away?.sport?.id === 1
 }
 
-// An ABS challenge review sits on the PLAY itself (`play.reviewDetails`), not
-// on an individual pitch event — verified against gamePk 823036's two real
-// challenges (Frelick's failed challenge, top 2nd; Mitchell's successful one,
-// top 8th), where neither pitch event carried a `reviewDetails` of its own.
-// `challengeTeamId` is only set when a specific club's player actually
-// challenged (as opposed to some other, non-challenge review), so requiring
-// it is what tells an ABS challenge apart from anything else that might set
-// `play.reviewDetails`.
+// An ABS challenge review can sit at EITHER the play level (`play.reviewDetails`)
+// or on the specific challenged pitch event (`play.playEvents[].reviewDetails`),
+// depending on whether the challenged pitch was the at-bat's deciding pitch —
+// verified against gamePk 823036, which has four real ABS challenges: two on
+// the play itself (Frelick's failed challenge, top 2nd; Mitchell's successful
+// one, top 8th) and two on a `type:"pitch"` playEvent instead (Fermín's failed
+// challenge, bottom 3rd; Contreras's failed challenge, bottom 8th). Both
+// locations must be scanned, or real challenges get missed.
+//
+// `challengeTeamId` alone isn't enough to identify one: the same game also has
+// a `reviewDetails` from MLB's older, unrelated manager's-replay-challenge
+// system (e.g. a pickoff-attempt review) that also sets `challengeTeamId`.
+// `reviewType` tells the two apart — every genuine ABS ball-strike challenge in
+// this game carries `"MJ"`; the manager's-replay review carries `"MA"` and only
+// ever appears on a non-`pitch` event. Requiring `reviewType === 'MJ'` is what
+// excludes it.
 function isAbsChallenge(review) {
-  return Boolean(review && review.challengeTeamId != null)
+  return Boolean(review && review.challengeTeamId != null && review.reviewType === 'MJ')
 }
 
 // 1-based half order (top 1 = 1, bottom 1 = 2, top 2 = 3, …), for clamping to
@@ -52,11 +60,13 @@ export function selectChallengeState(feed, throughInning, throughHalf) {
     const half = p.about?.halfInning
     if (inning == null || half == null) continue
     if (halfOrder(inning, half) > limit) break
-    const review = p.reviewDetails
-    if (!isAbsChallenge(review)) continue
-    const side = review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
-    if (!side) continue
-    outcomes[side].push(review.isOverturned ? 'success' : 'fail')
+    const candidates = [p.reviewDetails, ...(p.playEvents ?? []).map((pe) => pe.reviewDetails)]
+    for (const review of candidates) {
+      if (!isAbsChallenge(review)) continue
+      const side = review.challengeTeamId === awayId ? 'away' : review.challengeTeamId === homeId ? 'home' : null
+      if (!side) continue
+      outcomes[side].push(review.isOverturned ? 'success' : 'fail')
+    }
   }
   return {
     away: { teamId: awayId, outcomes: outcomes.away },

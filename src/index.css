@@ -8958,7 +8958,7 @@ body {
   width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
-  font-size: var(--fs-title-sm);
+  font-size: var(--fs-title-lg);
 }
 .bs__grid--board thead th.bs__boardInn {
   font-size: var(--fs-caption);
@@ -8997,7 +8997,7 @@ body {
   width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   background: var(--paper-1);
-  font-size: var(--fs-title-sm);
+  font-size: var(--fs-title-lg);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -11031,6 +11031,14 @@ body {
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
 }
+/* GameScoreCard's head: "GAME SCORE · HOW THIS IS CALCULATED" as one run —
+   the link sits inline right after the label rather than pinned to the
+   card's footer. */
+.team-score__head-title {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
 .team-score__grade {
   margin: 0 10px;
   padding: 12px 12px 2px;
@@ -11040,6 +11048,12 @@ body {
     linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
     var(--surface-inset);
   box-shadow: var(--inset-cell);
+}
+/* GameScoreCard has nothing below the gradient card (no driver rows, no
+   footer link — that moved into the head) — without its own bottom margin
+   the card's outer border sits right on top of it. */
+.team-score__grade:last-child {
+  margin-bottom: 10px;
 }
 .team-score__grade.is-active {
   border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
@@ -11368,6 +11382,17 @@ body {
   letter-spacing: var(--ls-label);
   border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
   cursor: pointer;
+}
+/* Sits inline right after "Game Score" in .team-score__head-title instead of
+   the card's footer — the surrounding uppercase/caption styling comes from
+   .team-score__head, this just drops the footer variant's own margin and
+   prefixes a middot separator. */
+.team-score__howlink--inline {
+  margin: 0;
+}
+.team-score__howlink--inline::before {
+  content: " · ";
+  border-bottom: none;
 }
 .team-score__howlink:focus-visible {
   outline: none;
