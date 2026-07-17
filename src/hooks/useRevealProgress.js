@@ -87,6 +87,23 @@ export function useRevealProgress(feed, regulation, actualCount) {
     }
   }, [storageKey, revealedThrough])
 
+  // The 'storage' event only fires in OTHER tabs/windows on the same origin,
+  // never the tab that made the write — so this picks up a reveal made in a
+  // second tab on the same game without needing a reload. Same ratchet as
+  // revealTo: only ever moves forward.
+  useEffect(() => {
+    if (!storageKey) return
+    function onStorage(e) {
+      if (e.key !== storageKey) return
+      const n = e.newValue == null ? -1 : Number(e.newValue)
+      if (Number.isInteger(n) && n >= 0) {
+        setRevealedThrough((prev) => (n > prev ? n : prev))
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [storageKey])
+
   useEffect(() => {
     if (!atBatStorageKey) return
     try {
