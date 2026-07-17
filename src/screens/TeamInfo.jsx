@@ -672,6 +672,13 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
                   .join(' · ')}
               </span>
             )}
+            {/* His most recent appearance, whatever level it came at (see
+                fetchPitcherLastGame) — an already-final box line from a past
+                game, so it's staging-safe the same way the season line above
+                is; never this game's. */}
+            {pitcherLine?.lastGame && (
+              <span className="startercard__last">{lastGameLine(pitcherLine.lastGame)}</span>
+            )}
           </div>
         </div>
       ) : (
@@ -679,6 +686,22 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
       )}
     </section>
   )
+}
+
+// "LAST: 7/12 AT BOS (AAA) — 6.0 IP · 5 H · 2 ER · 6 K" — the compact line
+// under .startercard__last's dotted divider (see fetchPitcherLastGame).
+function lastGameLine(g) {
+  const md = (g.date || '').slice(5).replace('-', '/').replace(/^0/, '')
+  const where = g.opponent ? `${g.home ? 'vs' : 'at'} ${g.opponent}${g.level ? ` (${g.level})` : ''}` : ''
+  const stat = [
+    g.inningsPitched && `${g.inningsPitched} IP`,
+    `${g.hits} H`,
+    `${g.earnedRuns} ER`,
+    `${g.strikeOuts} K`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+  return `Last: ${[md, where].filter(Boolean).join(' ')} — ${stat}`
 }
 
 // Show only the first handful up front — a heavy shared history (two rosters

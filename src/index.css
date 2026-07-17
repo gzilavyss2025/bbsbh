@@ -3429,8 +3429,11 @@ body {
   color: var(--field);
 }
 
-/* The starter's season line, its own row under the badges. */
-.startercard__stats {
+/* The starter's season line, then — same treatment, its own dashed divider —
+   his most recent appearance, so the card reads as a stack of dated facts
+   (badges, season-to-date, last time out) rather than one lump. */
+.startercard__stats,
+.startercard__last {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);

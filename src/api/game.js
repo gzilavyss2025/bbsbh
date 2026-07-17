@@ -1,7 +1,8 @@
 // Per-game fetchers that aren't the live feed's own hydration: win
-// probability, venue, managers, and a probable starter's season line.
+// probability, venue, managers, and a probable starter's season/last-game line.
 
 import { getJson } from './statsapi.js'
+import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 
 export async function fetchGameFeed(gamePk, options) {
   return getJson(`/api/v1.1/game/${gamePk}/feed/live`, options)
@@ -169,4 +170,64 @@ export async function fetchPitcherSeasonLine(personId, season, sportId = 1) {
     // MiLB coverage gaps / pre-debut arms — the staging row just omits it.
     return null
   }
+}
+
+// ---------------------------------------------------------------------------
+// A pitcher's most recent appearance, whatever level it came at — a rehabbing
+// big leaguer's last time out is often a MiLB start, and a MiLB starter can
+// straddle a level in either direction around a promotion/option, so a single
+// sportId-scoped gameLog call (the way the season line above is scoped to
+// `game.sportId`) would miss it. statsapi's gameLog has no combined-level
+// query (same limitation statsLevels.js documents for season totals), so this
+// fans out one gameLog call per level — MLB plus every full-season MiLB level
+// — and keeps whichever split has the latest date strictly BEFORE
+// `cutoffDate` (the officialDate of the game being staged). That cutoff is the
+// whole spoiler defense, same as person.js's gameLogView: it can never
+// resolve to tonight's own outing once the feed starts reflecting it. Falls
+// back to last season's log when the current season has no eligible start
+// yet (the first week or two of a new year).
+// ---------------------------------------------------------------------------
+
+const LAST_GAME_SPORT_IDS = [1, ...MILB_LEVELS.map((l) => l.sportId)]
+
+async function fetchGameLogSplits(personId, season, sportId) {
+  try {
+    const sport = sportId !== 1 ? `&sportId=${sportId}` : ''
+    const data = await getJson(
+      `/api/v1/people/${personId}/stats?stats=gameLog&group=pitching&season=${season}${sport}`,
+    )
+    return data.stats?.[0]?.splits ?? []
+  } catch {
+    return []
+  }
+}
+
+export async function fetchPitcherLastGame(personId, season, cutoffDate) {
+  if (!personId || !season) return null
+  for (const yr of [season, season - 1]) {
+    const perLevel = await Promise.all(
+      LAST_GAME_SPORT_IDS.map((sportId) => fetchGameLogSplits(personId, yr, sportId)),
+    )
+    const eligible = perLevel
+      .flat()
+      .filter((s) => s.date && (!cutoffDate || s.date < cutoffDate))
+    if (eligible.length === 0) continue
+    eligible.sort((a, b) => (a.date < b.date ? 1 : -1))
+    const s = eligible[0]
+    const st = s.stat ?? {}
+    return {
+      date: s.date,
+      opponent: teamAbbr(s.opponent ?? {}),
+      home: Boolean(s.isHome),
+      // Blank for MLB (the common case) — a level tag only earns its keep
+      // when it's NOT tonight's own level, same convention as gameLogView's
+      // tagLevel option.
+      level: s.sport?.id && s.sport.id !== 1 ? SPORT_LABEL[s.sport.id] ?? '' : '',
+      inningsPitched: st.inningsPitched ?? '',
+      hits: st.hits ?? 0,
+      earnedRuns: st.earnedRuns ?? 0,
+      strikeOuts: st.strikeOuts ?? 0,
+    }
+  }
+  return null
 }
