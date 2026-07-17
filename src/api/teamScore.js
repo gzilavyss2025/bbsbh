@@ -28,14 +28,18 @@ export function teamScoreFor(data, teamId, season, cutoff) {
 
 // Every team's score at the same cutoff, for the "how do we compare to the
 // other 29" dots on the Team Score card. statKey is 'season' or
-// 'currentForm' — the two grades TeamScoreCard shows.
+// 'currentForm' — the two grades TeamScoreCard shows. `tiebreak` carries the
+// finer-grained pre-rounding signal (see leagueRankNoTies) — unused by the
+// plain, ties-allowed leagueRank the Quality driver row still ranks with.
 export function leagueScoresFor(data, season, cutoff, statKey) {
   const byTeamId = data?.seasons?.[season]?.byTeamId
   if (!byTeamId) return []
   const rows = []
   for (const [teamId, snapshots] of Object.entries(byTeamId)) {
-    const score = latestAt(snapshots, cutoff)?.[statKey]?.score
-    if (score != null) rows.push({ teamId: Number(teamId), score })
+    const stat = latestAt(snapshots, cutoff)?.[statKey]
+    if (stat?.score != null) {
+      rows.push({ teamId: Number(teamId), score: stat.score, tiebreak: [stat.weightedWinsAbove500, stat.runDifferential] })
+    }
   }
   return rows
 }
@@ -52,15 +56,56 @@ export function leagueSeasonGradesFor(teamData, surpriseData, season, cutoff) {
     const surpriseSnapshots = surpriseData?.seasons?.[season]?.byTeamId?.[teamId]
     const surprise = surpriseSnapshots ? latestAt(surpriseSnapshots, cutoff) : null
     const grade = seasonGradeFor(quality, surprise)
-    if (grade) rows.push({ teamId: Number(teamId), score: grade.score })
+    if (grade) {
+      rows.push({
+        teamId: Number(teamId),
+        score: grade.score,
+        tiebreak: [quality?.weightedWinsAbove500, surprise?.residualWins],
+      })
+    }
   }
   return rows
 }
 
 // Where a team's own score sits among the league rows above (1 = best).
-// Null if the team isn't in the pool (e.g. too few games played yet).
+// Null if the team isn't in the pool (e.g. too few games played yet). Ties
+// share a rank (competition ranking) — the convention everywhere except
+// Season Grade and Current Form, which use leagueRankNoTies below instead.
 export function leagueRank(rows, teamId) {
   const mine = rows.find((r) => r.teamId === teamId)
   if (!mine) return null
   return { rank: 1 + rows.filter((r) => r.score > mine.score).length, of: rows.length }
+}
+
+// A strict, gapless 1..N ranking with a deterministic tiebreaker chain, for
+// the two metrics (Season Grade, Current Form) that show a rank pill AND a
+// strip of rank-numbered team chips — a shared score (both are rounded to
+// one decimal, so ties are common) would otherwise print two teams at the
+// same rank in both places. Falls through the rounded score to each row's
+// `tiebreak` array (a finer-grained underlying signal that rounded to the
+// same score, e.g. weightedWinsAbove500) and finally to teamId, so it always
+// resolves to a total order — no two teams can tie all the way down.
+function compareRowsNoTies(a, b) {
+  if (b.score !== a.score) return b.score - a.score
+  const ta = a.tiebreak ?? []
+  const tb = b.tiebreak ?? []
+  for (let i = 0; i < Math.max(ta.length, tb.length); i++) {
+    const diff = (tb[i] ?? 0) - (ta[i] ?? 0)
+    if (diff !== 0) return diff
+  }
+  return a.teamId - b.teamId
+}
+
+export function leagueRankNoTies(rows, teamId) {
+  const mine = rows.find((r) => r.teamId === teamId)
+  if (!mine) return null
+  return { rank: 1 + rows.filter((r) => compareRowsNoTies(r, mine) < 0).length, of: rows.length }
+}
+
+// Best-to-worst rows with a strict, gapless rank attached (see
+// leagueRankNoTies) — what the rank-chip strip iterates to print each team's
+// number, so a chip's number can never disagree with the "Nth of 30" pill
+// computed above for the same pool.
+export function rankedNoTies(rows) {
+  return [...rows].sort(compareRowsNoTies).map((r, i) => ({ ...r, rank: i + 1 }))
 }

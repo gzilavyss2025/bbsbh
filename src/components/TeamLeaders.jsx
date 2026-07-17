@@ -226,6 +226,9 @@ function LeaderCategory({
 // LeadersPage share this component too but show many more categories at
 // once (limit=10, ALL_CATEGORIES), where a long horizontal deck would be
 // worse than the page's own vertical scroll, so they leave this off.
+// `secondaryAction`: optional extra node rendered after "See all ›" in the
+// same header slot — TeamPage's only use is its "Organization leaders ›"
+// link, styled to match via the shared .tlead__seeall class.
 export function TeamLeaders({
   pool,
   categories,
@@ -241,6 +244,7 @@ export function TeamLeaders({
   showTeamAbbr = true,
   injuredIds = null,
   horizontal = false,
+  secondaryAction = null,
 }) {
   const ranked = useMemo(
     () =>
@@ -266,7 +270,7 @@ export function TeamLeaders({
       <SectionTitle
         title={title}
         action={
-          horizontal || onSeeAll ? (
+          horizontal || onSeeAll || secondaryAction ? (
             <span className="tlead__actions">
               {horizontal && (
                 <DeckNudge scrollRef={scrollRef} cardStep={HORIZONTAL_CARD_STEP} label="team leaders" />
@@ -276,6 +280,7 @@ export function TeamLeaders({
                   See all ›
                 </button>
               )}
+              {secondaryAction}
             </span>
           ) : null
         }

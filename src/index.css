@@ -8824,23 +8824,6 @@ body {
   padding: 1px 6px;
 }
 
-/* Org-wide leaders link on the team page — a standalone affordance under the
-   team's own leaders cross-section (styled like .tlead__seeall). */
-.tlead__orglink {
-  display: inline-block;
-  margin-top: 12px;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-link);
-}
-
 /* Leaders page (league/level/org). Reuses the .levelnav toggle look for its
    scope switcher, just centered + allowed to wrap onto a second line on a
    phone (seven scopes vs. the slate's five). */
@@ -10176,11 +10159,29 @@ body {
   padding: 7px 8px;
   font-size: var(--fs-small);
   text-align: right;
-  border-top: var(--bw-hair) solid var(--border-hairline);
   /* Data cells are single tokens; keep them on one line so a value like the
      pitcher W–L ("10–7") never wraps at its en-dash onto a second row. The
      wrap lives on .ledger-wrap (horizontal scroll) instead. */
   white-space: nowrap;
+}
+/* Row dividers as ONE full-width line per row (a background gradient owned by
+   the row) rather than a per-cell `border-top`. These are auto-layout tables,
+   and a row that carries a logo cell (the prospect tables' team/level columns)
+   gets a fractional intrinsic height; the browser then rounds that odd cell's
+   border box a device pixel off its text-only neighbors, so a per-cell top
+   border steps the hairline at that one seam (visible under BOTH `collapse`
+   and `separate` — it's a fractional-row-height artifact, not a collapse one).
+   A single line owned by the whole row snaps to device pixels exactly once, so
+   it stays flat across every column seam. thead has no rule; tfoot keeps its
+   own heavier one below. */
+.ledger tbody td {
+  border-top: none;
+}
+.ledger tbody tr {
+  background-image: linear-gradient(var(--border-hairline), var(--border-hairline));
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 100% var(--bw-hair);
 }
 .ledger thead th {
   border-top: none;
@@ -11014,7 +11015,7 @@ body {
 }
 .team-score__head {
   display: flex;
-  justify-content: space-between;
+  align-items: baseline;
   gap: 8px;
   padding: 10px 12px 0;
   color: var(--text-caption);
@@ -11040,6 +11041,7 @@ body {
   min-width: 0;
 }
 .team-score__grade {
+  min-width: 0;
   margin: 0 10px;
   padding: 12px 12px 2px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -11100,7 +11102,7 @@ body {
   min-width: 0;
 }
 .team-score__grade-kicker {
-  color: var(--seal-hatch);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -11111,6 +11113,7 @@ body {
   color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
   line-height: var(--lh-tight);
 }
 .team-score__grade-copy > span:last-child {
@@ -11169,6 +11172,7 @@ body {
 .team-score__row {
   display: grid;
   gap: 5px;
+  min-width: 0;
 }
 .team-score__row--driver {
   min-width: 0;
@@ -11189,6 +11193,10 @@ body {
 .team-score__row--driver .team-score__rowright {
   flex-direction: row-reverse;
   justify-content: space-between;
+  /* Same baseline-vs-size mismatch as .team-score__row--compact above — a
+     much bigger score number next to a small pill hangs the pill low
+     against it unless the pair is center- rather than baseline-aligned. */
+  align-items: center;
 }
 .team-score__row--driver .team-score__score {
   font-size: var(--fs-hero-sm);
@@ -11235,6 +11243,14 @@ body {
 .team-score__row--compact .team-score__score {
   font-size: var(--fs-title-sm);
 }
+/* The pill's own text is far smaller than the score number it sits next to
+   — baseline alignment (the .team-score__rowright default) hangs a small
+   pill low against a much taller number instead of centering it, which
+   reads as misaligned rather than paired. Center alignment fixes it for
+   this specific size mismatch. */
+.team-score__row--compact .team-score__rowright {
+  align-items: center;
+}
 .team-score__rowtop {
   display: flex;
   align-items: baseline;
@@ -11262,6 +11278,14 @@ body {
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
+}
+.team-score__label-phrase {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
 }
 .team-score__rowright {
   display: flex;
@@ -11369,9 +11393,268 @@ body {
   pointer-events: none;
   z-index: 1;
 }
+/* Rank-context strip — five teams around the pill's own rank, as small logo
+   chips. Grayscale-vs-color follows .vsteam__team's picked-vs-unpicked
+   convention rather than inventing a new one; only the layout/scroll/nav
+   plumbing is new here. */
+.rankstrip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+/* The distribution track (LeagueTrack, .team-score__track) and the rank
+   strip both answer "where does this team stand," but on a phone-width card
+   there isn't room to do that side by side and still show more than a
+   couple of rank chips — each gets its own full-width row instead, so the
+   strip can show however many chips fit rather than a cramped fixed count.
+   Tablet/desktop has the width to spare, so from the WIDE_QUERY breakpoint
+   up they go back to sharing one row (see the override below) — the track
+   takes whatever width is left, the strip stays its own five-chip size. */
+.team-score__trackrow {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 4px;
+  width: 100%;
+  min-width: 0;
+}
+.team-score__trackrow .team-score__track {
+  flex: 0 0 auto;
+  margin: 0;
+  min-width: 0;
+}
+.team-score__trackrow .rankstrip {
+  width: 100%;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  .team-score__trackrow {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .team-score__trackrow .team-score__track {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .team-score__trackrow .rankstrip {
+    width: auto;
+  }
+}
+.team-score__track--compact {
+  height: 26px;
+}
+.team-score__track--compact .team-score__track-base {
+  top: 13px;
+}
+.team-score__track--compact .team-score__track-mid {
+  top: 6px;
+  height: 14px;
+}
+.team-score__track--compact .team-score__dot {
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+}
+.team-score__track--compact .team-score__dot--us {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+}
+.rankstrip__track {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  /* Below this, the track fills its full-width row above (however many
+     chips fit). At/above it, the strip shares a row with the distribution
+     track (see .team-score__trackrow), so it reverts to a fixed
+     --rankstrip-track-width (set inline per render, exactly five
+     chip-widths) rather than a stray full-width row with empty space
+     trailing off the end of it. */
+  .rankstrip__track {
+    width: var(--rankstrip-track-width);
+  }
+}
+.rankstrip__rail {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 13px 0 0;
+}
+.rankstrip__rail::-webkit-scrollbar {
+  display: none;
+}
+.rankstrip__chip {
+  position: relative;
+  flex: 0 0 38px;
+  scroll-snap-align: start;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.rankstrip--compact .rankstrip__chip {
+  flex-basis: 28px;
+}
+.rankstrip__chip .teamlogo,
+.rankstrip__chip .teamlogo--fallback {
+  filter: grayscale(1);
+  opacity: 0.4;
+  transition: filter var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.rankstrip__chip--self .teamlogo,
+.rankstrip__chip--self .teamlogo--fallback {
+  filter: none;
+  opacity: 1;
+}
+@media (hover: hover) {
+  .rankstrip__chip:not(.rankstrip__chip--self):hover .teamlogo,
+  .rankstrip__chip:not(.rankstrip__chip--self):hover .teamlogo--fallback {
+    opacity: 0.7;
+  }
+}
+.rankstrip__chip:focus-visible {
+  outline: none;
+}
+.rankstrip__chip:focus-visible .teamlogo,
+.rankstrip__chip:focus-visible .teamlogo--fallback {
+  box-shadow: var(--ring);
+}
+.rankstrip__chip--self {
+  padding: 2px;
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--seal) 14%, transparent);
+  cursor: default;
+}
+.rankstrip__arrow {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--seal-hatch);
+}
+.rankstrip__n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite-soft);
+}
+.rankstrip__chip--self .rankstrip__n {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.rankstrip__fade {
+  position: absolute;
+  top: 13px;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+.rankstrip__fade--l {
+  left: 0;
+  background: linear-gradient(to right, var(--surface-inset), transparent);
+}
+.rankstrip__fade--r {
+  right: 0;
+  background: linear-gradient(to left, var(--surface-inset), transparent);
+}
+.rankstrip--compact .rankstrip__fade--l {
+  background: linear-gradient(to right, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+}
+.rankstrip--compact .rankstrip__fade--r {
+  background: linear-gradient(to left, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+}
+.rankstrip__fade.is-visible {
+  opacity: 1;
+}
+/* Prev/next — swipe covers touch, but a mouse or trackpad has no swipe
+   gesture over a card, so a hover-capable, fine pointer gets real buttons.
+   Gated on input capability (not a touch-event sniff, which is unreliable
+   on hybrid laptops), so a touchscreen never sees controls it doesn't need. */
+.rankstrip__nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: var(--bw-hair) solid var(--rule-soft);
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--graphite);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.rankstrip--compact .rankstrip__nav {
+  width: 18px;
+  height: 18px;
+}
+.rankstrip__nav::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-top: var(--bw-heavy) solid currentColor;
+  border-right: var(--bw-heavy) solid currentColor;
+}
+.rankstrip--compact .rankstrip__nav::before {
+  width: 5px;
+  height: 5px;
+}
+.rankstrip__nav--l::before {
+  transform: rotate(-135deg);
+  margin-left: 2px;
+}
+.rankstrip__nav--r::before {
+  transform: rotate(45deg);
+  margin-right: 2px;
+}
+.rankstrip__nav:hover:not(:disabled) {
+  background: var(--surface-inset);
+  color: var(--text-heading);
+}
+.rankstrip__nav:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.rankstrip__nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rankstrip__nav {
+    display: inline-flex;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rankstrip__chip .teamlogo,
+  .rankstrip__chip .teamlogo--fallback,
+  .rankstrip__fade,
+  .rankstrip__nav {
+    transition: none;
+  }
+}
+
 .team-score__howlink {
-  justify-self: start;
-  margin: -3px 12px 11px;
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -11486,7 +11769,6 @@ body {
 }
 .postseason-odds__head {
   display: flex;
-  justify-content: space-between;
   gap: 8px;
   color: var(--text-caption);
   font-family: var(--font-display);
@@ -11494,13 +11776,6 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-}
-.postseason-odds__head em {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-style: normal;
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
 }
 .postseason-odds__values {
   display: grid;
@@ -11572,20 +11847,6 @@ body {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
-}
-.txcard__head em {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-style: normal;
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
-}
-/* Groups DeckNudge alongside the "through {asOf}" dateline in the header's
-   right slot. */
-.txcard__headright {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 /* A horizontally swipeable deck of story cards, full-bleed to the screen's
@@ -12768,10 +13029,12 @@ body {
 }
 
 /* MLB team page's farm-system section — one card per full-season affiliate
-   (AAA/AA/A+/A), each a plain link to that club's own team page. */
+   (AAA/AA/A+/A), each a plain link to that club's own team page. Fixed at
+   two columns (not auto-fill) so four cards always fill two full rows
+   rather than an orphaned single card stranded on a third row. */
 .thub-affiliates {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 .thub-affiliate {
@@ -12813,6 +13076,92 @@ body {
   letter-spacing: var(--ls-caps);
   font-size: var(--fs-caption);
   color: var(--text-caption);
+}
+
+/* Prospect showcase — headshot spotlight strip above the ranked table,
+   spotlighting only the very top of the org list (see PROSPECT_SHOWCASE_COUNT
+   in TeamPage.jsx). Fixed column counts (not auto-fill) so the strip always
+   reads as one full row rather than wrapping an odd card onto its own line;
+   the row grows from 3 to 5 cards as the viewport (and .screen's own
+   max-width) widens, so a phone shows fewer, wider faces and the desktop
+   .screen width (960px, see the 740px breakpoint above) shows the whole
+   top-5 at once. Extra cards beyond the current column count are rendered
+   but hidden rather than unmounted, so no layout shift on resize. */
+.prospectshowcase {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.prospectshowcase__card:nth-child(n + 4) {
+  display: none;
+}
+@media (min-width: 420px) {
+  .prospectshowcase {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .prospectshowcase__card:nth-child(n + 4) {
+    display: flex;
+  }
+  .prospectshowcase__card:nth-child(n + 5) {
+    display: none;
+  }
+}
+@media (min-width: 740px) {
+  .prospectshowcase {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .prospectshowcase__card:nth-child(n + 5) {
+    display: flex;
+  }
+}
+.prospectshowcase__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+.prospectshowcase__shotwrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+.shot.prospectshowcase__shot {
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--shot-md-w) / var(--shot-md-h);
+}
+.shot.prospectshowcase__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.prospectshowcase__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-align: center;
+  line-height: var(--lh-ui);
+}
+.prospectshowcase__name {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  line-height: var(--lh-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 /* Team-page prospect table — an org's farm-system leaderboard, shown only on
