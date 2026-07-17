@@ -93,6 +93,9 @@ export function SiteFooter({
           <button type="button" className="sitefooter__link" onClick={() => navigate('/all-star-rosters')}>
             All Star Game
           </button>
+          <button type="button" className="sitefooter__link" onClick={() => navigate('/all-star-legacy')}>
+            All-Star Legacy
+          </button>
           <button type="button" className="sitefooter__link" onClick={() => navigate('/about')}>
             About
           </button>

@@ -165,6 +165,40 @@ export async function fetchRosterIdsForTeams(teamIds, rosterType = 'active') {
   return out
 }
 
+// Same cache/shape as fetchTeamRosterIds, but keeps each entry's primary
+// position alongside the id (the roster payload already carries it, no
+// extra hydrate needed) — for callers that LABEL a roster (a position pill
+// next to a name), not just check membership. Kept as its own
+// function/cache rather than changing fetchTeamRosterIds' return shape,
+// since most existing callers only want the plain id list.
+const rosterEntriesCache = new Map()
+export async function fetchTeamRosterEntries(teamId, rosterType = 'active') {
+  if (!teamId) return []
+  const key = `${teamId}:${rosterType}`
+  const cached = rosterEntriesCache.get(key)
+  if (cached && Date.now() - cached.ts < ROSTER_IDS_CACHE_TTL_MS) return cached.data
+  try {
+    const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=${rosterType}`)
+    const entries = (data.roster ?? [])
+      .filter((r) => r.person?.id)
+      .map((r) => ({ id: r.person.id, position: r.position?.abbreviation || '' }))
+    rosterEntriesCache.set(key, { ts: Date.now(), data: entries })
+    return entries
+  } catch {
+    return []
+  }
+}
+
+// The fetchRosterIdsForTeams fan-out, entries version.
+export async function fetchRosterEntriesForTeams(teamIds, rosterType = 'active') {
+  const results = await Promise.allSettled(teamIds.map((id) => fetchTeamRosterEntries(id, rosterType)))
+  const out = {}
+  teamIds.forEach((id, i) => {
+    out[id] = results[i].status === 'fulfilled' ? results[i].value : []
+  })
+  return out
+}
+
 // A club's full affiliate tree, read first from a static same-origin file
 // (public/data/affiliates.json), falling back to the live dedicated
 // /teams/affiliates endpoint (a plain team hydrate doesn't carry this) when
