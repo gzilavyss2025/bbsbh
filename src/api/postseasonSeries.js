@@ -15,7 +15,7 @@
 // live there against gamePk 263172) — summed over just this series' games
 // instead of folded into the career SQLite totals.
 import { getJson } from './statsapi.js'
-import { BATTING_CATEGORIES } from './postseasonLeaders.js'
+import { BATTING_CATEGORIES, int, rate3 } from './postseasonLeaders.js'
 
 export { BATTING_CATEGORIES }
 
@@ -75,10 +75,6 @@ async function fetchGameBoxscore(gamePk) {
   }
 }
 
-const int = (v) => String(v)
-// ".317" — three decimals, no leading zero (same convention as
-// postseasonLeaders.js's career board).
-const rate3 = (v) => v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1')
 // "6.2" — box score innings-pitched notation (whole innings + outs left over).
 const ipFormat = (outs) => `${Math.floor(outs / 3)}.${outs % 3}`
 
@@ -128,15 +124,19 @@ function rankPitching(map) {
 // has an entry under `team.players` (verified live against gamePk 813047:
 // 26 entries per side, only ~14 with an actual batting/pitching line), so the
 // SAME sweep that folds batting/pitching totals also builds each team's
-// series roster for free — no second fetch. Grouped position/pitcher by the
-// box score's own `position.abbreviation` (a two-way player's entry reflects
-// whichever role he's listed under for that game).
+// series roster for free — no second fetch. Grouped by `allPositions[0]`, the
+// player's PRIMARY position for that game, falling back to `position` only
+// for thin MiLB feeds that omit it — same convention as select.js's
+// selectLineup (see ADR-0005). `box.position` alone drifts to whatever a
+// player's CURRENT/final spot was by the end of the game, so a position
+// player who mops up an inning of relief would otherwise get filed as a
+// pitcher for the whole series roster.
 function rosterEntry(p, teamId) {
   return {
     id: p.person?.id ?? null,
     name: p.person?.fullName ?? '',
     teamId,
-    position: p.position?.abbreviation ?? '',
+    position: p.allPositions?.[0]?.abbreviation ?? p.position?.abbreviation ?? '',
     jersey: p.jerseyNumber ?? '',
   }
 }

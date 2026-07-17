@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -141,6 +141,13 @@ export function InningViewer({
   const revealNextAtBat = () =>
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (stepInfo?.nextCap ?? curAtBatCount + 1))
 
+  // Where the R/H/E/LOB totals land (Row 3 below) — scrolled into view once
+  // a user finishes stepping through a half one at-bat at a time (see
+  // HalfInning's onSteppedThrough), since by then PlayByPlay's own per-step
+  // scroll (ADR-0016) has carried them well past this row.
+  const statBoxRef = useRef(null)
+  const scrollToStatBox = () => statBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
   // Back never revisits the bogus address. Without this the URL, the stepnav's
@@ -279,12 +286,13 @@ export function InningViewer({
             highlights={highlights}
             revealedAtBatCount={curAtBatCount}
             onStepInfo={setStepInfo}
+            onSteppedThrough={scrollToStatBox}
           />
         </div>
 
         {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
             beside the win-probability chart. */}
-        <div className="innings__row2">
+        <div className="innings__row2" ref={statBoxRef}>
           <StatBox
             className="innings__statbox"
             placeholder

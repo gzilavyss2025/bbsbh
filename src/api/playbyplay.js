@@ -433,13 +433,26 @@ const NATURAL_BASE = {
 // runner's movement entry than his (see gamePk 823036: the CF's fielding
 // error credit sits on the trailing runner's leg, not the batter's own
 // 1st->2nd leg, even though the same misplay is what let the batter move up
-// too). Null when the play carries no error at all — its usual case.
+// too). Prefers whichever error is charged to the SAME fielder who fielded
+// the batted ball (`f_fielded_ball`, recorded on the batter's own leg) —
+// that's the fielder whose misplay actually let the batter advance — so a
+// play with two DISTINCT errors (one enabling the batter's own extra base,
+// a separate one advancing an unrelated runner) doesn't misattribute the
+// batter's leg to whichever error happens to appear first in the feed. Falls
+// back to the first error found when there's no fielded-ball credit to
+// match against. Null when the play carries no error at all — its usual case.
 function playErrorCredit(play) {
+  let fielderCode = null
+  const errorCodes = []
   for (const r of play.runners ?? []) {
-    const errCred = (r.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
-    if (errCred) return `E${errCred.position?.code ?? ''}`
+    for (const c of r.credits ?? []) {
+      if (c.credit === 'f_fielded_ball' && fielderCode == null) fielderCode = c.position?.code ?? ''
+      if (/error/.test(c.credit ?? '')) errorCodes.push(c.position?.code ?? '')
+    }
   }
-  return null
+  if (!errorCodes.length) return null
+  const matched = fielderCode != null ? errorCodes.find((code) => code === fielderCode) : undefined
+  return `E${matched ?? errorCodes[0]}`
 }
 
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3, '4B': 4, score: 4 }

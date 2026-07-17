@@ -30,9 +30,12 @@ const EMPTY = {
   pitching: { wins: [], strikeouts: [], saves: [], era: [] },
 }
 
-const int = (v) => String(v)
+// Exported so postseasonSeries.js's series-scoped board can share these
+// instead of keeping its own copy — both format the same career/series
+// counting + rate stats.
+export const int = (v) => String(v)
 // ".317" — three decimals, no leading zero (career postseason AVG).
-const rate3 = (v) => v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1')
+export const rate3 = (v) => v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1')
 // "2.14" — two decimals (career postseason ERA).
 const num2 = (v) => v.toFixed(2)
 
