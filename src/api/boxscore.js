@@ -483,9 +483,6 @@ function oneSide(feed, side, decisions, pitchNotes, pitcherLines) {
   return {
     id: meta.id ?? null,
     teamName: meta.name ?? meta.teamName ?? (side === 'away' ? 'Away' : 'Home'),
-    // The bare club nickname ("Brewers") for the line-score row header, where
-    // the full "Milwaukee Brewers" would crowd the innings.
-    clubName: meta.teamName ?? meta.clubName ?? '',
     abbreviation: meta.abbreviation ?? '',
     batters: battingRows(feed, side),
     batTotals: battingTotals(feed, side),

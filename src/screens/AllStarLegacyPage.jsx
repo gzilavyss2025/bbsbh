@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadAllStarRosters } from '../api/allStarRosters.js'
 import { topActiveByAppearances, currentRosterLegacyByTeam } from '../api/allStarLegacy.js'
 import { fetchRosterEntriesForTeams } from '../api/team.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { useColumnCount } from '../hooks/useColumnCount.js'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -22,7 +23,7 @@ import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 const TEAM_PREVIEW_COUNT = 8
 
 // The leader grid always wants at least this many cards, but a wide-enough
-// screen fits more per row than a phone does — see useGridColumnCount below —
+// screen fits more per row than a phone does — see useColumnCount —
 // so the ACTUAL count shown rounds up to whatever fills every row completely
 // rather than leaving an orphaned partial row. The pool fetched is generous
 // enough to cover the widest realistic layout (the app's own wide-screen cap
@@ -36,38 +37,6 @@ const LEADER_POOL_SIZE = 20
 // actually renders and the number of cards we hand it always agree.
 const LEADER_CARD_WIDTH = 240
 const LEADER_GRID_GAP = 12
-
-// How many columns a container the given ref points at currently fits, at
-// (cardWidth + gap) per column — remeasured on resize. Deliberately a small,
-// page-local duplicate of MasonryColumns.jsx's own measure() (same formula),
-// rather than importing it, since this page only needs the column COUNT, not
-// masonry's round-robin item distribution.
-//
-// A CALLBACK ref, not a plain useRef object: the grid <div> this attaches to
-// doesn't exist on first paint (the leader section shows a loading/empty
-// fallback until the async data resolves), so a useEffect keyed on
-// [cardWidth, gap] alone would run once against a still-null ref and then
-// never re-fire once the real element finally mounts — cols would stay
-// stuck at its initial guess forever, exactly the "stopped adapting to the
-// viewport" bug this replaced. Tracking the node itself in state makes the
-// measuring effect re-run the moment the element actually appears.
-function useGridColumnCount(cardWidth, gap) {
-  const [node, setNode] = useState(null)
-  const [cols, setCols] = useState(1)
-  const ref = useCallback((el) => setNode(el), [])
-  useEffect(() => {
-    if (!node) return
-    const measure = () => {
-      const w = node.clientWidth
-      setCols(Math.max(1, Math.floor((w + gap) / (cardWidth + gap))))
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(node)
-    return () => ro.disconnect()
-  }, [node, cardWidth, gap])
-  return [ref, cols]
-}
 
 function yearsLabel(years) {
   return years.join(', ')
@@ -240,7 +209,7 @@ export function AllStarLegacyPage() {
     return set
   }, [rosterEntriesAsync.data])
 
-  const [leaderGridRef, leaderCols] = useGridColumnCount(LEADER_CARD_WIDTH, LEADER_GRID_GAP)
+  const [leaderGridRef, leaderCols] = useColumnCount(LEADER_CARD_WIDTH, LEADER_GRID_GAP)
 
   const leaderPool = useMemo(() => {
     if (!hasRosters || !activeIds) return []
@@ -304,7 +273,12 @@ export function AllStarLegacyPage() {
   }, [byTeam])
 
   const loading = rostersAsync.loading || rosterEntriesAsync.loading
-  const error = rostersAsync.error && !hasRosters
+  // Either fetch failing is a real error — a cold rostersAsync failure blocks
+  // (no data ever landed), while a rosterEntriesAsync failure with rostersAsync
+  // already loaded is a stale-data case: the leader/team sections below would
+  // otherwise render their live-roster join as genuinely empty (see byTeam/
+  // activeIds' null guards) rather than as a load failure.
+  const error = rostersAsync.error || rosterEntriesAsync.error
 
   return (
     <div className="screen">
@@ -318,6 +292,7 @@ export function AllStarLegacyPage() {
         error={error}
         hasData={hasRosters}
         errorMessage="Couldn’t load All-Star Legacy. Try again."
+        staleErrorMessage="Couldn’t load current rosters — the leader board and team lists below may be incomplete."
         emptyMessage="No All-Star history is available right now."
         emptyProse
       />

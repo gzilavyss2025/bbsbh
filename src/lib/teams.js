@@ -455,14 +455,21 @@ const TEAM_COLOR_PAIRS = {
   158: ['#12284B', '#FFC52F'], // Brewers
 }
 
-// A diagonal, 100%-opacity two-tone stripe for `teamId` (MLB club or MiLB
+// `teamId`'s [primary, secondary] brand-color pair (MLB club or MiLB
 // affiliate, resolved to its parent org's pair via MILB_PARENT_ORG, same
-// fallback teamTintColor uses) — a plain CSS `background` value, ready to
-// drop on any element via inline style. Returns null for a team with no
-// known pair (an unaffiliated/complex-league MiLB id), so callers can fall
-// back to a flat color rather than render nothing.
+// fallback teamTintColor uses), or null for a team with no known pair (an
+// unaffiliated/complex-league MiLB id) — shared by every TEAM_COLOR_PAIRS
+// reader below so the affiliate-fallback rule lives in exactly one place.
+function resolveTeamColorPair(teamId) {
+  return TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]] ?? null
+}
+
+// A diagonal, 100%-opacity two-tone stripe for `teamId` — a plain CSS
+// `background` value, ready to drop on any element via inline style. Returns
+// null for a team with no known pair, so callers can fall back to a flat
+// color rather than render nothing.
 export function teamStripeGradient(teamId) {
-  const pair = TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]]
+  const pair = resolveTeamColorPair(teamId)
   if (!pair) return null
   const [a, b] = pair
   // 3px bands (6px per repeat) — fine enough to read as a woven zebra
@@ -473,12 +480,10 @@ export function teamStripeGradient(teamId) {
 
 // A club's single primary brand color (the first of TEAM_COLOR_PAIRS), for
 // contexts that want one team-identity hex rather than a two-tone stripe
-// (e.g. RadarPill's pressed-glyph state, or a solid hover fill). Same
-// MiLB-affiliate fallback as teamStripeGradient; returns null for a team
-// with no known pair.
+// (e.g. RadarPill's pressed-glyph state, or a solid hover fill). Returns
+// null for a team with no known pair.
 export function teamPrimaryColor(teamId) {
-  const pair = TEAM_COLOR_PAIRS[teamId] ?? TEAM_COLOR_PAIRS[MILB_PARENT_ORG[teamId]]
-  return pair ? pair[0] : null
+  return resolveTeamColorPair(teamId)?.[0] ?? null
 }
 
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed

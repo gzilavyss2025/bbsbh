@@ -8733,24 +8733,25 @@ body {
   .slate-body {
     display: grid;
     grid-template-columns: 1fr 300px;
+    grid-template-areas: "main recap";
     align-items: start;
     gap: 20px;
   }
   .slate-body .gamelist {
     grid-template-columns: 1fr;
   }
-  /* Pin the two columns by explicit placement rather than trusting auto-flow:
-     the game column (Off Day grid nested under it) left, the Day Recap rail
-     right. The rail is anchored to row 1 / column 2 so it's laid down first —
-     any other child (e.g. an Off Day section that ever escaped .slate-main —
-     see the wrapper comment in GameSelect.jsx) then auto-fills the LEFT column
-     instead of stealing the rail and bumping the recap onto its own row. */
+  /* Named areas, not bare column/row numbers: the game column (Off Day grid
+     nested under it) goes in "main", the Day Recap rail in "recap" — each
+     pinned there by name regardless of DOM order, so nothing can silently
+     land in the other's cell via row-major auto-flow. GameSelect.jsx renders
+     exactly these two children today (see its own wrapper comment); a real
+     third sibling would need its own named area added here too, rather than
+     falling through to an implicit, easy-to-miss auto-placed cell. */
   .slate-body > .slate-main {
-    grid-column: 1;
+    grid-area: main;
   }
   .slate-body > .pastdayrecap {
-    grid-row: 1;
-    grid-column: 2;
+    grid-area: recap;
   }
   /* Deliberately NOT sticky — a pinned rail read as disconnected from the
      grid it sits beside, so both columns just scroll together with the

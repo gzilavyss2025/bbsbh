@@ -101,7 +101,7 @@ export function BoxScore({
   return (
     <div className="boxscore">
       <div className="boxscore__head">
-        <h2 className="boxscore__title">Box score</h2>
+        <h2 className="boxscore__title" id="bs__title">Box score</h2>
         {!isFinal && (
           <div className="boxscore__headright">
             <RefreshButton onReload={onReload} loading={loading} />
@@ -283,8 +283,10 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
         <InsightsCard calloutNotes={calloutNotes} />
       </section>
 
-      <section className="bs__section">
-        <h2 className="bs__sectionTitle">Box score</h2>
+      <section className="bs__section" aria-labelledby="bs__title">
+        {/* No section heading here — the masthead's own "Box score" h2
+            (id="bs__title" below) already titles this section; a second
+            identical h2 would just duplicate it in the heading list. */}
         {/* The line score spans the full section width (not squeezed into a
             duo column) on every breakpoint — the one row every scorebook page
             reads across in one line. */}
@@ -759,7 +761,7 @@ function Scoreboard({ away, home, innings, onSection }) {
             {rows.map(({ side, cells, half }) => (
               <tr key={side.teamName}>
                 <td className="bs__boardName">
-                  <TeamLink id={side.id} className="bs__boardLogo">
+                  <TeamLink id={side.id} className="bs__boardLogo" ariaLabel={side.teamName}>
                     <TeamLogo teamId={side.id} name={side.teamName} size={28} />
                   </TeamLink>
                 </td>
