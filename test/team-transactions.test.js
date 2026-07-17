@@ -314,6 +314,21 @@ test('filterStoryworthy drops REL/SU rows logged entirely at a single affiliate'
   assert.deepEqual(kept.map((t) => t.id), [mlbRelease.id])
 })
 
+test('filterStoryworthy keeps a DFA (elected free agency) row even though it only touches the org via an affiliate', () => {
+  // Real row, verified live league-wide 2026-07-16: "elected free agency" is
+  // logged with toTeam the outrighted player's MINOR-LEAGUE club (Nashville
+  // Sounds, 556), never the MLB parent (158) directly — unlike REL/SU above,
+  // this is the NORMAL shape for every DFA row, not an occasional affiliate-
+  // only outlier, so it's exempt from the direct-touch gate.
+  const affiliateDfa = {
+    id: 928036, typeCode: 'DFA', date: '2026-07-16', effectiveDate: '2026-07-16',
+    person: { id: 675659, fullName: 'Greg Jones' }, toTeam: NASHVILLE,
+    description: 'LF Greg Jones elected free agency.',
+  }
+  const kept = filterStoryworthy([affiliateDfa], { orgId: 158 })
+  assert.deepEqual(kept.map((t) => t.id), [affiliateDfa.id])
+})
+
 test('filterStoryworthy suppresses an undebuted free-agent signing but keeps a debuted one', () => {
   // Real rows, verified live 2026-05-28: an org-depth minor-league signing —
   // no structural difference from a real NRI signing in the raw feed (it
@@ -456,6 +471,33 @@ test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own p
   assert.match(transfer.cutline.map((s) => s.text).join(''), /Brandon Lockridge/)
 })
 
+test('cutlineShuffle keeps a trailing DFA clause\'s leading position abbreviation intact', () => {
+  // Real bug, verified live 2026-04-23 (team 110): a shuffle's non-first
+  // clause is lowerFirst'd for mid-sentence flow, which is correct for an
+  // ordinary verb ("optioned...") but wrong for a DFA row — it has no
+  // leading club name to strip, so it starts with a position abbreviation
+  // ("C Old Vet elected free agency."), and lowerFirst mangled that into
+  // "c Old Vet elected free agency."
+  const recall = {
+    id: 1, typeCode: 'CU', date: '2026-07-17', effectiveDate: '2026-07-17',
+    person: { id: 900001, fullName: 'New Guy' }, fromTeam: NASHVILLE, toTeam: BREWERS,
+    description: 'Milwaukee Brewers recalled RHP New Guy from Nashville Sounds.',
+  }
+  const dfa = {
+    id: 2, typeCode: 'DFA', date: '2026-07-17', effectiveDate: '2026-07-17',
+    person: { id: 900002, fullName: 'Old Vet' }, toTeam: NASHVILLE,
+    description: 'C Old Vet elected free agency.',
+  }
+  const days = storiesFor([recall, dfa])
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'shuffle')
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Recalled RHP New Guy from Nashville Sounds; C Old Vet elected free agency.',
+  )
+})
+
 test('Jul 10: a same-day DFA + option + signing cluster into one shuffle', () => {
   const days = storiesFor(JUL10)
   assert.equal(days.length, 1)
@@ -524,6 +566,119 @@ test('Jul 15: a real 2-for-1 (plus cash) trade merges into ONE story, not three'
   // self-reference bug the real fixture originally exposed).
   const fielderMentions = stories[0].cutline.filter((s) => s.playerId === 700501)
   assert.equal(fielderMentions.length, 1)
+})
+
+test('Jul 15: a trade leg immediately optioned the same day still joins the trade story, not a Crow-style double-move', () => {
+  // Real bug, verified live 2026-07-15: every player in a multi-player trade
+  // gets the SAME fromTeam/toTeam (the deal's acting clubs), not his own
+  // direction — Gordon's TR row reads toTeam=Brewers same as McCullers'. When
+  // Gordon is ALSO optioned to Nashville the same day, rowDirection sees a
+  // same-person in+out pair and Step 1's Crow-case logic used to steal him
+  // out of the pool before Step 2's trade grouping ever ran, leaving him
+  // rendered as an unrelated solo "Optioned to Nashville" story instead of
+  // inside the trade.
+  const gordonOption = {
+    id: 930010, typeCode: 'OPT', date: '2026-07-15', effectiveDate: '2026-07-15',
+    person: { id: 700502, fullName: 'Colton Gordon' }, fromTeam: BREWERS, toTeam: NASHVILLE,
+    description: 'Milwaukee Brewers optioned LHP Colton Gordon to Nashville Sounds.',
+  }
+  const days = storiesFor([...JUL15_MULTI_PLAYER, gordonOption])
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.deepEqual(stories.map((s) => s.type), ['trade', 'roster-move'])
+
+  const trade = stories[0]
+  assert.deepEqual(trade.rail.map((r) => [r.role, r.banner, r.surname]), [
+    ['in', 'In', 'Gordon'],
+    ['in', 'In', 'McCullers Jr.'],
+    ['out', 'Out', 'Fielder'],
+  ])
+  assert.equal(
+    trade.cutline.map((s) => s.text).join(''),
+    'Acquired LHP Colton Gordon and RHP Lance McCullers Jr. from the Houston Astros for OF Jadyn Fielder.',
+  )
+
+  const optionStory = stories[1]
+  assert.deepEqual(optionStory.rail, [{
+    role: 'out', banner: 'Down', playerId: 700502, name: 'Colton Gordon',
+    surname: 'Gordon', pos: 'LHP', tintTeamId: 158,
+  }])
+})
+
+test('Jul 16: an outright assignment + same-day elected free agency merge into one departure card', () => {
+  // Real rows, verified live 2026-07-16: outrighted to Nashville, then
+  // elected free agency the same day (a vested veteran declining the
+  // assignment) — two separate raw rows for the same person/day that must
+  // read as one card, not two disconnected "Down" stories.
+  const outright = {
+    id: 928035, typeCode: 'OUT', date: '2026-07-16', effectiveDate: '2026-07-16',
+    person: { id: 675659, fullName: 'Greg Jones' }, fromTeam: BREWERS, toTeam: NASHVILLE,
+    description: 'Milwaukee Brewers sent LF Greg Jones outright to Nashville Sounds.',
+  }
+  const dfa = {
+    id: 928036, typeCode: 'DFA', date: '2026-07-16', effectiveDate: '2026-07-16',
+    person: { id: 675659, fullName: 'Greg Jones' }, toTeam: NASHVILLE,
+    description: 'LF Greg Jones elected free agency.',
+  }
+  const days = storiesFor([outright, dfa])
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'roster-move')
+  assert.deepEqual(stories[0].rail, [{
+    role: 'out', banner: 'Out', playerId: 675659, name: 'Greg Jones',
+    surname: 'Jones', pos: 'LF', tintTeamId: 158,
+  }])
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Sent LF Greg Jones outright to Nashville Sounds; elected free agency.',
+  )
+  assert.equal(stories[0].cutline.filter((s) => s.playerId === 675659).length, 1)
+  const nashvilleSeg = stories[0].cutline.find((s) => s.text === 'Nashville Sounds')
+  assert.equal(nashvilleSeg.teamId, 556)
+})
+
+test('cutlineDeparture falls back safely when the DFA row\'s embedded name spelling differs from person.fullName', () => {
+  // Real bug, verified live 2026-05-08 (team 144): person.fullName is "José
+  // Azócar" but the DFA row's own description spells it "Azocar" (no
+  // accent) — the exact-match label strip can't find "José Azócar" inside
+  // that text, so it falls through to the raw description ("LF José Azocar
+  // elected free agency."), which still starts with the position
+  // abbreviation. Must not get lowerFirst'd into "lF José Azocar...".
+  const outright = {
+    id: 1, typeCode: 'OUT', date: '2026-07-18', effectiveDate: '2026-07-18',
+    person: { id: 640492, fullName: 'José Azócar' }, fromTeam: BREWERS, toTeam: NASHVILLE,
+    description: 'Milwaukee Brewers sent LF José Azócar outright to Nashville Sounds.',
+  }
+  const dfa = {
+    id: 2, typeCode: 'DFA', date: '2026-07-18', effectiveDate: '2026-07-18',
+    person: { id: 640492, fullName: 'José Azócar' }, toTeam: NASHVILLE,
+    description: 'LF Jose Azocar elected free agency.',
+  }
+  const days = storiesFor([outright, dfa])
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Sent LF José Azócar outright to Nashville Sounds; LF Jose Azocar elected free agency.',
+  )
+})
+
+test('Jul 16: a lone DFA row (no same-day outright/release) still shows as its own story', () => {
+  const dfa = {
+    id: 928036, typeCode: 'DFA', date: '2026-07-16', effectiveDate: '2026-07-16',
+    person: { id: 675659, fullName: 'Greg Jones' }, toTeam: NASHVILLE,
+    description: 'LF Greg Jones elected free agency.',
+  }
+  const days = storiesFor([dfa])
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'roster-move')
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'LF Greg Jones elected free agency.',
+  )
 })
 
 test('days sort newest first, and multiple fixture days combine correctly', () => {
