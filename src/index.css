@@ -1859,12 +1859,13 @@ body {
   color: var(--text-muted);
 }
 
-/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. Same
-   caption color/weight as the status text it rides on; not a separate
-   attention-grabbing color, since it's a taste-preference extra, not a
-   status. */
+/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. A bonus
+   fact, not a status, so it gets the same plain-weight/muted treatment as
+   .gamecard__prospects rather than riding the bold weight .gamecard__status
+   picked up above — FINAL stays the one bolded word on the line. */
 .gamecard__gamescore {
-  font-weight: var(--w-bold);
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
 }
 
 /* Scorebook-readiness pill: four small checkbox pips for whether the basics
