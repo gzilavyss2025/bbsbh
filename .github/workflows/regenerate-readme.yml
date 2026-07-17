@@ -1,21 +1,22 @@
 name: Regenerate README
 
-# Once a day, have Claude Code re-read the codebase and rewrite README.md so the
-# user-facing feature list never drifts from what the app actually does. Pushing
-# to main triggers Vercel's normal auto-deploy (though the README isn't shipped
-# in the bundle — this just keeps the GitHub repo page honest).
+# Have Claude Code re-read the codebase and rewrite README.md so the
+# user-facing feature list never drifts from what the app actually does.
 #
-# Guard: this runs ONLY if something that could affect the README actually
-# changed in the last 24h. The repo's other daily crons (WAR, rehab, teams,
-# prospects, affiliates) commit generated data every morning, and this job
-# commits the README itself — none of that should trigger a rewrite. So the
-# check below looks for commits that touched anything OTHER than public/data/**
-# and README.md. No such commit → skip, and no Claude API call is made.
+# The nightly schedule for this moved into update-nightly-data.yml on
+# 2026-07-17 (folded into that workflow's single commit+push, so README
+# regen no longer triggers its own separate Vercel deployment). This file is
+# now workflow_dispatch-only, for forcing an out-of-band regen (e.g. right
+# after a feature merge, without waiting for the nightly batch).
 #
-# Offset from the data crons (WAR 09:00, rehab 09:30) so the commits don't race.
+# Guard: even when manually triggered, this runs ONLY if something that could
+# affect the README actually changed in the last 24h (unless `force` is set).
+# The repo's other crons commit generated data on their own schedules, and
+# this job commits the README itself — neither should trigger a rewrite. So
+# the check below looks for commits that touched anything OTHER than
+# public/data/** and README.md. No such commit → skip, and no Claude API call
+# is made.
 on:
-  schedule:
-    - cron: '0 10 * * *' # ~6am US Eastern
   workflow_dispatch:
     inputs:
       force:
