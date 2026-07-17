@@ -9,7 +9,7 @@ import { fetchGameCardsByPk } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
-import { useNav } from '../lib/nav.js'
+import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { gamePath } from '../lib/route.js'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -20,6 +20,7 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
+import { GameResultFace } from '../components/GameResultFace.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDayYear(iso) {
@@ -30,19 +31,33 @@ function monthDayYear(iso) {
 // Resolves the URL's seriesId against postseason-history.json (cached
 // in-memory, same fetch PostseasonHistoryPage/the old bracket modal already
 // use), then sweeps that series' handful of games for batting/pitching
-// totals (loadSeriesStats) and resolves each game's box-score link
+// totals (loadSeriesStats), resolves each game's box-score link
 // (fetchGameCardsByPk) — the exact live-resolve PostseasonSeriesModal used to
 // do, now owned by this page since the modal is retired in favor of direct
-// navigation (tapping a bracket card routes straight here).
-async function loadSeries(seriesId) {
+// navigation — and pulls each game's full feed + win probability
+// (usePastGameSignals) to render it as the same "revealed" result card the
+// slate shows for a past, Final game (GameResultFace), rather than a bare
+// score line. `usePastGameSignals`' own header warns it's only safe inside a
+// reveal because a same-day game might still be live; that concern doesn't
+// apply here — postseason-history.json only ever stores COMPLETED series, so
+// every game this page touches is already Final, same footing as
+// loadSeriesStats' own boxscore fetches needing no SealBox.
+async function loadSeries(seriesId, getSignals) {
   const history = await loadPostseasonHistory()
   const series = findSeriesById(history, seriesId)
   if (!series) return null
-  const [stats, cardsByPk] = await Promise.all([
+  const [stats, cardsByPk, signalsEntries] = await Promise.all([
     loadSeriesStats(series.games),
     fetchGameCardsByPk(series.games.map((g) => g.gamePk)),
+    Promise.all(
+      series.games.map((g) =>
+        getSignals(g.gamePk)
+          .then((signals) => [g.gamePk, signals])
+          .catch(() => [g.gamePk, null]),
+      ),
+    ),
   ])
-  return { series, stats, cardsByPk }
+  return { series, stats, cardsByPk, gameSignals: Object.fromEntries(signalsEntries) }
 }
 
 // Postseason Series: a single series' final result (winner/loser, series
@@ -59,15 +74,15 @@ async function loadSeries(seriesId) {
 export function PostseasonSeriesPage({ seriesId }) {
   const back = () => window.history.back()
   const { favoriteTeamId } = useFavoriteTeam()
-  const navigate = useNav()
-  const { loading, error, data } = useAsync(() => loadSeries(seriesId), [seriesId])
+  const getSignals = usePastGameSignals()
+  const { loading, error, data } = useAsync(() => loadSeries(seriesId, getSignals), [seriesId])
 
   useDocumentTitle(data?.series ? `${data.series.year} ${data.series.label}` : null)
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'psseries', noun: 'series', onBack: back })
   if (gate) return gate
 
-  const { series, stats, cardsByPk } = data
+  const { series, stats, cardsByPk, gameSignals } = data
   const { teamA, teamB, winnerTeamId, mvp, label, year, isWorldSeries, games } = series
   const winner = winnerTeamId === teamA.teamId ? teamA : teamB
   const loser = winnerTeamId === teamA.teamId ? teamB : teamA
@@ -114,43 +129,30 @@ export function PostseasonSeriesPage({ seriesId }) {
         </div>
       </div>
 
-      <ul className="psseries__games">
+      <div className="psseries__games">
         {games.map((g) => {
-          const awayWon = g.awayScore > g.homeScore
           const card = cardsByPk?.[g.gamePk]
+          const signals = gameSignals?.[g.gamePk]
+          const boxScorePath = card
+            ? gamePath(card.officialDate, card.away.abbreviation, card.home.abbreviation, 'boxscore', card.gameNumber)
+            : null
           return (
-            <li key={g.gameNumber}>
-              <button
-                type="button"
-                className="psseries__game"
-                disabled={!card}
-                onClick={() =>
-                  card &&
-                  navigate(
-                    gamePath(
-                      card.officialDate,
-                      card.away.abbreviation,
-                      card.home.abbreviation,
-                      'boxscore',
-                      card.gameNumber,
-                    ),
-                  )
-                }
-              >
+            <div key={g.gameNumber} className="psseries__gamewrap">
+              <div className="psseries__gamehead">
                 <span className="psseries__gamenum">Game {g.gameNumber}</span>
                 <span className="psseries__gamedate">{monthDayYear(g.date)}</span>
-                <span className={`psseries__gameline${awayWon ? ' psseries__gameline--awaywon' : ''}`}>
-                  <TeamLogo teamId={g.awayTeamId} name="" size={16} />
-                  <span className="psseries__gamescore">{g.awayScore}</span>
-                  <span className="psseries__at">@</span>
-                  <TeamLogo teamId={g.homeTeamId} name="" size={16} />
-                  <span className="psseries__gamescore">{g.homeScore}</span>
-                </span>
-              </button>
-            </li>
+              </div>
+              {signals && boxScorePath ? (
+                <div className="psseries__facewrap">
+                  <GameResultFace feed={signals.feed} winProb={signals.winProb} boxScorePath={boxScorePath} />
+                </div>
+              ) : (
+                <p className="hint hint--error">Couldn’t load this game’s result.</p>
+              )}
+            </div>
           )
         })}
-      </ul>
+      </div>
 
       {mvp && (
         <div className="psseries__mvp">
@@ -187,6 +189,53 @@ export function PostseasonSeriesPage({ seriesId }) {
           favoriteTeamId={favoriteTeamId}
         />
       )}
+
+      <div className="psseries__rosters">
+        <RosterCard teamId={winner.teamId} roster={stats.rosters[winner.teamId]} />
+        <RosterCard teamId={loser.teamId} roster={stats.rosters[loser.teamId]} />
+      </div>
+    </div>
+  )
+}
+
+// One team's series roster — every player who dressed for at least one game
+// of the series (see loadSeriesStats/rosterEntry), split into position
+// players and pitchers. Deliberately no favoriteTeamId highlight here: this
+// is a reference list of who was ON the roster, not a ranked/comparative
+// board like the result banner or the leader sections above it.
+function RosterCard({ teamId, roster }) {
+  const positionPlayers = roster?.positionPlayers ?? []
+  const pitchers = roster?.pitchers ?? []
+  if (positionPlayers.length === 0 && pitchers.length === 0) return null
+  return (
+    <section className="psseries__rostercard">
+      <div className="psseries__rosterhead">
+        <TeamLogo teamId={teamId} name={teamClubNameShort(teamId)} size={24} />
+        <span className="psseries__rosterteam">{teamClubNameShort(teamId)} roster</span>
+      </div>
+      {positionPlayers.length > 0 && (
+        <RosterGroup title="Position players" rows={positionPlayers} />
+      )}
+      {pitchers.length > 0 && <RosterGroup title="Pitchers" rows={pitchers} />}
+    </section>
+  )
+}
+
+function RosterGroup({ title, rows }) {
+  return (
+    <div className="psseries__rostergroup">
+      <h4 className="psseries__rostergrouptitle">{title}</h4>
+      <ul className="psseries__rosterlist">
+        {rows.map((p) => (
+          <li key={p.id} className="psseries__rosterrow">
+            <span className="psseries__rosternum">{p.jersey}</span>
+            <PlayerLink id={p.id} className="psseries__rostername">
+              {p.name}
+            </PlayerLink>
+            <span className="psseries__rosterpos">{p.position}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

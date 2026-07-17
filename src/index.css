@@ -13546,73 +13546,45 @@ body {
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
+/* Each game renders as the same "revealed" result card the slate's past-day
+   flip cards show (GameResultFace: final line, decisions, play of the game)
+   — this page never seals it (see PostseasonSeriesPage's loadSeries comment),
+   just a small "Game N · date" head above each card, same idea as the
+   scoreboard's own linescore header. */
 .psseries__games {
-  list-style: none;
-  margin: var(--space-2) 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
 }
-/* A button, not a plain row — tapping a game jumps straight to that game's
-   own box score (resolved from its gamePk via fetchGameCardsByPk). Disabled
-   (unclickable, dimmed) until that resolves, rather than a dead click that
-   silently does nothing. */
-.psseries__game {
+.psseries__gamewrap {
   display: flex;
-  align-items: center;
-  width: 100%;
+  flex-direction: column;
+  gap: 4px;
+}
+.psseries__gamehead {
+  display: flex;
+  align-items: baseline;
   gap: 8px;
-  padding: 6px 8px;
-  border: none;
-  border-radius: var(--radius-xs);
-  background: var(--surface-card);
-  font-family: inherit;
-  font-size: var(--fs-compact);
-  text-align: left;
-  cursor: pointer;
-}
-.psseries__game:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.psseries__game:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  padding: 0 2px;
 }
 .psseries__gamenum {
-  flex: none;
-  width: 50px;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-weight: var(--w-bold);
-  color: var(--text-heading);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 .psseries__gamedate {
-  flex: none;
-  width: 76px;
-  color: var(--text-muted);
-}
-.psseries__gameline {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
-}
-.psseries__gameline--awaywon .psseries__gamescore:first-of-type {
-  color: var(--text-heading);
-  font-weight: var(--w-bold);
-}
-.psseries__gameline:not(.psseries__gameline--awaywon) .psseries__gamescore:last-of-type {
-  color: var(--text-heading);
-  font-weight: var(--w-bold);
-}
-.psseries__at {
-  color: var(--text-muted);
   font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+/* GameResultFace's .flipback assumes the flip card's fixed-height face
+   (width/height: 100%) — embedded here in normal page flow instead, so its
+   height needs to come from its own content, not a 3D-flip parent. */
+.psseries__facewrap .flipback {
+  height: auto;
 }
 /* Tier-1 kraft-amber notification card, same family as .pitchernotice--pbp
    (the play-by-play "now pitching" card) — a flat tinted fill rather than
@@ -13659,6 +13631,88 @@ body {
   font-weight: var(--w-bold);
   font-size: var(--fs-ui);
   color: var(--seal-ink);
+}
+
+/* Both teams' series rosters, at the very bottom of the page — a reference
+   list of who dressed for the series (loadSeriesStats/rosterEntry), NOT a
+   ranked/comparative board, so unlike the result banner and leader sections
+   above it this deliberately carries no favoriteTeamId highlight. */
+.psseries__rosters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: var(--space-3);
+}
+@media (min-width: 560px) {
+  .psseries__rosters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.psseries__rostercard {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+.psseries__rosterhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-2);
+}
+.psseries__rosterteam {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+.psseries__rostergroup + .psseries__rostergroup {
+  margin-top: var(--space-2);
+}
+.psseries__rostergrouptitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.psseries__rosterlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.psseries__rosterrow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.psseries__rosternum {
+  flex: none;
+  width: 1.8em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  text-align: right;
+}
+.psseries__rostername {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-body);
+}
+.psseries__rosterpos {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
 }
 
 /* ------------------------------------------------------------ postseason leaders

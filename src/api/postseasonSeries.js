@@ -1,7 +1,7 @@
-// Postseason Series page's data — a single series' game-by-game result plus
+// Postseason Series page's data — a single series' game-by-game result,
 // batting/pitching leaders scoped to just that series (e.g. "2025 NL Division
-// Series"), a narrower cut than postseasonLeaders.js's since-2000 career
-// boards.
+// Series"), and both teams' series rosters — a narrower cut than
+// postseasonLeaders.js's since-2000 career boards.
 //
 // A series is only 3-7 games, so unlike the career boards (backed by the
 // shared SQLite layer, docs/adr/0021) this aggregates LIVE, client-side, on
@@ -102,6 +102,35 @@ function rankPitching(map) {
   }
 }
 
+// Every player dressed for a game — not just the ones who recorded a stat —
+// has an entry under `team.players` (verified live against gamePk 813047:
+// 26 entries per side, only ~14 with an actual batting/pitching line), so the
+// SAME sweep that folds batting/pitching totals also builds each team's
+// series roster for free — no second fetch. Grouped position/pitcher by the
+// box score's own `position.abbreviation` (a two-way player's entry reflects
+// whichever role he's listed under for that game).
+function rosterEntry(p, teamId) {
+  return {
+    id: p.person?.id ?? null,
+    name: p.person?.fullName ?? '',
+    teamId,
+    position: p.position?.abbreviation ?? '',
+    jersey: p.jerseyNumber ?? '',
+  }
+}
+
+function buildRosters(rosterByTeam) {
+  const out = {}
+  for (const [teamId, players] of rosterByTeam.entries()) {
+    const all = [...players.values()].sort((a, b) => a.name.localeCompare(b.name))
+    out[teamId] = {
+      positionPlayers: all.filter((p) => p.position !== 'P'),
+      pitchers: all.filter((p) => p.position === 'P'),
+    }
+  }
+  return out
+}
+
 // Sums every player's batting/pitching lines across just this series' games
 // (a handful of `/boxscore` fetches), then shapes the totals into
 // TeamLeaders' `precomputed` category-map contract ({ id, name, teamId,
@@ -110,11 +139,14 @@ function rankPitching(map) {
 // category with no qualifying player (e.g. no saves in this series, or too
 // thin a sample for the AVG/ERA floor) comes back as an empty array —
 // TeamLeaders already hides those rather than rendering an empty section.
+// Also returns each team's series roster (see rosterEntry/buildRosters
+// above), keyed by teamId.
 export async function loadSeriesStats(games) {
   const boxscores = await Promise.all((games ?? []).map((g) => fetchGameBoxscore(g.gamePk)))
 
   const batting = new Map()
   const pitching = new Map()
+  const rosterByTeam = new Map()
 
   for (const box of boxscores) {
     if (!box) continue
@@ -127,6 +159,9 @@ export async function loadSeriesStats(games) {
         const personId = p.person?.id
         if (!personId) continue
         const name = p.person.fullName ?? ''
+
+        if (!rosterByTeam.has(teamId)) rosterByTeam.set(teamId, new Map())
+        rosterByTeam.get(teamId).set(personId, rosterEntry(p, teamId))
 
         const bat = p.stats?.batting
         if (bat && (bat.atBats > 0 || bat.plateAppearances > 0)) {
@@ -187,5 +222,9 @@ export async function loadSeriesStats(games) {
     }
   }
 
-  return { batting: rankBatting(batting), pitching: rankPitching(pitching) }
+  return {
+    batting: rankBatting(batting),
+    pitching: rankPitching(pitching),
+    rosters: buildRosters(rosterByTeam),
+  }
 }
