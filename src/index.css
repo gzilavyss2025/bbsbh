@@ -57,7 +57,8 @@
      - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
-       (a player's `.txstory__namelink` stays uppercase on purpose) */
+       (a player's `.txstory__namelink` stays uppercase on purpose)
+     - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap` */
 #root * {
   text-transform: uppercase;
 }
@@ -2906,18 +2907,28 @@ body {
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+/* A crew size that doesn't fill the last row (1, 3, or 5 umpires — MiLB
+   often posts fewer than four, postseason crews sometimes post an odd
+   number) would leave the .umps__list background showing through as a gap;
+   stretch the lone last item across both columns instead. */
+.umps__list li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .umps__list li {
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  box-shadow: var(--shadow-card);
 }
 
 .umps__role {
@@ -2928,7 +2939,11 @@ body {
   color: var(--text-caption);
 }
 
-.umps__name {
+/* Scoped through the parent (not just `.umps__name`) so this outranks
+   `.plink`'s `font`/`color`/`text-transform: inherit` reset further down the
+   sheet — same specificity tie otherwise, and `.plink` would win by source
+   order, leaving the name in the button's inherited (unstyled) font. */
+.umps__namerow .umps__name {
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
@@ -2942,24 +2957,6 @@ body {
   gap: 5px;
   flex-wrap: wrap;
 }
-/* Wraps the HP tier pill as a tap target for the accuracy modal — reset to
-   bare, no underline-on-hover (would run oddly under the pill's own border/
-   fill), just the focus ring for keyboard access. */
-.umps__tierbtn {
-  appearance: none;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  line-height: var(--lh-zero);
-}
-.umps__tierbtn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-pill);
-}
-
 /* Umpire accuracy tier pill — a statistical-tier badge (Elite / Good /
    Average / Below Average; see api/umpires.js's tierForZ) shown next to a
    plate umpire's name on the lineup Umpires card, his own page, and the
@@ -2999,6 +2996,100 @@ body {
   color: var(--clay-deep);
   border-color: var(--clay);
   background: var(--clay-soft);
+}
+
+/* Umpire accuracy glyph — the HP tier's tap target on the lineup Umpires
+   card (UmpireTierGlyph.jsx). A solid home-plate silhouette on a
+   tier-colored dot, same four-ink language as .tierpill above; unlike
+   RadarPill's glyph (neutral until pressed) this one stays colored at rest
+   — the at-a-glance read is the point in this tight card. Tapping unfolds
+   .umptier__note in place, same idiom as .radarpill__note. */
+.umptier__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  color: #fff;
+}
+.umptier__glyph--elite {
+  background: var(--field-deep);
+}
+.umptier__glyph--good {
+  background: var(--award-ink);
+}
+.umptier__glyph--average {
+  background: var(--text-muted);
+}
+.umptier__glyph--below {
+  background: var(--clay-deep);
+}
+.umptier__glyph:hover,
+.umptier__glyph--open {
+  box-shadow: 0 0 0 1px var(--border-rule);
+}
+.umptier__glyph--open {
+  border-color: #fff;
+}
+.umptier__glyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.umptier__note {
+  /* Basis 100% inside .umps__namerow's own flex-wrap forces this onto its
+     own line below the name/glyph, same trick as .radarpill__note. */
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.umptier__note-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.umptier__note-stats {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.umptier__note-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+  cursor: pointer;
+}
+.umptier__note-link:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.umptier__note-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .umptier__note {
+    animation: none;
+  }
 }
 
 /* ---------------------------------------------------------------- lineup */
@@ -5955,18 +6046,17 @@ body {
   text-transform: uppercase;
   color: var(--text-heading);
 }
+.umpmodal__rankrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 .umpmodal__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--award-ink);
-}
-.umpmodal__extra {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
 }
 .umpmodal__hint {
   margin: 4px 0 0;
@@ -5975,17 +6065,21 @@ body {
 }
 .umpmodal__zone {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
   margin-bottom: 14px;
 }
 .umpmodal__zonecap {
   margin: 0;
+  flex: 1;
   font-size: var(--fs-caption);
   color: var(--text-muted);
   line-height: var(--lh-ui);
-  text-align: center;
+  text-align: left;
+  /* Natural-case explainer prose reads better than shouted caps for a full
+     sentence — same convention as .gsmodal .sheet__body. */
+  text-transform: none; /* caps-exempt */
 }
 .umpmodal__gtitle {
   margin: 0 0 6px;
@@ -6016,12 +6110,34 @@ body {
   font-size: var(--fs-compact);
   color: var(--text-caption);
 }
-.umpmodal__gmatch {
+.umpmodal__gmatchrow {
   justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.umpmodal__gmatch {
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--accent-primary);
+}
+/* The level tag on a mixed MLB/AAA game log (see hasMixedLevels in
+   UmpireAccuracyModal.jsx) — neutral ink, not a positive/negative accuracy
+   signal, so it deliberately doesn't borrow .tierpill's four-ink language. */
+.umpmodal__glevel {
+  display: inline-block;
+  padding: 1px 5px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 .umpmodal__gacc {
   font-family: var(--font-mono);
@@ -8848,22 +8964,17 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 
-  /* Six-man crew (LF + RF added) — two rows of three, laid out like the
-     game-facts box above it (one shared bordered card, hairline dividers)
-     rather than the auto-fit grid's individual shadowed pills. */
+  /* The narrow-layout odd-crew stretch (below) is tuned for a fixed 2-column
+     grid; undo it here so the wide auto-fit/six-man layouts keep their own
+     natural flow instead of a lone item spanning the full row. */
+  .teaminfo--spread .umps__list li:last-child {
+    grid-column: auto;
+  }
+
+  /* Six-man crew (LF + RF added) — two rows of three instead of the
+     auto-fit grid's flow. */
   .teaminfo--spread .umps__list--six {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: var(--border-rule);
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-  }
-  .teaminfo--spread .umps__list--six li {
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
   }
 
   .teaminfo__duo {

@@ -27,7 +27,7 @@ import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { ManagerLink } from '../components/ManagerLink.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
-import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { UmpireTierGlyph } from '../components/UmpireTierGlyph.jsx'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -305,14 +305,14 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
 
 function Umpires({ officials }) {
   // Under tonight's plate ump: his season accuracy TIER (Elite/Good/Average/
-  // Below Average — see api/umpires.js's tierForZ), as a small badge next to
-  // his name that opens the full accuracy modal (zone map + last five plate
-  // games) on tap. Rides its own async load (keyed to his id) so it works for
-  // both this card and the wide LineupSpread that also renders <Umpires>.
-  // It's a season aggregate of Final games only, so it can't leak tonight's
-  // (unplayed) result; hidden for MiLB / umps with no data. Deliberately just
-  // the tier shown inline (no rank/%/tendency) — that detail lives one tap
-  // away in the modal instead of cluttering the card.
+  // Below Average — see api/umpires.js's tierForZ), as a tap glyph next to
+  // his name (UmpireTierGlyph) that unfolds the tier tag + rank in place
+  // before the full accuracy modal (zone map, accuracy %, tendency, last
+  // five plate games) one tap further. Rides its own async load (keyed to
+  // his id) so it works for both this card and the wide LineupSpread that
+  // also renders <Umpires>. It's a season aggregate of Final games only, so
+  // it can't leak tonight's (unplayed) result; hidden for MiLB / umps with
+  // no data.
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)
@@ -336,9 +336,12 @@ function Umpires({ officials }) {
                 {o.name}
               </UmpireLink>
               {o.role === 'HP' && hpAccuracy?.tier && (
-                <button type="button" className="umps__tierbtn" onClick={() => setModalId(o.id)}>
-                  <UmpireTierPill tier={hpAccuracy.tier} />
-                </button>
+                <UmpireTierGlyph
+                  tier={hpAccuracy.tier}
+                  rank={hpAccuracy.rank}
+                  total={hpAccuracy.total}
+                  onFullBreakdown={() => setModalId(o.id)}
+                />
               )}
             </span>
           </li>
