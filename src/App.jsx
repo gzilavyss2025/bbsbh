@@ -38,6 +38,10 @@ const AllStarRostersPage = lazyNamed(
   () => import('./screens/AllStarRostersPage.jsx'),
   'AllStarRostersPage',
 )
+const AllStarLegacyPage = lazyNamed(
+  () => import('./screens/AllStarLegacyPage.jsx'),
+  'AllStarLegacyPage',
+)
 const StandingsPage = lazyNamed(() => import('./screens/StandingsPage.jsx'), 'StandingsPage')
 const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
 const TeamLeadersPage = lazyNamed(
@@ -129,6 +133,8 @@ export default function App() {
     content = <PostseasonHistoryPage />
   } else if (route.name === 'all-star-rosters') {
     content = <AllStarRostersPage />
+  } else if (route.name === 'all-star-legacy') {
+    content = <AllStarLegacyPage />
   } else if (route.name === 'standings') {
     content = <StandingsPage />
   } else if (route.name === 'player') {

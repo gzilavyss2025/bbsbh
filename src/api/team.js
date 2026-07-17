@@ -120,15 +120,33 @@ export async function fetchTeamIL(teamId, season) {
   }
 }
 
-// Session cache for fetchTeamRosterIds, keyed by `${teamId}:${rosterType}`.
+// Session cache for fetchTeamRosterEntries, keyed by `${teamId}:${rosterType}`.
 // Active rosters only churn on transactions (call-ups/trades/IL moves) — a few
 // times a week per team, not intraday — so a 30-minute TTL is long enough to
 // spare a refetch on every slate re-render within a session, while staying
 // short enough that a "roughly how many prospects" badge never goes stale for
 // long. A failed fetch is never cached, so a transient network blip doesn't
-// stick around for the full TTL.
-const ROSTER_IDS_CACHE_TTL_MS = 30 * 60 * 1000
-const rosterIdsCache = new Map()
+// stick around for the full TTL. Shared by fetchTeamRosterIds below — both
+// need the same roster payload, just shaped differently, so there's one fetch
+// and one cache per (teamId, rosterType), not two.
+const ROSTER_CACHE_TTL_MS = 30 * 60 * 1000
+const rosterEntriesCache = new Map()
+
+// A roster's person ids + each one's primary position (the payload already
+// carries it, no extra hydrate needed) — for callers that LABEL a roster (a
+// position pill next to a name), not just check membership. Degrades to [].
+export async function fetchTeamRosterEntries(teamId, rosterType = 'active') {
+  if (!teamId) return []
+  const key = `${teamId}:${rosterType}`
+  const cached = rosterEntriesCache.get(key)
+  if (cached && Date.now() - cached.ts < ROSTER_CACHE_TTL_MS) return cached.data
+  const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=${rosterType}`)
+  const entries = (data.roster ?? [])
+    .filter((r) => r.person?.id)
+    .map((r) => ({ id: r.person.id, position: r.position?.abbreviation || '' }))
+  rosterEntriesCache.set(key, { ts: Date.now(), data: entries })
+  return entries
+}
 
 // Just a roster's person ids — no stat hydration — for the slate's "N
 // prospects on this roster" badge (rosterType='active', the default: who's on
@@ -137,17 +155,12 @@ const rosterIdsCache = new Map()
 // resolution (see loadTeam) passes '40Man' instead, so an injured prospect
 // still resolves to his real affiliate — 'active' alone was dropping any
 // prospect on a 7-/60-day IL to the scraped level text with no logo (see
-// prospects.js). Degrades to [].
+// prospects.js). Derives from fetchTeamRosterEntries' shared cache rather
+// than fetching/caching its own copy of the same roster. Degrades to [].
 export async function fetchTeamRosterIds(teamId, rosterType = 'active') {
-  if (!teamId) return []
-  const key = `${teamId}:${rosterType}`
-  const cached = rosterIdsCache.get(key)
-  if (cached && Date.now() - cached.ts < ROSTER_IDS_CACHE_TTL_MS) return cached.data
   try {
-    const data = await getJson(`/api/v1/teams/${teamId}/roster?rosterType=${rosterType}`)
-    const ids = (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
-    rosterIdsCache.set(key, { ts: Date.now(), data: ids })
-    return ids
+    const entries = await fetchTeamRosterEntries(teamId, rosterType)
+    return entries.map((e) => e.id)
   } catch {
     return []
   }
@@ -158,6 +171,21 @@ export async function fetchTeamRosterIds(teamId, rosterType = 'active') {
 // fetchMilbYearByYear, since there's no batched multi-team roster endpoint.
 export async function fetchRosterIdsForTeams(teamIds, rosterType = 'active') {
   const results = await Promise.allSettled(teamIds.map((id) => fetchTeamRosterIds(id, rosterType)))
+  const out = {}
+  teamIds.forEach((id, i) => {
+    out[id] = results[i].status === 'fulfilled' ? results[i].value : []
+  })
+  return out
+}
+
+// The fetchRosterIdsForTeams fan-out, entries version. Degrades per-team on a
+// partial failure (same idiom as fetchRosterIdsForTeams), but rethrows when
+// EVERY team failed — that's a total outage, not "no active All-Stars," and
+// its one caller (AllStarLegacyPage) needs to tell those two apart rather
+// than silently rendering an empty roster as settled fact.
+export async function fetchRosterEntriesForTeams(teamIds, rosterType = 'active') {
+  const results = await Promise.allSettled(teamIds.map((id) => fetchTeamRosterEntries(id, rosterType)))
+  if (results.every((r) => r.status === 'rejected')) throw results[0].reason
   const out = {}
   teamIds.forEach((id, i) => {
     out[id] = results[i].status === 'fulfilled' ? results[i].value : []

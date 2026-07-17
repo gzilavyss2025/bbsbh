@@ -189,13 +189,6 @@ export default defineConfig({
             handler: 'NetworkOnly',
             method: 'GET',
           },
-          {
-            // Bluesky game buzz (see api/buzz.js). Score-revealing post text —
-            // never cache it, same stale-spoiler rationale as the score feeds.
-            urlPattern: ({ url }) => url.hostname === 'api.bsky.app',
-            handler: 'NetworkOnly',
-            method: 'GET',
-          },
         ],
       },
     }),

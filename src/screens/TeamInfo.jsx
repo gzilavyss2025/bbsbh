@@ -35,7 +35,10 @@ import { Headshot } from '../components/Headshot.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
 import { MilestonePill } from '../components/MilestonePill.jsx'
 import { RookiePill } from '../components/RookiePill.jsx'
+import { RadarPill } from '../components/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
+import { radarEntryFor } from '../api/feverRadar.js'
+import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -54,6 +57,8 @@ export function TeamInfo({
   oppPitcherLine,
   prospectsData,
   rookiesData,
+  feverRadarData,
+  savantPercentilesData,
   formerTeammatesData,
   callouts,
   onNext,
@@ -106,6 +111,8 @@ export function TeamInfo({
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
+        feverRadarData={feverRadarData}
+        savantPercentilesData={savantPercentilesData}
         formerTeammatesData={formerTeammatesData}
         callouts={callouts}
       />
@@ -138,6 +145,8 @@ export function LineupSpread({
   starterLines,
   prospectsData,
   rookiesData,
+  feverRadarData,
+  savantPercentilesData,
   formerTeammatesData,
   callouts,
   onNext,
@@ -188,6 +197,8 @@ export function LineupSpread({
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
+            feverRadarData={feverRadarData}
+            savantPercentilesData={savantPercentilesData}
             callouts={callouts}
           />
         ))}
@@ -216,7 +227,18 @@ export function LineupSpread({
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
 // Former teammates is deliberately NOT part of this column — see LineupSpread,
 // which renders one shared, full-width card grid below both columns instead.
-function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData, rookiesData, callouts }) {
+function TeamPanel({
+  feed,
+  side,
+  manager,
+  uniform,
+  oppPitcherLine,
+  prospectsData,
+  rookiesData,
+  feverRadarData,
+  savantPercentilesData,
+  callouts,
+}) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   return (
     <section className="teampanel">
@@ -241,6 +263,8 @@ function TeamPanel({ feed, side, manager, uniform, oppPitcherLine, prospectsData
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
+        feverRadarData={feverRadarData}
+        savantPercentilesData={savantPercentilesData}
         callouts={callouts}
         showTeammates={false}
       />
@@ -396,6 +420,8 @@ function TeamSections({
   oppPitcherLine,
   prospectsData,
   rookiesData,
+  feverRadarData,
+  savantPercentilesData,
   formerTeammatesData,
   callouts,
   showTeammates = true,
@@ -463,6 +489,12 @@ function TeamSections({
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                   <MilestonePill text={milestoneTextFor(callouts, p.id)} />
                   <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                  <RadarPill
+                    entry={radarEntryFor(feverRadarData, p.id)}
+                    teamId={meta.id}
+                    evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
+                    evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
+                  />
                   <BirthdayCake show={birthdayIds.has(p.id)} />
                 </span>
                 <span className="lineup__jersey">{p.jersey || ''}</span>
@@ -486,6 +518,12 @@ function TeamSections({
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <RadarPill
+                            entry={radarEntryFor(feverRadarData, p.id)}
+                            teamId={meta.id}
+                            evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
+                            evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
+                          />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>

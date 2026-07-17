@@ -6,6 +6,7 @@ import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
+import { stepToSection } from '../lib/route.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -14,7 +15,7 @@ import { WinProbChart } from '../components/WinProbChart.jsx'
 import { AbsRow } from '../components/StatBox.jsx'
 import { PerformerCard } from '../components/PastDayRecapBox.jsx'
 import { CalloutNote } from '../components/CalloutNote.jsx'
-import { GameBuzzCard } from '../components/GameBuzz.jsx'
+import { GameStoryCard } from '../components/GameStoryCard.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -83,6 +84,7 @@ export function BoxScore({
   vsTeam,
   onReload,
   loading,
+  onSection,
 }) {
   // The masthead above every section (GameView.jsx) already carries this
   // game's date, so the title itself just says "Box score" — no second date
@@ -99,7 +101,7 @@ export function BoxScore({
   return (
     <div className="boxscore">
       <div className="boxscore__head">
-        <h2 className="boxscore__title">Box score</h2>
+        <h2 className="boxscore__title" id="bs__title">Box score</h2>
         {!isFinal && (
           <div className="boxscore__headright">
             <RefreshButton onReload={onReload} loading={loading} />
@@ -134,6 +136,7 @@ export function BoxScore({
               managers={managers}
               uniforms={uniforms}
               scorebookWeather={scorebookWeather}
+              onSection={onSection}
             />
           )
         }}
@@ -153,12 +156,17 @@ export function BoxScore({
   )
 }
 
-// Ordered to fill a #22 scorebook page as you work down it: the final R/H/E/LOB
-// totals, the pitchers of record, the line score, then each team paired with its
-// own header card — the visiting team's crew and first pitch above its
-// batting/pitching, the home team's ballpark/weather/times above its own. The
-// complete MLB-style game-info text sits at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, calloutNotes, managers, uniforms, scorebookWeather }) {
+// Two sections, since this page has grown well past the literal box score:
+// HIGHLIGHTS is the night's story — final totals, decisions, Game Score, the
+// win-prob arc, Play of the Game, Three Stars, Statcast Leaders, Insights,
+// and now each team's own Game Story write-ups — everything you'd want above
+// the fold before you get into the scorebook itself. BOX SCORE is the literal
+// #22-page transcription: the line score (full-width, not squeezed into a
+// column), then each team paired with its own header card — the visiting
+// team's crew and first pitch above its batting/pitching, the home team's
+// ballpark/weather/times above its own — with the complete MLB-style
+// game-info text at the very bottom so nothing is lost.
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -232,58 +240,70 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
 
   return (
     <div className="bs">
-      {/* The duo/col wrappers are transparent on a phone (display: contents —
-          everything keeps stacking in this order on .bs's own gap) and become
-          two-up grids at the wide breakpoint: the left column runs totals
-          above the decisions, the right column runs the three stars above
-          the line score, then each club's header card + batting/pitching as
-          its own column, away beside home. */}
-      <div className="bs__duo">
-        <div className="bs__col">
-          <LineTotals away={box.away} home={box.home} />
-          {/* The game's win-probability arc, directly under the R/H/E/LOB
-              totals — the retrospective companion to the three stars (both
-              are the WPA story). Renders nothing at a park with no win-prob
-              feed. */}
-          <WinProbChart
-            points={winProbPoints}
-            awayAbbr={box.away.abbreviation}
-            homeAbbr={box.home.abbreviation}
-          />
-          <Decisions decisions={box.decisions} />
-          {/* Nested under the decisions rather than full-width up top — how
-              tonight's game rated for excitement against the rest of the
-              day's slate at this level, in the same visual family as the
-              Team Page's Season Grade card. Renders nothing until the
-              10-minute Game Score cron has scored this game. */}
-          <GameScoreCard feed={feed} />
+      <section className="bs__section">
+        <h2 className="bs__sectionTitle">Highlights</h2>
+        {/* The duo/col wrappers are transparent on a phone (display: contents
+            — everything keeps stacking in this order on .bs__section's own
+            gap) and become a two-up grid at the wide breakpoint: the left
+            column runs totals above the decisions, the right column runs
+            Play of the Game above Three Stars. */}
+        <div className="bs__duo">
+          <div className="bs__col">
+            <LineTotals away={box.away} home={box.home} />
+            {/* The game's win-probability arc, directly under the R/H/E/LOB
+                totals — the retrospective companion to the three stars (both
+                are the WPA story). Renders nothing at a park with no win-prob
+                feed. */}
+            <WinProbChart
+              points={winProbPoints}
+              awayAbbr={box.away.abbreviation}
+              homeAbbr={box.home.abbreviation}
+            />
+            <Decisions decisions={box.decisions} />
+            {/* Nested under the decisions rather than full-width up top — how
+                tonight's game rated for excitement against the rest of the
+                day's slate at this level, in the same visual family as the
+                Team Page's Season Grade card. Renders nothing until the
+                10-minute Game Score cron has scored this game. */}
+            <GameScoreCard feed={feed} />
+          </div>
+          <div className="bs__col">
+            <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
+            <ThreeStars stars={stars} />
+          </div>
         </div>
-        <div className="bs__col">
-          <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
-          <ThreeStars stars={stars} />
-          <Scoreboard away={box.away} home={box.home} innings={box.innings} />
+        {/* Full-width, directly under the totals/stars duo — right beneath
+            Three Stars, ahead of the day-level Statcast/Insights digests. */}
+        <GameStoryCard feed={feed} />
+        {/* Its own full-width row — three tiles across on desktop/ipad,
+            stacked on phone (see .bs__statcastRow's wide-breakpoint
+            override). */}
+        <StatcastLeadersCard feed={feed} insights={insights} />
+        {/* The catch-all for whatever the game turned up as notable. */}
+        <InsightsCard calloutNotes={calloutNotes} />
+      </section>
+
+      <section className="bs__section" aria-labelledby="bs__title">
+        {/* No section heading here — the masthead's own "Box score" h2
+            (id="bs__title" below) already titles this section; a second
+            identical h2 would just duplicate it in the heading list. */}
+        {/* The line score spans the full section width (not squeezed into a
+            duo column) on every breakpoint — the one row every scorebook page
+            reads across in one line. */}
+        <Scoreboard away={box.away} home={box.home} innings={box.innings} onSection={onSection} />
+        <div className="bs__duo">
+          <div className="bs__col">
+            <InfoCard fields={awayFields} />
+            <TeamBlock side={box.away} feed={feed} sideKey="away" />
+          </div>
+          <div className="bs__col">
+            <InfoCard fields={homeFields} />
+            <TeamBlock side={box.home} feed={feed} sideKey="home" />
+          </div>
         </div>
-      </div>
-      {/* Its own full-width row between the linescore/Game Score column and
-          the two team cards — three tiles across on desktop/ipad, stacked on
-          phone (see .bs__statcastRow's wide-breakpoint override). */}
-      <StatcastLeadersCard feed={feed} insights={insights} />
-      <div className="bs__duo">
-        <div className="bs__col">
-          <InfoCard fields={awayFields} />
-          <TeamBlock side={box.away} feed={feed} sideKey="away" />
-        </div>
-        <div className="bs__col">
-          <InfoCard fields={homeFields} />
-          <TeamBlock side={box.home} feed={feed} sideKey="home" />
-        </div>
-      </div>
-      <GameInfo rows={box.footNotes} />
-      {/* The catch-all for whatever the game turned up as notable, ahead of
-          the crowd's own reaction in Game Buzz right below it — both now
-          share this one reveal instead of asking for a second tap. */}
-      <InsightsCard calloutNotes={calloutNotes} />
-      <GameBuzzCard feed={feed} />
+        <GameInfo rows={box.footNotes} />
+      </section>
+
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>
   )
@@ -709,14 +729,16 @@ function LineTotals({ away, home }) {
 
 // The scorebook's line score: runs by inning (1…N, extras included) then each
 // club's R/H/E, one row per team the way it reads across the bottom of the #22
-// sheet. Team names ride in full-caps nickname (BREWERS / CARDINALS) hard against
-// the innings — each half-inning a fixed, equal-width bordered box, and any half
-// that scored inked bold red. (LOB and the winning pitcher live elsewhere: the
-// totals card up top and the decisions block above.)
-function Scoreboard({ away, home, innings }) {
+// sheet. The name column carries each club's logo (linked to its team page)
+// rather than a text nickname; each half-inning a fixed, equal-width bordered
+// box, and any half that scored inked bold red. A played half (a real number,
+// 0 included) is itself a button to that half-inning in the Innings view;
+// 'X' (the team never batted that half) isn't. (LOB and the winning pitcher
+// live elsewhere: the totals card up top and the decisions block above.)
+function Scoreboard({ away, home, innings, onSection }) {
   const rows = [
-    { side: away, cells: innings.map((i) => i.away) },
-    { side: home, cells: innings.map((i) => i.home) },
+    { side: away, cells: innings.map((i) => i.away), half: 'top' },
+    { side: home, cells: innings.map((i) => i.home), half: 'bottom' },
   ]
   return (
     <div className="bs__board">
@@ -736,13 +758,17 @@ function Scoreboard({ away, home, innings }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ side, cells }) => (
+            {rows.map(({ side, cells, half }) => (
               <tr key={side.teamName}>
                 <td className="bs__boardName">
-                  {side.clubName || side.abbreviation || side.teamName}
+                  <TeamLink id={side.id} className="bs__boardLogo" ariaLabel={side.teamName}>
+                    <TeamLogo teamId={side.id} name={side.teamName} size={28} />
+                  </TeamLink>
                 </td>
                 {cells.map((v, i) => {
-                  const scored = typeof v === 'number' && v > 0
+                  const played = typeof v === 'number'
+                  const scored = played && v > 0
+                  const label = `${half === 'bottom' ? 'Bottom' : 'Top'} ${ordinal(innings[i].num)}`
                   return (
                     <td
                       key={innings[i].num}
@@ -750,7 +776,18 @@ function Scoreboard({ away, home, innings }) {
                         scored ? ' bs__boardInn--scored' : ''
                       }`}
                     >
-                      {v}
+                      {played && onSection ? (
+                        <button
+                          type="button"
+                          className="bs__boardCellBtn"
+                          onClick={() => onSection(stepToSection(2, innings[i].num, half))}
+                          aria-label={label}
+                        >
+                          {v}
+                        </button>
+                      ) : (
+                        v
+                      )}
                     </td>
                   )
                 })}
@@ -867,35 +904,49 @@ function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
 }
 
 // The three stars of the game — the hockey-tradition nod, ranked by
-// win-probability added (see computeThreeStars). Three filled stars for the top
-// mover, two for the second, one for the third; each name carries its game line
-// in smaller type. Hidden entirely when WPA isn't available (most MiLB parks).
+// win-probability added (see computeThreeStars). Hidden entirely when WPA
+// isn't available (most MiLB parks). The top mover gets the Game Score
+// card's hero treatment (.team-score__grade's inset gradient panel, borrowed
+// as .stars3__hero) since it's the single most important line on the card;
+// #2/#3 fall into compact rows below, same idiom as .team-score__row--compact.
 function ThreeStars({ stars }) {
   if (!stars || stars.length === 0) return null
+  const [mvp, ...rest] = stars
   return (
     <div className="bs__stars">
       <h3 className="bs__starsTitle">Three stars</h3>
-      <ol className="bs__starList">
-        {stars.map((s) => (
-          <li className="bs__star" key={s.id}>
-            <span className="bs__starMarks" aria-label={`${s.stars} star`}>
-              {'★'.repeat(s.stars)}
-            </span>
-            <Headshot personId={s.id} name={s.name} teamId={s.teamId} className="bs__starShot" />
-            <span className="bs__starWho">
-              <span className="bs__starHead">
-                <PlayerLink id={s.id} className="bs__starName">{s.name}</PlayerLink>
-                {(s.teamAbbr || s.pos) && (
-                  <span className="bs__starMeta">
-                    {[s.teamAbbr, s.pos].filter(Boolean).join(' · ')}
-                  </span>
+      <div className="stars3__hero">
+        <Headshot personId={mvp.id} name={mvp.name} teamId={mvp.teamId} className="stars3__heroShot" />
+        <div className="stars3__heroCopy">
+          <span className="stars3__heroKicker" aria-label={`${mvp.stars} star`}>
+            {'★'.repeat(mvp.stars)}
+          </span>
+          <PlayerLink id={mvp.id} className="stars3__heroName">{mvp.name}</PlayerLink>
+          {(mvp.teamName || mvp.pos) && (
+            <span className="stars3__heroMeta">{[mvp.teamName, mvp.pos].filter(Boolean).join(' · ')}</span>
+          )}
+        </div>
+        <span className="stars3__heroStat">{mvp.stat}</span>
+      </div>
+      {rest.length > 0 && (
+        <ol className="stars3__list">
+          {rest.map((s) => (
+            <li className="stars3__row" key={s.id}>
+              <Headshot personId={s.id} name={s.name} teamId={s.teamId} className="stars3__rowShot" />
+              <span className="stars3__rowWho">
+                <span className="stars3__rowMarks" aria-label={`${s.stars} star`}>
+                  {'★'.repeat(s.stars)}
+                </span>
+                <PlayerLink id={s.id} className="stars3__rowName">{s.name}</PlayerLink>
+                {(s.teamName || s.pos) && (
+                  <span className="stars3__rowMeta">{[s.teamName, s.pos].filter(Boolean).join(' · ')}</span>
                 )}
               </span>
-              <span className="bs__starStat">{s.stat}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
+              <span className="stars3__rowStat">{s.stat}</span>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   )
 }

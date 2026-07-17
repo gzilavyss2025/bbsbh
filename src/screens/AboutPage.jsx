@@ -86,6 +86,17 @@ export function AboutPage({ onBack }) {
           endpoints and related public baseball data sources. Tally Baseball is an
           independent project and is not affiliated with MLB, MiLB, or any club.
         </p>
+        <p>
+          The breakout/cooling scouting signal shown on some batting orders is a
+          third-party model from{' '}
+          <a href="https://www.feverbaseball.com" target="_blank" rel="noreferrer">
+            Fever Baseball
+          </a>
+          , refreshed nightly. Unlike Tally Baseball&apos;s own callouts, it is not a
+          fact reconciled against the official record — it is one outside
+          model&apos;s opinion, shown here with attribution rather than folded into
+          the rest of the app&apos;s data.
+        </p>
       </section>
     </div>
   )

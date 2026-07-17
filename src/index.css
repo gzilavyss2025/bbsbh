@@ -54,7 +54,7 @@
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
        (the blurb title above it stays uppercase, same shouted-heading/
        natural-case-body split as the Game Score modal above)
-     - `.buzz__text` (Bluesky posts keep their authors' original casing)
+     - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose) */
@@ -1859,12 +1859,13 @@ body {
   color: var(--text-muted);
 }
 
-/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. Same
-   caption color/weight as the status text it rides on; not a separate
-   attention-grabbing color, since it's a taste-preference extra, not a
-   status. */
+/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. A bonus
+   fact, not a status, so it gets the same plain-weight/muted treatment as
+   .gamecard__prospects rather than riding the bold weight .gamecard__status
+   picked up above — FINAL stays the one bolded word on the line. */
 .gamecard__gamescore {
-  font-weight: var(--w-bold);
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
 }
 
 /* Scorebook-readiness pill: four small checkbox pips for whether the basics
@@ -3016,7 +3017,12 @@ body {
 .roster__row {
   display: grid;
   grid-template-columns: 24px 44px 1fr auto;
-  align-items: center;
+  /* start, not center: when a namewrap child (RadarPill's note) wraps the
+     row onto extra lines, order/jersey/pos must stay pinned level with the
+     name — centering them re-centers into the row's new full height and
+     overlaps the expanded note (see the radar-glyph prototype). Identical
+     to center for a normal single-line row, so nothing else shifts. */
+  align-items: start;
   gap: var(--space-2);
   padding: 10px 12px;
   background: var(--surface-card);
@@ -6694,10 +6700,7 @@ body {
   color: var(--text-heading);
 }
 
-/* ---------------------------------------------------------------- game buzz */
-/* The night's Bluesky posts — the last card inside the box score's own seal,
-   to crib storytelling numbers into the paper's GAME NOTES box. */
-.buzz {
+.gamestory {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -6705,7 +6708,7 @@ body {
   overflow: hidden;
 }
 
-.buzz__head {
+.gamestory__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -6713,14 +6716,7 @@ body {
   padding: var(--space-3) var(--space-3) var(--space-2);
 }
 
-/* The revealed posts/loader/error state, now rendered directly (no SealBox
-   .statgrid wrapper — see GameBuzz.jsx) — this is the one place that gives
-   that content its own breathing room on all 4 sides. */
-.buzz__body {
-  padding: 0 var(--space-3) var(--space-3);
-}
-
-.buzz__title {
+.gamestory__title {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-ui);
@@ -6730,7 +6726,7 @@ body {
   color: var(--text-heading);
 }
 
-.buzz__note {
+.gamestory__note {
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
@@ -6738,81 +6734,99 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
-.buzz__list {
+.gamestory__list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--space-3) var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-}
-
-.buzz__post {
-  padding-bottom: var(--space-3);
-  border-bottom: var(--bw-hair) solid var(--rule-soft);
-}
-.buzz__post:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.buzz__meta {
-  display: flex;
-  align-items: baseline;
   gap: var(--space-2);
-  margin-bottom: 3px;
 }
 
-.buzz__handle {
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  color: var(--accent-primary);
-  text-decoration: none;
-}
-
-.buzz__time,
-.buzz__eng {
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  font-variant-numeric: tabular-nums;
-}
-.buzz__eng {
-  margin-left: auto;
-}
-
-.buzz__text {
-  margin: 0;
-  /* Social-post prose — the ONE place we deliberately break the all-caps
-     house rule: posts keep their authors' original casing, set in plain
-     regular-weight Newsreader so they read as quoted voices rather than app
-     chrome. The casing opt-out itself is the #root-scoped rule below (a plain
-     class can't outweigh the global `#root *` uppercase). */
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  font-weight: var(--w-regular);
-  line-height: var(--lh-body);
-  color: var(--text-body);
-}
-
-/* The sanctioned exception to the ALL-CAPS INVARIANT. `#root .buzz__text`
-   (1 id + 1 class) outweighs the global `#root *` uppercase so the posts render
-   in their authors' own casing. The `caps-exempt` marker tells the check-caps
-   guard this `none` is deliberate — the only one allowed in the codebase. */
-#root .buzz__text {
-  text-transform: none; /* caps-exempt: Bluesky posts keep their original casing */
-}
-
-.buzz__state {
+.gamestory__link {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-decoration: none;
+  transition:
+    transform var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+/* On a device with a real pointer, the row fills with that team's own real
+   brand color at full brightness (--team-color, set inline per row — see
+   GameStoryCard.jsx) with the headline flipping to white for contrast, and
+   the logo recoloring to match (brightness(0) invert(1) turns any opaque
+   pixel white regardless of the mark's own colors — a plain CSS trick, no
+   second white-on-dark logo asset needed). Skipped on touch (hover:none) so
+   a tap doesn't leave the row stuck in its "hovered" color until the next
+   tap elsewhere. Falls through to the plain card look for a team
+   teamPrimaryColor doesn't know (--team-color unset). */
+@media (hover: hover) and (pointer: fine) {
+  .gamestory__link:hover {
+    background: var(--team-color, var(--surface-inset));
+    border-color: var(--team-color, var(--border-rule));
+    color: #fff;
+  }
+  .gamestory__link:hover .gamestory__logo {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.gamestory__logo {
+  flex-shrink: 0;
+  transition: filter var(--dur-fast) var(--ease-standard);
+}
+
+.gamestory__headline {
+  flex: 1;
+}
+
+#root .gamestory__headline {
+  text-transform: none; /* caps-exempt: a real MLB.com headline reads as a natural sentence, same idiom as .buzz__text */
+}
+
+.gamestory__link:active {
+  transform: scale(0.98);
+}
+
+.gamestory__link:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .bs {
   display: flex;
   flex-direction: column;
+  gap: var(--space-5);
+}
+
+.bs__section {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
+}
+
+.bs__sectionTitle {
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
 }
 
 .bs__team {
@@ -7321,9 +7335,11 @@ body {
   color: var(--text-body);
 }
 
-/* Three stars of the game — WPA leaders under the decisions. Gold kraft-amber
-   marks descending 3→1; each name over its game line in smaller mono type. Card
-   matches the decisions block above it. */
+/* Three stars of the game — WPA leaders under the decisions. Card matches
+   the decisions block above it. The top mover gets the Game Score card's
+   hero treatment (an inset gradient panel — see .stars3__hero below,
+   modeled on .team-score__grade); #2/#3 fall into compact rows underneath,
+   same idiom as .team-score__row--compact. */
 .bs__stars {
   padding: 12px 14px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -7340,61 +7356,54 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.bs__starList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.bs__star {
+
+.stars3__hero {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    var(--surface-inset);
+  box-shadow: var(--inset-cell);
 }
-/* Fixed to the star-mark column's own width so all three rows' headshots
-   line up regardless of how many marks a row carries. */
-.bs__starMarks {
+/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing
+   — the "player-of-game" scale, same size as .stars3__rowShot below so all
+   three stars' headshots line up at one size; only the surrounding
+   panel/copy marks this row as the top mover. */
+.shot.stars3__heroShot {
   flex: none;
-  min-width: 30px;
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-  letter-spacing: var(--ls-fixed);
-  color: var(--seal);
-}
-/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing,
-   same pattern as .bs__potgShot/.topperf__shot — a good, legible size next to
-   the name/position without dwarfing the row. */
-.shot.bs__starShot {
-  flex: none;
-  width: var(--shot-2xs-w);
-  height: var(--shot-2xs-h);
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-.shot.bs__starShot.shot--fallback {
-  font-size: var(--fs-num-md);
+.shot.stars3__heroShot.shot--fallback {
+  font-size: var(--fs-num-lg);
 }
-.bs__starWho {
+.stars3__heroCopy {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
+  flex: 1;
 }
-.bs__starHead {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
+.stars3__heroKicker {
+  color: var(--seal);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
 }
-.bs__starName {
+.stars3__heroName {
   font-family: var(--font-body);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
 }
-.bs__starMeta {
+.stars3__heroMeta {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -7402,7 +7411,70 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.bs__starStat {
+.stars3__heroStat {
+  flex: none;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stars3__list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.stars3__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 2px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+}
+/* Sits above the name inside .stars3__rowWho's column stack — same position
+   as .stars3__heroKicker above the hero's name — instead of a separate
+   fixed-width column to the left of the headshot. */
+.stars3__rowMarks {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
+  color: var(--seal);
+}
+.shot.stars3__rowShot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.stars3__rowShot.shot--fallback {
+  font-size: var(--fs-num-lg);
+}
+.stars3__rowWho {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.stars3__rowName {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.stars3__rowMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.stars3__rowStat {
+  flex: none;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
@@ -8454,42 +8526,70 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
-/* Club nickname hard against the innings — shrink-to-fit so there's no dead gap
-   between the name and inning 1, set in full-caps display like a printed score. */
+/* The club's logo, hard against the innings — shrink-to-fit so there's no
+   dead gap between it and inning 1. Linked (TeamLink) to the team page. */
 .bs__boardName {
   width: 1%;
   white-space: nowrap;
   text-align: left !important;
-  padding: 5px 10px 5px 0 !important;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+  padding: 3px 10px 3px 0 !important;
+}
+.bs__boardLogo {
+  display: inline-flex;
 }
 /* Each half-inning a fixed, equal-width bordered box regardless of the digits in
-   it; a half that scored is inked bold seam-red. */
+   it; a half that scored is inked bold seam-red. Sized up from the base
+   .bs__grid td font (the header row's inning numbers stay that base size —
+   see .bs__grid--board thead th below — only the run counts themselves grow). */
 .bs__boardInn {
-  width: 22px;
+  width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
+  font-size: var(--fs-title-sm);
+}
+.bs__grid--board thead th.bs__boardInn {
+  font-size: var(--fs-caption);
 }
 .bs__boardInn--scored {
   font-weight: var(--w-bold);
   color: var(--accent-negative);
 }
+/* A played half (a real run count, 0 included) is a button straight to that
+   half-inning in the Innings view — filling the cell so the whole box is the
+   tap target, not just the digit. 'X' (never batted) stays plain text. */
+.bs__boardCellBtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.bs__boardCellBtn:active {
+  transform: scale(0.92);
+}
+.bs__boardCellBtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
 /* R/H/E totals to the right — the same equal-width bordered boxes as the innings
    so the whole line reads as one grid, but on a subtly darker fill and bold to
-   mark them as the final tallies rather than an inning. */
+   mark them as the final tallies rather than an inning. Not a nav target (no
+   single half-inning to point at), so plain text, same bigger scale as the
+   inning cells beside them. */
 .bs__grid--board .bs__boardFinal {
-  width: 22px;
+  width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   background: var(--paper-1);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 .bs__grid--board thead .bs__boardFinal {
+  font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 
@@ -8633,11 +8733,25 @@ body {
   .slate-body {
     display: grid;
     grid-template-columns: 1fr 300px;
+    grid-template-areas: "main recap";
     align-items: start;
     gap: 20px;
   }
   .slate-body .gamelist {
     grid-template-columns: 1fr;
+  }
+  /* Named areas, not bare column/row numbers: the game column (Off Day grid
+     nested under it) goes in "main", the Day Recap rail in "recap" — each
+     pinned there by name regardless of DOM order, so nothing can silently
+     land in the other's cell via row-major auto-flow. GameSelect.jsx renders
+     exactly these two children today (see its own wrapper comment); a real
+     third sibling would need its own named area added here too, rather than
+     falling through to an implicit, easy-to-miss auto-placed cell. */
+  .slate-body > .slate-main {
+    grid-area: main;
+  }
+  .slate-body > .pastdayrecap {
+    grid-area: recap;
   }
   /* Deliberately NOT sticky — a pinned rail read as disconnected from the
      grid it sits beside, so both columns just scroll together with the
@@ -11903,6 +12017,134 @@ body {
   }
   .rookiepill__short {
     display: inline;
+  }
+}
+
+/* PROTOTYPE (claude/radar-glyph-prototype) — Fever Baseball radar as a tap
+   glyph, not upfront jargon: a small magnifying glass sits quietly in the
+   row; tapping it presses like a scout's stamp (reuses .postponed's
+   stamp-press) and unfolds a plain-language note. The glyph and card shell
+   stay ink/graphite (never the kraft-seal amber — that's reserved for score
+   covers, see CLAUDE.md's spoiler rule); green/clay-red is spent in exactly
+   one place, the note's own up/down tag, not as decorative chrome bolted
+   onto the card. The glyph and the note are direct siblings in the row's
+   namewrap flex-wrap (RadarPill.jsx returns a Fragment, not a wrapping
+   span) — namewrap's own flex-wrap puts the note on its own line via
+   flex-basis: 100%, so the glyph never shares a line, and therefore never a
+   cross-axis center, with the note's height. */
+.radarpill__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* border-box: pressed's thicker white ring must not grow the button past
+     this fixed 21px — same size/position tapped or not. */
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+  color: var(--graphite);
+  cursor: pointer;
+  transform: rotate(-4deg);
+  transition: border-color 120ms var(--ease-out), color 120ms var(--ease-out),
+    background-color 120ms var(--ease-out);
+}
+.radarpill__glyph:hover {
+  border-color: var(--graphite-soft);
+  color: var(--ink-2);
+}
+.radarpill__glyph--pressed {
+  /* --radar-team-color is set inline per-player (RadarPill.jsx, from
+     teamPrimaryColor) when the club has a known brand color; falls back to
+     plain ink for MiLB teams with none. Full-strength fill + a white ring,
+     deliberately loud — this is the one state meant to grab the eye. */
+  background: var(--radar-team-color, var(--ink-1));
+  border-width: 2px;
+  border-color: #fff;
+  color: #fff;
+  animation: stamp-press 300ms var(--ease-out) both;
+}
+.radarpill__glyph--pressed:hover {
+  /* Hovering an already-open glyph previews what tapping it will do — a
+     visibly team-colored wash (not the max-saturation fill it shows at
+     rest, not a bare ring either) as a "this is about to close" cue. */
+  background: color-mix(in srgb, var(--radar-team-color, var(--ink-1)) 55%, var(--bg-page));
+  border-width: 2px;
+  border-color: var(--radar-team-color, var(--graphite));
+  color: var(--radar-team-color, var(--ink-1));
+}
+.radarpill__note {
+  /* Basis 100% inside namewrap's own flex-wrap forces this onto its own
+     line, below name/pills/glyph — see the block comment above. */
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.radarpill__note-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.radarpill__note-tag--up {
+  color: var(--accent-positive);
+}
+.radarpill__note-tag--down {
+  color: var(--accent-negative);
+}
+.radarpill__note-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* Meter: exit velocity vs. the real qualified league (Savant percentile),
+   not Fever's own raw mph — a track + team-colored fill IS the comparison,
+   the label is a direct read of the same number, no legend/hover needed for
+   one value against a benchmark (dataviz skill's "meter" form). */
+.radarpill__meter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.radarpill__meter-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--border-hairline);
+  overflow: hidden;
+}
+.radarpill__meter-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--radar-team-color, var(--ink-1));
+}
+.radarpill__meter-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.radarpill__note-source {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+@media (prefers-reduced-motion: reduce) {
+  .radarpill__glyph--pressed,
+  .radarpill__note {
+    animation: none;
   }
 }
 
@@ -15850,4 +16092,313 @@ body {
   .scorebookstory__leaderhead, .scorebookstory__leaderrow { grid-template-columns: minmax(118px, 1fr) repeat(4, 38px); }
   .scorebookstory__filters { overflow-x: auto; }
   .scorebookstory__filters button { flex: none; }
+}
+
+/* --------------------------------------------------------- all-star legacy page
+   Two sections: a header grid of the all-time appearance leaders among ACTIVE
+   players (see AllStarLegacyPage.jsx), then one card per current MLB club with
+   every All-Star it's ever produced. Both reuse the milestone-watch page's
+   portrait-card shape (.milestonewatch-page__card) in spirit, but as plain CSS
+   grids rather than measured masonry columns — every leader card is close to
+   the same height (no variable milestone stack to accommodate), and the team
+   cards vary only in list length, which the per-card "Show all" expand already
+   bounds. */
+.allstarlegacy__section {
+  margin-top: var(--space-5);
+}
+.allstarlegacy__sectiontitle {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* Leader grid — the top-10 active All-Star card row. */
+.allstarlegacy__leadergrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+.allstarlegacy__leadercard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--inset-cell);
+}
+.allstarlegacy__leadermug {
+  flex: none;
+}
+.shot.allstarlegacy__leadershot {
+  display: block;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
+}
+.shot.allstarlegacy__leadershot.shot--fallback {
+  font-size: var(--fs-hero-md);
+}
+.allstarlegacy__leaderbody {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.allstarlegacy__leaderwho {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+}
+.allstarlegacy__leaderteam {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
+}
+.allstarlegacy__leadercount {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--accent-primary);
+}
+.allstarlegacy__leaderyears {
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+
+/* Team grid — one card per current MLB club. Wider min column than the
+   leader grid above (320 vs 240) to give the bigger honoree headshots below
+   room to breathe. */
+.allstarlegacy__teamgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+.allstarlegacy__teamcard {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--inset-cell);
+}
+.allstarlegacy__teamhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+/* This card's rank (1 = most current All-Stars) — a small ink-on-paper
+   number chip, same idea as the position pill below but square/neutral
+   rather than accent-colored, since it's orientation, not a jersey tag. */
+.allstarlegacy__teamrank {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+.allstarlegacy__teamname {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+}
+.allstarlegacy__teamtotal {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+/* Same divided-row idiom as .allstarrosters__rows/.thub-roster's hairline
+   separators and tight padding — but WITHOUT their own outer border/
+   background, since this list already lives inside the team card's own
+   bordered box (a nested second border/box read as a "card within a card").
+   Rows just fill that card's content area edge to edge, only separated by a
+   solid hairline. */
+.allstarlegacy__honorees {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.allstarlegacy__honoree {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.allstarlegacy__honorees li:first-child {
+  border-top: none;
+}
+.allstarlegacy__honoreemug {
+  position: relative;
+  flex: none;
+}
+/* Sized down from the leader grid's --shot-md to --shot-sm — tall enough to
+   read a face clearly, short enough that a two-line name+years block doesn't
+   leave a visible band of empty space above/below it inside a taller photo. */
+.shot.allstarlegacy__honoreeshot {
+  display: block;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
+}
+.shot.allstarlegacy__honoreeshot.shot--fallback {
+  font-size: var(--fs-hero-sm);
+}
+/* Primary position as a jersey-tag pill anchored to the photo's bottom-left,
+   same convention as .milestonewatch-page__pos. */
+.allstarlegacy__honoreepos {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--paper-0);
+  background: var(--accent-primary);
+  border-top-right-radius: var(--radius-xs);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.allstarlegacy__honoreebody {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.allstarlegacy__honoreename {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-compact);
+  overflow-wrap: break-word;
+}
+.allstarlegacy__honoreeyears {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+  /* Balances the wrap across lines (a long-tenured All-Star's year list
+     otherwise stranded just "2025, 2026" alone on a near-empty last line) —
+     same convention as .tscoremodal__title. */
+  text-wrap: balance;
+}
+.allstarlegacy__more {
+  align-self: center;
+  display: block;
+  margin: var(--space-3) auto 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+}
+.allstarlegacy__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Floating rank rail — a fixed vertical track along the viewport's right
+   edge (10vh to 90vh, so it never sits flush against the top or bottom),
+   with a small badge that TRAVELS along it: near the top at rank 1, near the
+   bottom at the last rank, sliding as the scroll-spy IntersectionObserver
+   updates "current rank" (see AllStarLegacyPage.jsx). Fixed to the VIEWPORT,
+   not the (possibly narrower, centered) .screen column, same convention as
+   .pagenav's fixed bottom bar. The wrap establishes one positioning context
+   spanning the full viewport height so the track and the badge — sized
+   differently — can both center on the same vertical line with no manual
+   pixel math between them. */
+.allstarlegacy__rankrail-wrap {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 6px;
+  width: 30px;
+  z-index: 15;
+  pointer-events: none;
+}
+.allstarlegacy__rankrail-track {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 10vh;
+  bottom: 10vh;
+  width: 2px;
+  background: var(--border-rule);
+}
+.allstarlegacy__rankrail {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 5px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--inset-cell);
+  transition: top 0.15s ease-out;
+}
+.allstarlegacy__rankrail-num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--accent-primary);
+}
+.allstarlegacy__rankrail-of {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+@media (max-width: 420px) {
+  .allstarlegacy__leadergrid,
+  .allstarlegacy__teamgrid {
+    grid-template-columns: 1fr;
+  }
 }
