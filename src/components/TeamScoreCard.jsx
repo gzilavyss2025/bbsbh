@@ -1,12 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ordinal } from '../api/person.js'
 import { leagueRank } from '../api/teamScore.js'
 import { qualityScoreFromGames, CURRENT_FORM_GAMES } from '../api/teamScoreFormula.js'
 import { seasonGradeFor } from '../api/seasonGradeFormula.js'
 import { teamClubName } from '../lib/teams.js'
 import { beeswarmRows } from '../lib/beeswarm.js'
+import { useNav, useLinkScope } from '../lib/nav.js'
+import { teamPath } from '../lib/route.js'
+import { TeamLogo } from './TeamLogo.jsx'
+import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 
 const DASH = '—'
+const RANKSTRIP_VISIBLE = 5
+const RANKSTRIP_STEP = 38
+const RANKSTRIP_STEP_COMPACT = 28
 const signed = (n) => `${n >= 0 ? '+' : ''}${n}`
 
 // Illustrative anchors for the "How this is calculated" modal — run through
@@ -61,6 +68,15 @@ export function TeamScoreCard({
   const surpriseRank = leagueRank(leagueSurpriseScores, teamId)
   const formRank = leagueRank(leagueFormScores, teamId)
 
+  // Tablet/desktop has the vertical room to spare, but "What built the
+  // grade" and the Current Form record line still fold away until the row
+  // that explains them is opened (same `open` accordion the numeric
+  // breakdown already uses, not a second piece of state) — a phone keeps
+  // everything visible up front, same as before.
+  const isWide = useMediaQuery(WIDE_QUERY)
+  const showDrivers = !isWide || open === 'grade' || open === 'quality' || open === 'surprise'
+  const showFormMeta = !isWide || open === 'form'
+
   return (
     <section className={`team-score${open ? ' is-open' : ''}`} aria-label={`Season Grade through ${snapshot.asOf}`}>
       <div className="team-score__head">
@@ -78,37 +94,41 @@ export function TeamScoreCard({
         onToggle={() => toggle('grade')}
       />
 
-      <div className="team-score__driver-group">
-        <span className="team-score__driver-heading">What built the grade</span>
-        <div className="team-score__drivers" aria-label="Season Grade drivers">
-          <ScoreRow
-            label="Quality"
-            summary={snapshot.season}
-            rank={qualityRank}
-            metaText={meta(snapshot.season)}
-            isOpen={open === 'quality'}
-            onToggle={() => toggle('quality')}
-            driver
-          />
-          <ScoreRow
-            label="Vs. expectation"
-            summary={surprise}
-            rank={surpriseRank}
-            metaText={surprise ? `${signed(surprise.residualWins)} wins vs. expected` : ''}
-            isOpen={open === 'surprise'}
-            onToggle={() => toggle('surprise')}
-            driver
-          />
+      {showDrivers && (
+        <div className="team-score__driver-group">
+          <span className="team-score__driver-heading">What built the grade</span>
+          <div className="team-score__drivers" aria-label="Season Grade drivers">
+            <ScoreRow
+              label="Quality"
+              summary={snapshot.season}
+              rank={qualityRank}
+              metaText={meta(snapshot.season)}
+              isOpen={open === 'quality'}
+              onToggle={() => toggle('quality')}
+              driver
+            />
+            <ScoreRow
+              label="Vs. expectation"
+              summary={surprise}
+              rank={surpriseRank}
+              metaText={surprise ? `${signed(surprise.residualWins)} wins vs. expected` : ''}
+              isOpen={open === 'surprise'}
+              onToggle={() => toggle('surprise')}
+              driver
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <ScoreRow
         label={`Current form · Last ${snapshot.currentForm?.games ?? CURRENT_FORM_GAMES}`}
         summary={snapshot.currentForm}
         rank={formRank}
-        metaText={meta(snapshot.currentForm)}
+        metaText={showFormMeta ? meta(snapshot.currentForm) : ''}
         isOpen={open === 'form'}
         onToggle={() => toggle('form')}
+        league={leagueFormScores}
+        teamId={teamId}
         compact
       />
 
@@ -149,7 +169,10 @@ function GradeHero({ grade, summary, rank, league, teamId, isOpen, onToggle }) {
         </span>
       </button>
       {summary?.score != null && league.length > 0 && (
-        <LeagueTrack league={league} ownScore={summary.score} teamId={teamId} />
+        <div className="team-score__trackrow">
+          <LeagueTrack league={league} ownScore={summary.score} teamId={teamId} />
+          <RankStrip league={league} teamId={teamId} />
+        </div>
       )}
     </div>
   )
@@ -194,7 +217,7 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
   )
 }
 
-function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, driver = false, compact = false }) {
+function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, league, teamId, driver = false, compact = false }) {
   return (
     <div className={`team-score__row${driver ? ' team-score__row--driver' : ''}${compact ? ' team-score__row--compact' : ''}${isOpen ? ' is-active' : ''}`}>
       <button
@@ -216,6 +239,136 @@ function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, driver = f
         </span>
       )}
       {metaText && <span className="team-score__meta">{metaText}</span>}
+      {summary?.score != null && league?.length > 0 && (
+        <div className="team-score__trackrow">
+          <LeagueTrack league={league} ownScore={summary.score} teamId={teamId} compact={compact} />
+          <RankStrip league={league} teamId={teamId} compact={compact} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// clamp(rank - half, 1, of - width + 1) — keeps the own team centered where
+// there's room, and slides (never shrinks) once that centering would run off
+// either end of the league.
+function rankWindowStart(rank, of, width) {
+  return Math.min(Math.max(rank - Math.floor(width / 2), 1), Math.max(of - width + 1, 1))
+}
+
+// Same competition-ranking convention as leagueRank (teamScore.js): a tie
+// shares a rank rather than getting consecutive numbers. Needed so a chip's
+// printed number can never disagree with the "Nth of 30" pill sitting right
+// next to it — a plain array-index label would show e.g. 14 on the self chip
+// while the pill (computed via leagueRank) says 13th for a score tied with
+// the team ahead of it.
+function tieAwareRanks(sorted) {
+  let rank = 1
+  return sorted.map((r, i) => {
+    if (i > 0 && sorted[i - 1].score !== r.score) rank = i + 1
+    return { ...r, rank }
+  })
+}
+
+// The rank pill's neighborhood: five teams around the club's own rank as
+// small logo chips, own team in color, the rest grayscale — the same
+// picked-vs-unpicked treatment .vsteam__team already uses elsewhere. Teams
+// beyond the five-wide window are real and reachable; the rail just clips to
+// five chips and scrolls, with prev/next buttons for a mouse or trackpad
+// (touch already swipes).
+function RankStrip({ league, teamId, compact = false }) {
+  const navigate = useNav()
+  const { asOf, sportId } = useLinkScope()
+  const railRef = useRef(null)
+  const [edge, setEdge] = useState({ l: false, r: false })
+
+  // Worst-to-best, left to right, so #1 lands on the right — reading order
+  // ends at the goal rather than starting there. Rank numbers (tie-aware,
+  // computed on the best-first order below) travel with each team either way.
+  const ranked = tieAwareRanks([...league].sort((a, b) => b.score - a.score)).reverse()
+  const of = ranked.length
+  const ownIndex = ranked.findIndex((r) => r.teamId === teamId)
+  const width = Math.min(RANKSTRIP_VISIBLE, of)
+  const step = compact ? RANKSTRIP_STEP_COMPACT : RANKSTRIP_STEP
+  // Windowing scrolls by list position (ties still occupy distinct chips);
+  // only the printed number below each chip uses the tie-aware rank.
+  const start = ownIndex >= 0 ? rankWindowStart(ownIndex + 1, of, width) : 1
+
+  const updateEdge = () => {
+    const rail = railRef.current
+    if (!rail) return
+    const max = rail.scrollWidth - rail.clientWidth
+    setEdge({ l: rail.scrollLeft > 2, r: rail.scrollLeft < max - 2 })
+  }
+
+  useLayoutEffect(() => {
+    const rail = railRef.current
+    if (!rail) return
+    rail.scrollLeft = (start - 1) * step
+    updateEdge()
+  }, [start, step])
+
+  if (ownIndex < 0 || of < 2) return null
+
+  const nudge = (dir) => {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    railRef.current?.scrollBy({ left: dir * step, behavior: reduceMotion ? 'auto' : 'smooth' })
+  }
+
+  return (
+    <div className={`rankstrip${compact ? ' rankstrip--compact' : ''}`}>
+      <button
+        type="button"
+        className="rankstrip__nav rankstrip__nav--l"
+        aria-label="Show worse-ranked teams"
+        disabled={!edge.l}
+        onClick={() => nudge(-1)}
+      />
+      <div className="rankstrip__track" style={{ width: step * width }}>
+        <div
+          className="rankstrip__rail"
+          ref={railRef}
+          onScroll={updateEdge}
+          role="list"
+          aria-label={`League rank, ${ordinal(ranked[ownIndex]?.rank ?? ownIndex + 1)} of ${of}`}
+        >
+          {ranked.map((r) => {
+            const isSelf = r.teamId === teamId
+            const name = teamClubName(r.teamId) ?? 'Team'
+            const logo = <TeamLogo teamId={r.teamId} name={name} size={compact ? 20 : 26} />
+            if (isSelf) {
+              return (
+                <span key={r.teamId} className="rankstrip__chip rankstrip__chip--self" aria-hidden="true">
+                  <span className="rankstrip__arrow" />
+                  {logo}
+                  <span className="rankstrip__n">{r.rank}</span>
+                </span>
+              )
+            }
+            return (
+              <button
+                key={r.teamId}
+                type="button"
+                className="rankstrip__chip"
+                onClick={() => navigate(teamPath(r.teamId, { d: asOf, s: sportId }))}
+                aria-label={`${name}, ${ordinal(r.rank)} of ${of}`}
+              >
+                {logo}
+                <span className="rankstrip__n">{r.rank}</span>
+              </button>
+            )
+          })}
+        </div>
+        <span className={`rankstrip__fade rankstrip__fade--l${edge.l ? ' is-visible' : ''}`} aria-hidden="true" />
+        <span className={`rankstrip__fade rankstrip__fade--r${edge.r ? ' is-visible' : ''}`} aria-hidden="true" />
+      </div>
+      <button
+        type="button"
+        className="rankstrip__nav rankstrip__nav--r"
+        aria-label="Show better-ranked teams"
+        disabled={!edge.r}
+        onClick={() => nudge(1)}
+      />
     </div>
   )
 }
@@ -224,10 +377,11 @@ function ScoreRow({ label, summary, rank, metaText, isOpen, onToggle, driver = f
 // its own score, ours as the larger navy marker. Hovering (mouse) or tapping
 // (touch) a dot names the team — the rank badge above already names ours, so
 // only the other 29 need the on-demand label.
-function LeagueTrack({ league, ownScore, teamId }) {
+function LeagueTrack({ league, ownScore, teamId, compact = false }) {
   const [activeId, setActiveId] = useState(null)
   const active = activeId != null ? league.find((r) => r.teamId === activeId) : null
   const dots = beeswarmRows(league.filter((r) => r.teamId !== teamId))
+  const dotTop = compact ? 11 : 17
 
   const show = (id) => setActiveId(id)
   const hide = () => setActiveId(null)
@@ -237,7 +391,7 @@ function LeagueTrack({ league, ownScore, teamId }) {
   }
 
   return (
-    <div className="team-score__track">
+    <div className={`team-score__track${compact ? ' team-score__track--compact' : ''}`}>
       <div className="team-score__track-base" />
       <div className="team-score__track-mid" />
       {active && (
@@ -250,7 +404,7 @@ function LeagueTrack({ league, ownScore, teamId }) {
           key={r.teamId}
           type="button"
           className="team-score__dot"
-          style={{ left: `${(r.score / 10) * 100}%`, top: `calc(17px + ${r.rowOffset}px)` }}
+          style={{ left: `${(r.score / 10) * 100}%`, top: `calc(${dotTop}px + ${r.rowOffset}px)` }}
           aria-label={`${teamClubName(r.teamId) ?? 'Team'} ${r.score.toFixed(1)}`}
           onMouseEnter={() => show(r.teamId)}
           onMouseLeave={hide}
@@ -265,7 +419,7 @@ function LeagueTrack({ league, ownScore, teamId }) {
       <button
         type="button"
         className="team-score__dot team-score__dot--us"
-        style={{ left: `${(ownScore / 10) * 100}%` }}
+        style={{ left: `${(ownScore / 10) * 100}%`, top: `${dotTop}px` }}
         aria-label={`Your team ${ownScore.toFixed(1)}`}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}

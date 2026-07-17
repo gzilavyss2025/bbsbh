@@ -10189,6 +10189,10 @@ body {
 .team-score__row--driver .team-score__rowright {
   flex-direction: row-reverse;
   justify-content: space-between;
+  /* Same baseline-vs-size mismatch as .team-score__row--compact above — a
+     much bigger score number next to a small pill hangs the pill low
+     against it unless the pair is center- rather than baseline-aligned. */
+  align-items: center;
 }
 .team-score__row--driver .team-score__score {
   font-size: var(--fs-hero-sm);
@@ -10234,6 +10238,14 @@ body {
 }
 .team-score__row--compact .team-score__score {
   font-size: var(--fs-title-sm);
+}
+/* The pill's own text is far smaller than the score number it sits next to
+   — baseline alignment (the .team-score__rowright default) hangs a small
+   pill low against a much taller number instead of centering it, which
+   reads as misaligned rather than paired. Center alignment fixes it for
+   this specific size mismatch. */
+.team-score__row--compact .team-score__rowright {
+  align-items: center;
 }
 .team-score__rowtop {
   display: flex;
@@ -10369,6 +10381,234 @@ body {
   pointer-events: none;
   z-index: 1;
 }
+/* Rank-context strip — five teams around the pill's own rank, as small logo
+   chips. Grayscale-vs-color follows .vsteam__team's picked-vs-unpicked
+   convention rather than inventing a new one; only the layout/scroll/nav
+   plumbing is new here. */
+.rankstrip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+/* The distribution track (LeagueTrack, .team-score__track) and the rank
+   strip both answer "where does this team stand," so they share one row
+   instead of stacking as two — the track gives the shape of the whole
+   league, the strip names the neighbors. The track takes whatever width is
+   left; the strip stays its own five-chip size regardless of how wide the
+   card is, so it's never a stray full-width row with empty space trailing
+   off the end of it. */
+.team-score__trackrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.team-score__trackrow .team-score__track {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+.team-score__track--compact {
+  height: 26px;
+}
+.team-score__track--compact .team-score__track-base {
+  top: 13px;
+}
+.team-score__track--compact .team-score__track-mid {
+  top: 6px;
+  height: 14px;
+}
+.team-score__track--compact .team-score__dot {
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+}
+.team-score__track--compact .team-score__dot--us {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+}
+.rankstrip__track {
+  position: relative;
+}
+.rankstrip__rail {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 13px 0 0;
+  /* Width is set inline per RankStrip render to exactly five chip-widths —
+     what's visible before any scrolling is literally five teams, not
+     however many happen to fit the card. */
+}
+.rankstrip__rail::-webkit-scrollbar {
+  display: none;
+}
+.rankstrip__chip {
+  position: relative;
+  flex: 0 0 38px;
+  scroll-snap-align: start;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.rankstrip--compact .rankstrip__chip {
+  flex-basis: 28px;
+}
+.rankstrip__chip .teamlogo,
+.rankstrip__chip .teamlogo--fallback {
+  filter: grayscale(1);
+  opacity: 0.4;
+  transition: filter var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.rankstrip__chip--self .teamlogo,
+.rankstrip__chip--self .teamlogo--fallback {
+  filter: none;
+  opacity: 1;
+}
+@media (hover: hover) {
+  .rankstrip__chip:not(.rankstrip__chip--self):hover .teamlogo,
+  .rankstrip__chip:not(.rankstrip__chip--self):hover .teamlogo--fallback {
+    opacity: 0.7;
+  }
+}
+.rankstrip__chip:focus-visible {
+  outline: none;
+}
+.rankstrip__chip:focus-visible .teamlogo,
+.rankstrip__chip:focus-visible .teamlogo--fallback {
+  box-shadow: var(--ring);
+}
+.rankstrip__chip--self {
+  padding: 2px;
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--seal) 14%, transparent);
+  cursor: default;
+}
+.rankstrip__arrow {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--seal-hatch);
+}
+.rankstrip__n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite-soft);
+}
+.rankstrip__chip--self .rankstrip__n {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.rankstrip__fade {
+  position: absolute;
+  top: 13px;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+.rankstrip__fade--l {
+  left: 0;
+  background: linear-gradient(to right, var(--surface-inset), transparent);
+}
+.rankstrip__fade--r {
+  right: 0;
+  background: linear-gradient(to left, var(--surface-inset), transparent);
+}
+.rankstrip--compact .rankstrip__fade--l {
+  background: linear-gradient(to right, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+}
+.rankstrip--compact .rankstrip__fade--r {
+  background: linear-gradient(to left, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+}
+.rankstrip__fade.is-visible {
+  opacity: 1;
+}
+/* Prev/next — swipe covers touch, but a mouse or trackpad has no swipe
+   gesture over a card, so a hover-capable, fine pointer gets real buttons.
+   Gated on input capability (not a touch-event sniff, which is unreliable
+   on hybrid laptops), so a touchscreen never sees controls it doesn't need. */
+.rankstrip__nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: var(--bw-hair) solid var(--rule-soft);
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--graphite);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.rankstrip--compact .rankstrip__nav {
+  width: 18px;
+  height: 18px;
+}
+.rankstrip__nav::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-top: var(--bw-heavy) solid currentColor;
+  border-right: var(--bw-heavy) solid currentColor;
+}
+.rankstrip--compact .rankstrip__nav::before {
+  width: 5px;
+  height: 5px;
+}
+.rankstrip__nav--l::before {
+  transform: rotate(-135deg);
+  margin-left: 2px;
+}
+.rankstrip__nav--r::before {
+  transform: rotate(45deg);
+  margin-right: 2px;
+}
+.rankstrip__nav:hover:not(:disabled) {
+  background: var(--surface-inset);
+  color: var(--text-heading);
+}
+.rankstrip__nav:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.rankstrip__nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rankstrip__nav {
+    display: inline-flex;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rankstrip__chip .teamlogo,
+  .rankstrip__chip .teamlogo--fallback,
+  .rankstrip__fade,
+  .rankstrip__nav {
+    transition: none;
+  }
+}
+
 .team-score__howlink {
   justify-self: start;
   margin: -3px 12px 11px;
