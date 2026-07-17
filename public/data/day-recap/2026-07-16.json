@@ -1,0 +1,375 @@
+{
+  "version": 1,
+  "date": "2026-07-16",
+  "generatedAt": "2026-07-17T12:18:48.455Z",
+  "bySportId": {
+    "1": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 682626,
+            "name": "Francisco Alvarez",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "C",
+            "stat": "2-3, 2 HR, 2 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 683146,
+            "name": "Brett Baty",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "2B",
+            "stat": "2-4, HR, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 665742,
+            "name": "Juan Soto",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "LF",
+            "stat": "1-1",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 547180,
+            "name": "Bryce Harper",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "1B",
+            "stat": "1-3, 2B",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 701807,
+            "name": "Carson Benge",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "RF",
+            "stat": "1-4, 1 SB",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 681035,
+            "name": "Christian Scott",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "5.2 IP, 3 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 605400,
+            "name": "Aaron Nola",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "P",
+            "stat": "6.0 IP, 6 H, 3 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 623211,
+            "name": "Huascar Brazobán",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "1.0 IP, 0 H, 0 ER, 0 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 642207,
+            "name": "Devin Williams",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "1.0 IP, 0 H, 0 ER, 1 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 548384,
+            "name": "Brooks Raley",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "0.1 IP, 0 H, 0 ER, 1 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 681035,
+            "name": "Christian Scott",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "5.2 IP, 3 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "score": 57.80000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 682626,
+            "name": "Francisco Alvarez",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "C",
+            "stat": "2-3, 2 HR, 2 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "score": 53.7,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 683146,
+            "name": "Brett Baty",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "parentOrgId": 121,
+            "position": "2B",
+            "stat": "2-4, HR, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "score": 27.4,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "losers": [
+          {
+            "id": 547180,
+            "name": "Bryce Harper",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "1B",
+            "stat": "1-3, 2B",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "score": 9.699999999999994,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 605400,
+            "name": "Aaron Nola",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "P",
+            "stat": "6.0 IP, 6 H, 3 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "score": 4.6000000000000085,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 607208,
+            "name": "Trea Turner",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "SS",
+            "stat": "1-4, HR, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07162026/nymphi/boxscore",
+              "awayAbbr": "NYM",
+              "homeAbbr": "PHI",
+              "awayScore": 4,
+              "homeScore": 1
+            },
+            "score": 3.099999999999995,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 823440,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Francisco Alvarez: 2 HR — NYM 4, PHI 1",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 682626,
+            "name": "Francisco Alvarez",
+            "teamId": 121,
+            "teamAbbr": "NYM",
+            "position": "C",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 121,
+              "abbr": "NYM"
+            },
+            "loser": {
+              "id": 143,
+              "abbr": "PHI"
+            }
+          },
+          "boxScorePath": "/07162026/nymphi/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": {
+          "id": 682626,
+          "name": "Francisco Alvarez",
+          "teamId": 121,
+          "teamAbbr": "NYM",
+          "parentOrgId": 121,
+          "position": "C",
+          "stat": "416 ft"
+        },
+        "hardestBaseHit": {
+          "id": 683146,
+          "name": "Brett Baty",
+          "teamId": 121,
+          "teamAbbr": "NYM",
+          "parentOrgId": 121,
+          "position": "2B",
+          "stat": "108.6 mph"
+        },
+        "fastestStrikeout": {
+          "id": 686751,
+          "name": "Seth Johnson",
+          "teamId": 143,
+          "teamAbbr": "PHI",
+          "parentOrgId": 143,
+          "position": "P",
+          "stat": "98.8 mph"
+        }
+      }
+    }
+  }
+}
