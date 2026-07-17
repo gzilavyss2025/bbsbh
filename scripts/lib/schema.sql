@@ -46,6 +46,70 @@ CREATE TABLE IF NOT EXISTS player_snapshots (
   PRIMARY KEY (date, player_id, board, source)
 );
 
+-- Career-since-2000 postseason batting/pitching totals, powering the
+-- Postseason Leaders page's leaderboards. This is the genuine cross-game
+-- aggregation case docs/adr/0021 calls out as the reason to add a new group
+-- here: gen-postseason-history.mjs only stores series/game RESULTS, never
+-- individual stat lines, so a leaderboard needs its own sweep
+-- (gen-postseason-leaders.mjs) over every postseason game's boxscore.
+--
+-- Stores CAREER TOTALS directly (accumulated via an incrementing upsert as
+-- each game is ingested), not one row per game — a per-game grain would be
+-- ~30x more rows for value this page never needs (no single-postseason
+-- slicing today), and a full re-sweep of every game since 2000 takes well
+-- under a minute, so there's no real cost to re-deriving it fresh rather
+-- than keeping a bulky per-game ledger in git (this project already prunes/
+-- chunks other data for the same reason — see gen-callouts.mjs's retention
+-- window and gen-team-transactions.mjs's season-chunking).
+-- postseason_ingested_games is the (tiny) idempotency guard: which gamePks
+-- have already been folded into the totals below, so a resumed or re-run
+-- sweep never double-counts a game.
+CREATE TABLE IF NOT EXISTS postseason_ingested_games (
+  game_pk INTEGER PRIMARY KEY
+);
+
+-- `latest_team_id`/`latest_season` track whichever club a player most
+-- recently played postseason ball for (for the leaderboard's team logo) —
+-- updated only when an ingested game's season is >= the stored one, so
+-- games folded in out of order (concurrent fetches) still converge on the
+-- true most-recent team regardless of ingestion order.
+CREATE TABLE IF NOT EXISTS postseason_batting_totals (
+  player_id       INTEGER PRIMARY KEY,
+  player_name     TEXT NOT NULL,
+  latest_team_id  INTEGER NOT NULL,
+  latest_season   INTEGER NOT NULL,
+  at_bats         INTEGER NOT NULL DEFAULT 0,
+  runs            INTEGER NOT NULL DEFAULT 0,
+  hits            INTEGER NOT NULL DEFAULT 0,
+  doubles         INTEGER NOT NULL DEFAULT 0,
+  triples         INTEGER NOT NULL DEFAULT 0,
+  home_runs       INTEGER NOT NULL DEFAULT 0,
+  rbi             INTEGER NOT NULL DEFAULT 0,
+  stolen_bases    INTEGER NOT NULL DEFAULT 0,
+  caught_stealing INTEGER NOT NULL DEFAULT 0,
+  walks           INTEGER NOT NULL DEFAULT 0,
+  strikeouts      INTEGER NOT NULL DEFAULT 0
+);
+
+-- `outs` (outs recorded) rather than a fractional-innings string — summing
+-- "6.1 IP" + "1.2 IP" as text would need its own thirds-of-an-inning math;
+-- outs sum with plain addition and convert to innings (outs / 3) once, at
+-- export time.
+CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
+  player_id      INTEGER PRIMARY KEY,
+  player_name    TEXT NOT NULL,
+  latest_team_id INTEGER NOT NULL,
+  latest_season  INTEGER NOT NULL,
+  outs           INTEGER NOT NULL DEFAULT 0,
+  wins           INTEGER NOT NULL DEFAULT 0,
+  losses         INTEGER NOT NULL DEFAULT 0,
+  saves          INTEGER NOT NULL DEFAULT 0,
+  hits           INTEGER NOT NULL DEFAULT 0,
+  earned_runs    INTEGER NOT NULL DEFAULT 0,
+  walks          INTEGER NOT NULL DEFAULT 0,
+  strikeouts     INTEGER NOT NULL DEFAULT 0
+);
+
 -- Available for future generation-time features that want a Quality+Surprise
 -- pair without hand-rolling the lookup. Deliberately NOT wired in to replace
 -- src/api/teamScore.js's leagueSeasonGradesFor: that function computes the

@@ -12,6 +12,7 @@
 //   '/milestones'                       -> { name: 'milestones' }
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
+//   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
@@ -61,6 +62,8 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'awards') return { name: 'awards-history' }
   if (parts.length === 1 && parts[0] === 'postseason-history')
     return { name: 'postseason-history' }
+  if (parts.length === 1 && parts[0] === 'postseason-leaders')
+    return { name: 'postseason-leaders' }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')

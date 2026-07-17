@@ -13048,6 +13048,8 @@ body {
 .pshistory__championtrophy {
   flex: none;
   display: block;
+  height: 22px;
+  width: auto;
 }
 
 /* Reveals the pre-DEFAULT_CUTOFF_YEAR seasons — same shape as .bs__noteMore
@@ -13101,6 +13103,15 @@ body {
   padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
+/* Seasons with no Wild Card round (2000-2011) drop both Wild Card columns
+   (see PostseasonHistoryPage.jsx's hasWildCard) — collapse to 5 tracks so
+   the World Series stays centered instead of leaving two empty columns on
+   the right. */
+.psbracket--no-wc {
+  grid-template-columns:
+    minmax(150px, 1fr) minmax(160px, 1.05fr) minmax(150px, 1.15fr)
+    minmax(160px, 1.05fr) minmax(150px, 1fr);
+}
 .psbracket__col {
   display: flex;
   flex-direction: column;
@@ -13116,6 +13127,9 @@ body {
 @media (min-width: 740px) and (max-width: 1279px) {
   .psbracket {
     grid-template-columns: repeat(7, minmax(84px, 1fr));
+  }
+  .psbracket--no-wc {
+    grid-template-columns: repeat(5, minmax(84px, 1fr));
   }
   .psbracket__col {
     min-width: 84px;
@@ -13164,6 +13178,8 @@ body {
 .psbracket__roundtrophy {
   flex: none;
   display: block;
+  height: 20px;
+  width: auto;
 }
 .psbracket__lanes {
   flex: 1;
@@ -13307,14 +13323,19 @@ body {
    behind a hairline divider. */
 .pswscard__mvp {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-top: 4px;
   padding-top: 8px;
   border-top: var(--bw-hair) dashed var(--border-rule);
+  text-align: center;
 }
 .pswscard__mug {
   position: relative;
+  flex: none;
+}
+.pswscard__mvplogo {
   flex: none;
 }
 /* 25% past the standard --shot-2xs rung — this card's the one place a WS
@@ -13347,7 +13368,9 @@ body {
 .pswscard__mvpinfo {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
+  width: 100%;
   min-width: 0;
 }
 .pswscard__mvptag {
@@ -13362,7 +13385,14 @@ body {
   font-weight: var(--w-bold);
   font-size: var(--fs-small);
   color: var(--text-heading);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+/* Position, read as plain text after the name when Headshot has no real
+   photo to anchor the usual corner pill to (see SeriesMvp). */
+.pswscard__mvppos {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
 }
 
 /* Condensed phone layout: the same AL→WS→NL reading order flowed vertically
@@ -13653,6 +13683,113 @@ body {
   font-weight: var(--w-bold);
   font-size: var(--fs-ui);
   color: var(--seal-ink);
+}
+
+/* ------------------------------------------------------------ postseason leaders
+   Franchise (titles/pennants/appearances) and repeat-MVP boards — a plain
+   rank list (team-keyed, not the player-keyed pool TeamLeaders/.tlead is
+   built around), styled as the same card idiom as .tlead__cat so this
+   section reads as one family with the batting/pitching TeamLeaders section
+   below it on the same page. */
+.psleaders__subtitle {
+  margin: 2px 0 var(--space-2);
+}
+.psleaders__teamsrow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: var(--space-3);
+}
+@media (min-width: 560px) {
+  .psleaders__teamsrow {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.psleaders__teamboard {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+.psleaders__teamlist,
+.psleaders__mvplist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.psleaders__teamrow,
+.psleaders__mvprow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.psleaders__rank {
+  flex: none;
+  width: 1.4em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  text-align: right;
+}
+.psleaders__teamlink {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.psleaders__teamname {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.psleaders__count {
+  flex: none;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.shot.psleaders__mvpshot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.psleaders__mvpshot.shot--fallback {
+  font-size: var(--fs-title-sm);
+}
+.psleaders__mvpwho {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.psleaders__mvpname {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.psleaders__mvppos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
 }
 
 /* ------------------------------------------------------------ all-star rosters
