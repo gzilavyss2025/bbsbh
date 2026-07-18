@@ -5,6 +5,7 @@
 //
 // Route shapes:
 //   '/'                                 -> { name: 'home' }
+//   '/{MMDDYYYY}'                       -> { name: 'home', date: YYYY-MM-DD }
 //   '/logos'                            -> { name: 'logos' }
 //   '/about'                            -> { name: 'about' }
 //   '/prospects'                        -> { name: 'prospects' }
@@ -55,6 +56,15 @@ export function parseRoute(url) {
   const asOf = q.get('d') || null
   const sportId = q.get('s') ? Number(q.get('s')) : null
   if (parts.length === 0) return { name: 'home' }
+  // A bare 8-digit date is the slate paged to that day ('/07172026') — the
+  // home screen, shareable. Every named single-segment route below is
+  // non-numeric, so the digit test can safely come first. An impossible
+  // calendar date (e.g. '13452026') falls through to today's slate rather
+  // than erroring on a hand-mangled link.
+  if (parts.length === 1 && /^\d{8}$/.test(parts[0])) {
+    const date = urlDateToApi(parts[0])
+    return isRealDate(date) ? { name: 'home', date } : { name: 'home' }
+  }
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
   if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
@@ -149,6 +159,22 @@ export function urlDateToApi(d) {
 export function apiDateToUrl(api) {
   const [y, m, d] = (api || '').split('-')
   return `${m}${d}${y}`
+}
+
+// Whether a YYYY-MM-DD string names a real calendar date — a Date round-trip
+// catches out-of-range months/days (e.g. '2026-13-45', '2026-02-30') that a
+// pure digit-count regex lets through.
+function isRealDate(api) {
+  const [y, m, d] = (api || '').split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
+}
+
+// The slate paged to a specific day. Today's slate is canonically the bare
+// '/' — GameSelect only builds this for a non-today date — so the home URL
+// never grows a redundant date suffix.
+export function slatePath(apiDate) {
+  return `/${apiDateToUrl(apiDate)}`
 }
 
 // Doubleheaders: both games share a date and matchup, so game 2 (and beyond)

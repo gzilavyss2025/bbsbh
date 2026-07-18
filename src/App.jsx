@@ -204,7 +204,17 @@ export default function App() {
       />
     )
   } else {
-    content = <GameSelect onPick={openGame} onShowLogos={() => go('/logos')} />
+    // `route.date` is only set by the '/{MMDDYYYY}' home shape (null = today);
+    // GameSelect pages between days by navigating those URLs itself (useNav),
+    // so a browsed-to day is a real, shareable address and Back/Forward walk
+    // the days you visited.
+    content = (
+      <GameSelect
+        date={route.date ?? null}
+        onPick={openGame}
+        onShowLogos={() => go('/logos')}
+      />
+    )
   }
 
   // NavProvider hands every deep PlayerLink/TeamLink the History-API `go` so a

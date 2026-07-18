@@ -1,4 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { useNav } from '../lib/nav.js'
+import { slatePath } from '../lib/route.js'
 import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -38,7 +40,9 @@ const ContinueScoring = isClerkEnabled
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
-// offset deliberately does NOT persist — "today" is the right place to start.
+// deliberately does NOT persist anywhere — it lives in the URL ('/{MMDDYYYY}',
+// bare '/' = today), so a paged-to day is shareable and "today" is always the
+// right place a fresh visit starts.
 const LEVEL_KEY = 'bbsbh:level'
 function readLevel() {
   try {
@@ -53,9 +57,9 @@ function readLevel() {
 // soonest → latest (the favorite team pinned to the top), with a LIVE pill on
 // any game in progress. Level is toggled with the thin buttons up top; no
 // more search box.
-export function GameSelect({ onPick, onShowLogos }) {
+export function GameSelect({ date = null, onPick, onShowLogos }) {
   useDocumentTitle(null)
-  const [offset, setOffset] = useState(0) // days from today
+  const navigate = useNav()
   const [sportId, setSportId] = useState(readLevel)
   const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
   const { gameScoreVisible, setGameScoreVisible } = useGameScoreVisible()
@@ -69,10 +73,20 @@ export function GameSelect({ onPick, onShowLogos }) {
     }
   }
 
-  const dateStr = useMemo(
-    () => toApiDate(addDays(new Date(), offset)),
-    [offset],
-  )
+  // The displayed date comes from the URL (see App.jsx): bare '/' means today.
+  // Paging navigates to the neighboring day's URL rather than bumping local
+  // state, so every browsed-to day is a shareable address and the browser's
+  // own Back/Forward retrace the days visited. Comparisons below lean on
+  // YYYY-MM-DD ordering lexically — no offset math needed.
+  const todayStr = toApiDate(new Date())
+  const dateStr = date ?? todayStr
+  const isToday = dateStr === todayStr
+  const goToDate = (apiDate) =>
+    navigate(apiDate === todayStr ? '/' : slatePath(apiDate))
+  const pageDay = (n) => {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    goToDate(toApiDate(addDays(new Date(y, m - 1, d), n)))
+  }
 
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
@@ -183,10 +197,10 @@ export function GameSelect({ onPick, onShowLogos }) {
     [sorted],
   )
 
-  // A day you've paged BACK to (offset < 0) gets the past-day treatment: each
-  // Final game's card flips over to a result summary, and the Day Recap panel
+  // A day you've paged BACK to (any date before today) gets the past-day
+  // treatment: each Final game's card flips over to a result summary, and the Day Recap panel
   // (Top Performers + Day Highlights) replaces the plain Top Performers box.
-  // Today (offset 0) gets the SAME treatment once every one of its games has
+  // Today gets the SAME treatment once every one of its games has
   // gone Final — at that point there's no more live refreshing to do, so it's
   // effectively already a "day you're looking back on". Before that (any game
   // still in Preview/Live), today keeps the ordinary live-refresh slate.
@@ -199,8 +213,8 @@ export function GameSelect({ onPick, onShowLogos }) {
   // exactly the "day is done" signal, without separately excluding
   // postponed games (a slate that's 4 Finals + 1 postponement still counts).
   const todayAllFinal =
-    offset === 0 && sorted.length > 0 && sorted.every((g) => g.abstractState === 'Final')
-  const showPastDayTreatment = offset < 0 || todayAllFinal
+    isToday && sorted.length > 0 && sorted.every((g) => g.abstractState === 'Final')
+  const showPastDayTreatment = dateStr < todayStr || todayAllFinal
   const finals = useMemo(
     () =>
       showPastDayTreatment
@@ -217,7 +231,8 @@ export function GameSelect({ onPick, onShowLogos }) {
   // exclusive with the past-day Day Recap rail (finals.length > 0): a day
   // either hasn't gone final yet (this) or already has (that), never both.
   // Both share the same `.slate-body` rail slot below.
-  const showTopPerformers = finals.length === 0 && offset <= 0 && eligibleGames.length > 0
+  const showTopPerformers =
+    finals.length === 0 && dateStr <= todayStr && eligibleGames.length > 0
 
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
@@ -277,24 +292,24 @@ export function GameSelect({ onPick, onShowLogos }) {
         </header>
 
         <div className="datenav datenav--row">
-          <button onClick={() => setOffset((o) => o - 1)} aria-label="Previous day">
+          <button onClick={() => pageDay(-1)} aria-label="Previous day">
             ‹
           </button>
           <span className="datenav__label">
             {humanDate(dateStr)}
             {/* One tap back to today once you've paged away — no arrow-mashing
                 home from a date you browsed to. */}
-            {offset !== 0 && (
+            {!isToday && (
               <button
                 type="button"
                 className="datenav__today"
-                onClick={() => setOffset(0)}
+                onClick={() => goToDate(todayStr)}
               >
                 Today
               </button>
             )}
           </span>
-          <button onClick={() => setOffset((o) => o + 1)} aria-label="Next day">
+          <button onClick={() => pageDay(1)} aria-label="Next day">
             ›
           </button>
         </div>

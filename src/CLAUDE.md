@@ -15,7 +15,9 @@ printable grayscale logo sheet for pencil-sketching, reached from the slate head
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 
 A tiny dependency-free layer over the History API (deliberately *not* react-router).
-Anchored on `/` (slate) and `/{MMDDYYYY}/{matchup}/{section}` (a deep-linkable
+Anchored on `/` (today's slate; `/{MMDDYYYY}` alone is the slate paged to that
+day — shareable, and `GameSelect`'s date arrows navigate these URLs rather than
+holding local state) and `/{MMDDYYYY}/{matchup}/{section}` (a deep-linkable
 game section), plus many standalone pages (`/logos`, `/leaders`, `/standings`,
 player/team/umpire/manager, postseason, …) — `route.js`'s `parseRoute` header is
 the authoritative, order-sensitive list of every route name. For a game section `matchup`

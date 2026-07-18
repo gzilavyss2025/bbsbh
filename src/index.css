@@ -8410,6 +8410,32 @@ body {
 .flipcard__face--back {
   transform: rotateY(180deg);
 }
+/* Once the flip lands, take the front face out entirely. backface-visibility
+   alone is not enough on iOS Safari: a descendant that gets promoted to its
+   own compositing layer — the team logo's `transform: scale(1.32)`
+   (.gamecard__logobox .teamlogo), the absolutely-positioned corner pills —
+   can keep painting through the rotated face, mirrored, and the per-child
+   backface-visibility patches sprinkled on .gamecard__* haven't reliably
+   held for the transformed logo. `visibility: hidden` is engine-independent:
+   nothing under the front face can paint (or take taps/focus — the front
+   card's buttons stop intercepting input meant for the result face). Delayed
+   to 225ms = the flip's 90° midpoint, when the front is edge-on and so
+   legitimately invisible anyway; the first half of the turn still shows it
+   rotating away. Reveal is one-directional (see FlipCard.jsx), so the
+   un-delayed reverse never runs in practice. */
+.flipcard--flipped .flipcard__face--front {
+  visibility: hidden;
+  transition: visibility 0s 225ms;
+}
+/* Reduced motion collapses the flip itself to an instant swap (the blanket
+   `transition-duration: 0.01ms !important` rule above) but leaves delays
+   alone — zero this one too so the front doesn't linger mirrored for 225ms
+   after an instant flip. */
+@media (prefers-reduced-motion: reduce) {
+  .flipcard--flipped .flipcard__face--front {
+    transition-delay: 0s;
+  }
+}
 
 /* The back face's content — final line, decisions, play of the game (see
    src/components/GameResultFace.jsx). Same card chrome as .gamecard so the
