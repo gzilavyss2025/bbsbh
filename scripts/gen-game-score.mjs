@@ -39,8 +39,8 @@
 // rebuilt) so every entry gets rebuilt in the current schema, then run with
 // `--days` covering from the earliest sportId's regularSeasonStartDate (see
 // /api/v1/seasons?sportId={id}&season={year}) through today.
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { selectRegulationInnings } from '../src/api/select.js'
 import { openDb, dumpGroup } from './lib/db.js'
@@ -383,8 +383,7 @@ async function main() {
 
   const writeOut = async () => {
     await dumpGroup(db, 'game-scores')
-    await mkdir(dirname(out), { recursive: true })
-    await writeFile(out, JSON.stringify(exportJson(db)))
+    await writeJsonAtomic(out, exportJson(db))
   }
 
   const today = new Date()

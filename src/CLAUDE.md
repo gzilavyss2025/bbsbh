@@ -15,8 +15,10 @@ printable grayscale logo sheet for pencil-sketching, reached from the slate head
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 
 A tiny dependency-free layer over the History API (deliberately *not* react-router).
-Three route shapes: `/` (slate), `/logos` (logo sheet), and
-`/{MMDDYYYY}/{matchup}/{section}` for a deep-linkable game section, where `matchup`
+Anchored on `/` (slate) and `/{MMDDYYYY}/{matchup}/{section}` (a deep-linkable
+game section), plus many standalone pages (`/logos`, `/leaders`, `/standings`,
+player/team/umpire/manager, postseason, …) — `route.js`'s `parseRoute` header is
+the authoritative, order-sensitive list of every route name. For a game section `matchup`
 is the away+home team abbreviations lowercased (`milaz`; game 2 of a doubleheader
 appends `-2`, game 1 stays bare so old links keep working) and `section` is
 `lineup1` / `lineup2` / `top{n}` / `bottom{n}` (the innings viewer shows one

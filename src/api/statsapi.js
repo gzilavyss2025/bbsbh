@@ -31,7 +31,14 @@ export async function getJson(
         headers: { Accept: 'application/json' },
         signal: controller.signal,
       })
-      if (res.ok) return res.json()
+      // Await the body read INSIDE the try so the timeout/abort covers it too:
+      // returning res.json() bare fires the `finally` clearTimeout before the
+      // body streams, leaving a 200-then-stall able to hang forever, and a
+      // success-path parse error would escape the retry/wrap handling below.
+      if (res.ok) {
+        const json = await res.json()
+        return json
+      }
 
       if (attempt < retries && RETRYABLE_STATUS.has(res.status)) {
         await delay(250 * 2 ** attempt)

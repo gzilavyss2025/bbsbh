@@ -10,8 +10,9 @@
 // four full-season MiLB levels on the same date. Run with --date=YYYY-MM-DD;
 // without it, generate yesterday's completed slate. A failed individual game
 // is skipped so one bad Stats API response does not erase the rest of a day.
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { computeTopPerformers, computeTopPerformersByResult } from '../src/api/topPerformers.js'
 import { rankDayHighlights } from '../src/api/dayHighlights.js'
@@ -115,13 +116,19 @@ async function buildSport(dateStr, sportId) {
 }
 
 const dateStr = parseDate(process.argv.slice(2))
+const outPath = join(outDir, `${dateStr}.json`)
 const results = await Promise.all(
   SPORT_IDS.map(async (sportId) => [sportId, await buildSport(dateStr, sportId)]),
 )
-const bySportId = Object.fromEntries(results.filter(([, value]) => value))
-await mkdir(outDir, { recursive: true })
-await writeFile(
-  join(outDir, `${dateStr}.json`),
-  JSON.stringify({ version: 1, date: dateStr, generatedAt: new Date().toISOString(), bySportId }, null, 2) + '\n',
+const built = Object.fromEntries(results.filter(([, value]) => value))
+// Merge over any prior recap for this date: a level whose game feeds all failed
+// this run (buildSport → null) keeps its previously-good data rather than being
+// dropped, so re-running a date during a Stats API hiccup can't thin or blank a
+// recap that was already complete. Freshly-built levels always win.
+const prior = await readJsonOr(outPath, { bySportId: {} })
+const bySportId = { ...(prior.bySportId ?? {}), ...built }
+await writeJsonAtomic(outPath, { version: 1, date: dateStr, generatedAt: new Date().toISOString(), bySportId }, 2)
+console.log(
+  `Wrote day recap for ${dateStr}: ${Object.keys(bySportId).length} levels ` +
+    `(${Object.keys(built).length} rebuilt this run)`,
 )
-console.log(`Wrote day recap for ${dateStr}: ${Object.keys(bySportId).length} levels`)

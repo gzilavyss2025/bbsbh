@@ -226,7 +226,7 @@ export async function fetchGamesByPk(gamePks) {
   if (!list.length) return {}
   try {
     const data = await getJson(
-      `/api/v1/schedule?gamePks=${list.join(',')}&hydrate=team`,
+      `/api/v1/schedule?gamePks=${list.join(',')}&hydrate=team&fields=${GAMES_BY_PK_FIELDS}`,
     )
     const out = {}
     for (const d of data.dates ?? []) {
@@ -261,7 +261,7 @@ export async function fetchGameCardsByPk(gamePks) {
   if (!list.length) return {}
   try {
     const data = await getJson(
-      `/api/v1/schedule?gamePks=${list.join(',')}&hydrate=team`,
+      `/api/v1/schedule?gamePks=${list.join(',')}&hydrate=team&fields=${GAME_CARDS_FIELDS}`,
     )
     const out = {}
     for (const d of data.dates ?? []) {
@@ -280,14 +280,24 @@ export async function fetchGameCardsByPk(gamePks) {
   }
 }
 
-// Both schedule fetchers below prune with `fields=`: the raw schedule row
-// carries each side's score/isWinner/leagueRecord, which are score-revealing and
-// which these selectors deliberately never read. An allowlist keeps them out of
-// the response (and client memory) entirely rather than fetching then discarding
+// The schedule fetchers here prune with `fields=`: the raw schedule row carries
+// each side's score/isWinner/leagueRecord, which are score-revealing and which
+// these selectors deliberately never read. An allowlist keeps them out of the
+// response (and client memory) entirely rather than fetching then discarding
 // — a payload win (~85% smaller) and a spoiler win. Each list is the exact
 // read-set of its function; `fields=` is name-based, so a name absent here
 // arrives `undefined`. (Verified 2026-07-12 against a live season: `fields=`
 // composes with `hydrate=team` — abbreviations still resolve.)
+
+// fetchGamesByPk reads only the boxscore-deep-link bits (date, abbreviations,
+// team ids, doubleheader number).
+const GAMES_BY_PK_FIELDS =
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,teams,away,home,team,id,name,teamName,abbreviation'
+// fetchGameCardsByPk feeds normalizeGame, so its allowlist covers that full
+// read-set (status, reschedule dates, sport id, venue timezone) — omitting any
+// would blank a Top Games card's status/date/tz.
+const GAME_CARDS_FIELDS =
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,status,statusCode,detailedState,abstractGameState,reason,rescheduleDate,rescheduleGameDate,teams,away,home,team,id,name,teamName,abbreviation,sport,venue,timeZone,tz'
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =

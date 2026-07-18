@@ -24,9 +24,28 @@ export const config = { runtime: 'nodejs' }
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json' },
+    // Per-user, auth-gated data — never let a shared cache (or the browser)
+    // hold one user's reveal progress and hand it to another request.
+    headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
   })
 }
+
+// A revealedThrough is a half-index; even a marathon extra-inning game stays
+// well under this. Bounds a malformed/hostile client so it can't store an
+// absurd integer that would then gate every device to a nonsense high-water.
+const MAX_REVEALED_THROUGH = 200
+
+// Atomically ratchet KEYS[1] up to ARGV[1] server-side, returning the resulting
+// value. Doing the max in Lua (rather than GET then SET in JS) closes the
+// read-modify-write race where two concurrent devices could each read the old
+// value and the lower write land last.
+const RATCHET_SCRIPT = `local cur = tonumber(redis.call('GET', KEYS[1]))
+local inc = tonumber(ARGV[1])
+if cur == nil or inc > cur then
+  redis.call('SET', KEYS[1], inc)
+  return inc
+end
+return cur`
 
 async function authenticate(req) {
   const secretKey = process.env.CLERK_SECRET_KEY
@@ -120,12 +139,10 @@ export default async function handler(req) {
     return jsonResponse({ error: 'invalid body' }, 400)
   }
   const incoming = body?.revealedThrough
-  if (!Number.isInteger(incoming) || incoming < 0) {
-    return jsonResponse({ error: 'revealedThrough must be a non-negative integer' }, 400)
+  if (!Number.isInteger(incoming) || incoming < 0 || incoming > MAX_REVEALED_THROUGH) {
+    return jsonResponse({ error: 'revealedThrough out of range' }, 400)
   }
-  const current = await redis.get(key)
-  const next = Math.max(Number.isInteger(current) ? current : -1, incoming)
-  await redis.set(key, next)
+  const next = Number(await redis.eval(RATCHET_SCRIPT, [key], [incoming]))
 
   // Fold this game into the scorebook index when the client sent a valid
   // snapshot (older clients simply don't, and the entry is skipped — the

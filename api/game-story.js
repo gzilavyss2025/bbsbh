@@ -165,7 +165,11 @@ async function teamStories(teamId, window) {
 
 export default async function handler(req) {
   const url = new URL(req.url)
-  const gamePk = url.searchParams.get('gamePk')
+  const gamePkParam = url.searchParams.get('gamePk')
+  // Only a bare integer — this is spliced into a statsapi feed path
+  // (resolveGameWindow → /api/v1.1/game/{gamePk}/feed/live); an unvalidated
+  // string could inject extra path/query segments onto that host.
+  const gamePk = /^\d+$/.test(gamePkParam ?? '') ? gamePkParam : null
   const awayId = Number(url.searchParams.get('awayId'))
   const homeId = Number(url.searchParams.get('homeId'))
 

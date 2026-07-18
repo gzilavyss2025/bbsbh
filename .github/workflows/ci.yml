@@ -21,8 +21,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Match .nvmrc — the test suite loads scripts/lib/db.js, which needs
+          # node:sqlite (stable in Node >=22.5); Node 20 lacks that builtin.
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm test
       - run: npm run build

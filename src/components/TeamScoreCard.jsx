@@ -428,11 +428,20 @@ function LeagueTrack({ league, ownScore, teamId, compact = false }) {
   const dots = beeswarmRows(league.filter((r) => r.teamId !== teamId))
   const dotTop = compact ? 11 : 17
 
+  // Track the tap auto-dismiss timer so navigating away mid-window clears it
+  // rather than leaking a pending closure that fires setState after unmount.
+  const dismissTimer = useRef(null)
+  useEffect(() => () => window.clearTimeout(dismissTimer.current), [])
+
   const show = (id) => setActiveId(id)
   const hide = () => setActiveId(null)
   const tap = (id) => {
     setActiveId(id)
-    window.setTimeout(() => setActiveId((current) => (current === id ? null : current)), 2200)
+    window.clearTimeout(dismissTimer.current)
+    dismissTimer.current = window.setTimeout(
+      () => setActiveId((current) => (current === id ? null : current)),
+      2200,
+    )
   }
 
   return (
