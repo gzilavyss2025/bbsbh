@@ -16,6 +16,7 @@
 // instead of folded into the career SQLite totals.
 import { getJson } from './statsapi.js'
 import { BATTING_CATEGORIES, int, rate3 } from './postseasonLeaders.js'
+import { startingPositionAbbr } from './select.js'
 
 export { BATTING_CATEGORIES }
 
@@ -124,19 +125,17 @@ function rankPitching(map) {
 // has an entry under `team.players` (verified live against gamePk 813047:
 // 26 entries per side, only ~14 with an actual batting/pitching line), so the
 // SAME sweep that folds batting/pitching totals also builds each team's
-// series roster for free — no second fetch. Grouped by `allPositions[0]`, the
-// player's PRIMARY position for that game, falling back to `position` only
-// for thin MiLB feeds that omit it — same convention as select.js's
-// selectLineup (see ADR-0005). `box.position` alone drifts to whatever a
-// player's CURRENT/final spot was by the end of the game, so a position
-// player who mops up an inning of relief would otherwise get filed as a
-// pitcher for the whole series roster.
+// series roster for free — no second fetch. Position uses startingPositionAbbr
+// (select.js, see ADR-0005) — a player's PRIMARY position for that game, not
+// his current/final box.position, which drifts to whatever spot he ended the
+// game at; a position player who mops up an inning of relief would otherwise
+// get filed as a pitcher for the whole series roster.
 function rosterEntry(p, teamId) {
   return {
     id: p.person?.id ?? null,
     name: p.person?.fullName ?? '',
     teamId,
-    position: p.allPositions?.[0]?.abbreviation ?? p.position?.abbreviation ?? '',
+    position: startingPositionAbbr(p),
     jersey: p.jerseyNumber ?? '',
   }
 }

@@ -33,6 +33,7 @@ import {
   firstPAIndexByBatter,
   firstRispPAIndexByBatter,
   NON_PA_EVENT_TYPES,
+  BASERUNNING_NOTE_EVENT_TYPES,
 } from './playbyplay.js'
 import { personNameParts, dayWordFor, dayWord, selectPrePitchChanges } from './select.js'
 
@@ -1355,7 +1356,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
         ? { id: pitcherId, ...personNameParts(pitcherPerson), hand: pitcherPerson.pitchHand?.code ?? '' }
         : null
     const baserunningNotes = (play.playEvents ?? [])
-      .filter((e) => !e.isPitch && NON_PA_EVENT_TYPES.has(e.details?.eventType))
+      .filter((e) => !e.isPitch && BASERUNNING_NOTE_EVENT_TYPES.has(e.details?.eventType))
       .map((e) => ({ eventType: e.details.eventType, runnerId: e.player?.id ?? null }))
     const entry = {
       eventType: play.result?.eventType ?? null,

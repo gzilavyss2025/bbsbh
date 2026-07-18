@@ -20,7 +20,7 @@
 // in the game yet, entering this half) comes from event replay, via
 // entrantsBeforeFirstPitch; the fielding position comes from defenseEntering.
 
-import { entryIndexById } from './select.js'
+import { entryIndexById, startingPositionAbbr } from './select.js'
 import {
   enteringLastName,
   enteringFirstName,
@@ -59,11 +59,7 @@ export function lineupEntering(feed, battingSide, throughInning, throughHalf, re
   }
   const jerseyOf = (id) =>
     boxPlayers[`ID${id}`]?.jerseyNumber ?? players[`ID${id}`]?.primaryNumber ?? ''
-  const posOf = (id) =>
-    posById[id] ??
-    boxPlayers[`ID${id}`]?.allPositions?.[0]?.abbreviation ??
-    boxPlayers[`ID${id}`]?.position?.abbreviation ??
-    ''
+  const posOf = (id) => posById[id] ?? startingPositionAbbr(boxPlayers[`ID${id}`])
 
   const bySlot = {} // slot (1-9) -> [{ id, bo }]
   for (const p of Object.values(boxPlayers)) {
