@@ -1,0 +1,2517 @@
+{
+  "version": 1,
+  "date": "2026-07-17",
+  "generatedAt": "2026-07-18T13:15:20.639Z",
+  "bySportId": {
+    "1": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 695600,
+            "name": "Carter Jensen",
+            "teamId": 118,
+            "teamAbbr": "KC",
+            "parentOrgId": 118,
+            "position": "C",
+            "stat": "3-5, 2 2B, 2 RBI",
+            "game": {
+              "boxScorePath": "/07172026/sdkc/boxscore",
+              "awayAbbr": "SD",
+              "homeAbbr": "KC",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 701678,
+            "name": "Hao-Yu Lee",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "parentOrgId": 116,
+            "position": "2B",
+            "stat": "1-4, 2B, 2 RBI",
+            "game": {
+              "boxScorePath": "/07172026/detlaa/boxscore",
+              "awayAbbr": "DET",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 609280,
+            "name": "Miguel Andujar",
+            "teamId": 135,
+            "teamAbbr": "SD",
+            "parentOrgId": 135,
+            "position": "DH",
+            "stat": "3-4, 3 2B, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/sdkc/boxscore",
+              "awayAbbr": "SD",
+              "homeAbbr": "KC",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 665953,
+            "name": "Andrés Chaparro",
+            "teamId": 120,
+            "teamAbbr": "WSH",
+            "parentOrgId": 120,
+            "position": "1B",
+            "stat": "4-5, 2 HR, 8 RBI, 4 R",
+            "game": {
+              "boxScorePath": "/07172026/wshath/boxscore",
+              "awayAbbr": "WSH",
+              "homeAbbr": "ATH",
+              "awayScore": 23,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 621493,
+            "name": "Taylor Ward",
+            "teamId": 110,
+            "teamAbbr": "BAL",
+            "parentOrgId": 110,
+            "position": "LF",
+            "stat": "1-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/balhou/boxscore",
+              "awayAbbr": "BAL",
+              "homeAbbr": "HOU",
+              "awayScore": 3,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 672282,
+            "name": "Reid Detmers",
+            "teamId": 108,
+            "teamAbbr": "LAA",
+            "parentOrgId": 108,
+            "position": "P",
+            "stat": "6.0 IP, 4 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07172026/detlaa/boxscore",
+              "awayAbbr": "DET",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 519242,
+            "name": "Chris Sale",
+            "teamId": 144,
+            "teamAbbr": "ATL",
+            "parentOrgId": 144,
+            "position": "P",
+            "stat": "7.0 IP, 2 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07172026/texatl/boxscore",
+              "awayAbbr": "TEX",
+              "homeAbbr": "ATL",
+              "awayScore": 1,
+              "homeScore": 15
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 687562,
+            "name": "Jake Bennett",
+            "teamId": 111,
+            "teamAbbr": "BOS",
+            "parentOrgId": 111,
+            "position": "P",
+            "stat": "6.0 IP, 1 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07172026/tbbos/boxscore",
+              "awayAbbr": "TB",
+              "homeAbbr": "BOS",
+              "awayScore": 0,
+              "homeScore": 10
+            },
+            "prospectRank": null,
+            "orgProspectRank": 6
+          },
+          {
+            "id": 694738,
+            "name": "Landen Roupp",
+            "teamId": 137,
+            "teamAbbr": "SF",
+            "parentOrgId": 137,
+            "position": "P",
+            "stat": "7.0 IP, 2 H, 0 ER, 2 K",
+            "game": {
+              "boxScorePath": "/07172026/sfsea/boxscore",
+              "awayAbbr": "SF",
+              "homeAbbr": "SEA",
+              "awayScore": 7,
+              "homeScore": 0
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 663567,
+            "name": "Peter Lambert",
+            "teamId": 117,
+            "teamAbbr": "HOU",
+            "parentOrgId": 117,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 10 K",
+            "game": {
+              "boxScorePath": "/07172026/balhou/boxscore",
+              "awayAbbr": "BAL",
+              "homeAbbr": "HOU",
+              "awayScore": 3,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 695600,
+            "name": "Carter Jensen",
+            "teamId": 118,
+            "teamAbbr": "KC",
+            "parentOrgId": 118,
+            "position": "C",
+            "stat": "3-5, 2 2B, 2 RBI",
+            "game": {
+              "boxScorePath": "/07172026/sdkc/boxscore",
+              "awayAbbr": "SD",
+              "homeAbbr": "KC",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "score": 88.89999999999999,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 701678,
+            "name": "Hao-Yu Lee",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "parentOrgId": 116,
+            "position": "2B",
+            "stat": "1-4, 2B, 2 RBI",
+            "game": {
+              "boxScorePath": "/07172026/detlaa/boxscore",
+              "awayAbbr": "DET",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 1
+            },
+            "score": 61.19999999999998,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 665953,
+            "name": "Andrés Chaparro",
+            "teamId": 120,
+            "teamAbbr": "WSH",
+            "parentOrgId": 120,
+            "position": "1B",
+            "stat": "4-5, 2 HR, 8 RBI, 4 R",
+            "game": {
+              "boxScorePath": "/07172026/wshath/boxscore",
+              "awayAbbr": "WSH",
+              "homeAbbr": "ATH",
+              "awayScore": 23,
+              "homeScore": 4
+            },
+            "score": 58.499999999999986,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "losers": [
+          {
+            "id": 672282,
+            "name": "Reid Detmers",
+            "teamId": 108,
+            "teamAbbr": "LAA",
+            "parentOrgId": 108,
+            "position": "P",
+            "stat": "6.0 IP, 4 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07172026/detlaa/boxscore",
+              "awayAbbr": "DET",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 1
+            },
+            "score": 62.00000000000002,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 609280,
+            "name": "Miguel Andujar",
+            "teamId": 135,
+            "teamAbbr": "SD",
+            "parentOrgId": 135,
+            "position": "DH",
+            "stat": "3-4, 3 2B, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/sdkc/boxscore",
+              "awayAbbr": "SD",
+              "homeAbbr": "KC",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "score": 58.999999999999986,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 663567,
+            "name": "Peter Lambert",
+            "teamId": 117,
+            "teamAbbr": "HOU",
+            "parentOrgId": 117,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 10 K",
+            "game": {
+              "boxScorePath": "/07172026/balhou/boxscore",
+              "awayAbbr": "BAL",
+              "homeAbbr": "HOU",
+              "awayScore": 3,
+              "homeScore": 2
+            },
+            "score": 49.80000000000002,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 824737,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Wilyer Abreu: 2 HR — TB 3, BOS 5",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 677800,
+            "name": "Wilyer Abreu",
+            "teamId": 111,
+            "teamAbbr": "BOS",
+            "position": "RF",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 111,
+              "abbr": "BOS"
+            },
+            "loser": {
+              "id": 139,
+              "abbr": "TB"
+            }
+          },
+          "boxScorePath": "/07172026/tbbos-2/boxscore"
+        },
+        {
+          "gamePk": 824332,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Spencer Steer: 2 HR — CIN 7, COL 2",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 668715,
+            "name": "Spencer Steer",
+            "teamId": 113,
+            "teamAbbr": "CIN",
+            "position": "RF-1B",
+            "stat": "2 HR"
+          },
+          "subCaption": "Team is 10-3 when he goes deep",
+          "teams": {
+            "winner": {
+              "id": 113,
+              "abbr": "CIN"
+            },
+            "loser": {
+              "id": 115,
+              "abbr": "COL"
+            }
+          },
+          "boxScorePath": "/07172026/cincol/boxscore"
+        },
+        {
+          "gamePk": 824981,
+          "tier": 1,
+          "score": 28.34686894262107,
+          "headline": "Andrés Chaparro: 2 HR — WSH 23, ATH 4",
+          "signals": [
+            "multiHr",
+            "blowout"
+          ],
+          "performer": {
+            "id": 665953,
+            "name": "Andrés Chaparro",
+            "teamId": 120,
+            "teamAbbr": "WSH",
+            "position": "1B",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 120,
+              "abbr": "WSH"
+            },
+            "loser": {
+              "id": 133,
+              "abbr": "ATH"
+            }
+          },
+          "boxScorePath": "/07172026/wshath/boxscore"
+        },
+        {
+          "gamePk": 823766,
+          "tier": 2,
+          "score": 31.841433380615204,
+          "headline": "The MIL outlasted the MIA in 10 innings — MIA 1, MIL 2",
+          "signals": [
+            "extras",
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 158,
+              "abbr": "MIL"
+            },
+            "loser": {
+              "id": 146,
+              "abbr": "MIA"
+            }
+          },
+          "boxScorePath": "/07172026/miamil/boxscore"
+        },
+        {
+          "gamePk": 824090,
+          "tier": 2,
+          "score": 31.841433380615204,
+          "headline": "The KC outlasted the SD in 10 innings — SD 6, KC 7",
+          "signals": [
+            "extras",
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 118,
+              "abbr": "KC"
+            },
+            "loser": {
+              "id": 135,
+              "abbr": "SD"
+            }
+          },
+          "boxScorePath": "/07172026/sdkc/boxscore"
+        },
+        {
+          "gamePk": 824901,
+          "tier": 2,
+          "score": 11.750309741540455,
+          "headline": "Chris Sale was dominant (Game Score 84) — TEX 1, ATL 15",
+          "signals": [
+            "gameScore",
+            "blowout"
+          ],
+          "performer": {
+            "id": 519242,
+            "name": "Chris Sale",
+            "teamId": 144,
+            "teamAbbr": "ATL",
+            "position": "P",
+            "stat": "Game Score 84"
+          },
+          "subCaption": "Team is 10-7 in his starts",
+          "teams": {
+            "winner": {
+              "id": 144,
+              "abbr": "ATL"
+            },
+            "loser": {
+              "id": 140,
+              "abbr": "TEX"
+            }
+          },
+          "boxScorePath": "/07172026/texatl/boxscore"
+        },
+        {
+          "gamePk": 823524,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The LAD edged the NYY by a single run — LAD 2, NYY 1",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 119,
+              "abbr": "LAD"
+            },
+            "loser": {
+              "id": 147,
+              "abbr": "NYY"
+            }
+          },
+          "boxScorePath": "/07172026/ladnyy/boxscore"
+        },
+        {
+          "gamePk": 824170,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The BAL edged the HOU by a single run — BAL 3, HOU 2",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 110,
+              "abbr": "BAL"
+            },
+            "loser": {
+              "id": 117,
+              "abbr": "HOU"
+            }
+          },
+          "boxScorePath": "/07172026/balhou/boxscore"
+        },
+        {
+          "gamePk": 824009,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The DET edged the LAA by a single run — DET 2, LAA 1",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 116,
+              "abbr": "DET"
+            },
+            "loser": {
+              "id": 108,
+              "abbr": "LAA"
+            }
+          },
+          "boxScorePath": "/07172026/detlaa/boxscore"
+        },
+        {
+          "gamePk": 825060,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The STL edged the AZ by a single run — STL 5, AZ 4",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 138,
+              "abbr": "STL"
+            },
+            "loser": {
+              "id": 109,
+              "abbr": "AZ"
+            }
+          },
+          "boxScorePath": "/07172026/stlaz/boxscore"
+        },
+        {
+          "gamePk": 824766,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 10-run laugher for the BOS — TB 0, BOS 10",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 111,
+              "abbr": "BOS"
+            },
+            "loser": {
+              "id": 139,
+              "abbr": "TB"
+            }
+          },
+          "boxScorePath": "/07172026/tbbos/boxscore"
+        },
+        {
+          "gamePk": 822789,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the CWS — CWS 12, TOR 4",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 145,
+              "abbr": "CWS"
+            },
+            "loser": {
+              "id": 141,
+              "abbr": "TOR"
+            }
+          },
+          "boxScorePath": "/07172026/cwstor/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": {
+          "id": 665953,
+          "name": "Andrés Chaparro",
+          "teamId": 120,
+          "teamAbbr": "WSH",
+          "parentOrgId": 120,
+          "position": "1B",
+          "stat": "467 ft"
+        },
+        "hardestBaseHit": {
+          "id": 665487,
+          "name": "Fernando Tatis Jr.",
+          "teamId": 135,
+          "teamAbbr": "SD",
+          "parentOrgId": 135,
+          "position": "RF",
+          "stat": "114.2 mph"
+        },
+        "fastestStrikeout": {
+          "id": 695243,
+          "name": "Mason Miller",
+          "teamId": 135,
+          "teamAbbr": "SD",
+          "parentOrgId": 135,
+          "position": "P",
+          "stat": "103.4 mph"
+        }
+      }
+    },
+    "11": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 676914,
+            "name": "Davis Schneider",
+            "teamId": 422,
+            "teamAbbr": "BUF",
+            "parentOrgId": 141,
+            "position": "LF",
+            "stat": "1-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/bufsyr/boxscore",
+              "awayAbbr": "BUF",
+              "homeAbbr": "SYR",
+              "awayScore": 7,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 669004,
+            "name": "MJ Melendez",
+            "teamId": 552,
+            "teamAbbr": "SYR",
+            "parentOrgId": 121,
+            "position": "RF",
+            "stat": "3-4, HR, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/bufsyr/boxscore",
+              "awayAbbr": "BUF",
+              "homeAbbr": "SYR",
+              "awayScore": 7,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 699912,
+            "name": "Jose Fernandez",
+            "teamId": 2310,
+            "teamAbbr": "RNO",
+            "parentOrgId": 109,
+            "position": "SS",
+            "stat": "2-5, HR, 4 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/rnosl/boxscore",
+              "awayAbbr": "RNO",
+              "homeAbbr": "SL",
+              "awayScore": 8,
+              "homeScore": 9
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 808975,
+            "name": "Hyeseong Kim",
+            "teamId": 238,
+            "teamAbbr": "OKC",
+            "parentOrgId": 119,
+            "position": "2B",
+            "stat": "3-4, HR, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/okctac/boxscore",
+              "awayAbbr": "OKC",
+              "homeAbbr": "TAC",
+              "awayScore": 4,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 682515,
+            "name": "Logan Porter",
+            "teamId": 561,
+            "teamAbbr": "SL",
+            "parentOrgId": 108,
+            "position": "C",
+            "stat": "1-2, 2 RBI",
+            "game": {
+              "boxScorePath": "/07172026/rnosl/boxscore",
+              "awayAbbr": "RNO",
+              "homeAbbr": "SL",
+              "awayScore": 8,
+              "homeScore": 9
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 662144,
+            "name": "Brian Keller",
+            "teamId": 1410,
+            "teamAbbr": "LHV",
+            "parentOrgId": 143,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07172026/lhvoma/boxscore",
+              "awayAbbr": "LHV",
+              "homeAbbr": "OMA",
+              "awayScore": 1,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 824620,
+            "name": "Tyson Hardin",
+            "teamId": 556,
+            "teamAbbr": "NAS",
+            "parentOrgId": 158,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 2 K",
+            "game": {
+              "boxScorePath": "/07172026/nornas/boxscore",
+              "awayAbbr": "NOR",
+              "homeAbbr": "NAS",
+              "awayScore": 4,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": 17
+          },
+          {
+            "id": 811315,
+            "name": "Brody Hopkins",
+            "teamId": 234,
+            "teamAbbr": "DUR",
+            "parentOrgId": 139,
+            "position": "P",
+            "stat": "6.0 IP, 2 H, 1 ER, 8 K",
+            "game": {
+              "boxScorePath": "/07172026/cltdur/boxscore",
+              "awayAbbr": "CLT",
+              "homeAbbr": "DUR",
+              "awayScore": 2,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": 4
+          },
+          {
+            "id": 696131,
+            "name": "Mason Black",
+            "teamId": 541,
+            "teamAbbr": "OMA",
+            "parentOrgId": 118,
+            "position": "P",
+            "stat": "5.1 IP, 2 H, 1 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07172026/lhvoma/boxscore",
+              "awayAbbr": "LHV",
+              "homeAbbr": "OMA",
+              "awayScore": 1,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 800600,
+            "name": "Jackson Kent",
+            "teamId": 534,
+            "teamAbbr": "ROC",
+            "parentOrgId": 120,
+            "position": "P",
+            "stat": "5.0 IP, 2 H, 1 ER, 8 K",
+            "game": {
+              "boxScorePath": "/07172026/jaxroc/boxscore",
+              "awayAbbr": "JAX",
+              "homeAbbr": "ROC",
+              "awayScore": 2,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": 15
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 676914,
+            "name": "Davis Schneider",
+            "teamId": 422,
+            "teamAbbr": "BUF",
+            "parentOrgId": 141,
+            "position": "LF",
+            "stat": "1-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/bufsyr/boxscore",
+              "awayAbbr": "BUF",
+              "homeAbbr": "SYR",
+              "awayScore": 7,
+              "homeScore": 5
+            },
+            "score": 63.900000000000006,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 682515,
+            "name": "Logan Porter",
+            "teamId": 561,
+            "teamAbbr": "SL",
+            "parentOrgId": 108,
+            "position": "C",
+            "stat": "1-2, 2 RBI",
+            "game": {
+              "boxScorePath": "/07172026/rnosl/boxscore",
+              "awayAbbr": "RNO",
+              "homeAbbr": "SL",
+              "awayScore": 8,
+              "homeScore": 9
+            },
+            "score": 44.19999999999999,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 693409,
+            "name": "César Prieto",
+            "teamId": 235,
+            "teamAbbr": "MEM",
+            "parentOrgId": 138,
+            "position": "2B",
+            "stat": "3-4, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/iowmem/boxscore",
+              "awayAbbr": "IOW",
+              "homeAbbr": "MEM",
+              "awayScore": 9,
+              "homeScore": 10
+            },
+            "score": 44.10000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "losers": [
+          {
+            "id": 669004,
+            "name": "MJ Melendez",
+            "teamId": 552,
+            "teamAbbr": "SYR",
+            "parentOrgId": 121,
+            "position": "RF",
+            "stat": "3-4, HR, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/bufsyr/boxscore",
+              "awayAbbr": "BUF",
+              "homeAbbr": "SYR",
+              "awayScore": 7,
+              "homeScore": 5
+            },
+            "score": 59.7,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 699912,
+            "name": "Jose Fernandez",
+            "teamId": 2310,
+            "teamAbbr": "RNO",
+            "parentOrgId": 109,
+            "position": "SS",
+            "stat": "2-5, HR, 4 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/rnosl/boxscore",
+              "awayAbbr": "RNO",
+              "homeAbbr": "SL",
+              "awayScore": 8,
+              "homeScore": 9
+            },
+            "score": 55.79999999999998,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 808975,
+            "name": "Hyeseong Kim",
+            "teamId": 238,
+            "teamAbbr": "OKC",
+            "parentOrgId": 119,
+            "position": "2B",
+            "stat": "3-4, HR, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/okctac/boxscore",
+              "awayAbbr": "OKC",
+              "homeAbbr": "TAC",
+              "awayScore": 4,
+              "homeScore": 5
+            },
+            "score": 46.10000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 814904,
+          "tier": 1,
+          "score": 43.25863312029961,
+          "headline": "Pablo Reyes: 2 HR — RNO 8, SL 9",
+          "signals": [
+            "multiHr",
+            "oneRun"
+          ],
+          "performer": {
+            "id": 622569,
+            "name": "Pablo Reyes",
+            "teamId": 561,
+            "teamAbbr": "SL",
+            "position": "3B",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 561,
+              "abbr": "SL"
+            },
+            "loser": {
+              "id": 2310,
+              "abbr": "RNO"
+            }
+          },
+          "boxScorePath": "/07172026/rnosl/boxscore"
+        },
+        {
+          "gamePk": 816701,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Tre' Morgan: 2 HR — CLT 2, DUR 8",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 691003,
+            "name": "Tre' Morgan",
+            "teamId": 234,
+            "teamAbbr": "DUR",
+            "position": "1B",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 234,
+              "abbr": "DUR"
+            },
+            "loser": {
+              "id": 494,
+              "abbr": "CLT"
+            }
+          },
+          "boxScorePath": "/07172026/cltdur/boxscore"
+        },
+        {
+          "gamePk": 815808,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The SWB edged the WOR by a single run — WOR 6, SWB 7",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 531,
+              "abbr": "SWB"
+            },
+            "loser": {
+              "id": 533,
+              "abbr": "WOR"
+            }
+          },
+          "boxScorePath": "/07172026/worswb/boxscore"
+        },
+        {
+          "gamePk": 816185,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The MEM edged the IOW by a single run — IOW 9, MEM 10",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 235,
+              "abbr": "MEM"
+            },
+            "loser": {
+              "id": 451,
+              "abbr": "IOW"
+            }
+          },
+          "boxScorePath": "/07172026/iowmem/boxscore"
+        },
+        {
+          "gamePk": 815954,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The OMA edged the LHV by a single run — LHV 1, OMA 2",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 541,
+              "abbr": "OMA"
+            },
+            "loser": {
+              "id": 1410,
+              "abbr": "LHV"
+            }
+          },
+          "boxScorePath": "/07172026/lhvoma/boxscore"
+        },
+        {
+          "gamePk": 814749,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The TAC edged the OKC by a single run — OKC 4, TAC 5",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 529,
+              "abbr": "TAC"
+            },
+            "loser": {
+              "id": 238,
+              "abbr": "OKC"
+            }
+          },
+          "boxScorePath": "/07172026/okctac/boxscore"
+        },
+        {
+          "gamePk": 815055,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the RR — LV 1, RR 9",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 102,
+              "abbr": "RR"
+            },
+            "loser": {
+              "id": 400,
+              "abbr": "LV"
+            }
+          },
+          "boxScorePath": "/07172026/lvrr/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": {
+          "id": 695491,
+          "name": "Joshua Báez",
+          "teamId": 235,
+          "teamAbbr": "MEM",
+          "parentOrgId": 138,
+          "position": "LF",
+          "stat": "473 ft"
+        },
+        "hardestBaseHit": {
+          "id": 667803,
+          "name": "Ernesto Martinez Jr.",
+          "teamId": 531,
+          "teamAbbr": "SWB",
+          "parentOrgId": 147,
+          "position": "1B",
+          "stat": "115.0 mph"
+        },
+        "fastestStrikeout": {
+          "id": 811315,
+          "name": "Brody Hopkins",
+          "teamId": 234,
+          "teamAbbr": "DUR",
+          "parentOrgId": 139,
+          "position": "P",
+          "stat": "99.2 mph"
+        }
+      }
+    },
+    "12": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 811287,
+            "name": "Carson Roccaforte",
+            "teamId": 1350,
+            "teamAbbr": "NWA",
+            "parentOrgId": 118,
+            "position": "CF",
+            "stat": "2-6, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/midnwa/boxscore",
+              "awayAbbr": "MID",
+              "homeAbbr": "NWA",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": 16
+          },
+          {
+            "id": 805956,
+            "name": "Kai Roberts",
+            "teamId": 510,
+            "teamAbbr": "SA",
+            "parentOrgId": 135,
+            "position": "CF",
+            "stat": "1-2, HR, 2 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/ccsa/boxscore",
+              "awayAbbr": "CC",
+              "homeAbbr": "SA",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 815697,
+            "name": "Arturo Disla",
+            "teamId": 540,
+            "teamAbbr": "FRI",
+            "parentOrgId": 140,
+            "position": "1B",
+            "stat": "2-3, 3 RBI",
+            "game": {
+              "boxScorePath": "/07172026/tulfri/boxscore",
+              "awayAbbr": "TUL",
+              "homeAbbr": "FRI",
+              "awayScore": 6,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 695524,
+            "name": "Jacob Cozart",
+            "teamId": 402,
+            "teamAbbr": "AKR",
+            "parentOrgId": 114,
+            "position": "C",
+            "stat": "2-4, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/akrbng/boxscore",
+              "awayAbbr": "AKR",
+              "homeAbbr": "BNG",
+              "awayScore": 11,
+              "homeScore": 0
+            },
+            "prospectRank": null,
+            "orgProspectRank": 17
+          },
+          {
+            "id": 694749,
+            "name": "Dylan Campbell",
+            "teamId": 247,
+            "teamAbbr": "BIR",
+            "parentOrgId": 145,
+            "position": "RF",
+            "stat": "2-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/rctbir/boxscore",
+              "awayAbbr": "RCT",
+              "homeAbbr": "BIR",
+              "awayScore": 5,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 800571,
+            "name": "Santiago Suarez",
+            "teamId": 421,
+            "teamAbbr": "MTG",
+            "parentOrgId": 139,
+            "position": "P",
+            "stat": "7.0 IP, 2 H, 1 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07172026/knxmtg/boxscore",
+              "awayAbbr": "KNX",
+              "homeAbbr": "MTG",
+              "awayScore": 1,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": 10
+          },
+          {
+            "id": 695247,
+            "name": "Jagger Haynes",
+            "teamId": 510,
+            "teamAbbr": "SA",
+            "parentOrgId": 135,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 0 ER, 8 K",
+            "game": {
+              "boxScorePath": "/07172026/ccsa/boxscore",
+              "awayAbbr": "CC",
+              "homeAbbr": "SA",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": 13
+          },
+          {
+            "id": 690162,
+            "name": "Kenny Serwa",
+            "teamId": 106,
+            "teamAbbr": "ERI",
+            "parentOrgId": 116,
+            "position": "P",
+            "stat": "5.0 IP, 2 H, 0 ER, 2 K",
+            "game": {
+              "boxScorePath": "/07172026/eriric/boxscore",
+              "awayAbbr": "ERI",
+              "homeAbbr": "RIC",
+              "awayScore": 5,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 691776,
+            "name": "Josh Hartle",
+            "teamId": 402,
+            "teamAbbr": "AKR",
+            "parentOrgId": 114,
+            "position": "P",
+            "stat": "5.0 IP, 1 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07172026/akrbng/boxscore",
+              "awayAbbr": "AKR",
+              "homeAbbr": "BNG",
+              "awayScore": 11,
+              "homeScore": 0
+            },
+            "prospectRank": null,
+            "orgProspectRank": 25
+          },
+          {
+            "id": 701411,
+            "name": "Jack Cebert",
+            "teamId": 1956,
+            "teamAbbr": "SOM",
+            "parentOrgId": 147,
+            "position": "P",
+            "stat": "4.2 IP, 1 H, 0 ER, 9 K",
+            "game": {
+              "boxScorePath": "/07172026/sompor/boxscore",
+              "awayAbbr": "SOM",
+              "homeAbbr": "POR",
+              "awayScore": 7,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": 25
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 811287,
+            "name": "Carson Roccaforte",
+            "teamId": 1350,
+            "teamAbbr": "NWA",
+            "parentOrgId": 118,
+            "position": "CF",
+            "stat": "2-6, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/midnwa/boxscore",
+              "awayAbbr": "MID",
+              "homeAbbr": "NWA",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "score": 83,
+            "prospectRank": null,
+            "orgProspectRank": 16
+          },
+          {
+            "id": 800571,
+            "name": "Santiago Suarez",
+            "teamId": 421,
+            "teamAbbr": "MTG",
+            "parentOrgId": 139,
+            "position": "P",
+            "stat": "7.0 IP, 2 H, 1 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07172026/knxmtg/boxscore",
+              "awayAbbr": "KNX",
+              "homeAbbr": "MTG",
+              "awayScore": 1,
+              "homeScore": 5
+            },
+            "score": 63.50000000000003,
+            "prospectRank": null,
+            "orgProspectRank": 10
+          },
+          {
+            "id": 695247,
+            "name": "Jagger Haynes",
+            "teamId": 510,
+            "teamAbbr": "SA",
+            "parentOrgId": 135,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 0 ER, 8 K",
+            "game": {
+              "boxScorePath": "/07172026/ccsa/boxscore",
+              "awayAbbr": "CC",
+              "homeAbbr": "SA",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "score": 54.800000000000004,
+            "prospectRank": null,
+            "orgProspectRank": 13
+          }
+        ],
+        "losers": [
+          {
+            "id": 815697,
+            "name": "Arturo Disla",
+            "teamId": 540,
+            "teamAbbr": "FRI",
+            "parentOrgId": 140,
+            "position": "1B",
+            "stat": "2-3, 3 RBI",
+            "game": {
+              "boxScorePath": "/07172026/tulfri/boxscore",
+              "awayAbbr": "TUL",
+              "homeAbbr": "FRI",
+              "awayScore": 6,
+              "homeScore": 4
+            },
+            "score": 45.19999999999999,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 694749,
+            "name": "Dylan Campbell",
+            "teamId": 247,
+            "teamAbbr": "BIR",
+            "parentOrgId": 145,
+            "position": "RF",
+            "stat": "2-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/rctbir/boxscore",
+              "awayAbbr": "RCT",
+              "homeAbbr": "BIR",
+              "awayScore": 5,
+              "homeScore": 3
+            },
+            "score": 41.4,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 686810,
+            "name": "Brennan Milone",
+            "teamId": 237,
+            "teamAbbr": "MID",
+            "parentOrgId": 133,
+            "position": "DH",
+            "stat": "3-4, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/midnwa/boxscore",
+              "awayAbbr": "MID",
+              "homeAbbr": "NWA",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "score": 40.400000000000006,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 817278,
+          "tier": 2,
+          "score": 31.841433380615204,
+          "headline": "The NWA outlasted the MID in 10 innings — MID 6, NWA 7",
+          "signals": [
+            "extras",
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 1350,
+              "abbr": "NWA"
+            },
+            "loser": {
+              "id": 237,
+              "abbr": "MID"
+            }
+          },
+          "boxScorePath": "/07172026/midnwa/boxscore"
+        },
+        {
+          "gamePk": 817211,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The SA edged the CC by a single run — CC 3, SA 4",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 510,
+              "abbr": "SA"
+            },
+            "loser": {
+              "id": 482,
+              "abbr": "CC"
+            }
+          },
+          "boxScorePath": "/07172026/ccsa/boxscore"
+        },
+        {
+          "gamePk": 818866,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 11-run laugher for the AKR — AKR 11, BNG 0",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 402,
+              "abbr": "AKR"
+            },
+            "loser": {
+              "id": 505,
+              "abbr": "BNG"
+            }
+          },
+          "boxScorePath": "/07172026/akrbng/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": null,
+        "hardestBaseHit": null,
+        "fastestStrikeout": null
+      }
+    },
+    "13": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 824615,
+            "name": "Connor Hujsak",
+            "teamId": 2498,
+            "teamAbbr": "BG",
+            "parentOrgId": 139,
+            "position": "CF",
+            "stat": "2-4, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/wsbg/boxscore",
+              "awayAbbr": "WS",
+              "homeAbbr": "BG",
+              "awayScore": 3,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 702610,
+            "name": "Ike Irish",
+            "teamId": 493,
+            "teamAbbr": "FRE",
+            "parentOrgId": 110,
+            "position": "1B",
+            "stat": "2-5, HR, 2B, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/fregvl/boxscore",
+              "awayAbbr": "FRE",
+              "homeAbbr": "GVL",
+              "awayScore": 7,
+              "homeScore": 8
+            },
+            "prospectRank": 82,
+            "orgProspectRank": 2
+          },
+          {
+            "id": 804114,
+            "name": "Luke Pelzer",
+            "teamId": 565,
+            "teamAbbr": "QC",
+            "parentOrgId": 118,
+            "position": "LF",
+            "stat": "2-4, 2B, 5 RBI, 1 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/qcwis/boxscore",
+              "awayAbbr": "QC",
+              "homeAbbr": "WIS",
+              "awayScore": 13,
+              "homeScore": 10
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 805268,
+            "name": "Peyton Williams",
+            "teamId": 435,
+            "teamAbbr": "VAN",
+            "parentOrgId": 141,
+            "position": "1B",
+            "stat": "4-4, HR, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/vantri/boxscore",
+              "awayAbbr": "VAN",
+              "homeAbbr": "TRI",
+              "awayScore": 5,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 822177,
+            "name": "Jose Cerice",
+            "teamId": 565,
+            "teamAbbr": "QC",
+            "parentOrgId": 118,
+            "position": "1B",
+            "stat": "2-3, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/qcwis/boxscore",
+              "awayAbbr": "QC",
+              "homeAbbr": "WIS",
+              "awayScore": 13,
+              "homeScore": 10
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 828334,
+            "name": "Holden Wilkerson",
+            "teamId": 435,
+            "teamAbbr": "VAN",
+            "parentOrgId": 141,
+            "position": "P",
+            "stat": "5.2 IP, 0 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07172026/vantri/boxscore",
+              "awayAbbr": "VAN",
+              "homeAbbr": "TRI",
+              "awayScore": 5,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 801801,
+            "name": "Noah Hall",
+            "teamId": 453,
+            "teamAbbr": "BRK",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "6.0 IP, 1 H, 0 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07172026/hvbrk/boxscore",
+              "awayAbbr": "HV",
+              "homeAbbr": "BRK",
+              "awayScore": 0,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 823116,
+            "name": "Dominic Niman",
+            "teamId": 2498,
+            "teamAbbr": "BG",
+            "parentOrgId": 139,
+            "position": "P",
+            "stat": "4.2 IP, 2 H, 0 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07172026/wsbg/boxscore",
+              "awayAbbr": "WS",
+              "homeAbbr": "BG",
+              "awayScore": 3,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 800063,
+            "name": "Andrew Taylor",
+            "teamId": 573,
+            "teamAbbr": "ASH",
+            "parentOrgId": 117,
+            "position": "P",
+            "stat": "4.0 IP, 0 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07172026/ashrom/boxscore",
+              "awayAbbr": "ASH",
+              "homeAbbr": "ROM",
+              "awayScore": 4,
+              "homeScore": 0
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 691263,
+            "name": "Esmerlin Vinicio",
+            "teamId": 461,
+            "teamAbbr": "EUG",
+            "parentOrgId": 137,
+            "position": "P",
+            "stat": "3.0 IP, 0 H, 0 ER, 4 K",
+            "game": {
+              "boxScorePath": "/07172026/hileug/boxscore",
+              "awayAbbr": "HIL",
+              "homeAbbr": "EUG",
+              "awayScore": 2,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 824615,
+            "name": "Connor Hujsak",
+            "teamId": 2498,
+            "teamAbbr": "BG",
+            "parentOrgId": 139,
+            "position": "CF",
+            "stat": "2-4, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/wsbg/boxscore",
+              "awayAbbr": "WS",
+              "homeAbbr": "BG",
+              "awayScore": 3,
+              "homeScore": 5
+            },
+            "score": 72.90000000000002,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 828334,
+            "name": "Holden Wilkerson",
+            "teamId": 435,
+            "teamAbbr": "VAN",
+            "parentOrgId": 141,
+            "position": "P",
+            "stat": "5.2 IP, 0 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07172026/vantri/boxscore",
+              "awayAbbr": "VAN",
+              "homeAbbr": "TRI",
+              "awayScore": 5,
+              "homeScore": 1
+            },
+            "score": 65.3,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 801801,
+            "name": "Noah Hall",
+            "teamId": 453,
+            "teamAbbr": "BRK",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "6.0 IP, 1 H, 0 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07172026/hvbrk/boxscore",
+              "awayAbbr": "HV",
+              "homeAbbr": "BRK",
+              "awayScore": 0,
+              "homeScore": 4
+            },
+            "score": 56.80000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "losers": [
+          {
+            "id": 702610,
+            "name": "Ike Irish",
+            "teamId": 493,
+            "teamAbbr": "FRE",
+            "parentOrgId": 110,
+            "position": "1B",
+            "stat": "2-5, HR, 2B, 1 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/fregvl/boxscore",
+              "awayAbbr": "FRE",
+              "homeAbbr": "GVL",
+              "awayScore": 7,
+              "homeScore": 8
+            },
+            "score": 57.19999999999999,
+            "prospectRank": 82,
+            "orgProspectRank": 2
+          },
+          {
+            "id": 821270,
+            "name": "Luis Peña",
+            "teamId": 572,
+            "teamAbbr": "WIS",
+            "parentOrgId": 158,
+            "position": "SS",
+            "stat": "3-4, 2 2B, 2 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/qcwis/boxscore",
+              "awayAbbr": "QC",
+              "homeAbbr": "WIS",
+              "awayScore": 13,
+              "homeScore": 10
+            },
+            "score": 45.4,
+            "prospectRank": 18,
+            "orgProspectRank": 2
+          },
+          {
+            "id": 809372,
+            "name": "Victor Figueroa",
+            "teamId": 493,
+            "teamAbbr": "FRE",
+            "parentOrgId": 110,
+            "position": "DH",
+            "stat": "2-4, 3B, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/fregvl/boxscore",
+              "awayAbbr": "FRE",
+              "homeAbbr": "GVL",
+              "awayScore": 7,
+              "homeScore": 8
+            },
+            "score": 40.19999999999999,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 819134,
+          "tier": 2,
+          "score": 18.8063653849365,
+          "headline": "Holden Wilkerson was dominant (Game Score 80) — VAN 5, TRI 1",
+          "signals": [
+            "gameScore"
+          ],
+          "performer": {
+            "id": 828334,
+            "name": "Holden Wilkerson",
+            "teamId": 435,
+            "teamAbbr": "VAN",
+            "position": "P",
+            "stat": "Game Score 80"
+          },
+          "subCaption": "Team is 1-5 in his starts",
+          "teams": {
+            "winner": {
+              "id": 435,
+              "abbr": "VAN"
+            },
+            "loser": {
+              "id": 460,
+              "abbr": "TRI"
+            }
+          },
+          "boxScorePath": "/07172026/vantri/boxscore"
+        },
+        {
+          "gamePk": 821819,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The WIL edged the JS by a single run — JS 4, WIL 5",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 426,
+              "abbr": "WIL"
+            },
+            "loser": {
+              "id": 427,
+              "abbr": "JS"
+            }
+          },
+          "boxScorePath": "/07172026/jswil/boxscore"
+        },
+        {
+          "gamePk": 822151,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The GVL edged the FRE by a single run — FRE 7, GVL 8",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 428,
+              "abbr": "GVL"
+            },
+            "loser": {
+              "id": 493,
+              "abbr": "FRE"
+            }
+          },
+          "boxScorePath": "/07172026/fregvl/boxscore"
+        },
+        {
+          "gamePk": 820121,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the CR — BEL 1, CR 9",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 492,
+              "abbr": "CR"
+            },
+            "loser": {
+              "id": 554,
+              "abbr": "BEL"
+            }
+          },
+          "boxScorePath": "/07172026/belcr/boxscore"
+        },
+        {
+          "gamePk": 819205,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the EVE — EVE 11, SPO 3",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 403,
+              "abbr": "EVE"
+            },
+            "loser": {
+              "id": 486,
+              "abbr": "SPO"
+            }
+          },
+          "boxScorePath": "/07172026/evespo/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": null,
+        "hardestBaseHit": null,
+        "fastestStrikeout": null
+      }
+    },
+    "14": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 814955,
+            "name": "Matthew Ferrara",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "parentOrgId": 143,
+            "position": "2B",
+            "stat": "4-5, 2 2B, 4 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/clrdun/boxscore",
+              "awayAbbr": "CLR",
+              "homeAbbr": "DUN",
+              "awayScore": 16,
+              "homeScore": 11
+            },
+            "prospectRank": null,
+            "orgProspectRank": 25
+          },
+          {
+            "id": 800276,
+            "name": "Juan Villavicencio",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "parentOrgId": 143,
+            "position": "SS",
+            "stat": "2-2, 2 HR, 2 RBI, 6 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/clrdun/boxscore",
+              "awayAbbr": "CLR",
+              "homeAbbr": "DUN",
+              "awayScore": 16,
+              "homeScore": 11
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 800179,
+            "name": "Nolan Beltran",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "parentOrgId": 143,
+            "position": "1B",
+            "stat": "3-5, 2 2B, 4 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/clrdun/boxscore",
+              "awayAbbr": "CLR",
+              "homeAbbr": "DUN",
+              "awayScore": 16,
+              "homeScore": 11
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 829052,
+            "name": "Breyson Guedez",
+            "teamId": 524,
+            "teamAbbr": "STK",
+            "parentOrgId": 133,
+            "position": "DH",
+            "stat": "2-4, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07172026/sjstk/boxscore",
+              "awayAbbr": "SJ",
+              "homeAbbr": "STK",
+              "awayScore": 6,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": 19
+          },
+          {
+            "id": 701206,
+            "name": "Willy Montero",
+            "teamId": 587,
+            "teamAbbr": "TAM",
+            "parentOrgId": 147,
+            "position": "LF",
+            "stat": "3-4, HR, 3 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/brdtam/boxscore",
+              "awayAbbr": "BRD",
+              "homeAbbr": "TAM",
+              "awayScore": 5,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 842589,
+            "name": "Gabe Tanner",
+            "teamId": 487,
+            "teamAbbr": "KAN",
+            "parentOrgId": 145,
+            "position": "P",
+            "stat": "6.0 IP, 2 H, 0 ER, 2 K",
+            "game": {
+              "boxScorePath": "/07172026/mbkan/boxscore",
+              "awayAbbr": "MB",
+              "homeAbbr": "KAN",
+              "awayScore": 1,
+              "homeScore": 9
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 814255,
+            "name": "Miguel Mejias",
+            "teamId": 507,
+            "teamAbbr": "SLU",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "1.0 IP, 0 H, 0 ER, 2 K",
+            "game": {
+              "boxScorePath": "/07172026/slupmb/boxscore",
+              "awayAbbr": "SLU",
+              "homeAbbr": "PMB",
+              "awayScore": 3,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 808274,
+            "name": "Elwis Mijares",
+            "teamId": 507,
+            "teamAbbr": "SLU",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "3.0 IP, 2 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07172026/slupmb/boxscore",
+              "awayAbbr": "SLU",
+              "homeAbbr": "PMB",
+              "awayScore": 3,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 808003,
+            "name": "Rafael Gonzalez",
+            "teamId": 3712,
+            "teamAbbr": "FAY",
+            "parentOrgId": 117,
+            "position": "P",
+            "stat": "3.0 IP, 0 H, 1 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07172026/augfay/boxscore",
+              "awayAbbr": "AUG",
+              "homeAbbr": "FAY",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 828244,
+            "name": "Kruz Schoolcraft",
+            "teamId": 103,
+            "teamAbbr": "LE",
+            "parentOrgId": 135,
+            "position": "P",
+            "stat": "5.0 IP, 3 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07172026/leont/boxscore",
+              "awayAbbr": "LE",
+              "homeAbbr": "ONT",
+              "awayScore": 12,
+              "homeScore": 0
+            },
+            "prospectRank": null,
+            "orgProspectRank": 2
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 814955,
+            "name": "Matthew Ferrara",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "parentOrgId": 143,
+            "position": "2B",
+            "stat": "4-5, 2 2B, 4 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/clrdun/boxscore",
+              "awayAbbr": "CLR",
+              "homeAbbr": "DUN",
+              "awayScore": 16,
+              "homeScore": 11
+            },
+            "score": 90.90000000000002,
+            "prospectRank": null,
+            "orgProspectRank": 25
+          },
+          {
+            "id": 800276,
+            "name": "Juan Villavicencio",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "parentOrgId": 143,
+            "position": "SS",
+            "stat": "2-2, 2 HR, 2 RBI, 6 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07172026/clrdun/boxscore",
+              "awayAbbr": "CLR",
+              "homeAbbr": "DUN",
+              "awayScore": 16,
+              "homeScore": 11
+            },
+            "score": 88.60000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 800179,
+            "name": "Nolan Beltran",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "parentOrgId": 143,
+            "position": "1B",
+            "stat": "3-5, 2 2B, 4 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/clrdun/boxscore",
+              "awayAbbr": "CLR",
+              "homeAbbr": "DUN",
+              "awayScore": 16,
+              "homeScore": 11
+            },
+            "score": 75.19999999999999,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "losers": [
+          {
+            "id": 821130,
+            "name": "Avinson Pinto",
+            "teamId": 414,
+            "teamAbbr": "SAL",
+            "parentOrgId": 111,
+            "position": "SS",
+            "stat": "3-4, 2 2B, 3 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07172026/delsal/boxscore",
+              "awayAbbr": "DEL",
+              "homeAbbr": "SAL",
+              "awayScore": 14,
+              "homeScore": 11
+            },
+            "score": 42.7,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 821112,
+            "name": "Anderson Fermin",
+            "teamId": 414,
+            "teamAbbr": "SAL",
+            "parentOrgId": 111,
+            "position": "LF",
+            "stat": "2-3, 3B, 3 RBI",
+            "game": {
+              "boxScorePath": "/07172026/delsal/boxscore",
+              "awayAbbr": "DEL",
+              "homeAbbr": "SAL",
+              "awayScore": 14,
+              "homeScore": 11
+            },
+            "score": 40.2,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 829398,
+            "name": "Franklin Primera",
+            "teamId": 414,
+            "teamAbbr": "SAL",
+            "parentOrgId": 111,
+            "position": "C",
+            "stat": "4-4, 2 2B, 4 R",
+            "game": {
+              "boxScorePath": "/07172026/delsal/boxscore",
+              "awayAbbr": "DEL",
+              "homeAbbr": "SAL",
+              "awayScore": 14,
+              "homeScore": 11
+            },
+            "score": 39.00000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 820650,
+          "tier": 1,
+          "score": 47.79542232389839,
+          "headline": "Juan Villavicencio: 2 HR — CLR 16, DUN 11",
+          "signals": [
+            "multiHr",
+            "extras"
+          ],
+          "performer": {
+            "id": 800276,
+            "name": "Juan Villavicencio",
+            "teamId": 566,
+            "teamAbbr": "CLR",
+            "position": "SS",
+            "stat": "2 HR"
+          },
+          "subCaption": "Team is 7-2 when he goes deep",
+          "teams": {
+            "winner": {
+              "id": 566,
+              "abbr": "CLR"
+            },
+            "loser": {
+              "id": 424,
+              "abbr": "DUN"
+            }
+          },
+          "boxScorePath": "/07172026/clrdun/boxscore"
+        },
+        {
+          "gamePk": 827119,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Brady Ebel: 2 HR — WIL 5, HIC 7",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 815816,
+            "name": "Brady Ebel",
+            "teamId": 249,
+            "teamAbbr": "WIL",
+            "position": "SS",
+            "stat": "2 HR"
+          },
+          "subCaption": "Team is 5-1 when he goes deep",
+          "teams": {
+            "winner": {
+              "id": 448,
+              "abbr": "HIC"
+            },
+            "loser": {
+              "id": 249,
+              "abbr": "WIL"
+            }
+          },
+          "boxScorePath": "/07172026/wilhic/boxscore"
+        },
+        {
+          "gamePk": 820397,
+          "tier": 2,
+          "score": 31.841433380615204,
+          "headline": "The SLU outlasted the PMB in 10 innings — SLU 3, PMB 2",
+          "signals": [
+            "extras",
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 507,
+              "abbr": "SLU"
+            },
+            "loser": {
+              "id": 279,
+              "abbr": "PMB"
+            }
+          },
+          "boxScorePath": "/07172026/slupmb/boxscore"
+        },
+        {
+          "gamePk": 827459,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The COL edged the CHS by a single run — COL 5, CHS 4",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 3705,
+              "abbr": "COL"
+            },
+            "loser": {
+              "id": 233,
+              "abbr": "CHS"
+            }
+          },
+          "boxScorePath": "/07172026/colchs/boxscore"
+        },
+        {
+          "gamePk": 827245,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The FAY edged the AUG by a single run — AUG 2, FAY 3",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 3712,
+              "abbr": "FAY"
+            },
+            "loser": {
+              "id": 478,
+              "abbr": "AUG"
+            }
+          },
+          "boxScorePath": "/07172026/augfay/boxscore"
+        },
+        {
+          "gamePk": 820977,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The STK edged the SJ by a single run — SJ 6, STK 7",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 524,
+              "abbr": "STK"
+            },
+            "loser": {
+              "id": 476,
+              "abbr": "SJ"
+            }
+          },
+          "boxScorePath": "/07172026/sjstk/boxscore"
+        },
+        {
+          "gamePk": 827047,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the KAN — MB 1, KAN 9",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 487,
+              "abbr": "KAN"
+            },
+            "loser": {
+              "id": 521,
+              "abbr": "MB"
+            }
+          },
+          "boxScorePath": "/07172026/mbkan/boxscore"
+        },
+        {
+          "gamePk": 820915,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the VIS — FRE 2, VIS 10",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 516,
+              "abbr": "VIS"
+            },
+            "loser": {
+              "id": 259,
+              "abbr": "FRE"
+            }
+          },
+          "boxScorePath": "/07172026/frevis/boxscore"
+        },
+        {
+          "gamePk": 821183,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 12-run laugher for the LE — LE 12, ONT 0",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 103,
+              "abbr": "LE"
+            },
+            "loser": {
+              "id": 6482,
+              "abbr": "ONT"
+            }
+          },
+          "boxScorePath": "/07172026/leont/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": {
+          "id": 804944,
+          "name": "Jackson Lovich",
+          "teamId": 587,
+          "teamAbbr": "TAM",
+          "parentOrgId": 147,
+          "position": "SS",
+          "stat": "432 ft"
+        },
+        "hardestBaseHit": {
+          "id": 804944,
+          "name": "Jackson Lovich",
+          "teamId": 587,
+          "teamAbbr": "TAM",
+          "parentOrgId": 147,
+          "position": "SS",
+          "stat": "111.2 mph"
+        },
+        "fastestStrikeout": {
+          "id": 807968,
+          "name": "David Matoma",
+          "teamId": 3390,
+          "teamAbbr": "BRD",
+          "parentOrgId": 134,
+          "position": "P",
+          "stat": "100.1 mph"
+        }
+      }
+    }
+  }
+}
