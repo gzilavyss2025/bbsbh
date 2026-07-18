@@ -56,8 +56,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // (which always bundles a leading note forward via nextStepBoundary — see
   // its own doc). Snap the effective cap forward to the first genuine at-bat
   // boundary so a fresh half's first tap behaves the same as every later one.
-  const firstBoundary = stepping ? nextStepBoundary(rawEntries, 0) : null
-  const effectiveCap = stepping ? Math.max(stepCap, firstBoundary) : stepCap
+  const effectiveCap = stepping ? Math.max(stepCap, nextStepBoundary(rawEntries, 0)) : stepCap
   // entries.push is unconditional in computeHalfInningFeed regardless of
   // stepCap — stepCap only gates RETROACTIVE writes onto already-pushed
   // entries (the `visible` check) — so rawEntries' entry KINDS/order above are
@@ -70,7 +69,18 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     effectiveCap > stepCap
       ? computeHalfInningFeed(feed, inning, half, battingSide, effectiveCap)
       : rawEntries
-  const exhausted = stepping && entries.length > 0 && effectiveCap >= entries.length
+  // A live, still-updating half can have its ONLY currently-fetched content
+  // be a leading event note with no plate appearance yet (e.g. extra innings'
+  // automatic placed-runner note, posted before the leadoff batter's own PA
+  // has resolved in the feed) — entries.length catching up to effectiveCap in
+  // that state must not read as "the whole half, done," or onStepComplete
+  // below fires a one-directional, localStorage-persisted commit of the
+  // entire half before any real result exists. Require at least one genuine
+  // at-bat card anywhere in entries first; a truly finished half always has
+  // one (an inning needs at least one batter), so this only ever holds back
+  // the live, still-populating edge case.
+  const hasAtBat = entries.some((e) => e.kind === 'atbat')
+  const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -265,6 +275,12 @@ const EVENT_CODES = {
   pickoff_1b: 'PO', pickoff_2b: 'PO', pickoff_3b: 'PO',
   pickoff_caught_stealing_2b: 'PO', pickoff_caught_stealing_3b: 'PO', pickoff_caught_stealing_home: 'PO',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
+  // Not observed as a standalone top-level play in either sampled game (both
+  // always nested inside a real plate appearance) — included for the same
+  // reason every other NON_PA-adjacent code above is, so IF one ever does
+  // surface on its own, it gets this card's real shorthand instead of
+  // EventNote's generic fallback icon.
+  runner_placed: 'RP', defensive_indiff: 'DI',
 }
 
 // The play-by-play prose for a baserunning event (steal, caught stealing, wild
