@@ -40,7 +40,8 @@
        `.psseries__potgDesc`, `.dayhl__rowBtn`
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
-       `.favteamsheet__pitch`
+       `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
+       `.favteamsheet__accountpitch` (the section title + button stay uppercase)
      - the About page body copy — `.aboutpage .caps-exempt`
      - the Game Score modal's explainer prose — `.gsmodal .sheet__body`, the
        quiet factor glosses `.gsfactor__note`, and the example lines
@@ -2916,6 +2917,12 @@ body {
    same prose block, no button. */
 .favteamsheet__accountpitch {
   margin: 0 0 var(--space-3);
+}
+/* #root-scoped so it outweighs the global `#root *` uppercase (1,0,1) — same
+   mechanism as .favteamsheet__pitch — so the multi-sentence account copy (and
+   the signed-in email) read as natural sentences instead of shouted chrome. */
+#root .favteamsheet__accountpitch {
+  text-transform: none; /* caps-exempt: account-pitch explainer prose reads as natural sentences, like the welcome pitch beside it */
 }
 .btn--account {
   width: 100%;
