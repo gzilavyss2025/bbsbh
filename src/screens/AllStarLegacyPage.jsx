@@ -324,7 +324,11 @@ export function AllStarLegacyPage() {
                   rank={i + 1}
                   honorees={byTeam?.get(teamId) ?? []}
                   cardRef={(el) => {
+                    // Add on attach, delete on the null detach call — otherwise
+                    // a remounted card leaves a stale detached node in the Set
+                    // that the observer keeps observing.
                     if (el) cardEls.current.add(el)
+                    else cardEls.current.forEach((n) => !n.isConnected && cardEls.current.delete(n))
                   }}
                 />
               ))}

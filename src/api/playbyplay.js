@@ -350,11 +350,11 @@ function scorebookCode(play, batterRunner) {
   if (REACH_CODES[et]) return { code: REACH_CODES[et], codeKind: HIT_EVENTS.has(et) ? 'hit' : 'reach' }
 
   const desc = play.result?.description ?? ''
-  const chain = (batterRunner?.credits ?? []).map((c) => c.position.code)
+  const chain = (batterRunner?.credits ?? []).map((c) => c.position?.code ?? '')
 
   if (et === 'field_error') {
     const errPos = (batterRunner?.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
-    return { code: `E${errPos?.position.code ?? ''}`, codeKind: 'error' }
+    return { code: `E${errPos?.position?.code ?? ''}`, codeKind: 'error' }
   }
   // Every strikeout is a K — swinging, on a foul tip, on a foul bunt, a checked
   // swing — keyed off the eventType, not one description phrasing (a foul-tip K
@@ -492,7 +492,7 @@ function runnerOutCode(play, runnerEntry) {
   const et = runnerEntry.details?.eventType ?? play.result?.eventType ?? ''
   const chain = (runnerEntry.credits ?? [])
     .filter((c) => /putout|assist/.test(c.credit ?? ''))
-    .map((c) => c.position.code)
+    .map((c) => c.position?.code ?? '')
     .join('-')
   let tag = ''
   if (et.startsWith('caught_stealing')) tag = 'CS'

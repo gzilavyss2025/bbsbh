@@ -85,9 +85,12 @@ function currentUrl() {
 }
 
 // Top-level router over the History API (no react-router — see lib/route.js).
-// Three shapes: the slate ('/'), the printable logo sheet ('/logos'), and a
-// deep-linkable game section ('/{date}/{matchup}/{section}'). Every section of
-// every game is a real, shareable URL; the back button walks the steps.
+// Anchored on the slate ('/') and the deep-linkable game section
+// ('/{date}/{matchup}/{section}'), plus the many standalone pages (logos,
+// leaders, standings, player/team/umpire/manager, postseason, …). lib/route.js's
+// parseRoute is the authoritative, order-sensitive list of every route name.
+// Every section of every game is a real, shareable URL; the back button walks
+// the steps.
 export default function App() {
   const [route, setRoute] = useState(() => parseRoute(currentUrl()))
   // The game object from the slate, carried into the game route so a same-session

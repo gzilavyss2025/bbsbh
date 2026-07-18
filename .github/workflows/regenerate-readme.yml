@@ -42,8 +42,10 @@ jobs:
 
       - name: Decide whether to regenerate
         id: check
+        env:
+          FORCE: ${{ github.event.inputs.force }}
         run: |
-          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+          if [ "$FORCE" = "true" ]; then
             echo "Forced via workflow_dispatch."
             echo "should_run=true" >> "$GITHUB_OUTPUT"
             exit 0

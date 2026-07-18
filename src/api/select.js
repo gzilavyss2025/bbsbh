@@ -482,7 +482,16 @@ const POSITION_LOWER = {
   P: 'pitcher',
 }
 
-export function selectPrePitchChanges(feed, inning, half) {
+// `revealedThrough` (a half-index; see halfIndex) is an OPTIONAL internal gate,
+// mirroring the self-enforcement in defenseEntering/lineupEntering so this
+// selector no longer stands alone in trusting the caller (all callers already
+// gate their rendering; this is defense-in-depth). Left as Infinity by default
+// so existing callers are unchanged; pass the real high-water mark to have the
+// selector itself return [] for a half further out than the user's next reveal.
+export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infinity) {
+  // Substitution timing is spoiler-adjacent (a flurry of subs telegraphs a
+  // still-sealed blowout), so only compute up to the user's own next half.
+  if (halfIndex(inning, half) > revealedThrough + 1) return []
   const changes = []
   const players = playerIndex(feed)
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {

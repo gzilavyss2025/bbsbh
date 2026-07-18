@@ -55,18 +55,36 @@ const TEAM_COLORS = {
 const FONT_FALLBACK = 'sans-serif'
 const BASE_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 @·—|#.,&'\"()/:+-"
 
+// This endpoint renders on an UNAUTHENTICATED path, and every novel query is a
+// cache miss that fans out to Google Fonts + image hosts. Bound each upstream
+// call so a slow/hostile host can't pin an edge invocation open, and cap the
+// glyph subset so a cache-busting query can't inflate the font requests.
+const FETCH_TIMEOUT_MS = 4000
+const MAX_CARD_TEXT = 160
+
+async function fetchWithTimeout(url, init) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 async function loadGoogleFont(spec, text) {
   const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(spec)}&text=${encodeURIComponent(text)}`
-  const css = await (await fetch(url)).text()
+  const css = await (await fetchWithTimeout(url)).text()
   const m = css.match(/src:\s*url\((.+?)\)\s*format\('(?:opentype|truetype)'\)/)
   if (!m) throw new Error(`no ttf src for ${spec}`)
-  const res = await fetch(m[1])
+  const res = await fetchWithTimeout(m[1])
   if (!res.ok) throw new Error(`font ${res.status} for ${spec}`)
   return res.arrayBuffer()
 }
 
 async function loadFonts(cardText) {
-  const text = BASE_GLYPHS + (cardText || '').toUpperCase() + (cardText || '')
+  const capped = (cardText || '').slice(0, MAX_CARD_TEXT)
+  const text = BASE_GLYPHS + capped.toUpperCase() + capped
   try {
     const [cond6, cond7, sans6] = await Promise.all([
       loadGoogleFont('IBM Plex Sans Condensed:wght@600', text),
@@ -110,8 +128,9 @@ function toBase64(arrayBuffer) {
 }
 
 async function fetchImage(url, mime) {
+  if (!url) return null
   try {
-    const res = await fetch(url)
+    const res = await fetchWithTimeout(url)
     if (!res.ok) return null
     return `data:${mime};base64,${toBase64(await res.arrayBuffer())}`
   } catch {
@@ -119,9 +138,13 @@ async function fetchImage(url, mime) {
   }
 }
 
+// Ids are spliced into the mlbstatic image path — accept only bare integers so
+// a query param can't reshape the URL into some other asset.
+const numericId = (id) => (/^\d+$/.test(String(id ?? '')) ? String(id) : null)
 const headshotSrc = (id) =>
-  `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${id}/headshot/silo/current`
-const logoSrc = (id) => `https://www.mlbstatic.com/team-logos/${id}.svg`
+  numericId(id) &&
+  `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_426,q_auto:best/v1/people/${numericId(id)}/headshot/silo/current`
+const logoSrc = (id) => numericId(id) && `https://www.mlbstatic.com/team-logos/${numericId(id)}.svg`
 
 function initials(name) {
   const parts = (name || '').trim().split(/\s+/)

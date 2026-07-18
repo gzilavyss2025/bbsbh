@@ -20,8 +20,8 @@
 //
 // Runs on a cron (.github/workflows/update-nightly-data.yml); also by hand:
 //   node scripts/gen-game-notes.mjs
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -104,12 +104,10 @@ async function mapWithConcurrency(items, limit, fn) {
 }
 
 // --- main ---------------------------------------------------------------------
-let prev = { notes: {} }
-try {
-  prev = JSON.parse(await readFile(out, 'utf8'))
-} catch {
-  // first run — no archive yet
-}
+// ENOENT → genuine first run; any other read/parse error (a corrupt committed
+// file) must abort, not silently rebuild from only the trailing window and
+// discard the archive this whole job exists to preserve.
+const prev = await readJsonOr(out, { notes: {} })
 
 const teamIds = await fetchMlbTeams()
 const fetched = await mapWithConcurrency(teamIds, 6, async (id) => ({
@@ -126,7 +124,6 @@ for (const row of fetched) {
   added += notes[row.id].length - before
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), notes }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), notes })
 const total = Object.values(notes).reduce((sum, arr) => sum + arr.length, 0)
 console.log(`wrote ${out} — ${total} notes across ${Object.keys(notes).length} teams (+${added} new)`)

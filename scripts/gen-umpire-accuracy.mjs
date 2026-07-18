@@ -69,8 +69,9 @@
 //     gen-run-expectancy.mjs) to reconstruct it. Null/0 when
 //     public/data/run-expectancy.json hasn't been built yet (hand-run, not
 //     nightly) — favor is a bonus figure on top of accuracy, never blocking.
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
@@ -369,12 +370,10 @@ const args = parseArgs(process.argv.slice(2))
 const { startDate, endDate } = dateRange(args)
 const season = Number(endDate.slice(0, 4))
 
-let prev = { umpires: {} }
-try {
-  prev = JSON.parse(await readFile(out, 'utf8'))
-} catch {
-  // first run — no file yet
-}
+// ENOENT → genuine first run; a corrupt committed file must abort rather than
+// silently rebuild the aggregate from only the last few days' finals and drop
+// the season's accumulated history.
+const prev = await readJsonOr(out, { umpires: {} })
 
 // The levels swept, most-senior first. AAA rides along because its parks carry
 // the pitch tracking the score needs (see header); AA/below don't, so they stay
@@ -477,8 +476,7 @@ for (const [id, u] of Object.entries(umpires)) {
   }
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), season, umpires: result }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, umpires: result })
 const gamesTotal = Object.values(result).reduce((n, u) => n + u.games.length, 0)
 console.log(
   `wrote ${out} — ${Object.keys(result).length} umpires, ${gamesTotal} games on file ` +

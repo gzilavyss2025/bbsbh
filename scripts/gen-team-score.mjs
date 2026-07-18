@@ -8,8 +8,8 @@
 // imports) so the team page's "how this is calculated" explainer can run the
 // same math client-side — re-exported here so this script stays the
 // existing import site for test/team-score.test.js.
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   pythagoreanPct,
@@ -200,8 +200,7 @@ async function main() {
     console.log(`${asOf}: ${Object.keys(snapshots).length} MLB team-score snapshots`)
   }
   await dumpGroup(db, 'team-snapshots')
-  await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify(exportJson(db)))
+  await writeJsonAtomic(out, exportJson(db))
   console.log(`wrote ${out}`)
   db.close()
 }

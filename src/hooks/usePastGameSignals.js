@@ -10,12 +10,18 @@ const cache = new Map()
 
 function loadSignals(gamePk) {
   if (!cache.has(gamePk)) {
-    cache.set(
-      gamePk,
-      Promise.all([fetchGameFeed(gamePk), fetchWinProbability(gamePk)]).then(
-        ([feed, winProb]) => ({ feed, winProb }),
-      ),
-    )
+    const pending = Promise.all([
+      fetchGameFeed(gamePk),
+      fetchWinProbability(gamePk),
+    ]).then(([feed, winProb]) => ({ feed, winProb }))
+    // Only a FULFILLED result is the immutable Final we mean to cache for the
+    // tab's lifetime. A transient failure (the flaky-ballpark-connection case)
+    // must NOT stick — evict the rejected promise so the next reveal re-fetches
+    // instead of replaying "Couldn't load this game" forever.
+    pending.catch(() => {
+      if (cache.get(gamePk) === pending) cache.delete(gamePk)
+    })
+    cache.set(gamePk, pending)
   }
   return cache.get(gamePk)
 }

@@ -30,8 +30,8 @@
 //
 // Runs on a cron via .github/workflows/update-nightly-data.yml. Also by hand:
 //   node scripts/gen-rookies.mjs
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
+import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { aggregateSplits } from '../src/api/person.js'
@@ -154,17 +154,17 @@ async function rookieRecordFor(personId, mlbDebutDate, groups) {
 }
 
 // --- main --------------------------------------------------------------------
-let existing = { generatedAt: null, players: {} }
-try {
-  existing = JSON.parse(await readFile(out, 'utf8'))
-} catch {
-  // first run — no file yet; gen-rookies-backfill.mjs should normally run
-  // first, but this degrades to building the file from scratch if not.
-}
+// ENOENT → first run; gen-rookies-backfill.mjs should normally run first, but
+// this degrades to building the file from scratch if not. A corrupt committed
+// file must abort rather than silently rebuild and drop closed records.
+const existing = await readJsonOr(out, { generatedAt: null, players: {} })
 
+// mapConcurrent returns null for a team whose roster fetch failed; keep the run
+// alive by dropping those rows. The optional chain must guard `r` itself (not
+// just `r.person`), or a null row throws here on one transient per-team failure.
 const rosterEntries = (await mapConcurrent(ALL_MLB_TEAM_IDS, 8, (teamId) => fetchFullRoster(teamId)))
   .flat()
-  .filter((r) => r.person?.mlbDebutDate)
+  .filter((r) => r?.person?.mlbDebutDate)
 
 // Only players not already CLOSED — a new debut, or one still open as of the
 // last run. Never re-touch a closed record.
@@ -189,9 +189,8 @@ for (const u of updates) {
   existing.players[id] = rec
 }
 
-await mkdir(dirname(out), { recursive: true })
 existing.generatedAt = new Date().toISOString()
-await writeFile(out, JSON.stringify(existing))
+await writeJsonAtomic(out, existing)
 console.log(
   `wrote ${out} (${Object.keys(existing.players).length} players total, checked ${toCheck.length} open candidates, ${added} newly added, ${closed} newly closed)`,
 )
