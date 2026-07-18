@@ -24,6 +24,7 @@
 //   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
+//   '/team-color-lab'                   -> { name: 'team-color-lab' }  (dev only, unlinked)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
@@ -75,6 +76,9 @@ export function parseRoute(url) {
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
     return { name: 'scorecard-lab' }
+  // Dev-only team-color swatch harness — parsed and rendered, but linked from nowhere.
+  if (parts.length === 1 && parts[0] === 'team-color-lab')
+    return { name: 'team-color-lab' }
   // Unlisted QA page (every club's Game Notes calibration status + a shortcut
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')

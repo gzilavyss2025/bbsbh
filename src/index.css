@@ -6781,6 +6781,146 @@ body {
   line-height: var(--lh-snug);
 }
 
+/* ---------------------------------------------------------- team color lab
+   Dev-only harness (screens/TeamColorLab.jsx) for comparing a club's logo
+   against its known brand colors — the same framed-tile shell as the slate
+   card's .gamecard__logobox, but the fill comes from --tint (set inline per
+   swatch) instead of --paper-1. */
+.colorlab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: 24px;
+}
+
+.colorlab__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.colorlab__teamname {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.colorlab__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* A plain button so a tap can mark the swatch as this team's pick — the
+   rectangle is drawn on this outer element (tile + label + hex together),
+   not just the color tile, so a pick reads as "this whole card", not just a
+   colored square. */
+.colorlab__swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 108px;
+  padding: 6px;
+  border: var(--bw-rule) solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.colorlab__swatch--picked {
+  border-color: var(--accent-positive);
+  background: color-mix(in srgb, var(--accent-positive) 12%, transparent);
+}
+
+/* Claude's suggestion for a team with no pick yet — a distinct orange so it
+   never reads as an actual pick (--picked, above). This color has no
+   semantic-token equivalent elsewhere in the app (a dev-tool-only marker),
+   so it's a literal hex rather than a design-system variable. */
+.colorlab__swatch--recommended {
+  border-color: #e8720c;
+  background: color-mix(in srgb, #e8720c 12%, transparent);
+}
+
+.colorlab__logobox {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  /* A diagonal light-to-dark sweep of the tint itself (not a second color) —
+     reads as a glossy, slightly domed badge instead of a flat paint chip. */
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--tint) 100%, white 22%) 0%,
+    var(--tint) 45%,
+    color-mix(in srgb, var(--tint) 100%, black 20%) 100%
+  );
+  box-shadow: var(--inset-cell);
+}
+
+.colorlab__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(1.32);
+}
+
+/* A handful of clubs' marks are a wide wordmark/script that already reaches
+   close to its own viewBox edges — the default edge-bleed scale above clips
+   those tips. Applied via .colorlab__logobox--loose (see LOOSE_FIT_TEAM_IDS
+   in TeamColorLab.jsx). */
+.colorlab__logobox--loose .teamlogo {
+  transform: scale(1.05);
+}
+
+.colorlab__caption {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.colorlab__hex {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+
+.colorlab__altlabel {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+/* The second (alternate-mark) row is reference-only, not clickable. */
+.colorlab__swatch--static {
+  cursor: default;
+}
+
+/* Alt marks come from mixed sources (vector, raster, mascot photos) unlike
+   the primary logo's uniform CDN art, so this skips the edge-bleed scale
+   treatment (.colorlab__logobox .teamlogo) — a plain contain-fit avoids
+   cropping content that treatment wasn't tuned for. */
+.colorlab__logobox--alt .colorlab__altimg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 /* -------------------------------------------------------------- logo sketch
    Tap a grayscale team mark on a team page to blow it up for pencil tracing.
    Reuses the .scrim backdrop but centers its card instead of docking a sheet. */
