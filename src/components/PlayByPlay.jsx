@@ -47,8 +47,40 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
   // card's diamond (see computeHalfInningFeed's stepCap doc).
-  const entries = computeHalfInningFeed(feed, inning, half, battingSide, stepCap)
-  const exhausted = stepping && entries.length > 0 && stepCap >= entries.length
+  const rawEntries = computeHalfInningFeed(feed, inning, half, battingSide, stepCap)
+  // The very first tap into a fresh half hardcodes stepCap to 1 (InningViewer
+  // has no legitimate way to know what entries[0] is ahead of this render —
+  // computeHalfInningFeed is reveal-only, ADR-0001). If entries[0] is a
+  // leading event note rather than a plate-appearance card, that tap would
+  // otherwise strand the note alone with no batter, unlike every later tap
+  // (which always bundles a leading note forward via nextStepBoundary — see
+  // its own doc). Snap the effective cap forward to the first genuine at-bat
+  // boundary so a fresh half's first tap behaves the same as every later one.
+  const effectiveCap = stepping ? Math.max(stepCap, nextStepBoundary(rawEntries, 0)) : stepCap
+  // entries.push is unconditional in computeHalfInningFeed regardless of
+  // stepCap — stepCap only gates RETROACTIVE writes onto already-pushed
+  // entries (the `visible` check) — so rawEntries' entry KINDS/order above are
+  // trustworthy even from a too-small stepCap, but the array actually used for
+  // display/annotation must come from a call made with the corrected cap, or
+  // the newly-bundled card would render with the right scorebook code and an
+  // empty diamond (its own play's advancement bookkeeping never ran against
+  // the original, too-small cap).
+  const entries =
+    effectiveCap > stepCap
+      ? computeHalfInningFeed(feed, inning, half, battingSide, effectiveCap)
+      : rawEntries
+  // A live, still-updating half can have its ONLY currently-fetched content
+  // be a leading event note with no plate appearance yet (e.g. extra innings'
+  // automatic placed-runner note, posted before the leadoff batter's own PA
+  // has resolved in the feed) — entries.length catching up to effectiveCap in
+  // that state must not read as "the whole half, done," or onStepComplete
+  // below fires a one-directional, localStorage-persisted commit of the
+  // entire half before any real result exists. Require at least one genuine
+  // at-bat card anywhere in entries first; a truly finished half always has
+  // one (an inning needs at least one batter), so this only ever holds back
+  // the live, still-populating edge case.
+  const hasAtBat = entries.some((e) => e.kind === 'atbat')
+  const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -57,10 +89,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     if (exhausted) {
       onStepComplete?.()
     } else {
-      const nextCap = nextStepBoundary(entries, stepCap)
+      const nextCap = nextStepBoundary(entries, effectiveCap)
       onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length })
     }
-  }, [stepping, exhausted, stepCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll the newly revealed at-bat into view on each step (ADR-0016): a
   // step boundary always lands right after a plate-appearance card (see
@@ -71,7 +103,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // very first tap of a still-fully-sealed half (mount at stepCap === 1)
   // always scrolls: that tap is the only visible change on the page (the
   // card appears well below the floating bar the user just tapped), so
-  // without this the tap looks like it did nothing.
+  // without this the tap looks like it did nothing. Compared against the RAW
+  // `stepCap` prop, not `effectiveCap` — this is detecting the user's own tap,
+  // which always arrives as the same raw value regardless of how far it gets
+  // bundled forward for display.
   const lastEntryRef = useRef(null)
   const prevStepCapRef = useRef(stepCap)
   const isFirstRenderRef = useRef(true)
@@ -85,7 +120,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   }, [stepping, stepCap])
 
   if (entries.length === 0) return null
-  const visibleEntries = stepping ? entries.slice(0, stepCap) : entries
+  const visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
@@ -240,6 +275,12 @@ const EVENT_CODES = {
   pickoff_1b: 'PO', pickoff_2b: 'PO', pickoff_3b: 'PO',
   pickoff_caught_stealing_2b: 'PO', pickoff_caught_stealing_3b: 'PO', pickoff_caught_stealing_home: 'PO',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
+  // Not observed as a standalone top-level play in either sampled game (both
+  // always nested inside a real plate appearance) — included for the same
+  // reason every other NON_PA-adjacent code above is, so IF one ever does
+  // surface on its own, it gets this card's real shorthand instead of
+  // EventNote's generic fallback icon.
+  runner_placed: 'RP', defensive_indiff: 'DI',
 }
 
 // The play-by-play prose for a baserunning event (steal, caught stealing, wild

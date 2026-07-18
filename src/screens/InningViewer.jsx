@@ -173,10 +173,32 @@ export function InningViewer({
   // What the NEXT "reveal next at-bat" tap should pass to revealAtBat — null
   // until HalfInning/PlayByPlay has actually computed the half's entries
   // (nothing to report before the first tap, which just starts at 1).
+  // Tagged with the half-index it was computed for (forIdx) and only trusted
+  // when that still matches curIdx, rather than cleared via a separate
+  // `useEffect(..., [curIdx])`: that reset raced against PlayByPlay's own
+  // mount-time report-back effect (a child effect fires before a parent's in
+  // the same commit), so navigating back into an already-partially-stepped
+  // half could have the freshly-computed, correctly-bundled nextCap
+  // immediately clobbered back to null by this component's own reset —
+  // silently reintroducing the exact "stranded lone note" bug PlayByPlay's
+  // effectiveCap fix exists to eliminate, just for the resume case instead of
+  // the fresh-first-tap case. Tagging makes a stale value from a half the
+  // user has since navigated away from self-invalidate on read, with no
+  // separate reset step to race.
   const [stepInfo, setStepInfo] = useState(null)
-  useEffect(() => setStepInfo(null), [curIdx])
+  const curStepInfo = stepInfo?.forIdx === curIdx ? stepInfo : null
+  // The literal `1` for a fresh half's first tap is a starting guess, not a
+  // guarantee: this component has no legitimate way to know whether the
+  // half's first entry is a leading event note rather than a plate
+  // appearance (computeHalfInningFeed is reveal-only, ADR-0001, so it can't
+  // be consulted from here ahead of PlayByPlay's own render). PlayByPlay.jsx
+  // silently corrects an understated cap forward to the first genuine at-bat
+  // boundary on its own — a new stepping entry point that bypasses PlayByPlay
+  // (or calls it in some other way) must preserve that correction itself, or
+  // the "reveal just a lone note" bug this pairing exists to prevent comes
+  // back.
   const revealNextAtBat = () =>
-    revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (stepInfo?.nextCap ?? curAtBatCount + 1))
+    revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
 
   // Where the R/H/E/LOB totals land (Row 3 below) — scrolled into view once
   // a user finishes stepping through a half one at-bat at a time (see
@@ -324,7 +346,7 @@ export function InningViewer({
             vsTeam={vsTeam}
             highlights={highlights}
             revealedAtBatCount={curAtBatCount}
-            onStepInfo={setStepInfo}
+            onStepInfo={(info) => setStepInfo({ ...info, forIdx: curIdx })}
             onSteppedThrough={scrollToStatBox}
           />
         </div>

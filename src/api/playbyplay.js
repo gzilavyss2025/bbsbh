@@ -37,7 +37,8 @@
 //    and how he advanced each leg on a later play (BB/GO/2B…). An out on the
 //    bases (`movement.isOut`) doesn't advance him.
 
-import { personNameParts } from './select.js'
+import { personNameParts, startingPositionAbbr } from './select.js'
+import { defenseEntering } from './defense.js'
 
 // Top-level plays that are baserunning events, not plate appearances: the
 // batter's at-bat continues (or restarts next inning) as its own later play.
@@ -63,6 +64,32 @@ export const NON_PA_EVENT_TYPES = new Set([
 // before first pitch). See api/select.js's selectGameStatus (`isWarmup`) for
 // the structural, spoiler-free notice built from the same detailedState.
 export const GAME_ADVISORY_EVENT_TYPE = 'game_advisory'
+
+// Two more local-only, NON_PA_EVENT_TYPES-adjacent classifications — kept out
+// of the shared set above (also used for PA/BF counting in this file and in
+// pitchers.js/derive.js, where neither belongs) but named here rather than
+// spelled out inline at each call site, so the two lists below can't drift
+// apart from each other without a reader noticing why they differ.
+//
+// BASERUNNING_NOTE_EVENT_TYPES: playEvents[].details.eventType values with no
+// plate appearance of their own that still deserve a baserunning sub-line
+// when they carry a description — every NON_PA_EVENT_TYPES code, plus
+// `runner_placed` (the automatic extra-innings runner, placed on 2nd to begin
+// the half) and `defensive_indiff`. Verified against gamePk 777747's bottom
+// of the 10th (Joey Ortiz's placement, Brice Turang's defensive-indifference
+// advance) — without this, both fell through with no card and no baserunning
+// sub-line, leaving no trace of how a runner got to base.
+//
+// NO_SLOT_CREDIT_EVENT_TYPES: runners[].details.eventType values that are
+// self-driven and credit no batter's plate appearance / lineup slot — every
+// NON_PA_EVENT_TYPES code, plus `defensive_indiff` only. `runner_placed` is
+// deliberately NOT here, and this is not an oversight: verified against the
+// same gamePk 777747, a placed runner's own runners[] movement (when he moves
+// at all) always carries the enclosing play's real result eventType (e.g.
+// 'single'), never 'runner_placed' itself — there is nothing for this list to
+// exclude for that event type.
+export const BASERUNNING_NOTE_EVENT_TYPES = new Set([...NON_PA_EVENT_TYPES, 'runner_placed', 'defensive_indiff'])
+const NO_SLOT_CREDIT_EVENT_TYPES = new Set([...NON_PA_EVENT_TYPES, 'defensive_indiff'])
 
 // Non-pitch playEvents that get their own interstitial note in the feed: mound
 // visits, pitching changes, ejections, and the fielding-side moves (a fresh
@@ -259,27 +286,54 @@ export function hasPitchLocations(pitchDetails) {
   )
 }
 
-function resolveBatter(feed, side, id) {
+// `positionEntering`: his fielding position as of entering the half this card
+// belongs to (see computeHalfInningFeed's own defenseEntering call), when
+// known. Falls back to his own boxscore starting position (startingPositionAbbr)
+// for a player defenseEntering has no fielding assignment for yet — a fresh
+// pinch-hitter's own at-bat card, before he's ever taken the field, or a
+// pitcher (defenseEntering excludes 'P', which has its own table). Using
+// `positionEntering` rather than a flat game-wide constant matters both ways:
+// it must not show a not-yet-revealed FUTURE switch (confirmed against gamePk
+// 823035's José Fermín, LF->3B->2B — his early cards must read LF, not his
+// eventual 2B), and it must not get STUCK on his original entry role once a
+// switch HAS already been revealed elsewhere on the same page (confirmed
+// against gamePk 823035's Jackson Chourio, a pinch-hitter who becomes the
+// left fielder — his cards from the half after that switch is revealed must
+// read LF, not his one-time-only 'PH' entry role, which a flat
+// startingPositionAbbr(box) read would otherwise show forever).
+function resolveBatter(feed, side, id, positionEntering) {
   const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
   const box = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${id}`] ?? {}
   return {
     id,
     fullName: (person.fullName ?? '').trim(),
     ...personNameParts(person),
-    pos: box.position?.abbreviation ?? '',
+    pos: positionEntering ?? startingPositionAbbr(box),
   }
 }
 
 // Strips the batter's own name off the front of an MLB description sentence
 // (they're already named on the card) — descriptions are templated and
-// consistently lead with the exact full name, except for the rare
-// replay-challenge phrasing, so an unmatched prefix just falls back to the
-// untrimmed sentence rather than mangling it.
+// consistently lead with the exact full name, except for a replay-challenge
+// prefix ("Rockies challenged (play at 1st), call on the field was upheld:
+// Tyler Soderstrom singles...", verified against gamePk 778442), where the
+// name sits after a "...: " clause instead of at the very start. Handle that
+// case too — the challenge language stays visible, only the duplicated name
+// is removed — and fall back to the untrimmed sentence rather than mangling
+// it if neither pattern matches.
 function trimLeadingName(description, fullName) {
   if (!description) return ''
-  if (fullName && description.startsWith(fullName)) {
+  if (!fullName) return description
+  if (description.startsWith(fullName)) {
     const rest = description.slice(fullName.length).trim()
     if (rest) return rest.charAt(0).toUpperCase() + rest.slice(1)
+  }
+  const marker = `: ${fullName}`
+  const at = description.indexOf(marker)
+  if (at !== -1) {
+    const before = description.slice(0, at + 1)
+    const after = description.slice(at + marker.length).trim()
+    if (after) return `${before} ${after}`
   }
   return description
 }
@@ -391,6 +445,12 @@ const ADVANCE_CODES = {
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
   field_error: 'E', error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
+  // Verified against gamePk 777747's bottom of the 10th (Brice Turang
+  // 1B->2B during Jackson Chourio's walk): without this entry,
+  // legAdvanceCode fell back to the enclosing play's own result type
+  // ('walk'), mislabeling the advance "BB" as if Chourio's own plate
+  // appearance had driven it.
+  defensive_indiff: 'DI',
 }
 
 function advanceCode(play) {
@@ -498,6 +558,10 @@ function runnerOutCode(play, runnerEntry) {
   if (et.startsWith('caught_stealing')) tag = 'CS'
   else if (et.startsWith('pickoff')) tag = 'PK' // includes pickoff_caught_stealing
   else if (DOUBLE_PLAY_EVENTS.has(et)) tag = 'DP'
+  // Verified against gamePk 778442's top of the 2nd (Jacob Wilson grounds
+  // into a 5-4-3 triple play): each of the two runners retired beyond the
+  // batter carries this eventType on their own runners[] entry.
+  else if (et === 'triple_play') tag = 'TP'
   else if (FORCED_OUT_EVENTS.has(et)) tag = 'FC'
   if (tag) return chain ? `${tag} ${chain}` : tag
   return chain || 'OUT'
@@ -619,6 +683,21 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     (p) => p?.about?.inning === inningNum && p?.about?.halfInning === half,
   )
 
+  // Each batting-side player's own fielding position as of entering THIS
+  // half (see resolveBatter's doc) — a player on this side can only gain a
+  // NEW fielding assignment during a half they're on DEFENSE, i.e. strictly
+  // between halves from this function's point of view, never mid-way through
+  // the batting half being rendered here, so one snapshot per call suffices.
+  // `Infinity` for revealedThrough is safe on the same footing as BoxScore's
+  // own whole-game read (defense.js's doc): this function is reveal-only and
+  // only ever runs inside (inningNum, half)'s own SealBox reveal render, and
+  // defenseEntering itself never looks past that half's first pitch.
+  const positionEntering = new Map()
+  for (const spot of defenseEntering(feed, battingSide, inningNum, half, Infinity) ?? []) {
+    const cur = spot.entries[spot.entries.length - 1]
+    if (cur?.id != null) positionEntering.set(cur.id, spot.position)
+  }
+
   const entries = []
   // batterId -> index of his CURRENT (most recent) atbat card. A batter who
   // bats around comes up more than once in the half; this always points at
@@ -739,7 +818,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
             })
           }
         }
-      } else if (NON_PA_EVENT_TYPES.has(et) && e.details?.description) {
+      } else if (BASERUNNING_NOTE_EVENT_TYPES.has(et) && e.details?.description) {
         // `e.player.id` on a baserunning playEvent is the runner it's about (the
         // stealer / picked-off man) — verified against a live steal — so a
         // leader call-out on a steal can key on the RUNNER, not the batter.
@@ -770,7 +849,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     const runners = play.runners ?? []
 
     if (isRealPA) {
-      const batter = resolveBatter(feed, battingSide, batterId)
+      const batter = resolveBatter(feed, battingSide, batterId, positionEntering.get(batterId))
       const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
       const pitches = pitchEvents.map(pitchCallCode)
       // Per-pitch detail for the strike-zone diagram: plate-crossing location
@@ -958,7 +1037,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         if (base <= (endBase.get(canon)?.base ?? 0)) continue
         const rEt = r.details?.eventType
         const code = legAdvanceCode(play, r)
-        const slot = rEt && NON_PA_EVENT_TYPES.has(rEt) ? null : batterSlot
+        const slot = rEt && NO_SLOT_CREDIT_EVENT_TYPES.has(rEt) ? null : batterSlot
         endBase.set(canon, { base, code, slot })
       }
       // The batter's own natural reach base (his top-of-diamond code already
