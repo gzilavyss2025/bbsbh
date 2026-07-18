@@ -2,13 +2,9 @@ import { useEffect, useState } from 'react'
 import { computeTopPerformers } from '../api/topPerformers.js'
 import { fetchDayRecap, recapForSport } from '../api/dayRecap.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { leagueLogoUrl } from '../lib/teams.js'
-import { useNav } from '../lib/nav.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { SealBox } from './SealBox.jsx'
-import { Headshot } from './Headshot.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PerformerCard } from './PastDayRecapBox.jsx'
 import { Loader } from './Loader.jsx'
 
 // The slate's hidden "kraft box": the day's top 5 batters and top 5 pitchers
@@ -16,69 +12,10 @@ import { Loader } from './Loader.jsx'
 // current level. Score-revealing (see src/api/topPerformers.js), so the whole
 // thing — including the fact it has anything to show — sits behind a SealBox,
 // keyed on date+level so switching either reseals it (same remount-to-reseal
-// pattern InningViewer uses for its own SealBoxes).
-
-function ProspectPill({ entry }) {
-  if (entry.prospectRank) {
-    return (
-      <span className="prospectpill">
-        <img src={leagueLogoUrl()} alt="" className="prospectpill__logo" />
-        #{entry.prospectRank} PROSPECT
-      </span>
-    )
-  }
-  if (entry.orgProspectRank) {
-    return (
-      <span className="prospectpill">
-        <TeamLogo teamId={entry.parentOrgId} name={entry.teamAbbr} size={12} />
-        #{entry.orgProspectRank} PROSPECT
-      </span>
-    )
-  }
-  return null
-}
-
-// The game a performance came from, as a plain score line ("MIL 10, STL 2")
-// linking to that game's (already-sealed) box score — not a PlayerLink/
-// TeamLink, so it navigates directly rather than through LinkScope.
-function GameScoreLink({ game }) {
-  const navigate = useNav()
-  if (!game) return null
-  return (
-    <button
-      type="button"
-      className="plink topperf__score"
-      onClick={() => navigate(game.boxScorePath)}
-    >
-      {game.awayAbbr} {game.awayScore}, {game.homeAbbr} {game.homeScore}
-    </button>
-  )
-}
-
-function PerformerRow({ entry }) {
-  return (
-    <li className="topperf__row">
-      <Headshot personId={entry.id} name={entry.name} teamId={entry.parentOrgId ?? entry.teamId} className="topperf__shot" />
-      <TeamLogo
-        teamId={entry.teamId}
-        name={entry.teamAbbr}
-        size={20}
-        className="topperf__logo"
-      />
-      <div className="topperf__who">
-        <div className="topperf__head">
-          <PlayerLink id={entry.id} className="topperf__name">
-            {entry.name}
-          </PlayerLink>
-          {entry.position && <span className="topperf__pos">{entry.position}</span>}
-          <ProspectPill entry={entry} />
-        </div>
-        <div className="topperf__stat">{entry.stat}</div>
-        <GameScoreLink game={entry.game} />
-      </div>
-    </li>
-  )
-}
+// pattern InningViewer uses for its own SealBoxes). Renders the same
+// .playercard tile (PerformerCard, src/components/PastDayRecapBox.jsx) as the
+// past-day recap's Winners/Losers and the box score's Insights card, so all
+// three "baseball card" surfaces stay one idiom rather than drifting apart.
 
 // Mounted only after reveal → the artifact read starts on reveal, never before.
 // Older dates without an artifact retain the original on-demand fallback.
@@ -126,9 +63,9 @@ function TopPerformersPanel({ games, prospects, dateStr, sportId }) {
         {data.batters.length > 0 && (
           <section className="topperf__section">
             <h3 className="topperf__title">Top Batters</h3>
-            <ul className="topperf__list">
+            <ul className="playercard__list">
               {data.batters.map((e) => (
-                <PerformerRow key={e.id} entry={e} />
+                <PerformerCard key={e.id} entry={e} />
               ))}
             </ul>
           </section>
@@ -136,9 +73,9 @@ function TopPerformersPanel({ games, prospects, dateStr, sportId }) {
         {data.pitchers.length > 0 && (
           <section className="topperf__section">
             <h3 className="topperf__title">Top Pitchers</h3>
-            <ul className="topperf__list">
+            <ul className="playercard__list">
               {data.pitchers.map((e) => (
-                <PerformerRow key={e.id} entry={e} />
+                <PerformerCard key={e.id} entry={e} />
               ))}
             </ul>
           </section>

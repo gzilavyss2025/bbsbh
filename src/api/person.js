@@ -12,6 +12,7 @@
 // a stat at a level OTHER than the game being scored, never that game's own line.
 
 import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
+import { monthDay } from '../lib/dates.js'
 import {
   ipToOuts,
   meetsWorkload,
@@ -390,7 +391,7 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
     .slice(0, limit)
     .map((s) => {
       const st = s.stat ?? {}
-      const md = (s.date || '').slice(5).replace('-', '/').replace(/^0/, '')
+      const md = monthDay(s.date)
       return {
         date: md,
         home: s.isHome,
@@ -1480,6 +1481,22 @@ function assignedDescription(t, fromLevel, toLevel) {
   if (!prefix || !toName || !fromName) return desc
   const withLevel = (name, lvl) => (lvl ? `${name} (${lvl})` : name)
   return `${prefix} assigned to ${withLevel(toName, toLevel)} from ${withLevel(fromName, fromLevel)}.`
+}
+
+// Undrafted / international signees carry no draft record (`personBio`'s
+// `draft` comes back null — see `draftInfo`), so the player page's Draft fact
+// falls back to this: the year of the earliest transaction the raw feed
+// itself labels 'Signed' via TXN_TYPES (SFA/SGN/IFA — free agent, amateur, or
+// international). Reuses the SAME lookup the transaction timeline already
+// applies rather than a second whitelist, so the two can't drift.
+export function signedFallback(transactions) {
+  let earliest = null
+  for (const t of transactions ?? []) {
+    if (TXN_TYPES[t.typeCode]?.label !== 'Signed') continue
+    const date = t.effectiveDate || t.date
+    if (date && (!earliest || date < earliest)) earliest = date
+  }
+  return earliest ? Number(earliest.slice(0, 4)) : null
 }
 
 // Curate + shape the career roster-move ledger. `transactions` is the raw

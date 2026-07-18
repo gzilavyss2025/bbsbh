@@ -178,6 +178,12 @@ async function buildSeason(year) {
   }
 
   const seriesMap = new Map()
+  // A rain/snow-suspended-and-resumed game can appear TWICE in the schedule
+  // pull under the same gamePk — a postponed placeholder row alongside the
+  // real completed record — so this tracks, per gamePk, whether the row
+  // currently kept is the genuine Final one (side channel, not part of the
+  // exported entry shape below).
+  const finalByGamePk = new Map()
   for (const g of games) {
     const key = seriesKeyFor(g)
     if (!seriesMap.has(key)) {
@@ -199,19 +205,25 @@ async function buildSeason(year) {
       homeTeamId: g.teams.home.team.id,
       homeScore: g.teams.home.score ?? null,
     }
-    // A rain-suspended/resumed game can appear TWICE in the schedule pull
-    // under the same gamePk — an unfinished placeholder row (null scores,
-    // occasionally even the wrong seriesGameNumber) alongside the real
-    // completed record. Keep only the scored row per gamePk, or the wins
-    // tally double-counts it (verified: 2009 ALCS Game 6 + 22 other
-    // suspended games across 2004-2022 — `awayScore > homeScore` on a
-    // null/null placeholder resolves to false, silently crediting the
-    // home team a phantom extra win).
+    // Both the placeholder and the real record report `abstractGameState:
+    // "Final"` (why the whole-season gate above doesn't catch this), but
+    // only the genuine completed game carries `codedGameState: "F"` — the
+    // placeholder's is "D" (Postponed). Verified against the real duplicate
+    // rows for 2009 ALCS Game 6 (gamePk 263172) + 22 other suspended games
+    // across 2004-2022: the placeholder's `awayScore`/`homeScore` are null
+    // in every verified case, but `codedGameState` is the actual signal the
+    // API uses to distinguish them, so this keeps the codedGameState==='F'
+    // row regardless of whether a future placeholder ever carries a
+    // non-null partial score instead of null — `awayScore > homeScore` on
+    // a kept placeholder would otherwise silently credit a phantom win.
+    const isFinalRecord = g.status?.codedGameState === 'F'
     const dupIndex = series.games.findIndex((existing) => existing.gamePk === entry.gamePk)
     if (dupIndex === -1) {
       series.games.push(entry)
-    } else if (series.games[dupIndex].awayScore == null && entry.awayScore != null) {
+      finalByGamePk.set(entry.gamePk, isFinalRecord)
+    } else if (isFinalRecord && !finalByGamePk.get(entry.gamePk)) {
       series.games[dupIndex] = entry
+      finalByGamePk.set(entry.gamePk, isFinalRecord)
     }
   }
 

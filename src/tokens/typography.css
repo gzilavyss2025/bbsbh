@@ -21,6 +21,7 @@
   --w-regular: 400;
   --w-semibold: 600;
   --w-bold:    700;
+  --w-black:   900;   /* the slate card's '@' watermark only — see index.css */
 
   /* Type scale — compact, second-screen mobile first. Components consume
      these roles rather than inventing local half-pixel steps. */
@@ -49,6 +50,7 @@
   --fs-hero-lg: 32px;
   --fs-hero-xl: 56px;
   --fs-hero-2xl: 64px;
+  --fs-watermark: 158px;   /* the slate card's '@' watermark only — see index.css */
 
   /* Line heights */
   --lh-zero:   0;

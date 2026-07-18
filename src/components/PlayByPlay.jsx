@@ -5,6 +5,7 @@ import {
   hasPitchLocations,
   firstRunPlay,
   firstPAIndexByBatter,
+  firstRispPAIndexByBatter,
   moundVisitRemainings,
   moundVisitsAllowed,
   pitchingChangePitcher,
@@ -103,12 +104,15 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // here, and only run when a bundle exists (a generated date) — otherwise
   // the cards render exactly as before. `firstRun` marks the play that scored
   // the game's first run; `firstPA` gates each batter's streak/situational/
-  // vs-team notes to his first card of the game; `progress` carries the
-  // per-play in-game counts that keep a note's number current through the
-  // play it sits on (never past it — see the two-tenses rule in
-  // callout-notes.js).
+  // vs-team notes to his first card of the game; `firstRispPA` gates the RISP
+  // note to his first card with a runner actually in scoring position, since
+  // (unlike the others) it reads as a non sequitur on a bases-empty PA;
+  // `progress` carries the per-play in-game counts that keep a note's number
+  // current through the play it sits on (never past it — see the two-tenses
+  // rule in callout-notes.js).
   const firstRun = callouts ? firstRunPlay(feed) : null
   const firstPA = callouts ? firstPAIndexByBatter(feed) : null
+  const firstRispPA = callouts ? firstRispPAIndexByBatter(feed) : null
   const progress = callouts ? computeCalloutProgress(feed) : null
 
   return (
@@ -122,7 +126,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           node = (
             <AtBatCard
               entry={entry}
-              calloutCtx={{ bundle: callouts, firstRun, firstPA, battingSide, vsTeam, progress }}
+              calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
             />
           )

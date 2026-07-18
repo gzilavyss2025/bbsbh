@@ -92,15 +92,24 @@ function ordinal(n) {
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
-// "MIL 5, STL 3" — the leading team is whoever was ahead at the moment of the
-// play (not always the eventual winner for an earlier-game play, but for the
-// game's single most decisive moment it usually is).
+// "MIL 5, STL 3" — comma-joined "ABBR score" pairs, in caller-supplied order.
+// Exported so any other "final score, plain text" spot (e.g. PastDayRecapBox's
+// GameScoreLink) renders the same shape instead of hand-rolling its own.
+export function scorePairsLine(pairs) {
+  return pairs.map(([abbr, score]) => `${abbr} ${score}`).join(', ')
+}
+
+// The leading team is whoever was ahead at the moment of the play (not always
+// the eventual winner for an earlier-game play, but for the game's single
+// most decisive moment it usually is).
 function scoreLine(box, potg) {
   const { awayScore, homeScore } = potg
   if (awayScore == null || homeScore == null) return null
-  const away = `${box.away.abbreviation} ${awayScore}`
-  const home = `${box.home.abbreviation} ${homeScore}`
-  return awayScore >= homeScore ? `${away}, ${home}` : `${home}, ${away}`
+  const pairs = [
+    [box.away.abbreviation, awayScore],
+    [box.home.abbreviation, homeScore],
+  ]
+  return scorePairsLine(awayScore >= homeScore ? pairs : [pairs[1], pairs[0]])
 }
 
 function escapeRegExp(s) {

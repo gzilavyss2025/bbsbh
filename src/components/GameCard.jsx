@@ -45,6 +45,7 @@ export function GameCard({
           card needs its own day, unlike the slate (one date heads the whole
           page). Absent on every ordinary slate card. */}
       {dateLabel && <div className="gamecard__datebanner">{dateLabel}</div>}
+      {pinned && <span className="gamecard__pinbadge" aria-label="Pinned team">★</span>}
       {postponed ? null : status.label ? (
         <span className="gamecard__delay" title={status.reason || undefined}>
           {status.label}
@@ -58,8 +59,15 @@ export function GameCard({
         onClick={() => onSelect(game)}
       >
         <div className="gamecard__teams">
+          {/* A screen-print-style watermark behind both marks rather than a
+              small glyph between them — two offset '@' layers (see
+              .gamecard__atmark in index.css), decorative like the mark it
+              replaces. */}
+          <span className="gamecard__atmark" aria-hidden="true">
+            <span className="gamecard__atmark-ghost">@</span>
+            <span className="gamecard__atmark-ink">@</span>
+          </span>
           <TeamMark team={game.away} side="away" />
-          <span className="gamecard__at" aria-hidden="true">@</span>
           <TeamMark team={game.home} side="home" />
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
@@ -82,7 +90,6 @@ export function GameCard({
               {prospectCount} Prospect{prospectCount === 1 ? '' : 's'}
             </span>
           )}
-          {pinned && <span className="gamecard__pin">★</span>}
           <span className="gamecard__metaright">
             {!postponed && game.abstractState !== 'Final' && (
               <ReadyPill game={game} />
@@ -190,11 +197,19 @@ function ReadyPill({ game }) {
 }
 
 // A team's mark, framed in a uniform bordered square so the two logos read at a
-// consistent size and the '@' lands dead-center between them. The mark is
-// overscaled to bleed to the frame like a printed badge (the tile clips the
-// overflow), the way Caught Looking tiles its club marks. Full color here on the
-// slate — elsewhere (the in-game masthead, the logo sheet) the marks stay
-// grayscale. Sits in the top grid row.
+// consistent size. The mark is overscaled to bleed to the frame like a printed
+// badge (the tile clips the overflow), the way Caught Looking tiles its club
+// marks. Full color here on the slate — elsewhere (the in-game masthead, the
+// logo sheet) the marks stay grayscale. Sits in the top grid row.
+//
+// A per-team tinted tile fill was tried here (first a teamTintColor soft
+// wash, then a hand-picked solid color) and reverted: a dense/large club
+// mark (the Yankees' interlocking NY, at minimum) reads as if it colored the
+// whole tile even against a light fill, needing a design pass before it's
+// worth shipping. The hand-picked color list is preserved in
+// .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md so revisiting
+// this doesn't mean re-deriving it. The tile stays the plain neutral paper
+// fill (.gamecard__logobox's own `background`) until that's resolved.
 function TeamMark({ team, side }) {
   return (
     <div className={`gamecard__logobox gamecard__logobox--${side}`}>

@@ -429,6 +429,14 @@ export function selectGameInfo(feed) {
     officialDate: gameData.datetime?.officialDate ?? '',
     // 'day' | 'night' | '' — lets a card say "starting today" vs "tonight".
     dayNight: gameData.datetime?.dayNight ?? '',
+    // The SCHEDULED start, park-local, pre-formatted by the feed ("6:45 PM") —
+    // unlike `firstPitch` above (boxscore.info, only populated once the game's
+    // under way), this is set from the schedule the moment the game exists, so
+    // it's the one time value available while the lineup still hasn't posted.
+    scheduledTime:
+      gameData.datetime?.time && gameData.datetime?.ampm
+        ? `${gameData.datetime.time} ${gameData.datetime.ampm}`
+        : '',
   }
 }
 

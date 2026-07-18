@@ -118,36 +118,53 @@ const upsertPitching = (db) =>
        strikeouts = postseason_pitching_totals.strikeouts + excluded.strikeouts`,
   )
 
+// The fetch above is the function's only await; everything below runs
+// synchronously, so wrapping it in a transaction can't interleave with
+// another concurrent worker's own transaction (Node's single-threaded — a
+// synchronous block always runs to completion before the next await-yielded
+// task gets a turn). This makes each game's ingest atomic: either every
+// player's upsert AND markGame commit together, or (on a mid-game DB error)
+// none of them do — without this, a killed/errored run could leave some
+// players' totals already added but the game not marked ingested, so a
+// resumed run (the whole point of postseason_ingested_games) would re-add
+// those same players' lines and inflate the public leaderboard.
 async function ingestGame(db, insertBat, insertPitch, markGame, gamePk, season) {
   const box = await getJson(`/api/v1/game/${gamePk}/boxscore`)
-  for (const side of [box.teams?.away, box.teams?.home]) {
-    if (!side) continue
-    const teamId = side.team.id
-    for (const key of Object.keys(side.players ?? {})) {
-      const p = side.players[key]
-      const personId = p.person?.id
-      if (!personId) continue
-      const name = p.person.fullName ?? ''
-      const bat = p.stats?.batting
-      if (bat && (bat.atBats > 0 || bat.plateAppearances > 0)) {
-        insertBat.run(
-          personId, name, teamId, season,
-          bat.atBats ?? 0, bat.runs ?? 0, bat.hits ?? 0, bat.doubles ?? 0, bat.triples ?? 0,
-          bat.homeRuns ?? 0, bat.rbi ?? 0, bat.stolenBases ?? 0, bat.caughtStealing ?? 0,
-          bat.baseOnBalls ?? 0, bat.strikeOuts ?? 0,
-        )
-      }
-      const pitch = p.stats?.pitching
-      if (pitch && pitch.outs > 0) {
-        insertPitch.run(
-          personId, name, teamId, season,
-          pitch.outs ?? 0, pitch.wins ?? 0, pitch.losses ?? 0, pitch.saves ?? 0,
-          pitch.hits ?? 0, pitch.earnedRuns ?? 0, pitch.baseOnBalls ?? 0, pitch.strikeOuts ?? 0,
-        )
+  db.exec('BEGIN')
+  try {
+    for (const side of [box.teams?.away, box.teams?.home]) {
+      if (!side) continue
+      const teamId = side.team.id
+      for (const key of Object.keys(side.players ?? {})) {
+        const p = side.players[key]
+        const personId = p.person?.id
+        if (!personId) continue
+        const name = p.person.fullName ?? ''
+        const bat = p.stats?.batting
+        if (bat && (bat.atBats > 0 || bat.plateAppearances > 0)) {
+          insertBat.run(
+            personId, name, teamId, season,
+            bat.atBats ?? 0, bat.runs ?? 0, bat.hits ?? 0, bat.doubles ?? 0, bat.triples ?? 0,
+            bat.homeRuns ?? 0, bat.rbi ?? 0, bat.stolenBases ?? 0, bat.caughtStealing ?? 0,
+            bat.baseOnBalls ?? 0, bat.strikeOuts ?? 0,
+          )
+        }
+        const pitch = p.stats?.pitching
+        if (pitch && pitch.outs > 0) {
+          insertPitch.run(
+            personId, name, teamId, season,
+            pitch.outs ?? 0, pitch.wins ?? 0, pitch.losses ?? 0, pitch.saves ?? 0,
+            pitch.hits ?? 0, pitch.earnedRuns ?? 0, pitch.baseOnBalls ?? 0, pitch.strikeOuts ?? 0,
+          )
+        }
       }
     }
+    markGame.run(gamePk)
+    db.exec('COMMIT')
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
   }
-  markGame.run(gamePk)
 }
 
 // --- team/award leaders, straight from postseason-history.json (free — no fetch) ---
