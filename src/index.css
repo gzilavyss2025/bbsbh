@@ -5327,18 +5327,14 @@ body {
   align-items: center;
   gap: 12px;
 }
-.statbox--pitchernotice {
-  min-height: 96px;
-  padding: 10px 14px;
-  border-style: solid;
-  border-color: var(--seal-hatch);
-  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
-}
 
-/* The same card in the play-by-play feed, where a pitching change happens
-   mid-inning — a self-contained seal-amber card interleaved with the at-bat
-   cards, so a new arm reads as prominently in the feed as it does in the stat
-   slot (rather than the old plain "Pitching Change: X replaces Y" note line). */
+/* The self-contained seal-amber notification card — the pre-pitch staging
+   cards at the top of a half (a pitching change, a fresh fielder, a
+   pinch-hitter; see HalfInning.jsx's PrePitchChanges) and the same card
+   interleaved with the at-bat cards when a change happens mid-inning
+   (PlayByPlay.jsx), so a new arm/fielder/hitter reads as prominently as the
+   plays around it (rather than the old plain "Pitching Change: X replaces Y"
+   note line). */
 .pitchernotice--pbp {
   margin: 4px 0;
   padding: 10px 12px;

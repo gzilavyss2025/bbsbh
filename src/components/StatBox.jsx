@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { selectPrePitchChanges, selectOfficials } from '../api/select.js'
+import { selectOfficials } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
 import { revealDerived, rollingPitches } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
@@ -7,7 +7,6 @@ import { selectUmpireFavor, hasPitchTracking } from '../api/umpireFavor.js'
 import { resolveCardPlayer } from '../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
-import { PitcherNotice } from './PitcherNotice.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { PerformerCard } from './PastDayRecapBox.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
@@ -44,20 +43,11 @@ function halfStatcastCards(feed, d) {
 // The R/H/E/LOB + pitch-stat summary card for the half being viewed, in row 2
 // beside the win-probability chart — its own coverless seal driven by the same
 // reveal flag as the rest of the half (nothing computed until revealed — the
-// spoiler guard is unchanged). Before reveal, `placeholder` renders nothing —
-// UNLESS a new pitcher is entering this half, in which case that takes over
-// the slot as a notification card instead (a pitching change is
-// pre-pitch/spoiler-free info, same as HalfInning.jsx's PrePitchChanges, and
-// worth a scorer's attention here). Only checked for the IMMEDIATE next half
-// to reveal (`isNextToReveal`) — same gate selectPrePitchChanges relies on
-// elsewhere — so a further-out sealed half never leaks its subs. The teaser
-// itself is gated on `startedRevealing`, not the coarser `revealed` (whole
-// half fully committed) — at-bat stepping (ADR-0016) can start revealing this
-// half's OWN feed while `revealed` is still false, and once it does, a
-// between-halves pitching change already has its own live PitcherNotice card
-// in that feed; leaving this on `!revealed` duplicated it for the entire
-// stepping window instead of just before the first tap (same bug/fix as
-// HalfInning.jsx's PrePitchChanges).
+// spoiler guard is unchanged). Before reveal, `placeholder` renders nothing:
+// the pre-pitch changes entering this half (a new pitcher, a fresh fielder, a
+// pinch-hitter) all stage together as cards at the TOP of the half now (see
+// HalfInning.jsx's PrePitchChanges), rather than the pitching change alone
+// being split off into this stat slot below the lineups.
 export function StatBox({
   feed,
   inning,
@@ -65,33 +55,15 @@ export function StatBox({
   battingSide,
   getDerived,
   revealed,
-  startedRevealing = revealed,
   className = '',
   placeholder = false,
-  pitchingName,
   awayAbbr,
   homeAbbr,
   awayLocation,
   homeLocation,
-  isNextToReveal = false,
   runExpectancy = null,
 }) {
-  if (!revealed && placeholder) {
-    const pitcherChange =
-      isNextToReveal && !startedRevealing
-        ? selectPrePitchChanges(feed, inning, half).find((c) => c.eventType === 'pitching_substitution')
-        : null
-    if (pitcherChange?.pitcher) {
-      return (
-        <PitcherNotice
-          pitcher={pitcherChange.pitcher}
-          teamName={pitchingName}
-          className={`statbox statbox--pitchernotice ${className}`}
-        />
-      )
-    }
-    return null
-  }
+  if (!revealed && placeholder) return null
   return (
     <div className={`statbox ${className}`} key={`${inning}-${half}`}>
       <SealBox forceRevealed={revealed} coverless>
