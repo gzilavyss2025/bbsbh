@@ -1,7 +1,17 @@
+import { lazy, Suspense } from 'react'
 import { TallyLockup } from './TallyBrand.jsx'
 import { SiteSearchButton } from './SiteSearch.jsx'
 import { SiteMenuButton } from './SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
+import { isClerkEnabled } from '../lib/clerkConfig.js'
+
+// AccountButton.jsx imports @clerk/clerk-react at its top, so it's only
+// dynamically imported (and only then does that SDK ever reach a user's
+// device) when a deploy actually configures Clerk — see main.jsx's matching
+// dynamic import and clerkConfig.js.
+const AccountButton = isClerkEnabled
+  ? lazy(() => import('./AccountButton.jsx').then((m) => ({ default: m.AccountButton })))
+  : null
 
 // The Tally wordmark shown atop every screen (except
 // the slate, which is already home) — tapping it returns to '/' with a full
@@ -24,6 +34,11 @@ export function SiteHeader() {
       <div className="sitebar__actions">
         <SiteSearchButton />
         <SiteMenuButton />
+        {AccountButton && (
+          <Suspense fallback={null}>
+            <AccountButton />
+          </Suspense>
+        )}
       </div>
     </div>
   )

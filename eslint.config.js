@@ -63,14 +63,17 @@ export default [
   },
 
   // Edge functions — the crawler-only link-preview layer (api/og.js,
-  // api/preview.js, api/_lib/). Web-platform runtime (fetch/Request/Response/
-  // URL/btoa), no JSX, no React. Not part of the SPA bundle.
+  // api/preview.js, api/_lib/) plus api/reveal.js (multi-device reveal sync,
+  // ADR-0022). Web-platform runtime (fetch/Request/Response/URL/btoa), no
+  // JSX, no React. Not part of the SPA bundle. `process.env` is real here —
+  // Vercel's Edge runtime exposes it for reading configured env vars, even
+  // though it isn't full Node.
   {
     files: ['api/**/*.js'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',
-      globals: { ...globals.browser },
+      globals: { ...globals.browser, process: 'readonly' },
     },
     rules: {
       ...js.configs.recommended.rules,
