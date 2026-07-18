@@ -7,6 +7,8 @@ import { PlayByPlay } from './PlayByPlay.jsx'
 import { PreHalfCallouts } from './PreHalfCallouts.jsx'
 import { EnteringReference } from './EnteringReference.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
+import { PitcherNotice } from './PitcherNotice.jsx'
+import { BatterNotice } from './BatterNotice.jsx'
 
 export function HalfInning({
   feed,
@@ -121,6 +123,7 @@ export function HalfInning({
             feed={feed}
             inning={inning}
             half={half}
+            battingName={battingSide === 'away' ? awayName : homeName}
             pitchingName={battingSide === 'away' ? homeName : awayName}
           />
         )}
@@ -201,33 +204,58 @@ export function HalfInning({
 }
 
 // Subs announced before this half's first pitch — rendered above the SealBox
-// (not inside it), gated by the caller to the half the user is about to
-// reveal. See selectPrePitchChanges for why this is spoiler-free. A pitching
-// substitution is excluded here — it gets its own notification card in row 2's
-// StatBox slot instead (see StatBox.jsx). A defensive sub/switch gets the same
-// "now playing" FielderNotice card as its mid-inning counterpart (PlayByPlay.jsx)
-// — a fresh fielder or a position change is worth exactly as much notice
-// between halves as it is mid-inning, so neither stays a plain list line.
-// Only offensive_substitution (a pinch hitter/runner announced pre-pitch)
-// still falls to the plain list — it's covered by its own at-bat card or
-// PinchRunNotice once the half is revealed.
-function PrePitchChanges({ feed, inning, half, pitchingName }) {
-  const changes = selectPrePitchChanges(feed, inning, half).filter(
-    (c) => c.eventType !== 'pitching_substitution',
-  )
+// (not inside it), gated by the caller to the half the user is about to reveal.
+// See selectPrePitchChanges for why this is spoiler-free. Every entering change
+// stages here as a matching headshot card, in the order it was announced: a
+// pitching change ("now pitching" — PitcherNotice), a fresh fielder or position
+// switch ("now playing" — FielderNotice), and a pinch-hitter ("now batting" —
+// BatterNotice). The pitching change and pinch-hitter used to live elsewhere
+// (the pitching change in row 2's StatBox slot below the lineups, the
+// pinch-hitter as a bare text line); they're all cards at the top now so the
+// pre-pitch staging reads as one consistent group. A pitching/defensive card
+// keys off the PITCHING team, the pinch-hitter off the BATTING team. On reveal
+// each is superseded by its live counterpart — the pitching/defensive change by
+// its own leading feed card, the pinch-hitter by his at-bat card — which is why
+// the caller drops this whole block once stepping starts (startedRevealing).
+// Anything that still can't resolve to a card (e.g. a pre-pitch pinch RUNNER,
+// vanishingly rare) falls to the plain text list.
+function PrePitchChanges({ feed, inning, half, battingName, pitchingName }) {
+  const changes = selectPrePitchChanges(feed, inning, half)
   if (changes.length === 0) return null
-  const cards = changes.filter((c) => c.fielder)
-  const rest = changes.filter((c) => !c.fielder)
+  const cards = changes.filter((c) => c.pitcher || c.fielder || c.batter)
+  const rest = changes.filter((c) => c.text)
   return (
     <div className="prepitch">
-      {cards.map((c, i) => (
-        <FielderNotice
-          key={`f-${i}`}
-          fielder={c.fielder}
-          teamName={pitchingName}
-          className="pitchernotice--pbp"
-        />
-      ))}
+      {cards.map((c, i) => {
+        if (c.pitcher) {
+          return (
+            <PitcherNotice
+              key={`c-${i}`}
+              pitcher={c.pitcher}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
+          )
+        }
+        if (c.batter) {
+          return (
+            <BatterNotice
+              key={`c-${i}`}
+              batter={c.batter}
+              teamName={battingName}
+              className="pitchernotice--pbp"
+            />
+          )
+        }
+        return (
+          <FielderNotice
+            key={`c-${i}`}
+            fielder={c.fielder}
+            teamName={pitchingName}
+            className="pitchernotice--pbp"
+          />
+        )
+      })}
       {rest.length > 0 && (
         <ul className="prepitch__list">
           {rest.map((c, i) => (

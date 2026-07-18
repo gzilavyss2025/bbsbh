@@ -535,6 +535,30 @@ export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infi
             position: POSITION_LOWER[ev.position?.abbreviation] ?? '',
           },
         })
+      } else if (
+        type === 'offensive_substitution' &&
+        ev.player?.id != null &&
+        ev.position?.abbreviation !== 'PR'
+      ) {
+        // A pinch-hitter announced before this half's first pitch gets the same
+        // headshot "now batting" card the fresh fielder/pitcher entries get,
+        // rather than a plain list line — all pre-pitch changes read as matching
+        // cards staged at the top of the half. A pinch RUNNER (position 'PR') is
+        // excluded: he owns no plate appearance and never enters pre-pitch (no
+        // one is aboard at a half's start), so he keeps the text fallback. On
+        // reveal this card is replaced by the pinch-hitter's own at-bat card, so
+        // the caller's startedRevealing gate keeps it from doubling up.
+        const person = players[`ID${ev.player.id}`] ?? {}
+        const { last, first } = personNameParts(person)
+        const name = last ? `${last}${first ? `, ${first}` : ''}` : person.fullName ?? ''
+        changes.push({
+          eventType: type,
+          batter: {
+            id: ev.player.id,
+            name,
+            jersey: boxscoreJersey(feed, ev.player.id) || person.primaryNumber || '',
+          },
+        })
       } else {
         changes.push({ eventType: type, text: ev.details.description })
       }
