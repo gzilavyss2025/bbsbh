@@ -1841,6 +1841,8 @@ body {
   top: 50%;
   left: 50%;
   z-index: 0;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
   font-family: "Big Shoulders Display", var(--font-display);
   font-weight: var(--w-black);
   font-size: var(--fs-watermark);
@@ -1874,6 +1876,8 @@ body {
 .gamecard__logobox {
   position: relative;
   z-index: 1;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
   width: 100%;
   max-width: 108px;
   aspect-ratio: 1 / 1;
@@ -1894,6 +1898,8 @@ body {
   height: 100% !important;
   object-fit: contain;
   border-radius: 0;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
   /* Scaled well past the frame so the mark bleeds to the edges like a printed
      badge; the tile clips the overflow. */
   transform: scale(1.32);
