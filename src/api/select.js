@@ -68,6 +68,19 @@ function otherSide(side) {
   return side === 'away' ? 'home' : 'away'
 }
 
+// A player's STARTING fielding position from a boxscore player record —
+// box.position is his CURRENT/final spot, which for anyone who changed
+// positions mid-game is not where he started (verified against gamePk 823035,
+// 2026-07-07 MIL@STL g2, where a starter's box.position read out his third
+// position of the night). box.allPositions[] lists his positions in the order
+// he played them, so its first entry is the true starting spot; only fall
+// back to box.position for thin MiLB feeds that omit allPositions. Shared by
+// selectLineup below and playbyplay.js's resolveBatter, so this fallback
+// can't drift between the two read paths again (see ADR-0005).
+export function startingPositionAbbr(box) {
+  return box?.allPositions?.[0]?.abbreviation ?? box?.position?.abbreviation ?? ''
+}
+
 // Whether a player is a pitcher BY TRADE (primary position, two-way players
 // included), not by what he happens to be doing in this game. Roster-card
 // membership must key on this: a bench catcher mopping up a blowout gets an
@@ -204,14 +217,9 @@ export function selectLineup(feed, side /* 'away' | 'home' */) {
       nameLastFirst: lastFirst(person.fullName ? person : box.person),
       last: lastName(person.fullName ? person : box.person),
       jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
-      // box.position is the player's CURRENT/final fielding spot, which for
-      // anyone who changed positions mid-game is NOT where he started —
-      // verified against gamePk 823035 (2026-07-07 MIL@STL g2), where a
-      // starter's box.position read out his third position of the night.
-      // box.allPositions[] is the same player's positions in the order he
-      // played them, so its first entry is the true starting spot; only fall
-      // back to box.position for thin MiLB feeds that omit allPositions.
-      position: box.allPositions?.[0]?.abbreviation ?? box.position?.abbreviation ?? '',
+      // See startingPositionAbbr above: box.position is the player's CURRENT/
+      // final fielding spot, not necessarily where he started.
+      position: startingPositionAbbr(box),
     }
   })
 }
