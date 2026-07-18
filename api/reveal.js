@@ -13,7 +13,13 @@
 import { verifyToken } from '@clerk/backend'
 import { Redis } from '@upstash/redis'
 
-export const config = { runtime: 'edge' }
+// Node.js runtime, NOT edge (unlike og.js/preview.js) — @clerk/backend's
+// verifyToken pulls in @clerk/shared internals that Vercel's edge sandbox
+// rejects outright (confirmed live: NOW_SANDBOX_WORKER_EDGE_FUNCTION_UNSUPPORTED_MODULES,
+// deployment dpl_F3DPPSY3uQvXPyecXSRMVhwPCWtw). The handler below still uses
+// the Web-standard Request/Response shape, which Vercel's Node.js runtime
+// supports the same as edge — only the `config.runtime` value changes.
+export const config = { runtime: 'nodejs' }
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
