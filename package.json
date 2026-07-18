@@ -22,7 +22,7 @@
     "check:typography": "node scripts/check-typography.mjs",
     "check:claude-md": "node scripts/check-claude-md.mjs",
     "lint:fix": "eslint . --fix",
-    "test": "node --test",
+    "test": "node --test \"test/**/*.test.js\"",
     "e2e": "playwright test"
   },
   "dependencies": {
