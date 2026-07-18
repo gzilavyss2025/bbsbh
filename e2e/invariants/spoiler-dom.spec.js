@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixtures.js'
 
 // The core invariant (CLAUDE.md: "the whole point of the app"): a sealed
 // value must not exist in the DOM pre-reveal, not merely be hidden by CSS.

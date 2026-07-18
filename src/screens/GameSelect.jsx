@@ -53,6 +53,20 @@ function readLevel() {
   }
 }
 
+// Testing escape hatch: `?nointro` on any slate URL suppresses the first-visit
+// welcome modal for that load, so an automated test (or a manual spot-check)
+// can hit the site with a cleared localStorage without the modal covering the
+// screen. Only affects the modal — the favorite-team default still applies —
+// and it's a one-load query flag, never persisted, so a shared link doesn't
+// carry it forward.
+function welcomeSuppressed() {
+  try {
+    return new URLSearchParams(window.location.search).has('nointro')
+  } catch {
+    return false
+  }
+}
+
 // Screen 1: pick a game. A single level's slate for the chosen date, sorted
 // soonest → latest (the favorite team pinned to the top), with a LIVE pill on
 // any game in progress. Level is toggled with the thin buttons up top; no
@@ -63,7 +77,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const [sportId, setSportId] = useState(readLevel)
   const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
   const { gameScoreVisible, setGameScoreVisible } = useGameScoreVisible()
-  const [showWelcome, setShowWelcome] = useState(isFirstVisit)
+  const [showWelcome, setShowWelcome] = useState(isFirstVisit && !welcomeSuppressed())
   const pickLevel = (id) => {
     setSportId(id)
     try {

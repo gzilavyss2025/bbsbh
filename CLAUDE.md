@@ -48,7 +48,9 @@ in the final handoff so the next context can resume safely.
 
 For user-visible changes, start the first free reserved localhost dev server,
 verify the exact changed route, keep it running, and include that clickable local
-URL in the final handoff. See `docs/development.md` for the full workflow.
+URL in the final handoff. **Append `?nointro` to any test URL** so the first-visit
+welcome modal doesn't cover the slate (e2e specs get it via `e2e/fixtures.js`).
+See `docs/development.md` for the full workflow.
 
 ## Commands
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixtures.js'
 
 // The `revealedThrough` high-water mark (InningViewer.jsx): persists per
 // gamePk to localStorage so returning to a game re-reveals only up to where

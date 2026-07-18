@@ -2910,6 +2910,21 @@ body {
   margin-top: var(--space-4);
 }
 
+/* Account "why sign in" panel in the welcome/settings modal (AccountPitch.jsx),
+   shown only when Clerk is configured. The pitch prose sits above a full-width
+   ink-navy button matching .btn--next; the signed-in confirmation reuses the
+   same prose block, no button. */
+.favteamsheet__accountpitch {
+  margin: 0 0 var(--space-3);
+}
+.btn--account {
+  width: 100%;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
+}
+
 /* Extra edge padding on the picker strip so even the alphabetical extremes
    (first/last club) can scroll all the way to center — without it, the
    native scrollLeft clamps at the content edge and an edge pick (e.g. the

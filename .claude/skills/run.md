@@ -5,6 +5,14 @@ description: Launch bbsbh's dev server and drive it with Playwright to verify a 
 
 # Running and verifying bbsbh
 
+> **Always append `?nointro` when loading the app to test.** On a fresh/cleared
+> localStorage the first-visit welcome modal pops on the slate (`/`,
+> `/{MMDDYYYY}`), covers the screen, and steals focus — `?nointro` suppresses it
+> for that load (see `GameSelect.jsx` `welcomeSuppressed`, `docs/development.md`).
+> Playwright specs get it for free: import `test`/`expect` from `e2e/fixtures.js`
+> (never `@playwright/test` directly) and every `page.goto`/`reload` carries it
+> automatically. Harmless on non-slate routes, so use it everywhere.
+
 This is a phone-first PWA with no backend — every screen fetches live from
 `statsapi.mlb.com`. There's no test suite (see CLAUDE.md); verification means
 actually loading screens in a browser. This skill exists to cut the token/time
@@ -59,8 +67,9 @@ npm run dev     # binds :5173 (strictPort — fails loudly instead of drifting t
 ```
 
 Ready when the terminal prints `ready in`. Navigate directly to
-`http://localhost:5173/{route}` — don't hit `/` and click through if you
-already know the route (see below). Kill the server when done
+`http://localhost:5173/{route}?nointro` — don't hit `/` and click through if you
+already know the route (see below), and keep the `?nointro` flag so the welcome
+modal never blocks the first-visit slate. Kill the server when done
 (`run_in_background` + stop, or Ctrl-C) — don't leave it orphaned across
 turns, it'll collide with the next `strictPort` start.
 

@@ -117,14 +117,33 @@ git fetch origin --prune
 Never use forced removal for a dirty worktree and never delete a branch whose
 unmerged work has not been pushed or explicitly abandoned by the maintainer.
 
+## Testing the app: always append `?nointro`
+
+On a fresh or cleared `localStorage`, the first-visit welcome modal
+(`FavoriteTeamModal` in `intro` mode) pops on the slate (`/`, `/{MMDDYYYY}`),
+covers the screen, and steals focus. When you load the app to test or verify —
+the home slate **or any other route** — append `?nointro` to the URL. It's a
+one-load query flag (`GameSelect.jsx` `welcomeSuppressed`), never persisted, so
+it doesn't leak into shared links, and it's harmless on non-slate routes since
+routing parses the pathname only — so use it everywhere by habit.
+
+- **Playwright** (`npm run e2e`, `npx playwright test`): import `test`/`expect`
+  from `e2e/fixtures.js`, never `@playwright/test` directly. The fixture rewrites
+  every `page.goto`/`page.reload` to carry `?nointro` automatically, so no spec
+  can forget.
+- **Manual / curl / MCP-driven**: put `?nointro` on the URL yourself, e.g.
+  `http://localhost:5173/?nointro`. A SessionStart hook reminds every session,
+  and a `Bash` PreToolUse advisory hook (`.claude/hooks/remind-nointro.mjs`)
+  nudges if a slate URL slips through without it.
+
 ## Local visual handoff
 
 For every user-visible change:
 
 - Run the relevant checks and start the first free reserved server: `npm run dev`,
   then `npm run dev:2` through `dev:5` if another agent owns the earlier port.
-- Verify the exact route that demonstrates the change. Keep the server running so
-  the maintainer can inspect it after the handoff.
+- Verify the exact route that demonstrates the change (with `?nointro`, per above).
+  Keep the server running so the maintainer can inspect it after the handoff.
 - End the final message with a clickable example URL, not merely the server root;
   for example, `http://localhost:5172/team/158` for a Brewers team-page change.
 
