@@ -24,7 +24,10 @@
 //      checkpoint's raw {w,l} tally past the sample floor — the live "leading
 //      after the 8th" strip and the box score's "moved to 18-2" note need the
 //      record however it reads, and need numbers (not a display string) to
-//      fold tonight's result in client-side. That walk also tallies
+//      fold tonight's result in client-side. The same walk also writes
+//      `tiedAfterFull` — the club's {w,l} when TIED after the 6th/7th/8th (a
+//      coin-flip situation, so numbers-only like leadAfterFull, no lopsidedness
+//      floor; see TIED_CHECKPOINTS). That walk also tallies
 //      `inningRuns` — season runs scored/allowed per inning 1–9 (plus how many
 //      games sampled), the "run differential by inning" note's data
 //      ("outscored opponents 38-14 in the 7th").
@@ -197,6 +200,16 @@ const HOMER_LOPSIDED = 0.7 // win% ≥ .700 or ≤ .300
 const LEAD_CHECKPOINTS = [6, 7, 8, 9]
 const LEAD_MIN_GAMES = 5
 const LEAD_LOPSIDED = 0.85 // win% ≥ .85 or ≤ .15
+
+// The companion to LEAD_CHECKPOINTS for games that were TIED (not led) after a
+// completed inning — "the Brewers are 12-9 this season when tied after the 7th".
+// A coin-flip situation, so no lopsidedness floor (leadAfterFull's shape, not
+// leadAfter's): the record itself is the point, however it reads. Ends at the
+// 8th — a tie after the 9th is the start of extra innings, which the app never
+// surfaces up front (ADR-0008). Read by buildTiedAfterNote /
+// buildTiedAfterHeldNotes in src/api/callout-notes.js.
+const TIED_CHECKPOINTS = [6, 7, 8]
+const TIED_MIN_GAMES = 5
 
 // Run-total buckets for "win% when scoring N+ runs" — unlike LEAD_LOPSIDED
 // above, this isn't hunting for a reversal, so no lopsidedness floor: the
@@ -426,6 +439,8 @@ async function scoringRecord(teamId, sportId) {
   let cbW = 0, cbL = 0 // comeback: trailed by COMEBACK_DEFICIT+ at some point
   const leadTally = {} // inning num -> { w, l }
   for (const n of LEAD_CHECKPOINTS) leadTally[n] = { w: 0, l: 0 }
+  const tiedTally = {} // inning num -> { w, l } (tied after that inning)
+  for (const n of TIED_CHECKPOINTS) tiedTally[n] = { w: 0, l: 0 }
   const raTally = {} // inning num -> { w, l } (allowed RUNS_ALLOWED_THRESHOLD+ by that inning)
   for (const n of RUNS_ALLOWED_CHECKPOINTS) raTally[n] = { w: 0, l: 0 }
   const rsTally = {} // run bucket -> { w, l } (scored bucket+ runs, final)
@@ -483,6 +498,8 @@ async function scoringRecord(teamId, sportId) {
       if (inn.num !== walkoffInning) {
         const bucket = leadTally[inn.num]
         if (bucket && meRuns > oppRuns) won ? bucket.w++ : bucket.l++
+        const tiedBucket = tiedTally[inn.num]
+        if (tiedBucket && meRuns === oppRuns) won ? tiedBucket.w++ : tiedBucket.l++
         const raBucket = raTally[inn.num]
         if (raBucket && oppRuns >= RUNS_ALLOWED_THRESHOLD) won ? raBucket.w++ : raBucket.l++
       }
@@ -515,6 +532,15 @@ async function scoringRecord(teamId, sportId) {
     if (pct >= LEAD_LOPSIDED || pct <= 1 - LEAD_LOPSIDED) leadAfter[n] = `${w}-${l}`
   }
 
+  // Record when tied after a completed inning — numbers only (no lopsidedness
+  // floor), the shape the live strip + box-score fold-in note need.
+  const tiedAfterFull = {}
+  for (const n of TIED_CHECKPOINTS) {
+    const { w, l } = tiedTally[n]
+    if (w + l < TIED_MIN_GAMES) continue
+    tiedAfterFull[n] = { w, l }
+  }
+
   const inningRuns = {}
   for (let n = 1; n <= INNING_RUNS_MAX; n++) {
     const { f, a, g: played } = runsTally[n]
@@ -545,6 +571,7 @@ async function scoringRecord(teamId, sportId) {
     opponentScoringFirst: `${osW}-${osL}`,
     leadAfter,
     leadAfterFull,
+    tiedAfterFull,
     inningRuns,
     runsScored,
     runsAllowedByInning,

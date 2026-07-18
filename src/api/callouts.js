@@ -77,6 +77,7 @@ export async function fetchCallouts(urlDate) {
 //     teamRecords:{ away:{extraInning,oneRun (MLB only — standings splits),
 //       scoringFirst,opponentScoringFirst,
 //       leadAfter:{[inning]:'W-L'}, leadAfterFull:{[inning]:{w,l}},
+//       tiedAfterFull:{[inning]:{w,l}} (record when tied after 6/7/8),
 //       inningRuns:{[inning]:{f,a,g}} (runs for/against + games sampled,
 //       innings 1–9), runsScored:{[bucket]:'W-L'},
 //       runsAllowedByInning:{[inning]:'W-L'}, comeback}, home:{…} } }
