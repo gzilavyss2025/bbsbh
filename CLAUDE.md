@@ -60,7 +60,9 @@ npm run dev        # dev server (fixed port 5173, strictPort)
 npm run build      # production build → dist/
 npm run preview    # serve the built app
 npm run lint       # eslint . && check-caps.mjs && check-claude-md.mjs
-npm run e2e        # playwright test — verification harness, not a CI suite
+npm test           # node:test unit suite (pure logic; CI-gated)
+npm run test:coverage  # same, with a per-file coverage report
+npm run e2e        # playwright test — browser verification harness, not CI-gated
 ```
 
 **Reserved dev ports (multi-agent safe).** `dev`/`preview` stay on
@@ -73,10 +75,13 @@ sibling repo tally-nfl's reserved `5174-5178`/`4174-4178`.
 
 The `node scripts/gen-*.mjs` data generators (WAR, rehab, umpires, callouts,
 vs-team-splits, game-notes, minors-leaders, milb-history, …) are documented in
-`scripts/CLAUDE.md`. There is no CI-enforced *test* suite; verify by running
-`npm run dev` / `npm run e2e` against a live or recent game. `docs/test-games.md`
-has verified gamePks with rare in-game events; `.claude/skills/run.md` documents
-the loop.
+`scripts/CLAUDE.md`. The `npm test` unit suite (`test/*.test.js`, CI-gated) covers
+the pure data layer — the reveal-only derivations, the spoiler gates, routing, and
+the run-expectancy/tiering math — including the spoiler invariant pinned on a
+captured real-game feed (`docs/testing.md`). It is not a substitute for the
+browser-level check: for anything user-visible also verify by running `npm run dev`
+/ `npm run e2e` against a live or recent game. `docs/test-games.md` has verified
+gamePks with rare in-game events; `.claude/skills/run.md` documents the loop.
 
 ## The spoiler rule — the core invariant
 

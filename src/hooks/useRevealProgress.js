@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { halfIndex } from '../api/select.js'
 import { computeDerivedByInning } from '../api/derive.js'
+import {
+  parseRevealMark,
+  parseAtBatMark,
+  mergeMark,
+  unlockedInnings,
+} from './revealProgressCore.js'
 
 // localStorage key prefix + reader for the per-game reveal high-water mark.
+// The parse/merge/unlock rules are the React-free core in revealProgressCore.js
+// (unit-tested there); this hook owns only the storage I/O and React wiring.
 const REVEAL_KEY = 'bbsbh:reveal:'
 function readRevealMark(storageKey) {
   if (!storageKey) return -1
   try {
-    const raw = window.localStorage.getItem(storageKey)
-    if (raw == null) return -1
-    const n = Number(raw)
-    return Number.isInteger(n) && n >= 0 ? n : -1
+    return parseRevealMark(window.localStorage.getItem(storageKey))
   } catch {
     return -1
   }
@@ -28,13 +33,7 @@ const ATBAT_KEY = 'bbsbh:reveal-atbat:'
 function readAtBatMark(storageKey) {
   if (!storageKey) return { halfIdx: -1, count: 0 }
   try {
-    const raw = window.localStorage.getItem(storageKey)
-    if (raw == null) return { halfIdx: -1, count: 0 }
-    const [h, c] = raw.split(':').map(Number)
-    if (!Number.isInteger(h) || !Number.isInteger(c) || h < 0 || c < 0) {
-      return { halfIdx: -1, count: 0 }
-    }
-    return { halfIdx: h, count: c }
+    return parseAtBatMark(window.localStorage.getItem(storageKey))
   } catch {
     return { halfIdx: -1, count: 0 }
   }
@@ -72,7 +71,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
   // so every caller pushing in an externally-sourced value goes through the
   // same one-directional guarantee instead of re-implementing it.
   const mergeRevealedThrough = useCallback((idx) => {
-    setRevealedThrough((prev) => (idx > prev ? idx : prev))
+    setRevealedThrough((prev) => mergeMark(prev, idx))
   }, [])
 
   const revealTo = useCallback(
@@ -106,8 +105,9 @@ export function useRevealProgress(feed, regulation, actualCount) {
     if (!storageKey) return
     function onStorage(e) {
       if (e.key !== storageKey) return
-      const n = e.newValue == null ? -1 : Number(e.newValue)
-      if (Number.isInteger(n) && n >= 0) mergeRevealedThrough(n)
+      // Same parse + forward-only merge as every other reveal source: a null
+      // or malformed newValue parses to -1, which the ratchet ignores.
+      mergeRevealedThrough(parseRevealMark(e.newValue))
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -128,11 +128,10 @@ export function useRevealProgress(feed, regulation, actualCount) {
 
   // How many innings are currently visible: regulation, plus one more for each
   // extra inning whose predecessor has already been fully revealed.
-  const unlocked = useMemo(() => {
-    let u = regulation
-    while (u < actualCount && revealedThrough >= halfIndex(u, 'bottom')) u++
-    return u
-  }, [regulation, actualCount, revealedThrough])
+  const unlocked = useMemo(
+    () => unlockedInnings(regulation, actualCount, revealedThrough),
+    [regulation, actualCount, revealedThrough],
+  )
 
   // Derived stats (pitches/whiffs/1st-pitch strikes) are parsed lazily and
   // cached: the map is only built the first time a box is actually revealed.

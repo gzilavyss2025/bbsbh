@@ -23,6 +23,7 @@
     "check:claude-md": "node scripts/check-claude-md.mjs",
     "lint:fix": "eslint . --fix",
     "test": "node --test \"test/**/*.test.js\"",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"scripts/**\" \"test/**/*.test.js\"",
     "e2e": "playwright test"
   },
   "dependencies": {
