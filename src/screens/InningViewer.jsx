@@ -72,6 +72,24 @@ export function InningViewer({
   const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat } =
     useRevealProgress(feed, regulation, actualCount)
 
+  // The spoiler-free identity the cloud scorebook index stores alongside the
+  // high-water mark (see api/reveal.js + ContinueScoring.jsx): enough to draw
+  // a "pick up your pencil" card on the slate — never a score. Field paths
+  // match what selectTeamMeta/selectGameBanner already read off gameData.
+  const gameSnapshot = useMemo(() => {
+    const gd = feed?.gameData
+    if (!gd) return null
+    return {
+      date: gd.datetime?.officialDate ?? '',
+      away: gd.teams?.away?.abbreviation ?? '',
+      home: gd.teams?.home?.abbreviation ?? '',
+      awayName: gd.teams?.away?.clubName ?? gd.teams?.away?.teamName ?? '',
+      homeName: gd.teams?.home?.clubName ?? gd.teams?.home?.teamName ?? '',
+      gameNumber: gd.game?.gameNumber ?? 1,
+      regulation,
+    }
+  }, [feed, regulation])
+
   // Only mounted when multi-device sync is configured (see clerkConfig.js) —
   // a conditionally-rendered component rather than a conditionally-called
   // hook, since Clerk's hooks require a ClerkProvider ancestor that only
@@ -83,6 +101,7 @@ export function InningViewer({
         gamePk={feed?.gamePk}
         revealedThrough={revealedThrough}
         mergeRevealedThrough={mergeRevealedThrough}
+        game={gameSnapshot}
       />
     </Suspense>
   )

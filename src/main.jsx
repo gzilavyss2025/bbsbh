@@ -16,9 +16,18 @@ async function mount() {
   const root = createRoot(document.getElementById('root'))
   let content = <App />
   if (isClerkEnabled) {
-    const { ClerkProvider } = await import('@clerk/clerk-react')
+    // clerkAppearance.js rides the same dynamic gate: it only ever loads
+    // alongside the SDK it themes.
+    const [{ ClerkProvider }, { clerkAppearance, clerkLocalization }] = await Promise.all([
+      import('@clerk/clerk-react'),
+      import('./lib/clerkAppearance.js'),
+    ])
     content = (
-      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+      <ClerkProvider
+        publishableKey={CLERK_PUBLISHABLE_KEY}
+        appearance={clerkAppearance}
+        localization={clerkLocalization}
+      >
         <App />
       </ClerkProvider>
     )

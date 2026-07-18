@@ -15,7 +15,12 @@ import { useAuth } from '@clerk/clerk-react'
 // useRevealProgress.js). Whenever the local mark advances, POST it so other
 // devices pick it up the same way. A signed-out user never calls
 // /api/reveal at all — everything behaves exactly as it does today.
-export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough }) {
+// `game` is an optional spoiler-free snapshot (date, team abbreviations/club
+// names, doubleheader number, regulation length — see InningViewer's
+// gameSnapshot) that rides along on the POST so the server can keep the
+// cloud scorebook index (the slate's "pick up your pencil" strip,
+// ContinueScoring.jsx) without ever refetching a feed. Never a score.
+export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough, game = null }) {
   const { isSignedIn, getToken } = useAuth()
   const lastPosted = useRef(-1)
 
@@ -58,7 +63,7 @@ export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough 
         await fetch(`/api/reveal?gamePk=${gamePk}`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ revealedThrough }),
+          body: JSON.stringify(game ? { revealedThrough, game } : { revealedThrough }),
         })
         lastPosted.current = revealedThrough
       } catch {
@@ -69,7 +74,7 @@ export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough 
     return () => {
       cancelled = true
     }
-  }, [isSignedIn, gamePk, revealedThrough, getToken])
+  }, [isSignedIn, gamePk, revealedThrough, getToken, game])
 
   return null
 }

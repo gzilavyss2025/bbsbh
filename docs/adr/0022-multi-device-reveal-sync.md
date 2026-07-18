@@ -79,3 +79,29 @@ one that runs on Node.js rather than edge (see above); unlike
 static fallback — an auth or KV outage means that request's sync attempt is
 skipped, caught by `RevealCloudSync.jsx`'s try/catch, and the device simply
 falls back to whatever `localStorage` already has.
+
+## Amendment: branding, the cloud scorebook index, and dev vs. production keys
+
+- **Branding.** Every Clerk-rendered surface (sign-in modal, UserButton menu)
+  is themed to the scorebook design system via `src/lib/clerkAppearance.js`
+  (`variables` = concrete hex mirroring `src/tokens/colors.css`, since Clerk
+  derives shades from them; `elements` = our own class names styled with the
+  real tokens in `src/index.css`). Signed in, the header avatar shows the
+  user's favorite-team logo instead of Clerk's photo — a visual overlay in
+  `AccountButton.jsx`, nothing uploaded to Clerk.
+- **The cloud scorebook index** (`scorebook:{userId}` hash in the same Redis)
+  extends the exception by the same rule: alongside each ratcheted
+  `revealedThrough` POST, the client sends a spoiler-free game snapshot
+  (date, team abbreviations/club names, doubleheader number, regulation
+  length — validated server-side, capped at 24 entries). `GET
+  /api/reveal?recent=1` lists them for the slate's signed-in "Pick up your
+  pencil" strip (`ContinueScoring.jsx`), which deep-links to the next half to
+  reveal without fetching a feed. Still never a score.
+- **"Development mode" watermark.** A Clerk *development instance*
+  (`pk_test_…`/`sk_test_…` keys) watermarks its components with a
+  "Development mode" banner and caps users. It is removed by creating a
+  **production instance** in the Clerk dashboard (requires the real domain +
+  the CNAME records Clerk prescribes), then swapping
+  `VITE_CLERK_PUBLISHABLE_KEY`/`CLERK_SECRET_KEY` in Vercel's Production
+  environment for the `pk_live_…`/`sk_live_…` pair. Upstash has no
+  dev/production split — the same Redis database serves both.

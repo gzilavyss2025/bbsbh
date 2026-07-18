@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -18,12 +18,23 @@ import { TallyLockup } from '../components/TallyBrand.jsx'
 import { SiteSearchButton } from '../components/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
+import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 import { PastDayRecapBox } from '../components/PastDayRecapBox.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+
+// Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
+// use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
+// ever fetched — let alone rendered — on a deploy without Clerk configured.
+const AccountButton = isClerkEnabled
+  ? lazy(() => import('../components/AccountButton.jsx').then((m) => ({ default: m.AccountButton })))
+  : null
+const ContinueScoring = isClerkEnabled
+  ? lazy(() => import('../components/ContinueScoring.jsx').then((m) => ({ default: m.ContinueScoring })))
+  : null
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
 // all season shouldn't reset to MLB every time they come back). The date
@@ -257,6 +268,11 @@ export function GameSelect({ onPick, onShowLogos }) {
             <LevelNav sportId={sportId} onChange={pickLevel} />
             <SiteSearchButton className="topbar__search" />
             <SiteMenuButton className="topbar__search" />
+            {AccountButton && (
+              <Suspense fallback={null}>
+                <AccountButton />
+              </Suspense>
+            )}
           </div>
         </header>
 
@@ -283,6 +299,15 @@ export function GameSelect({ onPick, onShowLogos }) {
           </button>
         </div>
       </div>
+
+      {/* Signed-in only, and only when the cloud scorebook has entries —
+          renders null otherwise, so the slate is untouched for everyone
+          else. See ContinueScoring.jsx. */}
+      {ContinueScoring && (
+        <Suspense fallback={null}>
+          <ContinueScoring />
+        </Suspense>
+      )}
 
       <AsyncStatus
         loading={loading}
