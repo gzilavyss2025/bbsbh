@@ -1688,12 +1688,16 @@ body {
   font-size: var(--fs-watermark);
   line-height: var(--lh-solid);
   pointer-events: none;
-  transform: translate(-50%, -50%) skewX(-8deg) rotate(-2deg);
+  /* This face's '@' carries more descent than ascent, so centering the line
+     box (top: 50% + -50% translate) alone left the glyph's own ink sitting
+     low and its tail clipped by .gamecard__teams' overflow: hidden. The
+     extra -12px nudges the visible ink, not just the box, to the center. */
+  transform: translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg);
 }
 .gamecard__atmark-ghost {
   color: var(--seal);
   opacity: 0.1;
-  transform: translate(calc(-50% + 2px), calc(-50% + 1px)) skewX(-8deg) rotate(-2deg);
+  transform: translate(calc(-50% + 2px), calc(-50% - 11px)) skewX(-8deg) rotate(-2deg);
 }
 .gamecard__atmark-ink {
   color: var(--navy);
