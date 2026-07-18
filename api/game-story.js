@@ -10,13 +10,17 @@
 //
 // A team's feed mixes everything they publish (trades, roster moves, season
 // features) with actual game coverage, and RSS carries no gamePk tag to
-// disambiguate — so this windows each feed to [first pitch, final out + 2h]
+// disambiguate — so this windows each feed to [first pitch, final out + 4h]
 // and takes every item published in that span as "about this game". Verified
 // live 2026-07-17 against gamePk 823440 (NYM @ PHI): the Mets' recap and a
 // same-game Soto-injury note both landed ~2h after the final out (not within
 // 1h, hence the wider buffer), while the Phillies' own recap-style piece
 // landed ~50min after — publish timing varies enough across teams/writers
-// that 1h would miss legitimate recaps.
+// that 1h would miss legitimate recaps. Widened from 2h to 4h after gamePk
+// 823766 (MIA @ MIL, 2026-07-17): the Brewers' walk-off recap landed 2h07m
+// after the final out, 7 minutes past the old 2h buffer — a walk-off's
+// recap runs late often enough (extra postgame interview time for the
+// deciding play) that 2h isn't a safe margin.
 //
 // Degrades to an empty list on any failure (feed not final yet, an RSS fetch
 // timing out, an unrecognized team) — never breaks the box score.
@@ -24,7 +28,7 @@
 export const config = { runtime: 'edge' }
 
 const MLB = 'https://statsapi.mlb.com'
-const WINDOW_BUFFER_MS = 2 * 60 * 60 * 1000
+const WINDOW_BUFFER_MS = 4 * 60 * 60 * 1000
 
 // A handful of mlb.com pages are rolling trackers, not dated articles — their
 // RSS pubDate is bumped on every edit, so a stale one can drift inside a
