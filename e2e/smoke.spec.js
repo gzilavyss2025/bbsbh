@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures.js'
 
 // Long-lived example (see .claude/skills/run.md) — not a regression suite,
 // just a template + a basic "did the app load and stay sealed" sanity check

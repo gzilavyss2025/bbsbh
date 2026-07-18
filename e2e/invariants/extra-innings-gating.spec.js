@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixtures.js'
 
 // Extra innings never spoil (InningViewer.jsx): an inning past regulation
 // only unlocks once the prior inning's bottom is revealed, so the running

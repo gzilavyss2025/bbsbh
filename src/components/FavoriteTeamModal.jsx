@@ -1,8 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { fetchTeams } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
 import { TeamLogo } from './TeamLogo.jsx'
+
+// Same lazy gate as GameSelect/SiteHeader: AccountPitch imports
+// @clerk/clerk-react at its top, so it's never fetched — let alone rendered —
+// on a deploy without Clerk configured (see clerkConfig.js). Rendered in both
+// the intro welcome modal and the footer's Settings modal.
+const AccountPitch = isClerkEnabled
+  ? lazy(() => import('./AccountPitch.jsx').then((m) => ({ default: m.AccountPitch })))
+  : null
 
 // Settings modal, shared by the first-visit welcome flow (GameSelect, `intro`)
 // and the footer's "Settings" button: the favorite-team picker plus the Game
@@ -170,6 +179,12 @@ export function FavoriteTeamModal({
               </button>
             </div>
           </section>
+        )}
+
+        {AccountPitch && (
+          <Suspense fallback={null}>
+            <AccountPitch />
+          </Suspense>
         )}
 
         {intro && (
