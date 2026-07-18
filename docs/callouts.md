@@ -51,6 +51,7 @@ table together.
 | onBaseExtended | 45 | + min(15, streak+1 − 8) |
 | onBaseRiding | 40 | + min(15, streak − 8) |
 | leadHeld / leadAfterLive | 40 | + 40 × skew |
+| tiedAfter / tiedAfterLive | 40 | + 40 × skew |
 | starterRec | 40 | + 40 × skew |
 | vsTeam | 40 | + min(15, 15 × (angle strength − 1)) |
 | leader (hits/SB) | 35 | + min(15, count / 4) |
@@ -144,6 +145,15 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   tonight after N−1 + their season record at that checkpoint
   (`leadAfterFull`, ≥ 5 games). Self-gates on `revealedThrough` covering
   inning N−1 (ADR-0014).
+- **tiedAfterLive** — the tied-game sibling of `leadAfterLive`: entering top of
+  inning N (checkpoints 6–8 only — a tie after the 9th is extra innings, never
+  surfaced up front) when the game is level after N−1, BOTH clubs' season
+  record when tied at that checkpoint (`tiedAfterFull`, ≥ 5 games, no
+  lopsidedness floor). "The Brewers are 12-9 this season when tied after the
+  7th." Same `revealedThrough` self-gate as leadAfterLive (ADR-0014). Roll-up
+  (`tiedAfter`, both clubs) folds tonight's result in once Final — "moved to
+  13-9…" for the winner, "dropped to 8-11…" for the loser — latest checkpoint
+  only, via `buildTiedAfterHeldNotes`.
 - **inningRunDiff** — entering an inning's top half: either club's season
   runs for/against in that inning (`inningRuns`) when noteworthy — ≥ 15
   games sampled, margin ≥ 12, and a 2× dominance ratio. Roll-up shows each

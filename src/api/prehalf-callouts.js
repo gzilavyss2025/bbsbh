@@ -8,11 +8,13 @@
 //      club's starter, bottom = the away club's). Season aggregate joined to
 //      the PROBABLE starter (gameData.probablePitchers — staged pre-game),
 //      both spoiler-free.
-//   2. Leading after the previous inning (top halves, 2nd inning on) — "The
-//      Brewers are 17-2 this season when leading after the 8th", for whichever
-//      club actually leads tonight. WHO leads is read off tonight's linescore,
-//      which is score-revealing — so this note is CALLER-GATED the same way
-//      the entering-lineup selectors are: it only computes once every inning
+//   2. Record after the previous inning (top halves, 2nd inning on) — "The
+//      Brewers are 17-2 this season when leading after the 8th" for whichever
+//      club leads tonight, or "…12-9 when tied after the 7th" for BOTH clubs
+//      when the game is level (checkpoints 6–8 only for the tied variant). WHO
+//      leads / that it's tied is read off tonight's linescore, which is
+//      score-revealing — so this note is CALLER-GATED the same way the
+//      entering-lineup selectors are: it only computes once every inning
 //      through N-1 sits at or under the reveal mark (`revealedThrough`),
 //      i.e. the reader has already seen the score it restates. The gate lives
 //      HERE, not in the component, so no future caller can skip it.
@@ -38,6 +40,7 @@ import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
   buildLeadingAfterNote,
+  buildTiedAfterNote,
   buildInningRunDiffNote,
   buildThirdTimeThroughNote,
 } from './callout-notes.js'
@@ -57,16 +60,24 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
     if (note) notes.push(note)
   }
 
-  // 2. Tonight's leader entering this inning + their season record at that
-  // checkpoint. Only for a top half (the checkpoint is "after a full inning"),
-  // and only once the whole previous inning is revealed — the defense-in-depth
-  // gate this module exists to own.
+  // 2. Tonight's record entering this inning at that checkpoint — the leader's
+  // "when leading after the Nth" if one club is ahead, or BOTH clubs' "when
+  // tied after the Nth" if they're level (a tie has no single leader to phrase,
+  // so each club gets its own note). Only for a top half (the checkpoint is
+  // "after a full inning"), and only once the whole previous inning is revealed
+  // — the defense-in-depth gate this module exists to own, since knowing who
+  // leads / that it's tied restates tonight's already-seen score.
   if (half === 'top' && inning >= 2 && halfIndex(inning - 1, 'bottom') <= revealedThrough) {
     const row = cumulativeInnings(feed).find((r) => r.inning === inning - 1)
     if (row && row.cumAway !== row.cumHome) {
       const side = row.cumAway > row.cumHome ? 'away' : 'home'
       const note = buildLeadingAfterNote(bundle, side, inning - 1)
       if (note) notes.push(note)
+    } else if (row) {
+      for (const side of ['away', 'home']) {
+        const note = buildTiedAfterNote(bundle, side, inning - 1)
+        if (note) notes.push(note)
+      }
     }
   }
 

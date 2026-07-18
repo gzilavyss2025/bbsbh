@@ -85,6 +85,7 @@ const SCORE_BASE = {
   onBaseExtended: 45,
   onBaseRiding: 40,
   leadHeld: 40,
+  tiedAfter: 40,
   starterRec: 40,
   vsTeam: 40,
   leader: 35,
@@ -778,6 +779,11 @@ export function cumulativeInnings(feed) {
 // after both the 7th and the 8th only gets the more dramatic (later) note, not
 // both. Mirrors gen-callouts.mjs's LEAD_CHECKPOINTS.
 const LEAD_CHECKPOINTS = [9, 8, 7, 6]
+// The tied-game checkpoints (gen-callouts.mjs's TIED_CHECKPOINTS), latest first
+// for the same "most dramatic wins" rule — a game tied after both the 7th and
+// the 8th gets only the 8th's note. No 9th: a tie after the 9th is extra
+// innings, which never surfaces up front (ADR-0008).
+const TIED_CHECKPOINTS = [8, 7, 6]
 
 // Which side led after each completed inning — 'away' | 'home' | null (tied),
 // keyed by inning number. Shared by the reversal + lead-held notes below.
@@ -845,6 +851,28 @@ export function buildLeadingAfterNote(bundle, side, inning) {
     kind: 'leadAfterLive',
     dedupeKey: `leadAfterLive-${side}-${inning}`,
     score: clampScore(SCORE_BASE.leadHeld + 40 * skew(rec.w, rec.l)),
+  }
+}
+
+// "The Brewers are 12-9 this season when tied after the 7th" — the tied-game
+// sibling of buildLeadingAfterNote, for the pre-half strip once the reader has
+// revealed through inning N and both clubs sat level. Unlike the leading-after
+// note there's no single leader to phrase, so the caller fires this for BOTH
+// clubs; each carries its own record. Same caller-gate: prehalf-callouts.js
+// only invokes it once inning N is revealed, since knowing the game was tied
+// there restates already-seen material. The bundle only carries keys 6–8
+// (TIED_CHECKPOINTS), so any other inning returns null.
+export function buildTiedAfterNote(bundle, side, inning) {
+  const rec = bundle?.teamRecords?.[side]?.tiedAfterFull?.[inning]
+  const teamName = bundle?.[side]?.name
+  if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
+  return {
+    text: `The ${teamName} are ${rec.w}-${rec.l} this season when tied after the ${ordinal(inning)}`,
+    personId: null,
+    side,
+    kind: 'tiedAfterLive',
+    dedupeKey: `tiedAfterLive-${side}-${inning}`,
+    score: clampScore(SCORE_BASE.tiedAfter + 40 * skew(rec.w, rec.l)),
   }
 }
 
@@ -979,6 +1007,38 @@ export function buildLeadHeldNote(feed, bundle, result) {
     }
   }
   return null
+}
+
+// The tied-game companion to buildLeadHeldNote: a game decided from a tie after
+// checkpoint N moves BOTH clubs' "when tied after the Nth" record — the winner
+// up, the loser down — so unlike the one-sided lead-held note this returns a
+// note per club, each folded with tonight's result (foldedRecordText handles
+// the "moved to"/"dropped to"/"just the Nth loss" voice). Result-aware, so
+// FINAL-ONLY; the box score's roll-up is the only caller. Latest checkpoint
+// wins, same rule as buildLeadHeldNote; reads the ungated `tiedAfterFull`
+// tallies so it fires however the record reads.
+export function buildTiedAfterHeldNotes(feed, bundle, result) {
+  if (!bundle || !result?.final) return []
+  const leaderAt = leaderAfterInnings(feed)
+  for (const n of TIED_CHECKPOINTS) {
+    if (leaderAt[n] !== null) continue // not tied after n (or n never reached)
+    const notes = []
+    for (const side of ['away', 'home']) {
+      const rec = bundle.teamRecords?.[side]?.tiedAfterFull?.[n]
+      const teamName = bundle[side]?.name
+      if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) continue
+      notes.push({
+        text: foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, `when tied after the ${ordinal(n)}`),
+        personId: null,
+        side,
+        kind: 'tiedAfter',
+        dedupeKey: `tiedAfter-${side}-${n}`,
+        score: clampScore(SCORE_BASE.tiedAfter + 40 * skew(rec.w, rec.l)),
+      })
+    }
+    return notes
+  }
+  return []
 }
 
 // These three thresholds/checkpoint lists must match gen-callouts.mjs's
@@ -1422,6 +1482,7 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
 
   add(buildLeadReversalNote(feed, bundle))
   add(buildLeadHeldNote(feed, bundle, result))
+  for (const note of buildTiedAfterHeldNotes(feed, bundle, result)) add(note)
   add(buildRunsScoredNote(feed, bundle, result))
   add(buildRunsAllowedNote(feed, bundle, result))
   add(buildComebackNote(feed, bundle, result))
