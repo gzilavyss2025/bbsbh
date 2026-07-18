@@ -10,6 +10,7 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
 const OUT = `${ROOT}/public/data/first-scorebook.json`
 const SCORE_FILE = `${ROOT}/public/data/game-score.json`
 const API = 'https://statsapi.mlb.com'
+const SEASON = 2026
 
 const ENTRIES = [
   ['2026-05-18', 'Brewers', 9, 'Cubs', 3],
@@ -85,6 +86,46 @@ const lineForBatter = (s) => {
 }
 const lineForPitcher = (s) => `${s.inningsPitched ?? '0.0'} IP, ${s.hits ?? 0} H, ${s.runs ?? 0} R, ${s.baseOnBalls ?? 0} BB, ${s.strikeOuts ?? 0} K`
 
+// Bounded-concurrency map — statsapi starts failing a large chunk of requests
+// once a few hundred are in flight at once, so a plain Promise.all(items.map)
+// over a full season's worth of boxscore fetches isn't reliable.
+async function mapLimit(items, limit, fn) {
+  const results = new Array(items.length)
+  let cursor = 0
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor++
+      results[index] = await fn(items[index])
+    }
+  }
+  await Promise.all(Array.from({ length: limit }, worker))
+  return results
+}
+
+// League-wide Game Score context for the book's pitching nuggets: every 2026
+// MLB starting pitcher's Bill James Game Score, so a start in the scorebook
+// can be placed against the whole season rather than just the other 31 in
+// the book. Boxscore-only (not the full live feed) keeps ~1,500 fetches fast.
+async function fetchLeagueStarterGameScores() {
+  const asOf = new Date().toISOString().slice(0, 10)
+  const schedule = await fetchJson(`/api/v1/schedule?sportId=1&startDate=${SEASON}-01-01&endDate=${asOf}&gameType=R`)
+  const gamePks = (schedule.dates ?? [])
+    .flatMap((d) => d.games ?? [])
+    .filter((g) => g.status?.abstractGameState === 'Final')
+    .map((g) => g.gamePk)
+  const boxscores = await mapLimit(gamePks, 40, (gamePk) => fetchJson(`/api/v1/game/${gamePk}/boxscore`).catch(() => null))
+  const scores = []
+  for (const box of boxscores) {
+    if (!box) continue
+    for (const side of ['away', 'home']) {
+      const starter = Object.values(box.teams?.[side]?.players ?? {}).find((bp) => bp.stats?.pitching?.gamesStarted === 1)
+      if (starter) scores.push(Math.round(pitcherGameScore(starter.stats.pitching)))
+    }
+  }
+  scores.sort((a, b) => a - b)
+  return { season: SEASON, asOf, count: scores.length, scores }
+}
+
 async function main() {
   const localScores = JSON.parse(await readFile(SCORE_FILE, 'utf8')).scores ?? {}
   const dates = [...new Set(ENTRIES.map(([date]) => date))]
@@ -108,12 +149,16 @@ async function main() {
     return { date, winner, winnerScore, loser, loserScore, gamePk: match.gamePk }
   })
 
-  const feeds = await Promise.all(resolved.map((g) => fetchJson(`/api/v1.1/game/${g.gamePk}/feed/live`)))
-  const winProbs = await Promise.all(resolved.map((g) => fetchJson(`/api/v1/game/${g.gamePk}/winProbability`).catch(() => [])))
+  const [feeds, winProbs, leagueStarterGameScores] = await Promise.all([
+    Promise.all(resolved.map((g) => fetchJson(`/api/v1.1/game/${g.gamePk}/feed/live`))),
+    Promise.all(resolved.map((g) => fetchJson(`/api/v1/game/${g.gamePk}/winProbability`).catch(() => []))),
+    fetchLeagueStarterGameScores(),
+  ])
   const playerTotals = new Map()
   const performances = []
   const moments = []
   const teamRecords = new Map()
+  const brewersStarts = []
 
   const games = resolved.map((listed, index) => {
     const feed = feeds[index]
@@ -151,6 +196,45 @@ async function main() {
         if (appearedBatting) performances.push({ type: 'batting', score, gamePk: listed.gamePk, date: listed.date, name: bp.person.fullName, playerId: id, team: team.abbreviation, teamId: team.id, line: lineForBatter(batting) })
         if (appearedPitching) performances.push({ type: 'pitching', score, gamePk: listed.gamePk, date: listed.date, name: bp.person.fullName, playerId: id, team: team.abbreviation, teamId: team.id, line: lineForPitcher(pitching), pitcherGameScore: pitcherGameScore(pitching) })
       }
+    }
+
+    for (const side of ['away', 'home']) {
+      const team = gd.teams[side]
+      if (team.id !== 158) continue
+      const starter = Object.values(box.teams[side].players ?? {}).find((bp) => bp.stats?.pitching?.gamesStarted === 1)
+      if (!starter) continue
+      const s = starter.stats.pitching
+      const oppSide = side === 'away' ? 'home' : 'away'
+      const opponent = gd.teams[oppSide]
+      const teamRuns = side === 'away' ? awayRuns : homeRuns
+      const oppRuns = side === 'away' ? homeRuns : awayRuns
+      const decisionWinnerId = feed.liveData.decisions?.winner?.id
+      const decisionLoserId = feed.liveData.decisions?.loser?.id
+      const decision = starter.person.id === decisionWinnerId ? 'W' : starter.person.id === decisionLoserId ? 'L' : 'ND'
+      brewersStarts.push({
+        playerId: starter.person.id,
+        name: starter.person.fullName,
+        gamePk: listed.gamePk,
+        date: listed.date,
+        opponent: opponent.clubName ?? opponent.name,
+        opponentId: opponent.id,
+        opponentAbbr: opponent.abbreviation,
+        ip: s.inningsPitched ?? '0.0',
+        outs: ipOuts(s.inningsPitched),
+        h: s.hits ?? 0,
+        r: s.runs ?? 0,
+        er: s.earnedRuns ?? 0,
+        bb: s.baseOnBalls ?? 0,
+        k: s.strikeOuts ?? 0,
+        hr: s.homeRuns ?? 0,
+        decision,
+        teamRuns,
+        oppRuns,
+        teamWin: winnerId === 158,
+        gameScore: pitcherGameScore(s),
+        completeGame: (s.completeGames ?? 0) > 0,
+        shutout: (s.shutouts ?? 0) > 0,
+      })
     }
 
     const wp = winProbs[index] ?? []
@@ -219,10 +303,12 @@ async function main() {
     moments: moments.filter((m) => m.description).sort((a, b) => b.swing - a.swing).slice(0, 12),
     battingLeaders: battingLeaders.slice(0, 12),
     pitchingLeaders: pitchingLeaders.slice(0, 12),
+    brewersStarts: brewersStarts.sort((a, b) => a.date.localeCompare(b.date)),
+    leagueStarterGameScores,
   }
   await mkdir(dirname(OUT), { recursive: true })
   await writeFile(OUT, `${JSON.stringify(output)}\n`)
-  console.log(`Wrote ${OUT}: ${games.length} games, ${players.length} players`)
+  console.log(`Wrote ${OUT}: ${games.length} games, ${players.length} players, ${leagueStarterGameScores.count} league starts scored`)
 }
 
 main().catch((error) => {

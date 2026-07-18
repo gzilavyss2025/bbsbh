@@ -20,6 +20,26 @@ function gameTitle(game) {
   return `${game.away.abbreviation} ${game.away.runs}, ${game.home.abbreviation} ${game.home.runs}`
 }
 
+function leagueGameScoreContext(sortedScores, value) {
+  if (!sortedScores?.length) return null
+  const count = sortedScores.length
+  let lo = 0
+  let hi = count
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1
+    if (sortedScores[mid] < value) lo = mid + 1
+    else hi = mid
+  }
+  const atOrAbove = count - lo
+  return { count, atOrAbove, percentile: (lo / count) * 100 }
+}
+
+function leagueRankPhrase(ctx, season) {
+  if (!ctx) return ''
+  if (ctx.atOrAbove <= 1) return `the single best-pitched start by any starting pitcher in the majors all ${season} season, out of ${ctx.count.toLocaleString()} starts`
+  return `better than ${ctx.percentile.toFixed(1)}% of the ${ctx.count.toLocaleString()} starts thrown across the majors this season`
+}
+
 function gameNote(game) {
   const total = game.away.runs + game.home.runs
   const margin = Math.abs(game.away.runs - game.home.runs)
@@ -68,6 +88,125 @@ export function FirstScorebookPage() {
     if (logFilter === 'close') return data.games.filter((game) => Math.abs(game.away.runs - game.home.runs) === 1)
     return data.games
   }, [data, logFilter])
+
+  const rotation = useMemo(() => {
+    if (!data) return []
+    const byPitcher = new Map()
+    for (const start of data.brewersStarts) {
+      const pitcher = byPitcher.get(start.playerId) ?? { id: start.playerId, name: start.name, starts: [] }
+      pitcher.starts.push(start)
+      byPitcher.set(start.playerId, pitcher)
+    }
+    return [...byPitcher.values()]
+      .map((pitcher) => {
+        const outs = pitcher.starts.reduce((n, s) => n + s.outs, 0)
+        const earnedRuns = pitcher.starts.reduce((n, s) => n + s.er, 0)
+        const walks = pitcher.starts.reduce((n, s) => n + s.bb, 0)
+        const hits = pitcher.starts.reduce((n, s) => n + s.h, 0)
+        const teamWins = pitcher.starts.filter((s) => s.teamWin).length
+        return {
+          ...pitcher,
+          gamesStarted: pitcher.starts.length,
+          wins: pitcher.starts.filter((s) => s.decision === 'W').length,
+          losses: pitcher.starts.filter((s) => s.decision === 'L').length,
+          teamWins,
+          teamLosses: pitcher.starts.length - teamWins,
+          strikeOuts: pitcher.starts.reduce((n, s) => n + s.k, 0),
+          inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+          era: outs ? (earnedRuns * 9) / (outs / 3) : 0,
+          whip: outs ? (walks + hits) / (outs / 3) : 0,
+        }
+      })
+      .sort((a, b) => b.gamesStarted - a.gamesStarted || a.era - b.era)
+  }, [data])
+
+  const rotationTotals = useMemo(() => {
+    if (!data?.brewersStarts?.length) return null
+    const starts = data.brewersStarts
+    const outs = starts.reduce((n, s) => n + s.outs, 0)
+    const earnedRuns = starts.reduce((n, s) => n + s.er, 0)
+    const teamWins = starts.filter((s) => s.teamWin).length
+    return {
+      arms: rotation.length,
+      starts: starts.length,
+      inningsPitched: `${Math.floor(outs / 3)}.${outs % 3}`,
+      era: (earnedRuns * 9) / (outs / 3),
+      strikeOuts: starts.reduce((n, s) => n + s.k, 0),
+      teamWins,
+      teamLosses: starts.length - teamWins,
+    }
+  }, [data, rotation])
+
+  const starterNuggets = useMemo(() => {
+    if (!data?.brewersStarts?.length || !rotationTotals) return []
+    const starts = data.brewersStarts
+    const league = data.leagueStarterGameScores
+    const bestStart = [...starts].sort((a, b) => b.gameScore - a.gameScore)[0]
+    const noDecisions = starts.filter((s) => s.decision === 'ND')
+    const hardLuck = noDecisions.length ? [...noDecisions].sort((a, b) => b.gameScore - a.gameScore)[0] : null
+    const workhorse = [...rotation].filter((p) => p.gamesStarted >= 4).sort((a, b) => (b.gamesStarted - b.wins - b.losses) - (a.gamesStarted - a.wins - a.losses))[0]
+    const tightest = [...rotation].filter((p) => p.gamesStarted >= 2).sort((a, b) => a.whip - b.whip)[0]
+    const bestStartLeague = leagueGameScoreContext(league?.scores, bestStart.gameScore)
+    const hardLuckLeague = hardLuck ? leagueGameScoreContext(league?.scores, hardLuck.gameScore) : null
+    const nuggets = [
+      {
+        key: 'best',
+        stat: bestStart.gameScore.toFixed(0),
+        label: 'Game Score',
+        headline: 'The one for the scrapbook',
+        body: `${bestStart.name}’s start against the ${bestStart.opponent} on ${dateLabel(bestStart.date, true)} is the best in the book — ${bestStart.ip} IP, ${bestStart.h} H, ${bestStart.bb} BB, ${bestStart.k} K${bestStart.shutout ? ', a shutout' : ''}${bestStart.completeGame ? ', and the only complete game a Brewers starter finished all summer.' : '.'} ${bestStartLeague ? `Leaguewide, it’s ${leagueRankPhrase(bestStartLeague, league.season)}.` : ''}`,
+      },
+      {
+        key: 'rotation',
+        stat: rotationTotals.era.toFixed(2),
+        label: 'Rotation ERA',
+        headline: 'The full arsenal',
+        body: `${rotationTotals.arms} different arms started for Milwaukee across these ${rotationTotals.starts} games and combined for a ${rotationTotals.era.toFixed(2)} ERA over ${rotationTotals.inningsPitched} innings with ${rotationTotals.strikeOuts} strikeouts. The Brewers went ${rotationTotals.teamWins}–${rotationTotals.teamLosses} in games their starter took the ball — the same record as the book itself.`,
+      },
+    ]
+    if (league?.scores?.length) {
+      const eliteThreshold = league.scores[Math.floor(0.9 * league.scores.length)]
+      const eliteStarts = starts.filter((s) => s.gameScore >= eliteThreshold).length
+      const bookAverage = starts.reduce((n, s) => n + s.gameScore, 0) / starts.length
+      const leagueAverage = league.scores.reduce((n, s) => n + s, 0) / league.scores.length
+      nuggets.push({
+        key: 'field',
+        stat: `${eliteStarts}/${starts.length}`,
+        label: 'Elite starts',
+        headline: 'Against the field',
+        body: `${eliteStarts} of the Brewers’ ${starts.length} starts in this book scored a Game Score of at least ${eliteThreshold} — the top 10% of all ${league.count.toLocaleString()} starts thrown across the majors in ${league.season}. The book’s starts averaged a ${bookAverage.toFixed(1)} Game Score, well above the ${leagueAverage.toFixed(1)} league average.`,
+      })
+    }
+    if (hardLuck) {
+      nuggets.push({
+        key: 'hardluck',
+        stat: hardLuck.gameScore.toFixed(0),
+        label: 'Game Score',
+        headline: 'Best start with nothing to show for it',
+        body: `${hardLuck.name} against the ${hardLuck.opponent} on ${dateLabel(hardLuck.date, true)} — ${hardLuck.ip} IP, ${hardLuck.h} H, ${hardLuck.bb} BB, ${hardLuck.k} K — is the best-pitched start in the book that still ended in a no-decision. The bullpen took it from there in a game Milwaukee ${hardLuck.teamWin ? 'eventually won' : 'let get away'}, ${hardLuck.teamRuns}–${hardLuck.oppRuns}.${hardLuckLeague ? ` It was still ${leagueRankPhrase(hardLuckLeague, league.season)}.` : ''}`,
+      })
+    }
+    if (workhorse) {
+      const decisions = workhorse.wins + workhorse.losses
+      nuggets.push({
+        key: 'workhorse',
+        stat: String(workhorse.gamesStarted),
+        label: 'Starts',
+        headline: `${workhorse.name}, the iron arm`,
+        body: `${workhorse.name} made more starts than anyone in the book (${workhorse.gamesStarted}) but left with a decision only ${decisions} time${decisions === 1 ? '' : 's'} — his own line reads ${workhorse.wins}–${workhorse.losses}, even though Milwaukee went ${workhorse.teamWins}–${workhorse.teamLosses} on the days he started.`,
+      })
+    }
+    if (tightest && tightest.id !== bestStart.playerId) {
+      nuggets.push({
+        key: 'tightest',
+        stat: tightest.whip.toFixed(2),
+        label: 'WHIP',
+        headline: `${tightest.name}’s tight ship`,
+        body: `Across ${tightest.gamesStarted} starts and ${tightest.inningsPitched} innings, ${tightest.name} posted the stingiest WHIP of any Brewers starter in the book at ${tightest.whip.toFixed(2)} — command that clean is rare even in a small sample.`,
+      })
+    }
+    return nuggets
+  }, [data, rotation, rotationTotals])
 
   if (archive.loading && !data) {
     return <div className="screen"><Loader /></div>
@@ -227,6 +366,40 @@ export function FirstScorebookPage() {
             })}
           </div>
         </div>
+      </section>
+
+      <section className="scorebookstory__section">
+        <SectionHead
+          eyebrow="Arm by arm"
+          title="The Brewers’ rotation"
+          note="Every pitcher who started for Milwaukee in these pages — his record, the team’s record behind him, and his ERA in those starts alone."
+        />
+        <div className="scorebookstory__leaders">
+          <h3>Starting pitchers</h3>
+          <div className="scorebookstory__leaderhead"><span>Pitcher</span><span>GS</span><span>Record</span><span>Team</span><span>ERA</span></div>
+          {rotation.map((pitcher) => (
+            <div className="scorebookstory__leaderrow" key={pitcher.id}>
+              <span><TeamLogo teamId={158} name="Brewers" size={20} /><b>{pitcher.name}</b><small>{pitcher.inningsPitched} IP</small></span>
+              <span>{pitcher.gamesStarted}</span>
+              <span>{pitcher.wins}–{pitcher.losses}</span>
+              <span>{pitcher.teamWins}–{pitcher.teamLosses}</span>
+              <span>{pitcher.era.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+        {starterNuggets.length > 0 && (
+          <div className="scorebookstory__nuggets">
+            {starterNuggets.map((nugget) => (
+              <article className="scorebookstory__nugget" key={nugget.key}>
+                <span className="scorebookstory__nuggetstat">{nugget.stat}<small>{nugget.label}</small></span>
+                <div>
+                  <strong>{nugget.headline}</strong>
+                  <p className="scorebookstory__prose">{nugget.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="scorebookstory__section">
