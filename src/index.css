@@ -462,6 +462,164 @@ body {
   background: var(--surface-inset);
 }
 
+/* Signed-in avatar = favorite-team logo (see AccountButton.jsx). Clerk's
+   UserButton stays the real, clickable trigger; its own avatar image is
+   faded out and our logo sits on top of the same box, taps passing through.
+   The box gets a paper inset + hairline rule so any logo (dark or light)
+   reads against the header. */
+.accountbtn__team {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.accountbtn__avatarbox {
+  background: var(--surface-inset) !important;
+  border: var(--bw-hair) solid var(--border-rule) !important;
+}
+.accountbtn__avatarimg {
+  opacity: 0 !important;
+}
+.accountbtn__teamlogo {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Clerk surfaces (sign-in modal, UserButton account menu) — the class names
+   are handed to Clerk via `elements` in lib/clerkAppearance.js; colors that
+   Clerk derives shades from live there as `variables` (concrete hex mirroring
+   tokens/colors.css). These rules add the scorebook character on top: paper
+   card, condensed uppercase headers, ink-navy primary button. `!important`
+   because Clerk's own injected stylesheet targets the same elements with
+   equal-or-higher specificity. Clerk portals render OUTSIDE #root, so the
+   global ALL-CAPS rule doesn't reach them — the uppercase here is opt-in per
+   element, matching the app's header/label conventions. */
+.tally-cl-card {
+  background: var(--surface-card) !important;
+  border: var(--bw-hair) solid var(--border-rule) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-raised) !important;
+}
+.tally-cl-title {
+  font-family: var(--font-display) !important;
+  font-size: var(--fs-h2) !important;
+  font-weight: var(--w-bold) !important;
+  letter-spacing: var(--ls-title) !important;
+  text-transform: uppercase !important;
+  color: var(--text-heading) !important;
+}
+.tally-cl-subtitle {
+  font-family: var(--font-body) !important;
+  font-size: var(--fs-small) !important;
+  color: var(--text-caption) !important;
+}
+.tally-cl-label {
+  font-family: var(--font-display) !important;
+  font-size: var(--fs-label) !important;
+  font-weight: var(--w-semibold) !important;
+  letter-spacing: var(--ls-label) !important;
+  text-transform: uppercase !important;
+  color: var(--text-caption) !important;
+}
+.tally-cl-primary {
+  background: var(--accent-primary) !important;
+  color: var(--text-on-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: var(--fs-ui) !important;
+  font-weight: var(--w-bold) !important;
+  letter-spacing: var(--ls-emphasis) !important;
+  text-transform: uppercase !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+.tally-cl-social {
+  background: var(--surface-inset) !important;
+  border: var(--bw-hair) solid var(--border-rule) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--text-body) !important;
+  font-family: var(--font-body) !important;
+}
+.tally-cl-link {
+  color: var(--accent-positive) !important;
+  font-weight: var(--w-semibold) !important;
+}
+.tally-cl-menuitem {
+  font-family: var(--font-body) !important;
+  color: var(--text-body) !important;
+}
+
+/* "Pick up your pencil" — the signed-in slate strip of recently-scored games
+   (ContinueScoring.jsx). Reads as a slim ledger card above the day's slate:
+   condensed uppercase label, mono matchup line, pencil-graphite meta. */
+.continuebar {
+  margin: var(--space-3) var(--app-gutter) 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.continuebar__label {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.continuebar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.continuebar__list li + li {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.continuebar__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.continuebar__item:active {
+  background: var(--surface-inset);
+}
+.continuebar__matchup {
+  grid-column: 1;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.continuebar__meta {
+  grid-column: 1;
+  grid-row: 2;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.continuebar__chevron {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  color: var(--text-caption);
+}
+
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
    sub-page (lineups, innings) so the sealed full box score is always one tap
    away without walking back through the sections. */
