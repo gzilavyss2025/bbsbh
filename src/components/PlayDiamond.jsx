@@ -65,8 +65,11 @@ function perpStroke(a, b, p, len = 6) {
   ]
 }
 
-export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, outAt = null, outCode = '', prBase = null, size = 108 }) {
+export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, size = 108 }) {
   const traveled = scored ? 4 : reached
+  // An UNEARNED run is circled, the scorer's convention — a red ring around the
+  // solid diamond. Only meaningful when he scored.
+  const unearned = scored && !earned
 
   // Geometry for a baserunning out: the path is drawn to where he was safe,
   // then a half-leg toward the base he was retired at (or nothing, if he was
@@ -95,6 +98,10 @@ export function PlayDiamond({ reached = 0, scored = false, legNotations = {}, ou
       viewBox="0 0 100 100"
       aria-hidden="true"
     >
+      {unearned && (
+        // The circled-run mark for an unearned run, drawn under the diamond.
+        <circle cx={50} cy={50} r={40} fill="none" stroke="var(--clay)" strokeWidth={2.5} />
+      )}
       {scored ? (
         // A run: the whole diamond penciled solid.
         <polygon

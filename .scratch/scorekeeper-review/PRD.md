@@ -1,7 +1,32 @@
 # Expert scorekeeper review — findings & triage
 
-Status: ready-for-human
+Status: implemented (A5, A6 deferred)
 Written: 2026-07-18
+
+## Implementation status (2026-07-18)
+
+Shipped in this branch and verified against real game feeds (anchor 823035,
+triple play 778442, cycle 778501):
+
+- **A1** — `scorebookCode` now emits `SF{n}` for sac flies and `SAC {chain}` for
+  sac bunts; the cycle game's sac fly renders `SF7`, no more `8U`.
+- **A2** — a strikeout where the batter reaches is now a REACH code (`K WP` /
+  `K PB` / `K E2`) over a diamond that shows him aboard, not a lone `K` over a
+  safe diamond.
+- **A3** — GIDP/triple-play batters get `DP`/`TP` on their own card (`DP 4-3`,
+  `TP 4-3` confirmed).
+- **A4** — unearned runs are circled on `PlayDiamond` (`earned` threaded from the
+  scoring runner's feed flag; Butler / Kelly / Tucker confirmed unearned, no
+  false positives in the all-earned game).
+- **A7** — the ScorecardSheet renders one row per slot occupant (starter + a
+  sub-line per substitute), each with its own name and AB/H/R/RBI line.
+- **A8** — the blank template's inning count is a prop (`templateInnings`), no
+  longer a hardcoded 11.
+- **A9** — new "By inning" digest on the box score (Pitches / Whiffs / LOB per
+  half), all plain play-by-play so it survives at MiLB parks.
+
+Deferred by request: **A5** (per-batter BB/SO on the box line) and **A6**
+(BB/SO/LOB columns on the paper scorecard).
 
 A working baseball scorekeeper's review of Tally Baseball (MLB + MiLB), driven
 by the actual scoring logic (`src/api/playbyplay.js`, `loadScorecard.js`,

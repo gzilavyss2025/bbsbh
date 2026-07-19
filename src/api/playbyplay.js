@@ -393,6 +393,12 @@ const REACH_CODES = {
 
 const HIT_EVENTS = new Set(['single', 'double', 'triple', 'home_run'])
 
+// Sacrifices — a plate appearance that is not an at-bat, each with its own
+// scorebook mark. The `_double_play` variants are a sacrifice on which a second
+// runner was also retired; the batter's own mark is still the sacrifice.
+const SAC_FLY_EVENTS = new Set(['sac_fly', 'sac_fly_double_play'])
+const SAC_BUNT_EVENTS = new Set(['sac_bunt', 'sac_bunt_double_play'])
+
 // The Numbers Game #22-style scorebook denotation for a batter's own plate
 // appearance — shown above the per-play diamond. Either how he reached (1B,
 // 2B, HR, BB, E6, FC…) or how he was retired (K, F8, L7, 6-3…). Returns a
@@ -416,23 +422,62 @@ function scorebookCode(play, batterRunner) {
   // to the catcher's putout "2"). The customary backwards "looking" K is drawn
   // only for a called third strike.
   if (et === 'strikeout' || et === 'strikeout_double_play') {
+    // An uncaught/dropped third strike (or a strike three that got away on a
+    // wild pitch / passed ball) still counts as a strikeout and an at-bat, but
+    // the batter is NOT out — he reached first. Render it as a REACH (a top
+    // code over a diamond that shows him aboard), annotated with how he got on,
+    // rather than an out code penciled in the diamond center. Without this the
+    // card showed a lone "K" over a diamond that already had him safe at first.
+    const reachedSafe = batterRunner && !batterRunner.movement?.isOut && !!batterRunner.movement?.end
+    if (reachedSafe) {
+      let how = ''
+      if (/wild pitch/i.test(desc)) how = 'WP'
+      else if (/passed ball/i.test(desc)) how = 'PB'
+      else {
+        const errPos = (batterRunner.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
+        how = `E${errPos?.position?.code ?? '2'}`
+      }
+      return { code: `K ${how}`, codeKind: 'reach' }
+    }
     if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
     return { code: 'K', codeKind: 'out' }
   }
+  // A sacrifice fly reads "SF" with the fielder who made the catch (SF8); a sac
+  // bunt "SAC" with its fielding chain (SAC 1-3). Keyed off the eventType (with
+  // a description fallback) BEFORE the generic fly/ground branches below —
+  // without it a sac fly's "hits a sacrifice fly to center fielder…" missed the
+  // /flies (out|into)/ test and fell through to the unassisted-putout branch,
+  // coming out as a bogus infield "8U".
+  if (SAC_FLY_EVENTS.has(et) || /sacrifice fly/i.test(desc)) {
+    return { code: `SF${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  }
+  if (SAC_BUNT_EVENTS.has(et) || /sacrifice (bunt|hit)/i.test(desc)) {
+    const c = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
+    return { code: c ? `SAC ${c}` : 'SAC', codeKind: 'out' }
+  }
+  // A double/triple play the batter hit into gets the play tag on his OWN card
+  // too (the erased runner's card already gets one via runnerOutCode) — a bare
+  // "6-4-3" doesn't say it turned two.
+  const dpTag =
+    et === 'grounded_into_double_play' || /into a double play/i.test(desc)
+      ? 'DP '
+      : et === 'triple_play' || et === 'grounded_into_triple_play' || /into a triple play/i.test(desc)
+        ? 'TP '
+        : ''
   // A ball caught for the out in FOUL territory gets an "F" penciled in front
   // of its normal code (a foul pop out to 1st is FP3, a foul fly to left is
   // FF7) — MLB's description names it explicitly ("… in foul territory").
   const foul = /in foul territory/i.test(desc) ? 'F' : ''
-  if (/lines? (out|into)/i.test(desc)) return { code: `${foul}L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/lines? (out|into)/i.test(desc)) return { code: `${dpTag}${foul}L${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   // A pop out (P) is its own scorebook code, distinct from a fly out (F) —
   // both come back from MLB as "pops out"/"flies out" in the description.
-  if (/pops? (out|into)/i.test(desc)) return { code: `${foul}P${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
-  if (/flies? (out|into)/i.test(desc)) return { code: `${foul}F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/pops? (out|into)/i.test(desc)) return { code: `${dpTag}${foul}P${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
+  if (/flies? (out|into)/i.test(desc)) return { code: `${dpTag}${foul}F${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   // A single-fielder chain (no throw — he fielded it and recorded the putout
   // himself) is the scorebook's "unassisted" play: 3U, 6U, etc, not a bare
   // position number.
   const code = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
-  return { code, codeKind: 'out' }
+  return { code: `${dpTag}${code}`, codeKind: 'out' }
 }
 
 // Short code for how a runner ADVANCED to a base on a given play — written by
@@ -737,6 +782,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
   // batter's final (or only) trip.
   const progress = new Map() // batterId -> furthest base of his current trip (1-3, 4 = run)
   const legs = new Map() // batterId -> { baseNum: { code, slot } } for his current trip
+  const earnedByBatter = new Map() // batterId -> whether his run was EARNED (only set when he scored)
   const finalizeTrip = (batterId) => {
     const cardIndex = originIndex.get(batterId)
     if (cardIndex == null) return
@@ -744,6 +790,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     entries[cardIndex].scored = base === 4
     entries[cardIndex].reached = base
     entries[cardIndex].legNotations = legs.get(batterId) ?? {}
+    // A run that scored UNEARNED (reached/advanced on an error or passed ball)
+    // is circled on the diamond, the scorer's convention; default earned when
+    // the feed doesn't say so, so a missing flag never mis-circles a clean run.
+    entries[cardIndex].earned = earnedByBatter.has(batterId) ? earnedByBatter.get(batterId) : true
   }
 
   for (const play of plays) {
@@ -931,6 +981,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // baserunner across the rest of his trip.
         reached: 0,
         scored: false,
+        earned: true,
       }
       entries.push(card)
       // A repeat plate appearance — the lineup batting around — bumps out
@@ -941,6 +992,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         finalizeTrip(batterId)
         progress.delete(batterId)
         legs.delete(batterId)
+        earnedByBatter.delete(batterId)
       }
       originIndex.set(batterId, cardIndex)
 
@@ -1038,7 +1090,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         const rEt = r.details?.eventType
         const code = legAdvanceCode(play, r)
         const slot = rEt && NO_SLOT_CREDIT_EVENT_TYPES.has(rEt) ? null : batterSlot
-        endBase.set(canon, { base, code, slot })
+        // The feed flags each scoring runner's leg earned/unearned; carry it so
+        // an unearned run can be circled on the diamond (see finalizeTrip).
+        endBase.set(canon, { base, code, slot, earned: r.details?.earned })
       }
       // The batter's own natural reach base (his top-of-diamond code already
       // explains it) — a further base on this same play only gets a leg
@@ -1046,6 +1100,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       const naturalBase = NATURAL_BASE[play.result?.eventType] ?? 1
       for (const [rid, info] of endBase) {
         if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
+        // A run (base 4) records whether it was earned — false only when the
+        // feed explicitly says so, so a clean run is never mistakenly circled.
+        if (info.base === 4) earnedByBatter.set(rid, info.earned !== false)
         if (rid !== batterId) {
           const m = legs.get(rid) ?? {}
           m[info.base] = { code: info.code, slot: info.slot }

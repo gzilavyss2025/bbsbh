@@ -17435,6 +17435,15 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
+/* A substitute's sub-line beneath the slot's starter: the name inset and set
+   in the lighter caption ink so the starter still reads as the row's head. */
+.sc-sheet__name--sub {
+  padding-left: var(--space-4);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+
 /* The corner cells sit at both sticky intersections, so they outrank both. */
 .sc-sheet__corner {
   z-index: 3;

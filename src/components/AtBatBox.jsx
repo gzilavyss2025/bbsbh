@@ -61,6 +61,7 @@ export function AtBatBox({ atbat = null }) {
           <PlayDiamond
             reached={atbat?.reached ?? 0}
             scored={atbat?.scored ?? false}
+            earned={atbat?.earned ?? true}
             legNotations={atbat?.legNotations ?? {}}
             outAt={atbat?.outAt ?? null}
             outCode={atbat?.outCode ?? ''}
