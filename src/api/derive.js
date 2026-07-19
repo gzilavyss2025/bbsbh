@@ -139,8 +139,11 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
 // Same reveal-only rule as the rest of this module: the whole game is already
 // behind the box score's SealBox by the time this is called, so aggregating
 // every half here doesn't leak anything the seal wasn't already covering.
-export function computeGameSuperlatives(feed) {
-  const map = computeDerivedByInning(feed)
+// `derivedMap` lets a caller that already built the per-inning map (the box
+// score builds one for the By-inning digest too) pass it in rather than have
+// this re-walk the whole play-by-play a second time.
+export function computeGameSuperlatives(feed, derivedMap) {
+  const map = derivedMap ?? computeDerivedByInning(feed)
   const best = {
     maxVelo: null,
     maxVeloType: '',
@@ -180,8 +183,8 @@ export function computeGameSuperlatives(feed) {
 // here comes from plain play-by-play (pitch call codes + the linescore's LOB),
 // so it survives at MiLB parks with no ball-tracking. Reveal-only, like the
 // rest of this module — the whole box score is already behind its seal.
-export function computeInningDigest(feed) {
-  const derived = computeDerivedByInning(feed)
+export function computeInningDigest(feed, derivedMap) {
+  const derived = derivedMap ?? computeDerivedByInning(feed)
   const innings = feed?.liveData?.linescore?.innings ?? []
   const rows = []
   for (const inn of innings) {

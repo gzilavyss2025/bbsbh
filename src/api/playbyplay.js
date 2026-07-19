@@ -430,14 +430,19 @@ function scorebookCode(play, batterRunner) {
     // card showed a lone "K" over a diamond that already had him safe at first.
     const reachedSafe = batterRunner && !batterRunner.movement?.isOut && !!batterRunner.movement?.end
     if (reachedSafe) {
+      // How he got on: a wild pitch or passed ball when the description names
+      // one, else the charged error (E{pos}) when the feed carries an error
+      // credit. When none is present, don't fabricate a catcher error — leave
+      // it a bare "K" reach (the diamond still shows him aboard), since an
+      // uncaught third strike can be scored with no error charged at all.
       let how = ''
       if (/wild pitch/i.test(desc)) how = 'WP'
       else if (/passed ball/i.test(desc)) how = 'PB'
       else {
         const errPos = (batterRunner.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
-        how = `E${errPos?.position?.code ?? '2'}`
+        if (errPos) how = `E${errPos.position?.code ?? ''}`
       }
-      return { code: `K ${how}`, codeKind: 'reach' }
+      return { code: how ? `K ${how}` : 'K', codeKind: 'reach' }
     }
     if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
     return { code: 'K', codeKind: 'out' }

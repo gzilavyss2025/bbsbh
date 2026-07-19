@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame, resolveCardPlayer } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
-import { computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
+import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
@@ -118,10 +118,14 @@ export function BoxScore({
           const stars = computeThreeStars(winProbability, feed)
           const potg = computePlayOfTheGame(winProbability, feed)
           const winProbPoints = selectWinProbPath(winProbability)
-          const insights = computeGameSuperlatives(feed)
+          // One per-inning play-by-play pass, shared by the Statcast
+          // superlatives and the By-inning digest below so the feed isn't
+          // walked twice on each reveal.
+          const derivedByInning = computeDerivedByInning(feed)
+          const insights = computeGameSuperlatives(feed, derivedByInning)
           // Per-half pitches / whiffs / LOB — plain play-by-play, so it holds
           // up at MiLB parks where the Statcast card can't.
-          const inningDigest = computeInningDigest(feed)
+          const inningDigest = computeInningDigest(feed, derivedByInning)
           // Every leader/streak/situational-record note that fired somewhere
           // in the game (see api/callout-notes.js) — the same notes the
           // innings view shows one at a time on the play they belong to,
