@@ -158,6 +158,15 @@ don't run these by hand.
   drift; two-strike detection carries the PRE-pitch count forward across
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
   `src/api/fouls.js` (Foul Tracker page, player-page card).
+- `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
+  per-season COMEBACK WIN counts: wins in which the club's win probability fell
+  below 10/20/30% at some point (nested: `sub10 <= sub20 <= sub30`). SQLite-backed
+  (`comeback-wins` group, ADR-0021) APPEND-ONLY incremental sweep of newly-Final
+  MLB regular-season games like `gen-game-score.mjs` (`--days` trailing window /
+  backfill); `comeback_ingested_games` is the idempotency guard. Per game it takes
+  the WINNER's minimum win prob (home share directly; away = `100 − home max`) from
+  the MLB-only `/winProbability` endpoint. App reads it via
+  `src/api/comebackWins.js` (Team Page's ranked "Comeback wins" card).
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record
