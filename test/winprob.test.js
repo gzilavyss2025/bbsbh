@@ -12,7 +12,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { WIN_PROB_FIELDS } from '../src/api/game.js'
-import { selectWinProbPath, winProbSplit } from '../src/api/winprob.js'
+import {
+  selectWinProbPath,
+  winProbSplit,
+  selectWinProbSwings,
+  selectWinProbBigPlays,
+} from '../src/api/winprob.js'
 
 // A tiny win-probability array shaped like the /winProbability endpoint's rows:
 // one entry per completed play, carrying the cumulative home win % and `about`.
@@ -94,4 +99,67 @@ test('winProbSplit reads the last plotted point and inherits the gate', () => {
   const thru1 = selectWinProbPath(buildWinProb(), { throughHalf: 1 })
   assert.deepEqual(winProbSplit(thru1), { home: 58, away: 42 })
   assert.equal(winProbSplit([]), null)
+})
+
+// --------------------------------------------------------------------------
+// selectWinProbSwings — per-half net swing (the Swing Stubs strip).
+// --------------------------------------------------------------------------
+test('selectWinProbSwings gives one signed net swing per revealed half', () => {
+  // Halves end at 52, 58, 46, 70; entered on 50, 52, 58, 46 → swings +2,+6,-12,+24.
+  const swings = selectWinProbSwings(buildWinProb())
+  assert.deepEqual(
+    swings.map((s) => [s.inning, s.half, s.swing]),
+    [
+      [1, 'top', 2],
+      [1, 'bottom', 6],
+      [2, 'top', -12],
+      [2, 'bottom', 24],
+    ],
+  )
+})
+
+test('selectWinProbSwings sums multiple plays within a half into one bar', () => {
+  // Two plays in top 1 (48 then 44) collapse to a single half entry: 44-50 = -6.
+  const wp = [
+    { homeTeamWinProbability: 48, about: { inning: 1, isTopInning: true } },
+    { homeTeamWinProbability: 44, about: { inning: 1, isTopInning: true } },
+    { homeTeamWinProbability: 55, about: { inning: 1, isTopInning: false } },
+  ]
+  const swings = selectWinProbSwings(wp)
+  assert.deepEqual(
+    swings.map((s) => [s.inning, s.half, s.swing]),
+    [
+      [1, 'top', -6],
+      [1, 'bottom', 11],
+    ],
+  )
+})
+
+test('selectWinProbSwings clamps to the revealed half and degrades to []', () => {
+  assert.equal(selectWinProbSwings(buildWinProb(), { throughHalf: 1 }).length, 2)
+  assert.deepEqual(selectWinProbSwings(null), [])
+  assert.deepEqual(selectWinProbSwings([]), [])
+})
+
+// --------------------------------------------------------------------------
+// selectWinProbBigPlays — the "how we got here" ledger.
+// --------------------------------------------------------------------------
+test('selectWinProbBigPlays returns the biggest swings, newest first', () => {
+  // Per-play deltas from even: +2, +6, -12, +24. With minSwing 8 only the last
+  // two qualify; newest-first ⇒ the +24 (idx 3) then the -12 (idx 2).
+  const plays = selectWinProbBigPlays(buildWinProb(), { minSwing: 8 })
+  assert.deepEqual(
+    plays.map((p) => [p.inning, p.half, p.delta, p.desc]),
+    [
+      [2, 'bottom', 24, 'Three-run homer'],
+      [2, 'top', -12, 'Two-run double'],
+    ],
+  )
+})
+
+test('selectWinProbBigPlays caps at limit and inherits the reveal gate', () => {
+  assert.equal(selectWinProbBigPlays(buildWinProb(), { minSwing: 1, limit: 2 }).length, 2)
+  // Through bottom 1 only, nothing clears an 8-point swing yet.
+  assert.deepEqual(selectWinProbBigPlays(buildWinProb(), { throughHalf: 1 }), [])
+  assert.deepEqual(selectWinProbBigPlays(null), [])
 })
