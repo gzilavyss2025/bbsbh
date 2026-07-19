@@ -273,3 +273,10 @@ from data already on hand computes live. When adding a family, give it a
 `kind`, a `dedupeKey` if it can restate itself, a `SCORE_BASE` row (and a
 line in the rubric table above), and decide its tense per ADR-0014's rule
 before picking its surface.
+
+**Names in callout prose read "First Last"** (or surname alone), never the
+scorebook's "Last, First" — callout copy is broadcast-voice, not a ledger
+row ("Bullpen watch: … — Carmen Mlodzinski, Khristian Curtis", "…of
+Woodruff's 84 pitches"). The Last-First convention belongs to the lineup/
+roster/pitcher-table *rows* the notes sit beside, not to the notes
+themselves.
