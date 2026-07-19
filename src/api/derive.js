@@ -91,7 +91,10 @@ export function computeDerivedByInning(feed) {
       if (code && WHIFF_CODES.has(code)) b.whiffs += 1
       if (code && FOUL_CODES.has(code)) {
         b.fouls += 1
-        if (preStrikes === 2) b.twoStrikeFouls += 1
+        // A two-strike foul TIP ('T') is caught for strike three — it ends
+        // the at-bat rather than extending it, so it stays out of the
+        // AB-extending counter (mirrors gen-fouls.mjs).
+        if (preStrikes === 2 && code !== 'T') b.twoStrikeFouls += 1
       }
       preStrikes = e.count?.strikes ?? preStrikes
 

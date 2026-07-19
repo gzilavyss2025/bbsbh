@@ -473,6 +473,16 @@ function TeamSections({
     const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
     return diff <= 3 * 86400000 ? d : null
   }, [feed, workloadData])
+  // Same freshness rule for the lineup grade: the nightly values file
+  // describes the CURRENT roster, so grading an archival game's posted nine
+  // against today's values would be stale nonsense — hide it there.
+  const freshLineupValues = useMemo(() => {
+    const d = feed?.gameData?.datetime?.officialDate ?? null
+    const asOf = (lineupValuesData?.asOf ?? '').slice(0, 10) || null
+    if (!d || !asOf) return null
+    const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
+    return diff <= 3 * 86400000 ? lineupValuesData : null
+  }, [feed, lineupValuesData])
 
   // Ties between this matchup's two clubs — see formerTeammatePairs. Skipped
   // entirely on the spread layout, which renders one shared copy itself
@@ -633,7 +643,7 @@ function TeamSections({
         )}
       </section>
 
-      <LineupStrengthCard data={lineupValuesData} teamId={meta.id} lineup={lineup} />
+      <LineupStrengthCard data={freshLineupValues} teamId={meta.id} lineup={lineup} />
 
       <BullpenBoard
         workload={workloadData}

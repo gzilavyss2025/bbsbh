@@ -25,7 +25,9 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
       .map((p) => {
         const avail = availabilityFor(workload, p.id, gameDate)
         const load = workloadFor(workload, p.id, gameDate)
-        if (!avail || !load || avail.status === 'sp') return null
+        // Rotation arms parked in the boxscore's pregame bullpen list aren't
+        // pen availability — this is a bullpen board, not a rotation one.
+        if (!avail || !load || load.role === 'SP') return null
         return {
           id: p.id,
           name: p.nameLastFirst,

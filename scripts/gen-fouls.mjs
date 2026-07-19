@@ -172,7 +172,10 @@ export function aggregateGameFouls(feed) {
       const code = pitchCallCode(e)
       const isFoul = !!code && FOUL_CODES.has(code)
       const isWhiff = !!code && WHIFF_CODES.has(code)
-      const twoStrike = isFoul && preStrikes === 2
+      // A two-strike foul TIP ('T') is caught for strike three — it ENDS the
+      // at-bat, the opposite of the AB-extending spoil twoStrikeFouls
+      // measures — so tips count as plain fouls only (mirrors derive.js).
+      const twoStrike = isFoul && preStrikes === 2 && code !== 'T'
 
       if (b) b.pitchesSeen += 1
       if (p) p.pitches += 1
