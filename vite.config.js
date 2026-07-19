@@ -97,6 +97,12 @@ export default defineConfig({
           // all 30 orgs — see scripts/gen-team-transactions.mjs), only ever
           // read a season at a time from one team's page.
           '**/data/team-transactions/*.json',
+          // Nightly foul-ball and pitcher-workload aggregates (~170 KB each,
+          // refreshed nightly — see scripts/gen-fouls.mjs / gen-workload.mjs);
+          // read on demand by the Foul Tracker page, player-page cards, and
+          // the lineup pages' bullpen board, so they stay off the install.
+          '**/data/fouls.json',
+          '**/data/workload.json',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -111,7 +117,7 @@ export default defineConfig({
             // precache. NetworkFirst keeps them fresh online and usable after
             // a successful visit when the user is offline at the park.
             urlPattern: ({ url }) =>
-              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters)\.json$/.test(
+              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload)\.json$/.test(
                 url.pathname,
               ) || /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
@@ -120,7 +126,7 @@ export default defineConfig({
               cacheName: 'bbsbh-static-data',
               networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 12,
+                maxEntries: 14,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
               },
             },

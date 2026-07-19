@@ -831,6 +831,7 @@ function InningTally({ rows, away, home }) {
               <th className="bs__nameCol">Half</th>
               <th>P</th>
               <th>Wh</th>
+              <th>F</th>
               <th>LOB</th>
             </tr>
           </thead>
@@ -842,6 +843,7 @@ function InningTally({ rows, away, home }) {
                 </td>
                 <td>{r.pitches}</td>
                 <td>{r.whiffs}</td>
+                <td>{r.fouls}</td>
                 <td>{r.lob}</td>
               </tr>
             ))}

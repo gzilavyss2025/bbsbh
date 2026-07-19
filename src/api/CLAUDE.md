@@ -308,6 +308,41 @@ for each generator; the reader modules:
   franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
   player-keyed pool `TeamLeaders` expects).
 
+- `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls.json`
+  (`gen-fouls.mjs`). Completed-game aggregates → spoiler-free, no SealBox
+  (same footing as WAR); MLB only. Feeds the Foul Tracker page (`/fouls`,
+  `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
+  the precompute can't be cut to a spoiler `asOf`, so the card hides under
+  one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the
+  SABR foul-accumulation hit-probability constants used in copy. The LIVE
+  per-half foul counters (`fouls`/`twoStrikeFouls`) live in `derive.js`'s
+  bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
+- `workload.js` — rolling pitcher workload, from `public/data/workload.json`
+  (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
+  owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`
+  (1/3/10-appearance buckets, days spanned, consecutive-day pattern),
+  `availabilityFor` (rule-based fresh/limited/down with human-readable
+  reasons — ESPN-published thresholds), `workloadVsBaseline` (vs. own norm +
+  role baseline). Surfaces: `BullpenBoard` on the lineup pages (gated to
+  slate-current games — the file describes "now"), the player page's
+  `PitcherWorkloadCard`, and the laboring baseline for `pitcherHealth.js`.
+- `pitcherHealth.js` — IN-GAME pitching health, ADR-0009 footing like
+  `pitchers.js` (gated by `revealedThrough`, never SealBox-wrapped):
+  `laboringFor` (tonight's pitches/inning vs. his own season norm from
+  workload.json — deliberately raw volume, not situation-weighted; see
+  `.scratch/metric-engines/pitching-health.md` for the research trail) and
+  `computeVeloDecay` (fastball-family velo, first-two-innings anchor vs.
+  latest revealed inning, within one pitch type; null at untracked MiLB
+  parks). Rendered as notes rows in `PitchersSection`.
+- `lineupStrength.js` — the Lineup Strength grade, from
+  `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
+  `src/lib/lineupSolver.js` (exact Hungarian assignment over the
+  position-eligibility matrix; FanGraphs positional-adjustment constants).
+  `lineupStrengthFor(data, teamId, actualLineup)` → 0–10 score, statTiers
+  tier, and the itemized receipt (bench swaps + out-of-position penalties).
+  Spoiler-free by construction (the posted starting nine + season
+  aggregates); surface is `LineupStrengthCard` under the batting order on
+  the lineup pages. MLB only.
 - `gameScore.js` — the slate card's `FINAL · 7.5` badge, from
   `public/data/game-score.json`. Unlike every file above, this ISN'T on the
   once-nightly cron — `gen-game-score.mjs` runs on its own 10-minute cron

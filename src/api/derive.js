@@ -8,7 +8,7 @@
 
 // Pitch call codes and non-PA event types are shared with the play-by-play
 // module (both reveal-only) so the two can never drift on the feed shape.
-import { NON_PA_EVENT_TYPES, WHIFF_CODES, pitchCallCode } from './playbyplay.js'
+import { NON_PA_EVENT_TYPES, WHIFF_CODES, FOUL_CODES, pitchCallCode } from './playbyplay.js'
 // Per-half LOB rides along from the linescore (also reveal-only).
 import { revealInning } from './linescore.js'
 
@@ -35,6 +35,10 @@ export function computeDerivedByInning(feed) {
     (map[k] ??= {
       pitches: 0,
       whiffs: 0,
+      fouls: 0,
+      // Fouls hit AT two strikes (the at-bat-extending kind) — a different,
+      // more telling count than raw fouls. See .scratch/metric-engines/.
+      twoStrikeFouls: 0,
       firstPitchStrikes: 0,
       plateAppearances: 0,
       // Statcast-flavored superlatives for the half — the game-notes numbers
@@ -51,6 +55,13 @@ export function computeDerivedByInning(feed) {
       longestHitPlayer: '', // the batter who hit it
       longestHitPlayerId: null,
     })
+
+  // A pitch event's `count` is the count AFTER that pitch (same off-by-one
+  // gen-run-expectancy.mjs documents), so the pre-pitch strike count is
+  // carried forward pitch to pitch — and across a non-PA play into the same
+  // batter's resumed at-bat, whose count continues.
+  let carryBatter = null
+  let carryStrikes = 0
 
   for (const play of plays) {
     const inning = play?.about?.inning
@@ -72,9 +83,17 @@ export function computeDerivedByInning(feed) {
     if (isPA) b.plateAppearances += 1
     b.pitches += pitches.length
 
+    const batterId = play.matchup?.batter?.id ?? null
+    let preStrikes = batterId != null && batterId === carryBatter ? carryStrikes : 0
+
     for (const e of pitches) {
       const code = pitchCallCode(e)
       if (code && WHIFF_CODES.has(code)) b.whiffs += 1
+      if (code && FOUL_CODES.has(code)) {
+        b.fouls += 1
+        if (preStrikes === 2) b.twoStrikeFouls += 1
+      }
+      preStrikes = e.count?.strikes ?? preStrikes
 
       const velo = e.pitchData?.startSpeed
       if (typeof velo === 'number' && velo > (b.maxVelo ?? -Infinity)) {
@@ -95,6 +114,16 @@ export function computeDerivedByInning(feed) {
         b.longestHitPlayer = play.matchup?.batter?.fullName ?? ''
         b.longestHitPlayerId = play.matchup?.batter?.id ?? null
       }
+    }
+
+    // A non-PA play's batter resumes with his count intact in a later play;
+    // a completed PA resets the carry.
+    if (!isPA) {
+      carryBatter = batterId
+      carryStrikes = preStrikes
+    } else {
+      carryBatter = null
+      carryStrikes = 0
     }
 
     // First pitch of the plate appearance (skipped for non-PA plays — their
@@ -118,6 +147,8 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
     derivedMap[key(inningNum, half)] ?? {
       pitches: 0,
       whiffs: 0,
+      fouls: 0,
+      twoStrikeFouls: 0,
       firstPitchStrikes: 0,
       plateAppearances: 0,
       maxVelo: null,
@@ -200,6 +231,7 @@ export function computeInningDigest(feed, derivedMap) {
         side: 'away',
         pitches: d?.pitches ?? 0,
         whiffs: d?.whiffs ?? 0,
+        fouls: d?.fouls ?? 0,
         lob: revealInning(feed, num, 'away')?.leftOnBase ?? 0,
       })
     }
@@ -211,6 +243,7 @@ export function computeInningDigest(feed, derivedMap) {
         side: 'home',
         pitches: d?.pitches ?? 0,
         whiffs: d?.whiffs ?? 0,
+        fouls: d?.fouls ?? 0,
         lob: revealInning(feed, num, 'home')?.leftOnBase ?? 0,
       })
     }

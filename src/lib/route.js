@@ -18,6 +18,7 @@
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
+//   '/fouls'                            -> { name: 'fouls' }
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
@@ -81,6 +82,7 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
     return { name: 'all-star-legacy' }
   if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
+  if (parts.length === 1 && parts[0] === 'fouls') return { name: 'fouls' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
   if (parts.length === 1 && parts[0] === 'top-games') return { name: 'top-games' }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
@@ -222,6 +224,9 @@ export function managerPath(id) {
 }
 export function umpireRankingsPath() {
   return '/umpires'
+}
+export function foulsPath() {
+  return '/fouls'
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

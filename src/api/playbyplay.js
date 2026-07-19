@@ -239,7 +239,10 @@ export function pinchRunningPlayers(feed, pinchId, replacedId) {
 
 // Swinging strike, swinging strike (blocked). Shared with derive.js.
 export const WHIFF_CODES = new Set(['S', 'W'])
-const FOUL_CODES = new Set(['F', 'L', 'T']) // foul, foul bunt, foul tip
+// Foul, foul bunt, foul tip. Shared with derive.js's per-half foul counters
+// and scripts/gen-fouls.mjs (the season foul sweep) so the code set never
+// drifts between the live and precomputed foul tallies.
+export const FOUL_CODES = new Set(['F', 'L', 'T'])
 const INPLAY_CODES = new Set(['D', 'X', 'E']) // in play: no out / out(s) / run(s)
 
 // A pitch event's call code, wherever this feed variant put it. Shared with
