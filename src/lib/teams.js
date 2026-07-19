@@ -580,3 +580,64 @@ const FAVORITE_ACCENT_OVERRIDES = {
 export function favoriteAccentColor(teamId) {
   return FAVORITE_ACCENT_OVERRIDES[teamId] || TEAM_COLORS[teamId] || null
 }
+
+// Extra current-era brand colors beyond a club's primary/secondary/accent —
+// only for clubs with a well-documented third-or-later color in their CURRENT
+// identity (no retro/throwback-only palettes: e.g. the White Sox's navy/red
+// "Southside" alternate and the Brewers'/Marlins'/Blue Jays' pre-rebrand
+// palettes are deliberately excluded). Cross-checked against Wikipedia team
+// infoboxes and teamcolorcodes.com (2026-07-17); skipped rather than guessed
+// wherever sources disagreed on the hex (e.g. Orioles' gray, Royals' powder
+// blue). Absent teams simply have no documented color beyond the pair + accent.
+const TEAM_COLOR_EXTRAS = {
+  108: [{ label: 'Silver', hex: '#C4CED4' }], // Angels
+  109: [{ label: 'Teal', hex: '#30CED8' }], // Diamondbacks
+  115: [{ label: 'Black', hex: '#000000' }], // Rockies
+  117: [{ label: 'Metallic Orange', hex: '#F4911E' }], // Astros
+  119: [{ label: 'Silver', hex: '#A5ACAF' }], // Dodgers
+  133: [{ label: 'Gray', hex: '#A2AAAD' }], // Athletics
+  136: [
+    { label: 'Silver', hex: '#C4CED4' },
+    { label: 'Red', hex: '#D50032' },
+  ], // Mariners
+  137: [
+    { label: 'Cream', hex: '#EFD19F' },
+    { label: 'Metallic Gold', hex: '#AE8F6F' },
+  ], // Giants
+  138: [{ label: 'Yellow', hex: '#FEDB00' }], // Cardinals
+  142: [{ label: 'Kasota Gold', hex: '#B9975B' }], // Twins
+  144: [{ label: 'Yellow', hex: '#EAAA00' }], // Braves
+  146: [
+    { label: 'Slate Gray', hex: '#41748D' },
+    { label: 'Black', hex: '#000000' },
+  ], // Marlins
+  147: [
+    { label: 'Navy', hex: '#0C2340' },
+    { label: 'Gray', hex: '#C4CED3' },
+  ], // Yankees
+  158: [{ label: 'Powder Blue', hex: '#6CACE4' }], // Brewers (2026 alt road jersey)
+}
+
+// A club's known brand colors as labeled swatches — the real primary +
+// secondary pair (TEAM_COLOR_PAIRS), the separately hand-picked
+// distinctiveness accent (TEAM_COLORS), and any researched extras
+// (TEAM_COLOR_EXTRAS) — deduped by hex so a club whose accent or extra just
+// restates an earlier swatch doesn't repeat it. MLB-only, empty array for a
+// MiLB id. Built for the team-color-lab dev page
+// (src/screens/TeamColorLab.jsx) — not used by any spoiler-facing surface.
+export function teamColorSwatches(teamId) {
+  const [primary, secondary] = TEAM_COLOR_PAIRS[teamId] ?? []
+  const candidates = [
+    { label: 'Primary', hex: primary },
+    { label: 'Secondary', hex: secondary },
+    { label: 'Accent', hex: TEAM_COLORS[teamId] },
+    ...(TEAM_COLOR_EXTRAS[teamId] ?? []),
+  ].filter((c) => c.hex)
+  const seen = new Set()
+  return candidates.filter((c) => {
+    const key = c.hex.toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
