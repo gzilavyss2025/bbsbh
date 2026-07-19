@@ -145,8 +145,12 @@ don't run these by hand.
   hitter-split, and situational callout. Covers MLB + the four full-season MiLB
   levels (each MiLB person-stats fetch must carry the level's `sportId` or the API
   silently returns the empty MLB line); career-derived families + standings splits
-  stay MLB-only. Per-date files are ~1MB, kept out of the PWA precache. See
-  `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a parallel path.
+  stay MLB-only. Per-date files are ~1MB, kept out of the PWA precache. Also
+  reads the LOCAL `public/data/fouls.json` once per run for two MLB-only bundle
+  keys — `foulSpoilers` (top-10 foul-per-game hitters on the two clubs) and
+  `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
+  absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
+  parallel path.
 - `gen-fouls.mjs` → `public/data/fouls.json` — season foul-ball aggregates
   (per-batter/pitcher/team totals, two-strike fouls, single-game highs, league
   by-inning + by-pitch-type rates with a starter/reliever split). SQLite-backed

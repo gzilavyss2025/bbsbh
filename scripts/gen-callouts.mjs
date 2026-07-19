@@ -117,7 +117,7 @@
 // Runs for TOMORROW's slate by default (the games it precomputes); pass a
 // YYYY-MM-DD as argv[2] to (re)generate a specific date by hand:
 //   node scripts/gen-callouts.mjs 2026-07-10
-import { writeFile, mkdir, readdir, rm } from 'node:fs/promises'
+import { writeFile, readFile, mkdir, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
@@ -181,6 +181,50 @@ const asOf = iso(new Date(target.getTime() - DAY_MS))
 const season = target.getUTCFullYear()
 const [ty, tm, td] = targetApi.split('-')
 const outFile = join(outDir, `${tm}${td}${ty}.json`)
+
+// --- Foul spoilers + league foul rate (MLB only) -----------------------------
+//
+// Both derive from the LOCAL public/data/fouls.json — the season foul aggregates
+// gen-fouls.mjs writes (MLB only) — read ONCE from disk, never re-fetched. If the
+// file is missing or unparseable, foulSpoilerBoard comes back empty and
+// foulRatePerPitch null, so the two keys simply don't attach to any bundle
+// (consumers null-guard). `foulSpoilerBoard` is a Map playerId(string) ->
+// { rank, perGame, fouls, g } over the league's TOP 10 QUALIFIED foul-per-game
+// batters, using the same relative games floor FoulTrackerPage.jsx applies:
+// g >= max(5, round(0.5 * maxGamesPlayed)), ranked by fouls/game. `foulRatePerPitch`
+// is league fouls / pitches (4 decimals), the per-MLB-game baseline like `bullpen`.
+const foulsPath = join(here, '..', 'public', 'data', 'fouls.json')
+async function loadFoulData() {
+  let data
+  try {
+    data = JSON.parse(await readFile(foulsPath, 'utf8'))
+  } catch {
+    return { foulSpoilerBoard: new Map(), foulRatePerPitch: null }
+  }
+  const board = new Map()
+  const batters = Object.entries(data?.batters ?? {})
+  if (batters.length > 0) {
+    const maxG = Math.max(...batters.map(([, b]) => b.g ?? 0))
+    const minGames = Math.max(5, Math.round(maxG * 0.5))
+    batters
+      .filter(([, b]) => (b.g ?? 0) >= minGames)
+      .sort((a, b) => b[1].fouls / b[1].g - a[1].fouls / a[1].g)
+      .slice(0, 10)
+      .forEach(([id, b], i) => {
+        board.set(String(id), {
+          rank: i + 1,
+          perGame: Math.round((b.fouls / b.g) * 10) / 10,
+          fouls: b.fouls,
+          g: b.g,
+        })
+      })
+  }
+  const totals = data?.league?.totals
+  const foulRatePerPitch =
+    totals && totals.pitches > 0 ? Math.round((totals.fouls / totals.pitches) * 1e4) / 1e4 : null
+  return { foulSpoilerBoard: board, foulRatePerPitch }
+}
+const { foulSpoilerBoard, foulRatePerPitch } = await loadFoulData()
 
 // Pitcher strikeouts (not a hit category, so separate from HIT_CATEGORY_KEYS).
 const PIT_KEYS = ['so_p']
@@ -1255,6 +1299,17 @@ for (const g of games) {
     if (line) birthdayStats[id] = line
   }
 
+  // Foul spoilers — any rostered hitter on this game's two clubs who ranks in
+  // the league's top-10 foul-per-game board (MLB only; joins by playerId
+  // against the same hitter membership every other hitter family uses).
+  const foulSpoilers = {}
+  if (mlb) {
+    for (const id of gameHitterIds) {
+      const s = foulSpoilerBoard.get(String(id))
+      if (s) foulSpoilers[id] = s
+    }
+  }
+
   outGames[g.gamePk] = {
     sportId,
     // 'day' | 'night' | '' — the schedule endpoint's own copy of
@@ -1269,6 +1324,12 @@ for (const g of games) {
     ...(bullpenAvgBySport[sportId] != null
       ? { bullpen: { avgPitches: bullpenAvgBySport[sportId], windowDays: RECENT_APPEARANCE_WINDOW_DAYS } }
       : {}),
+    // MLB-only foul additions from the local fouls.json (see loadFoulData). The
+    // league foul-per-pitch baseline rides every MLB bundle like `bullpen`;
+    // foulSpoilers carries this game's two clubs' top-10 foul-per-game hitters.
+    // Both absent on MiLB bundles and when fouls.json is missing/unparseable.
+    ...(mlb && foulRatePerPitch != null ? { foulRate: { perPitch: foulRatePerPitch } } : {}),
+    ...(mlb && foulSpoilerBoard.size > 0 ? { foulSpoilers } : {}),
     leaders,
     pitcherLeaders,
     streaks,

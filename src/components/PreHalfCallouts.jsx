@@ -10,8 +10,8 @@ import { TeamLogo } from './TeamLogo.jsx'
 // contract as the entering-lineup cards (ADR-0010); the one note that reads
 // tonight's score additionally gates itself on `revealedThrough` inside the
 // builder. Renders nothing without a bundle (MiLB / un-generated date).
-export function PreHalfCallouts({ feed, bundle, inning, half, revealedThrough }) {
-  const notes = buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrough })
+export function PreHalfCallouts({ feed, bundle, inning, half, revealedThrough, workload, gameDate }) {
+  const notes = buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrough, workload, gameDate })
   if (notes.length === 0) return null
   return (
     <div className="prehalf">

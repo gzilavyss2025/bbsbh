@@ -46,6 +46,13 @@ export async function fetchCallouts(urlDate) {
 //     away:{teamId,name}, home:{teamId,name},
 //     bullpen?:{ avgPitches, windowDays } — the level's average-reliever pitch
 //       count over the trailing window (the workload note's peer figure),
+//     foulRate?:{ perPitch } — league fouls/pitch (4 decimals), the baseline
+//       for the "team is making the starter fight" note; MLB only, from the
+//       local fouls.json (gen-fouls.mjs), absent when that file is missing,
+//     foulSpoilers?:{ [playerId]: { rank, perGame, fouls, g } } — this game's
+//       two clubs' hitters who rank in the league's top-10 foul-per-game board
+//       (qualified: g >= max(5, round(0.5·maxG)); rank 1-based, perGame to 1
+//       decimal); MLB only, same fouls.json source, absent when it's missing,
 //     leaders:{ [playerId]: { team, cats:{ hr, doubles, ... } } },
 //     pitcherLeaders:{ [playerId]: { team, cats:{ so_p } } },
 //     streaks:{ [playerId]: { onBase?, onBaseStart? ('YYYY-MM-DD', the

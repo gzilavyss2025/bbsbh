@@ -25,7 +25,7 @@ import { CalloutNote } from './CalloutNote.jsx'
 // velocity-decay flag, both already clamped to the reveal mark by the caller
 // (ADR-0009, same footing as the lines themselves). Optional; absent →
 // no health notes (MiLB, no workload baseline, thin samples).
-export function PitchersSection({ teams, bundle, health }) {
+export function PitchersSection({ teams, bundle, health, workload, gameDate }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
@@ -52,7 +52,7 @@ export function PitchersSection({ teams, bundle, health }) {
             <tbody>
               {t.rows.map((p) => {
                 const notes = [
-                  ...buildPitcherNotes(p, t.side, t.name, bundle),
+                  ...buildPitcherNotes(p, t.side, t.name, bundle, { workload, gameDate }),
                   ...healthNotes(p.id, health),
                 ]
                 return (

@@ -29,6 +29,8 @@ export function HalfInning({
   prospectsData,
   rookiesData,
   callouts,
+  workload,
+  workloadGameDate,
   vsTeam,
   highlights,
   revealedAtBatCount,
@@ -105,6 +107,8 @@ export function HalfInning({
             inning={inning}
             half={half}
             revealedThrough={revealedThrough}
+            workload={workload}
+            gameDate={workloadGameDate}
           />
         )}
 

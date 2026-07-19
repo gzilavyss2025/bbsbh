@@ -17,6 +17,7 @@
 //     `revealedThrough`, so nothing sealed is read here either.
 
 import { dayWordFor } from './select.js'
+import { workloadFor } from './workload.js'
 
 // Innings pitched ("6.1" = 6⅓) -> outs, so a 6.0-or-better check compares
 // linearly. Self-contained copy of the same helper used elsewhere (teamLeaders.js,
@@ -41,15 +42,35 @@ const LEVERAGE_AVG_GAP = 0.06
 // which club he pitches for ('away' | 'home'), `teamName` that club's display
 // name, `bundle` the game's callouts bundle (its `starterRecords` family is
 // keyed by pitcherId; `bullpen` carries the level's average-reliever workload
-// baseline). Returns a plain string[] — this table has no headshot/logo card
-// to attach identity to, unlike the play-by-play/box-score note families.
-export function buildPitcherNotes(row, side, teamName, bundle) {
+// baseline). `extras` optionally carries { workload, gameDate } — the
+// gen-workload.mjs precompute plus the game's own date (already
+// freshness-gated by the caller, like TeamInfo's bullpen board) — for the
+// consecutive-days note below. Returns a plain string[] — this table has no
+// headshot/logo card to attach identity to, unlike the play-by-play/box-score
+// note families.
+export function buildPitcherNotes(row, side, teamName, bundle, extras = {}) {
   const rec = bundle?.starterRecords?.[row.id]
   if (!rec) return []
   const bullpen = bundle?.bullpen
   const notes = []
   const team = teamName || 'His team'
   const word = dayWordFor(bundle?.dayNight)
+
+  // Consecutive-days work, from the workload precompute (completed
+  // appearances only — spoiler-free): the 3-straight-days pattern is the
+  // sharpest documented fatigue signal (velo down ~1.5 mph), so it leads.
+  // Suppresses the plain back-to-back fallback below (the ERA-split version
+  // still shows — a different fact worth keeping).
+  let consecNoted = false
+  const load =
+    extras.workload && extras.gameDate ? workloadFor(extras.workload, row.id, extras.gameDate) : null
+  if (load && load.consecDays >= 2) {
+    const dayWordCount = ['', '', 'third', 'fourth', 'fifth', 'sixth'][load.consecDays] ?? `${load.consecDays + 1}th`
+    const stretch =
+      load.last3?.pitches > 0 ? ` — ${load.last3.pitches} pitches over his last ${load.last3.apps} appearances` : ''
+    notes.push(`Working a ${dayWordCount} straight day${stretch}`)
+    consecNoted = true
+  }
 
   if (rec.homeAway) {
     const wl = rec.homeAway[side]
@@ -88,7 +109,7 @@ export function buildPitcherNotes(row, side, teamName, bundle) {
       notes.push(
         `Pitching on back-to-back days — he has a ${rec.backToBack.era.toFixed(2)} ERA on no rest this season (${rec.backToBack.restEra.toFixed(2)} otherwise)`,
       )
-    } else {
+    } else if (!consecNoted) {
       notes.push(`Pitching on back-to-back days ${word}`)
     }
   }

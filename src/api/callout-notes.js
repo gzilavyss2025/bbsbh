@@ -34,8 +34,11 @@ import {
   firstRispPAIndexByBatter,
   NON_PA_EVENT_TYPES,
   BASERUNNING_NOTE_EVENT_TYPES,
+  FOUL_CODES,
+  pitchCallCode,
 } from './playbyplay.js'
-import { personNameParts, dayWordFor, dayWord, selectPrePitchChanges } from './select.js'
+import { personNameParts, dayWordFor, dayWord, selectPrePitchChanges, halfIndex } from './select.js'
+import { availabilityFor } from './workload.js'
 
 // Marquee hit leader category keys, shared with gen-callouts.mjs (imported there).
 export const HIT_CATEGORY_KEYS = ['hr', 'triples', 'doubles', 'bb_b', 'sb', 'hbp']
@@ -68,6 +71,32 @@ const ON_BASE_EVENTS = new Set([
 
 const otherSide = (side) => (side === 'away' ? 'home' : 'away')
 
+// Fouls in one at-bat, from its ordered pitch call codes alone. The strike
+// count is re-simulated from the codes (called/whiff/foul all add a strike,
+// a foul never pushes past two), so a two-strike foul — the AB-extending
+// spoil — needs no play-event count fields. A two-strike foul TIP ('T') is
+// caught for strike three and excluded, same rule as derive.js/gen-fouls.mjs.
+export function foulCountsFromCodes(codes) {
+  let strikes = 0
+  let fouls = 0
+  let twoStrikeFouls = 0
+  for (const code of codes ?? []) {
+    if (code && FOUL_CODES.has(code)) {
+      fouls += 1
+      if (strikes === 2 && code !== 'T') twoStrikeFouls += 1
+      if (strikes < 2) strikes += 1
+    } else if (code === 'C' || code === 'S' || code === 'W') {
+      strikes += 1
+    }
+  }
+  return { fouls, twoStrikeFouls }
+}
+
+// Floors for the marathon-at-bat card: enough fouls that the battle IS the
+// story, and how many two-strike fouls earn the historical-odds line.
+const MARATHON_FOULS = 6
+const MARATHON_PRIOR_2K = 3
+
 // --- worthiness ---------------------------------------------------------------
 // Every note carries a 0–100 `score` = a per-family base + a magnitude bonus,
 // the callouts counterpart to the three stars' WPA ranking (ADR-0013): the
@@ -91,6 +120,10 @@ const SCORE_BASE = {
   vsTeam: 40,
   leader: 35,
   sbStreak: 35,
+  marathonAb: 45,
+  bullpenThin: 40,
+  foulVolume: 35,
+  foulSpoiler: 30,
   runsScored: 35,
   runsAllowed: 35,
   oneRun: 35,
@@ -189,6 +222,7 @@ export function computeCalloutProgress(feed) {
   const caughtRunners = new Set()
   const sbGame = new Map() // runnerId -> { n, firstInning, beforeCaught }
   const caught = new Map() // runnerId -> inning of his first CS tonight
+  const foulsByBatter = new Map() // batterId -> fouls hit tonight (raw count)
 
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     const idx = play.about?.atBatIndex
@@ -215,7 +249,15 @@ export function computeCalloutProgress(feed) {
 
     const sbHere = new Map()
     for (const e of play.playEvents ?? []) {
-      if (e.isPitch) continue
+      if (e.isPitch) {
+        // Tonight's raw foul tally per batter — feeds the box-score
+        // restatement of the foulSpoiler card ("Fouled off 6 tonight…").
+        const code = pitchCallCode(e)
+        if (batterId != null && code && FOUL_CODES.has(code)) {
+          foulsByBatter.set(batterId, (foulsByBatter.get(batterId) ?? 0) + 1)
+        }
+        continue
+      }
       const et = e.details?.eventType
       const rid = e.player?.id
       if (rid == null) continue
@@ -243,7 +285,7 @@ export function computeCalloutProgress(feed) {
       sb: sbHere,
     })
   }
-  return { byPlay, reached, sbGame, caught }
+  return { byPlay, reached, sbGame, caught, foulsByBatter }
 }
 
 // --- the vs-opponent career note ---------------------------------------------
@@ -449,6 +491,31 @@ export function buildCallouts(
     }
   }
 
+  // A marathon at-bat — he fouled off a pile of pitches in this one trip.
+  // Reads only the revealed play's own pitch codes (play cards carry
+  // `pitches`; the roll-up's thinner entries don't, so this family is a
+  // play-card exclusive — the moment IS the story). The historical odds line
+  // (SABR BRJ 2018, Retrosheet 1945-2015: two-strike counts reached by
+  // fouling produce a .291 hit probability vs .102 otherwise) is only earned
+  // by a real two-strike fight, not six first-pitch-swing spoils.
+  if (entry.pitches?.length) {
+    const { fouls, twoStrikeFouls } = foulCountsFromCodes(entry.pitches)
+    if (fouls >= MARATHON_FOULS) {
+      const prior =
+        twoStrikeFouls >= MARATHON_PRIOR_2K
+          ? ' — hitters who battle to two strikes on fouls like this have hit .291 across baseball history (.102 for everyone else)'
+          : ''
+      notes.push({
+        text: `Fouled off ${fouls} pitches in that ${entry.pitches.length}-pitch at-bat${prior}`,
+        personId: entry.batterId,
+        side: battingSide,
+        kind: 'marathonAb',
+        dedupeKey: `marathon-${entry.atBatIndex}`,
+        score: clampScore(SCORE_BASE.marathonAb + Math.min(15, 3 * (fouls - MARATHON_FOULS))),
+      })
+    }
+  }
+
   // He homered, and the club has a lopsided record in games he does. Entering
   // record only — tonight's result is unknowable from inside a revealed half
   // (the box-score roll-up rewrites this into the folded, result-aware form).
@@ -610,6 +677,22 @@ export function buildCallouts(
         kind: 'platoon',
         dedupeKey: `platoon-${entry.batterId}`,
         score: clampScore(SCORE_BASE.platoon),
+      })
+    }
+
+    // A league-elite pitch-spoiler stepping in (top-10 fouls per game, from
+    // the nightly foul sweep joined in gen-callouts.mjs). Entering fact only;
+    // the box-score roll-up restates it with tonight's own foul count.
+    const spoiler = bundle.foulSpoilers?.[entry.batterId]
+    if (spoiler) {
+      const rankWord = spoiler.rank === 1 ? "MLB's top pitch-spoiler" : `MLB's No. ${spoiler.rank} pitch-spoiler`
+      notes.push({
+        text: `${rankWord} — ${spoiler.perGame} foul balls a game this season`,
+        personId: entry.batterId,
+        side: battingSide,
+        kind: 'foulSpoiler',
+        dedupeKey: `foulspoiler-${entry.batterId}`,
+        score: clampScore(SCORE_BASE.foulSpoiler + Math.max(0, 11 - spoiler.rank)),
       })
     }
 
@@ -1295,6 +1378,96 @@ function actualStarters(feed) {
 // and every folded variant stays in entering-tense.
 // `vsTeam` (the separately-fetched vs-team-splits file, api/vsTeamSplits.js)
 // is optional — the career-vs-opponent note simply doesn't fire without it.
+// --- pre-half: the batting side is making the starter fight -----------------
+// Entering a half: how many of the opposing STARTER's pitches this side has
+// fouled off so far tonight, when that count is genuinely above the league
+// norm (bundle.foulRate, from the nightly foul sweep — absent on MiLB
+// bundles, which silently disables the family). Reads only halves strictly
+// BEFORE the one being staged — revealed material under the caller's gate
+// (prehalf-callouts.js), same footing as the times-through-the-order card.
+const FOUL_VOLUME_MIN_PITCHES = 50
+const FOUL_VOLUME_MIN_FOULS = 12
+const FOUL_VOLUME_RATIO = 1.35
+
+export function buildFoulVolumeNote(feed, bundle, inning, half) {
+  const rate = bundle?.foulRate?.perPitch
+  if (!rate) return null
+  const battingHalf = half === 'top' ? 'top' : 'bottom'
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const cutoff = halfIndex(inning, half)
+
+  const pitcherIds = new Set()
+  let pitches = 0
+  let fouls = 0
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const inn = play?.about?.inning
+    const h = play?.about?.halfInning
+    if (!inn || h !== battingHalf) continue
+    if (halfIndex(inn, h) >= cutoff) continue // strictly before this half
+    const pid = play.matchup?.pitcher?.id
+    if (pid != null) pitcherIds.add(pid)
+    for (const e of play.playEvents ?? []) {
+      if (!e.isPitch) continue
+      pitches += 1
+      const code = pitchCallCode(e)
+      if (code && FOUL_CODES.has(code)) fouls += 1
+    }
+  }
+  // One pitcher seen = the starter is still in; more = the story has moved on.
+  if (pitcherIds.size !== 1) return null
+  const expected = Math.round(rate * pitches)
+  if (pitches < FOUL_VOLUME_MIN_PITCHES) return null
+  if (fouls < FOUL_VOLUME_MIN_FOULS || fouls < FOUL_VOLUME_RATIO * rate * pitches) return null
+
+  const pitcherId = [...pitcherIds][0]
+  const { last } = personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {})
+  const team = bundle[battingSide]?.name
+  if (!last || !team) return null
+  return {
+    text: `The ${team} have fouled off ${fouls} of ${last}'s ${pitches} pitches — league average is about ${expected}`,
+    personId: pitcherId,
+    side: battingSide,
+    kind: 'foulVolume',
+    dedupeKey: `foulvolume-${battingSide}-${inning}`,
+    score: clampScore(SCORE_BASE.foulVolume + Math.min(15, fouls - expected)),
+  }
+}
+
+// --- pre-half: the defending club's bullpen is running on fumes --------------
+// First inning only, on the half where that club takes the field: how many of
+// its relievers enter tonight likely unavailable under the workload rules
+// (api/workload.js's availabilityFor — 3 straight days, 25+ yesterday, 35+
+// over three days). Backward-looking completed appearances only, so it's
+// spoiler-free; gated to a slate-current game (the workload file describes
+// "now") the same way TeamInfo's bullpen board is.
+const BULLPEN_THIN_MIN_DOWN = 2
+const WORKLOAD_FRESH_DAYS = 3
+
+export function buildBullpenThinNote(bundle, side, workload, gameDate) {
+  const teamId = bundle?.[side]?.teamId
+  const team = bundle?.[side]?.name
+  const asOf = workload?.asOf
+  if (teamId == null || !team || !workload?.pitchers || !gameDate || !asOf) return null
+  const drift = Math.abs(new Date(`${gameDate}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
+  if (!(drift <= WORKLOAD_FRESH_DAYS * 86400000)) return null
+
+  const down = []
+  for (const [pid, entry] of Object.entries(workload.pitchers)) {
+    if (entry.teamId !== teamId || entry.role !== 'RP') continue
+    const avail = availabilityFor(workload, pid, gameDate)
+    if (avail?.status === 'down') down.push(entry.name)
+  }
+  if (down.length < BULLPEN_THIN_MIN_DOWN) return null
+  return {
+    text: `Bullpen watch: ${down.length} ${team} relievers are likely down after heavy recent work — ${down.join(', ')}`,
+    personId: null,
+    side,
+    kind: 'bullpenThin',
+    dedupeKey: `bullpenthin-${side}`,
+    score: clampScore(SCORE_BASE.bullpenThin + Math.min(10, 5 * (down.length - BULLPEN_THIN_MIN_DOWN))),
+  }
+}
+
 export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   if (!bundle) return []
 
@@ -1370,6 +1543,26 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
     })) {
       add(note)
     }
+  }
+
+  // The foulSpoiler card restated with tonight's own tally (same dedupeKey,
+  // so this wording replaces the entering one whenever he actually spoiled a
+  // few) — tonight's-events narration, the roll-up's normal tense.
+  for (const [pid, spoiler] of Object.entries(bundle.foulSpoilers ?? {})) {
+    const tonight = progress.foulsByBatter?.get(Number(pid)) ?? 0
+    if (tonight < 3) continue
+    const seasonWord =
+      spoiler.rank === 1
+        ? `he averages an MLB-best ${spoiler.perGame} a game`
+        : `he averages ${spoiler.perGame} a game, No. ${spoiler.rank} in MLB`
+    add({
+      text: `Fouled off ${tonight} ${word} — ${seasonWord}`,
+      personId: Number(pid),
+      side: sideOfBatter(feed, Number(pid)),
+      kind: 'foulSpoiler',
+      dedupeKey: `foulspoiler-${pid}`,
+      score: clampScore(SCORE_BASE.foulSpoiler + Math.max(0, 11 - spoiler.rank) + Math.min(6, tonight - 3)),
+    })
   }
 
   // Result-aware rewrites of the per-play families (see the two-tenses rule in
