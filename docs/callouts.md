@@ -49,14 +49,17 @@ table together.
 | homerRec | 55 | + 40 × skew |
 | onBaseEnded | 50 | + min(15, streak − 8) |
 | onBaseExtended | 45 | + min(15, streak+1 − 8) |
+| marathonAb | 45 | + min(15, 3 × (fouls − 6)) |
 | onBaseRiding | 40 | + min(15, streak − 8) |
 | leadHeld / leadAfterLive | 40 | + 40 × skew |
 | tiedAfter / tiedAfterLive | 40 | + 40 × skew |
 | starterRec | 40 | + 40 × skew |
+| bullpenThin | 40 | + min(10, 5 × (relievers down − 2)) |
 | vsTeam | 40 | + min(15, 15 × (angle strength − 1)) |
 | leader (hits/SB) | 35 | + min(15, count / 4) |
 | leader (pitcher K) | 35 | + min(15, count / 12) |
 | sbStreak | 35 | + min(10, run − 4) |
+| foulVolume | 35 | + min(15, fouls − expected) |
 | runsScored | 35 | + 40 × skew |
 | runsAllowed | 35 | + 40 × skew |
 | oneRun / extraInnings | 35 | + 40 × skew |
@@ -64,6 +67,7 @@ table together.
 | comeback | 30 | + 60 × win% (resilience, not lopsidedness) |
 | scoringFirst / oppScoringFirst | 30 | + 100 × deviation from league norm |
 | inningRunDiff | 30 | + min(20, margin / 2) |
+| foulSpoiler | 30 | + (11 − rank); roll-up restatement adds + min(6, tonight − 3) |
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
 
@@ -115,6 +119,22 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   (`firstRispPAIndexByBatter` in `api/playbyplay.js`) — a bases-empty PA gets
   no card, since "hitting .349 with RISP" reads as a non sequitur with nobody
   on.
+- **marathonAb** — he fouled off 6+ pitches in this one at-bat, read straight
+  off the revealed play's own pitch codes (`foulCountsFromCodes`,
+  `callout-notes.js` — the strike count is re-simulated from the codes, and a
+  two-strike foul tip is excluded, same rule as `derive.js`/`gen-fouls.mjs`).
+  Play-card exclusive — the roll-up's thinner entries carry no pitch codes,
+  and the moment is the story. With 3+ genuine two-strike fouls the card adds
+  the historical odds (SABR BRJ 2018: .291 hit probability for foul-reached
+  two-strike counts vs .102 otherwise).
+- **foulSpoiler** — a league top-10 fouls-per-game batter steps in for his
+  first PA ("MLB's No. 2 pitch-spoiler — 4.1 foul balls a game this season"),
+  from the nightly `foulSpoilers` join (gen-callouts.mjs reads
+  `public/data/fouls.json`; qualification is the Foul Tracker page's own
+  relative games floor). Roll-up: restated with tonight's tally once he
+  actually spoiled a few ("Fouled off 6 tonight — he averages an MLB-best
+  4.6 a game", ≥ 3 fouls tonight; same dedupeKey so the last word wins). MLB
+  only (the foul sweep is MLB-only).
 - **birthday / birthdayStats** — slate-date birthday flag + his career line
   ON his birthday (`birthdays`/`birthdayStats`, ≥ 2 games and ≥ 5 AB).
 - **vsTeam** — career vs tonight's opponent, only on a notable angle
@@ -170,6 +190,25 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   leading-after note (ADR-0014), and fires only while the side's starter
   (first pitcher seen = last pitcher seen) is still in.
 
+- **foulVolume** — entering a half, inning 3+: the batting side's foul count
+  off the opposing STARTER tonight vs the league's per-pitch foul rate
+  (`bundle.foulRate`, from the nightly foul sweep — absent on MiLB bundles,
+  which disables the family). "The Cubs have fouled off 19 of Woodruff's 74
+  pitches — league average is about 14." Reads strictly-previous halves'
+  plays (revealed material), so it shares the times-through card's
+  `revealedThrough` self-gate (ADR-0014); fires only while the starter is the
+  only pitcher that side has seen. Gates: 50+ pitches, 12+ fouls, ≥ 1.35× the
+  expected count.
+- **bullpenThin** — 1st inning, on the half where the club takes the field:
+  how many of its relievers enter the night likely unavailable under the
+  workload rules (`buildBullpenThinNote` → `api/workload.js`'s
+  `availabilityFor` — 3 straight days, 25+ pitches yesterday, 35+ over three
+  days). "Bullpen watch: 3 Brewers relievers are likely down after heavy
+  recent work — Uribe, Payamps, Koenig." Backward-looking completed
+  appearances only (spoiler-free); self-gated to a slate-current game (the
+  workload file describes "now"), same freshness window as TeamInfo's bullpen
+  board. Gate: ≥ 2 relievers down.
+
 ### Whole-game (roll-up only)
 
 - **leadReversal** — led after a late checkpoint with a lopsided
@@ -208,12 +247,25 @@ season aggregates joined from the pitcher game-log sweep:
   tonight is no-rest work: "Pitching on back-to-back days — he has a 5.79
   ERA on no rest this season (3.46 otherwise)" (`backToBack`, ≥ 4 outings on
   each side).
+- **penFatigue** — he's working a 3rd (or later) consecutive day
+  (`workloadFor`, the gen-workload.mjs precompute, threaded in with the
+  game's freshness-gated date): "Working a third straight day — 41 pitches
+  over his last 3 appearances." The sharpest documented fatigue pattern
+  (velo down ~1.5 mph on 3 straight), so it leads; it suppresses the plain
+  back-to-back fallback below (the ERA-split version still shows — a
+  different fact).
 - **leverage** — opponents' AVG with his club ahead vs trailing/tied
   (`leverage`, the API's sah/sbh/sti splits, ≥ 8 IP per bucket, AVG gap
   ≥ .060): "Opponents hit .204 off him with the Sounds ahead this season,
   .301 with them trailing."
 
 ## Extending
+
+Two metric-adjacent families were deliberately NOT built as callouts: the
+lineup-strength grade (its receipt card already owns the lineup page — a
+callout would restate it) and the in-game laboring/velo-decay signals (they
+live as Pitchers-table health notes, `src/api/pitcherHealth.js`, where the
+row they annotate already sits).
 
 Per CLAUDE.md's standing rule: new record/streak/split families extend
 `gen-callouts.mjs` (never a parallel generation path); anything computable

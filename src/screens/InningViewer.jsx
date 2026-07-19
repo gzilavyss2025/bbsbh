@@ -246,6 +246,18 @@ export function InningViewer({
     return { labor, velo }
   }, [feed, revealedThrough, workload, pitcherLines])
 
+  // The workload file describes "now" — its availability rules only apply to
+  // a slate-current game (same freshness window TeamInfo's bullpen board
+  // uses). Null on an archival game, which silently disables the
+  // bullpen-thin pre-half note.
+  const workloadGameDate = useMemo(() => {
+    const d = feed?.gameData?.datetime?.officialDate ?? null
+    const asOf = workload?.asOf ?? null
+    if (!d || !asOf) return null
+    const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
+    return diff <= 3 * 86400000 ? d : null
+  }, [feed, workload])
+
   // The win-probability line "so far" — only the plays through the revealed
   // half. Same reveal gate as the running line and Pitchers table (a
   // reveal-only selector clamped to revealedThrough; see api/winprob.js), so
@@ -365,6 +377,8 @@ export function InningViewer({
             prospectsData={prospectsData}
             rookiesData={rookiesData}
             callouts={callouts}
+            workload={workload}
+            workloadGameDate={workloadGameDate}
             vsTeam={vsTeam}
             highlights={highlights}
             revealedAtBatCount={curAtBatCount}
@@ -417,6 +431,8 @@ export function InningViewer({
               ]}
               bundle={callouts}
               health={pitcherHealth}
+              workload={workload}
+              gameDate={workloadGameDate}
             />
             {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">
