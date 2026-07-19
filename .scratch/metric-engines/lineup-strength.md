@@ -153,12 +153,83 @@ every deduction is a line a scorekeeper can nod at.
 
 ## Research findings
 
-(to be filled by the research pass)
+From the external research pass (July 2026):
+
+- **Order barely matters; personnel dominates.** The Book: proper order strategy
+  "will only gain a few runs"; FanGraphs' synthesis of the Markov/sim literature
+  (Klaassen 2011) puts optimal-vs-*typical* order at **~5–15 runs/season**
+  (≤1.5 wins). Bukiet's Markov work's 30–50 runs/season figure is optimal vs.
+  *worst-case* order of the same nine — a different question; don't conflate.
+  Implication: a lineup grade should be ~90% "who's playing," ~10% "in what order."
+- **BvP is noise at real sample sizes.** The Book's consensus: unreliable below
+  ~50 PA; under ~10 AB it's "almost entirely luck." Public models discount raw BvP
+  in favor of true talent + platoon estimates.
+- **Platoon splits need heavy regression** toward the league-average split:
+  ~2,200 PA of league-average weight for RHB, ~1,000 PA for LHB (The Book). A
+  single season's observed split is mostly not real.
+- **Recency has *some* signal at the right window**: a rolling ~25-AB window shows
+  statistically significant (small) predictive value; 3–5-day "he's hot" windows
+  add roughly nothing over a proper baseline. Marcel (weighted multi-year +
+  regression) is the canonical simplest defensible true-talent estimate.
+- **Defense: prefer FRV over OAA.** Statcast's Fielding Run Value is the all-in-one
+  run-denominated metric (range + arm + framing/blocking for catchers); OAA
+  excludes catcher framing/blocking entirely (catcher OAA widely flagged as
+  unusable alone). Both are free Savant leaderboard CSVs — same fetch pattern as
+  the percentile CSV. **There is no published method for projecting OAA/FRV to a
+  position a player hasn't played** — public practice is the fixed FanGraphs
+  positional-adjustment constants (C +12.5 … DH −17.5 runs/162, confirmed current)
+  prorated by innings, exactly as engine L2 assumed.
+- **Prior art: white space.** Lineup *trackers* (RosterResource) and DFS
+  *optimizers* exist; nothing surfaced that grades a team's actual announced
+  lineup against its own optimal for a general audience.
 
 ## Re-evaluation
 
-(to be filled after research)
+What the research changes:
+
+- **L3 (Markov/sim) is demoted to last, decisively.** Its entire marginal value
+  over L2 is order effects, which the literature caps at ~1 win/season — the most
+  expensive engine buys the smallest validated signal.
+- **L2 is strengthened**: its two load-bearing assumptions (runs-denominated
+  value; fixed positional-adjustment constants as the out-of-position cost model)
+  are exactly current public practice. Add a Marcel-flavored regression to the
+  WAR-rate input (weight prior season + regress to mean at low PA) to fix the
+  April-noise failure mode already flagged.
+- **L1 amended**: use **FRV** (not OAA) as the defensive input — one different
+  column from the same Savant CSV family, and it fixes the catcher hole. The
+  unitless-sum objection stands; L1 works best as the *presentation* layer
+  (percentile language matches the app's existing Statcast cards) over L2's
+  run-denominated engine rather than as its own engine.
+- **L4 amended**: drop BvP from the math entirely (copy-only garnish, if that —
+  "career 8-for-19 vs. Webb" as flavor text); platoon term uses the
+  league-average split with The Book's regression weights, not raw observed
+  splits; form term uses a ~25-AB/30-day window, never shorter. So amended, L4
+  remains the highest-upside v2 layer.
+- **L5 unchanged** — research neither supports nor undermines it; its case was
+  always product-shaped (legibility), not evidentiary.
 
 ## Stack rank
 
-(to be filled after research)
+Scores 1–5 (higher better): **E** = effectiveness, **C** = ease of
+creation/maintenance, **U** = understandability.
+
+| # | Engine | E | C | U | Σ |
+|---|--------|---|---|---|---|
+| 1 | **L2 WAR-rate replacement delta** (+ Marcel-style regression) | 4 | 4 | 4 | 12 |
+| 2 | **L5 Deviation ledger** | 3 | 4 | 5 | 12 |
+| 3 | **L4 Matchup overlay** (amended: no BvP, regressed platoon) | 4 | 2 | 3 | 9 |
+| 4 | **L1 Percentile-composite gap** (amended: FRV) | 3 | 4 | 3 | 10 |
+| 5 | **L3 Markov/sim order model** | 3 | 1 | 1 | 5 |
+
+**Verdict.** Build **L2** as the engine: runs-denominated, every constant it needs
+is validated public practice, and the Hungarian solve is a small pure module.
+Present it **through an L5-style receipt** — the grade plus itemized lines ("Yelich
+resting −0.8", "Vaughn at 3B −0.4") — which is where L5's understandability
+actually belongs (a UI decision, not a competing engine). L1's percentile language
+can skin the same output for consistency with the existing Statcast cards. **L4**
+(platoon + regressed form) is the v2 layer once the base grade has a season of
+calibration; sequencing it later also gives the eligibility matrix time to prove
+out. **L3** is not worth building at any point: its cost buys the one input the
+literature says is nearly worthless. Note L4 ranks above L1 despite the lower Σ —
+Σ is not the rank; effectiveness upside on the same base engine outweighs a
+redundant standalone engine.

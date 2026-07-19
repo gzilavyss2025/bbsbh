@@ -134,12 +134,92 @@ show its three drivers (the Season Grade "drivers stay visible" rule, ADR-0020).
 
 ## Research findings
 
-(to be filled by the research pass)
+From the external research pass (July 2026):
+
+- **Leverage-weighted pitch counts were tested and rejected.** Russell Carleton
+  (Baseball Prospectus, "Why Do Pitchers Get Tired?", ~2015) built exactly engine
+  P2 — pitches × leverage of the PA — and ran it against outcomes 2010–2014:
+  **raw pitch count won every specification; the leverage-adjusted count never
+  entered significantly** (including a RISP-only variant). His conclusion: the
+  physical act of throwing is the fatigue driver; situational stress adds nothing
+  measurable on top of volume. Separately, pitchers *do* throw harder in big spots
+  (real, modest velo uptick with leverage) — but that supports "effort varies,"
+  not "leveraged pitches should count extra toward fatigue."
+- **Windup vs. stretch is a dead heuristic.** Fleisig et al. 2024 (*AJSM* +
+  *Sports Biomechanics*): <0.5 mph velocity difference, no significant kinetic/
+  kinematic differences between windup and stretch in professional pitchers. The
+  broadcaster "stretch is more taxing" claim has no biomechanical support.
+- **Velocity decline is the best-validated in-game fatigue signal.** Starters lose
+  ~0.9–1.0 mph on average first-to-last inning (Zimmerman/FanGraphs); peak-velo
+  loss explains ~23% of variance in K-rate change late in starts; outlier
+  droppers (−2 to −3 mph) are meaningful flags. Physiologically direct, unlike
+  any count-based scheme.
+- **The 30-pitch-inning danger zone has directional support, thin samples.** BP
+  Pitch-F/X work on 40+-pitch first innings found ~3.6 in. of fastball movement
+  loss across subsequent innings and worse next starts for the pitchers who lost
+  the most — distribution of pitches matters, not just the total — but n≈18–30;
+  evidence-supported, not conclusively quantified.
+- **PAP/PAP³ is the canonical published weighting scheme** (BP, Jazayerli 1998;
+  Woolner 2001): pitches past 100 count increasingly (cubed excess in PAP³) —
+  "it's the number of pitches thrown *tired*." Thresholds arbitrary, individual
+  variation ignored, and its own author considers it moot as a live tool — but it
+  validates the *shape* late-pitch weighting should take (tail-loaded, not
+  per-situation).
+- **TTO penalty:** ~8–10 wOBA points per pass; mechanism is batter familiarity
+  more than fatigue (repertoire-size interaction), and the newest peer-reviewed
+  work (Brill/Deshpande/Wyner 2023) finds no sharp third-time cliff. The related
+  Verducci-effect folk rule is essentially debunked.
+- **No prior product** ships a stress-adjusted live pitch count; nearest analog is
+  ESPN's rule-based reliever "tired" flag (a workload-side, not in-game, tool).
 
 ## Re-evaluation
 
-(to be filled after research)
+The research inverts the first-principles ordering:
+
+- **P2 is refuted for its stated purpose.** Its core premise — situational
+  weighting is more principled than heuristics — was specifically tested by
+  Carleton and lost to raw counts. Drop it. (The RE288 table keeps earning its
+  keep in umpire favor; it just has no fatigue business.)
+- **P1 survives only as *narrative*, and amended.** Cut the stretch tax
+  (debunked) and the RISP tax (Carleton). What remains defensible: the
+  big-inning tax (directional evidence) and a PAP³-style tail weight (pitches
+  past ~90–100 count extra). Reframed honestly, eP is a **storytelling stat**
+  ("78 pitches that felt like 94") — legitimate for this app, which is a
+  scorebook companion, not a projection system — but it must not be presented as
+  predictive.
+- **P4 is promoted to the top on effectiveness** — it's the one signal the
+  literature calls physiologically direct — with its known costs intact
+  (within-pitch-type comparison mandatory, MLB-only, small samples early).
+- **P3 gains standing**: Carleton's "volume is what matters" conclusion means
+  *pitches vs. own norm* is measuring the right thing, and it's the cheapest
+  engine here. "Laboring" framing (pitches/inning vs. his baseline) also happens
+  to be how broadcasters already talk.
+- **P5 re-specced**: the blend should be **P3 + P4** (the two evidence-backed
+  signals) with P1's eP as optional flavor — not the P1/P2-volume-stress core
+  originally sketched. Still v2.
+- A **TTO chip** ("3rd time through the order") is worth adding to whichever
+  engine ships — cheap to compute from revealed plays, well-evidenced magnitude —
+  as a display element, not a score input.
 
 ## Stack rank
 
-(to be filled after research)
+Scores 1–5: **E** effectiveness · **C** ease of creation/maintenance ·
+**U** understandability.
+
+| # | Engine | E | C | U | Σ |
+|---|--------|---|---|---|---|
+| 1 | **P3 Own-baseline deviation ("laboring index")** | 4 | 4 | 5 | 13 |
+| 2 | **P4 Velocity-decay fatigue signal** | 5 | 3 | 4 | 12 |
+| 3 | **P1 Effective pitches** (amended: big-inning + PAP³ tail only) | 2 | 4 | 4 | 10 |
+| 4 | **P5 Blended health gauge** (re-specced: P3+P4 core) | 4 | 2 | 3 | 9 |
+| 5 | **P2 Leverage/RE-weighted stress** | 1 | 3 | 3 | 7 |
+
+**Verdict.** Ship **P3** first: it is the only engine that is simultaneously
+cheap, universally available (MiLB included), aligned with the literature's
+"volume vs. own norm" conclusion, and phrased the way the booth already talks.
+Pair it with **P4** as a flag ("FB velo −1.8 since the 1st") wherever `pitchData`
+exists — together they cover both halves of "is he laboring?" (working harder
+than usual; losing stuff). **P1**'s amended eP is optional color for the Pitchers
+table — honest as narrative, and cuttable without loss. **P5** waits until
+P3/P4 have a season of behavior to calibrate against. **P2** should not be built:
+the one study on point says its added complexity buys nothing.

@@ -131,12 +131,89 @@ Payamps (B2B) · Likely down: Uribe (32 pitches yest.)."
 
 ## Research findings
 
-(to be filled by the research pass)
+From the external research pass (July 2026):
+
+- **Volume thrown beats days-rested as the fatigue predictor.** Burris & Coleman
+  (*JQAS* 2018) modeled reliever fatigue as dose-response: recent pitch volume
+  has a "virtually linear" negative relationship with subsequent performance,
+  while days-of-rest alone is only weakly associated. Velocity effects are
+  consistent across studies: ~0.4–0.5 mph down when tired (2019 and 2025 data
+  alike), up to ~1.5 mph after **three consecutive days** (Kalk 2008) — the
+  worst pattern found. Back-to-backs occur in ~16% of modern reliever
+  appearances; elite relievers' share of appearances jumped 37%→50% (2019→2025).
+- **ACWR's science is seriously contested.** Origin: Gabbett; acute (7-day) ÷
+  chronic (28-day) load, "sweet spot" 0.8–1.3. But Impellizzeri et al.
+  (2020–21) show the ratio suffers **mathematical coupling** (acute is a subset
+  of chronic → partly spurious correlation), the sweet spot may be a bucketing
+  artifact, and the windows are arbitrary — papers now argue to "dismiss ACWR
+  and its underlying theory." The only baseball-specific result is high-school
+  (ACWR >1.27 → 14.9× injury odds, n=18 pitchers); **no MLB validation exists**.
+- **The product space converged on rules and grids, not ratios.** ESPN publishes
+  an explicit reliever "tired" formula — flagged if **≥2 of {25+ pitches
+  yesterday, 35+ over last 3 days, pitched both prior days}** — and the standard
+  presentation is a rolling per-team pitch-count grid (Razzball's 7-day bullpen
+  chart; InsidethePen and Fantrax trackers similar). This is exactly the W5
+  shape, with published thresholds to borrow.
+- **Stress-weighted retrospective load has prior art but weak legs**: "leveraged
+  pitch count" concepts exist (BP/Bucs Dugout), but Carleton's BP test (see
+  `pitching-health.md`) found leverage-weighted counts add no predictive value
+  over raw counts. PAP³ (cubed pitches past 100) is the one weighting scheme
+  with published pedigree, and it's per-outing tail-weighting, not situational.
+- **Baselines to compare against**: starters now average mid-80s pitches/start
+  (~5.0 IP); ~3.3 relievers used per team-game. **The winning-vs-losing-team
+  usage split is an open research gap** — analysts assume contenders lean on top
+  arms harder (esp. September/postseason), but no effect-sized study exists.
+- Context worth carrying: MLB's own 2024 injury report argues velocity-chasing,
+  not workload per se, drives the elbow-injury epidemic — one more reason to
+  present workload as *usage description*, never injury prediction.
 
 ## Re-evaluation
 
-(to be filled after research)
+- **W1 upgraded from "the simple option" to "the evidence-aligned option"**:
+  Burris & Coleman's volume-dominates finding means raw pitch buckets track the
+  right variable. Add the **consecutive-days pattern** as a first-class field
+  (the 3-straight-days velo cliff is the sharpest documented effect) — the
+  first-principles design's rest-day emphasis is confirmed, and then some.
+- **W5 strengthened and de-risked**: its rule table no longer needs inventing —
+  seed it with ESPN's published thresholds (25 yesterday / 35 over 3 days /
+  B2B, flag on 2 of 3) plus a 3-straight-days hard flag, and present per-team as
+  a Razzball-style recent-usage grid. Prior art validates both the rules and
+  the UI idiom.
+- **W3 demoted**: mathematical-coupling critique + zero MLB validation means
+  ACWR should not be a shipped number. Salvage its one good idea — *load
+  relative to own recent norm* — as a plain percentage inside W4 ("40% above
+  his usual 10-game load"), no ratio branding, no sweet-spot zones, never
+  injury-flavored.
+- **W2 demoted further**: it inherits Carleton's negative result via the shared
+  stress-weight function (see `pitching-health.md` — P2 dropped, P1 reduced to
+  narrative), and it's the only engine requiring a second sweep pipeline. A
+  cheaper salvage exists if wanted later: per-outing PAP³ tail-weighting needs
+  only `numberOfPitches` already in hand — no play-by-play sweep at all.
+- **W4 refocused**: own-norm and role-cohort comparisons are the load-bearing
+  ones; the winning/losing-record split stays (it's cheap and the user asked)
+  but explicitly labeled as descriptive color — the research gap confirms
+  there's no evidentiary baseline to imply more.
 
 ## Stack rank
 
-(to be filled after research)
+Scores 1–5: **E** effectiveness · **C** ease of creation/maintenance ·
+**U** understandability.
+
+| # | Engine | E | C | U | Σ |
+|---|--------|---|---|---|---|
+| 1 | **W1 Raw rolling buckets** (+ consecutive-days pattern) | 4 | 5 | 5 | 14 |
+| 2 | **W5 Availability board** (ESPN-threshold rules, grid UI) | 4 | 4 | 5 | 13 |
+| 3 | **W4 Cohort baselines** (own-norm % + role cohort; record-split as color) | 3 | 4 | 4 | 11 |
+| 4 | **W3 ACWR** | 2 | 4 | 3 | 9 |
+| 5 | **W2 Stress-weighted backfill** | 2 | 2 | 3 | 7 |
+
+**Verdict.** **W1 + W5 together are the feature**: the 1/3/10-game buckets with
+days-spanned and consecutive-day patterns (W1) feeding a rule-based
+availability board with published, defensible thresholds (W5) — evidence-aligned,
+entirely on the existing `gen-callouts.mjs` gameLog sweep, spoiler-free, and
+matching how every prior-art product presents this data. **W4**'s own-norm
+percentage is the natural second release and quietly delivers what W3 promised
+without ACWR's baggage. **W3** should not ship as a branded ratio. **W2** is
+last: its premise lost its empirical footing and it carries the only real
+pipeline cost in the group — if stress-weighting ever returns, the PAP³-on-
+`numberOfPitches` shortcut delivers 80% of it for ~5% of the work.
