@@ -208,6 +208,30 @@ CREATE TABLE IF NOT EXISTS foul_ingested_games (
   date    TEXT NOT NULL
 );
 
+-- Per-team, per-season COMEBACK WIN counts (gen-comeback-wins.mjs): a win in
+-- which the team's win probability dropped below 10 / 20 / 30% at some point in
+-- the game. Buckets are NESTED (a sub-10 win also counts sub-20 and sub-30, so
+-- sub10 <= sub20 <= sub30). Like postseason_*/foul_*, a Final game's win-prob
+-- history is immutable, so these accumulate via an incrementing upsert as each
+-- newly-Final MLB game is swept, guarded by comeback_ingested_games so a resumed
+-- or re-run sweep never double-counts. `wins` is the team's total ingested wins
+-- (context for the buckets); the (team_id, season) key lets seasons coexist.
+CREATE TABLE IF NOT EXISTS comeback_win_totals (
+  team_id INTEGER NOT NULL,
+  season  INTEGER NOT NULL,
+  wins    INTEGER NOT NULL DEFAULT 0,
+  sub10   INTEGER NOT NULL DEFAULT 0,
+  sub20   INTEGER NOT NULL DEFAULT 0,
+  sub30   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (team_id, season)
+);
+
+-- Idempotency guard for comeback_win_totals: which gamePks are already folded in.
+CREATE TABLE IF NOT EXISTS comeback_ingested_games (
+  game_pk INTEGER PRIMARY KEY,
+  season  INTEGER NOT NULL
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,

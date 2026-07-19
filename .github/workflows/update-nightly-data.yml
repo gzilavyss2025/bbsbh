@@ -122,6 +122,10 @@ jobs:
         id: fever-radar
         continue-on-error: true
         run: node scripts/gen-fever-radar.mjs
+      - name: Comeback wins
+        id: comeback-wins
+        continue-on-error: true
+        run: node scripts/gen-comeback-wins.mjs
 
       - name: Decide whether to regenerate README
         id: readme-check
