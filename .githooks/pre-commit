@@ -11,9 +11,26 @@
 # CSS-only commit skips the suite so committing stays fast.
 if git diff --cached --name-only --diff-filter=ACM | grep -qE '\.(js|jsx|json|mjs)$'; then
   echo "pre-commit: running unit tests…"
-  node --test --test-reporter=dot "test/**/*.test.js" || {
+  # Capture output so we can (a) block on failures and (b) block on a run that
+  # collected ZERO tests — which is what an older Node (< 21, which can't expand
+  # the test/**/*.test.js glob) would silently do, giving a false "all clear".
+  # See .nvmrc: this project runs on Node 22.
+  out=$(node --test --test-reporter=tap "test/**/*.test.js" 2>&1)
+  status=$?
+  tests=$(printf '%s\n' "$out" | sed -n 's/^# tests \([0-9][0-9]*\).*/\1/p' | tail -1)
+
+  if [ "$status" -ne 0 ]; then
+    printf '%s\n' "$out"
     echo "pre-commit: unit tests failed — commit blocked. Fix them, or use 'git commit --no-verify' for a WIP commit."
     exit 1
-  }
+  fi
+
+  if [ -z "$tests" ] || [ "$tests" -eq 0 ]; then
+    printf '%s\n' "$out"
+    echo "pre-commit: no tests ran — commit blocked. This usually means Node is older than the version this project needs (see .nvmrc → Node 22). Run 'nvm use', update Node, or 'git commit --no-verify' to bypass."
+    exit 1
+  fi
+
+  echo "pre-commit: $tests unit tests passed."
 fi
 exit 0

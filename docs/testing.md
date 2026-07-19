@@ -126,9 +126,17 @@ Consequences to keep in mind when touching CI:
 
 ## A local safety net (optional): the pre-commit hook
 
-`.githooks/pre-commit` runs `npm test` before each commit, so a broken suite is
-caught on your machine before it ever reaches a PR. It's wired up automatically:
-`npm install` runs the `prepare` script, which points git at `.githooks/`. The
-hook **skips itself in CI** (`$CI` is set), so it never interferes with the
-nightly crons or the Actions runners — it only guards local commits. To bypass
-it for a genuine work-in-progress commit, `git commit --no-verify`.
+`.githooks/pre-commit` runs the unit suite before each commit, so a broken suite
+is caught on your machine before it ever reaches a PR. It's wired up
+automatically: `npm install` runs the `prepare` script, which points git at
+`.githooks/`. The hook **skips itself in CI** (`$CI` is set), so it never
+interferes with the nightly crons or the Actions runners — it only guards local
+commits. To bypass it for a genuine work-in-progress commit,
+`git commit --no-verify`.
+
+The hook blocks a commit in two cases: a test **failed**, or the run collected
+**zero tests**. The second case guards against a stale local Node — the
+`node --test "test/**/*.test.js"` glob needs Node ≥ 21, and on an older Node it
+would otherwise run nothing and report a false "all clear." The repo pins Node
+via `.nvmrc` (Node 22, matching CI); if the hook reports no tests ran, `nvm use`
+or update Node.
