@@ -1,0 +1,19 @@
+#!/bin/sh
+# Local safety net: refuse a commit whose unit suite is red, so a break is
+# caught on your machine before it reaches a PR (see docs/testing.md).
+#
+# Skips itself in CI (GitHub Actions sets $CI=true), so it NEVER interferes with
+# the nightly data crons or the Actions runners — it only guards local commits.
+# Bypass for a genuine work-in-progress commit with `git commit --no-verify`.
+[ "$CI" = "true" ] && exit 0
+
+# Only worth running when JS/JSON under test actually changed — a docs- or
+# CSS-only commit skips the suite so committing stays fast.
+if git diff --cached --name-only --diff-filter=ACM | grep -qE '\.(js|jsx|json|mjs)$'; then
+  echo "pre-commit: running unit tests…"
+  node --test --test-reporter=dot "test/**/*.test.js" || {
+    echo "pre-commit: unit tests failed — commit blocked. Fix them, or use 'git commit --no-verify' for a WIP commit."
+    exit 1
+  }
+fi
+exit 0

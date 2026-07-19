@@ -83,6 +83,13 @@ browser-level check: for anything user-visible also verify by running `npm run d
 / `npm run e2e` against a live or recent game. `docs/test-games.md` has verified
 gamePks with rare in-game events; `.claude/skills/run.md` documents the loop.
 
+**Test discipline (the suite only has value if it stays honest).** Never delete,
+skip, or loosen a test's assertions to make CI or a commit pass — fix the code, or
+stop and ask. A fix for a real bug lands with a test that FAILS without the fix (add
+it first, watch it fail, then fix). Product code and its tests land in the same PR.
+`main` requires the `lint-and-build` check; the nightly data crons bypass it via an
+admin PAT (`GH_BOT_TOKEN`) — see `docs/testing.md` before changing CI or that token.
+
 ## The spoiler rule — the core invariant
 
 This is the whole point of the app. **Do not let it drift.** The rule: a
