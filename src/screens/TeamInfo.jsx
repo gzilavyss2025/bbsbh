@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   selectLineup,
+  selectBullpen,
   selectTeamMeta,
   selectOfficials,
   selectGameInfo,
@@ -39,6 +40,8 @@ import { RadarPill } from '../components/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
+import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
+import { BullpenBoard } from '../components/BullpenBoard.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -60,6 +63,8 @@ export function TeamInfo({
   feverRadarData,
   savantPercentilesData,
   formerTeammatesData,
+  workloadData,
+  lineupValuesData,
   callouts,
   onNext,
   nextLabel,
@@ -114,6 +119,8 @@ export function TeamInfo({
         feverRadarData={feverRadarData}
         savantPercentilesData={savantPercentilesData}
         formerTeammatesData={formerTeammatesData}
+        workloadData={workloadData}
+        lineupValuesData={lineupValuesData}
         callouts={callouts}
       />
 
@@ -148,6 +155,8 @@ export function LineupSpread({
   feverRadarData,
   savantPercentilesData,
   formerTeammatesData,
+  workloadData,
+  lineupValuesData,
   callouts,
   onNext,
   onReload,
@@ -199,6 +208,8 @@ export function LineupSpread({
             rookiesData={rookiesData}
             feverRadarData={feverRadarData}
             savantPercentilesData={savantPercentilesData}
+            workloadData={workloadData}
+            lineupValuesData={lineupValuesData}
             callouts={callouts}
           />
         ))}
@@ -237,6 +248,8 @@ function TeamPanel({
   rookiesData,
   feverRadarData,
   savantPercentilesData,
+  workloadData,
+  lineupValuesData,
   callouts,
 }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
@@ -265,6 +278,8 @@ function TeamPanel({
         rookiesData={rookiesData}
         feverRadarData={feverRadarData}
         savantPercentilesData={savantPercentilesData}
+        workloadData={workloadData}
+        lineupValuesData={lineupValuesData}
         callouts={callouts}
         showTeammates={false}
       />
@@ -431,6 +446,8 @@ function TeamSections({
   feverRadarData,
   savantPercentilesData,
   formerTeammatesData,
+  workloadData,
+  lineupValuesData,
   callouts,
   showTeammates = true,
 }) {
@@ -444,6 +461,28 @@ function TeamSections({
   const season = feed?.gameData?.game?.season
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
+  const bullpenArms = useMemo(() => selectBullpen(feed, side), [feed, side])
+  // The availability board describes "now" (the nightly workload file's
+  // asOf); on an archival game its rested/tired flags would be about the
+  // wrong day entirely, so it only renders when this game sits within a few
+  // days of the file's own cutoff.
+  const boardGameDate = useMemo(() => {
+    const d = feed?.gameData?.datetime?.officialDate ?? null
+    const asOf = workloadData?.asOf ?? null
+    if (!d || !asOf) return null
+    const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
+    return diff <= 3 * 86400000 ? d : null
+  }, [feed, workloadData])
+  // Same freshness rule for the lineup grade: the nightly values file
+  // describes the CURRENT roster, so grading an archival game's posted nine
+  // against today's values would be stale nonsense — hide it there.
+  const freshLineupValues = useMemo(() => {
+    const d = feed?.gameData?.datetime?.officialDate ?? null
+    const asOf = (lineupValuesData?.asOf ?? '').slice(0, 10) || null
+    if (!d || !asOf) return null
+    const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
+    return diff <= 3 * 86400000 ? lineupValuesData : null
+  }, [feed, lineupValuesData])
 
   // Ties between this matchup's two clubs — see formerTeammatePairs. Skipped
   // entirely on the spread layout, which renders one shared copy itself
@@ -603,6 +642,14 @@ function TeamSections({
           </p>
         )}
       </section>
+
+      <LineupStrengthCard data={freshLineupValues} teamId={meta.id} lineup={lineup} />
+
+      <BullpenBoard
+        workload={workloadData}
+        bullpen={bullpenArms}
+        gameDate={boardGameDate}
+      />
 
       {oppDefense.length > 0 && (
         <section className="opp">

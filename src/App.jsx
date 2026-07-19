@@ -51,6 +51,10 @@ const AllStarLegacyPage = lazyNamed(
   'AllStarLegacyPage',
 )
 const StandingsPage = lazyNamed(() => import('./screens/StandingsPage.jsx'), 'StandingsPage')
+const FoulTrackerPage = lazyNamed(
+  () => import('./screens/FoulTrackerPage.jsx'),
+  'FoulTrackerPage',
+)
 const TeamPage = lazyNamed(() => import('./screens/TeamPage.jsx'), 'TeamPage')
 const TeamLeadersPage = lazyNamed(
   () => import('./screens/TeamLeadersPage.jsx'),
@@ -157,6 +161,8 @@ export default function App() {
     content = <AllStarLegacyPage />
   } else if (route.name === 'standings') {
     content = <StandingsPage />
+  } else if (route.name === 'fouls') {
+    content = <FoulTrackerPage />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {

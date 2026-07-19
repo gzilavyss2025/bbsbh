@@ -19,6 +19,8 @@ import { Ledger, spanCell } from '../components/Ledger.jsx'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
+import { FoulCard } from '../components/FoulCard.jsx'
+import { PitcherWorkloadCard } from '../components/PitcherWorkloadCard.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
@@ -272,6 +274,15 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             <StatcastPercentiles savant={block.savant} group={block.group} />
+
+            {/* Season foul-ball line (gen-fouls.mjs) + recent pitcher
+                workload (gen-workload.mjs) — both current-day-only cards
+                that hide under a spoiler asOf cutoff, like the Milestone
+                Watch projection. */}
+            <FoulCard playerId={bio.id} group={block.group} asOf={asOf} />
+            {block.group === 'pitching' && (
+              <PitcherWorkloadCard playerId={bio.id} asOf={asOf} />
+            )}
 
             {block.arsenal && (
               <>

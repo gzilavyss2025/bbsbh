@@ -53,6 +53,8 @@ export function GameView({ game, section, onSection }) {
     vsTeamSplitsData,
     highlightsData,
     runExpectancyData,
+    workloadData,
+    lineupValuesData,
     started,
   } = useGameData(game)
 
@@ -190,6 +192,8 @@ export function GameView({ game, section, onSection }) {
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
+          workloadData={workloadData}
+          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           onReload={feedState.reload}
@@ -212,6 +216,8 @@ export function GameView({ game, section, onSection }) {
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
+          workloadData={workloadData}
+          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
@@ -234,6 +240,8 @@ export function GameView({ game, section, onSection }) {
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
+          workloadData={workloadData}
+          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
@@ -260,6 +268,7 @@ export function GameView({ game, section, onSection }) {
           vsTeam={vsTeamSplitsData}
           highlights={highlightsData}
           runExpectancy={runExpectancyData}
+          workload={workloadData}
         />
       )}
       {feed && step === 3 && (

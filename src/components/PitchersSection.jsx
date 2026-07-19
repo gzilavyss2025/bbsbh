@@ -19,7 +19,13 @@ import { CalloutNote } from './CalloutNote.jsx'
 // club he's on) so buildPitcherNotes can pick the right half of a home/away
 // split. Absent bundle or no matching record → no notes, same degrade as
 // every other callout family.
-export function PitchersSection({ teams, bundle }) {
+//
+// `health` is the in-game pitching-health read (api/pitcherHealth.js): a
+// laboring index vs. the pitcher's own season norm plus the fastball
+// velocity-decay flag, both already clamped to the reveal mark by the caller
+// (ADR-0009, same footing as the lines themselves). Optional; absent →
+// no health notes (MiLB, no workload baseline, thin samples).
+export function PitchersSection({ teams, bundle, health }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
@@ -45,7 +51,10 @@ export function PitchersSection({ teams, bundle }) {
             </thead>
             <tbody>
               {t.rows.map((p) => {
-                const notes = buildPitcherNotes(p, t.side, t.name, bundle)
+                const notes = [
+                  ...buildPitcherNotes(p, t.side, t.name, bundle),
+                  ...healthNotes(p.id, health),
+                ]
                 return (
                   <Fragment key={p.id}>
                     <tr>
@@ -85,6 +94,27 @@ export function PitchersSection({ teams, bundle }) {
       ))}
     </section>
   )
+}
+
+// The health notes for one pitcher row — plain sentences in the same
+// CalloutNote dress as the workload/split notes above them. Only genuine
+// flags render (laboring ratio past its threshold; velo drop past its flag
+// line) — a normal outing adds no rows.
+function healthNotes(id, health) {
+  const notes = []
+  const labor = health?.labor?.[id]
+  if (labor?.laboring) {
+    notes.push(
+      `Laboring: ${labor.pitchesPerInning.toFixed(1)} pitches per inning tonight — his season norm is ${labor.baseline.toFixed(1)}.`,
+    )
+  }
+  const velo = health?.velo?.[id]
+  if (velo?.flagged) {
+    notes.push(
+      `Fastball down ${velo.drop.toFixed(1)} mph from his early innings (${velo.anchor.toFixed(1)} → ${velo.current.toFixed(1)}).`,
+    )
+  }
+  return notes
 }
 
 // A pitcher's name, always drawn in caps (see .pitchers__pname), auto-shrunk to

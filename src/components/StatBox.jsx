@@ -98,6 +98,8 @@ export function StatBox({
                 <Stat k="Pitches" v={d.pitches} />
                 <Stat k="Total pitches" v={rolling} />
                 <Stat k="Whiffs" v={d.whiffs} />
+                <Stat k="Fouls" v={d.fouls} />
+                <Stat k="2-strike fouls" v={d.twoStrikeFouls} />
                 <Stat k="1st-pitch strikes" v={`${d.firstPitchStrikes}/${d.plateAppearances}`} />
               </div>
               {challenges && (

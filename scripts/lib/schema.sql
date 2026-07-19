@@ -119,6 +119,95 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- both need the raw dated snapshots and the pure formula in the browser, so
 -- a build-time-precomputed grade would either miss historical cutoffs or
 -- break the explainer. See docs/adr/0021.
+-- Season-long foul-ball aggregates (gen-fouls.mjs, docs/.scratch/metric-engines/
+-- foul-tracker.md — engines F1-F5). A completed game's fouls are immutable, so
+-- like postseason_* these tables accumulate via incrementing upserts as each
+-- game's live feed is swept, guarded by foul_ingested_games so a resumed/re-run
+-- sweep never double-counts. Single-season (2026) by construction: the `season`
+-- column is informational (overwritten to the latest ingested season); a genuine
+-- new-season rebuild clears scripts/data/fouls.sql rather than adding a season
+-- key to every primary key. Foul/whiff classification mirrors the live
+-- derive.js path exactly via the shared FOUL_CODES/WHIFF_CODES/pitchCallCode in
+-- src/api/playbyplay.js, so the precomputed and live tallies can't drift.
+
+-- Fouls seen/hit BY each batter. `pitches_seen` counts every pitch thrown to him
+-- (including pitches during a mid-at-bat baserunning play that resumes his AB).
+-- `two_strike_fouls` are fouls hit with two strikes already (the AB-extending
+-- kind) — the pre-pitch strike count is carried pitch-to-pitch and across a
+-- non-PA play, since a pitch event's own `count` is the count AFTER the pitch.
+-- `max_game_fouls`/`max_game_pk` track his single-game high, updated only when a
+-- game exceeds the stored max (so it converges regardless of ingest order).
+CREATE TABLE IF NOT EXISTS foul_batter_totals (
+  person_id        INTEGER PRIMARY KEY,
+  season           INTEGER NOT NULL,
+  name             TEXT NOT NULL,
+  team_id          INTEGER,
+  games            INTEGER NOT NULL DEFAULT 0,
+  pa               INTEGER NOT NULL DEFAULT 0,
+  pitches_seen     INTEGER NOT NULL DEFAULT 0,
+  fouls            INTEGER NOT NULL DEFAULT 0,
+  two_strike_fouls INTEGER NOT NULL DEFAULT 0,
+  max_game_fouls   INTEGER NOT NULL DEFAULT 0,
+  max_game_pk      INTEGER
+);
+
+-- Fouls surrendered BY each pitcher, plus whiffs so the app can show the
+-- fouls-to-whiffs ratio the literature flags as the informative pitcher cut
+-- (Baumann, FanGraphs 2024). `starts` counts games he was his team's first
+-- pitcher (the starter); `is_starter` (majority-of-appearances-were-starts) is
+-- derived at export as starts*2 > games — stored as `starts` rather than a
+-- non-accumulable boolean so the incremental upsert stays correct.
+CREATE TABLE IF NOT EXISTS foul_pitcher_totals (
+  person_id  INTEGER PRIMARY KEY,
+  season     INTEGER NOT NULL,
+  name       TEXT NOT NULL,
+  team_id    INTEGER,
+  games      INTEGER NOT NULL DEFAULT 0,
+  starts     INTEGER NOT NULL DEFAULT 0,
+  pitches    INTEGER NOT NULL DEFAULT 0,
+  fouls      INTEGER NOT NULL DEFAULT 0,
+  whiffs     INTEGER NOT NULL DEFAULT 0
+);
+
+-- Fouls BY each team's batters (team-level roll-up for the club foul boards).
+CREATE TABLE IF NOT EXISTS foul_team_totals (
+  team_id          INTEGER PRIMARY KEY,
+  season           INTEGER NOT NULL,
+  games            INTEGER NOT NULL DEFAULT 0,
+  fouls            INTEGER NOT NULL DEFAULT 0,
+  two_strike_fouls INTEGER NOT NULL DEFAULT 0
+);
+
+-- League-wide foul distribution by inning (innings 10+ folded into inning 10),
+-- split by whether the pitcher on the mound was his team's starter or a
+-- reliever — a cut that (per the research notes) isn't published anywhere.
+CREATE TABLE IF NOT EXISTS foul_league_innings (
+  inning              INTEGER PRIMARY KEY,
+  season              INTEGER NOT NULL,
+  pitches             INTEGER NOT NULL DEFAULT 0,
+  fouls               INTEGER NOT NULL DEFAULT 0,
+  pitches_vs_starter  INTEGER NOT NULL DEFAULT 0,
+  fouls_vs_starter    INTEGER NOT NULL DEFAULT 0,
+  pitches_vs_reliever INTEGER NOT NULL DEFAULT 0,
+  fouls_vs_reliever   INTEGER NOT NULL DEFAULT 0
+);
+
+-- League-wide foul rate by pitch type (details.type.code / .description).
+CREATE TABLE IF NOT EXISTS foul_pitch_types (
+  code        TEXT PRIMARY KEY,
+  season      INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  pitches     INTEGER NOT NULL DEFAULT 0,
+  fouls       INTEGER NOT NULL DEFAULT 0
+);
+
+-- Idempotency guard: which gamePks have already been folded into the totals
+-- above (with the game's official date, so coverageSince is min(date)).
+CREATE TABLE IF NOT EXISTS foul_ingested_games (
+  game_pk INTEGER PRIMARY KEY,
+  date    TEXT NOT NULL
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,

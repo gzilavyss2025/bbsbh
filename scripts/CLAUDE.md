@@ -147,6 +147,29 @@ don't run these by hand.
   silently returns the empty MLB line); career-derived families + standings splits
   stay MLB-only. Per-date files are ~1MB, kept out of the PWA precache. See
   `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a parallel path.
+- `gen-fouls.mjs` → `public/data/fouls.json` — season foul-ball aggregates
+  (per-batter/pitcher/team totals, two-strike fouls, single-game highs, league
+  by-inning + by-pitch-type rates with a starter/reliever split). SQLite-backed
+  (`fouls` group, ADR-0021) APPEND-ONLY incremental sweep of Final MLB games'
+  live feeds like `gen-umpire-accuracy.mjs` (`--days` trailing window;
+  `--since`/`--until` backfill with checkpoints); `foul_ingested_games` is the
+  idempotency guard. Imports `FOUL_CODES`/`pitchCallCode` from
+  `src/api/playbyplay.js` so live (`derive.js`) and precomputed tallies can't
+  drift; two-strike detection carries the PRE-pitch count forward across
+  non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
+  `src/api/fouls.js` (Foul Tracker page, player-page card).
+- `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
+  workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
+  role inference, league mean/SD baselines per role, and winning/losing-record
+  team cohort means (descriptive color only). Full nightly rebuild from each
+  active-roster pitcher's season gameLog; MLB only. All bucket math (last
+  1/3/10, consecutive days, availability rules) lives in the reader
+  `src/api/workload.js`, computed relative to a caller-supplied date.
+- `gen-lineup-values.mjs` → `public/data/lineup-values.json` — per-hitter
+  run-value rates (FanGraphs WAR from the local `war.json`, Marcel-shrunk by
+  PA) plus a position-eligibility matrix from season+career fielding innings.
+  Feeds the Lineup Strength grade (`src/lib/lineupSolver.js` Hungarian
+  assignment + `src/api/lineupStrength.js`); MLB only, nightly rebuild.
 - `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone
   Watch list: every debuted player on an MLB org's `fullRoster` (active, IL, or in
   the minors) within reach of a round career-total milestone (`MILESTONE_DEFS` in

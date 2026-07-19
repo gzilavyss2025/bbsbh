@@ -18686,3 +18686,142 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ------------------------------------------------------------- foul tracker
+   FoulTrackerPage.jsx — season foul-ball boards. Reuses .standings/.ledger-wrap
+   ledger styling (same right-aligned mono figures, left-aligned .team cell);
+   only the per-table caption, the muted team abbreviation riding a player's
+   name, and the by-inning rate bar are specific to this page. */
+.foulboard__caption {
+  caption-side: top;
+  text-align: left;
+  padding: 16px 8px 6px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.foulboard__note {
+  display: block;
+  font-family: var(--font-body);
+  letter-spacing: var(--ls-text);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+  margin-top: 2px;
+  max-width: 48ch;
+}
+.foulboard__team {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+.foulboard__barcol {
+  width: 26%;
+}
+.foulboard__bar {
+  display: block;
+  height: 8px;
+  background: color-mix(in srgb, var(--graphite) 55%, transparent);
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------------- lineup strength
+   LineupStrengthCard.jsx — the 0-10 grade of tonight's posted order vs. the
+   roster's best nine, with its itemized receipt. Lives on the lineup pages
+   under the batting order; spoiler-free (season aggregates only). */
+.lstrength__row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.lstrength__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+.lstrength__receipt {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.lstrength__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.lstrength__delta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--accent-negative);
+  white-space: nowrap;
+}
+.lstrength__clean {
+  margin: 8px 0 0;
+  font-size: var(--fs-small);
+  color: var(--accent-positive);
+}
+.lstrength__caveat,
+.penboard__caveat {
+  margin: 8px 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  max-width: 52ch;
+}
+
+/* ---------------------------------------------------------- bullpen board
+   BullpenBoard.jsx — tonight's pen sorted likely-down → limited → fresh,
+   each with the rule that tripped ("32 pitches yesterday"). Spoiler-free:
+   built from completed appearances only (api/workload.js). */
+.penboard__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.penboard__row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.penboard__status {
+  flex: none;
+  min-width: 86px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+}
+.penboard__status--fresh {
+  color: var(--accent-positive);
+}
+.penboard__status--limited {
+  color: var(--award-ink);
+}
+.penboard__status--down {
+  color: var(--accent-negative);
+}
+.penboard__namewrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+}
+.penboard__detail {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}

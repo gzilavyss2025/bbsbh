@@ -51,6 +51,20 @@ export const GROUPS = {
     file: join(dataDir, 'postseason-player-stats.sql'),
     tables: ['postseason_ingested_games', 'postseason_batting_totals', 'postseason_pitching_totals'],
   },
+  // All six foul tables are written by the SAME single generator (gen-fouls.mjs)
+  // on the nightly cron — no cross-cron collision to isolate, so one group
+  // covers them all, same as postseason-player-stats above.
+  fouls: {
+    file: join(dataDir, 'fouls.sql'),
+    tables: [
+      'foul_ingested_games',
+      'foul_batter_totals',
+      'foul_pitcher_totals',
+      'foul_team_totals',
+      'foul_league_innings',
+      'foul_pitch_types',
+    ],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay

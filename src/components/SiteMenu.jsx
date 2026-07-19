@@ -11,6 +11,7 @@ const MENU_ITEMS = [
   { label: 'Top MLB Prospects', path: '/prospects' },
   { label: 'Rehab Assignments', path: '/rehab' },
   { label: 'Umpire Rankings', path: '/umpires' },
+  { label: 'Foul Tracker', path: '/fouls' },
   { label: 'Milestone Watch', path: '/milestones' },
   { label: 'Awards History', path: '/awards' },
   { label: 'Postseason History', path: '/postseason-history' },

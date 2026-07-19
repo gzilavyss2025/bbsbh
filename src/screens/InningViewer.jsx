@@ -10,6 +10,7 @@ import {
 } from '../api/select.js'
 import { selectWinProbPath } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
+import { laboringFor, computeVeloDecay } from '../api/pitcherHealth.js'
 import { safeToShowEntering } from '../api/enteringHalf.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
@@ -62,6 +63,7 @@ export function InningViewer({
   vsTeam,
   highlights,
   runExpectancy,
+  workload,
 }) {
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
@@ -223,6 +225,26 @@ export function InningViewer({
     () => computePitcherLines(feed, revealedThrough),
     [feed, revealedThrough],
   )
+
+  // In-game pitching health for the Pitchers table (api/pitcherHealth.js):
+  // the laboring index (tonight's pitches/inning vs. his own season norm,
+  // from the workload.json precompute) and the fastball velocity-decay flag.
+  // Both read only revealed plays — same ADR-0009 clamp as the lines above.
+  const pitcherHealth = useMemo(() => {
+    if (!feed) return null
+    const velo = computeVeloDecay(feed, revealedThrough)
+    const labor = {}
+    const entries = workload?.pitchers ?? null
+    if (entries) {
+      for (const side of ['away', 'home']) {
+        for (const row of pitcherLines[side] ?? []) {
+          const l = laboringFor(row, entries[row.id])
+          if (l) labor[row.id] = l
+        }
+      }
+    }
+    return { labor, velo }
+  }, [feed, revealedThrough, workload, pitcherLines])
 
   // The win-probability line "so far" — only the plays through the revealed
   // half. Same reveal gate as the running line and Pitchers table (a
@@ -394,6 +416,7 @@ export function InningViewer({
                 { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
               ]}
               bundle={callouts}
+              health={pitcherHealth}
             />
             {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">

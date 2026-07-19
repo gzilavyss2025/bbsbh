@@ -21,6 +21,8 @@ import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { fetchRunExpectancy } from '../api/umpireFavor.js'
+import { fetchWorkload } from '../api/workload.js'
+import { fetchLineupValues } from '../api/lineupStrength.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
 import { apiDateToUrl } from '../lib/route.js'
@@ -329,6 +331,31 @@ export function useGameData(game) {
   )
   const runExpectancyData = runExpectancy.data ?? null
 
+  // Rolling pitcher workload (gen-workload.mjs) — spoiler-free completed-
+  // appearance aggregates feeding the bullpen availability board (TeamInfo)
+  // and the Pitchers table's laboring baseline (pitcherHealth.js). MLB-only
+  // at source, same deferred tier as rookies/feverRadar.
+  const workload = useAsync(
+    () =>
+      enrichmentReady && game.sportId === SPORT_IDS.MLB
+        ? fetchWorkload()
+        : Promise.resolve(null),
+    [enrichmentReady, game.sportId],
+  )
+  const workloadData = workload.data ?? null
+
+  // Per-roster lineup values + position eligibility (gen-lineup-values.mjs) —
+  // spoiler-free season aggregates behind the Lineup Strength grade on the
+  // lineup pages (api/lineupStrength.js). MLB-only at source.
+  const lineupValues = useAsync(
+    () =>
+      enrichmentReady && game.sportId === SPORT_IDS.MLB
+        ? fetchLineupValues()
+        : Promise.resolve(null),
+    [enrichmentReady, game.sportId],
+  )
+  const lineupValuesData = lineupValues.data ?? null
+
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   return {
@@ -351,6 +378,8 @@ export function useGameData(game) {
     vsTeamSplitsData,
     highlightsData: highlights.data ?? null,
     runExpectancyData,
+    workloadData,
+    lineupValuesData,
     started,
   }
 }

@@ -78,6 +78,18 @@ jobs:
         id: former-teammates
         continue-on-error: true
         run: node scripts/gen-former-teammates.mjs
+      - name: Foul tracker
+        id: fouls
+        continue-on-error: true
+        run: node scripts/gen-fouls.mjs
+      - name: Pitcher workload
+        id: workload
+        continue-on-error: true
+        run: node scripts/gen-workload.mjs
+      - name: Lineup values
+        id: lineup-values
+        continue-on-error: true
+        run: node scripts/gen-lineup-values.mjs
       - name: Vs-team splits
         id: vs-team-splits
         continue-on-error: true
@@ -176,7 +188,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql README.md 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql README.md 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race, same shape as
@@ -201,6 +213,9 @@ jobs:
           steps.minors-leaders.outcome == 'failure' ||
           steps.callouts.outcome == 'failure' ||
           steps.former-teammates.outcome == 'failure' ||
+          steps.fouls.outcome == 'failure' ||
+          steps.workload.outcome == 'failure' ||
+          steps.lineup-values.outcome == 'failure' ||
           steps.vs-team-splits.outcome == 'failure' ||
           steps.savant-percentiles.outcome == 'failure' ||
           steps.milestones.outcome == 'failure' ||
