@@ -106,10 +106,14 @@ const NON_AB_EVENTS = new Set([
 // the fielder chain still shows in the diamond center. Only meaningful for outs.
 function classifyOut(eventType, desc = '') {
   if (eventType === 'strikeout' || eventType === 'strikeout_double_play') return 'SO'
+  // Sacrifices first, so a sac fly/bunt that also turned a double play is still
+  // marked as the sacrifice it was for the batter (matches scorebookCode's SF/SAC).
+  if (eventType === 'sac_fly' || eventType === 'sac_fly_double_play' || /sacrifice fly/i.test(desc)) return 'SF'
+  if (eventType === 'sac_bunt' || eventType === 'sac_bunt_double_play' || /sacrifice (bunt|hit)/i.test(desc)) return 'SAC'
   if (/double play|grounded into/i.test(desc)) return 'DP'
   if (/lines? (out|into)/i.test(desc)) return 'LO'
   if (/pops? (out|into)/i.test(desc)) return 'PO'
-  if (/flies? (out|into)|sac(rifice)? fly/i.test(desc)) return 'FO'
+  if (/flies? (out|into)/i.test(desc)) return 'FO'
   if (/grounds? (out|into)|grounded/i.test(desc)) return 'GO'
   if (/force(d)? out|fielder'?s choice/i.test(desc)) return 'FC'
   if (/sac(rifice)? bunt|bunt/i.test(desc)) return 'SAC'
@@ -141,10 +145,14 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
     }
   }
 
-  // Per slot: this inning's cards in plate-appearance order, plus running tallies.
+  // Per slot: this inning's cards in plate-appearance order, plus running
+  // tallies and the ordered list of players who occupied the slot (starter
+  // first, then each substitute) so the sheet can give each his own sub-line.
   const slotData = Array.from({ length: 9 }, (_, i) => ({
     slot: i + 1,
     byInning: {}, // inning -> [card, …]
+    occById: new Map(), // batterId -> occupant record
+    occupants: [], // occupant records in the order they took the slot
     ab: 0,
     h: 0,
     r: 0,
@@ -162,10 +170,30 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
       // same two-column ladder the live play-by-play card uses.
       card.ladder = pitchLadder(card.pitches ?? [])
       ;(s.byInning[inning] ??= []).push(card)
-      if (card.codeKind === 'hit') s.h += 1
-      if (!NON_AB_EVENTS.has(card.eventType)) s.ab += 1
-      if (card.scored) s.r += 1
+      // Which occupant of the slot this card belongs to (0 = starter), plus his
+      // own AB/H/R/RBI so each sub-line carries its own line, not the slot's sum.
+      let occ = s.occById.get(card.batterId)
+      if (!occ) {
+        const b = card.batter ?? {}
+        occ = {
+          id: card.batterId,
+          name: b.last ? `${b.last}${b.first ? `, ${b.first}` : ''}` : b.fullName ?? '',
+          pos: b.pos ?? '',
+          index: s.occupants.length,
+          ab: 0,
+          h: 0,
+          r: 0,
+          rbi: 0,
+        }
+        s.occById.set(card.batterId, occ)
+        s.occupants.push(occ)
+      }
+      card.occIndex = occ.index
+      if (card.codeKind === 'hit') { s.h += 1; occ.h += 1 }
+      if (!NON_AB_EVENTS.has(card.eventType)) { s.ab += 1; occ.ab += 1 }
+      if (card.scored) { s.r += 1; occ.r += 1 }
       s.rbi += card.rbi ?? 0
+      occ.rbi += card.rbi ?? 0
     }
   }
 
@@ -195,7 +223,17 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
       if (prevBatter != null && card.batterId !== prevBatter) card.subBefore = true
       prevBatter = card.batterId
     })
-    return { slot: s.slot, cells, ab: s.ab, h: s.h, r: s.r, rbi: s.rbi }
+    // One display row per occupant (starter first), each with only his own
+    // cards under the shared columns and his own line — so a pinch-hitter gets
+    // his own sub-line beneath the starter instead of sharing one name label.
+    const rows = s.occupants.map((occ) => {
+      const occCells = {}
+      for (const ci in cells) {
+        if (cells[ci].occIndex === occ.index) occCells[ci] = cells[ci]
+      }
+      return { id: occ.id, name: occ.name, pos: occ.pos, cells: occCells, ab: occ.ab, h: occ.h, r: occ.r, rbi: occ.rbi }
+    })
+    return { slot: s.slot, cells, rows, ab: s.ab, h: s.h, r: s.r, rbi: s.rbi }
   })
 
   const perInning = {}

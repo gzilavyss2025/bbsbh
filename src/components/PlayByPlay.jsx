@@ -386,7 +386,7 @@ function EventCard({ code, runnerId, segments }) {
 }
 
 function AtBatCard({ entry, calloutCtx, highlight }) {
-  const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, legNotations, pinchRunners, baserunningNotes } = entry
+  const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
   const calloutNotes = buildCallouts(entry, calloutCtx)
@@ -482,6 +482,7 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
           <PlayDiamond
             reached={reached}
             scored={scored}
+            earned={earned}
             legNotations={legNotations}
             outAt={outAt}
             outCode={outCode}

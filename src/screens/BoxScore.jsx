@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame, resolveCardPlayer } from '../api/boxscore.js'
 import { selectWinProbPath } from '../api/winprob.js'
-import { computeGameSuperlatives } from '../api/derive.js'
+import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
@@ -118,7 +118,14 @@ export function BoxScore({
           const stars = computeThreeStars(winProbability, feed)
           const potg = computePlayOfTheGame(winProbability, feed)
           const winProbPoints = selectWinProbPath(winProbability)
-          const insights = computeGameSuperlatives(feed)
+          // One per-inning play-by-play pass, shared by the Statcast
+          // superlatives and the By-inning digest below so the feed isn't
+          // walked twice on each reveal.
+          const derivedByInning = computeDerivedByInning(feed)
+          const insights = computeGameSuperlatives(feed, derivedByInning)
+          // Per-half pitches / whiffs / LOB — plain play-by-play, so it holds
+          // up at MiLB parks where the Statcast card can't.
+          const inningDigest = computeInningDigest(feed, derivedByInning)
           // Every leader/streak/situational-record note that fired somewhere
           // in the game (see api/callout-notes.js) — the same notes the
           // innings view shows one at a time on the play they belong to,
@@ -132,6 +139,7 @@ export function BoxScore({
               potg={potg}
               winProbPoints={winProbPoints}
               insights={insights}
+              inningDigest={inningDigest}
               calloutNotes={calloutNotes}
               managers={managers}
               uniforms={uniforms}
@@ -166,7 +174,7 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -291,6 +299,7 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, callout
             duo column) on every breakpoint — the one row every scorebook page
             reads across in one line. */}
         <Scoreboard away={box.away} home={box.home} innings={box.innings} onSection={onSection} />
+        <InningTally rows={inningDigest} away={box.away} home={box.home} />
         <div className="bs__duo">
           <div className="bs__col">
             <InfoCard fields={awayFields} />
@@ -794,6 +803,46 @@ function Scoreboard({ away, home, innings, onSection }) {
                 <td className="bs__boardFinal">{side.line.r}</td>
                 <td className="bs__boardFinal">{side.line.h}</td>
                 <td className="bs__boardFinal">{side.line.e}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// A per-half-inning tally the printed line score never carries: pitches thrown,
+// whiffs (swing-and-miss), and runners left on base, one row per played half in
+// order (see computeInningDigest). Everything here is plain play-by-play, so
+// unlike the Statcast/win-prob cards it renders at MiLB parks too — the box
+// score's one enrichment that never goes dark below AAA. Hidden only if the
+// feed carried no plays at all.
+function InningTally({ rows, away, home }) {
+  if (!rows || rows.length === 0) return null
+  const abbr = (side) => (side === 'away' ? away : home).abbreviation || (side === 'away' ? 'AWAY' : 'HOME')
+  return (
+    <div className="bs__tally">
+      <h3 className="bs__insightsTitle">By inning</h3>
+      <div className="bs__scroll">
+        <table className="bs__grid bs__grid--tally">
+          <thead>
+            <tr>
+              <th className="bs__nameCol">Half</th>
+              <th>P</th>
+              <th>Wh</th>
+              <th>LOB</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={`${r.inning}-${r.half}`}>
+                <td className="bs__nameCol">
+                  {r.half === 'top' ? '▲' : '▼'} {abbr(r.side)} {r.inning}
+                </td>
+                <td>{r.pitches}</td>
+                <td>{r.whiffs}</td>
+                <td>{r.lob}</td>
               </tr>
             ))}
           </tbody>

@@ -9,6 +9,8 @@
 // Pitch call codes and non-PA event types are shared with the play-by-play
 // module (both reveal-only) so the two can never drift on the feed shape.
 import { NON_PA_EVENT_TYPES, WHIFF_CODES, pitchCallCode } from './playbyplay.js'
+// Per-half LOB rides along from the linescore (also reveal-only).
+import { revealInning } from './linescore.js'
 
 // First-pitch-strike convention: the first pitch counts as a strike unless it
 // is a ball, ball in dirt, intentional ball, pitchout, or hit-by-pitch.
@@ -137,8 +139,11 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
 // Same reveal-only rule as the rest of this module: the whole game is already
 // behind the box score's SealBox by the time this is called, so aggregating
 // every half here doesn't leak anything the seal wasn't already covering.
-export function computeGameSuperlatives(feed) {
-  const map = computeDerivedByInning(feed)
+// `derivedMap` lets a caller that already built the per-inning map (the box
+// score builds one for the By-inning digest too) pass it in rather than have
+// this re-walk the whole play-by-play a second time.
+export function computeGameSuperlatives(feed, derivedMap) {
+  const map = derivedMap ?? computeDerivedByInning(feed)
   const best = {
     maxVelo: null,
     maxVeloType: '',
@@ -170,6 +175,47 @@ export function computeGameSuperlatives(feed) {
     }
   }
   return best
+}
+
+// A per-half-inning tally for the box score's "By inning" digest: pitches
+// thrown, whiffs (swing-and-miss), and runners left on base, one entry per
+// played half in order. Unlike the Statcast superlatives above, every figure
+// here comes from plain play-by-play (pitch call codes + the linescore's LOB),
+// so it survives at MiLB parks with no ball-tracking. Reveal-only, like the
+// rest of this module — the whole box score is already behind its seal.
+export function computeInningDigest(feed, derivedMap) {
+  const derived = derivedMap ?? computeDerivedByInning(feed)
+  const innings = feed?.liveData?.linescore?.innings ?? []
+  const rows = []
+  for (const inn of innings) {
+    const num = inn.num
+    if (num == null) continue
+    // A half was played only if the linescore carries that side's sub-object
+    // (a walk-off skips the home half of the last inning).
+    if (inn.away != null) {
+      const d = derived[`${num}-top`]
+      rows.push({
+        inning: num,
+        half: 'top',
+        side: 'away',
+        pitches: d?.pitches ?? 0,
+        whiffs: d?.whiffs ?? 0,
+        lob: revealInning(feed, num, 'away')?.leftOnBase ?? 0,
+      })
+    }
+    if (inn.home != null) {
+      const d = derived[`${num}-bottom`]
+      rows.push({
+        inning: num,
+        half: 'bottom',
+        side: 'home',
+        pitches: d?.pitches ?? 0,
+        whiffs: d?.whiffs ?? 0,
+        lob: revealInning(feed, num, 'home')?.leftOnBase ?? 0,
+      })
+    }
+  }
+  return rows
 }
 
 // Rolling (cumulative) pitch count for a pitching side through the given
