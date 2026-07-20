@@ -123,6 +123,7 @@ export function receiptFor(data, teamId, actualLineup) {
   const optBySlot = new Map(grade.optimal.assignments.map((a) => [a.slot, a]))
   const actBySlot = new Map(grade.actual.perSlot.map((a) => [a.slot, a]))
   const items = []
+  const benchSlots = new Set()
 
   // (a) Per-slot personnel swaps. The per-slot value delta between the optimal
   // and posted assignment decomposes the total gap exactly, so this is the gap's
@@ -135,10 +136,17 @@ export function receiptFor(data, teamId, actualLineup) {
     const deltaRpg = opt.value - act.value
     if (deltaRpg < 0.02) continue
     items.push({ kind: 'bench', inId: String(opt.id), outId: String(act.id), slot, deltaRpg })
+    benchSlots.add(slot)
   }
 
-  // (b) Out-of-position posted starters (familiarity < 0.7).
+  // (b) Out-of-position posted starters (familiarity < 0.7). Skip any slot that
+  // already has a bench swap above: the swap's value delta ALREADY prices in the
+  // posted starter's unfamiliarity there, so a separate out-of-position line for
+  // the same slot double-reports it (and reads as a duplicate row in the table).
+  // Only a slot whose posted starter is the OPTIMAL choice but still unfamiliar
+  // (no swap) earns its own out-of-position line.
   for (const { id, slot } of normalizeActual(actualLineup)) {
+    if (benchSlots.has(slot)) continue
     const p = byId.get(String(id))
     const weight = p?.elig?.[slot] ?? ELIG_FLOOR
     if (weight >= 0.7) continue

@@ -208,6 +208,37 @@ test('gradeLineup: optimal-ish posted lineup scores near 10, bench-heavy scores 
   assert.ok(dhSwap, 'receipt should flag the benched DH stud as a bench item')
 })
 
+test('receiptFor: a slot with a bench swap does not also emit a redundant oop line', () => {
+  // Post a weak, out-of-position bat at a slot the optimum would give to someone
+  // else: the slot must show as ONE bench swap, never a bench row AND an
+  // out-of-position row for the same slot (which read as a duplicate in the table).
+  const data = synthData()
+  const posted = [
+    { personId: 'c', position: 'C' },
+    { personId: '1b', position: '1B' },
+    { personId: '2b', position: '2B' },
+    { personId: 'scrub', position: '3B' }, // weak corner bat, unfamiliar at 3B
+    { personId: 'ss', position: 'SS' },
+    { personId: 'lf', position: 'LF' },
+    { personId: 'cf', position: 'CF' },
+    { personId: 'rf', position: 'RF' },
+    { personId: 'dhstud', position: 'DH' },
+  ]
+  const items = receiptFor(data, 1, posted)
+  const bySlot = new Map()
+  for (const it of items) {
+    const key = it.slot
+    assert.ok(
+      !(bySlot.has(key) && (bySlot.get(key) === 'bench' || it.kind === 'bench')),
+      `slot ${key} has both a bench and an out-of-position line`,
+    )
+    bySlot.set(key, it.kind)
+  }
+  // No slot appears more than once at all.
+  const slots = items.map((it) => it.slot)
+  assert.equal(slots.length, new Set(slots).size, 'a slot appears in more than one receipt row')
+})
+
 test('gradeLineup: unknown starter falls back to replacement without crashing', () => {
   const data = synthData()
   const posted = [

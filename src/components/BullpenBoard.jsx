@@ -39,6 +39,10 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
           status: avail.status,
           reasons: avail.reasons,
           last3: load.last3?.pitches ?? 0,
+          // Count of appearances in the last-3-OUTINGS bucket (which can span
+          // far more than 3 days) — used to word the fresh-arm fallback line
+          // accurately, not as "over 3 days".
+          last3apps: load.last3?.apps ?? 0,
           apps7: load.last7dayApps ?? 0,
         }
       })
@@ -82,7 +86,9 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
                 <span className="penboard__detail">
                   {r.reasons.length > 0
                     ? r.reasons.join(' · ')
-                    : `${r.last3} pitches over 3 days · ${r.apps7} of last 7`}
+                    : r.last3apps > 0
+                      ? `${r.last3} pitches over last ${r.last3apps} outing${r.last3apps === 1 ? '' : 's'} · ${r.apps7} app${r.apps7 === 1 ? '' : 's'} in 7 days`
+                      : 'No recent appearances'}
                 </span>
               </span>
             </li>
