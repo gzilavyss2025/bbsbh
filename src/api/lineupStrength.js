@@ -20,6 +20,7 @@ import {
   SLOTS,
 } from '../lib/lineupSolver.js'
 import { TIER_LABELS } from '../lib/statTiers.js'
+import { lineupStrengthTierFor } from '../lib/lineupStrengthTier.js'
 
 // Runs/game gap that maps to a 0/10 score. A whole-grade point is ~0.045
 // runs/game, so a lineup ~0.45 runs/game below its ceiling grades out. Tunable;
@@ -154,12 +155,18 @@ export function receiptFor(data, teamId, actualLineup) {
 export function lineupStrengthFor(data, teamId, actualLineup) {
   const grade = gradeLineup(data, teamId, actualLineup)
   if (!grade) return null
+  const items = receiptFor(data, teamId, actualLineup)
   return {
     score: grade.score,
     tier: grade.tier,
     tierLabel: grade.tierLabel,
+    // A lineup-specific, score-tracking tier word (separate from the shared
+    // statTiers `tier`/`tierLabel` above, which stay for any other consumer).
+    // Seeded on teamId so the within-band word is deterministic across refresh.
+    strengthTier: lineupStrengthTierFor(grade.score, teamId),
     gapRpg: grade.gapRpg,
-    items: receiptFor(data, teamId, actualLineup),
+    items,
+    rows: lineupStrengthRows(data, items),
     relaxed: grade.relaxed,
   }
 }
@@ -167,4 +174,33 @@ export function lineupStrengthFor(data, teamId, actualLineup) {
 // Name lookup for a receipt line (the values file carries display names).
 export function playerName(data, personId) {
   return data?.players?.[String(personId)]?.name ?? null
+}
+
+// Shape the receipt `items` into display rows for the Pos | Expected | Starting
+// | R/G table (LineupStrengthCard). Pure so the two item kinds' column mapping
+// is unit-testable:
+//   - bench: the optimal player is displaced by the posted starter, so
+//     Expected = inId (who you'd want), Starting = outId (who's in there).
+//   - oop:   a posted starter is out of position; there is NO displaced
+//     "expected" name, so `expected` is left null — the caller renders an
+//     em-dash rather than fabricating one. Starting = the posted player.
+// `deltaRpg` is the runs/game the row costs (rendered as a negative).
+export function lineupStrengthRows(data, items) {
+  return (items ?? []).map((it) =>
+    it.kind === 'bench'
+      ? {
+          kind: 'bench',
+          pos: it.slot,
+          expected: playerName(data, it.inId),
+          starting: playerName(data, it.outId),
+          deltaRpg: it.deltaRpg,
+        }
+      : {
+          kind: 'oop',
+          pos: it.slot,
+          expected: null,
+          starting: playerName(data, it.id),
+          deltaRpg: it.deltaRpg,
+        },
+  )
 }

@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { workloadFor, availabilityFor, workloadVsBaseline } from '../src/api/workload.js'
+import {
+  workloadFor,
+  availabilityFor,
+  workloadVsBaseline,
+  bullpenStatusCounts,
+} from '../src/api/workload.js'
 
 // Synthetic workload.json-shaped data. `apps` are most-recent-first, each
 // { d: 'YYYY-MM-DD', p: pitches, gs?: 1 }.
@@ -144,4 +149,18 @@ test('bucket day-span measures oldest appearance to asOf−1', () => {
   assert.equal(w.last3.apps, 3)
   assert.equal(w.last3.pitches, 42)
   assert.equal(w.last3.days, 5) // 07-10 → 07-15
+})
+
+// --- bullpen summary-pill counts (bullpenStatusCounts) -----------------------
+
+test('bullpenStatusCounts: tallies the three statuses, ignores anything else', () => {
+  const counts = bullpenStatusCounts(['fresh', 'fresh', 'limited', 'down', 'fresh'])
+  assert.deepEqual(counts, { fresh: 3, limited: 1, down: 1 })
+})
+
+test('bullpenStatusCounts: empty / missing input is all zeros', () => {
+  assert.deepEqual(bullpenStatusCounts([]), { fresh: 0, limited: 0, down: 0 })
+  assert.deepEqual(bullpenStatusCounts(undefined), { fresh: 0, limited: 0, down: 0 })
+  // An unrecognized status doesn't crash or leak a key.
+  assert.deepEqual(bullpenStatusCounts(['fresh', 'unknown']), { fresh: 1, limited: 0, down: 0 })
 })

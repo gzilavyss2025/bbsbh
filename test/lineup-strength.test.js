@@ -8,7 +8,8 @@ import {
   POS_ADJ,
   SLOTS,
 } from '../src/lib/lineupSolver.js'
-import { gradeLineup, receiptFor, lineupStrengthFor } from '../src/api/lineupStrength.js'
+import { gradeLineup, receiptFor, lineupStrengthFor, lineupStrengthRows } from '../src/api/lineupStrength.js'
+import { lineupStrengthTierFor } from '../src/lib/lineupStrengthTier.js'
 
 // --- a raw Hungarian core, exercised through the solver ----------------------
 // The solver assigns nine slots, so to hand-check a 4x4 we expose a tiny helper
@@ -253,6 +254,79 @@ test('gradeLineup: no-catcher roster still grades via the relax path', () => {
   const g = gradeLineup(noCatcher, 1, posted)
   assert.ok(g)
   assert.equal(g.relaxed, true)
+})
+
+// --- lineup-strength tier ladder (lib/lineupStrengthTier.js) -----------------
+
+test('tier ladder: each score band maps to the right colour family', () => {
+  // Six word-bands collapse onto three colours: strong (≥6), mid (4.5–6), weak.
+  const c = (score) => lineupStrengthTierFor(score).colorTier
+  assert.equal(c(9.5), 'strong') // Best nine
+  assert.equal(c(8.0), 'strong') // Near best
+  assert.equal(c(6.5), 'mid') // Mostly intact
+  assert.equal(c(5.0), 'mid') // Reshuffled
+  assert.equal(c(3.5), 'weak') // Short-handed
+  assert.equal(c(1.0), 'weak') // Bare bones
+  // Band edges are inclusive of their floor.
+  assert.equal(lineupStrengthTierFor(9.0).band, 0)
+  assert.equal(lineupStrengthTierFor(7.5).band, 1)
+  assert.equal(lineupStrengthTierFor(6.0).band, 2)
+  assert.equal(lineupStrengthTierFor(4.5).band, 3)
+  assert.equal(lineupStrengthTierFor(3.0).band, 4)
+  assert.equal(lineupStrengthTierFor(0).band, 5)
+})
+
+test('tier ladder: within-band word is deterministic on the seed', () => {
+  // Same score + same seed → identical word every call (no refresh flicker).
+  const a = lineupStrengthTierFor(4.0, 158)
+  const b = lineupStrengthTierFor(4.0, 158)
+  assert.equal(a.label, b.label)
+  // The label is one of that band's alternatives.
+  const bandWords = ['Short-handed', 'Depleted', 'Thinned out']
+  assert.ok(bandWords.includes(a.label))
+  // No seed → the first word of the band, deterministically.
+  assert.equal(lineupStrengthTierFor(4.0).label, 'Short-handed')
+})
+
+test('tier ladder: different seeds spread across a band (not all identical)', () => {
+  // The whole point of a per-lineup ladder — a slate of similar teams shouldn't
+  // all read the same. Over many seeds, more than one alternative must appear.
+  const labels = new Set()
+  for (let seed = 100; seed < 140; seed++) labels.add(lineupStrengthTierFor(6.5, seed).label)
+  assert.ok(labels.size > 1, `expected varied words within a band, got ${[...labels]}`)
+})
+
+// --- row shaping for the Expected/Starting/R/G table -------------------------
+
+test('lineupStrengthRows: bench and out-of-position rows map to the right columns', () => {
+  const data = synthData()
+  const rows = lineupStrengthRows(data, [
+    { kind: 'bench', inId: 'dhstud', outId: 'scrub', slot: 'DH', deltaRpg: 0.5 },
+    { kind: 'oop', id: 'ss', slot: '3B', weight: 0.4, deltaRpg: 0.1 },
+  ])
+  // bench: Expected = the optimal player (inId), Starting = posted starter (outId).
+  assert.deepEqual(rows[0], { kind: 'bench', pos: 'DH', expected: 'DhStud', starting: 'Scrub', deltaRpg: 0.5 })
+  // oop: no displaced expected name — never fabricated, left null for an em-dash.
+  assert.deepEqual(rows[1], { kind: 'oop', pos: '3B', expected: null, starting: 'Shortstop', deltaRpg: 0.1 })
+})
+
+test('lineupStrengthFor exposes strengthTier + rows on its result', () => {
+  const data = synthData()
+  const posted = [
+    { personId: 'c', position: 'C' },
+    { personId: '1b', position: '1B' },
+    { personId: '2b', position: '2B' },
+    { personId: '3b', position: '3B' },
+    { personId: 'ss', position: 'SS' },
+    { personId: 'scrub', position: 'LF' },
+    { personId: 'cf', position: 'CF' },
+    { personId: 'rf', position: 'RF' },
+    { personId: 'lf', position: 'DH' },
+  ]
+  const strength = lineupStrengthFor(data, 1, posted)
+  assert.ok(strength.strengthTier)
+  assert.ok(['strong', 'mid', 'weak'].includes(strength.strengthTier.colorTier))
+  assert.equal(strength.rows.length, strength.items.length)
 })
 
 test('valueLineup never returns -Infinity for a real placement', () => {

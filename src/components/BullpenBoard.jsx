@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
-import { availabilityFor, workloadFor } from '../api/workload.js'
+import { availabilityFor, bullpenStatusCounts, workloadFor } from '../api/workload.js'
+import { InfoPopover } from './InfoPopover.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { SectionMasthead } from './SectionMasthead.jsx'
 
 // The bullpen availability board — who's rested, who's limited, who's likely
 // down tonight, from each reliever's recent completed appearances
@@ -17,6 +19,9 @@ const STATUS_LABEL = {
   down: 'Likely down',
 }
 const STATUS_ORDER = { down: 0, limited: 1, fresh: 2 }
+// Summary pills read best-to-worst (fresh → limited → down), the reverse of the
+// board's down-first sort.
+const PILL_ORDER = ['fresh', 'limited', 'down']
 
 export function BullpenBoard({ workload, bullpen, gameDate }) {
   const rows = useMemo(() => {
@@ -44,33 +49,46 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
       )
   }, [workload, bullpen, gameDate])
 
+  const counts = useMemo(() => bullpenStatusCounts(rows.map((r) => r.status)), [rows])
+
   if (rows.length === 0) return null
 
   return (
-    <section className="penboard">
-      <h3 className="section__title">Bullpen tonight</h3>
-      <ul className="penboard__list">
-        {rows.map((r) => (
-          <li key={r.id} className="penboard__row">
-            <span className={`penboard__status penboard__status--${r.status}`}>
-              {STATUS_LABEL[r.status] ?? r.status}
+    <section className="metriccard penboard">
+      <SectionMasthead title="Bullpen tonight">
+        <InfoPopover label="How bullpen availability is judged">
+          Rested vs. worked from recent appearances — a workload signal, not a
+          talent grade. Managers overrule it nightly.
+        </InfoPopover>
+      </SectionMasthead>
+      <div className="metriccard__body">
+        <div className="penboard__pills">
+          {PILL_ORDER.filter((s) => counts[s] > 0).map((s) => (
+            <span key={s} className={`penboard__pill penboard__pill--${s}`}>
+              <span className="penboard__pillnum">{counts[s]}</span> {STATUS_LABEL[s]}
             </span>
-            <span className="penboard__namewrap">
-              <PlayerLink id={r.id} className="penboard__name">
-                {r.name}
-              </PlayerLink>
-              <span className="penboard__detail">
-                {r.reasons.length > 0
-                  ? r.reasons.join(' · ')
-                  : `${r.last3} pitches over 3 days · ${r.apps7} of last 7`}
+          ))}
+        </div>
+        <ul className="penboard__list">
+          {rows.map((r) => (
+            <li key={r.id} className="penboard__row">
+              <span className={`penboard__status penboard__status--${r.status}`}>
+                {STATUS_LABEL[r.status] ?? r.status}
               </span>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className="penboard__caveat">
-        Rested vs. worked from recent appearances — managers overrule this nightly.
-      </p>
+              <span className="penboard__namewrap">
+                <PlayerLink id={r.id} className="penboard__name">
+                  {r.name}
+                </PlayerLink>
+                <span className="penboard__detail">
+                  {r.reasons.length > 0
+                    ? r.reasons.join(' · ')
+                    : `${r.last3} pitches over 3 days · ${r.apps7} of last 7`}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }
