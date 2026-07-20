@@ -333,7 +333,8 @@ for each generator; the reader modules:
   `.scratch/metric-engines/pitching-health.md` for the research trail) and
   `computeVeloDecay` (fastball-family velo, first-two-innings anchor vs.
   latest revealed inning, within one pitch type; null at untracked MiLB
-  parks). Rendered as notes rows in `PitchersSection`.
+  parks). Folded into Margin Notes (`pitcher-callouts.js`'s `buildMarginNotes`,
+  see below and `docs/callouts.md`), not rendered directly.
 - `lineupStrength.js` — the Lineup Strength grade, from
   `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
   `src/lib/lineupSolver.js` (exact Hungarian assignment over the

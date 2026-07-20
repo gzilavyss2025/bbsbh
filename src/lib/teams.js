@@ -1,5 +1,7 @@
 // Static configuration that never needs a network call.
 
+import { readableTextColor } from './contrast.js'
+
 // The user scores Brewers games most often, so we pin them to the top of the
 // slate. teamId 158 is the Milwaukee Brewers in the MLB Stats API.
 export const PINNED_TEAM_ID = 158
@@ -484,6 +486,24 @@ export function teamStripeGradient(teamId) {
 // null for a team with no known pair.
 export function teamPrimaryColor(teamId) {
   return resolveTeamColorPair(teamId)?.[0] ?? null
+}
+
+// Candidate text colors for a team-brand-colored chip — the app's own
+// text-on-ink / text-heading tokens (tokens/colors.css). Mirrored here as hex
+// since contrast math needs literal values, not CSS custom properties.
+const CHIP_TEXT_LIGHT = '#FBF6E9' // --text-on-ink (--paper-2)
+const CHIP_TEXT_DARK = '#16222F' // --text-heading (--ink-0)
+
+// `teamId`'s primary/secondary pair plus whichever of the app's two text
+// tokens actually contrasts best against the primary (WCAG), for a chip that
+// prints a team's brand color as a solid fill — a pale/gold primary
+// correctly falls through to dark ink instead of assuming light text always
+// works. Returns null for a team with no known pair.
+export function teamChipColors(teamId) {
+  const pair = resolveTeamColorPair(teamId)
+  if (!pair) return null
+  const [primary, secondary] = pair
+  return { primary, secondary, text: readableTextColor(primary, CHIP_TEXT_LIGHT, CHIP_TEXT_DARK) }
 }
 
 // The 30 MLB clubs' display names, split into [location, club nickname], keyed

@@ -8,9 +8,9 @@ import {
   selectDelays,
   halfIndex,
 } from '../api/select.js'
-import { selectWinProbPath, selectWinProbSwings, selectWinProbBigPlays } from '../api/winprob.js'
+import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
-import { laboringFor, computeVeloDecay } from '../api/pitcherHealth.js'
+import { buildMarginNotes } from '../api/pitcher-callouts.js'
 import { safeToShowEntering } from '../api/enteringHalf.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
@@ -21,6 +21,7 @@ import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
 import { HalfInning } from '../components/HalfInning.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'
 import { PitchersSection } from '../components/PitchersSection.jsx'
+import { MarginNotes } from '../components/MarginNotes.jsx'
 import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
 import { RosterPanel } from '../components/RosterPanel.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
@@ -226,26 +227,6 @@ export function InningViewer({
     [feed, revealedThrough],
   )
 
-  // In-game pitching health for the Pitchers table (api/pitcherHealth.js):
-  // the laboring index (tonight's pitches/inning vs. his own season norm,
-  // from the workload.json precompute) and the fastball velocity-decay flag.
-  // Both read only revealed plays — same ADR-0009 clamp as the lines above.
-  const pitcherHealth = useMemo(() => {
-    if (!feed) return null
-    const velo = computeVeloDecay(feed, revealedThrough)
-    const labor = {}
-    const entries = workload?.pitchers ?? null
-    if (entries) {
-      for (const side of ['away', 'home']) {
-        for (const row of pitcherLines[side] ?? []) {
-          const l = laboringFor(row, entries[row.id])
-          if (l) labor[row.id] = l
-        }
-      }
-    }
-    return { labor, velo }
-  }, [feed, revealedThrough, workload, pitcherLines])
-
   // The workload file describes "now" — its availability rules only apply to
   // a slate-current game (same freshness window TeamInfo's bullpen board
   // uses). Null on an archival game, which silently disables the
@@ -258,6 +239,22 @@ export function InningViewer({
     return diff <= 3 * 86400000 ? d : null
   }, [feed, workload])
 
+  // The Margin Notes digest (api/pitcher-callouts.js): every pitcher who's
+  // appeared so far this game, ranked by worthiness and capped, folding in
+  // both the season-aggregate notes (streak, home/away split, workload,
+  // leverage) and the in-game health reads (laboring, velo decay —
+  // pitcherHealth.js, ADR-0009 footing, same reveal clamp as pitcherLines).
+  // Recomputed as the reveal mark advances, same dependency shape as
+  // pitcherLines itself.
+  const marginNotes = useMemo(
+    () =>
+      buildMarginNotes(feed, revealedThrough, callouts, { away: rosters.away.name, home: rosters.home.name }, {
+        workload,
+        gameDate: workloadGameDate,
+      }),
+    [feed, revealedThrough, callouts, rosters, workload, workloadGameDate],
+  )
+
   // The win-probability line "so far" — only the plays through the revealed
   // half. Same reveal gate as the running line and Pitchers table (a
   // reveal-only selector clamped to revealedThrough; see api/winprob.js), so
@@ -267,13 +264,9 @@ export function InningViewer({
     () => selectWinProbPath(winProbability, { throughHalf: revealedThrough }),
     [winProbability, revealedThrough],
   )
-  // The per-half swing seismograph and the biggest-swing ledger — same
-  // reveal-only selectors, same revealedThrough clamp, so they only ever cover
-  // revealed halves and grow one step per reveal (never hinting what's ahead).
-  const winProbSwings = useMemo(
-    () => selectWinProbSwings(winProbability, { throughHalf: revealedThrough }),
-    [winProbability, revealedThrough],
-  )
+  // The biggest-swing ledger — same reveal-only selector, same
+  // revealedThrough clamp, so it only ever covers revealed halves and grows
+  // one entry per reveal (never hinting what's ahead).
   const winProbBigPlays = useMemo(
     () => selectWinProbBigPlays(winProbability, { throughHalf: revealedThrough }),
     [winProbability, revealedThrough],
@@ -418,10 +411,11 @@ export function InningViewer({
           />
           <WinProbChart
             points={winProbPoints}
-            swings={winProbSwings}
             bigPlays={winProbBigPlays}
             awayAbbr={meta.away.abbreviation}
             homeAbbr={meta.home.abbreviation}
+            awayId={meta.away.id}
+            homeId={meta.home.id}
             partial
           />
         </div>
@@ -437,15 +431,12 @@ export function InningViewer({
             further-out half doesn't leave a title-only empty card. */}
         <div className="innings__ref">
           <div className="innings__ref-left">
+            <MarginNotes notes={marginNotes} feed={feed} bundle={callouts} />
             <PitchersSection
               teams={[
                 { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
                 { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
               ]}
-              bundle={callouts}
-              health={pitcherHealth}
-              workload={workload}
-              gameDate={workloadGameDate}
             />
             {safeToShowEntering(revealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">

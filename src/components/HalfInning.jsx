@@ -1,4 +1,5 @@
-import { selectPrePitchChanges } from '../api/select.js'
+import { useState } from 'react'
+import { selectPrePitchChanges, selectHalfStartingPitcher } from '../api/select.js'
 import { highlightsByPlayId } from '../api/highlights.js'
 import { ordinal } from '../lib/format.js'
 import { SealBox } from './SealBox.jsx'
@@ -48,6 +49,22 @@ export function HalfInning({
   // through one at-bat at a time already reads like a fully revealed one
   // instead of flipping layouts only on the very last tap.
   const startedRevealing = revealed || revealedAtBatCount > 0
+
+  // Persistent "Now Pitching" card (in addition to Margin Notes — see
+  // InningViewer): who's actually on the mound as of what's been revealed,
+  // shown at the top of the half for as long as this half is reachable
+  // (revealed || isNextToReveal — same gate as everything else above the
+  // seal, ADR-0010's footing). `enteringPitcher` is the spoiler-safe default
+  // (the half's starting pitcher, from selectHalfStartingPitcher — correct
+  // even before any of the half is revealed); `livePitcher` overrides it once
+  // PlayByPlay reports a pitching change it has actually revealed (see its
+  // onCurrentPitcher). The `.inning` wrapper's key={inning-half} remount
+  // (InningViewer, ADR-0002) resets this state fresh on every half, so it
+  // never carries a stale pitcher across navigation.
+  const enteringPitcher = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
+  const [livePitcher, setLivePitcher] = useState(null)
+  const nowPitching = livePitcher ?? enteringPitcher
+
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
   // state: ABOVE the seal (staged inside the SAME card as the play-by-play,
@@ -92,6 +109,15 @@ export function HalfInning({
             </span>
           </span>
         </h3>
+
+        {/* Persistent Now Pitching card — see the comment above nowPitching. */}
+        {(revealed || isNextToReveal) && nowPitching && (
+          <PitcherNotice
+            pitcher={nowPitching}
+            teamName={battingSide === 'away' ? homeName : awayName}
+            className="pitchernotice--pbp"
+          />
+        )}
 
         {/* The pre-half callout strip — the "entering this half" season-context
             cards (starter team record, leading-after checkpoint, inning run
@@ -173,6 +199,7 @@ export function HalfInning({
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
+                onCurrentPitcher={setLivePitcher}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => {
                   onReveal(inning, half)
@@ -211,36 +238,27 @@ export function HalfInning({
 // (not inside it), gated by the caller to the half the user is about to reveal.
 // See selectPrePitchChanges for why this is spoiler-free. Every entering change
 // stages here as a matching headshot card, in the order it was announced: a
-// pitching change ("now pitching" — PitcherNotice), a fresh fielder or position
-// switch ("now playing" — FielderNotice), and a pinch-hitter ("now batting" —
-// BatterNotice). The pitching change and pinch-hitter used to live elsewhere
-// (the pitching change in row 2's StatBox slot below the lineups, the
-// pinch-hitter as a bare text line); they're all cards at the top now so the
-// pre-pitch staging reads as one consistent group. A pitching/defensive card
-// keys off the PITCHING team, the pinch-hitter off the BATTING team. On reveal
-// each is superseded by its live counterpart — the pitching/defensive change by
-// its own leading feed card, the pinch-hitter by his at-bat card — which is why
-// the caller drops this whole block once stepping starts (startedRevealing).
-// Anything that still can't resolve to a card (e.g. a pre-pitch pinch RUNNER,
+// fresh fielder or position switch ("now playing" — FielderNotice) and a
+// pinch-hitter ("now batting" — BatterNotice). A pre-pitch PITCHING change is
+// deliberately NOT re-rendered here — the persistent Now Pitching card above
+// (see nowPitching in HalfInning) already names the incoming pitcher via the
+// same underlying identity (selectHalfStartingPitcher reads the half's first
+// play's matchup.pitcher, which already reflects a pre-pitch change), so a
+// second identical card here would just duplicate it. A defensive/pinch-hitter
+// card keys off the PITCHING/BATTING team respectively. On reveal each is
+// superseded by its live counterpart — the defensive change by its own leading
+// feed card, the pinch-hitter by his at-bat card — which is why the caller
+// drops this whole block once stepping starts (startedRevealing). Anything
+// that still can't resolve to a card (e.g. a pre-pitch pinch RUNNER,
 // vanishingly rare) falls to the plain text list.
 function PrePitchChanges({ feed, inning, half, battingName, pitchingName }) {
   const changes = selectPrePitchChanges(feed, inning, half)
-  if (changes.length === 0) return null
-  const cards = changes.filter((c) => c.pitcher || c.fielder || c.batter)
+  const cards = changes.filter((c) => c.fielder || c.batter)
   const rest = changes.filter((c) => c.text)
+  if (cards.length === 0 && rest.length === 0) return null
   return (
     <div className="prepitch">
       {cards.map((c, i) => {
-        if (c.pitcher) {
-          return (
-            <PitcherNotice
-              key={`c-${i}`}
-              pitcher={c.pitcher}
-              teamName={pitchingName}
-              className="pitchernotice--pbp"
-            />
-          )
-        }
         if (c.batter) {
           return (
             <BatterNotice

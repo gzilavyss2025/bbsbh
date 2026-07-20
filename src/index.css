@@ -6208,6 +6208,7 @@ body {
    without shouting. */
 .pbp__callout {
   display: flex;
+  align-items: flex-start;
   gap: 6px;
   margin-top: 4px;
   padding: 4px 8px;
@@ -7408,7 +7409,11 @@ body {
    plot split into a soft-navy home band (below the line) and a soft-clay away
    band (above). Reveal-gated everywhere it appears (see api/winprob.js): the
    innings view feeds only the plays through the revealed half, the box score
-   the whole game inside its seal. */
+   the whole game inside its seal. Real per-team brand color (teams.js's
+   teamChipColors) is reserved for identity chrome — the header swatches/
+   splitbar, the ledger chips, the linked big-swing markers — the bands/line
+   stay the neutral navy/clay pair above since their job is structural
+   ("which side of 50%"), not "which team". */
 .winprob {
   margin-bottom: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
@@ -7438,12 +7443,9 @@ body {
   color: var(--text-heading);
 }
 
-.winprob__sofar {
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-}
-
-/* Current/final split — the two team shares, home inked navy, away clay. */
+/* Current/final split — the two team shares, each swatch/figure in that
+   team's own real brand color (--team-color, set inline from
+   teamChipColors) rather than the generic navy/clay the chart bands use. */
 .winprob__split {
   display: flex;
   gap: 10px;
@@ -7466,11 +7468,22 @@ body {
   height: 9px;
   border-radius: 2px;
   border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--team-color, var(--graphite-soft));
 }
-.winprob__team--home::before { background: var(--winprob-home); }
-.winprob__team--away::before { background: var(--winprob-away); }
 
 .winprob__pct { color: var(--text-heading); }
+
+/* A one-line proportional recap of the split, in the same two team colors as
+   the swatches above — decorative echo of the split pills, not a second
+   source of truth. */
+.winprob__splitbar {
+  display: flex;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-hairline);
+  margin-bottom: 10px;
+}
 
 /* Scales uniformly (default preserveAspectRatio) so the dots stay round and the
    labels crisp. On a phone the viewBox ratio sets the height (~180px); on the
@@ -7515,10 +7528,13 @@ body {
   stroke-linecap: round;
 }
 
+/* Scoring-play flecks — deliberately flattened into the line (small, dim, no
+   stroke halo, no pointer affordance): a DIFFERENT set of plays than the
+   tappable big-swing markers below, and must never be mistakable for them. */
 .winprob__scoremark {
   fill: var(--clay);
-  stroke: var(--surface-inset);
-  stroke-width: 0.75;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .winprob__now {
@@ -7534,13 +7550,80 @@ body {
   fill: var(--text-caption);
 }
 
+/* Card-wide rule: these ▲/▼ are the ONLY top/bottom glyphs anywhere on this
+   card — the ledger below never reuses them (see .winprob__ledger-chip). */
 .winprob__inningarrow {
   font-size: var(--fs-caption);
 }
 
-/* Swing Stubs — the per-half seismograph under the line. One signed bar per
-   revealed half, down/navy toward home, up/clay toward away; the derivative the
-   line hides. Fixed-clamp scale (see WinProbChart.jsx), overflow notch beyond. */
+/* ---- linked highlighting: chart markers ----
+   One hand-drawn baseball per selectWinProbBigPlays() entry — a circle plus
+   two seam arcs, all inline SVG (no fetched icon, same "nothing external"
+   rule as the rest of this no-backend app). `.winprob__bigdot-hit` is an
+   invisible larger circle for a comfortable tap target around the small
+   visible glyph. `.winprob__bigdot-ball` scales as one unit via a CSS
+   transform (transform-box:fill-box pins the scale origin to the glyph's own
+   center, not the chart's corner). */
+.winprob__bigdot { cursor: pointer; }
+.winprob__bigdot-hit { fill: transparent; }
+.winprob__bigdot-ball {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.15s ease;
+}
+
+.winprob__ball-body {
+  fill: var(--surface-inset);
+  stroke: var(--ink-1);
+  stroke-width: 0.9px;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.winprob__ball-seam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 0.6px;
+  stroke-linecap: round;
+  opacity: 0.4;
+  transition: opacity 0.15s ease, stroke-width 0.15s ease;
+}
+
+.winprob__bigdot-ring {
+  r: 0px;
+  opacity: 0;
+  fill: var(--team-color);
+  transition: r 0.18s ease, opacity 0.18s ease;
+}
+
+.winprob__bigdot-label {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+.winprob__bigdot-label-bg { fill: var(--team-color); }
+.winprob__bigdot-label-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  fill: var(--team-text);
+}
+
+/* Active state: the tapped/hovered baseball grows and tints toward the
+   favored team's own color (seams stay --clay "seam red" — it never stops
+   reading as a ball), plus a soft halo and its own value label. Every OTHER
+   big-swing marker fades once something is active (.winprob.is-active) — an
+   idle chart shows every marker at equal, unhighlighted weight. */
+.winprob__bigdot.is-active .winprob__bigdot-ball { transform: scale(1.9); }
+.winprob__bigdot.is-active .winprob__ball-body {
+  fill: color-mix(in srgb, var(--team-color) 55%, var(--surface-inset));
+  stroke: var(--team-color);
+  stroke-width: 1.1px;
+}
+.winprob__bigdot.is-active .winprob__ball-seam { opacity: 1; stroke-width: 0.8px; }
+.winprob__bigdot.is-active .winprob__bigdot-ring { r: 11px; opacity: 0.16; }
+.winprob__bigdot.is-active .winprob__bigdot-label { opacity: 1; }
+.winprob.is-active .winprob__bigdot:not(.is-active) .winprob__bigdot-ball { opacity: 0.32; }
+
 .winprob__subhead {
   margin: 10px 0 4px;
   font-family: var(--font-display);
@@ -7551,27 +7634,10 @@ body {
   color: var(--text-caption);
 }
 
-.winprob__swings {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 92px;
-}
-
-.winprob__stubbase {
-  stroke: var(--graphite-soft);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-  opacity: 0.75;
-}
-
-.winprob__stub--home { fill: var(--ink-2); }
-.winprob__stub--away { fill: var(--clay); }
-.winprob__stubnotch--home { fill: var(--ink-2); }
-.winprob__stubnotch--away { fill: var(--clay); }
-
-/* "How we got here" — a ruled ledger of the biggest revealed swings, newest on
-   top: a colored, arrowed magnitude, the play, and its half-inning tag. */
+/* "How we got here" — a ruled ledger of the biggest revealed swings, newest
+   on top: a team-colored chip (abbreviation + signed % magnitude) with its
+   half-inning caption underneath, then the play in full (no truncation) —
+   and the ledger half of the chart↔ledger linked highlight above. */
 .winprob__ledger-list {
   margin: 0;
   padding: 0;
@@ -7580,48 +7646,171 @@ body {
 
 .winprob__ledger-row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 4px 0;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 6px;
+  margin: 0 -6px;
   border-top: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
   font-size: var(--fs-compact);
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
 }
 
 .winprob__ledger-row:first-child {
   border-top: 0;
 }
 
-.winprob__ledger-swing {
-  flex: none;
-  min-width: 34px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
+.winprob__ledger-row.is-active {
+  background: color-mix(in srgb, var(--team-color) 12%, var(--surface-inset));
+  box-shadow: inset 3px 0 0 var(--team-color);
+}
+.winprob.is-active .winprob__ledger-row:not(.is-active) { opacity: 0.5; }
+
+.winprob__ledger-meta {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
 }
 
-.winprob__ledger-swing--home { color: var(--ink-2); }
-.winprob__ledger-swing--away { color: var(--clay); }
-
-.winprob__ledger-arrow {
-  margin-right: 3px;
+.winprob__ledger-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
   font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.winprob__ledger-half {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 
 .winprob__ledger-desc {
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  margin: 0;
   color: var(--text-body);
 }
 
-.winprob__ledger-tag {
+/* ------------------------------------------------------------- margin notes
+   The ranked in-progress pitcher digest (MarginNotes.jsx, api/pitcher-
+   callouts.js's buildMarginNotes) — same card anatomy as .prehalf (a headshot
+   beside a star-marked sentence), sat above the Pitchers stat grid it used to
+   be folded into. Reuses .pitchers__title's label styling for its own title
+   rather than duplicating it. */
+.marginnotes {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+}
+.marginnotes__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.marginnotes__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+.marginnotes__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.marginnotes__avatar {
   flex: none;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+}
+.shot.marginnotes__shot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.marginnotes__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.marginnotes__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.marginnotes__who {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.marginnotes__text {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.marginnotes__mark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: var(--fs-caption);
+}
+/* Natural-case sentences, same sanctioned exception as .prehalf__who/__text
+   (see the ALL-CAPS INVARIANT block) — a player's name and a fun-fact
+   sentence aren't structural labels. */
+#root .marginnotes__who,
+#root .marginnotes__text {
+  text-transform: none; /* caps-exempt: margin notes read as natural sentences */
+}
+/* Same "Show N more" block button as .teammates__more (TeamInfo.jsx) and
+   .bs__noteMore (BoxScore.jsx) — one-way reveal, no collapse back. */
+.marginnotes__more {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
   color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.marginnotes__more:hover {
+  color: var(--text-body);
 }
 
 /* -------------------------------------------------------------- pitcher lines
@@ -7689,20 +7878,6 @@ body {
 
 .pitchers__grid tbody tr:last-child td {
   border-bottom: none;
-}
-
-/* The season-context note row under a pitcher's line (see api/pitcher-callouts.js)
-   — same .pbp__callout strip as the play-by-play/box score, just left-aligned
-   and de-tabularized since this cell is prose, not a stat column. */
-.pitchers__notes {
-  text-align: left;
-  font-family: var(--font-body);
-}
-.pitchers__notes .pbp__callout {
-  margin-top: 2px;
-}
-.pitchers__notes .pbp__callout:first-child {
-  margin-top: 0;
 }
 
 /* Name column takes a fixed share (the nine numeric columns split the remainder
