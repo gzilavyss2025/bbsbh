@@ -575,6 +575,33 @@ export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infi
   return changes
 }
 
+// The pitcher on the mound entering a half — its first play's own
+// matchup.pitcher, the same identity a pre-pitch "now pitching" card already
+// names when an actual change is announced (selectPrePitchChanges above).
+// This covers the far more common case where the same pitcher continues from
+// the half before, so a persistent "Now Pitching" card (see HalfInning.jsx)
+// always has an entering identity to show, not just on a change. Same
+// revealedThrough self-gate as selectPrePitchChanges — a half further out
+// than the user's next reveal must not say who's pitching: whether the
+// starter has been pulled yet is exactly the kind of game-flow spoiler the
+// reveal boundary exists to withhold.
+export function selectHalfStartingPitcher(feed, inning, half, revealedThrough = Infinity) {
+  if (halfIndex(inning, half) > revealedThrough + 1) return null
+  const play = (feed?.liveData?.plays?.allPlays ?? []).find(
+    (p) => p?.about?.inning === inning && p?.about?.halfInning === half,
+  )
+  const pitcherId = play?.matchup?.pitcher?.id
+  if (pitcherId == null) return null
+  const players = playerIndex(feed)
+  const person = players[`ID${pitcherId}`] ?? {}
+  return {
+    id: pitcherId,
+    name: lastFirst(person),
+    jersey: boxscoreJersey(feed, pitcherId) || person.primaryNumber || '',
+    hand: person.pitchHand?.code ?? '', // 'L' | 'R'
+  }
+}
+
 // The game jersey number for a player id, checked across both boxscore sides
 // (the incoming pitcher's side isn't known here). Falls back to '' so callers
 // can drop to gameData's primaryNumber.
