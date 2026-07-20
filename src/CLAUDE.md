@@ -101,14 +101,25 @@ link, "Reveal" always visible, accessible name contains the visible word).
 ## Design system (`src/index.css` + `src/tokens/*`)
 
 All CSS lives in `src/index.css`, which imports `src/tokens/*.css` (colors,
-typography, spacing, effects, fonts). The visual metaphor is a paper scorebook:
-manila paper, navy ink, pencil graphite, kraft-tape amber for seals. Use the
-semantic CSS variables (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.)
-rather than raw hex. Numbers render as mono tabular figures; structural labels are
-condensed uppercase. Type size, weight, leading, and tracking must use the semantic
-roles in `tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc
-values in `index.css`. The global ALL-CAPS invariant (see the block comment in
-`src/index.css`) is guarded by `scripts/check-caps.mjs` (the CSS half) and
-`scripts/check-name-casing.mjs` (the JS half — no per-component
-`.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via
-`npm run lint`.
+typography, spacing, layout, effects, fonts). The tiers are layered Carbon-style
+(ADR-0023): a **primitive** tier of raw values — `spacing.css` is the generic 4px
+scale + radii + border widths, `colors.css`'s `--paper-*`/`--ink-*`/`--seal` — and
+a **semantic alias** tier components consume (`--bg-canvas`, `--text-body`,
+`--seal-cover`). App-specific component geometry (the `--cell-size`, the `--shot-*`
+headshot rungs, the `--app-width` frame) lives in `tokens/layout.css`, kept OUT of
+the primitive scale. There is deliberately **no** third component tier — stay
+two-tier, promoting a value to a named component-scoped token only on high reuse or
+a guardable invariant (ADR-0023). The visual metaphor is a paper scorebook: manila
+paper, navy ink, pencil graphite, kraft-tape amber for seals. Use the semantic CSS
+variables (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.) rather than
+raw hex. Numbers render as mono tabular figures; structural labels are condensed
+uppercase.
+
+Type size, weight, leading, and tracking must use the semantic roles in
+`tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc values in
+`index.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
+(`check-focus-ring.mjs`), and the documented text-on-background token pairings must
+hold WCAG AA (`check-contrast.mjs`) — see ADR-0023. The global ALL-CAPS invariant
+(see the block comment in `src/index.css`) is guarded by `scripts/check-caps.mjs`
+(the CSS half) and `scripts/check-name-casing.mjs` (the JS half — no per-component
+`.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via `npm run lint`.

@@ -9,6 +9,7 @@
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
+@import './tokens/layout.css';
 @import './tokens/effects.css';
 
 :root {
@@ -8202,7 +8203,7 @@ body {
 }
 
 .gamestory__link:focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -12565,7 +12566,7 @@ body {
 .team-score__dot:focus-visible {
   opacity: 1;
   background: var(--ink-2, var(--text-heading));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-heading) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-heading) 20%, transparent); /* focus-ring-exempt — shared hover+focus emphasis on the dense dot rail, ink-tinted not the green ring */
   outline: none;
 }
 .team-score__dot--us {
