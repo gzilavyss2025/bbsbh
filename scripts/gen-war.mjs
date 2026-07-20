@@ -1,5 +1,7 @@
 // Regenerates public/data/war.json — current-season WAR per player, keyed by
-// MLB Stats API personId. Pulled from FanGraphs' internal leaderboard API,
+// MLB Stats API personId, plus a parallel `pa` map (hitter plate appearances,
+// same keys) so a consumer can re-apply the PA regression. Pulled from
+// FanGraphs' internal leaderboard API,
 // which is undocumented but CORS-open (verified 2026-07-07: returns
 // access-control-allow-origin: *) and, conveniently, already tags each row
 // with `xMLBAMID` — the SAME id as statsapi's personId, so no name-matching
@@ -31,17 +33,30 @@ async function fetchLeaderboard(stats) {
   const res = await fetch(url, { headers: { Origin: 'https://bbsbh.vercel.app' } })
   if (!res.ok) throw new Error(`FanGraphs ${stats} leaderboard: HTTP ${res.status}`)
   const json = await res.json()
-  const map = {}
+  const war = {}
+  const pa = {}
   for (const row of json.data ?? []) {
     const id = row.xMLBAMID
-    const war = Number(row.WAR)
-    if (id && Number.isFinite(war)) map[id] = Math.round(war * 10) / 10
+    const w = Number(row.WAR)
+    if (id && Number.isFinite(w)) war[id] = Math.round(w * 10) / 10
+    // Plate appearances travel alongside WAR so a downstream consumer can apply
+    // the same PA regression the nightly lineup-values build uses (the Lineup
+    // Strength grade's runtime fallback for a just-traded starter absent from
+    // that file — src/api/lineupStrength.js rpgFromWar). Batters only; a
+    // pitcher's rate denominator is IP, which this metric never needs.
+    const p = Number(row.PA)
+    if (id && Number.isFinite(p)) pa[id] = p
   }
-  return map
+  return { war, pa }
 }
 
-const [bat, pit] = await Promise.all([fetchLeaderboard('bat'), fetchLeaderboard('pit')])
+const [batLb, pitLb] = await Promise.all([fetchLeaderboard('bat'), fetchLeaderboard('pit')])
+const bat = batLb.war
+const pit = pitLb.war
+const pa = batLb.pa // hitter PA only (see fetchLeaderboard note)
 
 await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ season, generatedAt: new Date().toISOString(), bat, pit }))
-console.log(`wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers)`)
+await writeFile(out, JSON.stringify({ season, generatedAt: new Date().toISOString(), bat, pit, pa }))
+console.log(
+  `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers, ${Object.keys(pa).length} PA)`,
+)

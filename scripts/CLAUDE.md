@@ -54,7 +54,10 @@ Precomputed because they're too heavy (COST) to build on a page load. Normally y
 don't run these by hand.
 
 - `gen-war.mjs` → `public/data/war.json` — season WAR per player, from FanGraphs'
-  bulk leaderboard API (~1MB, unofficial). The template for the build-time-fetch
+  bulk leaderboard API (~1MB, unofficial), plus a parallel `pa` map (hitter plate
+  appearances, same keys) so a consumer can re-apply the PA regression — the
+  Lineup Strength grade uses it to re-value a just-traded starter absent from
+  `lineup-values.json` (`rpgFromWar`). The template for the build-time-fetch
   pattern; see `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. Starts from a transaction scan, then verifies each candidate against his

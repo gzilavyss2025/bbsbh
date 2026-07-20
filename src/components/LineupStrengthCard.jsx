@@ -16,15 +16,29 @@ import { SectionMasthead } from './SectionMasthead.jsx'
 export function LineupStrengthCard({ data, teamId, lineup }) {
   const result = useMemo(() => {
     if (!data || !teamId || (lineup?.length ?? 0) < 9) return null
+    // Posted names, so a starter valued only from war.json (not in the values
+    // file, where names live) still reads by name in the receipt.
+    const names = Object.fromEntries(lineup.map((p) => [String(p.id), p.name]))
     return lineupStrengthFor(
       data,
       teamId,
       lineup.map((p) => ({ personId: p.id, position: p.position })),
+      names,
     )
   }, [data, teamId, lineup])
 
   if (!result) return null
-  const { rows, strengthTier } = result
+  const { rows, strengthTier, ungraded } = result
+  // A starter with no value in either data file (a trade/call-up more recent than
+  // the nightly build): his slot is left out of the grade, said plainly here so a
+  // partial grade never masquerades as a complete one.
+  const unvalued = ungraded ?? []
+  // Two kinds of deduction, split into their own tables: a personnel swap (a
+  // better bat sat) reads as Expected → Starting; an out-of-position start reads
+  // as who's playing where vs. where he usually plays. Both priced in points off
+  // the 10, not raw runs/game.
+  const swaps = rows.filter((r) => r.kind === 'bench')
+  const outOfPos = rows.filter((r) => r.kind === 'oop')
 
   return (
     <section className="metriccard lstrength">
@@ -46,43 +60,63 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
           </span>
         </div>
 
-        {rows.length > 0 ? (
+        {unvalued.length > 0 && (
+          <p className="lstrength__partial">
+            {unvalued.map((u) => u.name || u.slot).join(', ')} not yet in the season
+            data — graded on the rest of the order.
+          </p>
+        )}
+
+        {rows.length === 0 && (
+          <p className="lstrength__clean">Full-strength — this is the roster’s best nine.</p>
+        )}
+
+        {swaps.length > 0 && (
           <table className="lstrength__table">
+            <caption className="lstrength__caption">Stronger bats on the bench</caption>
             <thead>
               <tr>
                 <th className="lstrength__pos" scope="col">Pos</th>
                 <th scope="col">Expected</th>
                 <th scope="col">Starting</th>
-                <th className="lstrength__rg" scope="col">R/G</th>
+                <th className="lstrength__pts" scope="col">Impact</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) =>
-                r.kind === 'oop' ? (
-                  // Out of position: no displaced "expected" name, so the posted
-                  // starter's name spans both middle columns with a natural-spot
-                  // hint ("usually 1B") instead of a fabricated Expected entry.
-                  <tr key={i}>
-                    <td className="lstrength__pos">{r.pos}</td>
-                    <td className="lstrength__oopcell" colSpan={2}>
-                      <span className="lstrength__starting">{r.starting ?? '—'}</span>
-                      {r.usualPos && <span className="lstrength__usual">usually {r.usualPos}</span>}
-                    </td>
-                    <td className="lstrength__rg">−{r.deltaRpg.toFixed(2)}</td>
-                  </tr>
-                ) : (
-                  <tr key={i}>
-                    <td className="lstrength__pos">{r.pos}</td>
-                    <td className="lstrength__expected">{r.expected}</td>
-                    <td className="lstrength__starting">{r.starting ?? '—'}</td>
-                    <td className="lstrength__rg">−{r.deltaRpg.toFixed(2)}</td>
-                  </tr>
-                ),
-              )}
+              {swaps.map((r, i) => (
+                <tr key={i}>
+                  <td className="lstrength__pos">{r.pos}</td>
+                  <td className="lstrength__expected">{r.expected}</td>
+                  <td className="lstrength__starting">{r.starting ?? '—'}</td>
+                  <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
-        ) : (
-          <p className="lstrength__clean">Full-strength — this is the roster’s best nine.</p>
+        )}
+
+        {outOfPos.length > 0 && (
+          <table className="lstrength__table lstrength__ooptable">
+            <caption className="lstrength__caption">Playing out of position</caption>
+            <thead>
+              <tr>
+                <th scope="col">Player</th>
+                <th className="lstrength__pos" scope="col">Playing</th>
+                <th className="lstrength__pos" scope="col">Usually</th>
+                <th className="lstrength__pts" scope="col">Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              {outOfPos.map((r, i) => (
+                <tr key={i}>
+                  <td className="lstrength__starting">{r.starting ?? '—'}</td>
+                  <td className="lstrength__pos">{r.pos}</td>
+                  <td className="lstrength__pos">{r.usualPos ?? '—'}</td>
+                  <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </section>

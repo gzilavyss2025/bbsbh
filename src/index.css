@@ -19184,6 +19184,7 @@ body {
   border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .metricbar__title {
+  margin: 0; /* also rendered as an <h3> on the plain page sections — kill UA margin */
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: var(--w-bold);
@@ -19191,6 +19192,14 @@ body {
   line-height: var(--lh-solid);
   text-transform: uppercase;
   color: var(--text-on-ink);
+}
+/* Batting order, opposing defense, and opposing starter wear the navy masthead
+   as a standalone section header (no enclosing .metriccard), so the section
+   carries the top spacing the old <h3> margin used to provide. */
+.lineup,
+.opp,
+.startercard {
+  margin-top: var(--space-4);
 }
 .metricbar__aside {
   display: inline-flex;
@@ -19373,25 +19382,28 @@ body {
 .lstrength__expected {
   color: var(--text-caption);
 }
-/* Out-of-position row: the posted starter's name spans the Expected+Starting
-   columns, with a muted "usually 1B" natural-spot hint after it (no fabricated
-   Expected name). */
-.lstrength__oopcell {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-}
 .lstrength__starting {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.lstrength__usual {
+/* Each deduction table's label — what this group of rows costs the grade. */
+.lstrength__caption {
+  caption-side: top;
+  margin-top: var(--space-3);
+  padding-bottom: 2px;
+  text-align: left;
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
-  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
-.lstrength__rg {
+/* The out-of-position table's second table gets a touch more top room so the two
+   groups read as distinct sections rather than one long list. */
+.lstrength__ooptable {
+  margin-top: var(--space-4);
+}
+/* Points off the 10, tabular so the column of deductions lines up. */
+.lstrength__pts {
   text-align: right;
   padding-right: 0;
   white-space: nowrap;
@@ -19400,10 +19412,21 @@ body {
   font-size: var(--fs-compact);
   color: var(--accent-negative);
 }
+th.lstrength__pts {
+  color: var(--text-caption);
+}
 .lstrength__clean {
   margin: var(--space-3) 0 0;
   font-size: var(--fs-small);
   color: var(--accent-positive);
+}
+/* A posted starter absent from the season data (recent trade/call-up): his slot
+   is left out of the grade, noted plainly so a partial grade stays honest. */
+.lstrength__partial {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
 }
 
 /* ---------------------------------------------------------- bullpen board
