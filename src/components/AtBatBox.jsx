@@ -4,7 +4,10 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 // row of two boxes — the play OUTCOME and the RBIs it drove in — with the base
 // diamond below. The OUTCOME box (top-left) reads the result of the plate
 // appearance: a base hit inks green and ringed (1B/2B/3B/HR), an error inks red
-// (E6), a walk/HBP its reach code, and an out its category (GO/FO/LO/SO…). The
+// (E6), a walk/HBP its reach code, and an out its category (GO/FO/LO/SO…);
+// an interrupted at-bat leaves it blank and pencils its graphite carry-over
+// mark ("CS →" — the half ended on the bases mid-count; see
+// computeHalfInningFeed's interruptedCode) mid-diamond instead. The
 // scorer's fielding chain for an out (F7, L3, 4-3, 6-3) is penciled in the MIDDLE
 // of the diamond. A gray "out" circle on the divider rings the 1/2/3 sequence
 // number, and a pitch strip of one white BALLS column and two darker STRIKES
@@ -33,16 +36,27 @@ export function AtBatBox({ atbat = null }) {
   const isHit = kind === 'hit'
   const isError = kind === 'error'
   // Outcome box (top-left): the out category for an out, otherwise the result
-  // code itself (hit / error / reach). A called third strike reads a backwards K.
+  // code itself (hit / error / reach). A called third strike reads a backwards
+  // K. An interrupted at-bat has no result, so its outcome box stays blank —
+  // the carry-over mark goes in the diamond instead (below).
   const outcome =
     kind === 'out'
       ? atbat?.calledLooking
         ? 'ꓘ'
         : atbat?.outType ?? ''
-      : atbat?.code ?? ''
-  // Diamond center (pencil): the fielding chain for an out — 4-3, F7, L3, 6-3 —
-  // where the fielders that recorded it are named. Only outs carry one.
-  const center = kind === 'out' && !atbat?.calledLooking ? atbat?.code ?? '' : ''
+      : kind === 'interrupted'
+        ? ''
+        : atbat?.code ?? ''
+  // Diamond center (pencil): the fielding chain for an out — 4-3, F7, L3,
+  // 6-3 — where the fielders that recorded it are named; or an interrupted
+  // at-bat's carry-over mark ("CS →"), penciled mid-diamond the way the
+  // scorer writes it.
+  const center =
+    kind === 'out' && !atbat?.calledLooking
+      ? atbat?.code ?? ''
+      : kind === 'interrupted'
+        ? atbat?.code ?? ''
+        : ''
 
   return (
     <div className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''}`}>
@@ -67,7 +81,15 @@ export function AtBatBox({ atbat = null }) {
             outCode={atbat?.outCode ?? ''}
             size={52}
           />
-          {center && <span className="sc-ab__center sc-ab__center--out">{center}</span>}
+          {center && (
+            <span
+              className={`sc-ab__center ${
+                kind === 'interrupted' ? 'sc-ab__center--interrupted' : 'sc-ab__center--out'
+              }`}
+            >
+              {center}
+            </span>
+          )}
         </div>
         <span className="sc-ab__out">{atbat?.outNumber ?? ''}</span>
       </div>
