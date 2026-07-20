@@ -59,7 +59,18 @@ read the linked ADRs before refactoring:
   from the caller-gated pre-pitch selectors in `src/api/` (see `src/api/CLAUDE.md`).
 - **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
   `PitchersSection` in `InningViewer.jsx`) is gated by the same `revealedThrough`
-  high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009).
+  high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009). A
+  pure numeric stat grid — the season-context/health prose that used to stack
+  under each row now lives in **Margin Notes** (`MarginNotes.jsx`, same
+  reveal-clamp footing), a ranked digest spanning both teams' pitchers; see
+  `docs/callouts.md`.
+- **The "Now Pitching" card** (`HalfInning.jsx`) is a persistent header naming
+  whoever's actually on the mound, shown for as long as the half is reachable
+  (`revealed || isNextToReveal`, same ADR-0010 gate as the lineup/defense
+  cards). Its entering-state identity comes from `select.js`'s
+  `selectHalfStartingPitcher` (spoiler-safe, callable before reveal); once the
+  half is opened, `PlayByPlay` reports the actual current pitcher back up via
+  an `onCurrentPitcher` callback as substitutions are revealed.
 - **Extra innings never spoil** — `InningViewer` and `RollingLine` show only
   `regulation` innings up front, unlocking extras one at a time as `revealedThrough`
   advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator

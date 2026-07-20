@@ -1,9 +1,17 @@
-// Per-pitcher season-context notes for the always-open Pitchers table (see
-// api/callout-notes.js for the analogous per-play/per-game family — this is the
-// same idea, applied to computePitcherLines' rows instead of an at-bat card).
-// Every fact here is a SEASON AGGREGATE (see gen-callouts.mjs's starterRecords),
-// so — like the rest of the callouts bundle — it needs no SealBox; it's exactly
-// as spoiler-free as the WHIP/AVG-against a leader card would show. Two shapes:
+// Per-pitcher in-progress notes — the "Margin Notes" digest (MarginNotes.jsx),
+// a ranked, capped surface fed by every pitcher who's appeared so far this
+// game (both sides), same worthiness-scoring pattern as the pre-half strip
+// (prehalf-callouts.js): each candidate carries a `score`, the caller sorts
+// and slices to MARGIN_NOTES_MAX. This used to be an UNSCORED plain-string
+// list wedged under each pitcher's row in the always-open Pitchers table
+// (see docs/callouts.md's "Pitchers table" section — it explicitly predated
+// the worthiness system); it's scored now so it can rank fairly against every
+// other in-progress fact instead of listing every qualifying note per pitcher
+// regardless of how interesting it is.
+//
+// Every SEASON-AGGREGATE fact here (see gen-callouts.mjs's starterRecords) is
+// as spoiler-free as the WHIP/AVG-against a leader card would show — it needs
+// no SealBox. Two shapes:
 //
 //   - "Entering tonight" facts (home/away split, CG/shutout total, scoreless-
 //     outing streak, the bullpen-workload comparison against the level's
@@ -11,13 +19,42 @@
 //     opponents' line with his club ahead vs trailing) describe the season
 //     BEFORE tonight, so they're shown as soon as his row exists, regardless
 //     of how tonight's outing goes.
-//   - Live milestones (the 6+ IP team record, the double-digit-strikeout
-//     count) only fire once his OWN revealed line tonight actually clears the
-//     threshold — computePitcherLines already keeps `ip`/`k` gated to
-//     `revealedThrough`, so nothing sealed is read here either.
+//   - Live facts (the health notes below, plus the 6+ IP team record and the
+//     double-digit-strikeout count) only fire once his OWN revealed line
+//     tonight actually clears the threshold — computePitcherLines already
+//     keeps `ip`/`k`/`pitches` gated to `revealedThrough`, and pitcherHealth.js
+//     is on the same ADR-0009 footing, so nothing sealed is read here either.
 
 import { dayWordFor } from './select.js'
 import { workloadFor } from './workload.js'
+import { computePitcherLines } from './pitchers.js'
+import { laboringFor, computeVeloDecay } from './pitcherHealth.js'
+
+const MARGIN_NOTES_MAX = 5
+
+// Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
+// callout-notes.js's SCORE_BASE (kept local rather than imported — this
+// family didn't exist there, and prehalf-callouts.js sets the precedent of a
+// self-contained scoring table rather than reaching into that file's
+// internals). Health notes (laboring, velo decay) lead — they're the most
+// actionable, tonight-specific read on a pitcher, ahead of season aggregates.
+// See docs/callouts.md's worthiness table for where these sit relative to
+// every other family.
+const SCORE_BASE = {
+  laboring: 48,
+  veloDecay: 46,
+  penFatigue: 42, // 3rd+ consecutive day — the sharpest documented fatigue pattern
+  workload: 38, // heavy recent pitch load vs the level's average reliever
+  backToBack: 36, // ERA split pitching on no rest
+  leverage: 34, // opponents' AVG with his club ahead vs trailing/tied
+  tenK: 33,
+  scorelessStreak: 32,
+  sixIp: 28,
+  homeAway: 30, // starts-only split — modest, since starterRec already covers this pre-half
+  cgShutout: 25,
+  recentAppearances: 20, // plain "Nth appearance in the last several days" fallback
+}
+const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
 
 // Innings pitched ("6.1" = 6⅓) -> outs, so a 6.0-or-better check compares
 // linearly. Self-contained copy of the same helper used elsewhere (teamLeaders.js,
@@ -45,16 +82,29 @@ const LEVERAGE_AVG_GAP = 0.06
 // baseline). `extras` optionally carries { workload, gameDate } — the
 // gen-workload.mjs precompute plus the game's own date (already
 // freshness-gated by the caller, like TeamInfo's bullpen board) — for the
-// consecutive-days note below. Returns a plain string[] — this table has no
-// headshot/logo card to attach identity to, unlike the play-by-play/box-score
-// note families.
-export function buildPitcherNotes(row, side, teamName, bundle, extras = {}) {
+// consecutive-days note below. `isStarter` is whether HE started tonight's
+// game (the first pitcher in the team's boxscore order) — `rec.homeAway` is a
+// starts-only split, so a reliever who happens to also start elsewhere in the
+// rotation must not get credited with "starts" he isn't making tonight.
+// Returns scored note objects — { text, personId, side, kind, dedupeKey,
+// score } — same shape callout-notes.js's builders return, so MarginNotes.jsx
+// can render this family exactly like a prehalf card.
+export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isStarter = false) {
   const rec = bundle?.starterRecords?.[row.id]
   if (!rec) return []
   const bullpen = bundle?.bullpen
   const notes = []
   const team = teamName || 'His team'
   const word = dayWordFor(bundle?.dayNight)
+  const push = (kind, text, scoreBonus = 0) =>
+    notes.push({
+      text,
+      personId: row.id,
+      side,
+      kind,
+      dedupeKey: `${kind}-${row.id}`,
+      score: clampScore(SCORE_BASE[kind] + scoreBonus),
+    })
 
   // Consecutive-days work, from the workload precompute (completed
   // appearances only — spoiler-free): the 3-straight-days pattern is the
@@ -68,19 +118,22 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}) {
     const dayWordCount = ['', '', 'third', 'fourth', 'fifth', 'sixth'][load.consecDays] ?? `${load.consecDays + 1}th`
     const stretch =
       load.last3?.pitches > 0 ? ` — ${load.last3.pitches} pitches over his last ${load.last3.apps} appearances` : ''
-    notes.push(`Working a ${dayWordCount} straight day${stretch}`)
+    push('penFatigue', `Working a ${dayWordCount} straight day${stretch}`)
     consecNoted = true
   }
 
-  if (rec.homeAway) {
+  if (isStarter && rec.homeAway) {
     const wl = rec.homeAway[side]
-    if (wl) notes.push(`${team} are ${wl} in his ${side === 'home' ? 'home' : 'road'} starts this year`)
+    if (wl) push('homeAway', `${team} are ${wl} in his ${side === 'home' ? 'home' : 'road'} starts this year`)
   }
   if (rec.cgShutout > 0) {
-    notes.push(`${rec.cgShutout} complete game${rec.cgShutout === 1 ? '' : 's'}/shutout${rec.cgShutout === 1 ? '' : 's'} this season`)
+    push(
+      'cgShutout',
+      `${rec.cgShutout} complete game${rec.cgShutout === 1 ? '' : 's'}/shutout${rec.cgShutout === 1 ? '' : 's'} this season`,
+    )
   }
   if (rec.scorelessStreak > 1) {
-    notes.push(`Riding a ${rec.scorelessStreak}-outing scoreless streak entering ${word}`)
+    push('scorelessStreak', `Riding a ${rec.scorelessStreak}-outing scoreless streak entering ${word}`, Math.min(15, rec.scorelessStreak - 1))
   }
 
   // Bullpen workload — a reliever who's been ridden hard lately, measured in
@@ -94,23 +147,25 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}) {
     bullpen?.avgPitches > 0 &&
     rec.recentPitches >= WORKLOAD_RATIO * bullpen.avgPitches
   ) {
-    notes.push(
+    push(
+      'workload',
       `Heavy recent workload: ${rec.recentPitches} pitches across ${rec.recentAppearances} appearances in the last ${bullpen.windowDays} days — the average reliever threw ${bullpen.avgPitches}`,
     )
   } else if (rec.recentAppearances > 1) {
     // Counting tonight's outing — the row only exists once he's pitched.
-    notes.push(`This is his ${ordinal(rec.recentAppearances + 1)} appearance in the last several days`)
+    push('recentAppearances', `This is his ${ordinal(rec.recentAppearances + 1)} appearance in the last several days`)
   }
 
   // Back-to-back days — he pitched on the slate's eve, so tonight's outing is
   // no-rest work; with enough of a season sample, how that's gone for him.
   if (rec.reliever && rec.pitchedYesterday) {
     if (rec.backToBack?.era != null && rec.backToBack?.restEra != null) {
-      notes.push(
+      push(
+        'backToBack',
         `Pitching on back-to-back days — he has a ${rec.backToBack.era.toFixed(2)} ERA on no rest this season (${rec.backToBack.restEra.toFixed(2)} otherwise)`,
       )
     } else if (!consecNoted) {
-      notes.push(`Pitching on back-to-back days ${word}`)
+      push('backToBack', `Pitching on back-to-back days ${word}`)
     }
   }
 
@@ -123,20 +178,83 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}) {
     const a = Number(ahead.avg)
     const c = Number(contrast.avg)
     const label = rec.leverage.behind ? 'trailing' : 'tied'
-    if (Number.isFinite(a) && Number.isFinite(c) && Math.abs(a - c) >= LEVERAGE_AVG_GAP) {
-      notes.push(
+    const gap = Math.abs(a - c)
+    if (Number.isFinite(a) && Number.isFinite(c) && gap >= LEVERAGE_AVG_GAP) {
+      push(
+        'leverage',
         `Opponents hit ${ahead.avg} off him with the ${team} ahead this season, ${contrast.avg} with them ${label}`,
+        Math.min(15, Math.round((gap - LEVERAGE_AVG_GAP) * 100)),
       )
     }
   }
 
   if (rec.sixIp && ipToOuts(row.ip) >= SIX_IP_OUTS) {
-    notes.push(`${team} are ${rec.sixIp} when he goes 6+ innings`)
+    push('sixIp', `${team} are ${rec.sixIp} when he goes 6+ innings`)
   }
   if (rec.tenK > 0 && Number(row.k) >= TEN_K_THRESHOLD) {
-    notes.push(`The ${ordinal(rec.tenK + 1)} time this season he's reached double-digit strikeouts`)
+    push('tenK', `The ${ordinal(rec.tenK + 1)} time this season he's reached double-digit strikeouts`)
   }
   return notes
+}
+
+// The health notes for one pitcher row — same scored shape as buildPitcherNotes,
+// so both feed the same ranked Margin Notes list. Only genuine flags return a
+// note (a normal outing adds nothing); see pitcherHealth.js for the thresholds.
+function healthNotes(id, side, health) {
+  const notes = []
+  const labor = health?.labor?.[id]
+  if (labor?.laboring) {
+    notes.push({
+      text: `Laboring: ${labor.pitchesPerInning.toFixed(1)} pitches per inning tonight — his season norm is ${labor.baseline.toFixed(1)}.`,
+      personId: id,
+      side,
+      kind: 'laboring',
+      dedupeKey: `laboring-${id}`,
+      score: clampScore(SCORE_BASE.laboring + Math.min(15, Math.round((labor.ratio - 1) * 30))),
+    })
+  }
+  const velo = health?.velo?.[id]
+  if (velo?.flagged) {
+    notes.push({
+      text: `Fastball down ${velo.drop.toFixed(1)} mph from his early innings (${velo.anchor.toFixed(1)} → ${velo.current.toFixed(1)}).`,
+      personId: id,
+      side,
+      kind: 'veloDecay',
+      dedupeKey: `veloDecay-${id}`,
+      score: clampScore(SCORE_BASE.veloDecay + Math.min(15, Math.round((velo.drop - 1.5) * 6))),
+    })
+  }
+  return notes
+}
+
+// The Margin Notes digest: every pitcher who's appeared so far this game
+// (both sides), ranked by score and capped at MARGIN_NOTES_MAX — the live
+// counterpart to the pre-half strip's PREHALF_MAX=2 cap, sized larger since
+// this covers the whole game's pitchers rather than one half's entering
+// pitcher. `feed`/`revealedThrough` build the reveal-clamped stat rows
+// (computePitcherLines, ADR-0009) and the health reads (pitcherHealth.js,
+// same footing); `bundle` is the game's callouts bundle; `teamNames` is
+// `{ away, home }` display names; `extras` is the `{ workload, gameDate }`
+// pair buildPitcherNotes reads for the consecutive-days note.
+export function buildMarginNotes(feed, revealedThrough, bundle, teamNames, extras = {}) {
+  if (!bundle) return []
+  const lines = computePitcherLines(feed, revealedThrough)
+  const velo = computeVeloDecay(feed, revealedThrough)
+  const notes = []
+  for (const side of ['away', 'home']) {
+    const teamName = teamNames?.[side] ?? ''
+    // A side's starter is always its first entry in boxscore order (see
+    // computePitcherLines) — computed once per side rather than threaded
+    // through as a prop, since Margin Notes spans every pitcher on both
+    // teams, not one row at a time like the old Pitchers-table call site.
+    for (const [i, row] of (lines[side] ?? []).entries()) {
+      const isStarter = i === 0
+      notes.push(...buildPitcherNotes(row, side, teamName, bundle, extras, isStarter))
+      const labor = laboringFor(row, extras.workload?.pitchers?.[row.id])
+      notes.push(...healthNotes(row.id, side, { labor: labor ? { [row.id]: labor } : {}, velo }))
+    }
+  }
+  return notes.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, MARGIN_NOTES_MAX)
 }
 
 function ordinal(n) {

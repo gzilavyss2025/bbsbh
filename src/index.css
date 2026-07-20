@@ -6208,6 +6208,7 @@ body {
    without shouting. */
 .pbp__callout {
   display: flex;
+  align-items: flex-start;
   gap: 6px;
   margin-top: 4px;
   padding: 4px 8px;
@@ -7624,6 +7625,96 @@ body {
   color: var(--text-caption);
 }
 
+/* ------------------------------------------------------------- margin notes
+   The ranked in-progress pitcher digest (MarginNotes.jsx, api/pitcher-
+   callouts.js's buildMarginNotes) — same card anatomy as .prehalf (a headshot
+   beside a star-marked sentence), sat above the Pitchers stat grid it used to
+   be folded into. Reuses .pitchers__title's label styling for its own title
+   rather than duplicating it. */
+.marginnotes {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+}
+.marginnotes__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.marginnotes__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+.marginnotes__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.marginnotes__avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+.shot.marginnotes__shot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.marginnotes__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.marginnotes__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.marginnotes__who {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.marginnotes__text {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.marginnotes__mark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: var(--fs-caption);
+}
+/* Natural-case sentences, same sanctioned exception as .prehalf__who/__text
+   (see the ALL-CAPS INVARIANT block) — a player's name and a fun-fact
+   sentence aren't structural labels. */
+#root .marginnotes__who,
+#root .marginnotes__text {
+  text-transform: none; /* caps-exempt: margin notes read as natural sentences */
+}
+
 /* -------------------------------------------------------------- pitcher lines
    Running lines for every pitcher who has appeared in a revealed half-inning —
    one block per team, each led by the team name and its own header row (gated
@@ -7689,20 +7780,6 @@ body {
 
 .pitchers__grid tbody tr:last-child td {
   border-bottom: none;
-}
-
-/* The season-context note row under a pitcher's line (see api/pitcher-callouts.js)
-   — same .pbp__callout strip as the play-by-play/box score, just left-aligned
-   and de-tabularized since this cell is prose, not a stat column. */
-.pitchers__notes {
-  text-align: left;
-  font-family: var(--font-body);
-}
-.pitchers__notes .pbp__callout {
-  margin-top: 2px;
-}
-.pitchers__notes .pbp__callout:first-child {
-  margin-top: 0;
 }
 
 /* Name column takes a fixed share (the nine numeric columns split the remainder

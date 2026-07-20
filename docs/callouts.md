@@ -13,19 +13,22 @@ birthday career lines) and the standings splits (one-run / extra-inning
 records) stay MLB-only — a MiLB bundle simply lacks those keys and the notes
 never fire.
 
-## The three surfaces
+## The four surfaces
 
 | Surface | Module | Tense |
 | --- | --- | --- |
 | Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`) via `PlayByPlay` | Entering + revealed plays only ("that's No. 16 this season") |
 | Pre-half strip (above each half's seal) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`) via `PreHalfCallouts` | Entering; the leading-after + times-through notes restate already-revealed material |
+| Margin Notes (always open, spans both teams' pitchers) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via `MarginNotes` | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
 | Box score Insights roll-up | `computeGameCalloutNotes` (`src/api/callout-notes.js`) via `BoxScore` | Result-aware once Final, narrated with tonight's own events ("Struck out 7 tonight and leads…", "Went 0-for-3 tonight, snapping…") |
 
-A fourth, adjacent surface — the always-open Pitchers table notes
-(`src/api/pitcher-callouts.js`, fed the whole bundle for the bullpen
-baseline) — predates the worthiness system and stays a plain string list; the
-lineup pages' milestone pill (`milestoneTextFor`) likewise. Both read the
-same nightly bundle.
+Margin Notes replaced the old Pitchers-table note list, which used to sit
+unscored (a plain string per row, every qualifying note shown regardless of
+how interesting it was) — it now joins the worthiness system, scored and
+capped the same way the pre-half strip is. The lineup pages' milestone pill
+(`milestoneTextFor`) is the one remaining surface that still predates
+worthiness scoring — it's a single fact per player, not a ranked list, so it
+has no need for one.
 
 ## Worthiness
 
@@ -75,6 +78,25 @@ table together.
 | foulSpoiler | 30 | + (11 − rank); roll-up restatement adds + min(6, tonight − 3) |
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
+
+Margin Notes' own family bases (`src/api/pitcher-callouts.js`'s local
+`SCORE_BASE` — self-contained rather than imported from `callout-notes.js`,
+same precedent the pre-half strip sets):
+
+| Family | Base | Bonus |
+| --- | --- | --- |
+| laboring | 48 | + min(15, 30 × (ratio − 1)) |
+| veloDecay | 46 | + min(15, 6 × (drop − 1.5)) |
+| penFatigue | 42 | — |
+| workload | 38 | — |
+| backToBack | 36 | — |
+| leverage | 34 | + min(15, 100 × (gap − 0.06)) |
+| tenK | 33 | — |
+| scorelessStreak | 32 | + min(15, streak − 1) |
+| sixIp | 28 | — |
+| homeAway | 30 | — |
+| cgShutout | 25 | — |
+| recentAppearances | 20 | — |
 
 ## The families
 
@@ -282,7 +304,17 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   headlines got the same prose treatment ("The Brewers edged the Cubs by a
   single run" — `dayHighlights.js`), distinct from these record cards.
 
-### Pitchers table (always-open, entering-tense)
+### Margin Notes (always-open, entering-tense, spans both teams)
+
+Renders below the seal, alongside the (now purely numeric) Pitchers stat
+grid — `buildMarginNotes` (`src/api/pitcher-callouts.js`) runs every
+pitcher who's appeared so far this game (both sides) through
+`buildPitcherNotes` plus the health builders below, then sorts by score and
+caps at `MARGIN_NOTES_MAX` (5), same shape as the pre-half strip's cap.
+`homeAway` only fires for the pitcher who actually started tonight's game
+(`isStarter`, position 0 in the team's boxscore pitching order) — a reliever
+who also has a starts record on file elsewhere in the rotation must not be
+credited with a game he isn't starting.
 
 Alongside the older home/away, CG/shutout, scoreless-streak, 6+ IP and 10-K
 notes (`buildPitcherNotes`), relievers get three workload/pattern notes, all
@@ -309,13 +341,26 @@ season aggregates joined from the pitcher game-log sweep:
   ≥ .060): "Opponents hit .204 off him with the Sounds ahead this season,
   .301 with them trailing."
 
+The two in-game health signals join the same ranked list (`healthNotes` in
+`pitcher-callouts.js`, wrapping `pitcherHealth.js`'s reads) and carry the
+highest bases in the family — tonight-specific and the most actionable read
+on a pitcher, ahead of every season aggregate above:
+
+- **laboring** — tonight's pitches/inning vs. his own season norm
+  (`laboringFor`, workload.json baseline): "Laboring: 24.7 pitches per
+  inning tonight — his season norm is 16.1."
+- **veloDecay** — fastball-family velocity drop from his first two innings
+  to his latest revealed one (`computeVeloDecay`): "Fastball down 2.0 mph
+  from his early innings (93.9 → 91.9)."
+
 ## Extending
 
-Two metric-adjacent families were deliberately NOT built as callouts: the
+One metric-adjacent family was deliberately NOT built as a callout: the
 lineup-strength grade (its receipt card already owns the lineup page — a
-callout would restate it) and the in-game laboring/velo-decay signals (they
-live as Pitchers-table health notes, `src/api/pitcherHealth.js`, where the
-row they annotate already sits).
+callout would restate it). The in-game laboring/velo-decay signals ARE
+callouts now (Margin Notes, above) — before the Pitchers table's notes
+joined the worthiness system, they were the one exception, kept as plain
+Pitchers-table rows since the row they annotate already sat right there.
 
 Per CLAUDE.md's standing rule: new record/streak/split families extend
 `gen-callouts.mjs` (never a parallel generation path); anything computable
