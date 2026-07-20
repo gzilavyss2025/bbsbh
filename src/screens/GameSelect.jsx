@@ -295,13 +295,19 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           </button>
           <div className="topbar__slateactions">
             <LevelNav sportId={sportId} onChange={pickLevel} />
-            <SiteSearchButton className="topbar__search" />
-            <SiteMenuButton className="topbar__search" />
-            {AccountButton && (
-              <Suspense fallback={null}>
-                <AccountButton />
-              </Suspense>
-            )}
+            {/* The icon buttons live in one nowrap sub-group so that when the
+                row runs out of width they drop below the level pills together —
+                as bare siblings flex-wrap moved them one at a time, orphaning
+                whichever single button no longer fit onto its own row. */}
+            <div className="topbar__iconcluster">
+              <SiteSearchButton className="topbar__search" />
+              <SiteMenuButton className="topbar__search" />
+              {AccountButton && (
+                <Suspense fallback={null}>
+                  <AccountButton />
+                </Suspense>
+              )}
+            </div>
           </div>
         </header>
 

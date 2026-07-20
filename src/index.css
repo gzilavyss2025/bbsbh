@@ -227,13 +227,45 @@ body {
   min-width: 0;
 }
 
+/* The icon buttons (search, menu, and — when reveal sync is configured — the
+   account button) as ONE nowrap unit inside the wrapping actions row. Without
+   this sub-group, flex-wrap moves items individually, so whichever single
+   button no longer fits drops to its own row as an orphan — a lone account
+   avatar floating under the menu icon on a 402px-wide iPhone was the real
+   rendered bug. Grouped, either all the icons share the level-pill row or the
+   whole trio wraps below it together (the fallback the .levelnav comment
+   below describes). Guarded by e2e/slate-header.spec.js. */
+.topbar__iconcluster {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+/* When the icon cluster wraps, the actions block doubles in height and the
+   topbar's align-items: center would float the wordmark vertically centered
+   between the two rows. Pinning it to the top keeps it aligned with the
+   level pills (first row) instead; in the single-row case the home button is
+   already the tallest item, so this changes nothing there. */
+.topbar--slate .topbar__home {
+  align-self: flex-start;
+}
+
+/* The signed-out "Sign in" pill keeps its 44px tap-target height elsewhere,
+   but inside the slate topbar it rides the same condensed 30px row as the
+   search/menu icons (same reasoning as .topbar--slate .topbar__search). */
+.topbar--slate .accountbtn__signin {
+  min-height: 30px;
+}
+
 /* Condensed to fit beside the title: content-width (not full-bleed), tighter
    gaps, and smaller pill buttons than the standalone level toggle. Natural
    (unshrunk) size — on a narrow phone there isn't room to compress five level
    pills AND the icon buttons onto one line without either overlapping or
    clipping button labels, so the icon buttons wrap onto their own row instead
-   (see .topbar__slateactions' flex-wrap) rather than the level pills losing
-   their min-content floor. */
+   (as a unit — see .topbar__iconcluster above) rather than the level pills
+   losing their min-content floor. */
 .topbar--slate .levelnav {
   flex: 0 0 auto;
   gap: 4px;
