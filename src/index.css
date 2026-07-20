@@ -9773,11 +9773,17 @@ body {
 /* Each half-inning a fixed, equal-width bordered box regardless of the digits in
    it; a half that scored is inked bold seam-red. Sized up from the base
    .bs__grid td font (the header row's inning numbers stay that base size —
-   see .bs__grid--board thead th below — only the run counts themselves grow). */
+   see .bs__grid--board thead th below — only the run counts themselves grow).
+   Needs the two-class ".bs__grid--board .bs__boardInn" selector, not a bare
+   ".bs__boardInn", to out-specificity the generic ".bs__grid th, .bs__grid td"
+   rule above — otherwise the per-inning digits get stuck at caption size while
+   .bs__boardFinal (already two classes) renders at the intended larger size. */
 .bs__boardInn {
   width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
+}
+.bs__grid--board .bs__boardInn {
   font-size: var(--fs-title-lg);
 }
 .bs__grid--board thead th.bs__boardInn {
