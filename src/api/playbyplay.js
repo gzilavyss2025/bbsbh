@@ -29,8 +29,12 @@
 //    ('atBat') from this kind of transient/action entry — see `isRealPA`.
 //  - A handful of eventTypes (caught stealing, pickoffs, wild pitches...)
 //    describe a baserunning event with no batting result for whoever is
-//    currently up — those don't get their own card, but their runners[] is
-//    still walked for out attribution.
+//    currently up — those get no RESULT card, but their runners[] is still
+//    walked for out attribution, and when such a play carries pitch events
+//    (an inning-ending caught stealing mid-count) the batter who was up gets
+//    an INTERRUPTED at-bat card so those pitches aren't lost (verified
+//    against gamePk 823764, bottom 7: Luis Lara 1-2 when Cooper Pratt was
+//    caught stealing for out 3; Lara restarted at 0-0 leading off the 8th).
 //  - Each runner's `movement.end` ('1B'/'2B'/'3B'/'score'/null) is walked
 //    across the whole half to find how far each batter got as a baserunner
 //    (his card's diamond shades the bases he legged out, solid if he scored)
@@ -528,6 +532,49 @@ function legAdvanceCode(play, r) {
   return advanceCode(play)
 }
 
+// The pitch-sequence fields an at-bat card renders, shared by a real plate
+// appearance's card and an INTERRUPTED at-bat's card (a top-level baserunning
+// play that carries the pitches thrown to whoever was mid-count when the half
+// ended on the bases — see the main loop). Per-pitch detail feeds the
+// strike-zone diagram: plate-crossing location (pX/pZ) against the batter's
+// own zone (strikeZoneTop/Bottom), plus velo and pitch type for the sequence
+// list. All Statcast-ish, so every field is null-guarded — at MiLB parks with
+// no tracking pX/pZ are simply absent and StrikeZone renders nothing (same
+// degrade as derive.js).
+function pitchCardInfo(play) {
+  const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
+  const pitches = pitchEvents.map(pitchCallCode)
+  const pitchDetails = pitchEvents.map((e, i) => {
+    const code = pitchCallCode(e)
+    const pd = e.pitchData ?? {}
+    const co = pd.coordinates ?? {}
+    return {
+      no: e.pitchNumber ?? i + 1,
+      code,
+      cat: pitchDotCategory(code),
+      px: typeof co.pX === 'number' ? co.pX : null,
+      pz: typeof co.pZ === 'number' ? co.pZ : null,
+      szTop: typeof pd.strikeZoneTop === 'number' ? pd.strikeZoneTop : null,
+      szBottom: typeof pd.strikeZoneBottom === 'number' ? pd.strikeZoneBottom : null,
+      mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
+      type: e.details?.type?.description ?? '',
+      callDesc: e.details?.call?.description ?? '',
+    }
+  })
+  return { pitchEvents, pitches, pitchDetails }
+}
+
+// The pitcher a plate appearance faced (for the strike-zone panel's "vs"
+// header) — his name parts off gameData, same shape as the batter. `hand`
+// ('L'/'R', bio fact not a result) feeds the platoon-split call-out (see
+// api/callout-notes.js), same field pitchers.js already reads.
+function matchupPitcher(feed, play) {
+  const pitcherId = play.matchup?.pitcher?.id
+  if (pitcherId == null) return null
+  const person = feed?.gameData?.players?.[`ID${pitcherId}`] ?? {}
+  return { id: pitcherId, ...personNameParts(person), hand: person.pitchHand?.code ?? '' }
+}
+
 // The base a batter's OWN reach code (scorebookCode's REACH_CODES) already
 // implies he's on — so his diamond only needs a FURTHER leg notation when he
 // advances past it on the SAME play (e.g. a single plus a fielding error that
@@ -908,41 +955,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
 
     if (isRealPA) {
       const batter = resolveBatter(feed, battingSide, batterId, positionEntering.get(batterId))
-      const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
-      const pitches = pitchEvents.map(pitchCallCode)
-      // Per-pitch detail for the strike-zone diagram: plate-crossing location
-      // (pX/pZ) against the batter's own zone (strikeZoneTop/Bottom), plus velo
-      // and pitch type for the sequence list. All Statcast-ish, so every field
-      // is null-guarded — at MiLB parks with no tracking pX/pZ are simply
-      // absent and StrikeZone renders nothing (same degrade as derive.js).
-      const pitchDetails = pitchEvents.map((e, i) => {
-        const code = pitchCallCode(e)
-        const pd = e.pitchData ?? {}
-        const co = pd.coordinates ?? {}
-        return {
-          no: e.pitchNumber ?? i + 1,
-          code,
-          cat: pitchDotCategory(code),
-          px: typeof co.pX === 'number' ? co.pX : null,
-          pz: typeof co.pZ === 'number' ? co.pZ : null,
-          szTop: typeof pd.strikeZoneTop === 'number' ? pd.strikeZoneTop : null,
-          szBottom: typeof pd.strikeZoneBottom === 'number' ? pd.strikeZoneBottom : null,
-          mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
-          type: e.details?.type?.description ?? '',
-          callDesc: e.details?.call?.description ?? '',
-        }
-      })
-
-      // The pitcher this PA faced (for the strike-zone panel's "vs" header) —
-      // his name parts off gameData, same shape as the batter. `hand`
-      // ('L'/'R', bio fact not a result) feeds the platoon-split call-out (see
-      // api/callout-notes.js), same field pitchers.js already reads.
-      const pitcherId = play.matchup?.pitcher?.id
-      const pitcherPerson = pitcherId != null ? feed?.gameData?.players?.[`ID${pitcherId}`] ?? {} : {}
-      const pitcher =
-        pitcherId != null
-          ? { id: pitcherId, ...personNameParts(pitcherPerson), hand: pitcherPerson.pitchHand?.code ?? '' }
-          : null
+      const { pitchEvents, pitches, pitchDetails } = pitchCardInfo(play)
+      const pitcher = matchupPitcher(feed, play)
 
       const cardIndex = entries.length
       const batterRunner = runners.find((r) => r.details?.runner?.id === batterId)
@@ -1008,17 +1022,92 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         card.outNumber = batterRunner.movement.outNumber
       }
     } else {
-      // A top-level baserunning play with no plate appearance of its own (an
-      // inning-ending caught stealing, whose batter's count resumes next
-      // inning) has no card to hang its prose on — emit it as its own note so
-      // the account isn't lost.
-      for (const n of baserunningNotes) {
-        entries.push({
-          kind: 'event',
-          eventType: n.eventType,
-          playerId: n.runnerId,
-          segments: n.segments,
+      // A top-level baserunning play with no plate appearance of its own — an
+      // inning-ending caught stealing or pickoff, or a walk-off steal / wild
+      // pitch — closes out whoever was mid-count at the plate. Two accounts
+      // ride this play and would otherwise vanish:
+      //
+      //  1. The prose. Unlike a MID-PA baserunning event (a nested playEvent
+      //     with its own description, collected into baserunningNotes above),
+      //     a top-level play's account lives only in its result.description
+      //     (verified against gamePk 823764, bottom 7: "Cooper Pratt caught
+      //     stealing 2nd base…" appears in no playEvent). Fold it in as a note
+      //     unless a nested note already told the same story.
+      //  2. The interrupted at-bat itself. The play's pitch events are the
+      //     pitches thrown to the batter who was up — they are NOT re-listed
+      //     when his at-bat restarts from scratch next inning (same feed fact
+      //     derive.js/pitchers.js lean on to count these pitches; see
+      //     NON_PA_EVENT_TYPES' doc). Verified against the same game: Luis
+      //     Lara saw 4 pitches (1-2) on the caught_stealing_2b play, then led
+      //     off the 8th with a fresh count. Without a card those pitches
+      //     appear in the half's PITCHES total but nowhere in the feed.
+      //
+      // So: with pitches on record, emit an INTERRUPTED at-bat card for the
+      // batter — pitch ladder and zone detail as usual, but no scorebook code,
+      // no out badge, an empty diamond, and the prose notes attached — else
+      // fall back to standalone event notes. The batter deliberately does NOT
+      // enter originIndex: he never reached base, and any runner attribution
+      // must keep resolving to real cards (his own earlier trip this half, if
+      // the lineup batted around).
+      const isBaserunningPlay =
+        play.result?.type === 'atBat' && NON_PA_EVENT_TYPES.has(play.result?.eventType)
+      const notes = [...baserunningNotes]
+      if (
+        isBaserunningPlay &&
+        play.result?.description &&
+        !notes.some((n) => n.eventType === play.result?.eventType)
+      ) {
+        const outRunner = runners.find((r) => r.movement?.isOut) ?? runners[0]
+        notes.push({
+          eventType: play.result.eventType,
+          runnerId: outRunner?.details?.runner?.id ?? null,
+          segments: linkifyNames(play.result.description, nameIndex),
         })
+      }
+      const { pitchEvents, pitches, pitchDetails } =
+        isBaserunningPlay && batterId != null ? pitchCardInfo(play) : { pitchEvents: [] }
+      if (pitchEvents.length > 0) {
+        // The interruption sentence is the card's own description (there is no
+        // batting result to describe); the count at the stoppage is a real
+        // scorer's note — on an inning-ending play it does NOT carry over
+        // (the batter restarts at 0-0), so it exists nowhere else.
+        const { balls, strikes } = play.count ?? {}
+        const countTail =
+          balls != null && strikes != null ? ` with the count ${balls}-${strikes}` : ''
+        entries.push({
+          kind: 'atbat',
+          interrupted: true,
+          batterId,
+          atBatIndex: play.about?.atBatIndex ?? null,
+          eventType: play.result?.eventType ?? null,
+          playId: pitchEvents.at(-1)?.playId ?? null,
+          batter: resolveBatter(feed, battingSide, batterId, positionEntering.get(batterId)),
+          pitcher: matchupPitcher(feed, play),
+          pitches,
+          pitchDetails,
+          batSide: play.matchup?.batSide?.code ?? '',
+          rbi: play.result?.rbi ?? 0,
+          descSegments: [
+            { text: `At-bat not completed — the inning ended on the bases${countTail}.` },
+          ],
+          code: '',
+          codeKind: 'none',
+          baserunningNotes: notes,
+          outNumber: null,
+          reached: 0,
+          scored: false,
+          earned: true,
+          legNotations: {},
+        })
+      } else {
+        for (const n of notes) {
+          entries.push({
+            kind: 'event',
+            eventType: n.eventType,
+            playerId: n.runnerId,
+            segments: n.segments,
+          })
+        }
       }
     }
 

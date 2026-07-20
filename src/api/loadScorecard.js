@@ -190,7 +190,12 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
       }
       card.occIndex = occ.index
       if (card.codeKind === 'hit') { s.h += 1; occ.h += 1 }
-      if (!NON_AB_EVENTS.has(card.eventType)) { s.ab += 1; occ.ab += 1 }
+      // An INTERRUPTED at-bat (the half ended on the bases mid-count — see
+      // computeHalfInningFeed) still gets its cell (the pitches were real),
+      // but no at-bat or plate appearance was charged, so it counts toward
+      // nothing. Its eventType is the baserunning event's
+      // (caught_stealing_2b…), which NON_AB_EVENTS alone wouldn't exclude.
+      if (!card.interrupted && !NON_AB_EVENTS.has(card.eventType)) { s.ab += 1; occ.ab += 1 }
       if (card.scored) { s.r += 1; occ.r += 1 }
       s.rbi += card.rbi ?? 0
       occ.rbi += card.rbi ?? 0
