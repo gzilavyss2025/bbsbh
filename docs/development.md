@@ -41,6 +41,12 @@ Then classify the task:
 
   Claude-created branches may use `claude/<slug>`; Codex-created branches use
   `codex/<slug>`. Use a unique, descriptive worktree directory.
+
+  A `PostToolUse` hook (`.claude/hooks/setup-new-worktree.mjs`) detects this
+  command and runs `npm install` + `npx playwright install chromium` in the new
+  worktree automatically, in the background — no need to install manually before
+  running `dev`/`lint`/`e2e` there. It's fire-and-forget; give it a minute before
+  the first command in a brand-new worktree.
 - **Task that depends on an open PR:** identify the exact PR and head branch first.
   Base the new branch on `origin/<that-head-branch>` only when the dependency is
   intentional, and record that dependency in the new PR and final handoff. Do not
