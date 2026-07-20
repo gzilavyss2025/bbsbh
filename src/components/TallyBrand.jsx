@@ -6,7 +6,7 @@ import { useId } from 'react'
 // browser but came out garbled ("TAILLY") through the OG-image Playwright
 // rasterizer, so a baked raster is the one asset that reads correctly
 // everywhere it's used, including scripts/og-image.html.
-const WORDMARK_ASPECT = 2628 / 816 // native public/brand/tally-wordmark.png size
+const WORDMARK_ASPECT = 1851 / 458 // native public/brand/tally-wordmark.png size
 
 export function TallyWordmark({ height = 20, title = 'Tally', ...rest }) {
   return (
