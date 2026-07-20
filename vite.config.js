@@ -24,7 +24,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
+      includeAssets: ['icons/icon.svg', 'icons/tally-baseball-mark-180.png'],
       manifest: {
         name: 'Tally Baseball',
         short_name: 'Tally',
