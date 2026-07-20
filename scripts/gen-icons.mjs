@@ -36,7 +36,7 @@ const svg = readFileSync(join(iconsDir, 'icon.svg'), 'utf8').replace(
 const targets = [
   { file: 'icon-192.png', size: 192, pad: 0 },
   { file: 'icon-512.png', size: 512, pad: 0 },
-  { file: 'apple-touch-icon.png', size: 180, pad: 0 },
+  { file: 'tally-baseball-mark-180.png', size: 180, pad: 0 },
   { file: 'icon-maskable-512.png', size: 512, pad: 0 },
 ]
 
