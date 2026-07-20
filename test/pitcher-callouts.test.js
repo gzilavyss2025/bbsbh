@@ -69,8 +69,13 @@ test('selectHalfStartingPitcher reflects a pre-announced pitching change once th
   assert.equal(pitcher?.id, 201)
 })
 
-// buildMarginNotes — the ranked, capped digest spanning both teams' pitchers.
-test('buildMarginNotes sorts by score, caps at 5, and respects the isStarter gate', () => {
+// buildMarginNotes — the ranked digest spanning both teams' pitchers. The
+// builder itself does not cap; MarginNotes.jsx caps what's shown up front and
+// reveals the rest on tap (see MARGIN_NOTES_SHOWN there), so with three
+// qualifying pitchers this fixture legitimately produces more than 5 notes —
+// pinning that is itself the regression check that the builder stopped
+// truncating.
+test('buildMarginNotes sorts by score, does not truncate, and respects the isStarter gate', () => {
   const feed = buildFeed()
   const marginBundle = {
     starterRecords: {
@@ -89,11 +94,29 @@ test('buildMarginNotes sorts by score, caps at 5, and respects the isStarter gat
     bullpen: { avgPitches: 10, windowDays: 3 },
   }
   const notes = buildMarginNotes(feed, 3, marginBundle, { away: 'Aways', home: 'Homes' })
-  assert.ok(notes.length > 0 && notes.length <= 5)
+  assert.equal(notes.length, 9) // 3 notes apiece for 200, 201, 300 — more than the old hard cap of 5
   for (let i = 1; i < notes.length; i++) {
     assert.ok(notes[i - 1].score >= notes[i].score)
   }
   assert.ok(!notes.some((n) => n.personId === 201 && n.kind === 'homeAway'))
+})
+
+// Dedup guard: every note the digest returns must carry a unique dedupeKey —
+// regardless of how many pitcher/health builders fire, the caller (and
+// React's key={n.dedupeKey}) must never see the same fact twice.
+test('buildMarginNotes never returns two notes with the same dedupeKey', () => {
+  const feed = buildFeed()
+  const marginBundle = {
+    starterRecords: {
+      200: { homeAway: { home: '3-1' }, cgShutout: 1, scorelessStreak: 4 },
+      201: { reliever: true, recentAppearances: 3, recentPitches: 40, bullpen: true },
+      300: { homeAway: { away: '2-2' }, scorelessStreak: 6, cgShutout: 1 },
+    },
+    bullpen: { avgPitches: 10, windowDays: 3 },
+  }
+  const notes = buildMarginNotes(feed, 3, marginBundle, { away: 'Aways', home: 'Homes' })
+  const keys = notes.map((n) => n.dedupeKey)
+  assert.equal(keys.length, new Set(keys).size)
 })
 
 test('buildMarginNotes returns [] with no bundle', () => {

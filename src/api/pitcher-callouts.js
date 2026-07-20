@@ -1,8 +1,10 @@
 // Per-pitcher in-progress notes — the "Margin Notes" digest (MarginNotes.jsx),
-// a ranked, capped surface fed by every pitcher who's appeared so far this
-// game (both sides), same worthiness-scoring pattern as the pre-half strip
-// (prehalf-callouts.js): each candidate carries a `score`, the caller sorts
-// and slices to MARGIN_NOTES_MAX. This used to be an UNSCORED plain-string
+// a ranked surface fed by every pitcher who's appeared so far this game (both
+// sides), same worthiness-scoring pattern as the pre-half strip
+// (prehalf-callouts.js): each candidate carries a `score`, sorted highest
+// first; MarginNotes.jsx caps how many render up front and reveals the rest
+// on tap (the FormerTeammates/InsightsCard "Show N more" pattern), so the
+// builder itself doesn't truncate. This used to be an UNSCORED plain-string
 // list wedged under each pitcher's row in the always-open Pitchers table
 // (see docs/callouts.md's "Pitchers table" section — it explicitly predated
 // the worthiness system); it's scored now so it can rank fairly against every
@@ -29,8 +31,6 @@ import { dayWordFor } from './select.js'
 import { workloadFor } from './workload.js'
 import { computePitcherLines } from './pitchers.js'
 import { laboringFor, computeVeloDecay } from './pitcherHealth.js'
-
-const MARGIN_NOTES_MAX = 5
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -228,10 +228,8 @@ function healthNotes(id, side, health) {
 }
 
 // The Margin Notes digest: every pitcher who's appeared so far this game
-// (both sides), ranked by score and capped at MARGIN_NOTES_MAX — the live
-// counterpart to the pre-half strip's PREHALF_MAX=2 cap, sized larger since
-// this covers the whole game's pitchers rather than one half's entering
-// pitcher. `feed`/`revealedThrough` build the reveal-clamped stat rows
+// (both sides), deduped and ranked by score — the live counterpart to the
+// pre-half strip. `feed`/`revealedThrough` build the reveal-clamped stat rows
 // (computePitcherLines, ADR-0009) and the health reads (pitcherHealth.js,
 // same footing); `bundle` is the game's callouts bundle; `teamNames` is
 // `{ away, home }` display names; `extras` is the `{ workload, gameDate }`
@@ -240,7 +238,31 @@ export function buildMarginNotes(feed, revealedThrough, bundle, teamNames, extra
   if (!bundle) return []
   const lines = computePitcherLines(feed, revealedThrough)
   const velo = computeVeloDecay(feed, revealedThrough)
-  const notes = []
+
+  // Dedupe by dedupeKey (falling back to the text itself), same contract
+  // callout-notes.js's box-score roll-up defines: a later note with the same
+  // key REPLACES the earlier one in place, so a stable sort below keeps
+  // first-fired position while still showing the most-current wording.
+  // `dedupeKey` already includes personId (`${kind}-${row.id}`), so today
+  // this only actually collapses anything in the (currently impossible, but
+  // not worth trusting blindly) case of the same pitcher/kind pair getting
+  // pushed twice — cheap insurance against a future duplicate note, same as
+  // why callout-notes.js keeps this pass even though most of its callers
+  // rarely trigger it either.
+  const byKey = new Map() // dedupeKey -> index into ordered
+  const ordered = []
+  const add = (note) => {
+    if (!note) return
+    const key = note.dedupeKey ?? note.text
+    const at = byKey.get(key)
+    if (at != null) {
+      ordered[at] = note
+      return
+    }
+    byKey.set(key, ordered.length)
+    ordered.push(note)
+  }
+
   for (const side of ['away', 'home']) {
     const teamName = teamNames?.[side] ?? ''
     // A side's starter is always its first entry in boxscore order (see
@@ -249,12 +271,12 @@ export function buildMarginNotes(feed, revealedThrough, bundle, teamNames, extra
     // teams, not one row at a time like the old Pitchers-table call site.
     for (const [i, row] of (lines[side] ?? []).entries()) {
       const isStarter = i === 0
-      notes.push(...buildPitcherNotes(row, side, teamName, bundle, extras, isStarter))
+      for (const note of buildPitcherNotes(row, side, teamName, bundle, extras, isStarter)) add(note)
       const labor = laboringFor(row, extras.workload?.pitchers?.[row.id])
-      notes.push(...healthNotes(row.id, side, { labor: labor ? { [row.id]: labor } : {}, velo }))
+      for (const note of healthNotes(row.id, side, { labor: labor ? { [row.id]: labor } : {}, velo })) add(note)
     }
   }
-  return notes.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, MARGIN_NOTES_MAX)
+  return ordered.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
 }
 
 function ordinal(n) {

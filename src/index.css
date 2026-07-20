@@ -7714,6 +7714,26 @@ body {
 #root .marginnotes__text {
   text-transform: none; /* caps-exempt: margin notes read as natural sentences */
 }
+/* Same "Show N more" block button as .teammates__more (TeamInfo.jsx) and
+   .bs__noteMore (BoxScore.jsx) — one-way reveal, no collapse back. */
+.marginnotes__more {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.marginnotes__more:hover {
+  color: var(--text-body);
+}
 
 /* -------------------------------------------------------------- pitcher lines
    Running lines for every pitcher who has appeared in a revealed half-inning —

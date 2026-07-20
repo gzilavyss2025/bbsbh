@@ -309,8 +309,11 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
 Renders below the seal, alongside the (now purely numeric) Pitchers stat
 grid — `buildMarginNotes` (`src/api/pitcher-callouts.js`) runs every
 pitcher who's appeared so far this game (both sides) through
-`buildPitcherNotes` plus the health builders below, then sorts by score and
-caps at `MARGIN_NOTES_MAX` (5), same shape as the pre-half strip's cap.
+`buildPitcherNotes` plus the health builders below, dedupes by `dedupeKey`
+(same latest-wins contract as `callout-notes.js`'s box-score roll-up), and
+sorts by score — the builder itself doesn't truncate. `MarginNotes.jsx` shows
+the first `MARGIN_NOTES_SHOWN` (5) up front and reveals the rest on tap, the
+same "Show N more" pattern as `FormerTeammates`/`InsightsCard`.
 `homeAway` only fires for the pitcher who actually started tonight's game
 (`isStarter`, position 0 in the team's boxscore pitching order) — a reliever
 who also has a starts record on file elsewhere in the rotation must not be
