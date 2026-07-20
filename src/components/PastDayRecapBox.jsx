@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { computeTopPerformersByResult } from '../api/topPerformers.js'
-import { rankDayHighlights } from '../api/dayHighlights.js'
+import { rankDayHighlights, selectGameResults } from '../api/dayHighlights.js'
 import { computeDaySuperlatives } from '../api/daySuperlatives.js'
 import { fetchCallouts } from '../api/callouts.js'
 import { fetchDayRecap, recapForSport } from '../api/dayRecap.js'
@@ -151,7 +151,120 @@ export function PerformerCard({ entry }) {
   )
 }
 
-function RecapPanel({ games, prospects, dateStr, sportId }) {
+// "Your Team": the favorite club's result up top, the answer to the first
+// question a returning fan has ("did my team win?"). Reads the bare result
+// (selectGameResults) so it shows even on a game with no standout; the team's
+// own top line rides along when there is one. The whole card taps to the box
+// score — the performer name stays plain text (not a link) so nothing
+// interactive nests inside the button.
+function YourTeamCard({ result, teamId, performer }) {
+  const navigate = useNav()
+  const abbr = result.home.id === teamId ? result.home.abbr : result.away.abbr
+  // winnerId is null on a tie (see selectGameResults) — show T, not a bogus L.
+  const outcome = result.winnerId == null ? 'tie' : result.winnerId === teamId ? 'win' : 'loss'
+  const badge = { win: 'W', loss: 'L', tie: 'T' }[outcome]
+  return (
+    <section className="dayhl__section">
+      <h3 className="dayhl__title">Your Team</h3>
+      <button
+        type="button"
+        className="yourteam"
+        onClick={() => result.boxScorePath && navigate(result.boxScorePath)}
+      >
+        <TeamLogo teamId={teamId} name={abbr} size={34} />
+        <span className="yourteam__body">
+          <span className="yourteam__result">
+            <span className={`yourteam__badge yourteam__badge--${outcome}`}>{badge}</span>
+            {scorePairsLine([
+              [result.away.abbr, result.away.r],
+              [result.home.abbr, result.home.r],
+            ])}
+          </span>
+          {performer && (
+            <span className="yourteam__perf">
+              {performer.name} — {performer.stat}
+            </span>
+          )}
+        </span>
+      </button>
+    </section>
+  )
+}
+
+// "Game of the Day": the day's #1-ranked highlight, promoted to a featured
+// lead so the fan gets the story before the lists (the top row of Day
+// Highlights was doing this job in a flat list; here it gets a headline, the
+// turning-point play, and — when the signal has one — its protagonist). The
+// headline taps through to the box score; the meta line carries the player/
+// team links, kept as siblings of the button, never nested inside it.
+function GameOfDayHero({ entry }) {
+  const navigate = useNav()
+  const { performer } = entry
+  return (
+    <section className="dayhl__section">
+      <h3 className="dayhl__title">Game of the Day</h3>
+      <div className="gotd">
+        <div className="gotd__head">
+          {performer ? (
+            <span className="dayhl__rowShotwrap">
+              <Headshot
+                personId={performer.id}
+                name={performer.name}
+                teamId={performer.teamId}
+                className="gotd__shot"
+              />
+              {performer.position && <span className="playercard__posbadge">{performer.position}</span>}
+            </span>
+          ) : (
+            <span className="dayhl__rowLogos">
+              <TeamLogo teamId={entry.teams?.winner?.id} name={entry.teams?.winner?.abbr} size={30} />
+              <TeamLogo teamId={entry.teams?.loser?.id} name={entry.teams?.loser?.abbr} size={30} />
+            </span>
+          )}
+          <button type="button" className="gotd__headline" onClick={() => navigate(entry.boxScorePath)}>
+            {entry.headline}
+          </button>
+        </div>
+        {entry.playOfGame && (
+          <p className="gotd__play">
+            <span className="gotd__playlabel">Turning point</span> {entry.playOfGame}
+          </p>
+        )}
+        {performer && (
+          <div className="dayhl__rowMeta">
+            <PlayerLink id={performer.id}>{performer.name}</PlayerLink>
+            <TeamLogo teamId={performer.teamId} name={performer.teamAbbr} size={14} />
+            <TeamLink id={performer.teamId}>{performer.teamAbbr}</TeamLink>
+            {entry.subCaption && <span className="dayhl__rowSub">· {entry.subCaption}</span>}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// "Odds & Ends": the former Statcast Leaders section, demoted from three
+// co-equal tile sections to one compact strip — freak-physics trivia earns a
+// footer line, not equal billing with the day's stories (the reviewers were
+// unanimous). Each item links the player; the number stays mono.
+function OddsAndEndsStrip({ cards }) {
+  return (
+    <section className="dayhl__section">
+      <h3 className="dayhl__title">Odds &amp; Ends</h3>
+      <ul className="oddsends">
+        {cards.map(({ label, entry }) => (
+          <li key={label} className="oddsends__item">
+            <span className="oddsends__label">{label}</span>
+            <PlayerLink id={entry.id}>{entry.name}</PlayerLink>
+            <span className="oddsends__stat">{entry.stat}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function RecapPanel({ games, prospects, dateStr, sportId, favoriteTeamId, favoriteAffiliateIds }) {
   const getSignals = usePastGameSignals()
   const [state, setState] = useState({ loading: true, error: false, data: null })
 
@@ -190,6 +303,7 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
           data: {
             performersByResult,
             highlights: rankDayHighlights(entries, calloutsData),
+            results: selectGameResults(entries),
             superlatives: computeDaySuperlatives(entries),
           },
         })
@@ -209,36 +323,78 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
   }
   if (!state.data) return null
 
-  const { performersByResult, highlights, superlatives } = state.data
+  const { performersByResult, highlights, superlatives, results } = state.data
   const { winners, losers } = performersByResult
-  const hasPerformers = winners.length > 0 || losers.length > 0
+
+  // The lead: the day's #1 highlight becomes "Game of the Day"; the rest are
+  // "What You Missed".
+  const hero = highlights[0] ?? null
+  const missed = highlights.slice(1)
+
+  // Your Team: the favorite club (or, on a MiLB level, one of its affiliates)
+  // if it played today. Absent on older artifacts with no `results` array.
+  const favIds = [favoriteTeamId, ...(favoriteAffiliateIds ?? [])].filter((id) => id != null)
+  const yourResult =
+    (results ?? []).find((r) => favIds.includes(r.away.id) || favIds.includes(r.home.id)) ?? null
+  const yourTeamId = yourResult
+    ? favIds.includes(yourResult.home.id)
+      ? yourResult.home.id
+      : yourResult.away.id
+    : null
+  // Match the club's own top line to the SHOWN game — the box-score path
+  // disambiguates a doubleheader (game 1 vs game 2), so a nightcap performer
+  // isn't pinned under the opener's result. Falls back to team-only when the
+  // path is absent (older artifact).
+  const yourPerformer = yourTeamId
+    ? ([...winners, ...losers].find(
+        (e) =>
+          e.teamId === yourTeamId &&
+          (!yourResult.boxScorePath || e.game?.boxScorePath === yourResult.boxScorePath),
+      ) ?? null)
+    : null
+
+  // One person, one appearance: a player already carrying a highlight (the hero
+  // or any "What You Missed" row) — or the Your Team line — is dropped from
+  // Standout Performances, so a name never hits the eye twice in one recap.
+  const shownIds = new Set(
+    [...highlights.map((h) => h.performer?.id), yourPerformer?.id].filter(Boolean),
+  )
+  const dedupe = (arr) => arr.filter((e) => !shownIds.has(e.id))
+  const winnersD = dedupe(winners)
+  const losersD = dedupe(losers)
+  const hasPerformers = winnersD.length > 0 || losersD.length > 0
+
   const statcastCards = [
-    { label: 'Longest Home Run', entry: superlatives.longestHomeRun },
-    { label: 'Hardest Base Hit', entry: superlatives.hardestBaseHit },
-    { label: 'Fastest Strikeout', entry: superlatives.fastestStrikeout },
+    { label: 'Longest HR', entry: superlatives.longestHomeRun },
+    { label: 'Hardest Hit', entry: superlatives.hardestBaseHit },
+    { label: 'Fastest K', entry: superlatives.fastestStrikeout },
   ].filter((c) => c.entry)
+
+  const nothing = !hero && !hasPerformers && !yourResult && statcastCards.length === 0
 
   return (
     <LinkScope asOf={dateStr} sportId={sportId}>
       <div className="pastdayrecap__body">
+        {yourResult && <YourTeamCard result={yourResult} teamId={yourTeamId} performer={yourPerformer} />}
+        {hero && <GameOfDayHero entry={hero} />}
         {hasPerformers && (
           <section className="dayhl__section">
-            <h3 className="dayhl__title">Top Performers</h3>
-            {winners.length > 0 && (
+            <h3 className="dayhl__title">Standout Performances</h3>
+            {winnersD.length > 0 && (
               <>
                 <h4 className="playercard__bucket">In a Win</h4>
                 <ul className="playercard__list">
-                  {winners.map((e) => (
+                  {winnersD.map((e) => (
                     <PerformerCard key={e.id} entry={e} />
                   ))}
                 </ul>
               </>
             )}
-            {losers.length > 0 && (
+            {losersD.length > 0 && (
               <>
                 <h4 className="playercard__bucket">In a Loss</h4>
                 <ul className="playercard__list">
-                  {losers.map((e) => (
+                  {losersD.map((e) => (
                     <PerformerCard key={e.id} entry={e} />
                   ))}
                 </ul>
@@ -246,32 +402,18 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
             )}
           </section>
         )}
-        {statcastCards.length > 0 && (
+        {missed.length > 0 && (
           <section className="dayhl__section">
-            <h3 className="dayhl__title">Statcast Leaders</h3>
-            {statcastCards.map(({ label, entry }) => (
-              <div key={label}>
-                <h4 className="playercard__bucket">{label}</h4>
-                <ul className="playercard__list">
-                  <PerformerCard entry={entry} />
-                </ul>
-              </div>
-            ))}
-          </section>
-        )}
-        {highlights.length > 0 && (
-          <section className="dayhl__section">
-            <h3 className="dayhl__title">Day Highlights</h3>
+            <h3 className="dayhl__title">What You Missed</h3>
             <ol className="dayhl__list">
-              {highlights.map((h) => (
+              {missed.map((h) => (
                 <DayHighlightRow key={h.gamePk} entry={h} />
               ))}
             </ol>
           </section>
         )}
-        {!hasPerformers && highlights.length === 0 && statcastCards.length === 0 && (
-          <p className="hint hint--prose">Nothing to recap for this day yet.</p>
-        )}
+        {statcastCards.length > 0 && <OddsAndEndsStrip cards={statcastCards} />}
+        {nothing && <p className="hint hint--prose">Nothing to recap for this day yet.</p>}
       </div>
     </LinkScope>
   )
@@ -288,7 +430,16 @@ function RecapPanel({ games, prospects, dateStr, sportId }) {
 // force-reveals this box too (via `forceRevealed`) — both buttons do the same
 // thing. SealBox's onReveal fires either way shown becomes true, whether from
 // this box's own tap or an external forceRevealed flip.
-export function PastDayRecapBox({ dateStr, sportId, games, prospectsData, revealedAll, onRevealAll }) {
+export function PastDayRecapBox({
+  dateStr,
+  sportId,
+  games,
+  prospectsData,
+  revealedAll,
+  onRevealAll,
+  favoriteTeamId,
+  favoriteAffiliateIds,
+}) {
   const [revealed, setRevealed] = useState(false)
   useEffect(() => setRevealed(false), [dateStr, sportId])
   const shown = revealed || revealedAll
@@ -306,7 +457,14 @@ export function PastDayRecapBox({ dateStr, sportId, games, prospectsData, reveal
         }}
       >
         {() => (
-          <RecapPanel games={games} prospects={prospectsData} dateStr={dateStr} sportId={sportId} />
+          <RecapPanel
+            games={games}
+            prospects={prospectsData}
+            dateStr={dateStr}
+            sportId={sportId}
+            favoriteTeamId={favoriteTeamId}
+            favoriteAffiliateIds={favoriteAffiliateIds}
+          />
         )}
       </SealBox>
     </div>
