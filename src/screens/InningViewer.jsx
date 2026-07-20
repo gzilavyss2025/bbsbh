@@ -8,7 +8,7 @@ import {
   selectDelays,
   halfIndex,
 } from '../api/select.js'
-import { selectWinProbPath, selectWinProbSwings, selectWinProbBigPlays } from '../api/winprob.js'
+import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { laboringFor, computeVeloDecay } from '../api/pitcherHealth.js'
 import { safeToShowEntering } from '../api/enteringHalf.js'
@@ -267,13 +267,9 @@ export function InningViewer({
     () => selectWinProbPath(winProbability, { throughHalf: revealedThrough }),
     [winProbability, revealedThrough],
   )
-  // The per-half swing seismograph and the biggest-swing ledger — same
-  // reveal-only selectors, same revealedThrough clamp, so they only ever cover
-  // revealed halves and grow one step per reveal (never hinting what's ahead).
-  const winProbSwings = useMemo(
-    () => selectWinProbSwings(winProbability, { throughHalf: revealedThrough }),
-    [winProbability, revealedThrough],
-  )
+  // The biggest-swing ledger — same reveal-only selector, same
+  // revealedThrough clamp, so it only ever covers revealed halves and grows
+  // one entry per reveal (never hinting what's ahead).
   const winProbBigPlays = useMemo(
     () => selectWinProbBigPlays(winProbability, { throughHalf: revealedThrough }),
     [winProbability, revealedThrough],
@@ -418,10 +414,11 @@ export function InningViewer({
           />
           <WinProbChart
             points={winProbPoints}
-            swings={winProbSwings}
             bigPlays={winProbBigPlays}
             awayAbbr={meta.away.abbreviation}
             homeAbbr={meta.home.abbreviation}
+            awayId={meta.away.id}
+            homeId={meta.home.id}
             partial
           />
         </div>
