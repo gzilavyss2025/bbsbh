@@ -1,7 +1,11 @@
 /* ============================================================
-   SPACING & LAYOUT — Scorekeeper
-   4px base grid. The scorebook is a grid, so cells and gaps
-   snap to this scale.
+   SPACING & RADII — Scorekeeper
+   The generic 4px layout scale. The scorebook is a grid, so
+   cells and gaps snap to this scale. This file is the primitive
+   tier — reusable, app-agnostic step values only. One-off
+   component dimensions (the phone-column width, the linescore
+   cell, the headshot rungs) live in layout.css so they don't
+   dilute the scale.
    ============================================================ */
 
 :root {
@@ -23,29 +27,6 @@
   --radius-md:  10px;
   --radius-lg:  16px;
   --radius-pill: 999px;
-
-  /* Cell sizing for the linescore grid */
-  --cell-size:  30px;   /* one inning box */
-  --cell-gap:   0px;    /* grid rules touch */
-
-  /* Headshot size scale. Every headshot in the app (the shared <Headshot>
-     component's .shot.* variants, plus the standalone .pitchernotice__shot)
-     draws its box from one of these six rungs instead of a hand-tuned
-     per-card size. All are a 3:4 portrait crop matching the base .shot, so
-     swapping a rung only changes scale, never the crop. A single shared CDN
-     source width (see realHeadshotUrl in lib/teams.js) feeds every rung and
-     is sized so the largest rung is never upscaled on a 3× phone. */
-  --shot-xl-w:  104px; --shot-xl-h:  139px;  /* player detail page header */
-  --shot-lg-w:   88px; --shot-lg-h:  117px;  /* rehab watch hero card */
-  --shot-md-w:   63px; --shot-md-h:   84px;  /* roster / leader / recap card */
-  --shot-sm-w:   54px; --shot-sm-h:   72px;  /* player-of-game, pitching change */
-  --shot-xs-w:   39px; --shot-xs-h:   52px;  /* top-performer / day-recap row */
-  --shot-2xs-w:  33px; --shot-2xs-h:   44px; /* box-score star / note / milestone */
-
-  /* App frame — the single phone-column width every screen is capped to. */
-  --app-width:   440px;      /* iPhone-class second screen */
-  --app-gutter:  16px;
-  --tap-min:     44px;       /* min hit target */
 
   /* Borders */
   --bw-hair: 1px;

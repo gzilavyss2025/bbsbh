@@ -394,6 +394,15 @@ Re-run only to fold in a new season.
 - `check-typography.mjs` — rejects ad hoc size, weight, line-height, and tracking
   declarations in `src/index.css`; add or reuse the semantic roles in
   `src/tokens/typography.css` instead.
+- `check-focus-ring.mjs` — every `:focus-visible` rule that draws a ring must use
+  `var(--focus-ring)` (outline) or `var(--ring)` (box-shadow), never a hand-rolled
+  color; a ring-less focus style (reusing a `:hover` border/background change) is
+  fine, and a deliberate one-off opts out with a `focus-ring-exempt` comment. See
+  ADR-0023.
+- `check-contrast.mjs` — resolves the color tokens to hex and asserts WCAG AA
+  (≥4.5:1 text, ≥3:1 large/UI) for the known text-on-background pairings (seal ink
+  on the kraft stripes, white on the IL clay stripes, the core semantic text roles).
+  Fix a failure by retuning the hex, never by lowering the threshold. See ADR-0023.
 - `check-claude-md.mjs` — guards the CLAUDE.md leanness rule: fails if the root
   `CLAUDE.md` exceeds `MAX_LINES` (200). Keeps subsystem detail in the nested
   `CLAUDE.md` files (this one, `src/CLAUDE.md`, `src/api/CLAUDE.md`) that load only
