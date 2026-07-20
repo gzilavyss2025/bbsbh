@@ -73,8 +73,10 @@ export async function fetchCallouts(urlDate) {
 //       leverage?:{ahead,behind,tied} (each {avg,ops,ip}|null — opponents'
 //       line with his club ahead/behind/tied),
 //       tto?:{1,2,3} (each {pa,ab,h,avg,ops} — opponents' line the 1st/2nd/
-//       3rd+ time through the order; probable starters only) } } — one entry
-//       per ROSTERED pitcher on either club, not just the day's probable
+//       3rd+ time through the order; probable starters only),
+//       pitchPace?:{n,avg,starts} (avg pitches through the first n innings of
+//       his starts; probable starters only, same playLog as tto) } } — one
+//       entry per ROSTERED pitcher on either club, not just the day's probable
 //       starters; teamStarts is the CLUB's W-L in his starts (numbers, so
 //       tonight's result can fold in),
 //     milestones:{ [playerId]: { stat, label, value, threshold, remaining } }
@@ -85,6 +87,10 @@ export async function fetchCallouts(urlDate) {
 //       scoringFirst,opponentScoringFirst,
 //       leadAfter:{[inning]:'W-L'}, leadAfterFull:{[inning]:{w,l}},
 //       tiedAfterFull:{[inning]:{w,l}} (record when tied after 6/7/8),
+//       scorelessThroughFull:{[inning]:{w,l}} (record when this club is
+//       scoreless through 1–6), bothScorelessThroughFull:{[inning]:{w,l}}
+//       (record when the game is still 0-0 through 2–7),
+//       dayOfWeek:{[0-6]:{w,l}} (record by day of week, 0=Sun…6=Sat),
 //       inningRuns:{[inning]:{f,a,g}} (runs for/against + games sampled,
 //       innings 1–9), runsScored:{[bucket]:'W-L'},
 //       runsAllowedByInning:{[inning]:'W-L'}, comeback}, home:{…} } }

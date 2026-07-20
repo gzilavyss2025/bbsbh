@@ -255,6 +255,31 @@ const LEAD_LOPSIDED = 0.85 // win% ≥ .85 or ≤ .15
 const TIED_CHECKPOINTS = [6, 7, 8]
 const TIED_MIN_GAMES = 5
 
+// "Record when scoreless through inning N" — the club's own offense hasn't
+// put up a run through a completed inning (a fan tracking a shut-out still has
+// a live story entering the next half). Numbers only (no lopsidedness floor
+// here — the note layer gates it, see SCORELESS_LOPSIDED in callout-notes.js —
+// so the box score can still fold tonight's result into whatever the record
+// is). Checkpoints 1–6: a run drought is a live story through the middle
+// innings, not once it's a blowout.
+const SCORELESS_CHECKPOINTS = [1, 2, 3, 4, 5, 6]
+const SCORELESS_MIN_GAMES = 5
+
+// "Record when the GAME is still 0-0 through inning N" — the pitchers'-duel
+// sibling: BOTH clubs scoreless after a completed inning. A rarer situation
+// than one side being shut out, so a lower sample floor, and no lopsidedness
+// floor (the record itself, however it reads, is the point — like tiedAfter).
+// Checkpoints 2–7: a 0-0 game only becomes a story a couple innings in.
+const BOTH_SCORELESS_CHECKPOINTS = [2, 3, 4, 5, 6, 7]
+const BOTH_SCORELESS_MIN_GAMES = 4
+
+// Day-of-week of the game's official date (0 = Sunday … 6 = Saturday, taken at
+// UTC noon so a date string never slips a day). A pure calendar fact — no
+// lopsidedness floor at the data layer; the note layer applies the sample +
+// one-sidedness gate (DOW_* in callout-notes.js) so an ordinary ~.500 weekday
+// stays quiet.
+const DOW_OF = (dateApi) => new Date(`${dateApi}T12:00:00Z`).getUTCDay()
+
 // Run-total buckets for "win% when scoring N+ runs" — unlike LEAD_LOPSIDED
 // above, this isn't hunting for a reversal, so no lopsidedness floor: the
 // record itself ("38-3 when scoring 6+") is the whole point, win-heavy or not.
@@ -491,6 +516,12 @@ async function scoringRecord(teamId, sportId) {
   for (const n of RUN_SCORED_BUCKETS) rsTally[n] = { w: 0, l: 0 }
   const runsTally = {} // inning num (1..INNING_RUNS_MAX) -> { f, a, g }
   for (let n = 1; n <= INNING_RUNS_MAX; n++) runsTally[n] = { f: 0, a: 0, g: 0 }
+  const slTally = {} // inning num -> { w, l } (this club scoreless through it)
+  for (const n of SCORELESS_CHECKPOINTS) slTally[n] = { w: 0, l: 0 }
+  const bothSlTally = {} // inning num -> { w, l } (game still 0-0 through it)
+  for (const n of BOTH_SCORELESS_CHECKPOINTS) bothSlTally[n] = { w: 0, l: 0 }
+  const dowTally = {} // 0..6 -> { w, l } (record on that day of the week)
+  for (let d = 0; d < 7; d++) dowTally[d] = { w: 0, l: 0 }
   const seen = new Set()
   for (const g of games) {
     if (g.status?.abstractGameState !== 'Final') continue
@@ -546,7 +577,19 @@ async function scoringRecord(teamId, sportId) {
         if (tiedBucket && meRuns === oppRuns) won ? tiedBucket.w++ : tiedBucket.l++
         const raBucket = raTally[inn.num]
         if (raBucket && oppRuns >= RUNS_ALLOWED_THRESHOLD) won ? raBucket.w++ : raBucket.l++
+        // Scoreless-through checkpoints: this club still at 0 through the
+        // inning (slTally), and the whole game still 0-0 (bothSlTally).
+        const slBucket = slTally[inn.num]
+        if (slBucket && meRuns === 0) won ? slBucket.w++ : slBucket.l++
+        const bothBucket = bothSlTally[inn.num]
+        if (bothBucket && meRuns === 0 && oppRuns === 0) won ? bothBucket.w++ : bothBucket.l++
       }
+    }
+
+    // Record on this game's day of the week — a whole-game fact, tallied once.
+    if (date) {
+      const dowBucket = dowTally[DOW_OF(date)]
+      if (dowBucket) won ? dowBucket.w++ : dowBucket.l++
     }
 
     if (minDeficit <= -COMEBACK_DEFICIT) won ? cbW++ : cbL++
@@ -610,6 +653,28 @@ async function scoringRecord(teamId, sportId) {
   const comebackTotal = cbW + cbL
   const comeback = comebackTotal >= COMEBACK_MIN_GAMES ? `${cbW}-${cbL}` : null
 
+  // Scoreless-through records — numbers (no lopsidedness floor here; the note
+  // layer gates one-sidedness), so the box score can fold tonight's result in.
+  const scorelessThroughFull = {}
+  for (const n of SCORELESS_CHECKPOINTS) {
+    const { w, l } = slTally[n]
+    if (w + l >= SCORELESS_MIN_GAMES) scorelessThroughFull[n] = { w, l }
+  }
+  const bothScorelessThroughFull = {}
+  for (const n of BOTH_SCORELESS_CHECKPOINTS) {
+    const { w, l } = bothSlTally[n]
+    if (w + l >= BOTH_SCORELESS_MIN_GAMES) bothScorelessThroughFull[n] = { w, l }
+  }
+
+  // Day-of-week records — every day the club actually played, keyed 0 (Sun)…6
+  // (Sat); the note layer picks tonight's weekday and applies the sample +
+  // one-sidedness gate.
+  const dayOfWeek = {}
+  for (let d = 0; d < 7; d++) {
+    const { w, l } = dowTally[d]
+    if (w + l > 0) dayOfWeek[d] = { w, l }
+  }
+
   return {
     scoringFirst: `${sfW}-${sfL}`,
     opponentScoringFirst: `${osW}-${osL}`,
@@ -620,6 +685,9 @@ async function scoringRecord(teamId, sportId) {
     runsScored,
     runsAllowedByInning,
     comeback,
+    scorelessThroughFull,
+    bothScorelessThroughFull,
+    dayOfWeek,
   }
 }
 
@@ -1015,7 +1083,37 @@ async function ttoSplits(personId, sportId) {
         : null
     out[trip] = { pa: t.pa, ab: t.ab, h: t.h, avg: formatAvg(t.h, t.ab), ops }
   }
-  return Object.keys(out).length > 0 ? out : null
+  const tto = Object.keys(out).length > 0 ? out : null
+
+  // Average pitches through the first PACE_INNINGS innings, from the SAME
+  // playLog. Each PA row's `play.pitchNumber` is the pitch count within that
+  // plate appearance (the terminal pitch's number), and `play.count.inning`
+  // is the inning it happened in — so summing pitchNumber over a game's PAs in
+  // innings ≤ N gives his pitches through inning N. Counted only for games he
+  // pitched from the 1st (a start) through at least the Nth (`innings.has`),
+  // so a short relief cameo or an early hook never dilutes the "through N"
+  // pace. Returns { n, avg, starts } once past PACE_MIN_STARTS, else null.
+  let paceSum = 0
+  let paceStarts = 0
+  for (const plays of byGame.values()) {
+    const innings = new Set(
+      plays.map((s) => s.stat?.play?.count?.inning).filter((n) => n != null),
+    )
+    if (!innings.has(1) || !innings.has(PACE_INNINGS)) continue
+    let pitches = 0
+    for (const s of plays) {
+      const inn = s.stat?.play?.count?.inning
+      if (inn != null && inn <= PACE_INNINGS) pitches += num(s.stat?.play?.pitchNumber)
+    }
+    paceSum += pitches
+    paceStarts += 1
+  }
+  const pitchPace =
+    paceStarts >= PACE_MIN_STARTS
+      ? { n: PACE_INNINGS, avg: Math.round(paceSum / paceStarts), starts: paceStarts }
+      : null
+
+  return tto || pitchPace ? { tto, pitchPace } : null
 }
 
 // ---------------------------------------------------------------------------
@@ -1271,17 +1369,24 @@ for (const g of games) {
     if (e.pitchedYesterday) entry.pitchedYesterday = true
     if (e.backToBack) entry.backToBack = e.backToBack
     if (e.leverage) entry.leverage = e.leverage
-    if (ttoById.has(id)) entry.tto = ttoById.get(id)
+    const paced = ttoById.get(id)
+    if (paced?.tto) entry.tto = paced.tto
+    if (paced?.pitchPace) entry.pitchPace = paced.pitchPace
     if (Object.keys(entry).length > 0) starterRecords[id] = entry
     if (e.milestone) milestones[id] = e.milestone
   }
 
   // A probable starter freshly called up may not be on the 40-man roster
-  // sweep — make sure his TTO split still lands in the bundle.
+  // sweep — make sure his TTO split + pitch-pace still land in the bundle.
   for (const side of ['away', 'home']) {
     const pid = g.teams?.[side]?.probablePitcher?.id
-    if (pid != null && ttoById.has(pid) && !starterRecords[pid]?.tto) {
-      starterRecords[pid] = { ...(starterRecords[pid] ?? {}), tto: ttoById.get(pid) }
+    const paced = pid != null ? ttoById.get(pid) : null
+    if (paced && (!starterRecords[pid]?.tto || !starterRecords[pid]?.pitchPace)) {
+      starterRecords[pid] = {
+        ...(starterRecords[pid] ?? {}),
+        ...(paced.tto ? { tto: paced.tto } : {}),
+        ...(paced.pitchPace ? { pitchPace: paced.pitchPace } : {}),
+      }
     }
   }
 
