@@ -108,12 +108,14 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   that began 6/25." All three share a dedupeKey, so the roll-up keeps the
   last word.
 - **sbStreak** — his unbroken steal run (`streaks.stolenBase`, floor 4);
-  first-PA card entering, updated on each steal ("that's 7 straight…") while
-  he hasn't been caught tonight (progress tracks CS/pickoff-CS). Roll-up,
-  Final: only earns a card when something happened on the bases — "Stole a
-  base in the 4th and has now stolen 10 straight without being caught," or
-  "Was caught stealing in the 6th, ending a run of 9 straight steals"; the
-  entering card with no attempt tonight is dropped.
+  fires only on the play he actually steals ("that's 7 straight…") while he
+  hasn't been caught tonight (progress tracks CS/pickoff-CS) — no entering
+  card on his first PA, since the streak has nothing to do with whatever that
+  PA produces. Roll-up, Final: only earns a card when something happened on
+  the bases — "Stole a base in the 4th and has now stolen 10 straight without
+  being caught," or "Was caught stealing in the 6th, ending a run of 9
+  straight steals"; a game with no attempt earns no card, live or in the
+  roll-up.
 - **risp / platoon** — season RISP and vs-L/vs-R lines (`situational`,
   ≥ 15 PA per split). Gate: the split average also has to deviate from his
   own season average by ≥ `SPLIT_AVG_DEVIATION` (.05) — an ordinary split
