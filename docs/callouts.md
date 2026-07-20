@@ -52,6 +52,7 @@ table together.
 | marathonAb | 45 | + min(15, 3 × (fouls − 6)) |
 | onBaseRiding | 40 | + min(15, streak − 8) |
 | leadHeld / leadAfterLive | 40 | + 40 × skew |
+| bothScoreless | 42 | + 40 × skew |
 | tiedAfter / tiedAfterLive | 40 | + 40 × skew |
 | starterRec | 40 | + 40 × skew |
 | bullpenThin | 40 | + min(10, 5 × (relievers down − 2)) |
@@ -64,9 +65,13 @@ table together.
 | runsAllowed | 35 | + 40 × skew |
 | oneRun / extraInnings | 35 | + 40 × skew |
 | tto (with a season split) | 35 | + min(15, 100 × AVG gap) |
+| scorelessThrough | 34 | + 40 × skew |
+| ttoPitches | 30 | + min(15, 10 × per-PA climb) |
+| pitchPace | 32 | + min(15, \|tonight − avg\| / 2) |
 | comeback | 30 | + 60 × win% (resilience, not lopsidedness) |
 | scoringFirst / oppScoringFirst | 30 | + 100 × deviation from league norm |
 | inningRunDiff | 30 | + min(20, margin / 2) |
+| dayOfWeek | 30 | + 40 × skew |
 | foulSpoiler | 30 | + (11 − rank); roll-up restatement adds + min(6, tonight − 3) |
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
@@ -161,6 +166,13 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   starts (`starterRecords[id].teamStarts`, ≥ 3 starts) — independent of his
   personal decisions. Roll-up restates it folded once Final, keyed to the
   actual (not probable) starters.
+- **dayOfWeek** — 1st inning, on the top half only (shown once): each club's
+  W-L on tonight's day of the week (`dayOfWeek`, keyed 0=Sun…6=Sat from the
+  game's official date). "The Brewers are 10-4 on Sundays this season." A pure
+  calendar fact — no reveal gate — but only when genuinely one-sided: ≥ 6 games
+  and win% ≥ .66 or ≤ .34 (`DOW_MIN_GAMES`/`DOW_LOPSIDED` in callout-notes.js),
+  or an ordinary weekday is noise. Roll-up (`buildDayOfWeekNotes`) folds tonight
+  in once Final. MLB + MiLB (the linescore sweep covers every level).
 - **leadAfterLive** — top of inning N ≥ 7 (checkpoints 6–9): whoever leads
   tonight after N−1 + their season record at that checkpoint
   (`leadAfterFull`, ≥ 5 games). Self-gates on `revealedThrough` covering
@@ -174,6 +186,24 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   (`tiedAfter`, both clubs) folds tonight's result in once Final — "moved to
   13-9…" for the winner, "dropped to 8-11…" for the loser — latest checkpoint
   only, via `buildTiedAfterHeldNotes`.
+- **scorelessThrough** — entering top of inning N (checkpoints 1–6) when a club
+  is still shut out after N−1: that club's season record when scoreless through
+  that inning (`scorelessThroughFull`). "The Brewers are 2-15 when scoreless
+  through 6 innings." Numbers-only in the bundle so the roll-up folds tonight
+  in; the note layer gates one-sidedness (`SCORELESS_LOPSIDED` .68, either
+  direction — an early ~.500 checkpoint means nothing). Same `revealedThrough`
+  self-gate as tiedAfterLive (knowing a side is scoreless restates the score).
+  Fires for whichever side is at 0 — but NOT when the game itself is 0-0, where
+  the bothScoreless framing takes over. Roll-up: `buildScorelessHeldNotes`,
+  deepest checkpoint, folded. MLB + MiLB.
+- **bothScoreless** — the pitchers'-duel sibling: entering top of inning N
+  (checkpoints 2–7) when the GAME is still 0-0 after N−1, BOTH clubs' record in
+  such games (`bothScorelessThroughFull`, ≥ 4 games, no lopsidedness floor — a
+  rare situation whose record is the point). "The Brewers are 5-3 in games
+  still 0-0 after the 7th." Base 42 so it edges tiedAfterLive (the more
+  dramatic framing of the same tied-after-N state). Same self-gate; roll-up
+  `buildBothScorelessHeldNotes`, deepest 0-0 checkpoint, both clubs, folded.
+  MLB + MiLB.
 - **inningRunDiff** — entering an inning's top half: either club's season
   runs for/against in that inning (`inningRuns`) when noteworthy — ≥ 15
   games sampled, margin ≥ 12, and a 2× dominance ratio. Roll-up shows each
@@ -189,6 +219,16 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   revealed material — so it self-gates on `revealedThrough` like the
   leading-after note (ADR-0014), and fires only while the side's starter
   (first pitcher seen = last pitcher seen) is still in.
+- **ttoPitches** — the grind-escalation sibling of `tto`, from the same playLog
+  split (`starterRecords[pid].tto[trip].ppa` — pitches per PA each time
+  through): "Batters make Peralta work more each time through this season — 3.8
+  pitches per PA the 1st time, 4.6 the 2nd, 5.3 the 3rd." Fires ONCE, entering
+  the half where the order first turns over a 2nd time (trip === 2), so it never
+  shares a strip with the 3rd-time AVG card. Shares that card's trip-detection
+  (`enteringStarterTrip`) and `revealedThrough` self-gate. Gates: each cited
+  trip ≥ 40 PA, and the 2nd time has to cost ≥ 0.4 more pitches per PA than the
+  1st (a real climb, not noise); the 3rd trip joins the line only when it keeps
+  climbing. Pre-half only. MLB + MiLB.
 
 - **foulVolume** — entering a half, inning 3+: the batting side's foul count
   off the opposing STARTER tonight vs the league's per-pitch foul rate
@@ -199,6 +239,16 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   `revealedThrough` self-gate (ADR-0014); fires only while the starter is the
   only pitcher that side has seen. Gates: 50+ pitches, 12+ fouls, ≥ 1.35× the
   expected count.
+- **pitchPace** — entering the half right after the starter completes his Nth
+  inning (`PACE_INNINGS` = 3): his pitch count tonight through N vs his season
+  pace (`starterRecords[pid].pitchPace` = `{n, avg, starts}`, ≥ 4 qualifying
+  starts, derived from the SAME playLog as `tto` — no extra fetch). "Through 3
+  tonight, Peralta is at 62 pitches — he averages 48 through three this season."
+  Reads his strictly-previous halves' pitches (revealed material), so it shares
+  the times-through `revealedThrough` self-gate; fires only while the starter is
+  the lone pitcher seen and tonight is ≥ 12 pitches off his norm (`PACE_MIN_DIFF`).
+  Pre-half only (a pace observation, not a season record — no roll-up sibling).
+  MLB + MiLB.
 - **bullpenThin** — 1st inning, on the half where the club takes the field:
   how many of its relievers enter the night likely unavailable under the
   workload rules (`buildBullpenThinNote` → `api/workload.js`'s

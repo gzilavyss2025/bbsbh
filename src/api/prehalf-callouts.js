@@ -1,7 +1,10 @@
 // The pre-half callout strip — the season-context cards shown ABOVE a
 // half-inning's seal, staging the half the way the pre-pitch change list and
 // entering-lineup cards do (ADR-0003/0010): what a broadcast would tell you as
-// the half begins, before any of its results. Four families (ADR-0014):
+// the half begins, before any of its results. The families (ADR-0014) — plus
+// each club's day-of-week record on the first half, the scoreless-through /
+// 0-0-game cards entering a still-scoreless inning, and the opposing starter's
+// pitch-count pace vs his season norm:
 //
 //   1. Starter team record (1st inning only) — the club's W-L in tonight's
 //      starter's starts, on the half where HE takes the mound (top = the home
@@ -41,8 +44,15 @@ import {
   buildStarterTeamRecordNote,
   buildLeadingAfterNote,
   buildTiedAfterNote,
+  buildScorelessThroughNote,
+  buildBothScorelessNote,
+  buildDayOfWeekNote,
+  buildStarterPitchPaceNote,
+  weekdayFromDate,
+  gameWeekday,
   buildInningRunDiffNote,
   buildThirdTimeThroughNote,
+  buildTtoPitchesNote,
   buildFoulVolumeNote,
   buildBullpenThinNote,
 } from './callout-notes.js'
@@ -65,15 +75,29 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
     if (note) notes.push(note)
     const pen = buildBullpenThinNote(bundle, side, workload, gameDate)
     if (pen) notes.push(pen)
+
+    // 1b. A pure calendar fact — this club's record on tonight's day of the
+    // week — shown once, entering the very first half. No reveal gate (the
+    // weekday gives away nothing), so it reads off the game date directly.
+    if (half === 'top') {
+      const dow = weekdayFromDate(gameDate) ?? gameWeekday(feed)
+      for (const s of ['away', 'home']) {
+        const note = buildDayOfWeekNote(bundle, s, dow)
+        if (note) notes.push(note)
+      }
+    }
   }
 
   // 2. Tonight's record entering this inning at that checkpoint — the leader's
   // "when leading after the Nth" if one club is ahead, or BOTH clubs' "when
   // tied after the Nth" if they're level (a tie has no single leader to phrase,
-  // so each club gets its own note). Only for a top half (the checkpoint is
-  // "after a full inning"), and only once the whole previous inning is revealed
-  // — the defense-in-depth gate this module exists to own, since knowing who
-  // leads / that it's tied restates tonight's already-seen score.
+  // so each club gets its own note). Plus the scoreless-through notes: the
+  // GAME still 0-0 fires the pitchers'-duel card for both clubs, otherwise any
+  // club still shut out gets its own run-drought card. Only for a top half (the
+  // checkpoint is "after a full inning"), and only once the whole previous
+  // inning is revealed — the defense-in-depth gate this module exists to own,
+  // since knowing who leads / that it's tied / that a side is scoreless
+  // restates tonight's already-seen score.
   if (half === 'top' && inning >= 2 && halfIndex(inning - 1, 'bottom') <= revealedThrough) {
     const row = cumulativeInnings(feed).find((r) => r.inning === inning - 1)
     if (row && row.cumAway !== row.cumHome) {
@@ -84,6 +108,21 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
       for (const side of ['away', 'home']) {
         const note = buildTiedAfterNote(bundle, side, inning - 1)
         if (note) notes.push(note)
+      }
+    }
+    if (row) {
+      const both0 = row.cumAway === 0 && row.cumHome === 0
+      if (both0) {
+        for (const side of ['away', 'home']) {
+          const note = buildBothScorelessNote(bundle, side, inning - 1)
+          if (note) notes.push(note)
+        }
+      } else {
+        for (const side of ['away', 'home']) {
+          if ((side === 'away' ? row.cumAway : row.cumHome) !== 0) continue
+          const note = buildScorelessThroughNote(bundle, side, inning - 1)
+          if (note) notes.push(note)
+        }
       }
     }
   }
@@ -110,6 +149,19 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
   // reached-half gate implies it, this defense-in-depth gate guarantees it).
   if (halfIndex(inning, half) <= revealedThrough + 1) {
     const note = buildThirdTimeThroughNote(feed, bundle, inning, half)
+    if (note) notes.push(note)
+    // The grind-escalation sibling — pitches per PA climbing each time through.
+    // Fires entering the 2nd-trip half only, so it never doubles up with the
+    // 3rd-time card above on the same strip.
+    const pace = buildTtoPitchesNote(feed, bundle, inning, half)
+    if (pace) notes.push(pace)
+  }
+
+  // 5. How hard the opposing starter is working — his pitch count tonight
+  // through his first few innings vs his season pace. Reads his strictly-
+  // previous halves' pitches (revealed material), so it shares the same gate.
+  if (halfIndex(inning, half) <= revealedThrough + 1) {
+    const note = buildStarterPitchPaceNote(feed, bundle, inning, half)
     if (note) notes.push(note)
   }
 

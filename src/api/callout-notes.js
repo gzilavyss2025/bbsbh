@@ -115,6 +115,7 @@ const SCORE_BASE = {
   onBaseExtended: 45,
   onBaseRiding: 40,
   leadHeld: 40,
+  bothScoreless: 42, // a 0-0 pitchers' duel — the dramatic framing of tiedAfter, just above it
   tiedAfter: 40,
   starterRec: 40,
   vsTeam: 40,
@@ -129,9 +130,13 @@ const SCORE_BASE = {
   oneRun: 35,
   extraInnings: 35,
   ttoSplit: 35, // the pre-half order-turns-over card WITH a season split behind it
+  scorelessThrough: 34, // record when this club is scoreless through inning N
+  pitchPace: 32, // the starter's pitches-through-N pace vs his season norm
   comeback: 30,
   scoringFirst: 30,
   inningRunDiff: 30,
+  dayOfWeek: 30, // record on tonight's day of the week
+  ttoPitches: 30, // pitches per PA escalating each time through the order
   risp: 25,
   platoon: 25,
   tto: 20, // …and the plain trip-fact fallback without one
@@ -960,6 +965,105 @@ export function buildTiedAfterNote(bundle, side, inning) {
   }
 }
 
+// --- scoreless-through / day-of-week ------------------------------------------
+// "The Brewers are 2-15 when scoreless through 6 innings" — a club still shut
+// out entering the next half, and its season record when that happens (see
+// gen-callouts.mjs's scorelessThroughFull). Numbers-only in the bundle, so the
+// box-score sibling below can fold tonight in; here it stays entering-tense.
+// CALLER-GATED like buildTiedAfterNote: knowing a club is scoreless through N
+// restates tonight's already-revealed score, so prehalf-callouts.js only fires
+// it once inning N is revealed. A run drought skews hard toward losing, so it
+// only earns a card once the record is genuinely one-sided — SCORELESS_LOPSIDED
+// keeps an ordinary early-inning ~.500 record (scoreless through the 1st means
+// little) quiet, in either direction (a club that wins anyway is just as much a
+// story). Shared with the roll-up below.
+const SCORELESS_LOPSIDED = 0.68
+function scorelessLopsided(w, l) {
+  const total = w + l
+  if (total <= 0) return false
+  const p = w / total
+  return p >= SCORELESS_LOPSIDED || p <= 1 - SCORELESS_LOPSIDED
+}
+const scorelessWhen = (inning) => `when scoreless through ${inning} ${inning === 1 ? 'inning' : 'innings'}`
+
+export function buildScorelessThroughNote(bundle, side, inning) {
+  const rec = bundle?.teamRecords?.[side]?.scorelessThroughFull?.[inning]
+  const teamName = bundle?.[side]?.name
+  if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
+  if (!scorelessLopsided(rec.w, rec.l)) return null
+  return {
+    text: `The ${teamName} are ${rec.w}-${rec.l} ${scorelessWhen(inning)}`,
+    personId: null,
+    side,
+    kind: 'scorelessThrough',
+    dedupeKey: `scorelessThroughLive-${side}-${inning}`,
+    score: clampScore(SCORE_BASE.scorelessThrough + 40 * skew(rec.w, rec.l)),
+  }
+}
+
+// "The Brewers are 5-3 in games still 0-0 after the 7th" — the pitchers'-duel
+// sibling, fired for BOTH clubs when the game itself is scoreless entering the
+// next half (bothScorelessThroughFull; a rare-situation record, so no
+// lopsidedness floor — the record itself is the point, like tiedAfter). Same
+// caller-gate as the scoreless-through note above.
+const bothScorelessWhen = (inning) => `in games still 0-0 after the ${ordinal(inning)}`
+
+export function buildBothScorelessNote(bundle, side, inning) {
+  const rec = bundle?.teamRecords?.[side]?.bothScorelessThroughFull?.[inning]
+  const teamName = bundle?.[side]?.name
+  if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
+  return {
+    text: `The ${teamName} are ${rec.w}-${rec.l} ${bothScorelessWhen(inning)}`,
+    personId: null,
+    side,
+    kind: 'bothScoreless',
+    dedupeKey: `bothScorelessLive-${side}-${inning}`,
+    score: clampScore(SCORE_BASE.bothScoreless + 40 * skew(rec.w, rec.l)),
+  }
+}
+
+// "The Brewers are 10-4 on Sundays this season" — a pure calendar fact (no
+// score-revealing content at all), so it rides the first-inning strip and the
+// box-score roll-up without a reveal gate. gen-callouts.mjs keeps every day the
+// club played (dayOfWeek, keyed 0=Sun…6=Sat); the gate is here — a real sample
+// and a genuinely one-sided split, or an ordinary weekday reads as noise.
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DOW_MIN_GAMES = 6
+const DOW_LOPSIDED = 0.66
+const dowWhen = (dow) => `on ${WEEKDAYS[dow]}s`
+
+// The day of week (0=Sun…6=Sat) of the game's official date, at UTC noon so the
+// date string never slips a day — matching gen-callouts.mjs's DOW_OF. Returns
+// null when the feed carries no date.
+export function gameWeekday(feed) {
+  const date = feed?.gameData?.datetime?.officialDate ?? feed?.gameData?.datetime?.originalDate
+  return weekdayFromDate(date)
+}
+export function weekdayFromDate(date) {
+  if (!date) return null
+  const d = new Date(`${date}T12:00:00Z`)
+  return Number.isNaN(d.getTime()) ? null : d.getUTCDay()
+}
+
+export function buildDayOfWeekNote(bundle, side, dow) {
+  if (dow == null || !WEEKDAYS[dow]) return null
+  const rec = bundle?.teamRecords?.[side]?.dayOfWeek?.[dow]
+  const teamName = bundle?.[side]?.name
+  if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
+  const total = rec.w + rec.l
+  if (total < DOW_MIN_GAMES) return null
+  const p = total > 0 ? rec.w / total : 0
+  if (!(p >= DOW_LOPSIDED || p <= 1 - DOW_LOPSIDED)) return null
+  return {
+    text: `The ${teamName} are ${rec.w}-${rec.l} ${dowWhen(dow)} this season`,
+    personId: null,
+    side,
+    kind: 'dayOfWeek',
+    dedupeKey: `dayOfWeek-${side}-${dow}`,
+    score: clampScore(SCORE_BASE.dayOfWeek + 40 * skew(rec.w, rec.l)),
+  }
+}
+
 // --- times-through-the-order --------------------------------------------------
 // "Batters see Imanaga a 3rd time this inning — they're hitting .444 off him
 // the 3rd time through this season (.242 the 1st time)" — the pre-half strip's
@@ -990,17 +1094,20 @@ export function buildTiedAfterNote(bundle, side, inning) {
 // due up in previously produced an inflated, off-batter trip number (e.g.
 // "3rd time" the half after only the leadoff man's 2nd look, because some
 // other spot in the order happened to bat in three separate quick innings).
-const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
-export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
-  const battingSide = half === 'top' ? 'away' : 'home'
-  const pitchingSide = otherSide(battingSide)
+// Shared trip-detection for the pre-half order-turnover cards below: which
+// pitcher a batting side is entering the staged half against, and how many
+// times the batter DUE UP LEADOFF has already seen him — the trip about to
+// begin. Returns { pitcherId, trip } with trip >= 2, or null when the order
+// hasn't turned over yet, the starter is gone (a reliever entered mid-game or a
+// between-innings change swapped him out), or the half hasn't started. Trips
+// count DISTINCT innings faced, not raw PAs — a batter who bats around twice in
+// one big inning is still one trip. CALLER-GATED: reads this side's previous
+// halves' plays (revealed material), so callers must restrict it to
+// halfIndex(inning, half) <= revealedThrough + 1.
+function enteringStarterTrip(feed, inning, half) {
   let firstPitcher = null
   let lastPitcher = null
-  // `${batterId}-${pitcherId}` -> distinct innings (turns through the order)
-  // that pairing has faced off, not raw PA count — a batter who bats around
-  // twice in one big inning is still only ONE trip through the order, so
-  // counting PAs would inflate a 2nd trip to a false 3rd.
-  const inningsFaced = new Map()
+  const inningsFaced = new Map() // `${batterId}-${pitcherId}` -> Set(innings faced)
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const about = p.about ?? {}
     // Same half TYPE only (this side batting), strictly before this inning.
@@ -1020,11 +1127,11 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   // The pitcher actually entering the staged half — a between-innings change
   // shows up as a leading pitching_substitution on the half's own first play.
   // If it swapped in someone other than the side's last pitcher, the starter
-  // is gone and this card must not fire (crediting a departed pitcher).
-  const entering = selectPrePitchChanges(feed, inning, half)
+  // is gone and these cards must not fire (crediting a departed pitcher).
+  const sub = selectPrePitchChanges(feed, inning, half)
     .filter((c) => c.eventType === 'pitching_substitution')
     .pop()
-  if (entering && entering.pitcher.id !== lastPitcher) return null
+  if (sub && sub.pitcher.id !== lastPitcher) return null
 
   // The batter actually due up first in the staged half — the order "turning
   // over" is defined by his trip count, not whoever has faced the pitcher the
@@ -1035,9 +1142,18 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   if (leadoff == null) return null // the half hasn't actually started yet
 
   const priorTrips = inningsFaced.get(`${leadoff}-${lastPitcher}`)?.size ?? 0
-  if (priorTrips < 2) return null // the order hasn't turned over twice yet
+  if (priorTrips < 1) return null // the leadoff hitter hasn't seen him before
+  return { pitcherId: lastPitcher, trip: priorTrips + 1 }
+}
 
-  const trip = priorTrips + 1 // the look the top of the order is now getting
+const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
+export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const pitchingSide = otherSide(battingSide)
+  const found = enteringStarterTrip(feed, inning, half)
+  if (!found || found.trip < 3) return null // the order hasn't turned over twice yet
+  const lastPitcher = found.pitcherId
+  const trip = found.trip // the look the top of the order is now getting
   const { last } = personNameParts(feed?.gameData?.players?.[`ID${lastPitcher}`] ?? {})
   const who = last || 'the starter'
   const tto = bundle?.starterRecords?.[lastPitcher]?.tto
@@ -1063,6 +1179,51 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
     kind: 'tto',
     dedupeKey: `tto-${pitchingSide}-${lastPitcher}`,
     score: clampScore(SCORE_BASE.tto),
+  }
+}
+
+// "Batters make Peralta work more each time through this season — 3.8 pitches
+// per PA the 1st time, 4.6 the 2nd, 5.3 the 3rd" — the grind-escalation sibling
+// of the times-through card, from the same playLog-derived split (each trip
+// bucket's pitches-per-PA, `tto[trip].ppa`; see gen-callouts.mjs). Fires ONCE,
+// entering the half where the order first turns over a 2nd time (trip === 2), so
+// it never shares a strip with the 3rd-time AVG card above. Same caller-gate as
+// that card (enteringStarterTrip reads previous halves). Only when the pace
+// genuinely climbs — each trip needs a real PA sample and the 2nd time has to
+// cost at least TTO_PITCHES_MIN_STEP more pitches than the 1st, or it's not a
+// "wearing him down" story.
+const TTO_PITCHES_MIN_PA = 40
+const TTO_PITCHES_MIN_STEP = 0.4
+export function buildTtoPitchesNote(feed, bundle, inning, half) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const pitchingSide = otherSide(battingSide)
+  const found = enteringStarterTrip(feed, inning, half)
+  if (!found || found.trip !== 2) return null // introduced as the order first flips
+  const pitcherId = found.pitcherId
+  const tto = bundle?.starterRecords?.[pitcherId]?.tto
+  const t1 = tto?.[1]
+  const t2 = tto?.[2]
+  if (!t1 || !t2 || !isNum(t1.ppa) || !isNum(t2.ppa)) return null
+  if (!(t1.pa >= TTO_PITCHES_MIN_PA) || !(t2.pa >= TTO_PITCHES_MIN_PA)) return null
+  if (!(t2.ppa - t1.ppa >= TTO_PITCHES_MIN_STEP)) return null // must actually escalate
+
+  // Fold the 3rd trip into the progression only when it keeps climbing and has
+  // its own real sample — otherwise the two-trip version tells the story clean.
+  const t3 = tto?.[3]
+  const includeT3 = t3 && isNum(t3.ppa) && t3.pa >= TTO_PITCHES_MIN_PA && t3.ppa >= t2.ppa
+  const { last } = personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {})
+  const who = last || 'the starter'
+  const tail = includeT3
+    ? `${t1.ppa} pitches per PA the 1st time through, ${t2.ppa} the 2nd, ${t3.ppa} the 3rd`
+    : `${t1.ppa} pitches per PA the 1st time through, ${t2.ppa} the 2nd`
+  const step = (includeT3 ? t3.ppa : t2.ppa) - t1.ppa
+  return {
+    text: `Batters make ${who} work more each time through this season — ${tail}`,
+    personId: pitcherId,
+    side: pitchingSide,
+    kind: 'ttoPitches',
+    dedupeKey: `ttoPitches-${pitchingSide}-${pitcherId}`,
+    score: clampScore(SCORE_BASE.ttoPitches + Math.min(15, step * 10)),
   }
 }
 
@@ -1123,6 +1284,112 @@ export function buildTiedAfterHeldNotes(feed, bundle, result) {
     return notes
   }
   return []
+}
+
+// Checkpoint lists for the scoreless-through roll-up, LATEST first (a club shut
+// out through the 6th was also through the 5th — only the deepest, most
+// dramatic checkpoint earns the note). Mirror gen-callouts.mjs's
+// SCORELESS_CHECKPOINTS / BOTH_SCORELESS_CHECKPOINTS.
+const SCORELESS_CHECKPOINTS = [6, 5, 4, 3, 2, 1]
+const BOTH_SCORELESS_CHECKPOINTS = [7, 6, 5, 4, 3, 2]
+
+// The box-score sibling of buildScorelessThroughNote: a club that was shut out
+// through checkpoint N tonight, its record when that happens folded with the
+// result ("Just the 2nd win in 14 games when scoreless through 6…"). One note
+// per club that was scoreless that deep, deepest checkpoint only, gated on the
+// same one-sidedness as the live note. Result-aware, so entering-tense until
+// the game is decided.
+export function buildScorelessHeldNotes(feed, bundle, result) {
+  if (!bundle) return []
+  const rows = cumulativeInnings(feed)
+  const notes = []
+  for (const side of ['away', 'home']) {
+    const n = SCORELESS_CHECKPOINTS.find((c) => {
+      const row = rows.find((r) => r.inning === c)
+      return row && (side === 'away' ? row.cumAway : row.cumHome) === 0
+    })
+    if (n == null) continue
+    const rec = bundle.teamRecords?.[side]?.scorelessThroughFull?.[n]
+    const teamName = bundle[side]?.name
+    if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) continue
+    if (!scorelessLopsided(rec.w, rec.l)) continue
+    const when = scorelessWhen(n)
+    notes.push({
+      text: result?.final
+        ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
+        : `The ${teamName} are ${rec.w}-${rec.l} ${when}`,
+      personId: null,
+      side,
+      oppSide: otherSide(side),
+      kind: 'scorelessThrough',
+      dedupeKey: `scorelessThrough-${side}`,
+      score: clampScore(SCORE_BASE.scorelessThrough + 40 * skew(rec.w, rec.l)),
+    })
+  }
+  return notes
+}
+
+// The box-score sibling of buildBothScorelessNote: the game was still 0-0 after
+// checkpoint N tonight, both clubs' record in such games folded with the result
+// (deepest 0-0 checkpoint only, both clubs — mirrors buildTiedAfterHeldNotes).
+export function buildBothScorelessHeldNotes(feed, bundle, result) {
+  if (!bundle) return []
+  const rows = cumulativeInnings(feed)
+  for (const n of BOTH_SCORELESS_CHECKPOINTS) {
+    const row = rows.find((r) => r.inning === n)
+    if (!row || row.cumAway !== 0 || row.cumHome !== 0) continue
+    const notes = []
+    for (const side of ['away', 'home']) {
+      const rec = bundle.teamRecords?.[side]?.bothScorelessThroughFull?.[n]
+      const teamName = bundle[side]?.name
+      if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) continue
+      const when = bothScorelessWhen(n)
+      notes.push({
+        text: result?.final
+          ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
+          : `The ${teamName} are ${rec.w}-${rec.l} ${when}`,
+        personId: null,
+        side,
+        oppSide: otherSide(side),
+        kind: 'bothScoreless',
+        dedupeKey: `bothScoreless-${side}`,
+        score: clampScore(SCORE_BASE.bothScoreless + 40 * skew(rec.w, rec.l)),
+      })
+    }
+    return notes
+  }
+  return []
+}
+
+// The box-score sibling of buildDayOfWeekNote: tonight's weekday record for
+// both clubs, folded with the result. A pure calendar fact — no reveal gate.
+export function buildDayOfWeekNotes(feed, bundle, result) {
+  if (!bundle) return []
+  const dow = gameWeekday(feed)
+  if (dow == null) return []
+  const notes = []
+  for (const side of ['away', 'home']) {
+    const rec = bundle.teamRecords?.[side]?.dayOfWeek?.[dow]
+    const teamName = bundle[side]?.name
+    if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) continue
+    const total = rec.w + rec.l
+    if (total < DOW_MIN_GAMES) continue
+    const p = total > 0 ? rec.w / total : 0
+    if (!(p >= DOW_LOPSIDED || p <= 1 - DOW_LOPSIDED)) continue
+    const when = dowWhen(dow)
+    notes.push({
+      text: result?.final
+        ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
+        : `The ${teamName} are ${rec.w}-${rec.l} ${when} this season`,
+      personId: null,
+      side,
+      oppSide: otherSide(side),
+      kind: 'dayOfWeek',
+      dedupeKey: `dayOfWeek-${side}`,
+      score: clampScore(SCORE_BASE.dayOfWeek + 40 * skew(rec.w, rec.l)),
+    })
+  }
+  return notes
 }
 
 // These three thresholds/checkpoint lists must match gen-callouts.mjs's
@@ -1433,6 +1700,57 @@ export function buildFoulVolumeNote(feed, bundle, inning, half) {
   }
 }
 
+// --- pre-half: how hard the starter is having to work ------------------------
+// "Through 3 tonight, Peralta is at 62 pitches — he averages 48 through three
+// this season" — entering the half right after the starter completes his Nth
+// inning, his pitch count tonight through N vs his season pace (the bundle's
+// playLog-derived starterRecords[pid].pitchPace; see gen-callouts.mjs). Reads
+// tonight's pitches from the pitcher's STRICTLY-PREVIOUS halves — revealed
+// material — so it shares the times-through card's caller-gate
+// (prehalf-callouts.js restricts it to halfIndex(inning, half) <=
+// revealedThrough + 1). Fires only while that side's starter is the lone
+// pitcher it has seen (a reliever's "through N" pace is meaningless), and only
+// when tonight's count is a notable distance from the norm.
+const PACE_MIN_DIFF = 12
+export function buildStarterPitchPaceNote(feed, bundle, inning, half) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const pitchingSide = otherSide(battingSide)
+
+  // The pitcher who has worked this side's previous halves, and his pitch count
+  // over them. Same-half type, strictly before the staged inning.
+  const pitcherIds = new Set()
+  let pitches = 0
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const inn = play?.about?.inning
+    const h = play?.about?.halfInning
+    if (!inn || h !== half || !(inn < inning)) continue
+    const pid = play.matchup?.pitcher?.id
+    if (pid != null) pitcherIds.add(pid)
+    for (const e of play.playEvents ?? []) if (e.isPitch) pitches += 1
+  }
+  if (pitcherIds.size !== 1) return null // starter's gone — the pace note doesn't apply
+  const pitcherId = [...pitcherIds][0]
+
+  const pace = bundle?.starterRecords?.[pitcherId]?.pitchPace
+  // The pace is "through N innings"; only fire entering the half right after
+  // his Nth (a starter in since the 1st has completed inning - 1 innings).
+  if (!pace || !isNum(pace.avg) || pace.n == null || inning !== pace.n + 1) return null
+  const diff = pitches - pace.avg
+  if (Math.abs(diff) < PACE_MIN_DIFF) return null
+
+  const { last } = personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {})
+  const who = last || 'the starter'
+  const word = dayWordFor(bundle.dayNight)
+  return {
+    text: `Through ${pace.n} ${word}, ${who} is at ${pitches} pitches — he averages ${pace.avg} through ${pace.n} this season`,
+    personId: pitcherId,
+    side: pitchingSide,
+    kind: 'pitchPace',
+    dedupeKey: `pitchPace-${pitchingSide}-${inning}`,
+    score: clampScore(SCORE_BASE.pitchPace + Math.min(15, Math.abs(diff) / 2)),
+  }
+}
+
 // --- pre-half: the defending club's bullpen is running on fumes --------------
 // First inning only, on the half where that club takes the field: how many of
 // its relievers enter tonight likely unavailable under the workload rules
@@ -1681,6 +1999,9 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
   add(buildRunsAllowedNote(feed, bundle, result))
   add(buildComebackNote(feed, bundle, result))
   for (const note of buildCloseGameNotes(feed, bundle, result)) add(note)
+  for (const note of buildScorelessHeldNotes(feed, bundle, result)) add(note)
+  for (const note of buildBothScorelessHeldNotes(feed, bundle, result)) add(note)
+  for (const note of buildDayOfWeekNotes(feed, bundle, result)) add(note)
 
   // Each club's single most lopsided inning-differential note (its signature
   // inning), tonight's runs in that inning folded in once decided. One per
