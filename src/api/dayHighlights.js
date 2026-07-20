@@ -94,6 +94,21 @@ export function multiHrSignal(feed) {
   }
 }
 
+// A starter's line the way the recap surfaces it — "7 IP, 4 H, 1 ER, 2 BB, 8 K",
+// the numbers a hand-scorer reads off the box — shown in place of the raw Game
+// Score (precise, but abstract to most fans) in the "was dominant (…)" headline
+// and the performer's stat line. Game Score still drives the ranking internally.
+function pitchingLine(s) {
+  if (!s) return ''
+  return [
+    `${s.inningsPitched ?? '0.0'} IP`,
+    `${s.hits ?? 0} H`,
+    `${s.earnedRuns ?? 0} ER`,
+    `${s.baseOnBalls ?? 0} BB`,
+    `${s.strikeOuts ?? 0} K`,
+  ].join(', ')
+}
+
 // Starter's Game Score, from either team's first pitcher of record.
 export function eliteGameScoreSignal(feed) {
   let best = null
@@ -106,7 +121,7 @@ export function eliteGameScoreSignal(feed) {
     if (!s) continue
     const gs = gameScore(s)
     if (gs >= 80 && (!best || gs > best.gs)) {
-      best = { gs, name: box?.person?.fullName ?? '', side, box }
+      best = { gs, name: box?.person?.fullName ?? '', side, box, line: pitchingLine(s) }
     }
   }
   if (!best) return null
@@ -116,11 +131,12 @@ export function eliteGameScoreSignal(feed) {
     // Scale with the actual Game Score (80 is the floor to fire) so an 85 start
     // ranks above an 80 one — the old two-bucket 25/40 made every 80–89 outing
     // tie, which left ordering among the day's dominant starts arbitrary. `gs`
-    // rides on the signal so the cross-game de-dupe below can rank by it.
+    // rides on the signal so the cross-game de-dupe below can rank by it (the
+    // DISPLAY switched to the stat line, but the RANKING is still Game Score).
     points: 25 + (best.gs - 80),
     gs: best.gs,
-    text: `${best.name} was dominant (Game Score ${best.gs})`,
-    performer: performerFrom(feed, best.side, best.box, `Game Score ${best.gs}`),
+    text: `${best.name} was dominant (${best.line})`,
+    performer: performerFrom(feed, best.side, best.box, best.line),
   }
 }
 
@@ -388,11 +404,18 @@ function pickTopSignal(signals) {
 // play can belong to the team that ultimately LOST (e.g. the go-ahead shot
 // the winner later overcame), which read as a non sequitur credited to the
 // wrong side.
+// The story half of a headline — the "{what happened}" without the "— {score}"
+// suffix, so a caller (the Game of the Day hero, which shows the score on its
+// own logo line) can render the narrative without the redundant score glued on.
+function buildStory(top, potg) {
+  if (!top) return null
+  return top.key === 'walkoff' && potg?.desc ? `${top.text}: ${firstSentence(potg.desc)}` : top.text
+}
 function buildHeadline(top, box, potg) {
   const score = `${box.away.abbreviation} ${box.away.line.r}, ${box.home.abbreviation} ${box.home.line.r}`
-  if (!top) return `Final: ${score}`
-  const text = top.key === 'walkoff' && potg?.desc ? `${top.text}: ${firstSentence(potg.desc)}` : top.text
-  return `${text} — ${score}`
+  const story = buildStory(top, potg)
+  if (!story) return `Final: ${score}`
+  return `${story} — ${score}`
 }
 
 // The callouts-sourced supplemental caption line for the winning signal's
@@ -481,22 +504,44 @@ export function rankDayHighlights(entries, calloutsData) {
 
       return {
         gamePk,
+        // Game number (1, or 1 & 2 on a doubleheader) — lets the recap label a
+        // twin bill's two rows so a repeated matchup isn't confusing.
+        gameNumber: game.gameNumber ?? null,
         tier,
         score,
         headline: buildHeadline(top, box, potg),
+        // The narrative alone, no score suffix — the Game of the Day hero shows
+        // the score on its own logo line, so it renders the story from this.
+        story: buildStory(top, potg),
         signals: signals.map((s) => s.key),
         performer: top?.performer ?? null,
         subCaption: performerSubCaption(top, bundle),
-        // The turning-point play, for the "Game of the Day" hero to show a
-        // beat beyond the headline (null where no win-prob feed → no potg).
-        // Suppressed on a walk-off: buildHeadline already splices the same play
-        // into the headline there, so showing it again reads as a stutter.
-        playOfGame: top?.key === 'walkoff' || !potg?.desc ? null : firstSentence(potg.desc),
-        // The team-logo fallback row's pair, when the winning signal has no
-        // performer (margin/length storylines, comeback) — winner first.
+        // The turning-point play with its protagonist, for the Game of the Day
+        // hero's photo + play-by-play block (the same idiom as the postseason
+        // series recap's Play of the Game). null where there's no win-prob feed
+        // (most MiLB parks) → no potg.
+        turningPoint: potg?.desc
+          ? {
+              desc: firstSentence(potg.desc),
+              batterId: potg.batterId,
+              batterName: potg.batterName,
+              batterTeamId: potg.batterTeamId,
+              batterTeamAbbr: potg.batterTeamAbbr,
+              batterPos: potg.batterPos,
+              inning: potg.inning,
+              half: potg.half,
+              awayAbbr: box.away.abbreviation,
+              awayScore: potg.awayScore,
+              homeAbbr: box.home.abbreviation,
+              homeScore: potg.homeScore,
+            }
+          : null,
+        // The winner/loser pair with run totals — winner first — for the hero's
+        // logo + score line and the team-logo storyline rows (margin/length/
+        // comeback, which carry no single performer).
         teams: winnerIsHome
-          ? { winner: { id: box.home.id, abbr: box.home.abbreviation }, loser: { id: box.away.id, abbr: box.away.abbreviation } }
-          : { winner: { id: box.away.id, abbr: box.away.abbreviation }, loser: { id: box.home.id, abbr: box.home.abbreviation } },
+          ? { winner: { id: box.home.id, abbr: box.home.abbreviation, r: box.home.line.r }, loser: { id: box.away.id, abbr: box.away.abbreviation, r: box.away.line.r } }
+          : { winner: { id: box.away.id, abbr: box.away.abbreviation, r: box.away.line.r }, loser: { id: box.home.id, abbr: box.home.abbreviation, r: box.home.line.r } },
         boxScorePath: gamePath(
           dateStr,
           game.away.abbreviation,

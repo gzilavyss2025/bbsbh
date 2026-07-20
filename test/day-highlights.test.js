@@ -329,8 +329,8 @@ function rankFeed({ away = {}, home = {}, innings = 9 } = {}) {
   return {
     gameData: {
       teams: {
-        away: { id: away.id ?? 10, abbreviation: away.abbr ?? 'AWY' },
-        home: { id: home.id ?? 20, abbreviation: home.abbr ?? 'HOM' },
+        away: { id: away.id ?? 10, abbreviation: away.abbr ?? 'AWY', clubName: away.clubName },
+        home: { id: home.id ?? 20, abbreviation: home.abbr ?? 'HOM', clubName: home.clubName },
       },
     },
     liveData: {
@@ -424,6 +424,46 @@ test('rankDayHighlights: a quiet game with no fired signal is dropped', () => {
     null,
   )
   assert.deepEqual(ranked, [])
+})
+
+test('rankDayHighlights: exposes a score-free story and winner/loser runs', () => {
+  const [top] = rankDayHighlights([dominantGame(1, START_98)], null)
+  assert.ok(/was dominant/.test(top.story))
+  assert.ok(!top.story.includes(' — '), 'story carries no score suffix')
+  // away (r:4) beat home (r:1) — winner first, with run totals for the hero's
+  // logo + score line.
+  assert.equal(top.teams.winner.r, 4)
+  assert.equal(top.teams.loser.r, 1)
+})
+
+test('rankDayHighlights: margin storyline names clubs, not abbreviations', () => {
+  // A one-run game between named clubs — the headline must read "The Angels
+  // edged the Tigers", never "The LAA edged the DET".
+  const [top] = rankDayHighlights(
+    [
+      rankEntry(
+        1,
+        rankFeed({
+          away: { r: 3, h: 8, abbr: 'LAA', clubName: 'Angels' },
+          home: { r: 2, h: 7, abbr: 'DET', clubName: 'Tigers' },
+        }),
+      ),
+    ],
+    null,
+  )
+  assert.equal(top.story, 'The Angels edged the Tigers by a single run')
+})
+
+// --------------------------------------------------------------------------
+// eliteGameScoreSignal — the DISPLAY is the stat line; the RANKING is still gs.
+// --------------------------------------------------------------------------
+test('eliteGameScoreSignal: headline shows the stat line, not "Game Score N"', () => {
+  const sig = eliteGameScoreSignal(
+    pitchFeed({ inningsPitched: '9.0', hits: 4, earnedRuns: 2, runs: 2, strikeOuts: 7, baseOnBalls: 0 }),
+  )
+  assert.equal(sig.text, 'Ace Starter was dominant (9.0 IP, 4 H, 2 ER, 0 BB, 7 K)')
+  assert.equal(sig.performer.stat, '9.0 IP, 4 H, 2 ER, 0 BB, 7 K')
+  assert.equal(sig.gs, 85) // ranking still keys on Game Score internally
 })
 
 // gameNumber rides on each result so the Your Team block can label a twin bill.
