@@ -214,6 +214,10 @@ export function selectGameResults(entries) {
       // suspended/called tie) so the caller can hide the W/L badge rather than
       // declaring the away side a phantom winner.
       winnerId: home.r === away.r ? null : home.r > away.r ? home.id : away.id,
+      // 1 for a single game, 1 & 2 for a doubleheader — lets the Your Team block
+      // label both games of a twin bill ("Game 1"/"Game 2") instead of showing
+      // only the opener.
+      gameNumber: game?.gameNumber ?? null,
       boxScorePath: game
         ? gamePath(dateStr, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber)
         : null,

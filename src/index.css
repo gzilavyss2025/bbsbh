@@ -9200,6 +9200,32 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
 }
+/* "Jump to games" — a small right-aligned utility control at the top of the
+   revealed recap (PastDayRecapBox), so a long recap doesn't strand the game
+   grid below the fold. margin-left:auto right-aligns a fit-width flex block in
+   the body's plain block flow. */
+.recapjump {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 0 var(--space-3) auto;
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.recapjump:active {
+  transform: translateY(1px);
+}
 .dayhl__section + .dayhl__section {
   margin-top: 16px;
 }
@@ -9423,7 +9449,13 @@ body {
 }
 
 /* --- "Your Team": the favorite club's result up top (YourTeamCard). One wide
-   tappable row: logo, a W/L badge + score, and the club's own line beneath. */
+   tappable row: logo, a W/L badge + score, and the club's own line beneath.
+   On a doubleheader day both games stack here under one heading. */
+.yourteam__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
 .yourteam {
   display: flex;
   align-items: center;
@@ -9446,6 +9478,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+/* "Game 1"/"Game 2" tag — only rendered on a doubleheader (see YourTeamCard),
+   a small caption above the score so the two rows are distinguishable. */
+.yourteam__game {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .yourteam__result {
   display: flex;
