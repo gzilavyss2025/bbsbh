@@ -1,4 +1,4 @@
-Status: needs-triage
+Status: ready-for-agent
 
 # Primary checkout's node_modules missing @clerk/clerk-react
 
@@ -28,12 +28,34 @@ dependency was added while the primary's `node_modules` wasn't touched. A
 session that tries to run the primary checkout's dev server (rather than a
 worktree's) can hit the same resolution error.
 
-## Open questions / next steps
+## Root cause (found same session, after initial triage above)
 
-- Not yet diagnosed *why* the primary's node_modules fell behind — worth
-  checking whether something (a hook, a script) is supposed to keep it in
-  sync and isn't, or whether it's simply expected drift from `npm install`
-  only running in worktrees.
-- Consider whether the worktree-setup automation from PR #277 should also
-  cover the primary checkout, or whether a lint/CI check should catch a
-  lockfile/node_modules mismatch before it's discovered mid-session.
+The primary checkout's local `main` was **18 commits behind `origin/main`**
+(`git status -sb` → `main...origin/main [behind 18]`). Those missing commits
+included PR #278 (merged 2026-07-20), which landed
+`.claude/hooks/setup-new-worktree.mjs` — a `PostToolUse` hook that auto-runs
+`npm install && npx playwright install chromium` for any worktree spun up
+with `git worktree add`, registered in `.claude/settings.json`. Because the
+primary checkout never pulled that commit, its local `.claude/settings.json`
+didn't register the hook, so it never fired for worktrees created from a
+session rooted in the stale primary — leaving them to hit the exact
+`npm install`-not-run friction the hook exists to prevent. It's plausible the
+same staleness is why `node_modules/@clerk` fell behind `package.json` in the
+primary itself (unconfirmed — the primary's `package.json` already listed
+Clerk, so this may be a separate, second drift).
+
+Note: the original open question below referenced "PR #277" as the source of
+the worktree-setup hook — #277 was actually **closed** (superseded by #278,
+which combined several open PRs, including #277's hook, into one branch/PR).
+The hook that exists on `origin/main` today shipped via #278, not #277.
+
+## Next steps
+
+- Bring the primary checkout's local `main` up to date (`git pull --ff-only`)
+  so hooks registered in newer commits actually take effect for future
+  sessions rooted there. A session should probably check for this drift
+  early (e.g. in `session-start.sh`) rather than discovering it mid-task.
+- Still unconfirmed: whether the primary's own `node_modules` needs the same
+  "stays in sync" treatment as worktrees (a `session-start.sh` step running
+  `npm install` if `package-lock.json` changed since last install), or
+  whether this was a one-off.
