@@ -146,6 +146,18 @@ export function availabilityFor(data, personId, asOfDate) {
   return { status, reasons }
 }
 
+// Tally a list of availability statuses into the summary-pill counts the
+// bullpen board shows above the board (Fresh / Limited / Likely down). Pure and
+// order-independent; unrecognized statuses are ignored. Kept here beside the
+// availability rules so the pill counts can't drift from the board's statuses.
+export function bullpenStatusCounts(statuses) {
+  const counts = { fresh: 0, limited: 0, down: 0 }
+  for (const s of statuses ?? []) {
+    if (s in counts) counts[s] += 1
+  }
+  return counts
+}
+
 // Load relative to baselines (W4): the pitcher's last-10-appearance pitch total
 // as a percentage above/below (a) his role's league baseline mean and (b) his
 // own season norm (season pitches / appearances × 10 = a typical 10-app load).

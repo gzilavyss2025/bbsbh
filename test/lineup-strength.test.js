@@ -8,7 +8,14 @@ import {
   POS_ADJ,
   SLOTS,
 } from '../src/lib/lineupSolver.js'
-import { gradeLineup, receiptFor, lineupStrengthFor } from '../src/api/lineupStrength.js'
+import {
+  gradeLineup,
+  receiptFor,
+  lineupStrengthFor,
+  lineupStrengthRows,
+  rpgFromWar,
+} from '../src/api/lineupStrength.js'
+import { lineupStrengthTierFor } from '../src/lib/lineupStrengthTier.js'
 
 // --- a raw Hungarian core, exercised through the solver ----------------------
 // The solver assigns nine slots, so to hand-check a 4x4 we expose a tiny helper
@@ -207,9 +214,41 @@ test('gradeLineup: optimal-ish posted lineup scores near 10, bench-heavy scores 
   assert.ok(dhSwap, 'receipt should flag the benched DH stud as a bench item')
 })
 
-test('gradeLineup: unknown starter falls back to replacement without crashing', () => {
+test('receiptFor: a slot with a bench swap does not also emit a redundant oop line', () => {
+  // Post a weak, out-of-position bat at a slot the optimum would give to someone
+  // else: the slot must show as ONE bench swap, never a bench row AND an
+  // out-of-position row for the same slot (which read as a duplicate in the table).
   const data = synthData()
   const posted = [
+    { personId: 'c', position: 'C' },
+    { personId: '1b', position: '1B' },
+    { personId: '2b', position: '2B' },
+    { personId: 'scrub', position: '3B' }, // weak corner bat, unfamiliar at 3B
+    { personId: 'ss', position: 'SS' },
+    { personId: 'lf', position: 'LF' },
+    { personId: 'cf', position: 'CF' },
+    { personId: 'rf', position: 'RF' },
+    { personId: 'dhstud', position: 'DH' },
+  ]
+  const items = receiptFor(data, 1, posted)
+  const bySlot = new Map()
+  for (const it of items) {
+    const key = it.slot
+    assert.ok(
+      !(bySlot.has(key) && (bySlot.get(key) === 'bench' || it.kind === 'bench')),
+      `slot ${key} has both a bench and an out-of-position line`,
+    )
+    bySlot.set(key, it.kind)
+  }
+  // No slot appears more than once at all.
+  const slots = items.map((it) => it.slot)
+  assert.equal(slots.length, new Set(slots).size, 'a slot appears in more than one receipt row')
+})
+
+// A lineup that's optimal for the eight players we CAN value, plus one starter
+// swapped in at DH. Used by the missing-starter tests below.
+function postedWithDh(dhId) {
+  return [
     { personId: 'c', position: 'C' },
     { personId: '1b', position: '1B' },
     { personId: '2b', position: '2B' },
@@ -218,12 +257,83 @@ test('gradeLineup: unknown starter falls back to replacement without crashing', 
     { personId: 'lf', position: 'LF' },
     { personId: 'cf', position: 'CF' },
     { personId: 'rf', position: 'RF' },
-    { personId: 'callup_9999', position: 'DH' }, // not in the values file
+    { personId: dhId, position: 'DH' },
   ]
-  const g = gradeLineup(data, 1, posted)
+}
+
+test('gradeLineup: a starter in no data file is excluded from the gap, not charged a penalty', () => {
+  // Regression: a just-acquired starter used to be valued at replacement AND
+  // docked an unfamiliarity penalty at the very slot we'd named his primary —
+  // an internal contradiction that tanked the grade of any lineup with him.
+  // Now his slot is left out of the gap entirely and surfaced as unvalued.
+  const data = synthData() // no warFallback → callup resolves nowhere
+  const g = gradeLineup(data, 1, postedWithDh('callup_9999'))
   assert.ok(g)
-  assert.ok(Number.isFinite(g.score))
-  assert.ok(g.gapRpg >= 0)
+  assert.deepEqual(g.ungraded, [{ id: 'callup_9999', slot: 'DH' }])
+  // The excluded DH slot contributes nothing: the other eight are posted at their
+  // optimal spots, so the gap is ~zero and the score is near the top.
+  assert.ok(g.gapRpg < 1e-9, `unvalued slot must not create a gap, got ${g.gapRpg}`)
+  assert.equal(g.score, 10)
+  // And no receipt line is fabricated for the slot we couldn't grade.
+  const items = receiptFor(data, 1, postedWithDh('callup_9999'))
+  assert.ok(!items.some((it) => it.slot === 'DH'))
+})
+
+test('gradeLineup: a starter absent from the values file but present in WAR is valued from it', () => {
+  // The "recent trade" case: not in the (nightly, team-scoped) values file, but
+  // his bat is in the league-wide WAR file. He must be valued from WAR — a real
+  // number, graded normally — not excluded and not dropped to replacement.
+  const data = synthData()
+  delete data.players['dhstud'] // vacate the DH-stud slot in the file
+  const constants = { paScale: 600, regressionPa: 250, runsPerWar: 9.5, games: 162 }
+  data.constants = constants
+  // A genuine masher by WAR: big sample, high WAR → a strong rpg.
+  data.warFallback = { bat: { traded_7: 5.0 }, pa: { traded_7: 600 } }
+  const g = gradeLineup(data, 1, postedWithDh('traded_7'))
+  assert.ok(g)
+  assert.equal(g.ungraded.length, 0, 'a WAR-resolved starter is graded, not excluded')
+  // His DH value is the WAR conversion (DH's positional adjustment nets to zero
+  // against his DH "primary"), a real bat well above replacement 0.
+  const dh = g.actual.perSlot.find((s) => s.slot === 'DH')
+  const expectedRpg = rpgFromWar(5.0, 600, constants)
+  assert.ok(Number.isFinite(expectedRpg) && expectedRpg > 0.15)
+  assert.ok(Math.abs(dh.value - expectedRpg) < 1e-9, `expected ${expectedRpg}, got ${dh.value}`)
+})
+
+test('gradeLineup: a starter in the file under another club (a trade) keeps his real value', () => {
+  // Present in data.players but tagged to a different teamId (his old club). His
+  // season value is team-independent, so grading the NEW club must reuse it
+  // rather than treating him as an unknown.
+  const data = synthData()
+  data.players['dhstud'].teamId = 999 // "traded away" in the file's eyes
+  const g = gradeLineup(data, 1, postedWithDh('dhstud'))
+  assert.ok(g)
+  assert.equal(g.ungraded.length, 0, 'a cross-team file entry is not treated as unknown')
+  const dh = g.actual.perSlot.find((s) => s.slot === 'DH')
+  assert.ok(dh.value > 0.8, `cross-team stud keeps his ~0.9 rpg, got ${dh.value}`)
+})
+
+test('lineupStrengthFor: an unvalued starter surfaces by name via the posted-lineup map', () => {
+  const data = synthData()
+  const strength = lineupStrengthFor(data, 1, postedWithDh('callup_9999'), {
+    callup_9999: 'Rookie Callup',
+  })
+  assert.deepEqual(strength.ungraded, [{ slot: 'DH', name: 'Rookie Callup' }])
+})
+
+test('rpgFromWar reproduces the nightly build model and degrades on missing inputs', () => {
+  const c = { paScale: 600, regressionPa: 250, runsPerWar: 9.5, games: 162 }
+  const expected = (war, pa) => {
+    const per600 = (war / pa) * 600
+    const reg = per600 * (pa / (pa + 250))
+    return (reg * 9.5) / 162
+  }
+  assert.ok(Math.abs(rpgFromWar(0.1, 98, c) - expected(0.1, 98)) < 1e-12)
+  assert.ok(Math.abs(rpgFromWar(5.0, 600, c) - expected(5.0, 600)) < 1e-12)
+  // Missing/zero inputs → null so the caller can fall back to exclude-the-slot.
+  assert.equal(rpgFromWar(1.0, 0, c), null)
+  assert.equal(rpgFromWar(undefined, 400, c), null)
+  assert.equal(rpgFromWar(2.0, NaN, c), null)
 })
 
 test('gradeLineup: no-catcher roster still grades via the relax path', () => {
@@ -253,6 +363,103 @@ test('gradeLineup: no-catcher roster still grades via the relax path', () => {
   const g = gradeLineup(noCatcher, 1, posted)
   assert.ok(g)
   assert.equal(g.relaxed, true)
+})
+
+// --- lineup-strength tier ladder (lib/lineupStrengthTier.js) -----------------
+
+test('tier ladder: each score band maps to the right colour family', () => {
+  // Six word-bands collapse onto three colours: strong (≥6), mid (4.5–6), weak.
+  const c = (score) => lineupStrengthTierFor(score).colorTier
+  assert.equal(c(9.5), 'strong') // Best nine
+  assert.equal(c(8.0), 'strong') // Near best
+  assert.equal(c(6.5), 'mid') // Mostly intact
+  assert.equal(c(5.0), 'mid') // Reshuffled
+  assert.equal(c(3.5), 'weak') // Short-handed
+  assert.equal(c(1.0), 'weak') // Bare bones
+  // Band edges are inclusive of their floor.
+  assert.equal(lineupStrengthTierFor(9.0).band, 0)
+  assert.equal(lineupStrengthTierFor(7.5).band, 1)
+  assert.equal(lineupStrengthTierFor(6.0).band, 2)
+  assert.equal(lineupStrengthTierFor(4.5).band, 3)
+  assert.equal(lineupStrengthTierFor(3.0).band, 4)
+  assert.equal(lineupStrengthTierFor(0).band, 5)
+})
+
+test('tier ladder: within-band word is deterministic on the seed', () => {
+  // Same score + same seed → identical word every call (no refresh flicker).
+  const a = lineupStrengthTierFor(4.0, 158)
+  const b = lineupStrengthTierFor(4.0, 158)
+  assert.equal(a.label, b.label)
+  // The label is one of that band's alternatives.
+  const bandWords = ['Short-handed', 'Depleted', 'Thinned out']
+  assert.ok(bandWords.includes(a.label))
+  // No seed → the first word of the band, deterministically.
+  assert.equal(lineupStrengthTierFor(4.0).label, 'Short-handed')
+})
+
+test('tier ladder: different seeds spread across a band (not all identical)', () => {
+  // The whole point of a per-lineup ladder — a slate of similar teams shouldn't
+  // all read the same. Over many seeds, more than one alternative must appear.
+  const labels = new Set()
+  for (let seed = 100; seed < 140; seed++) labels.add(lineupStrengthTierFor(6.5, seed).label)
+  assert.ok(labels.size > 1, `expected varied words within a band, got ${[...labels]}`)
+})
+
+// --- row shaping for the Expected/Starting/R/G table -------------------------
+
+test('lineupStrengthRows: bench and out-of-position rows map to the right columns', () => {
+  const data = synthData()
+  const rows = lineupStrengthRows(data, [
+    { kind: 'bench', inId: 'dhstud', outId: 'scrub', slot: 'DH', deltaRpg: 0.5 },
+    { kind: 'oop', id: 'ss', slot: '3B', weight: 0.4, deltaRpg: 0.1 },
+  ])
+  // bench: Expected = the optimal player (inId), Starting = posted starter (outId).
+  // scoreImpact = deltaRpg / SCORE_GAP_FULL (0.045), rounded to a tenth of a grade.
+  assert.deepEqual(rows[0], {
+    kind: 'bench',
+    pos: 'DH',
+    expected: 'DhStud',
+    starting: 'Scrub',
+    deltaRpg: 0.5,
+    scoreImpact: 11.1,
+  })
+  // oop: no displaced expected name (never fabricated); carries the player's
+  // usual (primary) position for the natural-spot hint.
+  assert.deepEqual(rows[1], {
+    kind: 'oop',
+    pos: '3B',
+    expected: null,
+    starting: 'Shortstop',
+    usualPos: 'SS',
+    deltaRpg: 0.1,
+    scoreImpact: 2.2,
+  })
+})
+
+test('lineupStrengthRows: oop usualPos is omitted when it equals the slot', () => {
+  const data = synthData()
+  // 'ss' posted at his own primary SS → no meaningful "usually" hint.
+  const [row] = lineupStrengthRows(data, [{ kind: 'oop', id: 'ss', slot: 'SS', weight: 0.5, deltaRpg: 0.1 }])
+  assert.equal(row.usualPos, null)
+})
+
+test('lineupStrengthFor exposes strengthTier + rows on its result', () => {
+  const data = synthData()
+  const posted = [
+    { personId: 'c', position: 'C' },
+    { personId: '1b', position: '1B' },
+    { personId: '2b', position: '2B' },
+    { personId: '3b', position: '3B' },
+    { personId: 'ss', position: 'SS' },
+    { personId: 'scrub', position: 'LF' },
+    { personId: 'cf', position: 'CF' },
+    { personId: 'rf', position: 'RF' },
+    { personId: 'lf', position: 'DH' },
+  ]
+  const strength = lineupStrengthFor(data, 1, posted)
+  assert.ok(strength.strengthTier)
+  assert.ok(['strong', 'mid', 'weak'].includes(strength.strengthTier.colorTier))
+  assert.equal(strength.rows.length, strength.items.length)
 })
 
 test('valueLineup never returns -Infinity for a real placement', () => {

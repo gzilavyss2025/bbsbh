@@ -339,11 +339,18 @@ for each generator; the reader modules:
   `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
   `src/lib/lineupSolver.js` (exact Hungarian assignment over the
   position-eligibility matrix; FanGraphs positional-adjustment constants).
-  `lineupStrengthFor(data, teamId, actualLineup)` → 0–10 score, statTiers
-  tier, and the itemized receipt (bench swaps + out-of-position penalties).
+  `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
+  statTiers tier, the itemized receipt (bench swaps + out-of-position
+  penalties), and `ungraded` (posted starters with no value in any file).
   Spoiler-free by construction (the posted starting nine + season
   aggregates); surface is `LineupStrengthCard` under the batting order on
-  the lineup pages. MLB only.
+  the lineup pages. MLB only. A starter posted after the last nightly build
+  (trade/call-up) is resolved best-data-first: another club's file entry,
+  then `war.json` (via `rpgFromWar`, which is why `fetchLineupValues`
+  attaches a `warFallback`), else his slot is excluded from the gap and shown
+  as "not yet in the season data" — a data hole never reads as a weakness.
+  `names` (the posted lineup's id→name map) backfills a war-only starter's
+  name in the receipt.
 - `gameScore.js` — the slate card's `FINAL · 7.5` badge, from
   `public/data/game-score.json`. Unlike every file above, this ISN'T on the
   once-nightly cron — `gen-game-score.mjs` runs on its own 10-minute cron

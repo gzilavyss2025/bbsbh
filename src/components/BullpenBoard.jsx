@@ -1,6 +1,8 @@
-import { useMemo } from 'react'
-import { availabilityFor, workloadFor } from '../api/workload.js'
+import { useMemo, useState } from 'react'
+import { availabilityFor, bullpenStatusCounts, workloadFor } from '../api/workload.js'
+import { InfoPopover } from './InfoPopover.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
+import { SectionMasthead } from './SectionMasthead.jsx'
 
 // The bullpen availability board — who's rested, who's limited, who's likely
 // down tonight, from each reliever's recent completed appearances
@@ -17,8 +19,27 @@ const STATUS_LABEL = {
   down: 'Likely down',
 }
 const STATUS_ORDER = { down: 0, limited: 1, fresh: 2 }
+// Summary pills read best-to-worst (fresh → limited → down), the reverse of the
+// board's down-first sort.
+const PILL_ORDER = ['fresh', 'limited', 'down']
+
+// The reason an arm sits where it does — the flag(s) that tripped, else a
+// plain recent-workload summary. Kept off the board face (it was visual noise)
+// and surfaced only as the row's hover title.
+function detailFor(r) {
+  if (r.reasons.length > 0) return r.reasons.join(' · ')
+  if (r.last3apps > 0) {
+    return `${r.last3} pitches over last ${r.last3apps} outing${r.last3apps === 1 ? '' : 's'} · ${r.apps7} app${r.apps7 === 1 ? '' : 's'} in 7 days`
+  }
+  return 'No recent appearances'
+}
 
 export function BullpenBoard({ workload, bullpen, gameDate }) {
+  // The status a top summary pill is being hovered — matching board rows stay
+  // lit, the rest dim. Pointer-only accent (nothing is hidden), so it needs no
+  // keyboard/ARIA affordance.
+  const [litStatus, setLitStatus] = useState(null)
+
   const rows = useMemo(() => {
     if (!workload || !gameDate || (bullpen?.length ?? 0) === 0) return []
     return bullpen
@@ -34,6 +55,9 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
           status: avail.status,
           reasons: avail.reasons,
           last3: load.last3?.pitches ?? 0,
+          // Count of appearances in the last-3-OUTINGS bucket (which can span
+          // far more than 3 days) — words the workload summary accurately.
+          last3apps: load.last3?.apps ?? 0,
           apps7: load.last7dayApps ?? 0,
         }
       })
@@ -44,33 +68,50 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
       )
   }, [workload, bullpen, gameDate])
 
+  const counts = useMemo(() => bullpenStatusCounts(rows.map((r) => r.status)), [rows])
+
   if (rows.length === 0) return null
 
   return (
-    <section className="penboard">
-      <h3 className="section__title">Bullpen tonight</h3>
-      <ul className="penboard__list">
-        {rows.map((r) => (
-          <li key={r.id} className="penboard__row">
-            <span className={`penboard__status penboard__status--${r.status}`}>
-              {STATUS_LABEL[r.status] ?? r.status}
+    <section className="metriccard penboard">
+      <SectionMasthead title="Bullpen tonight">
+        <InfoPopover label="How bullpen availability is judged">
+          Rested vs. worked from recent appearances — a workload signal, not a
+          talent grade. Managers overrule it nightly.
+        </InfoPopover>
+      </SectionMasthead>
+      <div className="metriccard__body">
+        <div className="penboard__pills">
+          {PILL_ORDER.filter((s) => counts[s] > 0).map((s) => (
+            <span
+              key={s}
+              className={`penboard__pill penboard__pill--${s}`}
+              onMouseEnter={() => setLitStatus(s)}
+              onMouseLeave={() => setLitStatus(null)}
+            >
+              <span className="penboard__pillnum">{counts[s]}</span> {STATUS_LABEL[s]}
             </span>
-            <span className="penboard__namewrap">
+          ))}
+        </div>
+        <ul className="penboard__list">
+          {rows.map((r) => (
+            <li
+              key={r.id}
+              className={`penboard__row${litStatus && litStatus !== r.status ? ' penboard__row--dim' : ''}`}
+            >
+              <span
+                className={`penboard__tag penboard__tag--${r.status}`}
+                title={detailFor(r)}
+              >
+                {STATUS_LABEL[r.status] ?? r.status}
+              </span>
               <PlayerLink id={r.id} className="penboard__name">
                 {r.name}
               </PlayerLink>
-              <span className="penboard__detail">
-                {r.reasons.length > 0
-                  ? r.reasons.join(' · ')
-                  : `${r.last3} pitches over 3 days · ${r.apps7} of last 7`}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className="penboard__caveat">
-        Rested vs. worked from recent appearances — managers overrule this nightly.
-      </p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }

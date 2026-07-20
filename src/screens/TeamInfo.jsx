@@ -41,6 +41,7 @@ import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
 import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
+import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
@@ -533,7 +534,7 @@ function TeamSections({
       />
 
       <section className="lineup">
-        <h3 className="section__title">Batting order</h3>
+        <SectionMasthead as="h3" title="Batting order" />
         {lineup.length > 0 ? (
           <ol className="lineup__list">
             {lineup.map((p) => (
@@ -643,6 +644,15 @@ function TeamSections({
         )}
       </section>
 
+      {oppDefense.length > 0 && (
+        <section className="opp">
+          <SectionMasthead as="h3" title="Opposing defense" />
+          {/* Drawn like the sheet's bottom-left diamond: surnames on writing
+              lines at their positions. The defense belongs to the OTHER side. */}
+          <DefenseDiamond defense={oppDefense} />
+        </section>
+      )}
+
       <LineupStrengthCard data={freshLineupValues} teamId={meta.id} lineup={lineup} />
 
       <BullpenBoard
@@ -650,15 +660,6 @@ function TeamSections({
         bullpen={bullpenArms}
         gameDate={boardGameDate}
       />
-
-      {oppDefense.length > 0 && (
-        <section className="opp">
-          <h3 className="section__title">Opposing defense</h3>
-          {/* Drawn like the sheet's bottom-left diamond: surnames on writing
-              lines at their positions. The defense belongs to the OTHER side. */}
-          <DefenseDiamond defense={oppDefense} />
-        </section>
-      )}
 
       {showTeammates && (
         <FormerTeammates
@@ -683,7 +684,7 @@ function TeamSections({
 function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rookiesData, callouts }) {
   return (
     <section className="startercard">
-      <h3 className="section__title">Opposing starter</h3>
+      <SectionMasthead as="h3" title="Opposing starter" />
       {pitcher ? (
         <div className="startercard__body">
           <Headshot

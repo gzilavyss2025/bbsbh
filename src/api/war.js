@@ -2,7 +2,9 @@
 // rather than fetched live from FanGraphs. That file is regenerated nightly
 // by scripts/gen-war.mjs (see .github/workflows/update-nightly-data.yml) — this module
 // just reads it. Keyed by MLB Stats API personId (FanGraphs' xMLBAMID is the
-// same id), so callers can index straight off a roster entry's person.id.
+// same id), so callers can index straight off a roster entry's person.id. Also
+// carries a parallel `pa` map (hitter plate appearances) the Lineup Strength
+// grade uses to re-value a just-traded starter (api/lineupStrength.js).
 // Degrades to empty maps before the file exists or on any fetch failure — a
 // missing WAR badge, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.
@@ -15,7 +17,7 @@ export async function fetchWarData() {
     if (!res.ok) throw new Error(`war.json ${res.status}`)
     cached = await res.json()
   } catch {
-    cached = { season: null, bat: {}, pit: {} }
+    cached = { season: null, bat: {}, pit: {}, pa: {} }
   }
   return cached
 }
