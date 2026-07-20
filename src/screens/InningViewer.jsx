@@ -276,6 +276,11 @@ export function InningViewer({
     return (
       <div className="innings">
         {cloudSync}
+        {/* Keep the LINEUPS / INNINGS / BOX tabs on screen pre-game — a deep
+            link straight to an innings URL (e.g. /…/top1) lands here, and
+            without the nav there'd be no way to reach the lineup/box pages
+            the hint points at (only the browser Back button). */}
+        {sectionNav && <div className="inningchrome">{sectionNav}</div>}
         <p className="hint hint--prose">
           This game hasn’t started yet. Lineups and info are on the previous
           pages; inning totals appear once first pitch is thrown.
