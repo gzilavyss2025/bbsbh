@@ -19373,12 +19373,23 @@ body {
 .lstrength__expected {
   color: var(--text-caption);
 }
-.lstrength__oop {
-  color: var(--graphite-soft);
+/* Out-of-position row: the posted starter's name spans the Expected+Starting
+   columns, with a muted "usually 1B" natural-spot hint after it (no fabricated
+   Expected name). */
+.lstrength__oopcell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
 }
 .lstrength__starting {
   font-weight: var(--w-semibold);
   color: var(--text-body);
+}
+.lstrength__usual {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
 }
 .lstrength__rg {
   text-align: right;
@@ -19406,6 +19417,8 @@ body {
   gap: 8px;
   margin-bottom: 4px;
 }
+/* Summary pills double as a hover filter: pointing at one lights its arms on
+   the board below and dims the rest (penboard__row--dim). */
 .penboard__pill {
   display: inline-flex;
   align-items: baseline;
@@ -19417,6 +19430,11 @@ body {
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
+  cursor: default;
+  transition: box-shadow 0.14s ease;
+}
+.penboard__pill:hover {
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 .penboard__pillnum {
   font-family: var(--font-mono);
@@ -19437,42 +19455,56 @@ body {
 }
 .penboard__list {
   list-style: none;
-  margin: 0;
+  margin: 6px 0 0;
   padding: 0;
 }
 .penboard__row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
-  padding: 8px 0;
+  padding: 7px 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
+  transition: opacity 0.14s ease;
 }
-.penboard__status {
+.penboard__row--dim {
+  opacity: 0.3;
+}
+/* Per-arm status tag — the same pill language as the summary above (label
+   only, no count), so the board reads as those pills stacked. */
+.penboard__tag {
   flex: none;
-  min-width: 86px;
+  min-width: 92px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  text-align: center;
 }
-.penboard__status--fresh {
-  color: var(--accent-positive);
+.penboard__tag--fresh {
+  color: var(--field-deep);
+  background: var(--field-soft);
 }
-.penboard__status--limited {
+.penboard__tag--limited {
   color: var(--award-ink);
+  background: var(--award-soft);
 }
-.penboard__status--down {
-  color: var(--accent-negative);
+.penboard__tag--down {
+  color: var(--clay-deep);
+  background: var(--clay-soft);
 }
-.penboard__namewrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
+.penboard__name {
   min-width: 0;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
-.penboard__detail {
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
+@media (prefers-reduced-motion: reduce) {
+  .penboard__pill,
+  .penboard__row {
+    transition: none;
+  }
 }

@@ -57,20 +57,28 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={i}>
-                  <td className="lstrength__pos">{r.pos}</td>
-                  <td className="lstrength__expected">
-                    {r.expected ?? (
-                      <span className="lstrength__oop" title="Out of position — no displaced starter">
-                        —
-                      </span>
-                    )}
-                  </td>
-                  <td className="lstrength__starting">{r.starting ?? '—'}</td>
-                  <td className="lstrength__rg">−{r.deltaRpg.toFixed(2)}</td>
-                </tr>
-              ))}
+              {rows.map((r, i) =>
+                r.kind === 'oop' ? (
+                  // Out of position: no displaced "expected" name, so the posted
+                  // starter's name spans both middle columns with a natural-spot
+                  // hint ("usually 1B") instead of a fabricated Expected entry.
+                  <tr key={i}>
+                    <td className="lstrength__pos">{r.pos}</td>
+                    <td className="lstrength__oopcell" colSpan={2}>
+                      <span className="lstrength__starting">{r.starting ?? '—'}</span>
+                      {r.usualPos && <span className="lstrength__usual">usually {r.usualPos}</span>}
+                    </td>
+                    <td className="lstrength__rg">−{r.deltaRpg.toFixed(2)}</td>
+                  </tr>
+                ) : (
+                  <tr key={i}>
+                    <td className="lstrength__pos">{r.pos}</td>
+                    <td className="lstrength__expected">{r.expected}</td>
+                    <td className="lstrength__starting">{r.starting ?? '—'}</td>
+                    <td className="lstrength__rg">−{r.deltaRpg.toFixed(2)}</td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         ) : (

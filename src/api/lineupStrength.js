@@ -190,25 +190,31 @@ export function playerName(data, personId) {
 //   - bench: the optimal player is displaced by the posted starter, so
 //     Expected = inId (who you'd want), Starting = outId (who's in there).
 //   - oop:   a posted starter is out of position; there is NO displaced
-//     "expected" name, so `expected` is left null — the caller renders an
-//     em-dash rather than fabricating one. Starting = the posted player.
+//     "expected" name, so `expected` is left null and the caller renders the
+//     player's name across the Expected/Starting columns with their `usualPos`
+//     (primary fielding position) as the natural-spot hint, rather than
+//     fabricating an expected name. `usualPos` is null when unknown or when it
+//     is the slot itself (so the caller can omit the hint).
 // `deltaRpg` is the runs/game the row costs (rendered as a negative).
 export function lineupStrengthRows(data, items) {
-  return (items ?? []).map((it) =>
-    it.kind === 'bench'
-      ? {
-          kind: 'bench',
-          pos: it.slot,
-          expected: playerName(data, it.inId),
-          starting: playerName(data, it.outId),
-          deltaRpg: it.deltaRpg,
-        }
-      : {
-          kind: 'oop',
-          pos: it.slot,
-          expected: null,
-          starting: playerName(data, it.id),
-          deltaRpg: it.deltaRpg,
-        },
-  )
+  return (items ?? []).map((it) => {
+    if (it.kind === 'bench') {
+      return {
+        kind: 'bench',
+        pos: it.slot,
+        expected: playerName(data, it.inId),
+        starting: playerName(data, it.outId),
+        deltaRpg: it.deltaRpg,
+      }
+    }
+    const usual = data?.players?.[String(it.id)]?.primaryPos ?? null
+    return {
+      kind: 'oop',
+      pos: it.slot,
+      expected: null,
+      starting: playerName(data, it.id),
+      usualPos: usual && usual !== it.slot ? usual : null,
+      deltaRpg: it.deltaRpg,
+    }
+  })
 }

@@ -337,8 +337,23 @@ test('lineupStrengthRows: bench and out-of-position rows map to the right column
   ])
   // bench: Expected = the optimal player (inId), Starting = posted starter (outId).
   assert.deepEqual(rows[0], { kind: 'bench', pos: 'DH', expected: 'DhStud', starting: 'Scrub', deltaRpg: 0.5 })
-  // oop: no displaced expected name — never fabricated, left null for an em-dash.
-  assert.deepEqual(rows[1], { kind: 'oop', pos: '3B', expected: null, starting: 'Shortstop', deltaRpg: 0.1 })
+  // oop: no displaced expected name (never fabricated); carries the player's
+  // usual (primary) position for the natural-spot hint.
+  assert.deepEqual(rows[1], {
+    kind: 'oop',
+    pos: '3B',
+    expected: null,
+    starting: 'Shortstop',
+    usualPos: 'SS',
+    deltaRpg: 0.1,
+  })
+})
+
+test('lineupStrengthRows: oop usualPos is omitted when it equals the slot', () => {
+  const data = synthData()
+  // 'ss' posted at his own primary SS → no meaningful "usually" hint.
+  const [row] = lineupStrengthRows(data, [{ kind: 'oop', id: 'ss', slot: 'SS', weight: 0.5, deltaRpg: 0.1 }])
+  assert.equal(row.usualPos, null)
 })
 
 test('lineupStrengthFor exposes strengthTier + rows on its result', () => {
