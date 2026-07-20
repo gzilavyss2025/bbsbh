@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame, resolveCardPlayer } from '../api/boxscore.js'
-import { selectWinProbPath } from '../api/winprob.js'
+import { selectWinProbPath, selectWinProbSwings, selectWinProbBigPlays } from '../api/winprob.js'
 import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
 import { managerLabel } from '../api/game.js'
@@ -118,6 +118,8 @@ export function BoxScore({
           const stars = computeThreeStars(winProbability, feed)
           const potg = computePlayOfTheGame(winProbability, feed)
           const winProbPoints = selectWinProbPath(winProbability)
+          const winProbSwings = selectWinProbSwings(winProbability)
+          const winProbBigPlays = selectWinProbBigPlays(winProbability)
           // One per-inning play-by-play pass, shared by the Statcast
           // superlatives and the By-inning digest below so the feed isn't
           // walked twice on each reveal.
@@ -138,6 +140,8 @@ export function BoxScore({
               stars={stars}
               potg={potg}
               winProbPoints={winProbPoints}
+              winProbSwings={winProbSwings}
+              winProbBigPlays={winProbBigPlays}
               insights={insights}
               inningDigest={inningDigest}
               calloutNotes={calloutNotes}
@@ -174,7 +178,7 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbSwings, winProbBigPlays, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -264,6 +268,8 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, insights, inningD
                 feed. */}
             <WinProbChart
               points={winProbPoints}
+              swings={winProbSwings}
+              bigPlays={winProbBigPlays}
               awayAbbr={box.away.abbreviation}
               homeAbbr={box.home.abbreviation}
             />

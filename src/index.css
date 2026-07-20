@@ -7497,6 +7497,92 @@ body {
   font-size: var(--fs-caption);
 }
 
+/* Swing Stubs — the per-half seismograph under the line. One signed bar per
+   revealed half, down/navy toward home, up/clay toward away; the derivative the
+   line hides. Fixed-clamp scale (see WinProbChart.jsx), overflow notch beyond. */
+.winprob__subhead {
+  margin: 10px 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.winprob__swings {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 92px;
+}
+
+.winprob__stubbase {
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.75;
+}
+
+.winprob__stub--home { fill: var(--ink-2); }
+.winprob__stub--away { fill: var(--clay); }
+.winprob__stubnotch--home { fill: var(--ink-2); }
+.winprob__stubnotch--away { fill: var(--clay); }
+
+/* "How we got here" — a ruled ledger of the biggest revealed swings, newest on
+   top: a colored, arrowed magnitude, the play, and its half-inning tag. */
+.winprob__ledger-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.winprob__ledger-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-compact);
+}
+
+.winprob__ledger-row:first-child {
+  border-top: 0;
+}
+
+.winprob__ledger-swing {
+  flex: none;
+  min-width: 34px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.winprob__ledger-swing--home { color: var(--ink-2); }
+.winprob__ledger-swing--away { color: var(--clay); }
+
+.winprob__ledger-arrow {
+  margin-right: 3px;
+  font-size: var(--fs-caption);
+}
+
+.winprob__ledger-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-body);
+}
+
+.winprob__ledger-tag {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
 /* -------------------------------------------------------------- pitcher lines
    Running lines for every pitcher who has appeared in a revealed half-inning —
    one block per team, each led by the team name and its own header row (gated

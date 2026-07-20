@@ -51,3 +51,59 @@ export function winProbSplit(points) {
   const home = Math.round(points[points.length - 1].home)
   return { home, away: 100 - home }
 }
+
+// The game opens even — 0–0 at first pitch — so the first half's swing is
+// measured from a 50% home share, matching WinProbChart's synthetic origin.
+const EVEN = 50
+
+// Per-half NET swing — the derivative the line hides ("which half turned it").
+// One signed entry per revealed half-inning: `swing` is the change in the home
+// team's win % across that half (positive = the half moved toward home, negative
+// = toward away), i.e. the half's ending share minus the share it was entered on.
+// REVEAL-ONLY via selectWinProbPath's `throughHalf` clamp — only halves at or
+// below the revealed mark produce an entry, and it grows one entry per reveal.
+// Returns [] when there's no win-prob data (MiLB) so the caller draws nothing.
+export function selectWinProbSwings(winProb, { throughHalf = Infinity } = {}) {
+  const points = selectWinProbPath(winProb, { throughHalf })
+  if (points.length === 0) return []
+  const swings = []
+  let prevEnd = EVEN
+  let i = 0
+  while (i < points.length) {
+    const { inning, half } = points[i]
+    let j = i
+    while (j < points.length && points[j].inning === inning && points[j].half === half) j++
+    const end = points[j - 1].home // this half's last plotted share
+    swings.push({ inning, half, swing: end - prevEnd })
+    prevEnd = end
+    i = j
+  }
+  return swings
+}
+
+// The biggest momentum plays so far, newest first — the "how we got here"
+// ledger. Each entry is a single play's per-play delta (home share vs. the play
+// before it, the first measured from even), kept only if it cleared a swing
+// threshold, then the top `limit` by magnitude, re-sorted newest-first for
+// display. REVEAL-ONLY (same `throughHalf` clamp); [] when there's no data.
+export function selectWinProbBigPlays(
+  winProb,
+  { throughHalf = Infinity, limit = 4, minSwing = 8 } = {},
+) {
+  const points = selectWinProbPath(winProb, { throughHalf })
+  if (points.length === 0) return []
+  let prev = EVEN
+  const plays = []
+  for (let idx = 0; idx < points.length; idx++) {
+    const p = points[idx]
+    const delta = p.home - prev
+    prev = p.home
+    if (Math.abs(delta) >= minSwing) {
+      plays.push({ idx, delta, home: p.home, inning: p.inning, half: p.half, desc: p.desc })
+    }
+  }
+  return plays
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .slice(0, limit)
+    .sort((a, b) => b.idx - a.idx) // newest first for the ledger
+}

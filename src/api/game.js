@@ -9,30 +9,39 @@ export async function fetchGameFeed(gamePk, options) {
 }
 
 // Per-play win probability — the ONLY source of WPA, which is absent from the
-// live feed (verified: /feed/live carries no homeTeamWinProbabilityAdded). Used
-// solely to rank the box score's three stars, so it's fetched lazily with that
-// view and resolves null on failure — many MiLB parks don't compute it, and it
-// must never take the game view down. Score-revealing (like the feed itself), so
-// the caller only turns it into DOM inside the box score's seal.
+// live feed (verified: /feed/live carries no homeTeamWinProbabilityAdded). It
+// powers three consumers, so it's fetched lazily with the game view and resolves
+// null on failure — many MiLB parks don't compute it, and it must never take the
+// game view down. Score-revealing (like the feed itself), so the caller only
+// turns it into DOM behind the reveal gate (the box-score seal, or the innings
+// view's `revealedThrough` clamp).
 //
 // The unpruned response is ~186 KB gzipped — nearly a whole second feed —
 // because each play entry carries the full `playEvents` pitch-by-pitch array
 // (~85% of the payload), which this app never reads (it takes pitch data from
-// /feed/live instead). WIN_PROB_FIELDS is the COMPLETE read-set of the two
-// consumers — `computeThreeStars` and `computePlayOfTheGame` in boxscore.js —
-// so the `fields=` allowlist prunes it to ~6 KB with byte-identical output
-// (measured/validated across 5 games, 2026-07-12; ADR/api-audit R1). `matchup`
+// /feed/live instead). WIN_PROB_FIELDS is the COMPLETE read-set of the THREE
+// consumers — `computeThreeStars` + `computePlayOfTheGame` in boxscore.js (which
+// read the per-play delta `homeTeamWinProbabilityAdded`) AND `selectWinProbPath`
+// in winprob.js → the WinProbChart line, which reads the CUMULATIVE
+// `homeTeamWinProbability` plus `about.isScoringPlay` — so the `fields=`
+// allowlist prunes the payload while keeping every field those three read. The
+// MLB `fields=` filter matches key names at any depth, so a nested read like
+// `about.isScoringPlay` needs BOTH `about` and `isScoringPlay` listed. `matchup`
 // keeps BOTH `batter` and `pitcher` (three stars credit the pitcher the inverse
 // WPA — dropping `pitcher` silently corrupts the stars on games a pitcher stars
 // in). If you read a NEW field off a win-prob entry, add its name here or it
-// arrives `undefined`.
-const WIN_PROB_FIELDS = [
+// arrives `undefined` — this is exactly how the WinProbChart once went blank
+// (`homeTeamWinProbability` was missing from the list; pinned now by
+// test/winprob.test.js).
+export const WIN_PROB_FIELDS = [
+  'homeTeamWinProbability',
   'homeTeamWinProbabilityAdded',
   'atBatIndex',
   'about',
   'captivatingIndex',
   'inning',
   'isTopInning',
+  'isScoringPlay',
   'matchup',
   'batter',
   'pitcher',
@@ -45,12 +54,12 @@ const WIN_PROB_FIELDS = [
   'details',
   'isScoringEvent',
   'runner',
-].join(',')
+]
 
 export async function fetchWinProbability(gamePk) {
   try {
     const data = await getJson(
-      `/api/v1/game/${gamePk}/winProbability?fields=${WIN_PROB_FIELDS}`,
+      `/api/v1/game/${gamePk}/winProbability?fields=${WIN_PROB_FIELDS.join(',')}`,
     )
     return Array.isArray(data) ? data : null
   } catch {

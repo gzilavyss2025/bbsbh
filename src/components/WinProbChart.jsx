@@ -30,7 +30,28 @@ const PLOT_B = H - PAD_B
 const PLOT_W = PLOT_R - PLOT_L
 const PLOT_H = PLOT_B - PLOT_T
 
-export function WinProbChart({ points, awayAbbr, homeAbbr, partial = false }) {
+// The Swing Stubs strip — a short seismograph beneath the line: one signed bar
+// per revealed half (the derivative the line hides). Same horizontal padding as
+// the plot so it reads on the same axis; its own short viewBox.
+const SW_W = W
+const SW_H = 72
+const SW_PAD_T = 8
+const SW_PAD_B = 8
+const SW_BASE = SW_PAD_T + (SW_H - SW_PAD_T - SW_PAD_B) / 2 // the even-game baseline
+const SW_MAX_BAR = (SW_H - SW_PAD_T - SW_PAD_B) / 2 // full-height bar reach
+// A FIXED clamp (not an auto-max): a half swinging the home win % by this many
+// points draws a full-height bar; anything past it gets an overflow notch. A
+// constant keeps the geometry stable and can't hint a future swing is coming.
+const SW_MAX_SWING = 30
+
+export function WinProbChart({
+  points,
+  swings = [],
+  bigPlays = [],
+  awayAbbr,
+  homeAbbr,
+  partial = false,
+}) {
   if (!points || points.length === 0) return null
 
   const away = awayAbbr || 'AWY'
@@ -191,6 +212,88 @@ export function WinProbChart({ points, awayAbbr, homeAbbr, partial = false }) {
           </text>
         ))}
       </svg>
+
+      {swings.length > 0 && (
+        <>
+          <h4 className="winprob__subhead">Swing by half</h4>
+          <svg
+            className="winprob__swings"
+            viewBox={`0 0 ${SW_W} ${SW_H}`}
+            role="img"
+            aria-label={`Net win-probability swing of each ${
+              partial ? 'revealed ' : ''
+            }half-inning, toward ${home} below the line or ${away} above it.`}
+          >
+            {/* The even-game baseline the bars grow from. */}
+            <line
+              className="winprob__stubbase"
+              x1={PLOT_L}
+              y1={SW_BASE}
+              x2={PLOT_R}
+              y2={SW_BASE}
+            />
+            {swings.map((s, k) => {
+              const slotW = (SW_W - PAD_L - PAD_R) / swings.length
+              const cx = PAD_L + (k + 0.5) * slotW
+              const barW = Math.max(1.5, Math.min(9, slotW * 0.5))
+              const mag = Math.min(Math.abs(s.swing), SW_MAX_SWING) / SW_MAX_SWING
+              const h = mag * SW_MAX_BAR
+              if (s.swing === 0) return null // a dead-even half: no bar (baseline only)
+              const toHome = s.swing > 0 // toward home ⇒ down/navy; away ⇒ up/clay
+              const tone = toHome ? 'home' : 'away'
+              const tipY = toHome ? SW_BASE + h : SW_BASE - h
+              const overflow = Math.abs(s.swing) > SW_MAX_SWING
+              const notch = toHome
+                ? `${cx - 3},${tipY} ${cx + 3},${tipY} ${cx},${tipY + 4}`
+                : `${cx - 3},${tipY} ${cx + 3},${tipY} ${cx},${tipY - 4}`
+              return (
+                <g key={`sw-${s.inning}-${s.half}`}>
+                  <rect
+                    className={`winprob__stub winprob__stub--${tone}`}
+                    x={cx - barW / 2}
+                    y={toHome ? SW_BASE : SW_BASE - h}
+                    width={barW}
+                    height={h}
+                  />
+                  {overflow && (
+                    <polygon
+                      className={`winprob__stubnotch winprob__stubnotch--${tone}`}
+                      points={notch}
+                    />
+                  )}
+                </g>
+              )
+            })}
+          </svg>
+        </>
+      )}
+
+      {bigPlays.length > 0 && (
+        <div className="winprob__ledger">
+          <h4 className="winprob__subhead">Biggest swings</h4>
+          <ol className="winprob__ledger-list">
+            {bigPlays.map((p) => {
+              const toHome = p.delta > 0
+              const tone = toHome ? 'home' : 'away'
+              const tag = `${p.half === 'top' ? 'T' : 'B'}${p.inning}`
+              return (
+                <li className="winprob__ledger-row" key={`bp-${p.idx}`}>
+                  <span className={`winprob__ledger-swing winprob__ledger-swing--${tone}`}>
+                    <span className="winprob__ledger-arrow" aria-hidden="true">
+                      {toHome ? '▼' : '▲'}
+                    </span>
+                    {Math.abs(Math.round(p.delta))}
+                  </span>
+                  <span className="winprob__ledger-desc">
+                    {p.desc || `${toHome ? home : away} rally`}
+                  </span>
+                  <span className="winprob__ledger-tag">{tag}</span>
+                </li>
+              )
+            })}
+          </ol>
+        </div>
+      )}
     </section>
   )
 }

@@ -17,6 +17,7 @@ import { fetchWarData } from '../api/war.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../api/teamScore.js'
+import { fetchComebackWins, leagueComebackWinsFor } from '../api/comebackWins.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
@@ -189,7 +190,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage, comebackWinsData] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -237,6 +238,7 @@ async function loadTeam(id, asOf) {
       sportId === 1
         ? loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false }))
         : Promise.resolve({ days: [], cursor: null, hasMore: false }),
+      sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -383,6 +385,21 @@ async function loadTeam(id, asOf) {
         statRank(league.pitching, id, 'pitchesPerInning', 'P/IP', true),
       ]
     : null
+
+  // Comeback wins — wins after the team's win probability fell below 10/20/30%
+  // (nested). Ranked against the league like batting/pitching, but shown ONLY
+  // when this club has at least one such win: sub30 is the widest bucket, so
+  // sub30 === 0 means all three are zero and the card is hidden.
+  const comebackRows = leagueComebackWinsFor(comebackWinsData, season)
+  const myComeback = comebackRows.find((r) => r.teamId === id)?.stat
+  const comeback =
+    myComeback && myComeback.sub30 > 0
+      ? [
+          statRank(comebackRows, id, 'sub10', '< 10%', false),
+          statRank(comebackRows, id, 'sub20', '< 20%', false),
+          statRank(comebackRows, id, 'sub30', '< 30%', false),
+        ]
+      : null
 
   const position = roster
     .filter((r) => r.position?.type !== 'Pitcher')
@@ -627,7 +644,7 @@ async function loadTeam(id, asOf) {
     postseasonOdds,
     transactionsPage,
     standings: standingsRows,
-    batting, pitching, position, pitchers, injured,
+    batting, pitching, comeback, position, pitchers, injured,
     preferredLineup, substitutes, startingPitchers, bullpen,
     affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
     manager,
@@ -676,7 +693,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
+  const { team, season, record, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -815,6 +832,7 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {batting && <TeamStats title="Team batting" stats={batting} />}
         {pitching && <TeamStats title="Team pitching" stats={pitching} />}
+        {comeback && <TeamStats title="Comeback wins" stats={comeback} />}
 
         <TeamLeaders
           pool={leaderPool}

@@ -65,6 +65,12 @@ export const GROUPS = {
       'foul_pitch_types',
     ],
   },
+  // Both comeback tables are written by the one nightly gen-comeback-wins.mjs —
+  // one group, same as fouls/postseason above.
+  'comeback-wins': {
+    file: join(dataDir, 'comeback-wins.sql'),
+    tables: ['comeback_win_totals', 'comeback_ingested_games'],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay

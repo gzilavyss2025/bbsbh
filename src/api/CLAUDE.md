@@ -374,6 +374,13 @@ for each generator; the reader modules:
   the same-cutoff Season Surprise snapshot; both drivers remain visible and a
   club enters the league Grade pool only when both exist. See
   `docs/season-grade.md` and ADR-0020.
+- `comebackWins.js` — the Team Page's ranked "Comeback wins" card, from
+  `public/data/comeback-wins.json` (`gen-comeback-wins.mjs`). Per-team,
+  per-season counts of wins after the club's win prob fell below 10/20/30%
+  (nested). `comebackWinsFor` selects one club; `leagueComebackWinsFor` returns
+  every club as `{ teamId, stat }` rows so `TeamPage`'s `statRank` ranks each
+  threshold out of 30. Spoiler-free (a Final-games aggregate, same footing as
+  WAR) — no `SealBox`; the card renders only when a bucket is non-zero.
 - `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
   prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
   opinion, deliberately NOT a callout family (see docs/callouts.md's
