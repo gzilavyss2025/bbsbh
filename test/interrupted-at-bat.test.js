@@ -15,7 +15,7 @@
 // on the caught_stealing_2b play.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { computeHalfInningFeed, nextStepBoundary } from '../src/api/playbyplay.js'
+import { computeHalfInningFeed, nextStepBoundary, interruptedCode } from '../src/api/playbyplay.js'
 import { scorecardPlays } from '../src/api/loadScorecard.js'
 
 // ---- fixture --------------------------------------------------------------
@@ -140,9 +140,11 @@ test('an inning-ending caught stealing mid-count yields an interrupted at-bat ca
   assert.equal(lara.interrupted, true)
   // The pitches thrown to him — the only record of them in the half.
   assert.deepEqual(lara.pitches, ['C', 'S', 'F', 'B'])
-  // No batting result: no scorebook code, no out badge, an empty diamond.
-  assert.equal(lara.code, '')
-  assert.equal(lara.codeKind, 'none')
+  // No batting result — the mark is the scorer's carry-over notation (the
+  // event that ended the half plus the arrow toward next inning's column),
+  // penciled as a note, with no out badge and an empty diamond.
+  assert.equal(lara.code, 'CS →')
+  assert.equal(lara.codeKind, 'interrupted')
   assert.equal(lara.outNumber, null)
   assert.equal(lara.reached, 0)
   assert.equal(lara.scored, false)
@@ -240,6 +242,20 @@ test('a pitch-less baserunning play still falls back to a standalone event note'
   assert.equal(entries[0].outCode, 'PK 1-3')
 })
 
+test('the carry-over mark tags mirror the runner-out notation', () => {
+  assert.equal(interruptedCode('caught_stealing_2b'), 'CS →')
+  assert.equal(interruptedCode('caught_stealing_home'), 'CS →')
+  assert.equal(interruptedCode('pickoff_1b'), 'PK →')
+  assert.equal(interruptedCode('pickoff_caught_stealing_2b'), 'PK →')
+  assert.equal(interruptedCode('stolen_base_home'), 'SB →')
+  assert.equal(interruptedCode('wild_pitch'), 'WP →')
+  assert.equal(interruptedCode('passed_ball'), 'PB →')
+  assert.equal(interruptedCode('balk'), 'BK →')
+  // Never fabricate a tag for an unknown event — the bare arrow still says
+  // "carried over" on its own.
+  assert.equal(interruptedCode('something_new'), '→')
+})
+
 test('a game advisory still produces no card and no note', () => {
   const entries = computeHalfInningFeed(
     buildFeed({
@@ -268,6 +284,8 @@ test('the scorecard grid shows the interrupted cell but charges no at-bat', () =
   const inning7Col = grid.columns.findIndex((c) => c.inning === 7)
   const cell = laraSlot.cells[inning7Col]
   assert.equal(cell.interrupted, true)
+  assert.equal(cell.code, 'CS →') // the outcome box shows the carry-over mark
+  assert.equal(cell.outType, '') // …not an out classification
   assert.equal(cell.ladder.length, 4) // the pitches still ink the strip
   assert.equal(laraSlot.ab, 0) // …but no official at-bat is charged
 })

@@ -532,6 +532,24 @@ function legAdvanceCode(play, r) {
   return advanceCode(play)
 }
 
+// The scorer's mark penciled above an INTERRUPTED at-bat's diamond: the
+// shorthand for the baserunning event that ended the half plus the
+// carry-over arrow ("CS →", "PK →") — the paper-scorebook convention of
+// pointing at the next inning's column, where this batter's at-bat restarts
+// from scratch. Tags mirror runnerOutCode's (CS/PK/…) so the interrupted
+// card and the caught runner's own out notation can't drift apart.
+export function interruptedCode(eventType) {
+  const et = eventType ?? ''
+  let tag = ''
+  if (et.startsWith('caught_stealing')) tag = 'CS'
+  else if (et.startsWith('pickoff')) tag = 'PK' // includes pickoff_caught_stealing
+  else if (et.startsWith('stolen_base')) tag = 'SB'
+  else if (et === 'wild_pitch') tag = 'WP'
+  else if (et === 'passed_ball') tag = 'PB'
+  else if (et === 'balk') tag = 'BK'
+  return tag ? `${tag} →` : '→'
+}
+
 // The pitch-sequence fields an at-bat card renders, shared by a real plate
 // appearance's card and an INTERRUPTED at-bat's card (a top-level baserunning
 // play that carries the pitches thrown to whoever was mid-count when the half
@@ -1090,8 +1108,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           descSegments: [
             { text: `At-bat not completed — the inning ended on the bases${countTail}.` },
           ],
-          code: '',
-          codeKind: 'none',
+          code: interruptedCode(play.result?.eventType),
+          codeKind: 'interrupted',
           baserunningNotes: notes,
           outNumber: null,
           reached: 0,

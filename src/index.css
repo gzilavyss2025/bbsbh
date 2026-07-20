@@ -5899,6 +5899,14 @@ body {
   color: var(--clay-deep);
 }
 
+/* An interrupted at-bat's carry-over mark ("CS →" — the half ended on the
+   bases mid-count; the at-bat restarts next inning). Pencil graphite, not
+   ink: it's a scorer's note, not a batting result. Same treatment on the
+   scorecard sheet's outcome box (.sc-ab__type--interrupted below). */
+.pbp__code--interrupted {
+  color: var(--text-caption);
+}
+
 /* An out's fielding chain, penciled dead center on the diamond instead of
    above it — bigger than the reach codes since it's the dominant mark on
    the card. Mirrors .sc-ab__center's placement on the scorecard sheet, minus
@@ -17767,6 +17775,11 @@ body {
 /* An error inks red. */
 .sc-ab__type--error {
   color: var(--accent-negative);
+}
+/* An interrupted at-bat's carry-over mark ("CS →") — pencil graphite, same
+   scorer's-note treatment as the live card's .pbp__code--interrupted. */
+.sc-ab__type--interrupted {
+  color: var(--text-caption);
 }
 .sc-ab__diamond {
   position: relative;

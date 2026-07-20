@@ -4,7 +4,9 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 // row of two boxes — the play OUTCOME and the RBIs it drove in — with the base
 // diamond below. The OUTCOME box (top-left) reads the result of the plate
 // appearance: a base hit inks green and ringed (1B/2B/3B/HR), an error inks red
-// (E6), a walk/HBP its reach code, and an out its category (GO/FO/LO/SO…). The
+// (E6), a walk/HBP its reach code, an out its category (GO/FO/LO/SO…), and an
+// interrupted at-bat its graphite carry-over mark ("CS →" — the half ended on
+// the bases mid-count; see computeHalfInningFeed's interruptedCode). The
 // scorer's fielding chain for an out (F7, L3, 4-3, 6-3) is penciled in the MIDDLE
 // of the diamond. A gray "out" circle on the divider rings the 1/2/3 sequence
 // number, and a pitch strip of one white BALLS column and two darker STRIKES
@@ -50,7 +52,13 @@ export function AtBatBox({ atbat = null }) {
         <div className="sc-ab__head">
           <span
             className={`sc-ab__type ${
-              isHit ? 'sc-ab__type--hit' : isError ? 'sc-ab__type--error' : ''
+              isHit
+                ? 'sc-ab__type--hit'
+                : isError
+                  ? 'sc-ab__type--error'
+                  : kind === 'interrupted'
+                    ? 'sc-ab__type--interrupted'
+                    : ''
             }`}
           >
             {outcome}
