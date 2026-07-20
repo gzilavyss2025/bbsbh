@@ -17,6 +17,23 @@ These rules apply to every agent and every session in this repository.
 - End every task with a handoff that names the branch, worktree path, PR, dependency branch (if any), validation status, and whether the worktree is safe to remove. Never remove a dirty worktree or one whose PR is still active.
 - In the PR description, list the files or subsystems changed and flag likely overlap with other active work.
 
+## Claude/Codex parity
+
+- These rules apply equally to Claude Code and Codex. Claude's `.claude/settings.json`
+  hooks are useful safeguards for Claude sessions, but Codex must not assume those
+  hooks ran: perform the fetch/worktree/status/PR checks above explicitly and never
+  edit the shared primary checkout.
+- Before editing, read this file and the root `CLAUDE.md`; then read the most
+  specific nested `CLAUDE.md` and linked ADRs for the directories or invariants the
+  task touches. Use `CONTEXT.md` and `docs/agents/` for shared vocabulary and
+  workflow conventions rather than recreating local interpretations.
+- The shared skills live under `.agents/skills/` and are available to both agents.
+  `.claude/skills/` contains Claude-oriented entrypoints and pointers; it is not a
+  substitute for the repository rules above.
+- Preserve the test harness honestly: run the relevant unit/lint/E2E checks, add a
+  regression test for a bug fix when practical, and never delete, skip, weaken, or
+  bypass an assertion just to get a green result. Record validation in the handoff.
+
 ## Local visual handoff
 
 - For user-visible changes, run the appropriate checks and start a localhost dev server using the first free reserved script: `npm run dev`, then `dev:2` through `dev:5` if needed.

@@ -14,11 +14,12 @@ description: Launch bbsbh's dev server and drive it with Playwright to verify a 
 > automatically. Harmless on non-slate routes, so use it everywhere.
 
 This is a phone-first PWA with no backend — every screen fetches live from
-`statsapi.mlb.com`. There's no test suite (see CLAUDE.md); verification means
-actually loading screens in a browser. This skill exists to cut the token/time
-cost of that loop: fixed port, no port-discovery, no manual server
-start/stop/poll cycle, and a pinned set of real games with known-rare events
-so you're not hunting for a live game each session.
+`statsapi.mlb.com`. The repository has a CI-gated unit suite and permanent
+Playwright invariant specs; browser verification is still required for
+user-visible changes because unit tests cannot prove layout or interaction. This
+skill cuts the token/time cost of that loop: fixed port, no port-discovery, no
+manual server start/stop/poll cycle, and a pinned set of real games with
+known-rare events so you're not hunting for a live game each session.
 
 ## Fast path: Playwright (preferred)
 
@@ -49,8 +50,9 @@ interpret. Reach for a screenshot only when checking actual visual layout.
 
 Delete throwaway specs when done; keep `e2e/smoke.spec.js` as the one
 long-lived example (slate loads, a pinned game's lineup and box score render).
-This is a verification harness, not a CI-enforced regression suite — see
-CLAUDE.md's "no test suite" note, which is still true in spirit.
+This is a verification harness in addition to the CI-gated unit suite, not a
+replacement for it. Keep the permanent specs in `e2e/invariants/` focused on
+the reveal mechanism rather than feature-specific rendering.
 
 `e2e/invariants/` is the one deliberate exception: permanent specs that guard
 the spoiler-reveal mechanism itself (DOM-absence pre-reveal, the
@@ -69,9 +71,9 @@ npm run dev     # binds :5173 (strictPort — fails loudly instead of drifting t
 Ready when the terminal prints `ready in`. Navigate directly to
 `http://localhost:5173/{route}?nointro` — don't hit `/` and click through if you
 already know the route (see below), and keep the `?nointro` flag so the welcome
-modal never blocks the first-visit slate. Kill the server when done
-(`run_in_background` + stop, or Ctrl-C) — don't leave it orphaned across
-turns, it'll collide with the next `strictPort` start.
+modal never blocks the first-visit slate. For a user-visible change, keep the
+server running for the maintainer's handoff as required by `AGENTS.md`; stop it
+only when no handoff is needed or when you must release the reserved port.
 
 ## Routes, so you don't have to derive them
 
