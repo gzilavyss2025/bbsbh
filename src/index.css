@@ -1943,16 +1943,6 @@ body {
   }
 }
 
-/* Reduced motion: keep the tilt (static decoration, not movement) but drop the
-   press/rise so nothing flies in — the `both` fill leaves each element at its
-   resting state. */
-@media (prefers-reduced-motion: reduce) {
-  .postponed,
-  .postponed__stamp {
-    animation: none;
-  }
-}
-
 /* The pinned favorite's border/gradient tint to that club's own accent color
    (--pin-accent, a per-team hex set inline by GameCard from
    favoriteAccentColor() — see lib/teams.js) rather than a fixed green, so an
@@ -3483,12 +3473,6 @@ body {
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
-@media (prefers-reduced-motion: reduce) {
-  .attendance__note {
-    animation: none;
-  }
-}
-
 .section__title {
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -3709,12 +3693,6 @@ body {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-@media (prefers-reduced-motion: reduce) {
-  .umptier__note {
-    animation: none;
-  }
-}
-
 /* ---------------------------------------------------------------- lineup */
 .lineup__list {
   list-style: none;
@@ -5038,7 +5016,7 @@ body {
   padding: 0 4px;
   border-radius: var(--radius-xs);
   color: var(--text-heading);
-  animation: wcall-count-new 1.6s var(--ease-out) 1;
+  animation: wcall-count-new var(--dur-highlight) var(--ease-out) 1;
 }
 @keyframes wcall-count-old {
   0% { opacity: 1; }
@@ -7742,7 +7720,7 @@ body {
 
 .winprob__bigdot-label {
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--dur-fast) ease;
   pointer-events: none;
 }
 .winprob__bigdot-label-bg { fill: var(--team-color); }
@@ -9004,8 +8982,10 @@ body {
   /* Strong ease-in-out (not ease-out): unlike a one-shot reveal, a flip is
      bidirectional and should feel symmetric turning either way. 450ms sits at
      the top of the "modal/drawer"-scale range — this swaps a whole card's
-     worth of content, not a small UI nudge. */
-  transition: transform 450ms cubic-bezier(0.77, 0, 0.175, 1);
+     worth of content, not a small UI nudge. --dur-flip/--ease-flip name this
+     because it's reused verbatim by every flip in the app (see the
+     .statcast__flipbtn comment below). */
+  transition: transform var(--dur-flip) var(--ease-flip);
 }
 .flipcard--flipped .flipcard__inner {
   transform: rotateY(180deg);
@@ -10920,7 +10900,7 @@ body {
   font: inherit;
   text-align: inherit;
   cursor: pointer;
-  transition: transform 160ms var(--ease-out);
+  transition: transform var(--dur-snappy) var(--ease-out);
 }
 .statcast__flipbtn:active {
   transform: scale(0.97);
@@ -11001,7 +10981,7 @@ body {
   border-radius: var(--radius-sm);
   background: none;
   cursor: pointer;
-  transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 /* Unselected clubs read as grayed-out pencil references; the picked one snaps to
    full color inside a raised card that pops against the recessed tray. An
@@ -11009,7 +10989,7 @@ body {
 .vsteam__team .teamlogo {
   filter: grayscale(1);
   opacity: 0.4;
-  transition: filter 0.12s ease, opacity 0.12s ease;
+  transition: filter var(--dur-fast) ease, opacity var(--dur-fast) ease;
 }
 .vsteam__team.is-empty .teamlogo {
   opacity: 0.24;
@@ -12575,7 +12555,7 @@ body {
   background: var(--graphite-soft);
   opacity: .6;
   cursor: pointer;
-  transition: opacity 120ms ease, box-shadow 120ms ease;
+  transition: opacity var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 /* No transform on hover/focus — scaling a dot grows its hit-tested visual
    box into densely-packed neighbors (30 teams over one 0–10 rail put many
@@ -12865,15 +12845,6 @@ body {
     display: inline-flex;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .rankstrip__chip .teamlogo,
-  .rankstrip__chip .teamlogo--fallback,
-  .rankstrip__fade,
-  .rankstrip__nav {
-    transition: none;
-  }
-}
-
 .team-score__howlink {
   margin: 0;
   padding: 0;
@@ -12971,12 +12942,6 @@ body {
   }
   .team-score__row--driver .team-score__meta {
     min-height: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .team-score__dot,
-  .team-score__detail {
-    transition: none;
   }
 }
 .postseason-odds {
@@ -13974,8 +13939,8 @@ body {
   color: var(--graphite);
   cursor: pointer;
   transform: rotate(-4deg);
-  transition: border-color 120ms var(--ease-out), color 120ms var(--ease-out),
-    background-color 120ms var(--ease-out);
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
 }
 .radarpill__glyph:hover {
   border-color: var(--graphite-soft);
@@ -14066,12 +14031,6 @@ body {
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
   color: var(--text-caption);
-}
-@media (prefers-reduced-motion: reduce) {
-  .radarpill__glyph--pressed,
-  .radarpill__note {
-    animation: none;
-  }
 }
 
 /* team-hub roster (own classes — the .roster panel is a different component) */
@@ -19115,7 +19074,7 @@ body {
 .allstarlegacy__rankrail {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19125,7 +19084,10 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   box-shadow: var(--inset-cell);
-  transition: top 0.15s ease-out;
+  /* Position is driven entirely by `transform` (set inline by
+     TeamRankRail), never `top` — `top` triggers layout on every scroll-tied
+     update, `transform` stays on the compositor. */
+  transition: transform var(--dur-fast) var(--ease-standard);
 }
 .allstarlegacy__rankrail-num {
   font-family: var(--font-mono);

@@ -23,6 +23,22 @@
   --dur-med:    220ms;
   --dur-slow:   360ms;
 
+  /* Sub-200ms press feedback (review-animations STANDARDS.md's "button press
+     feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */
+  --dur-snappy: 160ms;
+
+  /* The card flip (src/components/FlipCard.jsx, .flipcard__inner) — a
+     bidirectional turn, so it earns its own symmetric ease-in-out rather than
+     the one-shot --ease-out used everywhere else, and its own duration at the
+     top of the "modal/drawer" scale since it swaps a whole card's content. */
+  --dur-flip:  450ms;
+  --ease-flip: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* One-shot highlighter-mark fade (Game/Weather Call count changes) — a
+     deliberately longer, ink-fading beat, not a UI transition; fires once per
+     mount, never loops. */
+  --dur-highlight: 1.6s;
+
   /* Sealed cover — kraft tape look, reused via background */
   --seal-texture: repeating-linear-gradient(
       -45deg,

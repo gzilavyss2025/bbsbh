@@ -170,7 +170,10 @@ function TeamRankRail({ rank, total }) {
   return (
     <div className="allstarlegacy__rankrail-wrap" aria-hidden="true">
       <div className="allstarlegacy__rankrail-track" />
-      <div className="allstarlegacy__rankrail" style={{ top: `${thumbTopVh}vh` }}>
+      <div
+        className="allstarlegacy__rankrail"
+        style={{ transform: `translate(-50%, -50%) translateY(${thumbTopVh}vh)` }}
+      >
         <span className="allstarlegacy__rankrail-num">{rank}</span>
         <span className="allstarlegacy__rankrail-of">of {total}</span>
       </div>
