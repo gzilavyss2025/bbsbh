@@ -1049,7 +1049,7 @@ async function ttoSplits(personId, sportId) {
     byGame.get(pk).push(s)
   }
 
-  const mk = () => ({ pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, sf: 0, tb: 0 })
+  const mk = () => ({ pa: 0, ab: 0, h: 0, bb: 0, hbp: 0, sf: 0, tb: 0, pit: 0 })
   const tally = { 1: mk(), 2: mk(), 3: mk() }
   for (const plays of byGame.values()) {
     plays.sort((a, b) => num(a.stat?.play?.atBatNumber) - num(b.stat?.play?.atBatNumber))
@@ -1062,6 +1062,10 @@ async function ttoSplits(personId, sportId) {
       const d = s.stat.play.details
       const t = tally[Math.min(trips, 3)]
       t.pa++
+      // Pitches in this plate appearance — the terminal pitch's number within
+      // the PA. Summed per trip bucket, it yields pitches-per-PA the 1st/2nd/
+      // 3rd time through (the "batters make him work more each look" story).
+      t.pit += num(s.stat?.play?.pitchNumber)
       if (d.isAtBat) t.ab++
       if (d.isBaseHit) t.h++
       const et = d.eventType
@@ -1081,7 +1085,9 @@ async function ttoSplits(personId, sportId) {
       t.ab > 0 && obpDen > 0
         ? ((t.h + t.bb + t.hbp) / obpDen + t.tb / t.ab).toFixed(3).replace(/^0/, '')
         : null
-    out[trip] = { pa: t.pa, ab: t.ab, h: t.h, avg: formatAvg(t.h, t.ab), ops }
+    // Pitches per PA this trip, one decimal — the ttoPitches note reads it.
+    const ppa = Math.round((t.pit / t.pa) * 10) / 10
+    out[trip] = { pa: t.pa, ab: t.ab, h: t.h, avg: formatAvg(t.h, t.ab), ops, ppa }
   }
   const tto = Object.keys(out).length > 0 ? out : null
 

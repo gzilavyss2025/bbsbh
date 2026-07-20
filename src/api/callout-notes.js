@@ -136,6 +136,7 @@ const SCORE_BASE = {
   scoringFirst: 30,
   inningRunDiff: 30,
   dayOfWeek: 30, // record on tonight's day of the week
+  ttoPitches: 30, // pitches per PA escalating each time through the order
   risp: 25,
   platoon: 25,
   tto: 20, // …and the plain trip-fact fallback without one
@@ -1093,17 +1094,20 @@ export function buildDayOfWeekNote(bundle, side, dow) {
 // due up in previously produced an inflated, off-batter trip number (e.g.
 // "3rd time" the half after only the leadoff man's 2nd look, because some
 // other spot in the order happened to bat in three separate quick innings).
-const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
-export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
-  const battingSide = half === 'top' ? 'away' : 'home'
-  const pitchingSide = otherSide(battingSide)
+// Shared trip-detection for the pre-half order-turnover cards below: which
+// pitcher a batting side is entering the staged half against, and how many
+// times the batter DUE UP LEADOFF has already seen him — the trip about to
+// begin. Returns { pitcherId, trip } with trip >= 2, or null when the order
+// hasn't turned over yet, the starter is gone (a reliever entered mid-game or a
+// between-innings change swapped him out), or the half hasn't started. Trips
+// count DISTINCT innings faced, not raw PAs — a batter who bats around twice in
+// one big inning is still one trip. CALLER-GATED: reads this side's previous
+// halves' plays (revealed material), so callers must restrict it to
+// halfIndex(inning, half) <= revealedThrough + 1.
+function enteringStarterTrip(feed, inning, half) {
   let firstPitcher = null
   let lastPitcher = null
-  // `${batterId}-${pitcherId}` -> distinct innings (turns through the order)
-  // that pairing has faced off, not raw PA count — a batter who bats around
-  // twice in one big inning is still only ONE trip through the order, so
-  // counting PAs would inflate a 2nd trip to a false 3rd.
-  const inningsFaced = new Map()
+  const inningsFaced = new Map() // `${batterId}-${pitcherId}` -> Set(innings faced)
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const about = p.about ?? {}
     // Same half TYPE only (this side batting), strictly before this inning.
@@ -1123,11 +1127,11 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   // The pitcher actually entering the staged half — a between-innings change
   // shows up as a leading pitching_substitution on the half's own first play.
   // If it swapped in someone other than the side's last pitcher, the starter
-  // is gone and this card must not fire (crediting a departed pitcher).
-  const entering = selectPrePitchChanges(feed, inning, half)
+  // is gone and these cards must not fire (crediting a departed pitcher).
+  const sub = selectPrePitchChanges(feed, inning, half)
     .filter((c) => c.eventType === 'pitching_substitution')
     .pop()
-  if (entering && entering.pitcher.id !== lastPitcher) return null
+  if (sub && sub.pitcher.id !== lastPitcher) return null
 
   // The batter actually due up first in the staged half — the order "turning
   // over" is defined by his trip count, not whoever has faced the pitcher the
@@ -1138,9 +1142,18 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
   if (leadoff == null) return null // the half hasn't actually started yet
 
   const priorTrips = inningsFaced.get(`${leadoff}-${lastPitcher}`)?.size ?? 0
-  if (priorTrips < 2) return null // the order hasn't turned over twice yet
+  if (priorTrips < 1) return null // the leadoff hitter hasn't seen him before
+  return { pitcherId: lastPitcher, trip: priorTrips + 1 }
+}
 
-  const trip = priorTrips + 1 // the look the top of the order is now getting
+const TTO_MIN_AB = 20 // 3rd-trip sample floor before the card cites its AVG
+export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const pitchingSide = otherSide(battingSide)
+  const found = enteringStarterTrip(feed, inning, half)
+  if (!found || found.trip < 3) return null // the order hasn't turned over twice yet
+  const lastPitcher = found.pitcherId
+  const trip = found.trip // the look the top of the order is now getting
   const { last } = personNameParts(feed?.gameData?.players?.[`ID${lastPitcher}`] ?? {})
   const who = last || 'the starter'
   const tto = bundle?.starterRecords?.[lastPitcher]?.tto
@@ -1166,6 +1179,51 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
     kind: 'tto',
     dedupeKey: `tto-${pitchingSide}-${lastPitcher}`,
     score: clampScore(SCORE_BASE.tto),
+  }
+}
+
+// "Batters make Peralta work more each time through this season — 3.8 pitches
+// per PA the 1st time, 4.6 the 2nd, 5.3 the 3rd" — the grind-escalation sibling
+// of the times-through card, from the same playLog-derived split (each trip
+// bucket's pitches-per-PA, `tto[trip].ppa`; see gen-callouts.mjs). Fires ONCE,
+// entering the half where the order first turns over a 2nd time (trip === 2), so
+// it never shares a strip with the 3rd-time AVG card above. Same caller-gate as
+// that card (enteringStarterTrip reads previous halves). Only when the pace
+// genuinely climbs — each trip needs a real PA sample and the 2nd time has to
+// cost at least TTO_PITCHES_MIN_STEP more pitches than the 1st, or it's not a
+// "wearing him down" story.
+const TTO_PITCHES_MIN_PA = 40
+const TTO_PITCHES_MIN_STEP = 0.4
+export function buildTtoPitchesNote(feed, bundle, inning, half) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const pitchingSide = otherSide(battingSide)
+  const found = enteringStarterTrip(feed, inning, half)
+  if (!found || found.trip !== 2) return null // introduced as the order first flips
+  const pitcherId = found.pitcherId
+  const tto = bundle?.starterRecords?.[pitcherId]?.tto
+  const t1 = tto?.[1]
+  const t2 = tto?.[2]
+  if (!t1 || !t2 || !isNum(t1.ppa) || !isNum(t2.ppa)) return null
+  if (!(t1.pa >= TTO_PITCHES_MIN_PA) || !(t2.pa >= TTO_PITCHES_MIN_PA)) return null
+  if (!(t2.ppa - t1.ppa >= TTO_PITCHES_MIN_STEP)) return null // must actually escalate
+
+  // Fold the 3rd trip into the progression only when it keeps climbing and has
+  // its own real sample — otherwise the two-trip version tells the story clean.
+  const t3 = tto?.[3]
+  const includeT3 = t3 && isNum(t3.ppa) && t3.pa >= TTO_PITCHES_MIN_PA && t3.ppa >= t2.ppa
+  const { last } = personNameParts(feed?.gameData?.players?.[`ID${pitcherId}`] ?? {})
+  const who = last || 'the starter'
+  const tail = includeT3
+    ? `${t1.ppa} pitches per PA the 1st time through, ${t2.ppa} the 2nd, ${t3.ppa} the 3rd`
+    : `${t1.ppa} pitches per PA the 1st time through, ${t2.ppa} the 2nd`
+  const step = (includeT3 ? t3.ppa : t2.ppa) - t1.ppa
+  return {
+    text: `Batters make ${who} work more each time through this season — ${tail}`,
+    personId: pitcherId,
+    side: pitchingSide,
+    kind: 'ttoPitches',
+    dedupeKey: `ttoPitches-${pitchingSide}-${pitcherId}`,
+    score: clampScore(SCORE_BASE.ttoPitches + Math.min(15, step * 10)),
   }
 }
 

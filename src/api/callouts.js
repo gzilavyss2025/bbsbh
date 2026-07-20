@@ -72,8 +72,8 @@ export async function fetchCallouts(urlDate) {
 //       pitchedYesterday? (true), backToBack?:{g,era,restEra},
 //       leverage?:{ahead,behind,tied} (each {avg,ops,ip}|null — opponents'
 //       line with his club ahead/behind/tied),
-//       tto?:{1,2,3} (each {pa,ab,h,avg,ops} — opponents' line the 1st/2nd/
-//       3rd+ time through the order; probable starters only),
+//       tto?:{1,2,3} (each {pa,ab,h,avg,ops,ppa} — opponents' line + pitches
+//       per PA the 1st/2nd/3rd+ time through the order; probable starters only),
 //       pitchPace?:{n,avg,starts} (avg pitches through the first n innings of
 //       his starts; probable starters only, same playLog as tto) } } — one
 //       entry per ROSTERED pitcher on either club, not just the day's probable

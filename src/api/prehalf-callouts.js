@@ -52,6 +52,7 @@ import {
   gameWeekday,
   buildInningRunDiffNote,
   buildThirdTimeThroughNote,
+  buildTtoPitchesNote,
   buildFoulVolumeNote,
   buildBullpenThinNote,
 } from './callout-notes.js'
@@ -149,6 +150,11 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
   if (halfIndex(inning, half) <= revealedThrough + 1) {
     const note = buildThirdTimeThroughNote(feed, bundle, inning, half)
     if (note) notes.push(note)
+    // The grind-escalation sibling — pitches per PA climbing each time through.
+    // Fires entering the 2nd-trip half only, so it never doubles up with the
+    // 3rd-time card above on the same strip.
+    const pace = buildTtoPitchesNote(feed, bundle, inning, half)
+    if (pace) notes.push(pace)
   }
 
   // 5. How hard the opposing starter is working — his pitch count tonight

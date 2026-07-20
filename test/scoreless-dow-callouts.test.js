@@ -8,6 +8,8 @@ import {
   buildScorelessHeldNotes,
   buildBothScorelessHeldNotes,
   buildDayOfWeekNotes,
+  buildTtoPitchesNote,
+  buildThirdTimeThroughNote,
   weekdayFromDate,
   gameWeekday,
 } from '../src/api/callout-notes.js'
@@ -224,4 +226,97 @@ test('dayOfWeek roll-up folds tonight in for a lopsided weekday', () => {
   const away = notes.find((n) => n.side === 'away')
   assert.ok(away, 'expected an away dayOfWeek note')
   assert.match(away.text, /on Sundays/)
+})
+
+// --- pitches-per-PA by times-through-the-order (ttoPitches) -------------------
+
+// The away side (home pitcher 77 on the mound) faces him across `priorInnings`
+// tops; batter 10 leads off each, then leads off the staged top half too — so
+// entering the staged inning his trip = priorInnings + 1.
+function tripFeed({ priorInnings, stagedInning, pid = 77 }) {
+  const plays = []
+  for (let inn = 1; inn <= priorInnings; inn++) {
+    for (const b of [10, 11, 12]) {
+      plays.push({
+        about: { inning: inn, halfInning: 'top', atBatIndex: inn * 10 + b },
+        result: { eventType: 'field_out' },
+        matchup: { batter: { id: b }, pitcher: { id: pid } },
+        playEvents: [],
+      })
+    }
+  }
+  plays.push({
+    about: { inning: stagedInning, halfInning: 'top', atBatIndex: stagedInning * 100 },
+    result: { eventType: 'strikeout' },
+    matchup: { batter: { id: 10 }, pitcher: { id: pid } },
+    playEvents: [],
+  })
+  return {
+    gameData: { players: { [`ID${pid}`]: { lastName: 'Peralta', fullName: 'Freddy Peralta' } } },
+    liveData: { plays: { allPlays: plays } },
+  }
+}
+const ttoBundle = (tto) => ({ ...BASE, starterRecords: { 77: { tto } } })
+
+test('ttoPitches fires entering the 2nd trip with the full escalation', () => {
+  const feed = tripFeed({ priorInnings: 1, stagedInning: 2 })
+  const bundle = ttoBundle({
+    1: { pa: 60, ppa: 3.8 },
+    2: { pa: 55, ppa: 4.6 },
+    3: { pa: 42, ppa: 5.3 },
+  })
+  const note = buildTtoPitchesNote(feed, bundle, 2, 'top')
+  assert.ok(note, 'expected a ttoPitches note')
+  assert.equal(
+    note.text,
+    'Batters make Peralta work more each time through this season — 3.8 pitches per PA the 1st time through, 4.6 the 2nd, 5.3 the 3rd',
+  )
+  assert.equal(note.side, 'home')
+  assert.equal(note.personId, 77)
+})
+
+test('ttoPitches stays quiet without a real per-PA climb', () => {
+  const feed = tripFeed({ priorInnings: 1, stagedInning: 2 })
+  const bundle = ttoBundle({ 1: { pa: 60, ppa: 4.0 }, 2: { pa: 55, ppa: 4.2 } }) // step 0.2 < 0.4
+  assert.equal(buildTtoPitchesNote(feed, bundle, 2, 'top'), null)
+})
+
+test('ttoPitches drops the 3rd trip when the pace stops climbing', () => {
+  const feed = tripFeed({ priorInnings: 1, stagedInning: 2 })
+  const bundle = ttoBundle({
+    1: { pa: 60, ppa: 3.8 },
+    2: { pa: 55, ppa: 4.6 },
+    3: { pa: 42, ppa: 4.4 }, // dips — not part of the "wear him down" line
+  })
+  const note = buildTtoPitchesNote(feed, bundle, 2, 'top')
+  assert.ok(note)
+  assert.match(note.text, /4\.6 the 2nd$/)
+  assert.doesNotMatch(note.text, /the 3rd/)
+})
+
+test('ttoPitches only fires entering the 2nd trip, not the 3rd', () => {
+  const feed = tripFeed({ priorInnings: 2, stagedInning: 3 }) // trip === 3 here
+  const bundle = ttoBundle({ 1: { pa: 60, ppa: 3.8 }, 2: { pa: 55, ppa: 4.6 } })
+  assert.equal(buildTtoPitchesNote(feed, bundle, 3, 'top'), null)
+})
+
+// Regression lock on the shared trip-detection refactor: the 3rd-time AVG card
+// still fires on a genuine 3rd trip and stays quiet on a 2nd.
+test('buildThirdTimeThroughNote still fires on a real 3rd trip', () => {
+  const feed = tripFeed({ priorInnings: 2, stagedInning: 3 })
+  const bundle = ttoBundle({
+    1: { pa: 200, ab: 190, avg: '.242', ppa: 3.8 },
+    3: { pa: 70, ab: 60, avg: '.310', ppa: 5.0 },
+  })
+  const note = buildThirdTimeThroughNote(feed, bundle, 3, 'top')
+  assert.ok(note, 'expected a tto note')
+  assert.equal(note.kind, 'tto')
+  assert.match(note.text, /a 3rd time this inning/)
+  assert.match(note.text, /\.310 off him the 3rd time through/)
+})
+
+test('buildThirdTimeThroughNote stays quiet entering only the 2nd trip', () => {
+  const feed = tripFeed({ priorInnings: 1, stagedInning: 2 })
+  const bundle = ttoBundle({ 1: { pa: 60, avg: '.242' }, 3: { pa: 40, avg: '.310', ab: 40 } })
+  assert.equal(buildThirdTimeThroughNote(feed, bundle, 2, 'top'), null)
 })

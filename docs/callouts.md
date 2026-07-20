@@ -66,6 +66,7 @@ table together.
 | oneRun / extraInnings | 35 | + 40 × skew |
 | tto (with a season split) | 35 | + min(15, 100 × AVG gap) |
 | scorelessThrough | 34 | + 40 × skew |
+| ttoPitches | 30 | + min(15, 10 × per-PA climb) |
 | pitchPace | 32 | + min(15, \|tonight − avg\| / 2) |
 | comeback | 30 | + 60 × win% (resilience, not lopsidedness) |
 | scoringFirst / oppScoringFirst | 30 | + 100 × deviation from league norm |
@@ -218,6 +219,16 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   revealed material — so it self-gates on `revealedThrough` like the
   leading-after note (ADR-0014), and fires only while the side's starter
   (first pitcher seen = last pitcher seen) is still in.
+- **ttoPitches** — the grind-escalation sibling of `tto`, from the same playLog
+  split (`starterRecords[pid].tto[trip].ppa` — pitches per PA each time
+  through): "Batters make Peralta work more each time through this season — 3.8
+  pitches per PA the 1st time, 4.6 the 2nd, 5.3 the 3rd." Fires ONCE, entering
+  the half where the order first turns over a 2nd time (trip === 2), so it never
+  shares a strip with the 3rd-time AVG card. Shares that card's trip-detection
+  (`enteringStarterTrip`) and `revealedThrough` self-gate. Gates: each cited
+  trip ≥ 40 PA, and the 2nd time has to cost ≥ 0.4 more pitches per PA than the
+  1st (a real climb, not noise); the 3rd trip joins the line only when it keeps
+  climbing. Pre-half only. MLB + MiLB.
 
 - **foulVolume** — entering a half, inning 3+: the batting side's foul count
   off the opposing STARTER tonight vs the league's per-pitch foul rate
