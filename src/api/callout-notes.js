@@ -660,18 +660,6 @@ export function buildCallouts(
         score: clampScore(SCORE_BASE.onBaseRiding + Math.min(15, s.onBase - 8)),
       })
     }
-    if (s?.stolenBase) {
-      notes.push({
-        text: `Has stolen ${s.stolenBase} straight without being caught`,
-        personId: entry.batterId,
-        side: battingSide,
-        kind: 'sbStreak',
-        run: s.stolenBase,
-        dedupeKey: `sbstreak-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.sbStreak + Math.min(10, s.stolenBase - 4)),
-      })
-    }
-
     const platoon = entry.pitcher?.hand === 'L' ? sit?.vl : entry.pitcher?.hand === 'R' ? sit?.vr : null
     if (platoon) {
       const arm = entry.pitcher.hand === 'L' ? 'lefties' : 'righties'
