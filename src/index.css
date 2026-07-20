@@ -1695,6 +1695,15 @@ body {
   color: var(--pin-accent, var(--field));
 }
 
+/* ★'s glyph box is bounding-box-centered by the flex centering above, but a
+   5-pointed star's visual weight sits lower than its bounding box (a single
+   point on top, two full-width legs on the bottom), so bbox-centering reads
+   as sitting low in the coin. Nudge the glyph itself, not the coin. */
+.gamecard__pinbadge-star {
+  display: inline-block;
+  transform: translateY(-1px);
+}
+
 .gamecard__open:active {
   transform: translateY(1px);
 }

@@ -45,7 +45,11 @@ export function GameCard({
           card needs its own day, unlike the slate (one date heads the whole
           page). Absent on every ordinary slate card. */}
       {dateLabel && <div className="gamecard__datebanner">{dateLabel}</div>}
-      {pinned && <span className="gamecard__pinbadge" aria-label="Pinned team">★</span>}
+      {pinned && (
+        <span className="gamecard__pinbadge" aria-label="Pinned team">
+          <span className="gamecard__pinbadge-star">★</span>
+        </span>
+      )}
       {postponed ? null : status.label ? (
         <span className="gamecard__delay" title={status.reason || undefined}>
           {status.label}
