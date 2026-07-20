@@ -41,6 +41,21 @@ function performerFrom(feed, side, boxPlayer, stat) {
 
 const TIER = { RARE: 0, NOTABLE: 1, STORY: 2, CLOSE: 3 }
 
+// A starter-record sub-caption ("Team is 11-6 in his starts") only earns its
+// line when the club actually wins behind him — see performerSubCaption.
+const STARTER_RECORD_MIN_STARTS = 8
+const STARTER_RECORD_MIN_WINPCT = 0.6
+
+// How many "was dominant (Game Score N)" highlights a single day keeps. Four
+// near-identical dominant-pitcher rows read as a wall, so only the best-pitched
+// games survive — ranked by Game Score across the whole slate, NOT dropped by
+// whether the pitcher also appears in Top Performers (an earlier fix did that
+// and kept the WEAKEST duplicate while cutting the day's best starts — the
+// exact backfire the review flagged). The genuine best pitching story is
+// allowed to repeat between Top Performers and Highlights; the lesser dominant
+// starts are what get trimmed.
+const MAX_DOMINANT_HIGHLIGHTS = 2
+
 // Every player who batted, from the raw feed (selectBoxscore's battingRows
 // strips fields like homeRuns that this module needs but the printed box
 // score doesn't show).
@@ -49,30 +64,38 @@ function battersOf(feed, side) {
   return Object.values(players).filter((p) => p.battingOrder != null)
 }
 
-function multiHrSignal(feed) {
+export function multiHrSignal(feed) {
+  // Pick the BEST multi-HR line in the game, not the first one found. Scanning
+  // away batters first and returning on the first `hr >= 2` buried a 3-HR game
+  // on the home team under a 2-HR game on the away team (a real bug: the CIN/COL
+  // game on 2026-07-19 credited Tyler Stephenson's 2 HR while Hunter Goodman hit
+  // 3 in the same box score) — and the `hr >= 3` points bonus below was
+  // effectively unreachable whenever a 2-HR hitter batted first. `hr > best.hr`
+  // (strict) keeps the away hitter on an exact tie, preserving prior ordering.
+  let best = null
   for (const side of ['away', 'home']) {
     for (const p of battersOf(feed, side)) {
       const hr = p.stats?.batting?.homeRuns ?? 0
-      if (hr >= 2) {
-        const name = p.person?.fullName ?? ''
-        return {
-          key: 'multiHr',
-          tier: TIER.NOTABLE,
-          points: 50 + (hr >= 3 ? 15 : 0),
-          // Colon, not another em dash — buildHeadline already appends
-          // " — {score}", and two dashes back to back ("Name — 2 HR — score")
-          // read like three unrelated fragments instead of one headline.
-          text: `${name}: ${hr} HR`,
-          performer: performerFrom(feed, side, p, `${hr} HR`),
-        }
-      }
+      if (hr >= 2 && (!best || hr > best.hr)) best = { hr, p, side }
     }
   }
-  return null
+  if (!best) return null
+  const { hr, p, side } = best
+  const name = p.person?.fullName ?? ''
+  return {
+    key: 'multiHr',
+    tier: TIER.NOTABLE,
+    points: 50 + (hr >= 3 ? 15 : 0),
+    // Colon, not another em dash — buildHeadline already appends
+    // " — {score}", and two dashes back to back ("Name — 2 HR — score")
+    // read like three unrelated fragments instead of one headline.
+    text: `${name}: ${hr} HR`,
+    performer: performerFrom(feed, side, p, `${hr} HR`),
+  }
 }
 
 // Starter's Game Score, from either team's first pitcher of record.
-function eliteGameScoreSignal(feed) {
+export function eliteGameScoreSignal(feed) {
   let best = null
   for (const side of ['away', 'home']) {
     const team = feed?.liveData?.boxscore?.teams?.[side]
@@ -90,10 +113,112 @@ function eliteGameScoreSignal(feed) {
   return {
     key: 'gameScore',
     tier: TIER.STORY,
-    points: best.gs >= 90 ? 40 : 25,
+    // Scale with the actual Game Score (80 is the floor to fire) so an 85 start
+    // ranks above an 80 one — the old two-bucket 25/40 made every 80–89 outing
+    // tie, which left ordering among the day's dominant starts arbitrary. `gs`
+    // rides on the signal so the cross-game de-dupe below can rank by it.
+    points: 25 + (best.gs - 80),
+    gs: best.gs,
     text: `${best.name} was dominant (Game Score ${best.gs})`,
     performer: performerFrom(feed, best.side, best.box, `Game Score ${best.gs}`),
   }
+}
+
+// A batter who hit for the cycle — single + double + triple + homer in one
+// game (singles are derived: hits minus the extra-base kinds the box lists).
+// Rare enough to lead a day; a hand-scorer's dream to have on the card.
+export function cycleSignal(feed) {
+  for (const side of ['away', 'home']) {
+    for (const p of battersOf(feed, side)) {
+      const b = p.stats?.batting
+      if (!b) continue
+      const hr = b.homeRuns ?? 0
+      const triples = b.triples ?? 0
+      const doubles = b.doubles ?? 0
+      const singles = (b.hits ?? 0) - hr - triples - doubles
+      if (singles >= 1 && doubles >= 1 && triples >= 1 && hr >= 1) {
+        return {
+          key: 'cycle',
+          tier: TIER.RARE,
+          points: 90,
+          text: `${p.person?.fullName ?? ''} hit for the cycle`,
+          performer: performerFrom(feed, side, p, 'Cycle'),
+        }
+      }
+    }
+  }
+  return null
+}
+
+// A position player who took the mound — listed among a team's pitchers but
+// whose position in this game isn't P (usually mop-up in a lopsided game). A
+// novelty the box score alone reveals; degrades silently where the field is
+// absent.
+export function positionPlayerPitchingSignal(feed) {
+  for (const side of ['away', 'home']) {
+    const team = feed?.liveData?.boxscore?.teams?.[side]
+    for (const id of team?.pitchers ?? []) {
+      const p = team?.players?.[`ID${id}`]
+      const pos = p?.position?.abbreviation
+      // A genuine position player on the mound — not a pitcher (P) and not a
+      // two-way player (TWP), whose pitching is his job, not a novelty.
+      if (p && pos && pos !== 'P' && pos !== 'TWP') {
+        return {
+          key: 'positionPlayerPitching',
+          tier: TIER.NOTABLE,
+          points: 45,
+          text: `${p.person?.fullName ?? ''} took the mound — a position player pitching`,
+          performer: performerFrom(feed, side, p, 'Position player, P'),
+        }
+      }
+    }
+  }
+  return null
+}
+
+// A triple play anywhere in the game — read off the play-by-play event/desc
+// (no reliable structured flag), so match defensively on the phrase. No single
+// protagonist (it's a defensive sequence), so it renders as a team-logo row.
+export function triplePlaySignal(feed) {
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const text = `${play?.result?.event ?? ''} ${play?.result?.description ?? ''}`
+    if (/triple play/i.test(text)) {
+      return { key: 'triplePlay', tier: TIER.RARE, points: 85, text: 'A triple play turned', performer: null }
+    }
+  }
+  return null
+}
+
+// Every Final game's bare result (both sides + the winner id), for the recap's
+// "Your Team" block — which needs the score of the favorite club's game even
+// when nobody on it cracked Top Performers or a highlight. Reveal-only like the
+// rest of this module (it reads run totals straight off the box score).
+export function selectGameResults(entries) {
+  return (entries ?? []).filter(Boolean).map(({ gamePk, game, feed, dateStr }) => {
+    const box = feed?.liveData?.boxscore?.teams ?? {}
+    const gd = feed?.gameData?.teams ?? {}
+    // Run totals off teamStats (the same field topPerformers.js reads); ids/
+    // abbreviations off gameData (present even where a side's box is thin).
+    const side = (key) => ({
+      id: gd?.[key]?.id ?? box?.[key]?.team?.id ?? null,
+      abbr: gd?.[key]?.abbreviation ?? box?.[key]?.team?.abbreviation ?? '',
+      r: box?.[key]?.teamStats?.batting?.runs ?? 0,
+    })
+    const away = side('away')
+    const home = side('home')
+    return {
+      gamePk,
+      away,
+      home,
+      // null on a tie (thin MiLB box with both totals defaulting to 0, a
+      // suspended/called tie) so the caller can hide the W/L badge rather than
+      // declaring the away side a phantom winner.
+      winnerId: home.r === away.r ? null : home.r > away.r ? home.id : away.id,
+      boxScorePath: game
+        ? gamePath(dateStr, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber)
+        : null,
+    }
+  })
 }
 
 // Win-probability-dependent signals — walk-off and largest comeback. Both
@@ -232,10 +357,15 @@ function noHitterSignal(box, feed) {
 // The feed's own play description often runs multiple sentences together —
 // "Ezequiel Duran homers (8) on a fly ball to center field. Brandon Nimmo
 // scores." — where that trailing "X scores." clause is redundant once the
-// score is appended right after it. Keep only the first sentence.
-function firstSentence(desc) {
-  const cut = desc.indexOf('. ')
-  return (cut === -1 ? desc : desc.slice(0, cut)).replace(/\.\s*$/, '')
+// score is appended right after it. Keep only the first sentence — but split on
+// a REAL sentence break, not the period inside an abbreviated name ("Tatis Jr.",
+// "J.C. Escarra"), which a naive indexOf('. ') truncated mid-name.
+export function firstSentence(desc) {
+  const str = desc ?? ''
+  // ". " that is NOT preceded by a name suffix (Jr/Sr/…) or a lone initial.
+  const m = str.match(/(?<!\b(?:Jr|Sr|St|Dr|[A-Z]))\.\s/)
+  const cut = m ? m.index : -1
+  return (cut === -1 ? str : str.slice(0, cut)).replace(/\.\s*$/, '')
 }
 
 // The single signal a game's row is built around — same (tier, points) sort
@@ -269,7 +399,7 @@ function buildHeadline(top, box, potg) {
 // degrade-gracefully convention as every other callouts consumer — MiLB dates
 // mostly have these families too (see docs/callouts.md's coverage note), and
 // a missing bundle/field just means no sub-caption, never a crash.
-function performerSubCaption(top, bundle) {
+export function performerSubCaption(top, bundle) {
   const id = top?.performer?.id
   if (!id || !bundle) return null
   if (top.key === 'multiHr') {
@@ -280,7 +410,17 @@ function performerSubCaption(top, bundle) {
   }
   if (top.key === 'gameScore') {
     const rec = bundle.starterRecords?.[id]?.teamStarts
-    if (rec) return `Team is ${rec.w}-${rec.l} in his starts`
+    // Only surface the club's record in his starts when it's genuinely
+    // flattering. A .500-ish or losing record ("Team is 8-8 in his starts")
+    // under a "was dominant" headline reads as a non-sequitur downer that
+    // undercuts the praise, so require a winning record over a meaningful
+    // sample — otherwise the row carries no sub-caption at all.
+    if (rec) {
+      const starts = (rec.w ?? 0) + (rec.l ?? 0)
+      if (starts >= STARTER_RECORD_MIN_STARTS && rec.w / starts >= STARTER_RECORD_MIN_WINPCT) {
+        return `Team is ${rec.w}-${rec.l} in his starts`
+      }
+    }
   }
   return null
 }
@@ -290,24 +430,45 @@ function performerSubCaption(top, bundle) {
 // slate date, both needed to build the box-score link. `calloutsData` is the
 // whole date's bundle (fetchCallouts's return, `{games}` keyed by gamePk) —
 // optional, so a caller with none (or a pre-callouts date) still gets plain
-// protagonist rows with no sub-caption.
+// protagonist rows with no sub-caption. The "was dominant" pitcher rows are
+// de-duped across the whole slate (see MAX_DOMINANT_HIGHLIGHTS) — a cross-game
+// pass, so the ranking is computed here in two phases rather than one map.
 export function rankDayHighlights(entries, calloutsData) {
-  return entries
-    .filter(Boolean)
-    .map(({ gamePk, game, feed, winProb, dateStr }) => {
-      const box = selectBoxscore(feed)
-      const potg = computePlayOfTheGame(winProb, feed)
-      const winnerIsHome = box.home.line.r > box.away.line.r
-      const extraInnings = Math.max(0, (box.innings?.length ?? 9) - 9)
+  // Phase 1: gather every game's fired signals (the objects, not just keys).
+  const games = entries.filter(Boolean).map(({ gamePk, game, feed, winProb, dateStr }) => {
+    const box = selectBoxscore(feed)
+    const potg = computePlayOfTheGame(winProb, feed)
+    const winnerIsHome = box.home.line.r > box.away.line.r
+    const extraInnings = Math.max(0, (box.innings?.length ?? 9) - 9)
+    const signals = [
+      noHitterSignal(box, feed),
+      triplePlaySignal(feed),
+      cycleSignal(feed),
+      multiHrSignal(feed),
+      positionPlayerPitchingSignal(feed),
+      eliteGameScoreSignal(feed),
+      ...winProbSignals(winProb, winnerIsHome, potg),
+      ...marginSignals(box.away, box.home, extraInnings),
+    ].filter(Boolean)
+    return { gamePk, game, dateStr, box, potg, winnerIsHome, signals }
+  })
 
-      const signals = [
-        noHitterSignal(box, feed),
-        multiHrSignal(feed),
-        eliteGameScoreSignal(feed),
-        ...winProbSignals(winProb, winnerIsHome, potg),
-        ...marginSignals(box.away, box.home, extraInnings),
-      ].filter(Boolean)
+  // Cross-game de-dupe: keep only the top MAX_DOMINANT_HIGHLIGHTS "was dominant"
+  // starts by Game Score across the slate; strip the rest so the day's best
+  // pitching survives while the repetitive tail drops.
+  const kept = new Set(
+    games
+      .flatMap((g) => g.signals.filter((s) => s.key === 'gameScore'))
+      .sort((a, b) => (b.gs ?? 0) - (a.gs ?? 0))
+      .slice(0, MAX_DOMINANT_HIGHLIGHTS),
+  )
+  for (const g of games) {
+    g.signals = g.signals.filter((s) => s.key !== 'gameScore' || kept.has(s))
+  }
 
+  // Phase 2: finalize each game's rank key + display fields.
+  return games
+    .map(({ gamePk, game, dateStr, box, potg, winnerIsHome, signals }) => {
       const tier = signals.length ? Math.min(...signals.map((s) => s.tier)) : 4
       const raw = signals.reduce((sum, s) => sum + s.points, 0)
       const score = 100 * (1 - Math.exp(-raw / 120))
@@ -322,6 +483,11 @@ export function rankDayHighlights(entries, calloutsData) {
         signals: signals.map((s) => s.key),
         performer: top?.performer ?? null,
         subCaption: performerSubCaption(top, bundle),
+        // The turning-point play, for the "Game of the Day" hero to show a
+        // beat beyond the headline (null where no win-prob feed → no potg).
+        // Suppressed on a walk-off: buildHeadline already splices the same play
+        // into the headline there, so showing it again reads as a stutter.
+        playOfGame: top?.key === 'walkoff' || !potg?.desc ? null : firstSentence(potg.desc),
         // The team-logo fallback row's pair, when the winning signal has no
         // performer (margin/length storylines, comeback) — winner first.
         teams: winnerIsHome
@@ -338,7 +504,12 @@ export function rankDayHighlights(entries, calloutsData) {
     })
     // A quiet game with no fired signal (tier 4, the "Final: X, Y" default
     // headline) isn't a HIGHLIGHT — drop it rather than pad the list with
-    // scores that don't belong in a "most interesting" ranking.
+    // scores that don't belong in a "most interesting" ranking. A game whose
+    // ONLY signal is a blowout is likewise dropped: a rout is the opposite of a
+    // highlight (its points are even negative), and it only ever rode the list
+    // as filler — when a lopsided game also has a real story (a multi-HR night),
+    // that OTHER signal keeps it.
     .filter((entry) => entry.signals.length > 0)
+    .filter((entry) => !(entry.signals.length === 1 && entry.signals[0] === 'blowout'))
     .sort((a, b) => a.tier - b.tier || b.score - a.score)
 }

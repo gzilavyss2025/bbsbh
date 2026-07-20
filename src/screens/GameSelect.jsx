@@ -379,20 +379,29 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
       )}
 
       <div className={finals.length > 0 || showTopPerformers ? 'slate-body' : undefined}>
-        {/* The rail — live Top Performers or past-day Day Recap, never both
-            (see showTopPerformers above) — renders BEFORE .slate-main so a
-            phone-width slate (plain block flow, no grid) stacks it above the
-            game list, its original spot; the desktop grid (.slate-body in
-            index.css) repositions it to the right via a named area regardless
-            of this DOM order. Exactly one rail child today; a real second
-            sibling would need its own named area added there too, rather
-            than falling through to an implicit auto-placed cell. */}
+        {/* The sealed daily digest — live Top Performers or a past day's Day
+            Recap, never both (see showTopPerformers above) — leads the slate,
+            full width above the game grid (.slate-body stacks recap-first at
+            every width; see index.css). Both render BEFORE .slate-main so plain
+            block flow already puts them on top. */}
         {showTopPerformers && (
           <TopPerformersBox
             dateStr={dateStr}
             sportId={sportId}
             games={eligibleGames}
             prospectsData={prospects.data}
+          />
+        )}
+        {finals.length > 0 && (
+          <PastDayRecapBox
+            dateStr={dateStr}
+            sportId={sportId}
+            games={finals}
+            prospectsData={prospects.data}
+            revealedAll={revealedAll}
+            onRevealAll={() => setRevealedAll(true)}
+            favoriteTeamId={favoriteTeamId}
+            favoriteAffiliateIds={favoriteAffiliateIds}
           />
         )}
 
@@ -451,17 +460,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             />
           )}
         </div>
-
-        {finals.length > 0 && (
-          <PastDayRecapBox
-            dateStr={dateStr}
-            sportId={sportId}
-            games={finals}
-            prospectsData={prospects.data}
-            revealedAll={revealedAll}
-            onRevealAll={() => setRevealedAll(true)}
-          />
-        )}
       </div>
 
       <SiteFooter
