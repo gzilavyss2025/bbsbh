@@ -89,13 +89,23 @@ export async function fetchVenue(venueId) {
 // hit the dedicated coaches endpoint and find the manager row. The job title
 // varies: a permanent skipper is 'Manager' (jobId 'MNGR'), but a fill-in is
 // 'Interim Manager' (jobId 'NTRM') — e.g. Don Mattingly for the 2026 Phillies.
-// So we match any job ending in "Manager", prefer a permanent one, and tag an
-// interim with "(interim)" so the label stays honest.
+// So we match any job ending in "Manager", prefer an interim over a
+// permanent one, and tag the interim with "(interim)" so the label stays
+// honest.
 //
 // The endpoint defaults to the CURRENT roster, so a historical box score
 // needs its game's own `season` passed through — otherwise a 2014 game shows
 // today's skipper instead of the one who actually managed it (verified: the
 // endpoint accepts `?season=YYYY` and returns that season's staff).
+//
+// A fired mid-season permanent manager's 'Manager' row is NOT removed from
+// the roster once an interim replaces him — both appear in the same season's
+// response (verified live: the 2026 Mets' coaches endpoint still lists
+// Carlos Mendoza as 'Manager' alongside Andy Green as 'Interim Manager' after
+// Mendoza was let go). An active interim appointment always means the
+// permanent skipper isn't running the team right now, so the interim wins —
+// the opposite of the old "prefer permanent" rule, which kept showing the
+// fired manager for the rest of the season.
 // ---------------------------------------------------------------------------
 
 export async function fetchManager(teamId, season) {
@@ -109,9 +119,10 @@ export async function fetchManager(teamId, season) {
     // 'Associate Manager' role (jobId 'ASSM'), a senior-advisor title that
     // isn't a second team manager but would false-match a "manager" regex.
     const managers = roster.filter((r) => r.jobId === 'MNGR' || r.jobId === 'NTRM')
-    // Prefer the exact 'Manager' over an 'Interim Manager' if both appear.
+    // Prefer the Interim Manager over a permanent 'Manager' if both appear —
+    // see the comment block above.
     const mgr =
-      managers.find((r) => r.job === 'Manager') ?? managers[0] ?? null
+      managers.find((r) => r.job !== 'Manager') ?? managers[0] ?? null
     const name = mgr?.person?.fullName
     if (!name) return null
     return {
