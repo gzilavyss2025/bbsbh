@@ -3831,10 +3831,14 @@ body {
   align-items: center;
   gap: var(--space-3);
   padding: 10px 12px;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  /* border/radius/shadow now live on the .startercard container so the masthead
+     caps one card cleanly (see .startercard). */
+}
+/* No-pitcher fallback sits directly in the card (not the padded body), so inset
+   it to match. */
+.startercard > .hint {
+  margin: 0;
+  padding: 10px 12px;
 }
 
 .shot.startercard__shot {
@@ -19193,13 +19197,25 @@ body {
   text-transform: uppercase;
   color: var(--text-on-ink);
 }
-/* Batting order, opposing defense, and opposing starter wear the navy masthead
-   as a standalone section header (no enclosing .metriccard), so the section
-   carries the top spacing the old <h3> margin used to provide. */
+/* Batting order and opposing defense wear the navy masthead as a standalone
+   section header (no enclosing card), so the section carries the top spacing the
+   old <h3> margin used to provide. */
 .lineup,
-.opp,
+.opp {
+  margin-top: var(--space-4);
+}
+/* The opposing-starter card DOES enclose its body, so the masthead caps a real
+   card here. The container owns the border/radius/shadow; the masthead rounds its
+   own top corners to match (same trick as .metriccard — no overflow:hidden, so a
+   pill tooltip inside can still escape), and the inner body drops its own
+   border/radius. Before this the body was a fully-rounded card of its own and the
+   masthead's square bottom corners + gold border overhung it as little "ears". */
 .startercard {
   margin-top: var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 }
 .metricbar__aside {
   display: inline-flex;
