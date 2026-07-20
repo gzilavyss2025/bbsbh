@@ -483,6 +483,11 @@ function oneSide(feed, side, decisions, pitchNotes, pitcherLines) {
   return {
     id: meta.id ?? null,
     teamName: meta.name ?? meta.teamName ?? (side === 'away' ? 'Away' : 'Home'),
+    // The club nickname alone ("Angels", "Tigers") — narrative prose (Day
+    // Recap's margin/length storylines) reads "The Angels edged the Tigers",
+    // where the abbreviation ("The LAA edged the DET") read like a filing tag.
+    // Absent on thin MiLB feeds, so callers fall back to the abbreviation.
+    clubName: meta.clubName ?? meta.teamName ?? '',
     abbreviation: meta.abbreviation ?? '',
     batters: battingRows(feed, side),
     batTotals: battingTotals(feed, side),

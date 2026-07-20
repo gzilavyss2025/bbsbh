@@ -39,8 +39,9 @@
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
        notification cards), `.bs__potgDesc`, `.flipback__potg`,
        `.psseries__potgDesc`, `.dayhl__rowBtn`, and the Day Recap's
-       `.gotd__headline` (Game of the Day headline), `.gotd__play`
-       (turning-point play), `.yourteam__perf` (the club's own line)
+       `.gotd__story` (Game of the Day storyline line), `.gotd__sub`
+       (the performer's record sub-line), and `.gotd__potgDesc`
+       (the turning-point play-by-play)
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
@@ -9382,57 +9383,43 @@ body {
   max-width: 560px;
 }
 
-/* --- "Game of the Day" hero: the featured lead card (GameOfDayHero). Heavier
-   chrome than a list row — a bigger headshot, the headline as the focal line,
-   and the turning-point play beneath it. */
+/* --- "Game of the Day" hero: the featured lead card (GameOfDayHero). Three
+   stacked beats — (1) team logos + winner-first score, (2) the standout
+   performer as a full card (or the storyline sentence when there's no single
+   protagonist), (3) the turning point (headshot + play-by-play). */
 .gotd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--paper-1);
 }
-.gotd__head {
+/* Beat 1 — logos + score, the whole strip a tap through to the box score. */
+.gotd__scoreline {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-.shot.gotd__shot {
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.gotd__headline {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
   text-align: left;
   border: 0;
   background: none;
   padding: 0;
-  color: var(--text-body);
-  font-family: var(--font-read);
-  font-size: var(--fs-body);
-  line-height: var(--lh-prose);
   cursor: pointer;
   transition: transform var(--dur-fast) var(--ease-standard);
 }
-.gotd__headline:active {
+.gotd__scoreline:active {
   transform: translateY(1px);
 }
-#root .gotd__headline {
-  text-transform: none; /* caps-exempt: reads as a natural sentence, same as .dayhl__rowBtn */
+.gotd__score {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
 }
-.gotd__play {
-  margin: var(--space-2) 0 0;
-  color: var(--text-caption);
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-}
-#root .gotd__play {
-  text-transform: none; /* caps-exempt: a play-by-play sentence */
-}
-.gotd__playlabel {
+.gotd__game {
+  margin-left: auto;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -9440,17 +9427,133 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.gotd .dayhl__rowMeta {
-  margin-top: var(--space-2);
+/* Beat 2 — the standout performer (a full PerformerCard) with an optional
+   record sub-line, or the storyline sentence for a no-protagonist game. */
+.gotd__perfcard {
+  margin: 0;
+}
+.gotd__sub {
+  margin: 0;
+  color: var(--text-caption);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+#root .gotd__sub {
+  text-transform: none; /* caps-exempt: a name + record phrase, not a label */
+}
+.gotd__story {
+  margin: 0;
+  color: var(--text-body);
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+}
+#root .gotd__story {
+  text-transform: none; /* caps-exempt: reads as a natural sentence, same as .dayhl__rowBtn */
+}
+/* Beat 3 — turning point: headshot + play-by-play + running score, the same
+   idiom as the postseason series recap (mirrors .psseries__potg*). */
+.gotd__potg {
+  border-top: var(--bw-hair) solid var(--border-rule);
+  padding-top: var(--space-3);
+}
+.gotd__potgTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.gotd__potgBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.shot.gotd__potgShot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.gotd__potgShot.shot--fallback {
+  font-size: var(--fs-hero-sm);
+}
+.gotd__potgMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.gotd__potgWho {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gotd__potgName {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.gotd__potgMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.gotd__potgDesc {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-heading);
+  text-transform: capitalize; /* caps-exempt: title-case play-by-play narrative, same convention as .psseries__potgDesc */
+}
+.gotd__potgWhen {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
+}
+.gotd__potgScore {
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
 }
 
-/* --- "Your Team": the favorite club's result up top (YourTeamCard). One wide
-   tappable row: logo, a W/L badge + score, and the club's own line beneath.
-   On a doubleheader day both games stack here under one heading. */
+/* --- "Your Team": the favorite club's result (YourTeamCard) paired with the
+   club's standout performer as a full card. Winner-first score. On a
+   doubleheader day both games stack here under one heading. */
 .yourteam__list {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
+}
+/* Result + performer card: stacked on phones (card nests under the result),
+   side by side once there's room. */
+.yourteam__pair {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
+}
+.yourteam__perfcard {
+  margin: 0;
+}
+@media (min-width: 560px) {
+  .yourteam__pair {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .yourteam__pair > .yourteam,
+  .yourteam__pair > .yourteam__perfcard {
+    flex: 1 1 0;
+  }
 }
 .yourteam {
   display: flex;
@@ -9514,16 +9617,9 @@ body {
 .yourteam__badge--tie {
   background: var(--text-caption);
 }
-.yourteam__perf {
-  color: var(--text-caption);
-  font-size: var(--fs-small);
-}
-#root .yourteam__perf {
-  text-transform: none; /* caps-exempt: a name + stat line, not a label */
-}
 
-/* --- "Odds & Ends": the demoted Statcast strip (OddsAndEndsStrip). One tidy
-   list of trivia, not three tile sections. */
+/* --- "Odds & Ends": the demoted Statcast strip, now a footer within the
+   "What You Missed" section (see RecapPanel). One tidy list of trivia. */
 .oddsends {
   list-style: none;
   margin: 0;
@@ -9531,6 +9627,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+/* When trivia follows the highlight list in the merged section, a hairline
+   sets it apart as the footer strip it is. */
+.dayhl__list + .oddsends {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 .oddsends__item {
   display: flex;
@@ -9603,6 +9706,16 @@ body {
 .dayhl__rowText {
   flex: 1;
   min-width: 0;
+}
+/* "Game 1"/"Game 2" tag inline on a team storyline row (doubleheader). */
+.dayhl__rowGame {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
 }
 /* "Face the Story" protagonist row — same card chrome as .playercard, with a
    smaller headshot (this is a list row, not a grid tile) and the headline

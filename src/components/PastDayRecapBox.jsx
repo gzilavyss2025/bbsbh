@@ -31,12 +31,15 @@ import { scorePairsLine } from './GameResultFace.jsx'
 // button, rather than wrapping the whole row: the performer variant also
 // needs its own PlayerLink/TeamLink buttons alongside, and HTML disallows
 // nesting interactive elements inside a button.
-function DayHighlightRow({ entry }) {
+function DayHighlightRow({ entry, dhLabel }) {
   const navigate = useNav()
   const goToBox = () => navigate(entry.boxScorePath)
 
   if (entry.performer) {
     const { performer } = entry
+    // The headline already leads with the player's name ("Drake Baldwin: 2 HR
+    // — …"), so the meta line carries only the team + notes, never the name
+    // again — the repeated name read as a glitch.
     return (
       <li className="dayhl__row dayhl__row--performer">
         <span className="dayhl__rowShotwrap">
@@ -53,9 +56,9 @@ function DayHighlightRow({ entry }) {
             {entry.headline}
           </button>
           <div className="dayhl__rowMeta">
-            <PlayerLink id={performer.id}>{performer.name}</PlayerLink>
             <TeamLogo teamId={performer.teamId} name={performer.teamAbbr} size={14} />
             <TeamLink id={performer.teamId}>{performer.teamAbbr}</TeamLink>
+            {dhLabel && <span className="dayhl__rowSub">· {dhLabel}</span>}
             {entry.subCaption && <span className="dayhl__rowSub">· {entry.subCaption}</span>}
           </div>
         </div>
@@ -71,9 +74,63 @@ function DayHighlightRow({ entry }) {
           <TeamLogo teamId={teams?.winner?.id} name={teams?.winner?.abbr} size={20} />
           <TeamLogo teamId={teams?.loser?.id} name={teams?.loser?.abbr} size={20} />
         </span>
-        <span className="dayhl__rowText">{entry.headline}</span>
+        <span className="dayhl__rowText">
+          {entry.headline}
+          {dhLabel && <span className="dayhl__rowGame"> · {dhLabel}</span>}
+        </span>
       </button>
     </li>
+  )
+}
+
+// n → "1st"/"2nd"/"7th" for the turning-point inning tag.
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`
+}
+
+// The game's turning point — headshot + play-by-play + running score, the same
+// idiom as the postseason series recap's Play of the Game (SeriesPlayOfTheGame
+// in PostseasonSeriesPage.jsx). Reused here for the Game of the Day hero.
+function TurningPoint({ tp }) {
+  const halfLabel = tp.half === 'top' ? 'Top' : 'Bottom'
+  const hasScore = tp.awayScore != null && tp.homeScore != null
+  return (
+    <div className="gotd__potg">
+      <h4 className="gotd__potgTitle">Turning point</h4>
+      <div className="gotd__potgBody">
+        <Headshot personId={tp.batterId} name={tp.batterName} teamId={tp.batterTeamId} className="gotd__potgShot" />
+        <div className="gotd__potgMain">
+          {tp.batterName && (
+            <div className="gotd__potgWho">
+              <PlayerLink id={tp.batterId} className="gotd__potgName">
+                {tp.batterName}
+              </PlayerLink>
+              {(tp.batterTeamAbbr || tp.batterPos) && (
+                <span className="gotd__potgMeta">
+                  {[tp.batterTeamAbbr, tp.batterPos].filter(Boolean).join(' · ')}
+                </span>
+              )}
+            </div>
+          )}
+          <p className="gotd__potgDesc">
+            {tp.inning != null && (
+              <span className="gotd__potgWhen">
+                {halfLabel} {ordinal(tp.inning)}{' '}
+              </span>
+            )}
+            {tp.desc}
+            {hasScore && (
+              <span className="gotd__potgScore">
+                {' '}
+                {tp.awayAbbr} {tp.awayScore}, {tp.homeAbbr} {tp.homeScore}
+              </span>
+            )}
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -158,8 +215,18 @@ export function PerformerCard({ entry }) {
 // score — the performer name stays plain text (not a link) so nothing
 // interactive nests inside the button. `label` ("Game 1"/"Game 2") is set only
 // on a doubleheader, so a single game shows no redundant tag. The "Your Team"
-// heading lives in RecapPanel so both games of a twin bill share one.
-function YourTeamCard({ result, teamId, performer, label }) {
+// heading lives in RecapPanel so both games of a twin bill share one, and the
+// club's top performer rides alongside as a full PerformerCard (see RecapPanel).
+//
+// Score reads winner-first ("BREWERS 3, MARLINS 1"), the way a fan recounts a
+// result — regardless of home/away; a tie keeps away/home order.
+function winnerFirstPairs(result) {
+  const away = [result.away.abbr, result.away.r]
+  const home = [result.home.abbr, result.home.r]
+  if (result.winnerId == null) return [away, home]
+  return result.winnerId === result.home.id ? [home, away] : [away, home]
+}
+function YourTeamCard({ result, teamId, label }) {
   const navigate = useNav()
   const abbr = result.home.id === teamId ? result.home.abbr : result.away.abbr
   // winnerId is null on a tie (see selectGameResults) — show T, not a bogus L.
@@ -176,90 +243,53 @@ function YourTeamCard({ result, teamId, performer, label }) {
         {label && <span className="yourteam__game">{label}</span>}
         <span className="yourteam__result">
           <span className={`yourteam__badge yourteam__badge--${outcome}`}>{badge}</span>
-          {scorePairsLine([
-            [result.away.abbr, result.away.r],
-            [result.home.abbr, result.home.r],
-          ])}
+          {scorePairsLine(winnerFirstPairs(result))}
         </span>
-        {performer && (
-          <span className="yourteam__perf">
-            {performer.name} — {performer.stat}
-          </span>
-        )}
       </span>
     </button>
   )
 }
 
 // "Game of the Day": the day's #1-ranked highlight, promoted to a featured
-// lead so the fan gets the story before the lists (the top row of Day
-// Highlights was doing this job in a flat list; here it gets a headline, the
-// turning-point play, and — when the signal has one — its protagonist). The
-// headline taps through to the box score; the meta line carries the player/
-// team links, kept as siblings of the button, never nested inside it.
-function GameOfDayHero({ entry }) {
+// lead so the fan gets the story before the lists. Three beats, top to bottom:
+// (1) the team logos + winner-first score (taps to the box), (2) the standout
+// performer as a full PerformerCard — or, on a storyline with no single
+// protagonist (margin/length/comeback), the narrative line instead — and
+// (3) the turning point, a headshot + play-by-play (the postseason recap idiom,
+// see TurningPoint). `dhLabel` tags a doubleheader game so its matchup isn't
+// ambiguous.
+function GameOfDayHero({ entry, dhLabel }) {
   const navigate = useNav()
-  const { performer } = entry
+  const { performer, teams, turningPoint } = entry
   return (
     <section className="dayhl__section">
       <h3 className="dayhl__title">Game of the Day</h3>
       <div className="gotd">
-        <div className="gotd__head">
-          {performer ? (
-            <span className="dayhl__rowShotwrap">
-              <Headshot
-                personId={performer.id}
-                name={performer.name}
-                teamId={performer.teamId}
-                className="gotd__shot"
-              />
-              {performer.position && <span className="playercard__posbadge">{performer.position}</span>}
-            </span>
-          ) : (
-            <span className="dayhl__rowLogos">
-              <TeamLogo teamId={entry.teams?.winner?.id} name={entry.teams?.winner?.abbr} size={30} />
-              <TeamLogo teamId={entry.teams?.loser?.id} name={entry.teams?.loser?.abbr} size={30} />
-            </span>
-          )}
-          <button type="button" className="gotd__headline" onClick={() => navigate(entry.boxScorePath)}>
-            {entry.headline}
-          </button>
-        </div>
-        {entry.playOfGame && (
-          <p className="gotd__play">
-            <span className="gotd__playlabel">Turning point</span> {entry.playOfGame}
-          </p>
+        <button type="button" className="gotd__scoreline" onClick={() => navigate(entry.boxScorePath)}>
+          <span className="dayhl__rowLogos">
+            <TeamLogo teamId={teams?.winner?.id} name={teams?.winner?.abbr} size={28} />
+            <TeamLogo teamId={teams?.loser?.id} name={teams?.loser?.abbr} size={28} />
+          </span>
+          <span className="gotd__score">
+            {scorePairsLine([
+              [teams?.winner?.abbr, teams?.winner?.r],
+              [teams?.loser?.abbr, teams?.loser?.r],
+            ])}
+          </span>
+          {dhLabel && <span className="gotd__game">{dhLabel}</span>}
+        </button>
+        {performer ? (
+          <>
+            <ul className="playercard__list gotd__perfcard">
+              <PerformerCard entry={performer} />
+            </ul>
+            {entry.subCaption && <p className="gotd__sub">{entry.subCaption}</p>}
+          </>
+        ) : (
+          entry.story && <p className="gotd__story">{entry.story}</p>
         )}
-        {performer && (
-          <div className="dayhl__rowMeta">
-            <PlayerLink id={performer.id}>{performer.name}</PlayerLink>
-            <TeamLogo teamId={performer.teamId} name={performer.teamAbbr} size={14} />
-            <TeamLink id={performer.teamId}>{performer.teamAbbr}</TeamLink>
-            {entry.subCaption && <span className="dayhl__rowSub">· {entry.subCaption}</span>}
-          </div>
-        )}
+        {turningPoint && <TurningPoint tp={turningPoint} />}
       </div>
-    </section>
-  )
-}
-
-// "Odds & Ends": the former Statcast Leaders section, demoted from three
-// co-equal tile sections to one compact strip — freak-physics trivia earns a
-// footer line, not equal billing with the day's stories (the reviewers were
-// unanimous). Each item links the player; the number stays mono.
-function OddsAndEndsStrip({ cards }) {
-  return (
-    <section className="dayhl__section">
-      <h3 className="dayhl__title">Odds &amp; Ends</h3>
-      <ul className="oddsends">
-        {cards.map(({ label, entry }) => (
-          <li key={label} className="oddsends__item">
-            <span className="oddsends__label">{label}</span>
-            <PlayerLink id={entry.id}>{entry.name}</PlayerLink>
-            <span className="oddsends__stat">{entry.stat}</span>
-          </li>
-        ))}
-      </ul>
     </section>
   )
 }
@@ -354,6 +384,20 @@ function RecapPanel({ games, prospects, dateStr, sportId, favoriteTeamId, favori
   // Label each row only when there's more than one — a single game needs no tag.
   const isTwinBill = yourGames.length > 1
 
+  // Doubleheader detection: a matchup that appears twice on the slate. Rows for
+  // those games get a "Game 1"/"Game 2" tag so a repeated matchup (e.g. the two
+  // LAD/NYY games, one carrying Yamamoto's dominant start) isn't confusing.
+  const matchupKey = (a, b) => [a, b].sort((x, y) => x - y).join('-')
+  const dhCounts = {}
+  for (const r of results ?? []) {
+    const k = matchupKey(r.away.id, r.home.id)
+    dhCounts[k] = (dhCounts[k] ?? 0) + 1
+  }
+  const dhLabel = (entry) =>
+    entry.gameNumber != null && dhCounts[matchupKey(entry.teams?.winner?.id, entry.teams?.loser?.id)] > 1
+      ? `Game ${entry.gameNumber}`
+      : null
+
   // One person, one appearance: a player already carrying a highlight (the hero
   // or any "What You Missed" row) — or either Your Team line — is dropped from
   // Standout Performances, so a name never hits the eye twice in one recap.
@@ -402,18 +446,23 @@ function RecapPanel({ games, prospects, dateStr, sportId, favoriteTeamId, favori
             <h3 className="dayhl__title">Your Team</h3>
             <div className="yourteam__list">
               {yourGames.map(({ result, teamId, performer }) => (
-                <YourTeamCard
-                  key={result.gamePk}
-                  result={result}
-                  teamId={teamId}
-                  performer={performer}
-                  label={isTwinBill ? `Game ${result.gameNumber ?? ''}`.trim() : null}
-                />
+                <div className="yourteam__pair" key={result.gamePk}>
+                  <YourTeamCard
+                    result={result}
+                    teamId={teamId}
+                    label={isTwinBill ? `Game ${result.gameNumber ?? ''}`.trim() : null}
+                  />
+                  {performer && (
+                    <ul className="playercard__list yourteam__perfcard">
+                      <PerformerCard entry={performer} />
+                    </ul>
+                  )}
+                </div>
               ))}
             </div>
           </section>
         )}
-        {hero && <GameOfDayHero entry={hero} />}
+        {hero && <GameOfDayHero entry={hero} dhLabel={dhLabel(hero)} />}
         {hasPerformers && (
           <section className="dayhl__section">
             <h3 className="dayhl__title">Standout Performances</h3>
@@ -439,17 +488,32 @@ function RecapPanel({ games, prospects, dateStr, sportId, favoriteTeamId, favori
             )}
           </section>
         )}
-        {missed.length > 0 && (
+        {/* What You Missed + Odds & Ends share one section — the day's other
+            stories, then the freak-physics trivia strip as a footer, no second
+            heading. */}
+        {(missed.length > 0 || statcastCards.length > 0) && (
           <section className="dayhl__section">
             <h3 className="dayhl__title">What You Missed</h3>
-            <ol className="dayhl__list">
-              {missed.map((h) => (
-                <DayHighlightRow key={h.gamePk} entry={h} />
-              ))}
-            </ol>
+            {missed.length > 0 && (
+              <ol className="dayhl__list">
+                {missed.map((h) => (
+                  <DayHighlightRow key={h.gamePk} entry={h} dhLabel={dhLabel(h)} />
+                ))}
+              </ol>
+            )}
+            {statcastCards.length > 0 && (
+              <ul className="oddsends">
+                {statcastCards.map(({ label, entry }) => (
+                  <li key={label} className="oddsends__item">
+                    <span className="oddsends__label">{label}</span>
+                    <PlayerLink id={entry.id}>{entry.name}</PlayerLink>
+                    <span className="oddsends__stat">{entry.stat}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         )}
-        {statcastCards.length > 0 && <OddsAndEndsStrip cards={statcastCards} />}
         {nothing && <p className="hint hint--prose">Nothing to recap for this day yet.</p>}
       </div>
     </LinkScope>
