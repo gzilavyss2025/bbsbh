@@ -1232,12 +1232,10 @@ body {
 }
 
 /* ---------------------------------------------------------------- loader
-   Bat-and-ball loading indicator (Loader.jsx) — the app's shared "waiting"
-   state. The bat takes a cut (pivoting at the handle) while the ball drops
-   into the barrel in time with the swing; both freeze under reduced-motion.
-   Colors read on manila paper: kraft-amber wood, seam-red band + laces, a
-   brightest-paper ball fenced with a faded-rule hairline so it doesn't melt
-   into a card. */
+   Manual-scoreboard loading indicator (Loader.jsx) — one cream score plate
+   advances through 0–9 inside a field-green frame, like a scorekeeper has
+   posted it from behind the board. The rest of the board stays still, so the
+   wait reads as a quiet update rather than a looping sports-action graphic. */
 .loader {
   display: flex;
   align-items: center;
@@ -1246,45 +1244,69 @@ body {
 }
 
 .loader__stage {
-  position: relative;
   flex: none;
-  width: 128px;
-  height: 76px;
+  width: 96px;
+}
+
+.loader__scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   overflow: hidden;
+  border: 2px solid var(--field-deep);
+  background: var(--field-deep);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent);
 }
 
-.loader__bat {
-  position: absolute;
-  left: 6px;
-  bottom: 8px;
-  width: 116px;
-  height: auto;
-  transform-origin: 12% 58%; /* the hands, at the knob end (left) */
-  animation: loader-swing 0.62s cubic-bezier(0.63, 0.09, 0.75, 0.46) infinite alternate;
+.loader__inning-label {
+  grid-column: 1 / -1;
+  padding: 2px 0 1px;
+  color: var(--paper-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  text-align: center;
 }
 
-.loader__ball {
-  position: absolute;
-  left: 86px; /* over the barrel (right end) — the contact point */
-  bottom: 34px;
-  width: 25px;
-  height: 25px;
-  animation: loader-bounce 0.62s cubic-bezier(0.63, 0.09, 0.76, 0.45) infinite alternate;
+.loader__inning-grid {
+  display: contents;
 }
 
-.loader__bat-wood {
-  fill: var(--seal);
+.loader__inning-grid span,
+.loader__plate-window {
+  display: grid;
+  min-height: 23px;
+  place-items: center;
+  border-top: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
+  background: var(--field);
+  color: var(--paper-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
 }
-.loader__bat-band {
-  fill: var(--clay);
+
+.loader__inning-grid span:last-child {
+  border-right: 0;
 }
-.loader__ball-cover {
-  fill: var(--paper-3);
-  stroke: var(--rule);
-  stroke-width: 1.4;
+
+.loader__plate-window {
+  grid-column: 2;
+  overflow: hidden;
+  border-right-color: color-mix(in srgb, var(--paper-2) 74%, transparent);
+  background: var(--paper-2);
+  color: var(--field-deep);
 }
-.loader__ball-lace {
-  fill: var(--clay);
+
+.loader__plate {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  animation: loader-plate-settle 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .loader__label {
@@ -1296,26 +1318,14 @@ body {
   line-height: var(--lh-body);
 }
 
-/* Section-level placeholder — same choreography, smaller footprint so it
-   sits inside a card/column without shoving content around. */
+/* Section-level placeholder — same board, smaller footprint so it sits inside
+   a card or column without shoving content around. */
 .loader--inline {
   gap: var(--space-2);
   padding: 8px 2px;
 }
 .loader--inline .loader__stage {
-  width: 90px;
-  height: 52px;
-}
-.loader--inline .loader__bat {
-  width: 82px;
-  left: 3px;
-  bottom: 4px;
-}
-.loader--inline .loader__ball {
-  width: 18px;
-  height: 18px;
-  bottom: 24px;
-  left: 60px;
+  width: 76px;
 }
 .loader--inline .loader__label {
   font-size: var(--fs-ui);
@@ -1328,32 +1338,23 @@ body {
   text-transform: uppercase;
 }
 
-@keyframes loader-swing {
+@keyframes loader-plate-settle {
   0% {
-    transform: rotate(11deg);
+    opacity: 0;
+    transform: translateY(-45%);
+  }
+  55% {
+    opacity: 1;
   }
   100% {
-    transform: rotate(-17deg);
-  }
-}
-
-@keyframes loader-bounce {
-  0% {
-    transform: translateY(-30px);
-  }
-  100% {
+    opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Freeze on the contact tableau — bat through the zone, ball on the barrel. */
 @media (prefers-reduced-motion: reduce) {
-  .loader__bat,
-  .loader__ball {
+  .loader__plate {
     animation: none;
-  }
-  .loader__bat {
-    transform: rotate(-13deg);
   }
 }
 
