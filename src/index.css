@@ -19197,25 +19197,51 @@ body {
   text-transform: uppercase;
   color: var(--text-on-ink);
 }
-/* Batting order and opposing defense wear the navy masthead as a standalone
-   section header (no enclosing card), so the section carries the top spacing the
-   old <h3> margin used to provide. */
+/* Batting order, opposing defense, and opposing starter each wear the navy
+   masthead as the header of a real card. The CONTAINER owns the border / radius /
+   shadow; the inner body sheds its own so the masthead caps one clean card. Skip
+   this and the masthead's square bottom corners + gold border overhang the body's
+   rounded top corners as little "ears". */
 .lineup,
-.opp {
-  margin-top: var(--space-4);
-}
-/* The opposing-starter card DOES enclose its body, so the masthead caps a real
-   card here. The container owns the border/radius/shadow; the masthead rounds its
-   own top corners to match (same trick as .metriccard — no overflow:hidden, so a
-   pill tooltip inside can still escape), and the inner body drops its own
-   border/radius. Before this the body was a fully-rounded card of its own and the
-   masthead's square bottom corners + gold border overhung it as little "ears". */
+.opp,
 .startercard {
   margin-top: var(--space-4);
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
+}
+/* The batting-order rows and the defense diamond carry their own backgrounds, so
+   the card clips them (and the masthead) to its rounded corners. Safe here — these
+   two mastheads hold no info popover to escape, and the lineup list already ran
+   overflow:hidden. The starter card stays UNclipped (its pills' tooltips must
+   escape); its masthead rounds its own top corners to match, the .metriccard way. */
+.lineup,
+.opp {
+  overflow: hidden;
+}
+/* Bodies drop their own card chrome — the container owns it now. Scoped so
+   DefenseDiamond's six other (uncapped) usages keep their own border. */
+.lineup .lineup__list {
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+}
+.opp .defdiamond {
+  border: 0;
+  border-radius: 0;
+}
+/* Not-posted fallback inside the batting-order card: the roster block sheds its
+   own frame and its notice insets to the card. */
+.lineup .roster {
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+}
+.lineup .roster__notice {
+  margin: 8px 12px;
 }
 .metricbar__aside {
   display: inline-flex;
@@ -19428,7 +19454,13 @@ body {
   font-size: var(--fs-compact);
   color: var(--accent-negative);
 }
+/* The numeric header must right-align to sit over its right-aligned values —
+   the base `.lstrength__table th { text-align: left }` would otherwise win. Zero
+   the caps letter-spacing too so the last glyph lands flush with the mono numbers
+   below (trailing letter-spacing would nudge it left of the column edge). */
 th.lstrength__pts {
+  text-align: right;
+  letter-spacing: var(--ls-none);
   color: var(--text-caption);
 }
 .lstrength__clean {
