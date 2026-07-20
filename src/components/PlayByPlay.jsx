@@ -476,7 +476,7 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
       <div className="pbp__side">
         <PitchLadder pitches={pitches} />
         <div className="pbp__play">
-          {codeKind !== 'out' && code && (
+          {codeKind !== 'out' && codeKind !== 'interrupted' && code && (
             <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
           )}
           <PlayDiamond
@@ -496,6 +496,13 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
             ) : (
               code && <span className="pbp__code pbp__code--center pbp__code--out">{code}</span>
             ))}
+          {/* An interrupted at-bat's carry-over mark ("CS →") is penciled in
+              the MIDDLE of the diamond, where the scorer writes it — the
+              otherwise-empty diamond (nobody aboard, no out) is what keeps it
+              from reading as this batter's own baserunning. */}
+          {codeKind === 'interrupted' && code && (
+            <span className="pbp__code pbp__code--center pbp__code--interrupted">{code}</span>
+          )}
           {outNumber != null && (
             <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
               {outNumber}

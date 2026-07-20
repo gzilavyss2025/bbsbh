@@ -5900,9 +5900,10 @@ body {
 }
 
 /* An interrupted at-bat's carry-over mark ("CS →" — the half ended on the
-   bases mid-count; the at-bat restarts next inning). Pencil graphite, not
-   ink: it's a scorer's note, not a batting result. Same treatment on the
-   scorecard sheet's outcome box (.sc-ab__type--interrupted below). */
+   bases mid-count; the at-bat restarts next inning), penciled in the MIDDLE
+   of the diamond (combined with .pbp__code--center) the way the scorer
+   writes it. Pencil graphite, not ink: it's a scorer's note, not a batting
+   result. Same treatment on the scorecard sheet (.sc-ab__center--interrupted). */
 .pbp__code--interrupted {
   color: var(--text-caption);
 }
@@ -17776,11 +17777,6 @@ body {
 .sc-ab__type--error {
   color: var(--accent-negative);
 }
-/* An interrupted at-bat's carry-over mark ("CS →") — pencil graphite, same
-   scorer's-note treatment as the live card's .pbp__code--interrupted. */
-.sc-ab__type--interrupted {
-  color: var(--text-caption);
-}
 .sc-ab__diamond {
   position: relative;
   margin-top: 3px;
@@ -17809,6 +17805,12 @@ body {
 }
 .sc-ab__center--out {
   color: var(--graphite);
+}
+/* An interrupted at-bat's carry-over mark ("CS →") mid-diamond — same pencil
+   graphite as an out chain; the blank outcome box and empty diamond are what
+   distinguish it from a result (see AtBatBox). */
+.sc-ab__center--interrupted {
+  color: var(--text-caption);
 }
 /* The out circle rides the divider between the diamond and the pitch strip,
    ringed in pencil with the 1/2/3 sequence number inside. */
