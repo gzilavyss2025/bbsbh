@@ -156,38 +156,38 @@ export function PerformerCard({ entry }) {
 // (selectGameResults) so it shows even on a game with no standout; the team's
 // own top line rides along when there is one. The whole card taps to the box
 // score — the performer name stays plain text (not a link) so nothing
-// interactive nests inside the button.
-function YourTeamCard({ result, teamId, performer }) {
+// interactive nests inside the button. `label` ("Game 1"/"Game 2") is set only
+// on a doubleheader, so a single game shows no redundant tag. The "Your Team"
+// heading lives in RecapPanel so both games of a twin bill share one.
+function YourTeamCard({ result, teamId, performer, label }) {
   const navigate = useNav()
   const abbr = result.home.id === teamId ? result.home.abbr : result.away.abbr
   // winnerId is null on a tie (see selectGameResults) — show T, not a bogus L.
   const outcome = result.winnerId == null ? 'tie' : result.winnerId === teamId ? 'win' : 'loss'
   const badge = { win: 'W', loss: 'L', tie: 'T' }[outcome]
   return (
-    <section className="dayhl__section">
-      <h3 className="dayhl__title">Your Team</h3>
-      <button
-        type="button"
-        className="yourteam"
-        onClick={() => result.boxScorePath && navigate(result.boxScorePath)}
-      >
-        <TeamLogo teamId={teamId} name={abbr} size={34} />
-        <span className="yourteam__body">
-          <span className="yourteam__result">
-            <span className={`yourteam__badge yourteam__badge--${outcome}`}>{badge}</span>
-            {scorePairsLine([
-              [result.away.abbr, result.away.r],
-              [result.home.abbr, result.home.r],
-            ])}
-          </span>
-          {performer && (
-            <span className="yourteam__perf">
-              {performer.name} — {performer.stat}
-            </span>
-          )}
+    <button
+      type="button"
+      className="yourteam"
+      onClick={() => result.boxScorePath && navigate(result.boxScorePath)}
+    >
+      <TeamLogo teamId={teamId} name={abbr} size={34} />
+      <span className="yourteam__body">
+        {label && <span className="yourteam__game">{label}</span>}
+        <span className="yourteam__result">
+          <span className={`yourteam__badge yourteam__badge--${outcome}`}>{badge}</span>
+          {scorePairsLine([
+            [result.away.abbr, result.away.r],
+            [result.home.abbr, result.home.r],
+          ])}
         </span>
-      </button>
-    </section>
+        {performer && (
+          <span className="yourteam__perf">
+            {performer.name} — {performer.stat}
+          </span>
+        )}
+      </span>
+    </button>
   )
 }
 
@@ -332,32 +332,36 @@ function RecapPanel({ games, prospects, dateStr, sportId, favoriteTeamId, favori
   const missed = highlights.slice(1)
 
   // Your Team: the favorite club (or, on a MiLB level, one of its affiliates)
-  // if it played today. Absent on older artifacts with no `results` array.
+  // if it played today — BOTH games on a doubleheader day, not just the opener.
+  // Absent on older artifacts with no `results` array.
   const favIds = [favoriteTeamId, ...(favoriteAffiliateIds ?? [])].filter((id) => id != null)
-  const yourResult =
-    (results ?? []).find((r) => favIds.includes(r.away.id) || favIds.includes(r.home.id)) ?? null
-  const yourTeamId = yourResult
-    ? favIds.includes(yourResult.home.id)
-      ? yourResult.home.id
-      : yourResult.away.id
-    : null
-  // Match the club's own top line to the SHOWN game — the box-score path
-  // disambiguates a doubleheader (game 1 vs game 2), so a nightcap performer
-  // isn't pinned under the opener's result. Falls back to team-only when the
-  // path is absent (older artifact).
-  const yourPerformer = yourTeamId
-    ? ([...winners, ...losers].find(
-        (e) =>
-          e.teamId === yourTeamId &&
-          (!yourResult.boxScorePath || e.game?.boxScorePath === yourResult.boxScorePath),
-      ) ?? null)
-    : null
+  const yourGames = (results ?? [])
+    .filter((r) => favIds.includes(r.away.id) || favIds.includes(r.home.id))
+    .map((result) => {
+      const teamId = favIds.includes(result.home.id) ? result.home.id : result.away.id
+      // Match the club's own top line to THIS game — the box-score path
+      // disambiguates a doubleheader (game 1 vs game 2), so a nightcap
+      // performer isn't pinned under the opener's result. Falls back to
+      // team-only when the path is absent (older artifact).
+      const performer =
+        [...winners, ...losers].find(
+          (e) =>
+            e.teamId === teamId &&
+            (!result.boxScorePath || e.game?.boxScorePath === result.boxScorePath),
+        ) ?? null
+      return { result, teamId, performer }
+    })
+  // Label each row only when there's more than one — a single game needs no tag.
+  const isTwinBill = yourGames.length > 1
 
   // One person, one appearance: a player already carrying a highlight (the hero
-  // or any "What You Missed" row) — or the Your Team line — is dropped from
+  // or any "What You Missed" row) — or either Your Team line — is dropped from
   // Standout Performances, so a name never hits the eye twice in one recap.
   const shownIds = new Set(
-    [...highlights.map((h) => h.performer?.id), yourPerformer?.id].filter(Boolean),
+    [
+      ...highlights.map((h) => h.performer?.id),
+      ...yourGames.map((g) => g.performer?.id),
+    ].filter(Boolean),
   )
   const dedupe = (arr) => arr.filter((e) => !shownIds.has(e.id))
   const winnersD = dedupe(winners)
@@ -370,12 +374,45 @@ function RecapPanel({ games, prospects, dateStr, sportId, favoriteTeamId, favori
     { label: 'Fastest K', entry: superlatives.fastestStrikeout },
   ].filter((c) => c.entry)
 
-  const nothing = !hero && !hasPerformers && !yourResult && statcastCards.length === 0
+  const nothing = !hero && !hasPerformers && yourGames.length === 0 && statcastCards.length === 0
+
+  // The revealed recap can run long (hero + Your Team + Standouts + What You
+  // Missed) and push the game grid below the fold — a jump straight to the
+  // sealed game cards, since the grid is the reason most people opened the
+  // slate. Targets #slate-games in GameSelect; honors reduced-motion and hands
+  // keyboard focus to the grid, not just the viewport.
+  const jumpToGames = () => {
+    const el = typeof document !== 'undefined' && document.getElementById('slate-games')
+    if (!el) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+    el.focus({ preventScroll: true })
+  }
 
   return (
     <LinkScope asOf={dateStr} sportId={sportId}>
       <div className="pastdayrecap__body">
-        {yourResult && <YourTeamCard result={yourResult} teamId={yourTeamId} performer={yourPerformer} />}
+        {!nothing && (
+          <button type="button" className="recapjump" onClick={jumpToGames}>
+            Jump to games <span aria-hidden="true">↓</span>
+          </button>
+        )}
+        {yourGames.length > 0 && (
+          <section className="dayhl__section">
+            <h3 className="dayhl__title">Your Team</h3>
+            <div className="yourteam__list">
+              {yourGames.map(({ result, teamId, performer }) => (
+                <YourTeamCard
+                  key={result.gamePk}
+                  result={result}
+                  teamId={teamId}
+                  performer={performer}
+                  label={isTwinBill ? `Game ${result.gameNumber ?? ''}`.trim() : null}
+                />
+              ))}
+            </div>
+          </section>
+        )}
         {hero && <GameOfDayHero entry={hero} />}
         {hasPerformers && (
           <section className="dayhl__section">

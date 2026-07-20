@@ -405,7 +405,11 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           />
         )}
 
-        <div className="slate-main">
+        {/* Scroll/focus target for the recap's "Jump to games" control (see
+            PastDayRecapBox) — the revealed recap can run long and push the grid
+            below the fold. tabIndex -1 lets the jump hand keyboard focus here,
+            not just move the viewport. */}
+        <div className="slate-main" id="slate-games" tabIndex={-1} aria-label="Games">
           <ul className="gamelist">
             {sorted.length === 0 && isDerbyDay && (
               <li>

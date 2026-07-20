@@ -12,6 +12,7 @@ import {
   positionPlayerPitchingSignal,
   triplePlaySignal,
   selectGameResults,
+  rankDayHighlights,
   firstSentence,
 } from '../src/api/dayHighlights.js'
 
@@ -288,6 +289,156 @@ test('firstSentence: does not truncate inside initials like "J.C."', () => {
     firstSentence('J.C. Escarra doubles (3) on a sharp ground ball'),
     'J.C. Escarra doubles (3) on a sharp ground ball',
   )
+})
+
+// --------------------------------------------------------------------------
+// rankDayHighlights — the cross-game trims: keep only the top-2 "dominant
+// start" rows across the whole slate, and drop a game whose ONLY story is a
+// blowout (or that fired nothing at all). These live in the two-phase ranking,
+// not in any single signal, so they need a fuller whole-game feed than the
+// per-signal tests above (selectBoxscore reads run/hit/error totals off
+// liveData.linescore, batting off teamStats, and each starter's Game Score off
+// the first pitcher's pitching line).
+// --------------------------------------------------------------------------
+
+// Populate only the fields selectBoxscore + the signals actually read. `away`/
+// `home`: { abbr, id, r, h, e, bb, batters:[{id,name,hr,pos}], start:<pitching> }.
+function rankFeed({ away = {}, home = {}, innings = 9 } = {}) {
+  const oneSide = (s, fallbackId) => {
+    const players = {}
+    ;(s.batters ?? []).forEach((b, i) => {
+      players[`ID${b.id}`] = {
+        person: { id: b.id, fullName: b.name },
+        battingOrder: `${(i + 1) * 100}`,
+        position: { abbreviation: b.pos ?? 'DH' },
+        stats: { batting: { homeRuns: b.hr ?? 0 } },
+      }
+    })
+    const pitchers = []
+    if (s.start) {
+      const pid = s.startId ?? fallbackId
+      pitchers.push(pid)
+      players[`ID${pid}`] = {
+        person: { id: pid, fullName: s.startName ?? 'Starter' },
+        position: { abbreviation: 'P' },
+        stats: { pitching: s.start },
+      }
+    }
+    return { players, pitchers, teamStats: { batting: { baseOnBalls: s.bb ?? 0, runs: s.r ?? 0, hits: s.h ?? 0 } } }
+  }
+  return {
+    gameData: {
+      teams: {
+        away: { id: away.id ?? 10, abbreviation: away.abbr ?? 'AWY' },
+        home: { id: home.id ?? 20, abbreviation: home.abbr ?? 'HOM' },
+      },
+    },
+    liveData: {
+      decisions: {},
+      plays: { allPlays: [] },
+      boxscore: { info: [], teams: { away: oneSide(away, 900), home: oneSide(home, 901) } },
+      linescore: {
+        teams: {
+          away: { runs: away.r ?? 0, hits: away.h ?? 0, errors: away.e ?? 0, leftOnBase: 0 },
+          home: { runs: home.r ?? 0, hits: home.h ?? 0, errors: home.e ?? 0, leftOnBase: 0 },
+        },
+        innings: Array.from({ length: innings }, (_, i) => ({ num: i + 1, away: { runs: 0 }, home: { runs: 0 } })),
+      },
+    },
+  }
+}
+const rankEntry = (gamePk, feed) => ({
+  gamePk,
+  feed,
+  winProb: [],
+  dateStr: '2026-07-19',
+  game: { away: { abbreviation: 'AWY' }, home: { abbreviation: 'HOM' }, gameNumber: 1 },
+})
+// A dominant start with a given Game Score, plus enough of a win (margin 3, both
+// sides with hits) that NO other signal fires — so the only storyline is the
+// start itself. 9 IP lines: A→98, B→87, C→83 (all clear the 80 floor).
+const dominantGame = (gamePk, pitching) =>
+  rankEntry(gamePk, rankFeed({ away: { r: 4, h: 6, start: pitching }, home: { r: 1, h: 5 } }))
+const START_98 = { inningsPitched: '9.0', hits: 2, earnedRuns: 0, runs: 0, strikeOuts: 8, baseOnBalls: 0 }
+const START_87 = { inningsPitched: '9.0', hits: 4, earnedRuns: 1, runs: 1, strikeOuts: 6, baseOnBalls: 1 }
+const START_83 = { inningsPitched: '9.0', hits: 5, earnedRuns: 1, runs: 1, strikeOuts: 4, baseOnBalls: 1 }
+
+test('rankDayHighlights: keeps only the top-2 dominant starts across the slate', () => {
+  const ranked = rankDayHighlights(
+    [dominantGame(1, START_98), dominantGame(2, START_87), dominantGame(3, START_83)],
+    null,
+  )
+  // The 83 start is the weakest of three — trimmed, and since it was that
+  // game's only story the whole game drops off the recap.
+  assert.deepEqual(
+    ranked.map((e) => e.gamePk),
+    [1, 2],
+  )
+  assert.ok(ranked.every((e) => e.signals.includes('gameScore')))
+})
+
+test('rankDayHighlights: the surviving dominant starts sort best-first', () => {
+  // Feed them out of order; the 98 must still lead the 87.
+  const ranked = rankDayHighlights([dominantGame(2, START_87), dominantGame(1, START_98)], null)
+  assert.deepEqual(
+    ranked.map((e) => e.gamePk),
+    [1, 2],
+  )
+})
+
+test('rankDayHighlights: a game whose only story is a blowout is dropped', () => {
+  // A 10-run laugher with nothing else — no dominant start, no HR, both sides
+  // hit (so it isn't a no-hitter). Its lone signal is the blowout, which is the
+  // opposite of a highlight.
+  const ranked = rankDayHighlights(
+    [rankEntry(1, rankFeed({ away: { r: 12, h: 14 }, home: { r: 2, h: 5 } }))],
+    null,
+  )
+  assert.deepEqual(ranked, [])
+})
+
+test('rankDayHighlights: a blowout that also has a real story survives on that story', () => {
+  // Same 12-2 margin, but the winner has a 2-HR hitter — the multi-HR keeps the
+  // game, and it leads on that (NOTABLE) signal, not the blowout.
+  const ranked = rankDayHighlights(
+    [
+      rankEntry(
+        7,
+        rankFeed({
+          away: { r: 12, h: 14, batters: [{ id: 55, name: 'Big Fly', hr: 2 }] },
+          home: { r: 2, h: 5 },
+        }),
+      ),
+    ],
+    null,
+  )
+  assert.equal(ranked.length, 1)
+  assert.equal(ranked[0].gamePk, 7)
+  assert.ok(ranked[0].signals.includes('multiHr'))
+  assert.equal(ranked[0].performer.id, 55)
+})
+
+test('rankDayHighlights: a quiet game with no fired signal is dropped', () => {
+  const ranked = rankDayHighlights(
+    [rankEntry(1, rankFeed({ away: { r: 4, h: 8 }, home: { r: 1, h: 6 } }))],
+    null,
+  )
+  assert.deepEqual(ranked, [])
+})
+
+// gameNumber rides on each result so the Your Team block can label a twin bill.
+test('selectGameResults: carries gameNumber for doubleheader labeling', () => {
+  const results = selectGameResults([
+    { gamePk: 1, feed: feedResult(10, 'AWY', 3, 20, 'HOM', 7), dateStr: '2026-07-19', game: dhGame(1) },
+    { gamePk: 2, feed: feedResult(10, 'AWY', 5, 20, 'HOM', 2), dateStr: '2026-07-19', game: dhGame(2) },
+  ])
+  assert.equal(results[0].gameNumber, 1)
+  assert.equal(results[1].gameNumber, 2)
+})
+const dhGame = (gameNumber) => ({
+  away: { abbreviation: 'AWY' },
+  home: { abbreviation: 'HOM' },
+  gameNumber,
 })
 
 // Minimal feed selectGameResults reads run totals + ids from.
