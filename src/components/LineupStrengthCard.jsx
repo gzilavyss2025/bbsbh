@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { lineupStrengthFor } from '../api/lineupStrength.js'
 import { InfoPopover } from './InfoPopover.jsx'
+import { PlayerLink } from './PlayerLink.jsx'
 import { SectionMasthead } from './SectionMasthead.jsx'
 
 // The Lineup Strength card — tonight's posted batting order graded 0–10
@@ -86,8 +87,12 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
               {swaps.map((r, i) => (
                 <tr key={i}>
                   <td className="lstrength__pos">{r.pos}</td>
-                  <td className="lstrength__expected">{r.expected}</td>
-                  <td className="lstrength__starting">{r.starting ?? '—'}</td>
+                  <td className="lstrength__expected">
+                    <PlayerLink id={r.expectedId}>{r.expected}</PlayerLink>
+                  </td>
+                  <td className="lstrength__starting">
+                    <PlayerLink id={r.startingId}>{r.starting ?? '—'}</PlayerLink>
+                  </td>
                   <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
                 </tr>
               ))}
@@ -109,7 +114,9 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
             <tbody>
               {outOfPos.map((r, i) => (
                 <tr key={i}>
-                  <td className="lstrength__starting">{r.starting ?? '—'}</td>
+                  <td className="lstrength__starting">
+                    <PlayerLink id={r.startingId}>{r.starting ?? '—'}</PlayerLink>
+                  </td>
                   <td className="lstrength__pos">{r.pos}</td>
                   <td className="lstrength__pos">{r.usualPos ?? '—'}</td>
                   <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>

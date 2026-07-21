@@ -725,7 +725,7 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
               <RookiePill active={isActiveRookie(rookiesData, pitcher.id)} />
             </span>
             <span className="startercard__badges">
-              {pitcher.jersey && <span className="startercard__jersey">#{pitcher.jersey}</span>}
+              {pitcher.jersey && <span className="startercard__jersey">{pitcher.jersey}</span>}
               {pitcher.hand && <span className="startercard__hand">{pitcher.hand}HP</span>}
             </span>
             {/* Season line (aggregates only, never this game's) — the numbers
@@ -843,38 +843,40 @@ function FormerTeammates({ pairs, startingIds, dayNight, awayTeamId, homeTeamId 
   const hidden = cards.length - shown.length
   const startingLabel = dayNight === 'day' ? 'Starting today' : 'Starting tonight'
   return (
-    <section className="teammates">
-      <h3 className="section__title">Former teammates</h3>
-      {/* A CSS multi-column "waterfall" rather than a grid: a big reunion card
-          can run much taller than a plain pair card, and a grid stretches
-          every OTHER card in that row to match — the exact mess this avoids.
-          Each card just flows into whichever column has room next, like a
-          Pinterest/Twitter card wall, so one tall card never drags its
-          row-mates' height with it. */}
-      <ul className="teammates__grid">
-        {shown.map((c) =>
-          c.kind === 'group' ? (
-            <GroupCard
-              key={`g-${c.anchor.id}-${c.club.teamId}`}
-              card={c}
-              startingLabel={startingLabel}
-              sideTeamId={sideTeamId}
-            />
-          ) : (
-            <PairCard
-              key={`${c.a.id}-${c.b.id}`}
-              card={c}
-              startingLabel={startingLabel}
-              sideTeamId={sideTeamId}
-            />
-          ),
+    <section className="metriccard teammates">
+      <SectionMasthead as="h3" title="Former teammates" />
+      <div className="metriccard__body">
+        {/* A CSS multi-column "waterfall" rather than a grid: a big reunion card
+            can run much taller than a plain pair card, and a grid stretches
+            every OTHER card in that row to match — the exact mess this avoids.
+            Each card just flows into whichever column has room next, like a
+            Pinterest/Twitter card wall, so one tall card never drags its
+            row-mates' height with it. */}
+        <ul className="teammates__grid">
+          {shown.map((c) =>
+            c.kind === 'group' ? (
+              <GroupCard
+                key={`g-${c.anchor.id}-${c.club.teamId}`}
+                card={c}
+                startingLabel={startingLabel}
+                sideTeamId={sideTeamId}
+              />
+            ) : (
+              <PairCard
+                key={`${c.a.id}-${c.b.id}`}
+                card={c}
+                startingLabel={startingLabel}
+                sideTeamId={sideTeamId}
+              />
+            ),
+          )}
+        </ul>
+        {hidden > 0 && (
+          <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
+            Show {hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
+          </button>
         )}
-      </ul>
-      {hidden > 0 && (
-        <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
-          Show {hidden} more former {hidden === 1 ? 'teammate' : 'teammates'}
-        </button>
-      )}
+      </div>
     </section>
   )
 }

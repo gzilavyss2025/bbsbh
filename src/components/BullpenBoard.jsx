@@ -23,6 +23,14 @@ const STATUS_ORDER = { down: 0, limited: 1, fresh: 2 }
 // board's down-first sort.
 const PILL_ORDER = ['fresh', 'limited', 'down']
 
+// 'Left' / 'Right' handedness -> pitcher shorthand.
+function handAbbr(hand) {
+  const h = (hand || '').toLowerCase() // caps-js-exempt: normalizing for comparison below, not display casing
+  if (h.startsWith('l')) return 'LHP'
+  if (h.startsWith('r')) return 'RHP'
+  return ''
+}
+
 // The reason an arm sits where it does — the flag(s) that tripped, else a
 // plain recent-workload summary. Kept off the board face (it was visual noise)
 // and surfaced only as the row's hover title.
@@ -52,6 +60,8 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
         return {
           id: p.id,
           name: p.nameLastFirst,
+          jersey: p.jersey || '',
+          hand: handAbbr(p.hand),
           status: avail.status,
           reasons: avail.reasons,
           last3: load.last3?.pitches ?? 0,
@@ -108,6 +118,10 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
               <PlayerLink id={r.id} className="penboard__name">
                 {r.name}
               </PlayerLink>
+              <span className="penboard__badges">
+                {r.jersey && <span className="penboard__jersey">{r.jersey}</span>}
+                {r.hand && <span className="penboard__hand">{r.hand}</span>}
+              </span>
             </li>
           ))}
         </ul>
