@@ -3725,9 +3725,12 @@ body {
   font-size: var(--fs-ui);
 }
 
-/* Batting order: slot / name / jersey / position — jersey sits by the pos. */
+/* Batting order: slot / name / jersey / position — jersey and position sit in
+   fixed-width columns (rather than auto, which sizes to each row's own
+   content) so their right-aligned text forms a straight column down the
+   card regardless of whether a given row holds "9"/"DH" or "60"/"CF". */
 .lineup__row {
-  grid-template-columns: 24px 1fr auto auto;
+  grid-template-columns: 24px 1fr 34px 40px;
 }
 
 .lineup__list li:first-child {
@@ -3748,6 +3751,14 @@ body {
      re-centers this column within its actual row-track height. */
   align-self: center;
 }
+/* The batting order slot (1-9) reads as part of the name, sized/weighted to
+   match .lineup__name — but stays the quieter gray of the shared
+   .lineup__order/.roster__order rule above rather than full name-ink. */
+.lineup__order {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+}
 
 /* Jersey number sits between name and pos/hand, in seam red — matched to
    pos/hand's --fs-compact so the two line up as one size, not the row's
@@ -3763,6 +3774,13 @@ body {
 .roster__jersey {
   align-self: center;
 }
+/* Batting order's jersey/position columns are fixed-width (see .lineup__row
+   above) rather than shrink-to-fit, so bump these back up to the row's own
+   --fs-ui — matching the name — instead of staying at --fs-compact just to
+   agree with each other's size. */
+.lineup__jersey {
+  font-size: var(--fs-ui);
+}
 
 .lineup__name,
 .roster__name {
@@ -3772,8 +3790,16 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.lineup__name {
-  font-weight: var(--w-bold);
+/* A name with an id renders as a .plink button, and .plink (declared later,
+   same specificity) resets weight/color to `inherit` via its `font`/`color`
+   shorthand — same fix as .bs__player .bs__pname / .pitchers__cell
+   .plink.pitchers__pname below. Win it back with higher specificity so the
+   name still reads semibold body-ink instead of falling back to regular
+   inherited text. */
+.plink.lineup__name,
+.plink.roster__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
 
 /* Wraps a name + its optional ProspectPill as one grid cell: the name still
@@ -3798,6 +3824,14 @@ body {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   align-self: center;
+}
+.lineup__pos {
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  /* Right-align within the fixed-width column (see .lineup__row above) so
+     this lines up under the jersey column instead of hugging the gap on a
+     short one- or two-letter position. */
+  text-align: right;
 }
 
 /* The one thing that actually wraps a lineup/roster row taller is an open
@@ -3882,7 +3916,7 @@ body {
   display: flex;
   gap: 10px;
   font-family: var(--font-display);
-  font-size: var(--fs-compact);
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
@@ -17371,6 +17405,7 @@ body {
   border: none;
   padding: 0;
   font: inherit;
+  text-align: left;
   text-transform: uppercase;
   letter-spacing: var(--ls-num);
   color: var(--accent-primary);
@@ -19284,11 +19319,15 @@ body {
 }
 
 /* ------------------------------------------------------- pre-game metric card
-   Shared shell for the two derived/analytic cards under the batting order —
-   LineupStrengthCard.jsx + BullpenBoard.jsx. Unlike the plain-titled factual
-   sections around them (roster, opposing defense, umpires — posted facts), a
-   navy/gold masthead marks these two as the page's INTERPRETIVE modules (a
-   computed grade, a workload signal). SectionMasthead.jsx + InfoPopover.jsx. */
+   Shared shell, originally for the two derived/analytic cards under the
+   batting order — LineupStrengthCard.jsx + BullpenBoard.jsx (a computed
+   grade, a workload signal) — where the navy/gold masthead marked them as
+   the page's INTERPRETIVE modules, contrasted with the plain-titled factual
+   sections around them (roster, opposing defense, umpires — posted facts).
+   Former Teammates (TeamInfo.jsx) reuses the same shell for its card chrome
+   alone, purely for visual consistency with its pregame neighbors — it's
+   still a posted-facts listing, not an interpretive one.
+   SectionMasthead.jsx + InfoPopover.jsx. */
 .metriccard {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
@@ -19760,9 +19799,33 @@ body {
 }
 .penboard__name {
   min-width: 0;
+  flex: 1;
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Jersey number + LHP/RHP, pinned to the row's far right — same treatment as
+   .roster__jersey/.roster__pos, so it reads as the same fact in both places. */
+.penboard__badges {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.penboard__jersey {
+  color: var(--clay);
+}
+.penboard__hand {
+  color: var(--field);
 }
 @media (prefers-reduced-motion: reduce) {
   .penboard__pill,
