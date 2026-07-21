@@ -66,6 +66,7 @@ export function StatBox({
   if (!revealed && placeholder) return null
   return (
     <div className={`statbox ${className}`} key={`${inning}-${half}`}>
+      <h3 className="statbox__title">Insights</h3>
       <SealBox forceRevealed={revealed} coverless>
         {() => {
           // R/H/LOB are the batting side's; E is a *fielding* stat, so it

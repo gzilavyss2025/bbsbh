@@ -428,8 +428,6 @@ export function InningViewer({
               inning={effInning}
               half={effHalf}
               revealedThrough={revealedThrough}
-              awayAbbr={meta.away.abbreviation}
-              homeAbbr={meta.home.abbreviation}
               awayId={meta.away.id}
               homeId={meta.home.id}
               awayName={meta.away.clubName}

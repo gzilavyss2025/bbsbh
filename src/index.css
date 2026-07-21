@@ -4644,21 +4644,22 @@ body {
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  color: var(--text-heading);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
 }
 
 .half__team {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
-  color: var(--text-caption);
+  color: var(--text-on-ink);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
 
 .half__dot {
-  color: var(--accent-primary);
+  color: var(--seal);
   font-weight: var(--w-bold);
 }
 
@@ -4794,12 +4795,16 @@ body {
 }
 .abs__title {
   display: block;
+  padding: 8px 10px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+  border-radius: var(--radius-sm);
   margin-bottom: 8px;
 }
 .abs__rows {
@@ -5532,6 +5537,22 @@ body {
   min-width: 0;
 }
 
+/* Same flush masthead recipe as .half__title/.pitchers__title — no padding
+   of its own on .statbox, so this caps the card directly; overflow:hidden
+   above clips its square corners to the card's own rounded ones. */
+.statbox__title {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+
 /* The SealBox's own .statgrid wrapper paints --surface-inset once revealed,
    which otherwise shows through as a whiter patch inside this card's kraft
    background. Strip it back to transparent so .statbox's own background is
@@ -5849,67 +5870,56 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
   padding: 12px 14px;
+  overflow: hidden;
 }
+/* Bleeds past the card's own padding to cap it flush (same masthead recipe
+   as .half__title/.pitchers__title) — overflow:hidden on .dueup clips the
+   square corners here to the card's own rounded ones. */
 .dueup__title {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  margin-bottom: 8px;
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
 }
-.dueup__list {
-  display: flex;
-  flex-direction: column;
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
-  overflow: hidden;
-}
+/* Same headshot-column recipe as .upnext (UpNextBatters.jsx) — this card
+   previews the OTHER side's next half instead of the batting side's own, so
+   it keeps its own team-identifying title, but the body reads as the same
+   "who's due up" widget either way. */
 .dueup__row {
   display: grid;
-  grid-template-columns: 20px 1fr auto auto;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.dueup__col {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
+  gap: 5px;
+  text-align: center;
+  min-width: 0;
 }
-.dueup__row:first-child {
-  border-top: none;
-}
-.dueup__slot {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
+.shot.dueup__shot {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 .dueup__name {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.dueup__jersey {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  color: var(--clay);
-  text-align: right;
-}
-.dueup__pos {
   font-family: var(--font-display);
-  color: var(--field);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
+  color: var(--text-heading);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 @media (min-width: 740px) {
@@ -6106,11 +6116,14 @@ body {
 
 .halfdefense__title {
   margin: 0 0 8px;
-  padding: 4px 8px;
+  padding: 8px 10px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  color: var(--text-caption);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
@@ -7771,15 +7784,23 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
   padding: 12px 14px 10px;
+  overflow: hidden;
 }
 
+/* Bleeds past the card's own padding to cap it flush (same masthead recipe
+   as .half__title) rather than floating as a smaller rounded shape inside
+   the card's padding — overflow:hidden on .winprob clips the square corners
+   here to the card's own rounded ones. */
 .winprob__head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 4px 8px;
-  margin-bottom: 8px;
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
 }
 
 .winprob__title {
@@ -7790,7 +7811,7 @@ body {
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+  color: var(--text-on-ink);
 }
 
 /* Current/final split — the two team shares, each swatch/figure in that
@@ -7810,6 +7831,7 @@ body {
   gap: 4px;
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
 }
 
 .winprob__team::before {
@@ -7817,11 +7839,11 @@ body {
   width: 9px;
   height: 9px;
   border-radius: 2px;
-  border: var(--bw-hair) solid var(--border-hairline);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 45%, transparent);
   background: var(--team-color, var(--graphite-soft));
 }
 
-.winprob__pct { color: var(--text-heading); }
+.winprob__pct { color: var(--text-on-ink); }
 
 /* A one-line proportional recap of the split, in the same two team colors as
    the swatches above — decorative echo of the split pills, not a second
@@ -8175,16 +8197,23 @@ body {
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
   padding: 12px 14px 8px;
+  overflow: hidden;
 }
 
+/* Bleeds past the card's own padding to cap it flush (same masthead recipe
+   as .half__title) — overflow:hidden on .pitchers clips the square corners
+   here to the card's own rounded ones. */
 .pitchers__title {
-  margin: 0 0 8px;
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
 }
 
 /* Team name sits above that team's header row. */
@@ -10635,21 +10664,30 @@ body {
     display: none;
   }
   /* AbsCard's own card chrome — same recipe as .winprob/.marginnotes (border,
-     radius, background, shadow, padding) since here it sits directly in the
-     right column rather than nested inside StatBox's card. */
+     radius, background, shadow) since here it sits directly in the right
+     column rather than nested inside StatBox's card. No padding of its own —
+     SealBox's .statgrid wrapper already insets its content 14px, and the
+     title bar below bleeds past exactly that inset to cap the card flush
+     (same masthead recipe as .half__title), so overflow:hidden here clips it
+     to the card's own rounded corners instead of stacking a second, smaller
+     rounded shape inside the card's padding. */
   .abscard {
     display: block;
     border: var(--bw-hair) solid var(--border-rule);
     border-radius: var(--radius-md);
     background: var(--surface-card);
     box-shadow: var(--shadow-card);
-    padding: 12px 14px;
+    overflow: hidden;
   }
   /* Same fix as .statbox .statgrid above: SealBox's own .statgrid wrapper
      paints --surface-inset once revealed, which otherwise shows through as
      a whiter patch inside this card's own background. */
   .abscard .statgrid {
     background: none;
+  }
+  .abscard .abs__title {
+    margin: -14px -14px 8px;
+    border-radius: 0;
   }
   .abscard .abs {
     margin-top: 0;
@@ -10677,41 +10715,62 @@ body {
   .innings__ref-left .pitchers {
     margin-top: 0;
   }
+  /* One flush card, capped by the navy/gold masthead (same recipe as
+     .pitchers/.winprob/.abscard) — the diamond sheds its own border/shadow
+     below (like .opp .defdiamond's existing reset) rather than doubling up
+     as a second card nested inside this one. */
   .innings__ref-defense {
     display: block;
     margin-top: var(--space-3);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
   }
-  /* The defense diamond already carries its own full card border/shadow at
-     this width (see .halfdefense's own comment) unlike the phone copy, so
-     its dashed top divider — meant to separate it from the entering-lineups
-     list sharing .half's single card there — is a redundant second seam
-     between it and the Pitchers card above. */
   .innings__ref-defense .halfdefense {
     margin-top: 0;
     padding-top: 0;
     border-top: none;
   }
+  .innings__ref-defense .halfdefense__title {
+    border-radius: 0;
+  }
+  .innings__ref-defense .defdiamond {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    padding: 0 10px 12px;
+  }
+  /* Same recipe for the Lineups card. */
   .innings__ref-lineups {
     display: block;
     border: var(--bw-hair) solid var(--border-rule);
     border-radius: var(--radius-md);
     background: var(--surface-card);
     box-shadow: var(--shadow-card);
-    padding: 12px 14px;
+    overflow: hidden;
   }
   .innings__reference-title {
     margin: 0;
+    padding: 8px 10px;
     font-family: var(--font-display);
     font-size: var(--fs-label);
     font-weight: var(--w-bold);
     text-transform: uppercase;
     letter-spacing: var(--ls-label);
-    color: var(--text-heading);
+    color: var(--text-on-ink);
+    background: var(--navy);
+    border-bottom: 3px solid var(--seal);
   }
   .innings__ref-lineups .lineupcard {
-    margin-top: 8px;
-    padding-top: 0;
-    border-top: none;
+    margin-top: 0;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
 
   /* Rosters sit two-up beneath the reading pane. */
