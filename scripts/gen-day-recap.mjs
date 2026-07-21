@@ -1,10 +1,16 @@
 // Generates public/data/day-recap/YYYY-MM-DD.json for a completed slate.
 //
-// The artifact moves the expensive cross-game work out of the browser:
-//   - Top Performers (WPA + context-neutral player points)
-//   - Winners/Losers in the past-day recap
-//   - Day Highlights
-//   - Longest HR, hardest hit, and fastest strikeout
+// The artifact moves one piece of expensive cross-game work out of the browser:
+// Top Performers (WPA + context-neutral player points), read by
+// TopPerformersBox via src/api/dayRecap.js.
+//
+// It once carried three more sections — Day Highlights, the recap's
+// Winners/Losers split, and the day's Statcast superlatives — all consumed by
+// the Day Recap digest box. That box was retired in favor of per-card pills on
+// each game's own result card (dayHighlights.js's classifyGameCards, classified
+// live in the browser from feeds the flip cards already fetch), which left the
+// three sections generated but read by nobody. They're gone; don't re-add a
+// section here without a consumer landing in the same change.
 //
 // It is keyed by sport level because the UI can switch between MLB and the
 // four full-season MiLB levels on the same date. Run with --date=YYYY-MM-DD;
@@ -14,9 +20,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
-import { computeTopPerformers, computeTopPerformersByResult } from '../src/api/topPerformers.js'
-import { rankDayHighlights } from '../src/api/dayHighlights.js'
-import { computeDaySuperlatives } from '../src/api/daySuperlatives.js'
+import { computeTopPerformers } from '../src/api/topPerformers.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'day-recap')
@@ -54,16 +58,13 @@ async function scheduleFor(dateStr, sportId) {
   const data = await getJson(`/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=team`)
   return (data.dates ?? [])
     .flatMap((date) => date.games ?? [])
+    // A postponed/cancelled game can still carry a 'Final' abstract state but
+    // has no box score — an empty 0-0 line would read as a real result to
+    // every selector downstream. GameSelect excludes them the same way
+    // (selectGameStatus.isPostponed); mirror it here.
+    .filter((game) => !/postponed|cancel/i.test(game.status?.detailedState ?? ''))
     .map((game) => normalizeGame(game, sportId, dateStr))
     .filter((game) => game?.abstractState === 'Final')
-}
-
-async function feedFor(gamePk) {
-  const [feed, winProb] = await Promise.all([
-    getJson(`/api/v1.1/game/${gamePk}/feed/live`),
-    getJson(`/api/v1/game/${gamePk}/winProbability?fields=homeTeamWinProbabilityAdded,atBatIndex,about,inning,isTopInning,matchup,batter,pitcher,id,result,awayScore,homeScore,description,runners,details,isScoringEvent,runner`),
-  ])
-  return { feed, winProb: Array.isArray(winProb) ? winProb : null }
 }
 
 async function readJsonOrEmpty(path, fallback) {
@@ -74,25 +75,9 @@ async function readJsonOrEmpty(path, fallback) {
   }
 }
 
-function calloutsForDate(dateStr) {
-  const [year, month, day] = dateStr.split('-')
-  return join(here, '..', 'public', 'data', 'callouts', `${month}${day}${year}.json`)
-}
-
 async function buildSport(dateStr, sportId) {
   const games = await scheduleFor(dateStr, sportId)
   if (!games.length) return null
-
-  const settled = await Promise.allSettled(
-    games.map(async (game) => {
-      const { feed, winProb } = await feedFor(game.gamePk)
-      return { gamePk: game.gamePk, game, feed, winProb, dateStr }
-    }),
-  )
-  const entries = settled
-    .filter((result) => result.status === 'fulfilled')
-    .map((result) => result.value)
-  if (!entries.length) return null
 
   // The prospect snapshot is only used to attach existing rank badges; it is
   // not part of the expensive game scan and can be absent safely.
@@ -100,19 +85,18 @@ async function buildSport(dateStr, sportId) {
     join(here, '..', 'public', 'data', 'top-prospects.json'),
     { players: [], orgProspects: [] },
   )
-  const calloutsData = await readJsonOrEmpty(calloutsForDate(dateStr), { games: {} })
-  const performerInput = { games, prospects, dateStr }
+  // computeTopPerformers does its own per-game fetching (the light boxscore +
+  // win probability, via topPerformers.js's buildWpaMaps). This script used to
+  // ALSO pull every game's full feed/live for the three retired sections; that
+  // second, far heavier pass is gone with them.
+  const topPerformers = await computeTopPerformers({ games, prospects, dateStr })
 
-  const [topPerformers, performersByResult] = await Promise.all([
-    computeTopPerformers(performerInput),
-    computeTopPerformersByResult(performerInput),
-  ])
-  return {
-    topPerformers,
-    performersByResult,
-    highlights: rankDayHighlights(entries, calloutsData),
-    superlatives: computeDaySuperlatives(entries),
-  }
+  // Every game's fetch failing leaves both leaderboards empty. Report that as
+  // null so the merge below keeps this level's previously-good data instead of
+  // overwriting it with a blank — the same protection the old "no game feed
+  // loaded" guard gave.
+  if (!topPerformers.batters.length && !topPerformers.pitchers.length) return null
+  return { topPerformers }
 }
 
 const dateStr = parseDate(process.argv.slice(2))

@@ -483,6 +483,11 @@ function oneSide(feed, side, decisions, pitchNotes, pitcherLines) {
   return {
     id: meta.id ?? null,
     teamName: meta.name ?? meta.teamName ?? (side === 'away' ? 'Away' : 'Home'),
+    // The club nickname alone ("Angels", "Tigers") — narrative prose (Day
+    // Recap's margin/length storylines) reads "The Angels edged the Tigers",
+    // where the abbreviation ("The LAA edged the DET") read like a filing tag.
+    // Absent on thin MiLB feeds, so callers fall back to the abbreviation.
+    clubName: meta.clubName ?? meta.teamName ?? '',
     abbreviation: meta.abbreviation ?? '',
     batters: battingRows(feed, side),
     batTotals: battingTotals(feed, side),
@@ -618,6 +623,18 @@ export function computePlayOfTheGame(winProb, feed) {
         const gd = feed?.gameData?.players?.[`ID${id}`] ?? r.details.runner
         return { id, name: firstLast(gd) }
       }),
+    // Every fielder the description names ("...ground ball to third baseman
+    // Colt Keith", "...grounds into a double play, shortstop X to second
+    // baseman Y to first baseman Z") — collected from ALL of this play's
+    // runner legs, not just the batter's own, since a double play's credits
+    // are split across legs. `credits[].player` only carries an id (no
+    // name), same firstLast identity lookup as the batter/runners above.
+    fielders: (best.runners ?? [])
+      .flatMap((r) => r.credits ?? [])
+      .map((c) => c.player?.id)
+      .filter(Boolean)
+      .map((id) => ({ id, name: firstLast(feed?.gameData?.players?.[`ID${id}`] ?? {}) }))
+      .filter((f) => f.name),
   }
 }
 
@@ -680,11 +697,11 @@ export function findBoxscorePlayer(boxscore, id) {
 }
 
 // A player's identity fields a "baseball card" tile needs — headshot,
-// team, position — resolved from his personId within one game's feed. Shared
-// by the box score's own Insights card (Statcast superlatives) and
-// daySuperlatives.js's day-recap tiles, so the two PerformerCard surfaces
-// can't drift on how a player's team/position get resolved. Caller adds its
-// own `stat` line (the two surfaces format that differently).
+// team, position — resolved from his personId within one game's feed, in the
+// shape PerformerCard renders. Used by the box score's own Insights card
+// (Statcast superlatives); kept as a shared export so any further
+// PerformerCard surface resolves a player's team/position the same way rather
+// than rolling its own. Caller adds its own `stat` line.
 export function resolveCardPlayer(feed, personId) {
   if (personId == null) return null
   const found = findBoxscorePlayer(feed?.liveData?.boxscore, personId)

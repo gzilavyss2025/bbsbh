@@ -8,7 +8,7 @@ import { resolveCardPlayer } from '../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../lib/teams.js'
 import { SealBox } from './SealBox.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
-import { PerformerCard } from './PastDayRecapBox.jsx'
+import { PerformerCard } from './PerformerCard.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 
 // The half's three Statcast superlatives, resolved to the "baseball card"

@@ -80,6 +80,20 @@ const PAIRINGS = [
   { fg: 'text-muted', bg: 'surface-card', min: TEXT, note: 'muted text on raised card' },
   { fg: 'text-caption', bg: 'bg-page', min: TEXT, note: 'caption/graphite on page' },
   { fg: 'text-on-ink', bg: 'accent-primary', min: TEXT, note: 'inverse text on ink chip' },
+  // The slate result card's scenario pills (GameResultFace.jsx's
+  // SCENARIO_STYLE) — each filled solid in its own accent, so the fg/bg pair
+  // (and which text color a given accent needs) is asserted here rather than
+  // left to eyeball: field/clay/allstar-blue are dark/saturated enough for
+  // light on-ink text, but marker (Close Game) is a bright highlighter
+  // yellow — reversed, dark heading-ink text is what holds AA against IT.
+  { fg: 'text-on-ink', bg: 'field', min: TEXT, note: 'Dominant Performance pill text' },
+  { fg: 'text-on-ink', bg: 'clay', min: TEXT, note: 'Blowout pill text' },
+  { fg: 'text-heading', bg: 'marker', min: TEXT, note: 'Close Game pill text' },
+  { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'Extra Innings pill text' },
+  // The crown outranks all four and carries its own medal-amber fill, both on
+  // the card pill (.flipback__pill--crown) and on the filter chip that selects
+  // it (FILTER_CHIPS, src/lib/resultCards.js) — same pairing, asserted once.
+  { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
 ]

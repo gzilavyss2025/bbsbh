@@ -4,7 +4,7 @@ import { fetchDayRecap, recapForSport } from '../api/dayRecap.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { SealBox } from './SealBox.jsx'
-import { PerformerCard } from './PastDayRecapBox.jsx'
+import { PerformerCard } from './PerformerCard.jsx'
 import { Loader } from './Loader.jsx'
 
 // The slate's hidden "kraft box": the day's top 5 batters and top 5 pitchers
@@ -13,7 +13,7 @@ import { Loader } from './Loader.jsx'
 // thing — including the fact it has anything to show — sits behind a SealBox,
 // keyed on date+level so switching either reseals it (same remount-to-reseal
 // pattern InningViewer uses for its own SealBoxes). Renders the same
-// .playercard tile (PerformerCard, src/components/PastDayRecapBox.jsx) as the
+// .playercard tile (PerformerCard, src/components/PerformerCard.jsx) as the
 // past-day recap's Winners/Losers and the box score's Insights card, so all
 // three "baseball card" surfaces stay one idiom rather than drifting apart.
 

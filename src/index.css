@@ -38,7 +38,7 @@
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
        notification cards), `.bs__potgDesc`, `.flipback__potg`,
-       `.psseries__potgDesc`, `.dayhl__rowBtn`
+       `.psseries__potgDesc`
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
@@ -5460,10 +5460,10 @@ body {
 }
 
 /* The half's Statcast superlatives — now the same headshot "baseball card"
-   tile the day recap's Statcast Leaders and the box score's Insights card
-   use (PerformerCard, src/components/PastDayRecapBox.jsx), read via the same
-   resolveCardPlayer lookup, rather than the plain label/value/who tile
-   StatcastCard.jsx still renders for the player-page percentile grid. A
+   tile the box score's Insights card uses (PerformerCard, src/components/
+   PerformerCard.jsx), read via the same resolveCardPlayer lookup, rather
+   than the plain label/value/who tile StatcastCard.jsx still renders for the
+   player-page percentile grid. A
    seamless list, same recipe as .abs__rows just below (paper-2 background,
    one hairline divider between rows instead of a border per card) rather
    than each PerformerCard floating in its own bordered tile like it does in
@@ -8653,9 +8653,8 @@ body {
    between the linescore/Game Score column and the two team cards (see
    BoxScoreBody), each superlative rendered as a .playercard__bucket +
    .playercard__list, the same "baseball card" tile (headshot, team, stat
-   line) the past-day recap's Top Performers/Statcast Leaders use (see
-   PastDayRecapBox.jsx's PerformerCard) — so this card reads as the same
-   idiom as that daily digest rather than its own small tiles. Matches the
+   line) Top Performers uses (see PerformerCard.jsx) — so this card reads as
+   the same idiom as that slate box rather than its own small tiles. Matches the
    frame of .bs__insights/.bs__stars beside it. */
 .bs__statcastCard {
   padding: 12px 14px;
@@ -8923,11 +8922,11 @@ body {
 /* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
    (src/components/TopPerformersBox.jsx). A desktop-width slate sits it in the
    .slate-body rail beside the game grid (see .slate-body > .topperfbox
-   below), same spot + same non-sticky treatment as the past-day recap's rail;
-   a phone-width slate keeps it stacked above the game grid instead (DOM order
-   — see GameSelect.jsx). Rows render the shared .playercard tile (PerformerCard,
-   PastDayRecapBox.jsx) — the same "baseball card" idiom as the past-day
-   recap's Winners/Losers and the box score's Insights card. */
+   below); a phone-width slate keeps it stacked above the game grid instead
+   (DOM order — see GameSelect.jsx). Rows render the shared .playercard tile
+   (PerformerCard, src/components/PerformerCard.jsx) — the same "baseball
+   card" idiom the box score's Insights card and each slate result card's
+   Dominant Performance/Blowout pill (GameResultFace.jsx) also use. */
 .topperfbox {
   margin-top: 10px;
 }
@@ -8950,8 +8949,7 @@ body {
   padding: 12px 0 0;
 }
 /* Top Batters/Top Pitchers always stack (never side by side) — the rail is
-   too narrow to split a .playercard tile's headshot + text into two columns;
-   see .dayhl__section's own vertical stack for the same reasoning. */
+   too narrow to split a .playercard tile's headshot + text into two columns. */
 .topperf__sections {
   display: flex;
   flex-direction: column;
@@ -9010,6 +9008,63 @@ body {
 .pagenav--revealall {
   /* .pagenav already positions/backgrounds the floating bar; nothing else
      needed at phone width. */
+}
+
+/* The revealed slate's category filter (ResultFilterBar, GameSelect.jsx) —
+   one toggle chip per storyline that occurs somewhere today. Unselected: a
+   light tint of the chip's OWN accent color (--chip-accent) behind a colored
+   border, but ALWAYS dark heading-ink text — the raw accent itself isn't a
+   safe text color at every one of these hues (--marker, in particular, fails
+   WCAG AA as text on the page) so text never carries the accent directly,
+   only the background tint + border do. Selected: filled solid, the exact
+   same accent/text pairing the matching card's own pill uses (see
+   .flipback__pill--scenario/--crown, already contrast-checked) — a chip and
+   the cards it's currently filtering to read as one color. */
+.slate-filterbar {
+  margin: 12px 0;
+}
+.slate-filterbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* "Showing 3 of 15 games" — a live region (role="status") that only carries
+   text while a chip is on, so a screen reader hears the slate shrink instead
+   of silently losing most of it. Empty (not unmounted) when no filter is
+   active: a live region has to already be in the DOM for its later content
+   to be announced at all. */
+.slate-filterbar__count {
+  margin: 6px 0 0;
+  min-height: 1em;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.slate-filterbar__chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
+  color: var(--text-heading);
+  border: var(--bw-rule) solid var(--chip-accent);
+}
+.slate-filterbar__chip--active {
+  background: var(--chip-accent);
+  color: var(--chip-text);
+}
+.slate-filterbar__chip:active {
+  transform: translateY(1px);
+}
+.slate-filterbar__chip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 .flipcard {
@@ -9082,6 +9137,112 @@ body {
   color: var(--text-body);
   box-shadow: var(--shadow-card);
 }
+/* The card-level accent tint (GameResultFace.jsx's cardAccent/isPinnedGame):
+   two independent channels, since a card can carry both at once (your team's
+   own Blowout win, say) —
+   • .flipback--accent tints the BORDER to whichever single signal is the
+     biggest deal (crown > scenario > pinned-team, see cardAccent) via
+     --card-accent, same color-mix recipe .gamecard--pinned uses pregame.
+   • .flipback--pinned tints the BACKGROUND to the pinned team's own accent
+     (--pin-accent) regardless of which signal won the border — the same
+     gradient the slate's pregame card wears for a pinned team, so "this is
+     your team's game" reads the same before and after the reveal. */
+.flipback--accent {
+  /* Heavier (2px, --bw-heavy) AND a stronger mix (70%, vs. the pregame
+     pinned card's subtler 45%) than the hairline default — this is the one
+     border on the slate meant to read as "a different color," not just a
+     faintly warmer hairline, so both channels move together. */
+  border-width: var(--bw-heavy);
+  border-color: color-mix(in srgb, var(--card-accent) 70%, var(--border-rule));
+}
+.flipback--pinned {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+/* Box score button + pill row share one line — the button leads, the pill(s)
+   (ResultPills, GameResultFace.jsx) trail after it and wrap onto their own
+   line first if the card gets too narrow for both. */
+.flipback__topRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* The pill-badge row (ResultPills, GameResultFace.jsx) — at most one crowned
+   "Game of the Night" pill (amber fill, same medal-amber the app already uses
+   for award chips) alongside its own scenario pill (filled in that
+   scenario's own accent — see .flipback__pill--scenario below), plus the
+   doubleheader modifier (the one pill still left as a quiet outline chip,
+   same idiom as .prospectpill/.gamecard__dh — a doubleheader label isn't
+   tied to any accent color). The favorite team's game is called out by the
+   whole card's tint instead — see .flipback--pinned. */
+.flipback__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flipback__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+.flipback__pill--tag {
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.flipback__pill--crown {
+  background: var(--award-ink);
+  color: var(--text-on-ink);
+}
+/* The ★ glyph's own em-box doesn't sit centered against the label's caps at
+   this caption size — nudged onto the same visual center as the label
+   instead of floating off it. */
+.flipback__pill-star {
+  display: inline-block;
+  transform: translateY(0.5px);
+}
+/* The scenario pill (Dominant Performance/Blowout/Close Game/Extra Innings) —
+   filled solid in --pill-accent, the SAME token GameResultFace's cardAccent
+   hands the card's own border when this scenario wins that race, so the pill
+   and the border read as one color family even when something else (the
+   crown, the favorite team) outranks this scenario for the border. --pill-
+   text is per-scenario (see SCENARIO_STYLE, GameResultFace.jsx) rather than
+   always the same one: --field/--clay/--allstar-blue are dark/saturated
+   enough for light on-ink text, but --marker (Close Game) is a bright
+   highlighter yellow — reversed, dark ink text is what actually holds
+   WCAG AA against IT specifically. */
+.flipback__pill--scenario {
+  background: var(--pill-accent);
+  color: var(--pill-text);
+  border: var(--bw-hair) solid var(--pill-accent);
+}
+/* The Game of the Night's conditional second beat, and the Dominant
+   Performance / Blowout / Extra-Innings performer-card variant — a
+   PerformerCard sitting where (or beneath where) the plain-text Play of the
+   Game block would otherwise go, same list wrapper the slate rail/box score
+   Insights card use around it. Borderless here specifically: the OUTER
+   .flipback card already carries the card-level accent border above, so the
+   nested .playercard tile drops its own border/background/padding rather
+   than doubling up into a card-within-a-card. */
+.flipback__perfcard {
+  margin: 0;
+}
+.flipback__perfcard .playercard {
+  border: none;
+  background: none;
+  padding: 0;
+}
 /* Line score: a header row (R/H/E labels, once) above two team rows — team
    name flexes to fill the leading column, the three stat columns are fixed-
    width so header and value rows line up. Values are sized up from the
@@ -9091,19 +9252,6 @@ body {
   flex-direction: column;
   gap: 4px;
 }
-/* "11 INNINGS" — only shown when the game actually went past 9, sitting above
-   the logo/team-name + R-H-E rows it introduces. Same font/size as the R-H-E
-   VALUES below (not the small column-header labels) so it reads as another
-   headline number, not a caption. */
-.flipback__extras {
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  padding-bottom: 2px;
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-}
 .flipback__lsHeader,
 .flipback__team {
   display: grid;
@@ -9111,9 +9259,16 @@ body {
   align-items: center;
   column-gap: 8px;
 }
+/* Doubles as the "N innings" note on an extra-innings card (GameResultFace.jsx
+   only fills it in then) — same font/weight/color as the R/H/E labels beside
+   it (.flipback__lsCol) so the two read as one header row, just left- rather
+   than center-aligned to sit over the team names below it. */
 .flipback__lsTeamCol {
-  /* Empty — just holds the header row's leading column in alignment with the
-     team logo + name below it. */
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .flipback__lsCol {
   text-align: center;
@@ -9171,8 +9326,16 @@ body {
   gap: 10px;
   padding-top: 4px;
 }
-.shot.flipback__potgShot {
+/* Headshot + its position badge, same wrapper idiom as
+   .playercard__shotwrap/__posbadge (PerformerCard.jsx) — every headshot on
+   the slate carries the same nested position tag. */
+.flipback__potgShotwrap {
+  position: relative;
+  display: block;
   flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.flipback__potgShot {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
   border-radius: var(--radius-sm);
@@ -9212,20 +9375,15 @@ body {
 #root .flipback__potg .plink {
   text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
 }
-/* Compact, left-aligned above the logos/team names (left edge lines up with
-   them for free — both are direct children of the same padded .flipback
-   column) rather than the old full-width band pinned to the card's bottom.
-   Padding trimmed to a caption-sized pill (font/size match .flipback__lsCol's
-   R/H/E header) so it reads as scaled to that row, not a full-size button
-   that happens to be short. Negative margin-bottom pulls it in past the
-   column's own gap, right down against the R/H/E row it sits over, so the
-   card doesn't carry a second, looser gap on top of the first. */
+/* Sits in .flipback__topRow next to the pill row (see above), left-aligned
+   above the logos/team names rather than the old full-width band pinned to
+   the card's bottom. Padding trimmed to a caption-sized pill (font/size match
+   .flipback__lsCol's R/H/E header) so it reads as scaled to that row, not a
+   full-size button that happens to be short. */
 .flipback__boxbtn {
-  align-self: flex-start;
   width: auto;
   min-height: 0;
   padding: 4px 10px;
-  margin-bottom: -7px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -9236,46 +9394,21 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   DAY RECAP — past-day right rail: Top Performers + Day Highlights sharing one
-   seal (src/components/PastDayRecapBox.jsx, src/api/dayHighlights.js).
+   PLAYER CARD — the shared "baseball card" tile (src/components/
+   PerformerCard.jsx): headshot, name + position, team logo + abbreviation,
+   stat line. Used by the live Top Performers box, Statcast leaders, the box
+   score's Insights card, each result card's Dominant Performance/Blowout/
+   Extra-Innings pill (GameResultFace.jsx), and Award History.
    --------------------------------------------------------------------------- */
-.pastdayrecap {
-  margin-top: 10px;
+/* Recap-first stack (see .slate-body): the live Top Performers box leads, so
+   the game grid below it needs a gap. Only applies when that box is present
+   (the .slate-body wrapper) — a plain slate with no digest has no box above. */
+.slate-body > .slate-main {
+  margin-top: var(--space-4);
 }
-/* The base .statgrid (SealBox's revealed wrapper) paints its own bright
-   near-white inset background — same fix TopPerformersBox already needed
-   (see .topperfbox .statgrid above): switch it off here too, so the only
-   background showing is .pastdayrecap__body's cream card below. */
-.pastdayrecap .statgrid {
-  background: transparent;
-  padding: 12px 0 0;
-}
-/* The revealed panel's own card chrome — same border/radius/shadow/cream
-   surface as .gamecard/.flipback, so it reads as one more card on the sheet
-   rather than bare content sitting directly on the page background. */
-.pastdayrecap__body {
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
-.dayhl__section + .dayhl__section {
-  margin-top: 16px;
-}
-.dayhl__title {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-/* Winners/Losers "baseball card" tiles (src/components/PastDayRecapBox.jsx's
-   PerformerCard) — headshot, name + position, team logo + abbreviation, stat
-   line, in a compact horizontal tile (the sidebar is too narrow for a 3-up
-   grid of anything wider than this). */
+/* Winners/Losers "baseball card" tiles — headshot, name + position, team
+   logo + abbreviation, stat line, in a compact horizontal tile (the sidebar
+   is too narrow for a 3-up grid of anything wider than this). */
 .playercard__bucket {
   margin: 0 0 6px;
   font-family: var(--font-display);
@@ -9294,6 +9427,20 @@ body {
   padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+/* In the now-full-width Top Performers box (Winners/Losers + Statcast
+   Leaders), the "baseball card" tiles flow into as many columns as fit rather
+   than a single stacked column — the digest earns the width the recap-first
+   layout gives it (see .slate-body above). auto-fill collapses to one column
+   at phone width, so this is the only rule needed. */
+.topperfbox .playercard__list {
+  display: grid;
+  /* Cap the track (not 1fr): a 2-tile row would otherwise stretch each tile to
+     ~460px, leaving a whitespace river inside a horizontal card. `start` packs
+     them left so a 3-tile row doesn't leave an orphan cell floating mid-width. */
+  grid-template-columns: repeat(auto-fill, minmax(228px, 340px));
+  justify-content: start;
   gap: 8px;
 }
 /* Same layout on every viewport now (no phone-vs-wide split) — the bigger
@@ -9362,9 +9509,8 @@ body {
   display: none;
 }
 /* flex-wrap: wrap so the Top Performers rail's optional ProspectPill (see
-   PerformerCard, PastDayRecapBox.jsx) can drop to its own line rather than
-   overflowing the card — every other .playercard caller never fills this row
-   enough to wrap. */
+   PerformerCard.jsx) can drop to its own line rather than overflowing the
+   card — every other .playercard caller never fills this row enough to wrap. */
 .playercard__team {
   display: flex;
   align-items: center;
@@ -9382,7 +9528,7 @@ body {
   color: var(--text-muted);
 }
 /* The live Top Performers box's optional game-score line (GameScoreLink,
-   PastDayRecapBox.jsx) — same quiet-footnote treatment the old .topperf__score
+   PerformerCard.jsx) — same quiet-footnote treatment the old .topperf__score
    row had. Compound to beat .plink's `font: inherit` (declared later in this
    file), same reason .playercard__name compounds against PlayerLink. */
 .playercard__body .playercard__score {
@@ -9390,135 +9536,6 @@ body {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
-}
-.dayhl__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.dayhl__rowBtn {
-  width: 100%;
-  text-align: left;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--paper-1);
-  color: var(--text-body);
-  padding: 8px 10px;
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.dayhl__rowBtn:active {
-  transform: translateY(1px);
-}
-/* Day Highlights blurbs read as natural sentences in the serif "read" face —
-   same sanctioned exception as .pbp__desc/.flipback__potg above. */
-.dayhl__rowBtn {
-  font-family: var(--font-read);
-}
-#root .dayhl__rowBtn {
-  text-transform: none; /* caps-exempt: day highlights read as natural sentences */
-}
-.dayhl__rowBtn--teams {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* Overlapping team-logo pair for the no-protagonist fallback row (margin/
-   length storylines, comeback) — a light echo of the performer row's
-   headshot without implying a face where the signal has none. */
-.dayhl__rowLogos {
-  display: flex;
-  align-items: center;
-  flex: none;
-}
-.dayhl__rowLogos .teamlogo,
-.dayhl__rowLogos .teamlogo--fallback {
-  margin-right: -6px;
-  border-radius: 50%;
-  border: var(--bw-hair) solid var(--paper-1);
-  background: var(--surface-card);
-}
-.dayhl__rowLogos .teamlogo:last-child,
-.dayhl__rowLogos .teamlogo--fallback:last-child {
-  margin-right: 0;
-}
-.dayhl__rowText {
-  flex: 1;
-  min-width: 0;
-}
-/* "Face the Story" protagonist row — same card chrome as .playercard, with a
-   smaller headshot (this is a list row, not a grid tile) and the headline
-   sentence as its own inline button rather than the whole row, since the
-   row also carries separate PlayerLink/TeamLink buttons alongside it. */
-.dayhl__row--performer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-.dayhl__rowShotwrap {
-  position: relative;
-  display: block;
-  flex: none;
-  border-radius: var(--radius-sm);
-}
-.shot.dayhl__rowShot {
-  width: var(--shot-xs-w);
-  height: var(--shot-xs-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.dayhl__rowBody {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.dayhl__rowHeadlineBtn {
-  text-align: left;
-  border: none;
-  background: none;
-  padding: 0;
-  color: var(--text-body);
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-  cursor: pointer;
-}
-#root .dayhl__rowHeadlineBtn {
-  text-transform: none; /* caps-exempt: same sentence idiom as .dayhl__rowBtn */
-}
-.dayhl__rowHeadlineBtn:active {
-  transform: translateY(1px);
-}
-.dayhl__rowMeta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-}
-.dayhl__rowSub {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
-  color: var(--text-muted);
-}
-#root .dayhl__rowSub {
-  text-transform: none; /* caps-exempt: reads as a natural phrase, same idiom as .dayhl__rowBtn */
 }
 
 /* ---------------------------------------------------------------------------
@@ -10185,42 +10202,17 @@ body {
     gap: 12px;
   }
 
-  /* ---- slate body: game grid + a rail side by side, either the live day's
-     Top Performers box (TopPerformersBox.jsx) or a past day's Day Recap
-     (PastDayRecapBox.jsx) — GameSelect.jsx renders at most one of the two,
-     never both. The grid drops to ONE column here (rather than keeping the
-     2-up rule above) — a past-day flip card's back face carries more content
-     (R/H/E, decisions, play of the game) than the plain spoiler-free card,
-     and either way the ~300px rail leaves less width to share than the bare
-     2-up grid assumes. */
+  /* ---- slate body: the live day's sealed Top Performers box
+     (TopPerformersBox.jsx) — leads full width, with the game grid (2-up, the
+     base .gamelist rule above) below it. This replaced a 1fr/300px rail that
+     squeezed the content-rich box into a narrow sidebar beside a single
+     column of cards; leading-first matches the phone-width block order and
+     gives the box room for its tile grid (see .playercard__list inside
+     .topperfbox below). Renders BEFORE .slate-main in the JSX, so no grid is
+     needed — plain block flow stacks it first. */
   .slate-body {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    grid-template-areas: "main recap";
-    align-items: start;
-    gap: 20px;
+    display: block;
   }
-  .slate-body .gamelist {
-    grid-template-columns: 1fr;
-  }
-  /* Named areas, not bare column/row numbers: the game column (Off Day grid
-     nested under it) goes in "main", the rail in "recap" — pinned there by
-     name regardless of DOM order (TopPerformersBox is rendered BEFORE
-     .slate-main in the JSX, so a phone-width slate — no grid, plain block
-     flow — still stacks it above the game list, its original spot; the named
-     area is what moves it to the right at this breakpoint instead). A real
-     third sibling would need its own named area added here too, rather than
-     falling through to an implicit, easy-to-miss auto-placed cell. */
-  .slate-body > .slate-main {
-    grid-area: main;
-  }
-  .slate-body > .pastdayrecap,
-  .slate-body > .topperfbox {
-    grid-area: recap;
-  }
-  /* Deliberately NOT sticky — a pinned rail read as disconnected from the
-     grid it sits beside, so both columns just scroll together with the
-     page. */
 
   /* "Reveal all games" rides as a normal inline button up top once there's
      room for it; the mobile floating bottom bar (below) hides here. */
@@ -10262,27 +10254,39 @@ body {
     font-size: var(--fs-small);
   }
 
-  /* The slate rail (Top Performers/Day Recap — .topperfbox/.pastdayrecap,
-     ~300px, see .slate-body above) has more text-column room than the
-     two-line stack above assumes: even a long name ("Masataka Yoshida")
-     fits on one line at this width, so keep it single-line here (same
-     treatment as phone, just outranking the two-line rule above via the
-     extra specificity) and spend the freed line on a bigger, easier-to-read
-     stat line instead. flex-wrap stays on as a safety net for the rare name
-     that doesn't fit — it soft-wraps rather than overflowing the card. */
-  .topperfbox .playercard__name,
-  .pastdayrecap .playercard__name {
+  /* The slate rail (Top Performers — .topperfbox, ~300px, see .slate-body
+     above) has more text-column room than the two-line stack above assumes:
+     even a long name ("Masataka Yoshida") fits on one line at this width, so
+     keep it single-line here (same treatment as phone, just outranking the
+     two-line rule above via the extra specificity) and spend the freed line
+     on a bigger, easier-to-read stat line instead. flex-wrap stays on as a
+     safety net for the rare name that doesn't fit — it soft-wraps rather
+     than overflowing the card. */
+  .topperfbox .playercard__name {
     flex-direction: row;
     align-items: baseline;
     font-size: var(--fs-body);
   }
-  .topperfbox .playercard__namebreak,
-  .pastdayrecap .playercard__namebreak {
+  .topperfbox .playercard__namebreak {
     display: none;
   }
-  .topperfbox .playercard__stat,
-  .pastdayrecap .playercard__stat {
+  .topperfbox .playercard__stat {
     font-size: var(--fs-small);
+  }
+
+  /* The result card's own Dominant Performance/Blowout/Extra-Innings
+     performer tile (.flipback__perfcard) has the same room problem as the
+     Top Performers rail above: it sits inside a full slate card, not the
+     narrow two-up grid the two-line stack was built for, so a stacked
+     "Jackson<br>Merrill" just wastes a line for no reason at this width.
+     Same override, same reasoning. */
+  .flipback__perfcard .playercard__name {
+    flex-direction: row;
+    align-items: baseline;
+    font-size: var(--fs-body);
+  }
+  .flipback__perfcard .playercard__namebreak {
+    display: none;
   }
 
   /* ---- slate footer: the action grid stays compact rather than stretching
@@ -14783,8 +14787,8 @@ body {
    (.awardhistory__seasonyear) rather than its own full-width row, so the year
    costs vertical rail space, not horizontal card space. Recipients render as
    .playercard tiles — the app's own headshot idiom (position badge floated on
-   the headshot's bottom-left corner, same as Top Performers/Day Highlights;
-   see PastDayRecapBox.jsx's PerformerCard) rather than a bespoke avatar.
+   the headshot's bottom-left corner, same as Top Performers/slate result
+   cards; see PerformerCard.jsx) rather than a bespoke avatar.
    Three card treatments, by what a group actually has to show:
      - MVP/Cy Young/Rookie of the Year (one recipient per league, a stat
        line) render full-width (.awardhistory__cards--base).
@@ -15882,11 +15886,6 @@ body {
    the ledger's line-score subordinate to the banner above. */
 .psseries__facewrap .flipback__abbr {
   font-size: var(--fs-title-sm);
-}
-/* Same demotion for the "10 INNINGS" extras marker — a headline on the slate
-   card, a margin note in a ledger of five-plus games. */
-.psseries__facewrap .flipback__extras {
-  font-size: var(--fs-num-md);
 }
 /* One navy band per entry (the slate card's BOX SCORE button) would fight the
    pennant band above five to seven times over — quiet it to a compact

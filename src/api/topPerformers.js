@@ -120,11 +120,11 @@ function topN(map, ctxById, role, dateStr, n = 5) {
     .filter(Boolean)
 }
 
-// Shared by both exports below: fetches every game's light boxscore + win
-// probability and builds the per-player WPA maps + the context needed to
-// resolve a player's identity/stat line. Split out so the past-day Winners/
-// Losers split (computeTopPerformersByResult) doesn't refetch or re-derive
-// anything computeTopPerformers already does.
+// Fetches every game's light boxscore + win probability and builds the
+// per-player WPA maps + the context needed to resolve a player's identity/stat
+// line. Still split out from computeTopPerformers below (rather than inlined)
+// because it's the whole expensive half of this module, and keeping the fetch
+// fan-out separate from the ranking makes both readable on their own.
 async function buildWpaMaps(games) {
   const perGame = await Promise.all(
     (games ?? []).map(async (game) => {
@@ -178,46 +178,4 @@ export async function computeTopPerformers({ games, prospects, dateStr }) {
     batters: topN(battingWpa, ctxById, 'batting', dateStr).map((e) => attachProspect(prospects, e)),
     pitchers: topN(pitchingWpa, ctxById, 'pitching', dateStr).map((e) => attachProspect(prospects, e)),
   }
-}
-
-// The past-day recap's Winners/Losers split: unlike computeTopPerformers
-// (separate batting/pitching leaderboards), this combines both into ONE
-// cross-role ranking per player (a two-way player keeps whichever role earned
-// him the higher blended score) and buckets each by whether HIS team won or
-// lost that game — so a big individual game in a losing effort still gets
-// recognized, same spirit as a hockey "star" nod. Top `n` per bucket by the
-// same blended score the leaderboards use.
-export async function computeTopPerformersByResult({ games, prospects, dateStr }, n = 3) {
-  const { battingWpa, pitchingWpa, ctxById } = await buildWpaMaps(games)
-
-  const merged = new Map()
-  for (const e of scoredEntries(battingWpa, ctxById, 'batting')) {
-    merged.set(e.id, { ...e, role: 'batting' })
-  }
-  for (const e of scoredEntries(pitchingWpa, ctxById, 'pitching')) {
-    const existing = merged.get(e.id)
-    if (!existing || e.score > existing.score) merged.set(e.id, { ...e, role: 'pitching' })
-  }
-
-  const winners = []
-  const losers = []
-  for (const e of merged.values()) {
-    const ctx = ctxById.get(e.id)
-    if (!ctx) continue
-    const entry = resolveEntry(ctx, e.id, e.role, dateStr)
-    const found = findBoxscorePlayer(ctx.boxscore, e.id)
-    if (!entry || !found) continue
-    const awayRuns = ctx.boxscore.teams.away?.teamStats?.batting?.runs ?? 0
-    const homeRuns = ctx.boxscore.teams.home?.teamStats?.batting?.runs ?? 0
-    const won = found.side === 'away' ? awayRuns > homeRuns : homeRuns > awayRuns
-    ;(won ? winners : losers).push({ ...entry, score: e.score })
-  }
-
-  const topOf = (arr) =>
-    arr
-      .sort((a, b) => b.score - a.score)
-      .slice(0, n)
-      .map((e) => attachProspect(prospects, e))
-
-  return { winners: topOf(winners), losers: topOf(losers) }
 }

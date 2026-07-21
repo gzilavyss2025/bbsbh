@@ -215,7 +215,7 @@ The codebase carries a large catalog of hardcoded enums that mirror `meta` types
 - **eventTypes** (`meta/eventTypes`): `NON_PA_EVENT_TYPES`, `STOPPAGE_EVENTS`, `HIT_EVENTS`,
   `DOUBLE_PLAY_EVENTS`, `FORCED_OUT_EVENTS` (`playbyplay.js`), `ENTRY_EVENT_TYPES`/
   `PRE_PITCH_EVENT_TYPES` (`select.js`, `enteringHalf.js`), `STRIKEOUT_EVENTS`/`SB_EVENTS`/
-  `CS_EVENTS` (`callout-notes.js`, `daySuperlatives.js`), `MILESTONE_EVENTS` (`person-fetch.js`).
+  `CS_EVENTS` (`callout-notes.js`), `MILESTONE_EVENTS` (`person-fetch.js`).
 - **pitchCodes** (`meta/pitchCodes`): `WHIFF_CODES`, `FOUL_CODES`, `INPLAY_CODES`,
   `pitchDotCategory` (`playbyplay.js`), `NON_STRIKE_CODES` (`derive.js`).
 - **positions** (`meta/positions`): `FIELD_POSITIONS`, `DEFENSE_POSITION_ORDER`

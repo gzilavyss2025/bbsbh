@@ -34,7 +34,7 @@ function monthDay(iso) {
 }
 
 // "Pete Crow-Armstrong" -> ["Pete", "Crow-Armstrong"] (everything after the
-// first space) — same convention as PastDayRecapBox.jsx's splitFirstLast, so
+// first space) — same convention as PerformerCard.jsx's splitFirstLast, so
 // a dense card can break the name onto two lines at the first/last boundary
 // instead of the browser's own mid-word wrap.
 function splitFirstLast(full) {
@@ -110,9 +110,9 @@ function unionYears(firstYears, secondYears) {
 
 // One recipient — the app's own "baseball card" idiom (headshot + position
 // badge floated on its bottom-left corner, name, team, optional stat line),
-// same pattern as Top Performers/Day Highlights (see PastDayRecapBox.jsx's
-// PerformerCard + .playercard in index.css). `dense` (Silver Slugger/Gold
-// Glove) breaks the name onto two lines at the first/last boundary and
+// same pattern as Top Performers/slate result cards (see PerformerCard.jsx +
+// .playercard in index.css). `dense` (Silver Slugger/Gold Glove) breaks the
+// name onto two lines at the first/last boundary and
 // shrinks the face for a long name part on a phone, where a dense card is
 // half the width of a full one (desktop widens it back out — see index.css).
 // The team logo docks to the right of the team name at 740px+
@@ -316,7 +316,7 @@ function AllMlbYear({ year, first, second, favoriteTeamId, showYearLabel = true 
 // war-history.json/milb-history.json) — no SealBox needed, same as Milestone
 // Watch/League Leaders/WAR: a past season's award roll carries no individual
 // game's score. Recipient cards reuse the app's own headshot idiom
-// (.playercard, see PastDayRecapBox.jsx) rather than a bespoke avatar
+// (.playercard, see PerformerCard.jsx) rather than a bespoke avatar
 // treatment. A recipient who plays for the user's favoriteTeamId
 // (useFavoriteTeam, same preference the slate/standings/leaders pages already
 // highlight with) gets the same --fav-accent treatment as those surfaces.

@@ -4,6 +4,7 @@ import { splitName } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
+import { doubleHeaderLabel } from '../lib/resultCards.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals. The one
@@ -234,14 +235,6 @@ function TeamName({ team, side }) {
       <span className="gamecard__mascot">{mascot}</span>
     </span>
   )
-}
-
-// "Game 1" / "Game 2" for a card that's part of a doubleheader (regular or
-// split), so the two same-matchup rows on the slate are told apart at a glance.
-// A lone game (doubleHeader 'N') gets nothing.
-function doubleHeaderLabel(game) {
-  if (!game.doubleHeader || game.doubleHeader === 'N') return null
-  return `Game ${game.gameNumber ?? 1}`
 }
 
 // Pre-game start time. Primary read is the VIEWER's local clock (where they're

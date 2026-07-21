@@ -24,9 +24,10 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
-import { PastDayRecapBox } from '../components/PastDayRecapBox.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
+import { FILTER_CHIPS, reorderGameOfTheNight } from '../lib/resultCards.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -240,11 +241,68 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
+  // Per-game pill classification (Game of the Night / Dominant Performance /
+  // Blowout / Close Game / Extra Innings) for every card in `finals` — see
+  // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
+  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, revealedAll)
+
+  // The slate's actual render order: `sorted` (soonest → latest, favorite
+  // pinned first) with the crowned "Game of the Night" game promoted to the
+  // front — behind the favorite team's own game when there is one on the
+  // slate, otherwise outright first (see reorderGameOfTheNight). A no-op
+  // until cardMetaByGamePk is populated, so this can't leak which game is
+  // crowned ahead of the reveal-all gate above.
+  const gamesForDisplay = useMemo(
+    () =>
+      reorderGameOfTheNight(sorted, cardMetaByGamePk, (g) =>
+        isPinned(g, favoriteTeamId, favoriteAffiliateIds),
+      ),
+    [sorted, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds],
+  )
+
+  // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
+  // above) the user has toggled on. Reset on a new day/level, same as
+  // revealedAll above, so a stale filter never silently hides next slate's
+  // cards.
+  const [activeFilters, setActiveFilters] = useState(new Set())
+  useEffect(() => setActiveFilters(new Set()), [dateStr, sportId])
+  const toggleFilter = (key) =>
+    setActiveFilters((prev) => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  // Only offer a chip for a category that actually occurs somewhere in
+  // today's finals — an empty chip would just be a dead button. Empty until
+  // cardMetaByGamePk is populated, same reveal-all gate as everything else
+  // classification-derived on this page.
+  const availableFilters = useMemo(() => {
+    const present = new Set()
+    for (const meta of cardMetaByGamePk.values()) {
+      if (meta.isGameOfTheNight) present.add('crown')
+      if (meta.scenario) present.add(meta.scenario)
+    }
+    return FILTER_CHIPS.filter((c) => present.has(c.key))
+  }, [cardMetaByGamePk])
+  // With no filter selected, every card shows (gamesForDisplay unchanged). A
+  // selection shows the UNION of matching games — multi-select is "any of
+  // these", not "all of these" — and everything else drops out, so the
+  // selected categories are literally all that's left on screen.
+  const visibleGames = useMemo(() => {
+    if (activeFilters.size === 0) return gamesForDisplay
+    return gamesForDisplay.filter((g) => {
+      const meta = cardMetaByGamePk.get(g.gamePk)
+      if (!meta) return false
+      return (
+        (activeFilters.has('crown') && meta.isGameOfTheNight) ||
+        (meta.scenario && activeFilters.has(meta.scenario))
+      )
+    })
+  }, [gamesForDisplay, activeFilters, cardMetaByGamePk])
 
   // Whether the live Top Performers box has anything to show — mutually
-  // exclusive with the past-day Day Recap rail (finals.length > 0): a day
-  // either hasn't gone final yet (this) or already has (that), never both.
-  // Both share the same `.slate-body` rail slot below.
+  // exclusive with a past day's finals (finals.length > 0): a day either
+  // hasn't gone final yet (this) or already has (that), never both.
   const showTopPerformers =
     finals.length === 0 && dateStr <= todayStr && eligibleGames.length > 0
 
@@ -378,15 +436,22 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
-      <div className={finals.length > 0 || showTopPerformers ? 'slate-body' : undefined}>
-        {/* The rail — live Top Performers or past-day Day Recap, never both
-            (see showTopPerformers above) — renders BEFORE .slate-main so a
-            phone-width slate (plain block flow, no grid) stacks it above the
-            game list, its original spot; the desktop grid (.slate-body in
-            index.css) repositions it to the right via a named area regardless
-            of this DOM order. Exactly one rail child today; a real second
-            sibling would need its own named area added there too, rather
-            than falling through to an implicit auto-placed cell. */}
+      {availableFilters.length > 0 && (
+        <ResultFilterBar
+          chips={availableFilters}
+          active={activeFilters}
+          onToggle={toggleFilter}
+          shown={visibleGames.length}
+          total={gamesForDisplay.length}
+        />
+      )}
+
+      <div className={showTopPerformers ? 'slate-body' : undefined}>
+        {/* The live day's sealed Top Performers box — full width above the game
+            grid (.slate-body stacks it first at every width; see index.css).
+            Renders BEFORE .slate-main so plain block flow already puts it on
+            top. A past day's finals get no digest box above them — each
+            game's own pills (GameResultFace.jsx) carry that now. */}
         {showTopPerformers && (
           <TopPerformersBox
             dateStr={dateStr}
@@ -395,15 +460,17 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             prospectsData={prospects.data}
           />
         )}
-
-        <div className="slate-main">
+        {/* role="region" (not a bare div) so the aria-label is actually
+            honored and ResultFilterBar's aria-controls has a real target —
+            an aria-label on a role-less generic element is discarded. */}
+        <div className="slate-main" id="slate-games" role="region" aria-label="Games">
           <ul className="gamelist">
             {sorted.length === 0 && isDerbyDay && (
               <li>
                 <DerbyCard />
               </li>
             )}
-            {sorted.map((g) => {
+            {visibleGames.map((g) => {
               const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
                 ? favoriteTeamId
                 : null
@@ -422,6 +489,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                       pinnedTeamId={pinnedTeamId}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
+                      cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
                       onSelect={() => onPick(g, dateStr)}
                       onBoxScore={() => onPick(g, dateStr, 'boxscore')}
                     />
@@ -451,17 +519,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             />
           )}
         </div>
-
-        {finals.length > 0 && (
-          <PastDayRecapBox
-            dateStr={dateStr}
-            sportId={sportId}
-            games={finals}
-            prospectsData={prospects.data}
-            revealedAll={revealedAll}
-            onRevealAll={() => setRevealedAll(true)}
-          />
-        )}
       </div>
 
       <SiteFooter
@@ -489,10 +546,9 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 // The single "reveal all results" control for a past day's flip cards — a top
 // button (wide layout) plus a mobile-only fixed bottom bar duplicate, the same
 // floating-bar convention InningViewer uses for "Reveal {half}"
-// (.pagenav/.btn--reveal). One tap flips every Final game's card AND
-// force-reveals the Day Recap panel (see PastDayRecapBox's forceRevealed
-// prop) — there's no per-card unlock, and the Day Recap's own seal does the
-// same thing in reverse (see onRevealAll).
+// (.pagenav/.btn--reveal). One tap flips every Final game's card, which also
+// triggers useDayCardMeta's batched classification pass — there's no
+// per-card unlock.
 function RevealAllBar({ onReveal }) {
   return (
     <>
@@ -505,6 +561,46 @@ function RevealAllBar({ onReveal }) {
         </button>
       </div>
     </>
+  )
+}
+
+// The revealed day's category filter — one chip per "storyline" (see
+// FILTER_CHIPS in lib/resultCards.js) that actually occurs somewhere on
+// today's slate. Toggling a chip filters the grid below to the UNION of every
+// selected category (multi-select is "any of these") and lifts the matching
+// games to the only ones left on screen; toggling every chip back off shows
+// the whole slate again. Only ever rendered once `availableFilters` is
+// non-empty — itself gated on cardMetaByGamePk, so this can't appear (or leak
+// which categories exist) before the slate's reveal-all.
+//
+// `aria-controls` names the grid the chips actually govern (#slate-games,
+// role="region" on .slate-main), and the count line is a live region: a chip
+// silently deleting most of the slate is exactly the change a screen reader
+// user would otherwise never hear.
+function ResultFilterBar({ chips, active, onToggle, shown, total }) {
+  return (
+    <div className="slate-filterbar">
+      <div className="slate-filterbar__chips" role="group" aria-label="Filter by result" aria-controls="slate-games">
+        {chips.map((c) => {
+          const isActive = active.has(c.key)
+          return (
+            <button
+              key={c.key}
+              type="button"
+              className={`slate-filterbar__chip ${isActive ? 'slate-filterbar__chip--active' : ''}`}
+              style={{ '--chip-accent': c.accent, '--chip-text': c.text }}
+              aria-pressed={isActive}
+              onClick={() => onToggle(c.key)}
+            >
+              {c.label}
+            </button>
+          )
+        })}
+      </div>
+      <p className="slate-filterbar__count" role="status">
+        {active.size > 0 ? `Showing ${shown} of ${total} games` : ''}
+      </p>
+    </div>
   )
 }
 
