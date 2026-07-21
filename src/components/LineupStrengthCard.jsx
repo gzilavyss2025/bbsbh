@@ -1,19 +1,32 @@
 import { useMemo } from 'react'
 import { lineupStrengthFor } from '../api/lineupStrength.js'
 import { InfoPopover } from './InfoPopover.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
 import { SectionMasthead } from './SectionMasthead.jsx'
 
 // The Lineup Strength card — tonight's posted batting order graded 0–10
 // against the best lineup this roster could field (api/lineupStrength.js:
-// WAR-rate values, position eligibility, Hungarian assignment; see
-// .scratch/metric-engines/lineup-strength.md). Spoiler-free by construction:
-// the starting nine + season aggregates, nothing from tonight's game.
+// wRC+ bats, fielding runs, position eligibility, Hungarian assignment; see
+// docs/lineup-strength.md). Spoiler-free by construction: the starting nine +
+// season aggregates, nothing from tonight's game.
 //
-// The hero score + tier pill lead; the deductions read as an
-// Expected → Starting → cost table (each row a legible line-item, never a
-// mystery number). Renders nothing without data (MiLB, file missing) or before
-// the lineup posts.
+// SCORE ONLY, DELIBERATELY. The card shows the grade, its tier word, and the
+// partial-grade caveat — nothing else. The receipt that explains the grade is
+// still computed and unit-tested (`lineupStrengthFor().rows`); it is simply not
+// rendered yet, because HOW to explain a grade is an open design question and a
+// half-settled answer is worse than none.
+//
+// The deductions table that used to live here was retired once the model was
+// reworked (docs/lineup-strength.md): a table is scannable but reads badly for a
+// "chain" — a change that shifts three or four players along, which is 43% of all
+// findings. Prose handles those far better and single findings better still, but
+// it walls up at the 24% of lineups with three or more, and it loses the aligned
+// column you scan to find the biggest deduction. That trade is unresolved.
+//
+// Everything needed to resume is in place: `rows` carries kind, position, both
+// names, the departing player's own position, and the men who shift between.
+// See docs/lineup-strength.md "Explaining the grade" for the options and the
+// measurements behind them. Renders nothing without data (MiLB, file missing) or
+// before the lineup posts.
 export function LineupStrengthCard({ data, teamId, lineup }) {
   const result = useMemo(() => {
     if (!data || !teamId || (lineup?.length ?? 0) < 9) return null
@@ -29,25 +42,19 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
   }, [data, teamId, lineup])
 
   if (!result) return null
-  const { rows, strengthTier, ungraded } = result
+  const { strengthTier, ungraded } = result
   // A starter with no value in either data file (a trade/call-up more recent than
   // the nightly build): his slot is left out of the grade, said plainly here so a
   // partial grade never masquerades as a complete one.
   const unvalued = ungraded ?? []
-  // Two kinds of deduction, split into their own tables: a personnel swap (a
-  // better bat sat) reads as Expected → Starting; an out-of-position start reads
-  // as who's playing where vs. where he usually plays. Both priced in points off
-  // the 10, not raw runs/game.
-  const swaps = rows.filter((r) => r.kind === 'bench')
-  const outOfPos = rows.filter((r) => r.kind === 'oop')
 
   return (
     <section className="metriccard lstrength">
       <SectionMasthead title="Lineup strength">
         <InfoPopover label="How lineup strength is graded">
-          Graded against this roster’s best nine on season numbers. Rest days,
-          nagging injuries, and matchup plans the model can’t see all count
-          against it.
+          Graded on season bats and gloves against the best nine this roster
+          could field. Rest days, nagging injuries, and matchup plans the model
+          can’t see all count against it.
         </InfoPopover>
       </SectionMasthead>
       <div className="metriccard__body">
@@ -66,64 +73,6 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
             {unvalued.map((u) => u.name || u.slot).join(', ')} not yet in the season
             data — graded on the rest of the order.
           </p>
-        )}
-
-        {rows.length === 0 && (
-          <p className="lstrength__clean">Full-strength — this is the roster’s best nine.</p>
-        )}
-
-        {swaps.length > 0 && (
-          <table className="lstrength__table">
-            <caption className="lstrength__caption">Stronger bats on the bench</caption>
-            <thead>
-              <tr>
-                <th className="lstrength__pos" scope="col">Pos</th>
-                <th scope="col">Expected</th>
-                <th scope="col">Starting</th>
-                <th className="lstrength__pts" scope="col">Impact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {swaps.map((r, i) => (
-                <tr key={i}>
-                  <td className="lstrength__pos">{r.pos}</td>
-                  <td className="lstrength__expected">
-                    <PlayerLink id={r.expectedId}>{r.expected}</PlayerLink>
-                  </td>
-                  <td className="lstrength__starting">
-                    <PlayerLink id={r.startingId}>{r.starting ?? '—'}</PlayerLink>
-                  </td>
-                  <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {outOfPos.length > 0 && (
-          <table className="lstrength__table lstrength__ooptable">
-            <caption className="lstrength__caption">Playing out of position</caption>
-            <thead>
-              <tr>
-                <th scope="col">Player</th>
-                <th className="lstrength__pos" scope="col">Playing</th>
-                <th className="lstrength__pos" scope="col">Usually</th>
-                <th className="lstrength__pts" scope="col">Impact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {outOfPos.map((r, i) => (
-                <tr key={i}>
-                  <td className="lstrength__starting">
-                    <PlayerLink id={r.startingId}>{r.starting ?? '—'}</PlayerLink>
-                  </td>
-                  <td className="lstrength__pos">{r.pos}</td>
-                  <td className="lstrength__pos">{r.usualPos ?? '—'}</td>
-                  <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         )}
       </div>
     </section>

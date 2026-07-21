@@ -68,6 +68,52 @@ Optimal lineup = same Hungarian assignment as L1 but in run units. Grade = runs/
 gap between optimal and actual, scaled (≈0.15 runs/game per grade point, to be
 calibrated against the league-wide nightly distribution).
 
+> **Correction (July 2026, after shipping). The value input above is wrong — L2
+> as built no longer uses WAR at all. The shipped design, and the evidence behind
+> every deviation from what this section proposes, now lives in
+> [`docs/lineup-strength.md`](../../docs/lineup-strength.md) — read that first;
+> the rest of this file is the original engine survey, kept for the alternatives
+> it weighs and the research pass behind the constants.**
+>
+> **Symptom.** A posted Brewers lineup graded 2.2 with a receipt line reading
+> "DH — expected Christian Yelich (97 wRC+), starting William Contreras (105)".
+> Gary Sánchez, at 132 wRC+ the best rate on the roster, valued below
+> replacement. The model's bat ranking was almost exactly inverted.
+>
+> **Root cause.** WAR bundles bat, glove and a positional adjustment into one
+> number, so using it as the value input forced the grade to *reconstruct* a bat
+> by subtracting a full-season positional constant. That is not recoverable:
+>
+> 1. FanGraphs' `Positional` is **prorated by actual playing time**. Contreras
+>    had earned +4.7 positional runs at the time; the model stripped the full
+>    12.5. Yelich had paid −6.9; the model handed back 17.5. A ~19-run phantom
+>    swing between two players, manufactured from a number that was in the feed.
+> 2. The Marcel PA shrink had already scaled the embedded adjustment before the
+>    constant was removed at full strength, leaving a further
+>    `(1 - shrink) * POS_ADJ[primary]` residual pointing the same direction.
+> 3. Independently, the adjustment was ALSO applied at assignment time as
+>    `POS_ADJ[slot] - POS_ADJ[primary]`, where it does nothing: every lineup
+>    fills the same nine slots, so its sum is a constant that cancels, and a
+>    per-slot constant can't change which assignment is optimal.
+>
+> **What replaced it.** Read the components instead of the total —
+> `type=6` (Value) carries them at no extra request. Each hitter now gets a bat
+> (wRC+ regressed toward 100) and a glove (season Fielding runs regressed toward
+> 0) as independent numbers. `slotValue` adds both at a fielding slot and uses
+> the bat alone at **DH**, since a designated hitter's fielding contribution is
+> definitionally zero — which is also what makes hiding a poor defender there
+> correctly free. The positional adjustment is gone from the model entirely:
+> with fielding carried explicitly, nothing is left for it to proxy.
+>
+> **What this buys beyond the fix.** Joey Ortiz — 75 wRC+, worst bat among the
+> regulars, but +6.4 fielding runs, the best glove on the roster — keeps third
+> base. An offense-only model benches him; the old WAR model couldn't see either
+> half clearly. Regressing wRC+ toward *average* rather than replacement also
+> dissolved the low-PA problem, where a 27-PA callup used to read as a weakness.
+>
+> **Lesson for any future engine here: never re-derive a component from a
+> composite. Fetch the component.**
+
 - **Data:** `war.json` (exists), eligibility matrix, positional-adjustment constant
   table (static, well-known).
 - **Why runs matter:** the gap becomes *interpretable* — "this lineup gives up about

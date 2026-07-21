@@ -1,87 +1,105 @@
 // Pure, dependency-free assignment solver for the Lineup Strength grade
-// (metric engine L2 — see .scratch/metric-engines/lineup-strength.md). Given a
-// pool of hitters, each with a runs-per-game value (`rpg`), a primary position,
-// and a positional-eligibility map (`elig`), it finds the run-value-maximizing
-// assignment of nine field/DH slots to distinct players (an exact Hungarian
-// solve), and it values an already-posted lineup the same way. No fetching, no
-// DOM, no score data — the inputs are season aggregates only, so this module is
-// spoiler-free by construction and unit-testable in isolation.
+// (metric engine L2 — see docs/lineup-strength.md for the full design rationale,
+// which you should read before changing anything in this file). Given a pool of
+// hitters, each with a bat (`rpg`), a glove (`fldRpg`) and the set of positions
+// he can currently cover (`positions`), it finds the value-maximizing assignment
+// of nine field/DH slots to distinct players (an exact Hungarian solve), and it
+// values an already-posted lineup the same way. No fetching, no DOM, no score
+// data — the inputs are season aggregates only, so this module is spoiler-free
+// by construction and unit-testable in isolation.
+//
+// The whole objective, in one line:
+//
+//     total = sum(bat + glove) over the nine  -  glove(DH)
+//
+// because a designated hitter does not field. Everything below is that, plus
+// feasibility.
 
 // The nine lineup slots. Order is fixed so callers can rely on it.
 export const SLOTS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
-// FanGraphs defensive positional adjustments, runs per 162 defensive games —
-// the standard, published out-of-position cost model (confirmed current in the
-// July-2026 research pass; see the design doc's "Research findings"). A premium
-// up-the-middle spot is worth run value a corner/DH is not; moving a player off
-// his primary spot shifts his value by the difference, prorated to one game.
-export const POS_ADJ = {
-  C: 12.5,
-  SS: 7.5,
-  '2B': 2.5,
-  '3B': 2.5,
-  CF: 2.5,
-  LF: -7.5,
-  RF: -7.5,
-  '1B': -12.5,
-  DH: -17.5,
+// THE POSITIONAL ADJUSTMENT IS DELIBERATELY ABSENT FROM THIS MODULE. The
+// FanGraphs constants (C +12.5 … DH -17.5 runs per 162 defensive games) used to
+// be applied here, as POS_ADJ[slot] - POS_ADJ[primary]. Do not reintroduce them.
+//
+// Two reasons, either one sufficient:
+//
+//  1. It cancels. A lineup always fills the same nine slots, so the sum of the
+//     slots' own adjustments is a constant — out of the total, and out of every
+//     receipt row too, since a row compares two players at the SAME slot. Adding
+//     a per-slot constant to an assignment matrix also cannot change which
+//     assignment is optimal.
+//  2. Nothing is left for it to proxy. It existed to make bats at different
+//     positions comparable when the only input was WAR, which bundles bat and
+//     glove together. `lineup-values.json` now carries those SEPARATELY — `rpg`
+//     from wRC+ (offense only) and `fldRpg` from season fielding runs — so the
+//     defensive spectrum is priced directly, by measurement rather than by
+//     positional average.
+//
+// Trying to recover a bat from a WAR total is what broke the grade: FanGraphs'
+// `Positional` is prorated by actual playing time, so subtracting a full-season
+// constant overcharged a part-season catcher and overpaid a part-season DH. See
+// the value-model header in scripts/gen-lineup-values.mjs.
+
+// THERE IS NO FAMILIARITY DISCOUNT. Eligibility is a hard yes/no, never a
+// weight that shades a player's value at a spot. This is deliberate and is the
+// second thing (after the positional adjustment) that must not come back.
+//
+// `fldRpg` is a season TOTAL across every position a player manned — FanGraphs
+// publishes one fielding figure per player, not one per position — so it
+// contributes identically at every fielding slot. That left the familiarity
+// weight as the ONLY term that varied by arrangement, which meant every lineup
+// rearrangement the model ever proposed was driven by it. And familiarity is
+// innings data: evidence a player CAN cover a spot, not that he is good there.
+// Pricing feasibility as if it were quality produced answers like "start Yordan
+// Alvarez in left field" — he had more career LF innings than the man posted
+// there, so the model moved him out of the DH slot he belongs in.
+//
+// Consequence worth knowing: any two arrangements of the same eight fielders now
+// have exactly equal value. Only WHO is in the nine, and WHICH ONE DHs, can move
+// the number. See `PREFER_EPSILON` for how ties are settled.
+
+// Tie-break nudge, in runs/game. With no familiarity term, rearranging the same
+// eight fielders is value-neutral, so the solver would otherwise be free to
+// return a gratuitously shuffled "optimal" that differs from the posted lineup
+// for no reason. This epsilon makes it prefer leaving a player where his manager
+// put him whenever the choice is a genuine tie. It is orders of magnitude below
+// the smallest real difference the values file can express (rpg/fldRpg are
+// rounded to 1e-3), so it can never override an actual preference.
+export const PREFER_EPSILON = 1e-9
+
+// True when `p` can currently cover `slot`. `positions` is a plain array of slot
+// names built by gen-lineup-values.mjs from RECENT fielding innings — a career
+// total is not enough (see docs/lineup-strength.md on the Ryan Braun problem).
+export function isEligible(p, slot) {
+  return Array.isArray(p?.positions) && p.positions.includes(slot)
 }
 
-// A defensive game is 162 in the run/season convention above, so a positional
-// adjustment prorates to one game by dividing by 162.
-export const DEF_GAMES = 162
-
-// Runs/game charged for total unfamiliarity at a slot (eligibility weight 0).
-// A weight-1 (fully familiar) placement costs nothing; a weight-w placement
-// costs (1 - w) * this. Small on purpose — the eligibility gate already forbids
-// spots a player can't cover at all; this only shades the ones he can.
-export const UNFAMILIAR_PENALTY = 0.12
-
-// Floor eligibility weight applied to an actual-lineup placement whose values
-// file carries no familiarity for that slot (an unknown/fallback player, or a
-// spot he's never logged an inning at yet is nonetheless starting at tonight).
-// He is demonstrably playing there, so he is valued, not forbidden.
-export const ELIG_FLOOR = 0.3
-
-// Weight granted to a forced starter when a slot has no eligible candidate at
-// all (the no-catcher relax path). Below the normal eligible floor (0.3) so a
-// relaxed placement is visibly a stopgap, not a real option.
-export const RELAX_WEIGHT = 0.1
-
-// Positional value shift, runs/game, for playing `slot` when your primary
-// position is `primary`. Unknown primary (e.g. a two-way player's 'TWP', or a
-// pitcher forced to bat) carries no adjustment — we only credit/debit a shift
-// we can actually anchor.
-export function posDelta(slot, primary) {
-  const s = POS_ADJ[slot]
-  const pr = POS_ADJ[primary]
-  if (s === undefined || pr === undefined) return 0
-  return (s - pr) / DEF_GAMES
+// A designated hitter does not field, so his glove is worth exactly nothing in
+// that slot — the one place the two halves of a player's value come apart. This
+// is what makes hiding a poor defender at DH correctly free, what stops the model
+// from benching a glove-first regular over his bat alone, and what makes the
+// optimal DH simply "the worst glove among the nine, subject to someone being
+// able to cover the spot he vacates".
+export function fieldingCredit(p, slot) {
+  if (slot === 'DH') return 0
+  return p.fldRpg ?? 0
 }
 
-// Runs/game penalty for placing player `p` at `slot`, given his familiarity
-// weight there. Returns Infinity when he has no eligibility at the slot — the
-// caller reads that as a forbidden assignment.
-export function unfamiliarPenalty(p, slot) {
-  const w = p.elig?.[slot]
-  if (w === undefined) return Infinity
-  return (1 - w) * UNFAMILIAR_PENALTY
-}
-
-// Run value (runs/game) of player `p` in `slot`: his bat (rpg) + the positional
-// shift - the unfamiliarity penalty. -Infinity when the slot is forbidden (no
-// eligibility), which the solver treats as an impossible pairing.
+// Run value (runs/game) of player `p` in `slot`: his bat, plus his glove at a
+// fielding slot. -Infinity when he cannot cover the slot, which the solver reads
+// as an impossible pairing. Used to score PROPOSALS, so the gate applies.
 export function slotValue(p, slot) {
-  const w = p.elig?.[slot]
-  if (w === undefined) return -Infinity
-  return p.rpg + posDelta(slot, p.primaryPos) - (1 - w) * UNFAMILIAR_PENALTY
+  if (!isEligible(p, slot)) return -Infinity
+  return p.rpg + fieldingCredit(p, slot)
 }
 
-// Same value, but never forbidden: a missing eligibility floors to ELIG_FLOOR.
-// Used to value an actual posted placement, which is a fact, not a proposal.
+// Same value, but never forbidden. Used to value an already-posted placement,
+// which is a FACT, not a proposal: the manager has this defense on the field, and
+// second-guessing whether he can on our thin innings data is exactly the
+// presumption the eligibility gate exists to avoid on the other side.
 export function slotValueFloored(p, slot) {
-  const w = p.elig?.[slot] ?? ELIG_FLOOR
-  return p.rpg + posDelta(slot, p.primaryPos) - (1 - w) * UNFAMILIAR_PENALTY
+  return p.rpg + fieldingCredit(p, slot)
 }
 
 // Exact max-weight bipartite assignment (Hungarian / Kuhn-Munkres, O(n^2 m))
@@ -165,40 +183,55 @@ function solveAssignment(value, nRows, nCols) {
   return { rowCol, total, feasible }
 }
 
-function buildValueMatrix(players) {
-  return SLOTS.map((slot) => players.map((p) => slotValue(p, slot)))
+// `prefer` is an optional Map of playerId -> the slot he is POSTED at tonight.
+// Matching it earns PREFER_EPSILON, which settles value ties (see its comment)
+// in favour of leaving the manager's arrangement alone. `forbid` is an optional
+// Map of playerId -> Set of slots he must not be PROPOSED at, used for the
+// catcher-rest rule in lineupStrength.js.
+function buildValueMatrix(players, prefer, forbid) {
+  return SLOTS.map((slot) =>
+    players.map((p) => {
+      if (forbid?.get(String(p.id))?.has(slot)) return -Infinity
+      const v = slotValue(p, slot)
+      if (!Number.isFinite(v)) return v
+      return prefer?.get(String(p.id)) === slot ? v + PREFER_EPSILON : v
+    }),
+  )
 }
 
-function attempt(players) {
-  const value = buildValueMatrix(players)
-  const { rowCol, total, feasible } = solveAssignment(value, SLOTS.length, players.length)
+function attempt(players, prefer, forbid) {
+  const value = buildValueMatrix(players, prefer, forbid)
+  const { rowCol, feasible } = solveAssignment(value, SLOTS.length, players.length)
   if (!feasible) return null
+  // Report the TRUE value, without the tie-break nudge, so a caller differencing
+  // optimal against posted never sees an epsilon leak into the gap.
   const assignments = SLOTS.map((slot, i) => ({
     slot,
     id: players[rowCol[i]].id,
-    value: value[i][rowCol[i]],
+    value: slotValueFloored(players[rowCol[i]], slot),
   }))
-  return { assignments, total }
+  return { assignments, total: assignments.reduce((a, x) => a + x.value, 0) }
 }
 
-// When a slot has no eligible candidate at all (classically catcher), grant the
-// least-bad option a RELAX_WEIGHT floor so the solve can complete. Prefer a
-// player whose primary IS that slot; else the lowest-rpg bat (a real team parks
-// its least valuable stick behind the plate in an emergency). Returns a cloned
-// pool so the caller's players are untouched.
-function relaxEligibility(players) {
-  const clone = players.map((p) => ({ ...p, elig: { ...p.elig } }))
+// When a slot has no eligible candidate at all (classically catcher), force-fill
+// it so the solve can complete. Prefer a player whose primary IS that slot; else
+// the lowest-rpg bat (a real team parks its least valuable stick behind the plate
+// in an emergency) — skipping anyone `forbid` rules out at this slot (the
+// catcher-rest rule in lineupStrength.js), so a relaxed fill can never hand the
+// slot right back to the one player it exists to keep out of it. Returns a
+// cloned pool so the caller's players are untouched.
+function relaxEligibility(players, forbid) {
+  const clone = players.map((p) => ({ ...p, positions: [...(p.positions ?? [])] }))
+  const allowedAt = (p, slot) => !forbid?.get(String(p.id))?.has(slot)
   for (const slot of SLOTS) {
     if (slot === 'DH') continue
-    if (clone.some((p) => p.elig[slot] !== undefined)) continue
-    let pick = clone.filter((p) => p.primaryPos === slot)
+    if (clone.some((p) => p.positions.includes(slot) && allowedAt(p, slot))) continue
+    let pick = clone.filter((p) => p.primaryPos === slot && allowedAt(p, slot))
     if (pick.length === 0) {
-      const sorted = [...clone].sort((x, y) => x.rpg - y.rpg)
+      const sorted = clone.filter((p) => allowedAt(p, slot)).sort((x, y) => x.rpg - y.rpg)
       pick = sorted.length ? [sorted[0]] : []
     }
-    for (const p of pick) {
-      if (p.elig[slot] === undefined || p.elig[slot] < RELAX_WEIGHT) p.elig[slot] = RELAX_WEIGHT
-    }
+    for (const p of pick) if (!p.positions.includes(slot)) p.positions.push(slot)
   }
   return clone
 }
@@ -207,27 +240,29 @@ function relaxEligibility(players) {
 // { assignments: [{slot, id, value}], total } (biggest-value assignment), or
 // the same shape with `relaxed: true` when a slot had to be force-filled, or
 // null if even the relaxed problem is infeasible (fewer than nine players).
-export function solveOptimalLineup(players, _opts = {}) {
+// `opts.prefer` / `opts.forbid` are documented on buildValueMatrix.
+export function solveOptimalLineup(players, opts = {}) {
   if (!Array.isArray(players) || players.length < SLOTS.length) {
     // Too few candidates to fill nine distinct slots — relax can't help.
     if (!Array.isArray(players) || players.length === 0) return null
   }
-  const strict = attempt(players)
+  const { prefer, forbid } = opts
+  const strict = attempt(players, prefer, forbid)
   if (strict) return strict
-  const relaxed = attempt(relaxEligibility(players))
+  const relaxed = attempt(relaxEligibility(players, forbid), prefer, forbid)
   if (relaxed) return { ...relaxed, relaxed: true }
   return null
 }
 
 // Value an already-posted lineup: `actual` is [{id, slot}] (nine entries). Uses
 // the floored value so a real placement is never forbidden. A player not in the
-// pool is valued as replacement-level (rpg 0) at floor familiarity — never a
+// pool is valued as a league-average bat and glove (rpg/fldRpg 0) — never a
 // crash. Returns { total, perSlot: [{slot, id, value}] }.
 export function valueLineup(players, actual) {
   const byId = new Map(players.map((p) => [String(p.id), p]))
   let total = 0
   const perSlot = actual.map(({ id, slot }) => {
-    const p = byId.get(String(id)) ?? { id, rpg: 0, primaryPos: slot, elig: {} }
+    const p = byId.get(String(id)) ?? { id, rpg: 0, fldRpg: 0, primaryPos: slot, positions: [] }
     const value = slotValueFloored(p, slot)
     total += value
     return { slot, id, value }
