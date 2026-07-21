@@ -1,5 +1,6 @@
 import { selectBoxscore, computePlayOfTheGame } from '../api/boxscore.js'
 import { useNav } from '../lib/nav.js'
+import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
@@ -24,6 +25,13 @@ export function GameResultFace({ feed, winProb, boxScorePath, hidePlayOfGame = f
 
   return (
     <div className="flipback">
+      <button
+        type="button"
+        className="btn flipback__boxbtn"
+        onClick={() => navigate(boxScorePath)}
+      >
+        Box score
+      </button>
       <div className="flipback__linescore">
         {wentToExtras && (
           <div className="flipback__extras">{totalInnings} innings</div>
@@ -39,13 +47,6 @@ export function GameResultFace({ feed, winProb, boxScorePath, hidePlayOfGame = f
       </div>
       <Decisions decisions={box.decisions} />
       {potg?.desc && !hidePlayOfGame && <PlayOfTheGame potg={potg} box={box} />}
-      <button
-        type="button"
-        className="btn btn--next flipback__full"
-        onClick={() => navigate(boxScorePath)}
-      >
-        Box score
-      </button>
     </div>
   )
 }
@@ -160,33 +161,41 @@ function linkifyNames(text, mentions) {
 // label carries the half+inning ("Top 8th") after a centered dot; the
 // description ends with the bolded score, leading team first.
 function PlayOfTheGame({ potg, box }) {
-  const { desc, batterId, batterName, inning, half, runners } = potg
+  const { desc, batterId, batterName, batterTeamId, inning, half, runners } = potg
   const mentions = [{ id: batterId, name: batterName }, ...(runners ?? [])]
   const inningLabel = inning != null ? `${half === 'top' ? 'Top' : 'Bottom'} ${ordinal(inning)}` : null
   const score = scoreLine(box, potg)
   return (
     <div className="flipback__potgWrap">
-      <span className="flipback__potgLabel">
-        Play of the game
-        {inningLabel && (
-          <>
-            <span className="flipback__potgDot" aria-hidden="true">
+      <Headshot
+        personId={batterId}
+        name={batterName}
+        teamId={batterTeamId}
+        className="flipback__potgShot"
+      />
+      <div className="flipback__potgMain">
+        <span className="flipback__potgLabel">
+          Play of the game
+          {inningLabel && (
+            <>
+              <span className="flipback__potgDot" aria-hidden="true">
+                {' '}
+                &middot;{' '}
+              </span>
+              {inningLabel}
+            </>
+          )}
+        </span>
+        <p className="flipback__potg">
+          {linkifyNames(desc, mentions)}
+          {score && (
+            <>
               {' '}
-              &middot;{' '}
-            </span>
-            {inningLabel}
-          </>
-        )}
-      </span>
-      <p className="flipback__potg">
-        {linkifyNames(desc, mentions)}
-        {score && (
-          <>
-            {' '}
-            <b>{score}</b>
-          </>
-        )}
-      </p>
+              <b>{score}</b>
+            </>
+          )}
+        </p>
+      </div>
     </div>
   )
 }
