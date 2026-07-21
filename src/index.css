@@ -11266,7 +11266,11 @@ body {
   color: var(--text-heading);
   font-weight: var(--w-bold);
 }
-.ledger .opp {
+/* Namespaced (not bare `.opp`) — a plain `.opp` class collides with the
+   opposing-lineup/defense/starter CARD container selector below (`.lineup,
+   .opp, .startercard`), which was leaking its border/background/shadow/
+   overflow:hidden onto every ledger's team/player column. */
+.ledger .ledger__sub {
   color: var(--text-muted);
   font-family: var(--font-body);
 }
@@ -14392,7 +14396,7 @@ body {
 
 /* Team-page prospect table — an org's farm-system leaderboard, shown only on
    the parent MLB club's own page (affiliate pages badge their rosters instead). */
-.prospecttable .lft.opp {
+.prospecttable .lft.ledger__sub {
   display: flex;
   align-items: center;
   gap: 6px;
