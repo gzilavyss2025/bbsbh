@@ -41,6 +41,30 @@ function performerFrom(feed, side, boxPlayer, stat) {
 
 const TIER = { RARE: 0, NOTABLE: 1, STORY: 2, CLOSE: 3 }
 
+// Per-card pill scenario for the slate grid (each game's own result card, not
+// the digest list) — not every signal maps to its own bucket 1:1: walkoff and
+// comeback are drama/closeness stories (Close Game) despite walkoff scoring at
+// NOTABLE tier alongside multiHr/positionPlayerPitching, which are stat-line
+// stories (Dominant Performance). triplePlay has no natural performer (its own
+// signal sets performer: null) but still buckets as 'dominant' — a triple play
+// is almost always also the game's biggest win-probability play, so the card
+// render just falls back to the turningPoint block when performer is absent;
+// nothing new needed to degrade gracefully.
+const SCENARIO_BY_KEY = {
+  multiHr: 'dominant',
+  cycle: 'dominant',
+  gameScore: 'dominant',
+  positionPlayerPitching: 'dominant',
+  noHitter: 'dominant',
+  perfectGame: 'dominant',
+  triplePlay: 'dominant',
+  oneRun: 'close',
+  walkoff: 'close',
+  comeback: 'close',
+  extras: 'extras',
+  blowout: 'blowout',
+}
+
 // A starter-record sub-caption ("Team is 11-6 in his starts") only earns its
 // line when the club actually wins behind him — see performerSubCaption.
 const STARTER_RECORD_MIN_STARTS = 8
@@ -460,7 +484,10 @@ export function performerSubCaption(top, bundle) {
 // protagonist rows with no sub-caption. The "was dominant" pitcher rows are
 // de-duped across the whole slate (see MAX_DOMINANT_HIGHLIGHTS) — a cross-game
 // pass, so the ranking is computed here in two phases rather than one map.
-export function rankDayHighlights(entries, calloutsData) {
+// Shared by rankDayHighlights (the digest list, filtered/sorted) and
+// classifyGameCards (every game's own card, unfiltered) below — neither
+// duplicates the signal-gathering/de-dupe/field-building logic.
+function buildGameEntries(entries, calloutsData) {
   // Phase 1: gather every game's fired signals (the objects, not just keys).
   const games = entries.filter(Boolean).map(({ gamePk, game, feed, winProb, dateStr }) => {
     const box = selectBoxscore(feed)
@@ -514,6 +541,19 @@ export function rankDayHighlights(entries, calloutsData) {
         // the score on its own logo line, so it renders the story from this.
         story: buildStory(top, potg),
         signals: signals.map((s) => s.key),
+        // Which one signal the headline/pills are built around, and which
+        // per-card scenario bucket that maps to (see SCENARIO_BY_KEY) — null
+        // for a quiet game with nothing fired, same as `top` itself.
+        topKey: top?.key ?? null,
+        scenario: top ? (SCENARIO_BY_KEY[top.key] ?? null) : null,
+        // Deterministic, not random: a Blowout/Extra-Innings card picks
+        // between showing the turning-point play or the top performer's
+        // stat line, seeded off gamePk so the choice varies game-to-game but
+        // the SAME game always renders the same way and this pure function's
+        // tests stay reproducible. Only consulted when scenario is 'blowout'
+        // or 'extras'; the caller falls back to whichever of
+        // performer/turningPoint actually exists if the seeded pick is absent.
+        playChoice: gamePk % 2 === 0 ? 'performer' : 'play',
         performer: top?.performer ?? null,
         subCaption: performerSubCaption(top, bundle),
         // The turning-point play with its protagonist, for the Game of the Day
@@ -551,14 +591,41 @@ export function rankDayHighlights(entries, calloutsData) {
         ),
       }
     })
-    // A quiet game with no fired signal (tier 4, the "Final: X, Y" default
-    // headline) isn't a HIGHLIGHT — drop it rather than pad the list with
-    // scores that don't belong in a "most interesting" ranking. A game whose
-    // ONLY signal is a blowout is likewise dropped: a rout is the opposite of a
-    // highlight (its points are even negative), and it only ever rode the list
-    // as filler — when a lopsided game also has a real story (a multi-HR night),
-    // that OTHER signal keeps it.
-    .filter((entry) => entry.signals.length > 0)
-    .filter((entry) => !(entry.signals.length === 1 && entry.signals[0] === 'blowout'))
-    .sort((a, b) => a.tier - b.tier || b.score - a.score)
+}
+
+// A quiet game with no fired signal (tier 4, the "Final: X, Y" default
+// headline) isn't a HIGHLIGHT — drop it rather than pad the list with scores
+// that don't belong in a "most interesting" ranking. A game whose ONLY signal
+// is a blowout is likewise dropped: a rout is the opposite of a highlight (its
+// points are even negative), and it only ever rode the list as filler — when a
+// lopsided game also has a real story (a multi-HR night), that OTHER signal
+// keeps it. Shared by rankDayHighlights (to filter) and classifyGameCards (to
+// decide crown eligibility) so the two never disagree on what counts.
+function isHighlightWorthy(entry) {
+  return entry.signals.length > 0 && !(entry.signals.length === 1 && entry.signals[0] === 'blowout')
+}
+function byTierThenScore(a, b) {
+  return a.tier - b.tier || b.score - a.score
+}
+
+export function rankDayHighlights(entries, calloutsData) {
+  return buildGameEntries(entries, calloutsData).filter(isHighlightWorthy).sort(byTierThenScore)
+}
+
+// Per-card classification for the slate grid — EVERY final game gets an
+// entry here (unlike rankDayHighlights's digest list above, which drops quiet
+// and blowout-only games), since every game has its own result card whether
+// or not it's "worth listing." A quiet game gets scenario: null (no pill, no
+// extra headshot); a blowout-only game still gets scenario: 'blowout' for its
+// own card, it just never competes for the crown below.
+//
+// isGameOfTheNight is true for at most one game per day: whichever entry
+// would lead rankDayHighlights's own list (same isHighlightWorthy/
+// byTierThenScore, so the crown always matches what the old digest would have
+// led with) — never a quiet or blowout-only game, even if nothing else fired
+// that day.
+export function classifyGameCards(entries, calloutsData) {
+  const games = buildGameEntries(entries, calloutsData)
+  const crowned = games.filter(isHighlightWorthy).sort(byTierThenScore)[0]?.gamePk ?? null
+  return games.map((entry) => ({ ...entry, isGameOfTheNight: entry.gamePk === crowned }))
 }

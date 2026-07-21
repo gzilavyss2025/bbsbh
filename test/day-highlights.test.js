@@ -13,6 +13,7 @@ import {
   triplePlaySignal,
   selectGameResults,
   rankDayHighlights,
+  classifyGameCards,
   firstSentence,
 } from '../src/api/dayHighlights.js'
 
@@ -452,6 +453,71 @@ test('rankDayHighlights: margin storyline names clubs, not abbreviations', () =>
     null,
   )
   assert.equal(top.story, 'The Angels edged the Tigers by a single run')
+})
+
+// --------------------------------------------------------------------------
+// classifyGameCards — per-card pill classification for the slate grid. Unlike
+// rankDayHighlights (the digest list), every game gets an entry here, even a
+// quiet or blowout-only one that rankDayHighlights would drop — each game has
+// its own result card regardless of whether it's "worth listing".
+// --------------------------------------------------------------------------
+
+test('classifyGameCards: a quiet game keeps its own entry (rankDayHighlights would drop it)', () => {
+  const cards = classifyGameCards(
+    [rankEntry(1, rankFeed({ away: { r: 4, h: 8 }, home: { r: 1, h: 6 } }))],
+    null,
+  )
+  assert.equal(cards.length, 1)
+  assert.equal(cards[0].scenario, null)
+  assert.equal(cards[0].isGameOfTheNight, false)
+})
+
+test('classifyGameCards: a blowout-only game keeps scenario "blowout" and never wins the crown', () => {
+  const cards = classifyGameCards(
+    [rankEntry(1, rankFeed({ away: { r: 12, h: 14 }, home: { r: 2, h: 5 } }))],
+    null,
+  )
+  assert.equal(cards.length, 1)
+  assert.equal(cards[0].scenario, 'blowout')
+  assert.equal(cards[0].isGameOfTheNight, false)
+})
+
+test('classifyGameCards: crowns exactly the game that would lead rankDayHighlights', () => {
+  const entries = [dominantGame(1, START_87), dominantGame(2, START_98)]
+  const cards = classifyGameCards(entries, null)
+  const [rankedTop] = rankDayHighlights(entries, null)
+  const crowned = cards.filter((c) => c.isGameOfTheNight)
+  assert.equal(crowned.length, 1)
+  assert.equal(crowned[0].gamePk, rankedTop.gamePk)
+  assert.equal(crowned[0].gamePk, 2) // the 98 start beats the 87 start
+})
+
+test('classifyGameCards: buckets each signal into its card scenario', () => {
+  const [dominant] = classifyGameCards([dominantGame(1, START_98)], null)
+  assert.equal(dominant.scenario, 'dominant')
+
+  const [close] = classifyGameCards(
+    [rankEntry(1, rankFeed({ away: { r: 3, h: 8 }, home: { r: 2, h: 7 } }))],
+    null,
+  )
+  assert.equal(close.scenario, 'close')
+
+  const [extras] = classifyGameCards(
+    [rankEntry(1, rankFeed({ away: { r: 5, h: 10 }, home: { r: 4, h: 9 }, innings: 10 }))],
+    null,
+  )
+  assert.equal(extras.scenario, 'extras')
+})
+
+test('classifyGameCards: playChoice is deterministic by gamePk, not random', () => {
+  const feed = () => rankFeed({ away: { r: 12, h: 14 }, home: { r: 2, h: 5 } })
+  const [evenGame] = classifyGameCards([rankEntry(2, feed())], null)
+  const [oddGame] = classifyGameCards([rankEntry(3, feed())], null)
+  assert.equal(evenGame.playChoice, 'performer')
+  assert.equal(oddGame.playChoice, 'play')
+  // Same gamePk, called again — must reproduce the same choice.
+  const [again] = classifyGameCards([rankEntry(2, feed())], null)
+  assert.equal(again.playChoice, evenGame.playChoice)
 })
 
 // --------------------------------------------------------------------------
