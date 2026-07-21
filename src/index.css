@@ -19360,14 +19360,6 @@ body {
   color: var(--text-caption);
   font-weight: var(--w-regular);
 }
-.seasonseries__loser {
-  display: block;
-  width: 100%;
-  font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
-  color: var(--text-caption);
-  text-align: center;
-}
 .seasonseries__time {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

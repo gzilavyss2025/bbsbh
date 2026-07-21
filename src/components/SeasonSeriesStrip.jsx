@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { fetchSeasonSeries } from '../api/schedule.js'
 import { seasonSeriesCells } from '../api/seasonSeries.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -18,6 +18,7 @@ import { TeamLogo } from './TeamLogo.jsx'
 export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, sportId, currentGamePk }) {
   const navigate = useNav()
   const stripRef = useRef(null)
+  const currentCellRef = useRef(null)
   const season = (officialDate ?? '').slice(0, 4)
 
   const { data: games } = useAsync(
@@ -29,6 +30,14 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   )
 
   const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk)
+
+  // Land on the current game centered in the strip rather than wherever it
+  // falls chronologically — with a full multi-leg series (see the August leg
+  // in the real-game case study) it can be several cards deep.
+  useEffect(() => {
+    currentCellRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [cells.length])
+
   if (cells.length < 2) return null
 
   const scroll = (dir) => {
@@ -57,7 +66,12 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
         </button>
         <div className="seasonseries__strip" ref={stripRef}>
           {cells.map((cell) => (
-            <SeasonSeriesCell key={cell.gamePk} cell={cell} onSelect={() => openGame(cell)} />
+            <SeasonSeriesCell
+              key={cell.gamePk}
+              cell={cell}
+              onSelect={() => openGame(cell)}
+              cellRef={cell.isCurrent ? currentCellRef : null}
+            />
           ))}
         </div>
         <button
@@ -73,12 +87,13 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   )
 }
 
-function SeasonSeriesCell({ cell, onSelect }) {
+function SeasonSeriesCell({ cell, onSelect, cellRef }) {
   const dateLabel = monthDayYear(cell.apiDate)
   const oppLabel = `${cell.isHome ? 'vs' : '@'} ${cell.opponentAbbr}`
 
   return (
     <button
+      ref={cellRef}
       type="button"
       className={`seasonseries__cell${cell.isCurrent ? ' seasonseries__cell--current' : ''}`}
       onClick={onSelect}
@@ -90,7 +105,6 @@ function SeasonSeriesCell({ cell, onSelect }) {
             {cell.winnerScore}
             <span className="seasonseries__sep">–</span>
             {cell.loserScore}
-            {cell.loserAbbr && <span className="seasonseries__loser">{cell.loserAbbr}</span>}
           </span>
         </>
       ) : (
