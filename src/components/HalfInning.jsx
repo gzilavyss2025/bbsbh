@@ -75,7 +75,7 @@ export function HalfInning({
     inning > 1 ? selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough) : null
   const isFreshPitcher =
     livePitcher != null || inning === 1 || previousEnteringPitcher?.id !== enteringPitcher?.id
-  const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching for'
+  const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching'
 
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal

@@ -188,7 +188,11 @@ function AbsChallengesCard({ challenges, awayAbbr, homeAbbr }) {
 // footing as StatBox's — this only computes challenges.js's reveal-only
 // selector once revealed, never at render top-level (ADR-0001).
 export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
-  if (!gameHasAbs(feed)) return null
+  // Nothing to show pre-reveal (challenges are only known once revealed, and
+  // `coverless` means the SealBox itself renders nothing while sealed) — bail
+  // before the wrapper div rather than leaving an empty bordered card sitting
+  // above the win-probability chart.
+  if (!gameHasAbs(feed) || !revealed) return null
   return (
     <div className="abscard" key={`${inning}-${half}`}>
       <SealBox forceRevealed={revealed} coverless>

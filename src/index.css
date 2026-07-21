@@ -10498,6 +10498,16 @@ body {
     flex: 2 1 0;
     min-width: 0;
   }
+  /* Before reveal, .innings__statbox renders nothing at all (StatBox's own
+     placeholder bail — see its header comment), leaving this the ONLY flex
+     item in .innings__row2. A lone flex:2 item grows to fill the whole row
+     with no flex:3 sibling to share it with — the win-probability chart card
+     stretching edge to edge, its fixed-aspect SVG left stranded in a huge
+     gutter. Pin it back to its normal ~2/5 share instead of letting flex-grow
+     claim the rest. */
+  .innings__row2-right:only-child {
+    flex: 0 1 40%;
+  }
   .innings__row2-right > .winprob {
     flex: 1 1 auto;
   }
