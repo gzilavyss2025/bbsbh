@@ -9042,7 +9042,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: 14px 16px;
+  padding: 8px 16px 14px;
   border-radius: var(--radius-md);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
@@ -9127,8 +9127,26 @@ body {
   color: var(--text-heading);
   margin-right: 3px;
 }
+/* Headshot-led, same idiom as the full box score's .bs__potgBody (BoxScore.jsx)
+   — sized to --shot-md, matching the slate rail's Top Performers card
+   (.playercard__shot) so the lead player reads at the same scale wherever a
+   past game surfaces one: the photo anchors the left edge, the label +
+   description shift over into their own column. */
 .flipback__potgWrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   padding-top: 4px;
+}
+.shot.flipback__potgShot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.flipback__potgMain {
+  min-width: 0;
 }
 .flipback__potg {
   margin: 0;
@@ -9161,10 +9179,27 @@ body {
 #root .flipback__potg .plink {
   text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
 }
-.flipback__full {
-  align-self: center;
-  width: 50%;
-  margin-top: auto;
+/* Compact, left-aligned above the logos/team names (left edge lines up with
+   them for free — both are direct children of the same padded .flipback
+   column) rather than the old full-width band pinned to the card's bottom.
+   Padding trimmed to a caption-sized pill (font/size match .flipback__lsCol's
+   R/H/E header) so it reads as scaled to that row, not a full-size button
+   that happens to be short. Negative margin-bottom pulls it in past the
+   column's own gap, right down against the R/H/E row it sits over, so the
+   card doesn't carry a second, looser gap on top of the first. */
+.flipback__boxbtn {
+  align-self: flex-start;
+  width: auto;
+  min-height: 0;
+  padding: 4px 10px;
+  margin-bottom: -7px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
 }
 
 /* ---------------------------------------------------------------------------
@@ -15781,20 +15816,15 @@ body {
 .psseries__facewrap .flipback__extras {
   font-size: var(--fs-num-md);
 }
-/* One navy band per entry (the slate card's full-width BOX SCORE bar) would
-   fight the pennant band above five to seven times over — quiet it to a
-   compact secondary button, left-aligned like a ledger's margin note. */
-.psseries__facewrap .flipback__full {
-  align-self: flex-start;
-  width: auto;
-  margin-top: var(--space-1);
+/* One navy band per entry (the slate card's BOX SCORE button) would fight the
+   pennant band above five to seven times over — quiet it to a compact
+   secondary button, left-aligned like a ledger's margin note. */
+.psseries__facewrap .flipback__boxbtn {
+  margin-bottom: var(--space-1);
   background: var(--surface-inset);
   border: var(--bw-hair) solid var(--border-rule);
   color: var(--text-body);
-  font-family: var(--font-display);
   font-size: var(--fs-small);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
 }
 /* Headshot-led Play of the Game (SeriesPlayOfTheGame) — same idea as the full
    box score's own .bs__potg* (BoxScore.jsx), scoped to its own psseries__potg*
