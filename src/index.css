@@ -19313,8 +19313,18 @@ body {
   min-width: 0;
   gap: var(--space-2);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
+  /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it and fall
+     back to a full-size native scrollbar, which reads as a stray gray bar
+     under the square nav buttons (see .txcard__scroll for the same fix). The
+     ::-webkit-scrollbar rule below is what hides it in Chromium/WebKit. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.seasonseries__strip::-webkit-scrollbar {
+  display: none;
 }
 /* Once every card already fits (no nav arrows rendered — see
    SeasonSeriesStrip.jsx's canScroll check), center the row instead of
