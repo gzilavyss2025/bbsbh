@@ -9609,9 +9609,10 @@ body {
 .shot.tlead__shot.shot--fallback {
   font-size: var(--fs-hero-lg);
 }
-/* Team tag — logo over abbreviation, stacked compactly between the headshot
-   and the name/stat stack. Always names the club the leader plays FOR (see
-   FeaturedLeader's displayTeamId/displayTeamAbbr). */
+/* Team tag — logo over abbreviation, pinned to the card's far right edge
+   (last flex child, after the flex:1 .tlead__who soaks up the rest of the
+   row). Always names the club the leader plays FOR (see FeaturedLeader's
+   displayTeamId/displayTeamAbbr). */
 .tlead__teamtag {
   flex: none;
   display: flex;
@@ -9633,22 +9634,42 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
-.tlead__head {
+/* Two-line hero name — same idiom as PlayerPage's .player__name (a flex
+   column of first/last spans; being flex children blockifies the spans, so
+   the ellipsis trio below actually takes effect). Compound to beat .plink's
+   `font: inherit`/`text-align: inherit`, same as .playercard__score. */
+.tlead__who .tlead__name {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+  width: 100%;
 }
-/* Compound to beat .plink's `font: inherit`, same as .playercard__score. */
-.tlead__head .tlead__name {
+.tlead__name-first {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The surname gets its own full-width line rather than sharing one with the
+   stat value (the old layout's overflow bug — a long name like
+   "Adamczewski" ran into the stat beside it). Still falls back to an
+   ellipsis, same safety net as .player__name-last, for the rare name that
+   doesn't fit even with the full card width to itself. */
+.tlead__name-last {
   font-family: var(--font-body);
   font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* Shared inline IL cross (see components/InjuredMark.jsx) — same glyph/color
    as .il-banner__mark (player page), sized inline for a name rather than a
@@ -9659,13 +9680,15 @@ body {
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
 }
-.tlead__head .ilmark {
+.tlead__name-last .ilmark {
   font-size: var(--fs-small);
+  margin-left: 6px;
 }
 .tlead__row .ilmark {
   font-size: var(--fs-caption);
 }
 .tlead__pos {
+  margin-left: 6px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -9674,7 +9697,6 @@ body {
   color: var(--text-caption);
 }
 .tlead__stat {
-  flex: none;
   display: flex;
   align-items: baseline;
   gap: 5px;
