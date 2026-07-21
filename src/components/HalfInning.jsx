@@ -10,6 +10,7 @@ import { EnteringReference } from './EnteringReference.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PitcherNotice } from './PitcherNotice.jsx'
 import { BatterNotice } from './BatterNotice.jsx'
+import { UpNextBatters } from './UpNextBatters.jsx'
 
 export function HalfInning({
   feed,
@@ -129,6 +130,18 @@ export function HalfInning({
             teamName={battingSide === 'away' ? homeName : awayName}
             className="pitchernotice--pbp"
             label={nowPitchingLabel}
+          />
+        )}
+
+        {/* Who's due up to face him — gone the moment reveal starts, same
+            gate as PrePitchChanges/the entering reference below. */}
+        {!startedRevealing && isNextToReveal && (
+          <UpNextBatters
+            feed={feed}
+            inning={inning}
+            half={half}
+            revealedThrough={revealedThrough}
+            teamId={battingSide === 'away' ? awayId : homeId}
           />
         )}
 

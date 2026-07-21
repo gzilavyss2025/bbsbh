@@ -5391,6 +5391,53 @@ body {
   text-transform: none; /* caps-exempt: pre-half callout cards read as natural sentences */
 }
 
+/* UpNextBatters: who's due up to face the entering pitcher, before any of the
+   half is revealed — three headshot columns. Horizontal margin (not just
+   .prehalf's margin-bottom): a headshot flush against .half's own border
+   (which carries no padding of its own) reads worse than the text-only cards
+   around it do, the same reasoning the kraft "now pitching" card's own
+   horizontal margin follows (see .pitchernotice--pbp). */
+.upnext {
+  margin: 10px 14px 4px;
+}
+.upnext__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 8px;
+}
+.upnext__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.upnext__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  min-width: 0;
+}
+.shot.upnext__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.upnext__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .prepitch {
   margin-bottom: 12px;
   padding-bottom: 12px;

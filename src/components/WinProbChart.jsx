@@ -519,7 +519,11 @@ export function WinProbChart({
               const colors = chipColorsFor(toHome ? homeId : awayId)
               const val = Math.round(Math.abs(p.delta))
               const chipText = `${abbr} +${val}%`
-              const tag = `${p.half === 'top' ? 'T' : 'B'}${p.inning}`
+              // "Top 1st" / "Bottom 5th" — same half-label + ordinal shape as
+              // the half card's own title (HalfInning.jsx), rendered upper-
+              // case by .winprob__ledger-half's own text-transform rather
+              // than the old compact "T1"/"B5" shorthand.
+              const tag = `${p.half === 'top' ? 'Top' : 'Bottom'} ${ordinal(p.inning)}`
               const isActive = activeIdx === p.idx
               return (
                 <li
