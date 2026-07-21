@@ -46,10 +46,21 @@ function heightAt(a, wall) {
 // From the digitized arc when present, else the five posted distances.
 function wallPoints(dist, wall, arc) {
   if (arc && arc.length > 1) {
-    return arc.map(([xf, yf]) => {
-      const a = (Math.atan2(xf, yf) * 180) / Math.PI
-      return { ...toSvg(xf, yf), a, h: heightAt(a, wall) }
-    })
+    // The digitized polygon (GeomMLBStadiums' outfield_outer) runs past both foul
+    // poles into foul territory — bullpen/camera-well wall beyond the true fair
+    // line. Keep only the interior fair-territory points (within ±45° of dead
+    // center) and cap each end at the actual posted pole distance, so the fence
+    // still ends exactly at the foul line the labels report instead of bulging
+    // past it.
+    const interior = arc
+      .map(([xf, yf]) => ({ xf, yf, a: (Math.atan2(xf, yf) * 180) / Math.PI }))
+      .filter((p) => p.a >= -45 && p.a <= 45)
+    const pole = (adeg, r) => {
+      const rad = (adeg * Math.PI) / 180
+      return { xf: r * Math.sin(rad), yf: r * Math.cos(rad), a: adeg }
+    }
+    const withPoles = [pole(-45, dist.lf), ...interior, pole(45, dist.rf)]
+    return withPoles.map((p) => ({ ...toSvg(p.xf, p.yf), a: p.a, h: heightAt(p.a, wall) }))
   }
   return ['lf', 'lc', 'cf', 'rc', 'rf'].map((k) => {
     const a = ANGLE[k]
