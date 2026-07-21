@@ -47,6 +47,12 @@ Then classify the task:
   worktree automatically, in the background — no need to install manually before
   running `dev`/`lint`/`e2e` there. It's fire-and-forget; give it a minute before
   the first command in a brand-new worktree.
+
+  Dev servers started in a worktree keep running after that worktree's work is
+  merged and forgotten, squatting on the reserved ports. `session-start.sh`
+  reports any stale ones (branch already merged, or worktree deleted) at the
+  start of every local session; run the `/clean-dev-servers` skill to review
+  and kill them interactively.
 - **Task that depends on an open PR:** identify the exact PR and head branch first.
   Base the new branch on `origin/<that-head-branch>` only when the dependency is
   intentional, and record that dependency in the new PR and final handoff. Do not
