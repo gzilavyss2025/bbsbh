@@ -11,11 +11,11 @@ import {
   cycleSignal,
   positionPlayerPitchingSignal,
   triplePlaySignal,
-  selectGameResults,
   rankDayHighlights,
   classifyGameCards,
   firstSentence,
 } from '../src/api/dayHighlights.js'
+import { reorderGameOfTheNight } from '../src/lib/resultCards.js'
 
 // A minimal live-feed shape carrying only what multiHrSignal reads: each side's
 // boxscore players (battingOrder + batting.homeRuns + person + position) plus
@@ -249,24 +249,6 @@ test('triplePlaySignal: an ordinary game does not fire', () => {
   assert.equal(triplePlaySignal(feed), null)
 })
 
-test('selectGameResults: returns both sides + the winner id per game', () => {
-  const entries = [
-    { gamePk: 1, feed: feedResult(10, 'AWY', 3, 20, 'HOM', 7) },
-    { gamePk: 2, feed: feedResult(30, 'XXX', 5, 40, 'YYY', 2) },
-  ]
-  const results = selectGameResults(entries)
-  assert.equal(results.length, 2)
-  assert.deepEqual(results[0].home, { id: 20, abbr: 'HOM', r: 7 })
-  assert.equal(results[0].winnerId, 20)
-  assert.equal(results[1].winnerId, 30)
-})
-
-test('selectGameResults: a tie (or thin 0-0 box) reports no winner', () => {
-  // Never silently declare the away side the winner — the Your Team badge
-  // depends on this being null so it can show T, not a bogus L.
-  const [r] = selectGameResults([{ gamePk: 1, feed: feedResult(10, 'AWY', 4, 20, 'HOM', 4) }])
-  assert.equal(r.winnerId, null)
-})
 
 // --------------------------------------------------------------------------
 // firstSentence — trims to the first REAL sentence, not an abbreviation period.
@@ -532,29 +514,6 @@ test('eliteGameScoreSignal: headline shows the stat line, not "Game Score N"', (
   assert.equal(sig.gs, 85) // ranking still keys on Game Score internally
 })
 
-// gameNumber rides on each result so the Your Team block can label a twin bill.
-test('selectGameResults: carries gameNumber for doubleheader labeling', () => {
-  const results = selectGameResults([
-    { gamePk: 1, feed: feedResult(10, 'AWY', 3, 20, 'HOM', 7), dateStr: '2026-07-19', game: dhGame(1) },
-    { gamePk: 2, feed: feedResult(10, 'AWY', 5, 20, 'HOM', 2), dateStr: '2026-07-19', game: dhGame(2) },
-  ])
-  assert.equal(results[0].gameNumber, 1)
-  assert.equal(results[1].gameNumber, 2)
-})
-const dhGame = (gameNumber) => ({
-  away: { abbreviation: 'AWY' },
-  home: { abbreviation: 'HOM' },
-  gameNumber,
-})
-
-// Minimal feed selectGameResults reads run totals + ids from.
-function feedResult(awayId, awayAbbr, awayR, homeId, homeAbbr, homeR) {
-  const team = (runs) => ({ teamStats: { batting: { runs } } })
-  return {
-    gameData: { teams: { away: { id: awayId, abbreviation: awayAbbr }, home: { id: homeId, abbreviation: homeAbbr } } },
-    liveData: { boxscore: { teams: { away: team(awayR), home: team(homeR) } } },
-  }
-}
 
 test('eliteGameScoreSignal: a start under 80 does not fire', () => {
   // 6 IP, 5 H, 3 ER, 4 K → well under the 80 floor.
@@ -564,4 +523,45 @@ test('eliteGameScoreSignal: a start under 80 does not fire', () => {
     ),
     null,
   )
+})
+
+// --------------------------------------------------------------------------
+// reorderGameOfTheNight — where the crowned card lands in the slate's order.
+// The pre-fix version spliced to a hardcoded index 1, which on a slate with no
+// favorite-team game demoted the Game of the Night behind whichever game merely
+// started earliest.
+// --------------------------------------------------------------------------
+const slate = (...pks) => pks.map((gamePk) => ({ gamePk }))
+const crownedMeta = (pk) => new Map([[pk, { isGameOfTheNight: true }]])
+const pks = (games) => games.map((g) => g.gamePk)
+
+test('reorderGameOfTheNight: with no pinned game the crown takes slot 0', () => {
+  const games = slate(1, 2, 3, 4)
+  assert.deepEqual(pks(reorderGameOfTheNight(games, crownedMeta(3))), [3, 1, 2, 4])
+})
+
+test('reorderGameOfTheNight: with a pinned game leading, the crown sits behind it', () => {
+  const games = slate(1, 2, 3, 4)
+  const isPinned = (g) => g.gamePk === 1
+  assert.deepEqual(pks(reorderGameOfTheNight(games, crownedMeta(3), isPinned)), [1, 3, 2, 4])
+})
+
+test('reorderGameOfTheNight: a crown already in place is left alone', () => {
+  const games = slate(1, 2, 3)
+  assert.deepEqual(pks(reorderGameOfTheNight(games, crownedMeta(1))), [1, 2, 3])
+  const isPinned = (g) => g.gamePk === 1
+  assert.deepEqual(pks(reorderGameOfTheNight(games, crownedMeta(2), isPinned)), [1, 2, 3])
+})
+
+test('reorderGameOfTheNight: an empty meta map is a no-op (pre-reveal)', () => {
+  // The spoiler gate: nothing may be promoted before the day's reveal-all
+  // populates the map, or the order itself would leak which game is crowned.
+  const games = slate(1, 2, 3)
+  assert.equal(reorderGameOfTheNight(games, new Map()), games)
+})
+
+test('reorderGameOfTheNight: a slate with no crowned game is a no-op', () => {
+  const games = slate(1, 2, 3)
+  const meta = new Map([[2, { isGameOfTheNight: false }]])
+  assert.equal(reorderGameOfTheNight(games, meta), games)
 })

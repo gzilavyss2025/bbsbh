@@ -233,42 +233,6 @@ export function triplePlaySignal(feed) {
   return null
 }
 
-// Every Final game's bare result (both sides + the winner id), for the recap's
-// "Your Team" block — which needs the score of the favorite club's game even
-// when nobody on it cracked Top Performers or a highlight. Reveal-only like the
-// rest of this module (it reads run totals straight off the box score).
-export function selectGameResults(entries) {
-  return (entries ?? []).filter(Boolean).map(({ gamePk, game, feed, dateStr }) => {
-    const box = feed?.liveData?.boxscore?.teams ?? {}
-    const gd = feed?.gameData?.teams ?? {}
-    // Run totals off teamStats (the same field topPerformers.js reads); ids/
-    // abbreviations off gameData (present even where a side's box is thin).
-    const side = (key) => ({
-      id: gd?.[key]?.id ?? box?.[key]?.team?.id ?? null,
-      abbr: gd?.[key]?.abbreviation ?? box?.[key]?.team?.abbreviation ?? '',
-      r: box?.[key]?.teamStats?.batting?.runs ?? 0,
-    })
-    const away = side('away')
-    const home = side('home')
-    return {
-      gamePk,
-      away,
-      home,
-      // null on a tie (thin MiLB box with both totals defaulting to 0, a
-      // suspended/called tie) so the caller can hide the W/L badge rather than
-      // declaring the away side a phantom winner.
-      winnerId: home.r === away.r ? null : home.r > away.r ? home.id : away.id,
-      // 1 for a single game, 1 & 2 for a doubleheader — lets the Your Team block
-      // label both games of a twin bill ("Game 1"/"Game 2") instead of showing
-      // only the opener.
-      gameNumber: game?.gameNumber ?? null,
-      boxScorePath: game
-        ? gamePath(dateStr, game.away.abbreviation, game.home.abbreviation, 'boxscore', game.gameNumber)
-        : null,
-    }
-  })
-}
-
 // Win-probability-dependent signals — walk-off and largest comeback. Both
 // need the per-play winProb array (absent at most MiLB parks), so both
 // silently don't fire when it's missing.
@@ -348,7 +312,10 @@ function marginSignals(away, home, extraInnings) {
   const margin = Math.abs(away.line.r - home.line.r)
   const winner = away.line.r > home.line.r ? away : home
   const loser = winner === away ? home : away
-  const name = (side) => side.clubName || side.abbreviation || side.teamName
+  // clubName ("Brewers") reads as prose; boxscore.js already falls it back to
+  // teamName, so the only remaining gap is a MiLB feed thin enough to have
+  // neither — there the abbreviation beats oneSide's "Away"/"Home" placeholder.
+  const name = (side) => side.clubName || side.abbreviation
   // None of these three carry a single protagonist — they're team-vs-team
   // length/margin storylines — so `performer: null` throughout, same as
   // comeback above. A card with no performer falls back to the plain

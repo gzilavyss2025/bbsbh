@@ -8988,10 +8988,25 @@ body {
    .flipback__pill--scenario/--crown, already contrast-checked) — a chip and
    the cards it's currently filtering to read as one color. */
 .slate-filterbar {
+  margin: 12px 0;
+}
+.slate-filterbar__chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+}
+/* "Showing 3 of 15 games" — a live region (role="status") that only carries
+   text while a chip is on, so a screen reader hears the slate shrink instead
+   of silently losing most of it. Empty (not unmounted) when no filter is
+   active: a live region has to already be in the DOM for its later content
+   to be announced at all. */
+.slate-filterbar__count {
+  margin: 6px 0 0;
+  min-height: 1em;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .slate-filterbar__chip {
   display: inline-flex;

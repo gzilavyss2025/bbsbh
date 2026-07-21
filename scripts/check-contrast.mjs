@@ -90,6 +90,10 @@ const PAIRINGS = [
   { fg: 'text-on-ink', bg: 'clay', min: TEXT, note: 'Blowout pill text' },
   { fg: 'text-heading', bg: 'marker', min: TEXT, note: 'Close Game pill text' },
   { fg: 'text-on-ink', bg: 'allstar-blue', min: TEXT, note: 'Extra Innings pill text' },
+  // The crown outranks all four and carries its own medal-amber fill, both on
+  // the card pill (.flipback__pill--crown) and on the filter chip that selects
+  // it (FILTER_CHIPS, src/lib/resultCards.js) — same pairing, asserted once.
+  { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
 ]

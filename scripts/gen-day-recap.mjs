@@ -15,7 +15,7 @@ import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { computeTopPerformers, computeTopPerformersByResult } from '../src/api/topPerformers.js'
-import { rankDayHighlights, selectGameResults } from '../src/api/dayHighlights.js'
+import { rankDayHighlights } from '../src/api/dayHighlights.js'
 import { computeDaySuperlatives } from '../src/api/daySuperlatives.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -55,8 +55,8 @@ async function scheduleFor(dateStr, sportId) {
   return (data.dates ?? [])
     .flatMap((date) => date.games ?? [])
     // A postponed/cancelled game can still carry a 'Final' abstract state but
-    // has no box score — selectGameResults would emit a phantom 0-0 result and
-    // the Your Team card a bogus badge. GameSelect excludes them the same way
+    // has no box score — an empty 0-0 line would read as a real result to
+    // every selector downstream. GameSelect excludes them the same way
     // (selectGameStatus.isPostponed); mirror it here.
     .filter((game) => !/postponed|cancel/i.test(game.status?.detailedState ?? ''))
     .map((game) => normalizeGame(game, sportId, dateStr))
@@ -116,9 +116,6 @@ async function buildSport(dateStr, sportId) {
     topPerformers,
     performersByResult,
     highlights: rankDayHighlights(entries, calloutsData),
-    // Every Final game's bare result, for the recap's "Your Team" block — it
-    // needs the favorite club's score even on a game with no standout.
-    results: selectGameResults(entries),
     superlatives: computeDaySuperlatives(entries),
   }
 }

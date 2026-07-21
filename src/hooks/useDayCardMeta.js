@@ -19,7 +19,11 @@ import { usePastGameSignals } from './usePastGameSignals.js'
 // Map before that point and while the batch is in flight; a card simply shows
 // no pills until its entry is ready, same graceful-degrade spirit as the rest
 // of this reveal path.
-export function useDayCardMeta(finals, dateStr, sportId, revealed) {
+// No sportId parameter: the level is already baked into `finals` (GameSelect
+// re-derives it from that level's own schedule fetch, so switching levels
+// hands this a new array identity) and into `dateStr`. Taking it as a third
+// dep would just be a redundant trigger.
+export function useDayCardMeta(finals, dateStr, revealed) {
   const getSignals = usePastGameSignals()
   const [byGamePk, setByGamePk] = useState(new Map())
 
@@ -49,7 +53,7 @@ export function useDayCardMeta(finals, dateStr, sportId, revealed) {
     return () => {
       cancelled = true
     }
-  }, [finals, dateStr, sportId, revealed, getSignals])
+  }, [finals, dateStr, revealed, getSignals])
 
   return byGamePk
 }

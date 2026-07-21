@@ -27,19 +27,7 @@ import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
-import { SCENARIO_LABEL, SCENARIO_STYLE } from '../components/GameResultFace.jsx'
-
-// Every filter chip GameSelect's ResultFilterBar can show, in a fixed
-// display order — crown first (the single biggest deal), then the four
-// scenarios in the same order their own pills render on a card (see
-// ResultPills, GameResultFace.jsx). `accent`/`text` mirror SCENARIO_STYLE
-// (the crown's own colors match its existing pill — --award-ink fill,
-// --text-on-ink text, see .flipback__pill--crown) so a chip and the card
-// pill it filters for are always the identical color.
-const FILTER_CHIPS = [
-  { key: 'crown', label: '★ Game of the Night', accent: 'var(--award-ink)', text: 'var(--text-on-ink)' },
-  ...Object.entries(SCENARIO_LABEL).map(([key, label]) => ({ key, label, ...SCENARIO_STYLE[key] })),
-]
+import { FILTER_CHIPS, reorderGameOfTheNight } from '../lib/resultCards.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -256,16 +244,20 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
-  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, sportId, revealedAll)
+  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, revealedAll)
 
   // The slate's actual render order: `sorted` (soonest → latest, favorite
   // pinned first) with the crowned "Game of the Night" game promoted to the
-  // 2nd slot, right after the favorite team's own game — a no-op until
-  // cardMetaByGamePk is populated (see reorderGameOfTheNight), so this can't
-  // leak which game is crowned ahead of the reveal-all gate above.
+  // front — behind the favorite team's own game when there is one on the
+  // slate, otherwise outright first (see reorderGameOfTheNight). A no-op
+  // until cardMetaByGamePk is populated, so this can't leak which game is
+  // crowned ahead of the reveal-all gate above.
   const gamesForDisplay = useMemo(
-    () => reorderGameOfTheNight(sorted, cardMetaByGamePk),
-    [sorted, cardMetaByGamePk],
+    () =>
+      reorderGameOfTheNight(sorted, cardMetaByGamePk, (g) =>
+        isPinned(g, favoriteTeamId, favoriteAffiliateIds),
+      ),
+    [sorted, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds],
   )
 
   // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
@@ -445,7 +437,13 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
       )}
 
       {availableFilters.length > 0 && (
-        <ResultFilterBar chips={availableFilters} active={activeFilters} onToggle={toggleFilter} />
+        <ResultFilterBar
+          chips={availableFilters}
+          active={activeFilters}
+          onToggle={toggleFilter}
+          shown={visibleGames.length}
+          total={gamesForDisplay.length}
+        />
       )}
 
       <div className={showTopPerformers ? 'slate-body' : undefined}>
@@ -462,7 +460,10 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             prospectsData={prospects.data}
           />
         )}
-        <div className="slate-main" id="slate-games" tabIndex={-1} aria-label="Games">
+        {/* role="region" (not a bare div) so the aria-label is actually
+            honored and ResultFilterBar's aria-controls has a real target —
+            an aria-label on a role-less generic element is discarded. */}
+        <div className="slate-main" id="slate-games" role="region" aria-label="Games">
           <ul className="gamelist">
             {sorted.length === 0 && isDerbyDay && (
               <li>
@@ -564,31 +565,41 @@ function RevealAllBar({ onReveal }) {
 }
 
 // The revealed day's category filter — one chip per "storyline" (see
-// FILTER_CHIPS above) that actually occurs somewhere on today's slate.
-// Toggling a chip filters the grid below to the UNION of every selected
-// category (multi-select is "any of these") and lifts the matching games to
-// the only ones left on screen; toggling every chip back off shows the
-// whole slate again. Only ever rendered once `availableFilters` is non-empty
-// — itself gated on cardMetaByGamePk, so this can't appear (or leak which
-// categories exist) before the slate's reveal-all.
-function ResultFilterBar({ chips, active, onToggle }) {
+// FILTER_CHIPS in lib/resultCards.js) that actually occurs somewhere on
+// today's slate. Toggling a chip filters the grid below to the UNION of every
+// selected category (multi-select is "any of these") and lifts the matching
+// games to the only ones left on screen; toggling every chip back off shows
+// the whole slate again. Only ever rendered once `availableFilters` is
+// non-empty — itself gated on cardMetaByGamePk, so this can't appear (or leak
+// which categories exist) before the slate's reveal-all.
+//
+// `aria-controls` names the grid the chips actually govern (#slate-games,
+// role="region" on .slate-main), and the count line is a live region: a chip
+// silently deleting most of the slate is exactly the change a screen reader
+// user would otherwise never hear.
+function ResultFilterBar({ chips, active, onToggle, shown, total }) {
   return (
-    <div className="slate-filterbar" role="group" aria-label="Filter by result">
-      {chips.map((c) => {
-        const isActive = active.has(c.key)
-        return (
-          <button
-            key={c.key}
-            type="button"
-            className={`slate-filterbar__chip ${isActive ? 'slate-filterbar__chip--active' : ''}`}
-            style={{ '--chip-accent': c.accent, '--chip-text': c.text }}
-            aria-pressed={isActive}
-            onClick={() => onToggle(c.key)}
-          >
-            {c.label}
-          </button>
-        )
-      })}
+    <div className="slate-filterbar">
+      <div className="slate-filterbar__chips" role="group" aria-label="Filter by result" aria-controls="slate-games">
+        {chips.map((c) => {
+          const isActive = active.has(c.key)
+          return (
+            <button
+              key={c.key}
+              type="button"
+              className={`slate-filterbar__chip ${isActive ? 'slate-filterbar__chip--active' : ''}`}
+              style={{ '--chip-accent': c.accent, '--chip-text': c.text }}
+              aria-pressed={isActive}
+              onClick={() => onToggle(c.key)}
+            >
+              {c.label}
+            </button>
+          )
+        })}
+      </div>
+      <p className="slate-filterbar__count" role="status">
+        {active.size > 0 ? `Showing ${shown} of ${total} games` : ''}
+      </p>
     </div>
   )
 }
@@ -640,22 +651,4 @@ function sortGames(games, favoriteTeamId, favoriteAffiliateIds) {
     if (pa !== pb) return pa - pb
     return new Date(a.gameDate) - new Date(b.gameDate)
   })
-}
-
-// Promotes the crowned "Game of the Night" (dayHighlights.js's
-// classifyGameCards, via useDayCardMeta) to the slate's 2nd slot, right after
-// the favorite team's own game (already sorted first by sortGames above) —
-// once it's actually known. `cardMetaByGamePk` is an empty Map until the
-// day's reveal-all fires, so this is a no-op before then: nothing here can
-// promote a game ahead of time based on which one WILL turn out to be
-// crowned. A crowned game that's already 1st (it IS the favorite's own game)
-// or already 2nd is left alone — nothing to move.
-function reorderGameOfTheNight(games, cardMetaByGamePk) {
-  if (cardMetaByGamePk.size === 0) return games
-  const crownedIdx = games.findIndex((g) => cardMetaByGamePk.get(g.gamePk)?.isGameOfTheNight)
-  if (crownedIdx <= 1) return games
-  const next = [...games]
-  const [crowned] = next.splice(crownedIdx, 1)
-  next.splice(1, 0, crowned)
-  return next
 }

@@ -3,13 +3,19 @@
 // each resolved to the player who did it (headshot + position + team) so it can
 // render as a PerformerCard-style tile beside Top Performers.
 //
-// SPOILER RULE — reveal-only, exactly like derive.js / topPerformers.js. Only
-// ever call computeDaySuperlatives from inside the past-day recap's SealBox
-// reveal render (RecapPanel in PastDayRecapBox.jsx). The values here are
-// score-adjacent (a home run, a strikeout), so no fetched-then-hidden node may
-// exist before the user reveals.
+// NO LIVE CALLER TODAY. Its only consumer was the Day Recap digest box, retired
+// in favor of per-card pills (see dayHighlights.js's classifyGameCards); the
+// pill scenarios have no slot for a single-play superlative. Still generated
+// into the day-recap artifact by scripts/gen-day-recap.mjs and kept here rather
+// than deleted, since a future surface for "the day's longest homer" is the
+// obvious place it would land. Delete both together if that never comes.
 //
-// Reads the SAME per-game feeds RecapPanel already fetched for Day Highlights
+// SPOILER RULE — reveal-only, exactly like derive.js / topPerformers.js. Only
+// ever call computeDaySuperlatives from inside a SealBox's reveal render. The
+// values here are score-adjacent (a home run, a strikeout), so no fetched-then-
+// hidden node may exist before the user reveals.
+//
+// Reads the SAME per-game feeds the caller already fetched for Day Highlights
 // (usePastGameSignals), so it adds no network cost. Unlike derive.js's per-half
 // superlatives — which keep only the player's NAME — this keeps the
 // batter/pitcher personId so the card can show his headshot + position pill,

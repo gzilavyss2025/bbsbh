@@ -5,44 +5,8 @@ import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
-import { doubleHeaderLabel } from './GameCard.jsx'
 import { PerformerCard } from './PerformerCard.jsx'
-
-// Pill category label + a plain, ungated "this is a fact about the card"
-// treatment for every scenario except the crown (which alone gets the
-// filled amber "big deal" chrome — see .flipback__pill--crown in index.css).
-// Exported: GameSelect.jsx's slate-wide filter bar (ResultFilterBar) reuses
-// these SAME labels/colors for its filter chips, so a chip and the card pill
-// it filters for always read as the identical color/word.
-export const SCENARIO_LABEL = {
-  dominant: 'Dominant Performance',
-  blowout: 'Blowout',
-  close: 'Close Game',
-  extras: 'Extra Innings',
-}
-
-// Each scenario's own accent color, reused BOTH as the whole card's border
-// tint (see cardAccent below + .flipback--accent in index.css) and as its own
-// pill's fill (see ResultPills' .flipback__pill--scenario) — an existing
-// design-system token per scenario rather than a new hue, so the card
-// palette stays inside the app's established set:
-//   dominant → --field  (the app's own "positive" green)
-//   blowout  → --clay   (the app's own "alert/lopsided" red)
-//   close    → --marker (the "watch this" highlighter yellow)
-//   extras   → --allstar-blue (a distinct, unusual-occasion blue)
-// `text` is the ONE piece that can't just follow the same accent: filling a
-// pill solid with --marker and setting its own text to --marker too would be
-// invisible, and the WCAG-AA-legible foreground for a saturated dark fill
-// (field/clay/allstar-blue) is the opposite of what a light, bright fill
-// (marker) needs — see the contrast math this was checked against in the PR.
-// The crown itself outranks all four for the card border — see cardAccent's
-// priority order — but keeps its own existing amber pill treatment untouched.
-export const SCENARIO_STYLE = {
-  dominant: { accent: 'var(--field)', text: 'var(--text-on-ink)' },
-  blowout: { accent: 'var(--clay)', text: 'var(--text-on-ink)' },
-  close: { accent: 'var(--marker)', text: 'var(--text-heading)' },
-  extras: { accent: 'var(--allstar-blue)', text: 'var(--text-on-ink)' },
-}
+import { SCENARIO_LABEL, SCENARIO_STYLE, doubleHeaderLabel, scorePairsLine } from '../lib/resultCards.js'
 
 // The flip card's back face: what a past, Final game's card turns into once
 // revealed. Deliberately a SUMMARY, not the full box score — final R/H/E, the
@@ -85,13 +49,19 @@ export function GameResultFace({
   // team (--pin-accent, gradient + border — see .gamecard--pinned in
   // index.css): a background gradient that reads as "this is your team" at a
   // glance, independent of whichever pill(s) also apply.
-  const isPinnedGame = pinnedTeamId === box.away.id || pinnedTeamId === box.home.id
+  // A non-null pinnedTeamId IS the "this is your team's game" signal — the
+  // same test GameCard makes for the card's front face (`!!pinnedTeamId`).
+  // Don't re-derive it by matching the id against this box's two sides: on a
+  // MiLB level the caller pins the favorite's PARENT club, which matches
+  // neither affiliate's id, and the front and back of one flip card would
+  // then disagree about whether it's your game.
+  const isPinnedGame = pinnedTeamId != null
   // The card's BORDER, separately, goes to whichever single signal is the
   // biggest deal: the night's crowned game first (medal-amber, same accent
   // Award History/timeline chips use), THEN the favorite team's own game
   // (--pin-accent) — your team's game outranks a mere scenario tag — and
   // only once neither of those applies does this card's own scenario color
-  // (SCENARIO_STYLE above) get to set the border.
+  // (SCENARIO_STYLE, lib/resultCards.js) get to set the border.
   const cardAccent = isGameOfTheNight
     ? 'var(--award-line)'
     : isPinnedGame
@@ -109,23 +79,25 @@ export function GameResultFace({
   ]
     .filter(Boolean)
     .join(' ')
-  // A performer card replaces the default Play of the Game block only for a
+  // A performer card takes the default Play of the Game block's slot for a
   // Dominant Performance, or a Blowout/Extra-Innings card whose deterministic
   // playChoice landed on the performer variant — and only when a performer
   // actually exists (no performer just falls through to the default play,
   // same as an ungated card would render anyway).
-  const showPerformerInstead =
+  const showPerformer =
     !!performer &&
     (scenario === 'dominant' || ((scenario === 'blowout' || scenario === 'extras') && playChoice === 'performer'))
-  // The crowned game's second beat: the turning point PLUS the top
-  // performer's stat line underneath, when there is one. Only when we didn't
-  // already show that same performer above (avoids a Dominant Performance
-  // crown showing its one performer twice), and only when the performer is a
-  // genuinely different person than the turning-point's own batter — a
-  // walk-off's performer IS its turning-point batter, and a card showing the
-  // same face and name twice reads as a glitch, not a bonus fact.
-  const showSecondBeat =
-    !!isGameOfTheNight && !showPerformerInstead && !!performer && performer.id !== potg?.batterId
+  // Normally the two are alternatives — one beat per card. The CROWNED game
+  // is the day's headline card, though, so it earns both: the performer's
+  // stat line AND the turning point underneath it. Suppressed when they'd be
+  // the same person twice (a walk-off's performer IS its turning-point
+  // batter, and a card showing one face and name twice reads as a glitch,
+  // not a bonus fact) — and `hidePlayOfGame` still wins outright, for a
+  // caller with its own roomier Play of the Game treatment.
+  const showPlay =
+    !!potg?.desc &&
+    !hidePlayOfGame &&
+    (!showPerformer || (!!isGameOfTheNight && performer.id !== potg.batterId))
 
   return (
     <div className={cardClassName} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
@@ -152,24 +124,18 @@ export function GameResultFace({
         <TeamLine side={box.home} />
       </div>
       <Decisions decisions={box.decisions} />
-      {showPerformerInstead ? (
-        <ul className="playercard__list flipback__perfcard">
-          <PerformerCard entry={performer} />
-        </ul>
-      ) : (
-        potg?.desc && !hidePlayOfGame && <PlayOfTheGame potg={potg} box={box} />
-      )}
-      {showSecondBeat && (
+      {showPerformer && (
         <ul className="playercard__list flipback__perfcard">
           <PerformerCard entry={performer} />
         </ul>
       )}
+      {showPlay && <PlayOfTheGame potg={potg} box={box} />}
     </div>
   )
 }
 
 // The pills row: at most one "formatting scenario" pill — filled solid in
-// its OWN scenario color (SCENARIO_STYLE), same hue the card's border picks
+// its OWN scenario color (SCENARIO_STYLE, lib/resultCards.js), the hue the card's border picks
 // up when nothing outranks it, so the two visibly match even on a card where
 // something else (the crown, or the favorite team) won the border instead —
 // plus the crown pill (amber fill, unaffected by the above) and the
@@ -246,13 +212,6 @@ function ordinal(n) {
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
 
-// "MIL 5, STL 3" — comma-joined "ABBR score" pairs, in caller-supplied order.
-// Exported so any other "final score, plain text" spot (e.g. PerformerCard's
-// GameScoreLink) renders the same shape instead of hand-rolling its own.
-export function scorePairsLine(pairs) {
-  return pairs.map(([abbr, score]) => `${abbr} ${score}`).join(', ')
-}
-
 // The leading team is whoever was ahead at the moment of the play (not always
 // the eventual winner for an earlier-game play, but for the game's single
 // most decisive moment it usually is).
@@ -305,7 +264,10 @@ function linkifyNames(text, mentions) {
     })
 }
 
-// The night's single most memorable moment (see computePlayOfTheGame). Reads
+// The night's single most memorable moment (see computePlayOfTheGame). The
+// card's default second block — replaced by a PerformerCard on a Dominant
+// Performance (and the performer variant of Blowout/Extra Innings), and joined
+// BY one on the crowned Game of the Night, which shows both beats. Reads
 // as a natural-case sentence in the app's serif "read" face (see --font-read
 // / .pbp__desc for the established precedent) rather than the app's usual
 // all-caps display type — approved caps-exempt, see the CSS block comment.

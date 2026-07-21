@@ -4,7 +4,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
-import { scorePairsLine } from './GameResultFace.jsx'
+import { scorePairsLine } from '../lib/resultCards.js'
 
 // "Tyler Tolbert" -> ["Tyler", "Tolbert"] (everything after the first space).
 // Used so the name wraps to two lines next to the bigger headshot, without a
