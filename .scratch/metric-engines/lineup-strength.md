@@ -68,6 +68,28 @@ Optimal lineup = same Hungarian assignment as L1 but in run units. Grade = runs/
 gap between optimal and actual, scaled (≈0.15 runs/game per grade point, to be
 calibrated against the league-wide nightly distribution).
 
+> **Correction (July 2026, after shipping).** The framing above — apply the
+> positional adjustment "when a player is assigned off his primary spot" — is
+> wrong twice over, and both errors were live in the first implementation.
+>
+> 1. **It doesn't belong at assignment time at all.** Every lineup fills the same
+>    nine slots, so `sum(POS_ADJ[slot])` is a constant that cancels out of any
+>    posted-vs-optimal comparison, and adding a per-slot constant can't change
+>    which assignment is optimal. The adjustment's real job is one layer up:
+>    stripping it off each player's WAR rate so bats at different positions are
+>    comparable. It is applied exactly once now, in `gen-lineup-values.mjs`.
+>    Out-of-position cost is carried by the eligibility/familiarity discount,
+>    which is what the innings data actually measures.
+> 2. **Order of operations with the Marcel regression is load-bearing.** WAR
+>    already contains the adjustment, so regressing WAR shrinks it too; stripping
+>    a full-strength adjustment afterwards leaves a phantom
+>    `(1 - shrink) * POS_ADJ[primary]` — a penalty at premium positions, a bonus
+>    at DH/1B/corner, growing as the sample thins. Strip first, then regress.
+>
+> Symptom that surfaced it: a .822-OPS catcher on 181 PA valued below replacement
+> while a .710-OPS DH floated near the top of the same roster, which made a
+> lineup's receipt read as though the model wanted the weaker bat.
+
 - **Data:** `war.json` (exists), eligibility matrix, positional-adjustment constant
   table (static, well-known).
 - **Why runs matter:** the gap becomes *interpretable* — "this lineup gives up about

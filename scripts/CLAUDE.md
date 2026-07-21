@@ -182,10 +182,15 @@ don't run these by hand.
   1/3/10, consecutive days, availability rules) lives in the reader
   `src/api/workload.js`, computed relative to a caller-supplied date.
 - `gen-lineup-values.mjs` → `public/data/lineup-values.json` — per-hitter
-  run-value rates (FanGraphs WAR from the local `war.json`, Marcel-shrunk by
-  PA) plus a position-eligibility matrix from season+career fielding innings.
-  Feeds the Lineup Strength grade (`src/lib/lineupSolver.js` Hungarian
-  assignment + `src/api/lineupStrength.js`); MLB only, nightly rebuild.
+  run-value rates (FanGraphs WAR from the local `war.json`) plus a
+  position-eligibility matrix from season+career fielding innings. `rpg` is a
+  **position-NEUTRAL** bat: the positional adjustment is stripped off the raw
+  WAR-per-600 rate **before** the Marcel PA shrink, and this is the only place
+  in the pipeline it is applied at all. Reversing those two steps leaves a
+  phantom `(1 - shrink) * POS_ADJ[primary]` that punishes premium positions and
+  rewards DH/1B on thin samples — read the generator's header before touching
+  either step. Feeds the Lineup Strength grade (`src/lib/lineupSolver.js`
+  Hungarian assignment + `src/api/lineupStrength.js`); MLB only, nightly rebuild.
 - `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone
   Watch list: every debuted player on an MLB org's `fullRoster` (active, IL, or in
   the minors) within reach of a round career-total milestone (`MILESTONE_DEFS` in

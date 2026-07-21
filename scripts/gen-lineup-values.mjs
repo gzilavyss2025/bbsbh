@@ -14,14 +14,34 @@
 //     at a spot is not an option there).
 //
 // The value model (all constants below, echoed into the file's `constants` block
-// for the receipt's transparency): WAR/PA*600 = WAR per 600 PA, regressed
-// Marcel-style toward replacement at low PA, converted to runs/game at 9.5
-// runs/WAR over 162 games. Verified against a live 2026 Brewers roster before the
-// nightly cron was wired. Run by hand: node scripts/gen-lineup-values.mjs
+// for the receipt's transparency): WAR/PA*600 = WAR per 600 PA, the player's
+// POSITIONAL ADJUSTMENT STRIPPED OFF THAT RAW RATE, then the resulting
+// position-neutral bat regressed Marcel-style toward replacement at low PA and
+// converted to runs/game at 9.5 runs/WAR over 162 games.
+//
+// The order of those last two steps is load-bearing, not incidental. WAR already
+// contains the positional adjustment for the spot the player actually played, so
+// regressing WAR shrinks the embedded adjustment along with everything else.
+// Stripping a full-strength adjustment AFTERWARDS (which is what the solver used
+// to do, via a since-removed `posDelta`) leaves a phantom residual of
+// (1 - shrink) * POS_ADJ[primary] — a penalty at premium positions and a BONUS at
+// DH/1B/corner, growing as the sample thins. It graded a .822-OPS catcher on 181
+// PA below replacement while floating a .710-OPS DH near the top of the roster.
+// Strip first, then regress, and the whole rate shrinks by one consistent factor.
+//
+// `rpg` in the output file is therefore a position-NEUTRAL bat. Consumers add no
+// positional term of their own — see the POS_ADJ header in src/lib/lineupSolver.js
+// for why a slot's own adjustment cancels across a nine-slot lineup.
+//
+// Verified against a live 2026 Brewers roster before the nightly cron was wired.
+// Run by hand: node scripts/gen-lineup-values.mjs
 
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+// The positional-adjustment constants live with the solver so the strip here and
+// the runtime WAR fallback (src/api/lineupStrength.js) can't drift apart.
+import { POS_ADJ } from '../src/lib/lineupSolver.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'lineup-values.json')
@@ -99,11 +119,19 @@ const inns = (s) => {
   return Number.isFinite(n) ? n : 0
 }
 
-// WAR per 600 PA regressed toward replacement (0) at low PA, then runs/game.
-function computeRpg(war, pa) {
+// Position-neutral bat: WAR per 600 PA with `primaryPos`'s positional adjustment
+// stripped off the RAW rate, then regressed toward replacement (0) at low PA, then
+// runs/game. See the module header — strip-then-regress, never the reverse.
+// An unknown primary (a two-way player's 'TWP', a missing position) strips
+// nothing: we only remove an adjustment we can actually anchor.
+function computeRpg(war, pa, primaryPos) {
   if (!Number.isFinite(war) || !Number.isFinite(pa) || pa <= 0) return 0
   const warPer600 = (war / pa) * PA_SCALE
-  const regressed = warPer600 * (pa / (pa + REGRESSION_PA))
+  // POS_ADJ is runs per 162 defensive games; /RUNS_PER_WAR puts it in the same
+  // WAR-per-600-PA units as warPer600 (the model's standing 600 PA ~ 162 games
+  // approximation, unchanged by this fix).
+  const neutral = warPer600 - (POS_ADJ[primaryPos] ?? 0) / RUNS_PER_WAR
+  const regressed = neutral * (pa / (pa + REGRESSION_PA))
   return (regressed * RUNS_PER_WAR) / GAMES
 }
 
@@ -170,7 +198,7 @@ async function processPlayer(entry, warBat) {
     const pa = hitting?.stats?.[0]?.splits?.[0]?.stat?.plateAppearances ?? 0
     const war = warBat[id]
     const hasWar = war != null
-    const rpg = computeRpg(hasWar ? war : NaN, pa)
+    const rpg = computeRpg(hasWar ? war : NaN, pa, primaryPos)
     const seasonByPos = splitsByPos(fielding?.stats, 'season')
     const careerByPos = splitsByPos(fielding?.stats, 'career')
     const elig = buildEligibility(seasonByPos, careerByPos)

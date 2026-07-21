@@ -338,7 +338,11 @@ for each generator; the reader modules:
 - `lineupStrength.js` — the Lineup Strength grade, from
   `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
   `src/lib/lineupSolver.js` (exact Hungarian assignment over the
-  position-eligibility matrix; FanGraphs positional-adjustment constants).
+  position-eligibility matrix). The file's `rpg` is already a position-NEUTRAL
+  bat — the FanGraphs positional adjustment is applied once, in the generator —
+  so nothing here re-applies it; a slot's own adjustment provably cancels across
+  a nine-slot lineup (see the `POS_ADJ` header in `lineupSolver.js`). The one
+  runtime echo of the model is `rpgFromWar`, which must strip the same way.
   `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
   statTiers tier, the itemized receipt (bench swaps + out-of-position
   penalties), and `ungraded` (posted starters with no value in any file).

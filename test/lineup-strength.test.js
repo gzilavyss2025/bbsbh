@@ -1,13 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {
-  solveOptimalLineup,
-  valueLineup,
-  slotValue,
-  posDelta,
-  POS_ADJ,
-  SLOTS,
-} from '../src/lib/lineupSolver.js'
+import { solveOptimalLineup, valueLineup, slotValue, POS_ADJ, SLOTS } from '../src/lib/lineupSolver.js'
 import {
   gradeLineup,
   receiptFor,
@@ -74,12 +67,54 @@ test('forbidden assignments are respected (no eligibility = never placed there)'
   assert.equal(slotValue(players[0], 'C'), -Infinity)
 })
 
-test('positional adjustment math matches the FanGraphs constants', () => {
-  // Moving a shortstop to first base: (POS_ADJ.1B - POS_ADJ.SS) / 162.
-  const expected = (POS_ADJ['1B'] - POS_ADJ.SS) / 162
-  assert.ok(Math.abs(posDelta('1B', 'SS') - expected) < 1e-12)
-  // Unknown primary carries no adjustment.
-  assert.equal(posDelta('C', 'TWP'), 0)
+test('a slot carries no positional adjustment of its own (it cancels across nine slots)', () => {
+  // Every valid lineup fills the same nine slots, so the sum of the slots' own
+  // positional adjustments is a constant that cancels out of any posted-vs-optimal
+  // comparison. The adjustment is instead stripped ONCE, off each player's WAR
+  // rate, when lineup-values.json is built — see the module header. So a player's
+  // value must depend only on his bat and his familiarity at the slot, never on
+  // which slot it is.
+  const bat = { id: 'x', rpg: 0.2, primaryPos: 'C', elig: { C: 1, DH: 1, '1B': 1 } }
+  assert.equal(slotValue(bat, 'C'), 0.2)
+  assert.equal(slotValue(bat, 'DH'), 0.2)
+  assert.equal(slotValue(bat, '1B'), 0.2)
+  // The FanGraphs constants themselves are still the generator's strip input.
+  assert.equal(POS_ADJ.C, 12.5)
+  assert.equal(POS_ADJ.DH, -17.5)
+})
+
+test('the positional adjustment is stripped BEFORE the PA regression, not after', () => {
+  // The bug this pins: WAR already contains the positional adjustment for the
+  // spot a player actually played, so shrinking WAR toward replacement shrinks
+  // that adjustment too. Removing 100% of it afterwards leaves a phantom
+  // (1 - shrink) * POS_ADJ[primary] — a penalty at premium positions and a BONUS
+  // at DH/1B/corner, growing as the sample gets thinner.
+  //
+  // Compose the value the way the pipeline does: stored rate -> slot value.
+  const value = (war, pa, pos) =>
+    slotValue({ id: pos, rpg: rpgFromWar(war, pa, {}, pos), primaryPos: pos, elig: { DH: 1 } }, 'DH')
+  // What it must equal: the position-neutral rate, shrunk by the SAME factor.
+  const want = (war, pa, pos) => {
+    const neutral = (war / pa) * 600 - POS_ADJ[pos] / 9.5
+    return ((neutral * (pa / (pa + 250))) * 9.5) / 162
+  }
+  // The shrink factor must apply to the whole position-neutral rate, at every
+  // position and every sample size — no residual that varies with either.
+  for (const pos of ['C', 'SS', '2B', '1B', 'DH']) {
+    for (const [war, pa] of [[2.55, 600], [0.85, 200], [1.7, 400], [0.1, 27]]) {
+      const got = value(war, pa, pos)
+      assert.ok(
+        Math.abs(got - want(war, pa, pos)) < 1e-12,
+        `${pos} @ ${pa} PA: got ${got}, want ${want(war, pa, pos)}`,
+      )
+    }
+  }
+  // Concretely: a good catcher stays above replacement no matter how thin the
+  // sample. Under the old order his value went NEGATIVE, which is what let a
+  // replacement-level DH out-rank him.
+  assert.ok(value(2.55, 600, 'C') > 0, `good catcher, full sample: ${value(2.55, 600, 'C')}`)
+  assert.ok(value(0.85, 200, 'C') > 0, `same rate, thin sample: ${value(0.85, 200, 'C')}`)
+  assert.ok(value(2.55, 600, 'C') > value(0.85, 200, 'C'), 'the bigger sample keeps more of the rate')
 })
 
 test('full nine-slot synthetic roster: an obvious DH upgrade is taken', () => {
@@ -136,6 +171,8 @@ test('infeasible with fewer than nine players returns null', () => {
 
 test('regression / shrinkage math shrinks a low-PA hot start toward replacement', () => {
   // Reproduce the generator's computeRpg inline (kept in sync with constants).
+  // primaryPos omitted, so the positional strip is zero and this isolates the
+  // shrinkage term; the strip's ordering is pinned by its own test above.
   const RUNS_PER_WAR = 9.5
   const GAMES = 162
   const rpgOf = (war, pa) => {
@@ -292,10 +329,10 @@ test('gradeLineup: a starter absent from the values file but present in WAR is v
   const g = gradeLineup(data, 1, postedWithDh('traded_7'))
   assert.ok(g)
   assert.equal(g.ungraded.length, 0, 'a WAR-resolved starter is graded, not excluded')
-  // His DH value is the WAR conversion (DH's positional adjustment nets to zero
-  // against his DH "primary"), a real bat well above replacement 0.
+  // His DH value is the WAR conversion, anchored on his posted slot (we have no
+  // other read on his primary position) — a real bat well above replacement 0.
   const dh = g.actual.perSlot.find((s) => s.slot === 'DH')
-  const expectedRpg = rpgFromWar(5.0, 600, constants)
+  const expectedRpg = rpgFromWar(5.0, 600, constants, 'DH')
   assert.ok(Number.isFinite(expectedRpg) && expectedRpg > 0.15)
   assert.ok(Math.abs(dh.value - expectedRpg) < 1e-9, `expected ${expectedRpg}, got ${dh.value}`)
 })
@@ -323,13 +360,17 @@ test('lineupStrengthFor: an unvalued starter surfaces by name via the posted-lin
 
 test('rpgFromWar reproduces the nightly build model and degrades on missing inputs', () => {
   const c = { paScale: 600, regressionPa: 250, runsPerWar: 9.5, games: 162 }
-  const expected = (war, pa) => {
+  const expected = (war, pa, pos) => {
     const per600 = (war / pa) * 600
-    const reg = per600 * (pa / (pa + 250))
+    const neutral = per600 - (POS_ADJ[pos] ?? 0) / 9.5
+    const reg = neutral * (pa / (pa + 250))
     return (reg * 9.5) / 162
   }
   assert.ok(Math.abs(rpgFromWar(0.1, 98, c) - expected(0.1, 98)) < 1e-12)
   assert.ok(Math.abs(rpgFromWar(5.0, 600, c) - expected(5.0, 600)) < 1e-12)
+  // Same call with a primary position strips that position's adjustment first.
+  assert.ok(Math.abs(rpgFromWar(1.7, 400, c, 'C') - expected(1.7, 400, 'C')) < 1e-12)
+  assert.ok(Math.abs(rpgFromWar(0.2, 295, c, 'DH') - expected(0.2, 295, 'DH')) < 1e-12)
   // Missing/zero inputs → null so the caller can fall back to exclude-the-slot.
   assert.equal(rpgFromWar(1.0, 0, c), null)
   assert.equal(rpgFromWar(undefined, 400, c), null)

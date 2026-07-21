@@ -17,6 +17,7 @@ import {
   valueLineup,
   unfamiliarPenalty,
   ELIG_FLOOR,
+  POS_ADJ,
   SLOTS,
 } from '../lib/lineupSolver.js'
 import { TIER_LABELS } from '../lib/statTiers.js'
@@ -63,19 +64,23 @@ export async function fetchLineupValues() {
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n))
 
 // Value a bat from season WAR the same way the nightly build does (gen-lineup-
-// values.mjs computeRpg): WAR per 600 PA, regressed toward replacement at low PA,
-// converted to runs/game. Used only as a runtime fallback for a posted starter
+// values.mjs computeRpg): WAR per 600 PA, `primaryPos`'s positional adjustment
+// stripped off that RAW rate, then regressed toward replacement at low PA and
+// converted to runs/game — strip BEFORE regress, for the reason spelled out in
+// the generator's header. Result is a position-NEUTRAL bat, the same units
+// lineup-values.json stores. Used only as a runtime fallback for a posted starter
 // absent from the nightly values file but present in the season WAR file (war.json
 // carries `pa` alongside `bat` for exactly this). Returns null when WAR or PA is
 // missing so the caller can degrade to the replacement path.
-export function rpgFromWar(war, pa, constants = {}) {
+export function rpgFromWar(war, pa, constants = {}, primaryPos) {
   if (!Number.isFinite(war) || !Number.isFinite(pa) || pa <= 0) return null
   const paScale = constants.paScale ?? 600
   const regressionPa = constants.regressionPa ?? 250
   const runsPerWar = constants.runsPerWar ?? 9.5
   const games = constants.games ?? 162
   const warPer600 = (war / pa) * paScale
-  const regressed = warPer600 * (pa / (pa + regressionPa))
+  const neutral = warPer600 - (POS_ADJ[primaryPos] ?? 0) / runsPerWar
+  const regressed = neutral * (pa / (pa + regressionPa))
   return (regressed * runsPerWar) / games
 }
 
@@ -114,7 +119,14 @@ function resolveMissingStarter(data, id, slot) {
       primaryPos: known.primaryPos ?? slot,
     }
   }
-  const rpg = rpgFromWar(data?.warFallback?.bat?.[key], data?.warFallback?.pa?.[key], data?.constants)
+  // His posted slot stands in for his primary position (we don't know his real
+  // one), so it's also what the positional strip is anchored on.
+  const rpg = rpgFromWar(
+    data?.warFallback?.bat?.[key],
+    data?.warFallback?.pa?.[key],
+    data?.constants,
+    slot,
+  )
   if (rpg != null) {
     return { id: key, rpg, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, resolved: 'war' }
   }

@@ -11,10 +11,23 @@
 export const SLOTS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
 // FanGraphs defensive positional adjustments, runs per 162 defensive games —
-// the standard, published out-of-position cost model (confirmed current in the
-// July-2026 research pass; see the design doc's "Research findings"). A premium
-// up-the-middle spot is worth run value a corner/DH is not; moving a player off
-// his primary spot shifts his value by the difference, prorated to one game.
+// the standard, published constants (confirmed current in the July-2026 research
+// pass; see the design doc's "Research findings").
+//
+// These are NOT applied here. A lineup always fills the same nine slots, so
+// sum(POS_ADJ[slot]) is a constant that cancels out of any posted-vs-optimal
+// comparison — both at the total and, since each receipt row compares two
+// players at the SAME slot, at every line item. Adding a per-slot constant to
+// an assignment matrix also can't change which assignment is optimal. So the
+// adjustment is genuinely inert at this layer and is deliberately absent from
+// `slotValue`.
+//
+// Where it DOES belong is one layer up: WAR already contains the adjustment for
+// the position a player actually played, so `gen-lineup-values.mjs` strips it
+// off his raw WAR rate to store a position-NEUTRAL bat in lineup-values.json
+// (mirrored at runtime by `rpgFromWar`). Both import these constants from here
+// so the model has one home. Applying it in both places was the original bug:
+// see the header note on the strip's ordering in the generator.
 export const POS_ADJ = {
   C: 12.5,
   SS: 7.5,
@@ -26,10 +39,6 @@ export const POS_ADJ = {
   '1B': -12.5,
   DH: -17.5,
 }
-
-// A defensive game is 162 in the run/season convention above, so a positional
-// adjustment prorates to one game by dividing by 162.
-export const DEF_GAMES = 162
 
 // Runs/game charged for total unfamiliarity at a slot (eligibility weight 0).
 // A weight-1 (fully familiar) placement costs nothing; a weight-w placement
@@ -48,17 +57,6 @@ export const ELIG_FLOOR = 0.3
 // relaxed placement is visibly a stopgap, not a real option.
 export const RELAX_WEIGHT = 0.1
 
-// Positional value shift, runs/game, for playing `slot` when your primary
-// position is `primary`. Unknown primary (e.g. a two-way player's 'TWP', or a
-// pitcher forced to bat) carries no adjustment — we only credit/debit a shift
-// we can actually anchor.
-export function posDelta(slot, primary) {
-  const s = POS_ADJ[slot]
-  const pr = POS_ADJ[primary]
-  if (s === undefined || pr === undefined) return 0
-  return (s - pr) / DEF_GAMES
-}
-
 // Runs/game penalty for placing player `p` at `slot`, given his familiarity
 // weight there. Returns Infinity when he has no eligibility at the slot — the
 // caller reads that as a forbidden assignment.
@@ -68,20 +66,21 @@ export function unfamiliarPenalty(p, slot) {
   return (1 - w) * UNFAMILIAR_PENALTY
 }
 
-// Run value (runs/game) of player `p` in `slot`: his bat (rpg) + the positional
-// shift - the unfamiliarity penalty. -Infinity when the slot is forbidden (no
-// eligibility), which the solver treats as an impossible pairing.
+// Run value (runs/game) of player `p` in `slot`: his position-neutral bat (rpg)
+// minus the unfamiliarity penalty. No positional adjustment term — see the
+// POS_ADJ header for why it cancels here. -Infinity when the slot is forbidden
+// (no eligibility), which the solver treats as an impossible pairing.
 export function slotValue(p, slot) {
   const w = p.elig?.[slot]
   if (w === undefined) return -Infinity
-  return p.rpg + posDelta(slot, p.primaryPos) - (1 - w) * UNFAMILIAR_PENALTY
+  return p.rpg - (1 - w) * UNFAMILIAR_PENALTY
 }
 
 // Same value, but never forbidden: a missing eligibility floors to ELIG_FLOOR.
 // Used to value an actual posted placement, which is a fact, not a proposal.
 export function slotValueFloored(p, slot) {
   const w = p.elig?.[slot] ?? ELIG_FLOOR
-  return p.rpg + posDelta(slot, p.primaryPos) - (1 - w) * UNFAMILIAR_PENALTY
+  return p.rpg - (1 - w) * UNFAMILIAR_PENALTY
 }
 
 // Exact max-weight bipartite assignment (Hungarian / Kuhn-Munkres, O(n^2 m))
