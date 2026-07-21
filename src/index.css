@@ -19318,11 +19318,15 @@ body {
 }
 
 /* ------------------------------------------------------- pre-game metric card
-   Shared shell for the two derived/analytic cards under the batting order —
-   LineupStrengthCard.jsx + BullpenBoard.jsx. Unlike the plain-titled factual
-   sections around them (roster, opposing defense, umpires — posted facts), a
-   navy/gold masthead marks these two as the page's INTERPRETIVE modules (a
-   computed grade, a workload signal). SectionMasthead.jsx + InfoPopover.jsx. */
+   Shared shell, originally for the two derived/analytic cards under the
+   batting order — LineupStrengthCard.jsx + BullpenBoard.jsx (a computed
+   grade, a workload signal) — where the navy/gold masthead marked them as
+   the page's INTERPRETIVE modules, contrasted with the plain-titled factual
+   sections around them (roster, opposing defense, umpires — posted facts).
+   Former Teammates (TeamInfo.jsx) reuses the same shell for its card chrome
+   alone, purely for visual consistency with its pregame neighbors — it's
+   still a posted-facts listing, not an interpretive one.
+   SectionMasthead.jsx + InfoPopover.jsx. */
 .metriccard {
   margin-top: var(--space-4);
   border: var(--bw-hair) solid var(--border-rule);
