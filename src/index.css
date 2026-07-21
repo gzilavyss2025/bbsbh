@@ -5777,10 +5777,11 @@ body {
 .innings__row2-right > .winprob {
   margin-bottom: 0;
 }
-/* Below the wide breakpoint this wrapper doesn't exist as a layout box at
-   all — `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
-   `.statbox__abs`), so `.winprob` just needs to fall back into the same
-   single flex column as everything else in `.innings__row2`. */
+/* Below the wide breakpoint neither column wrapper exists as a layout box —
+   `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
+   `.statbox__abs`) — so their children just fall back into the same single
+   flex column as everything else in `.innings__row2`. */
+.innings__row2-left,
 .innings__row2-right {
   display: contents;
 }
@@ -5791,6 +5792,79 @@ body {
 .abscard {
   display: none;
 }
+
+/* DueUpNextCard: the OTHER team's next half, previewed — same card recipe as
+   .statbox, stacked below it on both breakpoints (unlike .abscard, this has
+   no other-breakpoint home to hide from). */
+.dueup {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+}
+.dueup__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 8px;
+}
+.dueup__list {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.dueup__row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.dueup__row:first-child {
+  border-top: none;
+}
+.dueup__slot {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.dueup__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dueup__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--clay);
+  text-align: right;
+}
+.dueup__pos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
 @media (min-width: 740px) {
   .innings__row2 {
     margin-top: 0;
@@ -10484,8 +10558,17 @@ body {
     flex-direction: row;
     align-items: stretch;
   }
-  .innings__row2 > .statbox {
+  /* Left column: the stat card, then the due-up-next preview beneath it
+     (see DueUpNextCard) — both share the row's larger 3/5 share. */
+  .innings__row2-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
     flex: 3 1 0;
+    min-width: 0;
+  }
+  .innings__row2-left > .statbox {
+    flex: 1 1 auto;
     min-width: 0;
   }
   /* ABS Challenges moves here from the stat card (see .statbox__abs below
@@ -10497,16 +10580,6 @@ body {
     gap: var(--space-3);
     flex: 2 1 0;
     min-width: 0;
-  }
-  /* Before reveal, .innings__statbox renders nothing at all (StatBox's own
-     placeholder bail — see its header comment), leaving this the ONLY flex
-     item in .innings__row2. A lone flex:2 item grows to fill the whole row
-     with no flex:3 sibling to share it with — the win-probability chart card
-     stretching edge to edge, its fixed-aspect SVG left stranded in a huge
-     gutter. Pin it back to its normal ~2/5 share instead of letting flex-grow
-     claim the rest. */
-  .innings__row2-right:only-child {
-    flex: 0 1 40%;
   }
   .innings__row2-right > .winprob {
     flex: 1 1 auto;
