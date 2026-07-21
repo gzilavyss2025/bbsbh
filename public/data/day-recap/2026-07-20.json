@@ -1,0 +1,603 @@
+{
+  "version": 1,
+  "date": "2026-07-20",
+  "generatedAt": "2026-07-21T13:50:39.307Z",
+  "bySportId": {
+    "1": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 693307,
+            "name": "Dillon Dingler",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "parentOrgId": 116,
+            "position": "C",
+            "stat": "4-5, 2 HR, 3 RBI, 3 R",
+            "game": {
+              "boxScorePath": "/07202026/detchc/boxscore",
+              "awayAbbr": "DET",
+              "homeAbbr": "CHC",
+              "awayScore": 8,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 607208,
+            "name": "Trea Turner",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "SS",
+            "stat": "3-5, 2 HR, 2B, 5 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07202026/ladphi/boxscore",
+              "awayAbbr": "LAD",
+              "homeAbbr": "PHI",
+              "awayScore": 7,
+              "homeScore": 10
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 665862,
+            "name": "Jazz Chisholm Jr.",
+            "teamId": 147,
+            "teamAbbr": "NYY",
+            "parentOrgId": 147,
+            "position": "2B",
+            "stat": "2-4, 2 HR, 5 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07202026/pitnyy/boxscore",
+              "awayAbbr": "PIT",
+              "homeAbbr": "NYY",
+              "awayScore": 5,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 666176,
+            "name": "Jo Adell",
+            "teamId": 108,
+            "teamAbbr": "LAA",
+            "parentOrgId": 108,
+            "position": "RF",
+            "stat": "2-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07202026/stllaa/boxscore",
+              "awayAbbr": "STL",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 605141,
+            "name": "Mookie Betts",
+            "teamId": 119,
+            "teamAbbr": "LAD",
+            "parentOrgId": 119,
+            "position": "SS",
+            "stat": "4-5, 2 HR, 3 RBI, 3 R",
+            "game": {
+              "boxScorePath": "/07202026/ladphi/boxscore",
+              "awayAbbr": "LAD",
+              "homeAbbr": "PHI",
+              "awayScore": 7,
+              "homeScore": 10
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 669923,
+            "name": "George Kirby",
+            "teamId": 136,
+            "teamAbbr": "SEA",
+            "parentOrgId": 136,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07202026/cinsea/boxscore",
+              "awayAbbr": "CIN",
+              "homeAbbr": "SEA",
+              "awayScore": 0,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 681517,
+            "name": "Kyle Leahy",
+            "teamId": 138,
+            "teamAbbr": "STL",
+            "parentOrgId": 138,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 4 K",
+            "game": {
+              "boxScorePath": "/07202026/stllaa/boxscore",
+              "awayAbbr": "STL",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 608379,
+            "name": "Michael Wacha",
+            "teamId": 118,
+            "teamAbbr": "KC",
+            "parentOrgId": 118,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07202026/sfkc/boxscore",
+              "awayAbbr": "SF",
+              "homeAbbr": "KC",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 671096,
+            "name": "Andrew Abbott",
+            "teamId": 113,
+            "teamAbbr": "CIN",
+            "parentOrgId": 113,
+            "position": "P",
+            "stat": "6.0 IP, 4 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07202026/cinsea/boxscore",
+              "awayAbbr": "CIN",
+              "homeAbbr": "SEA",
+              "awayScore": 0,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 682989,
+            "name": "Victor Mederos",
+            "teamId": 144,
+            "teamAbbr": "ATL",
+            "parentOrgId": 144,
+            "position": "P",
+            "stat": "2.1 IP, 1 H, 0 ER, 1 K",
+            "game": {
+              "boxScorePath": "/07202026/sdatl/boxscore",
+              "awayAbbr": "SD",
+              "homeAbbr": "ATL",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "performersByResult": {
+        "winners": [
+          {
+            "id": 669923,
+            "name": "George Kirby",
+            "teamId": 136,
+            "teamAbbr": "SEA",
+            "parentOrgId": 136,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07202026/cinsea/boxscore",
+              "awayAbbr": "CIN",
+              "homeAbbr": "SEA",
+              "awayScore": 0,
+              "homeScore": 8
+            },
+            "score": 65.20000000000002,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 693307,
+            "name": "Dillon Dingler",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "parentOrgId": 116,
+            "position": "C",
+            "stat": "4-5, 2 HR, 3 RBI, 3 R",
+            "game": {
+              "boxScorePath": "/07202026/detchc/boxscore",
+              "awayAbbr": "DET",
+              "homeAbbr": "CHC",
+              "awayScore": 8,
+              "homeScore": 6
+            },
+            "score": 61,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 607208,
+            "name": "Trea Turner",
+            "teamId": 143,
+            "teamAbbr": "PHI",
+            "parentOrgId": 143,
+            "position": "SS",
+            "stat": "3-5, 2 HR, 2B, 5 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07202026/ladphi/boxscore",
+              "awayAbbr": "LAD",
+              "homeAbbr": "PHI",
+              "awayScore": 7,
+              "homeScore": 10
+            },
+            "score": 60.899999999999984,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "losers": [
+          {
+            "id": 681517,
+            "name": "Kyle Leahy",
+            "teamId": 138,
+            "teamAbbr": "STL",
+            "parentOrgId": 138,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 4 K",
+            "game": {
+              "boxScorePath": "/07202026/stllaa/boxscore",
+              "awayAbbr": "STL",
+              "homeAbbr": "LAA",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "score": 48.10000000000001,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 605141,
+            "name": "Mookie Betts",
+            "teamId": 119,
+            "teamAbbr": "LAD",
+            "parentOrgId": 119,
+            "position": "SS",
+            "stat": "4-5, 2 HR, 3 RBI, 3 R",
+            "game": {
+              "boxScorePath": "/07202026/ladphi/boxscore",
+              "awayAbbr": "LAD",
+              "homeAbbr": "PHI",
+              "awayScore": 7,
+              "homeScore": 10
+            },
+            "score": 48.1,
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 687952,
+            "name": "Christian Encarnacion-Strand",
+            "teamId": 110,
+            "teamAbbr": "BAL",
+            "parentOrgId": 110,
+            "position": "3B",
+            "stat": "2-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07202026/balbos/boxscore",
+              "awayAbbr": "BAL",
+              "homeAbbr": "BOS",
+              "awayScore": 5,
+              "homeScore": 6
+            },
+            "score": 40.599999999999994,
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      },
+      "highlights": [
+        {
+          "gamePk": 824654,
+          "tier": 1,
+          "score": 47.79542232389839,
+          "headline": "Dillon Dingler: 2 HR — DET 8, CHC 6",
+          "signals": [
+            "multiHr",
+            "extras"
+          ],
+          "performer": {
+            "id": 693307,
+            "name": "Dillon Dingler",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "position": "C",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 116,
+              "abbr": "DET"
+            },
+            "loser": {
+              "id": 112,
+              "abbr": "CHC"
+            }
+          },
+          "boxScorePath": "/07202026/detchc/boxscore"
+        },
+        {
+          "gamePk": 823522,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Jazz Chisholm Jr.: 2 HR — PIT 5, NYY 8",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 665862,
+            "name": "Jazz Chisholm Jr.",
+            "teamId": 147,
+            "teamAbbr": "NYY",
+            "position": "2B",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 147,
+              "abbr": "NYY"
+            },
+            "loser": {
+              "id": 134,
+              "abbr": "PIT"
+            }
+          },
+          "boxScorePath": "/07202026/pitnyy/boxscore"
+        },
+        {
+          "gamePk": 823436,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Mookie Betts: 2 HR — LAD 7, PHI 10",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 605141,
+            "name": "Mookie Betts",
+            "teamId": 119,
+            "teamAbbr": "LAD",
+            "position": "SS",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 143,
+              "abbr": "PHI"
+            },
+            "loser": {
+              "id": 119,
+              "abbr": "LAD"
+            }
+          },
+          "boxScorePath": "/07202026/ladphi/boxscore"
+        },
+        {
+          "gamePk": 824167,
+          "tier": 1,
+          "score": 34.07593697995562,
+          "headline": "Yordan Alvarez: 2 HR — MIA 5, HOU 8",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 670541,
+            "name": "Yordan Alvarez",
+            "teamId": 117,
+            "teamAbbr": "HOU",
+            "position": "DH",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 117,
+              "abbr": "HOU"
+            },
+            "loser": {
+              "id": 146,
+              "abbr": "MIA"
+            }
+          },
+          "boxScorePath": "/07202026/miahou/boxscore"
+        },
+        {
+          "gamePk": 824410,
+          "tier": 1,
+          "score": 28.34686894262107,
+          "headline": "Petey Halpin: 2 HR — MIN 4, CLE 13",
+          "signals": [
+            "multiHr",
+            "blowout"
+          ],
+          "performer": {
+            "id": 690984,
+            "name": "Petey Halpin",
+            "teamId": 114,
+            "teamAbbr": "CLE",
+            "position": "CF",
+            "stat": "2 HR"
+          },
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 114,
+              "abbr": "CLE"
+            },
+            "loser": {
+              "id": 142,
+              "abbr": "MIN"
+            }
+          },
+          "boxScorePath": "/07202026/mincle/boxscore"
+        },
+        {
+          "gamePk": 824736,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The BOS edged the BAL by a single run — BAL 5, BOS 6",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 111,
+              "abbr": "BOS"
+            },
+            "loser": {
+              "id": 110,
+              "abbr": "BAL"
+            }
+          },
+          "boxScorePath": "/07202026/balbos/boxscore"
+        },
+        {
+          "gamePk": 824898,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The ATL edged the SD by a single run — SD 2, ATL 3",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 144,
+              "abbr": "ATL"
+            },
+            "loser": {
+              "id": 135,
+              "abbr": "SD"
+            }
+          },
+          "boxScorePath": "/07202026/sdatl/boxscore"
+        },
+        {
+          "gamePk": 824087,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The KC edged the SF by a single run — SF 3, KC 4",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 118,
+              "abbr": "KC"
+            },
+            "loser": {
+              "id": 137,
+              "abbr": "SF"
+            }
+          },
+          "boxScorePath": "/07202026/sfkc/boxscore"
+        },
+        {
+          "gamePk": 824006,
+          "tier": 3,
+          "score": 13.92920235749422,
+          "headline": "The LAA edged the STL by a single run — STL 2, LAA 3",
+          "signals": [
+            "oneRun"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 108,
+              "abbr": "LAA"
+            },
+            "loser": {
+              "id": 138,
+              "abbr": "STL"
+            }
+          },
+          "boxScorePath": "/07202026/stllaa/boxscore"
+        },
+        {
+          "gamePk": 823112,
+          "tier": 3,
+          "score": -8.690404952122899,
+          "headline": "A 8-run laugher for the SEA — CIN 0, SEA 8",
+          "signals": [
+            "blowout"
+          ],
+          "performer": null,
+          "subCaption": null,
+          "teams": {
+            "winner": {
+              "id": 136,
+              "abbr": "SEA"
+            },
+            "loser": {
+              "id": 113,
+              "abbr": "CIN"
+            }
+          },
+          "boxScorePath": "/07202026/cinsea/boxscore"
+        }
+      ],
+      "superlatives": {
+        "longestHomeRun": {
+          "id": 521692,
+          "name": "Salvador Perez",
+          "teamId": 118,
+          "teamAbbr": "KC",
+          "parentOrgId": 118,
+          "position": "DH",
+          "stat": "440 ft"
+        },
+        "hardestBaseHit": {
+          "id": 670541,
+          "name": "Yordan Alvarez",
+          "teamId": 117,
+          "teamAbbr": "HOU",
+          "parentOrgId": 117,
+          "position": "DH",
+          "stat": "114.2 mph"
+        },
+        "fastestStrikeout": {
+          "id": 694819,
+          "name": "Jacob Misiorowski",
+          "teamId": 158,
+          "teamAbbr": "MIL",
+          "parentOrgId": 158,
+          "position": "P",
+          "stat": "103.6 mph"
+        }
+      }
+    }
+  }
+}
