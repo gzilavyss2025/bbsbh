@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # Primary checkout's node_modules missing @clerk/clerk-react
 
@@ -49,13 +49,22 @@ the worktree-setup hook — #277 was actually **closed** (superseded by #278,
 which combined several open PRs, including #277's hook, into one branch/PR).
 The hook that exists on `origin/main` today shipped via #278, not #277.
 
-## Next steps
+## Resolution (2026-07-21)
 
-- Bring the primary checkout's local `main` up to date (`git pull --ff-only`)
-  so hooks registered in newer commits actually take effect for future
-  sessions rooted there. A session should probably check for this drift
-  early (e.g. in `session-start.sh`) rather than discovering it mid-task.
-- Still unconfirmed: whether the primary's own `node_modules` needs the same
-  "stays in sync" treatment as worktrees (a `session-start.sh` step running
-  `npm install` if `package-lock.json` changed since last install), or
-  whether this was a one-off.
+By the next session, the drift had grown to 52 commits behind — confirming
+this recurs rather than being a one-off. Fixed two ways:
+
+- Manually fast-forwarded the primary checkout's local `main` to `origin/main`
+  once (`git pull --ff-only`), after discarding an unrelated stray local edit
+  to `public/brand/tally-wordmark.png` that a newer commit also touched.
+- Added an automated guard to `.claude/hooks/session-start.sh` that runs on
+  every session start in the primary checkout only (detected via `.git` being
+  a real directory, not a worktree's gitfile pointer): if local `main` is
+  behind `origin/main` and the working tree is clean, it fast-forwards
+  automatically; if the tree is dirty, it warns instead of touching anything.
+  So the drift can no longer silently reach the size it did here.
+
+Still unconfirmed / left open: whether the primary's own `node_modules` needs
+the same "stays in sync" treatment as worktrees (a step running `npm install`
+if `package-lock.json` changed since last install). Not addressed by this fix
+since it wasn't the reported symptom this time around.
