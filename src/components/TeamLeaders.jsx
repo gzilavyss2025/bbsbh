@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { computeLeaders } from '../api/teamLeaders.js'
+import { splitDisplayName } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { SectionTitle } from './SectionTitle.jsx'
@@ -83,31 +84,37 @@ function FeaturedLeader({
   ]
     .filter(Boolean)
     .join(' ')
+  const { first, last } = splitDisplayName(entry.name)
   return (
     <div className={classes} style={favStyle}>
       <Headshot personId={entry.id} name={entry.name} teamId={teamId} className="tlead__shot" />
+      <div className="tlead__who">
+        {/* Two-line hero name (first name, then LAST NAME + position/IL mark) —
+            same idiom as PlayerPage's splitDisplayName hero — so a long
+            surname gets its own full-width line instead of competing with
+            the stat value for room on one shared row. */}
+        <PlayerLink id={entry.id} className="tlead__name">
+          {first && <span className="tlead__name-first">{first}</span>}
+          <span className="tlead__name-last">
+            {last}
+            <InjuredMark hurt={injuredIds?.has(entry.id)} />
+            {entry.position && <span className="tlead__pos">{entry.position}</span>}
+          </span>
+        </PlayerLink>
+        <div className="tlead__badges">
+          <LeaderBadges entry={entry} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
+        </div>
+        <div className="tlead__stat">
+          <span className="tlead__statval">{entry.display}</span>
+          <span className="tlead__statlabel">{category.short}</span>
+        </div>
+      </div>
       {teamId && (
         <div className="tlead__teamtag">
           <TeamLogo teamId={teamId} name={teamAbbr} size={24} className="tlead__logo" />
           {showTeamAbbr && teamAbbr && <span className="tlead__teamabbr">{teamAbbr}</span>}
         </div>
       )}
-      <div className="tlead__who">
-        <div className="tlead__head">
-          <PlayerLink id={entry.id} className="tlead__name">
-            {entry.name}
-          </PlayerLink>
-          <InjuredMark hurt={injuredIds?.has(entry.id)} />
-          {entry.position && <span className="tlead__pos">{entry.position}</span>}
-        </div>
-        <div className="tlead__badges">
-          <LeaderBadges entry={entry} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
-        </div>
-      </div>
-      <div className="tlead__stat">
-        <span className="tlead__statval">{entry.display}</span>
-        <span className="tlead__statlabel">{category.short}</span>
-      </div>
     </div>
   )
 }
