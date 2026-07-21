@@ -17,6 +17,7 @@ import { RefreshButton } from './TeamInfo.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { RollingLine } from '../components/RollingLine.jsx'
 import { StatBox, AbsCard } from '../components/StatBox.jsx'
+import { DueUpNextCard } from '../components/DueUpNextCard.jsx'
 import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
 import { HalfInning } from '../components/HalfInning.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'
@@ -399,21 +400,42 @@ export function InningViewer({
         {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
             beside the win-probability chart. */}
         <div className="innings__row2" ref={statBoxRef}>
-          <StatBox
-            className="innings__statbox"
-            placeholder
-            feed={feed}
-            inning={effInning}
-            half={effHalf}
-            battingSide={effHalf === 'top' ? 'away' : 'home'}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            awayLocation={meta.away.locationName || meta.away.abbreviation}
-            homeLocation={meta.home.locationName || meta.home.abbreviation}
-            getDerived={getDerived}
-            revealed={curIdx <= revealedThrough}
-            runExpectancy={runExpectancy}
-          />
+          {/* Left column: the stat card, then a preview of who's due up when
+              the OTHER team's next half starts — dueup.js's own gate keeps
+              this null until that half is actually the user's next one to
+              reveal (see DueUpNextCard's header comment), so it appears right
+              as the "NEXT >" nav does. Same display:contents-on-phone trick
+              as .innings__row2-right below: this wrapper only exists as a
+              layout box at the wide breakpoint. */}
+          <div className="innings__row2-left">
+            <StatBox
+              className="innings__statbox"
+              placeholder
+              feed={feed}
+              inning={effInning}
+              half={effHalf}
+              battingSide={effHalf === 'top' ? 'away' : 'home'}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+              awayLocation={meta.away.locationName || meta.away.abbreviation}
+              homeLocation={meta.home.locationName || meta.home.abbreviation}
+              getDerived={getDerived}
+              revealed={curIdx <= revealedThrough}
+              runExpectancy={runExpectancy}
+            />
+            <DueUpNextCard
+              feed={feed}
+              inning={effInning}
+              half={effHalf}
+              revealedThrough={revealedThrough}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+              awayId={meta.away.id}
+              homeId={meta.home.id}
+              awayName={meta.away.clubName}
+              homeName={meta.home.clubName}
+            />
+          </div>
           {/* Wide layout only: ABS Challenges moves here, above the chart,
               instead of trailing the pitch-stat grid on the left — see
               AbsCard's own header comment. On a phone this wrapper is

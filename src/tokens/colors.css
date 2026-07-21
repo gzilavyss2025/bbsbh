@@ -80,5 +80,9 @@
      height reads as who leads. Muted enough to sit under navy ink + graphite. */
   --winprob-home:     #C6D2DE;   /* soft navy — home win share */
   --winprob-away:     #EFDAD3;   /* soft clay — away win share */
-  --winprob-line:     var(--ink-1);
+  /* Bright white rather than ink: the bands are now full team-color/logo
+     tiles (see WinProbChart.jsx), so two dark-brand teams (e.g. Mets/Brewers
+     navy) can land close enough in value that an ink line all but disappears
+     at the seam — white holds up against any band color. */
+  --winprob-line:     #FFFFFF;
 }

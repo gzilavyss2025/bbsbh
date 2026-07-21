@@ -5391,6 +5391,53 @@ body {
   text-transform: none; /* caps-exempt: pre-half callout cards read as natural sentences */
 }
 
+/* UpNextBatters: who's due up to face the entering pitcher, before any of the
+   half is revealed — three headshot columns. Horizontal margin (not just
+   .prehalf's margin-bottom): a headshot flush against .half's own border
+   (which carries no padding of its own) reads worse than the text-only cards
+   around it do, the same reasoning the kraft "now pitching" card's own
+   horizontal margin follows (see .pitchernotice--pbp). */
+.upnext {
+  margin: 10px 14px 4px;
+}
+.upnext__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 8px;
+}
+.upnext__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.upnext__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  min-width: 0;
+}
+.shot.upnext__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.upnext__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .prepitch {
   margin-bottom: 12px;
   padding-bottom: 12px;
@@ -5579,7 +5626,10 @@ body {
    plays around it (rather than the old plain "Pitching Change: X replaces Y"
    note line). */
 .pitchernotice--pbp {
-  margin: 4px 0;
+  /* Horizontal margin, not just padding: .half has no padding of its own
+     (see .half__title's matching 14px inset comment), so without this the
+     card's own border sits flush against the card it's nested inside. */
+  margin: 4px 14px;
   padding: 10px 12px;
   border: var(--bw-hair) solid var(--seal-hatch);
   border-radius: var(--radius-sm);
@@ -5719,11 +5769,40 @@ body {
 }
 
 .pitchernotice__pitcher {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
+}
+.pitchernotice__pitcher > :first-child {
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Uniform number + throwing hand, pinned to the row's right edge — same
+   right-aligned treatment as the lineup card's .lineup__jersey/.lineup__pos. */
+.pitchernotice__badges {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: none;
+  font-size: var(--fs-compact);
+}
+.pitchernotice__jersey {
+  color: var(--clay);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  text-align: right;
+}
+.pitchernotice__hand {
+  color: var(--field);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
 }
 
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
@@ -5745,10 +5824,11 @@ body {
 .innings__row2-right > .winprob {
   margin-bottom: 0;
 }
-/* Below the wide breakpoint this wrapper doesn't exist as a layout box at
-   all — `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
-   `.statbox__abs`), so `.winprob` just needs to fall back into the same
-   single flex column as everything else in `.innings__row2`. */
+/* Below the wide breakpoint neither column wrapper exists as a layout box —
+   `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
+   `.statbox__abs`) — so their children just fall back into the same single
+   flex column as everything else in `.innings__row2`. */
+.innings__row2-left,
 .innings__row2-right {
   display: contents;
 }
@@ -5759,6 +5839,79 @@ body {
 .abscard {
   display: none;
 }
+
+/* DueUpNextCard: the OTHER team's next half, previewed — same card recipe as
+   .statbox, stacked below it on both breakpoints (unlike .abscard, this has
+   no other-breakpoint home to hide from). */
+.dueup {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+}
+.dueup__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 8px;
+}
+.dueup__list {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.dueup__row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.dueup__row:first-child {
+  border-top: none;
+}
+.dueup__slot {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.dueup__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dueup__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--clay);
+  text-align: right;
+}
+.dueup__pos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
 @media (min-width: 740px) {
   .innings__row2 {
     margin-top: 0;
@@ -7711,7 +7864,7 @@ body {
 .winprob__line {
   fill: none;
   stroke: var(--winprob-line);
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
@@ -10452,8 +10605,17 @@ body {
     flex-direction: row;
     align-items: stretch;
   }
-  .innings__row2 > .statbox {
+  /* Left column: the stat card, then the due-up-next preview beneath it
+     (see DueUpNextCard) — both share the row's larger 3/5 share. */
+  .innings__row2-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
     flex: 3 1 0;
+    min-width: 0;
+  }
+  .innings__row2-left > .statbox {
+    flex: 1 1 auto;
     min-width: 0;
   }
   /* ABS Challenges moves here from the stat card (see .statbox__abs below
