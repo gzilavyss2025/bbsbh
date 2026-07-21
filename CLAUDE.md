@@ -27,7 +27,8 @@ gated in CI). Detail lives in three tiers, most-specific first:
 
 When you're tempted to add detail here, add it to the right tier and leave a
 one-line pointer. If the leanness check fails, move content out — don't raise the
-cap.
+cap. After significant structural work, check whether the nested `CLAUDE.md` or
+`docs/adr/` entry it touched needs updating too — a stale tier is worse than none.
 
 ## Workflow & deployment
 
@@ -174,6 +175,8 @@ Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
   `src/tokens/*.css`. The metaphor is a paper scorebook (manila paper, navy ink,
   pencil graphite, kraft-tape amber seals). Use the semantic CSS variables, not raw
   hex. See `src/CLAUDE.md`.
+- **Flat directories don't stay flat.** Before adding roughly the 10th file to a
+  directory, propose subdirectories instead of piling on.
 
 ## Agent skills
 
