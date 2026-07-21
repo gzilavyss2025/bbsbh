@@ -65,6 +65,18 @@ export function HalfInning({
   const [livePitcher, setLivePitcher] = useState(null)
   const nowPitching = livePitcher ?? enteringPitcher
 
+  // "Now pitching" only fits the moment an arm actually takes the mound: the
+  // game's first half for each team, or a live mid-half substitution
+  // (livePitcher set). The far more common case — the same reliever/starter
+  // carrying over from the half before, same team's previous half of the
+  // same parity (a team only pitches every OTHER half) — reads as "Pitching
+  // for..." instead, since nothing just happened.
+  const previousEnteringPitcher =
+    inning > 1 ? selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough) : null
+  const isFreshPitcher =
+    livePitcher != null || inning === 1 || previousEnteringPitcher?.id !== enteringPitcher?.id
+  const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching for'
+
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
   // state: ABOVE the seal (staged inside the SAME card as the play-by-play,
@@ -116,6 +128,7 @@ export function HalfInning({
             pitcher={nowPitching}
             teamName={battingSide === 'away' ? homeName : awayName}
             className="pitchernotice--pbp"
+            label={nowPitchingLabel}
           />
         )}
 

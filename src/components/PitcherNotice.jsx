@@ -11,19 +11,24 @@ import { PlayerLink } from './PlayerLink.jsx'
 // card) comes from the caller's `className`; the inner photo+body layout is
 // this component's. `pitcher` is the { id, name, jersey, hand } shape
 // selectPrePitchChanges / pitchingChangePitcher build.
-export function PitcherNotice({ pitcher, teamName, className = '' }) {
+export function PitcherNotice({ pitcher, teamName, className = '', label = 'Now pitching' }) {
   if (!pitcher) return null
   return (
     <div className={`pitchernotice ${className}`}>
       <PitcherPhoto personId={pitcher.id} />
       <div className="pitchernotice__body">
         <span className="pitchernotice__now">
-          Now pitching{teamName ? ` for the ${teamName}` : ''}
+          {label}{teamName ? ` for the ${teamName}` : ''}
         </span>
         <span className="pitchernotice__pitcher">
           <PlayerLink id={pitcher.id}>{pitcher.name}</PlayerLink>
-          {pitcher.jersey ? ` ${pitcher.jersey}` : ''}
-          {pitcher.hand ? ` | ${pitcher.hand}HP` : ''}
+          {/* Uniform number + throwing hand, right-aligned same as the
+              lineup card's .lineup__jersey (see index.css) rather than
+              trailing inline after the name. */}
+          <span className="pitchernotice__badges">
+            {pitcher.jersey ? <span className="pitchernotice__jersey">{pitcher.jersey}</span> : null}
+            {pitcher.hand ? <span className="pitchernotice__hand">{pitcher.hand}HP</span> : null}
+          </span>
         </span>
       </div>
     </div>

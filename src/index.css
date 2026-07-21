@@ -5579,7 +5579,10 @@ body {
    plays around it (rather than the old plain "Pitching Change: X replaces Y"
    note line). */
 .pitchernotice--pbp {
-  margin: 4px 0;
+  /* Horizontal margin, not just padding: .half has no padding of its own
+     (see .half__title's matching 14px inset comment), so without this the
+     card's own border sits flush against the card it's nested inside. */
+  margin: 4px 14px;
   padding: 10px 12px;
   border: var(--bw-hair) solid var(--seal-hatch);
   border-radius: var(--radius-sm);
@@ -5719,11 +5722,40 @@ body {
 }
 
 .pitchernotice__pitcher {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
+}
+.pitchernotice__pitcher > :first-child {
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Uniform number + throwing hand, pinned to the row's right edge — same
+   right-aligned treatment as the lineup card's .lineup__jersey/.lineup__pos. */
+.pitchernotice__badges {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: none;
+  font-size: var(--fs-compact);
+}
+.pitchernotice__jersey {
+  color: var(--clay);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  text-align: right;
+}
+.pitchernotice__hand {
+  color: var(--field);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
 }
 
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
@@ -7711,7 +7743,7 @@ body {
 .winprob__line {
   fill: none;
   stroke: var(--winprob-line);
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
