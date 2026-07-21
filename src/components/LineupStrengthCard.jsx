@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react'
+import { useMemo } from 'react'
 import { lineupStrengthFor } from '../api/lineupStrength.js'
 import { InfoPopover } from './InfoPopover.jsx'
 import { SectionMasthead } from './SectionMasthead.jsx'
@@ -9,20 +9,24 @@ import { SectionMasthead } from './SectionMasthead.jsx'
 // docs/lineup-strength.md). Spoiler-free by construction: the starting nine +
 // season aggregates, nothing from tonight's game.
 //
-// The hero score + tier pill lead; the deductions read as ONE
-// Expected → Starting → cost table (each row a legible line-item, never a
-// mystery number). One row per FINDING, not per slot: a move that shuffles
-// several players is a single row whose `shifts` line names the men in between,
-// so a rotation never reads as several separate benchings.
+// SCORE ONLY, DELIBERATELY. The card shows the grade, its tier word, and the
+// partial-grade caveat — nothing else. The receipt that explains the grade is
+// still computed and unit-tested (`lineupStrengthFor().rows`); it is simply not
+// rendered yet, because HOW to explain a grade is an open design question and a
+// half-settled answer is worse than none.
 //
-// One table on purpose. The model now makes a single kind of claim — the optimum
-// would use somebody else, or use the same nine differently — and all three row
-// kinds (`sub`, `chain`, `shuffle`) share the same columns, so splitting them
-// would be a distinction without a difference. Measured over three slates: 89
-// subs, 68 chains, ONE shuffle. The old second table was for the rows that no
-// longer exist (out-of-position starts, priced off a familiarity discount the
-// model dropped — see docs/lineup-strength.md). Renders nothing without data
-// (MiLB, file missing) or before the lineup posts.
+// The deductions table that used to live here was retired once the model was
+// reworked (docs/lineup-strength.md): a table is scannable but reads badly for a
+// "chain" — a change that shifts three or four players along, which is 43% of all
+// findings. Prose handles those far better and single findings better still, but
+// it walls up at the 24% of lineups with three or more, and it loses the aligned
+// column you scan to find the biggest deduction. That trade is unresolved.
+//
+// Everything needed to resume is in place: `rows` carries kind, position, both
+// names, the departing player's own position, and the men who shift between.
+// See docs/lineup-strength.md "Explaining the grade" for the options and the
+// measurements behind them. Renders nothing without data (MiLB, file missing) or
+// before the lineup posts.
 export function LineupStrengthCard({ data, teamId, lineup }) {
   const result = useMemo(() => {
     if (!data || !teamId || (lineup?.length ?? 0) < 9) return null
@@ -38,7 +42,7 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
   }, [data, teamId, lineup])
 
   if (!result) return null
-  const { rows, strengthTier, ungraded } = result
+  const { strengthTier, ungraded } = result
   // A starter with no value in either data file (a trade/call-up more recent than
   // the nightly build): his slot is left out of the grade, said plainly here so a
   // partial grade never masquerades as a complete one.
@@ -70,55 +74,6 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
             data — graded on the rest of the order.
           </p>
         )}
-
-        {rows.length === 0 && (
-          <p className="lstrength__clean">Full-strength — this is the roster’s best nine.</p>
-        )}
-
-        {rows.length > 0 && (
-          <table className="lstrength__table">
-            <caption className="lstrength__caption">Where the best nine differs</caption>
-            <thead>
-              <tr>
-                <th className="lstrength__pos" scope="col">Pos</th>
-                <th scope="col">Expected</th>
-                <th scope="col">Starting</th>
-                <th className="lstrength__pts" scope="col">Impact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <Fragment key={i}>
-                  <tr>
-                    <td className="lstrength__pos">{r.pos}</td>
-                    <td className="lstrength__expected">{r.expected}</td>
-                    <td className="lstrength__starting">
-                      {r.starting ?? '—'}
-                      {/* A chain's departing player is NOT at the slot being
-                          filled, so his own position rides with his name —
-                          otherwise the row reads as though he played there. */}
-                      {r.startingPos && (
-                        <span className="lstrength__from">from {r.startingPos}</span>
-                      )}
-                    </td>
-                    <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
-                  </tr>
-                  {/* Who else moves, on its own full-width line: a four-man chain
-                      wraps to nonsense inside a ~110px phone column. */}
-                  {r.shifts.length > 0 && (
-                    <tr>
-                      <td />
-                      <td className="lstrength__shifts" colSpan={3}>
-                        {r.shifts.join(', ')}
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
-
       </div>
     </section>
   )
