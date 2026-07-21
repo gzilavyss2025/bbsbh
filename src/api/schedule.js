@@ -340,6 +340,53 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
   }
 }
 
+const SEASON_SERIES_FIELDS =
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner'
+
+// Same lookup as fetchHeadToHead, but WITH each side's score — feeds the
+// lineup page's season-series strip (see SeasonSeriesStrip.jsx). Safe to carry
+// scores here: every row this returns is either already Final (a genuinely
+// different, already-decided game) or not yet played (the feed reports no
+// score). The one exception — the game the strip is rendered ON — is the
+// caller's job to blank out via seasonSeriesCells' `currentGamePk`, since this
+// fetcher has no notion of which game is "the current page". Regular season
+// only ('R'), same dedupe-by-gamePk handling as fetchHeadToHead.
+export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
+  if (!teamAId || !teamBId || !season) return []
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R&fields=${SEASON_SERIES_FIELDS}`,
+    )
+    const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
+    const byPk = new Map()
+    for (const g of games) {
+      const awaySide = g.teams?.away
+      const homeSide = g.teams?.home
+      const a = awaySide?.team?.id
+      const h = homeSide?.team?.id
+      if ((a === teamAId && h === teamBId) || (a === teamBId && h === teamAId)) {
+        const final = g.status?.abstractGameState === 'Final'
+        byPk.set(g.gamePk, {
+          gamePk: g.gamePk,
+          apiDate: g.officialDate ?? (g.gameDate ?? '').slice(0, 10),
+          gameDate: g.gameDate ?? null,
+          gameNumber: g.gameNumber ?? 1,
+          awayId: a,
+          homeId: h,
+          final,
+          awayScore: final ? (awaySide?.score ?? null) : null,
+          homeScore: final ? (homeSide?.score ?? null) : null,
+        })
+      }
+    }
+    return [...byPk.values()].sort(
+      (x, y) => new Date(x.apiDate) - new Date(y.apiDate) || x.gameNumber - y.gameNumber,
+    )
+  } catch {
+    return []
+  }
+}
+
 // One team's full regular-season schedule, for the team page's monthly
 // calendar card. Dates/opponents/home-away are spoiler-free (same rationale as
 // fetchHeadToHead above). The raw schedule row also carries each side's

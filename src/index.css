@@ -19274,6 +19274,134 @@ body {
   align-items: center;
 }
 
+/* ------------------------------------------------------- season series strip
+   The lineup page's "other meetings this season" widget — SeasonSeriesStrip.jsx.
+   A .metriccard like Lineup Strength / Bullpen Tonight above, so it wears the
+   same navy/gold masthead; the body swaps the usual stacked layout for a
+   horizontally-scrolling row of game cards with always-on square nav buttons
+   (this app doesn't use circular chrome elsewhere, so the buttons stay square
+   like every other control). */
+.seasonseries__body {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-4);
+}
+.seasonseries__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.seasonseries__nav:hover {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.seasonseries__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.seasonseries__strip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+}
+.seasonseries__cell {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-display);
+  cursor: pointer;
+}
+.seasonseries__cell:hover {
+  background: color-mix(in srgb, var(--seal) 12%, transparent);
+}
+.seasonseries__cell:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.seasonseries__cell--current {
+  background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
+  border-color: var(--navy);
+}
+.seasonseries__cell--current:hover {
+  background: color-mix(in srgb, var(--navy) 13%, var(--surface-card));
+}
+.seasonseries__logo {
+  flex-shrink: 0;
+}
+.seasonseries__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+.seasonseries__sep {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+.seasonseries__loser {
+  display: block;
+  width: 100%;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+  text-align: center;
+}
+.seasonseries__time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: var(--lh-solid);
+}
+.seasonseries__estimated {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.seasonseries__date {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-align: center;
+  line-height: var(--lh-tight);
+}
+.seasonseries__opp {
+  display: block;
+  font-family: var(--font-display);
+  color: var(--text-muted);
+  font-weight: var(--w-semibold);
+}
+
 /* (i) info popover — a lightweight hover/tap tip (InfoPopover.jsx), not a
    modal: opens on hover/focus (CSS below) and on click (aria-expanded), closes
    on Escape / outside-click (JS). Lives in the navy bar, so the button inks in
