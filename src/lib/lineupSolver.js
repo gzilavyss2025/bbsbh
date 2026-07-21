@@ -216,15 +216,19 @@ function attempt(players, prefer, forbid) {
 // When a slot has no eligible candidate at all (classically catcher), force-fill
 // it so the solve can complete. Prefer a player whose primary IS that slot; else
 // the lowest-rpg bat (a real team parks its least valuable stick behind the plate
-// in an emergency). Returns a cloned pool so the caller's players are untouched.
-function relaxEligibility(players) {
+// in an emergency) — skipping anyone `forbid` rules out at this slot (the
+// catcher-rest rule in lineupStrength.js), so a relaxed fill can never hand the
+// slot right back to the one player it exists to keep out of it. Returns a
+// cloned pool so the caller's players are untouched.
+function relaxEligibility(players, forbid) {
   const clone = players.map((p) => ({ ...p, positions: [...(p.positions ?? [])] }))
+  const allowedAt = (p, slot) => !forbid?.get(String(p.id))?.has(slot)
   for (const slot of SLOTS) {
     if (slot === 'DH') continue
-    if (clone.some((p) => p.positions.includes(slot))) continue
-    let pick = clone.filter((p) => p.primaryPos === slot)
+    if (clone.some((p) => p.positions.includes(slot) && allowedAt(p, slot))) continue
+    let pick = clone.filter((p) => p.primaryPos === slot && allowedAt(p, slot))
     if (pick.length === 0) {
-      const sorted = [...clone].sort((x, y) => x.rpg - y.rpg)
+      const sorted = clone.filter((p) => allowedAt(p, slot)).sort((x, y) => x.rpg - y.rpg)
       pick = sorted.length ? [sorted[0]] : []
     }
     for (const p of pick) if (!p.positions.includes(slot)) p.positions.push(slot)
@@ -245,7 +249,7 @@ export function solveOptimalLineup(players, opts = {}) {
   const { prefer, forbid } = opts
   const strict = attempt(players, prefer, forbid)
   if (strict) return strict
-  const relaxed = attempt(relaxEligibility(players), prefer, forbid)
+  const relaxed = attempt(relaxEligibility(players, forbid), prefer, forbid)
   if (relaxed) return { ...relaxed, relaxed: true }
   return null
 }

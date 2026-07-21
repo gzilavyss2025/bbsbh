@@ -175,8 +175,10 @@ function tierForScore(score) {
 // one man 162 times, so proposing to put him back there is second-guessing
 // workload management the model cannot see, and it is wrong nearly every time it
 // fires. We therefore forbid the proposal outright rather than deduct for it.
-// Safe by construction: someone else is already posted at C, so the solve stays
-// feasible. See docs/lineup-strength.md ("What the model deliberately won't say").
+// Never starves the solve: relaxEligibility (lineupSolver.js) is forbid-aware, so
+// even a roster with no OTHER catcher-eligible candidate force-fills C with the
+// next-least-bad bat rather than the one player this rule exists to keep out.
+// See docs/lineup-strength.md ("What the model deliberately won't say").
 function catcherRestForbids(pool, actual) {
   const byId = new Map(pool.map((p) => [String(p.id), p]))
   const forbid = new Map()

@@ -716,3 +716,34 @@ test('catcher rest: the model never proposes putting a rested catcher back behin
   assert.equal(receiptFor(data, 1, posted).length, 0, 'and it costs the club nothing')
   assert.equal(grade.score, 10)
 })
+
+test('catcher rest: the relaxed force-fill never falls back to the man it forbids', () => {
+  // Thin catching depth: nobody in the pool is eligible at C except the resting
+  // starter, whom catcherRestForbids rules out. Without a forbid-aware relax,
+  // the only "fallback" candidate for the force-fill would be the very player
+  // the rule exists to keep out, and the whole grade would go infeasible —
+  // silently hiding the card — rather than degrading gracefully like every
+  // other data hole in this model.
+  const data = rosterOf((mk) => {
+    mk('starterC', 'StarterC', 'C', 0.6, 0, ['C']) // best bat on the roster, forbidden at C tonight
+    mk('emergencyC', 'EmergencyC', 'RF', -0.1, 0, []) // posted at C, not eligible anywhere yet
+    regulars(mk, ['C'])
+  })
+  const posted = [
+    { personId: 'starterC', position: 'DH' },
+    { personId: 'emergencyC', position: 'C' },
+    { personId: 'x1B', position: '1B' },
+    { personId: 'x2B', position: '2B' },
+    { personId: 'x3B', position: '3B' },
+    { personId: 'xSS', position: 'SS' },
+    { personId: 'xLF', position: 'LF' },
+    { personId: 'xCF', position: 'CF' },
+    { personId: 'xRF', position: 'RF' },
+  ]
+  const grade = gradeLineup(data, 1, posted)
+  assert.ok(grade, 'a thin-catching roster must still grade, not go infeasible')
+  assert.ok(grade.relaxed, 'C had no eligible candidate before the relax, so this must take that path')
+  const atCatcher = grade.optimal.assignments.find((a) => a.slot === 'C')
+  assert.notEqual(String(atCatcher.id), 'starterC', 'the rested catcher is never the fallback either')
+  assert.equal(String(atCatcher.id), 'emergencyC', 'falls back to the lowest-rpg allowed bat instead')
+})

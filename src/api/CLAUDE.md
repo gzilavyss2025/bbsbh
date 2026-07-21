@@ -349,8 +349,12 @@ for each generator; the reader modules:
   the rows sum to the gap; `rpgFromWar`/`fldRpgFromRuns` are the runtime echoes
   of the generator's model and must stay in step with it.
   `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
-  statTiers tier, the itemized receipt (bench swaps + out-of-position
-  penalties), and `ungraded` (posted starters with no value in any file).
+  statTiers tier, the itemized receipt (`sub`/`chain`/`shuffle` rows — a
+  personnel swap, a multi-slot shift, or a same-nine rearrangement) and
+  `ungraded` (posted starters with no value in any file). The card
+  (`LineupStrengthCard.jsx`) currently renders only the score + tier; the
+  receipt is computed and tested but deliberately not surfaced yet — see
+  docs/lineup-strength.md "Explaining the grade".
   Spoiler-free by construction (the posted starting nine + season
   aggregates); surface is `LineupStrengthCard` under the batting order on
   the lineup pages. MLB only. A starter posted after the last nightly build
