@@ -31,6 +31,11 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
 
   const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk)
   const [canScroll, setCanScroll] = useState(false)
+  // Which park the CURRENT game is at — every other cell whose game was
+  // hosted somewhere else gets a light tint, so a multi-leg series reads at a
+  // glance as "these happened at the other team's park" (see
+  // .seasonseries__cell--otherpark).
+  const currentHomeId = cells.find((c) => c.isCurrent)?.homeId
 
   // Land on the current game centered in the strip rather than wherever it
   // falls chronologically — with a full multi-leg series (see the August leg
@@ -96,6 +101,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
               cell={cell}
               onSelect={() => openGame(cell)}
               cellRef={cell.isCurrent ? currentCellRef : null}
+              otherPark={currentHomeId != null && cell.homeId !== currentHomeId}
             />
           ))}
         </div>
@@ -114,17 +120,23 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   )
 }
 
-function SeasonSeriesCell({ cell, onSelect, cellRef }) {
+function SeasonSeriesCell({ cell, onSelect, cellRef, otherPark }) {
   const dateLabel = monthDayYear(cell.apiDate)
-  const oppLabel = `${cell.isHome ? 'vs' : '@'} ${cell.opponentAbbr}`
+  // Always the host club, regardless of whose page this is — "@ NYM" says
+  // where the game was played, rather than flipping to "vs" on whichever
+  // side happens to be looking, which reads oddly once the shared desktop
+  // spread's single strip crosses into the other park's leg of the series.
+  const oppLabel = `@ ${cell.homeAbbr}`
+  const classNames = [
+    'seasonseries__cell',
+    cell.isCurrent && 'seasonseries__cell--current',
+    otherPark && 'seasonseries__cell--otherpark',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <button
-      ref={cellRef}
-      type="button"
-      className={`seasonseries__cell${cell.isCurrent ? ' seasonseries__cell--current' : ''}`}
-      onClick={onSelect}
-    >
+    <button ref={cellRef} type="button" className={classNames} onClick={onSelect}>
       {cell.final ? (
         <>
           <TeamLogo teamId={cell.winnerId} size={30} className="seasonseries__logo" />
@@ -132,6 +144,9 @@ function SeasonSeriesCell({ cell, onSelect, cellRef }) {
             {cell.winnerScore}
             <span className="seasonseries__sep">–</span>
             {cell.loserScore}
+            {cell.extraInnings && (
+              <span className="seasonseries__innings">({cell.extraInnings})</span>
+            )}
           </span>
         </>
       ) : (

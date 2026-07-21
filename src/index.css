@@ -19352,6 +19352,15 @@ body {
 .seasonseries__cell--current:hover {
   background: color-mix(in srgb, var(--navy) 13%, var(--surface-card));
 }
+/* A cell whose game was hosted at the OTHER team's park than the current
+   game — a light kraft/cream tint, distinct enough to separate a series'
+   legs at a glance without competing with the current-game navy highlight. */
+.seasonseries__cell--otherpark {
+  background: color-mix(in srgb, var(--seal) 7%, var(--surface-card));
+}
+.seasonseries__cell--otherpark:hover {
+  background: color-mix(in srgb, var(--seal) 16%, var(--surface-card));
+}
 .seasonseries__logo {
   flex-shrink: 0;
 }
@@ -19368,6 +19377,12 @@ body {
 .seasonseries__sep {
   color: var(--text-caption);
   font-weight: var(--w-regular);
+}
+.seasonseries__innings {
+  margin-left: 2px;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
 }
 .seasonseries__time {
   font-family: var(--font-mono);

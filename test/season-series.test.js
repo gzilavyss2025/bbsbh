@@ -17,6 +17,23 @@ test('seasonSeriesCells: winner/loser and score ordering for a finished game', (
   assert.equal(cell.loserAbbr, 'NYM')
   assert.equal(cell.isHome, true)
   assert.equal(cell.opponentAbbr, 'NYM')
+  assert.equal(cell.extraInnings, null)
+})
+
+test('seasonSeriesCells: a completed game that ran past 9 flags its inning count', () => {
+  const games = [
+    { gamePk: 5, apiDate: '2026-07-19', gameDate: '2026-07-19T23:10:00Z', gameNumber: 1, awayId: NYM, homeId: MIL, final: true, awayScore: 6, homeScore: 5, innings: 11 },
+  ]
+  const [cell] = seasonSeriesCells(games, MIL, 2)
+  assert.equal(cell.extraInnings, 11)
+})
+
+test('seasonSeriesCells: a regulation 9-inning final has no extra-innings flag', () => {
+  const games = [
+    { gamePk: 6, apiDate: '2026-07-18', gameDate: '2026-07-18T23:10:00Z', gameNumber: 1, awayId: NYM, homeId: MIL, final: true, awayScore: 6, homeScore: 5, innings: 9 },
+  ]
+  const [cell] = seasonSeriesCells(games, MIL, 2)
+  assert.equal(cell.extraInnings, null)
 })
 
 test('seasonSeriesCells: the currently-viewed game never carries a score, even if the feed marks it Final', () => {

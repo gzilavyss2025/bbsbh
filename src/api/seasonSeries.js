@@ -30,6 +30,8 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
       gameDate: g.gameDate,
       tzId: g.tzId,
       gameNumber: g.gameNumber,
+      awayId: g.awayId,
+      homeId: g.homeId,
       isHome,
       isCurrent,
       final,
@@ -41,6 +43,9 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
       winnerScore: winnerId == null ? null : Math.max(g.awayScore, g.homeScore),
       loserAbbr: loserId == null ? null : teamAbbr({ id: loserId }),
       loserScore: winnerId == null ? null : Math.min(g.awayScore, g.homeScore),
+      // Regulation is 9 — a completed game that ran longer gets its inning
+      // count flagged so the strip can show "(10)" etc. next to the score.
+      extraInnings: final && g.innings > 9 ? g.innings : null,
     }
   })
 }
