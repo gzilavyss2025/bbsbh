@@ -43,6 +43,7 @@ import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.j
 import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
+import { SeasonSeriesStrip } from '../components/SeasonSeriesStrip.jsx'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -73,6 +74,7 @@ export function TeamInfo({
   loading,
 }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  const oppMeta = useMemo(() => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'), [feed, side])
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
 
@@ -110,6 +112,14 @@ export function TeamInfo({
       </dl>
 
       <Umpires officials={officials} />
+
+      <SeasonSeriesStrip
+        viewingTeamId={meta.id}
+        opponentId={oppMeta.id}
+        officialDate={info.officialDate}
+        sportId={meta.sportId}
+        currentGamePk={feed?.gamePk}
+      />
 
       <TeamSections
         feed={feed}
@@ -194,6 +204,14 @@ export function LineupSpread({
       </dl>
 
       <Umpires officials={officials} />
+
+      <SeasonSeriesStrip
+        viewingTeamId={awayMeta.id}
+        opponentId={homeMeta.id}
+        officialDate={info.officialDate}
+        sportId={awayMeta.sportId}
+        currentGamePk={feed?.gamePk}
+      />
 
       <div className="teaminfo__duo">
         {['away', 'home'].map((side) => (
@@ -297,7 +315,11 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
       <BallparkFact venue={info.venue} />
-      <Fact label="First pitch" value={info.firstPitch} />
+      {/* Scheduled start (posted the moment the game exists) until the box
+          score's own "First pitch" info line posts once the game's under
+          way — the actual time then overwrites the estimate in place, same
+          cell, rather than adding a second fact. */}
+      <Fact label="First pitch" value={info.firstPitch || info.scheduledTime} />
       <Fact
         label="Weather"
         value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}

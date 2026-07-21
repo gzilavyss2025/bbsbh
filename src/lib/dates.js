@@ -23,6 +23,14 @@ export function monthDay(apiDate) {
   return m ? `${Number(m[1])}/${Number(m[2])}` : ''
 }
 
+// "4/14/26" — compact month/day/2-digit-year, for a context where the season
+// isn't otherwise implied (e.g. a cross-month season-series strip). Same
+// no-Date-round-trip approach as monthDay above.
+export function monthDayYear(apiDate) {
+  const m = /^\d{2}(\d{2})-(\d{2})-(\d{2})/.exec(apiDate ?? '')
+  return m ? `${Number(m[2])}/${Number(m[3])}/${m[1]}` : ''
+}
+
 // "Fri, Jul 5" style label for the slate header.
 export function humanDate(apiDate) {
   const [y, m, d] = apiDate.split('-').map(Number)
