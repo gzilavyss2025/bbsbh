@@ -13,7 +13,7 @@
 // gracefully at MiLB parks with no win-probability feed: the win-probability-
 // dependent signals (walk-off, comeback) just don't fire; margin, hits, extra
 // innings, decisions, and multi-HR all still work from the box score alone.
-import { selectBoxscore, computePlayOfTheGame, positionLabel } from './boxscore.js'
+import { selectBoxscore, computePlayOfTheGame, positionLabel, battingStat } from './boxscore.js'
 // Bill James Game Score (40 + 2*outs + K - 2*H - 4*ER - 2*(R-ER) - BB) —
 // shared with the three-stars/top-performers blend so the "dominant start"
 // signal here and the player rankings can't drift apart.
@@ -114,7 +114,11 @@ export function multiHrSignal(feed) {
     // " — {score}", and two dashes back to back ("Name — 2 HR — score")
     // read like three unrelated fragments instead of one headline.
     text: `${name}: ${hr} HR`,
-    performer: performerFrom(feed, side, p, `${hr} HR`),
+    // The performer card's own stat line is the full box line ("2-4, 2 HR, 5
+    // RBI, 2 R"), not just the HR count that earned the signal — see
+    // battingStat (boxscore.js), the same "hits-for-at-bats" line the printed
+    // box score and PostseasonSeriesPage's per-game ledger already use.
+    performer: performerFrom(feed, side, p, battingStat(p.stats?.batting ?? {})),
   }
 }
 
@@ -182,7 +186,7 @@ export function cycleSignal(feed) {
           tier: TIER.RARE,
           points: 90,
           text: `${p.person?.fullName ?? ''} hit for the cycle`,
-          performer: performerFrom(feed, side, p, 'Cycle'),
+          performer: performerFrom(feed, side, p, battingStat(b)),
         }
       }
     }

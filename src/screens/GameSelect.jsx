@@ -27,6 +27,19 @@ import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
+import { SCENARIO_LABEL, SCENARIO_STYLE } from '../components/GameResultFace.jsx'
+
+// Every filter chip GameSelect's ResultFilterBar can show, in a fixed
+// display order — crown first (the single biggest deal), then the four
+// scenarios in the same order their own pills render on a card (see
+// ResultPills, GameResultFace.jsx). `accent`/`text` mirror SCENARIO_STYLE
+// (the crown's own colors match its existing pill — --award-ink fill,
+// --text-on-ink text, see .flipback__pill--crown) so a chip and the card
+// pill it filters for are always the identical color.
+const FILTER_CHIPS = [
+  { key: 'crown', label: '★ Game of the Night', accent: 'var(--award-ink)', text: 'var(--text-on-ink)' },
+  ...Object.entries(SCENARIO_LABEL).map(([key, label]) => ({ key, label, ...SCENARIO_STYLE[key] })),
+]
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -245,6 +258,56 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
   const cardMetaByGamePk = useDayCardMeta(finals, dateStr, sportId, revealedAll)
 
+  // The slate's actual render order: `sorted` (soonest → latest, favorite
+  // pinned first) with the crowned "Game of the Night" game promoted to the
+  // 2nd slot, right after the favorite team's own game — a no-op until
+  // cardMetaByGamePk is populated (see reorderGameOfTheNight), so this can't
+  // leak which game is crowned ahead of the reveal-all gate above.
+  const gamesForDisplay = useMemo(
+    () => reorderGameOfTheNight(sorted, cardMetaByGamePk),
+    [sorted, cardMetaByGamePk],
+  )
+
+  // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
+  // above) the user has toggled on. Reset on a new day/level, same as
+  // revealedAll above, so a stale filter never silently hides next slate's
+  // cards.
+  const [activeFilters, setActiveFilters] = useState(new Set())
+  useEffect(() => setActiveFilters(new Set()), [dateStr, sportId])
+  const toggleFilter = (key) =>
+    setActiveFilters((prev) => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  // Only offer a chip for a category that actually occurs somewhere in
+  // today's finals — an empty chip would just be a dead button. Empty until
+  // cardMetaByGamePk is populated, same reveal-all gate as everything else
+  // classification-derived on this page.
+  const availableFilters = useMemo(() => {
+    const present = new Set()
+    for (const meta of cardMetaByGamePk.values()) {
+      if (meta.isGameOfTheNight) present.add('crown')
+      if (meta.scenario) present.add(meta.scenario)
+    }
+    return FILTER_CHIPS.filter((c) => present.has(c.key))
+  }, [cardMetaByGamePk])
+  // With no filter selected, every card shows (gamesForDisplay unchanged). A
+  // selection shows the UNION of matching games — multi-select is "any of
+  // these", not "all of these" — and everything else drops out, so the
+  // selected categories are literally all that's left on screen.
+  const visibleGames = useMemo(() => {
+    if (activeFilters.size === 0) return gamesForDisplay
+    return gamesForDisplay.filter((g) => {
+      const meta = cardMetaByGamePk.get(g.gamePk)
+      if (!meta) return false
+      return (
+        (activeFilters.has('crown') && meta.isGameOfTheNight) ||
+        (meta.scenario && activeFilters.has(meta.scenario))
+      )
+    })
+  }, [gamesForDisplay, activeFilters, cardMetaByGamePk])
+
   // Whether the live Top Performers box has anything to show — mutually
   // exclusive with a past day's finals (finals.length > 0): a day either
   // hasn't gone final yet (this) or already has (that), never both.
@@ -381,6 +444,10 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
+      {availableFilters.length > 0 && (
+        <ResultFilterBar chips={availableFilters} active={activeFilters} onToggle={toggleFilter} />
+      )}
+
       <div className={showTopPerformers ? 'slate-body' : undefined}>
         {/* The live day's sealed Top Performers box — full width above the game
             grid (.slate-body stacks it first at every width; see index.css).
@@ -402,7 +469,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                 <DerbyCard />
               </li>
             )}
-            {sorted.map((g) => {
+            {visibleGames.map((g) => {
               const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
                 ? favoriteTeamId
                 : null
@@ -496,6 +563,36 @@ function RevealAllBar({ onReveal }) {
   )
 }
 
+// The revealed day's category filter — one chip per "storyline" (see
+// FILTER_CHIPS above) that actually occurs somewhere on today's slate.
+// Toggling a chip filters the grid below to the UNION of every selected
+// category (multi-select is "any of these") and lifts the matching games to
+// the only ones left on screen; toggling every chip back off shows the
+// whole slate again. Only ever rendered once `availableFilters` is non-empty
+// — itself gated on cardMetaByGamePk, so this can't appear (or leak which
+// categories exist) before the slate's reveal-all.
+function ResultFilterBar({ chips, active, onToggle }) {
+  return (
+    <div className="slate-filterbar" role="group" aria-label="Filter by result">
+      {chips.map((c) => {
+        const isActive = active.has(c.key)
+        return (
+          <button
+            key={c.key}
+            type="button"
+            className={`slate-filterbar__chip ${isActive ? 'slate-filterbar__chip--active' : ''}`}
+            style={{ '--chip-accent': c.accent, '--chip-text': c.text }}
+            aria-pressed={isActive}
+            onClick={() => onToggle(c.key)}
+          >
+            {c.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 // Turns fetchAllStarInfo's two season dates into "is this empty day part of
 // the break, and is it Derby night specifically" for the given slate date.
 // The All-Star Game's own date is deliberately EXCLUDED (dateStr < resumeDate
@@ -543,4 +640,22 @@ function sortGames(games, favoriteTeamId, favoriteAffiliateIds) {
     if (pa !== pb) return pa - pb
     return new Date(a.gameDate) - new Date(b.gameDate)
   })
+}
+
+// Promotes the crowned "Game of the Night" (dayHighlights.js's
+// classifyGameCards, via useDayCardMeta) to the slate's 2nd slot, right after
+// the favorite team's own game (already sorted first by sortGames above) —
+// once it's actually known. `cardMetaByGamePk` is an empty Map until the
+// day's reveal-all fires, so this is a no-op before then: nothing here can
+// promote a game ahead of time based on which one WILL turn out to be
+// crowned. A crowned game that's already 1st (it IS the favorite's own game)
+// or already 2nd is left alone — nothing to move.
+function reorderGameOfTheNight(games, cardMetaByGamePk) {
+  if (cardMetaByGamePk.size === 0) return games
+  const crownedIdx = games.findIndex((g) => cardMetaByGamePk.get(g.gamePk)?.isGameOfTheNight)
+  if (crownedIdx <= 1) return games
+  const next = [...games]
+  const [crowned] = next.splice(crownedIdx, 1)
+  next.splice(1, 0, crowned)
+  return next
 }

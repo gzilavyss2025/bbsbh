@@ -11,11 +11,37 @@ import { PerformerCard } from './PerformerCard.jsx'
 // Pill category label + a plain, ungated "this is a fact about the card"
 // treatment for every scenario except the crown (which alone gets the
 // filled amber "big deal" chrome — see .flipback__pill--crown in index.css).
-const SCENARIO_LABEL = {
+// Exported: GameSelect.jsx's slate-wide filter bar (ResultFilterBar) reuses
+// these SAME labels/colors for its filter chips, so a chip and the card pill
+// it filters for always read as the identical color/word.
+export const SCENARIO_LABEL = {
   dominant: 'Dominant Performance',
   blowout: 'Blowout',
   close: 'Close Game',
   extras: 'Extra Innings',
+}
+
+// Each scenario's own accent color, reused BOTH as the whole card's border
+// tint (see cardAccent below + .flipback--accent in index.css) and as its own
+// pill's fill (see ResultPills' .flipback__pill--scenario) — an existing
+// design-system token per scenario rather than a new hue, so the card
+// palette stays inside the app's established set:
+//   dominant → --field  (the app's own "positive" green)
+//   blowout  → --clay   (the app's own "alert/lopsided" red)
+//   close    → --marker (the "watch this" highlighter yellow)
+//   extras   → --allstar-blue (a distinct, unusual-occasion blue)
+// `text` is the ONE piece that can't just follow the same accent: filling a
+// pill solid with --marker and setting its own text to --marker too would be
+// invisible, and the WCAG-AA-legible foreground for a saturated dark fill
+// (field/clay/allstar-blue) is the opposite of what a light, bright fill
+// (marker) needs — see the contrast math this was checked against in the PR.
+// The crown itself outranks all four for the card border — see cardAccent's
+// priority order — but keeps its own existing amber pill treatment untouched.
+export const SCENARIO_STYLE = {
+  dominant: { accent: 'var(--field)', text: 'var(--text-on-ink)' },
+  blowout: { accent: 'var(--clay)', text: 'var(--text-on-ink)' },
+  close: { accent: 'var(--marker)', text: 'var(--text-heading)' },
+  extras: { accent: 'var(--allstar-blue)', text: 'var(--text-on-ink)' },
 }
 
 // The flip card's back face: what a past, Final game's card turns into once
@@ -52,6 +78,37 @@ export function GameResultFace({
   const wentToExtras = totalInnings > 9
 
   const { scenario, playChoice, performer, isGameOfTheNight } = cardMeta ?? {}
+  // The pinned favorite's game no longer gets its own "Your Team · Won/Lost"
+  // text pill — the final score is already sitting right there in the line
+  // score below it, so the pill was just repeating it. Instead the whole card
+  // picks up the SAME accent tint the pregame slate card wears for a pinned
+  // team (--pin-accent, gradient + border — see .gamecard--pinned in
+  // index.css): a background gradient that reads as "this is your team" at a
+  // glance, independent of whichever pill(s) also apply.
+  const isPinnedGame = pinnedTeamId === box.away.id || pinnedTeamId === box.home.id
+  // The card's BORDER, separately, goes to whichever single signal is the
+  // biggest deal: the night's crowned game first (medal-amber, same accent
+  // Award History/timeline chips use), THEN the favorite team's own game
+  // (--pin-accent) — your team's game outranks a mere scenario tag — and
+  // only once neither of those applies does this card's own scenario color
+  // (SCENARIO_STYLE above) get to set the border.
+  const cardAccent = isGameOfTheNight
+    ? 'var(--award-line)'
+    : isPinnedGame
+      ? 'var(--pin-accent, var(--field))'
+      : scenario
+        ? SCENARIO_STYLE[scenario]?.accent
+        : null
+  const cardStyle = {}
+  if (isPinnedGame) cardStyle['--pin-accent'] = favoriteAccentColor(pinnedTeamId)
+  if (cardAccent) cardStyle['--card-accent'] = cardAccent
+  const cardClassName = [
+    'flipback',
+    isPinnedGame && 'flipback--pinned',
+    cardAccent && 'flipback--accent',
+  ]
+    .filter(Boolean)
+    .join(' ')
   // A performer card replaces the default Play of the Game block only for a
   // Dominant Performance, or a Blowout/Extra-Innings card whose deterministic
   // playChoice landed on the performer variant — and only when a performer
@@ -71,21 +128,22 @@ export function GameResultFace({
     !!isGameOfTheNight && !showPerformerInstead && !!performer && performer.id !== potg?.batterId
 
   return (
-    <div className="flipback">
-      <ResultPills game={game} pinnedTeamId={pinnedTeamId} box={box} cardMeta={cardMeta} />
-      <button
-        type="button"
-        className="btn flipback__boxbtn"
-        onClick={() => navigate(boxScorePath)}
-      >
-        Box score
-      </button>
+    <div className={cardClassName} style={Object.keys(cardStyle).length ? cardStyle : undefined}>
+      <div className="flipback__topRow">
+        <button
+          type="button"
+          className="btn flipback__boxbtn"
+          onClick={() => navigate(boxScorePath)}
+        >
+          Box score
+        </button>
+        <ResultPills game={game} cardMeta={cardMeta} />
+      </div>
       <div className="flipback__linescore">
-        {wentToExtras && (
-          <div className="flipback__extras">{totalInnings} innings</div>
-        )}
         <div className="flipback__lsHeader" aria-hidden="true">
-          <span className="flipback__lsTeamCol" />
+          <span className="flipback__lsTeamCol">
+            {wentToExtras && `${totalInnings} innings`}
+          </span>
           <span className="flipback__lsCol">R</span>
           <span className="flipback__lsCol">H</span>
           <span className="flipback__lsCol">E</span>
@@ -110,39 +168,38 @@ export function GameResultFace({
   )
 }
 
-// The pills row: at most one "formatting scenario" pill (the crown always
-// wins visually — amber fill — with the underlying category pill still
-// shown alongside it, per product decision) plus the two independent
-// modifiers (doubleheader, favorite team), in that fixed order. Renders
-// nothing at all for a quiet game with no scenario/modifiers — same
-// graceful-omission convention as the rest of this component.
-function ResultPills({ game, pinnedTeamId, box, cardMeta }) {
+// The pills row: at most one "formatting scenario" pill — filled solid in
+// its OWN scenario color (SCENARIO_STYLE), same hue the card's border picks
+// up when nothing outranks it, so the two visibly match even on a card where
+// something else (the crown, or the favorite team) won the border instead —
+// plus the crown pill (amber fill, unaffected by the above) and the
+// doubleheader modifier. The favorite team's game no longer gets its own
+// pill here — see isPinnedGame/cardAccent above, which tint the whole card
+// instead. Renders nothing at all for a quiet game with no scenario/
+// doubleheader — same graceful-omission convention as the rest of this
+// component.
+function ResultPills({ game, cardMeta }) {
   const { scenario, isGameOfTheNight } = cardMeta ?? {}
   const dhLabel = game ? doubleHeaderLabel(game) : null
-  const pinnedSide = pinnedTeamId === box.away.id ? 'away' : pinnedTeamId === box.home.id ? 'home' : null
-  const pinnedResult =
-    pinnedSide == null
-      ? null
-      : box.home.line.r === box.away.line.r
-        ? 'Your Team'
-        : box[pinnedSide].line.r > box[pinnedSide === 'away' ? 'home' : 'away'].line.r
-          ? 'Your Team · Won'
-          : 'Your Team · Lost'
+  const scenarioStyle = scenario ? SCENARIO_STYLE[scenario] : null
 
-  if (!isGameOfTheNight && !scenario && !dhLabel && !pinnedResult) return null
+  if (!isGameOfTheNight && !scenario && !dhLabel) return null
   return (
     <div className="flipback__pills">
-      {isGameOfTheNight && <span className="flipback__pill flipback__pill--crown">★ Game of the Night</span>}
-      {scenario && <span className="flipback__pill flipback__pill--tag">{SCENARIO_LABEL[scenario]}</span>}
-      {dhLabel && <span className="flipback__pill flipback__pill--tag">{dhLabel}</span>}
-      {pinnedResult && (
-        <span
-          className="flipback__pill flipback__pill--team"
-          style={{ '--pin-accent': favoriteAccentColor(pinnedTeamId) }}
-        >
-          {pinnedResult}
+      {isGameOfTheNight && (
+        <span className="flipback__pill flipback__pill--crown">
+          <span className="flipback__pill-star" aria-hidden="true">★</span> Game of the Night
         </span>
       )}
+      {scenarioStyle && (
+        <span
+          className="flipback__pill flipback__pill--scenario"
+          style={{ '--pill-accent': scenarioStyle.accent, '--pill-text': scenarioStyle.text }}
+        >
+          {SCENARIO_LABEL[scenario]}
+        </span>
+      )}
+      {dhLabel && <span className="flipback__pill flipback__pill--tag">{dhLabel}</span>}
     </div>
   )
 }
@@ -257,18 +314,21 @@ function linkifyNames(text, mentions) {
 // label carries the half+inning ("Top 8th") after a centered dot; the
 // description ends with the bolded score, leading team first.
 function PlayOfTheGame({ potg, box }) {
-  const { desc, batterId, batterName, batterTeamId, inning, half, runners } = potg
-  const mentions = [{ id: batterId, name: batterName }, ...(runners ?? [])]
+  const { desc, batterId, batterName, batterTeamId, batterPos, inning, half, runners, fielders } = potg
+  const mentions = [{ id: batterId, name: batterName }, ...(runners ?? []), ...(fielders ?? [])]
   const inningLabel = inning != null ? `${half === 'top' ? 'Top' : 'Bottom'} ${ordinal(inning)}` : null
   const score = scoreLine(box, potg)
   return (
     <div className="flipback__potgWrap">
-      <Headshot
-        personId={batterId}
-        name={batterName}
-        teamId={batterTeamId}
-        className="flipback__potgShot"
-      />
+      <span className="flipback__potgShotwrap">
+        <Headshot
+          personId={batterId}
+          name={batterName}
+          teamId={batterTeamId}
+          className="flipback__potgShot"
+        />
+        {batterPos && <span className="playercard__posbadge">{batterPos}</span>}
+      </span>
       <div className="flipback__potgMain">
         <span className="flipback__potgLabel">
           Play of the game

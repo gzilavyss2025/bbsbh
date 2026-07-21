@@ -8977,6 +8977,48 @@ body {
      needed at phone width. */
 }
 
+/* The revealed slate's category filter (ResultFilterBar, GameSelect.jsx) —
+   one toggle chip per storyline that occurs somewhere today. Unselected: a
+   light tint of the chip's OWN accent color (--chip-accent) behind a colored
+   border, but ALWAYS dark heading-ink text — the raw accent itself isn't a
+   safe text color at every one of these hues (--marker, in particular, fails
+   WCAG AA as text on the page) so text never carries the accent directly,
+   only the background tint + border do. Selected: filled solid, the exact
+   same accent/text pairing the matching card's own pill uses (see
+   .flipback__pill--scenario/--crown, already contrast-checked) — a chip and
+   the cards it's currently filtering to read as one color. */
+.slate-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.slate-filterbar__chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
+  color: var(--text-heading);
+  border: var(--bw-rule) solid var(--chip-accent);
+}
+.slate-filterbar__chip--active {
+  background: var(--chip-accent);
+  color: var(--chip-text);
+}
+.slate-filterbar__chip:active {
+  transform: translateY(1px);
+}
+.slate-filterbar__chip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 .flipcard {
   perspective: 1400px;
 }
@@ -9047,13 +9089,48 @@ body {
   color: var(--text-body);
   box-shadow: var(--shadow-card);
 }
+/* The card-level accent tint (GameResultFace.jsx's cardAccent/isPinnedGame):
+   two independent channels, since a card can carry both at once (your team's
+   own Blowout win, say) —
+   • .flipback--accent tints the BORDER to whichever single signal is the
+     biggest deal (crown > scenario > pinned-team, see cardAccent) via
+     --card-accent, same color-mix recipe .gamecard--pinned uses pregame.
+   • .flipback--pinned tints the BACKGROUND to the pinned team's own accent
+     (--pin-accent) regardless of which signal won the border — the same
+     gradient the slate's pregame card wears for a pinned team, so "this is
+     your team's game" reads the same before and after the reveal. */
+.flipback--accent {
+  /* Heavier (2px, --bw-heavy) AND a stronger mix (70%, vs. the pregame
+     pinned card's subtler 45%) than the hairline default — this is the one
+     border on the slate meant to read as "a different color," not just a
+     faintly warmer hairline, so both channels move together. */
+  border-width: var(--bw-heavy);
+  border-color: color-mix(in srgb, var(--card-accent) 70%, var(--border-rule));
+}
+.flipback--pinned {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+/* Box score button + pill row share one line — the button leads, the pill(s)
+   (ResultPills, GameResultFace.jsx) trail after it and wrap onto their own
+   line first if the card gets too narrow for both. */
+.flipback__topRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 /* The pill-badge row (ResultPills, GameResultFace.jsx) — at most one crowned
    "Game of the Night" pill (amber fill, same medal-amber the app already uses
-   for award chips) alongside its own category pill, plus the doubleheader/
-   favorite-team modifiers. Same idiom as .prospectpill/.gamecard__dh — a
-   quiet outline chip by default; only the crown and the favorite-team pill
-   get a filled treatment, since those two are the ones actually worth a
-   reader's first glance. */
+   for award chips) alongside its own scenario pill (filled in that
+   scenario's own accent — see .flipback__pill--scenario below), plus the
+   doubleheader modifier (the one pill still left as a quiet outline chip,
+   same idiom as .prospectpill/.gamecard__dh — a doubleheader label isn't
+   tied to any accent color). The favorite team's game is called out by the
+   whole card's tint instead — see .flipback--pinned. */
 .flipback__pills {
   display: flex;
   flex-wrap: wrap;
@@ -9080,17 +9157,43 @@ body {
   background: var(--award-ink);
   color: var(--text-on-ink);
 }
-.flipback__pill--team {
-  background: var(--pin-accent, var(--field));
-  color: var(--text-on-ink);
+/* The ★ glyph's own em-box doesn't sit centered against the label's caps at
+   this caption size — nudged onto the same visual center as the label
+   instead of floating off it. */
+.flipback__pill-star {
+  display: inline-block;
+  transform: translateY(0.5px);
+}
+/* The scenario pill (Dominant Performance/Blowout/Close Game/Extra Innings) —
+   filled solid in --pill-accent, the SAME token GameResultFace's cardAccent
+   hands the card's own border when this scenario wins that race, so the pill
+   and the border read as one color family even when something else (the
+   crown, the favorite team) outranks this scenario for the border. --pill-
+   text is per-scenario (see SCENARIO_STYLE, GameResultFace.jsx) rather than
+   always the same one: --field/--clay/--allstar-blue are dark/saturated
+   enough for light on-ink text, but --marker (Close Game) is a bright
+   highlighter yellow — reversed, dark ink text is what actually holds
+   WCAG AA against IT specifically. */
+.flipback__pill--scenario {
+  background: var(--pill-accent);
+  color: var(--pill-text);
+  border: var(--bw-hair) solid var(--pill-accent);
 }
 /* The Game of the Night's conditional second beat, and the Dominant
    Performance / Blowout / Extra-Innings performer-card variant — a
    PerformerCard sitting where (or beneath where) the plain-text Play of the
    Game block would otherwise go, same list wrapper the slate rail/box score
-   Insights card use around it. */
+   Insights card use around it. Borderless here specifically: the OUTER
+   .flipback card already carries the card-level accent border above, so the
+   nested .playercard tile drops its own border/background/padding rather
+   than doubling up into a card-within-a-card. */
 .flipback__perfcard {
   margin: 0;
+}
+.flipback__perfcard .playercard {
+  border: none;
+  background: none;
+  padding: 0;
 }
 /* Line score: a header row (R/H/E labels, once) above two team rows — team
    name flexes to fill the leading column, the three stat columns are fixed-
@@ -9101,19 +9204,6 @@ body {
   flex-direction: column;
   gap: 4px;
 }
-/* "11 INNINGS" — only shown when the game actually went past 9, sitting above
-   the logo/team-name + R-H-E rows it introduces. Same font/size as the R-H-E
-   VALUES below (not the small column-header labels) so it reads as another
-   headline number, not a caption. */
-.flipback__extras {
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  padding-bottom: 2px;
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-}
 .flipback__lsHeader,
 .flipback__team {
   display: grid;
@@ -9121,9 +9211,16 @@ body {
   align-items: center;
   column-gap: 8px;
 }
+/* Doubles as the "N innings" note on an extra-innings card (GameResultFace.jsx
+   only fills it in then) — same font/weight/color as the R/H/E labels beside
+   it (.flipback__lsCol) so the two read as one header row, just left- rather
+   than center-aligned to sit over the team names below it. */
 .flipback__lsTeamCol {
-  /* Empty — just holds the header row's leading column in alignment with the
-     team logo + name below it. */
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .flipback__lsCol {
   text-align: center;
@@ -9181,8 +9278,16 @@ body {
   gap: 10px;
   padding-top: 4px;
 }
-.shot.flipback__potgShot {
+/* Headshot + its position badge, same wrapper idiom as
+   .playercard__shotwrap/__posbadge (PerformerCard.jsx) — every headshot on
+   the slate carries the same nested position tag. */
+.flipback__potgShotwrap {
+  position: relative;
+  display: block;
   flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.flipback__potgShot {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
   border-radius: var(--radius-sm);
@@ -9222,20 +9327,15 @@ body {
 #root .flipback__potg .plink {
   text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
 }
-/* Compact, left-aligned above the logos/team names (left edge lines up with
-   them for free — both are direct children of the same padded .flipback
-   column) rather than the old full-width band pinned to the card's bottom.
-   Padding trimmed to a caption-sized pill (font/size match .flipback__lsCol's
-   R/H/E header) so it reads as scaled to that row, not a full-size button
-   that happens to be short. Negative margin-bottom pulls it in past the
-   column's own gap, right down against the R/H/E row it sits over, so the
-   card doesn't carry a second, looser gap on top of the first. */
+/* Sits in .flipback__topRow next to the pill row (see above), left-aligned
+   above the logos/team names rather than the old full-width band pinned to
+   the card's bottom. Padding trimmed to a caption-sized pill (font/size match
+   .flipback__lsCol's R/H/E header) so it reads as scaled to that row, not a
+   full-size button that happens to be short. */
 .flipback__boxbtn {
-  align-self: flex-start;
   width: auto;
   min-height: 0;
   padding: 4px 10px;
-  margin-bottom: -7px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -10124,6 +10224,21 @@ body {
   }
   .topperfbox .playercard__stat {
     font-size: var(--fs-small);
+  }
+
+  /* The result card's own Dominant Performance/Blowout/Extra-Innings
+     performer tile (.flipback__perfcard) has the same room problem as the
+     Top Performers rail above: it sits inside a full slate card, not the
+     narrow two-up grid the two-line stack was built for, so a stacked
+     "Jackson<br>Merrill" just wastes a line for no reason at this width.
+     Same override, same reasoning. */
+  .flipback__perfcard .playercard__name {
+    flex-direction: row;
+    align-items: baseline;
+    font-size: var(--fs-body);
+  }
+  .flipback__perfcard .playercard__namebreak {
+    display: none;
   }
 
   /* ---- slate footer: the action grid stays compact rather than stretching
@@ -15684,11 +15799,6 @@ body {
    the ledger's line-score subordinate to the banner above. */
 .psseries__facewrap .flipback__abbr {
   font-size: var(--fs-title-sm);
-}
-/* Same demotion for the "10 INNINGS" extras marker — a headline on the slate
-   card, a margin note in a ledger of five-plus games. */
-.psseries__facewrap .flipback__extras {
-  font-size: var(--fs-num-md);
 }
 /* One navy band per entry (the slate card's BOX SCORE button) would fight the
    pennant band above five to seven times over — quiet it to a compact

@@ -623,6 +623,18 @@ export function computePlayOfTheGame(winProb, feed) {
         const gd = feed?.gameData?.players?.[`ID${id}`] ?? r.details.runner
         return { id, name: firstLast(gd) }
       }),
+    // Every fielder the description names ("...ground ball to third baseman
+    // Colt Keith", "...grounds into a double play, shortstop X to second
+    // baseman Y to first baseman Z") — collected from ALL of this play's
+    // runner legs, not just the batter's own, since a double play's credits
+    // are split across legs. `credits[].player` only carries an id (no
+    // name), same firstLast identity lookup as the batter/runners above.
+    fielders: (best.runners ?? [])
+      .flatMap((r) => r.credits ?? [])
+      .map((c) => c.player?.id)
+      .filter(Boolean)
+      .map((id) => ({ id, name: firstLast(feed?.gameData?.players?.[`ID${id}`] ?? {}) }))
+      .filter((f) => f.name),
   }
 }
 
