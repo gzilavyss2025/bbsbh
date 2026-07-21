@@ -137,7 +137,7 @@ function SeasonSeriesCell({ cell, onSelect, cellRef, otherPark }) {
 
   return (
     <button ref={cellRef} type="button" className={classNames} onClick={onSelect}>
-      {cell.final ? (
+      {cell.final && cell.hasScore ? (
         <>
           <TeamLogo teamId={cell.winnerId} size={30} className="seasonseries__logo" />
           <span className="seasonseries__score">
@@ -149,6 +149,11 @@ function SeasonSeriesCell({ cell, onSelect, cellRef, otherPark }) {
             )}
           </span>
         </>
+      ) : cell.final ? (
+        // A completed game with no decisive score to show (a suspended/curfew
+        // tie, or the feed hasn't posted both sides' runs) — a plain label
+        // rather than a blank logo + score.
+        <span className="seasonseries__time">Final</span>
       ) : (
         <GameTime gameDate={cell.gameDate} tzId={cell.tzId} />
       )}

@@ -35,6 +35,12 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
       isHome,
       isCurrent,
       final,
+      // A completed game can still lack a decisive score — a suspended/curfew
+      // tie, or a feed that hasn't posted both sides' runs yet. Keyed on
+      // `winnerId` (not just both scores being present) so a genuine tie also
+      // reports false — distinct from `final` so the strip can render a plain
+      // "Final" label instead of a blank logo + score when there's no winner.
+      hasScore: winnerId != null,
       awayAbbr: teamAbbr({ id: g.awayId }),
       homeAbbr: teamAbbr({ id: g.homeId }),
       opponentAbbr: teamAbbr({ id: opponentId }),

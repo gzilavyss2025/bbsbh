@@ -68,4 +68,17 @@ test('seasonSeriesCells: degrades to no winner on a tied/incomplete score pair',
   assert.equal(cell.winnerId, null)
   assert.equal(cell.winnerScore, null)
   assert.equal(cell.loserAbbr, null)
+  assert.equal(cell.hasScore, false)
+})
+
+test('seasonSeriesCells: a genuine tie (equal scores) is final with no winner, flagged hasScore false', () => {
+  const games = [
+    { gamePk: 7, apiDate: '2026-05-15', gameDate: '2026-05-15T23:10:00Z', gameNumber: 1, awayId: NYM, homeId: MIL, final: true, awayScore: 4, homeScore: 4 },
+  ]
+  const [cell] = seasonSeriesCells(games, MIL, 2)
+  assert.equal(cell.final, true)
+  assert.equal(cell.hasScore, false)
+  assert.equal(cell.winnerId, null)
+  assert.equal(cell.winnerScore, null)
+  assert.equal(cell.loserAbbr, null)
 })
