@@ -15,8 +15,6 @@
 import {
   solveOptimalLineup,
   valueLineup,
-  unfamiliarPenalty,
-  ELIG_FLOOR,
   SLOTS,
 } from '../lib/lineupSolver.js'
 import { TIER_LABELS } from '../lib/statTiers.js'
@@ -124,15 +122,15 @@ function resolveMissingStarter(data, id, slot) {
       id: key,
       rpg: known.rpg ?? 0,
       fldRpg: known.fldRpg ?? 0,
-      elig: known.elig ?? { [slot]: 1, DH: 1 },
+      positions: known.positions ?? [slot, 'DH'],
       primaryPos: known.primaryPos ?? slot,
     }
   }
   const rpg = rpgFromWar(data?.warFallback?.wrc?.[key], data?.warFallback?.pa?.[key], data?.constants)
   if (rpg != null) {
-    return { id: key, rpg, fldRpg: 0, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, resolved: 'war' }
+    return { id: key, rpg, fldRpg: 0, positions: [slot, 'DH'], primaryPos: slot, resolved: 'war' }
   }
-  return { id: key, rpg: 0, fldRpg: 0, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, unknown: true }
+  return { id: key, rpg: 0, fldRpg: 0, positions: [slot, 'DH'], primaryPos: slot, unknown: true }
 }
 
 // Turn the values-file player map for one club (plus any actual starters missing
@@ -146,7 +144,7 @@ function candidatePool(data, teamId, actual) {
       id,
       rpg: p.rpg ?? 0,
       fldRpg: p.fldRpg ?? 0,
-      elig: p.elig ?? {},
+      positions: p.positions ?? [],
       primaryPos: p.primaryPos,
     })
     seen.add(String(id))
@@ -172,6 +170,24 @@ function tierForScore(score) {
   return 'below'
 }
 
+// A catcher posted anywhere but behind the plate is being RESTED from catching —
+// the single most common reason a starting catcher appears at DH. No club catches
+// one man 162 times, so proposing to put him back there is second-guessing
+// workload management the model cannot see, and it is wrong nearly every time it
+// fires. We therefore forbid the proposal outright rather than deduct for it.
+// Safe by construction: someone else is already posted at C, so the solve stays
+// feasible. See docs/lineup-strength.md ("What the model deliberately won't say").
+function catcherRestForbids(pool, actual) {
+  const byId = new Map(pool.map((p) => [String(p.id), p]))
+  const forbid = new Map()
+  for (const { id, slot } of actual) {
+    if (slot === 'C') continue
+    if (byId.get(String(id))?.primaryPos !== 'C') continue
+    forbid.set(String(id), new Set(['C']))
+  }
+  return forbid
+}
+
 // Grade one club's posted lineup. actualLineup: [{personId, position}] (nine
 // entries; position as the boxscore reports it). Returns { score, tier, gapRpg,
 // optimal, actual, ungraded, relaxed } or null when the pool can't be solved.
@@ -179,7 +195,12 @@ export function gradeLineup(data, teamId, actualLineup) {
   const actual = normalizeActual(actualLineup)
   if (!data || actual.length === 0) return null
   const pool = candidatePool(data, teamId, actual)
-  const optimal = solveOptimalLineup(pool)
+  // Settle value ties toward the manager's own arrangement: with no familiarity
+  // term, shuffling the same eight fielders is value-neutral, and an "optimal"
+  // that reshuffles them for nothing would produce receipt rows claiming a
+  // change worth zero. See PREFER_EPSILON in lineupSolver.js.
+  const prefer = new Map(actual.map(({ id, slot }) => [String(id), slot]))
+  const optimal = solveOptimalLineup(pool, { prefer, forbid: catcherRestForbids(pool, actual) })
   if (!optimal) return null
   const actualValued = valueLineup(pool, actual)
 
@@ -216,56 +237,107 @@ export function gradeLineup(data, teamId, actualLineup) {
   }
 }
 
-// Itemized "receipt" explaining the gap, biggest deltas first, capped at five:
-//  - bench: a slot where the optimal player differs from the posted one
-//    { kind:'bench', inId, outId, slot, deltaRpg } (runs/game the swap recovers)
-//  - oop: a posted player at a slot he's < 0.7 familiar with
-//    { kind:'oop', id, slot, weight, deltaRpg } (his unfamiliarity penalty there)
-// Items under 0.02 runs/game are dropped as noise.
+// Itemized "receipt" explaining the gap, biggest first, capped at five.
+//
+// The difference between the optimal and posted lineups is a permutation with
+// entries and exits, and it decomposes exactly into two shapes:
+//
+//   PATH  - starts at a slot whose optimal occupant is NOT in the posted lineup,
+//           then follows each displaced man to where the optimum would rather
+//           have him, until it reaches a posted starter the optimum has no place
+//           for. Net effect: one player in, one out, everyone between shifted.
+//           A plain one-for-one substitution is just a path of length 1.
+//   CYCLE - every slot's occupant is already in the lineup, so nobody enters or
+//           leaves; the same nine are arranged differently.
+//
+// Grouping matters for correctness, not only for wording. Reporting slot by slot
+// used to split one rotation into several rows that each read as a benching, and
+// the noise floor then dropped any leg whose delta was NEGATIVE — an optimum
+// routinely accepts a loss at one slot to gain more at another. The surviving leg
+// stood alone and overstated its own finding: Milwaukee's C/DH rotation showed
+// -1.2 grade points against a true cost of -0.7, and the card's rows summed to
+// 3.3 points against a 2.8-point gap. Grouping first, then applying the floor to
+// the GROUP, restores the property the receipt claims: the rows account for the
+// score.
+//
+// Emits one item per group:
+//   { kind:'sub'|'chain'|'shuffle', inId, outId, slot, shiftSlots, deltaRpg }
+// where `sub` is a length-1 path, `chain` a longer one, and `shuffle` a cycle.
+// Groups under 0.02 runs/game are dropped as noise.
 export function receiptFor(data, teamId, actualLineup) {
   const grade = gradeLineup(data, teamId, actualLineup)
   if (!grade) return []
-  const pool = candidatePool(data, teamId, normalizeActual(actualLineup))
-  const byId = new Map(pool.map((p) => [String(p.id), p]))
-  const optBySlot = new Map(grade.optimal.assignments.map((a) => [a.slot, a]))
-  const actBySlot = new Map(grade.actual.perSlot.map((a) => [a.slot, a]))
-  // Slots excluded from the gap (unvalued posted starter) earn no receipt line —
-  // we make no claim about a spot we couldn't grade.
-  const ungradedSlots = new Set((grade.ungraded ?? []).map((u) => u.slot))
-  const items = []
-  const benchSlots = new Set()
+  const opt = new Map(grade.optimal.assignments.map((a) => [a.slot, String(a.id)]))
+  const act = new Map(grade.actual.perSlot.map((a) => [a.slot, String(a.id)]))
+  const optValue = new Map(grade.optimal.assignments.map((a) => [a.slot, a.value]))
+  const actValue = new Map(grade.actual.perSlot.map((a) => [a.slot, a.value]))
+  const optSlotOf = new Map([...opt].map(([slot, id]) => [id, slot]))
+  const inPosted = new Set(act.values())
 
-  // (a) Per-slot personnel swaps. The per-slot value delta between the optimal
-  // and posted assignment decomposes the total gap exactly, so this is the gap's
-  // honest line-item breakdown.
-  for (const slot of SLOTS) {
-    if (ungradedSlots.has(slot)) continue
-    const opt = optBySlot.get(slot)
-    const act = actBySlot.get(slot)
-    if (!opt || !act) continue
-    if (String(opt.id) === String(act.id)) continue
-    const deltaRpg = opt.value - act.value
-    if (deltaRpg < 0.02) continue
-    items.push({ kind: 'bench', inId: String(opt.id), outId: String(act.id), slot, deltaRpg })
-    benchSlots.add(slot)
+  // Slots excluded from the gap (unvalued posted starter) earn no receipt line —
+  // we make no claim about a spot we couldn't grade — so they also break a chain
+  // rather than being walked through.
+  const ungradedSlots = new Set((grade.ungraded ?? []).map((u) => u.slot))
+  const differing = new Set(
+    SLOTS.filter((s) => !ungradedSlots.has(s) && opt.has(s) && act.has(s) && opt.get(s) !== act.get(s)),
+  )
+
+  const seen = new Set()
+  const walk = (start) => {
+    const slots = []
+    let cur = start
+    while (cur && differing.has(cur) && !seen.has(cur)) {
+      seen.add(cur)
+      slots.push(cur)
+      cur = optSlotOf.get(act.get(cur)) // where the man he displaced would go
+    }
+    return slots
   }
 
-  // (b) Out-of-position posted starters (familiarity < 0.7). Skip any slot that
-  // already has a bench swap above: the swap's value delta ALREADY prices in the
-  // posted starter's unfamiliarity there, so a separate out-of-position line for
-  // the same slot double-reports it (and reads as a duplicate row in the table).
-  // Only a slot whose posted starter is the OPTIMAL choice but still unfamiliar
-  // (no swap) earns its own out-of-position line.
-  for (const { id, slot } of normalizeActual(actualLineup)) {
-    if (ungradedSlots.has(slot)) continue
-    if (benchSlots.has(slot)) continue
-    const p = byId.get(String(id))
-    const weight = p?.elig?.[slot] ?? ELIG_FLOOR
-    if (weight >= 0.7) continue
-    const pen = unfamiliarPenalty(p ?? { elig: { [slot]: ELIG_FLOOR } }, slot)
-    const deltaRpg = Number.isFinite(pen) ? pen : (1 - ELIG_FLOOR) * 0.12
+  const groups = []
+  // Paths first, so a chain is never mistaken for a cycle by starting mid-chain.
+  for (const slot of differing) {
+    if (seen.has(slot) || inPosted.has(opt.get(slot))) continue
+    groups.push({ path: true, slots: walk(slot) })
+  }
+  // Anything still unvisited closes on itself: a cycle.
+  for (const slot of differing) {
+    if (seen.has(slot)) continue
+    groups.push({ path: false, slots: walk(slot) })
+  }
+
+  const items = []
+  for (const { path, slots } of groups) {
+    if (slots.length === 0) continue
+    const deltaRpg = slots.reduce(
+      (sum, s) => sum + ((optValue.get(s) ?? 0) - (actValue.get(s) ?? 0)),
+      0,
+    )
     if (deltaRpg < 0.02) continue
-    items.push({ kind: 'oop', id: String(id), slot, weight: Math.round(weight * 100) / 100, deltaRpg })
+    // A path's headline is its entry point: who comes in, and who ends up out.
+    // A cycle has no entry or exit, so its headline is the DH — the only slot at
+    // which rearranging the same nine can change the value at all, since fielding
+    // value is position-agnostic (see lineupSolver.js). A cycle that somehow
+    // avoids DH can only be a zero-value tie and is already gone above.
+    const head = path ? slots[0] : slots.find((s) => s === 'DH')
+    if (!head) continue
+    const tail = path ? slots[slots.length - 1] : head
+    items.push({
+      kind: path ? (slots.length === 1 ? 'sub' : 'chain') : 'shuffle',
+      inId: opt.get(head),
+      outId: act.get(tail),
+      slot: head,
+      // Where the departing player is actually posted. On a chain this is NOT
+      // `slot` — the man coming in takes one position and the man going out
+      // leaves from another, several shifts away. Naming it stops the row
+      // reading as "we'd rather have Susac catching than Adames", when Adames
+      // is the shortstop and was never a candidate to catch.
+      outSlot: tail,
+      // The other slots the move touches, for the "and everyone else moves up"
+      // line. Never includes the headline slot, which the row already states.
+      shiftSlots: slots.filter((s) => s !== head),
+      deltaRpg,
+    })
   }
 
   return items.sort((a, b) => b.deltaRpg - a.deltaRpg).slice(0, 5)
@@ -289,7 +361,12 @@ export function lineupStrengthFor(data, teamId, actualLineup, names = {}) {
     strengthTier: lineupStrengthTierFor(grade.score, teamId),
     gapRpg: grade.gapRpg,
     items,
-    rows: lineupStrengthRows(data, items, names),
+    rows: lineupStrengthRows(
+      data,
+      items,
+      names,
+      new Map(grade.optimal.assignments.map((a) => [a.slot, String(a.id)])),
+    ),
     // Posted starters we couldn't value (excluded from the gap); the card notes
     // them as "not yet valued" so a partial grade is transparent.
     ungraded: (grade.ungraded ?? []).map((u) => ({
@@ -306,17 +383,18 @@ export function playerName(data, personId, names = null) {
   return data?.players?.[String(personId)]?.name ?? names?.[String(personId)] ?? null
 }
 
-// Shape the receipt `items` into display rows for the Pos | Expected | Starting
-// | R/G table (LineupStrengthCard). Pure so the two item kinds' column mapping
-// is unit-testable:
-//   - bench: the optimal player is displaced by the posted starter, so
-//     Expected = inId (who you'd want), Starting = outId (who's in there).
-//   - oop:   a posted starter is out of position; there is NO displaced
-//     "expected" name, so `expected` is left null and the caller renders the
-//     player's name across the Expected/Starting columns with their `usualPos`
-//     (primary fielding position) as the natural-spot hint, rather than
-//     fabricating an expected name. `usualPos` is null when unknown or when it
-//     is the slot itself (so the caller can omit the hint).
+// Shape the receipt `items` into display rows for the
+// Pos | Expected | Starting | Impact table (LineupStrengthCard). Pure so the
+// column mapping is unit-testable. All three item kinds share one shape —
+// Expected is who the optimum wants, Starting is who the manager posted — which
+// is why the table needs no second layout:
+//   - sub:     a straight one-for-one. Expected/Starting are at the same slot.
+//   - chain:   Expected enters at `pos`; Starting leaves from further down the
+//              chain. `shifts` names the men who move between them, so the row
+//              never implies Starting was playing `pos`.
+//   - shuffle: the same nine, rearranged. Nobody enters or leaves; `pos` is
+//              always DH, the only slot where rearranging can change the value.
+//              `shifts` says where the displaced DH goes.
 // `deltaRpg` is the runs/game the row costs (rendered as a negative).
 // Points off the 10 that a `deltaRpg` deduction costs. The score is
 // 10 − gap/SCORE_GAP_FULL, so each line-item's share of the gap converts to
@@ -326,27 +404,27 @@ export function scoreImpactOf(deltaRpg) {
   return Math.round((deltaRpg / SCORE_GAP_FULL) * 10) / 10
 }
 
-export function lineupStrengthRows(data, items, names = null) {
-  return (items ?? []).map((it) => {
-    if (it.kind === 'bench') {
-      return {
-        kind: 'bench',
-        pos: it.slot,
-        expected: playerName(data, it.inId, names),
-        starting: playerName(data, it.outId, names),
-        deltaRpg: it.deltaRpg,
-        scoreImpact: scoreImpactOf(it.deltaRpg),
-      }
-    }
-    const usual = data?.players?.[String(it.id)]?.primaryPos ?? null
-    return {
-      kind: 'oop',
-      pos: it.slot,
-      expected: null,
-      starting: playerName(data, it.id, names),
-      usualPos: usual && usual !== it.slot ? usual : null,
-      deltaRpg: it.deltaRpg,
-      scoreImpact: scoreImpactOf(it.deltaRpg),
-    }
-  })
+export function lineupStrengthRows(data, items, names = null, optimalBySlot = null) {
+  return (items ?? []).map((it) => ({
+    kind: it.kind,
+    pos: it.slot,
+    expected: playerName(data, it.inId, names),
+    starting: playerName(data, it.outId, names),
+    // The departing player's own position, when it differs from `pos` — null on
+    // a straight substitution, where both men are at the same slot and repeating
+    // it would be noise.
+    startingPos: it.outSlot && it.outSlot !== it.slot ? it.outSlot : null,
+    // Human-readable "who else moves", e.g. ["Ben Malgeri to DH"]. Empty for a
+    // plain substitution. Needs the optimal assignment to name the man who ends
+    // up at each touched slot, so it degrades to [] when that isn't supplied.
+    shifts: (it.shiftSlots ?? [])
+      .map((slot) => {
+        const who = optimalBySlot?.get(slot)
+        const name = who ? playerName(data, who, names) : null
+        return name ? `${name} to ${slot}` : null
+      })
+      .filter(Boolean),
+    deltaRpg: it.deltaRpg,
+    scoreImpact: scoreImpactOf(it.deltaRpg),
+  }))
 }

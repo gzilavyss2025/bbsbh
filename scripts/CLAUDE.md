@@ -188,16 +188,17 @@ don't run these by hand.
 - `gen-lineup-values.mjs` → `public/data/lineup-values.json` — per-hitter value
   as **two separate numbers**, from the local `war.json`'s components: `rpg`
   (bat — wRC+ regressed toward the 100 league average by PA) and `fldRpg`
-  (glove — season fielding runs regressed toward 0 by innings), plus a
-  position-eligibility matrix from season+career fielding innings. The consumer
-  adds them at a fielding slot and uses the bat ALONE at DH. **Never re-derive
-  either from the WAR total** — WAR bundles bat, glove and a playing-time-prorated
-  positional adjustment, so subtracting a full-season positional constant to
-  recover a "bat" overcharges a part-season premium fielder and overpays a
-  part-season DH. That is what the model used to do, and it ranked a 132 wRC+
-  catcher last among his club's bats. The positional adjustment is now absent
-  from the pipeline entirely (it cancels across nine fixed slots). Read the
-  generator's value-model header before touching any of this. Feeds the Lineup
+  (glove — season fielding runs regressed toward 0 by innings), plus
+  `positions`, the boolean set of spots he can cover, gated on RECENT innings
+  (`stats=season,yearByYear`). The consumer adds bat and glove at a fielding slot
+  and uses the bat ALONE at DH. **Read `docs/lineup-strength.md` before touching
+  any of this.** Three things were removed from this model after each produced
+  provably wrong answers, and all three look like obvious additions: the
+  positional adjustment (never re-derive a component from the WAR total — WAR's
+  own `Positional` is playing-time-prorated), the familiarity weight (it was the
+  only term that varied by arrangement, so it drove every rearrangement the model
+  ever proposed), and career-based eligibility (a third of all eligibilities were
+  stale — Bryce Harper still "qualified" in right field). Feeds the Lineup
   Strength grade (`src/lib/lineupSolver.js` Hungarian assignment +
   `src/api/lineupStrength.js`); MLB only, nightly rebuild.
 - `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone

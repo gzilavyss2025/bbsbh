@@ -19709,10 +19709,13 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-/* The out-of-position table's second table gets a touch more top room so the two
-   groups read as distinct sections rather than one long list. */
-.lstrength__ooptable {
-  margin-top: var(--space-4);
+/* "Who else moves" under a multi-player change — the men shifted between the
+   player coming in and the player going out. Muted and on its own line so the
+   row still reads as one finding rather than several. */
+.lstrength__shifts {
+  display: block;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
 }
 /* Points off the 10, tabular so the column of deductions lines up. */
 .lstrength__pts {

@@ -337,15 +337,17 @@ for each generator; the reader modules:
   see below and `docs/callouts.md`), not rendered directly.
 - `lineupStrength.js` — the Lineup Strength grade, from
   `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
-  `src/lib/lineupSolver.js` (exact Hungarian assignment over the
-  position-eligibility matrix). Each hitter carries a bat (`rpg`, from wRC+) and
-  a glove (`fldRpg`, from season fielding runs) as SEPARATE numbers; `slotValue`
-  adds both at a fielding slot and uses the bat alone at DH, since a designated
-  hitter's fielding contribution is definitionally zero. There is no positional
-  adjustment anywhere in the model — it cancels across nine fixed slots, and with
-  fielding explicit nothing is left for it to proxy (see the header in
-  `lineupSolver.js`). The runtime echoes of the model are `rpgFromWar` and
-  `fldRpgFromRuns`, which must stay in step with the generator.
+  `src/lib/lineupSolver.js` (exact Hungarian assignment over the eligible
+  positions). Each hitter carries a bat (`rpg`, from wRC+) and a glove
+  (`fldRpg`, from season fielding runs) as SEPARATE numbers; `slotValue` adds
+  both at a fielding slot and uses the bat alone at DH. **`docs/lineup-strength.md`
+  is required reading before changing any of this** — it records the three things
+  removed from the model (positional adjustment, familiarity discount,
+  career-based eligibility), each of which looks like an obvious addition and
+  each of which produced provably wrong answers. `receiptFor` groups the
+  optimal-vs-posted difference into paths and cycles so one move is one row and
+  the rows sum to the gap; `rpgFromWar`/`fldRpgFromRuns` are the runtime echoes
+  of the generator's model and must stay in step with it.
   `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
   statTiers tier, the itemized receipt (bench swaps + out-of-position
   penalties), and `ungraded` (posted starters with no value in any file).
