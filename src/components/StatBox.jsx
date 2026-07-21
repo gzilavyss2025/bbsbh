@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { selectOfficials } from '../api/select.js'
 import { revealInning } from '../api/linescore.js'
-import { revealDerived, rollingPitches } from '../api/derive.js'
+import { revealDerived, rollingPitches, rollingMissedCalls } from '../api/derive.js'
 import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/challenges.js'
 import { selectUmpireFavor, hasPitchTracking } from '../api/umpireFavor.js'
 import { resolveCardPlayer } from '../api/boxscore.js'
@@ -75,6 +75,7 @@ export function StatBox({
           const fieldLine = revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')
           const d = revealDerived(getDerived(), inning, half)
           const rolling = rollingPitches(getDerived(), inning, half)
+          const rollingMissed = rollingMissedCalls(getDerived(), inning, half)
           // ABS challenge history through this half (reveal-only, clamped to the
           // reached half — see api/challenges.js). MLB only.
           const challenges = gameHasAbs(feed) ? selectChallengeState(feed, inning, half) : null
@@ -101,24 +102,18 @@ export function StatBox({
                 <Stat k="Fouls" v={d.fouls} />
                 <Stat k="2-strike fouls" v={d.twoStrikeFouls} />
                 <Stat k="1st-pitch strikes" v={`${d.firstPitchStrikes}/${d.plateAppearances}`} />
+                {d.missedCalls != null && <Stat k="Missed calls" v={d.missedCalls} />}
+                {rollingMissed != null && <Stat k="Total missed calls" v={rollingMissed} />}
               </div>
-              {challenges && (
-                <div className="abs">
-                  <span className="abs__title">ABS challenges</span>
-                  <div className="abs__rows">
-                    <AbsRow
-                      teamId={challenges.away.teamId}
-                      abbr={awayAbbr || 'AWAY'}
-                      outcomes={challenges.away.outcomes}
-                    />
-                    <AbsRow
-                      teamId={challenges.home.teamId}
-                      abbr={homeAbbr || 'HOME'}
-                      outcomes={challenges.home.outcomes}
-                    />
-                  </div>
-                </div>
-              )}
+              {/* On a phone this is the ABS card's only home. From the wide
+                  breakpoint up it's hidden here and a second copy — AbsCard,
+                  below — renders standalone in the win-probability column
+                  instead (see index.css's `.statbox__abs`/`.abscard` pair);
+                  CSS toggles which copy shows rather than this component
+                  reaching outside its own card. */}
+              <div className="statbox__abs">
+                <AbsChallengesCard challenges={challenges} awayAbbr={awayAbbr} homeAbbr={homeAbbr} />
+              </div>
               <UmpireFavorRow
                 data={umpireFavor}
                 hpName={hpName}
@@ -126,6 +121,7 @@ export function StatBox({
                 homeId={homeId}
                 awayLocation={awayLocation || awayAbbr || 'Away'}
                 homeLocation={homeLocation || homeAbbr || 'Home'}
+                totalMissedCalls={rollingMissed}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
                   (fastest pitch, hardest/longest ball) — sat below the play-by-play
@@ -160,6 +156,49 @@ export function StatBox({
             </>
           )
         }}
+      </SealBox>
+    </div>
+  )
+}
+
+// The ABS Challenges block: a title over one club-logo'd row per side (see
+// AbsRow below). Factored out of StatBox's own render so the exact same
+// markup can appear in two places — inline in the stat card on a phone, and
+// standalone as AbsCard's whole-card content on the wide layout — without
+// the challenge history itself being computed twice.
+function AbsChallengesCard({ challenges, awayAbbr, homeAbbr }) {
+  if (!challenges) return null
+  return (
+    <div className="abs">
+      <span className="abs__title">ABS challenges</span>
+      <div className="abs__rows">
+        <AbsRow teamId={challenges.away.teamId} abbr={awayAbbr || 'AWAY'} outcomes={challenges.away.outcomes} />
+        <AbsRow teamId={challenges.home.teamId} abbr={homeAbbr || 'HOME'} outcomes={challenges.home.outcomes} />
+      </div>
+    </div>
+  )
+}
+
+// Desktop-only sibling of StatBox: the SAME ABS Challenges block (see
+// AbsChallengesCard above), in its own card so it can sit above the
+// win-probability chart in the right column at the wide breakpoint instead
+// of trailing the pitch-stat grid in the left one — CSS hides this and
+// StatBox's own inline copy at whichever breakpoint doesn't want it (see
+// `.abscard`/`.statbox__abs` in index.css). Its own coverless SealBox, same
+// footing as StatBox's — this only computes challenges.js's reveal-only
+// selector once revealed, never at render top-level (ADR-0001).
+export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
+  if (!gameHasAbs(feed)) return null
+  return (
+    <div className="abscard" key={`${inning}-${half}`}>
+      <SealBox forceRevealed={revealed} coverless>
+        {() => (
+          <AbsChallengesCard
+            challenges={selectChallengeState(feed, inning, half)}
+            awayAbbr={awayAbbr}
+            homeAbbr={homeAbbr}
+          />
+        )}
       </SealBox>
     </div>
   )
@@ -227,7 +266,7 @@ export function AbsRow({ teamId, abbr, outcomes }) {
 // row renders nothing until there's at least one missed call with favor
 // behind it (which, since both are derived from the same hasFavor branch in
 // selectUmpireFavor, also guarantees worstCall is set whenever net is).
-function UmpireFavorRow({ data, hpName, awayId, homeId, awayLocation, homeLocation }) {
+function UmpireFavorRow({ data, hpName, awayId, homeId, awayLocation, homeLocation, totalMissedCalls }) {
   if (!data) return null
   const { favorAway, favorHome, worstCall } = data
   const net = favorAway != null && favorHome != null ? favorAway - favorHome : null
@@ -237,7 +276,14 @@ function UmpireFavorRow({ data, hpName, awayId, homeId, awayLocation, homeLocati
       <span className="umpfavor__title">{hpName ? `${hpName} behind the plate` : 'Plate umpire'}</span>
       <div className="umpfavor__row">
         {worstCall && <WorstCallCard data={worstCall} />}
-        <FavorMeter net={net} awayId={awayId} homeId={homeId} awayLocation={awayLocation} homeLocation={homeLocation} />
+        <FavorMeter
+          net={net}
+          awayId={awayId}
+          homeId={homeId}
+          awayLocation={awayLocation}
+          homeLocation={homeLocation}
+          totalMissedCalls={totalMissedCalls}
+        />
       </div>
     </div>
   )
@@ -407,7 +453,7 @@ function favorTier(magnitude) {
   return 'outlier'
 }
 
-function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation }) {
+function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMissedCalls }) {
   if (net == null) return null
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
@@ -424,6 +470,11 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation }) {
       {tier && (
         <span className={`favormeter__tierpill favormeter__tierpill--${tier}`} aria-hidden="true">
           {FAVOR_TIERS[tier]}
+          {/* The same cumulative count as the stat grid's "Total missed
+              calls" cell (StatBox's rollingMissedCalls) — repeated here so
+              the tier pill reads as "how routine/outlying" AND "how many"
+              in one glance, without sending the eye back up to the grid. */}
+          {totalMissedCalls != null && <span className="favormeter__tierpill-count"> · {totalMissedCalls}</span>}
         </span>
       )}
       <div className="favormeter__track-row">
@@ -433,7 +484,11 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation }) {
             favors, on top of the fill's own direction/color. Neither dims
             when it's an even split. */}
         <TeamLogo teamId={awayId} name={awayLocation} size={28} bw={!even && !towardAway} />
-        <div className="favormeter__track" role="img" aria-label={favorMeterLabel(net, awayLocation, homeLocation)}>
+        <div
+          className="favormeter__track"
+          role="img"
+          aria-label={favorMeterLabel(net, awayLocation, homeLocation, totalMissedCalls)}
+        >
           <span className="favormeter__mid" aria-hidden="true" />
           {!even && (
             <span
@@ -462,10 +517,11 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation }) {
   )
 }
 
-function favorMeterLabel(net, awayLocation, homeLocation) {
-  if (Math.abs(net) < FAVOR_EVEN_FLOOR) return 'Missed calls have been even so far'
+function favorMeterLabel(net, awayLocation, homeLocation, totalMissedCalls) {
+  const countSuffix = totalMissedCalls != null ? `, ${totalMissedCalls} missed calls total` : ''
+  if (Math.abs(net) < FAVOR_EVEN_FLOOR) return `Missed calls have been even so far${countSuffix}`
   const tierLabel = FAVOR_TIERS[favorTier(Math.abs(net))]
-  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayLocation : homeLocation} — ${tierLabel}`
+  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayLocation : homeLocation} — ${tierLabel}${countSuffix}`
 }
 
 function Stat({ k, v, tone }) {
