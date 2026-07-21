@@ -5708,7 +5708,7 @@ body {
   margin-top: var(--space-3);
   margin-bottom: var(--space-4);
 }
-.innings__row2 > .winprob {
+.innings__row2-right > .winprob {
   margin-bottom: 0;
 }
 /* Below the wide breakpoint this wrapper doesn't exist as a layout box at

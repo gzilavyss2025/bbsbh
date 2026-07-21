@@ -31,13 +31,18 @@ const BALL_R = 1.45 / 12
 
 // Whether a called pitch (ball or strike) was called incorrectly against its
 // own tracked plate location + the batter's strike zone. Null when the pitch
-// wasn't a ball/strike call (swing, foul, in play) or the feed carries no
-// tracking data for it — same MiLB degrade as the rest of this module.
-function isMissedCall(e) {
+// wasn't a ball/strike call (swing, foul, in play), the pre-pitch count is
+// corrupted feed data (a 4th ball/3rd strike already logged — rare, see
+// gen-run-expectancy.mjs's header; same guard umpireFavor.js applies before
+// its own favor tally, so the two counts can't silently diverge over the same
+// feed defect), or the feed carries no tracking data for it — same MiLB
+// degrade as the rest of this module.
+function isMissedCall(e, preBalls, preStrikes) {
   const code = pitchCallCode(e)
   const strikeCall = code === 'C'
   const ballCall = code === 'B' || code === '*B'
   if (!strikeCall && !ballCall) return null
+  if (preBalls > 3 || preStrikes > 2) return null
   const c = e.pitchData?.coordinates
   const top = e.pitchData?.strikeZoneTop
   const bot = e.pitchData?.strikeZoneBottom
@@ -96,6 +101,7 @@ export function computeDerivedByInning(feed) {
   // batter's resumed at-bat, whose count continues.
   let carryBatter = null
   let carryStrikes = 0
+  let carryBalls = 0
 
   for (const play of plays) {
     const inning = play?.about?.inning
@@ -119,6 +125,7 @@ export function computeDerivedByInning(feed) {
 
     const batterId = play.matchup?.batter?.id ?? null
     let preStrikes = batterId != null && batterId === carryBatter ? carryStrikes : 0
+    let preBalls = batterId != null && batterId === carryBatter ? carryBalls : 0
 
     for (const e of pitches) {
       const code = pitchCallCode(e)
@@ -130,10 +137,12 @@ export function computeDerivedByInning(feed) {
         // AB-extending counter (mirrors gen-fouls.mjs).
         if (preStrikes === 2 && code !== 'T') b.twoStrikeFouls += 1
       }
-      preStrikes = e.count?.strikes ?? preStrikes
 
-      const missed = isMissedCall(e)
+      const missed = isMissedCall(e, preBalls, preStrikes)
       if (missed != null) b.missedCalls = (b.missedCalls ?? 0) + (missed ? 1 : 0)
+
+      preStrikes = e.count?.strikes ?? preStrikes
+      preBalls = e.count?.balls ?? preBalls
 
       const velo = e.pitchData?.startSpeed
       if (typeof velo === 'number' && velo > (b.maxVelo ?? -Infinity)) {
@@ -161,9 +170,11 @@ export function computeDerivedByInning(feed) {
     if (!isPA) {
       carryBatter = batterId
       carryStrikes = preStrikes
+      carryBalls = preBalls
     } else {
       carryBatter = null
       carryStrikes = 0
+      carryBalls = 0
     }
 
     // First pitch of the plate appearance (skipped for non-PA plays — their
