@@ -4,21 +4,25 @@ name: Update nightly data
 # umpire plate accuracy, minor-league leaders, game call-outs, former
 # teammates, vs-team splits, milestone watch, team transactions, the
 # Fever Baseball radar snapshot (each documented at the top
-# of its own scripts/gen-*.mjs), AND the README regen (see the "Decide
-# whether to regenerate README" step below) in ONE workflow with a SINGLE
-# commit+push, instead of separate crons each triggering its own Vercel
-# deployment. Consolidated 2026-07-11 after two of the eight (update-callouts
-# and update-former-teammates, both previously at 10:30 UTC) collided on the
+# of its own scripts/gen-*.mjs) in ONE workflow with a SINGLE commit+push,
+# instead of separate crons each triggering its own Vercel deployment.
+# Consolidated 2026-07-11 after two of the eight (update-callouts and
+# update-former-teammates, both previously at 10:30 UTC) collided on the
 # push — a non-fast-forward rejection that silently dropped that night's
-# call-outs; README regen folded in 2026-07-17 for the same reason (it used
-# to run as its own daily cron and deploy). The generators are otherwise
-# unchanged and fully independent (each writes its own public/data/* file
-# with no read dependency on another's output — gen-callouts.mjs reads
-# vs-team-splits.json only at app runtime, never at generation time), so
-# continue-on-error lets one script's failure fall through to the rest
-# instead of blocking the batch; the job still fails at the end (for
-# cron-failure visibility in the Actions tab) if anything errored, but
-# whatever succeeded is already committed by then.
+# call-outs. README regen was folded in on 2026-07-17 for the same reason,
+# then ripped back out on 2026-07-21: its Claude Code Action step has no
+# working ANTHROPIC_API_KEY/CLAUDE_CODE_OAUTH_TOKEN secret, and on failure it
+# left the git remote's push auth pointed at its own (invalid) OIDC token
+# instead of the checkout's GH_BOT_TOKEN — silently discarding every
+# generator's output at the final push for every run from 2026-07-18 to
+# 2026-07-21. README regen is regenerate-readme.yml now, workflow_dispatch-only.
+# The generators here are otherwise unchanged and fully independent (each
+# writes its own public/data/* file with no read dependency on another's
+# output — gen-callouts.mjs reads vs-team-splits.json only at app runtime,
+# never at generation time), so continue-on-error lets one script's failure
+# fall through to the rest instead of blocking the batch; the job still
+# fails at the end (for cron-failure visibility in the Actions tab) if
+# anything errored, but whatever succeeded is already committed by then.
 on:
   schedule:
     - cron: '0 11 * * *' # ~7am US Eastern — the latest of the former per-job times, so every "after overnight X settles" / "after games go Final" constraint they each documented still holds
@@ -26,7 +30,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write # needed for the Regenerate README step's Claude Code Action
 
 jobs:
   update-nightly-data:
@@ -34,7 +37,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # full history so the README 24h-change check can see it
           # main requires the lint-and-build status check, which the default
           # GITHUB_TOKEN can never satisfy on a bare push (no PR = no check
           # run for that commit) — every run since 2026-07-13 had its commit
@@ -127,72 +129,11 @@ jobs:
         continue-on-error: true
         run: node scripts/gen-comeback-wins.mjs
 
-      - name: Decide whether to regenerate README
-        id: readme-check
-        run: |
-          # Commits in the last 24h touching something other than generated
-          # data or the README itself. Tonight's own data-gen commit hasn't
-          # happened yet (it lands in the same commit as this, below), and
-          # README's own auto-commit is excluded, so neither can trigger a
-          # rewrite — only actual code changes (i.e. a merged PR) do.
-          changed=$(git log --since='24 hours ago' --format=%H -- \
-            ':(exclude)public/data' ':(exclude)README.md' | head -n1)
-          if [ -z "$changed" ]; then
-            echo "No code changes in the last 24h — skipping README regeneration."
-            echo "should_run=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Code changed in the last 24h — regenerating README."
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Regenerate README with Claude Code
-        id: readme-regen
-        if: steps.readme-check.outputs.should_run == 'true'
-        continue-on-error: true
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            Rewrite README.md in this repo so it faithfully reflects what the app
-            does today.
-
-            This is Tally Baseball (repository name: bbsbh), a spoiler-safe,
-            read-only second-screen PWA for scoring baseball by hand. README.md
-            is written
-            for END USERS (not developers) in a warm, plain, second-person voice.
-            Read the current README.md first and preserve that voice, structure,
-            and its section headings wherever they still fit. This is NOT a
-            developer changelog and NOT the CLAUDE.md dev guide — keep it about
-            what a person using the app sees and can do.
-
-            To learn the current feature set, read the source — especially:
-              - src/App.jsx and src/lib/route.js (every screen/route that exists)
-              - src/screens/*.jsx (each user-facing screen)
-              - src/components/SiteFooter.jsx (the site-wide navigation)
-            Describe features in user terms, not implementation terms.
-
-            THE SPOILER RULE IS THE POINT OF THE APP — keep it central: a
-            score-revealing value is never in the page until the user taps to
-            reveal it, everything re-seals on navigation, and even tab titles and
-            game cards stay score-free. See CLAUDE.md's "spoiler rule" section
-            for the exact invariant, but do not copy dev jargon into the README.
-
-            Make only the edits needed to match reality: add features that now
-            exist, remove any the app no longer has, and correct anything stale.
-            Do NOT churn wording for its own sake or restructure a section that is
-            already accurate — a minimal, faithful diff is the goal. If the README
-            is already accurate, make no change at all. Edit README.md in place;
-            do not create new files or commit anything (a later step handles the
-            commit).
-          claude_args: |
-            --allowedTools Read,Edit,Write,Glob,Grep
-            --max-turns 40
-
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql README.md 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race, same shape as
@@ -227,8 +168,7 @@ jobs:
           steps.season-score.outcome == 'failure' ||
           steps.team-score.outcome == 'failure' ||
           steps.team-transactions.outcome == 'failure' ||
-          steps.fever-radar.outcome == 'failure' ||
-          steps.readme-regen.outcome == 'failure'
+          steps.fever-radar.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1
