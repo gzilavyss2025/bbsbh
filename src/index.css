@@ -38,10 +38,7 @@
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
        notification cards), `.bs__potgDesc`, `.flipback__potg`,
-       `.psseries__potgDesc`, `.dayhl__rowBtn` + its `.dayhl__rowText`
-       fallback-row child, and the Day Recap's `.gotd__story` (Game of the
-       Day storyline line), `.gotd__sub` (the performer's record sub-line),
-       and `.gotd__potgDesc` (the turning-point play-by-play)
+       `.psseries__potgDesc`
      - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
@@ -5443,10 +5440,10 @@ body {
 }
 
 /* The half's Statcast superlatives — now the same headshot "baseball card"
-   tile the day recap's Statcast Leaders and the box score's Insights card
-   use (PerformerCard, src/components/PastDayRecapBox.jsx), read via the same
-   resolveCardPlayer lookup, rather than the plain label/value/who tile
-   StatcastCard.jsx still renders for the player-page percentile grid. A
+   tile the box score's Insights card uses (PerformerCard, src/components/
+   PerformerCard.jsx), read via the same resolveCardPlayer lookup, rather
+   than the plain label/value/who tile StatcastCard.jsx still renders for the
+   player-page percentile grid. A
    seamless list, same recipe as .abs__rows just below (paper-2 background,
    one hairline divider between rows instead of a border per card) rather
    than each PerformerCard floating in its own bordered tile like it does in
@@ -8623,9 +8620,8 @@ body {
    between the linescore/Game Score column and the two team cards (see
    BoxScoreBody), each superlative rendered as a .playercard__bucket +
    .playercard__list, the same "baseball card" tile (headshot, team, stat
-   line) the past-day recap's Top Performers/Statcast Leaders use (see
-   PastDayRecapBox.jsx's PerformerCard) — so this card reads as the same
-   idiom as that daily digest rather than its own small tiles. Matches the
+   line) Top Performers uses (see PerformerCard.jsx) — so this card reads as
+   the same idiom as that slate box rather than its own small tiles. Matches the
    frame of .bs__insights/.bs__stars beside it. */
 .bs__statcastCard {
   padding: 12px 14px;
@@ -8893,11 +8889,11 @@ body {
 /* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
    (src/components/TopPerformersBox.jsx). A desktop-width slate sits it in the
    .slate-body rail beside the game grid (see .slate-body > .topperfbox
-   below), same spot + same non-sticky treatment as the past-day recap's rail;
-   a phone-width slate keeps it stacked above the game grid instead (DOM order
-   — see GameSelect.jsx). Rows render the shared .playercard tile (PerformerCard,
-   PastDayRecapBox.jsx) — the same "baseball card" idiom as the past-day
-   recap's Winners/Losers and the box score's Insights card. */
+   below); a phone-width slate keeps it stacked above the game grid instead
+   (DOM order — see GameSelect.jsx). Rows render the shared .playercard tile
+   (PerformerCard, src/components/PerformerCard.jsx) — the same "baseball
+   card" idiom the box score's Insights card and each slate result card's
+   Dominant Performance/Blowout pill (GameResultFace.jsx) also use. */
 .topperfbox {
   margin-top: 10px;
 }
@@ -8920,8 +8916,7 @@ body {
   padding: 12px 0 0;
 }
 /* Top Batters/Top Pitchers always stack (never side by side) — the rail is
-   too narrow to split a .playercard tile's headshot + text into two columns;
-   see .dayhl__section's own vertical stack for the same reasoning. */
+   too narrow to split a .playercard tile's headshot + text into two columns. */
 .topperf__sections {
   display: flex;
   flex-direction: column;
@@ -9251,78 +9246,21 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   DAY RECAP — past-day right rail: Top Performers + Day Highlights sharing one
-   seal (src/components/PastDayRecapBox.jsx, src/api/dayHighlights.js).
+   PLAYER CARD — the shared "baseball card" tile (src/components/
+   PerformerCard.jsx): headshot, name + position, team logo + abbreviation,
+   stat line. Used by the live Top Performers box, Statcast leaders, the box
+   score's Insights card, each result card's Dominant Performance/Blowout/
+   Extra-Innings pill (GameResultFace.jsx), and Award History.
    --------------------------------------------------------------------------- */
-.pastdayrecap {
-  margin-top: 10px;
-}
-/* Recap-first stack (see .slate-body): the digest box leads, so the game grid
-   below it needs a gap. Only applies when a recap/Top Performers box is present
+/* Recap-first stack (see .slate-body): the live Top Performers box leads, so
+   the game grid below it needs a gap. Only applies when that box is present
    (the .slate-body wrapper) — a plain slate with no digest has no box above. */
 .slate-body > .slate-main {
   margin-top: var(--space-4);
 }
-/* The base .statgrid (SealBox's revealed wrapper) paints its own bright
-   near-white inset background — same fix TopPerformersBox already needed
-   (see .topperfbox .statgrid above): switch it off here too, so the only
-   background showing is .pastdayrecap__body's cream card below. */
-.pastdayrecap .statgrid {
-  background: transparent;
-  padding: 12px 0 0;
-}
-/* The revealed panel's own card chrome — same border/radius/shadow/cream
-   surface as .gamecard/.flipback, so it reads as one more card on the sheet
-   rather than bare content sitting directly on the page background. */
-.pastdayrecap__body {
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-}
-/* "Jump to games" — a small right-aligned utility control at the top of the
-   revealed recap (PastDayRecapBox), so a long recap doesn't strand the game
-   grid below the fold. margin-left:auto right-aligns a fit-width flex block in
-   the body's plain block flow. */
-.recapjump {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  margin: 0 0 var(--space-3) auto;
-  padding: 4px 10px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-xs);
-  background: var(--surface-card);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.recapjump:active {
-  transform: translateY(1px);
-}
-.dayhl__section + .dayhl__section {
-  margin-top: 16px;
-}
-.dayhl__title {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-/* Winners/Losers "baseball card" tiles (src/components/PastDayRecapBox.jsx's
-   PerformerCard) — headshot, name + position, team logo + abbreviation, stat
-   line, in a compact horizontal tile (the sidebar is too narrow for a 3-up
-   grid of anything wider than this). */
+/* Winners/Losers "baseball card" tiles — headshot, name + position, team
+   logo + abbreviation, stat line, in a compact horizontal tile (the sidebar
+   is too narrow for a 3-up grid of anything wider than this). */
 .playercard__bucket {
   margin: 0 0 6px;
   font-family: var(--font-display);
@@ -9343,13 +9281,11 @@ body {
   flex-direction: column;
   gap: 8px;
 }
-/* In the now-full-width recap (Top Performers Winners/Losers + Statcast
+/* In the now-full-width Top Performers box (Winners/Losers + Statcast
    Leaders), the "baseball card" tiles flow into as many columns as fit rather
    than a single stacked column — the digest earns the width the recap-first
-   layout gives it (see .slate-body above). auto-fill collapses to one column at
-   phone width, so this is the only rule needed for both. Day Highlights keeps
-   its single-column ranked list (.dayhl__list) so 1→N reads top to bottom. */
-.pastdayrecap .playercard__list,
+   layout gives it (see .slate-body above). auto-fill collapses to one column
+   at phone width, so this is the only rule needed. */
 .topperfbox .playercard__list {
   display: grid;
   /* Cap the track (not 1fr): a 2-tile row would otherwise stretch each tile to
@@ -9425,9 +9361,8 @@ body {
   display: none;
 }
 /* flex-wrap: wrap so the Top Performers rail's optional ProspectPill (see
-   PerformerCard, PastDayRecapBox.jsx) can drop to its own line rather than
-   overflowing the card — every other .playercard caller never fills this row
-   enough to wrap. */
+   PerformerCard.jsx) can drop to its own line rather than overflowing the
+   card — every other .playercard caller never fills this row enough to wrap. */
 .playercard__team {
   display: flex;
   align-items: center;
@@ -9445,7 +9380,7 @@ body {
   color: var(--text-muted);
 }
 /* The live Top Performers box's optional game-score line (GameScoreLink,
-   PastDayRecapBox.jsx) — same quiet-footnote treatment the old .topperf__score
+   PerformerCard.jsx) — same quiet-footnote treatment the old .topperf__score
    row had. Compound to beat .plink's `font: inherit` (declared later in this
    file), same reason .playercard__name compounds against PlayerLink. */
 .playercard__body .playercard__score {
@@ -9453,448 +9388,6 @@ body {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
-}
-.dayhl__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  /* A ranked list reads down a single column, but the full ~900px recap width
-     would strand each short row in whitespace — hold it to a comfortable
-     reading measure (it still spans full width on phone). */
-  max-width: 560px;
-}
-
-/* --- "Game of the Day" hero: the featured lead card (GameOfDayHero). Three
-   stacked beats — (1) team logos + winner-first score, (2) the standout
-   performer as a full card (or the storyline sentence when there's no single
-   protagonist), (3) the turning point (headshot + play-by-play). */
-.gotd {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-}
-/* Beat 1 — logos + score, the whole strip a tap through to the box score. */
-.gotd__scoreline {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  text-align: left;
-  border: 0;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.gotd__scoreline:active {
-  transform: translateY(1px);
-}
-.gotd__score {
-  font-family: var(--font-mono);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  color: var(--text-body);
-}
-.gotd__game {
-  margin-left: auto;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-/* Beat 2 — the standout performer (a full PerformerCard) with an optional
-   record sub-line, or the storyline sentence for a no-protagonist game. */
-.gotd__perfcard {
-  margin: 0;
-}
-.gotd__sub {
-  margin: 0;
-  color: var(--text-caption);
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-}
-#root .gotd__sub {
-  text-transform: none; /* caps-exempt: a name + record phrase, not a label */
-}
-/* Bigger and bolder than plain body text: this is the hero's headline
-   sentence on a no-protagonist game (margin/length/comeback), standing in
-   for the PerformerCard beat — a same-size paragraph here read as an
-   afterthought next to the score line above and the Turning Point below. */
-.gotd__story {
-  margin: 0;
-  color: var(--text-heading);
-  font-family: var(--font-read);
-  font-size: var(--fs-h3);
-  font-weight: var(--w-semibold);
-  line-height: var(--lh-prose);
-}
-#root .gotd__story {
-  text-transform: none; /* caps-exempt: reads as a natural sentence, same as .dayhl__rowBtn */
-}
-/* Beat 3 — turning point: headshot + play-by-play + running score, the same
-   idiom as the postseason series recap (mirrors .psseries__potg*). */
-.gotd__potg {
-  border-top: var(--bw-hair) solid var(--border-rule);
-  padding-top: var(--space-3);
-}
-.gotd__potgTitle {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.gotd__potgBody {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-.shot.gotd__potgShot {
-  flex: none;
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.shot.gotd__potgShot.shot--fallback {
-  font-size: var(--fs-hero-sm);
-}
-.gotd__potgMain {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.gotd__potgWho {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.gotd__potgName {
-  font-family: var(--font-body);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-.gotd__potgMeta {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.gotd__potgDesc {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  color: var(--text-heading);
-}
-/* #root prefix required: a plain .gotd__potgDesc selector loses the
-   specificity fight against #root * above and renders uppercase anyway,
-   same gotcha the ALL-CAPS INVARIANT comment flags for .psseries__potgDesc. */
-#root .gotd__potgDesc {
-  text-transform: capitalize; /* caps-exempt: title-case play-by-play narrative, same convention as .psseries__potgDesc */
-}
-.gotd__potgWhen {
-  font-family: var(--font-body);
-  font-weight: var(--w-semibold);
-  color: var(--award-ink);
-}
-.gotd__potgScore {
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-}
-
-/* --- "Your Team": the favorite club's result (YourTeamCard) paired with the
-   club's standout performer as a full card. Winner-first score. On a
-   doubleheader day both games stack here under one heading. */
-.yourteam__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-/* Result + performer card: stacked on phones (card nests under the result),
-   side by side once there's room. The row layout waits for the app's one
-   wide-layout breakpoint (740px, not an earlier one of its own) — the
-   surrounding column stays phone-width until then, so switching sooner
-   squeezed both halves into a ~374px track and wrapped the score/name mid-word. */
-.yourteam__pair {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.yourteam__perfcard {
-  margin: 0;
-}
-@media (min-width: 740px) {
-  .yourteam__pair {
-    flex-direction: row;
-    align-items: stretch;
-  }
-  /* An even 1fr/1fr split left the result side (just a logo + one score
-     line) with a river of empty space next to the denser performer card
-     (headshot + name + team + stat line) — cap it to its content instead of
-     matching the performer card's width. */
-  .yourteam__pair > .yourteam {
-    flex: 0 1 300px;
-  }
-  .yourteam__pair > .yourteam__perfcard {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-}
-.yourteam {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  text-align: left;
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  color: var(--text-body);
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.yourteam:active {
-  transform: translateY(1px);
-}
-.yourteam__body {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-/* "Game 1"/"Game 2" tag — only rendered on a doubleheader (see YourTeamCard),
-   a small caption above the score so the two rows are distinguishable. */
-.yourteam__game {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.yourteam__result {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: var(--fs-body);
-}
-.yourteam__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: var(--radius-xs);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  color: var(--surface-card);
-}
-.yourteam__badge--win {
-  background: var(--accent-positive);
-}
-.yourteam__badge--loss {
-  background: var(--accent-negative);
-}
-.yourteam__badge--tie {
-  background: var(--text-caption);
-}
-
-/* --- "Odds & Ends": the demoted Statcast strip, now a footer within the
-   "What You Missed" section (see RecapPanel). One tidy list of trivia. */
-.oddsends {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-/* When trivia follows the highlight list in the merged section, a hairline
-   sets it apart as the footer strip it is. */
-.dayhl__list + .oddsends {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-.oddsends__item {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: var(--fs-small);
-}
-.oddsends__label {
-  min-width: 92px;
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-}
-.oddsends__stat {
-  font-family: var(--font-mono);
-  color: var(--text-body);
-}
-.dayhl__rowBtn {
-  width: 100%;
-  text-align: left;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--paper-1);
-  color: var(--text-body);
-  padding: 8px 10px;
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.dayhl__rowBtn:active {
-  transform: translateY(1px);
-}
-/* Day Highlights blurbs read as natural sentences in the serif "read" face —
-   same sanctioned exception as .pbp__desc/.flipback__potg above. */
-.dayhl__rowBtn {
-  font-family: var(--font-read);
-}
-#root .dayhl__rowBtn {
-  text-transform: none; /* caps-exempt: day highlights read as natural sentences */
-}
-.dayhl__rowBtn--teams {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* Overlapping team-logo pair for the no-protagonist fallback row (margin/
-   length storylines, comeback) — a light echo of the performer row's
-   headshot without implying a face where the signal has none. */
-.dayhl__rowLogos {
-  display: flex;
-  align-items: center;
-  flex: none;
-}
-.dayhl__rowLogos .teamlogo,
-.dayhl__rowLogos .teamlogo--fallback {
-  margin-right: -6px;
-  border-radius: 50%;
-  border: var(--bw-hair) solid var(--paper-1);
-  background: var(--surface-card);
-}
-.dayhl__rowLogos .teamlogo:last-child,
-.dayhl__rowLogos .teamlogo--fallback:last-child {
-  margin-right: 0;
-}
-.dayhl__rowText {
-  flex: 1;
-  min-width: 0;
-}
-/* #root prefix required — nested inside .dayhl__rowBtn, whose own caps-exempt
-   text-transform: none doesn't inherit here because #root * matches this span
-   directly too (same gotcha as .gotd__potgDesc above). */
-#root .dayhl__rowText {
-  text-transform: none; /* caps-exempt: same sentence idiom as .dayhl__rowBtn */
-}
-/* "Game 1"/"Game 2" tag inline on a team storyline row (doubleheader). */
-.dayhl__rowGame {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  white-space: nowrap;
-}
-/* "Face the Story" protagonist row — same card chrome as .playercard, with a
-   smaller headshot (this is a list row, not a grid tile) and the headline
-   sentence as its own inline button rather than the whole row, since the
-   row also carries separate PlayerLink/TeamLink buttons alongside it. */
-.dayhl__row--performer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-}
-.dayhl__rowShotwrap {
-  position: relative;
-  display: block;
-  flex: none;
-  border-radius: var(--radius-sm);
-}
-.shot.dayhl__rowShot {
-  width: var(--shot-xs-w);
-  height: var(--shot-xs-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.dayhl__rowBody {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.dayhl__rowHeadlineBtn {
-  text-align: left;
-  border: none;
-  background: none;
-  padding: 0;
-  color: var(--text-body);
-  font-family: var(--font-read);
-  font-size: var(--fs-small);
-  line-height: var(--lh-ui);
-  cursor: pointer;
-}
-#root .dayhl__rowHeadlineBtn {
-  text-transform: none; /* caps-exempt: same sentence idiom as .dayhl__rowBtn */
-}
-.dayhl__rowHeadlineBtn:active {
-  transform: translateY(1px);
-}
-.dayhl__rowMeta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-}
-.dayhl__rowSub {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
-  color: var(--text-muted);
-}
-#root .dayhl__rowSub {
-  text-transform: none; /* caps-exempt: reads as a natural phrase, same idiom as .dayhl__rowBtn */
 }
 
 /* ---------------------------------------------------------------------------
@@ -10561,16 +10054,14 @@ body {
     gap: 12px;
   }
 
-  /* ---- slate body: the sealed daily digest — the live day's Top Performers
-     box (TopPerformersBox.jsx) or a past day's Day Recap (PastDayRecapBox.jsx),
-     GameSelect.jsx renders at most one — leads full width, with the game grid
-     (2-up, the base .gamelist rule above) below it. This replaced a 1fr/300px
-     rail that squeezed the content-rich past-day recap into a narrow sidebar
-     beside a single column of cards; recap-first matches the phone-width block
-     order and gives the digest room for its tile grid (see .playercard__list
-     inside .pastdayrecap/.topperfbox below). Both boxes render BEFORE
-     .slate-main in the JSX, so no grid is needed — plain block flow stacks
-     them first. */
+  /* ---- slate body: the live day's sealed Top Performers box
+     (TopPerformersBox.jsx) — leads full width, with the game grid (2-up, the
+     base .gamelist rule above) below it. This replaced a 1fr/300px rail that
+     squeezed the content-rich box into a narrow sidebar beside a single
+     column of cards; leading-first matches the phone-width block order and
+     gives the box room for its tile grid (see .playercard__list inside
+     .topperfbox below). Renders BEFORE .slate-main in the JSX, so no grid is
+     needed — plain block flow stacks it first. */
   .slate-body {
     display: block;
   }
@@ -10615,26 +10106,23 @@ body {
     font-size: var(--fs-small);
   }
 
-  /* The slate rail (Top Performers/Day Recap — .topperfbox/.pastdayrecap,
-     ~300px, see .slate-body above) has more text-column room than the
-     two-line stack above assumes: even a long name ("Masataka Yoshida")
-     fits on one line at this width, so keep it single-line here (same
-     treatment as phone, just outranking the two-line rule above via the
-     extra specificity) and spend the freed line on a bigger, easier-to-read
-     stat line instead. flex-wrap stays on as a safety net for the rare name
-     that doesn't fit — it soft-wraps rather than overflowing the card. */
-  .topperfbox .playercard__name,
-  .pastdayrecap .playercard__name {
+  /* The slate rail (Top Performers — .topperfbox, ~300px, see .slate-body
+     above) has more text-column room than the two-line stack above assumes:
+     even a long name ("Masataka Yoshida") fits on one line at this width, so
+     keep it single-line here (same treatment as phone, just outranking the
+     two-line rule above via the extra specificity) and spend the freed line
+     on a bigger, easier-to-read stat line instead. flex-wrap stays on as a
+     safety net for the rare name that doesn't fit — it soft-wraps rather
+     than overflowing the card. */
+  .topperfbox .playercard__name {
     flex-direction: row;
     align-items: baseline;
     font-size: var(--fs-body);
   }
-  .topperfbox .playercard__namebreak,
-  .pastdayrecap .playercard__namebreak {
+  .topperfbox .playercard__namebreak {
     display: none;
   }
-  .topperfbox .playercard__stat,
-  .pastdayrecap .playercard__stat {
+  .topperfbox .playercard__stat {
     font-size: var(--fs-small);
   }
 
@@ -15097,8 +14585,8 @@ body {
    (.awardhistory__seasonyear) rather than its own full-width row, so the year
    costs vertical rail space, not horizontal card space. Recipients render as
    .playercard tiles — the app's own headshot idiom (position badge floated on
-   the headshot's bottom-left corner, same as Top Performers/Day Highlights;
-   see PastDayRecapBox.jsx's PerformerCard) rather than a bespoke avatar.
+   the headshot's bottom-left corner, same as Top Performers/slate result
+   cards; see PerformerCard.jsx) rather than a bespoke avatar.
    Three card treatments, by what a group actually has to show:
      - MVP/Cy Young/Rookie of the Year (one recipient per league, a stat
        line) render full-width (.awardhistory__cards--base).

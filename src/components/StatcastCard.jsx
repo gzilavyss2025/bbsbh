@@ -3,7 +3,7 @@
 // pitcher's card also names the pitch type (MAY (SINKER)). Used by the player
 // page's season-percentile grid (StatcastPercentiles.jsx); the innings view's
 // per-half superlatives and the box score's whole-game ones use the headshot
-// PerformerCard tile instead (src/components/PastDayRecapBox.jsx).
+// PerformerCard tile instead (src/components/PerformerCard.jsx).
 export function StatcastCard({ label, value, unit, who, detail }) {
   return (
     <div className="statcast__card">

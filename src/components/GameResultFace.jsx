@@ -190,7 +190,7 @@ function ordinal(n) {
 }
 
 // "MIL 5, STL 3" — comma-joined "ABBR score" pairs, in caller-supplied order.
-// Exported so any other "final score, plain text" spot (e.g. PastDayRecapBox's
+// Exported so any other "final score, plain text" spot (e.g. PerformerCard's
 // GameScoreLink) renders the same shape instead of hand-rolling its own.
 export function scorePairsLine(pairs) {
   return pairs.map(([abbr, score]) => `${abbr} ${score}`).join(', ')

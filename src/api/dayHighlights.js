@@ -347,7 +347,8 @@ function marginSignals(away, home, extraInnings) {
   const name = (side) => side.clubName || side.abbreviation || side.teamName
   // None of these three carry a single protagonist — they're team-vs-team
   // length/margin storylines — so `performer: null` throughout, same as
-  // comeback above. Renders as a team-logo row (see PastDayRecapBox.jsx).
+  // comeback above. A card with no performer falls back to the plain
+  // turning-point block instead of a PerformerCard (see GameResultFace.jsx).
   if (extraInnings > 0) {
     signals.push({
       key: 'extras',

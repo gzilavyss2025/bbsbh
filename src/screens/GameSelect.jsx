@@ -246,9 +246,8 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const cardMetaByGamePk = useDayCardMeta(finals, dateStr, sportId, revealedAll)
 
   // Whether the live Top Performers box has anything to show — mutually
-  // exclusive with the past-day Day Recap rail (finals.length > 0): a day
-  // either hasn't gone final yet (this) or already has (that), never both.
-  // Both share the same `.slate-body` rail slot below.
+  // exclusive with a past day's finals (finals.length > 0): a day either
+  // hasn't gone final yet (this) or already has (that), never both.
   const showTopPerformers =
     finals.length === 0 && dateStr <= todayStr && eligibleGames.length > 0
 
@@ -382,12 +381,12 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
-      <div className={finals.length > 0 || showTopPerformers ? 'slate-body' : undefined}>
-        {/* The sealed daily digest — live Top Performers or a past day's Day
-            Recap, never both (see showTopPerformers above) — leads the slate,
-            full width above the game grid (.slate-body stacks recap-first at
-            every width; see index.css). Both render BEFORE .slate-main so plain
-            block flow already puts them on top. */}
+      <div className={showTopPerformers ? 'slate-body' : undefined}>
+        {/* The live day's sealed Top Performers box — full width above the game
+            grid (.slate-body stacks it first at every width; see index.css).
+            Renders BEFORE .slate-main so plain block flow already puts it on
+            top. A past day's finals get no digest box above them — each
+            game's own pills (GameResultFace.jsx) carry that now. */}
         {showTopPerformers && (
           <TopPerformersBox
             dateStr={dateStr}
