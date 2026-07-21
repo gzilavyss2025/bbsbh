@@ -15,6 +15,7 @@ import {
   revealDerived,
   computeGameSuperlatives,
   rollingPitches,
+  rollingMissedCalls,
 } from '../src/api/derive.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computePitcherLines } from '../src/api/pitchers.js'
@@ -91,6 +92,100 @@ test('computeDerivedByInning tolerates an empty / malformed feed', () => {
   assert.deepEqual(computeDerivedByInning({}), {})
   assert.deepEqual(computeDerivedByInning(null), {})
   assert.deepEqual(computeDerivedByInning({ liveData: { plays: {} } }), {})
+})
+
+// --------------------------------------------------------------------------
+// derive.js — missed-calls tracking (isMissedCall / rollingMissedCalls)
+// --------------------------------------------------------------------------
+// A called pitch with a known tracked location; omit pX/pZ to simulate a
+// half with no pitch-tracking data (the MiLB-degrade case).
+function trackedPitch(code, { pX, pZ, top = 3.5, bot = 1.5, balls, strikes } = {}) {
+  const e = { isPitch: true, details: { call: { code } }, count: { balls, strikes } }
+  if (pX != null) e.pitchData = { coordinates: { pX, pZ }, strikeZoneTop: top, strikeZoneBottom: bot }
+  return e
+}
+
+function missedCallsFeed() {
+  return {
+    liveData: {
+      plays: {
+        allPlays: [
+          {
+            about: { inning: 1, halfInning: 'top' },
+            matchup: { pitcher: { id: 100 }, batter: { id: 1 } },
+            result: { type: 'atBat', eventType: 'strikeout' },
+            count: { outs: 1 },
+            playEvents: [
+              trackedPitch('C', { pX: 0, pZ: 2.5, balls: 0, strikes: 1 }), // correctly called strike
+              trackedPitch('C', { pX: 2.0, pZ: 2.5, balls: 0, strikes: 2 }), // ball called strike — missed
+            ],
+          },
+          {
+            about: { inning: 1, halfInning: 'bottom' },
+            matchup: { pitcher: { id: 200 }, batter: { id: 2 } },
+            result: { type: 'atBat', eventType: 'field_out' },
+            count: { outs: 1 },
+            playEvents: [
+              trackedPitch('B', { pX: 0, pZ: 2.5, balls: 1, strikes: 0 }), // strike called ball — missed
+            ],
+          },
+          {
+            about: { inning: 2, halfInning: 'top' },
+            matchup: { pitcher: { id: 100 }, batter: { id: 3 } },
+            result: { type: 'atBat', eventType: 'strikeout' },
+            count: { outs: 1 },
+            playEvents: [trackedPitch('C', { balls: 0, strikes: 1 })], // no tracking data
+          },
+        ],
+      },
+    },
+  }
+}
+
+test('missedCalls counts only genuine ball/strike disagreements, both directions', () => {
+  const m = computeDerivedByInning(missedCallsFeed())
+  const top1 = revealDerived(m, 1, 'top')
+  const bot1 = revealDerived(m, 1, 'bottom')
+  assert.equal(top1.missedCalls, 1) // the correctly-called strike doesn't count
+  assert.equal(bot1.missedCalls, 1)
+})
+
+test('missedCalls stays null for a half with no tracking data, even with called pitches', () => {
+  const top2 = revealDerived(computeDerivedByInning(missedCallsFeed()), 2, 'top')
+  assert.equal(top2.missedCalls, null)
+})
+
+test('rollingMissedCalls sums both halves of an earlier inning plus the current one', () => {
+  const m = computeDerivedByInning(missedCallsFeed())
+  assert.equal(rollingMissedCalls(m, 1, 'top'), 1) // top 1 only
+  assert.equal(rollingMissedCalls(m, 1, 'bottom'), 2) // + bottom 1
+  assert.equal(rollingMissedCalls(m, 2, 'top'), 2) // top 2 has no tracking data to add
+})
+
+test('a corrupted pre-pitch count (4th ball / 3rd strike already logged) is excluded from missedCalls', () => {
+  // Same guard umpireFavor.js applies before its own favor tally — the first
+  // pitch here carries no tracking data of its own but bumps the pre-pitch
+  // count to an impossible 4 balls for the second, tracked pitch.
+  const feed = {
+    liveData: {
+      plays: {
+        allPlays: [
+          {
+            about: { inning: 1, halfInning: 'top' },
+            matchup: { pitcher: { id: 100 }, batter: { id: 1 } },
+            result: { type: 'atBat', eventType: 'walk' },
+            count: { outs: 0 },
+            playEvents: [
+              trackedPitch('B', { balls: 4, strikes: 1 }),
+              trackedPitch('C', { pX: 2.0, pZ: 2.5, balls: 4, strikes: 2 }), // would be a miss, but the feeding count is corrupt
+            ],
+          },
+        ],
+      },
+    },
+  }
+  const top1 = revealDerived(computeDerivedByInning(feed), 1, 'top')
+  assert.equal(top1.missedCalls, null)
 })
 
 // --------------------------------------------------------------------------

@@ -19,6 +19,40 @@ import { revealInning } from './linescore.js'
 // first-pitch 55-footer as a strike.)
 const NON_STRIKE_CODES = new Set(['B', '*B', 'I', 'P', 'H'])
 
+// Plate half-width + ball radius, in feet — the same zone-geometry constants
+// as api/umpireFavor.js's missEdge (deliberately duplicated rather than
+// imported, mirroring how scripts/gen-umpire-accuracy.mjs already keeps its
+// own copy of this exact check — see that file's header). Used only to COUNT
+// a called pitch the ump got backwards (ball called strike or vice versa);
+// umpireFavor.js's version additionally scores the run-expectancy swing of
+// its single worst one.
+const HALF_PLATE = 8.5 / 12
+const BALL_R = 1.45 / 12
+
+// Whether a called pitch (ball or strike) was called incorrectly against its
+// own tracked plate location + the batter's strike zone. Null when the pitch
+// wasn't a ball/strike call (swing, foul, in play), the pre-pitch count is
+// corrupted feed data (a 4th ball/3rd strike already logged — rare, see
+// gen-run-expectancy.mjs's header; same guard umpireFavor.js applies before
+// its own favor tally, so the two counts can't silently diverge over the same
+// feed defect), or the feed carries no tracking data for it — same MiLB
+// degrade as the rest of this module.
+function isMissedCall(e, preBalls, preStrikes) {
+  const code = pitchCallCode(e)
+  const strikeCall = code === 'C'
+  const ballCall = code === 'B' || code === '*B'
+  if (!strikeCall && !ballCall) return null
+  if (preBalls > 3 || preStrikes > 2) return null
+  const c = e.pitchData?.coordinates
+  const top = e.pitchData?.strikeZoneTop
+  const bot = e.pitchData?.strikeZoneBottom
+  if (!c || c.pX == null || c.pZ == null || top == null || bot == null) return null
+  const inX = Math.abs(c.pX) <= HALF_PLATE + BALL_R
+  const inZ = c.pZ <= top + BALL_R && c.pZ >= bot - BALL_R
+  const actualStrike = inX && inZ
+  return actualStrike !== strikeCall
+}
+
 function key(inning, half) {
   return `${inning}-${half}` // half is 'top' | 'bottom'
 }
@@ -41,6 +75,11 @@ export function computeDerivedByInning(feed) {
       twoStrikeFouls: 0,
       firstPitchStrikes: 0,
       plateAppearances: 0,
+      // A called ball/strike the tracked pitch location disagreed with (a
+      // ball called a strike, or vice versa). null until the first tracked
+      // called pitch this half — absent entirely at untracked MiLB parks, so
+      // callers hide the stat rather than show a false 0 (see maxVelo below).
+      missedCalls: null,
       // Statcast-flavored superlatives for the half — the game-notes numbers
       // ("Miz threw 104.5"). null when the feed carries no tracking data
       // (common at MiLB levels); callers hide the stat rather than show 0.
@@ -62,6 +101,7 @@ export function computeDerivedByInning(feed) {
   // batter's resumed at-bat, whose count continues.
   let carryBatter = null
   let carryStrikes = 0
+  let carryBalls = 0
 
   for (const play of plays) {
     const inning = play?.about?.inning
@@ -85,6 +125,7 @@ export function computeDerivedByInning(feed) {
 
     const batterId = play.matchup?.batter?.id ?? null
     let preStrikes = batterId != null && batterId === carryBatter ? carryStrikes : 0
+    let preBalls = batterId != null && batterId === carryBatter ? carryBalls : 0
 
     for (const e of pitches) {
       const code = pitchCallCode(e)
@@ -96,7 +137,12 @@ export function computeDerivedByInning(feed) {
         // AB-extending counter (mirrors gen-fouls.mjs).
         if (preStrikes === 2 && code !== 'T') b.twoStrikeFouls += 1
       }
+
+      const missed = isMissedCall(e, preBalls, preStrikes)
+      if (missed != null) b.missedCalls = (b.missedCalls ?? 0) + (missed ? 1 : 0)
+
       preStrikes = e.count?.strikes ?? preStrikes
+      preBalls = e.count?.balls ?? preBalls
 
       const velo = e.pitchData?.startSpeed
       if (typeof velo === 'number' && velo > (b.maxVelo ?? -Infinity)) {
@@ -124,9 +170,11 @@ export function computeDerivedByInning(feed) {
     if (!isPA) {
       carryBatter = batterId
       carryStrikes = preStrikes
+      carryBalls = preBalls
     } else {
       carryBatter = null
       carryStrikes = 0
+      carryBalls = 0
     }
 
     // First pitch of the plate appearance (skipped for non-PA plays — their
@@ -154,6 +202,7 @@ export function revealDerived(derivedMap, inningNum, half /* 'top'|'bottom' */) 
       twoStrikeFouls: 0,
       firstPitchStrikes: 0,
       plateAppearances: 0,
+      missedCalls: null,
       maxVelo: null,
       maxVeloType: '',
       maxVeloPlayer: '',
@@ -262,6 +311,29 @@ export function rollingPitches(derivedMap, inningNum, half) {
   let total = 0
   for (let n = 1; n <= inningNum; n++) {
     total += derivedMap[key(n, half)]?.pitches ?? 0
+  }
+  return total
+}
+
+// Cumulative missed-call count through the half being viewed — unlike
+// rollingPitches above (one pitcher's side only), a blown ball/strike call
+// belongs to the plate umpire regardless of which team is pitching, so this
+// sums BOTH halves of every earlier inning plus the top half of the current
+// one, adding its bottom half too only when `half` itself is 'bottom'. Since
+// a half only renders this card once revealed, and reveal only ever advances
+// one half at a time, every half this sums over is already something the
+// user has revealed — same footing as challenges.js/umpireFavor.js's
+// cumulative-through-the-reached-half figures. Null (not 0) until at least
+// one summed half has tracking data, so an all-MiLB game hides the stat
+// instead of showing a false 0 — same convention as missedCalls itself.
+export function rollingMissedCalls(derivedMap, inningNum, half) {
+  let total = null
+  for (let n = 1; n <= inningNum; n++) {
+    const halves = n < inningNum || half === 'bottom' ? ['top', 'bottom'] : ['top']
+    for (const h of halves) {
+      const mc = derivedMap[key(n, h)]?.missedCalls
+      if (mc != null) total = (total ?? 0) + mc
+    }
   }
   return total
 }

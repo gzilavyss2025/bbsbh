@@ -16,7 +16,7 @@ import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { RollingLine } from '../components/RollingLine.jsx'
-import { StatBox } from '../components/StatBox.jsx'
+import { StatBox, AbsCard } from '../components/StatBox.jsx'
 import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
 import { HalfInning } from '../components/HalfInning.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'
@@ -414,15 +414,31 @@ export function InningViewer({
             revealed={curIdx <= revealedThrough}
             runExpectancy={runExpectancy}
           />
-          <WinProbChart
-            points={winProbPoints}
-            bigPlays={winProbBigPlays}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            awayId={meta.away.id}
-            homeId={meta.home.id}
-            partial
-          />
+          {/* Wide layout only: ABS Challenges moves here, above the chart,
+              instead of trailing the pitch-stat grid on the left — see
+              AbsCard's own header comment. On a phone this wrapper is
+              display:contents (index.css) so WinProbChart falls back into
+              the same single flex column as everything else, with the
+              phone's own ABS copy staying inline inside StatBox. */}
+          <div className="innings__row2-right">
+            <AbsCard
+              feed={feed}
+              inning={effInning}
+              half={effHalf}
+              revealed={curIdx <= revealedThrough}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+            />
+            <WinProbChart
+              points={winProbPoints}
+              bigPlays={winProbBigPlays}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+              awayId={meta.away.id}
+              homeId={meta.home.id}
+              partial
+            />
+          </div>
         </div>
 
         {/* Reference band. On the wide layout: pitchers + the fielding defense

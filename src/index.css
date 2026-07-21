@@ -60,7 +60,8 @@
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose)
-     - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap` */
+     - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap`
+     - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc` */
 #root * {
   text-transform: uppercase;
 }
@@ -4856,6 +4857,25 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
+  /* The innings view's stat card shares its row with the win-probability
+     column (see .innings__row2 above) rather than running the app's full
+     measure, so the worst-call diagram and favor meter don't have room for
+     a real two-up grid there even past this shared breakpoint — stay
+     stacked instead of squeezing both into half a narrow card. The box
+     score's own (unscoped) use of .umpfavor__row is unaffected — it runs
+     the full-width card the two-up grid was designed for. */
+  .innings__statbox .umpfavor__row {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Stacked full-card-width, .wcall__body's 124px-diagram + 1fr-text grid
+     otherwise stretches the text column across the whole card, stranding
+     the diagram at the left edge with empty space beside it — cap its width
+     and center the pair instead. */
+  .innings__statbox .wcall__body {
+    max-width: 380px;
+    margin: 0 auto;
+  }
 }
 .umpfavor__title {
   display: block;
@@ -5688,8 +5708,22 @@ body {
   margin-top: var(--space-3);
   margin-bottom: var(--space-4);
 }
-.innings__row2 > .winprob {
+.innings__row2-right > .winprob {
   margin-bottom: 0;
+}
+/* Below the wide breakpoint this wrapper doesn't exist as a layout box at
+   all — `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
+   `.statbox__abs`), so `.winprob` just needs to fall back into the same
+   single flex column as everything else in `.innings__row2`. */
+.innings__row2-right {
+  display: contents;
+}
+/* Mobile-first hidden: AbsCard's whole-card copy of ABS Challenges only
+   exists for the wide layout's right column (unhidden in the min-width:740px
+   block below) — on a phone the ABS block stays inline inside StatBox
+   (`.statbox__abs`, always visible there below this breakpoint). */
+.abscard {
+  display: none;
 }
 @media (min-width: 740px) {
   .innings__row2 {
@@ -7625,28 +7659,19 @@ body {
   max-height: 220px;
 }
 
-.winprob__band--away { fill: var(--winprob-away); }
-.winprob__band--home { fill: var(--winprob-home); }
-
-.winprob__inningline {
-  stroke: var(--rule-grid);
-  stroke-width: 1;
+/* The bands themselves are filled via inline `style={{ fill: url(#...) }}`
+   (WinProbChart.jsx) — a per-instance <pattern> id, so plain class selectors
+   can't target the fill here. What the rules below DO style is each
+   pattern's own tile content: that club's own color at FULL strength (set
+   per-instance via the --band-color custom property, one rule shared by
+   both bands rather than a --away/--home pair) plus a full-opacity copy of
+   the logo laid over it — a solid, saturated banner rather than a faint
+   watermark. */
+.winprob__patternbg {
+  fill: var(--band-color, var(--graphite-soft));
 }
-
-/* Subtler than .winprob__inningline — marks the top/bottom split within a
-   single inning rather than the boundary between two innings. */
-.winprob__halfline {
-  stroke: var(--rule-grid);
-  stroke-width: 1;
-  stroke-dasharray: 2 2;
-  opacity: 0.45;
-}
-
-.winprob__mid {
-  stroke: var(--graphite-soft);
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-  opacity: 0.75;
+.winprob__patternlogo {
+  opacity: 1;
 }
 
 .winprob__line {
@@ -7672,7 +7697,6 @@ body {
   stroke-width: 1.5;
 }
 
-.winprob__ylabel,
 .winprob__inninglabel {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
@@ -7830,6 +7854,15 @@ body {
   min-width: 0;
   margin: 0;
   color: var(--text-body);
+}
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment) —
+   the #root-scoped selector (1 id + 1 class) outweighs the global `#root *`
+   uppercase, same pattern as #root .pbp__desc above. A plain `.winprob__
+   ledger-desc { text-transform: none }` rule here would lose to `#root *` on
+   specificity and silently stay shouted — this is that exact trap. */
+#root .winprob__ledger-desc {
+  text-transform: none; /* caps-exempt: feed-sourced play description reads as a natural sentence, same idiom as .pbp__desc */
 }
 
 /* ------------------------------------------------------------- margin notes
@@ -10372,15 +10405,54 @@ body {
     gap: var(--space-4);
   }
 
-  /* Row 2: the stat card and win-probability chart side by side. */
+  /* Row 2: the stat card and win-probability column side by side. The stat
+     card carries far more content here (R/H/E/LOB + pitch counts, the
+     umpire-favor/worst-call pair, and the three Statcast cards — ABS moves
+     OUT to the right column below) than the chart + ledger, so it gets the
+     larger share of the row rather than an even split. */
   .innings__row2 {
     flex-direction: row;
     align-items: stretch;
   }
-  .innings__row2 > .statbox,
-  .innings__row2 > .winprob {
-    flex: 1 1 0;
+  .innings__row2 > .statbox {
+    flex: 3 1 0;
     min-width: 0;
+  }
+  /* ABS Challenges moves here from the stat card (see .statbox__abs below
+     and AbsCard's own header comment) — its own card stacked above the
+     chart, both sharing the right column's narrower share of the row. */
+  .innings__row2-right {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 2 1 0;
+    min-width: 0;
+  }
+  .innings__row2-right > .winprob {
+    flex: 1 1 auto;
+  }
+  .innings__statbox .statbox__abs {
+    display: none;
+  }
+  /* AbsCard's own card chrome — same recipe as .winprob/.marginnotes (border,
+     radius, background, shadow, padding) since here it sits directly in the
+     right column rather than nested inside StatBox's card. */
+  .abscard {
+    display: block;
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-card);
+    padding: 12px 14px;
+  }
+  /* Same fix as .statbox .statgrid above: SealBox's own .statgrid wrapper
+     paints --surface-inset once revealed, which otherwise shows through as
+     a whiter patch inside this card's own background. */
+  .abscard .statgrid {
+    background: none;
+  }
+  .abscard .abs {
+    margin-top: 0;
   }
 
   /* Reference band: pitchers + fielding defense on the left, both lineups on
