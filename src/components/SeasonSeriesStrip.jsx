@@ -118,9 +118,7 @@ function SeasonSeriesCell({ cell, onSelect, cellRef }) {
   )
 }
 
-// Local wall-clock time off the schedule feed's `gameDate` — every
-// not-yet-Final game in the strip is inherently a scheduled estimate, not a
-// posted first pitch, so it's always labeled as such (see GameCard's
+// Local wall-clock time off the schedule feed's `gameDate` (see GameCard's
 // StatusText for the same toLocaleTimeString approach on the slate card).
 function GameTime({ gameDate }) {
   if (!gameDate) return <span className="seasonseries__time">TBD</span>
@@ -130,10 +128,5 @@ function GameTime({ gameDate }) {
   } catch {
     return <span className="seasonseries__time">TBD</span>
   }
-  return (
-    <span className="seasonseries__time">
-      {local}
-      <span className="seasonseries__estimated">Estimated</span>
-    </span>
-  )
+  return <span className="seasonseries__time">{local}</span>
 }

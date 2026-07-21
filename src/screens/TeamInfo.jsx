@@ -315,7 +315,11 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
       <BallparkFact venue={info.venue} />
-      <Fact label="First pitch" value={info.firstPitch} />
+      {/* Scheduled start (posted the moment the game exists) until the box
+          score's own "First pitch" info line posts once the game's under
+          way — the actual time then overwrites the estimate in place, same
+          cell, rather than adding a second fact. */}
+      <Fact label="First pitch" value={info.firstPitch || info.scheduledTime} />
       <Fact
         label="Weather"
         value={scorebookWeatherLoading ? '…' : scorebookWeather?.text}

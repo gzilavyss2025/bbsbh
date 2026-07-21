@@ -19321,6 +19321,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-1) var(--space-2);
   border: var(--bw-hair) solid transparent;
@@ -19366,18 +19367,7 @@ body {
   font-size: var(--fs-body);
   font-weight: var(--w-bold);
   color: var(--text-body);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   line-height: var(--lh-solid);
-}
-.seasonseries__estimated {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 .seasonseries__date {
   font-family: var(--font-mono);
