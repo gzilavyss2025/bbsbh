@@ -341,21 +341,23 @@ export async function fetchHeadToHead(teamAId, teamBId, season, sportId = 1) {
 }
 
 const SEASON_SERIES_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id,score,isWinner,venue,name,timeZone,tz'
 
-// Same lookup as fetchHeadToHead, but WITH each side's score — feeds the
-// lineup page's season-series strip (see SeasonSeriesStrip.jsx). Safe to carry
-// scores here: every row this returns is either already Final (a genuinely
-// different, already-decided game) or not yet played (the feed reports no
-// score). The one exception — the game the strip is rendered ON — is the
-// caller's job to blank out via seasonSeriesCells' `currentGamePk`, since this
-// fetcher has no notion of which game is "the current page". Regular season
-// only ('R'), same dedupe-by-gamePk handling as fetchHeadToHead.
+// Same lookup as fetchHeadToHead, but WITH each side's score and the venue's
+// own time zone — feeds the lineup page's season-series strip (see
+// SeasonSeriesStrip.jsx, which shows each game at its own ballpark's local
+// time rather than the viewer's). Safe to carry scores here: every row this
+// returns is either already Final (a genuinely different, already-decided
+// game) or not yet played (the feed reports no score). The one exception —
+// the game the strip is rendered ON — is the caller's job to blank out via
+// seasonSeriesCells' `currentGamePk`, since this fetcher has no notion of
+// which game is "the current page". Regular season only ('R'), same
+// dedupe-by-gamePk handling as fetchHeadToHead.
 export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
   if (!teamAId || !teamBId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R&fields=${SEASON_SERIES_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamAId}&season=${season}&gameType=R&hydrate=venue(timezone)&fields=${SEASON_SERIES_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()
@@ -376,6 +378,7 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
           final,
           awayScore: final ? (awaySide?.score ?? null) : null,
           homeScore: final ? (homeSide?.score ?? null) : null,
+          tzId: g.venue?.timeZone?.id ?? null,
         })
       }
     }

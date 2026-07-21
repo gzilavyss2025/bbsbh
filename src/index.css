@@ -19309,10 +19309,18 @@ body {
 }
 .seasonseries__strip {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   gap: var(--space-2);
   overflow-x: auto;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
+}
+/* Once every card already fits (no nav arrows rendered — see
+   SeasonSeriesStrip.jsx's canScroll check), center the row instead of
+   left-packing it and leaving a lopsided gap on the wide desktop spread. */
+.seasonseries__strip--fit {
+  justify-content: center;
 }
 .seasonseries__cell {
   flex: 0 0 auto;

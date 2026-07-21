@@ -31,15 +31,16 @@ test('seasonSeriesCells: the currently-viewed game never carries a score, even i
   assert.equal(cell.loserScore, null)
 })
 
-test('seasonSeriesCells: a not-yet-played game carries no score or winner', () => {
+test('seasonSeriesCells: a not-yet-played game carries no score or winner, and passes its venue tz through', () => {
   const games = [
-    { gamePk: 3, apiDate: '2026-08-25', gameDate: '2026-08-25T23:10:00Z', gameNumber: 1, awayId: MIL, homeId: NYM, final: false, awayScore: null, homeScore: null },
+    { gamePk: 3, apiDate: '2026-08-25', gameDate: '2026-08-25T23:10:00Z', gameNumber: 1, awayId: MIL, homeId: NYM, final: false, awayScore: null, homeScore: null, tzId: 'America/New_York' },
   ]
   const [cell] = seasonSeriesCells(games, MIL, /* currentGamePk */ 2)
   assert.equal(cell.final, false)
   assert.equal(cell.winnerId, null)
   assert.equal(cell.isHome, false)
   assert.equal(cell.opponentAbbr, 'NYM')
+  assert.equal(cell.tzId, 'America/New_York')
 })
 
 test('seasonSeriesCells: degrades to no winner on a tied/incomplete score pair', () => {

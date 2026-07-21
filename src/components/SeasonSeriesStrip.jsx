@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchSeasonSeries } from '../api/schedule.js'
 import { seasonSeriesCells } from '../api/seasonSeries.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -30,12 +30,32 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   )
 
   const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk)
+  const [canScroll, setCanScroll] = useState(false)
 
   // Land on the current game centered in the strip rather than wherever it
   // falls chronologically — with a full multi-leg series (see the August leg
   // in the real-game case study) it can be several cards deep.
   useEffect(() => {
     currentCellRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [cells.length])
+
+  // Nav arrows (and the room they take up) only make sense once the strip
+  // actually overflows its card — a short series that already fits shouldn't
+  // show dead controls flanking a lopsided gap of white space. Re-checked on
+  // resize since the wide desktop spread can fit every game the narrow phone
+  // layout would need to scroll through.
+  useEffect(() => {
+    const el = stripRef.current
+    if (!el) return
+    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
+    check()
+    const ro = new ResizeObserver(check)
+    ro.observe(el)
+    window.addEventListener('resize', check)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', check)
+    }
   }, [cells.length])
 
   if (cells.length < 2) return null
@@ -56,15 +76,20 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
     <section className="metriccard seasonseries">
       <SectionMasthead title="Season series" as="h3" />
       <div className="metriccard__body seasonseries__body">
-        <button
-          type="button"
-          className="seasonseries__nav seasonseries__nav--left"
-          onClick={() => scroll(-1)}
-          aria-label="Scroll to earlier games"
+        {canScroll && (
+          <button
+            type="button"
+            className="seasonseries__nav seasonseries__nav--left"
+            onClick={() => scroll(-1)}
+            aria-label="Scroll to earlier games"
+          >
+            &#8249;
+          </button>
+        )}
+        <div
+          className={`seasonseries__strip${canScroll ? '' : ' seasonseries__strip--fit'}`}
+          ref={stripRef}
         >
-          &#8249;
-        </button>
-        <div className="seasonseries__strip" ref={stripRef}>
           {cells.map((cell) => (
             <SeasonSeriesCell
               key={cell.gamePk}
@@ -74,14 +99,16 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
             />
           ))}
         </div>
-        <button
-          type="button"
-          className="seasonseries__nav seasonseries__nav--right"
-          onClick={() => scroll(1)}
-          aria-label="Scroll to later games"
-        >
-          &#8250;
-        </button>
+        {canScroll && (
+          <button
+            type="button"
+            className="seasonseries__nav seasonseries__nav--right"
+            onClick={() => scroll(1)}
+            aria-label="Scroll to later games"
+          >
+            &#8250;
+          </button>
+        )}
       </div>
     </section>
   )
@@ -108,7 +135,7 @@ function SeasonSeriesCell({ cell, onSelect, cellRef }) {
           </span>
         </>
       ) : (
-        <GameTime gameDate={cell.gameDate} />
+        <GameTime gameDate={cell.gameDate} tzId={cell.tzId} />
       )}
       <span className="seasonseries__date">
         {dateLabel}
@@ -118,13 +145,19 @@ function SeasonSeriesCell({ cell, onSelect, cellRef }) {
   )
 }
 
-// Local wall-clock time off the schedule feed's `gameDate` (see GameCard's
-// StatusText for the same toLocaleTimeString approach on the slate card).
-function GameTime({ gameDate }) {
-  if (!gameDate) return <span className="seasonseries__time">TBD</span>
+// The ballpark's OWN local time — a strip spanning both legs of a series can
+// mix two time zones, so this deliberately never falls back to the viewer's
+// device time zone the way GameCard's slate-card clock does; missing tzId
+// just reads TBD rather than silently showing the wrong city's clock.
+function GameTime({ gameDate, tzId }) {
+  if (!gameDate || !tzId) return <span className="seasonseries__time">TBD</span>
   let local
   try {
-    local = new Date(gameDate).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    local = new Date(gameDate).toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: tzId,
+    })
   } catch {
     return <span className="seasonseries__time">TBD</span>
   }

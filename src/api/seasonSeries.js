@@ -28,6 +28,7 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
       gamePk: g.gamePk,
       apiDate: g.apiDate,
       gameDate: g.gameDate,
+      tzId: g.tzId,
       gameNumber: g.gameNumber,
       isHome,
       isCurrent,
