@@ -85,17 +85,30 @@ function dayBefore(iso) {
 // with no MLB action at all this season should get his stints at every MiLB
 // level combined, not just the level he's at right now (e.g. a mid-season
 // AA -> AAA promotion), reported at his current MiLB level.
-async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate, sportId, hasDebuted, levelStat }) {
-  if (sportId === 1) return { stat: levelStat, sportId: 1 }
+//
+// That blended `stat` is right for the TILES (one "how's he doing this year"
+// line) but wrong for the career register's current-level row, which must
+// stay level-scoped (one row per season+level, never blended — see
+// careerRegisterView) — so this also returns `levelOnlyStat`, the same
+// date-cut window filtered to just `sportId`, for the register to key its
+// current-season row on instead. A recent AA -> AAA call-up would otherwise
+// show his AAA row as AA+AAA combined while a separate, correct AA row also
+// exists (the AA line double-counted into both rows).
+export async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate, sportId, hasDebuted, levelStat }) {
+  if (sportId === 1) return { stat: levelStat, sportId: 1, levelOnlyStat: levelStat }
   if (hasDebuted) {
     const mlbSplits = await fetchPersonStats(id, {
       type: 'byDateRange', group, season, startDate, endDate, sportId: 1,
     })
     const mlbStat = aggregateSplits(mlbSplits, group)
-    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return { stat: mlbStat, sportId: 1 }
+    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return { stat: mlbStat, sportId: 1, levelOnlyStat: mlbStat }
   }
   const milbSplits = await fetchMilbByDateRange(id, group, season, startDate, endDate)
-  return { stat: aggregateSplits(milbSplits, group), sportId }
+  return {
+    stat: aggregateSplits(milbSplits, group),
+    sportId,
+    levelOnlyStat: aggregateSplits(milbSplits.filter((s) => s.sport?.id === sportId), group),
+  }
 }
 
 // Fetch the position-innings data for one CAREER scope ('mlb' | 'milb') — the
@@ -240,7 +253,7 @@ export async function loadPlayer(id, asOf) {
         // live club is a MiLB affiliate (Rowdy Tellez), else his current level.
         // The register and the promoted other-level tiles both key off it, so
         // the current-season line lands on the right level's row.
-        const { stat: tileStat, sportId: tileSportId } = await resolveCurrentSeasonStat({
+        const { stat: tileStat, sportId: tileSportId, levelOnlyStat } = await resolveCurrentSeasonStat({
           id, group, season, startDate, endDate, sportId: currentActivitySportId,
           hasDebuted: Boolean(bio.debut), levelStat: seasonStat,
         })
@@ -248,7 +261,7 @@ export async function loadPlayer(id, asOf) {
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
           gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
-          currentSeason: season, currentSportId: tileSportId, debutYear, tileStat,
+          currentSeason: season, currentSportId: tileSportId, debutYear, tileStat, levelOnlyStat,
           logTagLevel: onRehab,
           warByYear: warByYearFor(id, group, warCurrent, warHistory),
           transactions: txns,

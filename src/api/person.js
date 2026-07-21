@@ -1814,13 +1814,16 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, logTagLevel = false, warByYear = {}, transactions = [] }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, levelOnlyStat, logTagLevel = false, warByYear = {}, transactions = [] }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
-  // the "Current season" tiles AND stands in for the register's current-season
-  // row (see careerRegisterView), so that row can't move mid-game. `tileStat`
-  // (see loadPlayer) resolves to the live level for an active MLB/single-level
+  // the "Current season" tiles, so it can't move mid-game. `tileStat` (see
+  // loadPlayer) resolves to the live level for an active MLB/single-level
   // player but combines every MiLB level played this year when he hasn't
-  // appeared in the majors this season.
+  // appeared in the majors this season — right for a one-line tile, but the
+  // register's current-season row (see careerRegisterView) must stay
+  // level-scoped, so it uses `levelOnlyStat` (the same date-cut window,
+  // filtered to just this level) instead, falling back to `tileStat` only if
+  // that level-only fetch came back empty.
   const season = aggregateSplits(seasonSplits, group)
   const career = aggregateSplits(careerSplits, group)
   const tile = tileStat ?? season
@@ -1858,7 +1861,7 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     // the date-cut `tile` so it can't move mid-game.
     register: careerRegisterView({
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
-      currentStat: tile, currentSeason, currentSportId, careerStat: career, warByYear,
+      currentStat: levelOnlyStat ?? tile, currentSeason, currentSportId, careerStat: career, warByYear,
       transactions,
     }),
     milestones: milestoneWatchView(milestoneStat, group),

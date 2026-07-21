@@ -1033,7 +1033,7 @@ export function TeamPage({ id, asOf, sportId }) {
                     return (
                       <tr key={p.playerId}>
                         <td className="lft yr">{p.orgRank}</td>
-                        <td className="lft opp">
+                        <td className="lft ledger__sub">
                           <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
                           {isTop && <span className="prospecttable__top">#{p.topRank}</span>}
                         </td>

@@ -21,7 +21,7 @@ export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = ''
   const hide = new Set(hideNarrow)
   const narrow = (i) => (hide.has(i) ? 'col-narrow-hide' : '')
   const cellClass = (i) =>
-    [i === 0 ? 'lft yr' : i < leftCols ? 'lft opp' : '', narrow(i)].filter(Boolean).join(' ')
+    [i === 0 ? 'lft yr' : i < leftCols ? 'lft ledger__sub' : '', narrow(i)].filter(Boolean).join(' ')
   const footRows = totals ?? (total ? [{ label: totalLabel, cells: total }] : [])
   return (
     <div className="ledger-wrap">
