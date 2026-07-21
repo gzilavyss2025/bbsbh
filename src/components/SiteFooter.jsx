@@ -3,6 +3,12 @@ import { GameFinderModal } from './GameFinderModal.jsx'
 import { FavoriteTeamModal } from './FavoriteTeamModal.jsx'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { useNav } from '../lib/nav.js'
+import { REPORT_PAGES } from '../lib/reportPages.js'
+
+// Same REPORT_PAGES list the hamburger menu (SiteMenu.jsx) uses, plus About
+// as the trailing item — see reportPages.js for why Logo Sheet isn't here
+// (it's already one of the bordered action buttons above).
+const FOOTER_LINKS = [...REPORT_PAGES, { label: 'About', path: '/about' }]
 
 const YEAR = new Date().getFullYear()
 
@@ -57,51 +63,18 @@ export function SiteFooter({
       </div>
 
       <div className="sitefooter__more">
-        {/* Roughly "current-season and busiest first, archival/meta last":
-            standings/leaders/Top Games (what's happening now) → player-
-            trajectory pages (prospects/rehab/milestones) → the deeper-cut
-            umpire stats → season-culminating history → About, always last. */}
         <p className="sitefooter__more-label">More Baseball</p>
         <nav className="sitefooter__links" aria-label="More pages">
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/standings')}>
-            Standings
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/leaders')}>
-            League Leaders
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/top-games')}>
-            Top Games
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/prospects')}>
-            Top MLB Prospects
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/rehab')}>
-            Rehab assignments
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/milestones')}>
-            Milestone Watch
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/umpires')}>
-            Umpire Rankings
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/awards')}>
-            Awards History
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/postseason-history')}>
-            Postseason History
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/postseason-leaders')}>
-            Postseason Leaders
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/all-star-rosters')}>
-            All Star Game
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/all-star-legacy')}>
-            All-Star Legacy
-          </button>
-          <button type="button" className="sitefooter__link" onClick={() => navigate('/about')}>
-            About
-          </button>
+          {FOOTER_LINKS.map((item) => (
+            <button
+              key={item.path}
+              type="button"
+              className="sitefooter__link"
+              onClick={() => navigate(item.path)}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
       </div>
 

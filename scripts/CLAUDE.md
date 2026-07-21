@@ -427,5 +427,9 @@ Re-run only to fold in a new season.
   when Claude works in that directory, so the always-loaded root stays cheap. When
   it fails, move detail into the relevant nested file or `docs/*` and leave a pointer
   in root — don't just raise the cap.
+- `check-report-pages.mjs` — fails if `SiteMenu.jsx` (the hamburger menu) or
+  `SiteFooter.jsx` (the slate's "More Baseball" list) stops importing the shared
+  `REPORT_PAGES` array from `src/lib/reportPages.js` — the guard against those two
+  page lists silently drifting apart again.
 - `vercel-ignore-build.sh` — Vercel's Ignored Build Step (skips a deploy when a push
   touched only docs/scripts/workflow files). See `docs/development.md`.

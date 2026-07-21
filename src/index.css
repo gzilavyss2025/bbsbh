@@ -121,14 +121,19 @@ body {
 }
 
 /* ------------------------------------------------------------- slate header
-   The title, level tabs and date stepper ride together above the game
-   cards, divided from them by a bottom rule. Full-bleed to the screen edges
-   (the negative gutter margins) so the rule spans edge-to-edge. The slate
-   controls scroll away with the cards — deliberately NOT sticky, so a long
-   slate reads as one continuous sheet rather than pinning the tabs over the
-   games. No solid fill: the graph-paper grid is faint enough now to run
-   underneath the header without needing a canvas-color patch to separate it
-   from the tabs/date row below. */
+   The date stepper's own banner, just below the topbar (title + level tabs,
+   `.topbar--slate` below — a SIBLING of this div, not a child; see
+   GameSelect.jsx), divided from the game cards by a bottom rule. Full-bleed
+   to the screen edges (the negative gutter margins) so the rule spans
+   edge-to-edge. On a phone this scrolls away with the cards — deliberately
+   NOT sticky, so a long slate reads as one continuous sheet rather than
+   pinning a row over the games. No solid fill here: the graph-paper grid is
+   faint enough to run underneath without needing a canvas-color patch to
+   separate it from the date row. Desktop/iPad pins the topbar above (not
+   this) once there's room to spare it — see `.topbar--slate` inside the
+   `min-width: 740px` block below. It has to live OUTSIDE this div: a sticky
+   element can only stay stuck for as long as its own parent stays in the
+   scrollport, and `.slatehead` alone is only ever one short row tall. */
 .slatehead {
   margin: 0 calc(-1 * var(--app-gutter));
   padding: 0 var(--app-gutter) 8px;
@@ -10372,6 +10377,21 @@ body {
 @media (min-width: 740px) {
   .screen {
     max-width: 960px;
+  }
+
+  /* Pin the topbar (title, level toggle, search/menu icons) while the game
+     list scrolls beneath it — enough spare width here that a docked row
+     doesn't crowd the slate. The date stepper right below it is deliberately
+     left OUT: it's a per-day control, not a nav landmark worth nagging
+     "you're on {date}" through every scroll, and paging days already
+     reloads the slate under it anyway. Opaque backdrop so cards scroll
+     cleanly underneath instead of showing through (the phone-width
+     .slatehead comment above explains why no fill is needed there). */
+  .topbar--slate {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-canvas);
   }
 
   /* ---- slate: two game cards per row. The date stepper holds a phone-ish
