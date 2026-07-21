@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { lineupStrengthFor } from '../api/lineupStrength.js'
 import { InfoPopover } from './InfoPopover.jsx'
 import { SectionMasthead } from './SectionMasthead.jsx'
@@ -9,12 +9,20 @@ import { SectionMasthead } from './SectionMasthead.jsx'
 // docs/lineup-strength.md). Spoiler-free by construction: the starting nine +
 // season aggregates, nothing from tonight's game.
 //
-// The hero score + tier pill lead; the deductions read as an
+// The hero score + tier pill lead; the deductions read as ONE
 // Expected → Starting → cost table (each row a legible line-item, never a
 // mystery number). One row per FINDING, not per slot: a move that shuffles
 // several players is a single row whose `shifts` line names the men in between,
-// so a rotation never reads as several separate benchings. Renders nothing
-// without data (MiLB, file missing) or before the lineup posts.
+// so a rotation never reads as several separate benchings.
+//
+// One table on purpose. The model now makes a single kind of claim — the optimum
+// would use somebody else, or use the same nine differently — and all three row
+// kinds (`sub`, `chain`, `shuffle`) share the same columns, so splitting them
+// would be a distinction without a difference. Measured over three slates: 89
+// subs, 68 chains, ONE shuffle. The old second table was for the rows that no
+// longer exist (out-of-position starts, priced off a familiarity discount the
+// model dropped — see docs/lineup-strength.md). Renders nothing without data
+// (MiLB, file missing) or before the lineup posts.
 export function LineupStrengthCard({ data, teamId, lineup }) {
   const result = useMemo(() => {
     if (!data || !teamId || (lineup?.length ?? 0) < 9) return null
@@ -35,21 +43,14 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
   // the nightly build): his slot is left out of the grade, said plainly here so a
   // partial grade never masquerades as a complete one.
   const unvalued = ungraded ?? []
-  // Two kinds of finding, each with its own table. A personnel change — someone
-  // better is on the bench — reads as Expected → Starting. A shuffle keeps the
-  // same nine and only disagrees about who should DH, a much softer claim, so it
-  // is kept visually separate rather than mixed in with players who aren't
-  // playing at all. Both priced in points off the 10, not raw runs/game.
-  const swaps = rows.filter((r) => r.kind === 'sub' || r.kind === 'chain')
-  const shuffles = rows.filter((r) => r.kind === 'shuffle')
 
   return (
     <section className="metriccard lstrength">
       <SectionMasthead title="Lineup strength">
         <InfoPopover label="How lineup strength is graded">
-          Graded against this roster’s best nine on season numbers. Rest days,
-          nagging injuries, and matchup plans the model can’t see all count
-          against it.
+          Graded on season bats and gloves against the best nine this roster
+          could field. Rest days, nagging injuries, and matchup plans the model
+          can’t see all count against it.
         </InfoPopover>
       </SectionMasthead>
       <div className="metriccard__body">
@@ -74,9 +75,9 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
           <p className="lstrength__clean">Full-strength — this is the roster’s best nine.</p>
         )}
 
-        {swaps.length > 0 && (
+        {rows.length > 0 && (
           <table className="lstrength__table">
-            <caption className="lstrength__caption">Stronger bats on the bench</caption>
+            <caption className="lstrength__caption">Where the best nine differs</caption>
             <thead>
               <tr>
                 <th className="lstrength__pos" scope="col">Pos</th>
@@ -86,61 +87,38 @@ export function LineupStrengthCard({ data, teamId, lineup }) {
               </tr>
             </thead>
             <tbody>
-              {swaps.map((r, i) => (
-                <tr key={i}>
-                  <td className="lstrength__pos">{r.pos}</td>
-                  <td className="lstrength__expected">
-                    {r.expected}
-                    {r.shifts.length > 0 && (
-                      <span className="lstrength__shifts">{r.shifts.join(', ')}</span>
-                    )}
-                  </td>
-                  <td className="lstrength__starting">
-                    {r.starting ?? '—'}
-                    {r.startingPos && (
-                      <span className="lstrength__shifts">from {r.startingPos}</span>
-                    )}
-                  </td>
-                  <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
-                </tr>
+              {rows.map((r, i) => (
+                <Fragment key={i}>
+                  <tr>
+                    <td className="lstrength__pos">{r.pos}</td>
+                    <td className="lstrength__expected">{r.expected}</td>
+                    <td className="lstrength__starting">
+                      {r.starting ?? '—'}
+                      {/* A chain's departing player is NOT at the slot being
+                          filled, so his own position rides with his name —
+                          otherwise the row reads as though he played there. */}
+                      {r.startingPos && (
+                        <span className="lstrength__from">from {r.startingPos}</span>
+                      )}
+                    </td>
+                    <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
+                  </tr>
+                  {/* Who else moves, on its own full-width line: a four-man chain
+                      wraps to nonsense inside a ~110px phone column. */}
+                  {r.shifts.length > 0 && (
+                    <tr>
+                      <td />
+                      <td className="lstrength__shifts" colSpan={3}>
+                        {r.shifts.join(', ')}
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
         )}
 
-        {shuffles.length > 0 && (
-          <table className="lstrength__table">
-            <caption className="lstrength__caption">Same nine, better arranged</caption>
-            <thead>
-              <tr>
-                <th className="lstrength__pos" scope="col">Pos</th>
-                <th scope="col">Expected</th>
-                <th scope="col">Starting</th>
-                <th className="lstrength__pts" scope="col">Impact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shuffles.map((r, i) => (
-                <tr key={i}>
-                  <td className="lstrength__pos">{r.pos}</td>
-                  <td className="lstrength__expected">
-                    {r.expected}
-                    {r.shifts.length > 0 && (
-                      <span className="lstrength__shifts">{r.shifts.join(', ')}</span>
-                    )}
-                  </td>
-                  <td className="lstrength__starting">
-                    {r.starting ?? '—'}
-                    {r.startingPos && (
-                      <span className="lstrength__shifts">from {r.startingPos}</span>
-                    )}
-                  </td>
-                  <td className="lstrength__pts">−{r.scoreImpact.toFixed(1)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
       </div>
     </section>
   )

@@ -19710,9 +19710,18 @@ body {
   color: var(--text-body);
 }
 /* "Who else moves" under a multi-player change — the men shifted between the
-   player coming in and the player going out. Muted and on its own line so the
-   row still reads as one finding rather than several. */
+   player coming in and the player going out. Its own full-width line, muted and
+   indented under the names, so the row still reads as ONE finding rather than
+   several, and a four-man chain doesn't wrap to nonsense in a narrow column. */
 .lstrength__shifts {
+  padding-top: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+/* The departing player's own position, when a chain means it isn't the slot
+   being filled. Rides under his name rather than inline, to keep the name column
+   scannable. */
+.lstrength__from {
   display: block;
   font-size: var(--fs-caption);
   color: var(--text-caption);
