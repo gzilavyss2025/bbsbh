@@ -1,7 +1,7 @@
 {
   "version": 1,
   "date": "2026-07-19",
-  "generatedAt": "2026-07-20T14:06:29.096Z",
+  "generatedAt": "2026-07-20T21:08:00.091Z",
   "bySportId": {
     "1": {
       "topPerformers": {
@@ -312,10 +312,59 @@
       },
       "highlights": [
         {
+          "gamePk": 824330,
+          "gameNumber": 1,
+          "tier": 1,
+          "score": 41.822218579019165,
+          "headline": "Hunter Goodman: 3 HR — CIN 9, COL 6",
+          "story": "Hunter Goodman: 3 HR",
+          "signals": [
+            "multiHr"
+          ],
+          "performer": {
+            "id": 696100,
+            "name": "Hunter Goodman",
+            "teamId": 115,
+            "teamAbbr": "COL",
+            "position": "C",
+            "stat": "3 HR"
+          },
+          "subCaption": null,
+          "turningPoint": {
+            "desc": "Nathaniel Lowe homers (11) on a fly ball to right field",
+            "batterId": 663993,
+            "batterName": "Nathaniel Lowe",
+            "batterTeamId": 113,
+            "batterTeamAbbr": "CIN",
+            "batterPos": "DH",
+            "inning": 1,
+            "half": "top",
+            "awayAbbr": "CIN",
+            "awayScore": 3,
+            "homeAbbr": "COL",
+            "homeScore": 0
+          },
+          "teams": {
+            "winner": {
+              "id": 113,
+              "abbr": "CIN",
+              "r": 9
+            },
+            "loser": {
+              "id": 115,
+              "abbr": "COL",
+              "r": 6
+            }
+          },
+          "boxScorePath": "/07192026/cincol/boxscore"
+        },
+        {
           "gamePk": 824897,
+          "gameNumber": 1,
           "tier": 1,
           "score": 34.07593697995562,
           "headline": "Drake Baldwin: 2 HR — TEX 5, ATL 8",
+          "story": "Drake Baldwin: 2 HR",
           "signals": [
             "multiHr"
           ],
@@ -328,52 +377,41 @@
             "stat": "2 HR"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Wyatt Langford pops out to first baseman Matt Olson in foul territory",
+            "batterId": 694671,
+            "batterName": "Wyatt Langford",
+            "batterTeamId": 140,
+            "batterTeamAbbr": "TEX",
+            "batterPos": "LF",
+            "inning": 6,
+            "half": "top",
+            "awayAbbr": "TEX",
+            "awayScore": 3,
+            "homeAbbr": "ATL",
+            "homeScore": 4
+          },
           "teams": {
             "winner": {
               "id": 144,
-              "abbr": "ATL"
+              "abbr": "ATL",
+              "r": 8
             },
             "loser": {
               "id": 140,
-              "abbr": "TEX"
+              "abbr": "TEX",
+              "r": 5
             }
           },
           "boxScorePath": "/07192026/texatl/boxscore"
         },
         {
-          "gamePk": 824330,
-          "tier": 1,
-          "score": 34.07593697995562,
-          "headline": "Tyler Stephenson: 2 HR — CIN 9, COL 6",
-          "signals": [
-            "multiHr"
-          ],
-          "performer": {
-            "id": 663886,
-            "name": "Tyler Stephenson",
-            "teamId": 113,
-            "teamAbbr": "CIN",
-            "position": "C",
-            "stat": "2 HR"
-          },
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 113,
-              "abbr": "CIN"
-            },
-            "loser": {
-              "id": 115,
-              "abbr": "COL"
-            }
-          },
-          "boxScorePath": "/07192026/cincol/boxscore"
-        },
-        {
           "gamePk": 824086,
+          "gameNumber": 1,
           "tier": 1,
           "score": 28.34686894262107,
           "headline": "Jackson Merrill: 2 HR — SD 19, KC 2",
+          "story": "Jackson Merrill: 2 HR",
           "signals": [
             "multiHr",
             "blowout"
@@ -387,75 +425,82 @@
             "stat": "2 HR"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Fernando Tatis Jr. singles on a line drive to right fielder Jac Caglianone",
+            "batterId": 665487,
+            "batterName": "Fernando Tatis Jr.",
+            "batterTeamId": 135,
+            "batterTeamAbbr": "SD",
+            "batterPos": "RF",
+            "inning": 2,
+            "half": "top",
+            "awayAbbr": "SD",
+            "awayScore": 2,
+            "homeAbbr": "KC",
+            "homeScore": 1
+          },
           "teams": {
             "winner": {
               "id": 135,
-              "abbr": "SD"
+              "abbr": "SD",
+              "r": 19
             },
             "loser": {
               "id": 118,
-              "abbr": "KC"
+              "abbr": "KC",
+              "r": 2
             }
           },
           "boxScorePath": "/07192026/sdkc/boxscore"
         },
         {
           "gamePk": 825057,
+          "gameNumber": 1,
           "tier": 2,
           "score": 31.841433380615204,
-          "headline": "The AZ outlasted the STL in 10 innings — STL 7, AZ 8",
+          "headline": "The Diamondbacks outlasted the Cardinals in 10 innings — STL 7, AZ 8",
+          "story": "The Diamondbacks outlasted the Cardinals in 10 innings",
           "signals": [
             "extras",
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Nolan Arenado homers (13) on a fly ball to left center field",
+            "batterId": 571448,
+            "batterName": "Nolan Arenado",
+            "batterTeamId": 109,
+            "batterTeamAbbr": "AZ",
+            "batterPos": "3B",
+            "inning": 8,
+            "half": "bottom",
+            "awayAbbr": "STL",
+            "awayScore": 7,
+            "homeAbbr": "AZ",
+            "homeScore": 7
+          },
           "teams": {
             "winner": {
               "id": 109,
-              "abbr": "AZ"
+              "abbr": "AZ",
+              "r": 8
             },
             "loser": {
               "id": 138,
-              "abbr": "STL"
+              "abbr": "STL",
+              "r": 7
             }
           },
           "boxScorePath": "/07192026/stlaz/boxscore"
         },
         {
-          "gamePk": 822786,
-          "tier": 2,
-          "score": 18.8063653849365,
-          "headline": "Sean Burke was dominant (Game Score 80) — CWS 3, TOR 0",
-          "signals": [
-            "gameScore"
-          ],
-          "performer": {
-            "id": 680732,
-            "name": "Sean Burke",
-            "teamId": 145,
-            "teamAbbr": "CWS",
-            "position": "P",
-            "stat": "Game Score 80"
-          },
-          "subCaption": "Team is 7-8 in his starts",
-          "teams": {
-            "winner": {
-              "id": 145,
-              "abbr": "CWS"
-            },
-            "loser": {
-              "id": 141,
-              "abbr": "TOR"
-            }
-          },
-          "boxScorePath": "/07192026/cwstor/boxscore"
-        },
-        {
           "gamePk": 823523,
+          "gameNumber": 1,
           "tier": 2,
-          "score": 18.8063653849365,
-          "headline": "Yoshinobu Yamamoto was dominant (Game Score 85) — LAD 8, NYY 2",
+          "score": 22.119921692859513,
+          "headline": "Yoshinobu Yamamoto was dominant (9.0 IP, 4 H, 2 ER, 0 BB, 7 K) — LAD 8, NYY 2",
+          "story": "Yoshinobu Yamamoto was dominant (9.0 IP, 4 H, 2 ER, 0 BB, 7 K)",
           "signals": [
             "gameScore"
           ],
@@ -465,144 +510,421 @@
             "teamId": 119,
             "teamAbbr": "LAD",
             "position": "P",
-            "stat": "Game Score 85"
+            "stat": "9.0 IP, 4 H, 2 ER, 0 BB, 7 K"
           },
           "subCaption": "Team is 11-6 in his starts",
+          "turningPoint": {
+            "desc": "Shohei Ohtani doubles (17) on a sharp line drive to right fielder Max Schuemann",
+            "batterId": 660271,
+            "batterName": "Shohei Ohtani",
+            "batterTeamId": 119,
+            "batterTeamAbbr": "LAD",
+            "batterPos": "DH",
+            "inning": 3,
+            "half": "top",
+            "awayAbbr": "LAD",
+            "awayScore": 1,
+            "homeAbbr": "NYY",
+            "homeScore": 0
+          },
           "teams": {
             "winner": {
               "id": 119,
-              "abbr": "LAD"
+              "abbr": "LAD",
+              "r": 8
             },
             "loser": {
               "id": 147,
-              "abbr": "NYY"
+              "abbr": "NYY",
+              "r": 2
             }
           },
           "boxScorePath": "/07192026/ladnyy/boxscore"
         },
         {
-          "gamePk": 823439,
+          "gamePk": 822786,
+          "gameNumber": 1,
           "tier": 2,
           "score": 18.8063653849365,
-          "headline": "Nolan McLean was dominant (Game Score 80) — NYM 6, PHI 1",
+          "headline": "Sean Burke was dominant (6.2 IP, 2 H, 0 ER, 1 BB, 5 K) — CWS 3, TOR 0",
+          "story": "Sean Burke was dominant (6.2 IP, 2 H, 0 ER, 1 BB, 5 K)",
           "signals": [
             "gameScore"
           ],
           "performer": {
-            "id": 690997,
-            "name": "Nolan McLean",
-            "teamId": 121,
-            "teamAbbr": "NYM",
+            "id": 680732,
+            "name": "Sean Burke",
+            "teamId": 145,
+            "teamAbbr": "CWS",
             "position": "P",
-            "stat": "Game Score 80"
+            "stat": "6.2 IP, 2 H, 0 ER, 1 BB, 5 K"
           },
-          "subCaption": "Team is 8-11 in his starts",
+          "subCaption": null,
+          "turningPoint": {
+            "desc": "Colson Montgomery homers (24) on a fly ball to right center field",
+            "batterId": 695657,
+            "batterName": "Colson Montgomery",
+            "batterTeamId": 145,
+            "batterTeamAbbr": "CWS",
+            "batterPos": "SS",
+            "inning": 6,
+            "half": "top",
+            "awayAbbr": "CWS",
+            "awayScore": 2,
+            "homeAbbr": "TOR",
+            "homeScore": 0
+          },
           "teams": {
             "winner": {
-              "id": 121,
-              "abbr": "NYM"
+              "id": 145,
+              "abbr": "CWS",
+              "r": 3
             },
             "loser": {
-              "id": 143,
-              "abbr": "PHI"
+              "id": 141,
+              "abbr": "TOR",
+              "r": 0
             }
           },
-          "boxScorePath": "/07192026/nymphi/boxscore"
-        },
-        {
-          "gamePk": 823764,
-          "tier": 2,
-          "score": 18.8063653849365,
-          "headline": "Eury Pérez was dominant (Game Score 80) — MIA 1, MIL 3",
-          "signals": [
-            "gameScore"
-          ],
-          "performer": {
-            "id": 691587,
-            "name": "Eury Pérez",
-            "teamId": 146,
-            "teamAbbr": "MIA",
-            "position": "P",
-            "stat": "Game Score 80"
-          },
-          "subCaption": "Team is 8-8 in his starts",
-          "teams": {
-            "winner": {
-              "id": 158,
-              "abbr": "MIL"
-            },
-            "loser": {
-              "id": 146,
-              "abbr": "MIA"
-            }
-          },
-          "boxScorePath": "/07192026/miamil/boxscore"
+          "boxScorePath": "/07192026/cwstor/boxscore"
         },
         {
           "gamePk": 823521,
+          "gameNumber": 2,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The NYY edged the LAD by a single run — LAD 1, NYY 2",
+          "headline": "The Yankees edged the Dodgers by a single run — LAD 1, NYY 2",
+          "story": "The Yankees edged the Dodgers by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Jazz Chisholm Jr. homers (14) on a fly ball to left center field",
+            "batterId": 665862,
+            "batterName": "Jazz Chisholm Jr.",
+            "batterTeamId": 147,
+            "batterTeamAbbr": "NYY",
+            "batterPos": "2B",
+            "inning": 8,
+            "half": "bottom",
+            "awayAbbr": "LAD",
+            "awayScore": 1,
+            "homeAbbr": "NYY",
+            "homeScore": 2
+          },
           "teams": {
             "winner": {
               "id": 147,
-              "abbr": "NYY"
+              "abbr": "NYY",
+              "r": 2
             },
             "loser": {
               "id": 119,
-              "abbr": "LAD"
+              "abbr": "LAD",
+              "r": 1
             }
           },
           "boxScorePath": "/07192026/ladnyy-2/boxscore"
         },
         {
           "gamePk": 824007,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The LAA edged the DET by a single run — DET 2, LAA 3",
+          "headline": "The Angels edged the Tigers by a single run — DET 2, LAA 3",
+          "story": "The Angels edged the Tigers by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Dillon Dingler strikes out swinging",
+            "batterId": 693307,
+            "batterName": "Dillon Dingler",
+            "batterTeamId": 116,
+            "batterTeamAbbr": "DET",
+            "batterPos": "DH",
+            "inning": 5,
+            "half": "top",
+            "awayAbbr": "DET",
+            "awayScore": 1,
+            "homeAbbr": "LAA",
+            "homeScore": 1
+          },
           "teams": {
             "winner": {
               "id": 108,
-              "abbr": "LAA"
+              "abbr": "LAA",
+              "r": 3
             },
             "loser": {
               "id": 116,
-              "abbr": "DET"
+              "abbr": "DET",
+              "r": 2
             }
           },
           "boxScorePath": "/07192026/detlaa/boxscore"
+        }
+      ],
+      "results": [
+        {
+          "gamePk": 822786,
+          "away": {
+            "id": 145,
+            "abbr": "CWS",
+            "r": 3
+          },
+          "home": {
+            "id": 141,
+            "abbr": "TOR",
+            "r": 0
+          },
+          "winnerId": 145,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/cwstor/boxscore"
+        },
+        {
+          "gamePk": 823523,
+          "away": {
+            "id": 119,
+            "abbr": "LAD",
+            "r": 8
+          },
+          "home": {
+            "id": 147,
+            "abbr": "NYY",
+            "r": 2
+          },
+          "winnerId": 119,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/ladnyy/boxscore"
+        },
+        {
+          "gamePk": 823521,
+          "away": {
+            "id": 119,
+            "abbr": "LAD",
+            "r": 1
+          },
+          "home": {
+            "id": 147,
+            "abbr": "NYY",
+            "r": 2
+          },
+          "winnerId": 147,
+          "gameNumber": 2,
+          "boxScorePath": "/07192026/ladnyy-2/boxscore"
+        },
+        {
+          "gamePk": 824739,
+          "away": {
+            "id": 139,
+            "abbr": "TB",
+            "r": 1
+          },
+          "home": {
+            "id": 111,
+            "abbr": "BOS",
+            "r": 6
+          },
+          "winnerId": 111,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/tbbos/boxscore"
+        },
+        {
+          "gamePk": 823439,
+          "away": {
+            "id": 121,
+            "abbr": "NYM",
+            "r": 6
+          },
+          "home": {
+            "id": 143,
+            "abbr": "PHI",
+            "r": 1
+          },
+          "winnerId": 121,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/nymphi/boxscore"
+        },
+        {
+          "gamePk": 824897,
+          "away": {
+            "id": 140,
+            "abbr": "TEX",
+            "r": 5
+          },
+          "home": {
+            "id": 144,
+            "abbr": "ATL",
+            "r": 8
+          },
+          "winnerId": 144,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/texatl/boxscore"
+        },
+        {
+          "gamePk": 824411,
+          "away": {
+            "id": 134,
+            "abbr": "PIT",
+            "r": 7
+          },
+          "home": {
+            "id": 114,
+            "abbr": "CLE",
+            "r": 1
+          },
+          "winnerId": 134,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/pitcle/boxscore"
+        },
+        {
+          "gamePk": 824168,
+          "away": {
+            "id": 110,
+            "abbr": "BAL",
+            "r": 5
+          },
+          "home": {
+            "id": 117,
+            "abbr": "HOU",
+            "r": 2
+          },
+          "winnerId": 110,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/balhou/boxscore"
+        },
+        {
+          "gamePk": 824086,
+          "away": {
+            "id": 135,
+            "abbr": "SD",
+            "r": 19
+          },
+          "home": {
+            "id": 118,
+            "abbr": "KC",
+            "r": 2
+          },
+          "winnerId": 135,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/sdkc/boxscore"
+        },
+        {
+          "gamePk": 823764,
+          "away": {
+            "id": 146,
+            "abbr": "MIA",
+            "r": 1
+          },
+          "home": {
+            "id": 158,
+            "abbr": "MIL",
+            "r": 3
+          },
+          "winnerId": 158,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/miamil/boxscore"
         },
         {
           "gamePk": 824653,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 9-run laugher for the CHC — MIN 1, CHC 10",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 112,
-              "abbr": "CHC"
-            },
-            "loser": {
-              "id": 142,
-              "abbr": "MIN"
-            }
+          "away": {
+            "id": 142,
+            "abbr": "MIN",
+            "r": 1
           },
+          "home": {
+            "id": 112,
+            "abbr": "CHC",
+            "r": 10
+          },
+          "winnerId": 112,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/minchc/boxscore"
+        },
+        {
+          "gamePk": 824330,
+          "away": {
+            "id": 113,
+            "abbr": "CIN",
+            "r": 9
+          },
+          "home": {
+            "id": 115,
+            "abbr": "COL",
+            "r": 6
+          },
+          "winnerId": 113,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/cincol/boxscore"
+        },
+        {
+          "gamePk": 824978,
+          "away": {
+            "id": 120,
+            "abbr": "WSH",
+            "r": 5
+          },
+          "home": {
+            "id": 133,
+            "abbr": "ATH",
+            "r": 2
+          },
+          "winnerId": 120,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/wshath/boxscore"
+        },
+        {
+          "gamePk": 824007,
+          "away": {
+            "id": 116,
+            "abbr": "DET",
+            "r": 2
+          },
+          "home": {
+            "id": 108,
+            "abbr": "LAA",
+            "r": 3
+          },
+          "winnerId": 108,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/detlaa/boxscore"
+        },
+        {
+          "gamePk": 823113,
+          "away": {
+            "id": 137,
+            "abbr": "SF",
+            "r": 3
+          },
+          "home": {
+            "id": 136,
+            "abbr": "SEA",
+            "r": 6
+          },
+          "winnerId": 136,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/sfsea/boxscore"
+        },
+        {
+          "gamePk": 825057,
+          "away": {
+            "id": 138,
+            "abbr": "STL",
+            "r": 7
+          },
+          "home": {
+            "id": 109,
+            "abbr": "AZ",
+            "r": 8
+          },
+          "winnerId": 109,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/stlaz/boxscore"
         }
       ],
       "superlatives": {
@@ -945,9 +1267,11 @@
       "highlights": [
         {
           "gamePk": 815952,
+          "gameNumber": 1,
           "tier": 1,
           "score": 34.07593697995562,
           "headline": "Robert Moore: 2 HR — LHV 9, OMA 12",
+          "story": "Robert Moore: 2 HR",
           "signals": [
             "multiHr"
           ],
@@ -960,193 +1284,475 @@
             "stat": "2 HR"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Andrew Velazquez singles on a ground ball to right fielder Bryan De La Cruz",
+            "batterId": 623205,
+            "batterName": "Andrew Velazquez",
+            "batterTeamId": 541,
+            "batterTeamAbbr": "OMA",
+            "batterPos": "SS",
+            "inning": 2,
+            "half": "bottom",
+            "awayAbbr": "LHV",
+            "awayScore": 4,
+            "homeAbbr": "OMA",
+            "homeScore": 2
+          },
           "teams": {
             "winner": {
               "id": 541,
-              "abbr": "OMA"
+              "abbr": "OMA",
+              "r": 12
             },
             "loser": {
               "id": 1410,
-              "abbr": "LHV"
+              "abbr": "LHV",
+              "r": 9
             }
           },
           "boxScorePath": "/07192026/lhvoma/boxscore"
         },
         {
           "gamePk": 815804,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The SWB edged the WOR by a single run — WOR 4, SWB 5",
+          "headline": "The RailRiders edged the Red Sox by a single run — WOR 4, SWB 5",
+          "story": "The RailRiders edged the Red Sox by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "J.C. Escarra homers (4) on a fly ball to right field",
+            "batterId": 641555,
+            "batterName": "J.C. Escarra",
+            "batterTeamId": 531,
+            "batterTeamAbbr": "SWB",
+            "batterPos": "C",
+            "inning": 9,
+            "half": "bottom",
+            "awayAbbr": "WOR",
+            "awayScore": 4,
+            "homeAbbr": "SWB",
+            "homeScore": 5
+          },
           "teams": {
             "winner": {
               "id": 531,
-              "abbr": "SWB"
+              "abbr": "SWB",
+              "r": 5
             },
             "loser": {
               "id": 533,
-              "abbr": "WOR"
+              "abbr": "WOR",
+              "r": 4
             }
           },
           "boxScorePath": "/07192026/worswb/boxscore"
         },
         {
           "gamePk": 815582,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The TOL edged the GWN by a single run — GWN 5, TOL 6",
+          "headline": "The Mud Hens edged the Stripers by a single run — GWN 5, TOL 6",
+          "story": "The Mud Hens edged the Stripers by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Jace Jung homers (16) on a fly ball to right field",
+            "batterId": 690291,
+            "batterName": "Jace Jung",
+            "batterTeamId": 512,
+            "batterTeamAbbr": "TOL",
+            "batterPos": "2B",
+            "inning": 9,
+            "half": "bottom",
+            "awayAbbr": "GWN",
+            "awayScore": 5,
+            "homeAbbr": "TOL",
+            "homeScore": 6
+          },
           "teams": {
             "winner": {
               "id": 512,
-              "abbr": "TOL"
+              "abbr": "TOL",
+              "r": 6
             },
             "loser": {
               "id": 431,
-              "abbr": "GWN"
+              "abbr": "GWN",
+              "r": 5
             }
           },
           "boxScorePath": "/07192026/gwntol/boxscore"
         },
         {
           "gamePk": 816702,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The DUR edged the CLT by a single run — CLT 2, DUR 3",
+          "headline": "The Bulls edged the Knights by a single run — CLT 2, DUR 3",
+          "story": "The Bulls edged the Knights by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Carson Williams triples (4) on a sharp fly ball to center fielder Dru Baker",
+            "batterId": 700246,
+            "batterName": "Carson Williams",
+            "batterTeamId": 234,
+            "batterTeamAbbr": "DUR",
+            "batterPos": "2B",
+            "inning": 7,
+            "half": "bottom",
+            "awayAbbr": "CLT",
+            "awayScore": 2,
+            "homeAbbr": "DUR",
+            "homeScore": 3
+          },
           "teams": {
             "winner": {
               "id": 234,
-              "abbr": "DUR"
+              "abbr": "DUR",
+              "r": 3
             },
             "loser": {
               "id": 494,
-              "abbr": "CLT"
+              "abbr": "CLT",
+              "r": 2
             }
           },
           "boxScorePath": "/07192026/cltdur/boxscore"
         },
         {
           "gamePk": 815058,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The RR edged the LV by a single run — LV 4, RR 5",
+          "headline": "The Express edged the Aviators by a single run — LV 4, RR 5",
+          "story": "The Express edged the Aviators by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Aaron Zavala doubles (21) on a fly ball to center fielder Brayan Buelvas",
+            "batterId": 701648,
+            "batterName": "Aaron Zavala",
+            "batterTeamId": 102,
+            "batterTeamAbbr": "RR",
+            "batterPos": "LF",
+            "inning": 5,
+            "half": "bottom",
+            "awayAbbr": "LV",
+            "awayScore": 4,
+            "homeAbbr": "RR",
+            "homeScore": 4
+          },
           "teams": {
             "winner": {
               "id": 102,
-              "abbr": "RR"
+              "abbr": "RR",
+              "r": 5
             },
             "loser": {
               "id": 400,
-              "abbr": "LV"
+              "abbr": "LV",
+              "r": 4
             }
           },
           "boxScorePath": "/07192026/lvrr/boxscore"
         },
         {
           "gamePk": 815358,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The ELP edged the SUG by a single run — SUG 3, ELP 4",
+          "headline": "The Chihuahuas edged the Space Cowboys by a single run — SUG 3, ELP 4",
+          "story": "The Chihuahuas edged the Space Cowboys by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Bryce Johnson singles on a line drive to center fielder Jake Meyers",
+            "batterId": 669369,
+            "batterName": "Bryce Johnson",
+            "batterTeamId": 4904,
+            "batterTeamAbbr": "ELP",
+            "batterPos": "CF",
+            "inning": 9,
+            "half": "bottom",
+            "awayAbbr": "SUG",
+            "awayScore": 3,
+            "homeAbbr": "ELP",
+            "homeScore": 4
+          },
           "teams": {
             "winner": {
               "id": 4904,
-              "abbr": "ELP"
+              "abbr": "ELP",
+              "r": 4
             },
             "loser": {
               "id": 5434,
-              "abbr": "SUG"
+              "abbr": "SUG",
+              "r": 3
             }
           },
           "boxScorePath": "/07192026/sugelp/boxscore"
+        }
+      ],
+      "results": [
+        {
+          "gamePk": 816783,
+          "away": {
+            "id": 484,
+            "abbr": "IND",
+            "r": 13
+          },
+          "home": {
+            "id": 445,
+            "abbr": "COL",
+            "r": 6
+          },
+          "winnerId": 484,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/indcol/boxscore"
+        },
+        {
+          "gamePk": 815652,
+          "away": {
+            "id": 422,
+            "abbr": "BUF",
+            "r": 7
+          },
+          "home": {
+            "id": 552,
+            "abbr": "SYR",
+            "r": 3
+          },
+          "winnerId": 422,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/bufsyr/boxscore"
+        },
+        {
+          "gamePk": 815804,
+          "away": {
+            "id": 533,
+            "abbr": "WOR",
+            "r": 4
+          },
+          "home": {
+            "id": 531,
+            "abbr": "SWB",
+            "r": 5
+          },
+          "winnerId": 531,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/worswb/boxscore"
         },
         {
           "gamePk": 816182,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 9-run laugher for the IOW — IOW 13, MEM 4",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 451,
-              "abbr": "IOW"
-            },
-            "loser": {
-              "id": 235,
-              "abbr": "MEM"
-            }
+          "away": {
+            "id": 451,
+            "abbr": "IOW",
+            "r": 13
           },
+          "home": {
+            "id": 235,
+            "abbr": "MEM",
+            "r": 4
+          },
+          "winnerId": 451,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/iowmem/boxscore"
         },
         {
-          "gamePk": 814754,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 10-run laugher for the OKC — OKC 10, TAC 0",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 238,
-              "abbr": "OKC"
-            },
-            "loser": {
-              "id": 529,
-              "abbr": "TAC"
-            }
+          "gamePk": 815725,
+          "away": {
+            "id": 416,
+            "abbr": "LOU",
+            "r": 1
           },
+          "home": {
+            "id": 1960,
+            "abbr": "STP",
+            "r": 5
+          },
+          "winnerId": 1960,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/loustp/boxscore"
+        },
+        {
+          "gamePk": 815582,
+          "away": {
+            "id": 431,
+            "abbr": "GWN",
+            "r": 5
+          },
+          "home": {
+            "id": 512,
+            "abbr": "TOL",
+            "r": 6
+          },
+          "winnerId": 512,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/gwntol/boxscore"
+        },
+        {
+          "gamePk": 814754,
+          "away": {
+            "id": 238,
+            "abbr": "OKC",
+            "r": 10
+          },
+          "home": {
+            "id": 529,
+            "abbr": "TAC",
+            "r": 0
+          },
+          "winnerId": 238,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/okctac/boxscore"
         },
         {
-          "gamePk": 815875,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 9-run laugher for the ROC — JAX 2, ROC 11",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 534,
-              "abbr": "ROC"
-            },
-            "loser": {
-              "id": 564,
-              "abbr": "JAX"
-            }
+          "gamePk": 816702,
+          "away": {
+            "id": 494,
+            "abbr": "CLT",
+            "r": 2
           },
+          "home": {
+            "id": 234,
+            "abbr": "DUR",
+            "r": 3
+          },
+          "winnerId": 234,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/cltdur/boxscore"
+        },
+        {
+          "gamePk": 815875,
+          "away": {
+            "id": 564,
+            "abbr": "JAX",
+            "r": 2
+          },
+          "home": {
+            "id": 534,
+            "abbr": "ROC",
+            "r": 11
+          },
+          "winnerId": 534,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/jaxroc/boxscore"
+        },
+        {
+          "gamePk": 815952,
+          "away": {
+            "id": 1410,
+            "abbr": "LHV",
+            "r": 9
+          },
+          "home": {
+            "id": 541,
+            "abbr": "OMA",
+            "r": 12
+          },
+          "winnerId": 541,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/lhvoma/boxscore"
+        },
+        {
+          "gamePk": 815058,
+          "away": {
+            "id": 400,
+            "abbr": "LV",
+            "r": 4
+          },
+          "home": {
+            "id": 102,
+            "abbr": "RR",
+            "r": 5
+          },
+          "winnerId": 102,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/lvrr/boxscore"
+        },
+        {
+          "gamePk": 816102,
+          "away": {
+            "id": 568,
+            "abbr": "NOR",
+            "r": 0
+          },
+          "home": {
+            "id": 556,
+            "abbr": "NAS",
+            "r": 4
+          },
+          "winnerId": 556,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/nornas/boxscore"
+        },
+        {
+          "gamePk": 815428,
+          "away": {
+            "id": 105,
+            "abbr": "SAC",
+            "r": 5
+          },
+          "home": {
+            "id": 342,
+            "abbr": "ABQ",
+            "r": 1
+          },
+          "winnerId": 105,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/sacabq/boxscore"
+        },
+        {
+          "gamePk": 814903,
+          "away": {
+            "id": 2310,
+            "abbr": "RNO",
+            "r": 6
+          },
+          "home": {
+            "id": 561,
+            "abbr": "SL",
+            "r": 8
+          },
+          "winnerId": 561,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/rnosl/boxscore"
+        },
+        {
+          "gamePk": 815358,
+          "away": {
+            "id": 5434,
+            "abbr": "SUG",
+            "r": 3
+          },
+          "home": {
+            "id": 4904,
+            "abbr": "ELP",
+            "r": 4
+          },
+          "winnerId": 4904,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/sugelp/boxscore"
         }
       ],
       "superlatives": {
@@ -1489,9 +2095,11 @@
       "highlights": [
         {
           "gamePk": 818385,
+          "gameNumber": 1,
           "tier": 1,
           "score": 34.07593697995562,
           "headline": "Pedro León: 2 HR — ALT 6, REA 10",
+          "story": "Pedro León: 2 HR",
           "signals": [
             "multiHr"
           ],
@@ -1504,171 +2112,435 @@
             "stat": "2 HR"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Alex Binelas homers (20) on a line drive to right center field",
+            "batterId": 681323,
+            "batterName": "Alex Binelas",
+            "batterTeamId": 522,
+            "batterTeamAbbr": "REA",
+            "batterPos": "1B",
+            "inning": 1,
+            "half": "bottom",
+            "awayAbbr": "ALT",
+            "awayScore": 0,
+            "homeAbbr": "REA",
+            "homeScore": 3
+          },
           "teams": {
             "winner": {
               "id": 522,
-              "abbr": "REA"
+              "abbr": "REA",
+              "r": 10
             },
             "loser": {
               "id": 452,
-              "abbr": "ALT"
+              "abbr": "ALT",
+              "r": 6
             }
           },
           "boxScorePath": "/07192026/altrea/boxscore"
         },
         {
           "gamePk": 817275,
+          "gameNumber": 1,
           "tier": 2,
           "score": 36.23718483782268,
-          "headline": "The NWA outlasted the MID in 11 innings — MID 7, NWA 8",
+          "headline": "The Naturals outlasted the RockHounds in 11 innings — MID 7, NWA 8",
+          "story": "The Naturals outlasted the RockHounds in 11 innings",
           "signals": [
             "extras",
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Omar Hernandez homers (4) on a fly ball to left field",
+            "batterId": 683427,
+            "batterName": "Omar Hernandez",
+            "batterTeamId": 1350,
+            "batterTeamAbbr": "NWA",
+            "batterPos": "C",
+            "inning": 11,
+            "half": "bottom",
+            "awayAbbr": "MID",
+            "awayScore": 7,
+            "homeAbbr": "NWA",
+            "homeScore": 8
+          },
           "teams": {
             "winner": {
               "id": 1350,
-              "abbr": "NWA"
+              "abbr": "NWA",
+              "r": 8
             },
             "loser": {
               "id": 237,
-              "abbr": "MID"
+              "abbr": "MID",
+              "r": 7
             }
           },
           "boxScorePath": "/07192026/midnwa/boxscore"
         },
         {
           "gamePk": 818450,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The POR edged the SOM by a single run — SOM 1, POR 2",
+          "headline": "The Sea Dogs edged the Patriots by a single run — SOM 1, POR 2",
+          "story": "The Sea Dogs edged the Patriots by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Miguel Palma grounds into a double play, shortstop Mason White to second baseman Caden Rose to first baseman Brooks Brannon",
+            "batterId": 682692,
+            "batterName": "Miguel Palma",
+            "batterTeamId": 1956,
+            "batterTeamAbbr": "SOM",
+            "batterPos": "C",
+            "inning": 7,
+            "half": "top",
+            "awayAbbr": "SOM",
+            "awayScore": 0,
+            "homeAbbr": "POR",
+            "homeScore": 1
+          },
           "teams": {
             "winner": {
               "id": 546,
-              "abbr": "POR"
+              "abbr": "POR",
+              "r": 2
             },
             "loser": {
               "id": 1956,
-              "abbr": "SOM"
+              "abbr": "SOM",
+              "r": 1
             }
           },
           "boxScorePath": "/07192026/sompor/boxscore"
         },
         {
           "gamePk": 818796,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The CHE edged the HFD by a single run — HFD 4, CHE 5",
+          "headline": "The Baysox edged the Yard Goats by a single run — HFD 4, CHE 5",
+          "story": "The Baysox edged the Yard Goats by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Thomas Sosa homers (10) on a fly ball to right center field",
+            "batterId": 800449,
+            "batterName": "Thomas Sosa",
+            "batterTeamId": 418,
+            "batterTeamAbbr": "CHE",
+            "batterPos": "DH",
+            "inning": 8,
+            "half": "bottom",
+            "awayAbbr": "HFD",
+            "awayScore": 4,
+            "homeAbbr": "CHE",
+            "homeScore": 5
+          },
           "teams": {
             "winner": {
               "id": 418,
-              "abbr": "CHE"
+              "abbr": "CHE",
+              "r": 5
             },
             "loser": {
               "id": 538,
-              "abbr": "HFD"
+              "abbr": "HFD",
+              "r": 4
             }
           },
           "boxScorePath": "/07192026/hfdche/boxscore"
         },
         {
           "gamePk": 817205,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The CC edged the SA by a single run — CC 4, SA 3",
+          "headline": "The Hooks edged the Missions by a single run — CC 4, SA 3",
+          "story": "The Hooks edged the Missions by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Ryan Jackson grounds into a double play, second baseman Yamal Encarnacion to shortstop Max Holy to first baseman Will Bush",
+            "batterId": 810838,
+            "batterName": "Ryan Jackson",
+            "batterTeamId": 510,
+            "batterTeamAbbr": "SA",
+            "batterPos": "3B",
+            "inning": 6,
+            "half": "bottom",
+            "awayAbbr": "CC",
+            "awayScore": 4,
+            "homeAbbr": "SA",
+            "homeScore": 2
+          },
           "teams": {
             "winner": {
               "id": 482,
-              "abbr": "CC"
+              "abbr": "CC",
+              "r": 4
             },
             "loser": {
               "id": 510,
-              "abbr": "SA"
+              "abbr": "SA",
+              "r": 3
             }
           },
           "boxScorePath": "/07192026/ccsa/boxscore"
+        }
+      ],
+      "results": [
+        {
+          "gamePk": 818863,
+          "away": {
+            "id": 402,
+            "abbr": "AKR",
+            "r": 7
+          },
+          "home": {
+            "id": 505,
+            "abbr": "BNG",
+            "r": 3
+          },
+          "winnerId": 402,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/akrbng/boxscore"
+        },
+        {
+          "gamePk": 818662,
+          "away": {
+            "id": 463,
+            "abbr": "NH",
+            "r": 0
+          },
+          "home": {
+            "id": 547,
+            "abbr": "HBG",
+            "r": 2
+          },
+          "winnerId": 547,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/nhhbg/boxscore"
+        },
+        {
+          "gamePk": 818450,
+          "away": {
+            "id": 1956,
+            "abbr": "SOM",
+            "r": 1
+          },
+          "home": {
+            "id": 546,
+            "abbr": "POR",
+            "r": 2
+          },
+          "winnerId": 546,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/sompor/boxscore"
+        },
+        {
+          "gamePk": 818046,
+          "away": {
+            "id": 6325,
+            "abbr": "COL",
+            "r": 5
+          },
+          "home": {
+            "id": 498,
+            "abbr": "CHA",
+            "r": 2
+          },
+          "winnerId": 6325,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/colcha/boxscore"
+        },
+        {
+          "gamePk": 818796,
+          "away": {
+            "id": 538,
+            "abbr": "HFD",
+            "r": 4
+          },
+          "home": {
+            "id": 418,
+            "abbr": "CHE",
+            "r": 5
+          },
+          "winnerId": 418,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/hfdche/boxscore"
+        },
+        {
+          "gamePk": 817554,
+          "away": {
+            "id": 3898,
+            "abbr": "WCH",
+            "r": 12
+          },
+          "home": {
+            "id": 574,
+            "abbr": "ARK",
+            "r": 7
+          },
+          "winnerId": 3898,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/wchark/boxscore"
+        },
+        {
+          "gamePk": 818104,
+          "away": {
+            "id": 559,
+            "abbr": "RCT",
+            "r": 3
+          },
+          "home": {
+            "id": 247,
+            "abbr": "BIR",
+            "r": 7
+          },
+          "winnerId": 247,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/rctbir/boxscore"
+        },
+        {
+          "gamePk": 817275,
+          "away": {
+            "id": 237,
+            "abbr": "MID",
+            "r": 7
+          },
+          "home": {
+            "id": 1350,
+            "abbr": "NWA",
+            "r": 8
+          },
+          "winnerId": 1350,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/midnwa/boxscore"
         },
         {
           "gamePk": 817830,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 8-run laugher for the MTG — KNX 2, MTG 10",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 421,
-              "abbr": "MTG"
-            },
-            "loser": {
-              "id": 553,
-              "abbr": "KNX"
-            }
+          "away": {
+            "id": 553,
+            "abbr": "KNX",
+            "r": 2
           },
+          "home": {
+            "id": 421,
+            "abbr": "MTG",
+            "r": 10
+          },
+          "winnerId": 421,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/knxmtg/boxscore"
         },
         {
-          "gamePk": 818171,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 10-run laugher for the BLX — PNS 1, BLX 11",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 5015,
-              "abbr": "BLX"
-            },
-            "loser": {
-              "id": 4124,
-              "abbr": "PNS"
-            }
+          "gamePk": 818317,
+          "away": {
+            "id": 106,
+            "abbr": "ERI",
+            "r": 10
           },
+          "home": {
+            "id": 3410,
+            "abbr": "RIC",
+            "r": 5
+          },
+          "winnerId": 106,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/eriric/boxscore"
+        },
+        {
+          "gamePk": 818385,
+          "away": {
+            "id": 452,
+            "abbr": "ALT",
+            "r": 6
+          },
+          "home": {
+            "id": 522,
+            "abbr": "REA",
+            "r": 10
+          },
+          "winnerId": 522,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/altrea/boxscore"
+        },
+        {
+          "gamePk": 818171,
+          "away": {
+            "id": 4124,
+            "abbr": "PNS",
+            "r": 1
+          },
+          "home": {
+            "id": 5015,
+            "abbr": "BLX",
+            "r": 11
+          },
+          "winnerId": 5015,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/pnsblx/boxscore"
         },
         {
-          "gamePk": 817141,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 11-run laugher for the AMA — AMA 13, SPR 2",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 5368,
-              "abbr": "AMA"
-            },
-            "loser": {
-              "id": 440,
-              "abbr": "SPR"
-            }
+          "gamePk": 817205,
+          "away": {
+            "id": 482,
+            "abbr": "CC",
+            "r": 4
           },
+          "home": {
+            "id": 510,
+            "abbr": "SA",
+            "r": 3
+          },
+          "winnerId": 482,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/ccsa/boxscore"
+        },
+        {
+          "gamePk": 817415,
+          "away": {
+            "id": 260,
+            "abbr": "TUL",
+            "r": 4
+          },
+          "home": {
+            "id": 540,
+            "abbr": "FRI",
+            "r": 6
+          },
+          "winnerId": 540,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/tulfri/boxscore"
+        },
+        {
+          "gamePk": 817141,
+          "away": {
+            "id": 5368,
+            "abbr": "AMA",
+            "r": 13
+          },
+          "home": {
+            "id": 440,
+            "abbr": "SPR",
+            "r": 2
+          },
+          "winnerId": 5368,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/amaspr/boxscore"
         }
       ],
@@ -1988,9 +2860,11 @@
       "highlights": [
         {
           "gamePk": 819458,
+          "gameNumber": 1,
           "tier": 0,
           "score": 52.763344725898534,
           "headline": "No-hitter — QC 11, WIS 0",
+          "story": "No-hitter",
           "signals": [
             "noHitter",
             "blowout"
@@ -2004,23 +2878,41 @@
             "stat": "No-hitter"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Blake Mitchell singles on a line drive to right fielder Luis Castillo",
+            "batterId": 805810,
+            "batterName": "Blake Mitchell",
+            "batterTeamId": 565,
+            "batterTeamAbbr": "QC",
+            "batterPos": "C",
+            "inning": 4,
+            "half": "top",
+            "awayAbbr": "QC",
+            "awayScore": 0,
+            "homeAbbr": "WIS",
+            "homeScore": 0
+          },
           "teams": {
             "winner": {
               "id": 565,
-              "abbr": "QC"
+              "abbr": "QC",
+              "r": 11
             },
             "loser": {
               "id": 572,
-              "abbr": "WIS"
+              "abbr": "WIS",
+              "r": 0
             }
           },
           "boxScorePath": "/07192026/qcwis/boxscore"
         },
         {
           "gamePk": 822149,
+          "gameNumber": 1,
           "tier": 1,
           "score": 28.34686894262107,
           "headline": "Ike Irish: 2 HR — FRE 17, GVL 6",
+          "story": "Ike Irish: 2 HR",
           "signals": [
             "multiHr",
             "blowout"
@@ -2034,23 +2926,41 @@
             "stat": "2 HR"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Victor Figueroa homers (22) on a fly ball to right center field",
+            "batterId": 809372,
+            "batterName": "Victor Figueroa",
+            "batterTeamId": 493,
+            "batterTeamAbbr": "FRE",
+            "batterPos": "DH",
+            "inning": 5,
+            "half": "top",
+            "awayAbbr": "FRE",
+            "awayScore": 6,
+            "homeAbbr": "GVL",
+            "homeScore": 4
+          },
           "teams": {
             "winner": {
               "id": 493,
-              "abbr": "FRE"
+              "abbr": "FRE",
+              "r": 17
             },
             "loser": {
               "id": 428,
-              "abbr": "GVL"
+              "abbr": "GVL",
+              "r": 6
             }
           },
           "boxScorePath": "/07192026/fregvl/boxscore"
         },
         {
           "gamePk": 819204,
+          "gameNumber": 1,
           "tier": 1,
           "score": 28.34686894262107,
           "headline": "Carlos Jimenez: 2 HR — EVE 21, SPO 3",
+          "story": "Carlos Jimenez: 2 HR",
           "signals": [
             "multiHr",
             "blowout"
@@ -2064,127 +2974,411 @@
             "stat": "2 HR"
           },
           "subCaption": "Team is 8-3 when he goes deep",
+          "turningPoint": {
+            "desc": "Luis Suisbel homers (10) on a fly ball to left field",
+            "batterId": 692044,
+            "batterName": "Luis Suisbel",
+            "batterTeamId": 403,
+            "batterTeamAbbr": "EVE",
+            "batterPos": "1B",
+            "inning": 3,
+            "half": "top",
+            "awayAbbr": "EVE",
+            "awayScore": 4,
+            "homeAbbr": "SPO",
+            "homeScore": 1
+          },
           "teams": {
             "winner": {
               "id": 403,
-              "abbr": "EVE"
+              "abbr": "EVE",
+              "r": 21
             },
             "loser": {
               "id": 486,
-              "abbr": "SPO"
+              "abbr": "SPO",
+              "r": 3
             }
           },
           "boxScorePath": "/07192026/evespo/boxscore"
         },
         {
           "gamePk": 819860,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The DAY edged the LC by a single run — DAY 5, LC 4",
+          "headline": "The Dragons edged the Captains by a single run — DAY 5, LC 4",
+          "story": "The Dragons edged the Captains by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Marcus Smith triples (1) on a sharp line drive to center fielder Jace LaViolette",
+            "batterId": 687526,
+            "batterName": "Marcus Smith",
+            "batterTeamId": 459,
+            "batterTeamAbbr": "DAY",
+            "batterPos": "CF",
+            "inning": 9,
+            "half": "top",
+            "awayAbbr": "DAY",
+            "awayScore": 5,
+            "homeAbbr": "LC",
+            "homeScore": 4
+          },
           "teams": {
             "winner": {
               "id": 459,
-              "abbr": "DAY"
+              "abbr": "DAY",
+              "r": 5
             },
             "loser": {
               "id": 437,
-              "abbr": "LC"
+              "abbr": "LC",
+              "r": 4
             }
           },
           "boxScorePath": "/07192026/daylc/boxscore"
         },
         {
           "gamePk": 822409,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The BG edged the WS by a single run — WS 4, BG 5",
+          "headline": "The Hot Rods edged the Dash by a single run — WS 4, BG 5",
+          "story": "The Hot Rods edged the Dash by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Juanfel Peguero singles on a line drive to center fielder Ely Brown",
+            "batterId": 800346,
+            "batterName": "Juanfel Peguero",
+            "batterTeamId": 2498,
+            "batterTeamAbbr": "BG",
+            "batterPos": "2B",
+            "inning": 4,
+            "half": "bottom",
+            "awayAbbr": "WS",
+            "awayScore": 0,
+            "homeAbbr": "BG",
+            "homeScore": 2
+          },
           "teams": {
             "winner": {
               "id": 2498,
-              "abbr": "BG"
+              "abbr": "BG",
+              "r": 5
             },
             "loser": {
               "id": 580,
-              "abbr": "WS"
+              "abbr": "WS",
+              "r": 4
             }
           },
           "boxScorePath": "/07192026/wsbg/boxscore"
         },
         {
           "gamePk": 819130,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The TRI edged the VAN by a single run — VAN 1, TRI 2",
+          "headline": "The Dust Devils edged the Canadians by a single run — VAN 1, TRI 2",
+          "story": "The Dust Devils edged the Canadians by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Harold Coll homers (5) on a fly ball to left center field",
+            "batterId": 694563,
+            "batterName": "Harold Coll",
+            "batterTeamId": 460,
+            "batterTeamAbbr": "TRI",
+            "batterPos": "3B",
+            "inning": 7,
+            "half": "bottom",
+            "awayAbbr": "VAN",
+            "awayScore": 1,
+            "homeAbbr": "TRI",
+            "homeScore": 2
+          },
           "teams": {
             "winner": {
               "id": 460,
-              "abbr": "TRI"
+              "abbr": "TRI",
+              "r": 2
             },
             "loser": {
               "id": 435,
-              "abbr": "VAN"
+              "abbr": "VAN",
+              "r": 1
             }
           },
           "boxScorePath": "/07192026/vantri/boxscore"
-        },
+        }
+      ],
+      "results": [
         {
           "gamePk": 822334,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 12-run laugher for the HV — HV 14, BRK 2",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 537,
-              "abbr": "HV"
-            },
-            "loser": {
-              "id": 453,
-              "abbr": "BRK"
-            }
+          "away": {
+            "id": 537,
+            "abbr": "HV",
+            "r": 14
           },
+          "home": {
+            "id": 453,
+            "abbr": "BRK",
+            "r": 2
+          },
+          "winnerId": 537,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/hvbrk/boxscore"
         },
         {
-          "gamePk": 819391,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 10-run laugher for the HIL — HIL 12, EUG 2",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 419,
-              "abbr": "HIL"
-            },
-            "loser": {
-              "id": 461,
-              "abbr": "EUG"
-            }
+          "gamePk": 822337,
+          "away": {
+            "id": 537,
+            "abbr": "HV",
+            "r": 5
           },
+          "home": {
+            "id": 453,
+            "abbr": "BRK",
+            "r": 2
+          },
+          "winnerId": 537,
+          "gameNumber": 2,
+          "boxScorePath": "/07192026/hvbrk-2/boxscore"
+        },
+        {
+          "gamePk": 819860,
+          "away": {
+            "id": 459,
+            "abbr": "DAY",
+            "r": 5
+          },
+          "home": {
+            "id": 437,
+            "abbr": "LC",
+            "r": 4
+          },
+          "winnerId": 459,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/daylc/boxscore"
+        },
+        {
+          "gamePk": 821881,
+          "away": {
+            "id": 573,
+            "abbr": "ASH",
+            "r": 6
+          },
+          "home": {
+            "id": 432,
+            "abbr": "ROM",
+            "r": 3
+          },
+          "winnerId": 573,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/ashrom/boxscore"
+        },
+        {
+          "gamePk": 821818,
+          "away": {
+            "id": 427,
+            "abbr": "JS",
+            "r": 6
+          },
+          "home": {
+            "id": 426,
+            "abbr": "WIL",
+            "r": 10
+          },
+          "winnerId": 426,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/jswil/boxscore"
+        },
+        {
+          "gamePk": 819923,
+          "away": {
+            "id": 582,
+            "abbr": "WM",
+            "r": 8
+          },
+          "home": {
+            "id": 456,
+            "abbr": "GL",
+            "r": 6
+          },
+          "winnerId": 582,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/wmgl/boxscore"
+        },
+        {
+          "gamePk": 819792,
+          "away": {
+            "id": 584,
+            "abbr": "FW",
+            "r": 2
+          },
+          "home": {
+            "id": 499,
+            "abbr": "LAN",
+            "r": 6
+          },
+          "winnerId": 499,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/fwlan/boxscore"
+        },
+        {
+          "gamePk": 819595,
+          "away": {
+            "id": 443,
+            "abbr": "PEO",
+            "r": 0
+          },
+          "home": {
+            "id": 550,
+            "abbr": "SB",
+            "r": 7
+          },
+          "winnerId": 550,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/peosb/boxscore"
+        },
+        {
+          "gamePk": 820122,
+          "away": {
+            "id": 554,
+            "abbr": "BEL",
+            "r": 15
+          },
+          "home": {
+            "id": 492,
+            "abbr": "CR",
+            "r": 11
+          },
+          "winnerId": 554,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/belcr/boxscore"
+        },
+        {
+          "gamePk": 822409,
+          "away": {
+            "id": 580,
+            "abbr": "WS",
+            "r": 4
+          },
+          "home": {
+            "id": 2498,
+            "abbr": "BG",
+            "r": 5
+          },
+          "winnerId": 2498,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/wsbg/boxscore"
+        },
+        {
+          "gamePk": 819458,
+          "away": {
+            "id": 565,
+            "abbr": "QC",
+            "r": 11
+          },
+          "home": {
+            "id": 572,
+            "abbr": "WIS",
+            "r": 0
+          },
+          "winnerId": 565,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/qcwis/boxscore"
+        },
+        {
+          "gamePk": 822149,
+          "away": {
+            "id": 493,
+            "abbr": "FRE",
+            "r": 17
+          },
+          "home": {
+            "id": 428,
+            "abbr": "GVL",
+            "r": 6
+          },
+          "winnerId": 493,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/fregvl/boxscore"
+        },
+        {
+          "gamePk": 819204,
+          "away": {
+            "id": 403,
+            "abbr": "EVE",
+            "r": 21
+          },
+          "home": {
+            "id": 486,
+            "abbr": "SPO",
+            "r": 3
+          },
+          "winnerId": 403,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/evespo/boxscore"
+        },
+        {
+          "gamePk": 822073,
+          "away": {
+            "id": 477,
+            "abbr": "GBO",
+            "r": 3
+          },
+          "home": {
+            "id": 6324,
+            "abbr": "HCS",
+            "r": 7
+          },
+          "winnerId": 6324,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/gbohcs/boxscore"
+        },
+        {
+          "gamePk": 819391,
+          "away": {
+            "id": 419,
+            "abbr": "HIL",
+            "r": 12
+          },
+          "home": {
+            "id": 461,
+            "abbr": "EUG",
+            "r": 2
+          },
+          "winnerId": 419,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/hileug/boxscore"
+        },
+        {
+          "gamePk": 819130,
+          "away": {
+            "id": 435,
+            "abbr": "VAN",
+            "r": 1
+          },
+          "home": {
+            "id": 460,
+            "abbr": "TRI",
+            "r": 2
+          },
+          "winnerId": 460,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/vantri/boxscore"
         }
       ],
       "superlatives": {
@@ -2503,9 +3697,11 @@
       "highlights": [
         {
           "gamePk": 820980,
+          "gameNumber": 1,
           "tier": 1,
           "score": 34.07593697995562,
           "headline": "Gavin Turley: 2 HR — SJ 3, STK 6",
+          "story": "Gavin Turley: 2 HR",
           "signals": [
             "multiHr"
           ],
@@ -2518,23 +3714,41 @@
             "stat": "2 HR"
           },
           "subCaption": "Team is 6-1 when he goes deep",
+          "turningPoint": {
+            "desc": "Gavin Turley homers (8) on a fly ball to left field",
+            "batterId": 702504,
+            "batterName": "Gavin Turley",
+            "batterTeamId": 524,
+            "batterTeamAbbr": "STK",
+            "batterPos": "RF",
+            "inning": 1,
+            "half": "bottom",
+            "awayAbbr": "SJ",
+            "awayScore": 0,
+            "homeAbbr": "STK",
+            "homeScore": 2
+          },
           "teams": {
             "winner": {
               "id": 524,
-              "abbr": "STK"
+              "abbr": "STK",
+              "r": 6
             },
             "loser": {
               "id": 476,
-              "abbr": "SJ"
+              "abbr": "SJ",
+              "r": 3
             }
           },
           "boxScorePath": "/07192026/sjstk/boxscore"
         },
         {
           "gamePk": 821112,
+          "gameNumber": 1,
           "tier": 1,
           "score": 34.07593697995562,
           "headline": "Ryland Zaborowski: 2 HR — IE 5, RC 12",
+          "story": "Ryland Zaborowski: 2 HR",
           "signals": [
             "multiHr"
           ],
@@ -2547,23 +3761,41 @@
             "stat": "2 HR"
           },
           "subCaption": "Team is 8-1 when he goes deep",
+          "turningPoint": {
+            "desc": "Ryland Zaborowski homers (12) on a fly ball to left center field",
+            "batterId": 695301,
+            "batterName": "Ryland Zaborowski",
+            "batterTeamId": 526,
+            "batterTeamAbbr": "RC",
+            "batterPos": "1B",
+            "inning": 4,
+            "half": "bottom",
+            "awayAbbr": "IE",
+            "awayScore": 5,
+            "homeAbbr": "RC",
+            "homeScore": 9
+          },
           "teams": {
             "winner": {
               "id": 526,
-              "abbr": "RC"
+              "abbr": "RC",
+              "r": 12
             },
             "loser": {
               "id": 401,
-              "abbr": "IE"
+              "abbr": "IE",
+              "r": 5
             }
           },
           "boxScorePath": "/07192026/ierc/boxscore"
         },
         {
           "gamePk": 821182,
+          "gameNumber": 1,
           "tier": 1,
           "score": 34.07593697995562,
           "headline": "Easton Shelton: 2 HR — LE 5, ONT 11",
+          "story": "Easton Shelton: 2 HR",
           "signals": [
             "multiHr"
           ],
@@ -2576,105 +3808,363 @@
             "stat": "2 HR"
           },
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Easton Shelton homers (27) on a fly ball to center field",
+            "batterId": 806221,
+            "batterName": "Easton Shelton",
+            "batterTeamId": 6482,
+            "batterTeamAbbr": "ONT",
+            "batterPos": "1B",
+            "inning": 3,
+            "half": "bottom",
+            "awayAbbr": "LE",
+            "awayScore": 0,
+            "homeAbbr": "ONT",
+            "homeScore": 4
+          },
           "teams": {
             "winner": {
               "id": 6482,
-              "abbr": "ONT"
+              "abbr": "ONT",
+              "r": 11
             },
             "loser": {
               "id": 103,
-              "abbr": "LE"
+              "abbr": "LE",
+              "r": 5
             }
           },
           "boxScorePath": "/07192026/leont/boxscore"
         },
         {
           "gamePk": 820584,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The LAK edged the FTM by a single run — LAK 4, FTM 3",
+          "headline": "The Flying Tigers edged the Mighty Mussels by a single run — LAK 4, FTM 3",
+          "story": "The Flying Tigers edged the Mighty Mussels by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Zach MacDonald homers (15) on a fly ball to left field",
+            "batterId": 822487,
+            "batterName": "Zach MacDonald",
+            "batterTeamId": 570,
+            "batterTeamAbbr": "LAK",
+            "batterPos": "RF",
+            "inning": 6,
+            "half": "top",
+            "awayAbbr": "LAK",
+            "awayScore": 4,
+            "homeAbbr": "FTM",
+            "homeScore": 3
+          },
           "teams": {
             "winner": {
               "id": 570,
-              "abbr": "LAK"
+              "abbr": "LAK",
+              "r": 4
             },
             "loser": {
               "id": 509,
-              "abbr": "FTM"
+              "abbr": "FTM",
+              "r": 3
             }
           },
           "boxScorePath": "/07192026/lakftm/boxscore"
         },
         {
           "gamePk": 827457,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The CHS edged the COL by a single run — COL 7, CHS 8",
+          "headline": "The RiverDogs edged the Fireflies by a single run — COL 7, CHS 8",
+          "story": "The RiverDogs edged the Fireflies by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Tom Poole singles on a line drive to right fielder Roni Cabrera",
+            "batterId": 809231,
+            "batterName": "Tom Poole",
+            "batterTeamId": 233,
+            "batterTeamAbbr": "CHS",
+            "batterPos": "LF",
+            "inning": 4,
+            "half": "bottom",
+            "awayAbbr": "COL",
+            "awayScore": 7,
+            "homeAbbr": "CHS",
+            "homeScore": 8
+          },
           "teams": {
             "winner": {
               "id": 233,
-              "abbr": "CHS"
+              "abbr": "CHS",
+              "r": 8
             },
             "loser": {
               "id": 3705,
-              "abbr": "COL"
+              "abbr": "COL",
+              "r": 7
             }
           },
           "boxScorePath": "/07192026/colchs/boxscore"
         },
         {
           "gamePk": 820912,
+          "gameNumber": 1,
           "tier": 3,
           "score": 13.92920235749422,
-          "headline": "The FRE edged the VIS by a single run — FRE 2, VIS 1",
+          "headline": "The Grizzlies edged the Rawhide by a single run — FRE 2, VIS 1",
+          "story": "The Grizzlies edged the Rawhide by a single run",
           "signals": [
             "oneRun"
           ],
           "performer": null,
           "subCaption": null,
+          "turningPoint": {
+            "desc": "Yerald Nin flies out to center fielder Cameron Nelson",
+            "batterId": 800206,
+            "batterName": "Yerald Nin",
+            "batterTeamId": 516,
+            "batterTeamAbbr": "VIS",
+            "batterPos": "LF",
+            "inning": 9,
+            "half": "bottom",
+            "awayAbbr": "FRE",
+            "awayScore": 2,
+            "homeAbbr": "VIS",
+            "homeScore": 1
+          },
           "teams": {
             "winner": {
               "id": 259,
-              "abbr": "FRE"
+              "abbr": "FRE",
+              "r": 2
             },
             "loser": {
               "id": 516,
-              "abbr": "VIS"
+              "abbr": "VIS",
+              "r": 1
             }
           },
           "boxScorePath": "/07192026/frevis/boxscore"
+        }
+      ],
+      "results": [
+        {
+          "gamePk": 820253,
+          "away": {
+            "id": 3390,
+            "abbr": "BRD",
+            "r": 2
+          },
+          "home": {
+            "id": 587,
+            "abbr": "TAM",
+            "r": 7
+          },
+          "winnerId": 587,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/brdtam/boxscore"
+        },
+        {
+          "gamePk": 820584,
+          "away": {
+            "id": 570,
+            "abbr": "LAK",
+            "r": 4
+          },
+          "home": {
+            "id": 509,
+            "abbr": "FTM",
+            "r": 3
+          },
+          "winnerId": 570,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/lakftm/boxscore"
+        },
+        {
+          "gamePk": 820386,
+          "away": {
+            "id": 507,
+            "abbr": "SLU",
+            "r": 8
+          },
+          "home": {
+            "id": 279,
+            "abbr": "PMB",
+            "r": 6
+          },
+          "winnerId": 507,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/slupmb/boxscore"
+        },
+        {
+          "gamePk": 820719,
+          "away": {
+            "id": 479,
+            "abbr": "JUP",
+            "r": 3
+          },
+          "home": {
+            "id": 450,
+            "abbr": "DBT",
+            "r": 7
+          },
+          "winnerId": 450,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/jupdbt/boxscore"
         },
         {
           "gamePk": 827045,
-          "tier": 3,
-          "score": -8.690404952122899,
-          "headline": "A 8-run laugher for the KAN — MB 2, KAN 10",
-          "signals": [
-            "blowout"
-          ],
-          "performer": null,
-          "subCaption": null,
-          "teams": {
-            "winner": {
-              "id": 487,
-              "abbr": "KAN"
-            },
-            "loser": {
-              "id": 521,
-              "abbr": "MB"
-            }
+          "away": {
+            "id": 521,
+            "abbr": "MB",
+            "r": 2
           },
+          "home": {
+            "id": 487,
+            "abbr": "KAN",
+            "r": 10
+          },
+          "winnerId": 487,
+          "gameNumber": 1,
           "boxScorePath": "/07192026/mbkan/boxscore"
+        },
+        {
+          "gamePk": 827183,
+          "away": {
+            "id": 481,
+            "abbr": "HC",
+            "r": 10
+          },
+          "home": {
+            "id": 436,
+            "abbr": "FBG",
+            "r": 7
+          },
+          "winnerId": 481,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/hcfbg/boxscore"
+        },
+        {
+          "gamePk": 826853,
+          "away": {
+            "id": 548,
+            "abbr": "DEL",
+            "r": 2
+          },
+          "home": {
+            "id": 414,
+            "abbr": "SAL",
+            "r": 4
+          },
+          "winnerId": 414,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/delsal/boxscore"
+        },
+        {
+          "gamePk": 827457,
+          "away": {
+            "id": 3705,
+            "abbr": "COL",
+            "r": 7
+          },
+          "home": {
+            "id": 233,
+            "abbr": "CHS",
+            "r": 8
+          },
+          "winnerId": 233,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/colchs/boxscore"
+        },
+        {
+          "gamePk": 827243,
+          "away": {
+            "id": 478,
+            "abbr": "AUG",
+            "r": 7
+          },
+          "home": {
+            "id": 3712,
+            "abbr": "FAY",
+            "r": 5
+          },
+          "winnerId": 478,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/augfay/boxscore"
+        },
+        {
+          "gamePk": 820980,
+          "away": {
+            "id": 476,
+            "abbr": "SJ",
+            "r": 3
+          },
+          "home": {
+            "id": 524,
+            "abbr": "STK",
+            "r": 6
+          },
+          "winnerId": 524,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/sjstk/boxscore"
+        },
+        {
+          "gamePk": 821112,
+          "away": {
+            "id": 401,
+            "abbr": "IE",
+            "r": 5
+          },
+          "home": {
+            "id": 526,
+            "abbr": "RC",
+            "r": 12
+          },
+          "winnerId": 526,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/ierc/boxscore"
+        },
+        {
+          "gamePk": 821182,
+          "away": {
+            "id": 103,
+            "abbr": "LE",
+            "r": 5
+          },
+          "home": {
+            "id": 6482,
+            "abbr": "ONT",
+            "r": 11
+          },
+          "winnerId": 6482,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/leont/boxscore"
+        },
+        {
+          "gamePk": 820912,
+          "away": {
+            "id": 259,
+            "abbr": "FRE",
+            "r": 2
+          },
+          "home": {
+            "id": 516,
+            "abbr": "VIS",
+            "r": 1
+          },
+          "winnerId": 259,
+          "gameNumber": 1,
+          "boxScorePath": "/07192026/frevis/boxscore"
         }
       ],
       "superlatives": {
