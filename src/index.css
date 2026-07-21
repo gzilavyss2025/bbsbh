@@ -9052,6 +9052,51 @@ body {
   color: var(--text-body);
   box-shadow: var(--shadow-card);
 }
+/* The pill-badge row (ResultPills, GameResultFace.jsx) — at most one crowned
+   "Game of the Night" pill (amber fill, same medal-amber the app already uses
+   for award chips) alongside its own category pill, plus the doubleheader/
+   favorite-team modifiers. Same idiom as .prospectpill/.gamecard__dh — a
+   quiet outline chip by default; only the crown and the favorite-team pill
+   get a filled treatment, since those two are the ones actually worth a
+   reader's first glance. */
+.flipback__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flipback__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+.flipback__pill--tag {
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.flipback__pill--crown {
+  background: var(--award-ink);
+  color: var(--text-on-ink);
+}
+.flipback__pill--team {
+  background: var(--pin-accent, var(--field));
+  color: var(--text-on-ink);
+}
+/* The Game of the Night's conditional second beat, and the Dominant
+   Performance / Blowout / Extra-Innings performer-card variant — a
+   PerformerCard sitting where (or beneath where) the plain-text Play of the
+   Game block would otherwise go, same list wrapper the slate rail/box score
+   Insights card use around it. */
+.flipback__perfcard {
+  margin: 0;
+}
 /* Line score: a header row (R/H/E labels, once) above two team rows — team
    name flexes to fill the leading column, the three stat columns are fixed-
    width so header and value rows line up. Values are sized up from the

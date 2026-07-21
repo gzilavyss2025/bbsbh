@@ -24,9 +24,9 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
-import { PastDayRecapBox } from '../components/PastDayRecapBox.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -240,6 +240,10 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
+  // Per-game pill classification (Game of the Night / Dominant Performance /
+  // Blowout / Close Game / Extra Innings) for every card in `finals` — see
+  // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
+  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, sportId, revealedAll)
 
   // Whether the live Top Performers box has anything to show — mutually
   // exclusive with the past-day Day Recap rail (finals.length > 0): a day
@@ -392,23 +396,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             prospectsData={prospects.data}
           />
         )}
-        {finals.length > 0 && (
-          <PastDayRecapBox
-            dateStr={dateStr}
-            sportId={sportId}
-            games={finals}
-            prospectsData={prospects.data}
-            revealedAll={revealedAll}
-            onRevealAll={() => setRevealedAll(true)}
-            favoriteTeamId={favoriteTeamId}
-            favoriteAffiliateIds={favoriteAffiliateIds}
-          />
-        )}
-
-        {/* Scroll/focus target for the recap's "Jump to games" control (see
-            PastDayRecapBox) — the revealed recap can run long and push the grid
-            below the fold. tabIndex -1 lets the jump hand keyboard focus here,
-            not just move the viewport. */}
         <div className="slate-main" id="slate-games" tabIndex={-1} aria-label="Games">
           <ul className="gamelist">
             {sorted.length === 0 && isDerbyDay && (
@@ -435,6 +422,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                       pinnedTeamId={pinnedTeamId}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
+                      cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
                       onSelect={() => onPick(g, dateStr)}
                       onBoxScore={() => onPick(g, dateStr, 'boxscore')}
                     />
@@ -491,10 +479,9 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 // The single "reveal all results" control for a past day's flip cards — a top
 // button (wide layout) plus a mobile-only fixed bottom bar duplicate, the same
 // floating-bar convention InningViewer uses for "Reveal {half}"
-// (.pagenav/.btn--reveal). One tap flips every Final game's card AND
-// force-reveals the Day Recap panel (see PastDayRecapBox's forceRevealed
-// prop) — there's no per-card unlock, and the Day Recap's own seal does the
-// same thing in reverse (see onRevealAll).
+// (.pagenav/.btn--reveal). One tap flips every Final game's card, which also
+// triggers useDayCardMeta's batched classification pass — there's no
+// per-card unlock.
 function RevealAllBar({ onReveal }) {
   return (
     <>

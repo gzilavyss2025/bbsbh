@@ -238,8 +238,9 @@ function TeamName({ team, side }) {
 
 // "Game 1" / "Game 2" for a card that's part of a doubleheader (regular or
 // split), so the two same-matchup rows on the slate are told apart at a glance.
-// A lone game (doubleHeader 'N') gets nothing.
-function doubleHeaderLabel(game) {
+// A lone game (doubleHeader 'N') gets nothing. Exported: GameResultFace.jsx
+// reuses this exact label for the revealed back face's doubleheader pill.
+export function doubleHeaderLabel(game) {
   if (!game.doubleHeader || game.doubleHeader === 'N') return null
   return `Game ${game.gameNumber ?? 1}`
 }

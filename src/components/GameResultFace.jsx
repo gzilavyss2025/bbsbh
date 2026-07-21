@@ -1,9 +1,22 @@
 import { selectBoxscore, computePlayOfTheGame } from '../api/boxscore.js'
 import { useNav } from '../lib/nav.js'
+import { favoriteAccentColor } from '../lib/teams.js'
 import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
+import { doubleHeaderLabel } from './GameCard.jsx'
+import { PerformerCard } from './PerformerCard.jsx'
+
+// Pill category label + a plain, ungated "this is a fact about the card"
+// treatment for every scenario except the crown (which alone gets the
+// filled amber "big deal" chrome — see .flipback__pill--crown in index.css).
+const SCENARIO_LABEL = {
+  dominant: 'Dominant Performance',
+  blowout: 'Blowout',
+  close: 'Close Game',
+  extras: 'Extra Innings',
+}
 
 // The flip card's back face: what a past, Final game's card turns into once
 // revealed. Deliberately a SUMMARY, not the full box score — final R/H/E, the
@@ -16,15 +29,50 @@ import { TeamLogo } from './TeamLogo.jsx'
 // per-game ledger entry builds a headshot-led version from the same
 // computePlayOfTheGame call) suppress this compact text-only one instead of
 // showing both — the flip card itself keeps rendering it by default.
-export function GameResultFace({ feed, winProb, boxScorePath, hidePlayOfGame = false }) {
+//
+// `game`/`pinnedTeamId`/`cardMeta` are optional — only the slate's day-wide
+// pill redesign (GameSelect.jsx, via useDayCardMeta) passes them; the
+// Postseason Series page's per-game ledger entry doesn't, and simply gets no
+// pills row (same graceful-omission convention as `hidePlayOfGame` above).
+// `cardMeta` is one entry from dayHighlights.js's classifyGameCards — see
+// that module for what each field means.
+export function GameResultFace({
+  feed,
+  winProb,
+  boxScorePath,
+  hidePlayOfGame = false,
+  game = null,
+  pinnedTeamId = null,
+  cardMeta = null,
+}) {
   const navigate = useNav()
   const box = selectBoxscore(feed)
   const potg = computePlayOfTheGame(winProb, feed)
   const totalInnings = box.innings?.length ?? 9
   const wentToExtras = totalInnings > 9
 
+  const { scenario, playChoice, performer, isGameOfTheNight } = cardMeta ?? {}
+  // A performer card replaces the default Play of the Game block only for a
+  // Dominant Performance, or a Blowout/Extra-Innings card whose deterministic
+  // playChoice landed on the performer variant — and only when a performer
+  // actually exists (no performer just falls through to the default play,
+  // same as an ungated card would render anyway).
+  const showPerformerInstead =
+    !!performer &&
+    (scenario === 'dominant' || ((scenario === 'blowout' || scenario === 'extras') && playChoice === 'performer'))
+  // The crowned game's second beat: the turning point PLUS the top
+  // performer's stat line underneath, when there is one. Only when we didn't
+  // already show that same performer above (avoids a Dominant Performance
+  // crown showing its one performer twice), and only when the performer is a
+  // genuinely different person than the turning-point's own batter — a
+  // walk-off's performer IS its turning-point batter, and a card showing the
+  // same face and name twice reads as a glitch, not a bonus fact.
+  const showSecondBeat =
+    !!isGameOfTheNight && !showPerformerInstead && !!performer && performer.id !== potg?.batterId
+
   return (
     <div className="flipback">
+      <ResultPills game={game} pinnedTeamId={pinnedTeamId} box={box} cardMeta={cardMeta} />
       <button
         type="button"
         className="btn flipback__boxbtn"
@@ -46,7 +94,55 @@ export function GameResultFace({ feed, winProb, boxScorePath, hidePlayOfGame = f
         <TeamLine side={box.home} />
       </div>
       <Decisions decisions={box.decisions} />
-      {potg?.desc && !hidePlayOfGame && <PlayOfTheGame potg={potg} box={box} />}
+      {showPerformerInstead ? (
+        <ul className="playercard__list flipback__perfcard">
+          <PerformerCard entry={performer} />
+        </ul>
+      ) : (
+        potg?.desc && !hidePlayOfGame && <PlayOfTheGame potg={potg} box={box} />
+      )}
+      {showSecondBeat && (
+        <ul className="playercard__list flipback__perfcard">
+          <PerformerCard entry={performer} />
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// The pills row: at most one "formatting scenario" pill (the crown always
+// wins visually — amber fill — with the underlying category pill still
+// shown alongside it, per product decision) plus the two independent
+// modifiers (doubleheader, favorite team), in that fixed order. Renders
+// nothing at all for a quiet game with no scenario/modifiers — same
+// graceful-omission convention as the rest of this component.
+function ResultPills({ game, pinnedTeamId, box, cardMeta }) {
+  const { scenario, isGameOfTheNight } = cardMeta ?? {}
+  const dhLabel = game ? doubleHeaderLabel(game) : null
+  const pinnedSide = pinnedTeamId === box.away.id ? 'away' : pinnedTeamId === box.home.id ? 'home' : null
+  const pinnedResult =
+    pinnedSide == null
+      ? null
+      : box.home.line.r === box.away.line.r
+        ? 'Your Team'
+        : box[pinnedSide].line.r > box[pinnedSide === 'away' ? 'home' : 'away'].line.r
+          ? 'Your Team · Won'
+          : 'Your Team · Lost'
+
+  if (!isGameOfTheNight && !scenario && !dhLabel && !pinnedResult) return null
+  return (
+    <div className="flipback__pills">
+      {isGameOfTheNight && <span className="flipback__pill flipback__pill--crown">★ Game of the Night</span>}
+      {scenario && <span className="flipback__pill flipback__pill--tag">{SCENARIO_LABEL[scenario]}</span>}
+      {dhLabel && <span className="flipback__pill flipback__pill--tag">{dhLabel}</span>}
+      {pinnedResult && (
+        <span
+          className="flipback__pill flipback__pill--team"
+          style={{ '--pin-accent': favoriteAccentColor(pinnedTeamId) }}
+        >
+          {pinnedResult}
+        </span>
+      )}
     </div>
   )
 }
