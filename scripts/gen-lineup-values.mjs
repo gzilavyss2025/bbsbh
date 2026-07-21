@@ -6,32 +6,45 @@
 // Full rebuild, MLB only (sportId 1). For each of the 30 clubs it reads the
 // ACTIVE roster, keeps the non-pitchers (a two-way player's position type isn't
 // 'Pitcher', so he rides along as a hitter automatically), and per player pulls:
-//   - WAR from the LOCAL public/data/war.json (never refetch FanGraphs — that's
-//     gen-war.mjs's job; this reads its committed output, hitting WAR = .bat)
+//   - wRC+ and season Fielding runs from the LOCAL public/data/war.json (never
+//     refetch FanGraphs — that's gen-war.mjs's job; this reads its committed
+//     output, `.wrc` and `.fld`)
 //   - season PA via /people/{id}/stats?stats=season&group=hitting
 //   - season + career fielding innings by position (one combined call) → the
 //     eligibility matrix (the "Andrew Vaughn at 3B" guard: a handful of innings
 //     at a spot is not an option there).
 //
-// The value model (all constants below, echoed into the file's `constants` block
-// for the receipt's transparency): WAR/PA*600 = WAR per 600 PA, the player's
-// POSITIONAL ADJUSTMENT STRIPPED OFF THAT RAW RATE, then the resulting
-// position-neutral bat regressed Marcel-style toward replacement at low PA and
-// converted to runs/game at 9.5 runs/WAR over 162 games.
+// THE VALUE MODEL (all constants below, echoed into the file's `constants` block
+// for the receipt's transparency). Each hitter gets two independent numbers:
 //
-// The order of those last two steps is load-bearing, not incidental. WAR already
-// contains the positional adjustment for the spot the player actually played, so
-// regressing WAR shrinks the embedded adjustment along with everything else.
-// Stripping a full-strength adjustment AFTERWARDS (which is what the solver used
-// to do, via a since-removed `posDelta`) leaves a phantom residual of
-// (1 - shrink) * POS_ADJ[primary] — a penalty at premium positions and a BONUS at
-// DH/1B/corner, growing as the sample thins. It graded a .822-OPS catcher on 181
-// PA below replacement while floating a .710-OPS DH near the top of the roster.
-// Strip first, then regress, and the whole rate shrinks by one consistent factor.
+//   rpg    — his BAT. wRC+ (park- and league-adjusted offense, 100 = average)
+//            regressed toward 100 by PA, then expressed as runs/game above
+//            average for one lineup slot.
+//   fldRpg — his GLOVE. FanGraphs season Fielding runs, regressed toward 0 by
+//            defensive innings, then per defensive game.
 //
-// `rpg` in the output file is therefore a position-NEUTRAL bat. Consumers add no
-// positional term of their own — see the POS_ADJ header in src/lib/lineupSolver.js
-// for why a slot's own adjustment cancels across a nine-slot lineup.
+// The consumer adds them together at a fielding slot and uses the bat ALONE at
+// DH, because a designated hitter's fielding contribution is definitionally
+// zero (src/lib/lineupSolver.js `slotValue`). That is also what makes parking a
+// poor defender at DH correctly cost nothing, and what keeps a glove-first
+// regular — a 75 wRC+ third baseman with +6.4 fielding runs — in the lineup.
+//
+// WHY NOT WAR (the original model, and why it broke). WAR bundles bat, glove and
+// a positional adjustment into one number, so the grade had to reconstruct the
+// pieces: it subtracted a FULL-SEASON positional constant to recover a "bat".
+// Two things make that unrecoverable. FanGraphs' `Positional` is prorated by a
+// player's ACTUAL playing time (a catcher 60% of the way through a season has
+// earned ~+4.7 runs, not the full +12.5), and the Marcel PA shrink had already
+// scaled the embedded adjustment before the constant was removed at full
+// strength. Both errors point the same way: a phantom penalty at premium
+// positions and a phantom BONUS at DH. It ranked a 132 wRC+ catcher last among
+// a club's bats and a 97 wRC+ DH first — the exact inversion that surfaced this.
+// Read the components; never re-derive one from the total.
+//
+// The positional adjustment is now absent from the model entirely. Every lineup
+// fills the same nine slots, so its sum is a constant that cancels; with fielding
+// carried explicitly there is nothing left for it to proxy. See the POS_ADJ
+// header in src/lib/lineupSolver.js.
 //
 // Verified against a live 2026 Brewers roster before the nightly cron was wired.
 // Run by hand: node scripts/gen-lineup-values.mjs
@@ -39,9 +52,6 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-// The positional-adjustment constants live with the solver so the strip here and
-// the runtime WAR fallback (src/api/lineupStrength.js) can't drift apart.
-import { POS_ADJ } from '../src/lib/lineupSolver.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'lineup-values.json')
@@ -49,10 +59,17 @@ const warPath = join(here, '..', 'public', 'data', 'war.json')
 const season = new Date().getFullYear()
 
 // --- value-model tunables (documented in the module header) -----------------
-const RUNS_PER_WAR = 9.5 // standard runs-per-win conversion
-const GAMES = 162 // full season length, for per-game and positional proration
-const PA_SCALE = 600 // WAR-per-600-PA rate denominator
-const REGRESSION_PA = 250 // Marcel-style shrink: value *= PA / (PA + this)
+const GAMES = 162 // full season length, for per-game proration
+// Bat. wRC+ is a rate relative to a 100 league average, so it regresses toward
+// 100 (a thin sample means "probably average", NOT "probably replacement" — the
+// old model's shrink toward 0 is what let a 27-PA callup read as a weakness).
+const REGRESSION_PA = 250 // shrink: (wRC+ - 100) *= PA / (PA + this)
+const LEAGUE_R_PER_PA = 0.118 // league runs scored per plate appearance
+const PA_PER_SLOT = 4.2 // plate appearances one lineup slot gets per game
+// Glove. Fielding runs are far noisier per unit of sample than offense and
+// stabilize slowly, so they shrink on a much longer scale, toward 0 (average).
+const REGRESSION_INN = 600 // shrink: fielding runs *= innings / (innings + this)
+const DEF_INN_PER_GAME = 9 // fielding innings in one full defensive game
 
 // --- eligibility tunables ----------------------------------------------------
 const FIELD_POS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
@@ -67,10 +84,12 @@ const WEIGHT_FLOOR = 0.3 // floor for any eligible position
 const CONCURRENCY = 6
 
 const constants = {
-  runsPerWar: RUNS_PER_WAR,
   games: GAMES,
-  paScale: PA_SCALE,
   regressionPa: REGRESSION_PA,
+  leagueRPerPa: LEAGUE_R_PER_PA,
+  paPerSlot: PA_PER_SLOT,
+  regressionInn: REGRESSION_INN,
+  defInnPerGame: DEF_INN_PER_GAME,
   eligSeasonInn: ELIG_SEASON_INN,
   eligCareerInn: ELIG_CAREER_INN,
   weightSeasonFull: WEIGHT_SEASON_FULL,
@@ -119,20 +138,26 @@ const inns = (s) => {
   return Number.isFinite(n) ? n : 0
 }
 
-// Position-neutral bat: WAR per 600 PA with `primaryPos`'s positional adjustment
-// stripped off the RAW rate, then regressed toward replacement (0) at low PA, then
-// runs/game. See the module header — strip-then-regress, never the reverse.
-// An unknown primary (a two-way player's 'TWP', a missing position) strips
-// nothing: we only remove an adjustment we can actually anchor.
-function computeRpg(war, pa, primaryPos) {
-  if (!Number.isFinite(war) || !Number.isFinite(pa) || pa <= 0) return 0
-  const warPer600 = (war / pa) * PA_SCALE
-  // POS_ADJ is runs per 162 defensive games; /RUNS_PER_WAR puts it in the same
-  // WAR-per-600-PA units as warPer600 (the model's standing 600 PA ~ 162 games
-  // approximation, unchanged by this fix).
-  const neutral = warPer600 - (POS_ADJ[primaryPos] ?? 0) / RUNS_PER_WAR
-  const regressed = neutral * (pa / (pa + REGRESSION_PA))
-  return (regressed * RUNS_PER_WAR) / GAMES
+// BAT: wRC+ regressed toward the 100 league average by PA, then runs/game above
+// average for one lineup slot. No wRC+ (or no PA) → 0, i.e. exactly average, the
+// honest read on a player we have no offensive line for.
+function computeRpg(wrcPlus, pa) {
+  if (!Number.isFinite(wrcPlus) || !Number.isFinite(pa) || pa <= 0) return 0
+  const regressed = 100 + (wrcPlus - 100) * (pa / (pa + REGRESSION_PA))
+  return ((regressed - 100) / 100) * LEAGUE_R_PER_PA * PA_PER_SLOT
+}
+
+// GLOVE: season fielding runs (above average, all positions pooled) regressed
+// toward 0 by defensive innings, then per defensive game. Returns 0 when we have
+// no fielding line or he has not taken the field — average, never a penalty.
+// Pooling across positions is a known approximation: FanGraphs reports one
+// season Fielding figure per player, not one per position, so this reads as
+// "his glove, at the spot he usually plays". The eligibility/familiarity weight
+// carries the cost of using him somewhere else.
+function computeFldRpg(fldRuns, innings) {
+  if (!Number.isFinite(fldRuns) || !Number.isFinite(innings) || innings <= 0) return 0
+  const regressed = fldRuns * (innings / (innings + REGRESSION_INN))
+  return regressed / (innings / DEF_INN_PER_GAME)
 }
 
 // Familiarity weight [0,1] blending season and career innings share, floored
@@ -185,7 +210,7 @@ function splitsByPos(statsBlocks, typeName) {
   return map
 }
 
-async function processPlayer(entry, warBat) {
+async function processPlayer(entry, fg) {
   const id = entry.person.id
   const name = entry.person.fullName
   const primaryPos = entry.position?.abbreviation
@@ -196,21 +221,29 @@ async function processPlayer(entry, warBat) {
       getJson(`${API}/people/${id}/stats?stats=season,career&group=fielding&season=${season}`),
     ])
     const pa = hitting?.stats?.[0]?.splits?.[0]?.stat?.plateAppearances ?? 0
-    const war = warBat[id]
-    const hasWar = war != null
-    const rpg = computeRpg(hasWar ? war : NaN, pa, primaryPos)
+    const wrcPlus = fg.wrc[id]
+    const hasWrc = wrcPlus != null
+    const rpg = computeRpg(hasWrc ? wrcPlus : NaN, pa)
     const seasonByPos = splitsByPos(fielding?.stats, 'season')
     const careerByPos = splitsByPos(fielding?.stats, 'career')
     const elig = buildEligibility(seasonByPos, careerByPos)
+    // FanGraphs reports one season Fielding figure per player, so the innings it
+    // spans are this season's fielding innings POOLED over every position he
+    // manned — sum them to match the numerator's scope.
+    const seasonInn = Object.values(seasonByPos).reduce((a, b) => a + b, 0)
+    const fldRpg = computeFldRpg(fg.fld[id], seasonInn)
     const player = {
       name,
       teamId,
       primaryPos,
       rpg: round3(rpg),
+      fldRpg: round3(fldRpg),
       pa,
       elig,
     }
-    if (!hasWar) player.noWar = true
+    // Flags a player carrying no FanGraphs offensive line at all (so he is
+    // sitting at exactly league average by default rather than by measurement).
+    if (!hasWrc) player.noBat = true
     return [String(id), player]
   } catch (err) {
     console.warn(`  skip ${name} (${id}): ${err.message}`)
@@ -220,8 +253,14 @@ async function processPlayer(entry, warBat) {
 
 async function main() {
   const warRaw = JSON.parse(await readFile(warPath, 'utf8'))
-  const warBat = warRaw.bat ?? {} // hitting WAR, keyed by personId
-  console.log(`war.json: season ${warRaw.season}, ${Object.keys(warBat).length} batters`)
+  // The bat/glove split, not the WAR total — see the module header.
+  const fg = { wrc: warRaw.wrc ?? {}, fld: warRaw.fld ?? {} }
+  console.log(
+    `war.json: season ${warRaw.season}, ${Object.keys(fg.wrc).length} wRC+, ${Object.keys(fg.fld).length} Fld`,
+  )
+  if (Object.keys(fg.wrc).length === 0) {
+    throw new Error('war.json carries no `wrc` map — regenerate it with gen-war.mjs first')
+  }
 
   const teamsJson = await getJson(`${API}/teams?sportId=1&season=${season}`)
   const teams = (teamsJson.teams ?? []).filter((t) => t.sport?.id === 1 || t.id)
@@ -244,7 +283,7 @@ async function main() {
   }
   console.log(`hitters: ${hitters.length}`)
 
-  const results = await pool(hitters, CONCURRENCY, (h) => processPlayer(h, warBat))
+  const results = await pool(hitters, CONCURRENCY, (h) => processPlayer(h, fg))
   const players = {}
   for (const r of results) {
     if (r) players[r[0]] = r[1]

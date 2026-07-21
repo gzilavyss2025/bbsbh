@@ -54,10 +54,14 @@ Precomputed because they're too heavy (COST) to build on a page load. Normally y
 don't run these by hand.
 
 - `gen-war.mjs` → `public/data/war.json` — season WAR per player, from FanGraphs'
-  bulk leaderboard API (~1MB, unofficial), plus a parallel `pa` map (hitter plate
-  appearances, same keys) so a consumer can re-apply the PA regression — the
-  Lineup Strength grade uses it to re-value a just-traded starter absent from
-  `lineup-values.json` (`rpgFromWar`). The template for the build-time-fetch
+  bulk leaderboard API (~1MB, unofficial), plus parallel `pa` (hitter plate
+  appearances), `wrc` (wRC+) and `fld` (season fielding runs) maps on the same
+  keys. Reads the `type=6` **Value** view, which carries WAR's components
+  alongside the total at no extra request; `Fielding` there already includes
+  catcher framing (the components sum to WAR, so `CFraming` is NOT additive on
+  top). The three extra maps exist because the Lineup Strength grade needs a bat
+  and a glove SEPARATELY — see `gen-lineup-values.mjs` for why the WAR total
+  can't be decomposed after the fact. The template for the build-time-fetch
   pattern; see `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. Starts from a transaction scan, then verifies each candidate against his
@@ -181,16 +185,21 @@ don't run these by hand.
   active-roster pitcher's season gameLog; MLB only. All bucket math (last
   1/3/10, consecutive days, availability rules) lives in the reader
   `src/api/workload.js`, computed relative to a caller-supplied date.
-- `gen-lineup-values.mjs` → `public/data/lineup-values.json` — per-hitter
-  run-value rates (FanGraphs WAR from the local `war.json`) plus a
-  position-eligibility matrix from season+career fielding innings. `rpg` is a
-  **position-NEUTRAL** bat: the positional adjustment is stripped off the raw
-  WAR-per-600 rate **before** the Marcel PA shrink, and this is the only place
-  in the pipeline it is applied at all. Reversing those two steps leaves a
-  phantom `(1 - shrink) * POS_ADJ[primary]` that punishes premium positions and
-  rewards DH/1B on thin samples — read the generator's header before touching
-  either step. Feeds the Lineup Strength grade (`src/lib/lineupSolver.js`
-  Hungarian assignment + `src/api/lineupStrength.js`); MLB only, nightly rebuild.
+- `gen-lineup-values.mjs` → `public/data/lineup-values.json` — per-hitter value
+  as **two separate numbers**, from the local `war.json`'s components: `rpg`
+  (bat — wRC+ regressed toward the 100 league average by PA) and `fldRpg`
+  (glove — season fielding runs regressed toward 0 by innings), plus a
+  position-eligibility matrix from season+career fielding innings. The consumer
+  adds them at a fielding slot and uses the bat ALONE at DH. **Never re-derive
+  either from the WAR total** — WAR bundles bat, glove and a playing-time-prorated
+  positional adjustment, so subtracting a full-season positional constant to
+  recover a "bat" overcharges a part-season premium fielder and overpays a
+  part-season DH. That is what the model used to do, and it ranked a 132 wRC+
+  catcher last among his club's bats. The positional adjustment is now absent
+  from the pipeline entirely (it cancels across nine fixed slots). Read the
+  generator's value-model header before touching any of this. Feeds the Lineup
+  Strength grade (`src/lib/lineupSolver.js` Hungarian assignment +
+  `src/api/lineupStrength.js`); MLB only, nightly rebuild.
 - `gen-milestones.mjs` → `public/data/milestones.json` — the league-wide Milestone
   Watch list: every debuted player on an MLB org's `fullRoster` (active, IL, or in
   the minors) within reach of a round career-total milestone (`MILESTONE_DEFS` in

@@ -338,11 +338,14 @@ for each generator; the reader modules:
 - `lineupStrength.js` — the Lineup Strength grade, from
   `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
   `src/lib/lineupSolver.js` (exact Hungarian assignment over the
-  position-eligibility matrix). The file's `rpg` is already a position-NEUTRAL
-  bat — the FanGraphs positional adjustment is applied once, in the generator —
-  so nothing here re-applies it; a slot's own adjustment provably cancels across
-  a nine-slot lineup (see the `POS_ADJ` header in `lineupSolver.js`). The one
-  runtime echo of the model is `rpgFromWar`, which must strip the same way.
+  position-eligibility matrix). Each hitter carries a bat (`rpg`, from wRC+) and
+  a glove (`fldRpg`, from season fielding runs) as SEPARATE numbers; `slotValue`
+  adds both at a fielding slot and uses the bat alone at DH, since a designated
+  hitter's fielding contribution is definitionally zero. There is no positional
+  adjustment anywhere in the model — it cancels across nine fixed slots, and with
+  fielding explicit nothing is left for it to proxy (see the header in
+  `lineupSolver.js`). The runtime echoes of the model are `rpgFromWar` and
+  `fldRpgFromRuns`, which must stay in step with the generator.
   `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
   statTiers tier, the itemized receipt (bench swaps + out-of-position
   penalties), and `ungraded` (posted starters with no value in any file).

@@ -17,7 +17,6 @@ import {
   valueLineup,
   unfamiliarPenalty,
   ELIG_FLOOR,
-  POS_ADJ,
   SLOTS,
 } from '../lib/lineupSolver.js'
 import { TIER_LABELS } from '../lib/statTiers.js'
@@ -38,18 +37,18 @@ export async function fetchLineupValues() {
     const res = await fetch('/data/lineup-values.json')
     if (!res.ok) throw new Error(`lineup-values.json ${res.status}`)
     const values = await res.json()
-    // Attach the season WAR file as a secondary, runtime value source. A starter
+    // Attach the season file as a secondary, runtime value source. A starter
     // posted tonight can be absent from this (nightly, team-scoped) file after a
     // trade or call-up made since the last build; war.json is league-wide and
-    // rebuilt on its own cron, so it usually still carries his bat. candidatePool
+    // rebuilt on its own cron, so it usually still carries his line. candidatePool
     // reads warFallback to value such a starter instead of dropping him to
-    // replacement. Only trusted when its season matches, so a stale off-season
+    // league average. Only trusted when its season matches, so a stale off-season
     // file never bleeds in.
     let warFallback = null
     try {
       const war = await fetchWarData()
       if (war && (war.season == null || war.season === values.season)) {
-        warFallback = { bat: war.bat ?? {}, pa: war.pa ?? {} }
+        warFallback = { wrc: war.wrc ?? {}, pa: war.pa ?? {} }
       }
     } catch {
       warFallback = null
@@ -63,25 +62,32 @@ export async function fetchLineupValues() {
 
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n))
 
-// Value a bat from season WAR the same way the nightly build does (gen-lineup-
-// values.mjs computeRpg): WAR per 600 PA, `primaryPos`'s positional adjustment
-// stripped off that RAW rate, then regressed toward replacement at low PA and
-// converted to runs/game — strip BEFORE regress, for the reason spelled out in
-// the generator's header. Result is a position-NEUTRAL bat, the same units
-// lineup-values.json stores. Used only as a runtime fallback for a posted starter
-// absent from the nightly values file but present in the season WAR file (war.json
-// carries `pa` alongside `bat` for exactly this). Returns null when WAR or PA is
-// missing so the caller can degrade to the replacement path.
-export function rpgFromWar(war, pa, constants = {}, primaryPos) {
-  if (!Number.isFinite(war) || !Number.isFinite(pa) || pa <= 0) return null
-  const paScale = constants.paScale ?? 600
+// Value a bat the same way the nightly build does (gen-lineup-values.mjs
+// computeRpg): wRC+ regressed toward the 100 league average by PA, then runs/game
+// above average for one lineup slot. Used only as a runtime fallback for a posted
+// starter absent from the nightly values file but present in the season file
+// (war.json carries `wrc` and `pa` on the same keys for exactly this). Returns
+// null when wRC+ or PA is missing so the caller can degrade to the league-average
+// path. Named for the file it reads, not for WAR — the grade stopped using the
+// WAR total when it started reading the components (see the generator's header).
+export function rpgFromWar(wrcPlus, pa, constants = {}) {
+  if (!Number.isFinite(wrcPlus) || !Number.isFinite(pa) || pa <= 0) return null
   const regressionPa = constants.regressionPa ?? 250
-  const runsPerWar = constants.runsPerWar ?? 9.5
-  const games = constants.games ?? 162
-  const warPer600 = (war / pa) * paScale
-  const neutral = warPer600 - (POS_ADJ[primaryPos] ?? 0) / runsPerWar
-  const regressed = neutral * (pa / (pa + regressionPa))
-  return (regressed * runsPerWar) / games
+  const leagueRPerPa = constants.leagueRPerPa ?? 0.118
+  const paPerSlot = constants.paPerSlot ?? 4.2
+  const regressed = 100 + (wrcPlus - 100) * (pa / (pa + regressionPa))
+  return ((regressed - 100) / 100) * leagueRPerPa * paPerSlot
+}
+
+// Same, for the glove: season fielding runs regressed toward 0 by defensive
+// innings, then per defensive game. Null when either input is missing, which the
+// caller reads as "league average", never as a penalty.
+export function fldRpgFromRuns(fldRuns, innings, constants = {}) {
+  if (!Number.isFinite(fldRuns) || !Number.isFinite(innings) || innings <= 0) return null
+  const regressionInn = constants.regressionInn ?? 600
+  const defInnPerGame = constants.defInnPerGame ?? 9
+  const regressed = fldRuns * (innings / (innings + regressionInn))
+  return regressed / (innings / defInnPerGame)
 }
 
 // Boxscore position abbreviations map straight onto the solver's SLOTS, save a
@@ -97,13 +103,15 @@ function normalizeSlot(position) {
 // values file because he moved onto this roster after the last build). Three
 // tiers, best data first:
 //   (a) present in the values file under ANOTHER club (a recent trade): his
-//       season rpg and eligibility are team-independent, so use them as posted.
-//   (b) present in the season WAR file: value his bat from WAR (same model as the
+//       season rpg/fldRpg and eligibility are team-independent, so use them as posted.
+//   (b) present in the season file: value his bat from wRC+ (same model as the
 //       nightly build), eligible at the slot he's actually posted at (his de-facto
 //       primary) plus DH — we don't know his other positions, so the optimal
-//       shouldn't shuffle him elsewhere.
-//   (c) unknown everywhere: replacement bat, but FULLY familiar at his posted slot
-//       — you are never "out of position" at your own position. (The old floor
+//       shouldn't shuffle him elsewhere. His glove sits at league average: war.json
+//       carries season fielding runs but not the innings they span, and the values
+//       file (which would have them) is exactly what he's missing from.
+//   (c) unknown everywhere: league-average bat, but FULLY familiar at his posted
+//       slot — you are never "out of position" at your own position. (The old floor
 //       here double-charged an unfamiliarity penalty at a spot we'd just named his
 //       primary, tanking the grade of any lineup with a just-acquired starter.)
 //       Flagged `unknown` so gradeLineup excludes his slot from the gap rather
@@ -115,22 +123,16 @@ function resolveMissingStarter(data, id, slot) {
     return {
       id: key,
       rpg: known.rpg ?? 0,
+      fldRpg: known.fldRpg ?? 0,
       elig: known.elig ?? { [slot]: 1, DH: 1 },
       primaryPos: known.primaryPos ?? slot,
     }
   }
-  // His posted slot stands in for his primary position (we don't know his real
-  // one), so it's also what the positional strip is anchored on.
-  const rpg = rpgFromWar(
-    data?.warFallback?.bat?.[key],
-    data?.warFallback?.pa?.[key],
-    data?.constants,
-    slot,
-  )
+  const rpg = rpgFromWar(data?.warFallback?.wrc?.[key], data?.warFallback?.pa?.[key], data?.constants)
   if (rpg != null) {
-    return { id: key, rpg, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, resolved: 'war' }
+    return { id: key, rpg, fldRpg: 0, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, resolved: 'war' }
   }
-  return { id: key, rpg: 0, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, unknown: true }
+  return { id: key, rpg: 0, fldRpg: 0, elig: { [slot]: 1, DH: 1 }, primaryPos: slot, unknown: true }
 }
 
 // Turn the values-file player map for one club (plus any actual starters missing
@@ -140,7 +142,13 @@ function candidatePool(data, teamId, actual) {
   const seen = new Set()
   for (const [id, p] of Object.entries(data?.players ?? {})) {
     if (p.teamId !== teamId) continue
-    pool.push({ id, rpg: p.rpg ?? 0, elig: p.elig ?? {}, primaryPos: p.primaryPos })
+    pool.push({
+      id,
+      rpg: p.rpg ?? 0,
+      fldRpg: p.fldRpg ?? 0,
+      elig: p.elig ?? {},
+      primaryPos: p.primaryPos,
+    })
     seen.add(String(id))
   }
   for (const { id, slot } of actual) {

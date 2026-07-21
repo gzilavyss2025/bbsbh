@@ -1,12 +1,19 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { solveOptimalLineup, valueLineup, slotValue, POS_ADJ, SLOTS } from '../src/lib/lineupSolver.js'
+import {
+  solveOptimalLineup,
+  valueLineup,
+  slotValue,
+  fieldingCredit,
+  SLOTS,
+} from '../src/lib/lineupSolver.js'
 import {
   gradeLineup,
   receiptFor,
   lineupStrengthFor,
   lineupStrengthRows,
   rpgFromWar,
+  fldRpgFromRuns,
 } from '../src/api/lineupStrength.js'
 import { lineupStrengthTierFor } from '../src/lib/lineupStrengthTier.js'
 
@@ -67,54 +74,82 @@ test('forbidden assignments are respected (no eligibility = never placed there)'
   assert.equal(slotValue(players[0], 'C'), -Infinity)
 })
 
-test('a slot carries no positional adjustment of its own (it cancels across nine slots)', () => {
-  // Every valid lineup fills the same nine slots, so the sum of the slots' own
-  // positional adjustments is a constant that cancels out of any posted-vs-optimal
-  // comparison. The adjustment is instead stripped ONCE, off each player's WAR
-  // rate, when lineup-values.json is built — see the module header. So a player's
-  // value must depend only on his bat and his familiarity at the slot, never on
-  // which slot it is.
+test('no positional adjustment anywhere: a bat is worth the same at every slot', () => {
+  // The adjustment used to be applied here as POS_ADJ[slot] - POS_ADJ[primary].
+  // It cancels across nine fixed slots, and with fielding now carried explicitly
+  // there is nothing left for it to proxy. A player with no glove figure must be
+  // worth exactly his bat, wherever he is posted.
   const bat = { id: 'x', rpg: 0.2, primaryPos: 'C', elig: { C: 1, DH: 1, '1B': 1 } }
   assert.equal(slotValue(bat, 'C'), 0.2)
   assert.equal(slotValue(bat, 'DH'), 0.2)
   assert.equal(slotValue(bat, '1B'), 0.2)
-  // The FanGraphs constants themselves are still the generator's strip input.
-  assert.equal(POS_ADJ.C, 12.5)
-  assert.equal(POS_ADJ.DH, -17.5)
 })
 
-test('the positional adjustment is stripped BEFORE the PA regression, not after', () => {
-  // The bug this pins: WAR already contains the positional adjustment for the
-  // spot a player actually played, so shrinking WAR toward replacement shrinks
-  // that adjustment too. Removing 100% of it afterwards leaves a phantom
-  // (1 - shrink) * POS_ADJ[primary] — a penalty at premium positions and a BONUS
-  // at DH/1B/corner, growing as the sample gets thinner.
-  //
-  // Compose the value the way the pipeline does: stored rate -> slot value.
-  const value = (war, pa, pos) =>
-    slotValue({ id: pos, rpg: rpgFromWar(war, pa, {}, pos), primaryPos: pos, elig: { DH: 1 } }, 'DH')
-  // What it must equal: the position-neutral rate, shrunk by the SAME factor.
-  const want = (war, pa, pos) => {
-    const neutral = (war / pa) * 600 - POS_ADJ[pos] / 9.5
-    return ((neutral * (pa / (pa + 250))) * 9.5) / 162
-  }
-  // The shrink factor must apply to the whole position-neutral rate, at every
-  // position and every sample size — no residual that varies with either.
-  for (const pos of ['C', 'SS', '2B', '1B', 'DH']) {
-    for (const [war, pa] of [[2.55, 600], [0.85, 200], [1.7, 400], [0.1, 27]]) {
-      const got = value(war, pa, pos)
-      assert.ok(
-        Math.abs(got - want(war, pa, pos)) < 1e-12,
-        `${pos} @ ${pa} PA: got ${got}, want ${want(war, pa, pos)}`,
-      )
-    }
-  }
-  // Concretely: a good catcher stays above replacement no matter how thin the
-  // sample. Under the old order his value went NEGATIVE, which is what let a
-  // replacement-level DH out-rank him.
-  assert.ok(value(2.55, 600, 'C') > 0, `good catcher, full sample: ${value(2.55, 600, 'C')}`)
-  assert.ok(value(0.85, 200, 'C') > 0, `same rate, thin sample: ${value(0.85, 200, 'C')}`)
-  assert.ok(value(2.55, 600, 'C') > value(0.85, 200, 'C'), 'the bigger sample keeps more of the rate')
+test('a glove counts at every fielding slot and is worth nothing at DH', () => {
+  // The rule the whole model turns on: a designated hitter does not field.
+  const glove = { id: 'g', rpg: 0.05, fldRpg: 0.04, primaryPos: 'SS', elig: { SS: 1, DH: 1 } }
+  assert.ok(Math.abs(slotValue(glove, 'SS') - 0.09) < 1e-12, 'bat + glove in the field')
+  assert.ok(Math.abs(slotValue(glove, 'DH') - 0.05) < 1e-12, 'bat alone at DH')
+  assert.equal(fieldingCredit(glove, 'DH'), 0)
+  assert.equal(fieldingCredit(glove, 'SS'), 0.04)
+
+  // A liability's glove likewise costs nothing once he is hidden at DH, which is
+  // what makes DHing a bad defender free rather than penalised.
+  const liability = { id: 'l', rpg: 0.05, fldRpg: -0.06, primaryPos: '1B', elig: { '1B': 1, DH: 1 } }
+  assert.ok(slotValue(liability, 'DH') > slotValue(liability, '1B'))
+  assert.equal(slotValue(liability, 'DH'), 0.05)
+
+  // A missing fielding figure reads as league average, never as a penalty.
+  assert.equal(fieldingCredit({ rpg: 0.1, elig: {} }, 'CF'), 0)
+})
+
+test('a glove-first regular is not benched over his bat alone', () => {
+  // The case that motivated splitting bat from glove: a 75 wRC+ third baseman
+  // with the best fielding runs on the roster. Offense-only, the model swaps him
+  // out; with the glove counted, he holds the spot.
+  const gloveFirst = { id: 'ortiz', rpg: -0.07, fldRpg: 0.06, primaryPos: '3B', elig: { '3B': 1, DH: 1 } }
+  const batFirst = { id: 'masher', rpg: -0.02, fldRpg: -0.05, primaryPos: '3B', elig: { '3B': 1, DH: 1 } }
+  assert.ok(gloveFirst.rpg < batFirst.rpg, 'the glove-first player IS the weaker bat')
+  assert.ok(
+    slotValue(gloveFirst, '3B') > slotValue(batFirst, '3B'),
+    'but he is the more valuable third baseman',
+  )
+  // Move the same pair to DH and the ranking flips back to pure offense.
+  assert.ok(slotValue(gloveFirst, 'DH') < slotValue(batFirst, 'DH'))
+})
+
+test('rpgFromWar: wRC+ regresses toward league average, not toward replacement', () => {
+  // A thin sample means "probably average", NOT "probably terrible" — regressing
+  // toward 0 is what let a 27-PA callup read as a lineup weakness.
+  const thinGood = rpgFromWar(150, 27, {})
+  const fullGood = rpgFromWar(150, 600, {})
+  assert.ok(thinGood > 0 && thinGood < fullGood, 'a thin hot start pulls back toward average')
+  const thinBad = rpgFromWar(50, 27, {})
+  const fullBad = rpgFromWar(50, 600, {})
+  assert.ok(thinBad < 0 && thinBad > fullBad, 'a thin cold start pulls UP toward average')
+  // Exactly average is exactly zero, at any sample size.
+  assert.equal(rpgFromWar(100, 27, {}), 0)
+  assert.equal(rpgFromWar(100, 600, {}), 0)
+  // A 105 wRC+ catcher must out-rate a 97 wRC+ DH on similar samples — the
+  // inversion that surfaced this whole rework.
+  assert.ok(rpgFromWar(104.6, 400, {}) > rpgFromWar(96.8, 295, {}))
+})
+
+test('fldRpgFromRuns: fielding runs regress toward average on a long innings scale', () => {
+  const c = { regressionInn: 600, defInnPerGame: 9 }
+  // Regression governs the RATE, so hold the rate fixed and vary the sample:
+  // +6.4 runs over 1200 innings is the same per-inning rate as +0.53 over 100.
+  // The big sample keeps far more of it.
+  const full = fldRpgFromRuns(6.4, 1200, c)
+  const thin = fldRpgFromRuns(0.53, 100, c)
+  assert.ok(full > 0 && thin > 0 && full > thin, `full ${full} should exceed thin ${thin}`)
+  // A negative rate shrinks toward 0 from below, never past it.
+  const badFull = fldRpgFromRuns(-6.0, 1200, c)
+  const badThin = fldRpgFromRuns(-0.5, 100, c)
+  assert.ok(badFull < 0 && badThin < 0 && badThin > badFull, 'thin cold sample pulls up toward average')
+  // Missing inputs read as league average (null → caller uses 0), never a penalty.
+  assert.equal(fldRpgFromRuns(5, 0, c), null)
+  assert.equal(fldRpgFromRuns(undefined, 500, c), null)
 })
 
 test('full nine-slot synthetic roster: an obvious DH upgrade is taken', () => {
@@ -322,17 +357,17 @@ test('gradeLineup: a starter absent from the values file but present in WAR is v
   // number, graded normally — not excluded and not dropped to replacement.
   const data = synthData()
   delete data.players['dhstud'] // vacate the DH-stud slot in the file
-  const constants = { paScale: 600, regressionPa: 250, runsPerWar: 9.5, games: 162 }
+  const constants = { regressionPa: 250, leagueRPerPa: 0.118, paPerSlot: 4.2 }
   data.constants = constants
-  // A genuine masher by WAR: big sample, high WAR → a strong rpg.
-  data.warFallback = { bat: { traded_7: 5.0 }, pa: { traded_7: 600 } }
+  // A genuine masher: big sample, high wRC+ → a strong rpg.
+  data.warFallback = { wrc: { traded_7: 180 }, pa: { traded_7: 600 } }
   const g = gradeLineup(data, 1, postedWithDh('traded_7'))
   assert.ok(g)
-  assert.equal(g.ungraded.length, 0, 'a WAR-resolved starter is graded, not excluded')
-  // His DH value is the WAR conversion, anchored on his posted slot (we have no
-  // other read on his primary position) — a real bat well above replacement 0.
+  assert.equal(g.ungraded.length, 0, 'a file-resolved starter is graded, not excluded')
+  // His DH value is the wRC+ conversion — and at DH it is his bat alone, with no
+  // fielding figure to add (we have no innings for a player missing from the file).
   const dh = g.actual.perSlot.find((s) => s.slot === 'DH')
-  const expectedRpg = rpgFromWar(5.0, 600, constants, 'DH')
+  const expectedRpg = rpgFromWar(180, 600, constants)
   assert.ok(Number.isFinite(expectedRpg) && expectedRpg > 0.15)
   assert.ok(Math.abs(dh.value - expectedRpg) < 1e-9, `expected ${expectedRpg}, got ${dh.value}`)
 })
@@ -359,22 +394,20 @@ test('lineupStrengthFor: an unvalued starter surfaces by name via the posted-lin
 })
 
 test('rpgFromWar reproduces the nightly build model and degrades on missing inputs', () => {
-  const c = { paScale: 600, regressionPa: 250, runsPerWar: 9.5, games: 162 }
-  const expected = (war, pa, pos) => {
-    const per600 = (war / pa) * 600
-    const neutral = per600 - (POS_ADJ[pos] ?? 0) / 9.5
-    const reg = neutral * (pa / (pa + 250))
-    return (reg * 9.5) / 162
+  const c = { regressionPa: 250, leagueRPerPa: 0.118, paPerSlot: 4.2 }
+  const expected = (wrcPlus, pa) => {
+    const reg = 100 + (wrcPlus - 100) * (pa / (pa + 250))
+    return ((reg - 100) / 100) * 0.118 * 4.2
   }
-  assert.ok(Math.abs(rpgFromWar(0.1, 98, c) - expected(0.1, 98)) < 1e-12)
-  assert.ok(Math.abs(rpgFromWar(5.0, 600, c) - expected(5.0, 600)) < 1e-12)
-  // Same call with a primary position strips that position's adjustment first.
-  assert.ok(Math.abs(rpgFromWar(1.7, 400, c, 'C') - expected(1.7, 400, 'C')) < 1e-12)
-  assert.ok(Math.abs(rpgFromWar(0.2, 295, c, 'DH') - expected(0.2, 295, 'DH')) < 1e-12)
+  assert.ok(Math.abs(rpgFromWar(115, 98, c) - expected(115, 98)) < 1e-12)
+  assert.ok(Math.abs(rpgFromWar(180, 600, c) - expected(180, 600)) < 1e-12)
+  assert.ok(Math.abs(rpgFromWar(75, 256, c) - expected(75, 256)) < 1e-12)
+  // Constants default to the generator's when the file omits them.
+  assert.ok(Math.abs(rpgFromWar(115, 98) - expected(115, 98)) < 1e-12)
   // Missing/zero inputs → null so the caller can fall back to exclude-the-slot.
-  assert.equal(rpgFromWar(1.0, 0, c), null)
+  assert.equal(rpgFromWar(120, 0, c), null)
   assert.equal(rpgFromWar(undefined, 400, c), null)
-  assert.equal(rpgFromWar(2.0, NaN, c), null)
+  assert.equal(rpgFromWar(120, NaN, c), null)
 })
 
 test('gradeLineup: no-catcher roster still grades via the relax path', () => {

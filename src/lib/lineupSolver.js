@@ -10,35 +10,28 @@
 // The nine lineup slots. Order is fixed so callers can rely on it.
 export const SLOTS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
-// FanGraphs defensive positional adjustments, runs per 162 defensive games —
-// the standard, published constants (confirmed current in the July-2026 research
-// pass; see the design doc's "Research findings").
+// THE POSITIONAL ADJUSTMENT IS DELIBERATELY ABSENT FROM THIS MODULE. The
+// FanGraphs constants (C +12.5 … DH -17.5 runs per 162 defensive games) used to
+// be applied here, as POS_ADJ[slot] - POS_ADJ[primary]. Do not reintroduce them.
 //
-// These are NOT applied here. A lineup always fills the same nine slots, so
-// sum(POS_ADJ[slot]) is a constant that cancels out of any posted-vs-optimal
-// comparison — both at the total and, since each receipt row compares two
-// players at the SAME slot, at every line item. Adding a per-slot constant to
-// an assignment matrix also can't change which assignment is optimal. So the
-// adjustment is genuinely inert at this layer and is deliberately absent from
-// `slotValue`.
+// Two reasons, either one sufficient:
 //
-// Where it DOES belong is one layer up: WAR already contains the adjustment for
-// the position a player actually played, so `gen-lineup-values.mjs` strips it
-// off his raw WAR rate to store a position-NEUTRAL bat in lineup-values.json
-// (mirrored at runtime by `rpgFromWar`). Both import these constants from here
-// so the model has one home. Applying it in both places was the original bug:
-// see the header note on the strip's ordering in the generator.
-export const POS_ADJ = {
-  C: 12.5,
-  SS: 7.5,
-  '2B': 2.5,
-  '3B': 2.5,
-  CF: 2.5,
-  LF: -7.5,
-  RF: -7.5,
-  '1B': -12.5,
-  DH: -17.5,
-}
+//  1. It cancels. A lineup always fills the same nine slots, so the sum of the
+//     slots' own adjustments is a constant — out of the total, and out of every
+//     receipt row too, since a row compares two players at the SAME slot. Adding
+//     a per-slot constant to an assignment matrix also cannot change which
+//     assignment is optimal.
+//  2. Nothing is left for it to proxy. It existed to make bats at different
+//     positions comparable when the only input was WAR, which bundles bat and
+//     glove together. `lineup-values.json` now carries those SEPARATELY — `rpg`
+//     from wRC+ (offense only) and `fldRpg` from season fielding runs — so the
+//     defensive spectrum is priced directly, by measurement rather than by
+//     positional average.
+//
+// Trying to recover a bat from a WAR total is what broke the grade: FanGraphs'
+// `Positional` is prorated by actual playing time, so subtracting a full-season
+// constant overcharged a part-season catcher and overpaid a part-season DH. See
+// the value-model header in scripts/gen-lineup-values.mjs.
 
 // Runs/game charged for total unfamiliarity at a slot (eligibility weight 0).
 // A weight-1 (fully familiar) placement costs nothing; a weight-w placement
@@ -66,21 +59,30 @@ export function unfamiliarPenalty(p, slot) {
   return (1 - w) * UNFAMILIAR_PENALTY
 }
 
-// Run value (runs/game) of player `p` in `slot`: his position-neutral bat (rpg)
-// minus the unfamiliarity penalty. No positional adjustment term — see the
-// POS_ADJ header for why it cancels here. -Infinity when the slot is forbidden
-// (no eligibility), which the solver treats as an impossible pairing.
+// A designated hitter does not field, so his glove is worth exactly nothing in
+// that slot — the one place the two halves of a player's value come apart. This
+// is also what makes hiding a poor defender at DH correctly free, and what stops
+// the model from benching a glove-first regular over his bat alone.
+export function fieldingCredit(p, slot) {
+  if (slot === 'DH') return 0
+  return p.fldRpg ?? 0
+}
+
+// Run value (runs/game) of player `p` in `slot`: his bat (rpg), plus his glove
+// at a fielding slot, minus the unfamiliarity penalty. No positional adjustment
+// term — see the header above. -Infinity when the slot is forbidden (no
+// eligibility), which the solver treats as an impossible pairing.
 export function slotValue(p, slot) {
   const w = p.elig?.[slot]
   if (w === undefined) return -Infinity
-  return p.rpg - (1 - w) * UNFAMILIAR_PENALTY
+  return p.rpg + fieldingCredit(p, slot) - (1 - w) * UNFAMILIAR_PENALTY
 }
 
 // Same value, but never forbidden: a missing eligibility floors to ELIG_FLOOR.
 // Used to value an actual posted placement, which is a fact, not a proposal.
 export function slotValueFloored(p, slot) {
   const w = p.elig?.[slot] ?? ELIG_FLOOR
-  return p.rpg - (1 - w) * UNFAMILIAR_PENALTY
+  return p.rpg + fieldingCredit(p, slot) - (1 - w) * UNFAMILIAR_PENALTY
 }
 
 // Exact max-weight bipartite assignment (Hungarian / Kuhn-Munkres, O(n^2 m))
@@ -220,13 +222,13 @@ export function solveOptimalLineup(players, _opts = {}) {
 
 // Value an already-posted lineup: `actual` is [{id, slot}] (nine entries). Uses
 // the floored value so a real placement is never forbidden. A player not in the
-// pool is valued as replacement-level (rpg 0) at floor familiarity — never a
-// crash. Returns { total, perSlot: [{slot, id, value}] }.
+// pool is valued as a league-average bat and glove (rpg/fldRpg 0) at floor
+// familiarity — never a crash. Returns { total, perSlot: [{slot, id, value}] }.
 export function valueLineup(players, actual) {
   const byId = new Map(players.map((p) => [String(p.id), p]))
   let total = 0
   const perSlot = actual.map(({ id, slot }) => {
-    const p = byId.get(String(id)) ?? { id, rpg: 0, primaryPos: slot, elig: {} }
+    const p = byId.get(String(id)) ?? { id, rpg: 0, fldRpg: 0, primaryPos: slot, elig: {} }
     const value = slotValueFloored(p, slot)
     total += value
     return { slot, id, value }
