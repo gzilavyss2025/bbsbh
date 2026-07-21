@@ -697,11 +697,11 @@ export function findBoxscorePlayer(boxscore, id) {
 }
 
 // A player's identity fields a "baseball card" tile needs — headshot,
-// team, position — resolved from his personId within one game's feed. Shared
-// by the box score's own Insights card (Statcast superlatives) and
-// daySuperlatives.js's day-recap tiles, so the two PerformerCard surfaces
-// can't drift on how a player's team/position get resolved. Caller adds its
-// own `stat` line (the two surfaces format that differently).
+// team, position — resolved from his personId within one game's feed, in the
+// shape PerformerCard renders. Used by the box score's own Insights card
+// (Statcast superlatives); kept as a shared export so any further
+// PerformerCard surface resolves a player's team/position the same way rather
+// than rolling its own. Caller adds its own `stat` line.
 export function resolveCardPlayer(feed, personId) {
   if (personId == null) return null
   const found = findBoxscorePlayer(feed?.liveData?.boxscore, personId)

@@ -361,10 +361,9 @@ function groupCalloutNotes(notes) {
 }
 
 // The three Statcast superlatives (see computeGameSuperlatives), each
-// resolved to the "baseball card" shape PerformerCard renders — same
-// resolveCardPlayer lookup daySuperlatives.js uses for the day-recap's own
-// Statcast Leaders tiles. Filters out any superlative whose value or player
-// couldn't be resolved (most MiLB parks carry no tracking data at all).
+// resolved to the "baseball card" shape PerformerCard renders via
+// resolveCardPlayer (boxscore.js). Filters out any superlative whose value or
+// player couldn't be resolved (most MiLB parks carry no tracking data at all).
 function statcastCards(feed, insights) {
   const {
     maxVelo, maxVeloType, maxVeloPlayerId,

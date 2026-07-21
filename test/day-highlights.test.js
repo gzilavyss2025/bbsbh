@@ -11,7 +11,6 @@ import {
   cycleSignal,
   positionPlayerPitchingSignal,
   triplePlaySignal,
-  rankDayHighlights,
   classifyGameCards,
   firstSentence,
 } from '../src/api/dayHighlights.js'
@@ -275,13 +274,17 @@ test('firstSentence: does not truncate inside initials like "J.C."', () => {
 })
 
 // --------------------------------------------------------------------------
-// rankDayHighlights — the cross-game trims: keep only the top-2 "dominant
-// start" rows across the whole slate, and drop a game whose ONLY story is a
-// blowout (or that fired nothing at all). These live in the two-phase ranking,
-// not in any single signal, so they need a fuller whole-game feed than the
-// per-signal tests above (selectBoxscore reads run/hit/error totals off
-// liveData.linescore, batting off teamStats, and each starter's Game Score off
-// the first pitcher's pitching line).
+// classifyGameCards — the whole-slate pass behind each result card's pill.
+// Two layers are under test here. The cross-game trims (keep only the top-2
+// "dominant start" signals across the slate; a rout or a quiet game can't wear
+// the crown) live in the shared two-phase entry build, not in any single
+// signal, so they need a fuller whole-game feed than the per-signal tests above
+// (selectBoxscore reads run/hit/error totals off liveData.linescore, batting
+// off teamStats, and each starter's Game Score off the first pitcher's pitching
+// line). On top of that sits the per-card classification itself: every final
+// game gets an entry, even a quiet or blowout-only one that can never be
+// crowned — each game has its own card regardless of whether it's "worth
+// listing".
 // --------------------------------------------------------------------------
 
 // Populate only the fields selectBoxscore + the signals actually read. `away`/
@@ -346,44 +349,47 @@ const START_98 = { inningsPitched: '9.0', hits: 2, earnedRuns: 0, runs: 0, strik
 const START_87 = { inningsPitched: '9.0', hits: 4, earnedRuns: 1, runs: 1, strikeOuts: 6, baseOnBalls: 1 }
 const START_83 = { inningsPitched: '9.0', hits: 5, earnedRuns: 1, runs: 1, strikeOuts: 4, baseOnBalls: 1 }
 
-test('rankDayHighlights: keeps only the top-2 dominant starts across the slate', () => {
-  const ranked = rankDayHighlights(
+// The crown, and the gamePks whose entry kept a given signal — the two things
+// every test below reads off the classified slate.
+const crownOf = (cards) => cards.filter((c) => c.isGameOfTheNight).map((c) => c.gamePk)
+const withSignal = (cards, key) => cards.filter((c) => c.signals.includes(key)).map((c) => c.gamePk)
+
+test('classifyGameCards: keeps only the top-2 dominant-start signals across the slate', () => {
+  const cards = classifyGameCards(
     [dominantGame(1, START_98), dominantGame(2, START_87), dominantGame(3, START_83)],
     null,
   )
-  // The 83 start is the weakest of three — trimmed, and since it was that
-  // game's only story the whole game drops off the recap.
-  assert.deepEqual(
-    ranked.map((e) => e.gamePk),
-    [1, 2],
-  )
-  assert.ok(ranked.every((e) => e.signals.includes('gameScore')))
+  // Every game still gets its own card — but the 83 start is the weakest of
+  // three, so its signal is trimmed and, since that was its only story, the
+  // card goes quiet (no pill) rather than disappearing.
+  assert.equal(cards.length, 3)
+  assert.deepEqual(withSignal(cards, 'gameScore'), [1, 2])
+  assert.equal(cards.find((c) => c.gamePk === 3).scenario, null)
 })
 
-test('rankDayHighlights: the surviving dominant starts sort best-first', () => {
-  // Feed them out of order; the 98 must still lead the 87.
-  const ranked = rankDayHighlights([dominantGame(2, START_87), dominantGame(1, START_98)], null)
-  assert.deepEqual(
-    ranked.map((e) => e.gamePk),
-    [1, 2],
-  )
+test('classifyGameCards: the better dominant start takes the crown, fed out of order', () => {
+  const cards = classifyGameCards([dominantGame(2, START_87), dominantGame(1, START_98)], null)
+  assert.deepEqual(crownOf(cards), [1])
 })
 
-test('rankDayHighlights: a game whose only story is a blowout is dropped', () => {
+test('classifyGameCards: a game whose only story is a blowout never wins the crown', () => {
   // A 10-run laugher with nothing else — no dominant start, no HR, both sides
   // hit (so it isn't a no-hitter). Its lone signal is the blowout, which is the
-  // opposite of a highlight.
-  const ranked = rankDayHighlights(
+  // opposite of a highlight, so the day ends with no crown at all rather than
+  // crowning a rout.
+  const cards = classifyGameCards(
     [rankEntry(1, rankFeed({ away: { r: 12, h: 14 }, home: { r: 2, h: 5 } }))],
     null,
   )
-  assert.deepEqual(ranked, [])
+  assert.equal(cards.length, 1)
+  assert.equal(cards[0].scenario, 'blowout')
+  assert.deepEqual(crownOf(cards), [])
 })
 
-test('rankDayHighlights: a blowout that also has a real story survives on that story', () => {
-  // Same 12-2 margin, but the winner has a 2-HR hitter — the multi-HR keeps the
-  // game, and it leads on that (NOTABLE) signal, not the blowout.
-  const ranked = rankDayHighlights(
+test('classifyGameCards: a blowout that also has a real story is crowned on that story', () => {
+  // Same 12-2 margin, but the winner has a 2-HR hitter — the multi-HR makes the
+  // game eligible again, and it leads on that (NOTABLE) signal, not the blowout.
+  const cards = classifyGameCards(
     [
       rankEntry(
         7,
@@ -395,34 +401,36 @@ test('rankDayHighlights: a blowout that also has a real story survives on that s
     ],
     null,
   )
-  assert.equal(ranked.length, 1)
-  assert.equal(ranked[0].gamePk, 7)
-  assert.ok(ranked[0].signals.includes('multiHr'))
-  assert.equal(ranked[0].performer.id, 55)
+  assert.equal(cards.length, 1)
+  assert.ok(cards[0].signals.includes('multiHr'))
+  assert.equal(cards[0].scenario, 'dominant')
+  assert.equal(cards[0].performer.id, 55)
+  assert.deepEqual(crownOf(cards), [7])
 })
 
-test('rankDayHighlights: a quiet game with no fired signal is dropped', () => {
-  const ranked = rankDayHighlights(
+test('classifyGameCards: a quiet game keeps its own entry but stays uncrowned', () => {
+  const cards = classifyGameCards(
     [rankEntry(1, rankFeed({ away: { r: 4, h: 8 }, home: { r: 1, h: 6 } }))],
     null,
   )
-  assert.deepEqual(ranked, [])
+  assert.equal(cards.length, 1)
+  assert.equal(cards[0].scenario, null)
+  assert.deepEqual(crownOf(cards), [])
 })
 
-test('rankDayHighlights: exposes a score-free story and winner/loser runs', () => {
-  const [top] = rankDayHighlights([dominantGame(1, START_98)], null)
-  assert.ok(/was dominant/.test(top.story))
-  assert.ok(!top.story.includes(' — '), 'story carries no score suffix')
-  // away (r:4) beat home (r:1) — winner first, with run totals for the hero's
-  // logo + score line.
-  assert.equal(top.teams.winner.r, 4)
-  assert.equal(top.teams.loser.r, 1)
+test('classifyGameCards: exposes a score-free story and winner/loser runs', () => {
+  const [card] = classifyGameCards([dominantGame(1, START_98)], null)
+  assert.ok(/was dominant/.test(card.story))
+  assert.ok(!card.story.includes(' — '), 'story carries no score suffix')
+  // away (r:4) beat home (r:1) — winner first, with run totals.
+  assert.equal(card.teams.winner.r, 4)
+  assert.equal(card.teams.loser.r, 1)
 })
 
-test('rankDayHighlights: margin storyline names clubs, not abbreviations', () => {
+test('classifyGameCards: margin storyline names clubs, not abbreviations', () => {
   // A one-run game between named clubs — the headline must read "The Angels
   // edged the Tigers", never "The LAA edged the DET".
-  const [top] = rankDayHighlights(
+  const [card] = classifyGameCards(
     [
       rankEntry(
         1,
@@ -434,44 +442,7 @@ test('rankDayHighlights: margin storyline names clubs, not abbreviations', () =>
     ],
     null,
   )
-  assert.equal(top.story, 'The Angels edged the Tigers by a single run')
-})
-
-// --------------------------------------------------------------------------
-// classifyGameCards — per-card pill classification for the slate grid. Unlike
-// rankDayHighlights (the digest list), every game gets an entry here, even a
-// quiet or blowout-only one that rankDayHighlights would drop — each game has
-// its own result card regardless of whether it's "worth listing".
-// --------------------------------------------------------------------------
-
-test('classifyGameCards: a quiet game keeps its own entry (rankDayHighlights would drop it)', () => {
-  const cards = classifyGameCards(
-    [rankEntry(1, rankFeed({ away: { r: 4, h: 8 }, home: { r: 1, h: 6 } }))],
-    null,
-  )
-  assert.equal(cards.length, 1)
-  assert.equal(cards[0].scenario, null)
-  assert.equal(cards[0].isGameOfTheNight, false)
-})
-
-test('classifyGameCards: a blowout-only game keeps scenario "blowout" and never wins the crown', () => {
-  const cards = classifyGameCards(
-    [rankEntry(1, rankFeed({ away: { r: 12, h: 14 }, home: { r: 2, h: 5 } }))],
-    null,
-  )
-  assert.equal(cards.length, 1)
-  assert.equal(cards[0].scenario, 'blowout')
-  assert.equal(cards[0].isGameOfTheNight, false)
-})
-
-test('classifyGameCards: crowns exactly the game that would lead rankDayHighlights', () => {
-  const entries = [dominantGame(1, START_87), dominantGame(2, START_98)]
-  const cards = classifyGameCards(entries, null)
-  const [rankedTop] = rankDayHighlights(entries, null)
-  const crowned = cards.filter((c) => c.isGameOfTheNight)
-  assert.equal(crowned.length, 1)
-  assert.equal(crowned[0].gamePk, rankedTop.gamePk)
-  assert.equal(crowned[0].gamePk, 2) // the 98 start beats the 87 start
+  assert.equal(card.story, 'The Angels edged the Tigers by a single run')
 })
 
 test('classifyGameCards: buckets each signal into its card scenario', () => {

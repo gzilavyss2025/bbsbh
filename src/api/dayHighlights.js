@@ -1,8 +1,9 @@
 // DAY HIGHLIGHTS — ranks a past day's Final games by how interesting/memorable
 // they were, for the sealed "Day Highlights" panel on a past date's slate.
 // SPOILER RULE: reveal-only, exactly like linescore.js/derive.js/boxscore.js —
-// only ever call rankDayHighlights from inside a SealBox's reveal render
-// function, never at render top-level or in a pre-reveal useMemo.
+// only ever call classifyGameCards from inside a reveal (the slate's shared
+// reveal-all, via useDayCardMeta), never at render top-level or in a pre-reveal
+// useMemo.
 //
 // Each game is scanned for discrete "storylines," grouped into tiers (0 =
 // rarest/highest priority, down to 3 = a quiet game with nothing much fired).
@@ -41,8 +42,8 @@ function performerFrom(feed, side, boxPlayer, stat) {
 
 const TIER = { RARE: 0, NOTABLE: 1, STORY: 2, CLOSE: 3 }
 
-// Per-card pill scenario for the slate grid (each game's own result card, not
-// the digest list) — not every signal maps to its own bucket 1:1: walkoff and
+// Per-card pill scenario for the slate grid (each game's own result card) —
+// not every signal maps to its own bucket 1:1: walkoff and
 // comeback are drama/closeness stories (Close Game) despite walkoff scoring at
 // NOTABLE tier alongside multiHr/positionPlayerPitching, which are stat-line
 // stories (Dominant Performance). triplePlay has no natural performer (its own
@@ -70,14 +71,15 @@ const SCENARIO_BY_KEY = {
 const STARTER_RECORD_MIN_STARTS = 8
 const STARTER_RECORD_MIN_WINPCT = 0.6
 
-// How many "was dominant (Game Score N)" highlights a single day keeps. Four
-// near-identical dominant-pitcher rows read as a wall, so only the best-pitched
-// games survive — ranked by Game Score across the whole slate, NOT dropped by
-// whether the pitcher also appears in Top Performers (an earlier fix did that
-// and kept the WEAKEST duplicate while cutting the day's best starts — the
-// exact backfire the review flagged). The genuine best pitching story is
-// allowed to repeat between Top Performers and Highlights; the lesser dominant
-// starts are what get trimmed.
+// How many "was dominant" pitching storylines a single day keeps. Four
+// near-identical Dominant Performance cards read as a wall, so only the
+// best-pitched games keep that signal — ranked by Game Score across the whole
+// slate, NOT dropped by whether the pitcher also appears in Top Performers (an
+// earlier fix did that and kept the WEAKEST duplicate while cutting the day's
+// best starts — the exact backfire the review flagged). The genuine best
+// pitching story is allowed to repeat between Top Performers and its own card;
+// the lesser dominant starts are what lose the signal (and with it, usually
+// their pill — a game whose only story was an 83 Game Score goes quiet).
 const MAX_DOMINANT_HIGHLIGHTS = 2
 
 // Every player who batted, from the raw feed (selectBoxscore's battingRows
@@ -387,7 +389,7 @@ export function firstSentence(desc) {
 // The single signal a game's row is built around — same (tier, points) sort
 // the family ranking uses elsewhere, so "what fired" and "what's shown" never
 // disagree. Exported logic kept local (not every caller needs it) but shared
-// between buildHeadline and rankDayHighlights so both agree on the same pick.
+// between buildHeadline and buildGameEntries so both agree on the same pick.
 function pickTopSignal(signals) {
   return [...signals].sort((a, b) => a.tier - b.tier || b.points - a.points)[0]
 }
@@ -456,9 +458,8 @@ export function performerSubCaption(top, bundle) {
 // protagonist rows with no sub-caption. The "was dominant" pitcher rows are
 // de-duped across the whole slate (see MAX_DOMINANT_HIGHLIGHTS) — a cross-game
 // pass, so the ranking is computed here in two phases rather than one map.
-// Shared by rankDayHighlights (the digest list, filtered/sorted) and
-// classifyGameCards (every game's own card, unfiltered) below — neither
-// duplicates the signal-gathering/de-dupe/field-building logic.
+// classifyGameCards below is the only caller; kept separate from it so the
+// signal-gathering/de-dupe/field-building stays readable on its own.
 function buildGameEntries(entries, calloutsData) {
   // Phase 1: gather every game's fired signals (the objects, not just keys).
   const games = entries.filter(Boolean).map(({ gamePk, game, feed, winProb, dateStr }) => {
@@ -565,14 +566,11 @@ function buildGameEntries(entries, calloutsData) {
     })
 }
 
-// A quiet game with no fired signal (tier 4, the "Final: X, Y" default
-// headline) isn't a HIGHLIGHT — drop it rather than pad the list with scores
-// that don't belong in a "most interesting" ranking. A game whose ONLY signal
-// is a blowout is likewise dropped: a rout is the opposite of a highlight (its
-// points are even negative), and it only ever rode the list as filler — when a
-// lopsided game also has a real story (a multi-HR night), that OTHER signal
-// keeps it. Shared by rankDayHighlights (to filter) and classifyGameCards (to
-// decide crown eligibility) so the two never disagree on what counts.
+// Which games may wear the crown. A quiet game with no fired signal (tier 4,
+// the "Final: X, Y" default headline) isn't a highlight at all. A game whose
+// ONLY signal is a blowout is likewise out: a rout is the opposite of a
+// highlight (its points are even negative) — when a lopsided game also has a
+// real story (a multi-HR night), that OTHER signal makes it eligible again.
 function isHighlightWorthy(entry) {
   return entry.signals.length > 0 && !(entry.signals.length === 1 && entry.signals[0] === 'blowout')
 }
@@ -580,22 +578,15 @@ function byTierThenScore(a, b) {
   return a.tier - b.tier || b.score - a.score
 }
 
-export function rankDayHighlights(entries, calloutsData) {
-  return buildGameEntries(entries, calloutsData).filter(isHighlightWorthy).sort(byTierThenScore)
-}
-
-// Per-card classification for the slate grid — EVERY final game gets an
-// entry here (unlike rankDayHighlights's digest list above, which drops quiet
-// and blowout-only games), since every game has its own result card whether
-// or not it's "worth listing." A quiet game gets scenario: null (no pill, no
-// extra headshot); a blowout-only game still gets scenario: 'blowout' for its
-// own card, it just never competes for the crown below.
+// Per-card classification for the slate grid — EVERY final game gets an entry,
+// since every game has its own result card whether or not it's "worth
+// listing." A quiet game gets scenario: null (no pill, no extra headshot); a
+// blowout-only game still gets scenario: 'blowout' for its own card, it just
+// never competes for the crown below.
 //
-// isGameOfTheNight is true for at most one game per day: whichever entry
-// would lead rankDayHighlights's own list (same isHighlightWorthy/
-// byTierThenScore, so the crown always matches what the old digest would have
-// led with) — never a quiet or blowout-only game, even if nothing else fired
-// that day.
+// isGameOfTheNight is true for at most one game per day: the highest-ranked
+// eligible entry by (tier, score) — never a quiet or blowout-only game, even
+// if nothing else fired that day.
 export function classifyGameCards(entries, calloutsData) {
   const games = buildGameEntries(entries, calloutsData)
   const crowned = games.filter(isHighlightWorthy).sort(byTierThenScore)[0]?.gamePk ?? null
