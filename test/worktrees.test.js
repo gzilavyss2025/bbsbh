@@ -25,7 +25,7 @@ const merged = {
   upstream: 'origin/claude/some-feature',
   upstreamExists: true,
   merged: true,
-  atBaseTip: false,
+  onBaseFirstParent: false,
   dirty: 0,
 }
 
@@ -35,11 +35,11 @@ test('a merged branch with no uncommitted work is stale', () => {
   assert.match(status, /merged into origin\/main/)
 })
 
-test('a freshly created worktree sitting on the base tip is not stale', () => {
+test('a freshly created worktree with no commits of its own is not stale', () => {
   // Regression: `merged` alone is true here, because a branch cut from
-  // origin/main is trivially an ancestor of it. Only `atBaseTip` separates
-  // this from the merged case above.
-  const { stale, status } = classifyWorktree({ ...merged, atBaseTip: true })
+  // origin/main is trivially an ancestor of it. Only sitting on origin/main's
+  // own first-parent chain separates this from the merged case above.
+  const { stale, status } = classifyWorktree({ ...merged, onBaseFirstParent: true })
   assert.equal(stale, false)
   assert.match(status, /fresh/)
 })
@@ -82,7 +82,7 @@ test('a never-pushed branch is not stale', () => {
 })
 
 test('the primary checkout is never stale', () => {
-  const { stale } = classifyWorktree({ ...merged, isPrimary: true, branch: 'main', atBaseTip: true })
+  const { stale } = classifyWorktree({ ...merged, isPrimary: true, branch: 'main', onBaseFirstParent: true })
   assert.equal(stale, false)
 })
 
@@ -130,6 +130,52 @@ test('gatherFacts sees an upstream that no longer resolves', () => {
   const { stale, status } = classifyWorktree(facts)
   assert.equal(stale, true)
   assert.match(status, /upstream branch deleted/)
+})
+
+test('a fresh worktree stays fresh after the base branch moves on', () => {
+  // The bug this replaces: freshness was decided by "is HEAD exactly
+  // origin/main's tip", which stops being true the moment anything else merges.
+  // A worktree created minutes earlier then reclassified as merged-and-stale,
+  // and was offered for deletion while a concurrent agent was working in it.
+  // Here HEAD is two commits behind the tip but still on main's own first-parent
+  // chain, which is what "this branch has no commits of its own" really means.
+  const facts = gatherFacts(
+    { root: '/wt', branch: 'claude/just-started', isPrimary: false },
+    fakeGit({
+      'rev-parse --abbrev-ref origin/HEAD': 'origin/main',
+      'for-each-ref': 'origin/claude/just-started',
+      'rev-parse --verify --quiet': 'aaaaaaa',
+      'merge-base --is-ancestor': '', // ancestor of main
+      'rev-list --first-parent origin/main': 'ccccccc\nbbbbbbb\naaaaaaa',
+      'rev-parse HEAD': 'aaaaaaa',
+      'status --porcelain': '',
+    }),
+  )
+  assert.equal(facts.merged, true)
+  assert.equal(facts.onBaseFirstParent, true)
+
+  const { stale, status } = classifyWorktree(facts)
+  assert.equal(stale, false)
+  assert.match(status, /fresh/)
+})
+
+test('a genuinely merged branch is not mistaken for fresh', () => {
+  // The mirror of the case above: HEAD is inside main's history but is the
+  // branch's own commit, so it is NOT on main's first-parent chain.
+  const facts = gatherFacts(
+    { root: '/wt', branch: 'claude/done', isPrimary: false },
+    fakeGit({
+      'rev-parse --abbrev-ref origin/HEAD': 'origin/main',
+      'for-each-ref': 'origin/claude/done',
+      'rev-parse --verify --quiet': 'ddddddd',
+      'merge-base --is-ancestor': '',
+      'rev-list --first-parent origin/main': 'ccccccc\nbbbbbbb\naaaaaaa',
+      'rev-parse HEAD': 'ddddddd', // merged in as a second parent
+      'status --porcelain': '',
+    }),
+  )
+  assert.equal(facts.onBaseFirstParent, false)
+  assert.equal(classifyWorktree(facts).stale, true)
 })
 
 test('gatherFacts reports no upstream for a genuinely never-pushed branch', () => {

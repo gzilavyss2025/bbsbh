@@ -33,21 +33,31 @@ import { execFileSync } from 'node:child_process'
  * @param {string|null} facts.upstream      configured upstream ref, or null
  * @param {boolean} facts.upstreamExists    does that upstream ref still resolve
  * @param {boolean} facts.merged            is HEAD an ancestor of origin/<base>
- * @param {boolean} facts.atBaseTip         is HEAD exactly origin/<base>'s tip
+ * @param {boolean} facts.onBaseFirstParent is HEAD a commit origin/<base> itself
+ *                                          passed through (its first-parent chain)
  * @param {number} facts.dirty              count of uncommitted files
  */
 export function classifyWorktree(facts) {
-  const { branch, base, isPrimary, upstream, upstreamExists, merged, atBaseTip, dirty } = facts
+  const { branch, base, isPrimary, upstream, upstreamExists, merged, onBaseFirstParent, dirty } = facts
 
   if (isPrimary) return { status: `${base} (primary checkout)`, stale: false }
   if (!branch) return { status: 'detached (no branch)', stale: false }
 
   // A branch just created from origin/<base> is trivially an ancestor of it, so
-  // `merged` alone would flag the worktree you are actively starting work in as
-  // safe to delete. It is only distinguishable from a genuinely merged branch by
-  // sitting exactly on the base tip: a merged branch's HEAD is its own last
-  // commit, which is inside origin/<base>'s history but behind its tip.
-  if (merged && atBaseTip) return { status: 'fresh (no commits yet)', stale: false }
+  // `merged` alone would flag the worktree someone is actively starting work in
+  // as safe to delete.
+  //
+  // Telling the two apart by "is HEAD exactly origin/<base>'s tip" is not enough:
+  // that only holds until <base> moves. Any merge to <base> silently reclassified
+  // every already-open fresh worktree as merged — which nearly offered a
+  // concurrent agent's live checkout for deletion, minutes after it was created.
+  //
+  // What actually separates them is whose commit HEAD is. A branch with no work
+  // of its own sits on a commit <base> itself passed through — its first-parent
+  // chain. A merged branch sits on its own last commit, which enters <base>'s
+  // history as a *second* parent (merge commit) or not at all (squash). So
+  // first-parent membership holds however far <base> advances.
+  if (merged && onBaseFirstParent) return { status: 'fresh (no commits of its own)', stale: false }
 
   // Uncommitted work is the one hard stop. Never mark such a worktree stale, no
   // matter how merged it looks — that is someone's unsaved work.
@@ -130,7 +140,14 @@ export function gatherFacts(wt, run = tryGit) {
     upstream,
     upstreamExists: upstream !== null && run(['rev-parse', '--verify', '--quiet', upstream], root) !== null,
     merged: run(['merge-base', '--is-ancestor', 'HEAD', `origin/${base}`], root) !== null,
-    atBaseTip: run(['rev-parse', 'HEAD'], root) === run(['rev-parse', `origin/${base}`], root),
+    // `--is-ancestor` walks all parents; this deliberately walks only first
+    // parents, so it answers "was HEAD ever origin/<base> itself?" rather than
+    // "is HEAD somewhere in its history".
+    onBaseFirstParent:
+      run(['merge-base', '--is-ancestor', 'HEAD', `origin/${base}`], root) !== null &&
+      run(['rev-list', '--first-parent', `origin/${base}`], root)
+        ?.split('\n')
+        .includes(run(['rev-parse', 'HEAD'], root)) === true,
     dirty: dirtyOut ? dirtyOut.split('\n').filter(Boolean).length : 0,
   }
 }
