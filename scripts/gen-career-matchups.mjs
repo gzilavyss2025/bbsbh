@@ -81,9 +81,23 @@ async function mapConcurrent(items, limit, mapper) {
   return results
 }
 
-// --- schedule: the matchups to precompute (identical shape to
+// --- schedule: the matchups to precompute (same shape as
 // gen-former-teammates.mjs's fetchMatchups — kept as its own copy, same
-// self-contained convention as gen-rehab.mjs mirroring person.js) ------------
+// self-contained convention as gen-rehab.mjs mirroring person.js — EXCEPT
+// keyed by the normalized (unordered) team pair rather than literal
+// away-homeId, unlike that sibling: pairingsFor below always runs BOTH
+// directions itself (away-bats-vs-home-pitches AND the reverse) in one pass,
+// so which club the schedule happened to call "home" that day carries no
+// information this generator needs. Keying on the literal away-homeId (as
+// first written, and as gen-former-teammates.mjs still does — it uses the
+// direction for `a`/`b` framing, which this script doesn't) meant a
+// home-and-home flip within the window (the same two clubs hosting each
+// other on different days) produced TWO entries that both normalized to the
+// same output key later, so the second one silently redid — and wasted the
+// API calls for — the exact same work as the first. Verified against a real
+// full-league run before this fix: the truncation counter (incremented once
+// per raw entry) came out higher than the final matchup count, the
+// fingerprint of exactly this double-processing. ----------------------------
 async function fetchMatchups() {
   const pairs = new Map()
   const teams = new Map()
@@ -100,7 +114,8 @@ async function fetchMatchups() {
           const a = g.teams?.away?.team
           const h = g.teams?.home?.team
           if (!a?.id || !h?.id) continue
-          pairs.set(`${a.id}-${h.id}`, { awayId: a.id, homeId: h.id })
+          const key = a.id < h.id ? `${a.id}-${h.id}` : `${h.id}-${a.id}`
+          if (!pairs.has(key)) pairs.set(key, { awayId: a.id, homeId: h.id })
           teams.set(a.id, true)
           teams.set(h.id, true)
         }
