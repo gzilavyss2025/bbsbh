@@ -4629,6 +4629,51 @@ body {
   gap: 12px;
 }
 
+/* SPIKE: page-turn on advancing to the next half-inning — hinge on the left
+   edge like a bound scorebook, forward navigation only (Back is a plain
+   remount). A shadow sweeps across the page as it settles to fake the fold
+   without rendering a backside. perspective lives on .innings__grid, the
+   direct parent of .inning in InningViewer.jsx, since perspective only
+   reaches direct children. */
+.innings__grid {
+  perspective: 1600px;
+}
+.inning--pageturn {
+  position: relative;
+  transform-origin: left center;
+  animation: inning-pageturn-in var(--dur-slow) var(--ease-out) forwards;
+}
+.inning--pageturn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent 45%);
+  animation: inning-pageturn-shadow var(--dur-slow) var(--ease-out) forwards;
+}
+@keyframes inning-pageturn-in {
+  from {
+    transform: rotateY(-62deg);
+  }
+  to {
+    transform: rotateY(0deg);
+  }
+}
+@keyframes inning-pageturn-shadow {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inning--pageturn,
+  .inning--pageturn::after {
+    animation: none;
+  }
+}
+
 .half {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);

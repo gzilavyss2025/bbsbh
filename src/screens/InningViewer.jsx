@@ -146,6 +146,17 @@ export function InningViewer({
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
 
+  // SPIKE: page-turn animation, forward navigation only. The ref update has to
+  // live in an effect, not inline during render — StrictMode double-invokes
+  // render functions in dev, so a mutate-during-render "compare to previous
+  // render" pattern sees its own write on the second invocation and always
+  // computes turnedForward = false.
+  const prevIdxRef = useRef(curIdx)
+  const turnedForward = curIdx > prevIdxRef.current
+  useEffect(() => {
+    prevIdxRef.current = curIdx
+  }, [curIdx])
+
   // The next half within what's unlocked, for the floating advance button (§ the
   // lineup pages' btn--next, carried over to the innings view). Null at the last
   // unlocked half — which is always the bottom of the furthest revealed inning
@@ -367,7 +378,10 @@ export function InningViewer({
         {/* Row 2: the half's play-by-play (paired with its strike zone on the
             wide layout). key on inning+half → fresh mount; a box at/under the
             reveal mark stays open. */}
-        <div className="inning" key={`${effInning}-${effHalf}`}>
+        <div
+          className={`inning${turnedForward ? ' inning--pageturn' : ''}`}
+          key={`${effInning}-${effHalf}`}
+        >
           <HalfInning
             feed={feed}
             inning={effInning}
