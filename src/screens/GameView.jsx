@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
+import { useWakeLock } from '../hooks/useWakeLock.js'
+import { useKeepAwakePreference } from '../hooks/useKeepAwakePreference.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
 import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
@@ -50,6 +52,7 @@ export function GameView({ game, section, onSection }) {
     gameCallouts,
     broadcast,
     formerTeammatesData,
+    careerMatchupsData,
     vsTeamSplitsData,
     highlightsData,
     runExpectancyData,
@@ -57,6 +60,15 @@ export function GameView({ game, section, onSection }) {
     lineupValuesData,
     started,
   } = useGameData(game)
+
+  // Screen Wake Lock — keeps the phone's display on during a live game so it
+  // stays readable propped up next to a scorebook (see useWakeLock). Opt-in
+  // (battery cost of an always-on screen), persisted like the Game Score
+  // preference; only actually held while the game is Live, released the rest
+  // of the time (pregame staging, Final) regardless of the preference.
+  const { keepAwake, setKeepAwake } = useKeepAwakePreference()
+  const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
+  useWakeLock(keepAwake && isLive)
 
   // Where "Innings" returns to: the last half-inning page the user was on, so
   // hopping out to a lineup or the box score and back doesn't lose your place
@@ -142,6 +154,9 @@ export function GameView({ game, section, onSection }) {
         date={officialDate}
         gamePk={game.gamePk}
         onSketch={setSketching}
+        isLive={isLive}
+        keepAwake={keepAwake}
+        onSetKeepAwake={setKeepAwake}
       />
 
       {/* Delayed/suspended/postponed is structural game state, not a score —
@@ -192,12 +207,14 @@ export function GameView({ game, section, onSection }) {
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
+          careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
           lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           onReload={feedState.reload}
           loading={feedState.loading}
+          lastUpdated={feedState.lastUpdated}
         />
       )}
       {feed && step === 0 && !wide && (
@@ -216,6 +233,7 @@ export function GameView({ game, section, onSection }) {
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
+          careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
           lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
@@ -223,6 +241,7 @@ export function GameView({ game, section, onSection }) {
           nextLabel="Home team ›"
           onReload={feedState.reload}
           loading={feedState.loading}
+          lastUpdated={feedState.lastUpdated}
         />
       )}
       {feed && step === 1 && !wide && (
@@ -240,6 +259,7 @@ export function GameView({ game, section, onSection }) {
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
           formerTeammatesData={formerTeammatesData}
+          careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
           lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
@@ -247,6 +267,7 @@ export function GameView({ game, section, onSection }) {
           nextLabel="Innings ›"
           onReload={feedState.reload}
           loading={feedState.loading}
+          lastUpdated={feedState.lastUpdated}
         />
       )}
       {feed && step === 2 && (
@@ -260,6 +281,7 @@ export function GameView({ game, section, onSection }) {
           onBoxScore={() => onSection('boxscore')}
           onReload={feedState.reload}
           loading={feedState.loading}
+          lastUpdated={feedState.lastUpdated}
           pitcherRoles={pitcherRoles.data}
           winProbability={winProb.data}
           prospectsData={prospectsData}
@@ -282,6 +304,7 @@ export function GameView({ game, section, onSection }) {
           vsTeam={vsTeamSplitsData}
           onReload={feedState.reload}
           loading={feedState.loading}
+          lastUpdated={feedState.lastUpdated}
           onSection={onSection}
         />
       )}
@@ -296,7 +319,7 @@ export function GameView({ game, section, onSection }) {
 // right-aligned opposite them. Tapping a mark opens it enlarged for pencil
 // sketching. The date and the Watch link are both structural, not
 // score-revealing, so they render unconditionally (no seal).
-function Masthead({ away, home, date, gamePk, onSketch }) {
+function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSetKeepAwake }) {
   return (
     <div className="masthead">
       <div className="masthead__teams">
@@ -306,9 +329,34 @@ function Masthead({ away, home, date, gamePk, onSketch }) {
       </div>
       <div className="masthead__side">
         {date && <span className="masthead__date">{humanDate(date)}</span>}
+        {/* Only worth showing (and worth the tap) while the game can actually
+            hold the lock — pregame/Final it would just sit there inert. */}
+        {isLive && <KeepAwakeToggle on={keepAwake} onToggle={() => onSetKeepAwake(!keepAwake)} />}
         {gamePk && <WatchButton gamePk={gamePk} />}
       </div>
     </div>
+  )
+}
+
+// Screen-wake-lock toggle, same switch convention as the Settings modal's
+// Game Score pref (FavoriteTeamModal.jsx's favteamsheet__prefToggle) but
+// compact enough to ride in the masthead next to Watch — this is a per-game,
+// in-the-moment choice, not something worth burying in a separate modal.
+function KeepAwakeToggle({ on, onToggle }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={on ? 'Keep screen awake: on' : 'Keep screen awake: off'}
+      title="Keep the screen from sleeping during this live game"
+      className={`awaketoggle${on ? ' is-on' : ''}`}
+      onClick={onToggle}
+    >
+      <span className="awaketoggle__icon" aria-hidden="true">
+        {on ? '☀' : '☾'}
+      </span>
+    </button>
   )
 }
 

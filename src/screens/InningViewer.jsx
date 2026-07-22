@@ -55,6 +55,7 @@ export function InningViewer({
   onBoxScore,
   onReload,
   loading,
+  lastUpdated,
   pitcherRoles,
   winProbability,
   prospectsData,
@@ -340,7 +341,7 @@ export function InningViewer({
           This game hasn’t started yet. Lineups and info are on the previous
           pages; inning totals appear once first pitch is thrown.
         </p>
-        <RefreshButton onReload={onReload} loading={loading} />
+        <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
       </div>
     )
   }
@@ -522,7 +523,12 @@ export function InningViewer({
           reveal the whole half at once — either flips the bar back once the
           half is fully committed. */}
       <div className="pagenav pagenav--innings">
-        <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
+        <RefreshButton
+          onReload={onReload}
+          loading={loading}
+          lastUpdated={lastUpdated}
+          className="refreshbtn--float"
+        />
         {currentSealed ? (
           <div className="revealsplit">
             <button

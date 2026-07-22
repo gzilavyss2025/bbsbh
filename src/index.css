@@ -774,6 +774,34 @@ body {
   color: var(--text-on-ink);
 }
 
+/* Screen-wake-lock toggle (GameView.jsx's KeepAwakeToggle) — a compact icon
+   pill riding next to Watch, only shown while the game is Live. Same
+   on/off-state coloring convention as .favteamsheet__prefToggle.is-on. */
+.awaketoggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+.awaketoggle.is-on {
+  background: var(--accent-positive);
+  border-color: var(--accent-positive);
+}
+.awaketoggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.awaketoggle__icon {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+}
+
 /* At the narrowest supported phone width, the date is already present in the
    navigator and the detail card below. Removing this duplicate keeps the two
    club marks and MLB.TV action legible without shrinking any text below the
@@ -4225,6 +4253,55 @@ body {
   color: var(--text-body);
 }
 
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — a plain scorebook-style
+   stat list, deliberately not FormerTeammates' headshot cards (this is a line
+   off a stat sheet, not a story), riding the same .metriccard/.metriccard__body
+   shell. Each row wraps name-pair + stat line onto its own line at narrow
+   widths rather than truncating either. */
+.matchups__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.matchups__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 10px;
+  padding: 7px 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.matchups__row:last-child {
+  border-bottom: none;
+}
+.matchups__names {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+/* Scoped through the parent, same reason .umps__namerow .umps__name is —
+   outranks .plink's own font/color/text-transform: inherit reset, which
+   would otherwise win the same-specificity tie by source order. */
+.matchups__names .matchups__name {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.matchups__vs {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.matchups__line {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
 /* ----------------------------------------------------------- defense diamond
    The sheet's bottom-left graphic: infield square on its point, surnames on
    writing lines at their positions, the position number penciled beneath,
@@ -4424,6 +4501,17 @@ body {
 .refreshbtn__icon {
   font-size: var(--fs-ui);
   line-height: var(--lh-solid);
+}
+
+/* "as of 7:42 PM" — the live-refresh staleness caption riding next to every
+   RefreshButton (TeamInfo.jsx). Reads how fresh the on-screen feed actually
+   is, whether it landed from a manual tap, the auto-refresh poll
+   (useGameData's FEED_POLL_MS), or a foreground re-fetch. Caption-scale and
+   muted so it never competes with the button itself. */
+.refreshstamp {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  white-space: nowrap;
 }
 
 /* Game Notes button (lineup page) — a compact pill riding in the team head,

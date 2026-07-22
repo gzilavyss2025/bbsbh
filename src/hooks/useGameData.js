@@ -20,6 +20,7 @@ import { fetchSavantPercentiles } from '../api/savantPercentiles.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
+import { loadCareerMatchups } from '../api/careerMatchups.js'
 import { fetchRunExpectancy } from '../api/umpireFavor.js'
 import { fetchWorkload } from '../api/workload.js'
 import { fetchLineupValues } from '../api/lineupStrength.js'
@@ -32,6 +33,14 @@ import { SPORT_IDS } from '../lib/teams.js'
 // (see the `highlights` fetch below). Matches GameNotesButton's
 // NOTES_POLL_MS (TeamInfo.jsx).
 const HIGHLIGHTS_POLL_MS = 5 * 60 * 1000
+
+// How often to auto-refresh the live feed itself during a live game, so a
+// half-inning at the ballpark doesn't require a manual Refresh tap every
+// time. Independent of HIGHLIGHTS_POLL_MS — the score-bearing feed churns
+// far more often than highlight clips post. Spoiler-safe: reload() just
+// mints a new feed object, the same thing tapping Refresh already does, and
+// every score-revealing render path stays gated by SealBox/revealedThrough.
+const FEED_POLL_MS = 60 * 1000
 
 // Owns every data fetch a game page needs: the feed itself plus the roughly
 // nine independent lookups derived from or alongside it (managers, weather,
@@ -184,6 +193,16 @@ export function useGameData(game) {
     return () => clearInterval(id)
   }, [isLive, highlights.reload])
 
+  // Auto-refresh the feed itself while the game is Live — see FEED_POLL_MS.
+  // feedState.reload is useAsync's stale-while-revalidate `run`, so a
+  // transient poll failure keeps showing the last-good feed rather than
+  // blanking the page (AsyncStatus's staleErrorMessage in GameView).
+  useEffect(() => {
+    if (!isLive) return
+    const id = setInterval(feedState.reload, FEED_POLL_MS)
+    return () => clearInterval(id)
+  }, [isLive, feedState.reload])
+
   // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
   // gamesStarted-ratio/saves heuristic the team page badges pitchers with
   // (see rosterPitcherRole). The live feed carries no season stats, so this is
@@ -266,6 +285,16 @@ export function useGameData(game) {
     [enrichmentReady],
   )
   const formerTeammatesData = teammates.data ?? null
+
+  // Career batter/pitcher matchup history between the two clubs' rosters, at
+  // ANY level either has played (see api/careerMatchups.js) — same
+  // build-time-fetch tier as former teammates: one cached same-origin read,
+  // MLB + MiLB alike, degrading to no card outside the build's window.
+  const careerMatchupsQuery = useAsync(
+    () => (enrichmentReady ? loadCareerMatchups() : Promise.resolve(null)),
+    [enrichmentReady],
+  )
+  const careerMatchupsData = careerMatchupsQuery.data ?? null
 
   // Career vs-opponent lines (see api/vsTeamSplits.js) — the same static file
   // the player page's SPLITS VS TEAM card reads, reused here for the
@@ -374,6 +403,7 @@ export function useGameData(game) {
     gameCallouts,
     broadcast,
     formerTeammatesData,
+    careerMatchupsData,
     vsTeamSplitsData,
     highlightsData: highlights.data ?? null,
     runExpectancyData,

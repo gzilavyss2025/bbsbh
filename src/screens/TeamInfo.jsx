@@ -20,9 +20,10 @@ import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
+import { careerMatchupsFor } from '../api/careerMatchups.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { scorebookDate, monthDay } from '../lib/dates.js'
+import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
@@ -66,6 +67,7 @@ export function TeamInfo({
   feverRadarData,
   savantPercentilesData,
   formerTeammatesData,
+  careerMatchupsData,
   workloadData,
   lineupValuesData,
   callouts,
@@ -73,6 +75,7 @@ export function TeamInfo({
   nextLabel,
   onReload,
   loading,
+  lastUpdated,
 }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const oppMeta = useMemo(() => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'), [feed, side])
@@ -131,6 +134,7 @@ export function TeamInfo({
         feverRadarData={feverRadarData}
         savantPercentilesData={savantPercentilesData}
         formerTeammatesData={formerTeammatesData}
+        careerMatchupsData={careerMatchupsData}
         workloadData={workloadData}
         lineupValuesData={lineupValuesData}
         callouts={callouts}
@@ -140,7 +144,12 @@ export function TeamInfo({
           same place the innings page keeps it — freed up by Game Notes taking
           its old spot in the team head. */}
       <div className="pagenav pagenav--innings">
-        <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
+        <RefreshButton
+          onReload={onReload}
+          loading={loading}
+          lastUpdated={lastUpdated}
+          className="refreshbtn--float"
+        />
         <button className="btn btn--next" onClick={onNext}>
           {nextLabel}
         </button>
@@ -167,12 +176,14 @@ export function LineupSpread({
   feverRadarData,
   savantPercentilesData,
   formerTeammatesData,
+  careerMatchupsData,
   workloadData,
   lineupValuesData,
   callouts,
   onNext,
   onReload,
   loading,
+  lastUpdated,
 }) {
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
@@ -190,6 +201,12 @@ export function LineupSpread({
   const orgTies = useMemo(
     () => orgTiesFor(formerTeammatesData, awayMeta.id, homeMeta.id),
     [formerTeammatesData, awayMeta.id, homeMeta.id],
+  )
+  // Same order-independent, once-per-matchup shape as teammatePairs above —
+  // see careerMatchupsFor.
+  const matchupPairs = useMemo(
+    () => careerMatchupsFor(careerMatchupsData, awayMeta.id, homeMeta.id),
+    [careerMatchupsData, awayMeta.id, homeMeta.id],
   )
   const startingIds = useMemo(() => startingIdsFor(feed), [feed])
 
@@ -243,9 +260,15 @@ export function LineupSpread({
         homeTeamId={homeMeta.id}
       />
       <OrgTies ties={orgTies} />
+      <CareerMatchups pairs={matchupPairs} />
 
       <div className="pagenav pagenav--innings">
-        <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
+        <RefreshButton
+          onReload={onReload}
+          loading={loading}
+          lastUpdated={lastUpdated}
+          className="refreshbtn--float"
+        />
         <button className="btn btn--next" onClick={onNext}>
           Innings ›
         </button>
@@ -470,6 +493,7 @@ function TeamSections({
   feverRadarData,
   savantPercentilesData,
   formerTeammatesData,
+  careerMatchupsData,
   workloadData,
   lineupValuesData,
   callouts,
@@ -531,6 +555,11 @@ function TeamSections({
     showTeammates,
     feed,
   ])
+  // Same once-per-matchup skip as teammatePairs above — see careerMatchupsFor.
+  const matchupPairs = useMemo(
+    () => (showTeammates ? careerMatchupsFor(careerMatchupsData, meta.id, oppMeta.id) : []),
+    [showTeammates, careerMatchupsData, meta.id, oppMeta.id],
+  )
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const dayNight = info.dayNight
 
@@ -703,6 +732,7 @@ function TeamSections({
         />
       )}
       {showTeammates && <OrgTies ties={orgTies} />}
+      {showTeammates && <CareerMatchups pairs={matchupPairs} />}
     </>
   )
 }
@@ -1011,6 +1041,65 @@ function OrgTies({ ties }) {
   )
 }
 
+const MATCHUPS_SHOWN = 6
+
+// Every batter/pitcher pair on the two clubs with real career plate-
+// appearance history against each other, at ANY level either has played (see
+// careerMatchupsFor) — the "Contreras is 0-for-3 vs. tonight's starter"
+// scorebook fact, but not limited to just the probable starter, and not
+// limited to history made at tonight's own level: a AA lineup card still
+// shows a pair who last faced off in A+. A plain stat list rather than
+// FormerTeammates' headshot cards — this is a line off the stat sheet, not a
+// story about two people's careers crossing. Hidden when there's no history.
+function CareerMatchups({ pairs }) {
+  const [showAll, setShowAll] = useState(false)
+  if (!pairs || pairs.length === 0) return null
+  const shown = showAll ? pairs : pairs.slice(0, MATCHUPS_SHOWN)
+  const hidden = pairs.length - shown.length
+  return (
+    <section className="metriccard matchups">
+      <SectionMasthead as="h3" title="Career matchups" />
+      <div className="metriccard__body">
+        <ul className="matchups__list">
+          {shown.map((r) => (
+            <li key={`${r.batter.id}-${r.pitcher.id}`} className="matchups__row">
+              <span className="matchups__names">
+                <PlayerLink id={r.batter.id} className="matchups__name">
+                  {r.batter.name}
+                </PlayerLink>
+                <span className="matchups__vs" aria-hidden="true">vs</span>
+                <PlayerLink id={r.pitcher.id} className="matchups__name">
+                  {r.pitcher.name}
+                </PlayerLink>
+              </span>
+              <span className="matchups__line">{matchupLine(r)}</span>
+            </li>
+          ))}
+        </ul>
+        {hidden > 0 && (
+          <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
+            Show {hidden} more matchup{hidden === 1 ? '' : 's'}
+          </button>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// "2-for-7, 1 HR, 3 K — AA, A+" — scorebook shorthand first (the thing a
+// paper scorer already writes), extras only when they're nonzero so a plain
+// 0-for-2 doesn't carry three redundant zero badges, levels last so a
+// same-level pair (the common case) doesn't repeat what the card's own
+// context already implies.
+function matchupLine(r) {
+  const parts = [`${r.h}-for-${r.ab}`]
+  if (r.hr > 0) parts.push(`${r.hr} HR`)
+  if (r.bb > 0) parts.push(`${r.bb} BB`)
+  if (r.k > 0) parts.push(`${r.k} K`)
+  const stat = parts.join(', ')
+  return r.levels.length > 0 ? `${stat} — ${r.levels.join(', ')}` : stat
+}
+
 // A pitcher's roster position is already the plain "P" abbreviation (no
 // SP/RP split) at the source, but normalize defensively anyway — the badge
 // should never show anything longer than that for a pitcher.
@@ -1156,22 +1245,31 @@ function managerFact(manager) {
 // Same pill button/markup as the innings viewer's Refresh — reused here and
 // in the box score so every game page has one, not just the live innings.
 // `onReload` is undefined only for the (unused) case a caller skips it, so
-// this degrades to nothing rather than a dead button.
-export function RefreshButton({ onReload, loading, className = '' }) {
+// this degrades to nothing rather than a dead button. `lastUpdated`
+// (useAsync's epoch-ms field, threaded down from GameView's feedState) shows
+// a small "as of 7:42 PM" caption so a congested-wifi refresh failure or the
+// new auto-refresh poll (useGameData's FEED_POLL_MS) both stay legible —
+// you can tell how fresh what's on screen actually is without guessing.
+export function RefreshButton({ onReload, loading, lastUpdated, className = '' }) {
   if (!onReload) return null
   return (
-    <button
-      type="button"
-      className={`refreshbtn ${className}`.trim()}
-      onClick={onReload}
-      disabled={loading}
-      aria-label="Refresh live game data"
-    >
-      <span className="refreshbtn__icon" aria-hidden="true">
-        ↻
-      </span>
-      {loading ? 'Refreshing…' : 'Refresh'}
-    </button>
+    <>
+      <button
+        type="button"
+        className={`refreshbtn ${className}`.trim()}
+        onClick={onReload}
+        disabled={loading}
+        aria-label="Refresh live game data"
+      >
+        <span className="refreshbtn__icon" aria-hidden="true">
+          ↻
+        </span>
+        {loading ? 'Refreshing…' : 'Refresh'}
+      </button>
+      {lastUpdated && !loading && (
+        <span className="refreshstamp">as of {timeOfDay(lastUpdated)}</span>
+      )}
+    </>
   )
 }
 

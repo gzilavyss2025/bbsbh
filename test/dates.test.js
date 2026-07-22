@@ -5,7 +5,7 @@
 // to get off-by-one on.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isWithinDays } from '../src/lib/dates.js'
+import { isWithinDays, timeOfDay } from '../src/lib/dates.js'
 
 const TODAY = new Date(2026, 6, 22) // July 22, 2026
 
@@ -29,4 +29,18 @@ test('a missing or garbled date returns false', () => {
   assert.equal(isWithinDays(null, 7, TODAY), false)
   assert.equal(isWithinDays('', 7, TODAY), false)
   assert.equal(isWithinDays('not-a-date', 7, TODAY), false)
+})
+
+// timeOfDay — the live-refresh staleness caption's "7:42 PM" formatter.
+// Locale-formatted, so assert shape (hour:minute + AM/PM) rather than an
+// exact string.
+test('timeOfDay formats an epoch-ms timestamp as a 12-hour clock time', () => {
+  const evening = new Date(2026, 6, 22, 19, 42).getTime()
+  assert.match(timeOfDay(evening), /^\d{1,2}:\d{2}\s?[AP]M$/i)
+})
+
+test('timeOfDay degrades to empty string for a missing timestamp', () => {
+  assert.equal(timeOfDay(null), '')
+  assert.equal(timeOfDay(undefined), '')
+  assert.equal(timeOfDay(0), '')
 })
