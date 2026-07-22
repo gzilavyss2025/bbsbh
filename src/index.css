@@ -19569,7 +19569,16 @@ body {
    rate bar are specific to this page. No note/description copy under any
    board's title — deliberate, so a board reads as data first, and every
    board's table/list bleeds to the card's own edges below (rather than
-   floating inset with a second, redundant border) for more width on a phone. */
+   floating inset with a second, redundant border) for more width on a phone.
+   .metriccard itself is `overflow: visible` (its masthead's info-popover
+   needs to spill past the card), but no board here ever passes SectionMasthead
+   an info popover — so unlike its .metriccard siblings, this variant can
+   safely clip. It has to: a bled-flush table/list is a flat square, but the
+   card's own border curves inward at the bottom corners, so without clipping
+   the square corner pokes past the curve as a small triangular notch. */
+.foulboard-block {
+  overflow: hidden;
+}
 .foulboard-block .ledger-wrap {
   margin: 0 calc(-1 * var(--space-4));
 }
