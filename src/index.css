@@ -9228,14 +9228,18 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
+/* Capped and wrapping (not nowrap) so a big stat line — multi-extra-base-hit
+   games routinely run past 25 characters — wraps onto its own lines instead
+   of forcing .stars3__heroCopy's flex:1/min-width:0 name column to collapse,
+   which let the stat text render on top of the player name. */
 .stars3__heroStat {
   flex: none;
+  max-width: 38%;
   color: var(--text-heading);
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   text-align: right;
-  white-space: nowrap;
 }
 
 .stars3__list {
