@@ -84,6 +84,7 @@ export function BoxScore({
   vsTeam,
   onReload,
   loading,
+  lastUpdated,
   onSection,
 }) {
   // The masthead above every section (GameView.jsx) already carries this
@@ -104,7 +105,7 @@ export function BoxScore({
         <h2 className="boxscore__title" id="bs__title">Box score</h2>
         {!isFinal && (
           <div className="boxscore__headright">
-            <RefreshButton onReload={onReload} loading={loading} />
+            <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
           </div>
         )}
       </div>
@@ -159,7 +160,12 @@ export function BoxScore({
           index.css). Never shown once the game is Final. */}
       {!isFinal && (
         <div className="pagenav pagenav--boxscore">
-          <RefreshButton onReload={onReload} loading={loading} className="refreshbtn--float" />
+          <RefreshButton
+            onReload={onReload}
+            loading={loading}
+            lastUpdated={lastUpdated}
+            className="refreshbtn--float"
+          />
         </div>
       )}
     </div>

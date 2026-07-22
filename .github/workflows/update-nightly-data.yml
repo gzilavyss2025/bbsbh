@@ -2,8 +2,8 @@ name: Update nightly data
 
 # Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
 # umpire plate accuracy, minor-league leaders, game call-outs, former
-# teammates, vs-team splits, milestone watch, team transactions, the
-# Fever Baseball radar snapshot (each documented at the top
+# teammates, career matchups, vs-team splits, milestone watch, team
+# transactions, the Fever Baseball radar snapshot (each documented at the top
 # of its own scripts/gen-*.mjs) in ONE workflow with a SINGLE commit+push,
 # instead of separate crons each triggering its own Vercel deployment.
 # Consolidated 2026-07-11 after two of the eight (update-callouts and
@@ -98,6 +98,10 @@ jobs:
         id: former-teammates
         continue-on-error: true
         run: node scripts/gen-former-teammates.mjs
+      - name: Career matchups
+        id: career-matchups
+        continue-on-error: true
+        run: node scripts/gen-career-matchups.mjs
       - name: Foul tracker
         id: fouls
         continue-on-error: true
@@ -155,7 +159,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race, same shape as
@@ -181,6 +185,7 @@ jobs:
           steps.minors-leaders.outcome == 'failure' ||
           steps.callouts.outcome == 'failure' ||
           steps.former-teammates.outcome == 'failure' ||
+          steps.career-matchups.outcome == 'failure' ||
           steps.fouls.outcome == 'failure' ||
           steps.workload.outcome == 'failure' ||
           steps.lineup-values.outcome == 'failure' ||

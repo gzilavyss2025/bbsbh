@@ -95,3 +95,15 @@ export function longDate(apiDate) {
     year: 'numeric',
   })
 }
+
+// "7:42 PM" — the live-game refresh staleness indicator ("as of 7:42 PM"),
+// from a `Date.now()`-style epoch ms timestamp (useAsync's `lastUpdated`).
+// Returns '' for a missing timestamp so callers can skip the caption before
+// the first fetch has resolved.
+export function timeOfDay(epochMs) {
+  if (!epochMs) return ''
+  return new Date(epochMs).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
