@@ -11511,6 +11511,14 @@ body {
   padding-right: 14px;
   margin: 8px 0 8px 8px;
 }
+/* The active/picked state draws its own bordered card (.vsteam__team.is-active)
+   around the logo — the wider 14px resting padding above reads as loose once
+   that border shows up, so pull it back to the scrolling logos' own tighter
+   5px just for that state, without touching the resting padding. */
+.teamfilterstrip__pin.is-active {
+  padding-left: 5px;
+  padding-right: 5px;
+}
 .teamfilterstrip__divider {
   flex: 0 0 auto;
   align-self: stretch;
