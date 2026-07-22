@@ -19659,14 +19659,19 @@ body {
 /* Team Fouls Per Game (TeamBoard) — the rank+logo column has no visible
    text worth auto-sizing around (the team name is sr-only), so left to the
    default auto layout it read as an oversized "TEAM" header with a stray gap
-   before "Per game" started. Fixed layout + a snug explicit width for that
-   column instead lets the four stat columns share the rest of the row
-   evenly. */
+   before "Per game" started. Fixed layout snugs it up — but the width has to
+   live on a <colgroup> `<col>` (see TeamBoard's JSX), not a `th`/`td` rule:
+   under `table-layout: fixed`, a `th.team { width: 64px }` cell rule doesn't
+   get the other four columns to split the space it DIDN'T use — each unset
+   column still claims table-width ÷ 5, and the freed-up space past the
+   narrower team column is left as a blank gap (invisible on a narrow phone
+   table, a glaring empty column at tablet/desktop widths). Sizing the same
+   64px via a `<col>` instead makes the other four `<col>`s (left widthless)
+   actually share the true remainder evenly. */
 .foulboard--teams {
   table-layout: fixed;
 }
-.foulboard--teams th.team,
-.foulboard--teams td.team {
+.foulboard--teams__teamcol {
   width: 64px;
 }
 .foulboard__barcol {

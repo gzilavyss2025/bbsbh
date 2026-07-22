@@ -634,6 +634,13 @@ function TeamBoard({ teams, favoriteTeamId }) {
     <BoardCard title="Team fouls per game">
       <div className="ledger-wrap">
         <table className="standings foulboard foulboard--teams">
+          <colgroup>
+            <col className="foulboard--teams__teamcol" />
+            <col />
+            <col />
+            <col />
+            <col />
+          </colgroup>
           <thead>
             <tr>
               <th className="team">Team</th>
