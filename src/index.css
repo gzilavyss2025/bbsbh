@@ -11506,6 +11506,9 @@ body {
 }
 .teamfilterstrip__pin {
   flex: 0 0 auto;
+  width: auto;
+  padding-left: 14px;
+  padding-right: 14px;
   margin: 8px 0 8px 8px;
 }
 .teamfilterstrip__divider {
