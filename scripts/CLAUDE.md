@@ -417,9 +417,15 @@ process automatically.
   first. `--brief` prints only the summary and stays silent when nothing is
   stale — that's the mode the SessionStart hook uses. Acted on by
   `/clean-worktrees`. The staleness verdicts are pure and unit-tested in
-  `test/worktrees.test.js`; two cases there are non-obvious and were live bugs
-  (a freshly branched worktree looks merged, and requiring commits-ahead to tell
-  them apart mislabels every genuinely merged branch).
+  `test/worktrees.test.js`; three cases there are non-obvious and were all live
+  bugs. A freshly branched worktree is an ancestor of `origin/main` and so looks
+  merged; requiring commits-ahead to tell those apart flips it and mislabels
+  every genuinely merged branch; and the upstream must be read with
+  `for-each-ref`, never `@{u}`, because `@{u}` stops resolving the moment the
+  remote branch is deleted — which is the end state of every squash-merged PR,
+  so `@{u}` reports "no upstream" for precisely the worktrees this script
+  exists to find. That last one shipped in #312 and made the
+  upstream-deleted branch unreachable dead code.
 
 ## Lint guards (run by `npm run lint`, CI-enforced via `ci.yml`)
 
