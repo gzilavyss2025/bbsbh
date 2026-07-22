@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { fetchFouls } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'
 import { fetchPositions } from '../api/person-fetch.js'
@@ -9,6 +9,7 @@ import { monthDayYear, weekdayAbbr, isWithinDays } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
 import { gamePath } from '../lib/route.js'
 import { useNav } from '../lib/nav.js'
+import { filterByTeam } from '../lib/teamFilter.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -17,6 +18,8 @@ import { Headshot } from '../components/Headshot.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BaseoutDiamond } from '../components/BaseoutDiamond.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, favoriteAccentColor } from '../lib/teams.js'
 
@@ -56,8 +59,9 @@ export function FoulTrackerPage() {
   useDocumentTitle('Foul Tracker')
   const { loading, error, data } = useAsync(() => fetchFouls(), [])
   const { favoriteTeamId } = useFavoriteTeam()
+  const [filterTeamId, setFilterTeamId] = useState(null)
 
-  const boards = useMemo(() => buildBoards(data), [data])
+  const boards = useMemo(() => buildBoards(data, filterTeamId), [data, filterTeamId])
 
   // Single-Game-Highs' score+date badge links out to that game's box score —
   // the precompute only carries the gamePk (see gen-fouls.mjs's max_game_pk),
@@ -117,6 +121,14 @@ export function FoulTrackerPage() {
         emptyMessage="No foul data generated yet."
         emptyProse
       />
+
+      {boards && (
+        <TeamFilterStrip
+          selectedTeamId={filterTeamId}
+          onSelect={setFilterTeamId}
+          ariaLabel="Filter Foul Tracker by team"
+        />
+      )}
 
       {boards && (
         <>
@@ -187,20 +199,30 @@ export function FoulTrackerPage() {
           <TeamBoard teams={boards.teamRows} favoriteTeamId={favoriteTeamId} />
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }
 
 // Sorted boards from the raw precompute maps. Null when the file is missing
-// or empty — the page then shows its empty state.
-function buildBoards(data) {
-  const batters = Object.entries(data?.batters ?? {}).map(([id, b]) => ({ id, ...b }))
-  if (batters.length === 0) return null
-  const pitchers = Object.entries(data?.pitchers ?? {}).map(([id, p]) => ({ id, ...p }))
+// or empty — the page then shows its empty state. `teamId` (from the page's
+// TeamFilterStrip, null = every team) restricts every leader table to that
+// club's own players — but NOT the minGames floor, computed off the whole
+// league's max games played so switching teams never changes what counts as
+// "enough games this season," and NOT the league-wide by-inning/by-pitch-type
+// tables (see `league` below), which carry no team dimension to filter.
+function buildBoards(data, teamId = null) {
+  const allBatters = Object.entries(data?.batters ?? {}).map(([id, b]) => ({ id, ...b }))
+  if (allBatters.length === 0) return null
+  const allPitchers = Object.entries(data?.pitchers ?? {}).map(([id, p]) => ({ id, ...p }))
 
   // Playing-time floors scale with the season so the page works in April too.
-  const maxG = Math.max(...batters.map((b) => b.g))
+  const maxG = Math.max(...allBatters.map((b) => b.g))
   const minGames = Math.max(5, Math.round(maxG * 0.5))
+
+  const batters = filterByTeam(allBatters, teamId, (b) => b.teamId)
+  const pitchers = filterByTeam(allPitchers, teamId, (p) => p.teamId)
   const qualified = batters.filter((b) => b.g >= minGames)
   const qualifiedP = pitchers.filter((p) => (p.pitches ?? 0) >= 300)
 
@@ -222,9 +244,11 @@ function buildBoards(data) {
     pitcherRate: top(qualifiedP, (p) => p.fouls / p.pitches),
     pitcherRateLow: bottom(qualifiedP, (p) => p.fouls / p.pitches),
     league: data?.league ?? null,
-    teamRows: Object.entries(data?.teams ?? {})
-      .map(([id, t]) => ({ id: Number(id), ...t }))
-      .sort((a, b) => b.fouls / b.g - a.fouls / a.g),
+    teamRows: filterByTeam(
+      Object.entries(data?.teams ?? {}).map(([id, t]) => ({ id: Number(id), ...t })),
+      teamId,
+      (t) => t.id,
+    ).sort((a, b) => b.fouls / b.g - a.fouls / a.g),
   }
 }
 

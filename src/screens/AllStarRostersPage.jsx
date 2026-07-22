@@ -13,7 +13,8 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { AllStarGameResult } from '../components/AllStarGameResult.jsx'
-import { AllStarTeamFilter } from '../components/AllStarTeamFilter.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -204,7 +205,7 @@ function RosterYear({ year, roster, score, mvp, venue, card, navigate, effective
 // plainly here (see RosterYear/AllStarGameResult above + ADR-0019) — the
 // page's one deliberate exception to that invariant.
 //
-// The team filter (AllStarTeamFilter) picks one club to highlight across
+// The team filter (TeamFilterStrip) picks one club to highlight across
 // EVERY season at once, overriding the ordinary favorite-team highlight
 // while active — `effectiveTeamId` below is the filter pick, falling back to
 // favoriteTeamId only when no filter is picked (the default "MLB" entry).
@@ -260,7 +261,11 @@ export function AllStarRostersPage() {
 
       {seasons.length > 0 && (
         <>
-          <AllStarTeamFilter selectedTeamId={filterTeamId} onSelect={setFilterTeamId} />
+          <TeamFilterStrip
+            selectedTeamId={filterTeamId}
+            onSelect={setFilterTeamId}
+            ariaLabel="Filter rosters by team"
+          />
           <div className="allstarrosters__list">
             {visibleSeasons.map((year) => {
               const gamePk = games[year]
@@ -293,6 +298,8 @@ export function AllStarRostersPage() {
           {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

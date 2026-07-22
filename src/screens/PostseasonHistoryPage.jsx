@@ -10,6 +10,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { teamClubNameShort, teamFullName } from '../lib/teams.js'
 
 const AL = 103
@@ -441,6 +442,8 @@ export function PostseasonHistoryPage() {
           </nav>
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

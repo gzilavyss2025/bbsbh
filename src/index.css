@@ -11493,9 +11493,38 @@ body {
 }
 /* TeamFilterStrip — the same vsteam__tray strip, spanning the full content
    width as a team highlight picker (League Leaders, All-Star Rosters)
-   rather than the player-page opponent picker's narrower card. */
+   rather than the player-page opponent picker's narrower card. The "MLB"
+   reset button is pinned outside the scrolling club list (see
+   teamfilterstrip__row/__pin/__divider below) rather than being one of the
+   scrolled items, so it's always one tap away regardless of scroll position. */
 .teamfilterstrip {
   margin: var(--space-2) 0;
+}
+.teamfilterstrip__row {
+  display: flex;
+  align-items: center;
+}
+.teamfilterstrip__pin {
+  flex: 0 0 auto;
+  width: auto;
+  padding-left: 14px;
+  padding-right: 14px;
+  margin: 8px 8px 8px 8px;
+}
+/* The active/picked state draws its own bordered card (.vsteam__team.is-active)
+   around the logo — the wider 14px resting padding above reads as loose once
+   that border shows up, so pull it back to the scrolling logos' own tighter
+   5px just for that state, without touching the resting padding. */
+.teamfilterstrip__pin.is-active {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.teamfilterstrip__divider {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: var(--bw-hair);
+  margin: 8px 0;
+  background: var(--border-rule);
 }
 .teamfilterstrip__mlblogo {
   display: block;
@@ -17144,17 +17173,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* ------------------------------------------------------- All-Star team filter
-   (AllStarTeamFilter) — reuses SplitsVsTeam's .vsteam__tray/__strip/__team
-   scroller as-is; this class only adds the page-level spacing around it. */
-.allstarfilter {
-  margin: var(--space-2) 0;
-}
-.allstarfilter__mlblogo {
-  display: block;
-  object-fit: contain;
 }
 
 /* ---------------------------------------------------------------- umpire page */

@@ -17,6 +17,7 @@ import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10)
@@ -147,6 +148,8 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
             filtering={filtering}
           />
         )}
+
+        <ReportFooter />
       </div>
     </LinkScope>
   )

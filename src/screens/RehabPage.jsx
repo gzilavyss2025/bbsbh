@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { loadRehabAssignments } from '../api/rehab.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { filterByTeam } from '../lib/teamFilter.js'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -28,7 +32,9 @@ function monthDay(iso) {
 export function RehabPage() {
   useDocumentTitle('Rehab Assignments')
   const { loading, error, data } = useAsync(() => loadRehabAssignments(), [])
-  const players = data?.players ?? []
+  const [filterTeamId, setFilterTeamId] = useState(null)
+  const allPlayers = data?.players ?? []
+  const players = filterByTeam(allPlayers, filterTeamId, (p) => p.orgId)
   const updated = monthDay(data?.generatedAt?.slice(0, 10))
 
   return (
@@ -41,11 +47,23 @@ export function RehabPage() {
       <AsyncStatus
         loading={loading}
         error={error}
-        hasData={players.length > 0}
+        hasData={allPlayers.length > 0}
         errorMessage="Couldn’t load rehab assignments. Try again."
         emptyMessage="No players are on a rehab assignment right now."
         emptyProse
       />
+
+      {allPlayers.length > 0 && (
+        <TeamFilterStrip
+          selectedTeamId={filterTeamId}
+          onSelect={setFilterTeamId}
+          ariaLabel="Filter rehab assignments by team"
+        />
+      )}
+
+      {allPlayers.length > 0 && players.length === 0 && (
+        <p className="hint hint--prose">No players from that club are on a rehab assignment right now.</p>
+      )}
 
       {players.length > 0 && (
         <>
@@ -98,6 +116,8 @@ export function RehabPage() {
           </p>
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

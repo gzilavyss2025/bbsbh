@@ -14,6 +14,7 @@ import { SectionTitle } from '../components/SectionTitle.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 
 // One franchise leaderboard (Titles/Pennants/Appearances) — rank, logo, club
@@ -177,6 +178,8 @@ export function PostseasonLeadersPage() {
           favoriteTeamId={favoriteTeamId}
         />
       )}
+
+      <ReportFooter />
     </div>
   )
 }

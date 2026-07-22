@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// Guards against SiteMenu.jsx's and SiteFooter.jsx's "More Baseball" page
-// lists drifting apart again the way they did before src/lib/reportPages.js
-// existed (the menu was missing Top Games; the footer was missing Foul
-// Tracker and My First Scorebook). Fails if either file stops importing the
-// shared REPORT_PAGES array and goes back to a hand-rolled list.
+// Guards against SiteMenu.jsx's, SiteFooter.jsx's, and ReportFooter.jsx's
+// "More Baseball" page lists drifting apart again the way they did before
+// src/lib/reportPages.js existed (the menu was missing Top Games; the footer
+// was missing Foul Tracker and My First Scorebook). Fails if any of the three
+// files stops importing the shared REPORT_PAGES array and goes back to a
+// hand-rolled list.
 //
 // Run by `npm run lint` (so it gates every push).
 
@@ -16,6 +17,7 @@ const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const FILES = [
   join(ROOT, 'src/components/SiteMenu.jsx'),
   join(ROOT, 'src/components/SiteFooter.jsx'),
+  join(ROOT, 'src/components/ReportFooter.jsx'),
 ]
 
 const IMPORT_RE = /import\s*\{\s*REPORT_PAGES\s*\}\s*from\s*['"].*lib\/reportPages\.js['"]/
@@ -46,5 +48,5 @@ if (problems.length) {
 }
 
 console.log(
-  '✓ SiteMenu.jsx and SiteFooter.jsx both build their page list from src/lib/reportPages.js.'
+  '✓ SiteMenu.jsx, SiteFooter.jsx, and ReportFooter.jsx all build their page list from src/lib/reportPages.js.'
 )
