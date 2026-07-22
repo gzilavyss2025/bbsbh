@@ -86,7 +86,7 @@ export function marcelBaseline(records) {
 }
 
 function pythagoreanPace(record, gamesPlayed) {
-  const expected = (record.expectedRecords ?? []).find((r) => r.type === 'xWinLoss')
+  const expected = (record.records?.expectedRecords ?? []).find((r) => r.type === 'xWinLoss')
   const xGames = (expected?.wins ?? 0) + (expected?.losses ?? 0)
   if (xGames > 0) return round1((expected.wins / xGames) * 162)
   const rs = record.runsScored ?? 0

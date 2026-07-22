@@ -11674,6 +11674,59 @@ body {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 }
+/* Same card-look-on-the-wrap idea as .player .ledger-wrap above, but ALSO
+   resets the table's own overflow to visible (not just moves the shadow).
+   .standings's shared overflow:hidden (below) sits on the <table> itself, to
+   clip the header row's square corners to the table's own border-radius —
+   harmless for every other ledger table, but it breaks position:sticky's
+   containing-block chain for the sticky team column here: sticky computes
+   relative to the NEAREST ancestor whose overflow isn't visible, which with
+   overflow:hidden ON THE TABLE is the table itself (which never scrolls)
+   instead of .ledger-wrap (which does) — so the "stuck" column just slides
+   off with everything else. Only matters for the Standings boards, the one
+   ledger table with both a sticky column and real horizontal scroll wide
+   enough to use it (the "More columns" toggle, phone-only). */
+.standings-wrap {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  /* Native horizontal scrollbars vary wildly across platforms — some
+     Android/Chromium builds render a thick classic bar complete with arrow
+     buttons, which clashes hard against the scorebook look. A thin
+     paper-toned track with a graphite thumb instead (Firefox's styling
+     hook — the ::-webkit-scrollbar rules below are Chromium/WebKit's). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-caption) var(--bg-page);
+}
+.standings-wrap .standings--full {
+  overflow: visible;
+  /* The wrap above now owns the card chrome entirely — without resetting
+     these too, the table's OWN border-radius/border/box-shadow (still set
+     by the shared base .standings rule) render as a second, slightly
+     differently-curved rounded rect nested just inside the wrap's, since
+     `overflow: visible` no longer clips it away. Looks like a stray
+     duplicate element sitting in the corner rather than one clean edge. */
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+.standings-wrap::-webkit-scrollbar {
+  height: 7px;
+}
+.standings-wrap::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+.standings-wrap::-webkit-scrollbar-thumb {
+  background: var(--text-caption);
+  border-radius: var(--radius-pill);
+}
+.standings-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--text-body);
+}
+.standings-wrap::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
 /* Row copy ("vs"/"@" before the opponent) is written lowercase in JS; force it
    uppercase here rather than littering the markup with literal caps. */
 .player .ledger td {
@@ -13906,6 +13959,13 @@ body {
 .standings td {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  /* Same reasoning as .ledger td: data cells are single tokens (a W-L split
+     like "35-15", a streak code like "W2") — never let one wrap at its
+     hyphen onto a second row. Auto table layout then sizes each column to
+     fit its widest one-line value instead of squeezing it into wrapping;
+     .ledger-wrap's horizontal scroll (or, on phone, the "More columns"
+     toggle) is what absorbs a table that ends up wider than the viewport. */
+  white-space: nowrap;
 }
 .standings .team {
   text-align: left;
@@ -13974,6 +14034,25 @@ body {
 .standings td.is-negative {
   color: var(--accent-negative);
 }
+/* Division magic-number column once a club has clinched (at least a tie for)
+   its division — same "good news" tone as is-positive, bolded to read as a
+   verdict rather than just another number. */
+.standings td.is-clinched {
+  color: var(--accent-positive);
+  font-weight: var(--w-semibold);
+}
+/* Inline rank-movement glyph riding inside the GB/WCGB cell (not its own
+   column — see the standings enhancement plan's column-density note). */
+.standings-trend {
+  font-size: var(--fs-caption);
+  margin-left: 2px;
+}
+.standings-trend--up {
+  color: var(--accent-positive);
+}
+.standings-trend--down {
+  color: var(--accent-negative);
+}
 
 /* ---- Standings page ------------------------------------------------------ */
 
@@ -14028,6 +14107,34 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+}
+/* The date quick-jumps grow a new "Month 1" tab every month of the season —
+   left to wrap, that's an ever-taller control (already 3 lines by July; 7+
+   month tabs by October). Horizontal scroll instead, same full-bleed
+   edge-mask idiom as .txcard__scroll/.seasonseries__strip, keeps this row
+   pinned to exactly one line no matter how far the season has gone. */
+.standings-jumps--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.standings-jumps--scroll::-webkit-scrollbar {
+  display: none;
+}
+.standings-jumps--scroll .standings-jump {
+  flex: none;
+  scroll-snap-align: start;
 }
 .standings-jump {
   min-height: 28px;
@@ -14193,6 +14300,15 @@ body {
 .standings--full .st-ext {
   display: none;
 }
+/* Opt-in escape hatch (StandingsPage's "More columns" toggle, phone-only):
+   reveal the extra columns anyway and let .ledger-wrap's existing
+   overflow-x:auto take over as real horizontal scroll — the sticky team
+   column (below) keeps the row identifiable while scrolled. Unguarded by the
+   740px query on purpose, so it also works below it; harmless at/above it
+   since .st-ext is already shown there regardless. */
+.standings--full.is-expanded .st-ext {
+  display: table-cell;
+}
 /* Team column pinned as a safety net: the phone set fits without scroll, but a
    large accessibility font (or a very long club name) can still force overflow,
    and a stuck team name keeps the row readable when it does. */
@@ -14207,13 +14323,31 @@ body {
 .standings--full thead th.team {
   z-index: 2;
   background: var(--bg-page);
+  /* The wrap's own rounded top-left corner (.standings-wrap) clips a plain
+     static child fine, but a position:sticky element with its own z-index —
+     this cell — sits in its own compositor layer that some browsers don't
+     clip to an ancestor's border-radius. Left unrounded, its square corner
+     pokes a small notch of --bg-page (a visibly different tone from the
+     surrounding card) right where the outer curve should be, reading as a
+     stray misplaced rectangle. Round it directly instead of relying on the
+     ancestor's clip. */
+  border-top-left-radius: var(--radius-md);
+}
+.standings--full tbody tr:last-child td.team {
+  border-bottom-left-radius: var(--radius-md);
 }
 /* Solid (not the translucent row tint) so scrolled cells can't bleed through
    the pinned column. With `border-collapse: separate` the cell keeps its own
    `border-top` (from `.standings td`), so the row rule stays continuous across
-   the pinned/scrolling seam — no border hacks needed here. */
+   the pinned/scrolling seam — no border hacks needed here. Same 10% as
+   `.standings tr.is-me td` above, just mixed directly into --surface-card
+   instead of transparent (mixing X% into transparent, then compositing over
+   a solid --surface-card background, is mathematically the same rendered
+   color as mixing that X% directly into --surface-card) — keep these two
+   percentages equal, or the pinned cell reads as a second, mismatched
+   highlight tint stacked on top of the row's own. */
 .standings--full tr.is-me td.team {
-  background: color-mix(in srgb, var(--fav-accent, var(--field)) 16%, var(--surface-card));
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
 }
 
 /* ---- Wild Card board ------------------------------------------------------ */
@@ -14254,10 +14388,16 @@ body {
 
 @media (min-width: 740px) {
   /* Wide layout has room for the whole table — cap the page a touch narrower
-     than the 960px slate width so a 12-column standings grid stays legible
-     rather than stretching into sparse cells, and let the extra columns show. */
+     than the 960px slate width so a 15-column standings grid stays legible
+     rather than stretching into sparse cells, and let the extra columns show.
+     840px (not the original 760px, sized for a 12-column table that also
+     allowed data cells to wrap) is the smallest cap, with a little headroom,
+     the current 15-column Division board fits without .ledger-wrap's
+     horizontal-scroll fallback kicking in now that cells are nowrap —
+     verified against the table's actual rendered min-content width, not
+     guessed. */
   .screen.standings-screen {
-    max-width: 760px;
+    max-width: 840px;
   }
   .standings--full .st-ext {
     display: table-cell;

@@ -53,6 +53,48 @@ test('snapshots retain actual wins, schedule expectation, and separate trend', (
   assert.ok(snapshots[1].score > 5)
 })
 
+test('earnedPaceWins reads the feed\'s nested records.expectedRecords, not a top-level key', () => {
+  // Regression guard for the gen-season-score.mjs fix in PR #321: the real
+  // statsapi feed nests expectedRecords under `records`, never top-level.
+  // Plants a DECOY top-level expectedRecords with a different value — if
+  // pythagoreanPace regresses to reading the wrong (buggy, pre-fix) location,
+  // this decoy is what would get picked up instead, and the assertion fails.
+  const snapshots = buildSnapshots({
+    asOf: '2026-04-03',
+    baselines: {
+      1: { wins: 81, kind: 'market' },
+      2: { wins: 81, kind: 'market' },
+    },
+    standings: {
+      1: {
+        records: { expectedRecords: [{ type: 'xWinLoss', wins: 6, losses: 4 }] },
+        expectedRecords: [{ type: 'xWinLoss', wins: 1, losses: 9 }],
+      },
+    },
+    games: [
+      { gamePk: 1, date: '2026-04-01', homeId: 1, awayId: 2, homeWon: true },
+      { gamePk: 2, date: '2026-04-02', homeId: 2, awayId: 1, homeWon: false },
+    ],
+  })
+  assert.equal(snapshots[1].earnedPaceWins, 97.2) // (6/10)*162, from the correctly-nested record
+})
+
+test('earnedPaceWins falls back to the runs-based Pythagorean split when a team has no records object at all (thin early-season feed)', () => {
+  const snapshots = buildSnapshots({
+    asOf: '2026-04-03',
+    baselines: {
+      1: { wins: 81, kind: 'market' },
+      2: { wins: 81, kind: 'market' },
+    },
+    standings: {
+      1: { runsScored: 20, runsAllowed: 10 },
+    },
+    games: [{ gamePk: 1, date: '2026-04-01', homeId: 1, awayId: 2, homeWon: true }],
+  })
+  assert.ok(Number.isFinite(snapshots[1].earnedPaceWins))
+  assert.ok(snapshots[1].earnedPaceWins > 81) // outscoring opponents 2:1 should project a pace above .500
+})
+
 test('the reader never looks ahead of the Team Page cutoff', () => {
   const data = {
     seasons: {
