@@ -333,42 +333,48 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 
   return (
     <div className="screen screen--slate">
-      {/* One solid, sticky banner for all the slate controls (title, level tabs,
-          date). Pinned together on an opaque backdrop so the cards scroll
-          cleanly underneath instead of bleeding through a see-through header. */}
-      <div className="slatehead">
-        {/* Title + level toggle + search share one row: the Tally wordmark taps
-            home (a full reload — see lib/home.js) on the left, the condensed
-            MLB/AAA/… buttons and the search trigger ride together to its
-            right (grouped so `justify-content: space-between` splits only
-            title vs. that cluster, not each button individually). */}
-        <header className="topbar topbar--slate">
-          <button
-            type="button"
-            className="topbar__title topbar__home"
-            onClick={goHome}
-            aria-label="Reload games"
-          >
-            <TallyLockup height={20} />
-          </button>
-          <div className="topbar__slateactions">
-            <LevelNav sportId={sportId} onChange={pickLevel} />
-            {/* The icon buttons live in one nowrap sub-group so that when the
-                row runs out of width they drop below the level pills together —
-                as bare siblings flex-wrap moved them one at a time, orphaning
-                whichever single button no longer fit onto its own row. */}
-            <div className="topbar__iconcluster">
-              <SiteSearchButton className="topbar__search" />
-              <SiteMenuButton className="topbar__search" />
-              {AccountButton && (
-                <Suspense fallback={null}>
-                  <AccountButton />
-                </Suspense>
-              )}
-            </div>
+      {/* Title + level toggle + search share one row: the Tally wordmark taps
+          home (a full reload — see lib/home.js) on the left, the condensed
+          MLB/AAA/… buttons and the search trigger ride together to its
+          right (grouped so `justify-content: space-between` splits only
+          title vs. that cluster, not each button individually). A direct
+          child of .screen (not .slatehead below) so a sticky containing
+          block spans the whole scrollable page on desktop/iPad — nested one
+          level deeper, position: sticky could only hold it in view for the
+          height of its own short parent (see .topbar--slate's desktop rule
+          in index.css). */}
+      <header className="topbar topbar--slate">
+        <button
+          type="button"
+          className="topbar__title topbar__home"
+          onClick={goHome}
+          aria-label="Reload games"
+        >
+          <TallyLockup height={20} />
+        </button>
+        <div className="topbar__slateactions">
+          <LevelNav sportId={sportId} onChange={pickLevel} />
+          {/* The icon buttons live in one nowrap sub-group so that when the
+              row runs out of width they drop below the level pills together —
+              as bare siblings flex-wrap moved them one at a time, orphaning
+              whichever single button no longer fit onto its own row. */}
+          <div className="topbar__iconcluster">
+            <SiteSearchButton className="topbar__search" />
+            <SiteMenuButton className="topbar__search" />
+            {AccountButton && (
+              <Suspense fallback={null}>
+                <AccountButton />
+              </Suspense>
+            )}
           </div>
-        </header>
+        </div>
+      </header>
 
+      {/* The date stepper's own solid banner, divided from the game cards by
+          a bottom rule — deliberately NOT sticky (see the comment on
+          .slatehead in index.css), so it scrolls away under the pinned
+          topbar above rather than nagging "you're on {date}" forever. */}
+      <div className="slatehead">
         <div className="datenav datenav--row">
           <button onClick={() => pageDay(-1)} aria-label="Previous day">
             ‹

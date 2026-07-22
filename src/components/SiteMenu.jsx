@@ -1,24 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { useState } from 'react'
 import { useNav } from '../lib/nav.js'
+import { REPORT_PAGES } from '../lib/reportPages.js'
 
 // The standalone, non-game pages — everything you'd otherwise only reach by
-// scrolling to the bottom of the slate's footer (SiteFooter). Kept as a
-// single list here so the header menu and footer can't drift.
+// scrolling to the bottom of the slate's footer (SiteFooter). Built from the
+// same REPORT_PAGES list the footer uses, so the two can't drift; Logo Sheet
+// and About are appended here only (see reportPages.js for why).
 const MENU_ITEMS = [
-  { label: 'Standings', path: '/standings' },
-  { label: 'League Leaders', path: '/leaders' },
-  { label: 'Top MLB Prospects', path: '/prospects' },
-  { label: 'Rehab Assignments', path: '/rehab' },
-  { label: 'Umpire Rankings', path: '/umpires' },
-  { label: 'Foul Tracker', path: '/fouls' },
-  { label: 'Milestone Watch', path: '/milestones' },
-  { label: 'Awards History', path: '/awards' },
-  { label: 'Postseason History', path: '/postseason-history' },
-  { label: 'Postseason Leaders', path: '/postseason-leaders' },
-  { label: 'All Star Game', path: '/all-star-rosters' },
-  { label: 'All-Star Legacy', path: '/all-star-legacy' },
-  { label: 'My First Scorebook', path: '/first-scorebook' },
+  ...REPORT_PAGES,
   { label: 'Logo Sheet', path: '/logos' },
   { label: 'About', path: '/about' },
 ]
