@@ -65,6 +65,8 @@ export function batterFoulLine(data, personId) {
     maxGamePa: b.maxGamePa || 0,
     maxGamePitches: b.maxGamePitches || 0,
     maxGameOpponentId: b.maxGameOpponentId ?? null,
+    maxGameHisScore: b.maxGameHisScore ?? null,
+    maxGameOppScore: b.maxGameOppScore ?? null,
     maxGameDate: b.maxGameDate ?? null,
     bestPa: b.bestPa ?? null,
     foulsPerGame: g ? round(b.fouls / g) : null,

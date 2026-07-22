@@ -19781,6 +19781,70 @@ body {
   margin-top: 2px;
 }
 
+/* Single-Game Highs row — a 2x3 grid (shot/who/matchup on top, a full-width
+   stat-tile strip beneath) rather than .sgh-row's flex layout, so it gets its
+   own modifier instead of reusing .sgh-top/.sgh-valstack/.sgh-sub. */
+.gamehigh-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'shot who matchup' 'tiles tiles tiles';
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 8px;
+}
+.gamehigh-row .sgh-shot {
+  grid-area: shot;
+}
+.gamehigh-who {
+  grid-area: who;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.gamehigh-matchup {
+  grid-area: matchup;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.gamehigh-matchup__score {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.gamehigh-matchup__sep {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+.gamehigh-matchup__date {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.gamehigh-tiles {
+  grid-area: tiles;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--inset-cell);
+}
+.gamehigh-tiles .stat {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* ------------------------------------------------------- pre-game metric card
    Shared shell, originally for the two derived/analytic cards under the
    batting order — LineupStrengthCard.jsx + BullpenBoard.jsx (a computed

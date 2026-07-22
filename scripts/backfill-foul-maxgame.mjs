@@ -1,11 +1,13 @@
 // One-time migration: populate max_game_pa / max_game_pitches / max_game_opp_id
-// on foul_batter_totals for batters whose single-game-high already predates the
-// schema addition (see scripts/lib/schema.sql). Ordinary nightly gen-fouls.mjs
-// runs only touch those columns when a NEW game beats the stored max, so a
-// batter whose max happened before this migration would otherwise carry zeros
-// forever. Same footing as gen-rookies-backfill.mjs: a one-time historical sweep,
-// not part of the nightly cron, safe to re-run (only fills rows that still read
-// max_game_pa = 0, so an interrupted run resumes without re-fetching).
+// / max_game_his_score / max_game_opp_score on foul_batter_totals for batters
+// whose single-game-high already predates one of these schema additions (see
+// scripts/lib/schema.sql). Ordinary nightly gen-fouls.mjs runs only touch those
+// columns when a NEW game beats the stored max, so a batter whose max happened
+// before this migration would otherwise carry nulls/zeros forever. Same footing
+// as gen-rookies-backfill.mjs: a one-time historical sweep, not part of the
+// nightly cron, safe to re-run (only fills rows still missing either the PA/
+// pitches backfill OR the later score backfill, so an interrupted run resumes
+// without re-fetching everything).
 //
 // Deliberately scoped to the TOP N batters by max_game_fouls (the only ones any
 // Single-Game-Highs board actually shows) rather than every batter on file —
@@ -40,8 +42,10 @@ async function getJson(path) {
   return res.json()
 }
 
-// Walks one game's feed for one batter's PA/pitches-seen + opponent, same
-// counting rule as aggregateGameFouls's isPA test.
+// Walks one game's feed for one batter's PA/pitches-seen + opponent + the
+// game's final score (oriented his/opp, same convention as
+// aggregateGameFouls's post-loop gameHisScore/gameOppScore), same counting
+// rule as aggregateGameFouls's isPA test.
 async function maxGameStatsFor(feed, personId) {
   const awayId = feed?.gameData?.teams?.away?.id ?? null
   const homeId = feed?.gameData?.teams?.home?.id ?? null
@@ -54,14 +58,22 @@ async function maxGameStatsFor(feed, personId) {
   let pa = 0
   let pitches = 0
   let opponentId = null
+  let battingTeamId = null
+  let awayScore = 0
+  let homeScore = 0
   for (const play of plays) {
+    if (Number.isFinite(play.result?.awayScore)) awayScore = play.result.awayScore
+    if (Number.isFinite(play.result?.homeScore)) homeScore = play.result.homeScore
     if (play.matchup?.batter?.id !== personId) continue
     const half = play.about?.halfInning
     opponentId = half === 'top' ? homeId : awayId
+    battingTeamId = half === 'top' ? awayId : homeId
     if (!NON_PA.has(play.result?.eventType)) pa += 1
     pitches += (play.playEvents ?? []).filter((e) => e.isPitch).length
   }
-  return { pa, pitches, opponentId }
+  const hisScore = battingTeamId === awayId ? awayScore : homeScore
+  const oppScore = battingTeamId === awayId ? homeScore : awayScore
+  return { pa, pitches, opponentId, hisScore, oppScore }
 }
 
 async function main() {
@@ -72,15 +84,17 @@ async function main() {
   const rows = db
     .prepare(
       `SELECT person_id, max_game_pk FROM foul_batter_totals
-       WHERE max_game_pk IS NOT NULL AND max_game_pa = 0
+       WHERE max_game_pk IS NOT NULL AND (max_game_pa = 0 OR max_game_his_score IS NULL)
        ORDER BY max_game_fouls DESC LIMIT ?`,
     )
     .all(top)
 
-  console.log(`backfilling ${rows.length} batter(s)' max-game PA/pitches/opponent`)
+  console.log(`backfilling ${rows.length} batter(s)' max-game PA/pitches/opponent/score`)
 
   const update = db.prepare(
-    `UPDATE foul_batter_totals SET max_game_pa = ?, max_game_pitches = ?, max_game_opp_id = ?
+    `UPDATE foul_batter_totals
+     SET max_game_pa = ?, max_game_pitches = ?, max_game_opp_id = ?,
+         max_game_his_score = ?, max_game_opp_score = ?
      WHERE person_id = ?`,
   )
 
@@ -91,9 +105,11 @@ async function main() {
       feed = await getJson(`/api/v1.1/game/${row.max_game_pk}/feed/live`)
       feedCache.set(row.max_game_pk, feed)
     }
-    const { pa, pitches, opponentId } = await maxGameStatsFor(feed, row.person_id)
-    update.run(pa, pitches, opponentId, row.person_id)
-    console.log(`  person ${row.person_id}: gamePk ${row.max_game_pk} -> ${pa} PA, ${pitches} pitches, opp ${opponentId}`)
+    const { pa, pitches, opponentId, hisScore, oppScore } = await maxGameStatsFor(feed, row.person_id)
+    update.run(pa, pitches, opponentId, hisScore, oppScore, row.person_id)
+    console.log(
+      `  person ${row.person_id}: gamePk ${row.max_game_pk} -> ${pa} PA, ${pitches} pitches, opp ${opponentId}, score ${hisScore}-${oppScore}`,
+    )
   }
 
   await dumpGroup(db, 'fouls')

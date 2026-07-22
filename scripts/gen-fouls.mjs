@@ -91,7 +91,7 @@ export function aggregateGameFouls(feed) {
     if (!b) {
       b = {
         name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, twoStrikeFouls: 0, gameFouls: 0,
-        opponentId: null, bestPaFouls: 0, bestPa: null,
+        opponentId: null, bestPaFouls: 0, bestPa: null, gameHisScore: null, gameOppScore: null,
       }
       batters.set(id, b)
     } else {
@@ -309,6 +309,14 @@ export function aggregateGameFouls(feed) {
     }
   }
 
+  // Final score, oriented to "his"/"opp" rather than home/away so the UI never
+  // has to re-derive which side a batter's team was — his team can't change
+  // mid-game, so teamId vs. awayId/homeId settles it once per batter.
+  for (const [, b] of batters) {
+    b.gameHisScore = b.teamId === awayId ? awayScore : homeScore
+    b.gameOppScore = b.teamId === awayId ? homeScore : awayScore
+  }
+
   return { batters, pitchers, teams, innings, pitchTypes }
 }
 
@@ -318,8 +326,8 @@ const upsertBatter = (db) =>
     `INSERT INTO foul_batter_totals
        (person_id, season, name, team_id, games, pa, pitches_seen, fouls,
         two_strike_fouls, max_game_fouls, max_game_pk, max_game_pa,
-        max_game_pitches, max_game_opp_id)
-     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        max_game_pitches, max_game_opp_id, max_game_his_score, max_game_opp_score)
+     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id) DO UPDATE SET
        season = excluded.season,
        name = excluded.name,
@@ -338,7 +346,11 @@ const upsertBatter = (db) =>
        max_game_pitches = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
                           THEN excluded.max_game_pitches ELSE foul_batter_totals.max_game_pitches END,
        max_game_opp_id = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
-                          THEN excluded.max_game_opp_id ELSE foul_batter_totals.max_game_opp_id END`,
+                          THEN excluded.max_game_opp_id ELSE foul_batter_totals.max_game_opp_id END,
+       max_game_his_score = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_his_score ELSE foul_batter_totals.max_game_his_score END,
+       max_game_opp_score = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_opp_score ELSE foul_batter_totals.max_game_opp_score END`,
   )
 
 // Every column beyond `fouls` rides the SAME CASE guard (excluded.fouls >
@@ -456,7 +468,7 @@ async function ingestGame(db, stmts, gamePk, date, season) {
     for (const [id, b] of agg.batters) {
       stmts.batter.run(
         id, season, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
-        b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId,
+        b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId, b.gameHisScore, b.gameOppScore,
       )
       if (b.bestPa) {
         const pa = b.bestPa
@@ -520,6 +532,8 @@ export function exportFouls(db) {
       maxGamePa: r.max_game_pa,
       maxGamePitches: r.max_game_pitches,
       maxGameOpponentId: r.max_game_opp_id,
+      maxGameHisScore: r.max_game_his_score,
+      maxGameOppScore: r.max_game_opp_score,
       maxGameDate: r.max_game_pk != null ? (dateByGamePk.get(r.max_game_pk) ?? null) : null,
       bestPa: pa
         ? {

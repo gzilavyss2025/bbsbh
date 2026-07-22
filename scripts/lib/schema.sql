@@ -140,25 +140,30 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- `max_game_pa`/`max_game_pitches` are that SAME game's PA/pitches-seen totals
 -- (not season figures) — cheap to carry along since aggregateGameFouls already
 -- computes them per game; `max_game_opp_id` is the opposing team he faced that
--- game (his own team doesn't change mid-game, so it's captured once). Together
--- with a join against foul_ingested_games.date at export time, these let the
--- Single-Game Highs board show "when / against whom / how much work" without a
--- separate lookup.
+-- game (his own team doesn't change mid-game, so it's captured once).
+-- `max_game_his_score`/`max_game_opp_score` are that game's FINAL score (not an
+-- entering-the-PA snapshot the way foul_batter_pa_high's are) — his team's and
+-- the opponent's, already oriented so the UI never has to re-derive home/away
+-- from a team id. Together with a join against foul_ingested_games.date at
+-- export time, these let the Single-Game Highs board show "when / against
+-- whom / final score / how much work" without a separate lookup.
 CREATE TABLE IF NOT EXISTS foul_batter_totals (
-  person_id        INTEGER PRIMARY KEY,
-  season           INTEGER NOT NULL,
-  name             TEXT NOT NULL,
-  team_id          INTEGER,
-  games            INTEGER NOT NULL DEFAULT 0,
-  pa               INTEGER NOT NULL DEFAULT 0,
-  pitches_seen     INTEGER NOT NULL DEFAULT 0,
-  fouls            INTEGER NOT NULL DEFAULT 0,
-  two_strike_fouls INTEGER NOT NULL DEFAULT 0,
-  max_game_fouls   INTEGER NOT NULL DEFAULT 0,
-  max_game_pk      INTEGER,
-  max_game_pa      INTEGER NOT NULL DEFAULT 0,
-  max_game_pitches INTEGER NOT NULL DEFAULT 0,
-  max_game_opp_id  INTEGER
+  person_id          INTEGER PRIMARY KEY,
+  season             INTEGER NOT NULL,
+  name               TEXT NOT NULL,
+  team_id            INTEGER,
+  games              INTEGER NOT NULL DEFAULT 0,
+  pa                 INTEGER NOT NULL DEFAULT 0,
+  pitches_seen       INTEGER NOT NULL DEFAULT 0,
+  fouls              INTEGER NOT NULL DEFAULT 0,
+  two_strike_fouls   INTEGER NOT NULL DEFAULT 0,
+  max_game_fouls     INTEGER NOT NULL DEFAULT 0,
+  max_game_pk        INTEGER,
+  max_game_pa        INTEGER NOT NULL DEFAULT 0,
+  max_game_pitches   INTEGER NOT NULL DEFAULT 0,
+  max_game_opp_id    INTEGER,
+  max_game_his_score INTEGER,
+  max_game_opp_score INTEGER
 );
 
 -- The single most-fouled PLATE APPEARANCE a batter has had all season (as

@@ -185,11 +185,30 @@ test('a mid-AB interruption keeps the PA-foul tally AND the true entering snapsh
   assert.equal(b.bestPa.onSecond, false, 'nobody was on 2nd until the mid-PA steal — must not leak into the entering snapshot')
 })
 
+test('a batter\'s max-game score is oriented his/opp, not home/away', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      // Away batter 10 bats in the top half; final is away 5, home 3.
+      play({ batter: 10, pitcher: 200, eventType: 'single', event: 'Single', events: [pitch('F', 0)], awayScore: 2, homeScore: 1 }),
+      play({
+        half: 'bottom', batter: 40, pitcher: 100, eventType: 'flyout', event: 'Flyout',
+        events: [pitch('S', 0)], awayScore: 5, homeScore: 3,
+      }),
+    ]),
+  )
+  const away = agg.batters.get(10)
+  assert.equal(away.gameHisScore, 5, 'away batter\'s own score is the final away score')
+  assert.equal(away.gameOppScore, 3)
+  const home = agg.batters.get(40)
+  assert.equal(home.gameHisScore, 3, 'home batter\'s own score is the final home score')
+  assert.equal(home.gameOppScore, 5)
+})
+
 // --- reader selectors --------------------------------------------------------
 const readerData = {
   season: 2026,
   batters: {
-    500: { name: 'Foul King', teamId: 1, g: 40, pa: 160, pitchesSeen: 700, fouls: 120, twoStrikeFouls: 50, maxGameFouls: 7, maxGamePk: 999, maxGamePa: 5, maxGamePitches: 34, maxGameOpponentId: 2, maxGameDate: '2026-06-07' },
+    500: { name: 'Foul King', teamId: 1, g: 40, pa: 160, pitchesSeen: 700, fouls: 120, twoStrikeFouls: 50, maxGameFouls: 7, maxGamePk: 999, maxGamePa: 5, maxGamePitches: 34, maxGameOpponentId: 2, maxGameHisScore: 6, maxGameOppScore: 4, maxGameDate: '2026-06-07' },
     501: { name: 'Rare Fouler', teamId: 2, g: 5, pa: 20, pitchesSeen: 80, fouls: 6, twoStrikeFouls: 2, maxGameFouls: 2, maxGamePk: 998 },
     502: { name: 'Team2 Bat', teamId: 2, g: 30, pa: 120, pitchesSeen: 500, fouls: 60, twoStrikeFouls: 20, maxGameFouls: 4, maxGamePk: 997 },
   },
@@ -221,6 +240,8 @@ test('batterFoulLine derives per-game and per-PA rates', () => {
   assert.equal(line.maxGamePa, 5)
   assert.equal(line.maxGamePitches, 34)
   assert.equal(line.maxGameOpponentId, 2)
+  assert.equal(line.maxGameHisScore, 6)
+  assert.equal(line.maxGameOppScore, 4)
   assert.equal(line.maxGameDate, '2026-06-07')
   assert.equal(batterFoulLine(readerData, 999999), null)
 })

@@ -85,12 +85,10 @@ export function FoulTrackerPage() {
             featured
           />
 
-          <FoulStoryBoard
+          <GameHighBoard
             title="Single-game highs"
             note="The most fouls hit by one batter in a single game this season."
             rows={boards.gameHighs}
-            value={(b) => b.maxGameFouls}
-            summary={gameHighSummary}
           />
 
           <FoulStoryBoard
@@ -261,29 +259,6 @@ function FoulLeaderBoard({ title, note, rows, cols, cells, featured = false }) {
   )
 }
 
-// Single-game highs and Most-fouls-in-a-PA are both STORIES (one specific
-// game or at-bat), not rankings — so unlike FoulLeaderBoard above, every row
-// gets the fuller headshot + narrated-context treatment rather than just the
-// rank-1 leader. Reads in the order the thing actually happened: when/
-// against whom, how much work the at-bats took, then how many of those
-// pitches got fouled off — the number that made the board.
-function gameHighSummary(b) {
-  const scene = []
-  if (b.maxGameDate) scene.push(monthDay(b.maxGameDate))
-  if (b.maxGameOpponentId) scene.push(`vs ${teamAbbr({ id: b.maxGameOpponentId })}`)
-
-  const workload = []
-  if (b.maxGamePa) workload.push(`${b.maxGamePa} PA`)
-  if (b.maxGamePitches) workload.push(`${b.maxGamePitches} pitches seen`)
-
-  const parts = []
-  if (scene.length) parts.push(scene.join(' '))
-  if (workload.length) parts.push(workload.join(', '))
-  if (b.maxGameFouls && b.maxGamePitches) parts.push(`${b.maxGameFouls} fouled off`)
-
-  return parts.join(' · ')
-}
-
 // A result that reaches base or otherwise helps the batter's own line — the
 // user-facing "good outcome" set (hits, walks, HBP, a productive sac fly);
 // everything else (every out, however it's recorded, plus reaching on an
@@ -344,10 +319,12 @@ function PaScorebug({ pa }) {
   )
 }
 
-// `bug`, when given, renders a rich node (PaScorebug) below the header row
-// INSTEAD of a plain-language `summary` sentence — used only where the
-// situational data is rich enough to earn a visual widget.
-function FoulStoryBoard({ title, note, rows, value, summary, bug }) {
+// A STORY (one specific at-bat), not a ranking — so unlike FoulLeaderBoard
+// above, every row gets the fuller headshot treatment rather than just the
+// rank-1 leader. `bug` renders a rich node (PaScorebug) below the header row —
+// the only caller left is Most-Fouls-In-A-PA, whose situational data is rich
+// enough to earn the widget.
+function FoulStoryBoard({ title, note, rows, value, bug }) {
   if (!rows || rows.length === 0) return null
   return (
     <BoardCard title={title} note={note}>
@@ -366,12 +343,73 @@ function FoulStoryBoard({ title, note, rows, value, summary, bug }) {
                   <span className="sgh-vallabel">Fouls</span>
                 </span>
               </div>
-              {bug ? bug(b) : <div className="sgh-sub">{summary(b)}</div>}
+              {bug(b)}
             </div>
           </li>
         ))}
       </ol>
     </BoardCard>
+  )
+}
+
+// Single-game highs is ALSO a story, not a ranking, but reads as a compact
+// scorebug-style ledger row rather than a sentence: who, the game's final
+// score + date (the same logos-and-score idiom FirstScorebookPage's
+// gamegrid uses for "recap this game" — see ScorebookGameLink), then the
+// at-bat's workload as three stat tiles (same `.stat`/`.stat__v`/`.stat__k`
+// idiom StatBox's Insights row uses on the innings page) so PA/pitches-seen/
+// fouls read as one consistent line rather than a prose sentence.
+function GameHighBoard({ title, note, rows }) {
+  if (!rows || rows.length === 0) return null
+  return (
+    <BoardCard title={title} note={note}>
+      <ol className="sgh-list">
+        {rows.map((b) => (
+          <GameHighRow key={b.id} b={b} />
+        ))}
+      </ol>
+    </BoardCard>
+  )
+}
+
+function GameHighRow({ b }) {
+  const hasScore = b.maxGameHisScore != null && b.maxGameOppScore != null
+  return (
+    <li className="sgh-row gamehigh-row">
+      <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot" />
+      <div className="gamehigh-who">
+        <PlayerLink id={b.id} className="sgh-name">
+          {b.name}
+        </PlayerLink>
+        <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
+      </div>
+      <div className="gamehigh-matchup">
+        {hasScore && (
+          <span className="gamehigh-matchup__score">
+            <TeamLogo teamId={b.teamId} name={teamAbbr({ id: b.teamId })} size={20} />
+            <b>{b.maxGameHisScore}</b>
+            <span className="gamehigh-matchup__sep">–</span>
+            <b>{b.maxGameOppScore}</b>
+            <TeamLogo teamId={b.maxGameOpponentId} name={teamAbbr({ id: b.maxGameOpponentId })} size={20} />
+          </span>
+        )}
+        {b.maxGameDate && <span className="gamehigh-matchup__date">{monthDay(b.maxGameDate)}</span>}
+      </div>
+      <div className="gamehigh-tiles">
+        <div className="stat">
+          <span className="stat__v">{b.maxGamePa || '—'}</span>
+          <span className="stat__k">PA</span>
+        </div>
+        <div className="stat">
+          <span className="stat__v">{b.maxGamePitches || '—'}</span>
+          <span className="stat__k">Pitches seen</span>
+        </div>
+        <div className="stat">
+          <span className="stat__v">{b.maxGameFouls}</span>
+          <span className="stat__k">Fouls</span>
+        </div>
+      </div>
+    </li>
   )
 }
 
