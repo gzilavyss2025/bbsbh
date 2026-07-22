@@ -19559,6 +19559,109 @@ body {
   border-radius: 2px;
 }
 
+/* Foul Tracker's #1-leader headshot card (FoulFeatured, FoulTrackerPage.jsx)
+   — reuses .tlead__cat/.tlead__featured/.tlead__shot exactly as TeamLeaders
+   does elsewhere, so a photo on this page matches a photo anywhere else in
+   the app. .foulboard-block wraps a board's title + featured card + chaser
+   table as one unit; the title moved here from the table's own <caption>
+   (still the same visual style — foulboard__caption is reused on the <h2>). */
+.foulboard-block {
+  margin-top: 8px;
+}
+.foulboard-block__title {
+  padding: 16px 2px 8px;
+}
+.foulboard__featuredcard {
+  margin-bottom: 10px;
+}
+.foulboard__featuredteam {
+  align-self: flex-start;
+}
+.foulboard__featuredextra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.foulboard__featuredchip b {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+
+/* Single-Game Highs — every entry gets the headshot treatment (it's telling
+   one specific game's story, not ranking a season total), so unlike the
+   featured-card-plus-table boards above this is its own bordered list. */
+.sgh-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.sgh-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.sgh-row:first-child {
+  border-top: none;
+}
+.shot.sgh-shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+.sgh-body {
+  flex: 1;
+  min-width: 0;
+}
+.sgh-top {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+/* Compound (beats .plink's `font: inherit`/`text-align: inherit` reset —
+   same convention as .tlead__who .tlead__name). */
+.sgh-top .sgh-name {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sgh-val {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-num-md);
+  color: var(--text-heading);
+}
+.sgh-sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  margin-top: 2px;
+}
+
 /* ------------------------------------------------------- pre-game metric card
    Shared shell, originally for the two derived/analytic cards under the
    batting order — LineupStrengthCard.jsx + BullpenBoard.jsx (a computed
