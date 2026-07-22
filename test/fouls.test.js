@@ -6,6 +6,8 @@ import {
   pitcherFoulLine,
   foulLeaders,
   leagueFoulRates,
+  topFoulGames,
+  teamPitchTypeRates,
   FOUL_PRIORS,
   MIN_BATTER_GAMES,
 } from '../src/api/fouls.js'
@@ -121,6 +123,26 @@ test('team, pitcher, inning, and 10+ fold aggregates roll up correctly', () => {
   // Pitch-type tally (all 'FF' here).
   assert.equal(agg.pitchTypes.get('FF').pitches, 3)
   assert.equal(agg.pitchTypes.get('FF').fouls, 2)
+  // Both games' fouls are away team 1's total (2, batters 10 + 12); home team
+  // 2 never batted in this fixture. Neither play set a score, so it's still 0-0.
+  assert.deepEqual(agg.game, {
+    awayId: 1, homeId: 2, awayFouls: 2, homeFouls: 0, totalFouls: 2, awayScore: 0, homeScore: 0,
+  })
+})
+
+test('aggregateGameFouls splits the combined game total by home/away side and carries the final score', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      // Away batter fouls twice.
+      play({ batter: 10, pitcher: 200, eventType: 'strikeout', events: [pitch('F', 1), pitch('F', 2)], awayScore: 2, homeScore: 0 }),
+      // Home batter (bottom half) fouls once, off the away pitcher; this play's
+      // score is the game's FINAL score (the running tracker's last update).
+      play({ half: 'bottom', batter: 40, pitcher: 100, eventType: 'flyout', events: [pitch('F', 0)], awayScore: 2, homeScore: 3 }),
+    ]),
+  )
+  assert.deepEqual(agg.game, {
+    awayId: 1, homeId: 2, awayFouls: 2, homeFouls: 1, totalFouls: 3, awayScore: 2, homeScore: 3,
+  })
 })
 
 test('the most-fouled plate appearance captures the situational context ENTERING it, from the prior play', () => {
@@ -204,6 +226,30 @@ test('a batter\'s max-game score is oriented his/opp, not home/away', () => {
   assert.equal(home.gameOppScore, 5)
 })
 
+test('aggregateGameFouls splits pitch-type tallies (fouls AND whiffs) by batting team and by pitching team', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      // Away batter 10 (team 1) faces home pitcher 200 (team 2): one FF, fouled (not a whiff).
+      play({ batter: 10, pitcher: 200, eventType: 'strikeout', events: [pitch('F', 1, 'FF')] }),
+      // Home batter 40 (team 2) faces away pitcher 100 (team 1): one SL, a SWINGING STRIKE
+      // ('S' is a WHIFF_CODES entry, not a FOUL_CODES one) — whiffed, not fouled.
+      play({ half: 'bottom', batter: 40, pitcher: 100, eventType: 'flyout', events: [pitch('S', 0, 'SL')] }),
+    ]),
+  )
+  // Team 1's own batters saw the FF (fouled, not whiffed); team 2's own pitchers threw it.
+  assert.deepEqual(agg.battingPitchTypes.get(1).get('FF'), { description: 'FF', pitches: 1, fouls: 1, whiffs: 0 })
+  assert.deepEqual(agg.pitchingPitchTypes.get(2).get('FF'), { description: 'FF', pitches: 1, fouls: 1, whiffs: 0 })
+  // Team 2's own batters saw the SL (whiffed, not fouled); team 1's own pitchers threw it.
+  assert.deepEqual(agg.battingPitchTypes.get(2).get('SL'), { description: 'SL', pitches: 1, fouls: 0, whiffs: 1 })
+  assert.deepEqual(agg.pitchingPitchTypes.get(1).get('SL'), { description: 'SL', pitches: 1, fouls: 0, whiffs: 1 })
+  // No cross-contamination: a team's batting tally never picks up a pitch it
+  // only PITCHED, and vice versa.
+  assert.ok(!agg.battingPitchTypes.get(1).has('SL'))
+  assert.ok(!agg.pitchingPitchTypes.get(1).has('FF'))
+  assert.ok(!agg.battingPitchTypes.get(2).has('FF'))
+  assert.ok(!agg.pitchingPitchTypes.get(2).has('SL'))
+})
+
 // --- reader selectors --------------------------------------------------------
 const readerData = {
   season: 2026,
@@ -228,6 +274,24 @@ const readerData = {
       { code: 'SL', description: 'Slider', pitches: 500, fouls: 60 },
     ],
     totals: { pitches: 1800, fouls: 310, twoStrikeFouls: 120 },
+  },
+  topFoulGames: [
+    { gamePk: 111, date: '2026-05-01', homeTeamId: 2, homeFouls: 14, homeScore: 4, awayTeamId: 1, awayFouls: 10, awayScore: 3, totalFouls: 24 },
+    { gamePk: 112, date: '2026-05-02', homeTeamId: 3, homeFouls: 9, homeScore: 2, awayTeamId: 2, awayFouls: 8, awayScore: 5, totalFouls: 17 },
+    { gamePk: 113, date: '2026-05-03', homeTeamId: 3, homeFouls: 6, homeScore: 1, awayTeamId: 4, awayFouls: 5, awayScore: 6, totalFouls: 11 },
+  ],
+  teamPitchTypes: {
+    batting: {
+      1: [
+        { code: 'FF', description: 'Four-Seam Fastball', pitches: 200, fouls: 36, whiffs: 22 },
+        { code: 'SL', description: 'Slider', pitches: 40, fouls: 4, whiffs: 9 },
+      ],
+    },
+    pitching: {
+      1: [
+        { code: 'FF', description: 'Four-Seam Fastball', pitches: 150, fouls: 45, whiffs: 18 },
+      ],
+    },
   },
 }
 
@@ -281,6 +345,42 @@ test('leagueFoulRates computes overall + by-inning + by-pitch-type rates, sorted
   assert.equal(inn1.vsReliever.foulRate, 0.1) // 10 / 100
   // Pitch types sorted by foul rate desc: FF (0.20) before SL (0.12).
   assert.deepEqual(rates.byPitchType.map((r) => r.code), ['FF', 'SL'])
+})
+
+test('topFoulGames ranks by combined total, caps to n, and scopes to one team', () => {
+  const league = topFoulGames(readerData)
+  assert.deepEqual(league.map((g) => g.gamePk), [111, 112, 113], 'already ranked by the generator, highest total first')
+
+  const capped = topFoulGames(readerData, { n: 2 })
+  assert.equal(capped.length, 2)
+
+  // Team 2 is the away side of game 111 and the home side of game 112 — both
+  // should surface; game 113 (teams 3/4) should not.
+  const team2 = topFoulGames(readerData, { scope: 2 })
+  assert.deepEqual(team2.map((g) => g.gamePk), [111, 112])
+
+  assert.deepEqual(topFoulGames(null), [])
+})
+
+test('teamPitchTypeRates computes both sides for one team, sorted, null for no teamId', () => {
+  const rates = teamPitchTypeRates(readerData, 1)
+  assert.equal(rates.batting[0].code, 'FF', 'higher foul rate (18%) sorts first')
+  assert.equal(rates.batting[0].foulRate, 0.18) // 36 / 200
+  assert.equal(rates.batting[1].code, 'SL')
+  assert.equal(rates.batting[1].foulRate, 0.1) // 4 / 40
+  assert.equal(rates.pitching[0].code, 'FF')
+  assert.equal(rates.pitching[0].foulRate, 0.3) // 45 / 150 — team 1's PITCHERS get fouled off more than its batters
+
+  // Raw whiff counts ride straight through from the precompute, unaltered.
+  assert.equal(rates.batting[0].whiffs, 22)
+  assert.equal(rates.pitching[0].whiffs, 18)
+
+  // A team with no rows at all degrades to empty arrays, not a crash.
+  const noData = teamPitchTypeRates(readerData, 999)
+  assert.deepEqual(noData.batting, [])
+  assert.deepEqual(noData.pitching, [])
+
+  assert.equal(teamPitchTypeRates(readerData, null), null)
 })
 
 test('reader selectors are null-safe on missing data', () => {

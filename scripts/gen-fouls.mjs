@@ -30,9 +30,19 @@
 //   node scripts/gen-fouls.mjs                       # trailing 3 days
 //   node scripts/gen-fouls.mjs --days=7
 //   node scripts/gen-fouls.mjs --since=2026-03-20 [--until=2026-07-19]
+//   node scripts/gen-fouls.mjs --backfill-games      # see below
+//   node scripts/gen-fouls.mjs --backfill-team-pitch-types  # see below
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
-// long backfill resumes cleanly.
+// long backfill resumes cleanly. --backfill-games is a SEPARATE one-time backfill
+// for foul_game_totals specifically: since that table was added after most games
+// were already ingested, it re-fetches every already-ingested gamePk's feed and
+// fills in just that table (see main()'s early-return branch) without touching
+// the accumulating season tables. --backfill-team-pitch-types is the same idea
+// for foul_team_pitch_types_batting/_pitching (the team-filtered "batters vs
+// pitchers by pitch type" board), but since those two ACCUMULATE across games
+// rather than overwrite per gamePk, it wipes both tables first and rebuilds
+// them from scratch every time it runs, rather than only filling gaps.
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -71,7 +81,10 @@ async function getJson(path) {
 //     teams:    Map teamId   -> { fouls, twoStrikeFouls },
 //     innings:  Map inning   -> { pitches, fouls, pitchesVsStarter, foulsVsStarter,
 //                                 pitchesVsReliever, foulsVsReliever },
-//     pitchTypes: Map code   -> { description, pitches, fouls } }
+//     pitchTypes: Map code   -> { description, pitches, fouls },
+//     game: { awayId, homeId, awayFouls, homeFouls, totalFouls, awayScore, homeScore },
+//     battingPitchTypes:  Map teamId -> Map code -> { description, pitches, fouls, whiffs },
+//     pitchingPitchTypes: Map teamId -> Map code -> { description, pitches, fouls, whiffs } }
 export function aggregateGameFouls(feed) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const awayId = feed?.gameData?.teams?.away?.id ?? null
@@ -85,6 +98,15 @@ export function aggregateGameFouls(feed) {
   const teams = new Map()
   const innings = new Map()
   const pitchTypes = new Map()
+  // Team-scoped counterparts to `pitchTypes` above — keyed teamId -> code ->
+  // { description, pitches, fouls }. `battingPitchTypes` is the pitch types a
+  // team's OWN BATTERS saw (whoever was pitching); `pitchingPitchTypes` is the
+  // pitch types a team's OWN PITCHERS threw (whoever was batting). Two maps,
+  // not one keyed by (teamId, side), since a single pitch belongs to a
+  // batting team AND a pitching team at once — it always updates one entry in
+  // each map, never a shared row.
+  const battingPitchTypes = new Map()
+  const pitchingPitchTypes = new Map()
 
   const getBatter = (id, name, teamId) => {
     let b = batters.get(id)
@@ -132,6 +154,21 @@ export function aggregateGameFouls(feed) {
     if (!pt) {
       pt = { description: desc || '', pitches: 0, fouls: 0 }
       pitchTypes.set(code, pt)
+    } else if (desc && !pt.description) {
+      pt.description = desc
+    }
+    return pt
+  }
+  const getTeamPitchType = (store, teamId, code, desc) => {
+    let byCode = store.get(teamId)
+    if (!byCode) {
+      byCode = new Map()
+      store.set(teamId, byCode)
+    }
+    let pt = byCode.get(code)
+    if (!pt) {
+      pt = { description: desc || '', pitches: 0, fouls: 0, whiffs: 0 }
+      byCode.set(code, pt)
     } else if (desc && !pt.description) {
       pt.description = desc
     }
@@ -250,9 +287,22 @@ export function aggregateGameFouls(feed) {
 
       const tcode = e.details?.type?.code
       if (tcode) {
-        const pt = getPitchType(tcode, e.details?.type?.description)
+        const desc = e.details?.type?.description
+        const pt = getPitchType(tcode, desc)
         pt.pitches += 1
         if (isFoul) pt.fouls += 1
+        if (battingTeamId != null) {
+          const bpt = getTeamPitchType(battingPitchTypes, battingTeamId, tcode, desc)
+          bpt.pitches += 1
+          if (isFoul) bpt.fouls += 1
+          if (isWhiff) bpt.whiffs += 1
+        }
+        if (fieldingTeamId != null) {
+          const ppt = getTeamPitchType(pitchingPitchTypes, fieldingTeamId, tcode, desc)
+          ppt.pitches += 1
+          if (isFoul) ppt.fouls += 1
+          if (isWhiff) ppt.whiffs += 1
+        }
       }
 
       if (isWhiff && p) p.whiffs += 1
@@ -317,7 +367,20 @@ export function aggregateGameFouls(feed) {
     b.gameOppScore = b.teamId === awayId ? homeScore : awayScore
   }
 
-  return { batters, pitchers, teams, innings, pitchTypes }
+  // Both teams' fouls for THIS game (the "best souvenir odds" board) — just
+  // the two sides of `teams` above, oriented home/away since neither side is
+  // "his" the way a batter's own total is. awayScore/homeScore are already
+  // the FINAL score at this point (the running trackers advanced on every
+  // play all the way through the last one).
+  const awayFouls = teams.get(awayId)?.fouls ?? 0
+  const homeFouls = teams.get(homeId)?.fouls ?? 0
+  const game = {
+    awayId, homeId, awayFouls, homeFouls, totalFouls: awayFouls + homeFouls, awayScore, homeScore,
+  }
+
+  return {
+    batters, pitchers, teams, innings, pitchTypes, game, battingPitchTypes, pitchingPitchTypes,
+  }
 }
 
 // --- SQLite upserts ----------------------------------------------------------
@@ -453,6 +516,48 @@ const upsertPitchType = (db) =>
        fouls = foul_pitch_types.fouls + excluded.fouls`,
   )
 
+const upsertTeamPitchTypeBatting = (db) =>
+  db.prepare(
+    `INSERT INTO foul_team_pitch_types_batting (team_id, code, season, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(team_id, code) DO UPDATE SET
+       season = excluded.season,
+       description = excluded.description,
+       pitches = foul_team_pitch_types_batting.pitches + excluded.pitches,
+       fouls = foul_team_pitch_types_batting.fouls + excluded.fouls,
+       whiffs = foul_team_pitch_types_batting.whiffs + excluded.whiffs`,
+  )
+
+const upsertTeamPitchTypePitching = (db) =>
+  db.prepare(
+    `INSERT INTO foul_team_pitch_types_pitching (team_id, code, season, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(team_id, code) DO UPDATE SET
+       season = excluded.season,
+       description = excluded.description,
+       pitches = foul_team_pitch_types_pitching.pitches + excluded.pitches,
+       fouls = foul_team_pitch_types_pitching.fouls + excluded.fouls,
+       whiffs = foul_team_pitch_types_pitching.whiffs + excluded.whiffs`,
+  )
+
+// A whole game is inserted (or, during --backfill-games, re-upserted) as one
+// unit — there's no per-column accumulation the way the season totals above
+// have, so a plain overwrite-on-conflict is correct rather than a CASE guard.
+const upsertGameTotals = (db) =>
+  db.prepare(
+    `INSERT INTO foul_game_totals
+       (game_pk, home_team_id, home_fouls, home_score, away_team_id, away_fouls, away_score, total_fouls)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(game_pk) DO UPDATE SET
+       home_team_id = excluded.home_team_id,
+       home_fouls = excluded.home_fouls,
+       home_score = excluded.home_score,
+       away_team_id = excluded.away_team_id,
+       away_fouls = excluded.away_fouls,
+       away_score = excluded.away_score,
+       total_fouls = excluded.total_fouls`,
+  )
+
 const markIngested = (db) => db.prepare('INSERT OR IGNORE INTO foul_ingested_games (game_pk, date) VALUES (?, ?)')
 
 // Fetch the feed (the only await), then fold the whole game in as one atomic
@@ -491,6 +596,17 @@ async function ingestGame(db, stmts, gamePk, date, season) {
     for (const [code, pt] of agg.pitchTypes) {
       stmts.pitchType.run(code, season, pt.description, pt.pitches, pt.fouls)
     }
+    for (const [teamId, byCode] of agg.battingPitchTypes) {
+      for (const [code, pt] of byCode) {
+        stmts.teamPitchTypeBatting.run(teamId, code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+      }
+    }
+    for (const [teamId, byCode] of agg.pitchingPitchTypes) {
+      for (const [code, pt] of byCode) {
+        stmts.teamPitchTypePitching.run(teamId, code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+      }
+    }
+    stmts.game.run(gamePk, agg.game.homeId, agg.game.homeFouls, agg.game.homeScore, agg.game.awayId, agg.game.awayFouls, agg.game.awayScore, agg.game.totalFouls)
     stmts.mark.run(gamePk, date)
     db.exec('COMMIT')
   } catch (err) {
@@ -593,6 +709,24 @@ export function exportFouls(db) {
     .all()
     .map((r) => ({ code: r.code, description: r.description, pitches: r.pitches, fouls: r.fouls }))
 
+  // Every game with a combined total, richest first — the reader trims this to
+  // a top N (see src/api/fouls.js's topFoulGames), same "export the full sorted
+  // pool, let the page slice it" convention foulLeaders' callers use.
+  const topFoulGames = db
+    .prepare('SELECT * FROM foul_game_totals ORDER BY total_fouls DESC')
+    .all()
+    .map((r) => ({
+      gamePk: r.game_pk,
+      date: dateByGamePk.get(r.game_pk) ?? null,
+      homeTeamId: r.home_team_id,
+      homeFouls: r.home_fouls,
+      homeScore: r.home_score,
+      awayTeamId: r.away_team_id,
+      awayFouls: r.away_fouls,
+      awayScore: r.away_score,
+      totalFouls: r.total_fouls,
+    }))
+
   // League totals: pitches from the by-inning sum (every pitch is bucketed by
   // inning); fouls / two-strike fouls from the team sum (every foul is a foul BY
   // some team's batter) — the two independent roll-ups cross-check each other.
@@ -600,6 +734,25 @@ export function exportFouls(db) {
     pitches: byInning.reduce((s, r) => s + r.pitches, 0),
     fouls: Object.values(teams).reduce((s, t) => s + t.fouls, 0),
     twoStrikeFouls: Object.values(teams).reduce((s, t) => s + t.twoStrikeFouls, 0),
+  }
+
+  // Team-filtered pitch-type rows: keyed teamId -> array of rows, so the
+  // reader (src/api/fouls.js's teamPitchTypeRates) can look up one team's
+  // slice without scanning every row. `batting` is that team's own batters'
+  // fouls BY pitch type (whoever was pitching); `pitching` is that team's own
+  // pitchers' fouls BY pitch type (whoever was batting) — see schema.sql's
+  // foul_team_pitch_types_batting/_pitching for why these are two tables.
+  const groupByTeam = (rows) => {
+    const byTeam = {}
+    for (const r of rows) {
+      const list = byTeam[r.team_id] ?? (byTeam[r.team_id] = [])
+      list.push({ code: r.code, description: r.description, pitches: r.pitches, fouls: r.fouls, whiffs: r.whiffs })
+    }
+    return byTeam
+  }
+  const teamPitchTypes = {
+    batting: groupByTeam(db.prepare('SELECT * FROM foul_team_pitch_types_batting').all()),
+    pitching: groupByTeam(db.prepare('SELECT * FROM foul_team_pitch_types_pitching').all()),
   }
 
   return {
@@ -611,6 +764,8 @@ export function exportFouls(db) {
     pitchers,
     teams,
     league: { byInning, byPitchType, totals },
+    topFoulGames,
+    teamPitchTypes,
   }
 }
 
@@ -648,8 +803,126 @@ async function main() {
     team: upsertTeam(db),
     inning: upsertInning(db),
     pitchType: upsertPitchType(db),
+    teamPitchTypeBatting: upsertTeamPitchTypeBatting(db),
+    teamPitchTypePitching: upsertTeamPitchTypePitching(db),
+    game: upsertGameTotals(db),
     mark: markIngested(db),
   }
+
+  // One-time backfill: foul_game_totals didn't exist when most of this season's
+  // games were first swept, so their per-game totals are missing even though
+  // they're already in foul_ingested_games (and thus skipped by the normal
+  // pending-games loop below, which only ever looks at UN-ingested gamePks).
+  // Re-fetches every already-ingested game's feed and upserts ONLY
+  // foul_game_totals — never touches the accumulating season tables, so it's
+  // safe to run repeatedly and never double-counts them. Add --force to
+  // re-fill EVERY already-ingested game rather than just the ones with no row
+  // yet — needed the one time a column is added to foul_game_totals itself
+  // (e.g. away_score/home_score) after the first --backfill-games already ran,
+  // since those existing rows have the new column defaulted, not populated.
+  //   node scripts/gen-fouls.mjs --backfill-games [--force]
+  if (args['backfill-games']) {
+    const already = new Set(db.prepare('SELECT game_pk FROM foul_game_totals').all().map((r) => r.game_pk))
+    const targets = db
+      .prepare('SELECT game_pk FROM foul_ingested_games')
+      .all()
+      .map((r) => r.game_pk)
+      .filter((pk) => args.force || !already.has(pk))
+    console.log(`--backfill-games${args.force ? ' --force' : ''}: ${targets.length} games to (re)fill in foul_game_totals`)
+    let done = 0
+    const queue = [...targets]
+    async function backfillWorker() {
+      while (queue.length) {
+        const gamePk = queue.shift()
+        if (gamePk == null) return
+        try {
+          const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
+          const agg = aggregateGameFouls(feed)
+          stmts.game.run(gamePk, agg.game.homeId, agg.game.homeFouls, agg.game.homeScore, agg.game.awayId, agg.game.awayFouls, agg.game.awayScore, agg.game.totalFouls)
+        } catch (err) {
+          console.error(`backfill gamePk ${gamePk}: ${err.message}`)
+        }
+        done += 1
+        if (done % CHECKPOINT_EVERY === 0) {
+          console.log(`${done}/${targets.length} backfilled, checkpointing...`)
+          await dumpGroup(db, 'fouls')
+          await mkdir(dirname(out), { recursive: true })
+          await writeFile(out, JSON.stringify(exportFouls(db)))
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: CONCURRENCY }, backfillWorker))
+    await dumpGroup(db, 'fouls')
+    await mkdir(dirname(out), { recursive: true })
+    await writeFile(out, JSON.stringify(exportFouls(db)))
+    console.log(`backfilled ${done} games' foul_game_totals`)
+    db.close()
+    return
+  }
+
+  // One-time (re)build of the per-team pitch-type tables — added after most
+  // of the season's games were already swept, same situation as
+  // --backfill-games. UNLIKE that one, these two tables ACCUMULATE across
+  // games (like foul_pitch_types) rather than overwrite per gamePk, so there
+  // is no "just fill the missing rows" option: re-running against an
+  // already-populated table would double-count every game it touches again.
+  // Always wipes both tables first and rebuilds from every already-ingested
+  // game's feed, so it's safe to re-run (e.g. after a season reset) — it
+  // always starts from zero, never adds onto whatever was there.
+  //   node scripts/gen-fouls.mjs --backfill-team-pitch-types
+  if (args['backfill-team-pitch-types']) {
+    db.exec('DELETE FROM foul_team_pitch_types_batting')
+    db.exec('DELETE FROM foul_team_pitch_types_pitching')
+    const targets = db.prepare('SELECT game_pk, date FROM foul_ingested_games').all()
+    console.log(`--backfill-team-pitch-types: rebuilding from ${targets.length} already-ingested games`)
+    let done = 0
+    const queue = [...targets]
+    async function teamPitchTypeWorker() {
+      while (queue.length) {
+        const g = queue.shift()
+        if (!g) return
+        try {
+          const feed = await getJson(`/api/v1.1/game/${g.game_pk}/feed/live`)
+          const agg = aggregateGameFouls(feed)
+          const season = Number(g.date.slice(0, 4))
+          db.exec('BEGIN')
+          try {
+            for (const [teamId, byCode] of agg.battingPitchTypes) {
+              for (const [code, pt] of byCode) {
+                stmts.teamPitchTypeBatting.run(teamId, code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+              }
+            }
+            for (const [teamId, byCode] of agg.pitchingPitchTypes) {
+              for (const [code, pt] of byCode) {
+                stmts.teamPitchTypePitching.run(teamId, code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
+              }
+            }
+            db.exec('COMMIT')
+          } catch (err) {
+            db.exec('ROLLBACK')
+            throw err
+          }
+        } catch (err) {
+          console.error(`team-pitch-type backfill gamePk ${g.game_pk}: ${err.message}`)
+        }
+        done += 1
+        if (done % CHECKPOINT_EVERY === 0) {
+          console.log(`${done}/${targets.length} rebuilt, checkpointing...`)
+          await dumpGroup(db, 'fouls')
+          await mkdir(dirname(out), { recursive: true })
+          await writeFile(out, JSON.stringify(exportFouls(db)))
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: CONCURRENCY }, teamPitchTypeWorker))
+    await dumpGroup(db, 'fouls')
+    await mkdir(dirname(out), { recursive: true })
+    await writeFile(out, JSON.stringify(exportFouls(db)))
+    console.log(`rebuilt foul_team_pitch_types_batting/pitching from ${done} games`)
+    db.close()
+    return
+  }
+
   const existing = new Set(db.prepare('SELECT game_pk FROM foul_ingested_games').all().map((r) => r.game_pk))
 
   // MLB regular season only. Same postponed-replay dedup as the other sweeps: a

@@ -19895,6 +19895,26 @@ body {
 .foulboard-block {
   overflow: hidden;
 }
+/* Single-Game Highs + Best Souvenir Odds — both per-GAME story boards, so on
+   a wide screen (same breakpoint as the rest of the app's wide layout, see
+   `.screen` above) they share a row 50/50 instead of stacking full-width like
+   every other board on this page. Phone stays a single column: two
+   half-width story boards would be too cramped below 740px. */
+.foultracker__pair {
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 740px) {
+  .foultracker__pair {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .foultracker__pair > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
 .foulboard-block .ledger-wrap {
   margin: 0 calc(-1 * var(--space-4));
 }
@@ -19967,6 +19987,14 @@ body {
 }
 .foulboard__subhead th.team {
   text-align: left;
+}
+/* Team-view pitch-type comparison (TeamPitchCategoryGroup, FoulTrackerPage.jsx)
+   — the "significant gap between batters' and pitchers' own foul rates" row
+   highlight. Reuses the umpire favor-meter's own "outlier" amber wash
+   (.favormeter--outlier) rather than inventing a new accent, set per-<td>
+   (not the <tr> itself) — same convention as .standings tr.is-me above. */
+.standings tr.foulboard__row--outlier td {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 .foulboard__team {
   font-family: var(--font-mono);
@@ -20129,6 +20157,48 @@ body {
    uppercase; a plain .foultracker__intro selector alone can't. */
 #root .foultracker__intro {
   text-transform: none; /* caps-exempt */
+}
+
+/* Season average fouls/game (SeasonAverageCard) — the hero stat leading the
+   page, so the reader has a baseline before the leaderboards below start
+   ranking outliers against it. Reads as a sentence (.foulavg__lede) rather
+   than a bare number, since it's now carrying three figures (per game, per
+   PA, per start) instead of one. The fill bar is a real proportion (share of
+   an average game's pitches that got fouled off), not decoration — same
+   "quiet inset panel" idea as .scorebug, collapsed to a single bar. */
+.foulavg {
+  margin-top: var(--space-3);
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.foulavg__lede {
+  margin: 0 0 10px;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.foulavg__lede b {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.foulavg__meter {
+  display: block;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  overflow: hidden;
+}
+.foulavg__fill {
+  display: block;
+  height: 100%;
+  background: var(--field);
+  border-radius: var(--radius-pill);
 }
 
 /* A compact scorebug for the Most-Fouls-In-A-PA board (PaScorebug,
@@ -20477,6 +20547,48 @@ button.gamehigh-matchup:active {
   border: none;
   border-radius: 0;
   box-shadow: none;
+}
+
+/* Best Souvenir Odds (SouvenirGameBoard, FoulTrackerPage.jsx) — ranks GAMES,
+   not players, so unlike Single-Game Highs (.gamehigh-row) there's no photo
+   to anchor a two-line grid around: rank, the fouls-split tiles, and the
+   score+date badge all sit on ONE flex line (wrapping only if a viewport is
+   too narrow to hold it). Both teams are identified once, by the score
+   badge's logos — no separate name column, that was pure duplication.
+   Reuses .gamehigh-matchup's date-badge look and .stat's tile look, just not
+   GameHighRow's grid shape. */
+.souvenir-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+/* The fouls-split + total, as compact tiles right after the rank — same look
+   as .gamehigh-tiles' cells, just sized to their content instead of stretched
+   across a full-width row beneath. */
+.souvenir-row__tiles {
+  display: flex;
+  flex: none;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--inset-cell);
+}
+.souvenir-row__tiles .stat {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 6px 10px;
+  min-width: 60px;
+}
+/* margin-left: auto (rather than `justify-content: space-between` on the
+   row, which would also drag the rank number off the left edge) pushes just
+   the score+date badge flush right, leaving rank+tiles anchored at the start. */
+.souvenir-row__date {
+  margin-left: auto;
+  flex: none;
 }
 
 /* ------------------------------------------------------- pre-game metric card
