@@ -40,3 +40,14 @@ export function isActiveRookie(data, personId) {
 export function hasDebuted(data, personId) {
   return rookieRecordFor(data, personId) !== null
 }
+
+// The ROOKIE pill's actual visibility check. "Still under the rookie limit"
+// only reads as meaningful on an MLB roster/lineup — the same debuted,
+// still-under-limit player showing up in a MiLB game (rehab assignment,
+// optioned veteran) gets DebutPill there instead (see DebutPill.jsx), not a
+// second "rookie" claim about a level he's not filling a rookie's role on.
+// isMlb is the caller's own MLB-vs-MiLB context flag (see TeamInfo.jsx's
+// `isMlb`); the record itself (isActiveRookie) is level-agnostic.
+export function showRookiePill(data, personId, isMlb) {
+  return !!isMlb && isActiveRookie(data, personId)
+}

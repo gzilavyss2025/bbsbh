@@ -30,6 +30,7 @@ export function InningPage({
   inning,
   half,
   meta,
+  isMlb,
   revealedThrough,
   onReveal,
   prospectsData,
@@ -80,6 +81,7 @@ export function InningPage({
           onReveal={presentationOnly ? noop : onReveal}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
+          isMlb={isMlb}
           callouts={callouts}
           workload={workload}
           workloadGameDate={workloadGameDate}

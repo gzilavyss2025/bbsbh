@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { prospectBadge } from '../api/prospects.js'
-import { isActiveRookie } from '../api/rookies.js'
+import { showRookiePill } from '../api/rookies.js'
 import { PlayerLink } from './PlayerLink.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
 import { RookiePill } from './RookiePill.jsx'
@@ -12,7 +12,7 @@ import { RookiePill } from './RookiePill.jsx'
 // longer eligible — but ONLY once his entry sits at or below the reveal mark;
 // a substitution the user hasn't revealed their way to yet renders like any
 // other available player, so the card never hints at a sealed inning.
-export function RosterPanel({ title, roster, revealedThrough, prospectsData, rookiesData }) {
+export function RosterPanel({ title, roster, revealedThrough, prospectsData, rookiesData, isMlb }) {
   const [open, setOpen] = useState(false)
   const empty =
     roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
@@ -45,7 +45,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData, roo
                         {p.nameLastFirst}
                       </PlayerLink>
                       <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                      <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                      <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                     </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>
@@ -66,7 +66,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData, roo
                         {p.nameLastFirst}
                       </PlayerLink>
                       <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                      <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                      <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                     </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{p.position}</span>
@@ -87,7 +87,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData, roo
                         {p.nameLastFirst}
                       </PlayerLink>
                       <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                      <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                      <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                     </span>
                     <span className="roster__jersey">{p.jersey || ''}</span>
                     <span className="roster__pos">{handAbbr(p.hand)}</span>

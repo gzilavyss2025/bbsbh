@@ -1,7 +1,7 @@
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
 import { prospectBadge } from '../api/prospects.js'
-import { isActiveRookie } from '../api/rookies.js'
+import { showRookiePill } from '../api/rookies.js'
 import { ordinal } from '../lib/format.js'
 import { PlayerLink } from './PlayerLink.jsx'
 import { DefenseDiamond } from './DefenseDiamond.jsx'
@@ -14,7 +14,7 @@ import { RookiePill } from './RookiePill.jsx'
 // phone (staged around the seal), and as a right-column card on the wide layout.
 // Spoiler-free: revealedThrough is threaded straight into defenseEntering/
 // lineupEntering below, which enforce the gate themselves (ADR-0010).
-export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, prospectsData, rookiesData, revealedThrough }) {
+export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
   return (
     <>
       <LineupSection
@@ -25,6 +25,7 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
         homeName={homeName}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
+        isMlb={isMlb}
         revealedThrough={revealedThrough}
       />
       <DefenseSection
@@ -65,15 +66,15 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
 // itself enforces the reveal gate given revealedThrough, same as
 // DefenseSection above — it's the reference you copy onto the sheet before
 // scoring.
-export function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, revealedThrough }) {
+export function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
   if ((!away || away.length === 0) && (!home || home.length === 0)) return null
   return (
     <section className="lineupcard">
       <div className="lineupcard__teams">
-        <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} />
-        <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} />
+        <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} />
+        <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} />
       </div>
     </section>
   )
@@ -84,7 +85,7 @@ export function LineupSection({ feed, inning, half, awayName, homeName, prospect
 // occupant's jersey number + fielding position right-aligned on a shared column.
 // An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
 // than shown as a bare header.
-function LineupTeam({ name, slots, prospectsData, rookiesData }) {
+function LineupTeam({ name, slots, prospectsData, rookiesData, isMlb }) {
   if (slots.length === 0) return null
   return (
     <div className="lineupteam">
@@ -100,7 +101,7 @@ function LineupTeam({ name, slots, prospectsData, rookiesData }) {
                   <LineupName key={i} entry={e} />
                 ))}
                 <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
-                <RookiePill active={isActiveRookie(rookiesData, cur.id)} />
+                <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
               </span>
               <span className="lineupcard__meta">
                 {cur.jersey ? (

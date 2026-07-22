@@ -18,7 +18,7 @@ import { BallparkModal } from '../components/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
 import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
-import { isActiveRookie, hasDebuted } from '../api/rookies.js'
+import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -574,7 +574,7 @@ function TeamSections({
                   </PlayerLink>
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                   <MilestonePill text={milestoneTextFor(callouts, p.id)} />
-                  <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                  <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                   <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                   <RadarPill
                     entry={radarEntryFor(feverRadarData, p.id)}
@@ -606,7 +606,7 @@ function TeamSections({
                             {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                          <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                           <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                           <RadarPill
                             entry={radarEntryFor(feverRadarData, p.id)}
@@ -634,7 +634,7 @@ function TeamSections({
                             {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                          <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                           <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
@@ -656,7 +656,7 @@ function TeamSections({
                             {p.name}
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                          <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                           <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
@@ -740,7 +740,7 @@ function OpposingStarterCard({
               </PlayerLink>
               <ProspectPill {...prospectBadge(prospectsData, pitcher.id)} />
               <MilestonePill text={milestoneTextFor(callouts, pitcher.id)} />
-              <RookiePill active={isActiveRookie(rookiesData, pitcher.id)} />
+              <RookiePill active={showRookiePill(rookiesData, pitcher.id, isMlb)} />
               <DebutPill debuted={!isMlb && hasDebuted(rookiesData, pitcher.id)} />
             </span>
             <span className="startercard__badges">
