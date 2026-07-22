@@ -10,6 +10,8 @@ import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { SectionMasthead } from '../components/SectionMasthead.jsx'
+import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
 import { teamAbbr } from '../lib/teams.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
@@ -22,10 +24,13 @@ import { teamAbbr } from '../lib/teams.js'
 //
 // Each player leaderboard features its #1 entry as a headshot card (same
 // `.shot`/`.tlead__featured` idiom TeamLeaders uses elsewhere — see
-// FoulFeatured below) with ranks 2+ as a plain ledger table beneath; Single-
-// Game Highs is a different kind of content (one specific game, not a
-// ranking) so every row gets the fuller headshot + date/opponent/PA/pitches
-// treatment instead (see SingleGameHighs below).
+// FoulFeatured below) with ranks 2+ as a plain ledger table beneath. Single-
+// Game Highs and Most-Fouls-In-A-PA are different — a specific STORY, not a
+// ranking — so every row there gets the fuller headshot + narrated-context
+// treatment (see FoulStoryBoard below); the PA board's context is rich enough
+// (inning/outs/runners/score/pitcher) to earn its own scorebug widget rather
+// than a sentence (see PaScorebug). Every board wears the same navy/gold
+// SectionMasthead the rest of the app's card sections use.
 //
 // Deliberately a wide spread of angles — this page is the trial balloon for
 // which foul stats stick (see .scratch/metric-engines/foul-tracker.md).
@@ -45,7 +50,7 @@ export function FoulTrackerPage() {
         <h1 className="topbar__title">Foul Tracker</h1>
       </header>
 
-      <p className="hint">
+      <p className="hint foultracker__intro">
         {data?.season ?? 'This'} season’s foul balls, counted from every MLB game’s
         pitch-by-pitch{data?.gamesIngested ? ` (${data.gamesIngested} games so far)` : ''}.
         Fouls hit <em>at</em> two strikes are tracked separately — they’re the ones that
@@ -93,7 +98,7 @@ export function FoulTrackerPage() {
             note="The most foul balls a batter has fought off in a single at-bat this season."
             rows={boards.paHighs}
             value={(b) => b.bestPa.fouls}
-            summary={(b) => paHighSummary(b.bestPa)}
+            bug={(b) => <PaScorebug pa={b.bestPa} />}
           />
 
           <FoulLeaderBoard
@@ -153,6 +158,22 @@ function buildBoards(data) {
   }
 }
 
+// Every board on this page wears the same navy/gold masthead the rest of the
+// app's card sections use (Lineup Strength, Bullpen Tonight, batting order,
+// …) — the container owns the border/radius/shadow, the masthead caps it,
+// same convention as those.
+function BoardCard({ title, note, children }) {
+  return (
+    <section className="metriccard foulboard-block">
+      <SectionMasthead as="h2" title={title} />
+      <div className="metriccard__body">
+        {note && <p className="foulboard__note--body">{note}</p>}
+        {children}
+      </div>
+    </section>
+  )
+}
+
 // The rank-1 entry rendered as a headshot card — same `.shot`/`.tlead__cat`
 // idiom TeamLeaders' FeaturedLeader uses (see src/CLAUDE.md's design-system
 // notes), reused directly rather than reinvented, so a photo on this page
@@ -206,11 +227,7 @@ function FoulLeaderBoard({ title, note, rows, cols, cells, featured = false }) {
   const rest = featured ? rows.slice(1) : rows
   const rankOffset = featured ? 2 : 1
   return (
-    <div className="foulboard-block">
-      <h2 className="foulboard__caption foulboard-block__title">
-        {title}
-        {note ? <span className="foulboard__note"> {note}</span> : null}
-      </h2>
+    <BoardCard title={title} note={note}>
       {lead && <FoulFeatured player={lead} cols={cols} cells={cells} />}
       {rest.length > 0 && (
         <div className="ledger-wrap">
@@ -240,7 +257,7 @@ function FoulLeaderBoard({ title, note, rows, cols, cells, featured = false }) {
           </table>
         </div>
       )}
-    </div>
+    </BoardCard>
   )
 }
 
@@ -267,36 +284,58 @@ function gameHighSummary(b) {
   return parts.join(' · ')
 }
 
-// The single most-fouled AT-BAT of the season: the setting first (inning,
-// outs, runners, score — all as of the pitch that STARTED the at-bat, not
-// wherever it ended up), then who was on the mound, then the result.
-function paHighSummary(pa) {
-  const half = pa.half === 'top' ? 'Top' : 'Bottom'
-  const outsLabel = pa.outs === 1 ? '1 out' : `${pa.outs ?? 0} outs`
-  const runners = [pa.onFirst && '1st', pa.onSecond && '2nd', pa.onThird && '3rd'].filter(Boolean)
-  const scene = [`${half} ${ordinal(pa.inning)}`, outsLabel, runners.length ? `${runners.join('-')} on` : 'bases empty']
-
+// A compact scorebug for the single most-fouled AT-BAT of the season — the
+// same information a broadcast graphic would carry: both teams' score, the
+// inning, the base/out state ENTERING the at-bat (see gen-fouls.mjs's header
+// comment on why that's the PRIOR play's post-state), who was on the mound,
+// and how the at-bat actually ended.
+function PaScorebug({ pa }) {
   const hisScore = pa.half === 'top' ? pa.awayScore : pa.homeScore
   const oppScore = pa.half === 'top' ? pa.homeScore : pa.awayScore
-
-  const parts = [scene.join(', ')]
-  if (hisScore != null && oppScore != null) {
-    parts.push(`${teamAbbr({ id: pa.battingTeamId })} ${hisScore}, ${teamAbbr({ id: pa.opponentId })} ${oppScore}`)
-  }
-  if (pa.pitcherName) parts.push(`vs ${pa.pitcherName}`)
-
-  const story = parts.join(' · ')
-  return pa.resultEvent ? `${story} — ${pa.resultEvent}` : story
+  const outs = pa.outs ?? 0
+  return (
+    <div className="scorebug">
+      <div className="scorebug__score">
+        <span className="scorebug__team scorebug__team--his">
+          <TeamLogo teamId={pa.battingTeamId} name={teamAbbr({ id: pa.battingTeamId })} size={16} />
+          {teamAbbr({ id: pa.battingTeamId })}
+          <b>{hisScore}</b>
+        </span>
+        <span className="scorebug__team">
+          <TeamLogo teamId={pa.opponentId} name={teamAbbr({ id: pa.opponentId })} size={16} />
+          {teamAbbr({ id: pa.opponentId })}
+          <b>{oppScore}</b>
+        </span>
+        <span className="scorebug__inning">
+          <span className={`scorebug__arrow ${pa.half === 'top' ? 'is-top' : 'is-bottom'}`} aria-hidden="true">
+            {pa.half === 'top' ? '▲' : '▼'}
+          </span>
+          {ordinal(pa.inning)}
+        </span>
+      </div>
+      <div className="scorebug__situation">
+        <span className="scorebug__outs" role="img" aria-label={`${outs} ${outs === 1 ? 'out' : 'outs'}`}>
+          {[0, 1, 2].map((i) => (
+            <span key={i} className={`scorebug__outdot ${i < outs ? 'is-out' : ''}`} />
+          ))}
+        </span>
+        <DiamondGlyph size={20} bases={[!!pa.onFirst, !!pa.onSecond, !!pa.onThird]} />
+        <span className="scorebug__pitcher">
+          vs {pa.pitcherId ? <PlayerLink id={pa.pitcherId}>{pa.pitcherName}</PlayerLink> : pa.pitcherName}
+        </span>
+      </div>
+      {pa.resultEvent && <span className="scorebug__result">{pa.resultEvent}</span>}
+    </div>
+  )
 }
 
-function FoulStoryBoard({ title, note, rows, value, summary }) {
+// `bug`, when given, renders a rich node (PaScorebug) below the header row
+// INSTEAD of a plain-language `summary` sentence — used only where the
+// situational data is rich enough to earn a visual widget.
+function FoulStoryBoard({ title, note, rows, value, summary, bug }) {
   if (!rows || rows.length === 0) return null
   return (
-    <div className="foulboard-block">
-      <h2 className="foulboard__caption foulboard-block__title">
-        {title}
-        {note ? <span className="foulboard__note"> {note}</span> : null}
-      </h2>
+    <BoardCard title={title} note={note}>
       <ol className="sgh-list">
         {rows.map((b) => (
           <li className="sgh-row" key={b.id}>
@@ -312,12 +351,12 @@ function FoulStoryBoard({ title, note, rows, value, summary }) {
                   <span className="sgh-vallabel">Fouls</span>
                 </span>
               </div>
-              <div className="sgh-sub">{summary(b)}</div>
+              {bug ? bug(b) : <div className="sgh-sub">{summary(b)}</div>}
             </div>
           </li>
         ))}
       </ol>
-    </div>
+    </BoardCard>
   )
 }
 
@@ -329,48 +368,45 @@ function ByInning({ league }) {
   if (rows.length === 0) return null
   const max = Math.max(...rows.map((r) => (r.pitches > 0 ? r.fouls / r.pitches : 0)))
   return (
-    <div className="ledger-wrap">
-      <table className="standings foulboard">
-        <caption className="foulboard__caption">
-          Foul rate by inning
-          <span className="foulboard__note">
-            {' '}
-            Share of pitches fouled off, and how it splits against starters vs. bullpen
-            arms. Innings ten and beyond fold into the last row.
-          </span>
-        </caption>
-        <thead>
-          <tr>
-            <th className="team">Inning</th>
-            <th className="foulboard__barcol" aria-hidden="true"></th>
-            <th>All</th>
-            <th>Starters</th>
-            <th>Bullpen</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => {
-            const rate = r.pitches > 0 ? r.fouls / r.pitches : 0
-            const sp = r.vsStarter?.pitches > 0 ? r.vsStarter.fouls / r.vsStarter.pitches : null
-            const rp = r.vsReliever?.pitches > 0 ? r.vsReliever.fouls / r.vsReliever.pitches : null
-            return (
-              <tr key={r.inning}>
-                <td className="team">{r.inning >= 10 ? '10+' : r.inning}</td>
-                <td className="foulboard__barcol">
-                  <span
-                    className="foulboard__bar"
-                    style={{ width: max > 0 ? `${(rate / max) * 100}%` : 0 }}
-                  />
-                </td>
-                <td>{pct1(rate)}</td>
-                <td>{sp == null ? '—' : pct1(sp)}</td>
-                <td>{rp == null ? '—' : pct1(rp)}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+    <BoardCard
+      title="Foul rate by inning"
+      note="Share of pitches fouled off, and how it splits against starters vs. bullpen arms. Innings ten and beyond fold into the last row."
+    >
+      <div className="ledger-wrap">
+        <table className="standings foulboard">
+          <thead>
+            <tr>
+              <th className="team">Inning</th>
+              <th className="foulboard__barcol" aria-hidden="true"></th>
+              <th>All</th>
+              <th>Starters</th>
+              <th>Bullpen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const rate = r.pitches > 0 ? r.fouls / r.pitches : 0
+              const sp = r.vsStarter?.pitches > 0 ? r.vsStarter.fouls / r.vsStarter.pitches : null
+              const rp = r.vsReliever?.pitches > 0 ? r.vsReliever.fouls / r.vsReliever.pitches : null
+              return (
+                <tr key={r.inning}>
+                  <td className="team">{r.inning >= 10 ? '10+' : r.inning}</td>
+                  <td className="foulboard__barcol">
+                    <span
+                      className="foulboard__bar"
+                      style={{ width: max > 0 ? `${(rate / max) * 100}%` : 0 }}
+                    />
+                  </td>
+                  <td>{pct1(rate)}</td>
+                  <td>{sp == null ? '—' : pct1(sp)}</td>
+                  <td>{rp == null ? '—' : pct1(rp)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </BoardCard>
   )
 }
 
@@ -381,64 +417,60 @@ function ByPitchType({ league }) {
     .sort((a, b) => b.rate - a.rate)
   if (rows.length === 0) return null
   return (
-    <div className="ledger-wrap">
-      <table className="standings foulboard">
-        <caption className="foulboard__caption">
-          Foul rate by pitch type
-          <span className="foulboard__note"> Which pitches get spoiled the most.</span>
-        </caption>
-        <thead>
-          <tr>
-            <th className="team">Pitch</th>
-            <th>Foul%</th>
-            <th>Pitches</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.code}>
-              <td className="team">{r.description || r.code}</td>
-              <td>{pct1(r.rate)}</td>
-              <td>{r.pitches}</td>
+    <BoardCard title="Foul rate by pitch type" note="Which pitches get spoiled the most.">
+      <div className="ledger-wrap">
+        <table className="standings foulboard">
+          <thead>
+            <tr>
+              <th className="team">Pitch</th>
+              <th>Foul%</th>
+              <th>Pitches</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.code}>
+                <td className="team">{r.description || r.code}</td>
+                <td>{pct1(r.rate)}</td>
+                <td>{r.pitches}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </BoardCard>
   )
 }
 
 function TeamBoard({ teams }) {
   if (!teams || teams.length === 0) return null
   return (
-    <div className="ledger-wrap">
-      <table className="standings foulboard">
-        <caption className="foulboard__caption">
-          Team fouls per game
-          <span className="foulboard__note"> Fouls hit by each club’s batters.</span>
-        </caption>
-        <thead>
-          <tr>
-            <th className="team">Team</th>
-            <th>Per game</th>
-            <th>Fouls</th>
-            <th>2-Str</th>
-          </tr>
-        </thead>
-        <tbody>
-          {teams.map((t, i) => (
-            <tr key={t.id}>
-              <td className="team">
-                <span className="umprank__rank">{i + 1}</span>
-                {teamAbbr({ id: t.id })}
-              </td>
-              <td>{(t.fouls / t.g).toFixed(1)}</td>
-              <td>{t.fouls}</td>
-              <td>{t.twoStrikeFouls}</td>
+    <BoardCard title="Team fouls per game" note="Fouls hit by each club’s batters.">
+      <div className="ledger-wrap">
+        <table className="standings foulboard">
+          <thead>
+            <tr>
+              <th className="team">Team</th>
+              <th>Per game</th>
+              <th>Fouls</th>
+              <th>2-Str</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {teams.map((t, i) => (
+              <tr key={t.id}>
+                <td className="team">
+                  <span className="umprank__rank">{i + 1}</span>
+                  {teamAbbr({ id: t.id })}
+                </td>
+                <td>{(t.fouls / t.g).toFixed(1)}</td>
+                <td>{t.fouls}</td>
+                <td>{t.twoStrikeFouls}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </BoardCard>
   )
 }
