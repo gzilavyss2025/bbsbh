@@ -53,6 +53,22 @@ Then classify the task:
   reports any stale ones (branch already merged, or worktree deleted) at the
   start of every local session; run the `/clean-dev-servers` skill to review
   and kill them interactively.
+
+  The worktrees themselves accumulate the same way, and for the same reason:
+  merging a PR doesn't remove the local worktree it was written in. Left alone
+  they pile up — 48 of them by 2026-07, 41 already merged, each holding its own
+  ~14.5k-file `node_modules`. `session-start.sh` reports stale ones every local
+  session (`scripts/worktrees.mjs`); run the `/clean-worktrees` skill to review
+  and remove them interactively. Clear them a couple at a time as PRs land:
+  removal costs a few seconds each, so a large backlog is slow enough to exceed
+  a command timeout mid-sweep.
+
+## Starting a day
+
+The maintainer's routine is a fresh session and the `/start-day` skill, before
+any other prompt: it fetches, fast-forwards `main`, reports stale worktrees and
+dev servers, lists open PRs, and checks that the overnight data cron actually
+ran. It reports and asks; it never removes, pushes, or deploys on its own.
 - **Task that depends on an open PR:** identify the exact PR and head branch first.
   Base the new branch on `origin/<that-head-branch>` only when the dependency is
   intentional, and record that dependency in the new PR and final handoff. Do not

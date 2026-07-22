@@ -60,4 +60,16 @@ else
   if [ -f scripts/dev-servers.mjs ]; then
     node scripts/dev-servers.mjs || true
   fi
+
+  # --- Stale worktree report (local sessions only) -----------------------
+  # Same shape as the dev-server check above, and for the same reason: nothing
+  # in the branch → PR → merge flow removes a worktree once its PR lands, so
+  # they pile up silently (48 of them, 41 already merged, by 2026-07). Each
+  # holds its own ~14.5k-file node_modules, so a big backlog is slow to clear;
+  # surfacing it every session keeps it to one or two at a time. Reports only
+  # (--brief, and silent when there's nothing stale) — see
+  # .claude/skills/clean-worktrees.md for the interactive cleanup that acts.
+  if [ -f scripts/worktrees.mjs ]; then
+    node scripts/worktrees.mjs --brief || true
+  fi
 fi
