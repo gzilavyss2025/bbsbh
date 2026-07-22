@@ -65,7 +65,8 @@ async function getJson(path) {
 // No network, no DB — a pure function of the feed, so a synthetic fixture can
 // drive the exact counting rules. Shape:
 //   { batters:  Map personId -> { name, teamId, pa, pitchesSeen, fouls,
-//                                 twoStrikeFouls, gameFouls },
+//                                 twoStrikeFouls, gameFouls, opponentId,
+//                                 bestPaFouls, bestPa },
 //     pitchers: Map personId -> { name, teamId, pitches, fouls, whiffs, isStarter },
 //     teams:    Map teamId   -> { fouls, twoStrikeFouls },
 //     innings:  Map inning   -> { pitches, fouls, pitchesVsStarter, foulsVsStarter,
@@ -88,7 +89,10 @@ export function aggregateGameFouls(feed) {
   const getBatter = (id, name, teamId) => {
     let b = batters.get(id)
     if (!b) {
-      b = { name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, twoStrikeFouls: 0, gameFouls: 0 }
+      b = {
+        name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, twoStrikeFouls: 0, gameFouls: 0,
+        opponentId: null, bestPaFouls: 0, bestPa: null, gameHisScore: null, gameOppScore: null,
+      }
       batters.set(id, b)
     } else {
       if (name) b.name = name
@@ -136,13 +140,55 @@ export function aggregateGameFouls(feed) {
 
   // Pre-pitch strike count carried across pitches and across a non-PA play into
   // the same batter's resumed at-bat — identical to derive.js's carry logic.
+  // carryPaFouls/carryPaContext do the same for the Most-Fouls-In-A-PA board:
+  // a foul (or the entering situational snapshot) hit before a mid-AB
+  // interruption still belongs to the SAME plate appearance once it resumes.
   let carryBatter = null
   let carryStrikes = 0
+  let carryPaFouls = 0
+  let carryPaContext = null
+
+  // Running per-half-inning game state, always advanced to the play's OWN
+  // (POST-play) outs/runners/score before that play is otherwise processed —
+  // same off-by-one convention as the pitch-level count (see module header) —
+  // so each play's "entering" snapshot, captured below BEFORE this advance,
+  // is the state that PA actually started in. Outs/runners reset at every
+  // half-inning boundary; the score does not.
+  let outsEntering = 0
+  let onFirst = false
+  let onSecond = false
+  let onThird = false
+  let awayScore = 0
+  let homeScore = 0
+  let lastHalfKey = null
 
   for (const play of plays) {
     const inningNum = play?.about?.inning
     const half = play?.about?.halfInning
     if (!inningNum || !half) continue
+
+    const halfKey = `${inningNum}-${half}`
+    if (halfKey !== lastHalfKey) {
+      outsEntering = 0
+      onFirst = false
+      onSecond = false
+      onThird = false
+      lastHalfKey = halfKey
+    }
+    const enteringOuts = outsEntering
+    const enteringOnFirst = onFirst
+    const enteringOnSecond = onSecond
+    const enteringOnThird = onThird
+    const enteringAway = awayScore
+    const enteringHome = homeScore
+    // Advance the trackers for every play (even a zero-pitch one below), so a
+    // later play's "entering" snapshot is never stale.
+    if (Number.isFinite(play.count?.outs)) outsEntering = play.count.outs
+    onFirst = !!play.matchup?.postOnFirst
+    onSecond = !!play.matchup?.postOnSecond
+    onThird = !!play.matchup?.postOnThird
+    if (Number.isFinite(play.result?.awayScore)) awayScore = play.result.awayScore
+    if (Number.isFinite(play.result?.homeScore)) homeScore = play.result.homeScore
 
     const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
     if (pitchEvents.length === 0) continue
@@ -161,12 +207,31 @@ export function aggregateGameFouls(feed) {
     const b = batterId != null ? getBatter(batterId, play.matchup?.batter?.fullName ?? '', battingTeamId) : null
     const p = pitcherId != null ? getPitcher(pitcherId, play.matchup?.pitcher?.fullName ?? '', fieldingTeamId) : null
     if (p && vsStarter) p.isStarter = true // he is his team's first pitcher this game
+    // A batter's own team can't change mid-game, so the opponent he faced is the
+    // same every time we touch him this game — just keep (re)setting it.
+    if (b) b.opponentId = fieldingTeamId
     const team = battingTeamId != null ? getTeam(battingTeamId) : null
     const inn = getInning(Math.min(inningNum, MAX_INNING_BUCKET))
 
     if (isPA && b) b.pa += 1
 
-    let preStrikes = batterId != null && batterId === carryBatter ? carryStrikes : 0
+    // A NEW plate appearance (not a resumed one) is where the "entering"
+    // snapshot for this PA gets fixed — carried through any mid-AB
+    // interruption via carryPaContext, same idea as carryStrikes.
+    const isNewPa = batterId == null || batterId !== carryBatter
+    const paContextEntering = isNewPa
+      ? {
+          outs: enteringOuts,
+          onFirst: enteringOnFirst,
+          onSecond: enteringOnSecond,
+          onThird: enteringOnThird,
+          awayScore: enteringAway,
+          homeScore: enteringHome,
+        }
+      : carryPaContext
+
+    let preStrikes = isNewPa ? 0 : carryStrikes
+    let paFouls = isNewPa ? 0 : carryPaFouls
 
     for (const e of pitchEvents) {
       const code = pitchCallCode(e)
@@ -206,20 +271,50 @@ export function aggregateGameFouls(feed) {
           if (b) b.twoStrikeFouls += 1
           if (team) team.twoStrikeFouls += 1
         }
+        paFouls += 1
       }
 
       preStrikes = e.count?.strikes ?? preStrikes
     }
 
-    // A non-PA play's batter resumes with his count intact in a later play; a
-    // completed PA resets the carry (mirrors derive.js).
+    // A non-PA play's batter resumes with his count (and PA-foul tally +
+    // entering snapshot) intact in a later play; a completed PA resets every
+    // carry (mirrors derive.js) and, if it beats this GAME's best so far,
+    // records the plate appearance's full context — a season-wide max is
+    // resolved later by the SQL upsert's CASE guard, same as max_game_fouls.
     if (!isPA) {
       carryBatter = batterId
       carryStrikes = preStrikes
+      carryPaFouls = paFouls
+      carryPaContext = paContextEntering
     } else {
       carryBatter = null
       carryStrikes = 0
+      carryPaFouls = 0
+      carryPaContext = null
+      if (b && paFouls > b.bestPaFouls) {
+        b.bestPaFouls = paFouls
+        b.bestPa = {
+          pitcherId,
+          pitcherName: p?.name ?? play.matchup?.pitcher?.fullName ?? '',
+          resultEvent: play.result?.event ?? '',
+          resultType: play.result?.eventType ?? '',
+          inning: inningNum,
+          half,
+          battingTeamId,
+          opponentId: fieldingTeamId,
+          ...paContextEntering,
+        }
+      }
     }
+  }
+
+  // Final score, oriented to "his"/"opp" rather than home/away so the UI never
+  // has to re-derive which side a batter's team was — his team can't change
+  // mid-game, so teamId vs. awayId/homeId settles it once per batter.
+  for (const [, b] of batters) {
+    b.gameHisScore = b.teamId === awayId ? awayScore : homeScore
+    b.gameOppScore = b.teamId === awayId ? homeScore : awayScore
   }
 
   return { batters, pitchers, teams, innings, pitchTypes }
@@ -230,8 +325,9 @@ const upsertBatter = (db) =>
   db.prepare(
     `INSERT INTO foul_batter_totals
        (person_id, season, name, team_id, games, pa, pitches_seen, fouls,
-        two_strike_fouls, max_game_fouls, max_game_pk)
-     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+        two_strike_fouls, max_game_fouls, max_game_pk, max_game_pa,
+        max_game_pitches, max_game_opp_id, max_game_his_score, max_game_opp_score)
+     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id) DO UPDATE SET
        season = excluded.season,
        name = excluded.name,
@@ -244,7 +340,63 @@ const upsertBatter = (db) =>
        max_game_fouls = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
                              THEN excluded.max_game_fouls ELSE foul_batter_totals.max_game_fouls END,
        max_game_pk = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
-                          THEN excluded.max_game_pk ELSE foul_batter_totals.max_game_pk END`,
+                          THEN excluded.max_game_pk ELSE foul_batter_totals.max_game_pk END,
+       max_game_pa = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_pa ELSE foul_batter_totals.max_game_pa END,
+       max_game_pitches = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_pitches ELSE foul_batter_totals.max_game_pitches END,
+       max_game_opp_id = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_opp_id ELSE foul_batter_totals.max_game_opp_id END,
+       max_game_his_score = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_his_score ELSE foul_batter_totals.max_game_his_score END,
+       max_game_opp_score = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_opp_score ELSE foul_batter_totals.max_game_opp_score END`,
+  )
+
+// Every column beyond `fouls` rides the SAME CASE guard (excluded.fouls >
+// the stored fouls) since they all describe the ONE plate appearance the
+// fouls count belongs to — a season-wide max resolved the same way
+// max_game_fouls is, just with a whole context object instead of a lone int.
+const upsertBatterPaHigh = (db) =>
+  db.prepare(
+    `INSERT INTO foul_batter_pa_high
+       (person_id, fouls, game_pk, pitcher_id, pitcher_name, result_event,
+        result_type, inning, half, outs, on_first, on_second, on_third,
+        away_score, home_score, batting_team_id, opponent_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(person_id) DO UPDATE SET
+       fouls = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                    THEN excluded.fouls ELSE foul_batter_pa_high.fouls END,
+       game_pk = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                      THEN excluded.game_pk ELSE foul_batter_pa_high.game_pk END,
+       pitcher_id = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                         THEN excluded.pitcher_id ELSE foul_batter_pa_high.pitcher_id END,
+       pitcher_name = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                           THEN excluded.pitcher_name ELSE foul_batter_pa_high.pitcher_name END,
+       result_event = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                           THEN excluded.result_event ELSE foul_batter_pa_high.result_event END,
+       result_type = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                          THEN excluded.result_type ELSE foul_batter_pa_high.result_type END,
+       inning = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                     THEN excluded.inning ELSE foul_batter_pa_high.inning END,
+       half = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                   THEN excluded.half ELSE foul_batter_pa_high.half END,
+       outs = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                   THEN excluded.outs ELSE foul_batter_pa_high.outs END,
+       on_first = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                       THEN excluded.on_first ELSE foul_batter_pa_high.on_first END,
+       on_second = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                        THEN excluded.on_second ELSE foul_batter_pa_high.on_second END,
+       on_third = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                       THEN excluded.on_third ELSE foul_batter_pa_high.on_third END,
+       away_score = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                         THEN excluded.away_score ELSE foul_batter_pa_high.away_score END,
+       home_score = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                         THEN excluded.home_score ELSE foul_batter_pa_high.home_score END,
+       batting_team_id = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                              THEN excluded.batting_team_id ELSE foul_batter_pa_high.batting_team_id END,
+       opponent_id = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                          THEN excluded.opponent_id ELSE foul_batter_pa_high.opponent_id END`,
   )
 
 const upsertPitcher = (db) =>
@@ -314,7 +466,18 @@ async function ingestGame(db, stmts, gamePk, date, season) {
   db.exec('BEGIN')
   try {
     for (const [id, b] of agg.batters) {
-      stmts.batter.run(id, season, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls, b.gameFouls, gamePk)
+      stmts.batter.run(
+        id, season, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
+        b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId, b.gameHisScore, b.gameOppScore,
+      )
+      if (b.bestPa) {
+        const pa = b.bestPa
+        stmts.batterPaHigh.run(
+          id, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
+          pa.resultType, pa.inning, pa.half, pa.outs, pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0,
+          pa.onThird ? 1 : 0, pa.awayScore, pa.homeScore, pa.battingTeamId, pa.opponentId,
+        )
+      }
     }
     for (const [id, p] of agg.pitchers) {
       stmts.pitcher.run(id, season, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
@@ -343,8 +506,19 @@ export function exportFouls(db) {
   const seasonRow = db.prepare('SELECT season FROM foul_batter_totals LIMIT 1').get()
   const season = seasonRow?.season ?? (Number((coverageSince ?? '').slice(0, 4)) || null)
 
+  // gamePk -> officialDate, so a batter's max-game record can carry a date
+  // without duplicating it onto every row (foul_ingested_games already has it).
+  const dateByGamePk = new Map(
+    db.prepare('SELECT game_pk, date FROM foul_ingested_games').all().map((r) => [r.game_pk, r.date]),
+  )
+
+  const paHighByPerson = new Map(
+    db.prepare('SELECT * FROM foul_batter_pa_high WHERE fouls > 0').all().map((r) => [r.person_id, r]),
+  )
+
   const batters = {}
   for (const r of db.prepare('SELECT * FROM foul_batter_totals').all()) {
+    const pa = paHighByPerson.get(r.person_id)
     batters[r.person_id] = {
       name: r.name,
       teamId: r.team_id,
@@ -355,6 +529,33 @@ export function exportFouls(db) {
       twoStrikeFouls: r.two_strike_fouls,
       maxGameFouls: r.max_game_fouls,
       maxGamePk: r.max_game_pk,
+      maxGamePa: r.max_game_pa,
+      maxGamePitches: r.max_game_pitches,
+      maxGameOpponentId: r.max_game_opp_id,
+      maxGameHisScore: r.max_game_his_score,
+      maxGameOppScore: r.max_game_opp_score,
+      maxGameDate: r.max_game_pk != null ? (dateByGamePk.get(r.max_game_pk) ?? null) : null,
+      bestPa: pa
+        ? {
+            fouls: pa.fouls,
+            gamePk: pa.game_pk,
+            date: dateByGamePk.get(pa.game_pk) ?? null,
+            pitcherId: pa.pitcher_id,
+            pitcherName: pa.pitcher_name,
+            resultEvent: pa.result_event,
+            resultType: pa.result_type,
+            inning: pa.inning,
+            half: pa.half,
+            outs: pa.outs,
+            onFirst: !!pa.on_first,
+            onSecond: !!pa.on_second,
+            onThird: !!pa.on_third,
+            awayScore: pa.away_score,
+            homeScore: pa.home_score,
+            battingTeamId: pa.batting_team_id,
+            opponentId: pa.opponent_id,
+          }
+        : null,
     }
   }
 
@@ -442,6 +643,7 @@ async function main() {
   const db = await openDb()
   const stmts = {
     batter: upsertBatter(db),
+    batterPaHigh: upsertBatterPaHigh(db),
     pitcher: upsertPitcher(db),
     team: upsertTeam(db),
     inning: upsertInning(db),

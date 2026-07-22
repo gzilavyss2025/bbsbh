@@ -137,18 +137,65 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- non-PA play, since a pitch event's own `count` is the count AFTER the pitch.
 -- `max_game_fouls`/`max_game_pk` track his single-game high, updated only when a
 -- game exceeds the stored max (so it converges regardless of ingest order).
+-- `max_game_pa`/`max_game_pitches` are that SAME game's PA/pitches-seen totals
+-- (not season figures) — cheap to carry along since aggregateGameFouls already
+-- computes them per game; `max_game_opp_id` is the opposing team he faced that
+-- game (his own team doesn't change mid-game, so it's captured once).
+-- `max_game_his_score`/`max_game_opp_score` are that game's FINAL score (not an
+-- entering-the-PA snapshot the way foul_batter_pa_high's are) — his team's and
+-- the opponent's, already oriented so the UI never has to re-derive home/away
+-- from a team id. Together with a join against foul_ingested_games.date at
+-- export time, these let the Single-Game Highs board show "when / against
+-- whom / final score / how much work" without a separate lookup.
 CREATE TABLE IF NOT EXISTS foul_batter_totals (
-  person_id        INTEGER PRIMARY KEY,
-  season           INTEGER NOT NULL,
-  name             TEXT NOT NULL,
-  team_id          INTEGER,
-  games            INTEGER NOT NULL DEFAULT 0,
-  pa               INTEGER NOT NULL DEFAULT 0,
-  pitches_seen     INTEGER NOT NULL DEFAULT 0,
-  fouls            INTEGER NOT NULL DEFAULT 0,
-  two_strike_fouls INTEGER NOT NULL DEFAULT 0,
-  max_game_fouls   INTEGER NOT NULL DEFAULT 0,
-  max_game_pk      INTEGER
+  person_id          INTEGER PRIMARY KEY,
+  season             INTEGER NOT NULL,
+  name               TEXT NOT NULL,
+  team_id            INTEGER,
+  games              INTEGER NOT NULL DEFAULT 0,
+  pa                 INTEGER NOT NULL DEFAULT 0,
+  pitches_seen       INTEGER NOT NULL DEFAULT 0,
+  fouls              INTEGER NOT NULL DEFAULT 0,
+  two_strike_fouls   INTEGER NOT NULL DEFAULT 0,
+  max_game_fouls     INTEGER NOT NULL DEFAULT 0,
+  max_game_pk        INTEGER,
+  max_game_pa        INTEGER NOT NULL DEFAULT 0,
+  max_game_pitches   INTEGER NOT NULL DEFAULT 0,
+  max_game_opp_id    INTEGER,
+  max_game_his_score INTEGER,
+  max_game_opp_score INTEGER
+);
+
+-- The single most-fouled PLATE APPEARANCE a batter has had all season (as
+-- opposed to foul_batter_totals' max_game_* columns, which are a whole
+-- GAME's total). Separate table, not more columns on foul_batter_totals,
+-- since this carries the full situational context of one at-bat — who was
+-- on the mound, the result, and the score/inning/outs/runners entering it —
+-- for the Foul Tracker's "Most fouls in one plate appearance" board.
+-- `outs`/`on_first`/`on_second`/`on_third`/`away_score`/`home_score` are all
+-- the state ENTERING the plate appearance (aggregateGameFouls captures them
+-- before that play's own result updates the running game-state trackers —
+-- see its header comment). `fouls` is compared the same CASE-guarded way as
+-- max_game_fouls above, so it converges regardless of ingest order; a row
+-- exists only for a batter who has fouled off at least one pitch in some PA.
+CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
+  person_id       INTEGER PRIMARY KEY,
+  fouls           INTEGER NOT NULL DEFAULT 0,
+  game_pk         INTEGER,
+  pitcher_id      INTEGER,
+  pitcher_name    TEXT,
+  result_event    TEXT,
+  result_type     TEXT,
+  inning          INTEGER,
+  half            TEXT,
+  outs            INTEGER,
+  on_first        INTEGER NOT NULL DEFAULT 0,
+  on_second       INTEGER NOT NULL DEFAULT 0,
+  on_third        INTEGER NOT NULL DEFAULT 0,
+  away_score      INTEGER,
+  home_score      INTEGER,
+  batting_team_id INTEGER,
+  opponent_id     INTEGER
 );
 
 -- Fouls surrendered BY each pitcher, plus whiffs so the app can show the

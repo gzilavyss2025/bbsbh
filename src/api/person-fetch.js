@@ -47,6 +47,30 @@ export async function fetchPerson(personId) {
   }
 }
 
+// A batch of primary positions, keyed by person id ({ [id]: 'C' | 'SS' | ... }).
+// One request for however many ids a caller has (same batched-lookup idiom as
+// fetchGamesByPk) rather than a fetchPerson() per id — used where a board only
+// needs the position abbreviation, not a full bio (e.g. Foul Tracker's hero
+// cards). `fields=` trims the response to just id + primaryPosition, same
+// reasoning as the FIRST_*_FEED_FIELDS allowlists above. Degrades to {} on
+// failure or an empty id list — every caller already treats a missing entry
+// as "no position to show".
+const POSITIONS_FIELDS = 'people,id,primaryPosition,abbreviation'
+export async function fetchPositions(personIds) {
+  const list = [...new Set((personIds ?? []).filter(Boolean))]
+  if (!list.length) return {}
+  try {
+    const data = await getJson(`/api/v1/people?personIds=${list.join(',')}&fields=${POSITIONS_FIELDS}`)
+    const out = {}
+    for (const p of data.people ?? []) {
+      out[p.id] = p.primaryPosition?.abbreviation ?? ''
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
 // One stats bundle, parameterized by `type`
 // ('byDateRange' | 'career' | 'yearByYear' | 'statSplits' | 'gameLog') and
 // `group` ('hitting' | 'pitching'). Returns the RAW splits array — shaping and
