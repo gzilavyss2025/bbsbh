@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { fetchFouls } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'
+import { fetchPositions } from '../api/person-fetch.js'
+import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { monthDayYear, weekdayAbbr } from '../lib/dates.js'
@@ -10,6 +12,7 @@ import { useNav } from '../lib/nav.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
+import { TeamLink } from '../components/TeamLink.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
@@ -68,6 +71,22 @@ export function FoulTrackerPage() {
   )
   const { data: gameLinks } = useAsync(() => fetchGamesByPk(gameHighPks), [gameHighPks])
 
+  // The four leaderboards' #1 leaders get a hero card with a position under
+  // their name (see FoulFeatured) — the precompute has no position (it's
+  // aggregated purely from feed pitch/PA counts, not roster data), so a
+  // batched people lookup fills in just those handful of ids rather than
+  // adding position to every one of the hundreds of rows gen-fouls.mjs
+  // ingests. Degrades to {} on failure — FoulFeatured already treats a
+  // missing position as "don't show the position".
+  const featuredIds = useMemo(
+    () =>
+      [boards?.batterTotal?.[0], boards?.batterRate?.[0], boards?.pitcherRate?.[0], boards?.pitcherRateLow?.[0]]
+        .filter(Boolean)
+        .map((p) => p.id),
+    [boards],
+  )
+  const { data: positions } = useAsync(() => fetchPositions(featuredIds), [featuredIds])
+
   return (
     <div className="screen">
       <SiteHeader />
@@ -101,6 +120,7 @@ export function FoulTrackerPage() {
             cells={(b) => [b.fouls, (b.fouls / b.g).toFixed(1), b.twoStrikeFouls]}
             featured
             favoriteTeamId={favoriteTeamId}
+            positions={positions}
           />
           <FoulLeaderBoard
             title="Most fouls per game"
@@ -109,6 +129,7 @@ export function FoulTrackerPage() {
             cells={(b) => [(b.fouls / b.g).toFixed(2), b.fouls, b.twoStrikeFouls]}
             featured
             favoriteTeamId={favoriteTeamId}
+            positions={positions}
           />
 
           <GameHighBoard
@@ -137,6 +158,7 @@ export function FoulTrackerPage() {
             ]}
             featured
             favoriteTeamId={favoriteTeamId}
+            positions={positions}
           />
           <FoulLeaderBoard
             title="Fewest fouls — pitchers"
@@ -149,6 +171,7 @@ export function FoulTrackerPage() {
             ]}
             featured
             favoriteTeamId={favoriteTeamId}
+            positions={positions}
           />
 
           <ByInning league={boards.league} />
@@ -213,27 +236,41 @@ function BoardCard({ title, children }) {
   )
 }
 
-// The rank-1 entry rendered as a hero card — same headshot+name+logo top row
-// plus a three-tile stat strip idiom GameHighRow uses for Single-Game Highs
-// (`.gamehigh-tiles`/`.stat`, reused directly rather than reinvented), so
-// every board's #1 leader reads the same way. `cols`/`cells` are the SAME
+// The rank-1 entry rendered as a hero card — headshot, a two-line name (same
+// first/last split idiom as PlayerPage's/TeamLeaders' hero, see
+// splitDisplayName) with the team name underneath, a bigger centered team
+// logo, plus a three-tile stat strip idiom GameHighRow uses for Single-Game
+// Highs (`.gamehigh-tiles`/`.stat`, reused directly rather than reinvented),
+// so every board's #1 leader reads the same way. `cols`/`cells` are the SAME
 // descriptors the table beneath it uses — one tile per column — so a board's
 // shape only has to be described once.
-function FoulFeatured({ player, cols, cells, favoriteTeamId }) {
+function FoulFeatured({ player, cols, cells, favoriteTeamId, positions }) {
   const values = cells(player)
   const isFavorite = favoriteTeamId != null && player.teamId === favoriteTeamId
   const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(player.teamId) } : undefined
+  const { first, last } = splitDisplayName(player.name)
+  const position = positions?.[player.id]
   return (
     <div className={`foulboard__hero${isFavorite ? ' is-me' : ''}`} style={favStyle}>
       <div className="foulboard__herotop">
         <Headshot personId={player.id} name={player.name} teamId={player.teamId} className="foulboard__heroshot" />
-        <PlayerLink id={player.id} className="foulboard__heroname">
-          {player.name}
-        </PlayerLink>
+        <div className="foulboard__heroident">
+          <PlayerLink id={player.id} className="foulboard__heroname">
+            {first && <span className="foulboard__heroname-first">{first}</span>}
+            <span className="foulboard__heroname-last">{last}</span>
+          </PlayerLink>
+          <p className="foulboard__herometa">
+            {position && <span className="foulboard__heropos">{position}</span>}
+            {position && ' · '}
+            <TeamLink id={player.teamId} className="foulboard__heroteamname">
+              {teamFullName(player.teamId)}
+            </TeamLink>
+          </p>
+        </div>
         <TeamLogo
           teamId={player.teamId}
           name={teamAbbr({ id: player.teamId })}
-          size={28}
+          size={44}
           className="foulboard__heroteam"
         />
       </div>
@@ -252,14 +289,16 @@ function FoulFeatured({ player, cols, cells, favoriteTeamId }) {
 // `featured`: pulls rank 1 out into a FoulFeatured headshot card above the
 // table, which then starts numbering at 2 — the featured card IS his row, so
 // the table never shows him twice.
-function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteTeamId }) {
+function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteTeamId, positions }) {
   if (!rows || rows.length === 0) return null
   const lead = featured ? rows[0] : null
   const rest = featured ? rows.slice(1) : rows
   const rankOffset = featured ? 2 : 1
   return (
     <BoardCard title={title}>
-      {lead && <FoulFeatured player={lead} cols={cols} cells={cells} favoriteTeamId={favoriteTeamId} />}
+      {lead && (
+        <FoulFeatured player={lead} cols={cols} cells={cells} favoriteTeamId={favoriteTeamId} positions={positions} />
+      )}
       {rest.length > 0 && (
         <div className="ledger-wrap">
           <table className="standings foulboard">
@@ -276,7 +315,7 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
                 <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
                   <td className="team">
                     <span className="umprank__rank">{i + rankOffset}</span>
-                    <PlayerLink id={r.id}>{r.name}</PlayerLink>{' '}
+                    <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
                     <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
                   </td>
                   {cells(r).map((v, j) => (
@@ -363,20 +402,24 @@ function FoulStoryBoard({ title, rows, value, bug, favoriteTeamId }) {
           const pa = b.bestPa
           return (
             <li className="sgh-row" key={b.id} {...favRowProps(b.teamId, favoriteTeamId)}>
-              <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--lg" />
+              <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--xl" />
               <div className="sgh-body">
-                <div className="sgh-top">
-                  <PlayerLink id={b.id} className="sgh-name">
-                    {b.name}
-                  </PlayerLink>
-                  <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
+                <div className="sgh-header">
+                  <div className="sgh-namewrap">
+                    <div className="sgh-top">
+                      <PlayerLink id={b.id} className="sgh-name">
+                        {b.name}
+                      </PlayerLink>
+                      <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
+                    </div>
+                    <div className="sgh-sub">
+                      vs {pa.pitcherId ? <PlayerLink id={pa.pitcherId}>{pa.pitcherName}</PlayerLink> : pa.pitcherName}
+                    </div>
+                  </div>
                   <span className="sgh-valstack">
                     <span className="sgh-val">{value(b)}</span>
                     <span className="sgh-vallabel">Fouls</span>
                   </span>
-                </div>
-                <div className="sgh-sub">
-                  vs {pa.pitcherId ? <PlayerLink id={pa.pitcherId}>{pa.pitcherName}</PlayerLink> : pa.pitcherName}
                 </div>
                 {bug(b)}
               </div>
@@ -424,12 +467,14 @@ function GameHighRow({ b, favoriteTeamId, gameLinks }) {
         onClick: () => navigate(gamePath(link.apiDate, link.awayAbbr, link.homeAbbr, 'boxscore', link.gameNumber)),
       }
     : {}
+  const { first, last } = splitDisplayName(b.name)
   return (
     <li className="sgh-row gamehigh-row" {...favRowProps(b.teamId, favoriteTeamId)}>
-      <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot" />
+      <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--lg" />
       <div className="gamehigh-who">
-        <PlayerLink id={b.id} className="sgh-name">
-          {b.name}
+        <PlayerLink id={b.id} className="sgh-name gamehigh-name">
+          {first && <span className="foulboard__heroname-first">{first}</span>}
+          <span className="foulboard__heroname-last">{last}</span>
         </PlayerLink>
         <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
       </div>
@@ -588,7 +633,7 @@ function TeamBoard({ teams, favoriteTeamId }) {
   return (
     <BoardCard title="Team fouls per game">
       <div className="ledger-wrap">
-        <table className="standings foulboard">
+        <table className="standings foulboard foulboard--teams">
           <thead>
             <tr>
               <th className="team">Team</th>

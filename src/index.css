@@ -17430,6 +17430,7 @@ body {
   font-size: var(--fs-compact);
   color: var(--text-caption);
   min-width: 1.4em;
+  text-align: center;
 }
 
 /* ---------------------------------------------------------------- manager page
@@ -19635,6 +19636,39 @@ body {
   font-weight: var(--w-regular);
   color: var(--text-caption);
 }
+/* A long surname (e.g. "Gunnar Henderson") truncates with an ellipsis rather
+   than wrapping to a second line — unlike the umpire rankings table (which
+   keeps the wrap + top-align treatment above), this ledger's row also carries
+   a team-logo hero variant above it, so a wrapped 2-line name here read as a
+   stray gap before the team abbreviation instead of a clean row. */
+.foulboard .team > .foulboard__rowname {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Names never wrap in this table now, so the rank/team-abbr siblings can go
+   back to simple vertical centering against the (single-line) name and the
+   team-fouls table's logo, rather than the umpire table's wrap-safe
+   top-align (.standings .team > .umprank__rank/.foulboard__team above). */
+.foulboard .team > .umprank__rank,
+.foulboard .team > .foulboard__team {
+  align-self: center;
+}
+/* Team Fouls Per Game (TeamBoard) — the rank+logo column has no visible
+   text worth auto-sizing around (the team name is sr-only), so left to the
+   default auto layout it read as an oversized "TEAM" header with a stray gap
+   before "Per game" started. Fixed layout + a snug explicit width for that
+   column instead lets the four stat columns share the rest of the row
+   evenly. */
+.foulboard--teams {
+  table-layout: fixed;
+}
+.foulboard--teams th.team,
+.foulboard--teams td.team {
+  width: 64px;
+}
 .foulboard__barcol {
   width: 26%;
 }
@@ -19680,24 +19714,68 @@ body {
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
-/* Compound to beat .plink's `font: inherit`/`text-align: inherit` reset —
-   same convention as .sgh-top .sgh-name. */
-.foulboard__herotop .foulboard__heroname {
+.foulboard__heroident {
   flex: 1;
   min-width: 0;
+}
+/* Two-line hero name — same first/last split idiom as PlayerPage's/
+   TeamLeaders' hero (splitDisplayName) — sized up from the old single-line
+   ellipsis treatment so the #1 leader's name reads as the card's headline. */
+.foulboard__herotop .foulboard__heroname {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   font-family: var(--font-body);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-body);
   color: var(--text-heading);
+}
+.foulboard__heroname-first {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.foulboard__heroname-last {
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Team-name subline under the hero name — same "who this is" idiom as
+   PlayerPage's .player__meta line. */
+.foulboard__herometa {
+  margin: 2px 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+/* Compound to beat .plink's `font: inherit`/`color: inherit` reset. */
+.foulboard__herometa .foulboard__heroteamname {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--navy);
+}
+/* Same treatment as PlayerPage's .player__pos — a batched people lookup
+   (fetchPositions) fills this in for just the four featured leaders, so it's
+   absent (and this renders nothing) until that request resolves. */
+.foulboard__heropos {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+/* Sized up and vertically centered against the (now two-line-tall) name
+   column, rather than pinned to the card's top edge. */
 .foulboard__heroteam {
   flex: none;
-  align-self: flex-start;
+  align-self: center;
 }
 
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment in
@@ -19857,14 +19935,33 @@ body {
   border-radius: var(--radius-sm);
   flex: none;
 }
-/* Most-Fouls-In-A-PA's row is the roomiest on the page (its own scorebug
-   below already fills the card's width), so its headshot steps up a size
-   from the ordinary .sgh-shot baseline other lists on this page use. */
+/* Single-Game Highs steps its headshot up a size from the ordinary .sgh-shot
+   baseline other lists on this page use. */
 .shot.sgh-shot.sgh-shot--lg {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
 }
+/* Most-Fouls-In-A-PA's row is the roomiest on the page (its own scorebug
+   below already fills the card's width), so its headshot steps up one size
+   further still, past Single-Game Highs' --lg. */
+.shot.sgh-shot.sgh-shot--xl {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+}
 .sgh-body {
+  flex: 1;
+  min-width: 0;
+}
+/* Most-Fouls-In-A-PA's stat value (.sgh-valstack) centers against the
+   name+pitcher-line pair only (.sgh-namewrap), not the full row height —
+   without this wrapper it centered against the row's headshot instead and
+   rode noticeably above the "vs {pitcher}" line beneath the name. */
+.sgh-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sgh-namewrap {
   flex: 1;
   min-width: 0;
 }
@@ -19938,13 +20035,16 @@ body {
   gap: 6px;
   min-width: 0;
 }
-/* Same wrapped-name fix as .standings .team above (see that rule's comment) —
-   a long surname (e.g. "Pete Crow-Armstrong") wraps to two lines here too,
-   and align-items: center on the row would otherwise float the team
-   abbreviation at the row's vertical middle instead of by the name's first
-   line. */
-.gamehigh-who .foulboard__team {
-  align-self: flex-start;
+/* Two-line first/last name — same idiom and same classes as the board's
+   featured hero card (.foulboard__heroname-first/-last, FoulFeatured) —
+   rather than a single truncated line, so a full name always reads even in
+   this row's narrower "who" column (shot + matchup badge both eat into it),
+   and the team abbreviation beside it centers against the name's full
+   two-line height instead of floating relative to just one line. */
+.gamehigh-who .sgh-name.gamehigh-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 /* Wraps the final-score line + date in its own rounded card — when the
    batched schedule lookup (FoulTrackerPage's gameLinks) has resolved this
