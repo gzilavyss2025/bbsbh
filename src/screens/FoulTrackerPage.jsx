@@ -5,7 +5,7 @@ import { fetchPositions } from '../api/person-fetch.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { monthDayYear, weekdayAbbr } from '../lib/dates.js'
+import { monthDayYear, weekdayAbbr, isWithinDays } from '../lib/dates.js'
 import { ordinal } from '../lib/format.js'
 import { gamePath } from '../lib/route.js'
 import { useNav } from '../lib/nav.js'
@@ -71,21 +71,28 @@ export function FoulTrackerPage() {
   )
   const { data: gameLinks } = useAsync(() => fetchGamesByPk(gameHighPks), [gameHighPks])
 
-  // The four leaderboards' #1 leaders get a hero card with a position under
-  // their name (see FoulFeatured) — the precompute has no position (it's
-  // aggregated purely from feed pitch/PA counts, not roster data), so a
-  // batched people lookup fills in just those handful of ids rather than
+  // The four leaderboards' #1 leaders (hero cards, see FoulFeatured) plus
+  // every Single-Game-Highs row (GameHighRow, styled the same way) get a
+  // position + team name under their name — the precompute has no position
+  // (it's aggregated purely from feed pitch/PA counts, not roster data), so a
+  // batched people lookup fills in just this handful of ids rather than
   // adding position to every one of the hundreds of rows gen-fouls.mjs
-  // ingests. Degrades to {} on failure — FoulFeatured already treats a
+  // ingests. Degrades to {} on failure — both callers already treat a
   // missing position as "don't show the position".
-  const featuredIds = useMemo(
+  const positionIds = useMemo(
     () =>
-      [boards?.batterTotal?.[0], boards?.batterRate?.[0], boards?.pitcherRate?.[0], boards?.pitcherRateLow?.[0]]
+      [
+        boards?.batterTotal?.[0],
+        boards?.batterRate?.[0],
+        boards?.pitcherRate?.[0],
+        boards?.pitcherRateLow?.[0],
+        ...(boards?.gameHighs ?? []),
+      ]
         .filter(Boolean)
         .map((p) => p.id),
     [boards],
   )
-  const { data: positions } = useAsync(() => fetchPositions(featuredIds), [featuredIds])
+  const { data: positions } = useAsync(() => fetchPositions(positionIds), [positionIds])
 
   return (
     <div className="screen">
@@ -137,6 +144,7 @@ export function FoulTrackerPage() {
             rows={boards.gameHighs}
             favoriteTeamId={favoriteTeamId}
             gameLinks={gameLinks}
+            positions={positions}
           />
 
           <FoulStoryBoard
@@ -438,13 +446,13 @@ function FoulStoryBoard({ title, rows, value, bug, favoriteTeamId }) {
 // at-bat's workload as three stat tiles (same `.stat`/`.stat__v`/`.stat__k`
 // idiom StatBox's Insights row uses on the innings page) so PA/pitches-seen/
 // fouls read as one consistent line rather than a prose sentence.
-function GameHighBoard({ title, rows, favoriteTeamId, gameLinks }) {
+function GameHighBoard({ title, rows, favoriteTeamId, gameLinks, positions }) {
   if (!rows || rows.length === 0) return null
   return (
     <BoardCard title={title}>
       <ol className="sgh-list">
         {rows.map((b) => (
-          <GameHighRow key={b.id} b={b} favoriteTeamId={favoriteTeamId} gameLinks={gameLinks} />
+          <GameHighRow key={b.id} b={b} favoriteTeamId={favoriteTeamId} gameLinks={gameLinks} positions={positions} />
         ))}
       </ol>
     </BoardCard>
@@ -456,7 +464,7 @@ function GameHighBoard({ title, rows, favoriteTeamId, gameLinks }) {
 // until then, or if the lookup failed, it renders as a plain non-clickable
 // badge (same degrade-gracefully rule the rest of the app applies to any
 // dependent fetch).
-function GameHighRow({ b, favoriteTeamId, gameLinks }) {
+function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
   const navigate = useNav()
   const hasScore = b.maxGameHisScore != null && b.maxGameOppScore != null
   const link = b.maxGamePk != null ? gameLinks?.[b.maxGamePk] : null
@@ -468,6 +476,8 @@ function GameHighRow({ b, favoriteTeamId, gameLinks }) {
       }
     : {}
   const { first, last } = splitDisplayName(b.name)
+  const position = positions?.[b.id]
+  const isNew = isWithinDays(b.maxGameDate, 7)
   return (
     <li className="sgh-row gamehigh-row" {...favRowProps(b.teamId, favoriteTeamId)}>
       <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--lg" />
@@ -476,9 +486,20 @@ function GameHighRow({ b, favoriteTeamId, gameLinks }) {
           {first && <span className="foulboard__heroname-first">{first}</span>}
           <span className="foulboard__heroname-last">{last}</span>
         </PlayerLink>
-        <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
+        <p className="foulboard__herometa">
+          {position && <span className="foulboard__heropos">{position}</span>}
+          {position && ' · '}
+          <TeamLink id={b.teamId} className="foulboard__heroteamname">
+            {teamAbbr({ id: b.teamId })}
+          </TeamLink>
+        </p>
       </div>
       <MatchupTag className="gamehigh-matchup" {...matchupProps}>
+        {isNew && (
+          <span className="gamehigh-newstamp" aria-label="Within the last 7 days">
+            New!
+          </span>
+        )}
         {hasScore && (
           <span className="gamehigh-matchup__score">
             <TeamLogo teamId={b.teamId} name={teamAbbr({ id: b.teamId })} size={20} />

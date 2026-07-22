@@ -14,6 +14,22 @@ export function addDays(date, n) {
   return copy
 }
 
+// Whether an apiDate ("YYYY-MM-DD") falls within the last `days` days of
+// today, inclusive of today itself — used to flag a "new" callout on a
+// recently-happened event (e.g. foul tracker's single-game highs). Manual
+// y/m/d parse and a midnight-normalized `today`, like the rest of this file,
+// so the day-count doesn't drift across a DST edge the way subtracting raw
+// Date objects with time-of-day still attached can. Returns false for a
+// missing/garbled date or one in the future.
+export function isWithinDays(apiDate, days, today = new Date()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return false
+  const [y, m, d] = apiDate.split('-').map(Number)
+  const then = new Date(y, m - 1, d)
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const diffDays = Math.round((todayMidnight - then) / 86400000)
+  return diffDays >= 0 && diffDays <= days
+}
+
 // "7/5" — compact month/day for a game-log row, no leading zeros on either
 // side. Takes a YYYY-MM-DD string directly (not a Date) since callers already
 // have the raw statsapi date and a game-log row doesn't need to round-trip

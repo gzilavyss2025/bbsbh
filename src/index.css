@@ -20055,19 +20055,20 @@ body {
 .gamehigh-row .sgh-shot {
   grid-area: shot;
 }
+/* Name above a position-·-team subline — same stacked idiom as the board's
+   featured hero card (.foulboard__heroident, FoulFeatured), rather than the
+   old single-line name-plus-abbreviation row, so a Single-Game-Highs row
+   reads with the same "who this is" identity as the #1 leader's hero card. */
 .gamehigh-who {
   grid-area: who;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
   min-width: 0;
 }
 /* Two-line first/last name — same idiom and same classes as the board's
    featured hero card (.foulboard__heroname-first/-last, FoulFeatured) —
    rather than a single truncated line, so a full name always reads even in
-   this row's narrower "who" column (shot + matchup badge both eat into it),
-   and the team abbreviation beside it centers against the name's full
-   two-line height instead of floating relative to just one line. */
+   this row's narrower "who" column (shot + matchup badge both eat into it). */
 .gamehigh-who .sgh-name.gamehigh-name {
   display: flex;
   flex-direction: column;
@@ -20079,6 +20080,7 @@ body {
    `button.gamehigh-matchup` below) that opens that game's box score;
    otherwise it's a plain <div>, same look, no affordance. */
 .gamehigh-matchup {
+  position: relative;
   grid-area: matchup;
   display: flex;
   flex-direction: column;
@@ -20091,6 +20093,30 @@ body {
   font: inherit;
   color: inherit;
   text-align: center;
+}
+/* A game from the last 7 days gets the same rubber-stamped-badge treatment as
+   the schedule's .postponed__stamp (double rule, tilted) — green rather than
+   kraft-amber, since this marks a fresh addition rather than a held game, and
+   pinned to the score badge's own corner rather than riding inline with it. */
+.gamehigh-newstamp {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  z-index: 1;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
+  color: var(--text-on-ink);
+  padding: 3px 7px 2px;
+  border: 2px double var(--text-on-ink);
+  border-radius: 3px;
+  background: var(--field);
+  box-shadow: var(--shadow-card);
+  transform: rotate(-4deg);
+  pointer-events: none;
 }
 button.gamehigh-matchup {
   cursor: pointer;
