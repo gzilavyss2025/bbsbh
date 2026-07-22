@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { loadMilestoneWatch, formatMilestoneProjection } from '../api/milestones.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { filterByTeam } from '../lib/teamFilter.js'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
@@ -8,6 +10,7 @@ import { Headshot } from '../components/Headshot.jsx'
 import { MasonryColumns } from '../components/MasonryColumns.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {
@@ -56,7 +59,9 @@ function groupMilestoneRows(rows) {
 export function MilestoneWatchPage() {
   useDocumentTitle('Milestone Watch')
   const { loading, error, data } = useAsync(() => loadMilestoneWatch(), [])
-  const rows = data?.players ?? []
+  const [filterTeamId, setFilterTeamId] = useState(null)
+  const allRows = data?.players ?? []
+  const rows = filterByTeam(allRows, filterTeamId, (r) => r.teamId)
   const groups = groupMilestoneRows(rows)
   const updated = monthDay(data?.generatedAt?.slice(0, 10))
 
@@ -70,11 +75,23 @@ export function MilestoneWatchPage() {
       <AsyncStatus
         loading={loading}
         error={error}
-        hasData={rows.length > 0}
+        hasData={allRows.length > 0}
         errorMessage="Couldn’t load Milestone Watch. Try again."
         emptyMessage="No one is within range of a career milestone right now."
         emptyProse
       />
+
+      {allRows.length > 0 && (
+        <TeamFilterStrip
+          selectedTeamId={filterTeamId}
+          onSelect={setFilterTeamId}
+          ariaLabel="Filter Milestone Watch by team"
+        />
+      )}
+
+      {allRows.length > 0 && rows.length === 0 && (
+        <p className="hint hint--prose">No one on that club is within range of a career milestone right now.</p>
+      )}
 
       {rows.length > 0 && (
         <>

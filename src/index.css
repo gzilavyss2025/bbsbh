@@ -17146,17 +17146,6 @@ body {
   white-space: nowrap;
 }
 
-/* ------------------------------------------------------- All-Star team filter
-   (AllStarTeamFilter) — reuses SplitsVsTeam's .vsteam__tray/__strip/__team
-   scroller as-is; this class only adds the page-level spacing around it. */
-.allstarfilter {
-  margin: var(--space-2) 0;
-}
-.allstarfilter__mlblogo {
-  display: block;
-  object-fit: contain;
-}
-
 /* ---------------------------------------------------------------- umpire page */
 .umpage__head {
   margin: 6px 0 14px;
