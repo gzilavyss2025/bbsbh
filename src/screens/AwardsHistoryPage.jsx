@@ -10,6 +10,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SectionTitle } from '../components/SectionTitle.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { teamClubNameShort, favoriteAccentColor } from '../lib/teams.js'
 
 // The two All-MLB families arrive from the generator as ordinary award
@@ -466,6 +467,8 @@ export function AwardsHistoryPage() {
           {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

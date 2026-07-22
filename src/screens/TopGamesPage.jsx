@@ -13,6 +13,7 @@ import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { GameCard } from '../components/GameCard.jsx'
 import { TierPill } from '../components/TierPill.jsx'
 import { GameScoreModal } from '../components/GameScoreModal.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const LIMIT = 25
 
@@ -226,6 +227,8 @@ export function TopGamesPage() {
           onClose={() => setShowFormula(false)}
         />
       )}
+
+      <ReportFooter />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 
@@ -73,6 +74,8 @@ export function UmpireRankingsPage() {
           </table>
         </div>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

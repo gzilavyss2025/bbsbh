@@ -11,6 +11,7 @@ import { MasonryColumns } from '../components/MasonryColumns.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {
@@ -136,6 +137,8 @@ export function MilestoneWatchPage() {
           </p>
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

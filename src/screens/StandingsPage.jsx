@@ -9,6 +9,7 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // MLB seasons open in late March / early April; an earlier month-first button
@@ -388,6 +389,8 @@ export function StandingsPage() {
           Forward ›
         </button>
       </nav>
+
+      <ReportFooter />
     </div>
   )
 }

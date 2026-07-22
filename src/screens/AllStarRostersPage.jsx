@@ -14,6 +14,7 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { AllStarGameResult } from '../components/AllStarGameResult.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -297,6 +298,8 @@ export function AllStarRostersPage() {
           {updated && <p className="hint prospects__caption">Updated {updated}.</p>}
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

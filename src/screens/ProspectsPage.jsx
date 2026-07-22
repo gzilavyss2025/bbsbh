@@ -9,6 +9,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Ledger } from '../components/Ledger.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
@@ -114,6 +115,8 @@ export function ProspectsPage() {
           )}
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }

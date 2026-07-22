@@ -11,6 +11,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 
 // How many honorees a team card shows before "Show all" — most clubs' full
@@ -342,6 +343,8 @@ export function AllStarLegacyPage() {
           <TeamRankRail rank={currentRank} total={rankedTeamIds.length} />
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }
