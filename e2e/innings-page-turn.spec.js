@@ -57,6 +57,30 @@ test('backward navigation never renders the overlay', async ({ page }) => {
   await expect(page.locator('.turnscene__layer--preview')).toHaveCount(0)
 })
 
+test('keyboard-activating Back mid-turn lands backward, not on the abandoned forward target', async ({
+  page,
+}) => {
+  await page.goto(`${GAME}/bottom1`)
+
+  // Start a forward turn (bottom1 -> top2), wait for it to actually be
+  // mid-animation, then interrupt it via Back. index.css's
+  // `[aria-disabled='true'] { pointer-events: none }` rule already blocks a
+  // literal mouse/touch tap here, but that CSS can't stop a keyboard user
+  // (Tab to the button, press Enter) — the button never gets the real
+  // `disabled` attribute, only `aria-disabled`, which browsers don't treat as
+  // blocking keyboard activation. So this should still land on top1, not on
+  // the top2 the abandoned turn was headed to.
+  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
+  const backButton = page.getByRole('button', { name: 'Back one half-inning' })
+  await backButton.focus()
+  await page.keyboard.press('Enter')
+
+  await expect(page).toHaveURL(new RegExp(`${GAME}/top1$`))
+  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(0)
+  await expect(page.locator('.pagecurl')).toHaveCount(0)
+})
+
 test('prefers-reduced-motion skips the animation but navigation still works', async ({
   page,
 }) => {

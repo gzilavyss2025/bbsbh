@@ -54,19 +54,28 @@ export const InningPageTurn = forwardRef(function InningPageTurn(
     onStatusChange?.(state.status)
   }, [state.status, onStatusChange])
 
-  // The shared exit for every "can't/shouldn't animate" case: a capability
-  // check failing right as a turn is accepted, or a resize invalidating one
-  // already in flight. Cancels any running WAAPI animations synchronously
-  // (before dispatching) so the next render's active layer never inherits a
-  // leftover clip-path/opacity from a `fill: 'both'` animation that never
-  // got a chance to finish.
-  const snapToTarget = useCallback(() => {
+  // Cancels any running WAAPI animations synchronously (before dispatching)
+  // so the next render's active layer never inherits a leftover
+  // clip-path/opacity from a `fill: 'both'` animation that never got a
+  // chance to finish. Shared by snapToTarget and the external-nav interrupt
+  // below — both need to tear the in-flight turn down, they just disagree on
+  // whether to also commit.
+  const cancelTurn = useCallback(() => {
     runningAnimationsRef.current.forEach((a) => a.cancel())
     runningAnimationsRef.current = []
-    const { targetIdx } = stateRef.current
     dispatch({ type: 'CANCEL' })
+  }, [])
+
+  // The shared exit for every "can't/shouldn't animate, but nothing else
+  // navigated" case: a capability check failing right as a turn is accepted,
+  // or a resize invalidating one already in flight. In both cases activeIdx
+  // hasn't moved on its own, so finishing the turn ourselves via onCommit is
+  // correct here.
+  const snapToTarget = useCallback(() => {
+    const { targetIdx } = stateRef.current
+    cancelTurn()
     if (targetIdx != null) onCommit(targetIdx)
-  }, [onCommit])
+  }, [cancelTurn, onCommit])
 
   const requestHalf = useCallback(
     (toIdx) => {
@@ -84,16 +93,20 @@ export const InningPageTurn = forwardRef(function InningPageTurn(
   useImperativeHandle(ref, () => ({ requestHalf }), [requestHalf])
 
   // If something OTHER than this component's own commit changed which half
-  // is active mid-turn (e.g. Back clicked during a forward turn) — cancel
-  // rather than let a stale preview/animation keep racing toward a target
-  // that no longer follows from where we're navigating from.
+  // is active mid-turn (e.g. Back clicked during a forward turn — Back stays
+  // clickable throughout a turn, only aria-disabled) — cancel rather than
+  // let a stale preview/animation keep racing toward a target that no longer
+  // follows from where we're navigating from. This must NOT call
+  // snapToTarget: activeIdx has already moved to wherever that external nav
+  // decided, so re-committing onto the abandoned forward targetIdx here
+  // would clobber it right back to the turn's original destination.
   const prevActiveIdxRef = useRef(activeIdx)
   useEffect(() => {
     if (prevActiveIdxRef.current !== activeIdx && stateRef.current.status !== 'idle') {
-      snapToTarget()
+      cancelTurn()
     }
     prevActiveIdxRef.current = activeIdx
-  }, [activeIdx, snapToTarget])
+  }, [activeIdx, cancelTurn])
 
   // The moment a forward request is accepted: decide animate-or-snap. Every
   // check here is a hard requirement (see shouldAnimateTurn) — any one
@@ -202,10 +215,25 @@ export const InningPageTurn = forwardRef(function InningPageTurn(
   // A resize mid-turn (rotation, on-screen keyboard, devtools) invalidates
   // the geometry the animation started with — snap straight to the target
   // instead of continuing to play a turn that will look broken.
+  //
+  // ResizeObserver guarantees one callback right after `observe()` reporting
+  // the current size, whether or not anything actually resized — and since
+  // `onCommit` (InningViewer's `goTo`) is a fresh closure every render,
+  // `snapToTarget`'s identity (and so this effect) churns on every render a
+  // turn causes, re-subscribing constantly. Without skipping that guaranteed
+  // first callback, the very re-render that flips `state.status` to
+  // 'turning' re-subscribes the observer, whose immediate callback then reads
+  // 'turning' and snaps the turn before it ever gets to animate — every
+  // forward turn ends in a same-frame flash instead of playing out.
   useEffect(() => {
     const scene = sceneRef.current
     if (!scene || typeof ResizeObserver === 'undefined') return
+    let isInitialCallback = true
     const ro = new ResizeObserver(() => {
+      if (isInitialCallback) {
+        isInitialCallback = false
+        return
+      }
       if (stateRef.current.status === 'turning') snapToTarget()
     })
     ro.observe(scene)
