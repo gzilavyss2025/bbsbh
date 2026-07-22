@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { fetchFouls } from '../api/fouls.js'
+import { fetchFouls, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'
 import { fetchPositions } from '../api/person-fetch.js'
 import { splitDisplayName } from '../api/person.js'
@@ -21,7 +21,7 @@ import { BaseoutDiamond } from '../components/BaseoutDiamond.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
-import { teamAbbr, teamFullName, favoriteAccentColor } from '../lib/teams.js'
+import { teamAbbr, teamFullName, teamClubName, favoriteAccentColor } from '../lib/teams.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
 // league leaders (total, per game, single-game highs), two-strike "spoiling",
@@ -70,17 +70,21 @@ export function FoulTrackerPage() {
   // when the page is showing the whole league.
   const highlightTeamId = filterTeamId == null ? favoriteTeamId : null
 
-  // Single-Game-Highs' score+date badge links out to that game's box score —
-  // the precompute only carries the gamePk (see gen-fouls.mjs's max_game_pk),
-  // not which side was home/away, so a batched schedule lookup resolves the
-  // away/home abbreviations gamePath needs. Same fetchGamesByPk batching
+  // Single-Game-Highs' AND Best Souvenir Odds' score/date badges both link out
+  // to a box score — the precompute only carries each's gamePk (see
+  // gen-fouls.mjs's max_game_pk / foul_game_totals), not which side was
+  // home/away, so one batched schedule lookup (shared by both boards) resolves
+  // the away/home abbreviations gamePath needs. Same fetchGamesByPk batching
   // loadPlayer.js uses for its own game-log deep links. Degrades to {} on
   // failure — a plain, non-clickable date badge, not a crash.
-  const gameHighPks = useMemo(
-    () => (boards?.gameHighs ?? []).map((b) => b.maxGamePk).filter(Boolean),
+  const gameLinkPks = useMemo(
+    () => [
+      ...(boards?.gameHighs ?? []).map((b) => b.maxGamePk),
+      ...(boards?.souvenirGames ?? []).map((g) => g.gamePk),
+    ].filter(Boolean),
     [boards],
   )
-  const { data: gameLinks } = useAsync(() => fetchGamesByPk(gameHighPks), [gameHighPks])
+  const { data: gameLinks } = useAsync(() => fetchGamesByPk(gameLinkPks), [gameLinkPks])
 
   // The four leaderboards' #1 leaders (hero cards, see FoulFeatured) plus
   // every Single-Game-Highs row (GameHighRow, styled the same way) get a
@@ -120,6 +124,8 @@ export function FoulTrackerPage() {
         counts against .102 for everyone else (SABR, 1945–2015).
       </p>
 
+      {boards && <SeasonAverageCard data={data} />}
+
       <AsyncStatus
         loading={loading}
         error={error}
@@ -158,13 +164,24 @@ export function FoulTrackerPage() {
             positions={positions}
           />
 
-          <GameHighBoard
-            title="Single-game highs"
-            rows={boards.gameHighs}
-            favoriteTeamId={highlightTeamId}
-            gameLinks={gameLinks}
-            positions={positions}
-          />
+          {/* Both are per-GAME story boards (not player leaderboards), so on a
+              wide screen they share a row 50/50 instead of stacking full-width
+              like the rest of the page — see .foultracker__pair. */}
+          <div className="foultracker__pair">
+            <GameHighBoard
+              title="Single-game highs"
+              rows={boards.gameHighs}
+              favoriteTeamId={highlightTeamId}
+              gameLinks={gameLinks}
+              positions={positions}
+            />
+
+            <SouvenirGameBoard
+              title="Best souvenir odds"
+              rows={boards.souvenirGames}
+              gameLinks={gameLinks}
+            />
+          </div>
 
           <FoulStoryBoard
             title="Most fouls in one plate appearance"
@@ -202,7 +219,7 @@ export function FoulTrackerPage() {
           />
 
           <ByInning league={boards.league} />
-          <ByPitchType league={boards.league} />
+          <ByPitchType league={boards.league} teamRates={boards.teamPitchTypeRates} />
           <TeamBoard teams={boards.teamRows} favoriteTeamId={highlightTeamId} />
         </>
       )}
@@ -244,6 +261,7 @@ function buildBoards(data, teamId = null) {
       batters.filter((b) => (b.maxGameFouls ?? 0) > 0),
       (b) => b.maxGameFouls,
     ),
+    souvenirGames: topFoulGames(data, { scope: teamId ?? 'league' }),
     paHighs: top(
       batters.filter((b) => (b.bestPa?.fouls ?? 0) > 0),
       (b) => b.bestPa.fouls,
@@ -251,6 +269,9 @@ function buildBoards(data, teamId = null) {
     pitcherRate: top(qualifiedP, (p) => p.fouls / p.pitches),
     pitcherRateLow: bottom(qualifiedP, (p) => p.fouls / p.pitches),
     league: data?.league ?? null,
+    // Only meaningful once a team filter narrows the page to one club — see
+    // ByPitchType's team-vs-league branch below.
+    teamPitchTypeRates: teamId != null ? teamPitchTypeRates(data, teamId) : null,
     teamRows: filterByTeam(
       Object.entries(data?.teams ?? {}).map(([id, t]) => ({ id: Number(id), ...t })),
       teamId,
@@ -564,6 +585,132 @@ function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
   )
 }
 
+// Best Souvenir Odds — ranks GAMES, not players, by both teams' combined
+// fouls: more fouls hit means more balls that left play unfielded, so these
+// are the games a fan sitting anywhere near foul territory had the best shot
+// at going home with a keepsake. Unlike Single-Game Highs (GameHighBoard
+// above) — a two-line grid because a headshot+name needs the room — a game
+// has no photo to anchor, so everything (rank, both teams, the fouls split,
+// the date) fits on ONE line; only .gamehigh-matchup's date-badge chrome and
+// .stat's tile look are reused, not the two-row grid shape itself.
+function SouvenirGameBoard({ title, rows, gameLinks }) {
+  if (!rows || rows.length === 0) return null
+  return (
+    <BoardCard title={title}>
+      <ol className="sgh-list">
+        {rows.map((g, i) => (
+          <SouvenirGameRow key={g.gamePk} g={g} rank={i + 1} gameLinks={gameLinks} />
+        ))}
+      </ol>
+    </BoardCard>
+  )
+}
+
+function SouvenirGameRow({ g, rank, gameLinks }) {
+  const navigate = useNav()
+  const link = gameLinks?.[g.gamePk]
+  const MatchupTag = link ? 'button' : 'div'
+  const matchupProps = link
+    ? {
+        type: 'button',
+        onClick: () => navigate(gamePath(link.apiDate, link.awayAbbr, link.homeAbbr, 'boxscore', link.gameNumber)),
+      }
+    : {}
+  const isNew = isWithinDays(g.date, 7)
+  return (
+    <li className="sgh-row souvenir-row">
+      <span className="umprank__rank">{rank}</span>
+      {/* Both teams are already identified by the score badge's logos below —
+          a separate name/logo column here was pure duplication. */}
+      <div className="souvenir-row__tiles">
+        <div className="stat">
+          <span className="stat__v">{g.awayFouls}</span>
+          <span className="stat__k">{teamClubName(g.awayTeamId)}</span>
+        </div>
+        <div className="stat">
+          <span className="stat__v">{g.homeFouls}</span>
+          <span className="stat__k">{teamClubName(g.homeTeamId)}</span>
+        </div>
+        <div className="stat">
+          <span className="stat__v">{g.totalFouls}</span>
+          <span className="stat__k">Total</span>
+        </div>
+      </div>
+      {/* Same score+date badge idiom as GameHighRow above (gamehigh-matchup__score/
+          __sep/__date) — a fan scanning both boards should recognize a final
+          score in the same shape everywhere on this page, not a one-off. */}
+      <MatchupTag className="gamehigh-matchup souvenir-row__date" {...matchupProps}>
+        {isNew && (
+          <span className="gamehigh-newstamp" aria-label="Within the last 7 days">
+            New!
+          </span>
+        )}
+        <span className="gamehigh-matchup__score">
+          <TeamLogo teamId={g.awayTeamId} name={teamAbbr({ id: g.awayTeamId })} size={20} />
+          <b>{g.awayScore}</b>
+          <span className="gamehigh-matchup__sep">–</span>
+          <b>{g.homeScore}</b>
+          <TeamLogo teamId={g.homeTeamId} name={teamAbbr({ id: g.homeTeamId })} size={20} />
+        </span>
+        {g.date && (
+          <span className="gamehigh-matchup__date">
+            {weekdayAbbr(g.date)} {monthDayYear(g.date)}
+          </span>
+        )}
+      </MatchupTag>
+    </li>
+  )
+}
+
+// A hero stat leading the page — the numbers every leaderboard below assumes
+// the reader already has context for, read as a sentence rather than a bare
+// figure. `league.totals` is the whole (unfiltered) season's pitch/foul sums
+// (see gen-fouls.mjs's exportFouls), so this reads the same regardless of the
+// team filter, same as ByInning/ByPitchType below it. `avgFoulsPerPA` sums
+// EVERY batter's own season `pa` (data.batters has no minimum-games floor,
+// unlike the leaderboards below, so this total is the true league PA count).
+// `avgFoulsPerStart` reuses byInning's own vsStarter split (the same "was a
+// starter on the mound" cut ByInning renders) rather than each pitcher's own
+// season totals, since a pitcher's `g`/`fouls` mix starts AND any relief
+// appearances together — vsStarter.fouls is already scoped to starter innings
+// only. Total starts is gamesIngested * 2 (exactly one starter per team per
+// game) — nothing in the precompute tracks a league-wide start COUNT directly.
+// The fill bar is a genuine proportion (this share of an average game's
+// PITCHES got fouled off), not decoration.
+function SeasonAverageCard({ data }) {
+  const league = data?.league
+  const gamesIngested = data?.gamesIngested
+  if (!league?.totals || !gamesIngested) return null
+  const avgFouls = league.totals.fouls / gamesIngested
+  const avgPitches = league.totals.pitches / gamesIngested
+  const foulRate = league.totals.pitches > 0 ? league.totals.fouls / league.totals.pitches : 0
+
+  const totalPA = Object.values(data?.batters ?? {}).reduce((s, b) => s + (b.pa || 0), 0)
+  const avgFoulsPerPA = totalPA > 0 ? league.totals.fouls / totalPA : null
+
+  const starterFouls = (league.byInning ?? []).reduce((s, r) => s + (r.vsStarter?.fouls ?? 0), 0)
+  const totalStarts = gamesIngested * 2
+  const avgFoulsPerStart = totalStarts > 0 ? starterFouls / totalStarts : null
+
+  return (
+    <div className="foulavg">
+      <p className="foulavg__lede">
+        There are <b>{Math.round(avgPitches)}</b> pitches thrown in an average MLB game and{' '}
+        <b>{Math.round(avgFouls)}</b> are fouled off ({pct1(foulRate)}). The average plate appearance features{' '}
+        <b>{avgFoulsPerPA == null ? '—' : avgFoulsPerPA.toFixed(1)}</b> foul balls, and a starting pitcher averages{' '}
+        <b>{avgFoulsPerStart == null ? '—' : avgFoulsPerStart.toFixed(1)}</b> foul balls per start.
+      </p>
+      <div
+        className="foulavg__meter"
+        role="img"
+        aria-label={`${pct1(foulRate)} of an average game's pitches are fouled off`}
+      >
+        <span className="foulavg__fill" style={{ width: `${Math.min(foulRate * 100, 100).toFixed(1)}%` }} />
+      </div>
+    </div>
+  )
+}
+
 // The by-inning foul curve — does fouling spike late? — split vs. starters
 // and vs. relievers. This chart doesn't exist anywhere else in public
 // baseball data, which is half the fun of publishing it.
@@ -624,7 +771,86 @@ const PITCH_CATEGORY = {
 }
 const PITCH_CATEGORY_ORDER = ['Fastballs', 'Breaking balls', 'Offspeed', 'Other']
 
-function ByPitchType({ league }) {
+// Team-view sample floor — MUCH lower than the league table's 500, since one
+// club's own season volume for a single pitch type is a fraction of the
+// league's (a rare pitch like a splitter might only see a few hundred pitches
+// against/from one team all year).
+const MIN_TEAM_PITCH_COUNT = 30
+
+// A batting/pitching foul-rate gap this wide (5 percentage points) or more is
+// worth flagging automatically — foul rates cluster in a fairly narrow 10-30%
+// band leaguewide, so a 5-point split between a team's own two sides is a
+// real outlier, not sampling noise.
+const SIGNIFICANT_RATE_GAP = 0.05
+
+// Merges a team's battingRates/pitchingRates (from teamPitchTypeRates) into
+// one row per pitch code the team saw on EITHER side, each carrying a raw
+// pitch count (seen/thrown) plus a foul% and whiff% — both pure rates, not a
+// count riding along in the same cell — independently per side (null/dash if
+// that side never reached the floor). `isOutlier` flags a foul%-gap wide
+// enough to call out automatically (see SIGNIFICANT_RATE_GAP) — only
+// computable when BOTH sides cleared the sample floor, never from one lone
+// side.
+function buildTeamPitchTypeRows(rates) {
+  const battingByCode = new Map((rates?.batting ?? []).map((r) => [r.code, r]))
+  const pitchingByCode = new Map((rates?.pitching ?? []).map((r) => [r.code, r]))
+  const codes = new Set([...battingByCode.keys(), ...pitchingByCode.keys()])
+  const whiffRate = (whiffs, pitches) => (pitches > 0 ? whiffs / pitches : null)
+  return [...codes]
+    .map((code) => {
+      const b = battingByCode.get(code)
+      const p = pitchingByCode.get(code)
+      const battingPitches = b?.pitches ?? 0
+      const pitchingPitches = p?.pitches ?? 0
+      const battingRate = b?.foulRate ?? null
+      const pitchingRate = p?.foulRate ?? null
+      const gap = battingRate != null && pitchingRate != null ? Math.abs(battingRate - pitchingRate) : null
+      return {
+        code,
+        description: b?.description || p?.description || code,
+        category: PITCH_CATEGORY[code] ?? 'Other',
+        battingPitches,
+        battingRate,
+        battingWhiffRate: whiffRate(b?.whiffs ?? 0, battingPitches),
+        pitchingPitches,
+        pitchingRate,
+        pitchingWhiffRate: whiffRate(p?.whiffs ?? 0, pitchingPitches),
+        isOutlier: gap != null && gap >= SIGNIFICANT_RATE_GAP,
+      }
+    })
+    .filter((r) => r.battingPitches >= MIN_TEAM_PITCH_COUNT || r.pitchingPitches >= MIN_TEAM_PITCH_COUNT)
+}
+
+// `teamRates` (from FoulTrackerPage's buildBoards, only set once a team
+// filter is active) swaps the league-wide single-rate table for a two-sided
+// batters-vs-pitchers comparison scoped to that club — the plain league rate
+// stops being the interesting question once you've already narrowed to one
+// team. Reverts to the league table the moment the filter clears.
+function ByPitchType({ league, teamRates }) {
+  if (teamRates) {
+    const rows = buildTeamPitchTypeRows(teamRates)
+    if (rows.length === 0) return null
+    const groups = PITCH_CATEGORY_ORDER.map((category) => ({
+      category,
+      rows: rows
+        .filter((r) => r.category === category)
+        .sort((a, b) => b.battingPitches + b.pitchingPitches - (a.battingPitches + a.pitchingPitches)),
+    })).filter((g) => g.rows.length > 0)
+    return (
+      <BoardCard title="Foul rate by pitch type">
+        <div className="ledger-wrap">
+          <table className="standings foulboard">
+            <tbody>
+              {groups.map((g) => (
+                <TeamPitchCategoryGroup key={g.category} group={g} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </BoardCard>
+    )
+  }
+
   const rows = (league?.byPitchType ?? [])
     .filter((r) => r.pitches >= 500)
     .map((r) => ({ ...r, rate: r.fouls / r.pitches, category: PITCH_CATEGORY[r.code] ?? 'Other' }))
@@ -645,6 +871,48 @@ function ByPitchType({ league }) {
         </table>
       </div>
     </BoardCard>
+  )
+}
+
+// Same kraft-brown subheader shape as PitchCategoryGroup below, but split into
+// two 3-column groups (batters' own vs. pitchers' own): a raw pitch count
+// leads each side (# seen for batters, # thrown for pitchers), then foul% and
+// whiff% follow as plain percentages — no count riding along in either rate
+// cell, so every number in a rate column is directly comparable to the one
+// above/below it. A row whose two foul% figures diverge by SIGNIFICANT_
+// RATE_GAP or more gets the same amber "outlier" wash the umpire favor-meter
+// uses elsewhere in the app (.favormeter--outlier) — reused so "notable, look
+// here" reads the same way anywhere in the app rather than inventing a new
+// accent.
+function TeamPitchCategoryGroup({ group }) {
+  return (
+    <>
+      <tr className="foulboard__grouprow foulboard__grouprow--kraft">
+        <th colSpan={7} scope="rowgroup">
+          {group.category}
+        </th>
+      </tr>
+      <tr className="foulboard__subhead">
+        <th className="team">Pitch</th>
+        <th># Seen</th>
+        <th>Batters Foul%</th>
+        <th>Batters Whiff%</th>
+        <th># Thrown</th>
+        <th>Pitchers Foul%</th>
+        <th>Pitchers Whiff%</th>
+      </tr>
+      {group.rows.map((r) => (
+        <tr key={r.code} className={r.isOutlier ? 'foulboard__row--outlier' : undefined}>
+          <td className="team">{r.description || r.code}</td>
+          <td>{r.battingPitches > 0 ? r.battingPitches.toLocaleString('en-US') : '—'}</td>
+          <td>{r.battingRate == null ? '—' : pct1(r.battingRate)}</td>
+          <td>{r.battingWhiffRate == null ? '—' : pct1(r.battingWhiffRate)}</td>
+          <td>{r.pitchingPitches > 0 ? r.pitchingPitches.toLocaleString('en-US') : '—'}</td>
+          <td>{r.pitchingRate == null ? '—' : pct1(r.pitchingRate)}</td>
+          <td>{r.pitchingWhiffRate == null ? '—' : pct1(r.pitchingWhiffRate)}</td>
+        </tr>
+      ))}
+    </>
   )
 }
 
@@ -673,7 +941,7 @@ function PitchCategoryGroup({ group }) {
         <tr key={r.code}>
           <td className="team">{r.description || r.code}</td>
           <td>{pct1(r.rate)}</td>
-          <td>{r.pitches}</td>
+          <td>{r.pitches.toLocaleString('en-US')}</td>
         </tr>
       ))}
     </>

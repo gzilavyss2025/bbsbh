@@ -248,11 +248,71 @@ CREATE TABLE IF NOT EXISTS foul_pitch_types (
   fouls       INTEGER NOT NULL DEFAULT 0
 );
 
+-- Foul rate by pitch type, scoped to ONE team's own BATTERS (the pitch types
+-- they faced, whoever was pitching) — the team-filtered counterpart to the
+-- league-wide foul_pitch_types above. A separate table from foul_pitch_types_
+-- pitching below, not a `side` column on one shared table, since a single
+-- pitch belongs to BOTH a batting team and a pitching team at once — folding
+-- them into one table would need every row twice anyway (once per side), so
+-- two tables keyed the same way is simpler than one with a redundant column.
+-- `whiffs` (swinging strikes) rides alongside fouls — the same pitch-type
+-- breakdown answers both "how often do our batters foul this off" and "how
+-- often do they whiff on it" without a second table.
+CREATE TABLE IF NOT EXISTS foul_team_pitch_types_batting (
+  team_id     INTEGER NOT NULL,
+  code        TEXT NOT NULL,
+  season      INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  pitches     INTEGER NOT NULL DEFAULT 0,
+  fouls       INTEGER NOT NULL DEFAULT 0,
+  whiffs      INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (team_id, code)
+);
+
+-- Same idea as foul_team_pitch_types_batting, but for a team's own PITCHERS —
+-- the pitch types THEY threw, whoever was batting. Comparing the two for one
+-- team answers "are our pitchers getting fouled off/whiffing more or less on
+-- a pitch than our own batters do" — two different pools, not opposite views
+-- of the same at-bat.
+CREATE TABLE IF NOT EXISTS foul_team_pitch_types_pitching (
+  team_id     INTEGER NOT NULL,
+  code        TEXT NOT NULL,
+  season      INTEGER NOT NULL,
+  description TEXT NOT NULL,
+  pitches     INTEGER NOT NULL DEFAULT 0,
+  fouls       INTEGER NOT NULL DEFAULT 0,
+  whiffs      INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (team_id, code)
+);
+
 -- Idempotency guard: which gamePks have already been folded into the totals
 -- above (with the game's official date, so coverageSince is min(date)).
 CREATE TABLE IF NOT EXISTS foul_ingested_games (
   game_pk INTEGER PRIMARY KEY,
   date    TEXT NOT NULL
+);
+
+-- Both teams' foul totals for ONE game (the "best souvenir odds" board: which
+-- games saw the most combined fouls, i.e. the most balls that left play as a
+-- souvenir). A separate per-gamePk table rather than more columns on
+-- foul_team_totals (a SEASON roll-up) or foul_batter_totals' max_game_fouls (a
+-- single BATTER's game high) — this is a whole game's two-sided total, not
+-- attributable to one team or player. Written once per gamePk alongside the
+-- other foul_* tables in the same ingest transaction, so it's exactly as
+-- immutable/idempotent as they are.
+-- `home_score`/`away_score` are the game's FINAL score (not an entering-a-PA
+-- snapshot the way foul_batter_pa_high's are) — carried alongside the fouls
+-- split so the Best Souvenir Odds board can show "and here's how the game
+-- came out" without a separate schedule/boxscore lookup.
+CREATE TABLE IF NOT EXISTS foul_game_totals (
+  game_pk      INTEGER PRIMARY KEY,
+  home_team_id INTEGER NOT NULL,
+  home_fouls   INTEGER NOT NULL DEFAULT 0,
+  home_score   INTEGER NOT NULL DEFAULT 0,
+  away_team_id INTEGER NOT NULL,
+  away_fouls   INTEGER NOT NULL DEFAULT 0,
+  away_score   INTEGER NOT NULL DEFAULT 0,
+  total_fouls  INTEGER NOT NULL DEFAULT 0
 );
 
 -- Per-team, per-season COMEBACK WIN counts (gen-comeback-wins.mjs): a win in

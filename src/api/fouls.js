@@ -130,6 +130,20 @@ export function foulLeaders(data, { scope = 'league', minGames = MIN_BATTER_GAME
   }
 }
 
+// The season's most-fouled GAMES (both teams combined) — "best souvenir odds":
+// more fouls means more balls that left play unfielded, so these are the games
+// a fan sitting anywhere near foul territory had the best shot at a keepsake.
+// `scope` narrows to games either side of one team, same convention as
+// foulLeaders' scope; the underlying rows are already ranked highest-total-
+// first by the generator, so this only filters + caps to `n`. Null-safe
+// (empty array on missing data).
+export function topFoulGames(data, { scope = 'league', n = 10 } = {}) {
+  const rows = data?.topFoulGames ?? []
+  const teamFilter = scope !== 'league' ? Number(scope) : null
+  const inScope = (g) => teamFilter == null || g.homeTeamId === teamFilter || g.awayTeamId === teamFilter
+  return rows.filter(inScope).slice(0, n)
+}
+
 // League-wide foul rates: overall, by inning (with the starter/reliever split),
 // and by pitch type (sorted by foul rate, highest first). Null-safe — returns
 // null when the file (or its league block) is missing.
@@ -157,5 +171,28 @@ export function leagueFoulRates(data) {
     totals,
     byInning,
     byPitchType,
+  }
+}
+
+// One team's foul rate by pitch type, split by side: `batting` is that team's
+// OWN BATTERS' rate against each pitch type they saw (whoever was pitching);
+// `pitching` is that team's OWN PITCHERS' rate on each pitch type THEY threw
+// (whoever was batting) — two different pools, not opposite views of the same
+// at-bat (see gen-fouls.mjs's foul_team_pitch_types_batting/_pitching). Each
+// row also carries the raw `whiffs` count for that side/pitch type straight
+// from the precompute (no rate derived from it — the caller wants the count).
+// Only meaningful for one team at a time — league-wide already has
+// leagueFoulRates' byPitchType — so this returns null for a missing teamId
+// rather than a league-wide fallback. Each row sorted highest-foul-rate first.
+export function teamPitchTypeRates(data, teamId) {
+  if (teamId == null) return null
+  const rate = (fouls, pitches) => (pitches ? Number((fouls / pitches).toFixed(4)) : null)
+  const shape = (rows) =>
+    (rows ?? [])
+      .map((r) => ({ ...r, foulRate: rate(r.fouls, r.pitches) }))
+      .sort((a, b) => (b.foulRate ?? -Infinity) - (a.foulRate ?? -Infinity))
+  return {
+    batting: shape(data?.teamPitchTypes?.batting?.[teamId]),
+    pitching: shape(data?.teamPitchTypes?.pitching?.[teamId]),
   }
 }
