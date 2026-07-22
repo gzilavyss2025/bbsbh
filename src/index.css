@@ -13827,6 +13827,12 @@ body {
 }
 .standings .team {
   text-align: left;
+}
+/* Body cells only — a header `th.team` reads as a plain column caption like
+   every other header in the row (muted color, condensed font, via
+   `.standings thead th`), not the bold body-text emphasis a data row's
+   player/team name gets. */
+.standings td.team {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
