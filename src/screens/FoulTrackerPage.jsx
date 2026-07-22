@@ -63,6 +63,13 @@ export function FoulTrackerPage() {
 
   const boards = useMemo(() => buildBoards(data, filterTeamId), [data, filterTeamId])
 
+  // The favorite-team "is-me" tint (favRowProps below) is redundant, and
+  // actively overwhelming, once the team filter has restricted every visible
+  // row to one club — if that club IS the favorite, nearly every row lights
+  // up, drowning out the ranking it's supposed to accent. Only light rows up
+  // when the page is showing the whole league.
+  const highlightTeamId = filterTeamId == null ? favoriteTeamId : null
+
   // Single-Game-Highs' score+date badge links out to that game's box score —
   // the precompute only carries the gamePk (see gen-fouls.mjs's max_game_pk),
   // not which side was home/away, so a batched schedule lookup resolves the
@@ -138,7 +145,7 @@ export function FoulTrackerPage() {
             cols={['Fouls', 'Per game', 'With 2 Strikes']}
             cells={(b) => [b.fouls, (b.fouls / b.g).toFixed(1), b.twoStrikeFouls]}
             featured
-            favoriteTeamId={favoriteTeamId}
+            favoriteTeamId={highlightTeamId}
             positions={positions}
           />
           <FoulLeaderBoard
@@ -147,14 +154,14 @@ export function FoulTrackerPage() {
             cols={['Per game', 'Fouls', 'With 2 Strikes']}
             cells={(b) => [(b.fouls / b.g).toFixed(2), b.fouls, b.twoStrikeFouls]}
             featured
-            favoriteTeamId={favoriteTeamId}
+            favoriteTeamId={highlightTeamId}
             positions={positions}
           />
 
           <GameHighBoard
             title="Single-game highs"
             rows={boards.gameHighs}
-            favoriteTeamId={favoriteTeamId}
+            favoriteTeamId={highlightTeamId}
             gameLinks={gameLinks}
             positions={positions}
           />
@@ -164,7 +171,7 @@ export function FoulTrackerPage() {
             rows={boards.paHighs}
             value={(b) => b.bestPa.fouls}
             bug={(b) => <PaScorebug pa={b.bestPa} />}
-            favoriteTeamId={favoriteTeamId}
+            favoriteTeamId={highlightTeamId}
           />
 
           <FoulLeaderBoard
@@ -177,7 +184,7 @@ export function FoulTrackerPage() {
               p.whiffs > 0 ? (p.fouls / p.whiffs).toFixed(1) : '—',
             ]}
             featured
-            favoriteTeamId={favoriteTeamId}
+            favoriteTeamId={highlightTeamId}
             positions={positions}
           />
           <FoulLeaderBoard
@@ -190,13 +197,13 @@ export function FoulTrackerPage() {
               p.whiffs > 0 ? (p.fouls / p.whiffs).toFixed(1) : '—',
             ]}
             featured
-            favoriteTeamId={favoriteTeamId}
+            favoriteTeamId={highlightTeamId}
             positions={positions}
           />
 
           <ByInning league={boards.league} />
           <ByPitchType league={boards.league} />
-          <TeamBoard teams={boards.teamRows} favoriteTeamId={favoriteTeamId} />
+          <TeamBoard teams={boards.teamRows} favoriteTeamId={highlightTeamId} />
         </>
       )}
 
