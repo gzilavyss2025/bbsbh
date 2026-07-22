@@ -9,14 +9,20 @@
 // pitches backfill OR the later score backfill, so an interrupted run resumes
 // without re-fetching everything).
 //
-// Deliberately scoped to the TOP N batters by max_game_fouls (the only ones any
-// Single-Game-Highs board actually shows) rather than every batter on file —
-// walking every batter's own game would mean fetching several hundred distinct
-// game feeds for rows nothing renders. Any batter outside this cut keeps zeros
-// until his own max-game event happens to be a NEW one after this migration
-// (which the ordinary nightly run then fills in naturally).
+// `--top` scopes the run to the N batters by max_game_fouls most in need of a
+// fix, rather than always walking every batter on file — cheap to re-run,
+// since it only fetches feeds for rows the WHERE clause still finds broken.
+// IMPORTANT: the default of 20 dates from before the Foul Tracker's per-team
+// filter (PR #319) — with no filter, only the global top 12 ever rendered, so
+// 20 was headroom. Once a reader can filter to any of the 30 clubs, ANY
+// batter's row can surface (a team's own top 12 reaches far past the global
+// top 20), so a real catch-up run needs `--top` at least the total row count
+// (`SELECT COUNT(*) FROM foul_batter_totals`) — 700 comfortably covers a full
+// season. Any batter outside the requested cut keeps zeros until his own
+// max-game event happens to be a NEW one after this migration (which the
+// ordinary nightly run then fills in naturally).
 //
-//   node scripts/backfill-foul-maxgame.mjs [--top=20]
+//   node scripts/backfill-foul-maxgame.mjs [--top=700]
 import { openDb, dumpGroup } from './lib/db.js'
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -78,7 +84,7 @@ async function maxGameStatsFor(feed, personId) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const top = Number(args.top) || 20
+  const top = Number(args.top) || 700
 
   const db = await openDb()
   const rows = db
