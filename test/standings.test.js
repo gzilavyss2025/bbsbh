@@ -154,7 +154,7 @@ test('attachRankTrend sets trend on every team from a previous-snapshot rank map
   const leagues = [
     { id: 103, divisions: [{ id: 201, teams: [{ id: 1, rank: '1' }, { id: 2, rank: '2' }, { id: 3, rank: '3' }] }] },
   ]
-  const prevRanks = new Map([[1, 2], [2, 2], [3, 1]]) // team 1 climbed, team 2 held, team 3 fell, and team 3... wait recompute below
+  const prevRanks = new Map([[1, 2], [2, 2], [3, 1]]) // team 1 climbed, team 2 held, team 3 fell
   attachRankTrend(leagues, 'division', prevRanks)
   const [t1, t2, t3] = leagues[0].divisions[0].teams
   assert.equal(t1.trend, 'up') // 2 -> 1
