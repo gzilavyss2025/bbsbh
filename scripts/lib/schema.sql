@@ -161,6 +161,37 @@ CREATE TABLE IF NOT EXISTS foul_batter_totals (
   max_game_opp_id  INTEGER
 );
 
+-- The single most-fouled PLATE APPEARANCE a batter has had all season (as
+-- opposed to foul_batter_totals' max_game_* columns, which are a whole
+-- GAME's total). Separate table, not more columns on foul_batter_totals,
+-- since this carries the full situational context of one at-bat — who was
+-- on the mound, the result, and the score/inning/outs/runners entering it —
+-- for the Foul Tracker's "Most fouls in one plate appearance" board.
+-- `outs`/`on_first`/`on_second`/`on_third`/`away_score`/`home_score` are all
+-- the state ENTERING the plate appearance (aggregateGameFouls captures them
+-- before that play's own result updates the running game-state trackers —
+-- see its header comment). `fouls` is compared the same CASE-guarded way as
+-- max_game_fouls above, so it converges regardless of ingest order; a row
+-- exists only for a batter who has fouled off at least one pitch in some PA.
+CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
+  person_id       INTEGER PRIMARY KEY,
+  fouls           INTEGER NOT NULL DEFAULT 0,
+  game_pk         INTEGER,
+  pitcher_id      INTEGER,
+  pitcher_name    TEXT,
+  result_event    TEXT,
+  inning          INTEGER,
+  half            TEXT,
+  outs            INTEGER,
+  on_first        INTEGER NOT NULL DEFAULT 0,
+  on_second       INTEGER NOT NULL DEFAULT 0,
+  on_third        INTEGER NOT NULL DEFAULT 0,
+  away_score      INTEGER,
+  home_score      INTEGER,
+  batting_team_id INTEGER,
+  opponent_id     INTEGER
+);
+
 -- Fouls surrendered BY each pitcher, plus whiffs so the app can show the
 -- fouls-to-whiffs ratio the literature flags as the informative pitcher cut
 -- (Baumann, FanGraphs 2024). `starts` counts games he was his team's first

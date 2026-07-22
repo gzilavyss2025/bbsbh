@@ -4,6 +4,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { splitDisplayName } from '../api/person.js'
 import { monthDay } from '../lib/dates.js'
+import { ordinal } from '../lib/format.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -79,7 +80,21 @@ export function FoulTrackerPage() {
             featured
           />
 
-          <SingleGameHighs rows={boards.gameHighs} />
+          <FoulStoryBoard
+            title="Single-game highs"
+            note="The most fouls hit by one batter in a single game this season."
+            rows={boards.gameHighs}
+            value={(b) => b.maxGameFouls}
+            summary={gameHighSummary}
+          />
+
+          <FoulStoryBoard
+            title="Most fouls in one plate appearance"
+            note="The most foul balls a batter has fought off in a single at-bat this season."
+            rows={boards.paHighs}
+            value={(b) => b.bestPa.fouls}
+            summary={(b) => paHighSummary(b.bestPa)}
+          />
 
           <FoulLeaderBoard
             title="Foul magnets — pitchers"
@@ -125,6 +140,10 @@ function buildBoards(data) {
     gameHighs: top(
       batters.filter((b) => (b.maxGameFouls ?? 0) > 0),
       (b) => b.maxGameFouls,
+    ),
+    paHighs: top(
+      batters.filter((b) => (b.bestPa?.fouls ?? 0) > 0),
+      (b) => b.bestPa.fouls,
     ),
     pitcherRate: top(qualifiedP, (p) => p.fouls / p.pitches),
     league: data?.league ?? null,
@@ -225,13 +244,12 @@ function FoulLeaderBoard({ title, note, rows, cols, cells, featured = false }) {
   )
 }
 
-// A single-game high is a STORY (one specific game), not a ranking — so
-// unlike the boards above, every row here gets the fuller headshot +
-// date/opponent/workload treatment rather than just the rank-1 leader.
-// Reads in the order the game actually happened: when/against whom, how
-// much work the at-bats took, then how many of those pitches got fouled
-// off — the number that made the board — with his season total trailing
-// as the "how unusual was this for HIM" context.
+// Single-game highs and Most-fouls-in-a-PA are both STORIES (one specific
+// game or at-bat), not rankings — so unlike FoulLeaderBoard above, every row
+// gets the fuller headshot + narrated-context treatment rather than just the
+// rank-1 leader. Reads in the order the thing actually happened: when/
+// against whom, how much work the at-bats took, then how many of those
+// pitches got fouled off — the number that made the board.
 function gameHighSummary(b) {
   const scene = []
   if (b.maxGameDate) scene.push(monthDay(b.maxGameDate))
@@ -246,17 +264,38 @@ function gameHighSummary(b) {
   if (workload.length) parts.push(workload.join(', '))
   if (b.maxGameFouls && b.maxGamePitches) parts.push(`${b.maxGameFouls} fouled off`)
 
-  const story = parts.join(' · ')
-  return b.fouls ? `${story} — ${b.fouls} fouls this season` : story
+  return parts.join(' · ')
 }
 
-function SingleGameHighs({ rows }) {
+// The single most-fouled AT-BAT of the season: the setting first (inning,
+// outs, runners, score — all as of the pitch that STARTED the at-bat, not
+// wherever it ended up), then who was on the mound, then the result.
+function paHighSummary(pa) {
+  const half = pa.half === 'top' ? 'Top' : 'Bottom'
+  const outsLabel = pa.outs === 1 ? '1 out' : `${pa.outs ?? 0} outs`
+  const runners = [pa.onFirst && '1st', pa.onSecond && '2nd', pa.onThird && '3rd'].filter(Boolean)
+  const scene = [`${half} ${ordinal(pa.inning)}`, outsLabel, runners.length ? `${runners.join('-')} on` : 'bases empty']
+
+  const hisScore = pa.half === 'top' ? pa.awayScore : pa.homeScore
+  const oppScore = pa.half === 'top' ? pa.homeScore : pa.awayScore
+
+  const parts = [scene.join(', ')]
+  if (hisScore != null && oppScore != null) {
+    parts.push(`${teamAbbr({ id: pa.battingTeamId })} ${hisScore}, ${teamAbbr({ id: pa.opponentId })} ${oppScore}`)
+  }
+  if (pa.pitcherName) parts.push(`vs ${pa.pitcherName}`)
+
+  const story = parts.join(' · ')
+  return pa.resultEvent ? `${story} — ${pa.resultEvent}` : story
+}
+
+function FoulStoryBoard({ title, note, rows, value, summary }) {
   if (!rows || rows.length === 0) return null
   return (
     <div className="foulboard-block">
       <h2 className="foulboard__caption foulboard-block__title">
-        Single-game highs
-        <span className="foulboard__note"> The most fouls hit by one batter in a single game this season.</span>
+        {title}
+        {note ? <span className="foulboard__note"> {note}</span> : null}
       </h2>
       <ol className="sgh-list">
         {rows.map((b) => (
@@ -269,11 +308,11 @@ function SingleGameHighs({ rows }) {
                 </PlayerLink>
                 <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
                 <span className="sgh-valstack">
-                  <span className="sgh-val">{b.maxGameFouls}</span>
+                  <span className="sgh-val">{value(b)}</span>
                   <span className="sgh-vallabel">Fouls</span>
                 </span>
               </div>
-              <div className="sgh-sub">{gameHighSummary(b)}</div>
+              <div className="sgh-sub">{summary(b)}</div>
             </div>
           </li>
         ))}

@@ -19,10 +19,23 @@ const pitch = (code, postStrikes, typeCode = 'FF') => ({
   count: { strikes: postStrikes },
 })
 
-const play = ({ inning = 1, half = 'top', eventType = 'strikeout', batter, pitcher, events }) => ({
+// `outs`/`on1`/`on2`/`on3`/`awayScore`/`homeScore` are this PLAY's own
+// (POST-play) state — matches the real feed's off-by-one convention, so a
+// later play's "entering" snapshot is whatever the PRIOR play sets here.
+const play = ({
+  inning = 1, half = 'top', eventType = 'strikeout', event = '', batter, pitcher, events,
+  outs = 0, on1 = false, on2 = false, on3 = false, awayScore = 0, homeScore = 0,
+}) => ({
   about: { inning, halfInning: half },
-  result: { eventType },
-  matchup: { batter: { id: batter, fullName: `Batter ${batter}` }, pitcher: { id: pitcher, fullName: `Pitcher ${pitcher}` } },
+  result: { eventType, event, awayScore, homeScore },
+  count: { outs },
+  matchup: {
+    batter: { id: batter, fullName: `Batter ${batter}` },
+    pitcher: { id: pitcher, fullName: `Pitcher ${pitcher}` },
+    postOnFirst: on1 ? { id: 901 } : undefined,
+    postOnSecond: on2 ? { id: 902 } : undefined,
+    postOnThird: on3 ? { id: 903 } : undefined,
+  },
   playEvents: events,
 })
 
@@ -108,6 +121,67 @@ test('team, pitcher, inning, and 10+ fold aggregates roll up correctly', () => {
   // Pitch-type tally (all 'FF' here).
   assert.equal(agg.pitchTypes.get('FF').pitches, 3)
   assert.equal(agg.pitchTypes.get('FF').fouls, 2)
+})
+
+test('the most-fouled plate appearance captures the situational context ENTERING it, from the prior play', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      // Sets the scene: 1 out recorded, nobody on, still scoreless. The NEXT
+      // play's "entering" snapshot should read exactly this.
+      play({ batter: 20, pitcher: 200, eventType: 'flyout', event: 'Flyout', outs: 1 }),
+      // Our batter fouls twice then strikes out — outs=2/awayScore=1 here are
+      // this PLAY's own post-state and must NOT leak into the entering snapshot.
+      play({
+        batter: 10, pitcher: 200, eventType: 'strikeout', event: 'Strikeout',
+        events: [pitch('F', 1), pitch('F', 2), pitch('S', 3)],
+        outs: 2, awayScore: 1,
+      }),
+    ]),
+  )
+  const b = agg.batters.get(10)
+  assert.equal(b.bestPaFouls, 2)
+  assert.deepEqual(b.bestPa, {
+    pitcherId: 200,
+    pitcherName: 'Pitcher 200',
+    resultEvent: 'Strikeout',
+    inning: 1,
+    half: 'top',
+    battingTeamId: 1,
+    opponentId: 2,
+    outs: 1, // entering outs (the flyout before him), not the K's own post-outs
+    onFirst: false,
+    onSecond: false,
+    onThird: false,
+    awayScore: 0, // entering score, not this play's post-strikeout score
+    homeScore: 0,
+  })
+})
+
+test('a mid-AB interruption keeps the PA-foul tally AND the true entering snapshot, not the resumed segment\'s', () => {
+  const agg = aggregateGameFouls(
+    feedWith([
+      // Runner on 1st, 0 out, 2-1 game — the TRUE state this PA starts in.
+      play({ batter: 30, pitcher: 200, eventType: 'single', event: 'Single', outs: 0, on1: true, awayScore: 2, homeScore: 1 }),
+      // Batter 11 fouls once, then a stolen base interrupts (NON_PA) — by the
+      // time it resolves, outs/runners have changed (would be WRONG to use).
+      play({
+        batter: 11, pitcher: 200, eventType: 'stolen_base_2b',
+        events: [pitch('F', 1)], outs: 0, on1: false, on2: true, awayScore: 2, homeScore: 1,
+      }),
+      // At-bat resumes and ends in a walk; this play's own outs/runners must
+      // NOT overwrite the snapshot fixed on the first segment above.
+      play({
+        batter: 11, pitcher: 200, eventType: 'walk', event: 'Walk',
+        events: [pitch('F', 1)], outs: 1, on1: true, on2: true, awayScore: 2, homeScore: 1,
+      }),
+    ]),
+  )
+  const b = agg.batters.get(11)
+  assert.equal(b.bestPaFouls, 2, 'both fouls (across the interruption) belong to the one PA')
+  assert.equal(b.bestPa.resultEvent, 'Walk')
+  assert.equal(b.bestPa.outs, 0, 'entering outs from BEFORE the PA started, not after the steal')
+  assert.equal(b.bestPa.onFirst, true, 'runner was on 1st when this PA STARTED, before the steal moved him to 2nd')
+  assert.equal(b.bestPa.onSecond, false, 'nobody was on 2nd until the mid-PA steal — must not leak into the entering snapshot')
 })
 
 // --- reader selectors --------------------------------------------------------
