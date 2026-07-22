@@ -8,15 +8,6 @@
 // collapse on a phone via CSS — the secondary stat columns the career register
 // sheds on a small screen.
 
-// Wraps a cell's content so it renders as a single <td> spanning every
-// remaining column instead of one-per-column — the career register's missed-
-// season note (see person.js's missingSeasonRows) uses this so the sentence
-// can wrap within the row's width rather than sitting `nowrap` in one narrow
-// column and forcing the whole table into horizontal scroll on a phone.
-export function spanCell(value) {
-  return { __ledgerSpan: true, value }
-}
-
 export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '', totals = null, hideNarrow = [] }) {
   const hide = new Set(hideNarrow)
   const narrow = (i) => (hide.has(i) ? 'col-narrow-hide' : '')
