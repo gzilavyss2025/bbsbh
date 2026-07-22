@@ -13,9 +13,10 @@
 // majority of shared links, and where the bug this warms against was found.
 //
 // Self-contained (own small copies of the date/slug helpers), same
-// convention as gen-rehab.mjs mirroring person.js's transaction-scan logic —
-// the Vercel edge runtime's module graph and this Node script's don't
-// overlap, so there's nothing to import from.
+// convention as gen-rehab.mjs mirroring person.js's transaction-scan logic
+// for anything that lives under src/ — but api/_lib/http.js has no such
+// boundary (plain fetch/AbortController, no edge-runtime-only API), so its
+// fetchWithTimeout is imported directly rather than re-copied a third time.
 //
 // Rather than reconstructing /api/og's query params by hand (which would
 // duplicate — and could drift from — api/_lib/cards.js's own card-building
@@ -23,6 +24,11 @@
 // "og:image"> is read back out and warmed verbatim. That guarantees the
 // exact URL a real crawler will request, with no risk of warming a
 // differently-parameterized (and therefore differently-cached) image URL.
+// If api/preview.js's renderHead() ever reorders/requotes that tag, OG_IMAGE_RE
+// stops matching silently — warmPage logs a warning in that case rather than
+// letting image-warm coverage quietly drop to zero with no signal.
+
+import { fetchWithTimeout } from '../api/_lib/http.js'
 
 const STATSAPI = 'https://statsapi.mlb.com'
 const APP_ORIGIN = 'https://bbsbh.vercel.app'
@@ -88,18 +94,8 @@ async function mapConcurrent(items, limit, mapper) {
   return results
 }
 
-async function fetchWithTimeout(url) {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
-  try {
-    return await fetch(url, { signal: controller.signal })
-  } finally {
-    clearTimeout(timer)
-  }
-}
-
 async function getJson(url) {
-  const res = await fetchWithTimeout(url)
+  const res = await fetchWithTimeout(url, undefined, REQUEST_TIMEOUT_MS)
   if (!res.ok) throw new Error(`${res.status} for ${url}`)
   return res.json()
 }
@@ -109,17 +105,23 @@ async function getJson(url) {
 // warms that image URL too. Returns nothing meaningful — callers only care
 // about the counters below.
 async function warmPage(url, seenImages) {
-  const res = await fetchWithTimeout(url)
+  const res = await fetchWithTimeout(url, undefined, REQUEST_TIMEOUT_MS)
   const outcome = { url, ok: res.ok, status: res.status }
   if (!res.ok) return [outcome]
   const text = await res.text()
   const m = OG_IMAGE_RE.exec(text)
-  if (!m) return [outcome]
+  if (!m) {
+    console.warn(
+      `warm-previews: no og:image tag found on ${url} — OG_IMAGE_RE may no ` +
+        `longer match api/preview.js's renderHead() output`,
+    )
+    return [outcome]
+  }
   const imageUrl = m[1].replace(/&amp;/g, '&')
   if (seenImages.has(imageUrl)) return [outcome]
   seenImages.add(imageUrl)
   try {
-    const imgRes = await fetchWithTimeout(imageUrl)
+    const imgRes = await fetchWithTimeout(imageUrl, undefined, REQUEST_TIMEOUT_MS)
     return [outcome, { url: imageUrl, ok: imgRes.ok, status: imgRes.status }]
   } catch (err) {
     return [outcome, { url: imageUrl, ok: false, status: null, error: String(err) }]

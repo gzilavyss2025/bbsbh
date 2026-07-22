@@ -7,9 +7,12 @@
 
 export const FETCH_TIMEOUT_MS = 4000
 
-export async function fetchWithTimeout(url, init) {
+// `timeoutMs` defaults to the crawler-facing budget above but is overridable
+// per call — scripts/warm-previews.mjs reuses this same guard for its own,
+// more patient batch-job fetches (see its REQUEST_TIMEOUT_MS).
+export async function fetchWithTimeout(url, init, timeoutMs = FETCH_TIMEOUT_MS) {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
     return await fetch(url, { ...init, signal: controller.signal })
   } finally {
