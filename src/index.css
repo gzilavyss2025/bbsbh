@@ -11509,7 +11509,7 @@ body {
   width: auto;
   padding-left: 14px;
   padding-right: 14px;
-  margin: 8px 0 8px 8px;
+  margin: 8px 8px 8px 8px;
 }
 /* The active/picked state draws its own bordered card (.vsteam__team.is-active)
    around the logo — the wider 14px resting padding above reads as loose once
