@@ -1,15 +1,46 @@
 import { useMemo, useRef, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
-import { shapeStandings, shapeWildCard } from '../api/standings.js'
+import { fetchTeamScores, leagueSeasonGradesFor } from '../api/teamScore.js'
+import { fetchSeasonScores } from '../api/seasonScore.js'
+import {
+  shapeStandings,
+  shapeWildCard,
+  attachTeamField,
+  extractRanks,
+  attachRankTrend,
+  DASH,
+} from '../api/standings.js'
 import { favoriteAccentColor } from '../lib/teams.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
+
+// Rank-movement glyph: '' (not '—') when there's nothing to compare, since
+// this rides inline inside the always-visible GB/WCGB cell rather than its
+// own column — a bare dash there would read as "no GB" instead of "no trend".
+const TREND_GLYPH = { up: '▲', down: '▼' }
+
+// Inline rank-movement indicator, riding inside the GB/WCGB cell rather than
+// its own column (see column-density note in the standings enhancement plan)
+// — renders nothing for 'flat' (a held rank is the least informative case,
+// and next to a division leader's dash-placeholder GB a flat glyph doubles up
+// as a second, redundant dash) or when there's no trend to compare against
+// (missing from one of the two snapshots, or not ranked in this board mode).
+function TrendGlyph({ trend }) {
+  if (trend !== 'up' && trend !== 'down') return null
+  return <span className={`standings-trend standings-trend--${trend}`}>{TREND_GLYPH[trend]}</span>
+}
+
+// One decimal, or DASH when the team has no Season Grade snapshot yet.
+function formatGrade(grade) {
+  return grade != null ? grade.toFixed(1) : DASH
+}
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // MLB seasons open in late March / early April; an earlier month-first button
@@ -66,11 +97,13 @@ function buildJumps(today) {
 }
 
 // Screen: league-wide standings, both leagues × three divisions, with home/away
-// splits, runs for/against, run differential, streak and last-ten. Spoiler-safe
-// by default — the view opens "entering today" (through yesterday) and today's
-// live standings are an explicit, one-tap reveal. The historical quick-jumps
-// scrub back to earlier dates this season. (Previous seasons are a deliberate
-// later phase; `season` is already the one knob that would drive them.)
+// splits, runs for/against, run differential, expected (Pythagorean) pace,
+// Season Grade, division magic number/clinch, streak, last-ten, and a
+// rank-movement trend glyph riding on GB. Spoiler-safe by default — the view
+// opens "entering today" (through yesterday) and today's live standings are an
+// explicit, one-tap reveal. The historical quick-jumps scrub back to earlier
+// dates this season. (Previous seasons are a deliberate later phase; `season`
+// is already the one knob that would drive them.)
 export function StandingsPage() {
   useDocumentTitle('Standings')
 
@@ -85,6 +118,15 @@ export function StandingsPage() {
   // 'wildcard' (mlb.com's pooled wild-card race board, one list per league
   // with a cutoff line after the 3rd wild-card spot).
   const [boardMode, setBoardMode] = useState('division')
+
+  // Phone width hides the `.st-ext` columns to avoid horizontal scroll by
+  // default (see the progressive-disclosure comment on `.standings--full` in
+  // index.css) — this is the opt-in escape hatch: below the same 740px
+  // breakpoint the wide layout already uses for real, a toggle reveals them
+  // anyway and lets the table scroll sideways instead, team column pinned via
+  // the existing `.standings--full td.team` sticky rule.
+  const isWide = useMediaQuery(WIDE_QUERY)
+  const [expandedCols, setExpandedCols] = useState(false)
 
   // Selected date key: 'entering' (default, through yesterday), 'live' (opt-in,
   // includes today), 'step' (the bottom day-stepper is driving), or a jump key
@@ -136,13 +178,44 @@ export function StandingsPage() {
   const lastGood = useRef([])
   if (data) lastGood.current = data
   const shown = data ?? lastGood.current
-  const leagues = useMemo(
-    () =>
+
+  // Season Grade column: a SEPARATE, independent fetch of two already-nightly
+  // static files (never statsapi) — a slow/failed grade file must never block
+  // the primary standings table. Cutoff pinned to at most yesterday even in
+  // Live mode: the nightly snapshots have no "today" entry to leak anyway, so
+  // this makes the safety argument provable rather than incidental.
+  const { data: scoreFiles } = useAsync(() => Promise.all([fetchTeamScores(), fetchSeasonScores()]), [])
+  const gradeCutoff = view.date ?? yesterday
+  const gradeByTeamId = useMemo(() => {
+    if (!scoreFiles) return new Map()
+    const [teamScores, seasonScores] = scoreFiles
+    const rows = leagueSeasonGradesFor(teamScores, seasonScores, season, gradeCutoff)
+    return new Map(rows.map((r) => [r.teamId, r.score]))
+  }, [scoreFiles, season, gradeCutoff])
+
+  // Rank-movement trend: a second, independent standings fetch a week before
+  // whatever date is currently effectively shown (`view.date`, or `today` in
+  // Live mode) — always strictly OLDER than the primary fetch's own date, so
+  // it can never be less spoiler-safe than what's already on screen.
+  const compareDate = useMemo(() => shiftDays(view.date ?? today, -7), [view.date, today])
+  const { data: compareData } = useAsync(() => fetchLeagueStandings(season, compareDate), [season, compareDate])
+  const prevRankByTeamId = useMemo(() => {
+    const compareLeagues =
+      boardMode === 'wildcard'
+        ? shapeWildCard(compareData ?? [], favoriteTeamId)
+        : shapeStandings(compareData ?? [], favoriteTeamId)
+    return extractRanks(compareLeagues, boardMode)
+  }, [compareData, boardMode, favoriteTeamId])
+
+  const leagues = useMemo(() => {
+    const shaped =
       boardMode === 'wildcard'
         ? shapeWildCard(shown, favoriteTeamId)
-        : shapeStandings(shown, favoriteTeamId),
-    [shown, favoriteTeamId, boardMode],
-  )
+        : shapeStandings(shown, favoriteTeamId)
+    attachTeamField(shaped, gradeByTeamId, 'grade')
+    attachRankTrend(shaped, boardMode, prevRankByTeamId)
+    return shaped
+  }, [shown, favoriteTeamId, boardMode, gradeByTeamId, prevRankByTeamId])
 
   const refreshing = loading && shown.length > 0
 
@@ -192,7 +265,7 @@ export function StandingsPage() {
           )}
         </div>
 
-        <div className="standings-jumps" role="group" aria-label="Standings date">
+        <div className="standings-jumps standings-jumps--scroll" role="group" aria-label="Standings date">
           <button
             type="button"
             aria-pressed={selKey === 'entering'}
@@ -232,6 +305,19 @@ export function StandingsPage() {
             Wild Card
           </button>
         </div>
+
+        {!isWide && (
+          <div className="standings-jumps" role="group" aria-label="Standings column detail">
+            <button
+              type="button"
+              aria-pressed={expandedCols}
+              className={`standings-jump ${expandedCols ? 'is-active' : ''}`}
+              onClick={() => setExpandedCols((v) => !v)}
+            >
+              {expandedCols ? 'Fewer columns' : 'More columns ↔'}
+            </button>
+          </div>
+        )}
       </div>
 
       <AsyncStatus
@@ -248,8 +334,8 @@ export function StandingsPage() {
           ? leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
                 <h2 className="lgstand__league">{lg.name}</h2>
-                <div className="ledger-wrap">
-                  <table className="standings standings--full standings--wc">
+                <div className="ledger-wrap standings-wrap">
+                  <table className={`standings standings--full standings--wc ${expandedCols ? 'is-expanded' : ''}`.trim()}>
                     <thead>
                       <tr>
                         <th className="team">Team</th>
@@ -257,13 +343,15 @@ export function StandingsPage() {
                         <th>L</th>
                         <th>Pct</th>
                         <th>GB</th>
+                        <th className="st-ext">Pace</th>
+                        <th className="st-ext">Grade</th>
                         <th className="st-ext">Strk</th>
                         <th className="st-ext">L10</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="wc-grouphead">
-                        <td colSpan={7}>Division leaders</td>
+                        <td colSpan={9}>Division leaders</td>
                       </tr>
                       {lg.leaders.map((t) => (
                         <tr key={t.id} {...rowProps(t)}>
@@ -277,13 +365,17 @@ export function StandingsPage() {
                           <td>{t.w}</td>
                           <td>{t.l}</td>
                           <td>{t.pct}</td>
-                          <td>{t.gb}</td>
+                          <td>
+                            {t.gb} <TrendGlyph trend={t.trend} />
+                          </td>
+                          <td className="st-ext">{t.pace}</td>
+                          <td className="st-ext">{formatGrade(t.grade)}</td>
                           <td className="st-ext">{t.streak}</td>
                           <td className="st-ext">{t.l10}</td>
                         </tr>
                       ))}
                       <tr className="wc-grouphead">
-                        <td colSpan={7}>Wild card</td>
+                        <td colSpan={9}>Wild card</td>
                       </tr>
                       {lg.wildcard.map((t) => {
                         const { className, style } = rowProps(t)
@@ -303,7 +395,11 @@ export function StandingsPage() {
                             <td>{t.w}</td>
                             <td>{t.l}</td>
                             <td>{t.pct}</td>
-                            <td>{t.wcgb}</td>
+                            <td>
+                              {t.wcgb} <TrendGlyph trend={t.trend} />
+                            </td>
+                            <td className="st-ext">{t.pace}</td>
+                            <td className="st-ext">{formatGrade(t.grade)}</td>
                             <td className="st-ext">{t.streak}</td>
                             <td className="st-ext">{t.l10}</td>
                           </tr>
@@ -320,8 +416,8 @@ export function StandingsPage() {
                 {lg.divisions.map((div) => (
                   <div className="lgstand__div" key={div.id}>
                     <h3 className="lgstand__divname">{div.name}</h3>
-                    <div className="ledger-wrap">
-                      <table className="standings standings--full">
+                    <div className="ledger-wrap standings-wrap">
+                      <table className={`standings standings--full ${expandedCols ? 'is-expanded' : ''}`.trim()}>
                         <thead>
                           <tr>
                             <th className="team">Team</th>
@@ -329,11 +425,14 @@ export function StandingsPage() {
                             <th>L</th>
                             <th>Pct</th>
                             <th>GB</th>
+                            <th className="st-ext">Magic#</th>
                             <th className="st-ext">Home</th>
                             <th className="st-ext">Away</th>
                             <th className="st-ext">RS</th>
                             <th className="st-ext">RA</th>
                             <th>Diff</th>
+                            <th className="st-ext">Pace</th>
+                            <th className="st-ext">Grade</th>
                             <th className="st-ext">Strk</th>
                             <th className="st-ext">L10</th>
                           </tr>
@@ -350,12 +449,19 @@ export function StandingsPage() {
                               <td>{t.w}</td>
                               <td>{t.l}</td>
                               <td>{t.pct}</td>
-                              <td>{t.gb}</td>
+                              <td>
+                                {t.gb} <TrendGlyph trend={t.trend} />
+                              </td>
+                              <td className={`st-ext ${t.magic === 'Clinched' ? 'is-clinched' : ''}`.trim()}>
+                                {t.magic}
+                              </td>
                               <td className="st-ext">{t.home}</td>
                               <td className="st-ext">{t.away}</td>
                               <td className="st-ext">{t.rs}</td>
                               <td className="st-ext">{t.ra}</td>
                               <td className={t.diffTone}>{t.diff}</td>
+                              <td className="st-ext">{t.pace}</td>
+                              <td className="st-ext">{formatGrade(t.grade)}</td>
                               <td className="st-ext">{t.streak}</td>
                               <td className="st-ext">{t.l10}</td>
                             </tr>
