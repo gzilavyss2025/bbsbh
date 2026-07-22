@@ -29,6 +29,7 @@ export function RollingLine({
   homeName,
   curIdx,
   onSelect,
+  disabled = false,
 }) {
   const firstCol = Math.max(1, unlocked - regulation + 1)
   const cols = []
@@ -96,6 +97,7 @@ export function RollingLine({
                             l ? '' : 'rolling__pending'
                           } ${l && l.runs > 0 ? 'rolling__runs' : ''}`}
                           aria-current={active ? 'true' : undefined}
+                          aria-disabled={disabled || undefined}
                           // The label must carry the cell's value too — it
                           // overrides the visible text in the accessible name,
                           // and "Top of inning 3" alone hides both the runs

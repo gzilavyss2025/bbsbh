@@ -51,8 +51,8 @@ read the linked ADRs before refactoring:
 
 - **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
   only once revealed; reveal is one-directional, and re-sealing on inning
-  navigation works by the parent remounting with `key={inning}` (see
-  `InningViewer.jsx`) (ADR-0002).
+  navigation works by the parent remounting with `key={`${inning}-${half}`}`
+  (see `InningViewer.jsx`/`screens/innings/InningPage.jsx`) (ADR-0002).
 - The **defense diamond** and both teams' **lineup cards** render *outside* the
   seal as the pre-scoring reference (above it while sealed, below the play-by-play
   once revealed), gated to `revealed || isNextToReveal` (ADR-0010). The data comes
@@ -81,6 +81,14 @@ read the linked ADRs before refactoring:
   appearance at a time via a transient cursor (`atBatCountFor`,
   `useRevealProgress`) that always collapses into a normal `revealTo` commit
   rather than becoming a second spoiler boundary (ADR-0016).
+- **The forward page-turn transition** (`src/components/page-turn/`) mounts an
+  inert preview of the destination half — real (possibly still-sealed)
+  content — underneath the active one during the animation. `SealBox`'s own
+  render-function gate (ADR-0002) is what keeps that preview spoiler-safe;
+  `InningPage.jsx`'s `presentationOnly` flag only mutes side-effecting
+  callbacks (`onReveal`/`onStepInfo`/`onSteppedThrough`) so the preview can't
+  itself advance `revealedThrough` or double-report a step. Not a second
+  reveal boundary — see ADR-0024.
 
 ## Notification cards, casing, color, and button copy (ADR-0017)
 
