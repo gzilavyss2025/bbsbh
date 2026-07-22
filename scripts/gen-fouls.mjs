@@ -298,6 +298,7 @@ export function aggregateGameFouls(feed) {
           pitcherId,
           pitcherName: p?.name ?? play.matchup?.pitcher?.fullName ?? '',
           resultEvent: play.result?.event ?? '',
+          resultType: play.result?.eventType ?? '',
           inning: inningNum,
           half,
           battingTeamId,
@@ -348,9 +349,9 @@ const upsertBatterPaHigh = (db) =>
   db.prepare(
     `INSERT INTO foul_batter_pa_high
        (person_id, fouls, game_pk, pitcher_id, pitcher_name, result_event,
-        inning, half, outs, on_first, on_second, on_third, away_score,
-        home_score, batting_team_id, opponent_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        result_type, inning, half, outs, on_first, on_second, on_third,
+        away_score, home_score, batting_team_id, opponent_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id) DO UPDATE SET
        fouls = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                     THEN excluded.fouls ELSE foul_batter_pa_high.fouls END,
@@ -362,6 +363,8 @@ const upsertBatterPaHigh = (db) =>
                            THEN excluded.pitcher_name ELSE foul_batter_pa_high.pitcher_name END,
        result_event = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                            THEN excluded.result_event ELSE foul_batter_pa_high.result_event END,
+       result_type = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                          THEN excluded.result_type ELSE foul_batter_pa_high.result_type END,
        inning = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                      THEN excluded.inning ELSE foul_batter_pa_high.inning END,
        half = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
@@ -459,7 +462,7 @@ async function ingestGame(db, stmts, gamePk, date, season) {
         const pa = b.bestPa
         stmts.batterPaHigh.run(
           id, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
-          pa.inning, pa.half, pa.outs, pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0,
+          pa.resultType, pa.inning, pa.half, pa.outs, pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0,
           pa.onThird ? 1 : 0, pa.awayScore, pa.homeScore, pa.battingTeamId, pa.opponentId,
         )
       }
@@ -526,6 +529,7 @@ export function exportFouls(db) {
             pitcherId: pa.pitcher_id,
             pitcherName: pa.pitcher_name,
             resultEvent: pa.result_event,
+            resultType: pa.result_type,
             inning: pa.inning,
             half: pa.half,
             outs: pa.outs,

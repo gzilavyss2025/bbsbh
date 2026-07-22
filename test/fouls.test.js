@@ -144,6 +144,7 @@ test('the most-fouled plate appearance captures the situational context ENTERING
     pitcherId: 200,
     pitcherName: 'Pitcher 200',
     resultEvent: 'Strikeout',
+    resultType: 'strikeout',
     inning: 1,
     half: 'top',
     battingTeamId: 1,

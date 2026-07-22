@@ -19647,13 +19647,14 @@ body {
 .scorebug__situation {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding-top: 6px;
+  gap: 10px;
+  padding-top: 8px;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .scorebug__outs {
   display: inline-flex;
-  gap: 3px;
+  flex-direction: column;
+  gap: 4px;
 }
 .scorebug__outdot {
   width: 7px;
@@ -19667,6 +19668,8 @@ body {
   border-color: var(--clay-deep);
 }
 .scorebug__pitcher {
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-body);
   font-size: var(--fs-caption);
   color: var(--text-caption);
@@ -19676,15 +19679,24 @@ body {
 }
 .scorebug__result {
   align-self: flex-start;
+  margin-top: 2px;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-caps);
   padding: 2px 9px;
   border-radius: var(--radius-pill);
-  background: var(--seal-soft);
-  color: var(--award-ink);
-  border: var(--bw-hair) solid var(--rule-soft);
+  border: var(--bw-hair) solid transparent;
+}
+.scorebug__result.is-positive {
+  background: var(--field-soft);
+  color: var(--field-deep);
+  border-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+}
+.scorebug__result.is-negative {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+  border-color: color-mix(in srgb, var(--clay) 35%, var(--border-rule));
 }
 
 /* Single-Game Highs — every entry gets the headshot treatment (it's telling

@@ -180,6 +180,7 @@ CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
   pitcher_id      INTEGER,
   pitcher_name    TEXT,
   result_event    TEXT,
+  result_type     TEXT,
   inning          INTEGER,
   half            TEXT,
   outs            INTEGER,

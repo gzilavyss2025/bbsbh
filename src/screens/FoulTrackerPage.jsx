@@ -11,7 +11,7 @@ import { PlayerLink } from '../components/PlayerLink.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
-import { DiamondGlyph } from '../components/DiamondGlyph.jsx'
+import { BaseoutDiamond } from '../components/BaseoutDiamond.jsx'
 import { teamAbbr } from '../lib/teams.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
@@ -284,6 +284,18 @@ function gameHighSummary(b) {
   return parts.join(' · ')
 }
 
+// A result that reaches base or otherwise helps the batter's own line — the
+// user-facing "good outcome" set (hits, walks, HBP, a productive sac fly);
+// everything else (every out, however it's recorded, plus reaching on an
+// error — not credited as the batter's own doing) reads negative. Keyed on
+// the feed's machine eventType (see gen-fouls.mjs's resultType), not the
+// human-readable event string, so this can't be fooled by "Sac Fly" vs.
+// "Sac Bunt" wording drift the way string-matching would be.
+const POSITIVE_RESULT_TYPES = new Set([
+  'single', 'double', 'triple', 'home_run',
+  'walk', 'intent_walk', 'hit_by_pitch', 'sac_fly', 'catcher_interf',
+])
+
 // A compact scorebug for the single most-fouled AT-BAT of the season — the
 // same information a broadcast graphic would carry: both teams' score, the
 // inning, the base/out state ENTERING the at-bat (see gen-fouls.mjs's header
@@ -293,6 +305,7 @@ function PaScorebug({ pa }) {
   const hisScore = pa.half === 'top' ? pa.awayScore : pa.homeScore
   const oppScore = pa.half === 'top' ? pa.homeScore : pa.awayScore
   const outs = pa.outs ?? 0
+  const positive = POSITIVE_RESULT_TYPES.has(pa.resultType)
   return (
     <div className="scorebug">
       <div className="scorebug__score">
@@ -314,17 +327,19 @@ function PaScorebug({ pa }) {
         </span>
       </div>
       <div className="scorebug__situation">
+        <BaseoutDiamond size={30} bases={[!!pa.onFirst, !!pa.onSecond, !!pa.onThird]} />
         <span className="scorebug__outs" role="img" aria-label={`${outs} ${outs === 1 ? 'out' : 'outs'}`}>
           {[0, 1, 2].map((i) => (
             <span key={i} className={`scorebug__outdot ${i < outs ? 'is-out' : ''}`} />
           ))}
         </span>
-        <DiamondGlyph size={20} bases={[!!pa.onFirst, !!pa.onSecond, !!pa.onThird]} />
         <span className="scorebug__pitcher">
           vs {pa.pitcherId ? <PlayerLink id={pa.pitcherId}>{pa.pitcherName}</PlayerLink> : pa.pitcherName}
         </span>
       </div>
-      {pa.resultEvent && <span className="scorebug__result">{pa.resultEvent}</span>}
+      {pa.resultEvent && (
+        <span className={`scorebug__result ${positive ? 'is-positive' : 'is-negative'}`}>{pa.resultEvent}</span>
+      )}
     </div>
   )
 }
