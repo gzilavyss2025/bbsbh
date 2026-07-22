@@ -14,13 +14,11 @@ import { buildMarginNotes } from '../api/pitcher-callouts.js'
 import { safeToShowEntering } from '../api/enteringHalf.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
-import { WinProbChart } from '../components/WinProbChart.jsx'
 import { RollingLine } from '../components/RollingLine.jsx'
-import { StatBox, AbsCard } from '../components/StatBox.jsx'
-import { DueUpNextCard } from '../components/DueUpNextCard.jsx'
 import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
-import { HalfInning } from '../components/HalfInning.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'
+import { InningPage } from './innings/InningPage.jsx'
+import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
 import { PitchersSection } from '../components/PitchersSection.jsx'
 import { MarginNotes } from '../components/MarginNotes.jsx'
 import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
@@ -145,6 +143,56 @@ export function InningViewer({
   const effInning = Math.floor(curIdx / 2) + 1
   const effHalf = curIdx % 2 === 0 ? 'top' : 'bottom'
   const goTo = (idx) => onInning(Math.floor(idx / 2) + 1, idx % 2 === 0 ? 'top' : 'bottom')
+
+  // The page-turn transition (see InningPageTurn.jsx) for forward navigation
+  // only — backward always keeps calling goTo directly above. requestHalf
+  // itself falls back to an immediate goTo for anything that isn't a genuine
+  // forward/unlocked destination, so routing every forward call site through
+  // it is safe even at the edges (e.g. nextIdx null-guarded below anyway).
+  // turnStatus drives aria-disabled on the nav while a turn is in flight —
+  // it's advisory only (the reducer's own first-request-wins guard is what
+  // actually prevents a second turn from starting).
+  const pageTurnRef = useRef(null)
+  const [turnStatus, setTurnStatus] = useState('idle')
+  const turning = turnStatus !== 'idle'
+  const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
+
+  // Builds one InningPage instance for a given half-index — shared by the
+  // active (interactive) render and, mid-turn, the inert preview render.
+  // Keyed on the half itself so navigating (or the turn committing) forces
+  // the fresh remount SealBox's re-sealing depends on (ADR-0002); presentation-
+  // only-ness is left entirely to InningPage/HalfInning to enforce (ADR-0024).
+  const renderInningPage = (idx, { presentationOnly }) => {
+    const pageInning = Math.floor(idx / 2) + 1
+    const pageHalf = idx % 2 === 0 ? 'top' : 'bottom'
+    return (
+      <InningPage
+        key={`${pageInning}-${pageHalf}`}
+        feed={feed}
+        inning={pageInning}
+        half={pageHalf}
+        meta={meta}
+        revealedThrough={revealedThrough}
+        onReveal={revealTo}
+        prospectsData={prospectsData}
+        rookiesData={rookiesData}
+        callouts={callouts}
+        workload={workload}
+        workloadGameDate={workloadGameDate}
+        vsTeam={vsTeam}
+        highlights={highlights}
+        atBatCountFor={atBatCountFor}
+        onStepInfo={(info) => setStepInfo({ ...info, forIdx: idx })}
+        onSteppedThrough={scrollToStatBox}
+        getDerived={getDerived}
+        runExpectancy={runExpectancy}
+        winProbPoints={winProbPoints}
+        winProbBigPlays={winProbBigPlays}
+        statBoxRef={statBoxRef}
+        presentationOnly={presentationOnly}
+      />
+    )
+  }
 
   // The next half within what's unlocked, for the floating advance button (§ the
   // lineup pages' btn--next, carried over to the innings view). Null at the last
@@ -305,6 +353,7 @@ export function InningViewer({
           <button
             onClick={() => goTo(Math.max(0, curIdx - 1))}
             disabled={curIdx === 0}
+            aria-disabled={turning || undefined}
             aria-label="Back one half-inning"
           >
             ‹ Back
@@ -313,8 +362,9 @@ export function InningViewer({
             {effHalf === 'top' ? 'Top' : 'Bottom'} {ordinal(effInning)}
           </span>
           <button
-            onClick={() => goTo(Math.min(maxIdx, curIdx + 1))}
+            onClick={() => requestForwardHalf(Math.min(maxIdx, curIdx + 1))}
             disabled={curIdx === maxIdx}
+            aria-disabled={turning || undefined}
             aria-label="Next half-inning"
           >
             Next ›
@@ -361,105 +411,24 @@ export function InningViewer({
           awayName={meta.away.clubName}
           homeName={meta.home.clubName}
           curIdx={curIdx}
-          onSelect={goTo}
+          onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
+          disabled={turning}
         />
 
-        {/* Row 2: the half's play-by-play (paired with its strike zone on the
-            wide layout). key on inning+half → fresh mount; a box at/under the
-            reveal mark stays open. */}
-        <div className="inning" key={`${effInning}-${effHalf}`}>
-          <HalfInning
-            feed={feed}
-            inning={effInning}
-            half={effHalf}
-            battingSide={effHalf === 'top' ? 'away' : 'home'}
-            label={effHalf === 'top' ? 'Top' : 'Bottom'}
-            battingAbbr={effHalf === 'top' ? meta.away.abbreviation : meta.home.abbreviation}
-            pitchingAbbr={effHalf === 'top' ? meta.home.abbreviation : meta.away.abbreviation}
-            awayName={meta.away.clubName}
-            homeName={meta.home.clubName}
-            awayId={meta.away.id}
-            homeId={meta.home.id}
-            revealed={curIdx <= revealedThrough}
-            isNextToReveal={curIdx === revealedThrough + 1}
-            revealedThrough={revealedThrough}
-            onReveal={revealTo}
-            prospectsData={prospectsData}
-            rookiesData={rookiesData}
-            callouts={callouts}
-            workload={workload}
-            workloadGameDate={workloadGameDate}
-            vsTeam={vsTeam}
-            highlights={highlights}
-            revealedAtBatCount={curAtBatCount}
-            onStepInfo={(info) => setStepInfo({ ...info, forIdx: curIdx })}
-            onSteppedThrough={scrollToStatBox}
-          />
-        </div>
-
-        {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
-            beside the win-probability chart. */}
-        <div className="innings__row2" ref={statBoxRef}>
-          {/* Left column: the stat card, then a preview of who's due up when
-              the OTHER team's next half starts — dueup.js's own gate keeps
-              this null until that half is actually the user's next one to
-              reveal (see DueUpNextCard's header comment), so it appears right
-              as the "NEXT >" nav does. Same display:contents-on-phone trick
-              as .innings__row2-right below: this wrapper only exists as a
-              layout box at the wide breakpoint. */}
-          <div className="innings__row2-left">
-            <StatBox
-              className="innings__statbox"
-              placeholder
-              feed={feed}
-              inning={effInning}
-              half={effHalf}
-              battingSide={effHalf === 'top' ? 'away' : 'home'}
-              awayAbbr={meta.away.abbreviation}
-              homeAbbr={meta.home.abbreviation}
-              awayLocation={meta.away.locationName || meta.away.abbreviation}
-              homeLocation={meta.home.locationName || meta.home.abbreviation}
-              getDerived={getDerived}
-              revealed={curIdx <= revealedThrough}
-              runExpectancy={runExpectancy}
-            />
-            <DueUpNextCard
-              feed={feed}
-              inning={effInning}
-              half={effHalf}
-              revealedThrough={revealedThrough}
-              awayId={meta.away.id}
-              homeId={meta.home.id}
-              awayName={meta.away.clubName}
-              homeName={meta.home.clubName}
-            />
-          </div>
-          {/* Wide layout only: ABS Challenges moves here, above the chart,
-              instead of trailing the pitch-stat grid on the left — see
-              AbsCard's own header comment. On a phone this wrapper is
-              display:contents (index.css) so WinProbChart falls back into
-              the same single flex column as everything else, with the
-              phone's own ABS copy staying inline inside StatBox. */}
-          <div className="innings__row2-right">
-            <AbsCard
-              feed={feed}
-              inning={effInning}
-              half={effHalf}
-              revealed={curIdx <= revealedThrough}
-              awayAbbr={meta.away.abbreviation}
-              homeAbbr={meta.home.abbreviation}
-            />
-            <WinProbChart
-              points={winProbPoints}
-              bigPlays={winProbBigPlays}
-              awayAbbr={meta.away.abbreviation}
-              homeAbbr={meta.home.abbreviation}
-              awayId={meta.away.id}
-              homeId={meta.home.id}
-              partial
-            />
-          </div>
-        </div>
+        {/* The half's play-by-play (paired with its strike zone on the wide
+            layout) plus the R/H/E/LOB + pitch-stat/WPA row beneath it — see
+            InningPage.jsx. InningPageTurn owns the active render (key on
+            inning+half → fresh mount; a box at/under the reveal mark stays
+            open) plus, only mid-turn, the inert preview + curl overlay for a
+            forward navigation (see InningPageTurn.jsx). */}
+        <InningPageTurn
+          ref={pageTurnRef}
+          activeIdx={curIdx}
+          maxIdx={maxIdx}
+          renderPage={renderInningPage}
+          onCommit={goTo}
+          onStatusChange={setTurnStatus}
+        />
 
         {/* Reference band. On the wide layout: pitchers + the fielding defense
             on the left, both lineups on the right. On a phone only Pitchers
@@ -565,7 +534,11 @@ export function InningViewer({
             </button>
           </div>
         ) : nextIdx != null ? (
-          <button className="btn btn--next" onClick={() => goTo(nextIdx)}>
+          <button
+            className="btn btn--next"
+            onClick={() => requestForwardHalf(nextIdx)}
+            aria-disabled={turning || undefined}
+          >
             {nextLabel} ›
           </button>
         ) : (

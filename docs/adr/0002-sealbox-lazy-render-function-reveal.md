@@ -12,6 +12,6 @@ Reveal is one-directional: there's no "hide again" action, so a stray
 double-tap can't flash-and-rehide, and there's no "reveal the whole game"
 bypass — reveal is strictly per-half-inning. Re-sealing on inning navigation
 is deliberately not a state reset inside `SealBox` itself; the parent
-(`InningViewer.jsx`) remounts the tree with `key={inning}`, which resets
-every `SealBox` back to sealed as a side effect of React's remount semantics
-rather than bespoke reset logic.
+(`InningViewer.jsx`, via `InningPage.jsx`) remounts the tree with
+`key={`${inning}-${half}`}`, which resets every `SealBox` back to sealed as a
+side effect of React's remount semantics rather than bespoke reset logic.

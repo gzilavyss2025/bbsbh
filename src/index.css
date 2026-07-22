@@ -4629,6 +4629,59 @@ body {
   gap: 12px;
 }
 
+/* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +
+   .innings__row2 pairing as .innings__grid's row-2 child. The active layer
+   sits in normal flow (so the scene's height still tracks its content, same
+   as before this feature existed); a preview of the destination half, only
+   ever present mid-turn, is absolutely positioned to sit exactly underneath
+   it. Stacking is local to .turnscene and kept below .pagenav's z-index: 20
+   (the floating bar must never be covered by an in-flight turn). */
+.turnscene {
+  position: relative;
+  isolation: isolate;
+}
+.turnscene__layer--preview {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.turnscene__layer--active {
+  position: relative;
+  z-index: 2;
+}
+/* WAAPI drives the actual clip-path timeline (InningPageTurn.jsx) — this
+   only scopes `will-change` to the moment a turn is actually in flight, so
+   the browser isn't asked to keep a compositor layer warm for a page that's
+   sitting still 99% of the time. */
+.turnscene:has(.turnscene__layer--preview) .turnscene__layer--active {
+  will-change: clip-path;
+}
+
+/* The decorative curl overlay (PageCurlOverlay.jsx) — inline SVG only, never
+   real text/content. Sits above both layers, never intercepts a tap, and is
+   invisible to assistive tech; see the component's own header comment for
+   why a WAAPI-only transform/opacity timeline (no path morphing) is a hard
+   requirement here. */
+.pagecurl {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* The floating/inline nav's mid-turn state (InningViewer.jsx passes
+   aria-disabled, never the real `disabled` attribute, while a page turn is
+   preparing/turning, so focus never jumps). aria-disabled alone doesn't stop
+   clicks the way `disabled` does — pointer-events: none here is what
+   actually blocks a second tap from landing mid-animation; the reducer's
+   own first-request-wins guard (pageTurnState.js) is the real backstop. */
+.inningnav button[aria-disabled='true'],
+.rolling__pick[aria-disabled='true'],
+.pagenav--innings .btn[aria-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .half {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);

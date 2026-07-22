@@ -29,6 +29,7 @@ export function RollingLine({
   homeName,
   curIdx,
   onSelect,
+  disabled = false,
 }) {
   const firstCol = Math.max(1, unlocked - regulation + 1)
   const cols = []
@@ -96,6 +97,20 @@ export function RollingLine({
                             l ? '' : 'rolling__pending'
                           } ${l && l.runs > 0 ? 'rolling__runs' : ''}`}
                           aria-current={active ? 'true' : undefined}
+                          // `disabled` (mid-turn) is advisory here, same as the
+                          // Back/Next buttons: aria-disabled + CSS pointer-events:none
+                          // (index.css) block a mouse/touch tap but not keyboard
+                          // activation of this real <button>. onClick below is
+                          // deliberately unconditional — a keyboard-activated pick
+                          // mid-turn is made safe by InningPageTurn's own invariants,
+                          // not by anything in this component: a backward/current
+                          // pick calls onSelect -> goTo, an external activeIdx change
+                          // InningPageTurn's prevActiveIdxRef effect always cancels
+                          // rather than commits; a forward pick's requestForwardHalf
+                          // is a no-op outside `idle` (first-request-wins). See the
+                          // keyboard-interrupt e2e tests in
+                          // e2e/innings-page-turn.spec.js.
+                          aria-disabled={disabled || undefined}
                           // The label must carry the cell's value too — it
                           // overrides the visible text in the accessible name,
                           // and "Top of inning 3" alone hides both the runs
