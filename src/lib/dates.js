@@ -31,6 +31,16 @@ export function monthDayYear(apiDate) {
   return m ? `${Number(m[2])}/${Number(m[3])}/${m[1]}` : ''
 }
 
+// "MON" — 3-letter uppercase weekday abbreviation, for a compact date badge
+// (foul tracker's single-game-highs link). Same no-Date-round-trip approach
+// as monthDay/monthDayYear; returns '' for a missing/garbled date.
+export function weekdayAbbr(apiDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return ''
+  const [y, m, d] = apiDate.split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return dt.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 3).toUpperCase() // caps-js-exempt
+}
+
 // "Fri, Jul 5" style label for the slate header.
 export function humanDate(apiDate) {
   const [y, m, d] = apiDate.split('-').map(Number)

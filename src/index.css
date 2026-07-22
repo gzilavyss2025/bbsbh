@@ -22,6 +22,22 @@
   box-sizing: border-box;
 }
 
+/* Visually hidden but still announced — for a label a screen reader still
+   needs (e.g. a club's full name) once its visible text is replaced by a
+   decorative logo/icon. Standard clip-not-display technique so it stays in
+   the accessibility tree without affecting layout. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* === ALL-CAPS INVARIANT ===
    Every page renders uppercase — including live API values, which arrive
    mixed-case from statsapi (e.g. "Jackson Chourio"). This one rule is the
@@ -13823,6 +13839,17 @@ body {
   align-items: center;
   gap: 7px;
 }
+/* A name that wraps to two lines (a long surname on a narrow phone, e.g.
+   "Pete Crow-Armstrong") grows the .team row's height; align-items: center
+   above then floats the rank number and team-abbreviation siblings at the
+   row's vertical MIDDLE instead of by the name's first line, reading as a
+   stray gap between the name and its team. Pin those two side items to the
+   top of the row instead — a single-line name is unaffected (every sibling
+   is the same height already), so this only changes the wrapped case. */
+.standings .team > .umprank__rank,
+.standings .team > .foulboard__team {
+  align-self: flex-start;
+}
 /* The highlighted favorite-team row tints to that club's own accent
    (--fav-accent, a per-team hex set inline by StandingsPage from
    favoriteAccentColor() — see lib/teams.js), same convention as
@@ -19524,17 +19551,83 @@ body {
    .foulboard-block only adds page-specific tweaks on top of the shared
    .metriccard/.metricbar rules. Reuses .standings/.ledger-wrap ledger styling
    (same right-aligned mono figures, left-aligned .team cell) for the tables;
-   only the note copy, the muted team abbreviation riding a player's name, and
-   the by-inning rate bar are specific to this page. */
-.foulboard__note--body {
-  display: block;
-  font-family: var(--font-body);
-  letter-spacing: var(--ls-text);
+   only the muted team abbreviation riding a player's name and the by-inning
+   rate bar are specific to this page. No note/description copy under any
+   board's title — deliberate, so a board reads as data first, and every
+   board's table/list bleeds to the card's own edges below (rather than
+   floating inset with a second, redundant border) for more width on a phone. */
+.foulboard-block .ledger-wrap {
+  margin: 0 calc(-1 * var(--space-4));
+}
+/* A ledger-wrap that opens a card (no featured hero above it, e.g. Foul Rate
+   By Pitch Type, Team Fouls Per Game, Foul Rate By Inning) also cancels
+   .metriccard__body's own top padding — otherwise the table floats in a band
+   of blank paper under the masthead before its own header row starts. Scoped
+   to :first-child so a table that follows a FoulFeatured hero (which owns its
+   own bottom margin already) keeps its normal top breathing room. */
+.foulboard-block .metriccard__body > .ledger-wrap:first-child {
+  margin-top: calc(-1 * var(--space-3));
+}
+.foulboard-block .metriccard__body > .ledger-wrap:last-child {
+  margin-bottom: calc(-1 * var(--space-4));
+}
+.foulboard-block .ledger-wrap .standings.foulboard {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.foulboard-block .sgh-list {
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+  border: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: none;
+}
+/* A pitch-family subheader row (Foul Rate By Pitch Type) — a plain caption
+   band, not another masthead, so it reads as an in-table grouping rather than
+   competing with the card's own navy/gold header. */
+.foulboard__grouprow th {
+  text-align: left;
+  background: var(--bg-page);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
   color: var(--text-caption);
-  margin: 0 0 10px;
-  max-width: 48ch;
+}
+/* Kraft-brown variant — reuses the kraft-tape hatch color (--seal-hatch) as a
+   pure decorative fill here, unrelated to that color's spoiler-cover meaning
+   elsewhere in the app (see ADR-0004/CONTEXT.md's Seal) — a pitch family
+   isn't a sealed value, it just borrows the same paper-scorebook brown. */
+.foulboard__grouprow--kraft th {
+  /* Darkened past the plain --seal-hatch kraft tone so white text clears
+     WCAG AA (4.5:1) — the plain hatch color alone only holds ~3.7:1. */
+  background: color-mix(in srgb, var(--seal-hatch) 75%, var(--ink-0) 25%);
+  color: var(--text-on-ink);
+  border-top: none;
+}
+.foulboard__grouprow--kraft:first-child th {
+  border-top: none;
+}
+.foulboard__grouprow--kraft:not(:first-child) th {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+/* The repeated Pitch/Foul%/Pitches column header under each pitch-family
+   band — same look as .standings thead th, just living in a <tbody> row
+   instead of the table's single <thead> so it can repeat per group. */
+.foulboard__subhead th {
+  text-align: right;
+  border-top: none;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.foulboard__subhead th.team {
+  text-align: left;
 }
 .foulboard__team {
   font-family: var(--font-mono);
@@ -19552,32 +19645,59 @@ body {
   border-radius: 2px;
 }
 
-/* Foul Tracker's #1-leader headshot card (FoulFeatured, FoulTrackerPage.jsx)
-   — reuses .tlead__cat/.tlead__featured/.tlead__shot exactly as TeamLeaders
-   does elsewhere, so a photo on this page matches a photo anywhere else in
-   the app. */
-.foulboard__featuredcard {
+/* Foul Tracker's #1-leader hero card (FoulFeatured, FoulTrackerPage.jsx) —
+   headshot + name + team logo on their own top row, then the board's stat
+   columns as a full-width tile strip, the same `.gamehigh-tiles`/`.stat`
+   idiom Single-Game-Highs uses, so a page full of very different boards
+   still shares one "here's the #1 player" shape. */
+.foulboard__hero {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+/* Same favorite-team tint as .sgh-row.is-me — a fan's team jumps out on the
+   hero card the same way it does on every other row on this page. */
+.foulboard__hero.is-me {
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--field)), var(--shadow-card);
+}
+.foulboard__herotop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
 }
-.foulboard__featuredteam {
-  align-self: flex-start;
+/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing
+   — sized to --shot-lg, a step up from the ledger table's plain photos below
+   it, since this is the board's one hero image. */
+.shot.foulboard__heroshot {
+  flex: none;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
-.foulboard__featuredextra {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
+/* Compound to beat .plink's `font: inherit`/`text-align: inherit` reset —
+   same convention as .sgh-top .sgh-name. */
+.foulboard__herotop .foulboard__heroname {
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-}
-.foulboard__featuredchip b {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
   color: var(--text-heading);
-  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.foulboard__heroteam {
+  flex: none;
+  align-self: flex-start;
 }
 
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment in
@@ -19722,11 +19842,27 @@ body {
 .sgh-row:first-child {
   border-top: none;
 }
+/* Same favorite-team highlight as .standings tr.is-me (--fav-accent, set
+   inline from favoriteAccentColor()) — a fan's team tints the same way in
+   this list as it does in every ledger table on the page. */
+.sgh-row.is-me {
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+}
+.sgh-row.is-me .sgh-name {
+  color: var(--fav-accent, var(--field-deep));
+}
 .shot.sgh-shot {
   width: var(--shot-sm-w);
   height: var(--shot-sm-h);
   border-radius: var(--radius-sm);
   flex: none;
+}
+/* Most-Fouls-In-A-PA's row is the roomiest on the page (its own scorebug
+   below already fills the card's width), so its headshot steps up a size
+   from the ordinary .sgh-shot baseline other lists on this page use. */
+.shot.sgh-shot.sgh-shot--lg {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
 }
 .sgh-body {
   flex: 1;
@@ -19802,12 +19938,41 @@ body {
   gap: 6px;
   min-width: 0;
 }
+/* Same wrapped-name fix as .standings .team above (see that rule's comment) —
+   a long surname (e.g. "Pete Crow-Armstrong") wraps to two lines here too,
+   and align-items: center on the row would otherwise float the team
+   abbreviation at the row's vertical middle instead of by the name's first
+   line. */
+.gamehigh-who .foulboard__team {
+  align-self: flex-start;
+}
+/* Wraps the final-score line + date in its own rounded card — when the
+   batched schedule lookup (FoulTrackerPage's gameLinks) has resolved this
+   game's away/home abbreviations it renders as a real <button> (see
+   `button.gamehigh-matchup` below) that opens that game's box score;
+   otherwise it's a plain <div>, same look, no affordance. */
 .gamehigh-matchup {
   grid-area: matchup;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+}
+button.gamehigh-matchup {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button.gamehigh-matchup:hover,
+button.gamehigh-matchup:active {
+  border-color: var(--field);
+  background: var(--surface-inset);
 }
 .gamehigh-matchup__score {
   display: inline-flex;
