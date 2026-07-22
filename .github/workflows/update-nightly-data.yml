@@ -29,7 +29,7 @@ name: Update nightly data
 # anything errored, but whatever succeeded is already committed by then.
 on:
   schedule:
-    - cron: '0 11 * * *' # ~7am US Eastern — the latest of the former per-job times, so every "after overnight X settles" / "after games go Final" constraint they each documented still holds
+    - cron: '0 7 * * *' # ~3am US Eastern (2-3am during EST) — moved earlier 2026-07-22; the "Wait for yesterday's slate" step below backs off hourly if a late West Coast game is still in progress, up to the old ~7am ET ceiling, instead of always waiting that long
   workflow_dispatch: {}
 
 permissions:
@@ -51,6 +51,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 26 # node:sqlite ships stable here (docs/adr/0021) — gen-team-score.mjs/gen-season-score.mjs need it
+
+      - name: Wait for yesterday's slate to go Final
+        run: |
+          for i in 1 2 3 4; do
+            node scripts/check-slate-final.mjs && exit 0
+            echo "attempt $i/4: not all games settled yet — waiting 1 hour"
+            sleep 3600
+          done
+          echo "still not all settled after 4 hours — proceeding anyway (matches the old fixed ~7am ET run time)"
 
       - name: Game notes
         id: game-notes
@@ -141,8 +150,9 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race, same shape as
-          # update-game-score.yml — this workflow's 11:00 UTC run can
-          # collide with that one's every-10-minutes cron.
+          # update-game-score.yml — this workflow's push (now anywhere from
+          # ~7:00 to ~11:00 UTC depending on the wait-for-Final backoff above)
+          # can collide with that one's every-10-minutes cron.
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin "$(git rev-parse --abbrev-ref HEAD)"

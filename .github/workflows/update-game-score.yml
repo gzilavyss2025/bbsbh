@@ -46,7 +46,8 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Update game score"
           # This cron's :00 minute collides with update-nightly-data.yml's
-          # 11:00 UTC run once a day — retry with a rebase on a push race
+          # once-a-day run (~7:00-11:00 UTC, depending on its wait-for-Final
+          # backoff) — retry with a rebase on a push race
           # instead of silently dropping this run's scores (see that
           # workflow's header for the collision this same push shape once hit).
           # scripts/data/game-scores.sql is this workflow's own dump file
