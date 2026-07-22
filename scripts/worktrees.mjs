@@ -102,19 +102,35 @@ function listWorktrees() {
     .filter((w) => w.root)
 }
 
-function gatherFacts(wt) {
+/**
+ * Collects the raw git facts classifyWorktree needs. `run` is injected so
+ * test/worktrees.test.js can drive the upstream-deleted case, which is
+ * impossible to reach with a normal local repo but is the single most common
+ * real-world state (every squash-merged PR).
+ */
+export function gatherFacts(wt, run = tryGit) {
   const { root, branch, isPrimary } = wt
-  const base = tryGit(['rev-parse', '--abbrev-ref', 'origin/HEAD'], root)?.replace('origin/', '') || 'main'
-  const upstream = tryGit(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], root)
-  const dirtyOut = tryGit(['status', '--porcelain'], root)
+  const base = run(['rev-parse', '--abbrev-ref', 'origin/HEAD'], root)?.replace('origin/', '') || 'main'
+
+  // Read the *configured* upstream, not the resolvable one. `@{u}` stops
+  // resolving the moment the remote branch is deleted, which is exactly the
+  // end state of a merged PR — so asking git for `@{u}` reports "no upstream"
+  // for precisely the worktrees this script exists to find, and they get
+  // classified as never-pushed active work instead of stale. `for-each-ref`
+  // reports the configured upstream whether or not it still resolves.
+  const upstream = branch
+    ? run(['for-each-ref', '--format=%(upstream:short)', `refs/heads/${branch}`], root) || null
+    : null
+
+  const dirtyOut = run(['status', '--porcelain'], root)
   return {
     branch,
     base,
     isPrimary,
     upstream,
-    upstreamExists: upstream !== null && tryGit(['rev-parse', '--verify', '--quiet', upstream], root) !== null,
-    merged: tryGit(['merge-base', '--is-ancestor', 'HEAD', `origin/${base}`], root) !== null,
-    atBaseTip: tryGit(['rev-parse', 'HEAD'], root) === tryGit(['rev-parse', `origin/${base}`], root),
+    upstreamExists: upstream !== null && run(['rev-parse', '--verify', '--quiet', upstream], root) !== null,
+    merged: run(['merge-base', '--is-ancestor', 'HEAD', `origin/${base}`], root) !== null,
+    atBaseTip: run(['rev-parse', 'HEAD'], root) === run(['rev-parse', `origin/${base}`], root),
     dirty: dirtyOut ? dirtyOut.split('\n').filter(Boolean).length : 0,
   }
 }
