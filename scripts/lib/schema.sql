@@ -137,6 +137,13 @@ CREATE TABLE IF NOT EXISTS postseason_pitching_totals (
 -- non-PA play, since a pitch event's own `count` is the count AFTER the pitch.
 -- `max_game_fouls`/`max_game_pk` track his single-game high, updated only when a
 -- game exceeds the stored max (so it converges regardless of ingest order).
+-- `max_game_pa`/`max_game_pitches` are that SAME game's PA/pitches-seen totals
+-- (not season figures) — cheap to carry along since aggregateGameFouls already
+-- computes them per game; `max_game_opp_id` is the opposing team he faced that
+-- game (his own team doesn't change mid-game, so it's captured once). Together
+-- with a join against foul_ingested_games.date at export time, these let the
+-- Single-Game Highs board show "when / against whom / how much work" without a
+-- separate lookup.
 CREATE TABLE IF NOT EXISTS foul_batter_totals (
   person_id        INTEGER PRIMARY KEY,
   season           INTEGER NOT NULL,
@@ -148,7 +155,10 @@ CREATE TABLE IF NOT EXISTS foul_batter_totals (
   fouls            INTEGER NOT NULL DEFAULT 0,
   two_strike_fouls INTEGER NOT NULL DEFAULT 0,
   max_game_fouls   INTEGER NOT NULL DEFAULT 0,
-  max_game_pk      INTEGER
+  max_game_pk      INTEGER,
+  max_game_pa      INTEGER NOT NULL DEFAULT 0,
+  max_game_pitches INTEGER NOT NULL DEFAULT 0,
+  max_game_opp_id  INTEGER
 );
 
 -- Fouls surrendered BY each pitcher, plus whiffs so the app can show the

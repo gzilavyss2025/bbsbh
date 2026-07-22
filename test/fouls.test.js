@@ -53,6 +53,7 @@ test('a foul at one strike counts as a foul but NOT a two-strike foul', () => {
   assert.equal(b.pa, 1)
   assert.equal(b.pitchesSeen, 3)
   assert.equal(b.gameFouls, 2)
+  assert.equal(b.opponentId, 2, 'the away batter\'s opponent is the home team')
 })
 
 test('the pre-pitch strike count carries across a mid-AB non-PA (stolen base) play', () => {
@@ -113,7 +114,7 @@ test('team, pitcher, inning, and 10+ fold aggregates roll up correctly', () => {
 const readerData = {
   season: 2026,
   batters: {
-    500: { name: 'Foul King', teamId: 1, g: 40, pa: 160, pitchesSeen: 700, fouls: 120, twoStrikeFouls: 50, maxGameFouls: 7, maxGamePk: 999 },
+    500: { name: 'Foul King', teamId: 1, g: 40, pa: 160, pitchesSeen: 700, fouls: 120, twoStrikeFouls: 50, maxGameFouls: 7, maxGamePk: 999, maxGamePa: 5, maxGamePitches: 34, maxGameOpponentId: 2, maxGameDate: '2026-06-07' },
     501: { name: 'Rare Fouler', teamId: 2, g: 5, pa: 20, pitchesSeen: 80, fouls: 6, twoStrikeFouls: 2, maxGameFouls: 2, maxGamePk: 998 },
     502: { name: 'Team2 Bat', teamId: 2, g: 30, pa: 120, pitchesSeen: 500, fouls: 60, twoStrikeFouls: 20, maxGameFouls: 4, maxGamePk: 997 },
   },
@@ -142,6 +143,10 @@ test('batterFoulLine derives per-game and per-PA rates', () => {
   assert.equal(line.foulsPerPA, 0.75) // 120 / 160
   assert.equal(line.twoStrikeFoulsPerGame, 1.25) // 50 / 40
   assert.equal(line.maxGameFouls, 7)
+  assert.equal(line.maxGamePa, 5)
+  assert.equal(line.maxGamePitches, 34)
+  assert.equal(line.maxGameOpponentId, 2)
+  assert.equal(line.maxGameDate, '2026-06-07')
   assert.equal(batterFoulLine(readerData, 999999), null)
 })
 

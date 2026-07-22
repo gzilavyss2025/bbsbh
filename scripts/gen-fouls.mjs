@@ -65,7 +65,7 @@ async function getJson(path) {
 // No network, no DB — a pure function of the feed, so a synthetic fixture can
 // drive the exact counting rules. Shape:
 //   { batters:  Map personId -> { name, teamId, pa, pitchesSeen, fouls,
-//                                 twoStrikeFouls, gameFouls },
+//                                 twoStrikeFouls, gameFouls, opponentId },
 //     pitchers: Map personId -> { name, teamId, pitches, fouls, whiffs, isStarter },
 //     teams:    Map teamId   -> { fouls, twoStrikeFouls },
 //     innings:  Map inning   -> { pitches, fouls, pitchesVsStarter, foulsVsStarter,
@@ -88,7 +88,7 @@ export function aggregateGameFouls(feed) {
   const getBatter = (id, name, teamId) => {
     let b = batters.get(id)
     if (!b) {
-      b = { name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, twoStrikeFouls: 0, gameFouls: 0 }
+      b = { name, teamId, pa: 0, pitchesSeen: 0, fouls: 0, twoStrikeFouls: 0, gameFouls: 0, opponentId: null }
       batters.set(id, b)
     } else {
       if (name) b.name = name
@@ -161,6 +161,9 @@ export function aggregateGameFouls(feed) {
     const b = batterId != null ? getBatter(batterId, play.matchup?.batter?.fullName ?? '', battingTeamId) : null
     const p = pitcherId != null ? getPitcher(pitcherId, play.matchup?.pitcher?.fullName ?? '', fieldingTeamId) : null
     if (p && vsStarter) p.isStarter = true // he is his team's first pitcher this game
+    // A batter's own team can't change mid-game, so the opponent he faced is the
+    // same every time we touch him this game — just keep (re)setting it.
+    if (b) b.opponentId = fieldingTeamId
     const team = battingTeamId != null ? getTeam(battingTeamId) : null
     const inn = getInning(Math.min(inningNum, MAX_INNING_BUCKET))
 
@@ -230,8 +233,9 @@ const upsertBatter = (db) =>
   db.prepare(
     `INSERT INTO foul_batter_totals
        (person_id, season, name, team_id, games, pa, pitches_seen, fouls,
-        two_strike_fouls, max_game_fouls, max_game_pk)
-     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+        two_strike_fouls, max_game_fouls, max_game_pk, max_game_pa,
+        max_game_pitches, max_game_opp_id)
+     VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id) DO UPDATE SET
        season = excluded.season,
        name = excluded.name,
@@ -244,7 +248,13 @@ const upsertBatter = (db) =>
        max_game_fouls = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
                              THEN excluded.max_game_fouls ELSE foul_batter_totals.max_game_fouls END,
        max_game_pk = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
-                          THEN excluded.max_game_pk ELSE foul_batter_totals.max_game_pk END`,
+                          THEN excluded.max_game_pk ELSE foul_batter_totals.max_game_pk END,
+       max_game_pa = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_pa ELSE foul_batter_totals.max_game_pa END,
+       max_game_pitches = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_pitches ELSE foul_batter_totals.max_game_pitches END,
+       max_game_opp_id = CASE WHEN excluded.max_game_fouls > foul_batter_totals.max_game_fouls
+                          THEN excluded.max_game_opp_id ELSE foul_batter_totals.max_game_opp_id END`,
   )
 
 const upsertPitcher = (db) =>
@@ -314,7 +324,10 @@ async function ingestGame(db, stmts, gamePk, date, season) {
   db.exec('BEGIN')
   try {
     for (const [id, b] of agg.batters) {
-      stmts.batter.run(id, season, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls, b.gameFouls, gamePk)
+      stmts.batter.run(
+        id, season, b.name, b.teamId, b.pa, b.pitchesSeen, b.fouls, b.twoStrikeFouls,
+        b.gameFouls, gamePk, b.pa, b.pitchesSeen, b.opponentId,
+      )
     }
     for (const [id, p] of agg.pitchers) {
       stmts.pitcher.run(id, season, p.name, p.teamId, p.isStarter ? 1 : 0, p.pitches, p.fouls, p.whiffs)
@@ -343,6 +356,12 @@ export function exportFouls(db) {
   const seasonRow = db.prepare('SELECT season FROM foul_batter_totals LIMIT 1').get()
   const season = seasonRow?.season ?? (Number((coverageSince ?? '').slice(0, 4)) || null)
 
+  // gamePk -> officialDate, so a batter's max-game record can carry a date
+  // without duplicating it onto every row (foul_ingested_games already has it).
+  const dateByGamePk = new Map(
+    db.prepare('SELECT game_pk, date FROM foul_ingested_games').all().map((r) => [r.game_pk, r.date]),
+  )
+
   const batters = {}
   for (const r of db.prepare('SELECT * FROM foul_batter_totals').all()) {
     batters[r.person_id] = {
@@ -355,6 +374,10 @@ export function exportFouls(db) {
       twoStrikeFouls: r.two_strike_fouls,
       maxGameFouls: r.max_game_fouls,
       maxGamePk: r.max_game_pk,
+      maxGamePa: r.max_game_pa,
+      maxGamePitches: r.max_game_pitches,
+      maxGameOpponentId: r.max_game_opp_id,
+      maxGameDate: r.max_game_pk != null ? (dateByGamePk.get(r.max_game_pk) ?? null) : null,
     }
   }
 
