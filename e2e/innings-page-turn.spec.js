@@ -81,6 +81,50 @@ test('keyboard-activating Back mid-turn lands backward, not on the abandoned for
   await expect(page.locator('.pagecurl')).toHaveCount(0)
 })
 
+test('keyboard-activating a backward RollingLine pick mid-turn lands there, not on the abandoned forward target', async ({
+  page,
+}) => {
+  await page.goto(`${GAME}/bottom1`)
+
+  // Start a forward turn (bottom1 -> top2), then interrupt it via a
+  // keyboard-activated RollingLine pick rather than the Back button — the
+  // same aria-disabled-doesn't-block-keyboard gap as the Back button test
+  // above (RollingLine.jsx's onClick is deliberately unconditional; see its
+  // header comment), so this exercises the same InningPageTurn invariant
+  // (any external activeIdx change mid-turn cancels rather than commits)
+  // through a different call site.
+  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
+  const topOfFirst = page.getByRole('button', { name: /Top of the 1st/ })
+  await topOfFirst.focus()
+  await page.keyboard.press('Enter')
+
+  await expect(page).toHaveURL(new RegExp(`${GAME}/top1$`))
+  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(0)
+  await expect(page.locator('.pagecurl')).toHaveCount(0)
+})
+
+test('keyboard-activating a further-forward RollingLine pick mid-turn is dropped (first-request-wins)', async ({
+  page,
+}) => {
+  await page.goto(`${GAME}/top1`)
+
+  // Start a forward turn (top1 -> bottom1), then keyboard-activate a pick
+  // further ahead than the in-flight target — REQUEST_FORWARD is only
+  // honored from idle (pageTurnState.js), so this must be a no-op: the
+  // in-flight turn keeps heading to bottom1 rather than restarting or
+  // stacking toward bottom2.
+  await page.getByRole('button', { name: 'Next half-inning' }).click()
+  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(1)
+  const bottomOfSecond = page.getByRole('button', { name: /Bottom of the 2nd/ })
+  await bottomOfSecond.focus()
+  await page.keyboard.press('Enter')
+
+  await expect(page).toHaveURL(new RegExp(`${GAME}/bottom1$`))
+  await expect(page.locator('.turnscene__layer--preview')).toHaveCount(0)
+  await expect(page.locator('.pagecurl')).toHaveCount(0)
+})
+
 test('prefers-reduced-motion skips the animation but navigation still works', async ({
   page,
 }) => {
