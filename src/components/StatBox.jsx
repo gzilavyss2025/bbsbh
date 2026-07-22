@@ -479,7 +479,9 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMiss
               calls" cell (StatBox's rollingMissedCalls) — repeated here so
               the tier pill reads as "how routine/outlying" AND "how many"
               in one glance, without sending the eye back up to the grid. */}
-          {totalMissedCalls != null && <span className="favormeter__tierpill-count"> · {totalMissedCalls}</span>}
+          {totalMissedCalls != null && (
+            <span className="favormeter__tierpill-count"> · {totalMissedCalls} missed calls</span>
+          )}
         </span>
       )}
       <div className="favormeter__track-row">
