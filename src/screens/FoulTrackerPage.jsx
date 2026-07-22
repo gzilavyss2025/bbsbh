@@ -8,6 +8,7 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { Headshot } from '../components/Headshot.jsx'
+import { TeamLogo } from '../components/TeamLogo.jsx'
 import { teamAbbr } from '../lib/teams.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:
@@ -157,7 +158,12 @@ function FoulFeatured({ player, cols, cells }) {
             <span className="tlead__statlabel">{cols[0]}</span>
           </div>
         </div>
-        <span className="foulboard__team foulboard__featuredteam">{teamAbbr({ id: player.teamId })}</span>
+        <TeamLogo
+          teamId={player.teamId}
+          name={teamAbbr({ id: player.teamId })}
+          size={28}
+          className="tlead__logo foulboard__featuredteam"
+        />
       </div>
       {cols.length > 1 && (
         <div className="foulboard__featuredextra">
@@ -222,14 +228,26 @@ function FoulLeaderBoard({ title, note, rows, cols, cells, featured = false }) {
 // A single-game high is a STORY (one specific game), not a ranking — so
 // unlike the boards above, every row here gets the fuller headshot +
 // date/opponent/workload treatment rather than just the rank-1 leader.
+// Reads in the order the game actually happened: when/against whom, how
+// much work the at-bats took, then how many of those pitches got fouled
+// off — the number that made the board — with his season total trailing
+// as the "how unusual was this for HIM" context.
 function gameHighSummary(b) {
+  const scene = []
+  if (b.maxGameDate) scene.push(monthDay(b.maxGameDate))
+  if (b.maxGameOpponentId) scene.push(`vs ${teamAbbr({ id: b.maxGameOpponentId })}`)
+
+  const workload = []
+  if (b.maxGamePa) workload.push(`${b.maxGamePa} PA`)
+  if (b.maxGamePitches) workload.push(`${b.maxGamePitches} pitches seen`)
+
   const parts = []
-  if (b.maxGameDate) parts.push(monthDay(b.maxGameDate))
-  if (b.maxGameOpponentId) parts.push(`vs ${teamAbbr({ id: b.maxGameOpponentId })}`)
-  if (b.maxGamePa) parts.push(`${b.maxGamePa} PA`)
-  if (b.maxGamePitches) parts.push(`${b.maxGamePitches} pitches`)
-  parts.push(`${b.fouls} fouls this season`)
-  return parts.join(' · ')
+  if (scene.length) parts.push(scene.join(' '))
+  if (workload.length) parts.push(workload.join(', '))
+  if (b.maxGameFouls && b.maxGamePitches) parts.push(`${b.maxGameFouls} fouled off`)
+
+  const story = parts.join(' · ')
+  return b.fouls ? `${story} — ${b.fouls} fouls this season` : story
 }
 
 function SingleGameHighs({ rows }) {
@@ -250,7 +268,10 @@ function SingleGameHighs({ rows }) {
                   {b.name}
                 </PlayerLink>
                 <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
-                <span className="sgh-val">{b.maxGameFouls}</span>
+                <span className="sgh-valstack">
+                  <span className="sgh-val">{b.maxGameFouls}</span>
+                  <span className="sgh-vallabel">Fouls</span>
+                </span>
               </div>
               <div className="sgh-sub">{gameHighSummary(b)}</div>
             </div>

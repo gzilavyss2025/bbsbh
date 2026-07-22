@@ -19630,7 +19630,7 @@ body {
 }
 .sgh-top {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
 }
 /* Compound (beats .plink's `font: inherit`/`text-align: inherit` reset —
@@ -19646,14 +19646,29 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.sgh-val {
+.sgh-valstack {
   margin-left: auto;
   flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.sgh-val {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-weight: var(--w-bold);
   font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
   color: var(--text-heading);
+}
+.sgh-vallabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .sgh-sub {
   font-family: var(--font-mono);
