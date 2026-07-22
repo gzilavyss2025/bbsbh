@@ -31,3 +31,12 @@ export function rookieRecordFor(data, personId) {
 export function isActiveRookie(data, personId) {
   return rookieRecordFor(data, personId)?.rookieUntil === null
 }
+
+// Any record at all — open or closed rookie window — means this personId has
+// appeared in an MLB game before. The backfill (gen-rookies-backfill.mjs)
+// established a debut record for essentially every MLB debut back to 1901,
+// not just current rookie candidates, so this doubles as a general "has this
+// player debuted" check. Used by DebutPill.
+export function hasDebuted(data, personId) {
+  return rookieRecordFor(data, personId) !== null
+}

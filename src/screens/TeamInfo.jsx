@@ -18,7 +18,7 @@ import { BallparkModal } from '../components/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
 import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
-import { isActiveRookie } from '../api/rookies.js'
+import { isActiveRookie, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -36,6 +36,7 @@ import { Headshot } from '../components/Headshot.jsx'
 import { ProspectPill } from '../components/ProspectPill.jsx'
 import { MilestonePill } from '../components/MilestonePill.jsx'
 import { RookiePill } from '../components/RookiePill.jsx'
+import { DebutPill } from '../components/DebutPill.jsx'
 import { RadarPill } from '../components/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
@@ -477,6 +478,10 @@ function TeamSections({
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const birthdayIds = useMemo(() => selectBirthdayIds(feed), [feed])
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  // Debut pills are only informative on a MiLB roster, where most players
+  // HAVEN'T debuted — on an MLB roster it's true of nearly every name and
+  // adds nothing.
+  const isMlb = (meta.sportId ?? 1) === 1
   const oppMeta = useMemo(
     () => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'),
     [feed, side],
@@ -553,6 +558,7 @@ function TeamSections({
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         callouts={callouts}
+        isMlb={isMlb}
       />
 
       <section className="lineup">
@@ -569,6 +575,7 @@ function TeamSections({
                   <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                   <MilestonePill text={milestoneTextFor(callouts, p.id)} />
                   <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                  <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                   <RadarPill
                     entry={radarEntryFor(feverRadarData, p.id)}
                     teamId={meta.id}
@@ -600,6 +607,7 @@ function TeamSections({
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                           <RadarPill
                             entry={radarEntryFor(feverRadarData, p.id)}
                             teamId={meta.id}
@@ -627,6 +635,7 @@ function TeamSections({
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
@@ -648,6 +657,7 @@ function TeamSections({
                           </PlayerLink>
                           <ProspectPill {...prospectBadge(prospectsData, p.id)} />
                           <RookiePill active={isActiveRookie(rookiesData, p.id)} />
+                          <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                           <BirthdayCake show={birthdayIds.has(p.id)} />
                         </span>
                         <span className="roster__jersey">{p.jersey}</span>
@@ -703,7 +713,15 @@ function TeamSections({
 // the roster fallback. Same underlying data the old plain-text "Opposing
 // pitcher" row used (selectOpposingPitcher + the season line fetched
 // alongside it); this replaces that row rather than duplicating it.
-function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rookiesData, callouts }) {
+function OpposingStarterCard({
+  pitcher,
+  pitcherLine,
+  teamId,
+  prospectsData,
+  rookiesData,
+  callouts,
+  isMlb,
+}) {
   return (
     <section className="startercard">
       <SectionMasthead as="h3" title="Opposing starter" />
@@ -723,6 +741,7 @@ function OpposingStarterCard({ pitcher, pitcherLine, teamId, prospectsData, rook
               <ProspectPill {...prospectBadge(prospectsData, pitcher.id)} />
               <MilestonePill text={milestoneTextFor(callouts, pitcher.id)} />
               <RookiePill active={isActiveRookie(rookiesData, pitcher.id)} />
+              <DebutPill debuted={!isMlb && hasDebuted(rookiesData, pitcher.id)} />
             </span>
             <span className="startercard__badges">
               {pitcher.jersey && <span className="startercard__jersey">{pitcher.jersey}</span>}

@@ -280,15 +280,14 @@ export function useGameData(game) {
   const vsTeamSplitsData = vsTeamSplits.data ?? null
 
   // Rookie status for the roster/lineup surfaces (see RookiePill /
-  // isActiveRookie) — the nightly rookies precompute, same deferred
-  // MLB-only tier as vsTeamSplits/formerTeammates (a MiLB matchup's
-  // roster just resolves to no active rookies since the file is MLB-debut-only).
+  // isActiveRookie) — the nightly rookies precompute, same deferred tier as
+  // vsTeamSplits/formerTeammates. Fetched for MiLB matchups too (not just
+  // MLB) so DebutPill can flag a MiLB roster's already-debuted players
+  // (rehabbers, optioned veterans) — the file's debut records aren't
+  // MLB-roster-scoped, just MLB-debut-scoped.
   const rookies = useAsync(
-    () =>
-      enrichmentReady && game.sportId === SPORT_IDS.MLB
-        ? fetchRookiesData()
-        : Promise.resolve(null),
-    [enrichmentReady, game.sportId],
+    () => (enrichmentReady ? fetchRookiesData() : Promise.resolve(null)),
+    [enrichmentReady],
   )
   const rookiesData = rookies.data ?? null
 
