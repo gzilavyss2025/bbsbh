@@ -19,6 +19,7 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BaseoutDiamond } from '../components/BaseoutDiamond.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/ReportFooter.jsx'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, favoriteAccentColor } from '../lib/teams.js'
 
@@ -198,6 +199,8 @@ export function FoulTrackerPage() {
           <TeamBoard teams={boards.teamRows} favoriteTeamId={favoriteTeamId} />
         </>
       )}
+
+      <ReportFooter />
     </div>
   )
 }
