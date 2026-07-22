@@ -30,6 +30,7 @@ export function HalfInning({
   onReveal,
   prospectsData,
   rookiesData,
+  isMlb,
   callouts,
   workload,
   workloadGameDate,
@@ -104,6 +105,7 @@ export function HalfInning({
       homeName={homeName}
       prospectsData={prospectsData}
       rookiesData={rookiesData}
+      isMlb={isMlb}
     />
   )
 

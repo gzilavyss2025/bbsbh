@@ -154,10 +154,14 @@ for each generator; the reader modules:
   debut or closes a still-open one, never recomputes a closed record or drops
   a player who's fallen off every MLB org's roster. `scripts/gen-rookies-backfill.mjs`
   (hand-run, not on the cron) is the one-time historical sweep that establishes
-  everyone else. `isActiveRookie(data, id)` is the pill's lookup;
-  `rookieRecordFor(data, id)` feeds `rookieUntil` into `transactionTimelineView`
-  (`person.js`) via `loadPlayer.js`. Kept OUT of the PWA precache (~1.3 MB and
-  growing — see `vite.config.js`), fetched at runtime like `vs-team-splits.json`.
+  everyone else. `isActiveRookie(data, id)` is the level-agnostic rookie-record
+  lookup; `showRookiePill(data, id, isMlb)` is what RookiePill call sites
+  actually use — MLB-only by design, since a debuted-but-still-rookie player
+  showing up in a MiLB game (rehab, option) gets `hasDebuted`/DebutPill there
+  instead, not a second ROOKIE claim. `rookieRecordFor(data, id)` feeds
+  `rookieUntil` into `transactionTimelineView` (`person.js`) via `loadPlayer.js`.
+  Kept OUT of the PWA precache (~1.3 MB and growing — see `vite.config.js`),
+  fetched at runtime like `vs-team-splits.json`.
 - `umpires.js` — the umpire detail page (every game an umpire worked this season +
   base, most recent first), from `public/data/umpires.json`, keyed by umpire
   personId. Cost-driven: no "games by umpire" endpoint, so `gen-umpires.mjs` does a

@@ -14591,6 +14591,23 @@ body {
   }
 }
 
+/* MLB-debut pill — icon-only sibling to .prospectpill/.rookiepill/
+   .milestonepill (same shape/weight): no text, since the shield mark alone
+   carries the meaning next to a name. */
+.debutpill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 5px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.debutpill__logo {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
 /* PROTOTYPE (claude/radar-glyph-prototype) — Fever Baseball radar as a tap
    glyph, not upfront jargon: a small magnifying glass sits quietly in the
    row; tapping it presses like a scout's stamp (reuses .postponed's

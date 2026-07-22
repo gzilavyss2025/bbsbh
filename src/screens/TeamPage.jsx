@@ -23,7 +23,7 @@ import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../api/person.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
-import { fetchRookiesData, isActiveRookie } from '../api/rookies.js'
+import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
@@ -411,7 +411,7 @@ async function loadTeam(id, asOf) {
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
       prospect: prospectBadge(prospectsSnapshot, r.person?.id),
-      rookie: isActiveRookie(rookiesData, r.person?.id),
+      rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
 
@@ -430,7 +430,7 @@ async function loadTeam(id, asOf) {
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
       prospect: prospectBadge(prospectsSnapshot, r.person?.id),
-      rookie: isActiveRookie(rookiesData, r.person?.id),
+      rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
     }))
     .sort(comparePitchers)
 
@@ -448,7 +448,7 @@ async function loadTeam(id, asOf) {
         allStar: allStarIds.has(r.person?.id),
         war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
         prospect: prospectBadge(prospectsSnapshot, r.person?.id),
-        rookie: isActiveRookie(rookiesData, r.person?.id),
+        rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
         gs: Number(stat?.gamesStarted) || 0,
         saves: Number(stat?.saves) || 0,
         appearances: Number(stat?.gamesPitched ?? stat?.gamesPlayed) || 0,
@@ -602,7 +602,7 @@ async function loadTeam(id, asOf) {
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
       prospect: prospectBadge(prospectsSnapshot, r.person?.id),
-      rookie: isActiveRookie(rookiesData, r.person?.id),
+      rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
       games: Number(rosterHittingStat(r, id)?.gamesPlayed) || 0,
     }))
     .filter((p) => p.games > 0)

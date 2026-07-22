@@ -112,6 +112,11 @@ export function InningViewer({
     () => ({ away: selectTeamMeta(feed, 'away'), home: selectTeamMeta(feed, 'home') }),
     [feed],
   )
+  // Same MLB-vs-MiLB gate TeamInfo.jsx's lineup pages use for RookiePill —
+  // a rehab/optioned player still under the rookie limit gets DebutPill on a
+  // MiLB roster/lineup surface here, not a second ROOKIE claim (see
+  // showRookiePill, api/rookies.js).
+  const isMlb = (meta.away.sportId ?? 1) === 1
 
   // In-game delays (rain, etc.), spoiler-free (see selectDelays) — surfaced as a
   // between-half-innings notice on the affected half's page. Almost always empty.
@@ -172,6 +177,7 @@ export function InningViewer({
         inning={pageInning}
         half={pageHalf}
         meta={meta}
+        isMlb={isMlb}
         revealedThrough={revealedThrough}
         onReveal={revealTo}
         prospectsData={prospectsData}
@@ -472,6 +478,7 @@ export function InningViewer({
                 homeName={meta.home.clubName}
                 prospectsData={prospectsData}
                 rookiesData={rookiesData}
+                isMlb={isMlb}
                 revealedThrough={revealedThrough}
               />
             </div>
@@ -485,6 +492,7 @@ export function InningViewer({
             revealedThrough={revealedThrough}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
+            isMlb={isMlb}
           />
           <RosterPanel
             title={rosters.home.name}
@@ -492,6 +500,7 @@ export function InningViewer({
             revealedThrough={revealedThrough}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
+            isMlb={isMlb}
           />
         </div>
       </div>
