@@ -13833,8 +13833,15 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
 }
-.standings .team,
-.standings .team > * {
+/* Body cells only — a header `th.team` is plain left-aligned text (no
+   rank/logo/name-abbr row to lay out), and `display: flex` on a `<th>`
+   overrides its native `table-cell` display, which is what makes it
+   auto-stretch to match a taller row (e.g. this board's own header row,
+   where "% With 2 Strikes" wraps to two lines). Flexing it anyway sized the
+   cell to its own single-line content instead, leaving a strip of the
+   card's white background exposed at the bottom of just that header cell. */
+.standings td.team,
+.standings td.team > * {
   display: flex;
   align-items: center;
   gap: 7px;
