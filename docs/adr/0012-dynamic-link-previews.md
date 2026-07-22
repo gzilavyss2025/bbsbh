@@ -64,3 +64,34 @@ the simpler always-on route for now (it also gives humans correct titles).
 Regenerate/verify the cards by rendering `api/og.js`'s exported `buildTree`
 through `@vercel/og`'s `ImageResponse` in Node (it runs there too) and eyeballing
 the PNG — that's how these were checked.
+
+## 2026-07-22: hardening a reproduced game-link failure
+
+A shared "game in progress" link was found to fall back to the static default
+card. Root cause: `resolveGame()` (`api/_lib/cards.js`) fanned its 5
+sport-level schedule calls out via `Promise.allSettled`, which waits for
+every level to finish even after the MLB answer is already in, and none of
+those calls had a timeout (unlike `api/og.js`'s font/image fetches) — a slow
+statsapi response (more likely exactly when a game is live) could stall
+resolution with no ceiling. Worse, `api/preview.js` cached a failed
+resolution identically to a correct one (`s-maxage=3600`), so the one
+crawl that matters most — iMessage's, which fetches a link's preview once on
+the sender's device and never retries — could bake the wrong card in for up
+to an hour+ even after the underlying hiccup passed.
+
+Fixed by: a shared `fetchWithTimeout` (`api/_lib/http.js`, extracted from
+`api/og.js`) now also guards `cards.js`'s statsapi calls; `resolveGame`
+resolves as soon as any sport level's schedule contains the wanted matchup
+instead of waiting on all 5; and `api/preview.js` gives an unresolved card a
+much shorter cache lifetime (`s-maxage=30`) so a transient miss self-heals
+fast instead of sticking.
+
+Also added, since MLB's schedule is known well ahead of first pitch:
+`scripts/warm-previews.mjs`, a nightly best-effort pass that pre-warms the
+edge cache for the day's games/teams/rosters so the first real crawl is
+rarely cold. It only covers the finite, predictable routes (`lineup1`/
+`lineup2`/`boxscore`, team/player pages, and each game's single `og:image`,
+which is shared across every inning section) — the open-ended in-game
+`top{n}`/`bottom{n}` sections aren't precomputable, which is why the
+reliability fix above is the piece that actually covers an arbitrary
+mid-game share.

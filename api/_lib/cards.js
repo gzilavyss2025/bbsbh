@@ -16,6 +16,8 @@
 // `teamAbbr`) — the edge runtime can't import the app's ESM module graph, and
 // these three are near-immutable. Keep them byte-for-byte in sync.
 
+import { fetchWithTimeout } from './http.js'
+
 const MLB = 'https://statsapi.mlb.com'
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -57,26 +59,12 @@ function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
 // --- statsapi fetch (server side, crawler-only) ----------------------------
 
 async function getJson(path) {
-  const res = await fetch(`${MLB}${path}`, { headers: { Accept: 'application/json' } })
+  const res = await fetchWithTimeout(`${MLB}${path}`, { headers: { Accept: 'application/json' } })
   if (!res.ok) throw new Error(`MLB ${res.status} for ${path}`)
   return res.json()
 }
 
-// Scan a date's slate across every level and match the away+home slug back to a
-// game — the edge-side twin of src/api/schedule.js's resolveGame. `hydrate=team`
-// only: resolution needs abbreviations, nothing else.
-async function resolveGame(apiDate, matchup) {
-  const results = await Promise.allSettled(
-    SEARCHABLE_SPORT_IDS.map((sid) =>
-      getJson(`/api/v1/schedule?sportId=${sid}&date=${apiDate}&hydrate=team`),
-    ),
-  )
-  const games = []
-  for (const r of results) {
-    if (r.status !== 'fulfilled') continue
-    for (const day of r.value.dates ?? []) games.push(...(day.games ?? []))
-  }
-  const want = (matchup || '').toLowerCase()
+function findMatchup(games, want) {
   return (
     games.find(
       (g) =>
@@ -87,6 +75,48 @@ async function resolveGame(apiDate, matchup) {
         ) === want,
     ) ?? null
   )
+}
+
+// Resolves to the first non-null value among `promises` as it lands, or
+// `null` once every one of them has settled — a rejection counts the same as
+// a null fulfillment ("this one found nothing"), so a caller never needs to
+// pre-catch. Generic and network-agnostic on purpose: exported so the race
+// behavior itself (the fix for a reproduced bug — see resolveGame below) is
+// unit-testable with plain fake-delay promises, without mocking fetch/
+// statsapi. See test/cards.test.js.
+export function firstNonNull(promises) {
+  if (promises.length === 0) return Promise.resolve(null)
+  return new Promise((resolve) => {
+    let remaining = promises.length
+    const settle = (value) => {
+      remaining -= 1
+      if (value != null) resolve(value)
+      else if (remaining === 0) resolve(null)
+    }
+    for (const p of promises) {
+      Promise.resolve(p).then(settle, () => settle(null))
+    }
+  })
+}
+
+// Scan a date's slate across every level and match the away+home slug back to a
+// game — the edge-side twin of src/api/schedule.js's resolveGame. `hydrate=team`
+// only: resolution needs abbreviations, nothing else.
+//
+// Every sport level's schedule call fires concurrently, but we resolve as soon
+// as ANY of them turns up the wanted matchup rather than waiting on
+// `Promise.allSettled` to let every level finish (see `firstNonNull` above) —
+// sportId 1 (MLB) is where the overwhelming majority of shared links resolve,
+// and a single slow/timed-out MiLB-level response (more likely exactly when a
+// game is live and statsapi is busier) must not gate an already-found MLB game.
+async function resolveGame(apiDate, matchup) {
+  const want = (matchup || '').toLowerCase()
+  const pending = SEARCHABLE_SPORT_IDS.map((sid) =>
+    getJson(`/api/v1/schedule?sportId=${sid}&date=${apiDate}&hydrate=team`).then((data) =>
+      findMatchup((data.dates ?? []).flatMap((d) => d.games ?? []), want),
+    ),
+  )
+  return firstNonNull(pending)
 }
 
 // --- per-route card builders -----------------------------------------------

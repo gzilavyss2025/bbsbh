@@ -288,6 +288,20 @@ don't run these by hand.
   entry-point-guarded, so the formula is importable for tests. Backed by the
   SQLite layer above (`game_scores`); `public/data/game-score.json` is
   exported from the table.
+- `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
+  no entry in the nightly commit step). Runs in `update-nightly-data.yml`
+  alongside the generators above, but is the one script here that calls
+  `bbsbh.vercel.app` itself rather than only statsapi: proactively warms
+  `api/preview.js` + `api/og.js`'s edge cache (see
+  `docs/adr/0012-dynamic-link-previews.md`) for today's MLB slate — every
+  game's `lineup1`/`lineup2`/`boxscore` pages + shared `og:image`, every
+  playing team's page, and every one of those teams' active-roster players —
+  so the first real crawl of a shared link isn't a cold, statsapi-contested
+  resolution. Fetches each pretty page and reads its own rendered `og:image`
+  tag back out to warm rather than reconstructing `/api/og`'s query params by
+  hand, so it can't drift from what `api/_lib/cards.js` actually builds.
+  Best-effort only (`mapConcurrent`, same helper as `gen-milestones.mjs`) —
+  a failed warm is logged and skipped, never fatal to the run.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 
