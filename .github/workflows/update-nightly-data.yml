@@ -20,6 +20,11 @@ name: Update nightly data
 # step's `git add` list or the fail-check below — harmless on a clean
 # fast-forward push, but its always-unstaged output broke the push-race
 # rebase retry the first time two nightly runs collided (2026-07-21).
+# scripts/warm-previews.mjs (added 2026-07-22) is the one step here that
+# ISN'T a gen-*.mjs data generator — it writes no public/data/* file, so it
+# deliberately has no entry in the commit step's `git add` list, only in the
+# fail-check below. It proactively warms api/preview.js + api/og.js's edge
+# cache for today's MLB slate against bbsbh.vercel.app itself.
 # The generators here are otherwise unchanged and fully independent (each
 # writes its own public/data/* file with no read dependency on another's
 # output — gen-callouts.mjs reads vs-team-splits.json only at app runtime,
@@ -141,6 +146,10 @@ jobs:
         id: comeback-wins
         continue-on-error: true
         run: node scripts/gen-comeback-wins.mjs
+      - name: Warm preview cache
+        id: warm-previews
+        continue-on-error: true
+        run: node scripts/warm-previews.mjs
 
       - name: Commit if changed
         run: |
@@ -183,7 +192,8 @@ jobs:
           steps.team-score.outcome == 'failure' ||
           steps.team-transactions.outcome == 'failure' ||
           steps.fever-radar.outcome == 'failure' ||
-          steps.comeback-wins.outcome == 'failure'
+          steps.comeback-wins.outcome == 'failure' ||
+          steps.warm-previews.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1

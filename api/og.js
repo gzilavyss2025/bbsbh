@@ -18,6 +18,7 @@
 // instead of a broken card.
 
 import { ImageResponse } from '@vercel/og'
+import { fetchWithTimeout } from './_lib/http.js'
 
 export const config = { runtime: 'edge' }
 
@@ -55,22 +56,10 @@ const TEAM_COLORS = {
 const FONT_FALLBACK = 'sans-serif'
 const BASE_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 @·—|#.,&'\"()/:+-"
 
-// This endpoint renders on an UNAUTHENTICATED path, and every novel query is a
-// cache miss that fans out to Google Fonts + image hosts. Bound each upstream
-// call so a slow/hostile host can't pin an edge invocation open, and cap the
-// glyph subset so a cache-busting query can't inflate the font requests.
-const FETCH_TIMEOUT_MS = 4000
+// Cap the glyph subset too, so a cache-busting query can't inflate the font
+// requests. The upstream-timeout guard itself (fetchWithTimeout) is shared
+// with api/_lib/cards.js — see api/_lib/http.js.
 const MAX_CARD_TEXT = 160
-
-async function fetchWithTimeout(url, init) {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-  try {
-    return await fetch(url, { ...init, signal: controller.signal })
-  } finally {
-    clearTimeout(timer)
-  }
-}
 
 async function loadGoogleFont(spec, text) {
   const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(spec)}&text=${encodeURIComponent(text)}`

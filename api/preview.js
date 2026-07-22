@@ -124,9 +124,17 @@ export default async function handler(req) {
   return new Response(html, {
     headers: {
       'content-type': 'text/html; charset=utf-8',
-      // Humans and crawlers share this; keep it briefly edge-cached but always
-      // revalidatable (a traded player's card should refresh within the hour).
-      'cache-control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+      // Humans and crawlers share this. A resolved card is briefly edge-cached
+      // but always revalidatable (a traded player's card should refresh within
+      // the hour). An UNRESOLVED card (statsapi hiccup, or a share that landed
+      // mid-transient-failure) gets a much shorter lifetime instead of the same
+      // hour-plus window — otherwise the one bad crawl that matters most (a
+      // link's first, one-time fetch by iMessage/a chat client) bakes the
+      // static fallback in for anyone opening that URL for the rest of the
+      // hour, long after the underlying hiccup has passed.
+      'cache-control': card
+        ? 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+        : 'public, max-age=0, s-maxage=30',
     },
   })
 }
