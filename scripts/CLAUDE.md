@@ -401,6 +401,26 @@ Re-run only to fold in a new season.
   Deliberately a terminal script, NOT part of the app (game-night posts are
   spoilers). Source scoping/queries: `docs/game-buzz.md`.
 
+## Local-environment reporters (read-only; run by `session-start.sh`)
+
+Both report and never act. The acting counterparts are on-demand skills that
+confirm every target with the maintainer first — deliberate, because multiple
+agents work concurrently and nothing should reap another one's checkout or
+process automatically.
+
+- `dev-servers.mjs` — running `vite` dev/preview processes started from a
+  worktree of this repo, each classified stale (worktree deleted, or branch
+  merged) or active. Acted on by `/clean-dev-servers`.
+- `worktrees.mjs [--brief]` — every worktree, classified stale (merged into
+  `origin/main`, or upstream branch deleted) or active, with an uncommitted-file
+  count. Reads last-fetched remote state, so `git fetch origin --prune` must come
+  first. `--brief` prints only the summary and stays silent when nothing is
+  stale — that's the mode the SessionStart hook uses. Acted on by
+  `/clean-worktrees`. The staleness verdicts are pure and unit-tested in
+  `test/worktrees.test.js`; two cases there are non-obvious and were live bugs
+  (a freshly branched worktree looks merged, and requiring commits-ahead to tell
+  them apart mislabels every genuinely merged branch).
+
 ## Lint guards (run by `npm run lint`, CI-enforced via `ci.yml`)
 
 - `check-caps.mjs` — guards the global ALL-CAPS invariant (no CSS `text-transform`
