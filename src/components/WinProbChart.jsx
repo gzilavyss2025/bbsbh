@@ -164,7 +164,39 @@ export const LOGO_COLOR_OVERRIDES = {
 // straight in. NOTE: a per-team rotate/offset override breaks the away/home
 // tile grid's shared alignment across the plot seam for THAT team's band
 // only — an accepted tradeoff, not a bug.
-export const WPA_LOGO_LAYOUT_OVERRIDES = {}
+export const WPA_LOGO_LAYOUT_OVERRIDES = {
+  109: {
+    main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'city-connect': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
+  },
+  133: {
+    main: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
+  },
+  144: {
+    alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
+    'city-connect': { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
+  },
+  111: {
+    'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+  },
+  158: {
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'city-connect': { size: 69, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -8 },
+  },
+  136: {
+    'city-connect': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'alternate-3': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
+  },
+  139: {
+    'city-connect': { size: 65, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -10 },
+    alternate: { size: 117, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -68 },
+  },
+  141: {
+    'city-connect': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 7 },
+  },
+}
 
 export function wpaLogoLayout(teamId, treatment) {
   const o = WPA_LOGO_LAYOUT_OVERRIDES[teamId]?.[treatment]
@@ -211,7 +243,39 @@ export const BAND_COLOR_OVERRIDES = {
 // (flat fill) or `{ pinstripe: true, color }` (the scorebook pinstripe
 // pattern — see PinstripePattern below — `color` is the line color, white
 // background implied, same convention as teams.js's MAIN_OVERRIDES).
-export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {}
+export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
+  109: {
+    main: '#E3D4AD',
+    alternate: '#E3D4AD',
+    'city-connect': '#523178',
+  },
+  133: {
+    main: '#003831',
+  },
+  144: {
+    alternate: '#CE1141',
+    'city-connect': '#7BA7D8',
+  },
+  111: {
+    'city-connect': '#5A8D84',
+  },
+  158: {
+    alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+    'city-connect': '#ff6c58',
+  },
+  136: {
+    'city-connect': '#203F79',
+    'alternate-3': '#000000',
+    'alternate-2': '#0C2C56',
+  },
+  139: {
+    'city-connect': '#7bc35e',
+    alternate: '#8FBCE6',
+  },
+  141: {
+    'city-connect': '#161827',
+  },
+}
 
 // The pinstripe line color at its default weight — same literal
 // mainTreatmentPinstripeColor/treatmentPinstripeColor (teams.js) fall back

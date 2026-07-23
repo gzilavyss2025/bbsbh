@@ -100,7 +100,7 @@ test('treatmentScale returns a curated per-team/treatment override', () => {
 })
 
 test('treatmentScale defaults to 1 for an uncurated team or treatment', () => {
-  assert.equal(treatmentScale(158, 'alternate'), 1)
+  assert.equal(treatmentScale(158, 'city-connect'), 1) // Brewers has no city-connect override
   assert.equal(treatmentScale(139, 'city-connect'), 1) // Rays has no city-connect override
 })
 
