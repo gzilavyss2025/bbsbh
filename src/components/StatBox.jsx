@@ -281,7 +281,7 @@ export function AbsRow({ teamId, abbr, outcomes }) {
               <span
                 className={`abs__detailresult abs__detailresult--${o.outcome === 'success' ? 'won' : 'lost'}`}
               >
-                {o.outcome === 'success' ? 'Overturned' : 'Upheld'}
+                {o.outcome === 'success' ? 'Overturned' : 'Confirmed'}
               </span>
             </li>
           ))}
