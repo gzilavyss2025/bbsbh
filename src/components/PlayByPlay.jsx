@@ -94,29 +94,20 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll the newly revealed at-bat into view on each step (ADR-0016): a
-  // step boundary always lands right after a plate-appearance card (see
-  // nextStepBoundary), so the last visible entry is the one that just came
-  // in. Skipped when a step count carries over from a PREVIOUS visit (mount
-  // at stepCap > 1, e.g. returning to a half already mid-step) so the page
-  // doesn't jump before the user has tapped anything this visit — but the
-  // very first tap of a still-fully-sealed half (mount at stepCap === 1)
-  // always scrolls: that tap is the only visible change on the page (the
-  // card appears well below the floating bar the user just tapped), so
-  // without this the tap looks like it did nothing. Compared against the RAW
-  // `stepCap` prop, not `effectiveCap` — this is detecting the user's own tap,
-  // which always arrives as the same raw value regardless of how far it gets
-  // bundled forward for display.
+  // Scroll the newly revealed at-bat to the TOP of the viewport on each step
+  // (ADR-0016): a step boundary always lands right after a plate-appearance
+  // card (see nextStepBoundary), so the last visible entry is the one that
+  // just came in. Fires on every stepCap change AND on mount — including a
+  // reload that resumes a half already mid-step, not just a tap made THIS
+  // visit — so returning to a partially-stepped half always lands you back
+  // at the newest card rather than at the top of the whole half. Compared
+  // against the RAW `stepCap` prop, not `effectiveCap`, so a single tap that
+  // bundles a leading event note forward still scrolls exactly once.
   const lastEntryRef = useRef(null)
-  const prevStepCapRef = useRef(stepCap)
-  const isFirstRenderRef = useRef(true)
   useEffect(() => {
-    const firstTapOfHalf = isFirstRenderRef.current && stepCap === 1
-    isFirstRenderRef.current = false
-    if (stepping && (stepCap !== prevStepCapRef.current || firstTapOfHalf)) {
-      lastEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (stepping) {
+      lastEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-    prevStepCapRef.current = stepCap
   }, [stepping, stepCap])
 
   // Reports the pitcher actually on the mound as of what's visible right now
