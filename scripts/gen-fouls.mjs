@@ -152,7 +152,7 @@ export function aggregateGameFouls(feed) {
   const getPitchType = (code, desc) => {
     let pt = pitchTypes.get(code)
     if (!pt) {
-      pt = { description: desc || '', pitches: 0, fouls: 0 }
+      pt = { description: desc || '', pitches: 0, fouls: 0, whiffs: 0 }
       pitchTypes.set(code, pt)
     } else if (desc && !pt.description) {
       pt.description = desc
@@ -183,6 +183,7 @@ export function aggregateGameFouls(feed) {
   let carryBatter = null
   let carryStrikes = 0
   let carryPaFouls = 0
+  let carryPaPitches = 0
   let carryPaContext = null
 
   // Running per-half-inning game state, always advanced to the play's OWN
@@ -269,6 +270,7 @@ export function aggregateGameFouls(feed) {
 
     let preStrikes = isNewPa ? 0 : carryStrikes
     let paFouls = isNewPa ? 0 : carryPaFouls
+    let paPitches = (isNewPa ? 0 : carryPaPitches) + pitchEvents.length
 
     for (const e of pitchEvents) {
       const code = pitchCallCode(e)
@@ -291,6 +293,7 @@ export function aggregateGameFouls(feed) {
         const pt = getPitchType(tcode, desc)
         pt.pitches += 1
         if (isFoul) pt.fouls += 1
+        if (isWhiff) pt.whiffs += 1
         if (battingTeamId != null) {
           const bpt = getTeamPitchType(battingPitchTypes, battingTeamId, tcode, desc)
           bpt.pitches += 1
@@ -336,11 +339,13 @@ export function aggregateGameFouls(feed) {
       carryBatter = batterId
       carryStrikes = preStrikes
       carryPaFouls = paFouls
+      carryPaPitches = paPitches
       carryPaContext = paContextEntering
     } else {
       carryBatter = null
       carryStrikes = 0
       carryPaFouls = 0
+      carryPaPitches = 0
       carryPaContext = null
       if (b && paFouls > b.bestPaFouls) {
         b.bestPaFouls = paFouls
@@ -349,6 +354,8 @@ export function aggregateGameFouls(feed) {
           pitcherName: p?.name ?? play.matchup?.pitcher?.fullName ?? '',
           resultEvent: play.result?.event ?? '',
           resultType: play.result?.eventType ?? '',
+          resultDescription: play.result?.description ?? '',
+          paPitches,
           inning: inningNum,
           half,
           battingTeamId,
@@ -424,9 +431,10 @@ const upsertBatterPaHigh = (db) =>
   db.prepare(
     `INSERT INTO foul_batter_pa_high
        (person_id, fouls, game_pk, pitcher_id, pitcher_name, result_event,
-        result_type, inning, half, outs, on_first, on_second, on_third,
-        away_score, home_score, batting_team_id, opponent_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        result_type, result_description, pa_pitches, inning, half, outs,
+        on_first, on_second, on_third, away_score, home_score,
+        batting_team_id, opponent_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id) DO UPDATE SET
        fouls = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                     THEN excluded.fouls ELSE foul_batter_pa_high.fouls END,
@@ -440,6 +448,10 @@ const upsertBatterPaHigh = (db) =>
                            THEN excluded.result_event ELSE foul_batter_pa_high.result_event END,
        result_type = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                           THEN excluded.result_type ELSE foul_batter_pa_high.result_type END,
+       result_description = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                                  THEN excluded.result_description ELSE foul_batter_pa_high.result_description END,
+       pa_pitches = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
+                         THEN excluded.pa_pitches ELSE foul_batter_pa_high.pa_pitches END,
        inning = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
                      THEN excluded.inning ELSE foul_batter_pa_high.inning END,
        half = CASE WHEN excluded.fouls > foul_batter_pa_high.fouls
@@ -507,13 +519,14 @@ const upsertInning = (db) =>
 
 const upsertPitchType = (db) =>
   db.prepare(
-    `INSERT INTO foul_pitch_types (code, season, description, pitches, fouls)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO foul_pitch_types (code, season, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(code) DO UPDATE SET
        season = excluded.season,
        description = excluded.description,
        pitches = foul_pitch_types.pitches + excluded.pitches,
-       fouls = foul_pitch_types.fouls + excluded.fouls`,
+       fouls = foul_pitch_types.fouls + excluded.fouls,
+       whiffs = foul_pitch_types.whiffs + excluded.whiffs`,
   )
 
 const upsertTeamPitchTypeBatting = (db) =>
@@ -579,8 +592,9 @@ async function ingestGame(db, stmts, gamePk, date, season) {
         const pa = b.bestPa
         stmts.batterPaHigh.run(
           id, b.bestPaFouls, gamePk, pa.pitcherId, pa.pitcherName, pa.resultEvent,
-          pa.resultType, pa.inning, pa.half, pa.outs, pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0,
-          pa.onThird ? 1 : 0, pa.awayScore, pa.homeScore, pa.battingTeamId, pa.opponentId,
+          pa.resultType, pa.resultDescription, pa.paPitches, pa.inning, pa.half, pa.outs,
+          pa.onFirst ? 1 : 0, pa.onSecond ? 1 : 0, pa.onThird ? 1 : 0, pa.awayScore,
+          pa.homeScore, pa.battingTeamId, pa.opponentId,
         )
       }
     }
@@ -594,7 +608,7 @@ async function ingestGame(db, stmts, gamePk, date, season) {
       stmts.inning.run(inning, season, i.pitches, i.fouls, i.pitchesVsStarter, i.foulsVsStarter, i.pitchesVsReliever, i.foulsVsReliever)
     }
     for (const [code, pt] of agg.pitchTypes) {
-      stmts.pitchType.run(code, season, pt.description, pt.pitches, pt.fouls)
+      stmts.pitchType.run(code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
     }
     for (const [teamId, byCode] of agg.battingPitchTypes) {
       for (const [code, pt] of byCode) {
@@ -660,6 +674,8 @@ export function exportFouls(db) {
             pitcherName: pa.pitcher_name,
             resultEvent: pa.result_event,
             resultType: pa.result_type,
+            resultDescription: pa.result_description,
+            paPitches: pa.pa_pitches,
             inning: pa.inning,
             half: pa.half,
             outs: pa.outs,
@@ -707,7 +723,7 @@ export function exportFouls(db) {
   const byPitchType = db
     .prepare('SELECT * FROM foul_pitch_types ORDER BY pitches DESC')
     .all()
-    .map((r) => ({ code: r.code, description: r.description, pitches: r.pitches, fouls: r.fouls }))
+    .map((r) => ({ code: r.code, description: r.description, pitches: r.pitches, fouls: r.fouls, whiffs: r.whiffs }))
 
   // Every game with a combined total, richest first — the reader trims this to
   // a top N (see src/api/fouls.js's topFoulGames), same "export the full sorted

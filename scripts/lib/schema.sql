@@ -178,24 +178,30 @@ CREATE TABLE IF NOT EXISTS foul_batter_totals (
 -- see its header comment). `fouls` is compared the same CASE-guarded way as
 -- max_game_fouls above, so it converges regardless of ingest order; a row
 -- exists only for a batter who has fouled off at least one pitch in some PA.
+-- `result_description` is the feed's full play-by-play prose (e.g. "Kyle
+-- Manzardo grounds out to first base."), and `pa_pitches` is the pitch count
+-- of this exact plate appearance (not the batter's game/season total) — both
+-- feed the board's "Pitch N: <description>" line.
 CREATE TABLE IF NOT EXISTS foul_batter_pa_high (
-  person_id       INTEGER PRIMARY KEY,
-  fouls           INTEGER NOT NULL DEFAULT 0,
-  game_pk         INTEGER,
-  pitcher_id      INTEGER,
-  pitcher_name    TEXT,
-  result_event    TEXT,
-  result_type     TEXT,
-  inning          INTEGER,
-  half            TEXT,
-  outs            INTEGER,
-  on_first        INTEGER NOT NULL DEFAULT 0,
-  on_second       INTEGER NOT NULL DEFAULT 0,
-  on_third        INTEGER NOT NULL DEFAULT 0,
-  away_score      INTEGER,
-  home_score      INTEGER,
-  batting_team_id INTEGER,
-  opponent_id     INTEGER
+  person_id          INTEGER PRIMARY KEY,
+  fouls              INTEGER NOT NULL DEFAULT 0,
+  game_pk            INTEGER,
+  pitcher_id         INTEGER,
+  pitcher_name       TEXT,
+  result_event       TEXT,
+  result_type        TEXT,
+  result_description TEXT,
+  pa_pitches         INTEGER,
+  inning             INTEGER,
+  half               TEXT,
+  outs               INTEGER,
+  on_first           INTEGER NOT NULL DEFAULT 0,
+  on_second          INTEGER NOT NULL DEFAULT 0,
+  on_third           INTEGER NOT NULL DEFAULT 0,
+  away_score         INTEGER,
+  home_score         INTEGER,
+  batting_team_id    INTEGER,
+  opponent_id        INTEGER
 );
 
 -- Fouls surrendered BY each pitcher, plus whiffs so the app can show the
@@ -240,12 +246,16 @@ CREATE TABLE IF NOT EXISTS foul_league_innings (
 );
 
 -- League-wide foul rate by pitch type (details.type.code / .description).
+-- `whiffs` (swinging strikes) was added after the table's initial rows were
+-- ingested — see scripts/backfill-foul-pitchtype-whiffs.mjs for the one-time
+-- migration that filled it in for already-ingested games.
 CREATE TABLE IF NOT EXISTS foul_pitch_types (
   code        TEXT PRIMARY KEY,
   season      INTEGER NOT NULL,
   description TEXT NOT NULL,
   pitches     INTEGER NOT NULL DEFAULT 0,
-  fouls       INTEGER NOT NULL DEFAULT 0
+  fouls       INTEGER NOT NULL DEFAULT 0,
+  whiffs      INTEGER NOT NULL DEFAULT 0
 );
 
 -- Foul rate by pitch type, scoped to ONE team's own BATTERS (the pitch types
