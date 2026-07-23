@@ -75,6 +75,12 @@ export const GROUPS = {
     file: join(dataDir, 'comeback-wins.sql'),
     tables: ['comeback_win_totals', 'comeback_ingested_games'],
   },
+  // Written by the one nightly gen-jerseys.mjs — its own group (not folded
+  // into an existing one) since no other generator ever writes this table.
+  jerseys: {
+    file: join(dataDir, 'jerseys.sql'),
+    tables: ['jerseys'],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay
