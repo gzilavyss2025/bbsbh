@@ -121,6 +121,15 @@ for each generator; the reader modules:
   two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
   so MiLB rows fall back to a dash.
+- `jerseys.js` — what a team actually wore in a given game, from
+  `public/data/jerseys.json` (`scripts/gen-jerseys.mjs`, nightly). Keyed
+  `${gamePk}:${teamId}` → `'alternate' | 'city-connect'`; a standard jersey or
+  an unposted assignment simply has no key. `jerseyTreatmentFor(data, gamePk,
+  teamId)` returns that or `null`. `GameCard.jsx` reads it to pick which
+  `TeamLogo` variant to render for the home-page slate — `null` (or a team
+  with no curated art in `public/team-logos/`) falls back to `'base'` via
+  `TeamLogo`'s own fallback chain, never a broken image. Spoiler-free: a
+  jersey choice, not game state.
 - `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of

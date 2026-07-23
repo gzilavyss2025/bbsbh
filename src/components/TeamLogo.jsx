@@ -5,7 +5,10 @@ import { teamLogoUrl } from '../lib/teams.js'
 // app. The label next to it always names the team in text, so the image is
 // aria-hidden and purely visual.
 //
-// `variant` picks which mark to draw ('base' | 'primary' | 'cap' | 'wordmark').
+// `variant` picks which mark to draw ('base' | 'primary' | 'cap' | 'wordmark' |
+// 'alternate' | 'city-connect'). The last two resolve to a locally curated
+// asset (teamLogoUrl -> localLogoUrl, teams.js) rather than the mlbstatic CDN,
+// and coverage is partial by design — that's what the fallback below is for.
 // Fallback degrades in two steps, consistent with the app's "MiLB data is
 // rendered defensively" rule:
 //   • a variant that fails to load -> retry the plain base logo;

@@ -5,6 +5,8 @@ import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
 import { doubleHeaderLabel } from '../lib/resultCards.js'
+import { useAsync } from '../hooks/useAsync.js'
+import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals. The one
@@ -37,6 +39,10 @@ export function GameCard({
   // left unset (undefined) when not pinned or the team has no known color, so
   // the CSS var(--pin-accent, var(--field)) fallback takes over.
   const style = pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : undefined
+  // Static same-origin file (nightly-generated), same "fetch once, session
+  // cache" shape as every other public/data/*.json reader — this is not one
+  // network request per card, just a cache hit after the first card mounts.
+  const { data: jerseysData } = useAsync(fetchJerseysData, [])
   return (
     <div
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
@@ -72,8 +78,8 @@ export function GameCard({
             <span className="gamecard__atmark-ghost">@</span>
             <span className="gamecard__atmark-ink">@</span>
           </span>
-          <TeamMark team={game.away} side="away" />
-          <TeamMark team={game.home} side="home" />
+          <TeamMark team={game.away} side="away" gamePk={game.gamePk} jerseysData={jerseysData} />
+          <TeamMark team={game.home} side="home" gamePk={game.gamePk} jerseysData={jerseysData} />
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
         </div>
@@ -215,10 +221,17 @@ function ReadyPill({ game }) {
 // .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md so revisiting
 // this doesn't mean re-deriving it. The tile stays the plain neutral paper
 // fill (.gamecard__logobox's own `background`) until that's resolved.
-function TeamMark({ team, side }) {
+function TeamMark({ team, side, gamePk, jerseysData }) {
+  // Swaps to a team's curated Alternate/City Connect mark when that's what
+  // it's actually wearing this game (scripts/gen-jerseys.mjs, nightly).
+  // Coverage is partial by design — TeamLogo's own fallback chain quietly
+  // drops back to the base logo for any team without curated art, or before
+  // the uniforms assignment has posted (jerseyTreatmentFor -> null either
+  // way). Never score-revealing: a jersey choice, not a game state.
+  const variant = jerseyTreatmentFor(jerseysData, gamePk, team.id) ?? 'base'
   return (
     <div className={`gamecard__logobox gamecard__logobox--${side}`}>
-      <TeamLogo teamId={team.id} name={team.name} size={56} />
+      <TeamLogo teamId={team.id} name={team.name} size={56} variant={variant} />
     </div>
   )
 }

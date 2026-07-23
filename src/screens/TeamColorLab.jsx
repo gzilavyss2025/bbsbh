@@ -2,43 +2,26 @@ import { useEffect, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName, teamClubName, teamColorSwatches } from '../lib/teams.js'
+import {
+  ALL_MLB_TEAM_IDS,
+  teamAbbr,
+  teamFullName,
+  teamClubName,
+  teamColorSwatches,
+  localLogoUrl,
+} from '../lib/teams.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
 // everywhere else (components/TeamLogo.jsx) — so only Alternate and City
-// Connect are locally procured, hand-cropped transparent PNGs (see the
-// folder convention below). Order here is also render order per team.
+// Connect are locally procured, hand-cropped transparent PNGs (localLogoUrl,
+// teams.js — same convention TeamLogo's 'alternate'/'city-connect' variants
+// use for the home-page game cards). Order here is also render order per team.
 const TREATMENTS = [
   { key: 'main', label: 'Main' },
   { key: 'alternate', label: 'Alternate' },
   { key: 'city-connect', label: 'City Connect' },
 ]
-
-// Where a procured file for `teamId`/`treatment` is expected, served
-// same-origin out of public/ like every other static asset in this app.
-// Filename is the club's real abbreviation (teams.js's TEAM_ABBR, e.g.
-// "MIL", "SD", "CWS") — human-legible for manually sorting a folder of PNGs,
-// and already the single source of truth for spelling a club's short code
-// everywhere else in the app, so there's no second id scheme to keep in sync.
-// A missing file 404s and TreatmentLogo below falls back to a wireframe
-// placeholder — there's no manifest to hand-maintain as files are added.
-// Never called for 'main' — that treatment renders TeamLogo instead.
-function localLogoUrl(teamId, treatment) {
-  const abbr = teamAbbr({ id: teamId })
-  if (!abbr) return null
-  const ext = ALT_LOGO_SVG.has(teamId) && treatment === 'alternate' ? 'svg' : 'png'
-  return `/team-logos/${treatment}/${abbr}.${ext}`
-}
-
-// Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
-// (every path recolored to the club's one real brand color straight off the
-// official multicolor logo) rather than a photographed/cropped PNG like every
-// other Alternate treatment here.
-const ALT_LOGO_SVG = new Set([
-  133, // Athletics
-  118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
-])
 
 // Per-team, per-treatment tweak to the tile's edge-bleed scale (applied on
 // top of the 1.32 default every tinted tile gets) — for treatments other than

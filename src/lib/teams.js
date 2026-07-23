@@ -146,8 +146,37 @@ export const LOGO_VARIANTS = [
   { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
 ]
 
+// Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
+// (every path recolored to the club's one real brand color straight off the
+// official multicolor logo) rather than a photographed/cropped PNG like every
+// other Alternate treatment. Single source of truth for both localLogoUrl
+// below and Team Color Lab's own tiles — grows as more art is added in
+// whatever format it's supplied in.
+const ALT_LOGO_SVG = new Set([
+  133, // Athletics
+  118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
+])
+
+// Where a procured Alternate/City Connect logo for `teamId`/`treatment` is
+// expected — hand-curated, transparent-cropped art checked into public/, since
+// the mlbstatic CDN carries no such marks (see the LOGO_VARIANTS comment
+// above). Filename is the club's real abbreviation, already the single
+// source of truth for spelling a club's short code everywhere else in this
+// app. Deliberately has NO team-id whitelist: coverage grows purely by
+// dropping a new file into public/team-logos/{treatment}/ — a missing file
+// 404s and callers (TeamLogo's fallback chain, Team Color Lab's
+// TreatmentLogo) degrade gracefully, so there's no manifest to hand-maintain.
+// Never called for 'main' — that treatment renders the CDN base logo instead.
+export function localLogoUrl(teamId, treatment) {
+  const abbr = teamAbbr({ id: teamId })
+  if (!abbr) return null
+  const ext = ALT_LOGO_SVG.has(teamId) && treatment === 'alternate' ? 'svg' : 'png'
+  return `/team-logos/${treatment}/${abbr}.${ext}`
+}
+
 export function teamLogoUrl(teamId, variant = 'base') {
   if (!teamId) return null
+  if (variant === 'alternate' || variant === 'city-connect') return localLogoUrl(teamId, variant)
   if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
   const v = LOGO_VARIANTS.find((x) => x.key === variant)
   return v ? `${LOGO_BASE}/${v.path}/${teamId}.svg` : `${LOGO_BASE}/${teamId}.svg`
