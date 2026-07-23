@@ -10,12 +10,16 @@ import {
   teamLogoUrl,
   ALT_COLORS,
   ALT2_COLORS,
+  ALT3_COLORS,
   CITY_CONNECT_COLORS,
   TREATMENT_SCALE,
   MAIN_OVERRIDES,
   mainOverrideLogoUrl,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
+  hasAlternate2,
+  hasAlternate3,
+  hasCityConnect,
 } from '../lib/teams.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
@@ -28,6 +32,7 @@ const TREATMENTS = [
   { key: 'main', label: 'Main' },
   { key: 'alternate', label: 'Alternate' },
   { key: 'alternate-2', label: 'Alternate 2' },
+  { key: 'alternate-3', label: 'Alternate 3' },
   { key: 'city-connect', label: 'City Connect' },
 ]
 
@@ -112,7 +117,9 @@ function colorsFor(teamId, treatmentKey) {
       ? ALT_COLORS[teamId]
       : treatmentKey === 'alternate-2'
         ? ALT2_COLORS[teamId]
-        : CITY_CONNECT_COLORS[teamId]
+        : treatmentKey === 'alternate-3'
+          ? ALT3_COLORS[teamId]
+          : CITY_CONNECT_COLORS[teamId]
   return colors ? withMainRoleLabels(teamId, colors) : []
 }
 
@@ -128,10 +135,18 @@ const JERSEY_TREATMENT_OVERRIDES = {
   '144_jersey_4_2026': 'main', // Braves Alt 2 Navy — worn with the plain Main mark
   '146_jersey_3_2026': 'alternate-2', // Marlins Alt 1 Black — worn with the Alternate 2 mark
   '146_jersey_1_2026': 'alternate', // Marlins Home White — worn with the Alternate mark, not plain Main
-  '146_jersey_4_2026': 'main', // Marlins Alt 2 Teal — worn with the plain Main mark
+  '146_jersey_4_2026': 'alternate-3', // Marlins Alt 2 Teal — worn with the Alternate 3 mark
   '147_jersey_2_2026': 'alternate', // Yankees Away Grey — worn with the Alternate mark, not plain Main
   '118_jersey_4_2026': 'main', // Royals Alt 1 Royal Blue — worn with the plain Main mark
   '118_jersey_2_2026': 'alternate-2', // Royals Away Grey — worn with the Alternate 2 mark
+  '158_jersey_4_2026': 'alternate-2', // Brewers Alt 2 Navy Blue — worn with the Alternate 2 mark
+  '108_jersey_2_2026': 'alternate', // Angels Away Grey — worn with the Alternate mark, not plain Main
+  '138_jersey_3_2026': 'alternate-2', // Cardinals Alt 1 Cream — worn with the Alternate 2 mark
+  '136_jersey_1_2026': 'alternate', // Mariners Home White — worn with the Alternate mark, not plain Main
+  '136_jersey_3_2026': 'main', // Mariners Alt 1 Teal — worn with the plain Main mark
+  '136_jersey_2_2026': 'alternate-2', // Mariners Away Navy — worn with the Alternate 2 mark
+  '136_jersey_4_2026': 'alternate-3', // Mariners Steelheads Alt 2 Cream — worn with the Alternate 3 mark
+  '137_jersey_4_2026': 'alternate-2', // Giants Alt 2 Black "Gigantes" — worn with the Alternate 2 mark (moved off City Connect)
 }
 
 // Which jersey(s) in the uniforms CATALOG (as opposed to a single game's
@@ -225,11 +240,22 @@ function teamAnchorId(teamId) {
 
 function TeamColorRow({ teamId, catalog }) {
   const name = teamFullName(teamId)
+  // Alternate 2/3 are opt-in per team (unlike Main/Alternate/City Connect,
+  // which every club eventually gets) — skip the tile entirely for a team
+  // with none set up, rather than showing an empty placeholder. City Connect
+  // is skipped outright for a team with no real one (hasCityConnect), same
+  // idea but permanent rather than "not procured yet".
+  const treatments = TREATMENTS.filter(
+    (t) =>
+      (t.key !== 'alternate-2' || hasAlternate2(teamId)) &&
+      (t.key !== 'alternate-3' || hasAlternate3(teamId)) &&
+      (t.key !== 'city-connect' || hasCityConnect(teamId)),
+  )
   return (
     <section className="colorlab__row" id={teamAnchorId(teamId)}>
       <h2 className="colorlab__teamname">{name}</h2>
       <div className="colorlab__treatments">
-        {TREATMENTS.map((t) => (
+        {treatments.map((t) => (
           <TreatmentBox
             key={t.key}
             teamId={teamId}

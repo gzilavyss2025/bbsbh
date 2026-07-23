@@ -44,7 +44,7 @@ test('treatmentBgColor returns the bg:true hex for a curated team/treatment', ()
 })
 
 test('treatmentBgColor returns null for a team with no curated background yet', () => {
-  assert.equal(treatmentBgColor(108, 'alternate'), null) // Angels — no ALT_COLORS entry
+  assert.equal(treatmentBgColor(116, 'alternate'), null) // Tigers — no ALT_COLORS entry
 })
 
 test('treatmentBgColor returns null for a pinstriped tile with no flat bg swatch', () => {

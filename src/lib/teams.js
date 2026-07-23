@@ -146,15 +146,17 @@ export const LOGO_VARIANTS = [
   { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
 ]
 
-// Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
-// (every path recolored to the club's one real brand color straight off the
-// official multicolor logo) rather than a photographed/cropped PNG like every
-// other Alternate treatment. Single source of truth for both localLogoUrl
-// below and Team Color Lab's own tiles — grows as more art is added in
-// whatever format it's supplied in.
+// Teams/treatments whose local art is a hand-flattened/recolored SVG (every
+// path recolored off the official multicolor logo) rather than a
+// photographed/cropped PNG like every other curated treatment. Keyed
+// `${teamId}:${treatment}` since the same club's Alternate and Alternate 2
+// can differ. Single source of truth for both localLogoUrl below and Team
+// Color Lab's own tiles — grows as more art is added in whatever format
+// it's supplied in.
 const ALT_LOGO_SVG = new Set([
-  118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
-  147, // Yankees — the plain mlbstatic base mark (hat-and-bat crest), fill recolored from its default #132448 to #0C2340
+  '118:alternate', // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
+  '147:alternate', // Yankees — the plain mlbstatic base mark (hat-and-bat crest), fill recolored from its default #132448 to #0C2340
+  '158:alternate-2', // Brewers — the plain mlbstatic ball-in-glove mark, gold panels recolored white and the (formerly white) baseball recolored navy
 ])
 
 // Teams whose Alternate mark is the plain, unmodified mlbstatic CDN base logo
@@ -163,11 +165,22 @@ const ALT_LOGO_SVG = new Set([
 // curated background; only the mark itself is the stock CDN art.
 const ALT_USES_BASE_LOGO = new Set([
   133, // Athletics — no curated Alternate art; the real multicolor A's mark on the secondary gold tile
+  108, // Angels — same plain CDN mark as Main, just re-paired with a grey tile for their Away Grey jersey
 ])
+
+// Teams with no real City Connect uniform at all (as opposed to one whose art
+// just hasn't been procured yet) — Team Color Lab skips the tile entirely
+// rather than showing an empty placeholder that implies one is coming.
+const NO_CITY_CONNECT = new Set([
+  147, // Yankees — opted out of the program
+])
+
+export function hasCityConnect(teamId) {
+  return !NO_CITY_CONNECT.has(teamId)
+}
 
 // Same idea as ALT_USES_BASE_LOGO, but for the Alternate 2 treatment.
 const ALT2_USES_BASE_LOGO = new Set([
-  158, // Brewers — Alternate 2 reuses the plain Main mark, just re-paired with the Main triad's colors
   118, // Royals — the plain CDN mark is already navy #004687 (Main's own is a locally recolored white copy)
 ])
 
@@ -184,7 +197,7 @@ const ALT2_USES_BASE_LOGO = new Set([
 export function localLogoUrl(teamId, treatment) {
   const abbr = teamAbbr({ id: teamId })
   if (!abbr) return null
-  const ext = ALT_LOGO_SVG.has(teamId) && treatment === 'alternate' ? 'svg' : 'png'
+  const ext = ALT_LOGO_SVG.has(`${teamId}:${treatment}`) ? 'svg' : 'png'
   return `/team-logos/${treatment}/${abbr}.${ext}`
 }
 
@@ -192,7 +205,8 @@ export function teamLogoUrl(teamId, variant = 'base') {
   if (!teamId) return null
   if (variant === 'alternate' && ALT_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
   if (variant === 'alternate-2' && ALT2_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
-  if (variant === 'alternate' || variant === 'city-connect' || variant === 'alternate-2') return localLogoUrl(teamId, variant)
+  if (variant === 'alternate' || variant === 'city-connect' || variant === 'alternate-2' || variant === 'alternate-3')
+    return localLogoUrl(teamId, variant)
   // A locally hand-edited recolor of the Main mark (mainOverrideLogoUrl,
   // MAIN_OVERRIDES below) rather than the plain CDN base logo — for the
   // handful of clubs whose base mark doesn't read against its new tinted
@@ -225,6 +239,8 @@ export function leagueLogoUrl() {
 // opt-in background only shown when the Alternate treatment itself is shown,
 // not a promotion of that proposal into the app's real teamPrimaryColor.
 export const ALT_COLORS = {
+  108: [{ label: 'Silver', hex: '#C4CED4', bg: true }], // Angels — same plain CDN mark as Main, on grey for Away Grey
+  138: [{ label: 'Background', hex: '#9DDFFF', bg: true }], // Cardinals — the bird-on-bat mark
   115: [{ label: 'Primary', hex: '#33006F', bg: true }], // Rockies
   118: [{ label: 'Baby Blue', hex: '#6DADF4', bg: true }], // Royals
   109: [
@@ -252,7 +268,7 @@ export const ALT_COLORS = {
     { label: 'Third', hex: '#A2AAAD' },
   ], // Athletics
   135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres
-  136: [{ label: 'Background', hex: '#005C5C', bg: true }], // Mariners
+  136: [{ label: 'Background', hex: '#F5F0E1', bg: true }], // Mariners — offwhite, for their Home White jersey
   137: [
     { label: 'Secondary', hex: '#27251F' },
     { label: 'Third', hex: '#EFD19F', bg: true },
@@ -284,6 +300,7 @@ export const CITY_CONNECT_COLORS = {
     { label: 'Primary', hex: '#0097A9' },
     { label: 'Secondary', hex: '#523178', bg: true },
   ], // Diamondbacks
+  136: [{ label: 'Background', hex: '#203F79', bg: true }], // Mariners — the trident mark
   110: [{ label: 'Secondary', hex: '#E1D2BE', bg: true }], // Orioles
   144: [
     { label: 'Primary', hex: '#D32826' },
@@ -315,6 +332,7 @@ export const CITY_CONNECT_COLORS = {
     { label: 'Secondary', hex: '#EBDFCB' },
   ], // Rangers — both sampled off the png itself (red field, cream T)
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
+  138: [{ label: 'Primary', hex: '#C41E3A', bg: true }], // Cardinals — "The Lou" mark on their standard red
   146: [{ label: 'Background', hex: '#000000', bg: true }], // Marlins
   158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
 }
@@ -322,19 +340,25 @@ export const CITY_CONNECT_COLORS = {
 // A second Alternate treatment. Rangers: same badge as ALT_COLORS' Alternate,
 // recolored (public/team-logos/alternate-2/TEX.png: the red offset border
 // swapped for Primary blue) and re-paired with the opposite swatch as its
-// tile fill. Brewers: the plain Main mark (ALT2_USES_BASE_LOGO above)
-// re-paired with the Main triad's own three colors, background on Third.
+// tile fill. Brewers: the plain mlbstatic ball-in-glove mark recolored
+// (public/team-logos/alternate-2/MIL.svg, ALT_LOGO_SVG above — gold panels to
+// white, the baseball from white to navy) on its own Primary navy tile.
 // Marlins: a procured tri-color (public/team-logos/alternate-2/MIA.png) with
 // its own Background swatch (black, not one of the three brand colors).
 // Royals: the plain CDN mark (ALT2_USES_BASE_LOGO above), already navy
 // #004687, on a plain grey tile matching their Away Grey jersey. Cubs: the
 // mark formerly procured as City Connect (public/team-logos/alternate-2/
 // CHC.png, moved from city-connect/ — Cubs have no separate City Connect
-// look, this mark belongs here instead) on a plain blue tile.
+// look, this mark belongs here instead) on a plain blue tile. Cardinals: the
+// same bird-on-bat mark as ALT_COLORS' Alternate, re-paired with a cream tile
+// for their Alt 1 Cream jersey.
 // Team Color Lab prototype only, same footing as ALT_COLORS/CITY_CONNECT_COLORS.
 export const ALT2_COLORS = {
   112: [{ label: 'Background', hex: '#7698CE', bg: true }], // Cubs
   118: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Royals
+  136: [{ label: 'Primary', hex: '#0C2C56', bg: true }], // Mariners — the outlined-S mark, for their Away Navy jersey
+  137: [{ label: 'Background', hex: '#000000', bg: true }], // Giants — the mark moved off City Connect, for their Alt 2 Black "Gigantes" jersey
+  138: [{ label: 'Background', hex: '#FCEDD6', bg: true }], // Cardinals
   140: [
     { label: 'Secondary', hex: '#C0111F', bg: true },
     { label: 'Primary', hex: '#003278' },
@@ -345,14 +369,32 @@ export const ALT2_COLORS = {
     { label: 'Third', hex: '#41748D' },
     { label: 'Background', hex: '#000000', bg: true },
   ], // Marlins
-  158: [
-    { label: 'Primary', hex: '#12284B' },
-    { label: 'Secondary', hex: '#FFC52F' },
-    { label: 'Third', hex: '#6CACE4', bg: true },
-  ], // Brewers — same Primary/Secondary/Third as Main; background is Third (Powder Blue)
+  158: [{ label: 'Primary', hex: '#12284B', bg: true }], // Brewers — the recolored ball-in-glove mark on its own Primary navy
 }
 
-// The tile/card background hex for a team's Alternate, Alternate 2, or City
+// A third Alternate treatment. Marlins: a procured mark (public/team-logos/
+// alternate-3/MIA.png, the throwback "F" marlin) on its own teal tile.
+// Mariners: the cream "S" mark for their Steelheads alt, on black.
+export const ALT3_COLORS = {
+  136: [{ label: 'Background', hex: '#000000', bg: true }], // Mariners
+  146: [{ label: 'Background', hex: '#009CA7', bg: true }], // Marlins
+}
+
+// Whether `teamId` has an Alternate 2/3 set up at all — either curated colors
+// (ALT2_COLORS/ALT3_COLORS) or an explicit plain-CDN-mark opt-in
+// (ALT2_USES_BASE_LOGO). Both are opt-in per team (unlike Main/Alternate/City
+// Connect, which every club eventually gets), so Team Color Lab skips
+// rendering the tile entirely for a team with neither, rather than showing an
+// empty placeholder.
+export function hasAlternate2(teamId) {
+  return !!(ALT2_COLORS[teamId] || ALT2_USES_BASE_LOGO.has(teamId))
+}
+
+export function hasAlternate3(teamId) {
+  return !!ALT3_COLORS[teamId]
+}
+
+// The tile/card background hex for a team's Alternate, Alternate 2/3, or City
 // Connect treatment, or null if that team has no curated background yet
 // (callers should fall back to their own neutral fill, same as a missing
 // logo file). 'main'/'base' have no entry here — a standard jersey always
@@ -363,9 +405,11 @@ export function treatmentBgColor(teamId, treatment) {
       ? ALT_COLORS[teamId]
       : treatment === 'alternate-2'
         ? ALT2_COLORS[teamId]
-        : treatment === 'city-connect'
-          ? CITY_CONNECT_COLORS[teamId]
-          : null
+        : treatment === 'alternate-3'
+          ? ALT3_COLORS[teamId]
+          : treatment === 'city-connect'
+            ? CITY_CONNECT_COLORS[teamId]
+            : null
   return colors?.find((c) => c.bg)?.hex ?? null
 }
 
@@ -385,6 +429,7 @@ export const TREATMENT_SCALE = {
   118: { alternate: 0.85, 'alternate-2': 0.85 }, // Royals — same KC mark + scale as Main's own override
   109: { alternate: 1.1 }, // Diamondbacks — bumped up so the top-anchored bleed just barely clips the teal border
   115: { 'city-connect': 1.15 }, // Rockies — mark reads small against the tint at 1.32 alone
+  136: { alternate: 0.95 }, // Mariners — shrunk 5% off the default 1.32 edge-bleed
   140: {
     // T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was
     // chroma-keyed to transparent, and its own bbox already fills most of the
@@ -454,10 +499,10 @@ export const MAIN_OVERRIDES = {
   133: { bg: 'primary', recolor: true }, // Athletics — green -> white
   134: { bg: 'primary', scale: 0.95 }, // Pirates
   135: { bg: 'primary', recolor: true, scale: 0.85 }, // Padres — dark -> secondary gold
-  136: { bg: 'secondary' }, // Mariners
+  136: { bg: 'secondary', recolor: true }, // Mariners — compass-rose mark
   137: { bg: 'secondary', scale: 0.9 }, // Giants
   138: { bg: 'primary', recolor: true, scale: 0.85 }, // Cardinals — red -> white
-  139: { bg: 'secondary', scale: 0.95 }, // Rays
+  139: { bg: 'primary', recolor: true, scale: 0.95 }, // Rays — navy letters -> white, kept the baby-blue undertone shadow
   // Rangers — the circular "Texas Rangers" crest badge (main-overrides/TEX.png,
   // swapped in from Alternate) rather than the mlbstatic mark; it's already
   // edge-to-edge in its own canvas like the Reds/Astros marks below, so scale
@@ -468,7 +513,7 @@ export const MAIN_OVERRIDES = {
   143: { bg: 'primary', recolor: true }, // Phillies — red/white swapped
   144: { bg: 'secondary', recolor: true }, // Braves — red -> white (bg matches the navy border)
   145: { bg: 'secondary' }, // White Sox
-  146: { bg: 'primary' }, // Marlins
+  146: { bg: 'third' }, // Marlins — Slate Gray
   // Yankees — white with the shared black pinstripe (mainTreatmentPinstripe)
   // to match their home pinstripe jersey, instead of a flat navy tile. No
   // `recolor` — the plain mlbstatic mark is already navy, so this wears the
@@ -481,8 +526,8 @@ export const MAIN_OVERRIDES = {
 const MAIN_BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
 
 // Every other override here is a hand-edited copy of the vector mlbstatic
-// mark (.svg); the Rangers' is a chroma-keyed raster crop.
-const MAIN_OVERRIDE_PNG = new Set([140])
+// mark (.svg); the Rangers' and Mariners' are procured raster art.
+const MAIN_OVERRIDE_PNG = new Set([140, 136])
 
 // The locally hand-edited Main-treatment mark for `teamId`, for a team whose
 // MAIN_OVERRIDES entry sets `recolor: true` — served same-origin out of
