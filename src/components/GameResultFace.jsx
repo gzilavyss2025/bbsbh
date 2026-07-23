@@ -6,7 +6,13 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { PerformerCard } from './PerformerCard.jsx'
-import { SCENARIO_LABEL, SCENARIO_STYLE, doubleHeaderLabel, scorePairsLine } from '../lib/resultCards.js'
+import {
+  SCENARIO_LABEL,
+  SCENARIO_STYLE,
+  doubleHeaderLabel,
+  scorePairsLine,
+  showsPerformerCard,
+} from '../lib/resultCards.js'
 
 // The flip card's back face: what a past, Final game's card turns into once
 // revealed. Deliberately a SUMMARY, not the full box score — final R/H/E, the
@@ -41,7 +47,7 @@ export function GameResultFace({
   const totalInnings = box.innings?.length ?? 9
   const wentToExtras = totalInnings > 9
 
-  const { scenario, playChoice, performer, isGameOfTheNight } = cardMeta ?? {}
+  const { scenario, performer, isGameOfTheNight } = cardMeta ?? {}
   // The pinned favorite's game no longer gets its own "Your Team · Won/Lost"
   // text pill — the final score is already sitting right there in the line
   // score below it, so the pill was just repeating it. Instead the whole card
@@ -84,9 +90,7 @@ export function GameResultFace({
   // playChoice landed on the performer variant — and only when a performer
   // actually exists (no performer just falls through to the default play,
   // same as an ungated card would render anyway).
-  const showPerformer =
-    !!performer &&
-    (scenario === 'dominant' || ((scenario === 'blowout' || scenario === 'extras') && playChoice === 'performer'))
+  const showPerformer = showsPerformerCard(cardMeta)
   // Normally the two are alternatives — one beat per card. The CROWNED game
   // is the day's headline card, though, so it earns both: the performer's
   // stat line AND the turning point underneath it. Suppressed when they'd be
