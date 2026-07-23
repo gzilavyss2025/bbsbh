@@ -29,6 +29,7 @@
 //   '/team-color-lab'                   -> { name: 'team-color-lab' }  (dev only, unlinked)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
+//   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
@@ -98,6 +99,8 @@ export function parseRoute(url) {
   // Personal scorebook archive, reached from the site menu or a direct link.
   if (parts.length === 1 && parts[0] === 'first-scorebook')
     return { name: 'first-scorebook' }
+  // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
+  if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
