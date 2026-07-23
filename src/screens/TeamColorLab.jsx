@@ -121,10 +121,27 @@ const CITY_CONNECT_COLORS = {
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
 }
 
+// A plain "Background" swatch (the common case above — just describes the
+// tile fill, no color identity of its own) gets relabeled to Primary/
+// Secondary/Third when its hex is one of that same club's Main-treatment
+// colors (e.g. the Brewers' Alternate background is their Main Third,
+// Powder Blue) — same color, so it should read as the same swatch, not a
+// second unrelated one. An entry with its own explicit label already (e.g.
+// Diamondbacks City Connect's Primary/Secondary — a distinct color identity
+// unrelated to their Main triad) is left alone.
+function withMainRoleLabels(teamId, colors) {
+  const triad = mainColorTriad(teamId)
+  return colors.map((c) => {
+    if (c.label !== 'Background') return c
+    const match = triad.find((m) => m.hex.toLowerCase() === c.hex.toLowerCase()) // caps-js-exempt
+    return match ? { ...c, label: match.label } : c
+  })
+}
+
 function colorsFor(teamId, treatmentKey) {
   if (treatmentKey === 'main') return mainColorTriad(teamId)
-  if (treatmentKey === 'alternate') return ALT_COLORS[teamId] ?? []
-  return CITY_CONNECT_COLORS[teamId] ?? []
+  const colors = treatmentKey === 'alternate' ? ALT_COLORS[teamId] : CITY_CONNECT_COLORS[teamId]
+  return colors ? withMainRoleLabels(teamId, colors) : []
 }
 
 // Dev harness for reviewing each club's three logo treatments — Main,
