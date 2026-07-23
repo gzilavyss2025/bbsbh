@@ -10,6 +10,16 @@ import { getJson } from './statsapi.js'
 // Assets sort jersey → pants → cap so the composed line always reads top-down.
 const UNIFORM_PIECE_ORDER = { J: 0, P: 1, C: 2 }
 
+// Every asset label arrives as "<Club> <descriptor> <Piece>" — the club name
+// is redundant next to a team header/row, so every reader strips it the same
+// way.
+function stripClubName(text, clubName) {
+  if (clubName && text.startsWith(`${clubName} `)) {
+    return text.slice(clubName.length + 1)
+  }
+  return text
+}
+
 export async function fetchGameUniforms(gamePk, options) {
   if (!gamePk) return null
   try {
@@ -47,13 +57,7 @@ export async function fetchGameUniforms(gamePk, options) {
 export function uniformLine(assets, clubName) {
   if (!assets?.length) return ''
   return assets
-    .map((a) => {
-      let text = a.text
-      if (clubName && text.startsWith(`${clubName} `)) {
-        text = text.slice(clubName.length + 1)
-      }
-      return text.replace(/\s(Jersey|Pants|Hat)$/, (m) => m.toLowerCase())
-    })
+    .map((a) => stripClubName(a.text, clubName).replace(/\s(Jersey|Pants|Hat)$/, (m) => m.toLowerCase()))
     .join(' · ')
 }
 
@@ -68,10 +72,7 @@ export function uniformLine(assets, clubName) {
 export function uniformSummary(assets, side, clubName) {
   if (!assets?.length) return ''
   const jersey = assets.find((a) => a.piece === 'J') ?? assets[0]
-  let text = jersey.text
-  if (clubName && text.startsWith(`${clubName} `)) {
-    text = text.slice(clubName.length + 1)
-  }
+  let text = stripClubName(jersey.text, clubName)
   text = text
     .replace(/\s*\bJersey\b\s*/i, ' ') // drop the piece noun
     .replace(/\bAlt\b/gi, 'Alternate') // expand the abbreviation
@@ -83,4 +84,60 @@ export function uniformSummary(assets, side, clubName) {
   // City Connect) gets tonight's side stamped on the front.
   if (/^(home|road|away)\b/i.test(text)) return text
   return `${side === 'away' ? 'Away' : 'Home'} ${text}`
+}
+
+// The per-team OPTIONS catalog (as opposed to fetchGameUniforms' per-game
+// ASSIGNMENT) — `/api/v1/uniforms/team`, verified in docs/uniforms-and-logos.md.
+// Every current MLB club's full asset list for a season, in one call
+// (teamIds takes a comma list). MiLB is not covered (empty asset arrays), so
+// this is MLB-only in practice.
+export async function fetchTeamUniformCatalog(teamIds, season, options) {
+  if (!teamIds?.length) return {}
+  try {
+    const data = await getJson(
+      `/api/v1/uniforms/team?teamIds=${teamIds.join(',')}&season=${season}`,
+      options,
+    )
+    const byTeam = {}
+    for (const t of data.uniforms ?? []) {
+      const assets = (t.uniformAssets ?? [])
+        .map((a) => ({
+          text: a.uniformAssetText ?? '',
+          piece: a.uniformAssetType?.uniformAssetTypeCode ?? '',
+          code: a.uniformAssetCode ?? null,
+        }))
+        .filter((a) => a.text)
+      if (assets.length) byTeam[t.teamId] = assets
+    }
+    return byTeam
+  } catch {
+    return {}
+  }
+}
+
+// Which logo TREATMENT ('main' | 'alternate' | 'city-connect') a catalog
+// asset's own label implies, off the same three-way naming convention every
+// club's catalog follows (verified against a live 2026 pull for all 30
+// clubs): "City Connect …" names itself; "Home/Away/Road …" is the standard
+// uniform Main renders; everything else (Alt N, a special one-off like the
+// Dodgers' "Gold Series") is some flavor of Alternate. `clubName` is stripped
+// first so a club whose own nickname starts with a piece word (e.g. a
+// hypothetical "Home Runs") can't false-match — none currently does, but the
+// strip keeps the check anchored to the descriptor, not the name.
+export function classifyUniformAsset(text, clubName) {
+  const rest = stripClubName(text, clubName)
+  if (/^city connect\b/i.test(rest)) return 'city-connect'
+  if (/^(home|away|road)\b/i.test(rest)) return 'main'
+  return 'alternate'
+}
+
+// A catalog asset's label with the club name and the redundant "Jersey" noun
+// dropped — "Home White", "Alt 2 Navy Blue", "City Connect 2.0" — same
+// trimming convention as uniformSummary above, just without that function's
+// side-stamping (a catalog entry already names its own side/variant).
+export function jerseyLabel(text, clubName) {
+  return stripClubName(text, clubName)
+    .replace(/\s*\bJersey\b\s*/i, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
