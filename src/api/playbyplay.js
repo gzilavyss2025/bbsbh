@@ -509,6 +509,14 @@ const ADVANCE_CODES = {
   // ('walk'), mislabeling the advance "BB" as if Chourio's own plate
   // appearance had driven it.
   defensive_indiff: 'DI',
+  // Same REACH_CODES entry (scorebookCode) already uses for the batter's
+  // OWN reach-on-CI — without this, a runner forced up by someone else's
+  // catcher's-interference call fell all the way through advanceCode's
+  // fallback to the generic ground-out "GO", mislabeling the leg (verified
+  // live: Michael Harris II to 2nd on Mauricio Dubón's catcher interference
+  // showed "GO5" — a ground-out code for a play that was neither a ground
+  // ball nor an out).
+  catcher_interf: 'CI',
 }
 
 function advanceCode(play) {
