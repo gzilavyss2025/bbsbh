@@ -6,6 +6,7 @@ import {
   selectBench,
   selectTeamMeta,
   selectDelays,
+  selectSkippedBottomHalf,
   halfIndex,
 } from '../api/select.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
@@ -221,8 +222,16 @@ export function InningViewer({
   // (regulation or an unlocked extra). There the floating button becomes
   // "Box score ›" instead of the next-half label, so the bottom of the 9th
   // never sprouts a "Top 10th ›" that would leak the game going to extras
-  // before it's revealed.
-  const nextIdx = curIdx < maxIdx ? curIdx + 1 : null
+  // before it's revealed. Also null once the CURRENT half is a fully-revealed
+  // top whose bottom half was skipped outright (selectSkippedBottomHalf — the
+  // home team was already ahead, so the game ended right there) — there's no
+  // "Bottom {n}th" to advance to, so this reads as "you've seen everything;
+  // here's the box score" same as the true last half of the game does. Not a
+  // spoiler: the gate on `curIdx <= revealedThrough` means this only ever
+  // fires once the user has themselves fully revealed that top half.
+  const skippedBottomHalf =
+    effHalf === 'top' && curIdx <= revealedThrough && selectSkippedBottomHalf(feed, effInning)
+  const nextIdx = curIdx < maxIdx && !skippedBottomHalf ? curIdx + 1 : null
   const nextLabel =
     nextIdx == null
       ? null
@@ -384,7 +393,7 @@ export function InningViewer({
           </span>
           <button
             onClick={() => requestForwardHalf(Math.min(maxIdx, curIdx + 1))}
-            disabled={curIdx === maxIdx}
+            disabled={curIdx === maxIdx || skippedBottomHalf}
             aria-disabled={turning || undefined}
             aria-label="Next half-inning"
           >

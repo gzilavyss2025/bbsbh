@@ -641,6 +641,29 @@ export function selectIsFinal(feed) {
   return feed?.gameData?.status?.abstractGameState === 'Final'
 }
 
+// Whether a given inning's HOME half was skipped entirely — the away team
+// made the last out in the top with the game already decided (the home team
+// already ahead, so batting the bottom half would be pointless — "the
+// walk-off that wasn't needed"), or a suspended/curtailed game stopped
+// there. Structural fact straight off the feed's own linescore: a completed
+// inning's home entry carries no `runs` key at all when it was never played,
+// vs. `runs: 0` for a played-but-scoreless half — not a score itself, same
+// footing as selectIsFinal, but ONLY trustworthy once the whole game has
+// actually concluded. Mid-game, a not-yet-`runs` bottom entry just means the
+// home team hasn't batted YET, not that it never will — this must never be
+// read before that, or "no bottom half coming" itself leaks that the home
+// team is already leading entering it.
+//
+// Callers must additionally gate this on the TOP half already being fully
+// revealed (halfIndex(inning, 'top') <= revealedThrough) before showing
+// anything derived from it — selectIsFinal alone tells you the *game* is
+// over, not that the user has caught up to this specific half yet.
+export function selectSkippedBottomHalf(feed, inning) {
+  if (!selectIsFinal(feed)) return false
+  const row = (feed?.liveData?.linescore?.innings ?? []).find((i) => i.num === inning)
+  return row != null && row.home?.runs === undefined
+}
+
 // Coarse game-state flags for the delayed/suspended/postponed/warmup banner.
 // Structural metadata, not a score — safe to render unconditionally, same as
 // selectHasStarted above. `detailedState` carries MLB's specific phrasing

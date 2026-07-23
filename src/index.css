@@ -8534,6 +8534,18 @@ body {
   color: var(--graphite-soft);
 }
 
+/* A half that never happened at all (the home team already ahead entering
+   it, so the game ended in the top half) — permanently inert, not merely
+   "not revealed yet," so it reads distinctly from .rolling__pending's dot
+   and overrides the generic mid-turn [aria-disabled] dimming (opacity 0.6,
+   which reads as "temporarily unavailable") with a plain, undimmed graphite
+   ✕ instead. */
+.rolling__pick.rolling__skipped {
+  opacity: 1;
+  color: var(--graphite-soft);
+  cursor: default;
+}
+
 /* A frame that scored: inked bold and field-green (the same positive accent
    as the R stat and the RBI tag), the way a scorer's eye jumps to the runs.
    Placed before is-active so the selected half still wins (the crossing
