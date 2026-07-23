@@ -869,6 +869,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     entries[cardIndex].earned = earnedByBatter.has(batterId) ? earnedByBatter.get(batterId) : true
   }
 
+  // Whether any real pitch has been thrown yet this half — used below to
+  // recognize the half's very first pitching change (announced before its
+  // first pitch) as the one selectHalfStartingPitcher already reports via
+  // HalfInning's persistent "Now Pitching" card, so this feed doesn't push a
+  // second, duplicate card for it.
+  let anyPitchInHalf = false
   for (const play of plays) {
     // Non-pitch playEvents split two ways: STOPPAGE_EVENTS (mound visits,
     // subs) are their own interstitial notes; baserunning events (caught
@@ -888,8 +894,24 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // after `visible` is known for this play, same pattern as baserunningNotes.
     const pendingPinchRunnerCards = []
     for (const e of play.playEvents ?? []) {
-      if (e.isPitch) continue
+      if (e.isPitch) {
+        anyPitchInHalf = true
+        continue
+      }
       const et = e.details?.eventType
+      if (et === 'pitching_substitution' && !anyPitchInHalf) {
+        // The half's very FIRST pitching change, before its first pitch, is
+        // the same identity selectHalfStartingPitcher already reads (the
+        // half's first play's matchup.pitcher) and HalfInning renders as its
+        // persistent "Now Pitching" card for as long as the half is
+        // reachable — before AND after reveal, unlike the staged pre-pitch
+        // list this mirrors (see HalfInning's PrePitchChanges, which excludes
+        // a pre-pitch pitching change for the same reason). Pushing it here
+        // too would duplicate that header card once this half is revealed/
+        // stepped into. A genuine MID-half change (anyPitchInHalf already
+        // true) still gets its own card below, same as ever.
+        continue
+      }
       if (STOPPAGE_EVENTS.has(et)) {
         const text = sentenceCaseEventText(e.details.description)
         entries.push({
