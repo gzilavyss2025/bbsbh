@@ -4,7 +4,6 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import {
   DEFAULT_PINSTRIPE_COLOR,
-  LOGO_COLOR_OVERRIDES,
   PinstripePattern,
   RecolorFilter,
   WPA_PLOT_SIZE,
@@ -34,6 +33,7 @@ import {
   hasAlternate4,
   hasCityConnect,
 } from '../lib/teams.js'
+import { wpaLogoFor } from '../lib/wpaLogo.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
@@ -538,9 +538,10 @@ function TreatmentWpaPreview({
   const paddingY = draft?.paddingY ?? layoutDefaults.paddingY
   const hasDraft = draft && Object.keys(draft).length > 0
 
-  const logoOverride = LOGO_COLOR_OVERRIDES[teamId]
-  const variant = treatment === 'main' ? 'base' : treatment
-  const logo = logoOverride?.mode === 'swap' ? logoOverride.src : teamLogoUrl(teamId, variant)
+  // Same resolver the real chart uses (lib/wpaLogo.js), so this preview can't
+  // drift from it — including the rule that a recolor override never touches
+  // a treatment's own procured art, only the stock CDN base mark.
+  const { src: logo, recolor: logoOverride } = wpaLogoFor(teamId, treatment)
 
   // Horizontal margin is a fixed 4px, same as WinProbChart.jsx's own tile —
   // only the vertical gap is adjustable here (and can go negative to overlap

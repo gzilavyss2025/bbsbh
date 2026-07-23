@@ -3,12 +3,12 @@ import { CopyBox } from '../components/CopyBox.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import {
   BAND_COLOR_OVERRIDES,
-  LOGO_COLOR_OVERRIDES,
   RecolorFilter,
   chipColorsFor,
 } from '../components/WinProbChart.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { ALL_MLB_TEAM_IDS, teamFullName, teamLogoUrl } from '../lib/teams.js'
+import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
+import { wpaLogoFor } from '../lib/wpaLogo.js'
 
 // Design harness for reviewing the win-probability chart's tiled band pattern
 // (WinProbChart.jsx) for every club at every level — MLB plus all four full-
@@ -154,11 +154,11 @@ export function TeamPatternLab() {
 function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
   const patternUid = useId()
   const colors = chipColorsFor(teamId)
-  const logoOverride = LOGO_COLOR_OVERRIDES[teamId]
-  // A 'swap' override points at its own precomputed recolored asset; every
-  // other case uses the normal CDN mark, recolored in place via the filter
-  // below — same split WinProbChart.jsx makes for the real chart.
-  const logo = logoOverride?.mode === 'swap' ? logoOverride.src : teamLogoUrl(teamId)
+  // This harness reviews the club's Main pattern only, resolved through the
+  // same wpaLogoFor (lib/wpaLogo.js) the real chart uses — a 'swap' override
+  // points at its own precomputed recolored asset, every other case uses the
+  // normal CDN mark recolored in place via the filter below.
+  const { src: logo, recolor: logoOverride } = wpaLogoFor(teamId, 'main')
   const bandColor = BAND_COLOR_OVERRIDES[teamId] ?? colors.primary
   const patternId = `patternlab-${patternUid}`
   const recolorId = `patternlab-recolor-${patternUid}`

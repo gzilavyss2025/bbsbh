@@ -2,12 +2,12 @@ import { useId, useState } from 'react'
 import { winProbSplit } from '../api/winprob.js'
 import {
   teamChipColors,
-  teamLogoUrl,
   treatmentBgColor,
   mainTreatmentPinstripe,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
 } from '../lib/teams.js'
+import { wpaLogoFor } from '../lib/wpaLogo.js'
 import { ordinal } from '../lib/format.js'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
@@ -106,45 +106,13 @@ export const WPA_LOGO_DEFAULTS = {
   paddingY: LOGO_PADDING_Y,
 }
 
-// A handful of clubs' base logo mark is itself (near-)solid in the same hex
-// as their own primary brand color — verified against the actual CDN SVGs,
-// not a guess — so tiled over a same-colored band (below), the mark all but
-// vanishes into its own background. Each entry is a hand-picked fix for one
-// club, in one of three modes:
-//   - 'flood': recolor the WHOLE rendered silhouette (its alpha channel) to
-//     `color` via an SVG filter (feFlood + feComposite) — for a mark that's
-//     genuinely (or close enough to) one flat color throughout, so there's
-//     nothing worth preserving from its original fills.
-//   - 'outline': keep the mark's own original colors, but add (or, per
-//     Phillies, thicken an EXISTING) `color` halo just outside its
-//     silhouette via feMorphology (dilate) + feFlood + feComposite +
-//     feMerge — for a mark that's otherwise fine, just needs a touch more
-//     separation from its own band.
-//   - 'swap': the mark has MULTIPLE distinct original colors and only ONE
-//     of them collides with the band — recoloring the whole silhouette
-//     (flood) would wrongly flatten the colors that were already fine, and
-//     an SVG filter can't reliably isolate one specific original hex from
-//     another at this render size (anti-aliased edges between the two
-//     regions blend into a smear). So `src` points at a small precomputed
-//     variant of the CDN's own SVG (public/team-logo-overrides/), a
-//     byte-for-byte copy with ONLY the colliding fill's hex swapped —
-//     verified against the live CDN source, not reconstructed from memory.
-// A team with no entry here keeps its logo's own natural colors.
-export const LOGO_COLOR_OVERRIDES = {
-  113: { mode: 'flood', color: '#FFFFFF' }, // Reds — base mark is solid red, no black in it to preserve
-  118: { mode: 'flood', color: '#FFFFFF' }, // Royals
-  119: { mode: 'flood', color: '#FFFFFF' }, // Dodgers
-  120: { mode: 'flood', color: '#FFFFFF' }, // Nationals
-  133: { mode: 'flood', color: '#FFFFFF' }, // Athletics
-  135: { mode: 'flood', color: '#FFC425' }, // Padres — their own secondary yellow
-  137: { mode: 'flood', color: '#27251F' }, // Giants — their own secondary near-black
-  138: { mode: 'flood', color: '#FFFFFF' }, // Cardinals
-  147: { mode: 'flood', color: '#FFFFFF' }, // Yankees
-  116: { mode: 'flood', color: '#FFFFFF' }, // Tigers — the "D"
-  142: { mode: 'swap', src: '/team-logo-overrides/142.svg' }, // Twins — navy "T" to white, red kept
-  114: { mode: 'swap', src: '/team-logo-overrides/114.svg' }, // Guardians — navy outer border to white, red kept
-  143: { mode: 'outline', color: '#FFFFFF', radius: 0.6 }, // Phillies — thicken the mark's existing white edge
-}
+// The per-club recolor curation (LOGO_COLOR_OVERRIDES) and the resolver that
+// decides which mark a band tiles — and whether that mark may be recolored at
+// all — live in lib/wpaLogo.js, pure and unit-tested (test/wpa-logo.test.js).
+// The short version: those overrides were verified against each club's stock
+// CDN base mark and only ever reach that art, never the hand-procured
+// treatment PNGs in public/team-logos/, which already carry their own colors.
+// RecolorFilter below renders whatever entry the resolver hands back.
 
 // Which logo TREATMENT tiles a club's band is decided PER GAME, not per
 // team — see the `awayTreatment`/`homeTreatment` props below, sourced from
@@ -282,7 +250,7 @@ export function chipColorsFor(teamId) {
   return teamChipColors(teamId) ?? { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 }
 
-// The <filter> a LOGO_COLOR_OVERRIDES entry needs, or null for no override /
+// The <filter> a wpaLogoFor `recolor` entry needs, or null for no override /
 // a 'swap' override (that one's already-recolored asset needs no filter at
 // all). 'flood': feFlood paints the override color, feComposite's
 // operator="in" clips that flood to the image's own alpha channel (its
@@ -369,30 +337,21 @@ export function WinProbChart({
   const split = winProbSplit(points)
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
-  const awayLogoOverride = LOGO_COLOR_OVERRIDES[awayId]
-  const homeLogoOverride = LOGO_COLOR_OVERRIDES[homeId]
-  // A 'swap' override points at its own precomputed asset (see the
-  // LOGO_COLOR_OVERRIDES block comment); every other case — no override, or
-  // a 'flood'/'outline' override that recolors the ORIGINAL art in place via
-  // filter — uses the normal CDN mark. Null for an unmapped MiLB id, in
-  // which case that band's pattern just has no logo tile and reads as its
-  // flat structural color, same as before this feature existed.
-  //
   // `awayTreatment`/`homeTreatment` (props) carry that GAME's real worn
   // uniform treatment — see api/jerseys.js — so the tiled mark actually
   // matches tonight's jersey rather than always being the club's Main mark.
   // Callers with no such data (or a MiLB game outside jerseys.json's
   // coverage) simply omit the prop, and this falls back to 'main'.
+  //
+  // wpaLogoFor (lib/wpaLogo.js) resolves each band's mark AND whether a
+  // recolor override reaches it. A null `src` — an unmapped MiLB id, or a
+  // treatment with no procured art on file — just means that band has no logo
+  // tile and reads as its flat structural color, same as before logo tiling
+  // existed.
   const awayTreat = awayTreatment ?? 'main'
   const homeTreat = homeTreatment ?? 'main'
-  const awayLogo =
-    awayLogoOverride?.mode === 'swap'
-      ? awayLogoOverride.src
-      : teamLogoUrl(awayId, awayTreat === 'main' ? 'base' : awayTreat)
-  const homeLogo =
-    homeLogoOverride?.mode === 'swap'
-      ? homeLogoOverride.src
-      : teamLogoUrl(homeId, homeTreat === 'main' ? 'base' : homeTreat)
+  const { src: awayLogo, recolor: awayLogoOverride } = wpaLogoFor(awayId, awayTreat)
+  const { src: homeLogo, recolor: homeLogoOverride } = wpaLogoFor(homeId, homeTreat)
   const awayLayout = wpaLogoLayout(awayId, awayTreat)
   const homeLayout = wpaLogoLayout(homeId, homeTreat)
   // Horizontal margin is a fixed 4px; vertical is the per-(team, treatment)
@@ -486,8 +445,8 @@ export function WinProbChart({
       >
         {/* Each band's step-and-repeat texture: a tile of a solid fill of
             that band's own color (BAND_COLOR_OVERRIDES-aware) plus one copy
-            of that club's own logo (LOGO_COLOR_OVERRIDES-aware — see the
-            block comments up top for both). patternTransform (identical on
+            of that club's own logo (wpaLogoFor-resolved — see the block
+            comments up top for both). patternTransform (identical on
             both patterns) tilts + shifts the shared tile grid off-axis, so
             it reads as wallpaper rather than a grid anchored at the plot's
             corner. patternUnits="userSpaceOnUse" plus matching x/y ties both
