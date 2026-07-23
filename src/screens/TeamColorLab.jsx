@@ -25,7 +25,22 @@ const TREATMENTS = [
 // Never called for 'main' — that treatment renders TeamLogo instead.
 function localLogoUrl(teamId, treatment) {
   const abbr = teamAbbr({ id: teamId })
-  return abbr ? `/team-logos/${treatment}/${abbr}.png` : null
+  if (!abbr) return null
+  const ext = ALT_LOGO_SVG.has(teamId) && treatment === 'alternate' ? 'svg' : 'png'
+  return `/team-logos/${treatment}/${abbr}.${ext}`
+}
+
+// Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
+// (every path recolored to the club's one real brand color straight off the
+// official multicolor logo) rather than a photographed/cropped PNG like every
+// other Alternate treatment here.
+const ALT_LOGO_SVG = new Set([133]) // Athletics
+
+// Per-team, per-treatment tweak to the tile's edge-bleed scale (applied on
+// top of the 1.32 default every tinted tile gets) — for treatments other than
+// Main, which has its own scale on MAIN_OVERRIDES.
+const TREATMENT_SCALE = {
+  139: { alternate: 1.3 }, // Rays — mark reads small against the tint at 1.32 alone
 }
 
 // The three official colors for a team's Main treatment are already known
@@ -105,10 +120,19 @@ const ALT_COLORS = {
   ], // Reds — same pair as Main
   114: [{ label: 'Background', hex: '#00385D', bg: true }], // Guardians
   119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers
+  133: [
+    { label: 'Primary', hex: '#003831' },
+    { label: 'Secondary', hex: '#EFB21E', bg: true },
+    { label: 'Third', hex: '#A2AAAD' },
+  ], // Athletics — Main's own triad, background is Secondary
   135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres
   136: [{ label: 'Background', hex: '#005C5C', bg: true }], // Mariners
   137: [{ label: 'Background', hex: '#FD5A1E', bg: true }], // Giants
-  139: [{ label: 'Background', hex: '#8FBCE6', bg: true }], // Rays
+  139: [
+    { label: 'Primary', hex: '#092C5C' },
+    { label: 'Secondary', hex: '#8FBCE6', bg: true },
+    { label: 'Third', hex: '#F5D130' },
+  ], // Rays — Main's own triad, background is Secondary (unchanged)
   146: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Marlins
   147: [{ label: 'Background', hex: '#0C2340', bg: true }], // Yankees
   158: [{ label: 'Background', hex: '#6CACE4', bg: true }], // Brewers
@@ -216,11 +240,12 @@ function TreatmentBox({ teamId, name, treatment, label }) {
     : colors.findIndex((c) => c?.bg)
 
   const tint = activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined
+  const treatmentScale = override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
   const logoboxStyle =
     tint || override
       ? {
           '--tint': tint,
-          '--scale': 1.32 * (override?.scale ?? 1),
+          '--scale': 1.32 * treatmentScale,
         }
       : undefined
 
