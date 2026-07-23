@@ -2090,9 +2090,12 @@ body {
    gentle crop that makes mismatched source logos read at one consistent
    size. `position: relative` + a z-index above the '@' watermark's 0 (see
    .gamecard__atmark-* above) keeps the tile's own opaque fill painting over
-   the watermark rather than under it. (A per-team tinted fill was tried and
-   reverted here — see TeamMark's comment in GameCard.jsx and
-   .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md.) */
+   the watermark rather than under it. (A universal per-team tinted fill for
+   the default/Main logo was tried and reverted here — see TeamMark's comment
+   in GameCard.jsx and .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md.
+   `--tint`/`--scale` below are instead set narrowly, only when TeamMark swaps
+   in a curated Alternate/City Connect mark — same vars, same fallback
+   pattern as Team Color Lab's own .colorlab__logobox.) */
 .gamecard__logobox {
   position: relative;
   z-index: 1;
@@ -2109,7 +2112,7 @@ body {
   padding: 2px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  background: var(--paper-1);
+  background: var(--tint, var(--paper-1));
   box-shadow: var(--inset-cell);
 }
 
@@ -2121,8 +2124,11 @@ body {
   backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
   -webkit-backface-visibility: hidden;
   /* Scaled well past the frame so the mark bleeds to the edges like a printed
-     badge; the tile clips the overflow. */
-  transform: scale(1.32);
+     badge; the tile clips the overflow. --scale lets a jersey-swap tint
+     (TeamMark, GameCard.jsx) shrink a dense mark so it doesn't read as "the
+     whole tile is this color" against its own new fill — same var Team Color
+     Lab's own tiles use. */
+  transform: scale(var(--scale, 1.32));
 }
 
 /* The monogram fallback already is a bordered tile — drop its own chrome so it

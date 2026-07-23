@@ -6,7 +6,23 @@
 // changes once posted, so this needs no SealBox and no coordination with the
 // spoiler rule.
 //
-// Background data only — no public/data/*.json export and no UI surface yet.
+// Also regenerates public/data/jerseys.json — a small derived export, keyed
+// `${gamePk}:${teamId}` -> 'alternate' | 'city-connect', for the home-page
+// game cards to swap in a team's curated alternate/city-connect logo when
+// that's what it's wearing (src/api/jerseys.js). 'main' (standard home/away)
+// entries are dropped: the only question a reader ever asks is "is there a
+// non-main treatment for this game/team". No team-id filtering — coverage of
+// which teams have curated logo art at all is a public/ file-existence fact,
+// decided once in src/lib/teams.js's teamLogoUrl fallback, not duplicated
+// here as a whitelist that would drift every time new logo art is added.
+// The export only re-derives (full table scan + rewrite) when this run
+// actually recorded a row — an already-recorded (gamePk, teamId) is never
+// re-upserted, so a no-op night would otherwise rewrite an identical file.
+//
+// v2 idea (not built): once enough per-team history accumulates, guess a
+// likely pre-posting treatment (e.g. from day-of-week pattern) and correct it
+// once the real assignment posts, instead of always falling back to main.
+//
 // Writes straight to the shared SQLite layer (scripts/lib/db.js, ADR-0021),
 // its own `jerseys` group (scripts/data/jerseys.sql), one row per (game,
 // team) side. `payload_json` carries each side's asset list verbatim
@@ -24,8 +40,15 @@
 // Run by hand:
 //   node scripts/gen-jerseys.mjs            # trailing 3 days
 //   node scripts/gen-jerseys.mjs --days=200 # season-to-date backfill
-import { pathToFileURL } from 'node:url'
+import { writeFile, mkdir } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
+import { classifyUniformAsset } from '../src/api/uniforms.js'
+import { teamClubName } from '../src/lib/teams.js'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const jerseysJsonPath = join(here, '..', 'public', 'data', 'jerseys.json')
 
 const BASE = 'https://statsapi.mlb.com'
 const DEFAULT_DAYS = 3
@@ -59,6 +82,27 @@ function normalizeAssets(side) {
       code: a.uniformAssetCode ?? null,
     }))
     .filter((a) => a.text)
+}
+
+// Pure/unit-testable: rows -> { "${gamePk}:${teamId}": 'alternate' | 'city-connect' }.
+// Drops 'main' entries and any row whose payload has no jersey ('J') asset or
+// fails to parse — a bad/degraded row is just skipped, never fatal.
+export function buildJerseysExport(rows) {
+  const out = {}
+  for (const row of rows) {
+    let assets
+    try {
+      assets = JSON.parse(row.payload_json)
+    } catch {
+      continue
+    }
+    const jersey = Array.isArray(assets) ? assets.find((a) => a.piece === 'J') : null
+    if (!jersey?.text) continue
+    const treatment = classifyUniformAsset(jersey.text, teamClubName(row.team_id))
+    if (treatment === 'main') continue
+    out[`${row.game_pk}:${row.team_id}`] = treatment
+  }
+  return out
 }
 
 async function main() {
@@ -151,9 +195,23 @@ async function main() {
     console.log(
       `wrote scripts/data/jerseys.sql (${recorded} side(s) recorded this run, ${notPosted} not posted yet, ${total} total rows)`,
     )
+
+    // Only re-derive the export when this run actually added/changed rows —
+    // an already-recorded (gamePk, teamId) is never re-upserted (see the
+    // `existing` skip above), so on a no-op night the export is guaranteed
+    // byte-identical to what's already on disk. Skips a full-table scan +
+    // rewrite for nothing.
+    const rows = db.prepare('SELECT game_pk, team_id, payload_json FROM jerseys').all()
+    const exported = buildJerseysExport(rows)
+    await mkdir(dirname(jerseysJsonPath), { recursive: true })
+    await writeFile(jerseysJsonPath, JSON.stringify(exported))
+    console.log(
+      `wrote public/data/jerseys.json (${Object.keys(exported).length} non-main treatment(s))`,
+    )
   } else {
     console.log(`no changes (${notPosted} not posted yet, ${total} total rows)`)
   }
+
   db.close()
 }
 

@@ -146,8 +146,37 @@ export const LOGO_VARIANTS = [
   { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
 ]
 
+// Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
+// (every path recolored to the club's one real brand color straight off the
+// official multicolor logo) rather than a photographed/cropped PNG like every
+// other Alternate treatment. Single source of truth for both localLogoUrl
+// below and Team Color Lab's own tiles — grows as more art is added in
+// whatever format it's supplied in.
+const ALT_LOGO_SVG = new Set([
+  133, // Athletics
+  118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
+])
+
+// Where a procured Alternate/City Connect logo for `teamId`/`treatment` is
+// expected — hand-curated, transparent-cropped art checked into public/, since
+// the mlbstatic CDN carries no such marks (see the LOGO_VARIANTS comment
+// above). Filename is the club's real abbreviation, already the single
+// source of truth for spelling a club's short code everywhere else in this
+// app. Deliberately has NO team-id whitelist: coverage grows purely by
+// dropping a new file into public/team-logos/{treatment}/ — a missing file
+// 404s and callers (TeamLogo's fallback chain, Team Color Lab's
+// TreatmentLogo) degrade gracefully, so there's no manifest to hand-maintain.
+// Never called for 'main' — that treatment renders the CDN base logo instead.
+export function localLogoUrl(teamId, treatment) {
+  const abbr = teamAbbr({ id: teamId })
+  if (!abbr) return null
+  const ext = ALT_LOGO_SVG.has(teamId) && treatment === 'alternate' ? 'svg' : 'png'
+  return `/team-logos/${treatment}/${abbr}.${ext}`
+}
+
 export function teamLogoUrl(teamId, variant = 'base') {
   if (!teamId) return null
+  if (variant === 'alternate' || variant === 'city-connect') return localLogoUrl(teamId, variant)
   if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
   const v = LOGO_VARIANTS.find((x) => x.key === variant)
   return v ? `${LOGO_BASE}/${v.path}/${teamId}.svg` : `${LOGO_BASE}/${teamId}.svg`
@@ -159,6 +188,129 @@ export function teamLogoUrl(teamId, variant = 'base') {
 // badges, which aren't tied to any one club.
 export function leagueLogoUrl() {
   return `${LOGO_BASE}/league-on-light/1.svg`
+}
+
+// Alternate/City Connect tile-background colors — hand-curated together with
+// each team's curated logo file (localLogoUrl above), since these marks don't
+// carry an official three-color set the way Main does (teamColorSwatches
+// below). Single source of truth for Team Color Lab's swatch tiles AND the
+// home-page game card's jersey-variant background (treatmentBgColor below) —
+// moved here so both read the same curated set rather than drifting. Each
+// entry is a small swatch list; the one flagged `bg: true` is the color
+// actually used as a fill. A team with no entry here has no known background
+// yet — callers should leave their surface plain rather than render nothing.
+// Rockies' hex mirrors TeamColorLab's own proposed Primary override (that
+// page's PRIMARY_OVERRIDE) — kept as a literal here since this is a narrow,
+// opt-in background only shown when the Alternate treatment itself is shown,
+// not a promotion of that proposal into the app's real teamPrimaryColor.
+export const ALT_COLORS = {
+  115: [{ label: 'Primary', hex: '#33006F', bg: true }], // Rockies
+  118: [{ label: 'Baby Blue', hex: '#6DADF4', bg: true }], // Royals
+  109: [
+    { label: 'Primary', hex: '#A71930', bg: true },
+    { label: 'Third', hex: '#30CED8' },
+  ], // Diamondbacks
+  112: [
+    { label: 'Primary', hex: '#0E3386', bg: true },
+    { label: 'Secondary', hex: '#CC3433' },
+  ], // Cubs
+  110: [
+    { label: 'Primary', hex: '#DF4601' },
+    { label: 'Secondary', hex: '#000000', bg: true },
+  ], // Orioles
+  111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox
+  113: [
+    { label: 'Primary', hex: '#C6011F', bg: true },
+    { label: 'Secondary', hex: '#000000' },
+  ], // Reds
+  114: [{ label: 'Background', hex: '#00385D', bg: true }], // Guardians
+  119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers
+  133: [
+    { label: 'Primary', hex: '#003831' },
+    { label: 'Secondary', hex: '#EFB21E', bg: true },
+    { label: 'Third', hex: '#A2AAAD' },
+  ], // Athletics
+  135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres
+  136: [{ label: 'Background', hex: '#005C5C', bg: true }], // Mariners
+  137: [{ label: 'Background', hex: '#FD5A1E', bg: true }], // Giants
+  139: [
+    { label: 'Primary', hex: '#092C5C' },
+    { label: 'Secondary', hex: '#8FBCE6', bg: true },
+    { label: 'Third', hex: '#F5D130' },
+  ], // Rays
+  144: [
+    { label: 'Primary', hex: '#CE1141', bg: true },
+    { label: 'Secondary', hex: '#13274F' },
+  ], // Braves
+  146: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Marlins
+  147: [{ label: 'Background', hex: '#0C2340', bg: true }], // Yankees
+  158: [{ label: 'Background', hex: '#6CACE4', bg: true }], // Brewers
+}
+
+export const CITY_CONNECT_COLORS = {
+  109: [
+    { label: 'Primary', hex: '#0097A9' },
+    { label: 'Secondary', hex: '#523178', bg: true },
+  ], // Diamondbacks
+  110: [{ label: 'Secondary', hex: '#E1D2BE', bg: true }], // Orioles
+  144: [
+    { label: 'Primary', hex: '#D32826' },
+    { label: 'Secondary', hex: '#374EA1' },
+    { label: 'Third', hex: '#7BA7D8', bg: true },
+  ], // Braves
+  113: [
+    { label: 'Primary', hex: '#C6011F' },
+    { label: 'Secondary', hex: '#000000', bg: true },
+  ], // Reds
+  115: [
+    { label: 'Primary', hex: '#8ABFEB', bg: true },
+    { label: 'Secondary', hex: '#4F4FC9' },
+  ], // Rockies
+  118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
+  111: [{ label: 'Primary', hex: '#5A8D84', bg: true }], // Red Sox
+  117: [
+    { label: 'Primary', hex: '#0F2948' },
+    { label: 'Secondary', hex: '#CEC8B2', bg: true },
+    { label: 'Third', hex: '#FC7A1E' },
+  ], // Astros
+  133: [
+    { label: 'Primary', hex: '#003831', bg: true },
+    { label: 'Secondary', hex: '#EFB21E' },
+  ], // Athletics
+  139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
+  145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
+  158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
+}
+
+// The tile/card background hex for a team's Alternate or City Connect
+// treatment, or null if that team has no curated background yet (callers
+// should fall back to their own neutral fill, same as a missing logo file).
+// 'main'/'base' have no entry here — a standard jersey always renders on the
+// plain paper fill everywhere outside Team Color Lab.
+export function treatmentBgColor(teamId, treatment) {
+  const colors =
+    treatment === 'alternate' ? ALT_COLORS[teamId] : treatment === 'city-connect' ? CITY_CONNECT_COLORS[teamId] : null
+  return colors?.find((c) => c.bg)?.hex ?? null
+}
+
+// Per-team, per-treatment tweak to a tinted tile's edge-bleed scale (applied
+// on top of the 1.32 default every tile normally gets) — a few marks read
+// large/dense enough that the default overscale reads as "the whole tile is
+// this color" against a real fill (see .scratch/gamecard-team-colors' parked
+// solid-tile-color issue for the general version of this problem on Main;
+// these per-team fixes are the narrower version already solved for Alternate/
+// City Connect specifically).
+export const TREATMENT_SCALE = {
+  139: { alternate: 1.3 }, // Rays — mark reads small against the tint at 1.32 alone
+  113: { 'city-connect': 0.75 }, // Reds — the "C" mark already touches all four
+  // edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink
+  // down so the whole mark stays inside the tile.
+  117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
+  118: { alternate: 0.85 }, // Royals — same KC mark + scale as Main's own override
+}
+
+export function treatmentScale(teamId, treatment) {
+  return TREATMENT_SCALE[teamId]?.[treatment] ?? 1
 }
 
 // ---------------------------------------------------------------------------

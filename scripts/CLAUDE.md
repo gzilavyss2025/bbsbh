@@ -198,18 +198,26 @@ don't run these by hand.
   the WINNER's minimum win prob (home share directly; away = `100 − home max`) from
   the MLB-only `/winProbability` endpoint. App reads it via
   `src/api/comebackWins.js` (Team Page's ranked "Comeback wins" card).
-- `gen-jerseys.mjs` — background data only, no `public/data/*.json` export and
-  no reader module yet: what each MLB club wore in every game, from
-  `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the live feed
-  carries zero uniform data). SQLite-backed (`jerseys` group, ADR-0021),
-  its own table keyed `(game_pk, team_id)`, one row per side with
+- `gen-jerseys.mjs` → `public/data/jerseys.json` — what each MLB club wore in
+  every game, from `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the
+  live feed carries zero uniform data). SQLite-backed (`jerseys` group,
+  ADR-0021), its own table keyed `(game_pk, team_id)`, one row per side with
   `payload_json` carrying that side's asset list verbatim (label text, piece
-  code, and `uniformAssetCode` — the join key the upcoming team-color-lab
-  page will correlate against a logo variant). APPEND-ONLY/incremental like
+  code, and `uniformAssetCode`). APPEND-ONLY/incremental like
   `gen-comeback-wins.mjs`: each run sweeps a trailing window of dates
   (`--days`) and skips any `(gamePk, teamId)` pair already recorded; the
   endpoint fills in around game time, so a game not yet posted just retries
-  next run. MLB only — unverified for MiLB.
+  next run. MLB only — unverified for MiLB. The JSON export is a small derived
+  view, keyed `${gamePk}:${teamId}` → `'alternate' | 'city-connect'`
+  (`classifyUniformAsset`, `src/api/uniforms.js`), dropping standard `'main'`
+  jerseys entirely; read by `src/api/jerseys.js` so the home-page game cards
+  (`GameCard.jsx`) can swap in a team's curated logo when that's what it's
+  wearing. No team-id whitelist anywhere in this pipeline — curated-logo
+  coverage (`public/team-logos/{alternate,city-connect}/`) is decided once, by
+  file presence, in `teamLogoUrl`'s fallback (`src/lib/teams.js`), so dropping
+  in a new logo file is the only step needed to light up a team, no code
+  change. v2 idea, not built: guess a likely pre-posting treatment from
+  accumulated history instead of always falling back to the base logo.
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record
