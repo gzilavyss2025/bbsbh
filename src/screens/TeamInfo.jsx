@@ -46,13 +46,17 @@ import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/SeasonSeriesStrip.jsx'
+import { SPORT_LABEL, MASTHEAD_LOGO_NATURAL_COLOR } from '../lib/teams.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
 // weather, attendance, manager, umpires) and every person outside the
 // opposing-defense diamond is penciled surname-first with a uniform number.
-// Nothing here is score-revealing, so it renders openly. The team's logo
-// lives in the game masthead (see GameView), not here.
+// Nothing here is score-revealing, so it renders openly. The game masthead
+// (see GameView) carries the main away@home logo pairing; the batting-order /
+// opposing-starter / opposing-defense section headers below also carry a
+// small club mark of their own, forced to solid white for the navy bar (see
+// index.css's .metricbar__logo).
 export function TeamInfo({
   feed,
   side,
@@ -260,7 +264,13 @@ export function LineupSpread({
         homeTeamId={homeMeta.id}
       />
       <OrgTies ties={orgTies} />
-      <CareerMatchups pairs={matchupPairs} />
+      <CareerMatchups
+        pairs={matchupPairs}
+        startingIds={startingIds}
+        teamA={{ id: awayMeta.id, name: awayMeta.teamName }}
+        teamB={{ id: homeMeta.id, name: homeMeta.teamName }}
+        levelLabel={SPORT_LABEL[awayMeta.sportId] ?? 'MLB'}
+      />
 
       <div className="pagenav pagenav--innings">
         <RefreshButton
@@ -452,6 +462,15 @@ function rosterFallbackGroups(roster) {
   return { batters, starters, bullpen }
 }
 
+// The masthead logo's className for `teamId` — the white-filter treatment
+// (see index.css's .metricbar__logo--white) for most clubs, or the plain
+// (unfiltered, real-colored) mark for the small exception set that flattens
+// into an unreadable blob under that filter (see teams.js's
+// MASTHEAD_LOGO_NATURAL_COLOR).
+function mastheadLogoClass(teamId) {
+  return MASTHEAD_LOGO_NATURAL_COLOR.has(teamId) ? 'metricbar__logo' : 'metricbar__logo metricbar__logo--white'
+}
+
 // The ids of every player in TONIGHT's starting lineups, both clubs, plus both
 // probable starting pitchers — used to pin/badge a former-teammate pair who are
 // about to face each other for real, pitch by pitch, on the user's own
@@ -584,6 +603,7 @@ function TeamSections({
         pitcher={oppPitcher}
         pitcherLine={oppPitcherLine}
         teamId={oppMeta.id}
+        teamName={oppMeta.teamName}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         callouts={callouts}
@@ -591,7 +611,18 @@ function TeamSections({
       />
 
       <section className="lineup">
-        <SectionMasthead as="h3" title="Batting order" />
+        <SectionMasthead
+          as="h3"
+          title="Batting order"
+          logo={
+            <TeamLogo
+              teamId={meta.id}
+              name={meta.teamName}
+              size={20}
+              className={mastheadLogoClass(meta.id)}
+            />
+          }
+        />
         {lineup.length > 0 ? (
           <ol className="lineup__list">
             {lineup.map((p) => (
@@ -707,7 +738,18 @@ function TeamSections({
 
       {oppDefense.length > 0 && (
         <section className="opp">
-          <SectionMasthead as="h3" title="Opposing defense" />
+          <SectionMasthead
+            as="h3"
+            title="Defense"
+            logo={
+              <TeamLogo
+                teamId={oppMeta.id}
+                name={oppMeta.teamName}
+                size={20}
+                className={mastheadLogoClass(oppMeta.id)}
+              />
+            }
+          />
           {/* Drawn like the sheet's bottom-left diamond: surnames on writing
               lines at their positions. The defense belongs to the OTHER side. */}
           <DefenseDiamond defense={oppDefense} />
@@ -732,7 +774,15 @@ function TeamSections({
         />
       )}
       {showTeammates && <OrgTies ties={orgTies} />}
-      {showTeammates && <CareerMatchups pairs={matchupPairs} />}
+      {showTeammates && (
+        <CareerMatchups
+          pairs={matchupPairs}
+          startingIds={startingIds}
+          teamA={{ id: meta.id, name: meta.teamName }}
+          teamB={{ id: oppMeta.id, name: oppMeta.teamName }}
+          levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
+        />
+      )}
     </>
   )
 }
@@ -747,6 +797,7 @@ function OpposingStarterCard({
   pitcher,
   pitcherLine,
   teamId,
+  teamName,
   prospectsData,
   rookiesData,
   callouts,
@@ -754,7 +805,18 @@ function OpposingStarterCard({
 }) {
   return (
     <section className="startercard">
-      <SectionMasthead as="h3" title="Opposing starter" />
+      <SectionMasthead
+        as="h3"
+        title="Starting pitcher"
+        logo={
+          <TeamLogo
+            teamId={teamId}
+            name={teamName}
+            size={20}
+            className={mastheadLogoClass(teamId)}
+          />
+        }
+      />
       {pitcher ? (
         <div className="startercard__body">
           <Headshot
@@ -1043,61 +1105,138 @@ function OrgTies({ ties }) {
 
 const MATCHUPS_SHOWN = 6
 
+// Groups rows by pitcher (so every batter who's faced a given pitcher stays
+// adjacent on the table, rather than interleaved by raw PA count) while
+// preserving the original "most real history first" ordering: pitcher groups
+// are ranked by their own total PA, and batters within a group are ranked by
+// PA too. Pure re-sort, no data reshaping — same row shape in, same rows out.
+function sortByPitcher(rows) {
+  const byPitcher = new Map()
+  for (const r of rows) {
+    const group = byPitcher.get(r.pitcher.id)
+    if (group) group.push(r)
+    else byPitcher.set(r.pitcher.id, [r])
+  }
+  return [...byPitcher.values()]
+    .map((group) => group.sort((x, y) => y.pa - x.pa))
+    .sort((a, b) => b.reduce((sum, r) => sum + r.pa, 0) - a.reduce((sum, r) => sum + r.pa, 0))
+    .flat()
+}
+
 // Every batter/pitcher pair on the two clubs with real career plate-
 // appearance history against each other, at ANY level either has played (see
 // careerMatchupsFor) — the "Contreras is 0-for-3 vs. tonight's starter"
 // scorebook fact, but not limited to just the probable starter, and not
 // limited to history made at tonight's own level: a AA lineup card still
-// shows a pair who last faced off in A+. A plain stat list rather than
+// shows a pair who last faced off in A+. A plain stat table rather than
 // FormerTeammates' headshot cards — this is a line off the stat sheet, not a
 // story about two people's careers crossing. Hidden when there's no history.
-function CareerMatchups({ pairs }) {
-  const [showAll, setShowAll] = useState(false)
-  if (!pairs || pairs.length === 0) return null
-  const shown = showAll ? pairs : pairs.slice(0, MATCHUPS_SHOWN)
-  const hidden = pairs.length - shown.length
+//
+// `pairs` mixes both directions (teamA batting vs teamB pitching, and vice
+// versa — see careerMatchupsFor's header); this splits it into the two real
+// baseball facts a reader actually wants ("how has THIS lineup done against
+// THAT pitching staff") rather than one interleaved list. `startingIds` (see
+// startingIdsFor) is the same set FormerTeammates uses for its "starting
+// tonight" badge — here it drives a soft row highlight for a pair that's
+// tonight's actual batter vs. the opposing actual starter, the highest-value
+// row on the table.
+function CareerMatchups({ pairs, startingIds, teamA, teamB, levelLabel }) {
+  const tableA = useMemo(
+    () => sortByPitcher((pairs ?? []).filter((r) => r.batter.teamId === teamA?.id)),
+    [pairs, teamA?.id],
+  )
+  const tableB = useMemo(
+    () => sortByPitcher((pairs ?? []).filter((r) => r.batter.teamId === teamB?.id)),
+    [pairs, teamB?.id],
+  )
+  if (tableA.length === 0 && tableB.length === 0) return null
   return (
     <section className="metriccard matchups">
       <SectionMasthead as="h3" title="Career matchups" />
       <div className="metriccard__body">
-        <ul className="matchups__list">
-          {shown.map((r) => (
-            <li key={`${r.batter.id}-${r.pitcher.id}`} className="matchups__row">
-              <span className="matchups__names">
-                <PlayerLink id={r.batter.id} className="matchups__name">
-                  {r.batter.name}
-                </PlayerLink>
-                <span className="matchups__vs" aria-hidden="true">vs</span>
-                <PlayerLink id={r.pitcher.id} className="matchups__name">
-                  {r.pitcher.name}
-                </PlayerLink>
-              </span>
-              <span className="matchups__line">{matchupLine(r)}</span>
-            </li>
-          ))}
-        </ul>
-        {hidden > 0 && (
-          <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
-            Show {hidden} more matchup{hidden === 1 ? '' : 's'}
-          </button>
-        )}
+        <MatchupTable
+          title={`${teamA?.name || 'Team'} batters vs ${teamB?.name || 'team'} pitchers`}
+          rows={tableA}
+          startingIds={startingIds}
+          levelLabel={levelLabel}
+        />
+        <MatchupTable
+          title={`${teamB?.name || 'Team'} batters vs ${teamA?.name || 'team'} pitchers`}
+          rows={tableB}
+          startingIds={startingIds}
+          levelLabel={levelLabel}
+        />
       </div>
     </section>
   )
 }
 
+// One direction's table (e.g. "Braves batters vs Padres pitchers") — rows
+// already grouped by pitcher (sortByPitcher). Each table shows/hides
+// independently since one direction commonly has far more real history than
+// the other (a club's long-tenured regulars vs. a just-called-up opener).
+function MatchupTable({ title, rows, startingIds, levelLabel }) {
+  const [showAll, setShowAll] = useState(false)
+  if (rows.length === 0) return null
+  const shown = showAll ? rows : rows.slice(0, MATCHUPS_SHOWN)
+  const hidden = rows.length - shown.length
+  return (
+    <div className="matchuptable">
+      <h4 className="matchuptable__title">{title}</h4>
+      <div className="ledger-wrap">
+        <table className="standings matchuptable__table">
+          <thead>
+            <tr>
+              <th className="matchuptable__namecol">Batter</th>
+              <th className="matchuptable__namecol">Pitcher</th>
+              <th>Line</th>
+            </tr>
+          </thead>
+          <tbody>
+            {shown.map((r) => {
+              const tonight = startingIds?.has(r.batter.id) && startingIds?.has(r.pitcher.id)
+              return (
+                <tr
+                  key={`${r.batter.id}-${r.pitcher.id}`}
+                  className={tonight ? 'matchuptable__row--tonight' : undefined}
+                >
+                  <td className="matchuptable__name">
+                    <PlayerLink id={r.batter.id}>{r.batter.name}</PlayerLink>
+                  </td>
+                  <td className="matchuptable__name">
+                    <PlayerLink id={r.pitcher.id}>{r.pitcher.name}</PlayerLink>
+                  </td>
+                  <td className="matchuptable__line">{matchupLine(r, levelLabel)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      {hidden > 0 && (
+        <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
+          Show {hidden} more matchup{hidden === 1 ? '' : 's'}
+        </button>
+      )}
+    </div>
+  )
+}
+
 // "2-for-7, 1 HR, 3 K — AA, A+" — scorebook shorthand first (the thing a
 // paper scorer already writes), extras only when they're nonzero so a plain
-// 0-for-2 doesn't carry three redundant zero badges, levels last so a
-// same-level pair (the common case) doesn't repeat what the card's own
-// context already implies.
-function matchupLine(r) {
+// 0-for-2 doesn't carry three redundant zero badges, levels last so a pair
+// who's only ever faced off at tonight's own level (the common case) doesn't
+// repeat what the card's own context already implies — only a pair with
+// history at ANOTHER level too keeps the full list, tonight's level included,
+// so a reader can see how much of the sample carries over.
+function matchupLine(r, levelLabel) {
   const parts = [`${r.h}-for-${r.ab}`]
   if (r.hr > 0) parts.push(`${r.hr} HR`)
   if (r.bb > 0) parts.push(`${r.bb} BB`)
   if (r.k > 0) parts.push(`${r.k} K`)
   const stat = parts.join(', ')
-  return r.levels.length > 0 ? `${stat} — ${r.levels.join(', ')}` : stat
+  const onlyTonightsLevel = r.levels.length === 1 && r.levels[0] === levelLabel
+  return r.levels.length > 0 && !onlyTonightsLevel ? `${stat} — ${r.levels.join(', ')}` : stat
 }
 
 // A pitcher's roster position is already the plain "P" abbreviation (no
