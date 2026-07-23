@@ -6060,13 +6060,14 @@ body {
 
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
    side by side from the wide breakpoint up (see media query below).
-   margin-top only below the wide breakpoint: .innings__grid itself supplies
-   the gap between rows there (see its own media-query rule), but on a phone
-   .innings__grid is plain block flow with no gap of its own, so without this
-   the card directly above (.inning — either just the play-by-play, or that
-   plus the standalone .halfentering reference once a half starts revealing)
-   would butt straight up against this one with no seam between their two
-   borders. */
+   margin-top at every width: .innings__grid's own flex gap (see its
+   media-query rule) only reaches DIRECT children, and InningPageTurn.jsx
+   wraps .inning + this row together inside .turnscene, so they're siblings
+   INSIDE one grid child rather than two grid children themselves — the
+   margin here is what actually separates them from the card directly above
+   (.inning — either just the play-by-play, or that plus the standalone
+   .halfentering reference once a half starts revealing) at every width, not
+   just on a phone. */
 .innings__row2 {
   display: flex;
   flex-direction: column;
@@ -6152,12 +6153,6 @@ body {
   color: var(--text-heading);
   max-width: 100%;
   overflow-wrap: anywhere;
-}
-
-@media (min-width: 740px) {
-  .innings__row2 {
-    margin-top: 0;
-  }
 }
 
 /* Phone-only: once a half starts revealing, promote row 2 (the R/H/E/LOB +
@@ -6434,9 +6429,15 @@ body {
 /* The "Pitch colors" button at the foot of the play-by-play card (moved down
    from the header — see HalfInning.jsx) — left-aligned like the zone/
    highlight buttons above it, with the card's own 14px horizontal inset
-   (.half has no padding of its own; see .half__title's matching padding). */
+   (.half has no padding of its own; see .half__title's matching padding).
+   Overrides .pitchkeybtn's own var(--surface-inset) fill (a near-white chip,
+   right for sitting on a plain page background) with the card's own
+   var(--surface-card) tone instead — sitting directly on .half's own
+   background here, the brighter inset shade read as a mismatched white
+   patch rather than a chip. */
 .half__pitchkeyfoot {
   margin: var(--space-3) 14px 12px;
+  background: var(--surface-card);
 }
 
 /* This is a phone-first app, so "mobile" is the default breakpoint below
