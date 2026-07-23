@@ -186,7 +186,6 @@ export function mastheadLogoClass(teamId) {
 const ALT_LOGO_SVG = new Set([
   '118:alternate', // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
   '147:alternate', // Yankees — the plain mlbstatic base mark (hat-and-bat crest), fill recolored from its default #132448 to #0C2340
-  '158:alternate-2', // Brewers — the plain mlbstatic ball-in-glove mark, gold panels recolored white and the (formerly white) baseball recolored navy
 ])
 
 // Teams whose Alternate mark is the plain, unmodified mlbstatic CDN base logo
@@ -336,7 +335,10 @@ export const ALT_COLORS = {
   // Brewers — white with the shared black pinstripe (TREATMENT_PINSTRIPE_COLOR
   // above) instead of a flat swatch fill; no `bg` flag since the tile isn't a
   // solid color.
-  158: [{ label: 'Primary', hex: '#12284B' }],
+  158: [
+    { label: 'Primary', hex: '#12284B' },
+    { label: 'Secondary', hex: '#FEC52E' },
+  ],
 }
 
 export const CITY_CONNECT_COLORS = {
@@ -386,9 +388,8 @@ export const CITY_CONNECT_COLORS = {
 // A second Alternate treatment. Rangers: same badge as ALT_COLORS' Alternate,
 // recolored (public/team-logos/alternate-2/TEX.png: the red offset border
 // swapped for Primary blue) and re-paired with the opposite swatch as its
-// tile fill. Brewers: the plain mlbstatic ball-in-glove mark recolored
-// (public/team-logos/alternate-2/MIL.svg, ALT_LOGO_SVG above — gold panels to
-// white, the baseball from white to navy) on its own Primary navy tile.
+// tile fill. Brewers: a procured Wisconsin-state "M" mark
+// (public/team-logos/alternate-2/MIL.png) on its own Primary navy tile.
 // Marlins: a procured tri-color (public/team-logos/alternate-2/MIA.png) with
 // its own Background swatch (black, not one of the three brand colors).
 // Royals: the plain CDN mark (ALT2_USES_BASE_LOGO above), already navy
@@ -416,7 +417,10 @@ export const ALT2_COLORS = {
     { label: 'Third', hex: '#41748D' },
     { label: 'Background', hex: '#000000', bg: true },
   ], // Marlins
-  158: [{ label: 'Primary', hex: '#12284B', bg: true }], // Brewers — the recolored ball-in-glove mark on its own Primary navy
+  158: [
+    { label: 'Primary', hex: '#12284B', bg: true },
+    { label: 'Secondary', hex: '#FEC52E' },
+  ], // Brewers — the Wisconsin-state "M" mark on its own Primary navy
   141: [{ label: 'Baby Blue', hex: '#84BEE4', bg: true }], // Blue Jays — jay-head mark (alternate-2/TOR.png), Alt 2 Baby Blue jersey
 }
 
@@ -504,6 +508,7 @@ export const TREATMENT_SCALE = {
     'alternate-2': 0.85, // same badge/canvas as Alternate, just recolored — same edge-bleed fix applies
   },
   141: { 'city-connect': 0.75 }, // Blue Jays — the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile
+  158: { alternate: 0.8 }, // Brewers — the wheat/laurel-and-ball mark shrunk 20% off the default 1.32 edge-bleed
 }
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same
