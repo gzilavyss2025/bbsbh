@@ -2,14 +2,13 @@ import { useEffect, useId, useState } from 'react'
 import { CopyIconButton } from '../components/CopyBox.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { PinstripePattern, RecolorFilter } from '../components/WinProbChart.jsx'
 import {
   DEFAULT_PINSTRIPE_COLOR,
-  PinstripePattern,
-  RecolorFilter,
   WPA_PLOT_SIZE,
   wpaBandColor,
   wpaBandPinstripeColor,
-} from '../components/WinProbChart.jsx'
+} from '../lib/wpaBandColors.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import {
   ALL_MLB_TEAM_IDS,
@@ -568,7 +567,7 @@ function TreatmentWpaPreview({
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
     `Where: src/lib/wpaLogo.js — WPA_LOGO_LAYOUT_OVERRIDES[${teamId}].${treatment} / ` +
-    `src/components/WinProbChart.jsx — WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}].${treatment}\n` +
+    `src/lib/wpaBandColors.js — WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}].${treatment}\n` +
     `WPA_LOGO_LAYOUT_OVERRIDES[${teamId}] = { ...WPA_LOGO_LAYOUT_OVERRIDES[${teamId}], ` +
     `${treatment}: { size: ${size}, rotate: ${rotate}, offsetX: ${offsetX}, offsetY: ${offsetY}, ` +
     `paddingX: ${paddingX}, paddingY: ${paddingY}, rowShift: ${rowShift} } }\n` +
