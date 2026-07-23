@@ -16,6 +16,7 @@ import { AbsRow } from '../components/StatBox.jsx'
 import { PerformerCard } from '../components/PerformerCard.jsx'
 import { CalloutNote } from '../components/CalloutNote.jsx'
 import { GameStoryCard } from '../components/GameStoryCard.jsx'
+import { GamePhotosStrip } from '../components/GamePhotosStrip.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -289,6 +290,12 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
           <div className="bs__col">
             <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
             <ThreeStars stars={stars} />
+            {/* Stacked under Three Stars in this same right-hand column
+                (rather than a full-width row of its own) so on desktop/ipad
+                it fills the space the shorter right column leaves beside the
+                left column's Decisions/Game Score — see GamePhotosStrip.jsx
+                for why it's safe here (inside the seal) but not above it. */}
+            <GamePhotosStrip gamePk={feed?.gamePk} />
           </div>
         </div>
         {/* Full-width, directly under the totals/stars duo — right beneath

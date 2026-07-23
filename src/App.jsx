@@ -184,7 +184,7 @@ export default function App() {
   } else if (route.name === 'first-scorebook') {
     content = <FirstScorebookPage />
   } else if (route.name === 'photos') {
-    content = <GamePhotosPage />
+    content = <GamePhotosPage initialGamePk={route.gamePk ?? null} />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
   } else if (route.name === 'team-color-lab' && TeamColorLab) {

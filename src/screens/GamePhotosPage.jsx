@@ -29,12 +29,17 @@ function monthDay(iso) {
 // Deliberately NOT part of the spoiler-safe scored-game flow (root
 // CLAUDE.md) — a recap/celebration photo narrates the outcome just by
 // looking at it, so this page carries its own notice instead of a SealBox.
-// Linked from the footer/menu like any other reference page (reportPages.js).
-export function GamePhotosPage() {
+// Linked from the footer/menu like any other reference page (reportPages.js),
+// or deep-linked to one game's gallery (`/photos/{gamePk}`, `initialGamePk`
+// below) from that game's own box score — see GamePhotosStrip.jsx.
+export function GamePhotosPage({ initialGamePk = null } = {}) {
   useDocumentTitle('Game Photos')
   const [teamId, setTeamId] = useState(PINNED_TEAM_ID)
   const [season, setSeason] = useState(CURRENT_YEAR)
-  const [gamePk, setGamePk] = useState(null)
+  const [gamePk, setGamePk] = useState(initialGamePk)
+  // Arriving via a deep link skips straight to that game's gallery — the
+  // club/season picker only reappears once the user asks to browse.
+  const [browsing, setBrowsing] = useState(initialGamePk == null)
 
   const pickTeam = (id) => {
     setTeamId(id)
@@ -42,6 +47,10 @@ export function GamePhotosPage() {
   }
   const pickSeason = (y) => {
     setSeason(y)
+    setGamePk(null)
+  }
+  const browseAllGames = () => {
+    setBrowsing(true)
     setGamePk(null)
   }
 
@@ -76,81 +85,92 @@ export function GamePhotosPage() {
         </p>
       </div>
 
-      <section className="gamephotos__section">
-        <div className="gamephotos__sectionhead">
-          <h2 className="gamephotos__sectiontitle">Club</h2>
-        </div>
-        <TeamFilterStrip selectedTeamId={teamId} onSelect={pickTeam} ariaLabel="Choose a club" />
-      </section>
+      {browsing && (
+        <>
+          <section className="gamephotos__section">
+            <div className="gamephotos__sectionhead">
+              <h2 className="gamephotos__sectiontitle">Club</h2>
+            </div>
+            <TeamFilterStrip selectedTeamId={teamId} onSelect={pickTeam} ariaLabel="Choose a club" />
+          </section>
 
-      <section className="gamephotos__section">
-        <div className="gamephotos__sectionhead">
-          <h2 className="gamephotos__sectiontitle">
-            {teamId ? teamFullName(teamId) : 'Games'}
-          </h2>
-          {teamId && (
-            <select
-              className="gamephotos__seasonselect"
-              aria-label="Season"
-              value={season}
-              onChange={(e) => pickSeason(Number(e.target.value))}
-            >
-              {SEASONS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+          <section className="gamephotos__section">
+            <div className="gamephotos__sectionhead">
+              <h2 className="gamephotos__sectiontitle">
+                {teamId ? teamFullName(teamId) : 'Games'}
+              </h2>
+              {teamId && (
+                <select
+                  className="gamephotos__seasonselect"
+                  aria-label="Season"
+                  value={season}
+                  onChange={(e) => pickSeason(Number(e.target.value))}
+                >
+                  {SEASONS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
 
-        {!teamId && <p className="hint hint--prose">Pick a club above to browse its games.</p>}
+            {!teamId && <p className="hint hint--prose">Pick a club above to browse its games.</p>}
 
-        {teamId && (
-          <>
-            <AsyncStatus
-              loading={scheduleState.loading}
-              error={scheduleState.error}
-              hasData={games.length > 0}
-              errorMessage="Couldn’t load the schedule. Try again."
-              onRetry={scheduleState.reload}
-              emptyMessage={`No ${season} games played yet.`}
-            />
-            {games.length > 0 && (
-              <ul className="gamephotos__games">
-                {games.map((g) => {
-                  const active = g.gamePk === gamePk
-                  return (
-                    <li key={g.gamePk}>
-                      <button
-                        type="button"
-                        className={`gamephotos__gamerow${active ? ' is-active' : ''}`}
-                        aria-pressed={active}
-                        onClick={() => setGamePk(g.gamePk)}
-                      >
-                        <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={26} />
-                        <span className="gamephotos__gamematchup">
-                          {g.isHome ? `vs ${g.opponent.abbreviation}` : `at ${g.opponent.abbreviation}`}
-                          {g.gameNumber > 1 && <em> · Gm {g.gameNumber}</em>}
-                        </span>
-                        <span className="gamephotos__gamedate">{monthDay(g.apiDate)}</span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
+            {teamId && (
+              <>
+                <AsyncStatus
+                  loading={scheduleState.loading}
+                  error={scheduleState.error}
+                  hasData={games.length > 0}
+                  errorMessage="Couldn’t load the schedule. Try again."
+                  onRetry={scheduleState.reload}
+                  emptyMessage={`No ${season} games played yet.`}
+                />
+                {games.length > 0 && (
+                  <ul className="gamephotos__games">
+                    {games.map((g) => {
+                      const active = g.gamePk === gamePk
+                      return (
+                        <li key={g.gamePk}>
+                          <button
+                            type="button"
+                            className={`gamephotos__gamerow${active ? ' is-active' : ''}`}
+                            aria-pressed={active}
+                            onClick={() => setGamePk(g.gamePk)}
+                          >
+                            <TeamLogo teamId={g.opponent.id} name={g.opponent.name} size={26} />
+                            <span className="gamephotos__gamematchup">
+                              {g.isHome ? `vs ${g.opponent.abbreviation}` : `at ${g.opponent.abbreviation}`}
+                              {g.gameNumber > 1 && <em> · Gm {g.gameNumber}</em>}
+                            </span>
+                            <span className="gamephotos__gamedate">{monthDay(g.apiDate)}</span>
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </>
             )}
-          </>
-        )}
-      </section>
+          </section>
+        </>
+      )}
 
       {gamePk && (
         <section className="gamephotos__section gamephotos__gallery">
           <div className="gamephotos__sectionhead">
             <h2 className="gamephotos__sectiontitle">Photos</h2>
-            {photos.length > 0 && (
-              <span className="gamephotos__resultsmeta">{photos.length} found</span>
-            )}
+            <span className="gamephotos__galleryactions">
+              {photos.length > 0 && (
+                <span className="gamephotos__resultsmeta">{photos.length} found</span>
+              )}
+              {!browsing && (
+                <button type="button" className="gamephotos__browsebtn" onClick={browseAllGames}>
+                  Browse other games
+                </button>
+              )}
+            </span>
           </div>
           <AsyncStatus
             loading={photosState.loading}
