@@ -15,6 +15,9 @@
 // which teams have curated logo art at all is a public/ file-existence fact,
 // decided once in src/lib/teams.js's teamLogoUrl fallback, not duplicated
 // here as a whitelist that would drift every time new logo art is added.
+// The export only re-derives (full table scan + rewrite) when this run
+// actually recorded a row — an already-recorded (gamePk, teamId) is never
+// re-upserted, so a no-op night would otherwise rewrite an identical file.
 //
 // v2 idea (not built): once enough per-team history accumulates, guess a
 // likely pre-posting treatment (e.g. from day-of-week pattern) and correct it
@@ -192,17 +195,22 @@ async function main() {
     console.log(
       `wrote scripts/data/jerseys.sql (${recorded} side(s) recorded this run, ${notPosted} not posted yet, ${total} total rows)`,
     )
+
+    // Only re-derive the export when this run actually added/changed rows —
+    // an already-recorded (gamePk, teamId) is never re-upserted (see the
+    // `existing` skip above), so on a no-op night the export is guaranteed
+    // byte-identical to what's already on disk. Skips a full-table scan +
+    // rewrite for nothing.
+    const rows = db.prepare('SELECT game_pk, team_id, payload_json FROM jerseys').all()
+    const exported = buildJerseysExport(rows)
+    await mkdir(dirname(jerseysJsonPath), { recursive: true })
+    await writeFile(jerseysJsonPath, JSON.stringify(exported))
+    console.log(
+      `wrote public/data/jerseys.json (${Object.keys(exported).length} non-main treatment(s))`,
+    )
   } else {
     console.log(`no changes (${notPosted} not posted yet, ${total} total rows)`)
   }
-
-  const rows = db.prepare('SELECT game_pk, team_id, payload_json FROM jerseys').all()
-  const exported = buildJerseysExport(rows)
-  await mkdir(dirname(jerseysJsonPath), { recursive: true })
-  await writeFile(jerseysJsonPath, JSON.stringify(exported))
-  console.log(
-    `wrote public/data/jerseys.json (${Object.keys(exported).length} non-main treatment(s))`,
-  )
 
   db.close()
 }

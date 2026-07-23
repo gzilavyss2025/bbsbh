@@ -7,18 +7,32 @@
 // key. Degrades to an empty object before the file exists or on any fetch
 // failure — a missed logo swap, never a broken page. Cached in-memory for the
 // session since the file only changes once a day.
+//
+// `inFlight` memoizes the request itself, not just its result: GameCard calls
+// this once per card on the home slate, all on the same mount tick, and
+// `cached` alone only short-circuits a call that starts AFTER the first one
+// has resolved — every card that calls in before then would otherwise fire
+// its own redundant fetch of the same file. Holding the shared promise
+// closes that window; every concurrent caller awaits the one request.
 let cached = null
+let inFlight = null
 
 export async function fetchJerseysData() {
   if (cached) return cached
-  try {
-    const res = await fetch('/data/jerseys.json')
-    if (!res.ok) throw new Error(`jerseys.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = {}
+  if (!inFlight) {
+    inFlight = fetch('/data/jerseys.json')
+      .then((res) => {
+        if (!res.ok) throw new Error(`jerseys.json ${res.status}`)
+        return res.json()
+      })
+      .catch(() => ({}))
+      .then((data) => {
+        cached = data
+        inFlight = null
+        return cached
+      })
   }
-  return cached
+  return inFlight
 }
 
 // 'alternate' | 'city-connect' | null — null covers a standard jersey, an
