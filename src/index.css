@@ -16157,6 +16157,17 @@ body {
   border: var(--bw-hair) solid var(--seal);
   border-radius: var(--radius-sm);
 }
+/* One-line plain-language gloss above a stats grid (Comeback wins), so the
+   bare < 10% / < 20% / < 30% thresholds read as "their chance of winning the
+   game," not something the viewer has to infer. */
+.tstats__caption {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+  padding: 8px 8px 4px;
+  margin: 0;
+}
 .tstats {
   display: grid;
   grid-template-columns: 1fr 1fr;

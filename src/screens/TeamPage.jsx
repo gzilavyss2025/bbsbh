@@ -920,7 +920,13 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {batting && <TeamStats title="Team batting" stats={batting} />}
         {pitching && <TeamStats title="Team pitching" stats={pitching} />}
-        {comeback && <TeamStats title="Comeback wins" stats={comeback} />}
+        {comeback && (
+          <TeamStats
+            title="Comeback wins"
+            stats={comeback}
+            caption="Wins the team pulled out after its chance of winning the game dropped below each mark at some point."
+          />
+        )}
 
         <TeamLeaders
           pool={leaderPool}
@@ -1245,11 +1251,12 @@ function SeriesStrip({ games, allStarGame, refDate }) {
   )
 }
 
-function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
+function TeamStats({ title, stats, note = 'rank out of 30', highlightKey, caption }) {
   return (
     <>
       <SectionTitle title={title} note={note} />
       <div className="tstats-card">
+        {caption && <p className="tstats__caption">{caption}</p>}
         <div className="tstats">
           {stats.map((s) => (
             <div
