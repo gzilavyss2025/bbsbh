@@ -118,6 +118,11 @@ export function GameScoreCard({ feed }) {
       <div className="team-score__head">
         <span className="team-score__head-title">
           Game Score
+          {/* Plain text, outside the button, so the middot separator reads
+              visually gold like the link beside it without itself being part
+              of the clickable/underlined target — only "How this is
+              calculated" opens the modal. */}
+          <span className="team-score__howsep" aria-hidden="true"> · </span>
           <button
             type="button"
             className="team-score__howlink team-score__howlink--inline"

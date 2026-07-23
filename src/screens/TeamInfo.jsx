@@ -1381,8 +1381,9 @@ function Fact({ label, value }) {
 // literal "i" character — the global ALL-CAPS invariant forces all rendered
 // text uppercase (see index.css / check-caps.mjs), which would flatten a
 // literal letter into a capital I, so a vector shape is the same move
-// UmpireTierGlyph's home-plate icon already makes.
-function InfoIcon() {
+// UmpireTierGlyph's home-plate icon already makes. Exported so the box
+// score's own Attendance field (BoxScore.jsx) can reuse the same glyph.
+export function InfoIcon() {
   return (
     <svg viewBox="0 0 20 20" width="10" height="10" aria-hidden="true">
       <circle cx="10" cy="5.5" r="1.8" fill="currentColor" />

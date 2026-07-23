@@ -130,7 +130,39 @@ export const BAND_COLOR_OVERRIDES = {
 // (flat fill) or `{ pinstripe: true, color }` (the scorebook pinstripe
 // pattern — see PinstripePattern below — `color` is the line color, white
 // background implied, same convention as teams.js's MAIN_OVERRIDES).
-export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {}
+export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
+  109: {
+    main: '#E3D4AD',
+    alternate: '#E3D4AD',
+    'city-connect': '#523178',
+  },
+  133: {
+    main: '#003831',
+  },
+  144: {
+    alternate: '#CE1141',
+    'city-connect': '#7BA7D8',
+  },
+  111: {
+    'city-connect': '#5A8D84',
+  },
+  158: {
+    alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+    'city-connect': '#ff6c58',
+  },
+  136: {
+    'city-connect': '#203F79',
+    'alternate-3': '#000000',
+    'alternate-2': '#0C2C56',
+  },
+  139: {
+    'city-connect': '#7bc35e',
+    alternate: '#8FBCE6',
+  },
+  141: {
+    'city-connect': '#161827',
+  },
+}
 
 // The pinstripe line color at its default weight — same literal
 // mainTreatmentPinstripeColor/treatmentPinstripeColor (teams.js) fall back

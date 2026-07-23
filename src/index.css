@@ -5058,6 +5058,26 @@ body {
   box-shadow: var(--inset-cell);
   overflow: hidden;
 }
+/* The box score's own ABS Challenges card (BoxAbs, BoxScore.jsx) reads as one
+   complete card — the navy title's bottom corners square off and sit flush
+   against the rows below, rather than floating above them as its own
+   separately rounded pill (the innings view's copy of this same .abs/
+   .abs__title markup keeps that floating "ears" look). */
+.bs__abscard {
+  /* Now an independent card in its own right (BoxScoreBody's .bs__col),
+     not the batting/pitching card's tail — the column's own flex gap
+     (var(--space-4)) spaces it from its neighbors, so the base .abs rule's
+     own margin-top would double that gap. */
+  margin-top: 0;
+}
+.bs__abscard .abs__title {
+  margin-bottom: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.bs__abscard .abs__rows {
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
 .abs__row + .abs__row {
   border-top: var(--bw-hair) solid var(--border-rule);
 }
@@ -6479,6 +6499,32 @@ body {
   border-radius: var(--radius-sm);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+}
+
+/* The box score's own Defense card (BoxDefense, BoxScore.jsx) reads as one
+   complete card — the navy title's bottom corners square off and sit flush
+   against the diamond below (whose own border/shadow drops its top edge in
+   turn), rather than floating above it as its own separately rounded pill
+   over a separately bordered diamond (the innings view's copy of this same
+   .halfdefense/.defdiamond markup, EnteringReference.jsx, keeps that
+   floating "ears" look). */
+.bs__defensecard.halfdefense {
+  /* Now an independent card in its own right (BoxScoreBody's .bs__col),
+     below BoxAbs but no longer its nested continuation — the column's own
+     flex gap (var(--space-4)) spaces the two apart, so the base .halfdefense
+     rule's own dashed divider + margin/padding would draw a second, redundant
+     seam on top of that gap. */
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+.bs__defensecard .halfdefense__title {
+  margin-bottom: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.bs__defensecard .defdiamond {
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
 /* On a phone, .halfdefense (and the diamond inside it) sits INSIDE .half's own
@@ -9653,14 +9699,32 @@ body {
   padding: 12px 14px 10px;
 }
 
-.bs__teamname {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+/* These five box score cards each wear the pre-game cards' own navy/gold
+   SectionMasthead (same .metricbar/.metricbar__title as Lineup Strength/
+   Bullpen Health) as their own header, in place of the plain caption titles
+   they used to carry. Unlike those cards, these keep one uniform padding on
+   their content rather than a separate header/body split, so the masthead
+   bleeds out to the card's own edges via a negative margin matching that
+   padding (12px/14px on every one of the five) instead of the container
+   dropping its own top padding. */
+.bs__team > .metricbar,
+.bs__potg > .metricbar,
+.bs__stars > .metricbar,
+.bs__statcastCard > .metricbar,
+.bs__insights > .metricbar {
+  margin: -12px -14px 10px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Every navy/gold header on this page reads at the same, larger size —
+   .metricbar__title's own var(--fs-body) — rather than the smaller sizes
+   .abs__title/.halfdefense__title/.winprob__title carry by default
+   elsewhere (those are shared with the innings view, so the bump is scoped
+   to .bs rather than changing the shared classes themselves). */
+.bs .abs__title,
+.bs .halfdefense__title,
+.bs .winprob__title {
+  font-size: var(--fs-body);
 }
 
 .bs__scroll {
@@ -9914,15 +9978,6 @@ body {
   box-shadow: var(--shadow-card);
   margin-bottom: 10px;
 }
-.bs__potgTitle {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
 .bs__potgBody {
   display: flex;
   align-items: flex-start;
@@ -10024,6 +10079,34 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+/* The by-inning tally: collapsed by default, same toggle-with-chevron idiom
+   as the lineup page's RosterPanel (.roster__toggle), styled to this page's
+   own card frame (matches .bs__insights) rather than the lineup page's. */
+.bs__tally {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--space-3);
+  overflow: hidden;
+}
+.bs__tallyToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.bs__tallyChevron {
+  color: var(--text-caption);
+}
+.bs__tallyBody {
+  padding: 10px 14px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 /* The box score's own Statcast Leaders card — its own full-width row
    between the linescore/Game Score column and the two team cards (see
@@ -10161,15 +10244,6 @@ body {
   border-radius: var(--radius-md);
   background: var(--paper-1);
   box-shadow: var(--shadow-card);
-}
-.bs__starsTitle {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .stars3__hero {
@@ -11654,20 +11728,18 @@ body {
   display: inline-flex;
 }
 /* Each half-inning a fixed, equal-width bordered box regardless of the digits in
-   it; a half that scored is inked bold seam-red. Sized up from the base
-   .bs__grid td font (the header row's inning numbers stay that base size —
-   see .bs__grid--board thead th below — only the run counts themselves grow).
-   Needs the two-class ".bs__grid--board .bs__boardInn" selector, not a bare
-   ".bs__boardInn", to out-specificity the generic ".bs__grid th, .bs__grid td"
-   rule above — otherwise the per-inning digits get stuck at caption size while
-   .bs__boardFinal (already two classes) renders at the intended larger size. */
+   it; a half that scored is inked bold seam-red. Deliberately compact — the
+   line score is a quick-glance grid, not a headline number — at half the size
+   of the old --fs-title-lg reading. Needs the two-class
+   ".bs__grid--board .bs__boardInn" selector, not a bare ".bs__boardInn", to
+   out-specificity the generic ".bs__grid th, .bs__grid td" rule above. */
 .bs__boardInn {
   width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   color: var(--text-body);
 }
 .bs__grid--board .bs__boardInn {
-  font-size: var(--fs-title-lg);
+  font-size: var(--fs-compact);
 }
 .bs__grid--board thead th.bs__boardInn {
   font-size: var(--fs-caption);
@@ -11706,7 +11778,7 @@ body {
   width: 26px;
   border: var(--bw-hair) solid var(--border-hairline);
   background: var(--paper-1);
-  font-size: var(--fs-title-lg);
+  font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
@@ -14803,14 +14875,15 @@ body {
 }
 /* Sits inline right after "Game Score" in .team-score__head-title instead of
    the card's footer — the surrounding uppercase/caption styling comes from
-   .team-score__head, this just drops the footer variant's own margin and
-   prefixes a middot separator. */
+   .team-score__head, this just drops the footer variant's own margin. The
+   middot separator itself is a plain sibling span (.team-score__howsep,
+   GameScoreCard.jsx), not part of this button — a ::before on the button
+   would render the dot INSIDE the clickable/underlined link. */
 .team-score__howlink--inline {
   margin: 0;
 }
-.team-score__howlink--inline::before {
-  content: " · ";
-  border-bottom: none;
+.team-score__howsep {
+  color: var(--seal-hatch);
 }
 .team-score__howlink:focus-visible {
   outline: none;

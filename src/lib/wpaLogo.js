@@ -133,7 +133,39 @@ export const WPA_LOGO_DEFAULTS = {
 // straight in. NOTE: a per-team rotate/offset override breaks the away/home
 // tile grid's shared alignment across the plot seam for THAT team's band
 // only — an accepted tradeoff, not a bug.
-export const WPA_LOGO_LAYOUT_OVERRIDES = {}
+export const WPA_LOGO_LAYOUT_OVERRIDES = {
+  109: {
+    main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'city-connect': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
+  },
+  133: {
+    main: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
+  },
+  144: {
+    alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
+    'city-connect': { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
+  },
+  111: {
+    'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+  },
+  158: {
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'city-connect': { size: 69, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -8 },
+  },
+  136: {
+    'city-connect': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'alternate-3': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
+  },
+  139: {
+    'city-connect': { size: 65, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -10 },
+    alternate: { size: 117, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -68 },
+  },
+  141: {
+    'city-connect': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 7 },
+  },
+}
 
 export function wpaLogoLayout(teamId, treatment) {
   const o = WPA_LOGO_LAYOUT_OVERRIDES[teamId]?.[treatment]
