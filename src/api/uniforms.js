@@ -145,6 +145,12 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '136_jersey_2_2026': 'alternate-2', // Mariners Away Navy — worn with the Alternate 2 mark
   '136_jersey_4_2026': 'alternate-3', // Mariners Steelheads Alt 2 Cream — worn with the Alternate 3 mark
   '137_jersey_4_2026': 'alternate-2', // Giants Alt 2 Black "Gigantes" — worn with the Alternate 2 mark (moved off City Connect)
+  '141_jersey_4_2026': 'alternate-2', // Blue Jays Alt 2 Baby Blue — worn with the Alternate 2 mark
+  '141_jersey_6_2026': 'alternate-3', // Blue Jays Alt 4 Canada Red — worn with the Alternate 3 mark
+  '141_jersey_2_2026': 'alternate-4', // Blue Jays Away Grey — worn with the Alternate 4 mark, not plain Main
+  '120_jersey_2_2026': 'alternate', // Nationals Road Grey — worn with the Alternate mark, not plain Main
+  '120_jersey_3_2026': 'alternate-2', // Nationals Alt 1 Red "W" — worn with the Alternate 2 mark
+  '120_jersey_4_2026': 'alternate-3', // Nationals Alt 2 Blue — worn with the Alternate 3 mark
 }
 
 // Which logo TREATMENT ('main' | 'alternate' | 'alternate-2' | 'alternate-3' |

@@ -11,6 +11,7 @@ import {
   ALT_COLORS,
   ALT2_COLORS,
   ALT3_COLORS,
+  ALT4_COLORS,
   CITY_CONNECT_COLORS,
   TREATMENT_SCALE,
   MAIN_OVERRIDES,
@@ -19,6 +20,7 @@ import {
   treatmentPinstripeColor,
   hasAlternate2,
   hasAlternate3,
+  hasAlternate4,
   hasCityConnect,
 } from '../lib/teams.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
@@ -33,6 +35,7 @@ const TREATMENTS = [
   { key: 'alternate', label: 'Alternate' },
   { key: 'alternate-2', label: 'Alternate 2' },
   { key: 'alternate-3', label: 'Alternate 3' },
+  { key: 'alternate-4', label: 'Alternate 4' },
   { key: 'city-connect', label: 'City Connect' },
 ]
 
@@ -119,7 +122,9 @@ function colorsFor(teamId, treatmentKey) {
         ? ALT2_COLORS[teamId]
         : treatmentKey === 'alternate-3'
           ? ALT3_COLORS[teamId]
-          : CITY_CONNECT_COLORS[teamId]
+          : treatmentKey === 'alternate-4'
+            ? ALT4_COLORS[teamId]
+            : CITY_CONNECT_COLORS[teamId]
   return colors ? withMainRoleLabels(teamId, colors) : []
 }
 
@@ -222,6 +227,7 @@ function TeamColorRow({ teamId, catalog }) {
     (t) =>
       (t.key !== 'alternate-2' || hasAlternate2(teamId)) &&
       (t.key !== 'alternate-3' || hasAlternate3(teamId)) &&
+      (t.key !== 'alternate-4' || hasAlternate4(teamId)) &&
       (t.key !== 'city-connect' || hasCityConnect(teamId)),
   )
   return (
