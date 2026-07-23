@@ -7651,6 +7651,21 @@ body {
   box-shadow: var(--inset-cell);
 }
 
+/* Rockies' Main tile (MAIN_OVERRIDES' `pinstripe` flag, TeamColorLab.jsx) —
+   white with a subtle vertical black pinstripe, echoing their home jersey,
+   instead of a flat brand-color --tint like every other override. Compound
+   selector for guaranteed higher specificity over the plain `background:
+   var(--tint, ...)` rule above regardless of source order. */
+.colorlab__logobox.colorlab__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.16) 0,
+    rgba(0, 0, 0, 0.16) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+
 /* A diagonal white-to-black sheen over the whole tile face (background AND
    mark alike, via the ::after stacking above both) — reads as a glossy,
    slightly domed badge instead of a flat paint chip. Applied to every
