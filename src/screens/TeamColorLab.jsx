@@ -7,12 +7,19 @@ import {
   teamFullName,
   teamClubName,
   teamColorSwatches,
-  localLogoUrl,
+  teamLogoUrl,
   ALT_COLORS,
+  ALT2_COLORS,
+  ALT3_COLORS,
   CITY_CONNECT_COLORS,
   TREATMENT_SCALE,
   MAIN_OVERRIDES,
   mainOverrideLogoUrl,
+  mainTreatmentPinstripeColor,
+  treatmentPinstripeColor,
+  hasAlternate2,
+  hasAlternate3,
+  hasCityConnect,
 } from '../lib/teams.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
@@ -24,6 +31,8 @@ import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../a
 const TREATMENTS = [
   { key: 'main', label: 'Main' },
   { key: 'alternate', label: 'Alternate' },
+  { key: 'alternate-2', label: 'Alternate 2' },
+  { key: 'alternate-3', label: 'Alternate 3' },
   { key: 'city-connect', label: 'City Connect' },
 ]
 
@@ -40,6 +49,16 @@ const TREATMENTS = [
 // these tiles large enough for the off-center weight to matter yet.
 const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
+}
+
+// Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS
+// transform-origin-y on .colorlab__logoimg/.teamlogo. Default 'center' bleeds
+// evenly off all four edges; 'top' anchors the mark to the top of the tile so
+// the overscale only bleeds off the bottom, keeping the mark's full size
+// without clipping its top/sides. Page-local only, same footing as
+// TREATMENT_OFFSET_X above.
+const TREATMENT_ORIGIN_Y = {
+  109: { alternate: '10%' }, // Diamondbacks — anchored just below the top so the teal border only just clips, most of the bleed still goes to the bottom
 }
 
 // A proposed replacement for a team's Primary swatch, tried out on this page
@@ -93,17 +112,15 @@ function withMainRoleLabels(teamId, colors) {
 
 function colorsFor(teamId, treatmentKey) {
   if (treatmentKey === 'main') return mainColorTriad(teamId)
-  const colors = treatmentKey === 'alternate' ? ALT_COLORS[teamId] : CITY_CONNECT_COLORS[teamId]
+  const colors =
+    treatmentKey === 'alternate'
+      ? ALT_COLORS[teamId]
+      : treatmentKey === 'alternate-2'
+        ? ALT2_COLORS[teamId]
+        : treatmentKey === 'alternate-3'
+          ? ALT3_COLORS[teamId]
+          : CITY_CONNECT_COLORS[teamId]
   return colors ? withMainRoleLabels(teamId, colors) : []
-}
-
-// Hand-tuned corrections where a jersey's own catalog naming doesn't match
-// which logo it's actually paired with on the field — classifyUniformAsset's
-// naming-convention guess is right for the other ~29 clubs but not every
-// exception. Keyed by uniformAssetCode (stable within a season, unlike the
-// label text) so a wording tweak next season can't silently mis-target this.
-const JERSEY_TREATMENT_OVERRIDES = {
-  '112_jersey_4_2026': 'city-connect', // Cubs Alt 2 Baby Blue — worn with the City Connect mark, not the plain Alternate "C"
 }
 
 // Which jersey(s) in the uniforms CATALOG (as opposed to a single game's
@@ -112,21 +129,20 @@ const JERSEY_TREATMENT_OVERRIDES = {
 // self-identifies as Home/Away/Road, "Alt N …", or "City Connect …"
 // (verified against a live 2026 pull for all 30 clubs — classifyUniformAsset),
 // so this needs no per-team hand-authoring like ALT_COLORS/CITY_CONNECT_COLORS
-// above beyond the rare JERSEY_TREATMENT_OVERRIDES exception; a new/renamed
-// jersey in a future season's catalog is otherwise picked up automatically.
-// `null` means the catalog hasn't loaded yet (still fetching or MLB-only
-// endpoint miss); an empty array is a loaded catalog with no jersey in that
-// bucket.
+// above beyond the rare exceptions classifyUniformAsset's own
+// JERSEY_TREATMENT_OVERRIDES table covers (src/api/uniforms.js — shared with
+// gen-jerseys.mjs's live game-card classification, so this page's jersey
+// matches can't drift from what the real card actually renders); a new/
+// renamed jersey in a future season's catalog is otherwise picked up
+// automatically. `null` means the catalog hasn't loaded yet (still fetching
+// or MLB-only endpoint miss); an empty array is a loaded catalog with no
+// jersey in that bucket.
 function jerseyMatchesFor(catalog, teamId, treatmentKey) {
   const assets = catalog[teamId]
   if (!assets) return null
   const clubName = teamClubName(teamId)
   return assets
-    .filter((a) => {
-      if (a.piece !== 'J') return false
-      const treatment = JERSEY_TREATMENT_OVERRIDES[a.code] ?? classifyUniformAsset(a.text, clubName)
-      return treatment === treatmentKey
-    })
+    .filter((a) => a.piece === 'J' && classifyUniformAsset(a.text, clubName, a.code) === treatmentKey)
     .map((a) => jerseyLabel(a.text, clubName))
 }
 
@@ -171,22 +187,48 @@ export function TeamColorLab() {
         until supplied.
       </p>
 
-      <div className="colorlab">
-        {teams.map((id) => (
-          <TeamColorRow key={id} teamId={id} catalog={catalog} />
-        ))}
+      <div className="colorlab__layout">
+        <nav className="colorlab__nav" aria-label="Jump to team">
+          {teams.map((id) => (
+            <a key={id} className="colorlab__navlink" href={`#${teamAnchorId(id)}`} title={teamFullName(id)}>
+              <TeamLogo teamId={id} name={teamFullName(id)} size={28} />
+            </a>
+          ))}
+        </nav>
+        <div className="colorlab">
+          {teams.map((id) => (
+            <TeamColorRow key={id} teamId={id} catalog={catalog} />
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
+// Anchor id for a team's row — shared by the row itself and the pinned
+// sidebar's jump links (colorlab__nav) so the two never drift apart.
+function teamAnchorId(teamId) {
+  return `colorlab-team-${teamId}`
+}
+
 function TeamColorRow({ teamId, catalog }) {
   const name = teamFullName(teamId)
+  // Alternate 2/3 are opt-in per team (unlike Main/Alternate/City Connect,
+  // which every club eventually gets) — skip the tile entirely for a team
+  // with none set up, rather than showing an empty placeholder. City Connect
+  // is skipped outright for a team with no real one (hasCityConnect), same
+  // idea but permanent rather than "not procured yet".
+  const treatments = TREATMENTS.filter(
+    (t) =>
+      (t.key !== 'alternate-2' || hasAlternate2(teamId)) &&
+      (t.key !== 'alternate-3' || hasAlternate3(teamId)) &&
+      (t.key !== 'city-connect' || hasCityConnect(teamId)),
+  )
   return (
-    <section className="colorlab__row">
+    <section className="colorlab__row" id={teamAnchorId(teamId)}>
       <h2 className="colorlab__teamname">{name}</h2>
       <div className="colorlab__treatments">
-        {TREATMENTS.map((t) => (
+        {treatments.map((t) => (
           <TreatmentBox
             key={t.key}
             teamId={teamId}
@@ -206,28 +248,36 @@ function TreatmentBox({ teamId, name, treatment, label, catalog }) {
   const jerseyMatches = jerseyMatchesFor(catalog, teamId, treatment)
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
+  const pinstripeColor = treatment === 'main'
+    ? override?.pinstripe
+      ? mainTreatmentPinstripeColor(teamId)
+      : null
+    : treatmentPinstripeColor(teamId, treatment)
   // Main picks its tile background from one of the three official swatches
-  // (MAIN_OVERRIDES names which); Alternate/City Connect flag whichever of
-  // their user-supplied swatches is the background directly (see ALT_COLORS/
-  // CITY_CONNECT_COLORS' `bg: true`).
-  const activeBgIndex = override?.pinstripe
-    ? -1 // a hand-styled background (see below), not one of the three brand swatches
+  // (MAIN_OVERRIDES names which) or a literal `bgHex` (Brewers); Alternate/
+  // City Connect flag whichever of their user-supplied swatches is the
+  // background directly (see ALT_COLORS/CITY_CONNECT_COLORS' `bg: true`).
+  const activeBgIndex = override?.bgHex || pinstripeColor
+    ? -1 // a hand-styled/literal background (see below), not one of the three brand swatches
     : override
       ? BG_ROLE_INDEX[override.bg]
       : colors.findIndex((c) => c?.bg)
 
-  const tint = activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined
+  const tint = override?.bgHex ?? (activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined)
   const treatmentScale = override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
   const treatmentOffsetX = TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
+  const treatmentOriginY = TREATMENT_ORIGIN_Y[teamId]?.[treatment] ?? 'center'
   const logoboxStyle =
-    tint || override || treatmentOffsetX
+    tint || override || pinstripeColor || treatmentOffsetX || treatmentOriginY !== 'center'
       ? {
           '--tint': tint,
           '--scale': 1.32 * treatmentScale,
           '--offset-x': `${treatmentOffsetX}%`,
+          '--origin-y': treatmentOriginY,
+          '--pinstripe-color': pinstripeColor ?? undefined,
         }
       : undefined
-  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${override?.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`
+  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${pinstripeColor ? ' colorlab__logobox--pinstripe' : ''}`
 
   return (
     <div className="colorlab__treatment">
@@ -267,7 +317,7 @@ function TreatmentLogo({ teamId, name, treatment, override }) {
       ? override?.recolor
         ? mainOverrideLogoUrl(teamId)
         : null
-      : localLogoUrl(teamId, treatment)
+      : teamLogoUrl(teamId, treatment)
   const [failed, setFailed] = useState(false)
   useEffect(() => setFailed(false), [url])
 

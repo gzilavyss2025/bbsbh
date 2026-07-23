@@ -26,6 +26,15 @@ test('buildJerseysExport keeps alternate/city-connect, drops main', () => {
   })
 })
 
+test('buildJerseysExport applies JERSEY_TREATMENT_OVERRIDES via the asset code, overriding the naming-convention guess', () => {
+  const rows = [
+    // "Home White" would classify as 'main' (dropped) by name alone, but
+    // this code is one of the Mariners' known naming/logo exceptions.
+    row(4, 136, [{ text: 'Mariners Home White', piece: 'J', code: '136_jersey_1_2026' }]),
+  ]
+  assert.deepEqual(buildJerseysExport(rows), { '4:136': 'alternate' })
+})
+
 test('buildJerseysExport skips a row with no jersey-piece asset', () => {
   const rows = [row(1, 158, [{ text: 'Brewers Road Gray Pants', piece: 'P' }])]
   assert.deepEqual(buildJerseysExport(rows), {})
