@@ -2,76 +2,51 @@ import { useEffect, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName, teamClubName, teamColorSwatches } from '../lib/teams.js'
+import {
+  ALL_MLB_TEAM_IDS,
+  teamAbbr,
+  teamFullName,
+  teamClubName,
+  teamColorSwatches,
+  localLogoUrl,
+  ALT_COLORS,
+  CITY_CONNECT_COLORS,
+  TREATMENT_SCALE,
+} from '../lib/teams.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
 // everywhere else (components/TeamLogo.jsx) — so only Alternate and City
-// Connect are locally procured, hand-cropped transparent PNGs (see the
-// folder convention below). Order here is also render order per team.
+// Connect are locally procured, hand-cropped transparent PNGs (localLogoUrl,
+// teams.js — same convention TeamLogo's 'alternate'/'city-connect' variants
+// use for the home-page game cards). Order here is also render order per team.
 const TREATMENTS = [
   { key: 'main', label: 'Main' },
   { key: 'alternate', label: 'Alternate' },
   { key: 'city-connect', label: 'City Connect' },
 ]
 
-// Where a procured file for `teamId`/`treatment` is expected, served
-// same-origin out of public/ like every other static asset in this app.
-// Filename is the club's real abbreviation (teams.js's TEAM_ABBR, e.g.
-// "MIL", "SD", "CWS") — human-legible for manually sorting a folder of PNGs,
-// and already the single source of truth for spelling a club's short code
-// everywhere else in the app, so there's no second id scheme to keep in sync.
-// A missing file 404s and TreatmentLogo below falls back to a wireframe
-// placeholder — there's no manifest to hand-maintain as files are added.
-// Never called for 'main' — that treatment renders TeamLogo instead.
-function localLogoUrl(teamId, treatment) {
-  const abbr = teamAbbr({ id: teamId })
-  if (!abbr) return null
-  const ext = ALT_LOGO_SVG.has(teamId) && treatment === 'alternate' ? 'svg' : 'png'
-  return `/team-logos/${treatment}/${abbr}.${ext}`
-}
-
-// Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
-// (every path recolored to the club's one real brand color straight off the
-// official multicolor logo) rather than a photographed/cropped PNG like every
-// other Alternate treatment here.
-const ALT_LOGO_SVG = new Set([
-  133, // Athletics
-  118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
-])
+// ALT_COLORS/CITY_CONNECT_COLORS/TREATMENT_SCALE (per-treatment tile
+// background swatches + the edge-bleed scale-downs a few dense marks need
+// against a real fill) now live in teams.js — the home-page game card reads
+// the same curated set (treatmentBgColor/treatmentScale) so a color tuned
+// here shows up there too, with no second copy to drift.
 
 // Per-team, per-treatment horizontal nudge (percent of the tile's own width,
 // negative = left) for a mark whose visual weight sits off-center once scaled
 // up — CSS translateX on .colorlab__logoimg/.teamlogo, applied before scale.
+// Page-local only (unlike TREATMENT_SCALE above) — no other surface renders
+// these tiles large enough for the off-center weight to matter yet.
 const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
 }
 
-// Per-team, per-treatment tweak to the tile's edge-bleed scale (applied on
-// top of the 1.32 default every tinted tile gets) — for treatments other than
-// Main, which has its own scale on MAIN_OVERRIDES.
-const TREATMENT_SCALE = {
-  139: { alternate: 1.6 }, // Rays — mark reads small against the tint at 1.32 alone
-  113: { 'city-connect': 0.75 }, // Reds — the "C" mark already touches all four
-  // edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink
-  // down so the whole mark stays inside the tile.
-  117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
-  118: { alternate: 0.85 }, // Royals — same KC mark + scale as Main's own override
-  140: {
-    // T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was
-    // chroma-keyed to transparent, and its own bbox already fills most of the
-    // canvas, so shrink slightly off the default 1.32 edge-bleed to avoid
-    // clipping the crossbar tips.
-    alternate: 0.85,
-    'city-connect': 0.855, // shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless
-  },
-}
-
 // A proposed replacement for a team's Primary swatch, tried out on this page
 // only — teams.js's TEAM_COLOR_PAIRS/TEAM_COLORS (the real app-wide source
-// every other surface reads) is untouched. Applied to BOTH the Main triad
-// (mainColorTriad below) and ALT_COLORS' own Primary entry, so the two tiles
-// can't drift onto two different "Primary" hexes.
+// every other surface reads) is untouched. Applied to the Main triad
+// (mainColorTriad below); teams.js's ALT_COLORS[115] carries the same hex as
+// a literal so the Main and Alternate tiles here can't drift onto two
+// different "Primary" purples.
 const PRIMARY_OVERRIDE = {
   115: '#33006F', // Rockies — proposed purple
 }
@@ -154,111 +129,6 @@ function mainOverrideLogoUrl(teamId) {
   if (!abbr) return null
   const ext = MAIN_OVERRIDE_PNG.has(teamId) ? 'png' : 'svg'
   return `/team-logos/main-overrides/${abbr}.${ext}`
-}
-
-// Alternate/City Connect colors have no existing source in this app — the
-// user supplies these treatment-by-treatment, together with each logo file.
-// Usually just the one tile-background color (unlike Main's fixed Primary/
-// Secondary/Third triad, since these marks don't carry an official 3-color
-// set here), but a team can get a full swatch set too (e.g. Diamondbacks
-// City Connect's Primary/Secondary) — whichever entry carries `bg: true` is
-// the one used as the tile's actual background. Keyed by teamId; a team
-// with no entry yet renders a placeholder swatch, same as a missing logo.
-const ALT_COLORS = {
-  // Rockies — the outline-only mark's background is the proposed purple
-  // (PRIMARY_OVERRIDE), same value Main's own Primary swatch now shows.
-  115: [{ label: 'Primary', hex: PRIMARY_OVERRIDE[115], bg: true }],
-  // Royals — the same recolored-white KC mark as Main (ALT_LOGO_SVG), but on
-  // a baby-blue background of its own — Main keeps its real Primary navy.
-  118: [{ label: 'Baby Blue', hex: '#6DADF4', bg: true }],
-  // Diamondbacks — sampled off the snake-head mark itself (a transparent
-  // PNG); both colors are exact matches for Main's own Primary/Third.
-  109: [
-    { label: 'Primary', hex: '#A71930', bg: true },
-    { label: 'Third', hex: '#30CED8' },
-  ],
-  112: [
-    { label: 'Primary', hex: '#0E3386', bg: true },
-    { label: 'Secondary', hex: '#CC3433' },
-  ], // Cubs — same pair as Main
-  110: [
-    { label: 'Primary', hex: '#DF4601' },
-    { label: 'Secondary', hex: '#000000', bg: true },
-  ], // Orioles — same pair as Main, background is the Secondary
-  111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox
-  113: [
-    { label: 'Primary', hex: '#C6011F', bg: true },
-    { label: 'Secondary', hex: '#000000' },
-  ], // Reds — same pair as Main
-  114: [{ label: 'Background', hex: '#00385D', bg: true }], // Guardians
-  119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers
-  133: [
-    { label: 'Primary', hex: '#003831' },
-    { label: 'Secondary', hex: '#EFB21E', bg: true },
-    { label: 'Third', hex: '#A2AAAD' },
-  ], // Athletics — Main's own triad, background is Secondary
-  135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres
-  136: [{ label: 'Background', hex: '#005C5C', bg: true }], // Mariners
-  137: [{ label: 'Background', hex: '#FD5A1E', bg: true }], // Giants
-  139: [
-    { label: 'Primary', hex: '#092C5C' },
-    { label: 'Secondary', hex: '#8FBCE6', bg: true },
-    { label: 'Third', hex: '#F5D130' },
-  ], // Rays — Main's own triad, background is Secondary (unchanged)
-  140: [
-    { label: 'Primary', hex: '#003278', bg: true },
-    { label: 'Secondary', hex: '#C0111F' },
-  ], // Rangers — same Primary/Secondary pair as Main; background is Primary
-  // (navy), same hex the T-badge's own chroma-keyed-out fill used to be
-  144: [
-    { label: 'Primary', hex: '#CE1141', bg: true },
-    { label: 'Secondary', hex: '#13274F' },
-  ], // Braves — script wordmark, same pair as Main
-  146: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Marlins
-  147: [{ label: 'Background', hex: '#0C2340', bg: true }], // Yankees
-  158: [{ label: 'Background', hex: '#6CACE4', bg: true }], // Brewers
-}
-
-const CITY_CONNECT_COLORS = {
-  109: [
-    { label: 'Primary', hex: '#0097A9' },
-    { label: 'Secondary', hex: '#523178', bg: true },
-  ], // Diamondbacks
-  110: [{ label: 'Secondary', hex: '#E1D2BE', bg: true }], // Orioles
-  144: [
-    { label: 'Primary', hex: '#D32826' },
-    { label: 'Secondary', hex: '#374EA1' },
-    { label: 'Third', hex: '#7BA7D8', bg: true },
-  ], // Braves
-  113: [
-    { label: 'Primary', hex: '#C6011F' },
-    { label: 'Secondary', hex: '#000000', bg: true },
-  ], // Reds — same pair as Main, background is the Secondary
-  115: [
-    { label: 'Primary', hex: '#8ABFEB', bg: true },
-    { label: 'Secondary', hex: '#4F4FC9' },
-  ], // Rockies
-  118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
-  111: [{ label: 'Primary', hex: '#5A8D84', bg: true }], // Red Sox
-  117: [
-    { label: 'Primary', hex: '#0F2948' },
-    { label: 'Secondary', hex: '#CEC8B2', bg: true },
-    { label: 'Third', hex: '#FC7A1E' },
-  ], // Astros
-  // Athletics — the Sacramento patch's own solid field IS Main's Primary
-  // (an unambiguous bg pick, unlike a transparent PNG), Secondary is the
-  // bridge/lettering detail — same pair as Main.
-  133: [
-    { label: 'Primary', hex: '#003831', bg: true },
-    { label: 'Secondary', hex: '#EFB21E' },
-  ],
-  139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
-  140: [
-    { label: 'Primary', hex: '#892535', bg: true },
-    { label: 'Secondary', hex: '#EBDFCB' },
-  ], // Rangers — both sampled off the png itself (red field, cream T)
-  145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
-  158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
 }
 
 // A plain "Background" swatch (the common case above — just describes the

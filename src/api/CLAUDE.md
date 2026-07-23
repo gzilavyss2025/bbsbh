@@ -121,6 +121,15 @@ for each generator; the reader modules:
   two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
   so MiLB rows fall back to a dash.
+- `jerseys.js` — what a team actually wore in a given game, from
+  `public/data/jerseys.json` (`scripts/gen-jerseys.mjs`, nightly). Keyed
+  `${gamePk}:${teamId}` → `'alternate' | 'city-connect'`; a standard jersey or
+  an unposted assignment simply has no key. `jerseyTreatmentFor(data, gamePk,
+  teamId)` returns that or `null`. `GameCard.jsx` reads it to pick which
+  `TeamLogo` variant to render for the home-page slate — `null` (or a team
+  with no curated art in `public/team-logos/`) falls back to `'base'` via
+  `TeamLogo`'s own fallback chain, never a broken image. Spoiler-free: a
+  jersey choice, not game state.
 - `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
   Cost-driven: a league-wide transaction scan then per-candidate verification
   against his game log + rehab club's schedule to drop ended stints — dozens of
@@ -419,6 +428,19 @@ for each generator; the reader modules:
   (`player_snapshots`); each exported row's `movement` is a self-join against
   the nearest prior snapshot bbsbh itself recorded, not Fever's own
   `/api/data/movers` feed.
+
+- `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
+  finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
+  uses for video. MLB serves every editorial photo through img.mlbstatic.com
+  with a Cloudinary resize transform baked into the URL path;
+  `fetchGamePhotos` walks the whole content JSON, strips each URL's transform
+  segment back to the photographer's original upload, and dedupes by photo id.
+  Deliberately NOT reveal-only or SealBox-wrapped — a recap/celebration photo
+  narrates the outcome just by looking at it, same risk as a highlight clip's
+  title, but this is a standalone personal tool outside the scored-game flow
+  (its page carries its own disclaimer instead). See root CLAUDE.md's spoiler
+  section for why that's a deliberate, narrow exception rather than a hole in
+  the rule.
 
 ## Leader boards (live)
 

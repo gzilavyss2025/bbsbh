@@ -76,6 +76,10 @@ const FirstScorebookPage = lazyNamed(
   () => import('./screens/FirstScorebookPage.jsx'),
   'FirstScorebookPage',
 )
+const GamePhotosPage = lazyNamed(
+  () => import('./screens/GamePhotosPage.jsx'),
+  'GamePhotosPage',
+)
 // Scorecard Lab deliberately contains full-reveal code. It is available only
 // in development and is omitted from the production module graph.
 const ScorecardLab = import.meta.env.DEV
@@ -179,6 +183,12 @@ export default function App() {
     content = <GameNotesDebugPage />
   } else if (route.name === 'first-scorebook') {
     content = <FirstScorebookPage />
+  } else if (route.name === 'photos') {
+    // Keyed on the deep-linked gamePk so navigating between `/photos` and
+    // `/photos/{gamePk}` (e.g. the page's own footer link back to the plain
+    // browse view) remounts with fresh state instead of reusing the same
+    // instance's stale useState seed.
+    content = <GamePhotosPage key={route.gamePk ?? 'browse'} initialGamePk={route.gamePk ?? null} />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
   } else if (route.name === 'team-color-lab' && TeamColorLab) {

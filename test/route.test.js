@@ -22,6 +22,7 @@ import {
   orgLeadersPath,
   teamLeadersPath,
   umpirePath,
+  gamePhotosPath,
 } from '../src/lib/route.js'
 
 // --------------------------------------------------------------------------
@@ -64,6 +65,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/scorecard-lab': 'scorecard-lab',
     '/game-notes-debug': 'game-notes-debug',
     '/first-scorebook': 'first-scorebook',
+    '/photos': 'photos',
   }
   for (const [path, name] of Object.entries(cases)) {
     assert.equal(parseRoute(path).name, name, path)
@@ -223,4 +225,13 @@ test('leadersPath uses the bare /leaders for mlb and keys every other scope', ()
 test('a built player path with a cutoff parses back to the same cutoff', () => {
   const parsed = parseRoute(playerPath(123, { d: '2026-07-05', s: 11 }))
   assert.deepEqual(parsed, { name: 'player', id: '123', asOf: '2026-07-05', sportId: 11 })
+})
+
+test('gamePhotosPath deep-links to one game and parses back with its gamePk', () => {
+  assert.equal(gamePhotosPath(823035), '/photos/823035')
+  assert.deepEqual(parseRoute(gamePhotosPath(823035)), { name: 'photos', gamePk: 823035 })
+})
+
+test('a non-numeric photos gamePk segment falls back to the plain browse route', () => {
+  assert.deepEqual(parseRoute('/photos/not-a-number'), { name: 'photos' })
 })
