@@ -31,4 +31,9 @@
   --app-width:   440px;      /* iPhone-class second screen */
   --app-gutter:  16px;
   --tap-min:     44px;       /* min hit target */
+
+  /* The box-score skeleton's rolling baseball icon (BoxScoreSkeleton.jsx,
+     .skel__ball) — its own component-scoped size rather than borrowing a
+     --fs-* typography role for an unrelated icon dimension. */
+  --skel-ball-size: 56px;
 }

@@ -73,6 +73,24 @@ export function scorePairsLine(pairs) {
   return pairs.map(([abbr, score]) => `${abbr} ${score}`).join(', ')
 }
 
+// Whether GameResultFace will stack an extra PerformerCard block above its
+// Play of the Game text for this card — a performer takes that slot on a
+// Dominant Performance, or a Blowout/Extra-Innings card whose deterministic
+// playChoice landed on the performer variant. Pulled out of GameResultFace so
+// BoxScoreSkeleton (its card's "still fetching" placeholder) can make the
+// SAME call from the same cardMeta and reserve a matching placeholder shape
+// — a best-effort narrowing of the window where the real face pops in an
+// extra block after mounting, not a guarantee it never does (see
+// BoxScoreSkeleton.jsx's own header comment for why cardMeta can arrive
+// after this card's own reveal fetch already has).
+export function showsPerformerCard(cardMeta) {
+  const { scenario, playChoice, performer } = cardMeta ?? {}
+  return (
+    !!performer &&
+    (scenario === 'dominant' || ((scenario === 'blowout' || scenario === 'extras') && playChoice === 'performer'))
+  )
+}
+
 // Promotes the crowned "Game of the Night" (dayHighlights.js's
 // classifyGameCards, via useDayCardMeta) to the front of the slate — but
 // behind the favorite team's own game, which sortGames already floated to

@@ -515,5 +515,11 @@ process automatically.
   `SiteFooter.jsx` (the slate's "More Baseball" list) stops importing the shared
   `REPORT_PAGES` array from `src/lib/reportPages.js` — the guard against those two
   page lists silently drifting apart again.
+- `check-skeleton-ball-frames.mjs` — fails if `BoxScoreSkeleton.jsx`'s
+  `BALL_FRAME_COUNT`/`BALL_SPIN_LOOPS` stop matching the hardcoded frame-strip
+  width, `steps()` count, and `skel-ball-spin` keyframe fraction in the
+  `.skel__ballFrames` CSS rule — those three CSS values can't read the JS
+  constants directly (`steps()` needs a literal integer, not a `var()`), so
+  this is the guard against them drifting apart.
 - `vercel-ignore-build.sh` — Vercel's Ignored Build Step (skips a deploy when a push
   touched only docs/scripts/workflow files). See `docs/development.md`.

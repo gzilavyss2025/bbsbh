@@ -4324,53 +4324,46 @@ body {
   color: var(--text-body);
 }
 
-/* Career Matchups (TeamInfo.jsx's CareerMatchups) — a plain scorebook-style
-   stat list, deliberately not FormerTeammates' headshot cards (this is a line
-   off a stat sheet, not a story), riding the same .metriccard/.metriccard__body
-   shell. Each row wraps name-pair + stat line onto its own line at narrow
-   widths rather than truncating either. */
-.matchups__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small stat tables
+   (one per batting direction — "Braves batters vs Padres pitchers" and back),
+   deliberately not FormerTeammates' headshot cards (this is a line off a stat
+   sheet, not a story). Each table rides the shared .standings shell (see
+   .foulboard for the same reuse) rather than inventing new table chrome. */
+.matchuptable {
+  margin-top: var(--space-4);
 }
-.matchups__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 10px;
-  padding: 7px 0;
-  border-bottom: var(--bw-hair) solid var(--border-rule);
+.matchuptable:first-child {
+  margin-top: 0;
 }
-.matchups__row:last-child {
-  border-bottom: none;
+.matchuptable__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
-.matchups__names {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
+.matchuptable__table th.matchuptable__namecol,
+.matchuptable__table td.matchuptable__name {
+  text-align: left;
 }
-/* Scoped through the parent, same reason .umps__namerow .umps__name is —
-   outranks .plink's own font/color/text-transform: inherit reset, which
-   would otherwise win the same-specificity tie by source order. */
-.matchups__names .matchups__name {
-  font-size: var(--fs-small);
+.matchuptable__table td.matchuptable__name {
+  font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.matchups__vs {
-  font-size: var(--fs-caption);
+.matchuptable__table td.matchuptable__line {
+  font-variant-numeric: tabular-nums;
   color: var(--text-caption);
 }
-.matchups__line {
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-  white-space: nowrap;
+/* A batter in tonight's actual starting lineup facing the opposing club's
+   actual probable starter — the one row on this table that's about to play
+   out for real on the user's own scoresheet. Same highlighter-yellow "pay
+   attention" wash as .standings tr.foulboard__row--outlier, set per-<td> so
+   the row's own hairline borders (owned by each cell) stay unbroken. */
+.matchuptable__row--tonight td {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 
 /* ----------------------------------------------------------- defense diamond
@@ -10214,6 +10207,271 @@ body {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: var(--text-on-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   BOX SCORE SKELETON (src/components/BoxScoreSkeleton.jsx) — a
+   PastGameFlipCard's back face while a revealed game's feed/win-probability
+   are still in flight. Reuses .flipback's own chrome (border, padding,
+   shadow — see `.skel` sharing that class in the component) so the
+   placeholder matches the eventual card's footprint in the common case.
+   .skel__perfcard below adds the one block whose presence varies per game
+   (a PerformerCard, when showsPerformerCard(cardMeta) says GameResultFace
+   will show one) — best-effort, not a guarantee: cardMetaByGamePk
+   (useDayCardMeta.js) needs THIS game's own signals plus every other game's,
+   so it can populate no earlier than this card's own fetch resolves, and
+   often lands just after — in which case GameResultFace itself mounts
+   without the block first and grows into it on cardMeta's next render, same
+   as it already could before this component existed. This placeholder only
+   narrows that window; closing it fully would mean reworking
+   useDayCardMeta's per-game vs. day-wide timing, out of scope here. Grayscale
+   blocks shaped like that layout pulse together as ONE unit (a single
+   animation on
+   .skel__body, not per-bar — matches the plain "everything fades together"
+   skeleton idiom rather than a busier staggered shimmer), plus a small
+   baseball rolling back and forth across the middle of the card on its own
+   z-index, layered above the pulsing bars rather than confined to a strip
+   of its own — a wink at "still rounding the bases" rather than a literal
+   progress bar.
+   --------------------------------------------------------------------------- */
+.skel__body {
+  position: relative; /* the containing block .skel__ball positions itself against */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: skel-pulse 1.5s ease-in-out infinite;
+}
+.skel__bar,
+.skel__circle {
+  display: inline-block;
+  background: var(--rule-soft);
+  border-radius: var(--radius-xs);
+}
+.skel__circle {
+  border-radius: var(--radius-pill);
+}
+.skel__topRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.skel__bar--btn {
+  width: 74px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+}
+.skel__bar--pill {
+  width: 96px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+}
+.skel__linescore {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.skel__team {
+  display: grid;
+  grid-template-columns: 24px 1fr repeat(3, 20px);
+  align-items: center;
+  column-gap: 8px;
+}
+.skel__circle--logo {
+  width: 24px;
+  height: 24px;
+}
+.skel__bar--team {
+  height: 14px;
+  width: 70%;
+}
+.skel__bar--num {
+  height: 14px;
+  width: 100%;
+}
+.skel__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.skel__bar--decision {
+  height: 12px;
+  width: 60%;
+}
+/* Only rendered when showsPerformerCard(cardMeta) says the real
+   GameResultFace will stack a PerformerCard block here (see
+   BoxScoreSkeleton.jsx) — mirrors .playercard's own row shape (headshot +
+   name/team/stat lines) so reserving this placeholder doesn't itself
+   introduce the layout jump it exists to prevent. */
+.skel__perfcard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+.skel__bar--perfShot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+.skel__perfLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.skel__bar--perfName {
+  height: 14px;
+  width: 55%;
+}
+.skel__bar--perfTeam {
+  height: 12px;
+  width: 35%;
+}
+.skel__bar--perfStat {
+  height: 12px;
+  width: 70%;
+}
+.skel__potg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 4px;
+}
+.skel__circle--shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+.skel__potgLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+.skel__bar--short {
+  height: 12px;
+  width: 40%;
+}
+.skel__bar--long {
+  height: 12px;
+  width: 90%;
+}
+@keyframes skel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+/* .skel__ball only carries POSITION (the roll across the card, `left` +
+   vertical centering) — the SPIN is a separate animation one layer down on
+   .skel__ballFrames (see BoxScoreSkeleton.jsx's header comment for why a
+   flat `rotate()` on this outer element would be the wrong motion: it'd spin
+   the ball around the axis pointing AT the viewer, like a coin, not the
+   axis a ball rolling along this path actually turns on). Splitting position
+   from spin onto two elements is what lets both run as independent
+   `infinite alternate` CSS animations that nonetheless stay in lockstep —
+   same duration/direction, same clock. Positioned against .skel__body (see
+   that rule's `position: relative`) rather than confined to its own bottom
+   strip, so it rolls across the middle of the card, over the top of the
+   pulsing bars — `z-index` lifts it above them, and the drop-shadow is what
+   sells "floating over," not "sitting flush with." */
+.skel__ball {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--skel-ball-size);
+  height: var(--skel-ball-size);
+  transform: translateY(-50%);
+  z-index: 2;
+  filter: drop-shadow(var(--shadow-drop-raised));
+  animation: skel-roll 2.4s ease-in-out infinite alternate;
+}
+.skel__ballBody {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.skel__ballBody circle {
+  /* fill comes from the SkelBall-defined radialGradient (its highlight/
+     shadow stops are the two rules below) — not set here. */
+  stroke: var(--rule);
+  stroke-width: 3;
+}
+.skel__ballShadeLight {
+  stop-color: var(--paper-3);
+}
+.skel__ballShadeDark {
+  stop-color: var(--rule-soft);
+}
+/* The circular "window": clips the wide frame-strip SVG down to one frame's
+   worth, same idea as a classic sprite-sheet animation's viewport. Circular
+   (not square) so a frame's seam artwork — which is only guaranteed correct
+   inside the ball's own silhouette — can never paint past the ball's edge. */
+.skel__ballWindow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+/* BALL_TOTAL_STEPS slots (BoxScoreSkeleton.jsx — BALL_FRAME_COUNT unique
+   rotation snapshots repeated BALL_SPIN_LOOPS times via <use>, not
+   regenerated) laid out side by side and stepped through via `steps()`, the
+   standard technique for a sprite-sheet rotation — see that file's header
+   comment for why the rotation itself needs to be precomputed 3D frames
+   rather than a flat `rotate()`. 3600% wide = 36 frame-widths (12 frames ×
+   3 loops); the endpoint travels 35 of those 36 steps (the 36th IS the
+   starting frame again, so stopping short of it avoids a same-frame
+   double-step at the loop boundary). Every number here is hardcoded rather
+   than threaded in from JS since `steps()` needs a literal integer — update
+   all three together (JS's BALL_FRAME_COUNT/BALL_SPIN_LOOPS) if any changes. */
+.skel__ballFrames {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3600%;
+  height: 100%;
+  animation: skel-ball-spin 2.4s steps(35) infinite alternate;
+}
+.skel__ballSeam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.skel__ballStitch {
+  stroke: var(--clay);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+@keyframes skel-roll {
+  from { left: 0; }
+  to   { left: calc(100% - var(--skel-ball-size)); }
+}
+@keyframes skel-ball-spin {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-35 / 36 * 100%)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel__body {
+    animation: none;
+    opacity: 0.8;
+  }
+  .skel__ball {
+    animation: none;
+    left: calc(50% - var(--skel-ball-size) / 2);
+  }
+  .skel__ballFrames {
+    animation: none;
+    transform: translateX(0);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -18042,6 +18300,18 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--accent-primary);
 }
+/* Single-Game Highs' "View more" toggle, revealing the rest of the list past
+   GAME_HIGHS_LIMIT — same convention as .umpage__showall above. */
+.foulboard__viewmore {
+  display: block;
+  margin: 10px auto 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
 
 .umpage__filter {
   display: flex;
@@ -20329,7 +20599,7 @@ body {
 /* ------------------------------------------------------------- foul tracker
    FoulTrackerPage.jsx — season foul-ball boards. Every board is a .metriccard
    wearing the same navy/gold SectionMasthead the rest of the app's card
-   sections use (Lineup Strength, Bullpen Tonight, batting order, …) —
+   sections use (Lineup Strength, Bullpen Health, batting order, …) —
    .foulboard-block only adds page-specific tweaks on top of the shared
    .metriccard/.metricbar rules. Reuses .standings/.ledger-wrap ledger styling
    (same right-aligned mono figures, left-aligned .team cell) for the tables;
@@ -20366,6 +20636,66 @@ body {
     flex: 1 1 0;
     min-width: 0;
   }
+}
+/* Baseline sentence above the Most/Fewest split — same "state the average
+   before the ranked outliers" idea as .foulavg__lede, reused as a one-liner
+   scoped to this one card rather than the whole page. No caps-exempt override
+   (see the ALL-CAPS INVARIANT block up top): like .foulavg__lede, this reads
+   as shouted-caps scorebook copy rather than natural-case prose, consistent
+   with every other number-bearing sentence on this page. */
+.foulboard__whiffavg {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+.foulboard__whiffavg b {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Fouls per whiff's Most/Fewest split — one card, two columns. Stacked below
+   740px (same breakpoint as .foultracker__pair above); side by side on
+   desktop with a hairline divider between them, since these are two views of
+   one stat rather than two unrelated boards sharing a row. Deliberately NOT
+   `.ledger-wrap` for the inner scroll container — `.foulboard-block
+   .ledger-wrap` below bleeds a ledger-wrap edge-to-edge under the card's own
+   padding, which is right for a single full-width table but would blow a
+   half-width column out past its own column. */
+.foulboard__whiffsplit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+@media (min-width: 740px) {
+  .foulboard__whiffsplit {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .foulboard__whiffsplit > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .foulboard__whiffcol + .foulboard__whiffcol {
+    padding-left: var(--space-4);
+    border-left: var(--bw-hair) solid var(--border-rule);
+  }
+}
+.foulboard__whiffcol-heading {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.foulboard__whiffcol-hint {
+  font-weight: var(--w-regular);
+}
+.foulboard__whiffcol-scroll {
+  overflow-x: auto;
 }
 .foulboard-block .ledger-wrap {
   margin: 0 calc(-1 * var(--space-4));
@@ -20407,21 +20737,20 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
-/* Kraft-brown variant — reuses the kraft-tape hatch color (--seal-hatch) as a
-   pure decorative fill here, unrelated to that color's spoiler-cover meaning
-   elsewhere in the app (see ADR-0004/CONTEXT.md's Seal) — a pitch family
-   isn't a sealed value, it just borrows the same paper-scorebook brown. */
-.foulboard__grouprow--kraft th {
-  /* Darkened past the plain --seal-hatch kraft tone so white text clears
-     WCAG AA (4.5:1) — the plain hatch color alone only holds ~3.7:1. */
-  background: color-mix(in srgb, var(--seal-hatch) 75%, var(--ink-0) 25%);
+/* Navy variant — replaced an earlier kraft-tape-brown fill that sat directly
+   under the card's own navy/gold masthead border and clashed with the gold.
+   `--accent-primary` (navy) is already a guarded text-on-ink pairing (see
+   check-contrast.mjs), and reads as a continuation of the masthead's own navy
+   rather than a competing accent. */
+.foulboard__grouprow--navy th {
+  background: var(--accent-primary);
   color: var(--text-on-ink);
   border-top: none;
 }
-.foulboard__grouprow--kraft:first-child th {
+.foulboard__grouprow--navy:first-child th {
   border-top: none;
 }
-.foulboard__grouprow--kraft:not(:first-child) th {
+.foulboard__grouprow--navy:not(:first-child) th {
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 /* The repeated Pitch/Foul%/Pitches column header under each pitch-family
@@ -20657,16 +20986,27 @@ body {
    FoulTrackerPage.jsx) — both teams' score, the inning, the base/out state
    ENTERING the at-bat, who was on the mound, and the result. Styled as a
    quiet inset panel (not a broadcast-dark graphic) to stay inside the paper-
-   scorebook palette rather than importing a foreign TV-graphic look. */
+   scorebook palette rather than importing a foreign TV-graphic look. Placed
+   at FoulStoryBoard's `.storypa-row` grid's own `scorebug` area, below the
+   name/fouls/name top line — kept tight (small padding/gap) to keep the
+   row's total height close to the headshots'. On desktop it's capped to
+   max-width and centered (`justify-self`) rather than stretched — a grid
+   item stretches to fill its column by default, and with the batter's "vs
+   {pitcher}" line gone (see .sgh-sub) there was no longer a reason for it to
+   run the full width between the photos; a phone reverts both (see the
+   media query below) since it's the only place the score/situation shows up
+   there. */
 .scorebug {
-  margin-top: 8px;
+  grid-area: scorebug;
+  justify-self: center;
+  max-width: 320px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
-  padding: 8px 10px;
+  padding: 5px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 .scorebug__score {
   display: flex;
@@ -20710,8 +21050,8 @@ body {
 .scorebug__situation {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-top: 8px;
+  gap: 6px;
+  padding-top: 5px;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .scorebug__outs {
@@ -20730,19 +21070,8 @@ body {
   background: var(--clay);
   border-color: var(--clay-deep);
 }
-.scorebug__pitcher {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .scorebug__result {
-  align-self: flex-start;
-  margin-top: 2px;
+  flex: none;
   font-family: var(--font-display);
   font-weight: var(--w-bold);
   font-size: var(--fs-caption);
@@ -20760,6 +21089,26 @@ body {
   background: var(--clay-soft);
   color: var(--clay-deep);
   border-color: color-mix(in srgb, var(--clay) 35%, var(--border-rule));
+}
+/* Fills the white space the diamond/out-dots/result pill leave to their right
+   with the play's own feed prose — natural sentence case, so it needs the
+   caps-exempt override (see the ALL-CAPS INVARIANT block near the top of this
+   file) same as play-by-play's .pbp__desc. The leading "Pitch N:" stays bold
+   (see the <b> in PaScorebug) but inherits this same natural case. Truncated
+   to ONE line (ellipsis, not wrapped) — this now lives in a narrower column
+   than a full-width card, and a wrapped second line would blow the height
+   budget the whole row is built to stay within (see .scorebug above). */
+#root .scorebug__prose {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  color: var(--text-body);
+  text-transform: none; /* caps-exempt: at-bat prose reads as a natural sentence */
 }
 
 /* Single-Game Highs — every entry gets the headshot treatment (it's telling
@@ -20813,22 +21162,63 @@ body {
   width: var(--shot-lg-w);
   height: var(--shot-lg-h);
 }
-.sgh-body {
-  flex: 1;
-  min-width: 0;
+/* Most-Fouls-In-A-PA's row (.storypa-row) — a 3x2 grid, batter/pitcher
+   headshots each spanning BOTH rows (the same grid-area name repeated on
+   both template rows below) so they read tall as ever, while the middle 1fr
+   column stacks a name/fouls/name top line over the scorebug — which now
+   spans that SAME column, the full width between the two photos. */
+.sgh-row.storypa-row {
+  display: grid;
+  /* minmax(0, 1fr), not a bare 1fr — a bare 1fr's automatic min-width:auto
+     refuses to shrink below the topline/scorebug's own content width, which
+     on a narrow phone forced the whole grid wider than the card and clipped
+     the pitcher headshot clean off (.sgh-list's overflow:hidden hid the
+     overflow instead of showing a scrollbar). minmax(0, …) lets the column
+     actually shrink, so the ellipsis/wrap rules already on its children
+     (sgh-name, sgh-sub, scorebug__prose, …) can do their job. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'battershot topline    pitchershot'
+    'battershot scorebug   pitchershot';
+  column-gap: 10px;
+  row-gap: 6px;
 }
-/* Most-Fouls-In-A-PA's stat value (.sgh-valstack) centers against the
-   name+pitcher-line pair only (.sgh-namewrap), not the full row height —
-   without this wrapper it centered against the row's headshot instead and
-   rode noticeably above the "vs {pitcher}" line beneath the name. */
-.sgh-header {
+.storypa-row__battershot {
+  grid-area: battershot;
+  align-self: center;
+}
+.storypa-row__pitchershot {
+  grid-area: pitchershot;
+  align-self: center;
+}
+.storypa-row__topline {
+  grid-area: topline;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 10px;
 }
-.sgh-namewrap {
-  flex: 1;
+/* Equal flex-grow on BOTH name blocks means they always end up the same
+   width, whatever either name's length — which is what keeps
+   .storypa-row__val genuinely centered rather than merely sitting next to
+   the batter's name. */
+.storypa-row__who {
+  flex: 1 1 0;
   min-width: 0;
+}
+.storypa-row__who--pitcher {
+  text-align: right;
+}
+.storypa-row__who--pitcher .sgh-top {
+  justify-content: flex-end;
+}
+/* One line, not the older stacked number-over-label — see the <span> pairing
+   in FoulStoryBoard (no <br>/block wrapper between them). */
+.storypa-row__val {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
 }
 .sgh-top {
   display: flex;
@@ -20848,14 +21238,6 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.sgh-valstack {
-  margin-left: auto;
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-}
 .sgh-val {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -20872,16 +21254,64 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
+/* Most-Fouls-In-A-PA's "vs {pitcher}" line — hidden by DEFAULT (desktop),
+   since the pitcher's own name/team now sits next to his headshot on the
+   right (.storypa-row__who--pitcher) and repeating him here read as
+   redundant. Restored on a phone below, where that right-hand name is the
+   one that gets dropped instead (see the media query) — there, "vs {pitcher}"
+   is the only place his name still appears. */
 .sgh-sub {
+  display: none;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-caption);
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Ellipsis truncation needs overflow:hidden, but that also clips .plink's
+     hover/focus underline (text-underline-offset: 3px, see index.css's .plink
+     rule) since the line box has no room below the text baseline for it —
+     the underline was computing as applied but rendering invisible. This
+     padding gives it that room back without affecting the horizontal
+     ellipsis clipping. */
+  padding-bottom: 6px;
+}
+/* Most-Fouls-In-A-PA's row on a phone: both headshots sit in their own auto
+   grid columns now (.storypa-row), so unlike the row's older flex layout they
+   don't eat into the middle column's text space — but that column still has
+   to fit two names AND the fouls count on one line, so it steps both
+   headshots down to the roster-card size for extra room and lets the score
+   line wrap if a longer team/score combo still doesn't fit. Below this width
+   the pitcher's name/team drops (his headshot still carries him) in favor of
+   restoring "vs {pitcher}" under the batter's name instead — with nothing on
+   its right, .storypa-row__who--batter's own flex:1 growth pushes the fouls
+   count flush to the row's right edge for free, no separate rule needed. */
+@media (max-width: 600px) {
+  .shot.sgh-shot.sgh-shot--xl.storypa-row__battershot,
+  .shot.sgh-shot.sgh-shot--xl.storypa-row__pitchershot {
+    width: var(--shot-md-w);
+    height: var(--shot-md-h);
+  }
+  .scorebug__score {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+  .sgh-sub {
+    display: block;
+  }
+  .storypa-row__who--pitcher {
+    display: none;
+  }
+  .scorebug {
+    justify-self: stretch;
+    max-width: none;
+  }
 }
 
 /* Single-Game Highs row — a 2x3 grid (shot/who/matchup on top, a full-width
    stat-tile strip beneath) rather than .sgh-row's flex layout, so it gets its
-   own modifier instead of reusing .sgh-top/.sgh-valstack/.sgh-sub. */
+   own modifier instead of reusing .sgh-top/.storypa-row__val/.sgh-sub. */
 .gamehigh-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -21080,6 +21510,9 @@ button.gamehigh-matchup:active {
 }
 .metricbar__title {
   margin: 0; /* also rendered as an <h3> on the plain page sections — kill UA margin */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: var(--w-bold);
@@ -21087,6 +21520,24 @@ button.gamehigh-matchup:active {
   line-height: var(--lh-solid);
   text-transform: uppercase;
   color: var(--text-on-ink);
+}
+/* The batting-order / opposing-starter / opposing-defense mastheads' club
+   mark (SectionMasthead's `logo` prop) — a decorative flourish, never the
+   sole identifier (the title text sits right next to it), so the image
+   itself carries no alt text. */
+.metricbar__logo {
+  flex: 0 0 auto;
+}
+/* Forced to a solid white silhouette (same `filter` trick as .teamlogo--bw's
+   grayscale) rather than the CDN's own multicolor mark, so most clubs' logo
+   reads as a clean white lockup against the navy bar. NOT applied for the
+   ids in teams.js's MASTHEAD_LOGO_NATURAL_COLOR — a mark whose OWN design
+   already carries a light/white ring or outline (Cubs, Astros, Blue Jays,
+   Brewers) flattens into an unreadable solid blob under this filter, since
+   the filter can't tell that ring apart from the shape it encloses once both
+   become the same color; those four read fine in their real colors as-is. */
+.metricbar__logo--white {
+  filter: brightness(0) invert(1);
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
    masthead as the header of a real card. The CONTAINER owns the border / radius /
@@ -21141,7 +21592,7 @@ button.gamehigh-matchup:active {
 
 /* ------------------------------------------------------- season series strip
    The lineup page's "other meetings this season" widget — SeasonSeriesStrip.jsx.
-   A .metriccard like Lineup Strength / Bullpen Tonight above, so it wears the
+   A .metriccard like Lineup Strength / Bullpen Health above, so it wears the
    same navy/gold masthead; the body swaps the usual stacked layout for a
    horizontally-scrolling row of game cards with always-on square nav buttons
    (this app doesn't use circular chrome elsewhere, so the buttons stay square

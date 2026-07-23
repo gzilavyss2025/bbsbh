@@ -84,7 +84,7 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
 
   return (
     <section className="metriccard penboard">
-      <SectionMasthead title="Bullpen tonight">
+      <SectionMasthead title="Bullpen health">
         <InfoPopover label="How bullpen availability is judged">
           Rested vs. worked from recent appearances — a workload signal, not a
           talent grade. Managers overrule it nightly.
