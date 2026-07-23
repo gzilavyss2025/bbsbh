@@ -4364,11 +4364,15 @@ body {
   color: var(--text-body);
 }
 
-/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small stat tables
-   (one per batting direction — "Braves batters vs Padres pitchers" and back),
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small lists (one per
+   batting direction — "Braves batters vs Padres pitchers" and back),
    deliberately not FormerTeammates' headshot cards (this is a line off a stat
-   sheet, not a story). Each table rides the shared .standings shell (see
-   .foulboard for the same reuse) rather than inventing new table chrome. */
+   sheet, not a story). Grouped one heading per opposing pitcher, with the
+   batters he's faced listed beneath, each as a batter→line row. This replaced
+   an earlier three-column batter/pitcher/line table that repeated the pitcher
+   on every row and overflowed a phone's width (horizontal swipe to read the
+   line) — collapsing the pitcher to a group heading leaves a two-part row that
+   fits any width and reads cleaner on desktop too. */
 .matchuptable {
   margin-top: var(--space-4);
 }
@@ -4384,25 +4388,65 @@ body {
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.matchuptable__table th.matchuptable__namecol,
-.matchuptable__table td.matchuptable__name {
-  text-align: left;
+.matchuplist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
-.matchuptable__table td.matchuptable__name {
+/* One opposing pitcher and the batters who've faced him. */
+.matchupgroup__pitcher {
+  margin: 0 0 var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* "vs" prefix ahead of the pitcher's name — a quiet function word, kept small
+   and uppercase so the eye lands on the name, not the label. */
+.matchupgroup__vs {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.matchupgroup__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Batter name on the left, career line on the right; the line is allowed to
+   wrap under a long name (margin-left:auto keeps it right-aligned when it
+   does) so nothing ever forces the row wider than the card. */
+.matchupgroup__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.matchupgroup__batter {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.matchuptable__table td.matchuptable__line {
+.matchupgroup__line {
+  margin-left: auto;
   font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
   color: var(--text-caption);
+  text-align: right;
 }
 /* A batter in tonight's actual starting lineup facing the opposing club's
-   actual probable starter — the one row on this table that's about to play
-   out for real on the user's own scoresheet. Same highlighter-yellow "pay
-   attention" wash as .standings tr.foulboard__row--outlier, set per-<td> so
-   the row's own hairline borders (owned by each cell) stay unbroken. */
-.matchuptable__row--tonight td {
+   actual probable starter — the one row on this list that's about to play out
+   for real on the user's own scoresheet. Same highlighter-yellow "pay
+   attention" wash as .standings tr.foulboard__row--outlier. */
+.matchupgroup__row--tonight {
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 

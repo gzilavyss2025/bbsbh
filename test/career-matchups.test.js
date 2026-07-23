@@ -4,7 +4,7 @@
 // a thin symmetric-key lookup and isn't covered here.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { sortByPitcher, matchupLine } from '../src/api/careerMatchups.js'
+import { sortByPitcher, groupByPitcher, matchupLine } from '../src/api/careerMatchups.js'
 
 function row({ batterId, pitcherId, pa }) {
   return {
@@ -62,6 +62,35 @@ test('sortByPitcher ranks batters within a pitcher group by PA, most first', () 
 
 test('sortByPitcher on an empty list returns an empty list', () => {
   assert.deepEqual(sortByPitcher([]), [])
+})
+
+test('groupByPitcher collapses adjacent same-pitcher rows into one group each', () => {
+  const rows = sortByPitcher([
+    row({ batterId: 1, pitcherId: 10, pa: 3 }),
+    row({ batterId: 2, pitcherId: 20, pa: 9 }),
+    row({ batterId: 3, pitcherId: 10, pa: 7 }),
+  ])
+  const groups = groupByPitcher(rows)
+  // Pitcher 10 (total PA 10 > pitcher 20's 9) leads; his two batters share one
+  // group, ordered by PA (batter 3's 7 ahead of batter 1's 3).
+  assert.deepEqual(
+    groups.map((g) => ({ pitcher: g.pitcher.id, batters: g.rows.map((r) => r.batter.id) })),
+    [
+      { pitcher: 10, batters: [3, 1] },
+      { pitcher: 20, batters: [2] },
+    ],
+  )
+})
+
+test('groupByPitcher carries the pitcher object and every row through unchanged', () => {
+  const rows = [row({ batterId: 1, pitcherId: 10, pa: 4 })]
+  const [group] = groupByPitcher(rows)
+  assert.equal(group.pitcher, rows[0].pitcher)
+  assert.deepEqual(group.rows, rows)
+})
+
+test('groupByPitcher on an empty list returns an empty list', () => {
+  assert.deepEqual(groupByPitcher([]), [])
 })
 
 test('matchupLine renders the bare AB/H line with no extras or levels', () => {
