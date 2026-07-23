@@ -35,13 +35,30 @@ function localLogoUrl(teamId, treatment) {
 // (every path recolored to the club's one real brand color straight off the
 // official multicolor logo) rather than a photographed/cropped PNG like every
 // other Alternate treatment here.
-const ALT_LOGO_SVG = new Set([133]) // Athletics
+const ALT_LOGO_SVG = new Set([
+  133, // Athletics
+  118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
+])
 
 // Per-team, per-treatment tweak to the tile's edge-bleed scale (applied on
 // top of the 1.32 default every tinted tile gets) — for treatments other than
 // Main, which has its own scale on MAIN_OVERRIDES.
 const TREATMENT_SCALE = {
   139: { alternate: 1.3 }, // Rays — mark reads small against the tint at 1.32 alone
+  113: { 'city-connect': 0.75 }, // Reds — the "C" mark already touches all four
+  // edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink
+  // down so the whole mark stays inside the tile.
+  117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
+  118: { alternate: 0.85 }, // Royals — same KC mark + scale as Main's own override
+}
+
+// A proposed replacement for a team's Primary swatch, tried out on this page
+// only — teams.js's TEAM_COLOR_PAIRS/TEAM_COLORS (the real app-wide source
+// every other surface reads) is untouched. Applied to BOTH the Main triad
+// (mainColorTriad below) and ALT_COLORS' own Primary entry, so the two tiles
+// can't drift onto two different "Primary" hexes.
+const PRIMARY_OVERRIDE = {
+  115: '#33006F', // Rockies — proposed purple
 }
 
 // The three official colors for a team's Main treatment are already known
@@ -52,7 +69,10 @@ function mainColorTriad(teamId) {
   const labels = ['Primary', 'Secondary', 'Third']
   return teamColorSwatches(teamId)
     .slice(0, 3)
-    .map((s, i) => ({ label: labels[i], hex: s.hex }))
+    .map((s, i) => ({
+      label: labels[i],
+      hex: i === 0 && PRIMARY_OVERRIDE[teamId] ? PRIMARY_OVERRIDE[teamId] : s.hex,
+    }))
 }
 
 // A first pass at every club's Main tile as it'd look with a colored
@@ -73,7 +93,13 @@ const MAIN_OVERRIDES = {
   112: { bg: 'secondary', scale: 0.9 }, // Cubs
   113: { bg: 'secondary' }, // Reds
   114: { bg: 'primary', recolor: true }, // Guardians — navy border -> white
-  115: { bg: 'primary' }, // Rockies
+  // Rockies — white with a subtle black pinstripe (colorlab__logobox--pinstripe
+  // below) to match their home pinstripe jersey, instead of a flat brand-color
+  // tint like every other override here. `recolor` here isn't a color swap —
+  // it points at a local copy of the mlbstatic mark with the black rim thinned
+  // (a matching-color stroke on the silver inset paths, same weld technique as
+  // the Athletics Alternate seam fix) so it doesn't read too heavy against white.
+  115: { pinstripe: true, recolor: true },
   116: { bg: 'primary', recolor: true }, // Tigers — navy -> white
   117: { bg: 'secondary', scale: 0.9 }, // Astros
   118: { bg: 'primary', recolor: true, scale: 0.85 }, // Royals — navy -> white
@@ -114,6 +140,26 @@ function mainOverrideLogoUrl(teamId) {
 // the one used as the tile's actual background. Keyed by teamId; a team
 // with no entry yet renders a placeholder swatch, same as a missing logo.
 const ALT_COLORS = {
+  // Rockies — the outline-only mark's background is the proposed purple
+  // (PRIMARY_OVERRIDE), same value Main's own Primary swatch now shows.
+  115: [{ label: 'Primary', hex: PRIMARY_OVERRIDE[115], bg: true }],
+  // Royals — the same recolored-white KC mark as Main (ALT_LOGO_SVG), but on
+  // a baby-blue background of its own — Main keeps its real Primary navy.
+  118: [{ label: 'Baby Blue', hex: '#6DADF4', bg: true }],
+  // Diamondbacks — sampled off the snake-head mark itself (a transparent
+  // PNG); both colors are exact matches for Main's own Primary/Third.
+  109: [
+    { label: 'Primary', hex: '#A71930', bg: true },
+    { label: 'Third', hex: '#30CED8' },
+  ],
+  112: [
+    { label: 'Primary', hex: '#0E3386', bg: true },
+    { label: 'Secondary', hex: '#CC3433' },
+  ], // Cubs — same pair as Main
+  110: [
+    { label: 'Primary', hex: '#DF4601' },
+    { label: 'Secondary', hex: '#000000', bg: true },
+  ], // Orioles — same pair as Main, background is the Secondary
   111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox
   113: [
     { label: 'Primary', hex: '#C6011F', bg: true },
@@ -134,6 +180,10 @@ const ALT_COLORS = {
     { label: 'Secondary', hex: '#8FBCE6', bg: true },
     { label: 'Third', hex: '#F5D130' },
   ], // Rays — Main's own triad, background is Secondary (unchanged)
+  144: [
+    { label: 'Primary', hex: '#CE1141', bg: true },
+    { label: 'Secondary', hex: '#13274F' },
+  ], // Braves — script wordmark, same pair as Main
   146: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Marlins
   147: [{ label: 'Background', hex: '#0C2340', bg: true }], // Yankees
   158: [{ label: 'Background', hex: '#6CACE4', bg: true }], // Brewers
@@ -159,6 +209,19 @@ const CITY_CONNECT_COLORS = {
     { label: 'Secondary', hex: '#4F4FC9' },
   ], // Rockies
   118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
+  111: [{ label: 'Primary', hex: '#5A8D84', bg: true }], // Red Sox
+  117: [
+    { label: 'Primary', hex: '#0F2948' },
+    { label: 'Secondary', hex: '#CEC8B2', bg: true },
+    { label: 'Third', hex: '#FC7A1E' },
+  ], // Astros
+  // Athletics — the Sacramento patch's own solid field IS Main's Primary
+  // (an unambiguous bg pick, unlike a transparent PNG), Secondary is the
+  // bridge/lettering detail — same pair as Main.
+  133: [
+    { label: 'Primary', hex: '#003831', bg: true },
+    { label: 'Secondary', hex: '#EFB21E' },
+  ],
   139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
   158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
@@ -187,22 +250,36 @@ function colorsFor(teamId, treatmentKey) {
   return colors ? withMainRoleLabels(teamId, colors) : []
 }
 
+// Hand-tuned corrections where a jersey's own catalog naming doesn't match
+// which logo it's actually paired with on the field — classifyUniformAsset's
+// naming-convention guess is right for the other ~29 clubs but not every
+// exception. Keyed by uniformAssetCode (stable within a season, unlike the
+// label text) so a wording tweak next season can't silently mis-target this.
+const JERSEY_TREATMENT_OVERRIDES = {
+  '112_jersey_4_2026': 'city-connect', // Cubs Alt 2 Baby Blue — worn with the City Connect mark, not the plain Alternate "C"
+}
+
 // Which jersey(s) in the uniforms CATALOG (as opposed to a single game's
 // worn assignment) correspond to a given tile — the cross-reference the
 // team-color-lab page exists to answer. Every club's catalog jersey label
 // self-identifies as Home/Away/Road, "Alt N …", or "City Connect …"
 // (verified against a live 2026 pull for all 30 clubs — classifyUniformAsset),
 // so this needs no per-team hand-authoring like ALT_COLORS/CITY_CONNECT_COLORS
-// above; a new/renamed jersey in a future season's catalog is picked up
-// automatically. `null` means the catalog hasn't loaded yet (still fetching
-// or MLB-only endpoint miss); an empty array is a loaded catalog with no
-// jersey in that bucket.
+// above beyond the rare JERSEY_TREATMENT_OVERRIDES exception; a new/renamed
+// jersey in a future season's catalog is otherwise picked up automatically.
+// `null` means the catalog hasn't loaded yet (still fetching or MLB-only
+// endpoint miss); an empty array is a loaded catalog with no jersey in that
+// bucket.
 function jerseyMatchesFor(catalog, teamId, treatmentKey) {
   const assets = catalog[teamId]
   if (!assets) return null
   const clubName = teamClubName(teamId)
   return assets
-    .filter((a) => a.piece === 'J' && classifyUniformAsset(a.text, clubName) === treatmentKey)
+    .filter((a) => {
+      if (a.piece !== 'J') return false
+      const treatment = JERSEY_TREATMENT_OVERRIDES[a.code] ?? classifyUniformAsset(a.text, clubName)
+      return treatment === treatmentKey
+    })
     .map((a) => jerseyLabel(a.text, clubName))
 }
 
@@ -282,9 +359,11 @@ function TreatmentBox({ teamId, name, treatment, label, catalog }) {
   // (MAIN_OVERRIDES names which); Alternate/City Connect flag whichever of
   // their user-supplied swatches is the background directly (see ALT_COLORS/
   // CITY_CONNECT_COLORS' `bg: true`).
-  const activeBgIndex = override
-    ? BG_ROLE_INDEX[override.bg]
-    : colors.findIndex((c) => c?.bg)
+  const activeBgIndex = override?.pinstripe
+    ? -1 // a hand-styled background (see below), not one of the three brand swatches
+    : override
+      ? BG_ROLE_INDEX[override.bg]
+      : colors.findIndex((c) => c?.bg)
 
   const tint = activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined
   const treatmentScale = override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
@@ -295,12 +374,13 @@ function TreatmentBox({ teamId, name, treatment, label, catalog }) {
           '--scale': 1.32 * treatmentScale,
         }
       : undefined
+  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${override?.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`
 
   return (
     <div className="colorlab__treatment">
       <span className="colorlab__treatmentlabel">{label}</span>
       <div className="colorlab__treatmentbox">
-        <div className="colorlab__logobox colorlab__logobox--gloss" style={logoboxStyle}>
+        <div className={logoboxClass} style={logoboxStyle}>
           <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />
         </div>
         <div className="colorlab__swatchrow">
