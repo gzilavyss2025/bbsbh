@@ -14247,6 +14247,163 @@ body {
   font-size: var(--fs-caption);
 }
 
+/* The club's Main "logo card" in the team-page hero — its mark on the curated
+   tinted tile (TeamTreatmentMark treatment="main"), same framed/overscaled/
+   glossy recipe as the slate card's .gamecard__logobox and the off-day tile.
+   Fills the header grid's 64px logo column. */
+.team-hub__logobox {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.team-hub__logobox.team-hub__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+.team-hub__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.team-hub__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.team-hub__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-display-lg);
+}
+
+/* ------------------------------------------------- logo & jersey combinations
+   A horizontal, touch-draggable strip on the team page — one card per catalog
+   jersey (its logo treatment tile over the jersey's name, the club's record in
+   games it wore it below). Native overflow-x scroll gives touch/trackpad
+   panning; useDragScroll (JerseyCombos.jsx) adds mouse click-drag. */
+.jerseystrip {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: 2px 0 var(--space-2);
+  /* Momentum panning shouldn't select the card text mid-drag. */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  touch-action: pan-x;
+}
+.jerseystrip:active {
+  cursor: grabbing;
+}
+.jerseycombo {
+  flex: 0 0 auto;
+  width: 104px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3) var(--space-2);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.jerseycombo__logobox {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.jerseycombo__logobox.jerseycombo__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+.jerseycombo__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.jerseycombo__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.jerseycombo__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-h3);
+}
+.jerseycombo__name {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-compact);
+  color: var(--text-heading);
+  /* Draggable strip: don't let a pointer-drag turn into a text selection. */
+  pointer-events: none;
+}
+.jerseycombo__rec {
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
 .sitebar__wordmark,
 .topbar__home svg,
 .topbar__home img,
