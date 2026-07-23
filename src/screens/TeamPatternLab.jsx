@@ -30,8 +30,9 @@ import { wpaLogoFor, wpaTilePlacements } from '../lib/wpaLogo.js'
 // Deliberately bigger than the real chart's own tile (WPA_LOGO_DEFAULTS.size)
 // — this grid is a magnified review surface, not a true-size preview; Team
 // Color Lab's per-treatment WPA box is the true-size one. The tile math
-// itself is the shared wpaTilePlacements, half-drop included, so a club's
-// pattern reads here the way it reads in a real chart.
+// itself is the shared wpaTilePlacements (row shift included, though it's off
+// by default), so a club's pattern reads here the way it reads in a real
+// chart.
 const LOGO_SIZE = 30
 const LOGO_PADDING = 6
 const LOGO_ROTATE = -14

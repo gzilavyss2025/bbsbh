@@ -546,8 +546,9 @@ function TreatmentWpaPreview({
 
   // Same tile math as the real chart, too (wpaTilePlacements) — the two
   // paddings are independent, and either can go negative to overlap adjacent
-  // tiles' logos on purpose. `images` is one placement per row the half-drop
-  // needs, so a shifted grid previews exactly as it ships.
+  // tiles' logos on purpose. `images` is one placement per row the tile
+  // needs — one by default, two once a row shift is dialed in — so a shifted
+  // grid previews exactly as it would ship.
   const { tileW, tileH, images } = wpaTilePlacements({ size, paddingX, paddingY, rowShift })
   const patternId = `wpaprev-pattern-${uid}`
   const recolorId = `wpaprev-recolor-${uid}`
@@ -607,7 +608,8 @@ function TreatmentWpaPreview({
             <input type="number" value={paddingY} onChange={(e) => onField('paddingY', Number(e.target.value))} />
           </label>
           {/* Percent of a tile's width each row steps sideways from the one
-              above it — 50 is the brickwork half-drop, 0 a plain grid. */}
+              above it — 0 (the shipped default) is a plain grid, 50 the
+              brickwork half-drop. */}
           <label>
             <span>Shift %</span>
             <input type="number" value={rowShift} onChange={(e) => onField('rowShift', Number(e.target.value))} />

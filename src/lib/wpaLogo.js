@@ -104,10 +104,12 @@ const LOGO_OFFSET_Y = 6
 const LOGO_PADDING_X = 4
 const LOGO_PADDING_Y = 4
 // How far each row is shifted sideways from the one above it, as a percent of
-// the tile's own width — the half-drop that makes this read as a proper
-// step-and-repeat rather than marks stacked in visible columns. 50 staggers
-// alternating rows like brickwork; 0 turns it off and restores a plain grid.
-const LOGO_ROW_SHIFT = 50
+// the tile's own width. 50 staggers alternating rows like brickwork; 0 (the
+// default — every club, every treatment) leaves a plain grid, whose columns
+// the pattern's own off-axis rotation already breaks up. Tunable per (team,
+// treatment) via WPA_LOGO_LAYOUT_OVERRIDES.rowShift, previewed as Team Color
+// Lab's "Shift %" field.
+const LOGO_ROW_SHIFT = 0
 
 // The global layout numbers above, exported as one object so a caller (Team
 // Color Lab's WPA logo lab, screens/TeamColorLab.jsx) can seed its per-team
@@ -151,12 +153,13 @@ export function wpaLogoLayout(teamId, treatment) {
 // `tileW`/`tileH` are the pattern's own width/height and `images` the logo
 // placements inside it, all in pattern-local (pre-rotation) coordinates.
 //
-// With no row shift that's the simple case — one logo, one row, tile height
-// is one row's height. A shift can't be expressed by moving that single
-// logo (every row would shift by the same amount and the grid would just
-// lean), so the tile grows to TWO rows tall and carries two placements: the
-// second inset sideways by `shift`. Repeating that 2-row tile is what
-// staggers every OTHER row, i.e. brickwork.
+// With no row shift — the default everywhere — that's the simple case: one
+// logo, one row, tile height is one row's height. When a (team, treatment)
+// does opt into a shift, it can't be expressed by moving that single logo
+// (every row would shift by the same amount and the grid would just lean), so
+// the tile grows to TWO rows tall and carries two placements: the second
+// inset sideways by `shift`. Repeating that 2-row tile is what staggers every
+// OTHER row, i.e. brickwork.
 //
 // The shifted row runs off the tile's right edge by design; the caller's
 // pattern sets `overflow: visible`, so the neighboring tile to the left

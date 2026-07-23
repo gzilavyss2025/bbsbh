@@ -112,10 +112,11 @@ test('a negative padding still leaves a positive tile to repeat', () => {
   assert.ok(tileH >= 1, `tile height stayed positive, got ${tileH}`)
 })
 
-test('layout falls back to the shared defaults, half-drop included', () => {
+test('layout falls back to the shared defaults, row shift off', () => {
   const layout = wpaLogoLayout(NATIONALS, 'main')
   assert.deepEqual(layout, WPA_LOGO_DEFAULTS)
-  assert.equal(layout.rowShift, 50, 'bands ship as a brickwork step-and-repeat')
+  assert.equal(layout.rowShift, 0, 'bands ship as a plain grid until a team opts in')
+  assert.equal(wpaTilePlacements(layout).images.length, 1, 'one logo per tile by default')
   // wpaTilePlacements fills in anything a caller leaves out, so a partial
   // override (say size alone) can't silently drop the shift or a padding.
   assert.deepEqual(wpaTilePlacements({ size: WPA_LOGO_DEFAULTS.size }), wpaTilePlacements(layout))

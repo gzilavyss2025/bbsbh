@@ -76,8 +76,8 @@ export const WPA_PLOT_SIZE = { width: PLOT_W, height: PLOT_H }
 
 // The step-and-repeat band texture — each tile a SOLID fill of that band's
 // own club color plus a copy of that club's own logo, the grid tilted and
-// half-dropped so it reads as wallpaper the eye stumbles into mid-pattern
-// rather than one anchored at the plot's corner. All of that geometry (the
+// offset so it reads as wallpaper the eye stumbles into mid-pattern rather
+// than one anchored at the plot's corner. All of that geometry (the
 // per-(team, treatment) layout table, its defaults, and the tile placement
 // math) lives in lib/wpaLogo.js alongside the art resolver, pure and
 // unit-tested (test/wpa-logo.test.js); the two dev labs that preview this
