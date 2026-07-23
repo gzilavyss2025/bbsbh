@@ -113,6 +113,15 @@ function mainOverrideLogoUrl(teamId) {
 // the one used as the tile's actual background. Keyed by teamId; a team
 // with no entry yet renders a placeholder swatch, same as a missing logo.
 const ALT_COLORS = {
+  // Diamondbacks — sampled off the snake-head mark itself (a transparent PNG,
+  // so no bg pick is obvious from the art the way it is for a filled patch);
+  // both colors happen to be exact matches for Main's own Primary/Third, so
+  // no bg:true here — the tile stays plain paper until a background is
+  // chosen by eye.
+  109: [
+    { label: 'Primary', hex: '#A71930' },
+    { label: 'Third', hex: '#30CED8' },
+  ],
   111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox
   113: [
     { label: 'Primary', hex: '#C6011F', bg: true },
@@ -158,6 +167,13 @@ const CITY_CONNECT_COLORS = {
     { label: 'Secondary', hex: '#4F4FC9' },
   ], // Rockies
   118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
+  // Athletics — the Sacramento patch's own solid field IS Main's Primary
+  // (an unambiguous bg pick, unlike a transparent PNG), Secondary is the
+  // bridge/lettering detail — same pair as Main.
+  133: [
+    { label: 'Primary', hex: '#003831', bg: true },
+    { label: 'Secondary', hex: '#EFB21E' },
+  ],
   139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
   158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
