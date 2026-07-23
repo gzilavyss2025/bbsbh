@@ -123,53 +123,26 @@ function colorsFor(teamId, treatmentKey) {
   return colors ? withMainRoleLabels(teamId, colors) : []
 }
 
-// Hand-tuned corrections where a jersey's own catalog naming doesn't match
-// which logo it's actually paired with on the field — classifyUniformAsset's
-// naming-convention guess is right for the other ~29 clubs but not every
-// exception. Keyed by uniformAssetCode (stable within a season, unlike the
-// label text) so a wording tweak next season can't silently mis-target this.
-const JERSEY_TREATMENT_OVERRIDES = {
-  '112_jersey_4_2026': 'alternate-2', // Cubs Alt 2 Baby Blue — worn with the Alternate 2 mark (moved off City Connect)
-  '112_jersey_2_2026': 'alternate', // Cubs Away Grey — worn with the Alternate mark, not plain Main
-  '133_jersey_4_2026': 'city-connect', // Athletics Alt 2 Yellow "Sacramento" — worn with the City Connect mark
-  '144_jersey_4_2026': 'main', // Braves Alt 2 Navy — worn with the plain Main mark
-  '146_jersey_3_2026': 'alternate-2', // Marlins Alt 1 Black — worn with the Alternate 2 mark
-  '146_jersey_1_2026': 'alternate', // Marlins Home White — worn with the Alternate mark, not plain Main
-  '146_jersey_4_2026': 'alternate-3', // Marlins Alt 2 Teal — worn with the Alternate 3 mark
-  '147_jersey_2_2026': 'alternate', // Yankees Away Grey — worn with the Alternate mark, not plain Main
-  '118_jersey_4_2026': 'main', // Royals Alt 1 Royal Blue — worn with the plain Main mark
-  '118_jersey_2_2026': 'alternate-2', // Royals Away Grey — worn with the Alternate 2 mark
-  '158_jersey_4_2026': 'alternate-2', // Brewers Alt 2 Navy Blue — worn with the Alternate 2 mark
-  '108_jersey_2_2026': 'alternate', // Angels Away Grey — worn with the Alternate mark, not plain Main
-  '138_jersey_3_2026': 'alternate-2', // Cardinals Alt 1 Cream — worn with the Alternate 2 mark
-  '136_jersey_1_2026': 'alternate', // Mariners Home White — worn with the Alternate mark, not plain Main
-  '136_jersey_3_2026': 'main', // Mariners Alt 1 Teal — worn with the plain Main mark
-  '136_jersey_2_2026': 'alternate-2', // Mariners Away Navy — worn with the Alternate 2 mark
-  '136_jersey_4_2026': 'alternate-3', // Mariners Steelheads Alt 2 Cream — worn with the Alternate 3 mark
-  '137_jersey_4_2026': 'alternate-2', // Giants Alt 2 Black "Gigantes" — worn with the Alternate 2 mark (moved off City Connect)
-}
-
 // Which jersey(s) in the uniforms CATALOG (as opposed to a single game's
 // worn assignment) correspond to a given tile — the cross-reference the
 // team-color-lab page exists to answer. Every club's catalog jersey label
 // self-identifies as Home/Away/Road, "Alt N …", or "City Connect …"
 // (verified against a live 2026 pull for all 30 clubs — classifyUniformAsset),
 // so this needs no per-team hand-authoring like ALT_COLORS/CITY_CONNECT_COLORS
-// above beyond the rare JERSEY_TREATMENT_OVERRIDES exception; a new/renamed
-// jersey in a future season's catalog is otherwise picked up automatically.
-// `null` means the catalog hasn't loaded yet (still fetching or MLB-only
-// endpoint miss); an empty array is a loaded catalog with no jersey in that
-// bucket.
+// above beyond the rare exceptions classifyUniformAsset's own
+// JERSEY_TREATMENT_OVERRIDES table covers (src/api/uniforms.js — shared with
+// gen-jerseys.mjs's live game-card classification, so this page's jersey
+// matches can't drift from what the real card actually renders); a new/
+// renamed jersey in a future season's catalog is otherwise picked up
+// automatically. `null` means the catalog hasn't loaded yet (still fetching
+// or MLB-only endpoint miss); an empty array is a loaded catalog with no
+// jersey in that bucket.
 function jerseyMatchesFor(catalog, teamId, treatmentKey) {
   const assets = catalog[teamId]
   if (!assets) return null
   const clubName = teamClubName(teamId)
   return assets
-    .filter((a) => {
-      if (a.piece !== 'J') return false
-      const treatment = JERSEY_TREATMENT_OVERRIDES[a.code] ?? classifyUniformAsset(a.text, clubName)
-      return treatment === treatmentKey
-    })
+    .filter((a) => a.piece === 'J' && classifyUniformAsset(a.text, clubName, a.code) === treatmentKey)
     .map((a) => jerseyLabel(a.text, clubName))
 }
 
@@ -284,7 +257,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog }) {
   // (MAIN_OVERRIDES names which) or a literal `bgHex` (Brewers); Alternate/
   // City Connect flag whichever of their user-supplied swatches is the
   // background directly (see ALT_COLORS/CITY_CONNECT_COLORS' `bg: true`).
-  const activeBgIndex = override?.pinstripe || override?.bgHex || pinstripeColor
+  const activeBgIndex = override?.bgHex || pinstripeColor
     ? -1 // a hand-styled/literal background (see below), not one of the three brand swatches
     : override
       ? BG_ROLE_INDEX[override.bg]

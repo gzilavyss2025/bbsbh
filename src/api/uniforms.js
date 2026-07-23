@@ -115,16 +115,51 @@ export async function fetchTeamUniformCatalog(teamIds, season, options) {
   }
 }
 
-// Which logo TREATMENT ('main' | 'alternate' | 'city-connect') a catalog
-// asset's own label implies, off the same three-way naming convention every
-// club's catalog follows (verified against a live 2026 pull for all 30
-// clubs): "City Connect …" names itself; "Home/Away/Road …" is the standard
-// uniform Main renders; everything else (Alt N, a special one-off like the
-// Dodgers' "Gold Series") is some flavor of Alternate. `clubName` is stripped
-// first so a club whose own nickname starts with a piece word (e.g. a
-// hypothetical "Home Runs") can't false-match — none currently does, but the
-// strip keeps the check anchored to the descriptor, not the name.
-export function classifyUniformAsset(text, clubName) {
+// Jerseys whose actual on-field treatment doesn't match what
+// classifyUniformAsset's naming-convention guess below would return — e.g. a
+// club's "Away Grey" is paired with the Alternate mark, not the plain Main
+// one, or an "Alt 2" jersey is worn with the Alternate 3 mark rather than
+// Alternate 2. Verified per-club against a live 2026 pull; keyed by
+// uniformAssetCode (stable within a season, unlike the label text) so a
+// wording tweak next season can't silently mis-target this. Single source of
+// truth for both `classifyUniformAsset` (below, which the nightly
+// gen-jerseys.mjs precompute calls for the real game-card logo swap) and Team
+// Color Lab's own jersey-match display — one table, no drift between what the
+// lab shows and what the live card renders.
+export const JERSEY_TREATMENT_OVERRIDES = {
+  '112_jersey_4_2026': 'alternate-2', // Cubs Alt 2 Baby Blue — worn with the Alternate 2 mark (moved off City Connect)
+  '112_jersey_2_2026': 'alternate', // Cubs Away Grey — worn with the Alternate mark, not plain Main
+  '133_jersey_4_2026': 'city-connect', // Athletics Alt 2 Yellow "Sacramento" — worn with the City Connect mark
+  '144_jersey_4_2026': 'main', // Braves Alt 2 Navy — worn with the plain Main mark
+  '146_jersey_3_2026': 'alternate-2', // Marlins Alt 1 Black — worn with the Alternate 2 mark
+  '146_jersey_1_2026': 'alternate', // Marlins Home White — worn with the Alternate mark, not plain Main
+  '146_jersey_4_2026': 'alternate-3', // Marlins Alt 2 Teal — worn with the Alternate 3 mark
+  '147_jersey_2_2026': 'alternate', // Yankees Away Grey — worn with the Alternate mark, not plain Main
+  '118_jersey_4_2026': 'main', // Royals Alt 1 Royal Blue — worn with the plain Main mark
+  '118_jersey_2_2026': 'alternate-2', // Royals Away Grey — worn with the Alternate 2 mark
+  '158_jersey_4_2026': 'alternate-2', // Brewers Alt 2 Navy Blue — worn with the Alternate 2 mark
+  '108_jersey_2_2026': 'alternate', // Angels Away Grey — worn with the Alternate mark, not plain Main
+  '138_jersey_3_2026': 'alternate-2', // Cardinals Alt 1 Cream — worn with the Alternate 2 mark
+  '136_jersey_1_2026': 'alternate', // Mariners Home White — worn with the Alternate mark, not plain Main
+  '136_jersey_3_2026': 'main', // Mariners Alt 1 Teal — worn with the plain Main mark
+  '136_jersey_2_2026': 'alternate-2', // Mariners Away Navy — worn with the Alternate 2 mark
+  '136_jersey_4_2026': 'alternate-3', // Mariners Steelheads Alt 2 Cream — worn with the Alternate 3 mark
+  '137_jersey_4_2026': 'alternate-2', // Giants Alt 2 Black "Gigantes" — worn with the Alternate 2 mark (moved off City Connect)
+}
+
+// Which logo TREATMENT ('main' | 'alternate' | 'alternate-2' | 'alternate-3' |
+// 'city-connect') a catalog asset implies. `code` (a catalog/assignment
+// entry's `uniformAssetCode`) is checked against JERSEY_TREATMENT_OVERRIDES
+// first for the rare exception; otherwise this falls back to the naming
+// convention every club's catalog follows (verified against a live 2026 pull
+// for all 30 clubs): "City Connect …" names itself; "Home/Away/Road …" is the
+// standard uniform Main renders; everything else (Alt N, a special one-off
+// like the Dodgers' "Gold Series") is Alternate. `clubName` is stripped first
+// so a club whose own nickname starts with a piece word (e.g. a hypothetical
+// "Home Runs") can't false-match — none currently does, but the strip keeps
+// the check anchored to the descriptor, not the name.
+export function classifyUniformAsset(text, clubName, code) {
+  if (code && JERSEY_TREATMENT_OVERRIDES[code]) return JERSEY_TREATMENT_OVERRIDES[code]
   const rest = stripClubName(text, clubName)
   if (/^city connect\b/i.test(rest)) return 'city-connect'
   if (/^(home|away|road)\b/i.test(rest)) return 'main'

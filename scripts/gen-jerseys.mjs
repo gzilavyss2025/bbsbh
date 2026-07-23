@@ -7,9 +7,9 @@
 // spoiler rule.
 //
 // Also regenerates public/data/jerseys.json — a small derived export, keyed
-// `${gamePk}:${teamId}` -> 'alternate' | 'city-connect', for the home-page
-// game cards to swap in a team's curated alternate/city-connect logo when
-// that's what it's wearing (src/api/jerseys.js). 'main' (standard home/away)
+// `${gamePk}:${teamId}` -> 'alternate' | 'alternate-2' | 'alternate-3' |
+// 'city-connect', for the home-page game cards to swap in a team's curated
+// logo when that's what it's wearing (src/api/jerseys.js). 'main' (standard home/away)
 // entries are dropped: the only question a reader ever asks is "is there a
 // non-main treatment for this game/team". No team-id filtering — coverage of
 // which teams have curated logo art at all is a public/ file-existence fact,
@@ -84,7 +84,7 @@ function normalizeAssets(side) {
     .filter((a) => a.text)
 }
 
-// Pure/unit-testable: rows -> { "${gamePk}:${teamId}": 'alternate' | 'city-connect' }.
+// Pure/unit-testable: rows -> { "${gamePk}:${teamId}": 'alternate' | 'alternate-2' | 'alternate-3' | 'city-connect' }.
 // Drops 'main' entries and any row whose payload has no jersey ('J') asset or
 // fails to parse — a bad/degraded row is just skipped, never fatal.
 export function buildJerseysExport(rows) {
@@ -98,7 +98,7 @@ export function buildJerseysExport(rows) {
     }
     const jersey = Array.isArray(assets) ? assets.find((a) => a.piece === 'J') : null
     if (!jersey?.text) continue
-    const treatment = classifyUniformAsset(jersey.text, teamClubName(row.team_id))
+    const treatment = classifyUniformAsset(jersey.text, teamClubName(row.team_id), jersey.code)
     if (treatment === 'main') continue
     out[`${row.game_pk}:${row.team_id}`] = treatment
   }
