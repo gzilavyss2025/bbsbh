@@ -707,20 +707,31 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 12px;
   margin: 2px 0 16px;
 }
 
 .masthead__teams {
   display: flex;
   align-items: center;
-  gap: 20px;
+  /* Tight enough that the '@' reads as sitting between the two marks, not
+     floating in its own dead space (the tiles carry their own 4px padding on
+     top of this). */
+  gap: 8px;
 }
 
+/* The date + keep-awake toggle + MLB.TV pill. Allowed to wrap (right-aligned)
+   so on a narrow phone the pill drops to a second line within this cluster
+   instead of pushing the whole masthead wider than the viewport and forcing a
+   horizontal scroll. `min-width: 0` lets the cluster shrink to its widest
+   single child (the date) so that wrap can actually happen. */
 .masthead__side {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 10px;
+  min-width: 0;
 }
 
 .masthead__date {
@@ -811,7 +822,7 @@ body {
     gap: 10px;
   }
   .masthead__teams {
-    gap: 12px;
+    gap: 6px;
   }
   .masthead__date {
     display: none;
@@ -911,11 +922,37 @@ body {
   box-shadow: none;
 }
 
+/* The '@' between the two club marks. Reuses the slate card's screen-print
+   treatment (.gamecard__atmark — Big Shoulders Display, printed twice a couple
+   px out of register in kraft-amber + navy, the misregistration real ballpark-
+   program print runs have), but as an inline, full-opacity mark sized to sit
+   between the logos rather than the faint full-bleed watermark behind them. The
+   navy ink layer is in flow (sizes the box); the kraft ghost is an offset copy
+   pinned over it. */
 .masthead__at {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
+  position: relative;
+  display: inline-block;
+  flex: none;
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-weight: var(--w-black);
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-solid);
+}
+.masthead__at-ink,
+.masthead__at-ghost {
+  display: block;
+  transform: skewX(-8deg) rotate(-2deg);
+}
+.masthead__at-ghost {
+  position: absolute;
+  inset: 0;
+  color: var(--seal);
+  opacity: 0.5;
+  transform: translate(2px, 1.5px) skewX(-8deg) rotate(-2deg);
+}
+.masthead__at-ink {
+  position: relative;
+  color: var(--navy);
 }
 
 /* ---------------------------------------------------------- level toggle
