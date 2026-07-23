@@ -4864,6 +4864,16 @@ body {
   box-shadow: var(--shadow-card);
 }
 
+/* SealBox's revealed wrapper (.statgrid, SealBox.jsx) defaults to
+   var(--surface-inset) — right for a reveal sitting directly on the plain
+   page (the box score's own top-level SealBox), but PlayByPlay's SealBox
+   nests inside .half, itself already a var(--surface-card) card, so that
+   brighter inset shade showed through the gaps between at-bat rows as a
+   mismatched white band. Match the card it's actually nested in instead. */
+.half .statgrid {
+  background: var(--surface-card);
+}
+
 .half__title {
   display: flex;
   align-items: baseline;
