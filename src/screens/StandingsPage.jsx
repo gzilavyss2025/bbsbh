@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
-import { fetchTeamScores, leagueSeasonGradesFor } from '../api/teamScore.js'
+import { fetchTeamScores, leagueSeasonGradesFor, gradeTiersByTeamId } from '../api/teamScore.js'
 import { fetchSeasonScores } from '../api/seasonScore.js'
 import {
   shapeStandings,
@@ -40,6 +40,14 @@ function TrendGlyph({ trend }) {
 // One decimal, or DASH when the team has no Season Grade snapshot yet.
 function formatGrade(grade) {
   return grade != null ? grade.toFixed(1) : DASH
+}
+
+// Season Grade cell: the number plus a percentile pill (top third of the
+// league-wide pool green, bottom third red, the rest the neutral rankchip
+// tone) — same good/bad palette as the WAR rank chip on the Team page.
+function GradePill({ grade, tier }) {
+  const cls = tier === 'high' ? ' rankchip--good' : tier === 'low' ? ' rankchip--bad' : ''
+  return <span className={`rankchip${cls}`}>{formatGrade(grade)}</span>
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -186,11 +194,16 @@ export function StandingsPage() {
   // this makes the safety argument provable rather than incidental.
   const { data: scoreFiles } = useAsync(() => Promise.all([fetchTeamScores(), fetchSeasonScores()]), [])
   const gradeCutoff = view.date ?? yesterday
-  const gradeByTeamId = useMemo(() => {
-    if (!scoreFiles) return new Map()
+  // Grade + percentile tier come from the SAME pool of rows, so a team's pill
+  // color can never disagree with its printed number.
+  const { gradeByTeamId, gradeTierByTeamId } = useMemo(() => {
+    if (!scoreFiles) return { gradeByTeamId: new Map(), gradeTierByTeamId: new Map() }
     const [teamScores, seasonScores] = scoreFiles
     const rows = leagueSeasonGradesFor(teamScores, seasonScores, season, gradeCutoff)
-    return new Map(rows.map((r) => [r.teamId, r.score]))
+    return {
+      gradeByTeamId: new Map(rows.map((r) => [r.teamId, r.score])),
+      gradeTierByTeamId: gradeTiersByTeamId(rows),
+    }
   }, [scoreFiles, season, gradeCutoff])
 
   // Rank-movement trend: a second, independent standings fetch a week before
@@ -213,9 +226,10 @@ export function StandingsPage() {
         ? shapeWildCard(shown, favoriteTeamId)
         : shapeStandings(shown, favoriteTeamId)
     attachTeamField(shaped, gradeByTeamId, 'grade')
+    attachTeamField(shaped, gradeTierByTeamId, 'gradeTier')
     attachRankTrend(shaped, boardMode, prevRankByTeamId)
     return shaped
-  }, [shown, favoriteTeamId, boardMode, gradeByTeamId, prevRankByTeamId])
+  }, [shown, favoriteTeamId, boardMode, gradeByTeamId, gradeTierByTeamId, prevRankByTeamId])
 
   const refreshing = loading && shown.length > 0
 
@@ -369,7 +383,9 @@ export function StandingsPage() {
                             {t.gb} <TrendGlyph trend={t.trend} />
                           </td>
                           <td className="st-ext">{t.pace}</td>
-                          <td className="st-ext">{formatGrade(t.grade)}</td>
+                          <td className="st-ext">
+                            <GradePill grade={t.grade} tier={t.gradeTier} />
+                          </td>
                           <td className="st-ext">{t.streak}</td>
                           <td className="st-ext">{t.l10}</td>
                         </tr>
@@ -399,7 +415,9 @@ export function StandingsPage() {
                               {t.wcgb} <TrendGlyph trend={t.trend} />
                             </td>
                             <td className="st-ext">{t.pace}</td>
-                            <td className="st-ext">{formatGrade(t.grade)}</td>
+                            <td className="st-ext">
+                              <GradePill grade={t.grade} tier={t.gradeTier} />
+                            </td>
                             <td className="st-ext">{t.streak}</td>
                             <td className="st-ext">{t.l10}</td>
                           </tr>
@@ -461,7 +479,9 @@ export function StandingsPage() {
                               <td className="st-ext">{t.ra}</td>
                               <td className={t.diffTone}>{t.diff}</td>
                               <td className="st-ext">{t.pace}</td>
-                              <td className="st-ext">{formatGrade(t.grade)}</td>
+                              <td className="st-ext">
+                                <GradePill grade={t.grade} tier={t.gradeTier} />
+                              </td>
                               <td className="st-ext">{t.streak}</td>
                               <td className="st-ext">{t.l10}</td>
                             </tr>
