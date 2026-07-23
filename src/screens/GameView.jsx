@@ -9,7 +9,7 @@ import { selectGameStatus } from '../api/select.js'
 import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
@@ -158,6 +158,7 @@ export function GameView({ game, section, onSection }) {
         isLive={isLive}
         keepAwake={keepAwake}
         onSetKeepAwake={setKeepAwake}
+        treatment={winProbTreatment}
       />
 
       {/* Delayed/suspended/postponed is structural game state, not a score —
@@ -322,13 +323,13 @@ export function GameView({ game, section, onSection }) {
 // right-aligned opposite them. Tapping a mark opens it enlarged for pencil
 // sketching. The date and the Watch link are both structural, not
 // score-revealing, so they render unconditionally (no seal).
-function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSetKeepAwake }) {
+function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSetKeepAwake, treatment }) {
   return (
     <div className="masthead">
       <div className="masthead__teams">
-        <MastheadLogo team={away} onSketch={() => onSketch('away')} />
+        <MastheadLogo team={away} treatment={treatment?.away} onSketch={() => onSketch('away')} />
         <span className="masthead__at" aria-hidden="true">@</span>
-        <MastheadLogo team={home} onSketch={() => onSketch('home')} />
+        <MastheadLogo team={home} treatment={treatment?.home} onSketch={() => onSketch('home')} />
       </div>
       <div className="masthead__side">
         {date && <span className="masthead__date">{humanDateWithYear(date)}</span>}
@@ -431,7 +432,14 @@ function gameTitle(game, step, inning, half) {
   return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
 }
 
-function MastheadLogo({ team, onSketch }) {
+// The mark inside the masthead tile, sized so the EDGE_BLEED overscale
+// TeamTreatmentMark applies (1.32) lands it at ~53px — 20% larger than the
+// bare 44px logo this tile replaced. The tile itself is a little larger
+// still, so the mark reads as printed on a uniform patch rather than filling
+// a frame edge to edge.
+const MASTHEAD_MARK = 40
+
+function MastheadLogo({ team, treatment, onSketch }) {
   return (
     <button
       type="button"
@@ -439,7 +447,13 @@ function MastheadLogo({ team, onSketch }) {
       onClick={onSketch}
       aria-label={`Enlarge ${team.name || 'team'} logo for sketching`}
     >
-      <TeamLogo teamId={team.id} name={team.name} size={44} />
+      <TeamTreatmentMark
+        teamId={team.id}
+        name={team.name}
+        treatment={treatment}
+        size={MASTHEAD_MARK}
+        block="masthead__logobox"
+      />
     </button>
   )
 }

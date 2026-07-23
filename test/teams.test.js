@@ -11,6 +11,7 @@ import {
   teamLogoUrl,
   treatmentBgColor,
   treatmentScale,
+  treatmentTile,
   treatmentPinstripeColor,
   hasAlternate2,
   hasAlternate3,
@@ -172,4 +173,47 @@ test('mainTreatmentPinstripeColor defaults to black unless a team overrides it',
 test('mainTreatmentRecolor is true only for teams whose Main mark swaps to the hand-edited asset', () => {
   assert.equal(mainTreatmentRecolor(114), true) // Guardians
   assert.equal(mainTreatmentRecolor(115), false) // Rockies — pinstriped but not recolored
+})
+
+// treatmentTile — the one resolver the slate card, the in-game masthead, and
+// Team Color Lab all read so a club's tile looks the same in every one.
+// Added when the masthead adopted the tile (previously GameCard.jsx assembled
+// these four values inline).
+
+test('treatmentTile spells the Main look the three ways its callers do', () => {
+  // The slate card says 'base', the WPA chart says 'main', and a game with no
+  // posted uniform yet says null — all one look.
+  const main = treatmentTile(115, 'main')
+  assert.deepEqual(treatmentTile(115, 'base'), main)
+  assert.deepEqual(treatmentTile(115, null), main)
+  assert.deepEqual(treatmentTile(115, undefined), main)
+})
+
+test('treatmentTile picks a pinstripe pattern over a flat tint, never both', () => {
+  const rockies = treatmentTile(115, 'main') // pinstriped Main tile
+  assert.equal(rockies.pinstripeColor, 'rgba(0, 0, 0, 0.16)')
+  assert.equal(rockies.tint, null, 'a pattern tile has no flat swatch to fill with')
+
+  const dbacks = treatmentTile(109, 'main')
+  assert.equal(dbacks.pinstripeColor, null)
+  assert.ok(dbacks.tint, 'a flat tile keeps its curated swatch')
+})
+
+test('treatmentTile routes a recolored Main mark to its hand-edited asset', () => {
+  assert.equal(treatmentTile(114, 'main').logoVariant, 'main-recolor') // Guardians
+  assert.equal(treatmentTile(115, 'main').logoVariant, 'base') // Rockies — stock CDN mark
+})
+
+test('treatmentTile carries a non-Main treatment through as its own variant', () => {
+  const cc = treatmentTile(158, 'city-connect')
+  assert.equal(cc.logoVariant, 'city-connect')
+  assert.equal(cc.tint, treatmentBgColor(158, 'city-connect'))
+  assert.equal(cc.scale, treatmentScale(158, 'city-connect'))
+})
+
+test('treatmentTile gives an uncurated club a usable tile rather than throwing', () => {
+  const tile = treatmentTile(999999, 'alternate')
+  assert.equal(tile.logoVariant, 'alternate')
+  assert.equal(tile.pinstripeColor, null)
+  assert.equal(tile.scale, 1, 'no curated scale means no overscale adjustment')
 })

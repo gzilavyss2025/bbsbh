@@ -53,10 +53,15 @@ export const LOGO_COLOR_OVERRIDES = {
 
 // The mark this (team, treatment) band tiles, plus the LOGO_COLOR_OVERRIDES
 // entry — if any — that may recolor it:
-//   { src, recolor }   src: url or null (no art on file — the band then reads
-//                      as its flat structural color, same as before logo
-//                      tiling existed); recolor: an override entry or null,
+//   { src, recolor }   src: url or null; recolor: an override entry or null,
 //                      handed straight to WinProbChart's <RecolorFilter>.
+//
+// This resolves a URL, it does NOT promise the file behind it exists —
+// procured treatment art is added club by club, so a team wearing an
+// Alternate nobody has cropped a mark for yet still resolves to that
+// Alternate's path. wpaLogoWithFallback below is what turns that miss into
+// the club's base mark; callers wanting the fallback should go through the
+// useWpaLogo hook (hooks/useWpaLogo.js) rather than calling this directly.
 //
 // The recolor tables above are curated AGAINST THE CDN BASE MARK — a stock
 // mlbstatic SVG whose fills were read off the live source. Every other
@@ -79,6 +84,24 @@ export function wpaLogoFor(teamId, treatment = 'main') {
   const override = LOGO_COLOR_OVERRIDES[teamId]
   if (!override || src !== teamLogoUrl(teamId, 'base')) return { src, recolor: null }
   return { src: override.mode === 'swap' ? override.src : src, recolor: override }
+}
+
+// Same, but for a caller that has since learned this treatment's art isn't
+// actually there (`artMissing` — a 404, or no URL to try in the first place).
+// Falls all the way back to the club's Main mark, which is the stock CDN
+// logo and therefore always exists — and, being the base mark again, gets its
+// LOGO_COLOR_OVERRIDES recolor back too, exactly as if the club were wearing
+// its Main uniform.
+//
+// This matters because an SVG <image> inside a <pattern> has no error
+// handling of its own: a 404'd href paints NOTHING and the band renders as a
+// bare color with no marks on it at all, silently. The slate card's own logo
+// has always dropped back to base on a miss (components/TeamLogo.jsx); this
+// is the band doing the same thing. Only the MARK falls back — the band keeps
+// the treatment's own curated color, since that's a separate table that
+// doesn't depend on art being on file.
+export function wpaLogoWithFallback(teamId, treatment, artMissing) {
+  return wpaLogoFor(teamId, artMissing ? 'main' : treatment)
 }
 
 // ---------------------------------------------------------------------------

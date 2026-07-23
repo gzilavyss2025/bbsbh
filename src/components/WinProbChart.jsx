@@ -7,7 +7,8 @@ import {
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
 } from '../lib/teams.js'
-import { wpaLogoFor, wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { useWpaLogo } from '../hooks/useWpaLogo.js'
 import { ordinal } from '../lib/format.js'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
@@ -313,6 +314,21 @@ export function WinProbChart({
     },
   })
 
+  // `awayTreatment`/`homeTreatment` (props) carry that GAME's real worn
+  // uniform treatment — see api/jerseys.js — so the tiled mark actually
+  // matches tonight's jersey rather than always being the club's Main mark.
+  // Callers with no such data (or a MiLB game outside jerseys.json's
+  // coverage) simply omit the prop, and this falls back to 'main'.
+  //
+  // useWpaLogo (hooks/useWpaLogo.js) resolves each band's mark AND whether a
+  // recolor override reaches it, dropping back to the club's Main mark for a
+  // treatment whose art isn't on file yet. Resolved ABOVE the empty-points
+  // early return below, since a hook can't be called conditionally.
+  const awayTreat = awayTreatment ?? 'main'
+  const homeTreat = homeTreatment ?? 'main'
+  const { src: awayLogo, recolor: awayLogoOverride } = useWpaLogo(awayId, awayTreat)
+  const { src: homeLogo, recolor: homeLogoOverride } = useWpaLogo(homeId, homeTreat)
+
   if (!points || points.length === 0) return null
 
   const away = awayAbbr || 'AWY'
@@ -320,21 +336,6 @@ export function WinProbChart({
   const split = winProbSplit(points)
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
-  // `awayTreatment`/`homeTreatment` (props) carry that GAME's real worn
-  // uniform treatment — see api/jerseys.js — so the tiled mark actually
-  // matches tonight's jersey rather than always being the club's Main mark.
-  // Callers with no such data (or a MiLB game outside jerseys.json's
-  // coverage) simply omit the prop, and this falls back to 'main'.
-  //
-  // wpaLogoFor (lib/wpaLogo.js) resolves each band's mark AND whether a
-  // recolor override reaches it. A null `src` — an unmapped MiLB id, or a
-  // treatment with no procured art on file — just means that band has no logo
-  // tile and reads as its flat structural color, same as before logo tiling
-  // existed.
-  const awayTreat = awayTreatment ?? 'main'
-  const homeTreat = homeTreatment ?? 'main'
-  const { src: awayLogo, recolor: awayLogoOverride } = wpaLogoFor(awayId, awayTreat)
-  const { src: homeLogo, recolor: homeLogoOverride } = wpaLogoFor(homeId, homeTreat)
   const awayLayout = wpaLogoLayout(awayId, awayTreat)
   const homeLayout = wpaLogoLayout(homeId, homeTreat)
   const awayTile = wpaTilePlacements(awayLayout)

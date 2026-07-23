@@ -32,7 +32,8 @@ import {
   hasAlternate4,
   hasCityConnect,
 } from '../lib/teams.js'
-import { wpaLogoFor, wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { useWpaLogo } from '../hooks/useWpaLogo.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
@@ -539,10 +540,14 @@ function TreatmentWpaPreview({
   const rowShift = draft?.rowShift ?? layoutDefaults.rowShift
   const hasDraft = draft && Object.keys(draft).length > 0
 
-  // Same resolver the real chart uses (lib/wpaLogo.js), so this preview can't
-  // drift from it — including the rule that a recolor override never touches
-  // a treatment's own procured art, only the stock CDN base mark.
-  const { src: logo, recolor: logoOverride } = wpaLogoFor(teamId, treatment)
+  // Same resolver the real chart uses (hooks/useWpaLogo.js), so this preview
+  // can't drift from it — including the rule that a recolor override never
+  // touches a treatment's own procured art (only the stock CDN base mark),
+  // and the drop back to the club's Main mark when there's no art on file for
+  // this treatment yet. The tile on the LEFT is the one that still says "No
+  // logo yet" — that's the panel whose job is flagging the gap; this one
+  // shows what a real game would render.
+  const { src: logo, recolor: logoOverride } = useWpaLogo(teamId, treatment)
 
   // Same tile math as the real chart, too (wpaTilePlacements) — the two
   // paddings are independent, and either can go negative to overlap adjacent

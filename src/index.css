@@ -832,6 +832,46 @@ body {
   outline-offset: 2px;
 }
 
+/* The masthead's team marks are the same curated uniform tile the slate card
+   shows (.gamecard__logobox — one shared TeamTreatmentMark, one shared
+   treatmentTile resolver in lib/teams.js), so the club you tapped into a game
+   with still reads as the club wearing tonight's jersey. Sized off the mark
+   inside it (GameView.jsx's MASTHEAD_MARK): the mark lands ~20% larger than
+   the bare logo this replaced, with the tile a little larger still so the
+   overscaled art crops against a border rather than floating in one. */
+.masthead__logobox {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+
+/* A hand-styled pattern instead of a flat --tint swatch, same recipe as
+   .gamecard__logobox--pinstripe. */
+.masthead__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+
+/* Same edge-bleed overscale as .gamecard__logobox .teamlogo — the tile's own
+   overflow:hidden does the cropping; --scale lets a club's curated
+   per-treatment scale pull a dense mark back down. */
+.masthead__logobox .teamlogo {
+  transform: scale(var(--scale, 1.32));
+}
+
 /* ---------------------------------------------------------------- step nav
    The four stops of a game — away lineup, home lineup, innings, box score —
    as a segmented row under the masthead, so every section is one tap from

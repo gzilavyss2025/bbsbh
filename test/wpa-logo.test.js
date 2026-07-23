@@ -16,6 +16,7 @@ import {
   WPA_LOGO_DEFAULTS,
   wpaLogoFor,
   wpaLogoLayout,
+  wpaLogoWithFallback,
   wpaTilePlacements,
 } from '../src/lib/wpaLogo.js'
 import { teamLogoUrl } from '../src/lib/teams.js'
@@ -69,6 +70,38 @@ test('defaults to main, and degrades to no tile for an unknown club', () => {
   // An unmapped MiLB id has no abbreviation, so there's no procured file to
   // point at — the band just renders its flat color, no broken <image>.
   assert.equal(wpaLogoFor(999999, 'alternate').src, null)
+})
+
+// --- missing art -----------------------------------------------------------
+//
+// An SVG <image> in a <pattern> can't report its own 404 — it silently paints
+// nothing, so a club wearing an Alternate nobody has cropped art for yet got
+// a bare colored band with no marks on it at all. These pin the drop back to
+// the club's Main mark (which is the stock CDN logo, so it always exists).
+
+test('a treatment with no art on file falls back to the base mark', () => {
+  // Tigers (116) wear an Alternate in real games but have no alternate/DET.png
+  // on disk — that URL resolves fine and then 404s.
+  const tried = wpaLogoFor(116, 'alternate')
+  assert.equal(tried.src, '/team-logos/alternate/DET.png')
+  assert.equal(wpaLogoWithFallback(116, 'alternate', false).src, tried.src, 'tries the treatment first')
+
+  const fellBack = wpaLogoWithFallback(116, 'alternate', true)
+  assert.equal(fellBack.src, teamLogoUrl(116, 'base'))
+  // Back on the base mark, so its recolor curation applies again — otherwise
+  // the Tigers' navy "D" would vanish into their own navy band.
+  assert.deepEqual(fellBack.recolor, LOGO_COLOR_OVERRIDES[116])
+})
+
+test('falling back keeps a swap override pointed at its precomputed asset', () => {
+  const fellBack = wpaLogoWithFallback(142, 'alternate-4', true)
+  assert.equal(fellBack.src, LOGO_COLOR_OVERRIDES[142].src)
+})
+
+test('a club with no recolor curation falls back to a plain base mark', () => {
+  const fellBack = wpaLogoWithFallback(158, 'alternate-4', true)
+  assert.equal(fellBack.src, teamLogoUrl(158, 'base'))
+  assert.equal(fellBack.recolor, null)
 })
 
 // --- tile geometry ---------------------------------------------------------
