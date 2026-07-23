@@ -256,3 +256,14 @@ export async function fetchUniformNameOverrides() {
   }
   return cachedNameOverrides
 }
+
+// Syncs the module cache above to a freshly saved map — call right after a
+// successful POST to the dev-only save endpoint (see UniformNamesPage.jsx's
+// handleSave). Without this, fetchUniformNameOverrides keeps serving
+// whatever it cached on this page's initial load for the rest of the
+// session (a full reload is the only thing that would otherwise pick up
+// the save), which is surprising on a page whose whole point is "edit, hit
+// Save, see it stick."
+export function primeUniformNameOverridesCache(overrides) {
+  cachedNameOverrides = overrides
+}

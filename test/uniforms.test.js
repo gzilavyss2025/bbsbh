@@ -13,6 +13,8 @@ import {
   uniformFriendlyName,
   formatUniformName,
   uniformDisplayName,
+  fetchUniformNameOverrides,
+  primeUniformNameOverridesCache,
 } from '../src/api/uniforms.js'
 
 // --------------------------------------------------------------------------
@@ -162,4 +164,16 @@ test('uniformDisplayName ignores overrides for a code with no matching entry', (
     uniformDisplayName('Brewers Alt 1 Pinstripe Jersey', 'Brewers', '158_jersey_3_2026', overrides),
     'Alternate: Pinstripe',
   )
+})
+
+// --------------------------------------------------------------------------
+// primeUniformNameOverridesCache — keeps fetchUniformNameOverrides' module
+// cache in step with a just-saved map (see UniformNamesPage.jsx's handleSave),
+// instead of it silently continuing to serve whatever it cached on first load
+// for the rest of the session.
+// --------------------------------------------------------------------------
+test('primeUniformNameOverridesCache makes fetchUniformNameOverrides return the primed value without refetching', async () => {
+  const primed = { '158_jersey_1_2026': 'Home Creams' }
+  primeUniformNameOverridesCache(primed)
+  assert.deepEqual(await fetchUniformNameOverrides(), primed)
 })

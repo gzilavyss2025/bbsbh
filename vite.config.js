@@ -4,6 +4,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
+// Curated overrides are a few hundred bytes per club at most (see
+// public/data/uniform-names.json) — this is a generous ceiling against a
+// runaway/malformed POST, not a real-world size.
+const UNIFORM_NAMES_MAX_BODY_BYTES = 256 * 1024
+
 // Dev-only save endpoint for the /uniform-names curation page (see
 // src/screens/UniformNamesPage.jsx + src/api/uniforms.js's
 // fetchUniformNameOverrides). This app has no backend anywhere else — every
@@ -16,29 +21,64 @@ import { fileURLToPath } from 'node:url'
 // not a single-row patch) straight to public/data/uniform-names.json, the
 // same file the page and src/api/uniforms.js's fetchUniformNameOverrides read
 // back at runtime — a save takes effect immediately, no restart needed.
+// Route lives under `/__dev/…` rather than `/api/…` — this repo's `api/`
+// directory is reserved for the two real backend exceptions (OG previews,
+// reveal sync, see root CLAUDE.md), which are Vercel edge functions, not Vite
+// dev middleware; a shared `/api/` prefix would misleadingly suggest this is
+// a third one.
 function uniformNamesDevSave() {
   const filePath = fileURLToPath(new URL('./public/data/uniform-names.json', import.meta.url))
   return {
     name: 'uniform-names-dev-save',
     configureServer(server) {
-      server.middlewares.use('/api/dev/uniform-names', (req, res) => {
+      server.middlewares.use('/__dev/uniform-names', (req, res) => {
         if (req.method !== 'POST') {
           res.statusCode = 405
           res.end('POST only')
           return
         }
         let body = ''
+        let tooLarge = false
         req.on('data', (chunk) => {
+          if (tooLarge) return
           body += chunk
+          if (Buffer.byteLength(body) > UNIFORM_NAMES_MAX_BODY_BYTES) {
+            tooLarge = true
+            res.statusCode = 413
+            res.end('body too large')
+            req.destroy()
+          }
         })
         req.on('end', async () => {
+          if (tooLarge) return
+          let parsed
           try {
-            const parsed = JSON.parse(body || '{}')
+            parsed = JSON.parse(body || '{}')
+          } catch (err) {
+            res.statusCode = 400
+            res.end(`invalid JSON: ${err.message}`)
+            return
+          }
+          // The saved shape is always a flat uniformAssetCode -> display-name
+          // string map (see uniforms.js's fetchUniformNameOverrides) — reject
+          // anything else (an array, nested objects, non-string values)
+          // rather than writing a shape the app's readers don't expect.
+          const isValidOverridesMap =
+            parsed !== null &&
+            typeof parsed === 'object' &&
+            !Array.isArray(parsed) &&
+            Object.values(parsed).every((v) => typeof v === 'string')
+          if (!isValidOverridesMap) {
+            res.statusCode = 400
+            res.end('expected a flat { uniformAssetCode: string } map')
+            return
+          }
+          try {
             await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`)
             res.statusCode = 200
             res.end('ok')
           } catch (err) {
-            res.statusCode = 400
+            res.statusCode = 500
             res.end(err.message)
           }
         })

@@ -6,6 +6,7 @@ import { ALL_MLB_TEAM_IDS, teamFullName, teamClubName } from '../lib/teams.js'
 import {
   fetchTeamUniformCatalog,
   fetchUniformNameOverrides,
+  primeUniformNameOverridesCache,
   uniformDisplayName,
   jerseyLabel,
 } from '../api/uniforms.js'
@@ -18,7 +19,7 @@ function teamAnchorId(teamId) {
   return `uniformnames-team-${teamId}`
 }
 
-const SAVE_URL = '/api/dev/uniform-names'
+const SAVE_URL = '/__dev/uniform-names'
 
 // Dev-only curation page (App.jsx gates the import to import.meta.env.DEV —
 // see there for why) for authoring the exact wording a scorer sees for every
@@ -86,6 +87,11 @@ export function UniformNamesPage() {
         body: JSON.stringify(merged),
       })
       if (!res.ok) throw new Error(`save failed: ${res.status}`)
+      // Keep src/api/uniforms.js's module-level cache in step so any other
+      // consumer that calls fetchUniformNameOverrides() later this same
+      // session sees the save immediately, not the pre-save snapshot it
+      // cached on first load.
+      primeUniformNameOverridesCache(merged)
       setSavedOverrides(merged)
       setEdits({})
       setStatus('saved')
