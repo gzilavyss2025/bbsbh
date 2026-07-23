@@ -99,7 +99,10 @@ function mainOverrideLogoUrl(teamId) {
 // with no entry yet renders a placeholder swatch, same as a missing logo.
 const ALT_COLORS = {
   111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox
-  113: [{ label: 'Background', hex: '#C6011F', bg: true }], // Reds
+  113: [
+    { label: 'Primary', hex: '#C6011F', bg: true },
+    { label: 'Secondary', hex: '#000000' },
+  ], // Reds — same pair as Main
   114: [{ label: 'Background', hex: '#00385D', bg: true }], // Guardians
   119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers
   135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres
@@ -116,6 +119,10 @@ const CITY_CONNECT_COLORS = {
     { label: 'Primary', hex: '#0097A9' },
     { label: 'Secondary', hex: '#523178', bg: true },
   ], // Diamondbacks
+  113: [
+    { label: 'Primary', hex: '#C6011F' },
+    { label: 'Secondary', hex: '#000000', bg: true },
+  ], // Reds — same pair as Main, background is the Secondary
   118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
   139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
