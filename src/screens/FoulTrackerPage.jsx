@@ -250,6 +250,17 @@ function buildBoards(data, teamId = null) {
   const qualifiedP = pitchers.filter((p) => (p.pitches ?? 0) >= 300)
   const foulsPerWhiffPool = qualifiedP.filter((p) => p.whiffs > 0)
 
+  // Always the whole league's qualifying pool, ignoring `teamId` — the
+  // Most/Fewest cutoff below (pitcherFoulsPerWhiffAvg) has to hold steady
+  // when a team filter narrows the page, or switching teams would redraw the
+  // very line that decides which side a pitcher falls on.
+  const leagueFoulsPerWhiffPool = allPitchers.filter((p) => (p.pitches ?? 0) >= 300 && p.whiffs > 0)
+  const pitcherFoulsPerWhiffAvg =
+    leagueFoulsPerWhiffPool.length > 0
+      ? leagueFoulsPerWhiffPool.reduce((s, p) => s + p.fouls, 0) /
+        leagueFoulsPerWhiffPool.reduce((s, p) => s + p.whiffs, 0)
+      : null
+
   const top = (arr, keyFn, n = 12) => [...arr].sort((a, b) => keyFn(b) - keyFn(a)).slice(0, n)
   const bottom = (arr, keyFn, n = 12) => [...arr].sort((a, b) => keyFn(a) - keyFn(b)).slice(0, n)
 
@@ -268,21 +279,32 @@ function buildBoards(data, teamId = null) {
     ),
     pitcherRate: top(qualifiedP, (p) => p.fouls / p.pitches),
     pitcherRateLow: bottom(qualifiedP, (p) => p.fouls / p.pitches),
-    // Same qualifiedP pool as pitcherRate above, further restricted to
-    // pitchers who've actually recorded a whiff — the ratio is undefined
-    // (divide-by-zero) otherwise. `foulsPerWhiffAvg` is the SAME pool's
-    // aggregate rate (total fouls / total whiffs, not an average of each
-    // pitcher's own ratio — same sum-then-divide convention as
+    // Most/Fewest split on which side of the LEAGUE-wide average (never the
+    // team-filtered pool) a pitcher falls, not a top-12/bottom-12 of whatever
+    // pool is on screen — a top/bottom split of a team-narrowed pool put the
+    // same handful of pitchers on both sides once a team filter left only a
+    // few qualifiers. Same "don't let the team filter move the floor" rule
+    // minGames follows above. `pitcherFoulsPerWhiffAvg` is the full league
+    // pool's aggregate rate (total fouls / total whiffs, not an average of
+    // each pitcher's own ratio — same sum-then-divide convention as
     // SeasonAverageCard's avgFoulsPerPA/avgFoulsPerStart below, so a
     // low-whiff reliever's noisy individual ratio can't skew the baseline
-    // the way a mean-of-ratios would) — the middle the Most/Fewest extremes
-    // are read against.
-    pitcherFoulsPerWhiff: top(foulsPerWhiffPool, (p) => p.fouls / p.whiffs),
-    pitcherFoulsPerWhiffLow: bottom(foulsPerWhiffPool, (p) => p.fouls / p.whiffs),
-    pitcherFoulsPerWhiffAvg:
-      foulsPerWhiffPool.length > 0
-        ? foulsPerWhiffPool.reduce((s, p) => s + p.fouls, 0) / foulsPerWhiffPool.reduce((s, p) => s + p.whiffs, 0)
-        : null,
+    // the way a mean-of-ratios would).
+    pitcherFoulsPerWhiff:
+      pitcherFoulsPerWhiffAvg == null
+        ? []
+        : top(
+            foulsPerWhiffPool.filter((p) => p.fouls / p.whiffs > pitcherFoulsPerWhiffAvg),
+            (p) => p.fouls / p.whiffs,
+          ),
+    pitcherFoulsPerWhiffLow:
+      pitcherFoulsPerWhiffAvg == null
+        ? []
+        : bottom(
+            foulsPerWhiffPool.filter((p) => p.fouls / p.whiffs < pitcherFoulsPerWhiffAvg),
+            (p) => p.fouls / p.whiffs,
+          ),
+    pitcherFoulsPerWhiffAvg,
     league: data?.league ?? null,
     // Only meaningful once a team filter narrows the page to one club — see
     // ByPitchType's team-vs-league branch below.
@@ -314,13 +336,9 @@ function BoardCard({ title, children }) {
 // The rank-1 entry rendered as a hero card — headshot, a two-line name (same
 // first/last split idiom as PlayerPage's/TeamLeaders' hero, see
 // splitDisplayName) with the team name underneath, a bigger centered team
-// logo, plus a three-tile stat strip idiom GameHighRow uses for Single-Game
-// Highs (`.gamehigh-tiles`/`.stat`, reused directly rather than reinvented),
-// so every board's #1 leader reads the same way. `cols`/`cells` are the SAME
-// descriptors the table beneath it uses — one tile per column — so a board's
-// shape only has to be described once.
-function FoulFeatured({ player, cols, cells, favoriteTeamId, positions }) {
-  const values = cells(player)
+// logo. The table beneath still lists this same player at rank 1 with his
+// stats, so nothing here needs to repeat them.
+function FoulFeatured({ player, favoriteTeamId, positions }) {
   const isFavorite = favoriteTeamId != null && player.teamId === favoriteTeamId
   const favStyle = isFavorite ? { '--fav-accent': favoriteAccentColor(player.teamId) } : undefined
   const { first, last } = splitDisplayName(player.name)
@@ -349,14 +367,6 @@ function FoulFeatured({ player, cols, cells, favoriteTeamId, positions }) {
           className="foulboard__heroteam"
         />
       </div>
-      <div className="gamehigh-tiles foulboard__herotiles">
-        {cols.map((c, j) => (
-          <div className="stat" key={c}>
-            <span className="stat__v">{values[j]}</span>
-            <span className="stat__k">{c}</span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
@@ -371,9 +381,7 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
   const rankOffset = 1
   return (
     <BoardCard title={title}>
-      {lead && (
-        <FoulFeatured player={lead} cols={cols} cells={cells} favoriteTeamId={favoriteTeamId} positions={positions} />
-      )}
+      {lead && <FoulFeatured player={lead} favoriteTeamId={favoriteTeamId} positions={positions} />}
       {rest.length > 0 && (
         <div className="ledger-wrap">
           <table className="standings foulboard">
@@ -507,7 +515,18 @@ const POSITIVE_RESULT_TYPES = new Set([
 // same information a broadcast graphic would carry: both teams' score, the
 // inning, the base/out state ENTERING the at-bat (see gen-fouls.mjs's header
 // comment on why that's the PRIOR play's post-state), who was on the mound,
-// and how the at-bat actually ended.
+// and how the at-bat actually ended. Renders at FoulStoryBoard's `.storypa-row`
+// grid's own `scorebug` area, spanning the FULL width between the two
+// headshots (not just under the batter's name) — kept compact (small diamond/
+// logos) so, combined with the name/fouls/pitcher-name line above it, the
+// whole card's height still stays close to the headshots'. The situation line
+// (diamond, out dots, result pill) doesn't fill its own width, so the play's
+// full prose (gen-fouls.mjs's resultDescription, the feed's own play-by-play
+// sentence) fills that leftover space, single-line/ellipsis-truncated rather
+// than wrapped — a wrapped second line would blow the height budget. Prefixed
+// with the deciding pitch number in bold ("Pitch 6: ...") since that's the
+// stat this whole board is about, read before the sentence describing what
+// happened on it.
 function PaScorebug({ pa }) {
   const hisScore = pa.half === 'top' ? pa.awayScore : pa.homeScore
   const oppScore = pa.half === 'top' ? pa.homeScore : pa.awayScore
@@ -517,12 +536,12 @@ function PaScorebug({ pa }) {
     <div className="scorebug">
       <div className="scorebug__score">
         <span className="scorebug__team scorebug__team--his">
-          <TeamLogo teamId={pa.battingTeamId} name={teamAbbr({ id: pa.battingTeamId })} size={16} />
+          <TeamLogo teamId={pa.battingTeamId} name={teamAbbr({ id: pa.battingTeamId })} size={14} />
           {teamAbbr({ id: pa.battingTeamId })}
           <b>{hisScore}</b>
         </span>
         <span className="scorebug__team">
-          <TeamLogo teamId={pa.opponentId} name={teamAbbr({ id: pa.opponentId })} size={16} />
+          <TeamLogo teamId={pa.opponentId} name={teamAbbr({ id: pa.opponentId })} size={14} />
           {teamAbbr({ id: pa.opponentId })}
           <b>{oppScore}</b>
         </span>
@@ -534,25 +553,43 @@ function PaScorebug({ pa }) {
         </span>
       </div>
       <div className="scorebug__situation">
-        <BaseoutDiamond size={30} bases={[!!pa.onFirst, !!pa.onSecond, !!pa.onThird]} />
+        <BaseoutDiamond size={20} bases={[!!pa.onFirst, !!pa.onSecond, !!pa.onThird]} />
         <span className="scorebug__outs" role="img" aria-label={`${outs} ${outs === 1 ? 'out' : 'outs'}`}>
           {[0, 1, 2].map((i) => (
             <span key={i} className={`scorebug__outdot ${i < outs ? 'is-out' : ''}`} />
           ))}
         </span>
+        {pa.resultEvent && (
+          <span className={`scorebug__result ${positive ? 'is-positive' : 'is-negative'}`}>{pa.resultEvent}</span>
+        )}
+        {pa.resultDescription && (
+          <p className="scorebug__prose">
+            {pa.paPitches != null && <b>Pitch {pa.paPitches}: </b>}
+            {pa.resultDescription}
+          </p>
+        )}
       </div>
-      {pa.resultEvent && (
-        <span className={`scorebug__result ${positive ? 'is-positive' : 'is-negative'}`}>{pa.resultEvent}</span>
-      )}
     </div>
   )
 }
 
 // A STORY (one specific at-bat), not a ranking — so unlike FoulLeaderBoard
 // above, every row gets the fuller headshot treatment rather than just the
-// rank-1 leader. `bug` renders a rich node (PaScorebug) below the header row —
-// the only caller left is Most-Fouls-In-A-PA, whose situational data is rich
-// enough to earn the widget.
+// rank-1 leader. `bug` renders a rich node (PaScorebug) — the only caller left
+// is Most-Fouls-In-A-PA, whose situational data is rich enough to earn the
+// widget.
+//
+// The row is batter-vs-pitcher, so it wears BOTH faces — the batter's headshot
+// pinned left (as every other board's row does) and the pitcher he fouled off
+// pinned right. A 3x2 grid (.storypa-row): both headshots span both grid
+// rows (same "battershot"/"pitchershot" area repeated on both template rows),
+// so they read as tall as ever, while the middle 1fr column stacks a top
+// line — batter name/team, the fouls count, pitcher name/team — over the
+// scorebug, which now spans that SAME full 1fr column (100% of the space
+// between the two photos) rather than being confined under just the batter's
+// name. The fouls count sits between two equal flex:1 name blocks in the top
+// line, which is what keeps it genuinely centered regardless of how long
+// either name runs.
 function FoulStoryBoard({ title, rows, value, bug, favoriteTeamId }) {
   if (!rows || rows.length === 0) return null
   return (
@@ -561,28 +598,49 @@ function FoulStoryBoard({ title, rows, value, bug, favoriteTeamId }) {
         {rows.map((b) => {
           const pa = b.bestPa
           return (
-            <li className="sgh-row" key={b.id} {...favRowProps(b.teamId, favoriteTeamId)}>
-              <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--xl" />
-              <div className="sgh-body">
-                <div className="sgh-header">
-                  <div className="sgh-namewrap">
-                    <div className="sgh-top">
-                      <PlayerLink id={b.id} className="sgh-name">
-                        {b.name}
-                      </PlayerLink>
-                      <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
-                    </div>
-                    <div className="sgh-sub">
-                      vs {pa.pitcherId ? <PlayerLink id={pa.pitcherId}>{pa.pitcherName}</PlayerLink> : pa.pitcherName}
-                    </div>
+            <li className="sgh-row storypa-row" key={b.id} {...favRowProps(b.teamId, favoriteTeamId)}>
+              <Headshot
+                personId={b.id}
+                name={b.name}
+                teamId={b.teamId}
+                className="sgh-shot sgh-shot--xl storypa-row__battershot"
+              />
+              <div className="storypa-row__topline">
+                <div className="storypa-row__who">
+                  <div className="sgh-top">
+                    <PlayerLink id={b.id} className="sgh-name">
+                      {b.name}
+                    </PlayerLink>
+                    <span className="foulboard__team">{teamAbbr({ id: b.teamId })}</span>
                   </div>
-                  <span className="sgh-valstack">
-                    <span className="sgh-val">{value(b)}</span>
-                    <span className="sgh-vallabel">Fouls</span>
-                  </span>
+                  <div className="sgh-sub">
+                    vs {pa.pitcherId ? <PlayerLink id={pa.pitcherId}>{pa.pitcherName}</PlayerLink> : pa.pitcherName}
+                  </div>
                 </div>
-                {bug(b)}
+                <span className="storypa-row__val">
+                  <span className="sgh-val">{value(b)}</span>
+                  <span className="sgh-vallabel">Fouls</span>
+                </span>
+                <div className="storypa-row__who storypa-row__who--pitcher">
+                  <div className="sgh-top">
+                    {pa.pitcherId ? (
+                      <PlayerLink id={pa.pitcherId} className="sgh-name">
+                        {pa.pitcherName}
+                      </PlayerLink>
+                    ) : (
+                      <span className="sgh-name">{pa.pitcherName}</span>
+                    )}
+                    <span className="foulboard__team">{teamAbbr({ id: pa.opponentId })}</span>
+                  </div>
+                </div>
               </div>
+              {bug(b)}
+              <Headshot
+                personId={pa.pitcherId}
+                name={pa.pitcherName}
+                teamId={pa.opponentId}
+                className="sgh-shot sgh-shot--xl storypa-row__pitchershot"
+              />
             </li>
           )
         })}
@@ -598,15 +656,24 @@ function FoulStoryBoard({ title, rows, value, bug, favoriteTeamId }) {
 // at-bat's workload as three stat tiles (same `.stat`/`.stat__v`/`.stat__k`
 // idiom StatBox's Insights row uses on the innings page) so PA/pitches-seen/
 // fouls read as one consistent line rather than a prose sentence.
+const GAME_HIGHS_LIMIT = 5
+
 function GameHighBoard({ title, rows, favoriteTeamId, gameLinks, positions }) {
+  const [showAll, setShowAll] = useState(false)
   if (!rows || rows.length === 0) return null
+  const shown = showAll ? rows : rows.slice(0, GAME_HIGHS_LIMIT)
   return (
     <BoardCard title={title}>
       <ol className="sgh-list">
-        {rows.map((b) => (
+        {shown.map((b) => (
           <GameHighRow key={b.id} b={b} favoriteTeamId={favoriteTeamId} gameLinks={gameLinks} positions={positions} />
         ))}
       </ol>
+      {!showAll && rows.length > GAME_HIGHS_LIMIT && (
+        <button type="button" className="plink foulboard__viewmore" onClick={() => setShowAll(true)}>
+          View more
+        </button>
+      )}
     </BoardCard>
   )
 }
@@ -632,7 +699,7 @@ function GameHighRow({ b, favoriteTeamId, gameLinks, positions }) {
   const isNew = isWithinDays(b.maxGameDate, 7)
   return (
     <li className="sgh-row gamehigh-row" {...favRowProps(b.teamId, favoriteTeamId)}>
-      <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--lg" />
+      <Headshot personId={b.id} name={b.name} teamId={b.teamId} className="sgh-shot sgh-shot--xl" />
       <div className="gamehigh-who">
         <PlayerLink id={b.id} className="sgh-name gamehigh-name">
           {first && <span className="foulboard__heroname-first">{first}</span>}

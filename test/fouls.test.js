@@ -25,11 +25,11 @@ const pitch = (code, postStrikes, typeCode = 'FF') => ({
 // (POST-play) state — matches the real feed's off-by-one convention, so a
 // later play's "entering" snapshot is whatever the PRIOR play sets here.
 const play = ({
-  inning = 1, half = 'top', eventType = 'strikeout', event = '', batter, pitcher, events,
+  inning = 1, half = 'top', eventType = 'strikeout', event = '', description = '', batter, pitcher, events,
   outs = 0, on1 = false, on2 = false, on3 = false, awayScore = 0, homeScore = 0,
 }) => ({
   about: { inning, halfInning: half },
-  result: { eventType, event, awayScore, homeScore },
+  result: { eventType, event, description, awayScore, homeScore },
   count: { outs },
   matchup: {
     batter: { id: batter, fullName: `Batter ${batter}` },
@@ -155,6 +155,7 @@ test('the most-fouled plate appearance captures the situational context ENTERING
       // this PLAY's own post-state and must NOT leak into the entering snapshot.
       play({
         batter: 10, pitcher: 200, eventType: 'strikeout', event: 'Strikeout',
+        description: 'Batter 10 strikes out swinging.',
         events: [pitch('F', 1), pitch('F', 2), pitch('S', 3)],
         outs: 2, awayScore: 1,
       }),
@@ -167,6 +168,8 @@ test('the most-fouled plate appearance captures the situational context ENTERING
     pitcherName: 'Pitcher 200',
     resultEvent: 'Strikeout',
     resultType: 'strikeout',
+    resultDescription: 'Batter 10 strikes out swinging.',
+    paPitches: 3,
     inning: 1,
     half: 'top',
     battingTeamId: 1,
@@ -202,6 +205,7 @@ test('a mid-AB interruption keeps the PA-foul tally AND the true entering snapsh
   const b = agg.batters.get(11)
   assert.equal(b.bestPaFouls, 2, 'both fouls (across the interruption) belong to the one PA')
   assert.equal(b.bestPa.resultEvent, 'Walk')
+  assert.equal(b.bestPa.paPitches, 2, 'pitch count carries across the interruption same as the foul tally')
   assert.equal(b.bestPa.outs, 0, 'entering outs from BEFORE the PA started, not after the steal')
   assert.equal(b.bestPa.onFirst, true, 'runner was on 1st when this PA STARTED, before the steal moved him to 2nd')
   assert.equal(b.bestPa.onSecond, false, 'nobody was on 2nd until the mid-PA steal — must not leak into the entering snapshot')
