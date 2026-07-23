@@ -7114,21 +7114,29 @@ body {
 }
 
 /* Numbered pitch-by-pitch list beside the diagram. */
+/* The grid lives on the LIST, not each row — every .pitchlist__row is
+   display:contents (its cells become direct grid items of .pitchlist), so
+   all rows share one set of column tracks. That's what gives the trailing
+   ABS-challenge pill (.pitchlist__challenge, its own 4th column) one fixed
+   horizontal position down the whole list — before this, each row was its
+   OWN independent 3-column grid, so a marker appended after the variable-
+   length call text (BALL vs SWINGING STRIKE vs …) landed at a different x
+   position on every row it appeared on. */
 .pitchlist {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 2px;
-}
-.pitchlist__row {
-  display: grid;
-  grid-template-columns: 16px 1fr auto;
-  gap: 7px;
+  grid-template-columns: 16px 1fr auto auto;
+  column-gap: 7px;
+  row-gap: 2px;
   align-items: baseline;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
+}
+.pitchlist__row {
+  display: contents;
 }
 .pitchlist__num {
   width: 15px;
@@ -7156,17 +7164,31 @@ body {
 }
 .pitchlist__type { color: var(--text-body); }
 
-/* ABS challenge marker (ChallengeMark, StrikeZone.jsx) — the challenging
-   club's mark plus a plain solid dot for whether THAT CLUB's challenge
-   succeeded (green) or failed (red), never a judgment about the pitch call
-   itself. Sits inline at the end of .pitchlist__meta, right after the call
-   word it's marking. Same win/loss colors as .abs__pip, so the app keeps one
-   dot vocabulary instead of two. */
+/* ABS challenge marker (ChallengeMark, StrikeZone.jsx) — its own trailing
+   grid column (.pitchlist's 4th track), so it sits at one fixed horizontal
+   position down the whole list rather than wherever the variable-length call
+   text (BALL vs SWINGING STRIKE vs …) happens to end. A neutral kraft-free
+   gray pill — soft fill, darker gray outline — deliberately NOT the app's
+   usual navy/kraft palette, so it reads as a distinct, separate marker system
+   rather than another card chrome element. "ABS" labels it before the club
+   mark; the dot after is a plain solid fill for whether THAT CLUB's
+   challenge succeeded (green) or failed (red) — same win/loss colors as
+   .abs__pip, so the app keeps one dot vocabulary instead of two. */
 .pitchlist__challenge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-left: 5px;
+  gap: 3px;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--graphite-soft) 16%, var(--paper-2));
+  border: var(--bw-hair) solid var(--graphite-soft);
+}
+.pitchlist__challengelabel {
+  font-family: var(--font-display);
+  font-size: 0.8em; /* relative to the pill's inherited var(--fs-caption) */
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--graphite);
 }
 .pitchlist__challengelogo {
   flex: 0 0 auto;
