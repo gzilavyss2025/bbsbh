@@ -135,6 +135,7 @@ export const BAND_COLOR_OVERRIDES = {
   6325: '#000000', // Columbus Clingstones (MiLB) — plain black
   432: '#D0A353', // Rome Emperors (MiLB) — no true yellow in their mark, closest is this laurel gold
   437: '#FDB913', // Lake County Captains (MiLB) — their own logo gold, sampled off the CDN mark
+  565: '#AD8505', // Quad Cities River Bandits (MiLB) — their own logo bronze/gold, not their parent org's navy
 }
 
 // A team's brand pair for chip/marker chrome, falling back to a neutral
