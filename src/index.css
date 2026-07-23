@@ -7697,7 +7697,7 @@ body {
   height: 100% !important;
   object-fit: contain;
   border-radius: 0;
-  transform: scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) scale(var(--scale, 1.32));
 }
 
 .colorlab__logoplaceholder {

@@ -40,16 +40,31 @@ const ALT_LOGO_SVG = new Set([
   118, // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
 ])
 
+// Per-team, per-treatment horizontal nudge (percent of the tile's own width,
+// negative = left) for a mark whose visual weight sits off-center once scaled
+// up — CSS translateX on .colorlab__logoimg/.teamlogo, applied before scale.
+const TREATMENT_OFFSET_X = {
+  139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
+}
+
 // Per-team, per-treatment tweak to the tile's edge-bleed scale (applied on
 // top of the 1.32 default every tinted tile gets) — for treatments other than
 // Main, which has its own scale on MAIN_OVERRIDES.
 const TREATMENT_SCALE = {
-  139: { alternate: 1.3 }, // Rays — mark reads small against the tint at 1.32 alone
+  139: { alternate: 1.6 }, // Rays — mark reads small against the tint at 1.32 alone
   113: { 'city-connect': 0.75 }, // Reds — the "C" mark already touches all four
   // edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink
   // down so the whole mark stays inside the tile.
   117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
   118: { alternate: 0.85 }, // Royals — same KC mark + scale as Main's own override
+  140: {
+    // T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was
+    // chroma-keyed to transparent, and its own bbox already fills most of the
+    // canvas, so shrink slightly off the default 1.32 edge-bleed to avoid
+    // clipping the crossbar tips.
+    alternate: 0.85,
+    'city-connect': 0.855, // shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless
+  },
 }
 
 // A proposed replacement for a team's Primary swatch, tried out on this page
@@ -113,7 +128,11 @@ const MAIN_OVERRIDES = {
   137: { bg: 'secondary', scale: 0.9 }, // Giants
   138: { bg: 'primary', recolor: true, scale: 0.85 }, // Cardinals — red -> white
   139: { bg: 'secondary', scale: 0.95 }, // Rays
-  140: { bg: 'secondary', scale: 0.9 }, // Rangers
+  // Rangers — the circular "Texas Rangers" crest badge (main-overrides/TEX.png,
+  // swapped in from Alternate) rather than the mlbstatic mark; it's already
+  // edge-to-edge in its own canvas like the Reds/Astros marks below, so scale
+  // down off the default 1.32 edge-bleed instead of up.
+  140: { bg: 'primary', recolor: true, scale: 0.75 },
   141: { bg: 'third' }, // Blue Jays
   142: { bg: 'primary', recolor: true, scale: 0.85 }, // Twins — navy T -> white
   143: { bg: 'primary', recolor: true }, // Phillies — red/white swapped
@@ -126,9 +145,15 @@ const MAIN_OVERRIDES = {
 
 const BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
 
+// Every other override here is a hand-edited copy of the vector mlbstatic
+// mark (.svg); the Rangers' is a chroma-keyed raster crop (see MAIN_OVERRIDES).
+const MAIN_OVERRIDE_PNG = new Set([140])
+
 function mainOverrideLogoUrl(teamId) {
   const abbr = teamAbbr({ id: teamId })
-  return abbr ? `/team-logos/main-overrides/${abbr}.svg` : null
+  if (!abbr) return null
+  const ext = MAIN_OVERRIDE_PNG.has(teamId) ? 'png' : 'svg'
+  return `/team-logos/main-overrides/${abbr}.${ext}`
 }
 
 // Alternate/City Connect colors have no existing source in this app — the
@@ -180,6 +205,11 @@ const ALT_COLORS = {
     { label: 'Secondary', hex: '#8FBCE6', bg: true },
     { label: 'Third', hex: '#F5D130' },
   ], // Rays — Main's own triad, background is Secondary (unchanged)
+  140: [
+    { label: 'Primary', hex: '#003278', bg: true },
+    { label: 'Secondary', hex: '#C0111F' },
+  ], // Rangers — same Primary/Secondary pair as Main; background is Primary
+  // (navy), same hex the T-badge's own chroma-keyed-out fill used to be
   144: [
     { label: 'Primary', hex: '#CE1141', bg: true },
     { label: 'Secondary', hex: '#13274F' },
@@ -223,6 +253,10 @@ const CITY_CONNECT_COLORS = {
     { label: 'Secondary', hex: '#EFB21E' },
   ],
   139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
+  140: [
+    { label: 'Primary', hex: '#892535', bg: true },
+    { label: 'Secondary', hex: '#EBDFCB' },
+  ], // Rangers — both sampled off the png itself (red field, cream T)
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
   158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
 }
@@ -367,11 +401,13 @@ function TreatmentBox({ teamId, name, treatment, label, catalog }) {
 
   const tint = activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined
   const treatmentScale = override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
+  const treatmentOffsetX = TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
   const logoboxStyle =
-    tint || override
+    tint || override || treatmentOffsetX
       ? {
           '--tint': tint,
           '--scale': 1.32 * treatmentScale,
+          '--offset-x': `${treatmentOffsetX}%`,
         }
       : undefined
   const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${override?.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`
