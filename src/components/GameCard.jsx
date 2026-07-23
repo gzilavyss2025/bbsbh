@@ -1,7 +1,16 @@
 import { TeamLogo } from './TeamLogo.jsx'
 import { BreakableLocation } from './BreakableLocation.jsx'
 import { splitName } from '../lib/teamSplits.js'
-import { leagueLogoUrl, favoriteAccentColor, treatmentBgColor, treatmentScale } from '../lib/teams.js'
+import {
+  leagueLogoUrl,
+  favoriteAccentColor,
+  treatmentBgColor,
+  treatmentScale,
+  mainTreatmentTint,
+  mainTreatmentScale,
+  mainTreatmentPinstripe,
+  mainTreatmentRecolor,
+} from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
 import { doubleHeaderLabel } from '../lib/resultCards.js'
@@ -213,19 +222,18 @@ function ReadyPill({ game }) {
 // marks. Full color here on the slate — elsewhere (the in-game masthead, the
 // logo sheet) the marks stay grayscale. Sits in the top grid row.
 //
-// A per-team tinted tile fill for the DEFAULT/Main logo was tried here (first
-// a teamTintColor soft wash, then a hand-picked solid color) and reverted: a
-// dense/large club mark (the Yankees' interlocking NY, at minimum) reads as
-// if it colored the whole tile even against a light fill, needing a design
-// pass before it's worth shipping universally. The hand-picked color list is
-// preserved in .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md
-// so revisiting THAT doesn't mean re-deriving it. This is a narrower, already-
-// solved case: only the Alternate/City Connect jersey swap below gets a tint,
-// using the exact per-team background + edge-bleed scale Team Color Lab
-// already tuned per-treatment (treatmentBgColor/treatmentScale, teams.js) —
-// the dense-mark problem for THOSE specific team/treatment pairs is the one
-// TREATMENT_SCALE already fixes. A standard/Main jersey still renders on the
-// plain paper fill.
+// A per-team tinted tile fill for the DEFAULT/Main logo was tried here once
+// (first a teamTintColor soft wash, then a hand-picked solid color) and
+// reverted: a dense/large club mark (the Yankees' interlocking NY, at
+// minimum) read as if it colored the whole tile even against a light fill.
+// That first attempt's hand-picked color list is preserved in
+// .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md for reference,
+// but it's not what's live now — Team Color Lab separately solved the same
+// dense-mark problem (a per-team edge-bleed scale-down, MAIN_OVERRIDES in
+// teams.js) for its own Main-tile prototype, and that's the version wired in
+// below: every tile (Main, Alternate, City Connect alike) gets its curated
+// background + scale + optional recolored mark from teams.js, so a team's
+// mark always reads legibly against its own fill.
 function TeamMark({ team, side, gamePk, jerseysData }) {
   // Swaps to a team's curated Alternate/City Connect mark when that's what
   // it's actually wearing this game (scripts/gen-jerseys.mjs, nightly).
@@ -233,14 +241,20 @@ function TeamMark({ team, side, gamePk, jerseysData }) {
   // drops back to the base logo for any team without curated art, or before
   // the uniforms assignment has posted (jerseyTreatmentFor -> null either
   // way). Never score-revealing: a jersey choice, not a game state.
-  const variant = jerseyTreatmentFor(jerseysData, gamePk, team.id) ?? 'base'
-  const tint = variant === 'base' ? null : treatmentBgColor(team.id, variant)
-  const style = tint
-    ? { '--tint': tint, '--scale': 1.32 * treatmentScale(team.id, variant) }
-    : undefined
+  const jerseyVariant = jerseyTreatmentFor(jerseysData, gamePk, team.id) ?? 'base'
+  const isMain = jerseyVariant === 'base'
+  const pinstripe = isMain && mainTreatmentPinstripe(team.id)
+  const tint = isMain ? mainTreatmentTint(team.id) : treatmentBgColor(team.id, jerseyVariant)
+  const scale = isMain ? mainTreatmentScale(team.id) : treatmentScale(team.id, jerseyVariant)
+  const logoVariant = isMain && mainTreatmentRecolor(team.id) ? 'main-recolor' : jerseyVariant
+  const style =
+    tint || pinstripe
+      ? { '--tint': tint, '--scale': 1.32 * scale }
+      : undefined
+  const boxClass = `gamecard__logobox gamecard__logobox--${side}${pinstripe ? ' gamecard__logobox--pinstripe' : ''}`
   return (
-    <div className={`gamecard__logobox gamecard__logobox--${side}`} style={style}>
-      <TeamLogo teamId={team.id} name={team.name} size={56} variant={variant} />
+    <div className={boxClass} style={style}>
+      <TeamLogo teamId={team.id} name={team.name} size={56} variant={logoVariant} />
     </div>
   )
 }

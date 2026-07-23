@@ -56,7 +56,7 @@ test('treatmentBgColor returns null for main/base, even for a team with alt colo
 // treatmentScale
 // --------------------------------------------------------------------------
 test('treatmentScale returns a curated per-team/treatment override', () => {
-  assert.equal(treatmentScale(139, 'alternate'), 1.3) // Rays
+  assert.equal(treatmentScale(139, 'alternate'), 1.6) // Rays
   assert.equal(treatmentScale(113, 'city-connect'), 0.75) // Reds
 })
 
