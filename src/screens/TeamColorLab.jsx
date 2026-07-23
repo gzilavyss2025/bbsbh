@@ -153,9 +153,14 @@ const CITY_CONNECT_COLORS = {
     { label: 'Primary', hex: '#C6011F' },
     { label: 'Secondary', hex: '#000000', bg: true },
   ], // Reds — same pair as Main, background is the Secondary
+  115: [
+    { label: 'Primary', hex: '#8ABFEB', bg: true },
+    { label: 'Secondary', hex: '#4F4FC9' },
+  ], // Rockies
   118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
   139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
   145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
+  158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
 }
 
 // A plain "Background" swatch (the common case above — just describes the
