@@ -6,6 +6,7 @@ import { selectChallengeState, gameHasAbs, START_CHALLENGES } from '../api/chall
 import { selectUmpireFavor, hasPitchTracking } from '../api/umpireFavor.js'
 import { resolveCardPlayer } from '../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../lib/teams.js'
+import { ordinal } from '../lib/format.js'
 import { SealBox } from './SealBox.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { PerformerCard } from './PerformerCard.jsx'
@@ -221,9 +222,17 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
 // mark (never for MLB, where ABS lives, but keeps the row robust).
 // Exported: the box score's pitching-notes area reuses this exact row for the
 // whole-game challenge tally instead of growing a second copy.
+//
+// The whole row is a toggle button (covers "tap a pip" too — the pips sit
+// inside it) that expands a detail list underneath: who challenged, which
+// half, and the outcome in words — the same three facts the pips encode as
+// color, spelled out for a tap-to-open reader. Disabled/inert with no
+// affordance when there's nothing to challenge yet (outcomes.length === 0).
 export function AbsRow({ teamId, abbr, outcomes }) {
   const [logoBroken, setLogoBroken] = useState(false)
-  const failed = outcomes.filter((o) => o === 'fail').length
+  const [expanded, setExpanded] = useState(false)
+  const hasChallenges = outcomes.length > 0
+  const failed = outcomes.filter((o) => o.outcome === 'fail').length
   const won = outcomes.length - failed
   const remaining = Math.max(START_CHALLENGES - failed, 0)
   const logo = teamId != null ? teamLogoUrl(teamId) : null
@@ -233,26 +242,51 @@ export function AbsRow({ teamId, abbr, outcomes }) {
   } overturned, ${left}`
   return (
     <div className="abs__row">
-      {logo && !logoBroken ? (
-        <img className="abs__logo" src={logo} alt={abbr} onError={() => setLogoBroken(true)} />
-      ) : (
-        <span className="abs__team">{abbr}</span>
+      <button
+        type="button"
+        className="abs__rowbtn"
+        onClick={() => setExpanded((v) => !v)}
+        disabled={!hasChallenges}
+        aria-expanded={hasChallenges ? expanded : undefined}
+      >
+        {logo && !logoBroken ? (
+          <img className="abs__logo" src={logo} alt={abbr} onError={() => setLogoBroken(true)} />
+        ) : (
+          <span className="abs__team">{abbr}</span>
+        )}
+        <span className="abs__pips" role="img" aria-label={label}>
+          {outcomes.map((o, i) => (
+            <span
+              key={i}
+              className={`abs__pip abs__pip--${o.outcome === 'success' ? 'won' : 'lost'}`}
+              aria-hidden="true"
+            />
+          ))}
+          {Array.from({ length: remaining }, (_, i) => (
+            <span key={`open-${i}`} className="abs__pip abs__pip--open" aria-hidden="true" />
+          ))}
+        </span>
+        <span className="abs__rec" aria-hidden="true">
+          {won}–{failed} · {left}
+        </span>
+      </button>
+      {expanded && hasChallenges && (
+        <ol className="abs__detail">
+          {outcomes.map((o, i) => (
+            <li key={i} className="abs__detailrow">
+              <span className="abs__detailhalf">
+                {o.half === 'top' ? 'Top' : 'Bot'} {ordinal(o.inning)}
+              </span>
+              <span className="abs__detailwho">{o.playerName || abbr}</span>
+              <span
+                className={`abs__detailresult abs__detailresult--${o.outcome === 'success' ? 'won' : 'lost'}`}
+              >
+                {o.outcome === 'success' ? 'Overturned' : 'Upheld'}
+              </span>
+            </li>
+          ))}
+        </ol>
       )}
-      <span className="abs__pips" role="img" aria-label={label}>
-        {outcomes.map((o, i) => (
-          <span
-            key={i}
-            className={`abs__pip abs__pip--${o === 'success' ? 'won' : 'lost'}`}
-            aria-hidden="true"
-          />
-        ))}
-        {Array.from({ length: remaining }, (_, i) => (
-          <span key={`open-${i}`} className="abs__pip abs__pip--open" aria-hidden="true" />
-        ))}
-      </span>
-      <span className="abs__rec" aria-hidden="true">
-        {won}–{failed} · {left}
-      </span>
     </div>
   )
 }

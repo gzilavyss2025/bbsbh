@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { TeamLogo } from './TeamLogo.jsx'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS
@@ -170,10 +171,44 @@ export function PitchList({ pitchDetails }) {
           <span className="pitchlist__meta">
             {p.mph != null ? `${p.mph} MPH, ` : ''}
             {p.callDesc}
+            {p.challenge && <ChallengeMark challenge={p.challenge} />}
           </span>
         </li>
       ))}
     </ol>
+  )
+}
+
+// The ABS challenge marker on a challenged pitch's row (see api/challenges.js's
+// challengeForPlay) — the challenging club's own mark, then a plain solid dot
+// for whether THAT CLUB's challenge succeeded. Deliberately never "good for
+// the batter/pitcher": the color only ever answers one question — did the
+// club whose mark is right next to it get the call it wanted — so it can't
+// mean opposite things on a strike-to-ball overturn vs. a ball-to-strike one.
+// Sits right after the call word, not out by the mph figure, so it reads as
+// part of what this pitch was called. Solid fill only, no glyph inside — the
+// ABS Challenges card's own pips (.abs__pip) never carry one either, so this
+// stays one dot vocabulary for the whole app rather than a second.
+function ChallengeMark({ challenge }) {
+  const label = `${challenge.playerName ? `${challenge.playerName}'s` : 'A'} challenge ${
+    challenge.outcome === 'success' ? 'succeeded' : 'failed'
+  }`
+  return (
+    <span className="pitchlist__challenge" title={label}>
+      <TeamLogo
+        teamId={challenge.teamId}
+        name={challenge.playerName}
+        size={13}
+        className="pitchlist__challengelogo"
+      />
+      <span
+        className={`pitchlist__challengedot pitchlist__challengedot--${
+          challenge.outcome === 'success' ? 'win' : 'loss'
+        }`}
+        aria-hidden="true"
+      />
+      <span className="sr-only">{label}</span>
+    </span>
   )
 }
 
