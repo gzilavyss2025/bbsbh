@@ -198,6 +198,18 @@ don't run these by hand.
   the WINNER's minimum win prob (home share directly; away = `100 − home max`) from
   the MLB-only `/winProbability` endpoint. App reads it via
   `src/api/comebackWins.js` (Team Page's ranked "Comeback wins" card).
+- `gen-jerseys.mjs` — background data only, no `public/data/*.json` export and
+  no reader module yet: what each MLB club wore in every game, from
+  `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the live feed
+  carries zero uniform data). SQLite-backed (`jerseys` group, ADR-0021),
+  its own table keyed `(game_pk, team_id)`, one row per side with
+  `payload_json` carrying that side's asset list verbatim (label text, piece
+  code, and `uniformAssetCode` — the join key the upcoming team-color-lab
+  page will correlate against a logo variant). APPEND-ONLY/incremental like
+  `gen-comeback-wins.mjs`: each run sweeps a trailing window of dates
+  (`--days`) and skips any `(gamePk, teamId)` pair already recorded; the
+  endpoint fills in around game time, so a game not yet posted just retries
+  next run. MLB only — unverified for MiLB.
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record

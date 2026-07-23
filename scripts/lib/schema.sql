@@ -339,6 +339,24 @@ CREATE TABLE IF NOT EXISTS comeback_ingested_games (
   season  INTEGER NOT NULL
 );
 
+-- The daily jersey/uniform record: what each club actually wore in a given
+-- game, from /api/v1/uniforms/game (gen-jerseys.mjs). One row per (game,
+-- team) side rather than per-asset — a side's jersey/pants/hat always arrive
+-- together and are read together — with `payload_json` carrying the asset
+-- list verbatim (label text, piece code J/P/C, and uniformAssetCode — the
+-- join key a future team-color-lab correlation needs) rather than exploding
+-- into columns, same convention as team_snapshots/player_snapshots. MLB only
+-- (see docs/uniforms-and-logos.md — the endpoint isn't verified for MiLB).
+CREATE TABLE IF NOT EXISTS jerseys (
+  game_pk      INTEGER NOT NULL,
+  team_id      INTEGER NOT NULL,
+  side         TEXT NOT NULL,
+  date         TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  updated_at   TEXT NOT NULL,
+  PRIMARY KEY (game_pk, team_id)
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,
