@@ -2244,6 +2244,7 @@ body {
   color: inherit;
 }
 .offdaycard__logobox {
+  position: relative;
   width: 100%;
   max-width: 64px;
   aspect-ratio: 1 / 1;
@@ -2254,16 +2255,47 @@ body {
   padding: 2px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
-  background: var(--paper-1);
+  /* --tint (mainTreatmentTint, teams.js) fills with that club's curated
+     Main-tile background, same recipe as .gamecard__logobox — an off-day
+     team always shows its Main mark, never a jersey-swap variant. */
+  background: var(--tint, var(--paper-1));
   box-shadow: var(--inset-cell);
+}
+/* Rockies-only pinstripe background, same recipe as .gamecard__logobox's own
+   pinstripe variant. */
+.offdaycard__logobox.offdaycard__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.16) 0,
+    rgba(0, 0, 0, 0.16) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+/* Same diagonal gloss sheen as .gamecard__logobox::after, so an off-day tile
+   reads as the identical glossy badge as a slate card's. */
+.offdaycard__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
 }
 .offdaycard__logobox .teamlogo {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain;
   border-radius: 0;
-  /* Bleed to the frame like the slate tiles; the box clips the overflow. */
-  transform: scale(1.32);
+  /* Bleed to the frame like the slate tiles; the box clips the overflow.
+     --scale (mainTreatmentScale) shrinks a dense/large mark so it doesn't
+     read as "the whole tile is this color" against its own new fill. */
+  transform: scale(var(--scale, 1.32));
 }
 .offdaycard__logobox .teamlogo--fallback {
   border: none;
