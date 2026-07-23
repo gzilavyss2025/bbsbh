@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { loadPlayer, loadPositionScope } from '../api/loadPlayer.js'
 import { splitDisplayName } from '../api/person.js'
-import { leagueLogoUrl, SPORT_LABEL } from '../lib/teams.js'
+import { leagueLogoUrl, SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -105,7 +105,12 @@ export function PlayerPage({ id, asOf, sportId }) {
         <BackBtn onClick={back} />
 
         <header className="player__hero">
-          <Headshot personId={bio.id} name={bio.fullName} teamId={bio.team?.parentOrgId ?? bio.team?.id} />
+          <Headshot
+            personId={bio.id}
+            name={bio.fullName}
+            teamId={bio.team?.parentOrgId ?? bio.team?.id}
+            isMlb={isMlbTeamId(bio.team?.id)}
+          />
           <div className="player__ident">
             <h1 className="player__name">
               {firstName && <span className="player__name-first">{firstName}</span>}
