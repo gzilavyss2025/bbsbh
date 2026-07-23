@@ -103,11 +103,53 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // at the newest card rather than at the top of the whole half. Compared
   // against the RAW `stepCap` prop, not `effectiveCap`, so a single tap that
   // bundles a leading event note forward still scrolls exactly once.
+  //
+  // Deferred one animation frame and cancelable, rather than calling
+  // scrollIntoView directly in the effect body: this app renders inside
+  // StrictMode, which double-invokes every effect in dev (mount, clean up,
+  // mount again) to surface exactly this class of bug — without the guard,
+  // the first, thrown-away invocation's scroll call was still in flight when
+  // the second, real one fired. `true` (the legacy boolean form, not the
+  // options-object form) is a deliberately DIFFERENT API: it's the one
+  // scrollIntoView signature the spec defines as always instant, with no
+  // "behavior" of its own to be pulled into any CSS/JS smooth-scroll
+  // ambiguity — verified live that `{behavior:'auto'}` was NOT actually
+  // instant here even though computed CSS scroll-behavior read 'auto' too.
+  //
+  // Confirmed live with frame-by-frame sampling: the scroll lands exactly on
+  // target the instant it runs — but on a fresh MOUNT specifically (a reload
+  // resuming a half already mid-step), something else on the page finishes
+  // loading ~100-200ms later and grows the page's height by exactly the
+  // amount the target then drifts down by. A same-visit tap never shows this
+  // (nothing else on the page is still loading by then). A ResizeObserver on
+  // document.body/documentElement never caught it either — verified live
+  // that neither element's OWN box actually resizes even though the page's
+  // scrollHeight does (both are viewport-height-locked, so overflowing
+  // content grows scrollHeight without growing either element's box, and
+  // ResizeObserver only reports box-size changes). Polling every frame
+  // instead sidesteps needing to know WHICH ancestor's box would even fire —
+  // it just re-snaps whenever the target's own on-screen position drifts
+  // from the top, for a short settling window, then stops once it's held
+  // still for a few consecutive frames (or a hard 2s cap either way).
   const lastEntryRef = useRef(null)
   useEffect(() => {
-    if (stepping) {
-      lastEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (!stepping) return
+    let frame
+    let framesLeft = 120 // ~2s hard cap
+    let stableStreak = 0
+    const settle = () => {
+      const top = lastEntryRef.current?.getBoundingClientRect().top
+      if (top != null && Math.abs(top) > 1) {
+        lastEntryRef.current.scrollIntoView(true)
+        stableStreak = 0
+      } else {
+        stableStreak++
+      }
+      framesLeft--
+      if (stableStreak < 10 && framesLeft > 0) frame = requestAnimationFrame(settle)
     }
+    frame = requestAnimationFrame(settle)
+    return () => cancelAnimationFrame(frame)
   }, [stepping, stepCap])
 
   // Reports the pitcher actually on the mound as of what's visible right now
