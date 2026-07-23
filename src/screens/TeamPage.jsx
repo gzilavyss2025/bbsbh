@@ -924,7 +924,7 @@ export function TeamPage({ id, asOf, sportId }) {
           <TeamStats
             title="Comeback wins"
             stats={comeback}
-            caption="Wins the team pulled out after its chance of winning the game dropped below each mark at some point."
+            caption="Wins after the team's chance of winning the game fell below 10%, 20%, or 30% at some point, then rallied."
           />
         )}
 
