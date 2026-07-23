@@ -9,6 +9,7 @@ import {
   mainTreatmentTint,
   mainTreatmentScale,
   mainTreatmentPinstripe,
+  mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
 } from '../lib/teams.js'
 
@@ -72,7 +73,9 @@ function OffDayCard({ team, pinned, onOpen }) {
   const scale = mainTreatmentScale(id)
   const logoVariant = mainTreatmentRecolor(id) ? 'main-recolor' : 'base'
   const logoboxStyle =
-    tint || pinstripe ? { '--tint': tint, '--scale': 1.32 * scale } : undefined
+    tint || pinstripe
+      ? { '--tint': tint, '--scale': 1.32 * scale, '--pinstripe-color': pinstripe ? mainTreatmentPinstripeColor(id) : undefined }
+      : undefined
   const logoboxClass = `offdaycard__logobox${pinstripe ? ' offdaycard__logobox--pinstripe' : ''}`
   return (
     <button

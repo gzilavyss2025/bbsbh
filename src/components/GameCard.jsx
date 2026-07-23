@@ -9,7 +9,9 @@ import {
   mainTreatmentTint,
   mainTreatmentScale,
   mainTreatmentPinstripe,
+  mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
+  treatmentPinstripeColor,
 } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
@@ -243,13 +245,18 @@ function TeamMark({ team, side, gamePk, jerseysData }) {
   // way). Never score-revealing: a jersey choice, not a game state.
   const jerseyVariant = jerseyTreatmentFor(jerseysData, gamePk, team.id) ?? 'base'
   const isMain = jerseyVariant === 'base'
-  const pinstripe = isMain && mainTreatmentPinstripe(team.id)
+  const pinstripeColor = isMain
+    ? mainTreatmentPinstripe(team.id)
+      ? mainTreatmentPinstripeColor(team.id)
+      : null
+    : treatmentPinstripeColor(team.id, jerseyVariant)
+  const pinstripe = !!pinstripeColor
   const tint = isMain ? mainTreatmentTint(team.id) : treatmentBgColor(team.id, jerseyVariant)
   const scale = isMain ? mainTreatmentScale(team.id) : treatmentScale(team.id, jerseyVariant)
   const logoVariant = isMain && mainTreatmentRecolor(team.id) ? 'main-recolor' : jerseyVariant
   const style =
     tint || pinstripe
-      ? { '--tint': tint, '--scale': 1.32 * scale }
+      ? { '--tint': tint, '--scale': 1.32 * scale, '--pinstripe-color': pinstripe ? pinstripeColor : undefined }
       : undefined
   const boxClass = `gamecard__logobox gamecard__logobox--${side}${pinstripe ? ' gamecard__logobox--pinstripe' : ''}`
   return (

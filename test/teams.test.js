@@ -15,8 +15,8 @@ test('localLogoUrl builds a curated-art path from the team abbreviation', () => 
 })
 
 test('localLogoUrl uses .svg only for the ALT_LOGO_SVG teams, and only on alternate', () => {
-  assert.equal(localLogoUrl(133, 'alternate'), '/team-logos/alternate/ATH.svg') // Athletics
-  assert.equal(localLogoUrl(133, 'city-connect'), '/team-logos/city-connect/ATH.png') // svg only applies to alternate
+  assert.equal(localLogoUrl(118, 'alternate'), '/team-logos/alternate/KC.svg') // Royals
+  assert.equal(localLogoUrl(118, 'city-connect'), '/team-logos/city-connect/KC.png') // svg only applies to alternate
 })
 
 test('localLogoUrl returns null for a team with no known abbreviation', () => {
@@ -39,12 +39,16 @@ test('teamLogoUrl returns null without a teamId, even for alternate/city-connect
 // treatmentBgColor
 // --------------------------------------------------------------------------
 test('treatmentBgColor returns the bg:true hex for a curated team/treatment', () => {
-  assert.equal(treatmentBgColor(158, 'alternate'), '#6CACE4')
-  assert.equal(treatmentBgColor(158, 'city-connect'), '#0C436A')
+  assert.equal(treatmentBgColor(109, 'alternate'), '#A71930') // Diamondbacks
+  assert.equal(treatmentBgColor(158, 'city-connect'), '#0C436A') // Brewers
 })
 
 test('treatmentBgColor returns null for a team with no curated background yet', () => {
   assert.equal(treatmentBgColor(108, 'alternate'), null) // Angels — no ALT_COLORS entry
+})
+
+test('treatmentBgColor returns null for a pinstriped tile with no flat bg swatch', () => {
+  assert.equal(treatmentBgColor(158, 'alternate'), null) // Brewers Alternate is pinstriped, not a flat swatch
 })
 
 test('treatmentBgColor returns null for main/base, even for a team with alt colors curated', () => {

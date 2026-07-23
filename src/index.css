@@ -2116,13 +2116,14 @@ body {
   box-shadow: var(--inset-cell);
 }
 
-/* Rockies-only: a hand-styled pattern instead of a flat --tint swatch, same
-   recipe as Team Color Lab's own .colorlab__logobox--pinstripe. */
+/* A hand-styled pattern instead of a flat --tint swatch, same recipe as Team
+   Color Lab's own .colorlab__logobox--pinstripe. --pinstripe-color (Rockies'
+   black, Yankees' navy) picks the line color per team. */
 .gamecard__logobox.gamecard__logobox--pinstripe {
   background: repeating-linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.16) 0,
-    rgba(0, 0, 0, 0.16) 1px,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
     #fff 1px,
     #fff 7px
   );
@@ -2261,13 +2262,13 @@ body {
   background: var(--tint, var(--paper-1));
   box-shadow: var(--inset-cell);
 }
-/* Rockies-only pinstripe background, same recipe as .gamecard__logobox's own
-   pinstripe variant. */
+/* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
+   variant — --pinstripe-color picks the line color per team. */
 .offdaycard__logobox.offdaycard__logobox--pinstripe {
   background: repeating-linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.16) 0,
-    rgba(0, 0, 0, 0.16) 1px,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
     #fff 1px,
     #fff 7px
   );
@@ -7871,6 +7872,57 @@ body {
 /* ---------------------------------------------------------- team color lab
    Dev-only harness (screens/TeamColorLab.jsx) reviewing each club's Main/
    Alternate/City Connect logo treatment against its three official colors. */
+.colorlab__layout {
+  display: block;
+}
+
+/* A pinned jump-list of every club's logo (colorlab__navlink -> #colorlab-team-{id})
+   so a reviewer can jump straight to a team instead of scrolling past 29
+   others. Two columns (grid, below) so all 30 fit without a scrollbar of its
+   own. Fixed to the viewport rather than laid out inside .screen's own narrow
+   app-width column (tokens/layout.css) — there's no room for a second column
+   at phone width, and this page is a desktop-only design harness anyway
+   (unlisted, never linked — see the function doc above). Hidden below the
+   width where it'd overlap the page's own centered content. */
+.colorlab__nav {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .colorlab__nav {
+    display: grid;
+    grid-template-columns: repeat(2, 32px);
+    gap: var(--space-1);
+    position: fixed;
+    left: var(--space-4);
+    top: 96px;
+    padding: var(--space-2);
+    background: var(--surface-card);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    z-index: 5;
+  }
+
+  .colorlab__navlink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+  }
+
+  .colorlab__navlink:hover {
+    background: var(--paper-1);
+  }
+
+  .colorlab__navlink:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
 .colorlab {
   display: flex;
   flex-direction: column;
@@ -7947,16 +7999,18 @@ body {
   box-shadow: var(--inset-cell);
 }
 
-/* Rockies' Main tile (MAIN_OVERRIDES' `pinstripe` flag, TeamColorLab.jsx) —
-   white with a subtle vertical black pinstripe, echoing their home jersey,
-   instead of a flat brand-color --tint like every other override. Compound
-   selector for guaranteed higher specificity over the plain `background:
-   var(--tint, ...)` rule above regardless of source order. */
+/* A Main tile with MAIN_OVERRIDES' `pinstripe` flag (TeamColorLab.jsx) —
+   white with a subtle vertical pinstripe echoing that club's own home
+   jersey, instead of a flat brand-color --tint like every other override.
+   --pinstripe-color (mainTreatmentPinstripeColor) picks the line color per
+   team — Rockies' black, Yankees' navy. Compound selector for guaranteed
+   higher specificity over the plain `background: var(--tint, ...)` rule
+   above regardless of source order. */
 .colorlab__logobox.colorlab__logobox--pinstripe {
   background: repeating-linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.16) 0,
-    rgba(0, 0, 0, 0.16) 1px,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
     #fff 1px,
     #fff 7px
   );
@@ -7994,6 +8048,7 @@ body {
   object-fit: contain;
   border-radius: 0;
   transform: translateX(var(--offset-x, 0)) scale(var(--scale, 1.32));
+  transform-origin: center var(--origin-y, center);
 }
 
 .colorlab__logoplaceholder {
