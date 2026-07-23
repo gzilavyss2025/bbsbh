@@ -8,6 +8,7 @@ import {
 } from '../api/game.js'
 import { fetchHighlights } from '../api/highlights.js'
 import { fetchGameUniforms, uniformSummary } from '../api/uniforms.js'
+import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
 import { generateScorebookWeather } from '../api/weather.js'
@@ -386,6 +387,24 @@ export function useGameData(game) {
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
+  // Which logo treatment each side actually wore tonight, for the
+  // win-probability chart's tiled band (WinProbChart.jsx) — read from the
+  // same nightly precompute GameCard.jsx already reads to swap a slate
+  // card's logo (api/jerseys.js), not a second live fetch. Same deferred
+  // tier as the other same-origin static reads above; a game outside the
+  // file's coverage (MiLB, not posted yet) resolves both sides to 'main'.
+  const jerseysQuery = useAsync(
+    () => (enrichmentReady ? fetchJerseysData() : Promise.resolve(null)),
+    [enrichmentReady],
+  )
+  const winProbTreatment = useMemo(
+    () => ({
+      away: jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.away.id) ?? 'main',
+      home: jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.home.id) ?? 'main',
+    }),
+    [jerseysQuery.data, game.gamePk, game.away.id, game.home.id],
+  )
+
   return {
     feedState,
     feed,
@@ -409,6 +428,7 @@ export function useGameData(game) {
     runExpectancyData,
     workloadData,
     lineupValuesData,
+    winProbTreatment,
     started,
   }
 }

@@ -47,6 +47,7 @@ export function InningPage({
   runExpectancy,
   winProbPoints,
   winProbBigPlays,
+  winProbTreatment,
   statBoxRef,
   presentationOnly = false,
 }) {
@@ -152,6 +153,8 @@ export function InningPage({
             homeAbbr={meta.home.abbreviation}
             awayId={meta.away.id}
             homeId={meta.home.id}
+            awayTreatment={winProbTreatment?.away}
+            homeTreatment={winProbTreatment?.home}
             partial
           />
         </div>

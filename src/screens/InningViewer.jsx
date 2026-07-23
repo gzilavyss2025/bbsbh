@@ -58,6 +58,7 @@ export function InningViewer({
   lastUpdated,
   pitcherRoles,
   winProbability,
+  winProbTreatment,
   prospectsData,
   rookiesData,
   callouts,
@@ -195,6 +196,7 @@ export function InningViewer({
         runExpectancy={runExpectancy}
         winProbPoints={winProbPoints}
         winProbBigPlays={winProbBigPlays}
+        winProbTreatment={winProbTreatment}
         statBoxRef={statBoxRef}
         presentationOnly={presentationOnly}
       />

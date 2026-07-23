@@ -7959,6 +7959,16 @@ body {
   color: var(--text-caption);
 }
 
+/* Wraps the existing logo+swatches box AND the per-treatment WPA preview
+   (TreatmentWpaPreview, TeamColorLab.jsx) side by side — wraps to stack on
+   narrow viewports rather than squeezing both into one row. */
+.colorlab__treatmentrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
 .colorlab__treatmentbox {
   display: flex;
   align-items: center;
@@ -8094,6 +8104,14 @@ body {
   box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive);
 }
 
+/* Marks which swatch is currently driving the WPA preview's band color
+   (TreatmentWpaPreview) — a distinct ring color from --active above so the
+   two "this swatch is driving X" claims (tile background vs. WPA band)
+   never read as the same indicator. */
+.colorlab__swatchcell--wpaselected .colorlab__swatchchip {
+  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-primary);
+}
+
 .colorlab__swatchchip--placeholder {
   background: repeating-linear-gradient(
     45deg,
@@ -8102,6 +8120,24 @@ body {
     var(--border-rule) 4px,
     var(--border-rule) 5px
   );
+}
+
+/* A swatch chip that doubles as a "use this as the WPA band color" button
+   (ColorSwatch's onPickWpaBand) — same size/shape as the plain chip, just
+   with pointer affordance and a hover nudge. */
+.colorlab__swatchchip--btn {
+  display: block;
+  padding: 0;
+  cursor: pointer;
+}
+
+.colorlab__swatchchip--btn:hover {
+  transform: scale(1.06);
+}
+
+.colorlab__swatchchip--btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .colorlab__swatchlabel {
@@ -8135,6 +8171,130 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
+}
+
+/* Per-TREATMENT win-probability chart preview (TreatmentWpaPreview,
+   TeamColorLab.jsx) — a compact live preview of this exact tile's mark
+   tiled the way WinProbChart.jsx would render it, sitting beside the
+   existing logo+swatches box (see .colorlab__treatmentrow above) since a
+   real game can wear any of a club's treatments, not just Main. */
+.colorlab__wpapreview {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+}
+
+/* Controls (left) beside the true-size chart preview (right) — see
+   .colorlab__wpapreviewsvg below for why "true size" matters. */
+.colorlab__wpapreviewbody {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.colorlab__wpapreviewhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.colorlab__wpapreviewlabel {
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.colorlab__wparesetbtn {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: 2px var(--space-1);
+  cursor: pointer;
+}
+
+.colorlab__wparesetbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* WPA_PLOT_SIZE's own px dimensions (WinProbChart.jsx) — the real chart's
+   band area at true desktop size, not a shrunken thumbnail, so a Size well
+   past 100 (previously indistinguishable from ~100 in a tiny 3-tile-wide
+   box) reads as it actually would in the app. max-width keeps it from
+   overflowing a narrow viewport; the SVG's own viewBox keeps the tile
+   pattern's proportions correct at any rendered width. */
+.colorlab__wpapreviewsvg {
+  display: block;
+  flex: 1 1 304px;
+  width: 304px;
+  max-width: 100%;
+  height: 136px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+
+.colorlab__wpapreviewfields {
+  flex: 0 0 112px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  align-content: start;
+}
+
+.colorlab__wpapreviewcolor {
+  grid-column: 1 / -1;
+}
+
+.colorlab__wpapreviewfields label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.colorlab__wpapreviewfields input {
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 1px var(--space-1);
+}
+
+/* The Pinstripe toggle — a checkbox + its own label read left-to-right
+   instead of stacked like the number/text fields above it, and its input
+   shouldn't stretch to the row's full width like a text field does. Extra
+   specificity (repeating the parent) beats the generic label/input rules
+   above without resorting to !important. */
+.colorlab__wpapreviewfields label.colorlab__wpapreviewcheck {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.colorlab__wpapreviewfields .colorlab__wpapreviewcheck input {
+  width: auto;
+  border: none;
+  padding: 0;
+}
+
+.colorlab__wpapreviewfields input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* ---------------------------------------------------------- uniform names
@@ -8249,7 +8409,11 @@ body {
   border-radius: var(--radius-sm);
 }
 
-.patternlab__copybox {
+/* Shared copy-to-clipboard block (components/CopyBox.jsx) — a pre-formatted
+   context block plus a copy button, first built for Team Pattern Lab below
+   and reused wherever a lab page needs to hand exact edit context back to
+   Claude (e.g. Team Color Lab's WPA logo lab, TeamColorLab.jsx). */
+.copybox {
   position: relative;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -8257,7 +8421,7 @@ body {
   padding: var(--space-2);
 }
 
-.patternlab__copytext {
+.copybox__text {
   margin: 0;
   padding-right: var(--space-6);
   font-family: var(--font-mono);
@@ -8267,7 +8431,7 @@ body {
   word-break: break-word;
 }
 
-.patternlab__copybtn {
+.copybox__btn {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
@@ -8280,7 +8444,27 @@ body {
   cursor: pointer;
 }
 
-.patternlab__copybtn:focus-visible {
+.copybox__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Compact icon-only copy affordance for inline placement next to a single
+   line (Team Color Lab's per-jersey match row) rather than a full CopyBox
+   block. */
+.copybox__iconbtn {
+  flex: 0 0 auto;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
+.copybox__iconbtn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

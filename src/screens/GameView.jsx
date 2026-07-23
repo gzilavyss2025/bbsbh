@@ -58,6 +58,7 @@ export function GameView({ game, section, onSection }) {
     runExpectancyData,
     workloadData,
     lineupValuesData,
+    winProbTreatment,
     started,
   } = useGameData(game)
 
@@ -284,6 +285,7 @@ export function GameView({ game, section, onSection }) {
           lastUpdated={feedState.lastUpdated}
           pitcherRoles={pitcherRoles.data}
           winProbability={winProb.data}
+          winProbTreatment={winProbTreatment}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           callouts={gameCallouts}
@@ -300,6 +302,7 @@ export function GameView({ game, section, onSection }) {
           uniforms={uniformBrief}
           scorebookWeather={weather.data}
           winProbability={winProb.data}
+          winProbTreatment={winProbTreatment}
           callouts={gameCallouts}
           vsTeam={vsTeamSplitsData}
           onReload={feedState.reload}
