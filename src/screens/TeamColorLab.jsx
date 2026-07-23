@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName, teamColorSwatches } from '../lib/teams.js'
+import { ALL_MLB_TEAM_IDS, teamAbbr, teamFullName, teamClubName, teamColorSwatches } from '../lib/teams.js'
+import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
 // everywhere else (components/TeamLogo.jsx) — so only Alternate and City
@@ -202,6 +203,25 @@ function colorsFor(teamId, treatmentKey) {
   return colors ? withMainRoleLabels(teamId, colors) : []
 }
 
+// Which jersey(s) in the uniforms CATALOG (as opposed to a single game's
+// worn assignment) correspond to a given tile — the cross-reference the
+// team-color-lab page exists to answer. Every club's catalog jersey label
+// self-identifies as Home/Away/Road, "Alt N …", or "City Connect …"
+// (verified against a live 2026 pull for all 30 clubs — classifyUniformAsset),
+// so this needs no per-team hand-authoring like ALT_COLORS/CITY_CONNECT_COLORS
+// above; a new/renamed jersey in a future season's catalog is picked up
+// automatically. `null` means the catalog hasn't loaded yet (still fetching
+// or MLB-only endpoint miss); an empty array is a loaded catalog with no
+// jersey in that bucket.
+function jerseyMatchesFor(catalog, teamId, treatmentKey) {
+  const assets = catalog[teamId]
+  if (!assets) return null
+  const clubName = teamClubName(teamId)
+  return assets
+    .filter((a) => a.piece === 'J' && classifyUniformAsset(a.text, clubName) === treatmentKey)
+    .map((a) => jerseyLabel(a.text, clubName))
+}
+
 // Dev harness for reviewing each club's three logo treatments — Main,
 // Alternate, City Connect — side by side with their official brand colors.
 // Reached at /team-color-lab, linked from nowhere. Logos and Alternate/City
@@ -212,6 +232,20 @@ export function TeamColorLab() {
   const teams = [...ALL_MLB_TEAM_IDS].sort((a, b) =>
     teamFullName(a).localeCompare(teamFullName(b)),
   )
+  const [catalog, setCatalog] = useState({})
+
+  // One call for all 30 clubs' current-season uniform catalog (verified to
+  // accept a comma list — docs/uniforms-and-logos.md), so the jersey-match
+  // field below never needs a per-team fetch.
+  useEffect(() => {
+    let cancelled = false
+    fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()).then((data) => {
+      if (!cancelled) setCatalog(data)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <div className="screen">
@@ -227,29 +261,37 @@ export function TeamColorLab() {
 
       <div className="colorlab">
         {teams.map((id) => (
-          <TeamColorRow key={id} teamId={id} />
+          <TeamColorRow key={id} teamId={id} catalog={catalog} />
         ))}
       </div>
     </div>
   )
 }
 
-function TeamColorRow({ teamId }) {
+function TeamColorRow({ teamId, catalog }) {
   const name = teamFullName(teamId)
   return (
     <section className="colorlab__row">
       <h2 className="colorlab__teamname">{name}</h2>
       <div className="colorlab__treatments">
         {TREATMENTS.map((t) => (
-          <TreatmentBox key={t.key} teamId={teamId} name={name} treatment={t.key} label={t.label} />
+          <TreatmentBox
+            key={t.key}
+            teamId={teamId}
+            name={name}
+            treatment={t.key}
+            label={t.label}
+            catalog={catalog}
+          />
         ))}
       </div>
     </section>
   )
 }
 
-function TreatmentBox({ teamId, name, treatment, label }) {
+function TreatmentBox({ teamId, name, treatment, label, catalog }) {
   const colors = colorsFor(teamId, treatment)
+  const jerseyMatches = jerseyMatchesFor(catalog, teamId, treatment)
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   // Main picks its tile background from one of the three official swatches
@@ -283,6 +325,21 @@ function TreatmentBox({ teamId, name, treatment, label }) {
           ))}
         </div>
       </div>
+      <JerseyMatch matches={jerseyMatches} />
+    </div>
+  )
+}
+
+// The uniforms-CATALOG cross-reference for this tile — which real jersey
+// name(s) a scorer would see this club actually wear when this treatment is
+// the one on the field. `null` while the catalog is still loading; an empty
+// array is a loaded catalog with nothing in this bucket.
+function JerseyMatch({ matches }) {
+  if (matches === null) return null
+  return (
+    <div className="colorlab__jerseymatch">
+      <span className="colorlab__jerseymatchlabel">Jersey</span>
+      <span>{matches.length ? matches.join(' · ') : '—'}</span>
     </div>
   )
 }
