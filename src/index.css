@@ -6141,6 +6141,34 @@ body {
   letter-spacing: var(--ls-caps);
 }
 
+/* How many pitches he'd already thrown entering this half (PitcherNotice's
+   `entering` prop, HalfInning.jsx only) — pinned to the card's right edge,
+   a compact two-line figure beside the photo+body block rather than folded
+   into either. */
+.pitchernotice__entering {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+.pitchernotice__enteringcount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.pitchernotice__enteringwhen {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
    side by side from the wide breakpoint up (see media query below).
    margin-top at every width: .innings__grid's own flex gap (see its
