@@ -6034,8 +6034,8 @@ body {
 .usagepips__pip--open {
   border: 1.3px solid var(--graphite-soft);
 }
-/* Mound-visit card: the pips stand alone as the card's one figure (no ABS
-   pass/fail count beside them like StatBox's row), so they read at 2x size. */
+/* Mound-visit card: the pips are the card's one figure, so they read at 2x
+   size. */
 .pitchernotice--mv .usagepips {
   gap: 8px;
 }
@@ -6045,6 +6045,18 @@ body {
 }
 .pitchernotice--mv .usagepips__pip--open {
   border-width: 2.6px;
+}
+/* "N left" tail beside the pips — same idiom as the ABS row's own .abs__rec
+   readout: the fill/outline pips alone don't say which state means used vs.
+   still available, so this spells it out in words. */
+.pitchernotice__mvcount {
+  flex: none;
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
 }
 /* An ejection/event card's sentence — same natural-case prose treatment as
    .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full

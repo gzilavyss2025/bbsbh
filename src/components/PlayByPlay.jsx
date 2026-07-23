@@ -387,7 +387,10 @@ function EventNote({ entry }) {
 // left (MLB caps them — see moundVisitsAllowed), drawn as used/open pips
 // (UsagePips) — the same shared component StatBox.jsx's ABS challenge row
 // uses, sized up here (pitchernotice--mv) since this card has no other figure
-// competing for attention.
+// competing for attention. A visible "N left" tail rides alongside the pips,
+// same idiom as the ABS row's own .abs__rec readout — the dots alone don't
+// say which fill state means used vs. still available, so a viewer has to
+// guess (verified feedback: kraft-brown fill read as ambiguous either way).
 function MoundVisitBar({ team, teamId, remaining, allowed }) {
   const used = remaining != null && allowed != null ? Math.max(0, allowed - remaining) : null
   const label =
@@ -397,7 +400,14 @@ function MoundVisitBar({ team, teamId, remaining, allowed }) {
       <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
       <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
       <span className="pitchernotice__spacer" />
-      {used != null && <UsagePips allowed={allowed} used={used} label={label} />}
+      {used != null && (
+        <>
+          <UsagePips allowed={allowed} used={used} label={label} />
+          <span className="pitchernotice__mvcount" aria-hidden="true">
+            {remaining} left
+          </span>
+        </>
+      )}
     </div>
   )
 }
