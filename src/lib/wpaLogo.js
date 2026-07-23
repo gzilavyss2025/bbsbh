@@ -170,6 +170,8 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'city-connect': { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
   },
   111: {
+    main: { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
     'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
   },
   158: {
@@ -187,6 +189,17 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   },
   141: {
     'city-connect': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 7 },
+  },
+  110: {
+    'city-connect': { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+  },
+  112: {
+    main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
+  },
+  115: {
+    'city-connect': { size: 49, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -12 },
   },
 }
 
