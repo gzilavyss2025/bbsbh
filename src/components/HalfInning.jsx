@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { selectPrePitchChanges, selectHalfStartingPitcher, halfIndex } from '../api/select.js'
+import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../api/select.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { highlightsByPlayId } from '../api/highlights.js'
 import { ordinal } from '../lib/format.js'
@@ -83,10 +83,9 @@ export function HalfInning({
   // nearly every revealed half, not just a genuine mid-half change,
   // mislabeling a starter who simply carried over from his own previous
   // start (verified live: Chris Sale continuing from top 5th into top 6th
-  // with no pitching change showed "Now pitching" every time).
-  const previousEnteringPitcher =
-    inning > 1 ? selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough) : null
-  const isFreshPitcher = inning === 1 || nowPitching?.id !== previousEnteringPitcher?.id
+  // with no pitching change showed "Now pitching" every time). See
+  // selectIsFreshPitcher's own header comment (select.js) for the fix.
+  const isFreshPitcher = selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitching?.id)
   const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching'
 
   // How many pitches he'd thrown in THIS GAME entering this half — clamped to

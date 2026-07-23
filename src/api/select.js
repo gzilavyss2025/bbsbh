@@ -602,6 +602,27 @@ export function selectHalfStartingPitcher(feed, inning, half, revealedThrough = 
   }
 }
 
+// Whether `nowPitchingId` (HalfInning.jsx's own `nowPitching` — livePitcher ??
+// enteringPitcher, i.e. whoever's ACTUALLY on the mound as of what's
+// revealed) actually just took the mound THIS half, vs. carrying over from
+// the same team's previous half of the same parity (a team only pitches
+// every OTHER half, so "previous" means inning-1, same half). The game's
+// first half for either team (inning === 1) always reads fresh — there's no
+// earlier half of the same parity to have carried over from.
+//
+// Extracted so this decision — previously inlined in HalfInning.jsx and
+// compared against `livePitcher != null` alone — is unit-testable: that
+// earlier check mislabeled every pitcher continuing from his own previous
+// start as "Now pitching" (verified live: Chris Sale continuing from top 5th
+// into top 6th with no pitching change showed "Now pitching" every time),
+// since PlayByPlay's onCurrentPitcher reports a value unconditionally the
+// moment any of a half is revealed, not just on a genuine substitution.
+export function selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitchingId) {
+  if (inning === 1) return true
+  const previous = selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough)
+  return nowPitchingId !== previous?.id
+}
+
 // The game jersey number for a player id, checked across both boxscore sides
 // (the incoming pitcher's side isn't known here). Falls back to '' so callers
 // can drop to gameData's primaryNumber.
