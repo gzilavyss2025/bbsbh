@@ -7573,10 +7573,8 @@ body {
 }
 
 /* ---------------------------------------------------------- team color lab
-   Dev-only harness (screens/TeamColorLab.jsx) for comparing a club's logo
-   against its known brand colors — the same framed-tile shell as the slate
-   card's .gamecard__logobox, but the fill comes from --tint (set inline per
-   swatch) instead of --paper-1. */
+   Dev-only harness (screens/TeamColorLab.jsx) reviewing each club's Main/
+   Alternate/City Connect logo treatment against its three official colors. */
 .colorlab {
   display: flex;
   flex-direction: column;
@@ -7599,84 +7597,19 @@ body {
   color: var(--text-heading);
 }
 
-.colorlab__swatches {
+.colorlab__treatments {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-3);
 }
 
-/* A plain button so a tap can mark the swatch as this team's pick — the
-   rectangle is drawn on this outer element (tile + label + hex together),
-   not just the color tile, so a pick reads as "this whole card", not just a
-   colored square. */
-.colorlab__swatch {
+.colorlab__treatment {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 4px;
-  width: 108px;
-  padding: 6px;
-  border: var(--bw-rule) solid transparent;
-  border-radius: var(--radius-md);
-  background: none;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out);
 }
 
-.colorlab__swatch--picked {
-  border-color: var(--accent-positive);
-  background: color-mix(in srgb, var(--accent-positive) 12%, transparent);
-}
-
-/* Claude's suggestion for a team with no pick yet — a distinct orange so it
-   never reads as an actual pick (--picked, above). This color has no
-   semantic-token equivalent elsewhere in the app (a dev-tool-only marker),
-   so it's a literal hex rather than a design-system variable. */
-.colorlab__swatch--recommended {
-  border-color: #e8720c;
-  background: color-mix(in srgb, #e8720c 12%, transparent);
-}
-
-.colorlab__logobox {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 2px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  /* A diagonal light-to-dark sweep of the tint itself (not a second color) —
-     reads as a glossy, slightly domed badge instead of a flat paint chip. */
-  background: linear-gradient(
-    155deg,
-    color-mix(in srgb, var(--tint) 100%, white 22%) 0%,
-    var(--tint) 45%,
-    color-mix(in srgb, var(--tint) 100%, black 20%) 100%
-  );
-  box-shadow: var(--inset-cell);
-}
-
-.colorlab__logobox .teamlogo {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
-  border-radius: 0;
-  transform: scale(1.32);
-}
-
-/* A handful of clubs' marks are a wide wordmark/script that already reaches
-   close to its own viewBox edges — the default edge-bleed scale above clips
-   those tips. Applied via .colorlab__logobox--loose (see LOOSE_FIT_TEAM_IDS
-   in TeamColorLab.jsx). */
-.colorlab__logobox--loose .teamlogo {
-  transform: scale(1.05);
-}
-
-.colorlab__caption {
+.colorlab__treatmentlabel {
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
@@ -7685,31 +7618,146 @@ body {
   color: var(--text-caption);
 }
 
-.colorlab__hex {
+.colorlab__treatmentbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--inset-cell);
+}
+
+/* The exact frame the real slate card uses (.gamecard__logobox in GameCard.jsx)
+   — same size, border, radius, and inset shadow, so a treatment previewed
+   here looks like it would in the actual game card, not a flat comparison
+   swatch. Fill defaults to the card's plain paper, same as Alternate/City
+   Connect; a Main-treatment background mockup (MAIN_OVERRIDES in
+   TeamColorLab.jsx) sets --tint inline to try a brand color instead. */
+.colorlab__logobox {
+  flex: 0 0 auto;
+  position: relative;
+  width: 108px;
+  height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+
+/* A diagonal white-to-black sheen over the whole tile face (background AND
+   mark alike, via the ::after stacking above both) — reads as a glossy,
+   slightly domed badge instead of a flat paint chip. Applied to every
+   treatment's tile (Main, Alternate, City Connect). */
+.colorlab__logobox--gloss::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+/* Same edge-bleed overscale as .gamecard__logobox .teamlogo, so a procured
+   Alternate/City Connect mark previews at the same crop the real card would
+   apply, not a smaller contain-fit thumbnail. Also covers Main, which
+   renders a plain .teamlogo (components/TeamLogo.jsx) inside this same box.
+   --scale lets a Main mockup shrink a dense mark off the default 1.32 (see
+   MAIN_OVERRIDES) so it doesn't read as "the whole tile is this color"
+   against its own new background fill. */
+.colorlab__logobox .teamlogo,
+.colorlab__logoimg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+
+.colorlab__logoplaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-2);
+  text-align: center;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    var(--border-rule) 6px,
+    var(--border-rule) 7px
+  );
+}
+
+.colorlab__swatchrow {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.colorlab__swatchcell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 76px;
+}
+
+.colorlab__swatchcell--placeholder {
+  opacity: 0.5;
+}
+
+.colorlab__swatchchip {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+
+/* Marks which swatch a Main-treatment background mockup (MAIN_OVERRIDES,
+   TeamColorLab.jsx) actually used as the tile's --tint, so it's clear at a
+   glance which of the three colors above is driving the box beside it. */
+.colorlab__swatchcell--active .colorlab__swatchchip {
+  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive);
+}
+
+.colorlab__swatchchip--placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    var(--border-rule) 4px,
+    var(--border-rule) 5px
+  );
+}
+
+.colorlab__swatchlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.colorlab__swatchhex {
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
   color: var(--text-muted);
-}
-
-.colorlab__altlabel {
-  margin: var(--space-3) 0 var(--space-2);
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-}
-
-/* The second (alternate-mark) row is reference-only, not clickable. */
-.colorlab__swatch--static {
-  cursor: default;
-}
-
-/* Alt marks come from mixed sources (vector, raster, mascot photos) unlike
-   the primary logo's uniform CDN art, so this skips the edge-bleed scale
-   treatment (.colorlab__logobox .teamlogo) — a plain contain-fit avoids
-   cropping content that treatment wasn't tuned for. */
-.colorlab__logobox--alt .colorlab__altimg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 /* -------------------------------------------------------------- logo sketch
