@@ -1,12 +1,9 @@
 import { useEffect, useId, useState } from 'react'
 import { CopyBox } from '../components/CopyBox.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
-import {
-  BAND_COLOR_OVERRIDES,
-  RecolorFilter,
-  chipColorsFor,
-} from '../components/WinProbChart.jsx'
+import { RecolorFilter } from '../components/WinProbChart.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { BAND_COLOR_OVERRIDES, chipColorsFor } from '../lib/wpaBandColors.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
 import { wpaLogoFor, wpaTilePlacements } from '../lib/wpaLogo.js'
 
