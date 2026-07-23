@@ -937,6 +937,12 @@ body {
   font-weight: var(--w-black);
   font-size: var(--fs-title-lg);
   line-height: var(--lh-solid);
+  /* Render the mark 2x larger than its 24px box WITHOUT changing layout: a
+     transform doesn't affect the flow box, so the two logo tiles (and the 4px
+     gaps to this mark) stay exactly where they are — the '@' just grows out
+     from its own center, overlapping onto the marks like the slate card's
+     behind-the-logos watermark. */
+  transform: scale(2);
 }
 .masthead__at-ink,
 .masthead__at-ghost {
