@@ -90,29 +90,35 @@ function mainOverrideLogoUrl(teamId) {
 }
 
 // Alternate/City Connect colors have no existing source in this app — the
-// user supplies these treatment-by-treatment, together with each logo file,
-// as a single tile-background color (unlike Main's fixed Primary/Secondary/
-// Third triad, since these marks don't carry an official 3-color set here).
-// Keyed by teamId; a team with no entry yet renders a placeholder swatch,
-// same as a missing logo.
+// user supplies these treatment-by-treatment, together with each logo file.
+// Usually just the one tile-background color (unlike Main's fixed Primary/
+// Secondary/Third triad, since these marks don't carry an official 3-color
+// set here), but a team can get a full swatch set too (e.g. Diamondbacks
+// City Connect's Primary/Secondary) — whichever entry carries `bg: true` is
+// the one used as the tile's actual background. Keyed by teamId; a team
+// with no entry yet renders a placeholder swatch, same as a missing logo.
 const ALT_COLORS = {
-  111: [{ label: 'Background', hex: '#0C2340' }], // Red Sox
-  113: [{ label: 'Background', hex: '#C6011F' }], // Reds
-  114: [{ label: 'Background', hex: '#00385D' }], // Guardians
-  119: [{ label: 'Background', hex: '#FFFFFF' }], // Dodgers
-  135: [{ label: 'Background', hex: '#2F241D' }], // Padres
-  136: [{ label: 'Background', hex: '#005C5C' }], // Mariners
-  137: [{ label: 'Background', hex: '#FD5A1E' }], // Giants
-  139: [{ label: 'Background', hex: '#8FBCE6' }], // Rays
-  146: [{ label: 'Background', hex: '#FFFFFF' }], // Marlins
-  147: [{ label: 'Background', hex: '#0C2340' }], // Yankees
-  158: [{ label: 'Background', hex: '#6CACE4' }], // Brewers
+  111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox
+  113: [{ label: 'Background', hex: '#C6011F', bg: true }], // Reds
+  114: [{ label: 'Background', hex: '#00385D', bg: true }], // Guardians
+  119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers
+  135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres
+  136: [{ label: 'Background', hex: '#005C5C', bg: true }], // Mariners
+  137: [{ label: 'Background', hex: '#FD5A1E', bg: true }], // Giants
+  139: [{ label: 'Background', hex: '#8FBCE6', bg: true }], // Rays
+  146: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Marlins
+  147: [{ label: 'Background', hex: '#0C2340', bg: true }], // Yankees
+  158: [{ label: 'Background', hex: '#6CACE4', bg: true }], // Brewers
 }
 
 const CITY_CONNECT_COLORS = {
-  118: [{ label: 'Background', hex: '#FFFFFF' }], // Royals
-  139: [{ label: 'Background', hex: '#000000' }], // Rays
-  145: [{ label: 'Background', hex: '#000000' }], // White Sox
+  109: [
+    { label: 'Primary', hex: '#0097A9' },
+    { label: 'Secondary', hex: '#523178', bg: true },
+  ], // Diamondbacks
+  118: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Royals
+  139: [{ label: 'Background', hex: '#000000', bg: true }], // Rays
+  145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
 }
 
 function colorsFor(teamId, treatmentKey) {
@@ -172,10 +178,12 @@ function TreatmentBox({ teamId, name, treatment, label }) {
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   // Main picks its tile background from one of the three official swatches
-  // (MAIN_OVERRIDES names which); Alternate/City Connect have only the one
-  // user-supplied Background swatch (index 0, see ALT_COLORS/
-  // CITY_CONNECT_COLORS), used as their tile background whenever present.
-  const activeBgIndex = override ? BG_ROLE_INDEX[override.bg] : colors[0] ? 0 : -1
+  // (MAIN_OVERRIDES names which); Alternate/City Connect flag whichever of
+  // their user-supplied swatches is the background directly (see ALT_COLORS/
+  // CITY_CONNECT_COLORS' `bg: true`).
+  const activeBgIndex = override
+    ? BG_ROLE_INDEX[override.bg]
+    : colors.findIndex((c) => c?.bg)
 
   const tint = activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined
   const logoboxStyle =
@@ -190,10 +198,7 @@ function TreatmentBox({ teamId, name, treatment, label }) {
     <div className="colorlab__treatment">
       <span className="colorlab__treatmentlabel">{label}</span>
       <div className="colorlab__treatmentbox">
-        <div
-          className={`colorlab__logobox ${treatment === 'main' ? 'colorlab__logobox--gloss' : ''}`}
-          style={logoboxStyle}
-        >
+        <div className="colorlab__logobox colorlab__logobox--gloss" style={logoboxStyle}>
           <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />
         </div>
         <div className="colorlab__swatchrow">

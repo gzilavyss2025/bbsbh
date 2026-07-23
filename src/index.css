@@ -6862,8 +6862,8 @@ body {
 
 /* A diagonal white-to-black sheen over the whole tile face (background AND
    mark alike, via the ::after stacking above both) — reads as a glossy,
-   slightly domed badge instead of a flat paint chip. Main only; Alternate/
-   City Connect stay a flat reference swatch. */
+   slightly domed badge instead of a flat paint chip. Applied to every
+   treatment's tile (Main, Alternate, City Connect). */
 .colorlab__logobox--gloss::after {
   content: '';
   position: absolute;
