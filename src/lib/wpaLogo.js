@@ -1,9 +1,10 @@
-// Which mark tiles a WPA band, and whether it may be recolored — the single
-// resolver every WPA step-and-repeat surface shares (the real chart,
-// components/WinProbChart.jsx, plus the two dev labs that preview it,
-// screens/TeamColorLab.jsx and screens/TeamPatternLab.jsx). Pure string
-// resolution over teams.js's URL builders, deliberately kept out of the
-// chart's .jsx so it's unit-testable (test/wpa-logo.test.js).
+// Which mark tiles a WPA band, how that tile is laid out, and whether the
+// mark may be recolored — the geometry + art resolution every WPA
+// step-and-repeat surface shares (the real chart, components/WinProbChart.jsx,
+// plus the two dev labs that preview it, screens/TeamColorLab.jsx and
+// screens/TeamPatternLab.jsx). Pure string/number math over teams.js's URL
+// builders, deliberately kept out of the chart's .jsx so it's unit-testable
+// (test/wpa-logo.test.js).
 import { teamLogoUrl } from './teams.js'
 
 // A handful of clubs' base logo mark is itself (near-)solid in the same hex
@@ -78,4 +79,107 @@ export function wpaLogoFor(teamId, treatment = 'main') {
   const override = LOGO_COLOR_OVERRIDES[teamId]
   if (!override || src !== teamLogoUrl(teamId, 'base')) return { src, recolor: null }
   return { src: override.mode === 'swap' ? override.src : src, recolor: override }
+}
+
+// ---------------------------------------------------------------------------
+// Tile geometry
+//
+// Each tile is one copy of the club's mark, inset by a margin so neighboring
+// tiles don't touch — compact and tightly packed rather than sparse.
+// `rotate` + `offsetX`/`offsetY` (applied by the caller as the pattern's
+// patternTransform) tilt and shift the whole grid off-axis, so the wallpaper
+// reads as something the eye stumbles into mid-pattern rather than a grid
+// anchored at the plot's top-left corner.
+const LOGO_SIZE = 20
+const LOGO_ROTATE = -14
+const LOGO_OFFSET_X = 8
+const LOGO_OFFSET_Y = 6
+// The tile's margins — the gap between one logo and the next tile's logo
+// directly beside (paddingX) or above/below (paddingY) it, in the pattern's
+// own coordinate system, pre-rotation. The two are independent, so a tile can
+// go tall-and-loose or wide-and-tight without the other axis following.
+// Negative shrinks the tile smaller than the logo itself, so adjacent tiles'
+// marks overlap on purpose — a deliberate choice for a club whose mark wants
+// to run tighter than its own footprint.
+const LOGO_PADDING_X = 4
+const LOGO_PADDING_Y = 4
+// How far each row is shifted sideways from the one above it, as a percent of
+// the tile's own width — the half-drop that makes this read as a proper
+// step-and-repeat rather than marks stacked in visible columns. 50 staggers
+// alternating rows like brickwork; 0 turns it off and restores a plain grid.
+const LOGO_ROW_SHIFT = 50
+
+// The global layout numbers above, exported as one object so a caller (Team
+// Color Lab's WPA logo lab, screens/TeamColorLab.jsx) can seed its per-team
+// controls at the same defaults this chart uses for every team without a
+// per-team override.
+export const WPA_LOGO_DEFAULTS = {
+  size: LOGO_SIZE,
+  rotate: LOGO_ROTATE,
+  offsetX: LOGO_OFFSET_X,
+  offsetY: LOGO_OFFSET_Y,
+  paddingX: LOGO_PADDING_X,
+  paddingY: LOGO_PADDING_Y,
+  rowShift: LOGO_ROW_SHIFT,
+}
+
+// Layout/color FINE-TUNING for a specific (team, treatment) pairing — e.g. a
+// wide City Connect wordmark needing more tile room than the standard crest.
+// Nested `{ [teamId]: { [treatment]: {...} } }`, same treatment-key vocabulary
+// as Team Color Lab's tiles and api/uniforms.js's JERSEY_TREATMENT_OVERRIDES,
+// so a value copied from Team Color Lab's per-treatment WPA preview pastes
+// straight in. NOTE: a per-team rotate/offset override breaks the away/home
+// tile grid's shared alignment across the plot seam for THAT team's band
+// only — an accepted tradeoff, not a bug.
+export const WPA_LOGO_LAYOUT_OVERRIDES = {}
+
+export function wpaLogoLayout(teamId, treatment) {
+  const o = WPA_LOGO_LAYOUT_OVERRIDES[teamId]?.[treatment]
+  return {
+    size: o?.size ?? LOGO_SIZE,
+    rotate: o?.rotate ?? LOGO_ROTATE,
+    offsetX: o?.offsetX ?? LOGO_OFFSET_X,
+    offsetY: o?.offsetY ?? LOGO_OFFSET_Y,
+    paddingX: o?.paddingX ?? LOGO_PADDING_X,
+    paddingY: o?.paddingY ?? LOGO_PADDING_Y,
+    rowShift: o?.rowShift ?? LOGO_ROW_SHIFT,
+  }
+}
+
+// A layout turned into the concrete numbers an SVG <pattern> needs:
+//   { tileW, tileH, images: [{ x, y }, …] }
+// `tileW`/`tileH` are the pattern's own width/height and `images` the logo
+// placements inside it, all in pattern-local (pre-rotation) coordinates.
+//
+// With no row shift that's the simple case — one logo, one row, tile height
+// is one row's height. A shift can't be expressed by moving that single
+// logo (every row would shift by the same amount and the grid would just
+// lean), so the tile grows to TWO rows tall and carries two placements: the
+// second inset sideways by `shift`. Repeating that 2-row tile is what
+// staggers every OTHER row, i.e. brickwork.
+//
+// The shifted row runs off the tile's right edge by design; the caller's
+// pattern sets `overflow: visible`, so the neighboring tile to the left
+// paints the wrapped remainder into the gap and the rows stay unbroken. (That
+// same overflow is what lets a negative padding overlap adjacent tiles' marks
+// at all, so this rides on a property the pattern already depends on rather
+// than adding a third clipped copy per tile.)
+export function wpaTilePlacements(layout) {
+  const { size, paddingX, paddingY, rowShift } = { ...WPA_LOGO_DEFAULTS, ...layout }
+  const tileW = size + paddingX
+  const rowH = Math.max(1, size + paddingY)
+  const insetX = paddingX / 2
+  const insetY = paddingY / 2
+  // A shift of a whole tile width (or none at all) lands every row back in
+  // the same columns — same picture as no shift, at half the draw cost.
+  const shift = (tileW * (rowShift % 100)) / 100
+  if (!shift) return { tileW, tileH: rowH, images: [{ x: insetX, y: insetY }] }
+  return {
+    tileW,
+    tileH: rowH * 2,
+    images: [
+      { x: insetX, y: insetY },
+      { x: insetX + shift, y: insetY + rowH },
+    ],
+  }
 }

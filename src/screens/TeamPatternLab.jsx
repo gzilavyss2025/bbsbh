@@ -8,7 +8,7 @@ import {
 } from '../components/WinProbChart.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
-import { wpaLogoFor } from '../lib/wpaLogo.js'
+import { wpaLogoFor, wpaTilePlacements } from '../lib/wpaLogo.js'
 
 // Design harness for reviewing the win-probability chart's tiled band pattern
 // (WinProbChart.jsx) for every club at every level — MLB plus all four full-
@@ -27,12 +27,17 @@ import { wpaLogoFor } from '../lib/wpaLogo.js'
 // The copy box + per-team feedback field exist so a review pass can happen
 // off-screen: read down the grid, type what should change under each team,
 // then copy the compiled block at the bottom into a message to Claude.
+// Deliberately bigger than the real chart's own tile (WPA_LOGO_DEFAULTS.size)
+// — this grid is a magnified review surface, not a true-size preview; Team
+// Color Lab's per-treatment WPA box is the true-size one. The tile math
+// itself is the shared wpaTilePlacements, half-drop included, so a club's
+// pattern reads here the way it reads in a real chart.
 const LOGO_SIZE = 30
-const LOGO_TILE = LOGO_SIZE + 6
-const LOGO_INSET = (LOGO_TILE - LOGO_SIZE) / 2
+const LOGO_PADDING = 6
 const LOGO_ROTATE = -14
 const LOGO_OFFSET_X = 8
 const LOGO_OFFSET_Y = 6
+const TILE = wpaTilePlacements({ size: LOGO_SIZE, paddingX: LOGO_PADDING, paddingY: LOGO_PADDING })
 
 const LEAGUE_FILTERS = [
   { key: 'mlb', label: 'MLB', sportId: 1 },
@@ -178,27 +183,30 @@ function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
             patternUnits="userSpaceOnUse"
             x={0}
             y={0}
-            width={LOGO_TILE}
-            height={LOGO_TILE}
+            width={TILE.tileW}
+            height={TILE.tileH}
             patternTransform={`rotate(${LOGO_ROTATE}) translate(${LOGO_OFFSET_X} ${LOGO_OFFSET_Y})`}
+            style={{ overflow: 'visible' }}
           >
             <rect
-              width={LOGO_TILE}
-              height={LOGO_TILE}
+              width={TILE.tileW}
+              height={TILE.tileH}
               className="winprob__patternbg"
               style={{ '--band-color': bandColor }}
             />
-            {logo && (
-              <image
-                href={logo}
-                x={LOGO_INSET}
-                y={LOGO_INSET}
-                width={LOGO_SIZE}
-                height={LOGO_SIZE}
-                className="winprob__patternlogo"
-                filter={logoOverride && logoOverride.mode !== 'swap' ? `url(#${recolorId})` : undefined}
-              />
-            )}
+            {logo &&
+              TILE.images.map((img, i) => (
+                <image
+                  key={i}
+                  href={logo}
+                  x={img.x}
+                  y={img.y}
+                  width={LOGO_SIZE}
+                  height={LOGO_SIZE}
+                  className="winprob__patternlogo"
+                  filter={logoOverride && logoOverride.mode !== 'swap' ? `url(#${recolorId})` : undefined}
+                />
+              ))}
           </pattern>
         </defs>
         <rect x={0} y={0} width={200} height={120} style={{ fill: `url(#${patternId})` }} />

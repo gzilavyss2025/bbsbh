@@ -9,7 +9,6 @@ import {
   WPA_PLOT_SIZE,
   wpaBandColor,
   wpaBandPinstripeColor,
-  wpaLogoLayout,
 } from '../components/WinProbChart.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import {
@@ -33,7 +32,7 @@ import {
   hasAlternate4,
   hasCityConnect,
 } from '../lib/teams.js'
-import { wpaLogoFor } from '../lib/wpaLogo.js'
+import { wpaLogoFor, wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
@@ -535,7 +534,9 @@ function TreatmentWpaPreview({
   const rotate = draft?.rotate ?? layoutDefaults.rotate
   const offsetX = draft?.offsetX ?? layoutDefaults.offsetX
   const offsetY = draft?.offsetY ?? layoutDefaults.offsetY
+  const paddingX = draft?.paddingX ?? layoutDefaults.paddingX
   const paddingY = draft?.paddingY ?? layoutDefaults.paddingY
+  const rowShift = draft?.rowShift ?? layoutDefaults.rowShift
   const hasDraft = draft && Object.keys(draft).length > 0
 
   // Same resolver the real chart uses (lib/wpaLogo.js), so this preview can't
@@ -543,13 +544,11 @@ function TreatmentWpaPreview({
   // a treatment's own procured art, only the stock CDN base mark.
   const { src: logo, recolor: logoOverride } = wpaLogoFor(teamId, treatment)
 
-  // Horizontal margin is a fixed 4px, same as WinProbChart.jsx's own tile —
-  // only the vertical gap is adjustable here (and can go negative to overlap
-  // adjacent tiles' logos on purpose).
-  const tileW = size + 4
-  const tileH = size + paddingY
-  const insetX = 2
-  const insetY = paddingY / 2
+  // Same tile math as the real chart, too (wpaTilePlacements) — the two
+  // paddings are independent, and either can go negative to overlap adjacent
+  // tiles' logos on purpose. `images` is one placement per row the half-drop
+  // needs, so a shifted grid previews exactly as it ships.
+  const { tileW, tileH, images } = wpaTilePlacements({ size, paddingX, paddingY, rowShift })
   const patternId = `wpaprev-pattern-${uid}`
   const recolorId = `wpaprev-recolor-${uid}`
   const pinstripeId = `wpaprev-pinstripe-${uid}`
@@ -562,10 +561,11 @@ function TreatmentWpaPreview({
   const copyText =
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
-    `Where: src/components/WinProbChart.jsx — WPA_LOGO_LAYOUT_OVERRIDES[${teamId}].${treatment} / ` +
-    `WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}].${treatment}\n` +
+    `Where: src/lib/wpaLogo.js — WPA_LOGO_LAYOUT_OVERRIDES[${teamId}].${treatment} / ` +
+    `src/components/WinProbChart.jsx — WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}].${treatment}\n` +
     `WPA_LOGO_LAYOUT_OVERRIDES[${teamId}] = { ...WPA_LOGO_LAYOUT_OVERRIDES[${teamId}], ` +
-    `${treatment}: { size: ${size}, rotate: ${rotate}, offsetX: ${offsetX}, offsetY: ${offsetY}, paddingY: ${paddingY} } }\n` +
+    `${treatment}: { size: ${size}, rotate: ${rotate}, offsetX: ${offsetX}, offsetY: ${offsetY}, ` +
+    `paddingX: ${paddingX}, paddingY: ${paddingY}, rowShift: ${rowShift} } }\n` +
     `WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}] = { ...WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}], ` +
     `${treatment}: ${overrideValue} }`
 
@@ -599,8 +599,18 @@ function TreatmentWpaPreview({
             <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
           </label>
           <label>
+            <span>H-Pad</span>
+            <input type="number" value={paddingX} onChange={(e) => onField('paddingX', Number(e.target.value))} />
+          </label>
+          <label>
             <span>V-Pad</span>
             <input type="number" value={paddingY} onChange={(e) => onField('paddingY', Number(e.target.value))} />
+          </label>
+          {/* Percent of a tile's width each row steps sideways from the one
+              above it — 50 is the brickwork half-drop, 0 a plain grid. */}
+          <label>
+            <span>Shift %</span>
+            <input type="number" value={rowShift} onChange={(e) => onField('rowShift', Number(e.target.value))} />
           </label>
           <label className="colorlab__wpapreviewcolor">
             <span>{pinstripe ? 'Stripe' : 'Band'}</span>
@@ -632,27 +642,24 @@ function TreatmentWpaPreview({
               x={0}
               y={0}
               width={tileW}
-              height={Math.max(1, tileH)}
+              height={tileH}
               patternTransform={`rotate(${rotate}) translate(${offsetX} ${offsetY})`}
               style={{ overflow: 'visible' }}
             >
-              <rect
-                width={tileW}
-                height={Math.max(1, tileH)}
-                className="winprob__patternbg"
-                style={{ '--band-color': bandFill }}
-              />
-              {logo && (
-                <image
-                  href={logo}
-                  x={insetX}
-                  y={insetY}
-                  width={size}
-                  height={size}
-                  className="winprob__patternlogo"
-                  filter={logoOverride && logoOverride.mode !== 'swap' ? `url(#${recolorId})` : undefined}
-                />
-              )}
+              <rect width={tileW} height={tileH} className="winprob__patternbg" style={{ '--band-color': bandFill }} />
+              {logo &&
+                images.map((img, i) => (
+                  <image
+                    key={i}
+                    href={logo}
+                    x={img.x}
+                    y={img.y}
+                    width={size}
+                    height={size}
+                    className="winprob__patternlogo"
+                    filter={logoOverride && logoOverride.mode !== 'swap' ? `url(#${recolorId})` : undefined}
+                  />
+                ))}
             </pattern>
           </defs>
           <rect

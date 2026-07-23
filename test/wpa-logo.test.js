@@ -11,7 +11,13 @@
 // rule that an override only reaches the art it was verified against.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { LOGO_COLOR_OVERRIDES, wpaLogoFor } from '../src/lib/wpaLogo.js'
+import {
+  LOGO_COLOR_OVERRIDES,
+  WPA_LOGO_DEFAULTS,
+  wpaLogoFor,
+  wpaLogoLayout,
+  wpaTilePlacements,
+} from '../src/lib/wpaLogo.js'
 import { teamLogoUrl } from '../src/lib/teams.js'
 
 // Nationals (120) — a 'flood' club with procured PNGs for three treatments.
@@ -63,4 +69,54 @@ test('defaults to main, and degrades to no tile for an unknown club', () => {
   // An unmapped MiLB id has no abbreviation, so there's no procured file to
   // point at — the band just renders its flat color, no broken <image>.
   assert.equal(wpaLogoFor(999999, 'alternate').src, null)
+})
+
+// --- tile geometry ---------------------------------------------------------
+
+test('the two paddings size the tile independently on their own axis', () => {
+  const wide = wpaTilePlacements({ size: 20, paddingX: 10, paddingY: 4, rowShift: 0 })
+  assert.equal(wide.tileW, 30) // size + paddingX
+  assert.equal(wide.tileH, 24) // size + paddingY, one row
+  assert.deepEqual(wide.images, [{ x: 5, y: 2 }]) // each inset by half its own padding
+
+  const tall = wpaTilePlacements({ size: 20, paddingX: 4, paddingY: 10, rowShift: 0 })
+  assert.equal(tall.tileW, 24)
+  assert.equal(tall.tileH, 30)
+  assert.deepEqual(tall.images, [{ x: 2, y: 5 }])
+})
+
+test('a row shift staggers alternating rows by that % of a tile width', () => {
+  const { tileW, tileH, images } = wpaTilePlacements({ size: 20, paddingX: 4, paddingY: 4, rowShift: 50 })
+  // Two rows per tile — repeating THAT is what makes every other row stagger.
+  assert.equal(tileW, 24)
+  assert.equal(tileH, 48)
+  assert.deepEqual(images, [
+    { x: 2, y: 2 },
+    { x: 14, y: 26 }, // half a tile width (12) over, one row height (24) down
+  ])
+})
+
+test('a shift of zero or a whole tile width collapses back to a plain grid', () => {
+  const plain = wpaTilePlacements({ size: 20, paddingX: 4, paddingY: 4, rowShift: 0 })
+  assert.equal(plain.images.length, 1)
+  assert.equal(plain.tileH, 24)
+  // 100% lands every row back in the same columns — same picture, half the draws.
+  assert.deepEqual(wpaTilePlacements({ size: 20, paddingX: 4, paddingY: 4, rowShift: 100 }), plain)
+})
+
+test('a negative padding still leaves a positive tile to repeat', () => {
+  // Overlapping marks on purpose: the logo is bigger than its own tile, and
+  // the pattern's overflow:visible is what lets neighbors bleed into each
+  // other. The tile itself must never collapse to zero/negative height.
+  const { tileH } = wpaTilePlacements({ size: 20, paddingX: 4, paddingY: -40, rowShift: 0 })
+  assert.ok(tileH >= 1, `tile height stayed positive, got ${tileH}`)
+})
+
+test('layout falls back to the shared defaults, half-drop included', () => {
+  const layout = wpaLogoLayout(NATIONALS, 'main')
+  assert.deepEqual(layout, WPA_LOGO_DEFAULTS)
+  assert.equal(layout.rowShift, 50, 'bands ship as a brickwork step-and-repeat')
+  // wpaTilePlacements fills in anything a caller leaves out, so a partial
+  // override (say size alone) can't silently drop the shift or a padding.
+  assert.deepEqual(wpaTilePlacements({ size: WPA_LOGO_DEFAULTS.size }), wpaTilePlacements(layout))
 })
