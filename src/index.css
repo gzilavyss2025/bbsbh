@@ -55,7 +55,7 @@
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
        notification cards), `.bs__potgDesc`, `.flipback__potg`,
        `.psseries__potgDesc`
-     - the pre-half callout cards — `.prehalf__who`, `.prehalf__text`
+     - the pre-half callout cards' fun-fact line — `.prehalf__text`
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
        `.favteamsheet__accountpitch` (the section title + button stay uppercase)
@@ -8762,12 +8762,13 @@ body {
   color: var(--seal-deep);
   font-size: var(--fs-caption);
 }
-/* Natural-case sentences, same sanctioned exception as .prehalf__who/__text
-   (see the ALL-CAPS INVARIANT block) — a player's name and a fun-fact
-   sentence aren't structural labels. */
-#root .marginnotes__who,
+/* The fun-fact sentence reads as a natural-case sentence — same sanctioned
+   exception as .prehalf__text (see the ALL-CAPS INVARIANT block) — but the
+   name line above it is a structural label like any other card heading, so
+   it stays in the app's shouted convention (same split as .prehalf__who,
+   which lost this same exemption). */
 #root .marginnotes__text {
-  text-transform: none; /* caps-exempt: margin notes read as natural sentences */
+  text-transform: none; /* caps-exempt: margin notes' fun-fact line reads as a natural sentence */
 }
 /* Same "Show N more" block button as .teammates__more (TeamInfo.jsx) and
    .bs__noteMore (BoxScore.jsx) — one-way reveal, no collapse back. */
@@ -11598,15 +11599,19 @@ body {
     gap: 0 var(--space-6);
     align-items: start;
   }
-  /* Reset to line the Pitchers card's own top edge up with the Lineups
-     card's on its right — .pitchers' margin-top is sized for the phone flow
-     (stacked below the running content above it), but here it's the left
-     column's first element with nothing above it to space from. Same reset
-     for .innings__ref-defense: MarginNotes/Pitchers can both render nothing
-     (early in a game, or no notes that half), leaving the Defense card as the
-     column's actual first element — its own margin-top is sized for sitting
-     BELOW a sibling, so it needs the same zero-out when it lands first. */
+  /* Reset to line the left column's own top edge up with the Lineups card's
+     on its right — .pitchers' margin-top is sized for the phone flow
+     (stacked below the running content above it), but here it's often the
+     left column's first element with nothing above it to space from
+     (.pitchers relies on a PRECEDING sibling's own margin-bottom for
+     spacing, same idiom .marginnotes/.innings__ref-defense use, so
+     unconditionally zeroing its top margin never loses a gap). Margin Notes
+     and Defense only sometimes land first — MarginNotes can be absent (no
+     notes that half) and Defense render nothing too (early in a game) —
+     hence the :first-child gate on those two instead of the same
+     unconditional reset. */
   .innings__ref-left .pitchers,
+  .innings__ref-left > .marginnotes:first-child,
   .innings__ref-left > .innings__ref-defense:first-child {
     margin-top: 0;
   }
