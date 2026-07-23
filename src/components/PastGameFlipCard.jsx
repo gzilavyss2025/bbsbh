@@ -67,7 +67,7 @@ export function PastGameFlipCard({
       )}
       renderBack={() => {
         if (state.loading) {
-          return <BoxScoreSkeleton />
+          return <BoxScoreSkeleton cardMeta={cardMeta} />
         }
         if (state.error) {
           return <p className="hint hint--error">Couldn&apos;t load this game.</p>

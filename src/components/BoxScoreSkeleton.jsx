@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { showsPerformerCard } from '../lib/resultCards.js'
 
 // Placeholder for a PastGameFlipCard's back face while a revealed game's
 // feed/win-probability are still in flight (see PastGameFlipCard.jsx) —
@@ -12,7 +13,23 @@ import { useId } from 'react'
 // copies of the scoreboard-flip Loader reads as the same animation
 // stuttering/repeating. Purely decorative (aria-hidden); the one accessible
 // string is the status message screen readers get instead.
-export function BoxScoreSkeleton() {
+//
+// `cardMeta` is the SAME classification PastGameFlipCard forwards to
+// GameResultFace once revealed, threaded through here too so
+// showsPerformerCard (resultCards.js) can reserve a matching
+// .skel__perfcard block when the real face is going to stack an extra
+// PerformerCard above its Play of the Game text (the crowned Game of the
+// Night shows both). Best-effort, NOT a guarantee against every layout
+// jump: cardMeta comes from a day-wide batch (useDayCardMeta.js) that needs
+// every game's own signals before it can classify any one of them, so it
+// can populate no earlier than — and often slightly after — this card's own
+// fetch resolves and this skeleton unmounts. When it lands late,
+// GameResultFace itself mounts without the block and grows into it on the
+// next render, same as it already could before this skeleton existed; this
+// placeholder only narrows that window, for whichever cards' own fetches
+// happen to be slower than the day-wide classification.
+export function BoxScoreSkeleton({ cardMeta = null }) {
+  const showPerformer = showsPerformerCard(cardMeta)
   return (
     <div className="flipback skel" role="status">
       <span className="sr-only">Pulling the box score…</span>
@@ -29,6 +46,7 @@ export function BoxScoreSkeleton() {
           <span className="skel__bar skel__bar--decision" />
           <span className="skel__bar skel__bar--decision" />
         </div>
+        {showPerformer && <SkelPerformerCard />}
         <div className="skel__potg">
           <span className="skel__circle skel__circle--shot" />
           <div className="skel__potgLines">
@@ -50,6 +68,22 @@ function SkelTeamRow() {
       <span className="skel__bar skel__bar--num" />
       <span className="skel__bar skel__bar--num" />
       <span className="skel__bar skel__bar--num" />
+    </div>
+  )
+}
+
+// Mirrors PerformerCard.jsx's shape (headshot + name/team/stat lines) — only
+// rendered when showsPerformerCard(cardMeta) says the real GameResultFace
+// will show one too (see the BoxScoreSkeleton header comment above).
+function SkelPerformerCard() {
+  return (
+    <div className="skel__perfcard">
+      <span className="skel__bar skel__bar--perfShot" />
+      <div className="skel__perfLines">
+        <span className="skel__bar skel__bar--perfName" />
+        <span className="skel__bar skel__bar--perfTeam" />
+        <span className="skel__bar skel__bar--perfStat" />
+      </div>
     </div>
   )
 }
@@ -278,8 +312,8 @@ function buildFrame(theta) {
     }
   }
   const seamD = subpaths
-    .filter((sub) => sub.length > 1)
-    .map((sub) => sub.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' '))
+    .filter((subpath) => subpath.length > 1)
+    .map((subpath) => subpath.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' '))
     .join(' ')
 
   const stitchLines = []
