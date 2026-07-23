@@ -1,3 +1,8 @@
+---
+name: clean-worktrees
+description: Interactively remove local bbsbh worktrees whose work is already merged or whose upstream branch was deleted. Use when the user says "clean worktrees" or asks to clear out stale worktrees.
+---
+
 # /clean-worktrees
 
 Interactively remove local worktrees whose work is already merged. Companion to

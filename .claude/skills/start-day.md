@@ -1,3 +1,8 @@
+---
+name: start-day
+description: Get the local bbsbh checkout to a known-good state at the start of a session (refresh main, check worktrees/dev servers/open PRs/nightly cron) and report what needs a decision. Use when the user says "start day" or asks for the morning status check.
+---
+
 # /start-day
 
 The maintainer's first command of the day, in a fresh session, before any other
