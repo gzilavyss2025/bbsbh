@@ -85,8 +85,16 @@ const LOGO_SIZE = 20
 const LOGO_ROTATE = -14
 const LOGO_OFFSET_X = 8
 const LOGO_OFFSET_Y = 6
+// The tile's vertical margin (horizontal stays a fixed 4px, see LOGO_TILE_X
+// below) — the gap between one logo and the next tile's logo directly above/
+// below it, in the tile pattern's own coordinate system (pre-rotation).
+// Adjustable per (team, treatment) via WPA_LOGO_LAYOUT_OVERRIDES.paddingY
+// below; negative shrinks the tile smaller than the logo itself, so adjacent
+// tiles' marks overlap on purpose — a deliberate choice for a club whose mark
+// wants to run tighter than its own footprint.
+const LOGO_PADDING_Y = 4
 
-// The four global layout numbers above, exported as one object so a caller
+// The five global layout numbers above, exported as one object so a caller
 // (Team Color Lab's WPA logo lab, screens/TeamColorLab.jsx) can seed its
 // per-team controls at the same defaults this chart uses for every team
 // without a per-team override.
@@ -95,6 +103,7 @@ export const WPA_LOGO_DEFAULTS = {
   rotate: LOGO_ROTATE,
   offsetX: LOGO_OFFSET_X,
   offsetY: LOGO_OFFSET_Y,
+  paddingY: LOGO_PADDING_Y,
 }
 
 // A handful of clubs' base logo mark is itself (near-)solid in the same hex
@@ -164,6 +173,7 @@ export function wpaLogoLayout(teamId, treatment) {
     rotate: o?.rotate ?? LOGO_ROTATE,
     offsetX: o?.offsetX ?? LOGO_OFFSET_X,
     offsetY: o?.offsetY ?? LOGO_OFFSET_Y,
+    paddingY: o?.paddingY ?? LOGO_PADDING_Y,
   }
 }
 
@@ -385,10 +395,17 @@ export function WinProbChart({
       : teamLogoUrl(homeId, homeTreat === 'main' ? 'base' : homeTreat)
   const awayLayout = wpaLogoLayout(awayId, awayTreat)
   const homeLayout = wpaLogoLayout(homeId, homeTreat)
-  const awayTile = awayLayout.size + 4
-  const awayInset = (awayTile - awayLayout.size) / 2
-  const homeTile = homeLayout.size + 4
-  const homeInset = (homeTile - homeLayout.size) / 2
+  // Horizontal margin is a fixed 4px; vertical is the per-(team, treatment)
+  // paddingY (wpaLogoLayout above) — the two aren't tied together, so a tile
+  // can go tall-and-loose or short-and-overlapping without also widening.
+  const awayTileW = awayLayout.size + 4
+  const awayTileH = awayLayout.size + awayLayout.paddingY
+  const awayInsetX = 2
+  const awayInsetY = awayLayout.paddingY / 2
+  const homeTileW = homeLayout.size + 4
+  const homeTileH = homeLayout.size + homeLayout.paddingY
+  const homeInsetX = 2
+  const homeInsetY = homeLayout.paddingY / 2
   const awayPatternId = `winprob-away-${patternUid}`
   const homePatternId = `winprob-home-${patternUid}`
   const awayRecolorId = `winprob-recolor-away-${patternUid}`
@@ -502,21 +519,22 @@ export function WinProbChart({
             patternUnits="userSpaceOnUse"
             x={PLOT_L}
             y={PLOT_T}
-            width={awayTile}
-            height={awayTile}
+            width={awayTileW}
+            height={Math.max(1, awayTileH)}
             patternTransform={`rotate(${awayLayout.rotate}) translate(${awayLayout.offsetX} ${awayLayout.offsetY})`}
+            style={{ overflow: 'visible' }}
           >
             <rect
-              width={awayTile}
-              height={awayTile}
+              width={awayTileW}
+              height={Math.max(1, awayTileH)}
               className="winprob__patternbg"
               style={{ '--band-color': awayBandFill }}
             />
             {awayLogo && (
               <image
                 href={awayLogo}
-                x={awayInset}
-                y={awayInset}
+                x={awayInsetX}
+                y={awayInsetY}
                 width={awayLayout.size}
                 height={awayLayout.size}
                 className="winprob__patternlogo"
@@ -529,21 +547,22 @@ export function WinProbChart({
             patternUnits="userSpaceOnUse"
             x={PLOT_L}
             y={PLOT_T}
-            width={homeTile}
-            height={homeTile}
+            width={homeTileW}
+            height={Math.max(1, homeTileH)}
             patternTransform={`rotate(${homeLayout.rotate}) translate(${homeLayout.offsetX} ${homeLayout.offsetY})`}
+            style={{ overflow: 'visible' }}
           >
             <rect
-              width={homeTile}
-              height={homeTile}
+              width={homeTileW}
+              height={Math.max(1, homeTileH)}
               className="winprob__patternbg"
               style={{ '--band-color': homeBandFill }}
             />
             {homeLogo && (
               <image
                 href={homeLogo}
-                x={homeInset}
-                y={homeInset}
+                x={homeInsetX}
+                y={homeInsetY}
                 width={homeLayout.size}
                 height={homeLayout.size}
                 className="winprob__patternlogo"

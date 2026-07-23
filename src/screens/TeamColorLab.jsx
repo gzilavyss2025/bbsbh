@@ -535,14 +535,20 @@ function TreatmentWpaPreview({
   const rotate = draft?.rotate ?? layoutDefaults.rotate
   const offsetX = draft?.offsetX ?? layoutDefaults.offsetX
   const offsetY = draft?.offsetY ?? layoutDefaults.offsetY
+  const paddingY = draft?.paddingY ?? layoutDefaults.paddingY
   const hasDraft = draft && Object.keys(draft).length > 0
 
   const logoOverride = LOGO_COLOR_OVERRIDES[teamId]
   const variant = treatment === 'main' ? 'base' : treatment
   const logo = logoOverride?.mode === 'swap' ? logoOverride.src : teamLogoUrl(teamId, variant)
 
-  const tile = size + 4
-  const inset = (tile - size) / 2
+  // Horizontal margin is a fixed 4px, same as WinProbChart.jsx's own tile —
+  // only the vertical gap is adjustable here (and can go negative to overlap
+  // adjacent tiles' logos on purpose).
+  const tileW = size + 4
+  const tileH = size + paddingY
+  const insetX = 2
+  const insetY = paddingY / 2
   const patternId = `wpaprev-pattern-${uid}`
   const recolorId = `wpaprev-recolor-${uid}`
   const pinstripeId = `wpaprev-pinstripe-${uid}`
@@ -558,7 +564,7 @@ function TreatmentWpaPreview({
     `Where: src/components/WinProbChart.jsx — WPA_LOGO_LAYOUT_OVERRIDES[${teamId}].${treatment} / ` +
     `WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}].${treatment}\n` +
     `WPA_LOGO_LAYOUT_OVERRIDES[${teamId}] = { ...WPA_LOGO_LAYOUT_OVERRIDES[${teamId}], ` +
-    `${treatment}: { size: ${size}, rotate: ${rotate}, offsetX: ${offsetX}, offsetY: ${offsetY} } }\n` +
+    `${treatment}: { size: ${size}, rotate: ${rotate}, offsetX: ${offsetX}, offsetY: ${offsetY}, paddingY: ${paddingY} } }\n` +
     `WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}] = { ...WPA_TREATMENT_BAND_COLOR_OVERRIDES[${teamId}], ` +
     `${treatment}: ${overrideValue} }`
 
@@ -591,6 +597,10 @@ function TreatmentWpaPreview({
             <span>Y</span>
             <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
           </label>
+          <label>
+            <span>V-Pad</span>
+            <input type="number" value={paddingY} onChange={(e) => onField('paddingY', Number(e.target.value))} />
+          </label>
           <label className="colorlab__wpapreviewcolor">
             <span>{pinstripe ? 'Stripe' : 'Band'}</span>
             <input type="text" value={bandColor} onChange={(e) => onField('bandColor', e.target.value)} />
@@ -620,16 +630,22 @@ function TreatmentWpaPreview({
               patternUnits="userSpaceOnUse"
               x={0}
               y={0}
-              width={tile}
-              height={tile}
+              width={tileW}
+              height={Math.max(1, tileH)}
               patternTransform={`rotate(${rotate}) translate(${offsetX} ${offsetY})`}
+              style={{ overflow: 'visible' }}
             >
-              <rect width={tile} height={tile} className="winprob__patternbg" style={{ '--band-color': bandFill }} />
+              <rect
+                width={tileW}
+                height={Math.max(1, tileH)}
+                className="winprob__patternbg"
+                style={{ '--band-color': bandFill }}
+              />
               {logo && (
                 <image
                   href={logo}
-                  x={inset}
-                  y={inset}
+                  x={insetX}
+                  y={insetY}
                   width={size}
                   height={size}
                   className="winprob__patternlogo"
