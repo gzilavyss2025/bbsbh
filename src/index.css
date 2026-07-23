@@ -6366,6 +6366,15 @@ body {
   margin: var(--space-3) 14px 12px;
 }
 
+/* This is a phone-first app, so "mobile" is the default breakpoint below
+   740px — hide the "Pitch colors" legend button/modal there; it still shows
+   at the wider breakpoint. */
+@media (max-width: 739.98px) {
+  .half__pitchkeyfoot {
+    display: none;
+  }
+}
+
 .pbp__note {
   display: flex;
   align-items: center;
