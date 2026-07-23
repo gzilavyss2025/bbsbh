@@ -90,13 +90,30 @@ function mainOverrideLogoUrl(teamId) {
 }
 
 // Alternate/City Connect colors have no existing source in this app — the
-// user supplies these treatment-by-treatment, together with each logo file.
-// Keyed by teamId, each value up to 3 { label, hex } entries in Primary/
-// Secondary/Third order. A team with no entry yet (or an entry short of 3)
-// renders the missing slot(s) as a placeholder swatch, same as a missing logo.
-const ALT_COLORS = {}
+// user supplies these treatment-by-treatment, together with each logo file,
+// as a single tile-background color (unlike Main's fixed Primary/Secondary/
+// Third triad, since these marks don't carry an official 3-color set here).
+// Keyed by teamId; a team with no entry yet renders a placeholder swatch,
+// same as a missing logo.
+const ALT_COLORS = {
+  111: [{ label: 'Background', hex: '#0C2340' }], // Red Sox
+  113: [{ label: 'Background', hex: '#C6011F' }], // Reds
+  114: [{ label: 'Background', hex: '#00385D' }], // Guardians
+  119: [{ label: 'Background', hex: '#FFFFFF' }], // Dodgers
+  135: [{ label: 'Background', hex: '#2F241D' }], // Padres
+  136: [{ label: 'Background', hex: '#005C5C' }], // Mariners
+  137: [{ label: 'Background', hex: '#FD5A1E' }], // Giants
+  139: [{ label: 'Background', hex: '#8FBCE6' }], // Rays
+  146: [{ label: 'Background', hex: '#FFFFFF' }], // Marlins
+  147: [{ label: 'Background', hex: '#0C2340' }], // Yankees
+  158: [{ label: 'Background', hex: '#6CACE4' }], // Brewers
+}
 
-const CITY_CONNECT_COLORS = {}
+const CITY_CONNECT_COLORS = {
+  118: [{ label: 'Background', hex: '#FFFFFF' }], // Royals
+  139: [{ label: 'Background', hex: '#000000' }], // Rays
+  145: [{ label: 'Background', hex: '#000000' }], // White Sox
+}
 
 function colorsFor(teamId, treatmentKey) {
   if (treatmentKey === 'main') return mainColorTriad(teamId)
@@ -154,14 +171,20 @@ function TreatmentBox({ teamId, name, treatment, label }) {
   const colors = colorsFor(teamId, treatment)
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
-  const activeBgIndex = override ? BG_ROLE_INDEX[override.bg] : -1
+  // Main picks its tile background from one of the three official swatches
+  // (MAIN_OVERRIDES names which); Alternate/City Connect have only the one
+  // user-supplied Background swatch (index 0, see ALT_COLORS/
+  // CITY_CONNECT_COLORS), used as their tile background whenever present.
+  const activeBgIndex = override ? BG_ROLE_INDEX[override.bg] : colors[0] ? 0 : -1
 
-  const logoboxStyle = override
-    ? {
-        '--tint': colors[activeBgIndex]?.hex,
-        '--scale': 1.32 * (override.scale ?? 1),
-      }
-    : undefined
+  const tint = activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined
+  const logoboxStyle =
+    tint || override
+      ? {
+          '--tint': tint,
+          '--scale': 1.32 * (override?.scale ?? 1),
+        }
+      : undefined
 
   return (
     <div className="colorlab__treatment">
