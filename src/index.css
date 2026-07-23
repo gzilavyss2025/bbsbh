@@ -20360,21 +20360,20 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
-/* Navy variant (misleadingly still named `--kraft` from an earlier
-   kraft-tape-brown fill) — that brown sat directly under the card's own
-   navy/gold masthead border and clashed with the gold. `--accent-primary`
-   (navy) is already a guarded text-on-ink pairing (see check-contrast.mjs),
-   and reads as a continuation of the masthead's own navy rather than a
-   competing accent. */
-.foulboard__grouprow--kraft th {
+/* Navy variant — replaced an earlier kraft-tape-brown fill that sat directly
+   under the card's own navy/gold masthead border and clashed with the gold.
+   `--accent-primary` (navy) is already a guarded text-on-ink pairing (see
+   check-contrast.mjs), and reads as a continuation of the masthead's own navy
+   rather than a competing accent. */
+.foulboard__grouprow--navy th {
   background: var(--accent-primary);
   color: var(--text-on-ink);
   border-top: none;
 }
-.foulboard__grouprow--kraft:first-child th {
+.foulboard__grouprow--navy:first-child th {
   border-top: none;
 }
-.foulboard__grouprow--kraft:not(:first-child) th {
+.foulboard__grouprow--navy:not(:first-child) th {
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 /* The repeated Pitch/Foul%/Pitches column header under each pitch-family

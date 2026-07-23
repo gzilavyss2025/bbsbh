@@ -120,9 +120,10 @@ test('team, pitcher, inning, and 10+ fold aggregates roll up correctly', () => {
   // All pitches were vs the starter.
   assert.equal(agg.innings.get(1).pitchesVsStarter, 2)
   assert.equal(agg.innings.get(1).pitchesVsReliever, 0)
-  // Pitch-type tally (all 'FF' here).
+  // Pitch-type tally (all 'FF' here): 3 pitches, 2 fouls ('F'), 1 whiff ('S').
   assert.equal(agg.pitchTypes.get('FF').pitches, 3)
   assert.equal(agg.pitchTypes.get('FF').fouls, 2)
+  assert.equal(agg.pitchTypes.get('FF').whiffs, 1)
   // Both games' fouls are away team 1's total (2, batters 10 + 12); home team
   // 2 never batted in this fixture. Neither play set a score, so it's still 0-0.
   assert.deepEqual(agg.game, {

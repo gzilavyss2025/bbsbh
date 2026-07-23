@@ -377,12 +377,10 @@ function FoulFeatured({ player, favoriteTeamId, positions }) {
 function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteTeamId, positions }) {
   if (!rows || rows.length === 0) return null
   const lead = featured ? rows[0] : null
-  const rest = rows
-  const rankOffset = 1
   return (
     <BoardCard title={title}>
       {lead && <FoulFeatured player={lead} favoriteTeamId={favoriteTeamId} positions={positions} />}
-      {rest.length > 0 && (
+      {rows.length > 0 && (
         <div className="ledger-wrap">
           <table className="standings foulboard">
             <thead>
@@ -394,10 +392,10 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
               </tr>
             </thead>
             <tbody>
-              {rest.map((r, i) => (
+              {rows.map((r, i) => (
                 <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
                   <td className="team">
-                    <span className="umprank__rank">{i + rankOffset}</span>
+                    <span className="umprank__rank">{i + 1}</span>
                     <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
                     <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
                   </td>
@@ -1023,7 +1021,9 @@ function ByPitchType({ league, teamRates }) {
     .map((r) => ({
       ...r,
       rate: r.fouls / r.pitches,
-      whiffRate: r.pitches > 0 ? (r.whiffs ?? 0) / r.pitches : null,
+      // Preserve null (rather than defaulting to 0) so a row genuinely missing
+      // whiff data renders '—' below, not a misleading 0.0%.
+      whiffRate: r.whiffs == null ? null : r.whiffs / r.pitches,
       category: PITCH_CATEGORY[r.code] ?? 'Other',
     }))
   if (rows.length === 0) return null
@@ -1059,7 +1059,7 @@ function ByPitchType({ league, teamRates }) {
 function TeamPitchCategoryGroup({ group }) {
   return (
     <>
-      <tr className="foulboard__grouprow foulboard__grouprow--kraft">
+      <tr className="foulboard__grouprow foulboard__grouprow--navy">
         <th colSpan={7} scope="rowgroup">
           {group.category}
         </th>
@@ -1101,7 +1101,7 @@ function TeamPitchCategoryGroup({ group }) {
 function PitchCategoryGroup({ group }) {
   return (
     <>
-      <tr className="foulboard__grouprow foulboard__grouprow--kraft">
+      <tr className="foulboard__grouprow foulboard__grouprow--navy">
         <th colSpan={4} scope="rowgroup">
           {group.category}
         </th>
