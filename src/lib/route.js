@@ -104,8 +104,13 @@ export function parseRoute(url) {
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   // Same page, deep-linked straight to one game's gallery (e.g. from the box
   // score) — skips the club/season picker instead of adding a distinct route name.
-  if (parts.length === 2 && parts[0] === 'photos')
-    return { name: 'photos', gamePk: Number(parts[1]) }
+  // A non-numeric segment falls back to the plain browse view (same idea as
+  // the invalid-date fallback above) rather than stranding the page with
+  // neither a picker nor a gallery to show.
+  if (parts.length === 2 && parts[0] === 'photos') {
+    const gamePk = Number(parts[1])
+    return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
+  }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')

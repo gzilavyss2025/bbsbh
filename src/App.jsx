@@ -184,7 +184,11 @@ export default function App() {
   } else if (route.name === 'first-scorebook') {
     content = <FirstScorebookPage />
   } else if (route.name === 'photos') {
-    content = <GamePhotosPage initialGamePk={route.gamePk ?? null} />
+    // Keyed on the deep-linked gamePk so navigating between `/photos` and
+    // `/photos/{gamePk}` (e.g. the page's own footer link back to the plain
+    // browse view) remounts with fresh state instead of reusing the same
+    // instance's stale useState seed.
+    content = <GamePhotosPage key={route.gamePk ?? 'browse'} initialGamePk={route.gamePk ?? null} />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
   } else if (route.name === 'team-color-lab' && TeamColorLab) {
