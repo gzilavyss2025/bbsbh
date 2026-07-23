@@ -81,6 +81,7 @@ export function BoxScore({
   uniforms,
   scorebookWeather,
   winProbability,
+  winProbTreatment,
   callouts,
   vsTeam,
   onReload,
@@ -142,6 +143,7 @@ export function BoxScore({
               potg={potg}
               winProbPoints={winProbPoints}
               winProbBigPlays={winProbBigPlays}
+              winProbTreatment={winProbTreatment}
               insights={insights}
               inningDigest={inningDigest}
               calloutNotes={calloutNotes}
@@ -183,7 +185,7 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -278,6 +280,8 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
               homeAbbr={box.home.abbreviation}
               awayId={box.away.id}
               homeId={box.home.id}
+              awayTreatment={winProbTreatment?.away}
+              homeTreatment={winProbTreatment?.home}
             />
             <Decisions decisions={box.decisions} />
             {/* Nested under the decisions rather than full-width up top — how

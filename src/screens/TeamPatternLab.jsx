@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react'
+import { CopyBox } from '../components/CopyBox.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import {
   BAND_COLOR_OVERRIDES,
@@ -202,7 +203,7 @@ function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
         </defs>
         <rect x={0} y={0} width={200} height={120} style={{ fill: `url(#${patternId})` }} />
       </svg>
-      <CopyBox text={copyText} label="Copy team info" />
+      <CopyBox text={copyText} label={`Copy ${name} pattern info`} />
       <label className="patternlab__notelabel" htmlFor={`note-${teamId}`}>
         What should change about this team’s pattern?
       </label>
@@ -213,31 +214,6 @@ function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
         onChange={(e) => onNoteChange(e.target.value)}
         rows={3}
       />
-    </div>
-  )
-}
-
-function CopyBox({ text, label }) {
-  const [copied, setCopied] = useState(false)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // Clipboard permission denied or unavailable — the text is still
-      // selectable/readable in the box, so this fails quiet rather than
-      // throwing up an error the user can't act on.
-    }
-  }
-
-  return (
-    <div className="patternlab__copybox">
-      <pre className="patternlab__copytext">{text}</pre>
-      <button type="button" className="patternlab__copybtn" onClick={copy} aria-label={label}>
-        {copied ? 'Copied!' : '⧉ Copy'}
-      </button>
     </div>
   )
 }
