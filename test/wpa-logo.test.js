@@ -140,9 +140,15 @@ test('a shift of zero or a whole tile width collapses back to a plain grid', () 
 test('a negative padding still leaves a positive tile to repeat', () => {
   // Overlapping marks on purpose: the logo is bigger than its own tile, and
   // the pattern's overflow:visible is what lets neighbors bleed into each
-  // other. The tile itself must never collapse to zero/negative height.
+  // other. The tile itself must never collapse to zero/negative size — an
+  // SVG pattern with width or height ≤ 0 is silently not rendered, and the
+  // whole band loses its marks. Both axes matter: H-Pad is just as tunable
+  // in Team Color Lab (and pasteable into an override) as V-Pad.
   const { tileH } = wpaTilePlacements({ size: 20, paddingX: 4, paddingY: -40, rowShift: 0 })
   assert.ok(tileH >= 1, `tile height stayed positive, got ${tileH}`)
+
+  const { tileW } = wpaTilePlacements({ size: 20, paddingX: -40, paddingY: 4, rowShift: 0 })
+  assert.ok(tileW >= 1, `tile width stayed positive, got ${tileW}`)
 })
 
 test('layout falls back to the shared defaults, row shift off', () => {

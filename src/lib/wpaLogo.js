@@ -237,7 +237,11 @@ export function wpaLogoLayout(teamId, treatment) {
 // than adding a third clipped copy per tile.)
 export function wpaTilePlacements(layout) {
   const { size, paddingX, paddingY, rowShift } = { ...WPA_LOGO_DEFAULTS, ...layout }
-  const tileW = size + paddingX
+  // Clamped like rowH below: a pattern whose width or height hits ≤ 0 is
+  // silently not rendered at all, so a padding more negative than the mark
+  // is tall/wide (typeable in Team Color Lab's H-Pad/V-Pad fields) must
+  // degrade to maximum overlap, not a blank band.
+  const tileW = Math.max(1, size + paddingX)
   const rowH = Math.max(1, size + paddingY)
   const insetX = paddingX / 2
   const insetY = paddingY / 2

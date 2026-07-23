@@ -8,7 +8,9 @@ summary and the high-level architecture map.
 ## Screens (`src/screens/`)
 
 `GameSelect` (slate with the MLB/AAA/AA/A+/A level toggle) → `GameView` (owns the
-site-home bar + grayscale away@home masthead that opens the sketch modal) →
+site-home bar + away@home masthead of uniform-treatment tiles — the same
+`TeamTreatmentMark` square the slate card shows — each opening the grayscale
+sketch modal) →
 `TeamInfo` (×2, away then home) → `InningViewer`. `LogoSheet` is a standalone
 printable grayscale logo sheet for pencil-sketching, reached from the slate header.
 
