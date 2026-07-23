@@ -8137,6 +8137,141 @@ body {
   color: var(--text-caption);
 }
 
+/* ------------------------------------------------------------ team pattern lab
+   Dev-only harness (screens/TeamPatternLab.jsx) reviewing every club's
+   win-probability band pattern (WinProbChart.jsx) at full size, one league
+   level at a time. */
+.patternlab__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.patternlab__filterbtn {
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-compact);
+  cursor: pointer;
+}
+
+.patternlab__filterbtn.is-active {
+  background: var(--ink-0);
+  color: var(--text-on-ink);
+  border-color: var(--ink-0);
+}
+
+.patternlab__filterbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.patternlab__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5);
+  padding-bottom: var(--space-6);
+}
+
+.patternlab__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.patternlab__teamname {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
+}
+
+.patternlab__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.patternlab__copybox {
+  position: relative;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+  padding: var(--space-2);
+}
+
+.patternlab__copytext {
+  margin: 0;
+  padding-right: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.patternlab__copybtn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}
+
+.patternlab__copybtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.patternlab__notelabel {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.patternlab__notefield {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+.patternlab__notefield:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.patternlab__compiled {
+  padding-bottom: var(--space-6);
+}
+
+.patternlab__compiledtitle {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-h2);
+  margin-bottom: var(--space-3);
+}
+
 /* -------------------------------------------------------------- logo sketch
    Tap a grayscale team mark on a team page to blow it up for pencil tracing.
    Reuses the .scrim backdrop but centers its card instead of docking a sheet. */

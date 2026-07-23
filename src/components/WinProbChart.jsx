@@ -97,7 +97,7 @@ const LOGO_OFFSET_Y = 6
 //     byte-for-byte copy with ONLY the colliding fill's hex swapped —
 //     verified against the live CDN source, not reconstructed from memory.
 // A team with no entry here keeps its logo's own natural colors.
-const LOGO_COLOR_OVERRIDES = {
+export const LOGO_COLOR_OVERRIDES = {
   113: { mode: 'flood', color: '#FFFFFF' }, // Reds — base mark is solid red, no black in it to preserve
   118: { mode: 'flood', color: '#FFFFFF' }, // Royals
   119: { mode: 'flood', color: '#FFFFFF' }, // Dodgers
@@ -118,7 +118,7 @@ const LOGO_COLOR_OVERRIDES = {
 // reads better as a big fill, or (Diamondbacks) a literal accent from their
 // own logo art that isn't in that pair at all. Falls through to the team's
 // normal chip primary for every other team.
-const BAND_COLOR_OVERRIDES = {
+export const BAND_COLOR_OVERRIDES = {
   109: '#3EC1CC', // Diamondbacks — the teal from their own "A" logo, not in TEAM_COLOR_PAIRS
   111: '#0C2340', // Red Sox — secondary navy, not primary red
   136: '#005C5C', // Mariners — secondary green/teal, not primary navy
@@ -128,7 +128,7 @@ const BAND_COLOR_OVERRIDES = {
 // A team's brand pair for chip/marker chrome, falling back to a neutral
 // graphite pair for a team teamChipColors doesn't know (no teamId handed in,
 // or an unrecognized MiLB id) rather than rendering an undefined color.
-function chipColorsFor(teamId) {
+export function chipColorsFor(teamId) {
   return teamChipColors(teamId) ?? { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 }
 
@@ -142,7 +142,7 @@ function chipColorsFor(teamId) {
 // override color, then feMerge stacks it BEHIND (feMergeNode order = paint
 // order) the original artwork — a same-color halo just outside the mark's
 // existing edge, thickened if the mark already had one of its own (Phillies).
-function RecolorFilter({ id, override }) {
+export function RecolorFilter({ id, override }) {
   if (!override || override.mode === 'swap') return null
   if (override.mode === 'outline') {
     return (
