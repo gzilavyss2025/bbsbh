@@ -27,6 +27,7 @@
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/team-color-lab'                   -> { name: 'team-color-lab' }  (unlisted QA page)
+//   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/team-pattern-lab'                 -> { name: 'team-pattern-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
@@ -94,6 +95,12 @@ export function parseRoute(url) {
   // Dev-only team-color swatch harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'team-color-lab')
     return { name: 'team-color-lab' }
+  // Dev-only uniform-name curation page (App.jsx gates the actual component
+  // to import.meta.env.DEV, same as scorecard-lab below) — parsed here
+  // regardless so a stray production visit falls through to 'home' instead of
+  // matching the generic 3-segment game route.
+  if (parts.length === 1 && parts[0] === 'uniform-names')
+    return { name: 'uniform-names' }
   // Win-probability band pattern review harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'team-pattern-lab')
     return { name: 'team-pattern-lab' }

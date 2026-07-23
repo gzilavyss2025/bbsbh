@@ -182,3 +182,94 @@ export function jerseyLabel(text, clubName) {
     .replace(/\s+/g, ' ')
     .trim()
 }
+
+// The standardized three-level breakdown a category-level consumer (a future
+// record-by-jersey grouping — Home wins vs. Away wins vs. every Alternate
+// bucketed together) reads instead of classifyUniformAsset's five raw
+// treatment keys. Level 1 is Home / Away / City Connect: a standard jersey
+// already names itself (Home/Away/Road always leads its own label —
+// classifyUniformAsset's own naming convention), so nothing further is shown.
+// Anything else is an Alternate (Level 2 — a fixed qualifier, not a per-jersey
+// name, since classifyUniformAsset's alternate/alternate-2/alternate-3 split
+// is a logo-treatment detail this grouping intentionally drops); Level 3 is
+// that specific alternate's own descriptor, derived from the club's own label
+// text — every current alternate already names its color/style there ("Alt 2
+// Navy Blue" -> "Navy Blue", "Alt 1 Pinstripe" -> "Pinstripe", "Alt 4 Canada
+// Red" -> "Canada Red"). Purely derived, no curation input — see
+// uniformDisplayName below for the human-editable full name a scorer actually
+// reads.
+export function uniformFriendlyName(text, clubName, code) {
+  const treatment = classifyUniformAsset(text, clubName, code)
+  if (treatment === 'city-connect') return { level1: 'City Connect', level2: null, level3: null }
+  if (treatment === 'main') {
+    const rest = stripClubName(text, clubName)
+    // A rare JERSEY_TREATMENT_OVERRIDES entry can force 'main' onto text that
+    // doesn't self-identify (e.g. Braves' "Alt 2 Navy", worn with the plain
+    // Main mark) — an "Alt N …"-labeled jersey is never worn on the road in
+    // modern MLB (the road jersey is always the grey/road standard), so it's
+    // safely Home even without a leading Home/Away/Road word.
+    const level1 = /^(away|road)\b/i.test(rest) ? 'Away' : 'Home'
+    return { level1, level2: null, level3: null }
+  }
+  const level3 =
+    stripClubName(text, clubName)
+      .replace(/\s*\bJersey\b\s*/i, ' ')
+      .replace(/^\s*(?:Home|Away|Road|Alt(?:ernate)?)\s*\d*\s*/i, '')
+      .replace(/\s+/g, ' ')
+      .trim() || null
+  return { level1: null, level2: 'Alternate', level3 }
+}
+
+// Flattens uniformFriendlyName's Level 1/2/3 breakdown into the single line a
+// scorer actually reads — "Home", "Away", "City Connect", "Alternate: Navy
+// Blue". The DEFAULT wording, used only when no curated override exists (see
+// uniformDisplayName below).
+export function formatUniformName({ level1, level2, level3 }) {
+  if (level1) return level1
+  if (level2 && level3) return `${level2}: ${level3}`
+  return level2 ?? ''
+}
+
+// The full, human-curated display name for one jersey — every jersey gets
+// one, not just Alternates, since the /uniform-names page lets a person
+// overwrite the wording for ANY row (including a Home/Away/City Connect one
+// that already names itself) for full precision. `overrides` is that page's
+// save format at public/data/uniform-names.json: a flat uniformAssetCode ->
+// string map. A curated entry wins outright; absent one, falls back to
+// formatUniformName(uniformFriendlyName(...)) — the same default a fresh,
+// never-reviewed jersey shows.
+export function uniformDisplayName(text, clubName, code, overrides) {
+  const curated = code ? overrides?.[code] : null
+  return curated || formatUniformName(uniformFriendlyName(text, clubName, code))
+}
+
+// The /uniform-names page's own saved curation, from public/data/uniform-
+// names.json — a hand-authored map (uniformAssetCode -> the full display
+// string) written by that page's dev-only Save button (vite.config.js's
+// middleware), not a scripts/gen-*.mjs precompute. Same fetch-and-cache shape
+// as the other static readers in this file's sibling modules; degrades to {}
+// so a missing file (nothing curated yet) just falls back to
+// uniformDisplayName's own default everywhere.
+let cachedNameOverrides
+export async function fetchUniformNameOverrides() {
+  if (cachedNameOverrides !== undefined) return cachedNameOverrides
+  try {
+    const res = await fetch('/data/uniform-names.json')
+    if (!res.ok) throw new Error(`uniform-names.json ${res.status}`)
+    cachedNameOverrides = await res.json()
+  } catch {
+    cachedNameOverrides = {}
+  }
+  return cachedNameOverrides
+}
+
+// Syncs the module cache above to a freshly saved map — call right after a
+// successful POST to the dev-only save endpoint (see UniformNamesPage.jsx's
+// handleSave). Without this, fetchUniformNameOverrides keeps serving
+// whatever it cached on this page's initial load for the rest of the
+// session (a full reload is the only thing that would otherwise pick up
+// the save), which is surprising on a page whose whole point is "edit, hit
+// Save, see it stick."
+export function primeUniformNameOverridesCache(overrides) {
+  cachedNameOverrides = overrides
+}

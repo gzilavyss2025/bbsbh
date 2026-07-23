@@ -90,6 +90,13 @@ const ScorecardLab = import.meta.env.DEV
 // production. Reachable at /team-color-lab but linked from no menu (see
 // lib/route.js) — unlisted, not gated.
 const TeamColorLab = lazyNamed(() => import('./screens/TeamColorLab.jsx'), 'TeamColorLab')
+// Uniform Names is a curation tool whose Save button only works against the
+// dev-only vite.config.js middleware — pointless (and confusing) in a
+// production build where that endpoint doesn't exist, so it's gated to DEV
+// like ScorecardLab above rather than shipped unlisted like Team Color Lab.
+const UniformNamesPage = import.meta.env.DEV
+  ? lazyNamed(() => import('./screens/UniformNamesPage.jsx'), 'UniformNamesPage')
+  : null
 // Win-probability band pattern review harness — same footing as Team Color
 // Lab above (no score/reveal content, safe to ship, reachable only by direct
 // URL — see lib/route.js).
@@ -197,8 +204,11 @@ export default function App() {
     content = <ScorecardLab />
   } else if (route.name === 'team-color-lab') {
     content = <TeamColorLab />
+  } else if (route.name === 'uniform-names' && UniformNamesPage) {
+    content = <UniformNamesPage />
   } else if (route.name === 'team-pattern-lab') {
     content = <TeamPatternLab />
+
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
