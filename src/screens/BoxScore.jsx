@@ -27,7 +27,9 @@ import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { ManagerLink } from '../components/ManagerLink.jsx'
 import { GameScoreCard } from '../components/GameScoreCard.jsx'
-import { RefreshButton } from './TeamInfo.jsx'
+import { SectionMasthead } from '../components/SectionMasthead.jsx'
+import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
+import { ballparkFor } from '../lib/ballparkData.js'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -241,7 +243,17 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
     // The feed appends a period to the venue name ("Busch Stadium.") — drop it.
     // Ballpark + Attendance pair on one row; Time of Game + Game End on another.
     { label: 'Ballpark', value: get('Venue').replace(/\.\s*$/, '') },
-    { label: 'Attendance', value: get('Att').replace(/\.\s*$/, '') },
+    {
+      label: 'Attendance',
+      // AttendanceValue degrades to the plain figure (or '' when the feed
+      // hasn't posted one, so InfoCard's own '—' fallback still shows).
+      value: get('Att').replace(/\.\s*$/, '') && (
+        <AttendanceValue
+          venue={get('Venue').replace(/\.\s*$/, '')}
+          attendance={get('Att').replace(/\.\s*$/, '')}
+        />
+      ),
+    },
     // Outdoor scorebook weather from the park's lat/lon (see weather.js) — the
     // value to copy onto paper. Falls back to the box-score weather when the
     // generator has nothing (e.g. a MiLB park with no coordinates).
@@ -264,15 +276,21 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
         {/* The duo/col wrappers are transparent on a phone (display: contents
             — everything keeps stacking in this order on .bs__section's own
             gap) and become a two-up grid at the wide breakpoint: the left
-            column runs totals above the decisions, the right column runs
-            Play of the Game above Three Stars. */}
+            column runs totals above Game Score above the win-prob arc, the
+            right column runs the decisions above Play of the Game above
+            Three Stars. */}
         <div className="bs__duo">
           <div className="bs__col">
             <LineTotals away={box.away} home={box.home} />
-            {/* The game's win-probability arc, directly under the R/H/E/LOB
-                totals — the retrospective companion to the three stars (both
-                are the WPA story). Renders nothing at a park with no win-prob
-                feed. */}
+            {/* Directly under the R/H/E/LOB totals — how tonight's game rated
+                for excitement against the rest of the day's slate at this
+                level, in the same visual family as the Team Page's Season
+                Grade card. Renders nothing until the 10-minute Game Score
+                cron has scored this game. */}
+            <GameScoreCard feed={feed} />
+            {/* The game's win-probability arc — the retrospective companion
+                to the three stars (both are the WPA story). Renders nothing
+                at a park with no win-prob feed. */}
             <WinProbChart
               points={winProbPoints}
               bigPlays={winProbBigPlays}
@@ -283,22 +301,17 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
               awayTreatment={winProbTreatment?.away}
               homeTreatment={winProbTreatment?.home}
             />
-            <Decisions decisions={box.decisions} />
-            {/* Nested under the decisions rather than full-width up top — how
-                tonight's game rated for excitement against the rest of the
-                day's slate at this level, in the same visual family as the
-                Team Page's Season Grade card. Renders nothing until the
-                10-minute Game Score cron has scored this game. */}
-            <GameScoreCard feed={feed} />
           </div>
           <div className="bs__col">
+            <Decisions decisions={box.decisions} />
             <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
             <ThreeStars stars={stars} />
             {/* Stacked under Three Stars in this same right-hand column
                 (rather than a full-width row of its own) so on desktop/ipad
                 it fills the space the shorter right column leaves beside the
-                left column's Decisions/Game Score — see GamePhotosStrip.jsx
-                for why it's safe here (inside the seal) but not above it. */}
+                left column's totals/Game Score/win-prob arc — see
+                GamePhotosStrip.jsx for why it's safe here (inside the seal)
+                but not above it. */}
             <GamePhotosStrip gamePk={feed?.gamePk} />
           </div>
         </div>
@@ -325,11 +338,17 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
         <div className="bs__duo">
           <div className="bs__col">
             <InfoCard fields={awayFields} />
-            <TeamBlock side={box.away} feed={feed} sideKey="away" />
+            <TeamBlock side={box.away} />
+            {/* Each own independent card, outside the batting/pitching card
+                above — not nested tail sections of it (see BoxAbs/BoxDefense). */}
+            <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} />
+            <BoxDefense feed={feed} sideKey="away" />
           </div>
           <div className="bs__col">
             <InfoCard fields={homeFields} />
-            <TeamBlock side={box.home} feed={feed} sideKey="home" />
+            <TeamBlock side={box.home} />
+            <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} />
+            <BoxDefense feed={feed} sideKey="home" />
           </div>
         </div>
         <GameInfo rows={box.footNotes} />
@@ -425,7 +444,7 @@ function StatcastLeadersCard({ feed, insights }) {
   if (cards.length === 0) return null
   return (
     <section className="bs__statcastCard">
-      <h3 className="bs__insightsTitle">Statcast Leaders</h3>
+      <SectionMasthead as="h3" title="Statcast Leaders" />
       <div className="bs__statcastRow">
         {cards.map(({ label, entry }) => (
           <div className="bs__statcastCol" key={label}>
@@ -451,7 +470,7 @@ function InsightsCard({ calloutNotes }) {
   const hiddenCount = groups.length - shownGroups.length
   return (
     <section className="bs__insights">
-      <h3 className="bs__insightsTitle">Insights</h3>
+      <SectionMasthead as="h3" title="Insights" />
       {/* Every leader/streak/situational-record note that fired somewhere in
           the game (see computeGameCalloutNotes) — the same notes shown one at
           a time on the play they belong to in the innings view, rolled up
@@ -505,6 +524,45 @@ function InsightNoteCard({ group }) {
   )
 }
 
+// The Attendance fill-in's "i" glyph + % full note — the same tap-glyph-
+// unfolds-in-place idiom as the lineup page's own AttendanceFact
+// (TeamInfo.jsx), reusing its .attendance__* styling and InfoIcon glyph.
+// Only reached (see homeFields above) when the feed posted a figure, so no
+// separate "not posted yet" branch is needed here; degrades to the plain
+// attendance figure when the park isn't one of the 30 MLB parks on file
+// (see ballparkData.js) or its capacity can't be paired with tonight's count.
+function AttendanceValue({ venue, attendance }) {
+  const [open, setOpen] = useState(false)
+  const park = ballparkFor(venue)
+  const count = Number(attendance.replace(/,/g, ''))
+  const pctFull = park?.capacity && count ? Math.round((count / park.capacity) * 100) : null
+
+  if (!pctFull) return attendance
+
+  return (
+    <>
+      <span className="attendance__value">
+        {attendance}
+        <button
+          type="button"
+          className={`attendance__glyph${open ? ' attendance__glyph--open' : ''}`}
+          onClick={() => setOpen((was) => !was)}
+          aria-expanded={open}
+          aria-label="How full is the stadium"
+        >
+          <InfoIcon />
+        </button>
+      </span>
+      {open && (
+        <p className="attendance__note">
+          <span className="attendance__note-pct">{pctFull}% full</span>
+          <span className="attendance__note-cap">{park.capacity.toLocaleString()} capacity</span>
+        </p>
+      )}
+    </>
+  )
+}
+
 // A card of the scorebook's labeled fill-in boxes — each a small caption over
 // its value, so you read a box and copy it into the matching slot on the sheet.
 // Anything the feed didn't post shows "—".
@@ -524,12 +582,10 @@ function InfoCard({ fields }) {
   )
 }
 
-function TeamBlock({ side, feed, sideKey }) {
+function TeamBlock({ side }) {
   return (
     <section className="bs__team">
-      <h3 className="bs__teamname">
-        <TeamLink id={side.id}>{side.teamName}</TeamLink>
-      </h3>
+      <SectionMasthead as="h3" title={<TeamLink id={side.id}>{side.teamName}</TeamLink>} />
 
       <div className="bs__scroll">
         {/* Columns follow the #22 scorebook's batter-totals order (AB·R·H·RBI),
@@ -675,9 +731,6 @@ function TeamBlock({ side, feed, sideKey }) {
           ))}
         </div>
       )}
-
-      <BoxAbs feed={feed} sideKey={sideKey} abbr={side.abbreviation} />
-      <BoxDefense feed={feed} sideKey={sideKey} />
     </section>
   )
 }
@@ -689,12 +742,16 @@ function TeamBlock({ side, feed, sideKey }) {
 // behind its own seal. Previously this data only reached the page as raw
 // feed text buried in the Pitching notes ("ABS Challenge: ATL 1-2…"); this is
 // the same StatBox pip row instead of a second copy of it. MLB only —
-// gameHasAbs is false at every MiLB park.
+// gameHasAbs is false at every MiLB park. Its own independent card below the
+// team's batting/pitching card (BoxScoreBody), not a tail section of it —
+// bs__abscard scopes the attached-header + card-frame treatment (see
+// index.css) to just this copy of the shared .abs/.abs__title markup; the
+// innings view's own AbsChallengesCard (StatBox.jsx) keeps its own look.
 function BoxAbs({ feed, sideKey, abbr }) {
   if (!gameHasAbs(feed)) return null
   const side = selectChallengeState(feed, Infinity, 'bottom')[sideKey]
   return (
-    <div className="abs">
+    <div className="abs bs__abscard">
       <span className="abs__title">ABS Challenges</span>
       <div className="abs__rows">
         <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} />
@@ -710,11 +767,16 @@ function BoxAbs({ feed, sideKey, abbr }) {
 // "through" cutoff means "entering a half that never comes" — i.e. the whole
 // game. Safe to compute here: the whole box score is already behind its own
 // SealBox, so there's nothing left to spoil by walking the full play-by-play.
+// Its own independent card below BoxAbs, not a tail section of the team's
+// batting/pitching card — bs__defensecard scopes the attached-header +
+// standalone-card treatment (see index.css) to just this copy of the shared
+// .halfdefense/.defdiamond markup; the innings view's own DefenseSection
+// (EnteringReference.jsx) keeps its own floating header + bordered diamond.
 function BoxDefense({ feed, sideKey }) {
   const defense = defenseEntering(feed, sideKey, Infinity, 'bottom')
   if (defense.length === 0) return null
   return (
-    <section className="halfdefense">
+    <section className="halfdefense bs__defensecard">
       <h4 className="halfdefense__title">Defense</h4>
       <DefenseDiamond defense={defense} />
     </section>
@@ -838,14 +900,27 @@ function Scoreboard({ away, home, innings, onSection }) {
 // order (see computeInningDigest). Everything here is plain play-by-play, so
 // unlike the Statcast/win-prob cards it renders at MiLB parks too — the box
 // score's one enrichment that never goes dark below AAA. Hidden only if the
-// feed carried no plays at all.
+// feed carried no plays at all. Collapsed by default — same toggle-with-
+// chevron idiom as the lineup page's RosterPanel (roster__toggle), styled to
+// this page's own card frame — since it's scorebook-nerd detail most readers
+// won't want open every time, unlike the line score above it.
 function InningTally({ rows, away, home }) {
+  const [open, setOpen] = useState(false)
   if (!rows || rows.length === 0) return null
   const abbr = (side) => (side === 'away' ? away : home).abbreviation || (side === 'away' ? 'AWAY' : 'HOME')
   return (
     <div className="bs__tally">
-      <h3 className="bs__insightsTitle">By inning</h3>
-      <div className="bs__scroll">
+      <button
+        type="button"
+        className="bs__tallyToggle"
+        onClick={() => setOpen((was) => !was)}
+        aria-expanded={open}
+      >
+        <span className="bs__insightsTitle">By inning</span>
+        <span className="bs__tallyChevron" aria-hidden="true">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+      <div className="bs__scroll bs__tallyBody">
         <table className="bs__grid bs__grid--tally">
           <thead>
             <tr>
@@ -871,6 +946,7 @@ function InningTally({ rows, away, home }) {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   )
 }
@@ -930,7 +1006,7 @@ function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
   const hasScore = play.awayScore != null && play.homeScore != null
   return (
     <div className="bs__potg">
-      <h3 className="bs__potgTitle">Play of the game</h3>
+      <SectionMasthead as="h3" title="Play of the game" />
       <div className="bs__potgBody">
         <Headshot
           personId={play.batterId}
@@ -986,7 +1062,7 @@ function ThreeStars({ stars }) {
   const [mvp, ...rest] = stars
   return (
     <div className="bs__stars">
-      <h3 className="bs__starsTitle">Three stars</h3>
+      <SectionMasthead as="h3" title="Three stars" />
       <div className="stars3__hero">
         <Headshot personId={mvp.id} name={mvp.name} teamId={mvp.teamId} className="stars3__heroShot" />
         <div className="stars3__heroCopy">
