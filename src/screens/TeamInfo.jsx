@@ -46,7 +46,7 @@ import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL, MASTHEAD_LOGO_NATURAL_COLOR } from '../lib/teams.js'
+import { SPORT_LABEL, mastheadLogoClass } from '../lib/teams.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -460,15 +460,6 @@ function rosterFallbackGroups(roster) {
     .filter((r) => (r.isPitcher || r.twoWay) && r.role !== 'SP')
     .sort((a, b) => a.name.localeCompare(b.name))
   return { batters, starters, bullpen }
-}
-
-// The masthead logo's className for `teamId` — the white-filter treatment
-// (see index.css's .metricbar__logo--white) for most clubs, or the plain
-// (unfiltered, real-colored) mark for the small exception set that flattens
-// into an unreadable blob under that filter (see teams.js's
-// MASTHEAD_LOGO_NATURAL_COLOR).
-function mastheadLogoClass(teamId) {
-  return MASTHEAD_LOGO_NATURAL_COLOR.has(teamId) ? 'metricbar__logo' : 'metricbar__logo metricbar__logo--white'
 }
 
 // The ids of every player in TONIGHT's starting lineups, both clubs, plus both

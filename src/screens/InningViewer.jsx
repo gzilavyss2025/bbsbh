@@ -463,6 +463,7 @@ export function InningViewer({
                   half={effHalf}
                   fieldingSide={effHalf === 'top' ? 'home' : 'away'}
                   fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
+                  fieldingTeamId={effHalf === 'top' ? meta.home.id : meta.away.id}
                   revealedThrough={revealedThrough}
                 />
               </div>

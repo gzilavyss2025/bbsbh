@@ -37,7 +37,7 @@ import { ordinal } from '../lib/format.js'
 // score omits it.
 
 const W = 328
-const H = 168
+const H = 220
 // No y-axis labels to clear room for anymore (see the block comment above) —
 // just enough left margin for the bands/line to not butt against the card
 // edge.
@@ -291,21 +291,6 @@ export function WinProbChart({
             {home} <span className="winprob__pct">{split.home}%</span>
           </span>
         </div>
-      </div>
-
-      {/* A one-line proportional recap of the split, in each team's own real
-          color — the header swatches already carry the identity, this just
-          echoes it as a shape. Purely decorative (the split pills carry the
-          real numbers), hidden from assistive tech. */}
-      <div className="winprob__splitbar" aria-hidden="true">
-        <span
-          className="winprob__splitbar-seg"
-          style={{ width: `${split.away}%`, background: awayColors.primary }}
-        />
-        <span
-          className="winprob__splitbar-seg"
-          style={{ width: `${split.home}%`, background: homeColors.primary }}
-        />
       </div>
 
       <svg

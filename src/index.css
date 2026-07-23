@@ -4491,9 +4491,15 @@ body {
 }
 
 /* ---------------------------------------------------------------- innings */
-/* Room at the bottom so the last roster panel clears the fixed .pagenav bar. */
+/* Room at the bottom so the last roster panel clears the fixed .pagenav bar.
+   Taller than the generic 72px other screens use: .pagenav--innings stacks a
+   Refresh button above the primary Next/reveal-split row at every width now
+   (see InningViewer.jsx), so the floating bar itself runs closer to 130px
+   tall (14px top pad + 34px refresh + 8px gap + 44px button row + 14px
+   bottom pad) — 72px left the primary row, and sometimes Refresh too,
+   overlapping the last content above it. */
 .innings {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  padding-bottom: calc(130px + env(safe-area-inset-bottom));
 }
 
 /* Phone-only: the floating bar's own Refresh (refreshbtn--float, fixed at the
@@ -5613,13 +5619,13 @@ body {
   font-size: var(--fs-caption);
 }
 
-/* The pre-half callout cards read as natural-case sentences — the player's own
-   name and the season-context fun-fact line — the same sanctioned exception as
-   the play-by-play copy (see the ALL-CAPS INVARIANT block). Opt out of the
-   global uppercase; the #root-scoped selector outranks `#root *`. */
-#root .prehalf__who,
+/* The pre-half callout cards' fun-fact line reads as a natural-case sentence —
+   the same sanctioned exception as the play-by-play copy (see the ALL-CAPS
+   INVARIANT block) — but the name line above it is a structural label like any
+   other card heading, so it stays in the app's shouted convention. Opt out of
+   the global uppercase; the #root-scoped selector outranks `#root *`. */
 #root .prehalf__text {
-  text-transform: none; /* caps-exempt: pre-half callout cards read as natural sentences */
+  text-transform: none; /* caps-exempt: pre-half callout cards' fun-fact line reads as a natural sentence */
 }
 
 /* UpNextBatters: who's due up to face the entering pitcher, before any of the
@@ -5655,8 +5661,8 @@ body {
   min-width: 0;
 }
 .shot.upnext__shot {
-  width: var(--shot-md-w);
-  height: var(--shot-md-h);
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
@@ -6343,6 +6349,9 @@ body {
 .halfdefense__title {
   margin: 0 0 8px;
   padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -8441,27 +8450,18 @@ body {
 
 .winprob__pct { color: var(--text-on-ink); }
 
-/* A one-line proportional recap of the split, in the same two team colors as
-   the swatches above — decorative echo of the split pills, not a second
-   source of truth. */
-.winprob__splitbar {
-  display: flex;
-  height: 5px;
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-  border: var(--bw-hair) solid var(--border-hairline);
-  margin-bottom: 10px;
-}
-
 /* Scales uniformly (default preserveAspectRatio) so the dots stay round and the
    labels crisp. On a phone the viewBox ratio sets the height (~180px); on the
    wide box-score layout max-height caps it and it letterboxes rather than
-   growing huge. */
+   growing huge. Taller than before now that the decorative splitbar recap
+   (removed — it duplicated the split pills above and the chart's own bands
+   below) no longer claims its own slice of the card's height; the chart
+   grows into that freed space instead. */
 .winprob__svg {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 220px;
+  max-height: 260px;
 }
 
 /* The bands themselves are filled via inline `style={{ fill: url(#...) }}`
@@ -8527,6 +8527,7 @@ body {
 .winprob__bigdot-ball {
   transform-box: fill-box;
   transform-origin: center;
+  transform: scale(1.7);
   transition: transform 0.15s ease;
 }
 
@@ -8571,7 +8572,7 @@ body {
    reading as a ball), plus a soft halo and its own value label. Every OTHER
    big-swing marker fades once something is active (.winprob.is-active) — an
    idle chart shows every marker at equal, unhighlighted weight. */
-.winprob__bigdot.is-active .winprob__bigdot-ball { transform: scale(1.9); }
+.winprob__bigdot.is-active .winprob__bigdot-ball { transform: scale(3.23); } /* 1.9 * the 1.7x base size */
 .winprob__bigdot.is-active .winprob__ball-body {
   fill: color-mix(in srgb, var(--team-color) 55%, var(--surface-inset));
   stroke: var(--team-color);
@@ -8674,24 +8675,32 @@ body {
    The ranked in-progress pitcher digest (MarginNotes.jsx, api/pitcher-
    callouts.js's buildMarginNotes) — same card anatomy as .prehalf (a headshot
    beside a star-marked sentence), sat above the Pitchers stat grid it used to
-   be folded into. Reuses .pitchers__title's label styling for its own title
-   rather than duplicating it. */
+   be folded into. Same flush navy/gold masthead recipe as .pitchers__title
+   (bleeds past the card's own padding to cap it flush; overflow:hidden on
+   .marginnotes clips the square corners to the card's own rounded ones), plus
+   its own margin-bottom so it doesn't sit flush against the Pitchers card
+   right below it. */
 .marginnotes {
   margin-top: var(--space-4);
+  margin-bottom: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding: 12px 14px;
+  padding: 12px 14px 8px;
+  overflow: hidden;
 }
 .marginnotes__title {
-  margin: 0 0 8px;
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--text-heading);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
 }
 .marginnotes__grid {
   display: grid;
@@ -11591,8 +11600,13 @@ body {
   /* Reset to line the Pitchers card's own top edge up with the Lineups
      card's on its right — .pitchers' margin-top is sized for the phone flow
      (stacked below the running content above it), but here it's the left
-     column's first element with nothing above it to space from. */
-  .innings__ref-left .pitchers {
+     column's first element with nothing above it to space from. Same reset
+     for .innings__ref-defense: MarginNotes/Pitchers can both render nothing
+     (early in a game, or no notes that half), leaving the Defense card as the
+     column's actual first element — its own margin-top is sized for sitting
+     BELOW a sibling, so it needs the same zero-out when it lands first. */
+  .innings__ref-left .pitchers,
+  .innings__ref-left > .innings__ref-defense:first-child {
     margin-top: 0;
   }
   /* One flush card, capped by the navy/gold masthead (same recipe as
@@ -11635,6 +11649,9 @@ body {
   .innings__reference-title {
     margin: 0;
     padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    min-height: 20px; /* matches the Defense masthead's own 20px logo, so both bars share one height */
     font-family: var(--font-display);
     font-size: var(--fs-label);
     font-weight: var(--w-bold);
@@ -15387,6 +15404,25 @@ body {
   .rookiepill__short {
     display: inline;
   }
+}
+
+/* "Due up" pill — marks the one lineup-card slot leading off a team's own
+   next half (see LineupSection, EnteringReference.jsx). Same amber seal chip
+   as .standings-reveal rather than the neutral rookie/prospect palette, so it
+   reads as a live, time-sensitive marker rather than a standing badge. */
+.duepill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  border: var(--bw-hair) solid var(--seal-deep);
 }
 
 /* MLB-debut pill — icon-only sibling to .prospectpill/.rookiepill/

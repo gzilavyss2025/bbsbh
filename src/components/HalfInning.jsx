@@ -103,6 +103,8 @@ export function HalfInning({
       battingSide={battingSide}
       awayName={awayName}
       homeName={homeName}
+      awayId={awayId}
+      homeId={homeId}
       prospectsData={prospectsData}
       rookiesData={rookiesData}
       isMlb={isMlb}
@@ -245,10 +247,13 @@ export function HalfInning({
         </SealBox>
 
         {/* The pitch-color key: a static legend, no game data, so it's
-            spoiler-free and can sit at the foot of the card regardless of
-            reveal state — moved down here from the header so it reads next
-            to the pitch dots it explains rather than beside the team names. */}
-        <PitchColorsKey className="half__pitchkeyfoot" />
+            spoiler-free — moved down here from the header so it reads next
+            to the pitch dots it explains rather than beside the team names.
+            Only worth the desktop-only foot space once there are actually
+            pitch dots on screen to explain (startedRevealing); before that,
+            on the wide layout, it'd just be a lone button sitting under an
+            empty card. */}
+        {startedRevealing && <PitchColorsKey className="half__pitchkeyfoot" />}
       </section>
 
       {/* From the first at-bat step onward (startedRevealing — see above), the
