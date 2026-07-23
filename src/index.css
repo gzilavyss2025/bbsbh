@@ -6860,6 +6860,24 @@ body {
   box-shadow: var(--inset-cell);
 }
 
+/* A diagonal white-to-black sheen over the whole tile face (background AND
+   mark alike, via the ::after stacking above both) — reads as a glossy,
+   slightly domed badge instead of a flat paint chip. Main only; Alternate/
+   City Connect stay a flat reference swatch. */
+.colorlab__logobox--gloss::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
 /* Same edge-bleed overscale as .gamecard__logobox .teamlogo, so a procured
    Alternate/City Connect mark previews at the same crop the real card would
    apply, not a smaller contain-fit thumbnail. Also covers Main, which

@@ -39,17 +39,18 @@ function mainColorTriad(teamId) {
     .map((s, i) => ({ label: labels[i], hex: s.hex }))
 }
 
-// A first pass at 29 clubs' Main tile as it'd look with a colored background
-// (the real card, and every other row on this page, uses a plain paper
-// fill) — each entry names which of the three swatches above becomes the
-// tile's background, an optional scale-down off the card's normal 1.32
+// A first pass at every club's Main tile as it'd look with a colored
+// background (the real card, and every other row on this page, uses a plain
+// paper fill) — each entry names which of the three swatches above becomes
+// the tile's background, an optional scale-down off the card's normal 1.32
 // edge-bleed (a large/dense mark reading as "the whole tile is this color"
 // against its own brand fill), and whether the mark itself needed a
 // recolor (see public/team-logos/main-overrides/{ABBR}.svg — the mlbstatic
 // CDN mark with specific fills swapped, e.g. Guardians' navy outline ->
 // white, Phillies' red/white swapped) to stay legible against its new
-// background. Diamondbacks has no entry — not part of this pass.
+// background.
 const MAIN_OVERRIDES = {
+  109: { bg: 'secondary' }, // Diamondbacks
   108: { bg: 'secondary', scale: 0.9 }, // Angels
   110: { bg: 'secondary' }, // Orioles
   111: { bg: 'secondary' }, // Red Sox
@@ -166,7 +167,10 @@ function TreatmentBox({ teamId, name, treatment, label }) {
     <div className="colorlab__treatment">
       <span className="colorlab__treatmentlabel">{label}</span>
       <div className="colorlab__treatmentbox">
-        <div className="colorlab__logobox" style={logoboxStyle}>
+        <div
+          className={`colorlab__logobox ${treatment === 'main' ? 'colorlab__logobox--gloss' : ''}`}
+          style={logoboxStyle}
+        >
           <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />
         </div>
         <div className="colorlab__swatchrow">
