@@ -115,11 +115,10 @@ export const LOGO_COLOR_OVERRIDES = {
 
 // A handful of clubs' band background is better off as something OTHER than
 // their TEAM_COLOR_PAIRS primary (teams.js) — a lighter secondary shade that
-// reads better as a big fill, or (Diamondbacks) a literal accent from their
-// own logo art that isn't in that pair at all. Falls through to the team's
-// normal chip primary for every other team.
+// reads better as a big fill. Falls through to the team's normal chip
+// primary for every other team.
 export const BAND_COLOR_OVERRIDES = {
-  109: '#3EC1CC', // Diamondbacks — the teal from their own "A" logo, not in TEAM_COLOR_PAIRS
+  109: '#E3D4AD', // Diamondbacks — their real secondary sand/desert tone (TEAM_COLOR_PAIRS)
   111: '#0C2340', // Red Sox — secondary navy, not primary red
   136: '#005C5C', // Mariners — secondary green/teal, not primary navy
   139: '#8FBCE6', // Rays — secondary lighter blue, not primary navy
