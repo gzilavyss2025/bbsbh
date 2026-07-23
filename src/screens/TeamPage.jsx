@@ -155,6 +155,37 @@ function comparePitchers(a, b) {
     Number(a.jersey) - Number(b.jersey)
   )
 }
+// Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
+const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// Record by day of week, off the same cutoff-gated `schedule` rows the
+// Schedule section below already renders (fetchTeamSchedule only sets `won`
+// once a game is Final AND on/before the asOf cutoff — see api/schedule.js —
+// so this reads no further ahead than the rest of the page). Days with no
+// decided games yet show DASH rather than "0-0".
+function dayOfWeekRecord(games) {
+  const tally = DOW_LABELS.map(() => ({ wins: 0, losses: 0 }))
+  for (const g of games) {
+    if (g.won == null) continue
+    const dow = new Date(`${g.apiDate}T00:00:00Z`).getUTCDay()
+    if (g.won) tally[dow].wins++
+    else tally[dow].losses++
+  }
+  return DOW_LABELS.map((label, i) => {
+    const { wins, losses } = tally[i]
+    const total = wins + losses
+    return {
+      k: label,
+      v: total ? `${wins}-${losses}` : DASH,
+      rank: total ? (wins / total).toFixed(3).replace(/^0/, '') : DASH,
+    }
+  })
+}
+// Same UTC-parse convention as dayOfWeekRecord's own apiDate → weekday
+// mapping (and isoToday() itself), so "today" lines up with whichever row
+// that same calendar date would have tallied into.
+function todayDowLabel() {
+  return DOW_LABELS[new Date(`${isoToday()}T00:00:00Z`).getUTCDay()]
+}
 function runDiff(rec) {
   const d = rec.runDifferential
   if (!Number.isFinite(d)) return DASH
@@ -630,11 +661,14 @@ async function loadTeam(id, asOf) {
       (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
     )
 
+  const dayOfWeek = schedule.some((g) => g.won != null) ? dayOfWeekRecord(schedule) : null
+
   return {
     team, season, sportId,
     record: myRec
       ? { wins: myRec.wins, losses: myRec.losses, rank: myRec.divisionRank, div: team.division?.name }
       : null,
+    dayOfWeek,
     seasonScore,
     teamScore,
     leagueGradeScores,
@@ -693,7 +727,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
+  const { team, season, record, dayOfWeek, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -828,6 +862,10 @@ export function TeamPage({ id, asOf, sportId }) {
               refDate={asOf || isoToday()}
             />
           </>
+        )}
+
+        {dayOfWeek && (
+          <TeamStats title="Record by Day of Week" stats={dayOfWeek} note="win pct" highlightKey={todayDowLabel()} />
         )}
 
         {batting && <TeamStats title="Team batting" stats={batting} />}
@@ -1157,14 +1195,17 @@ function SeriesStrip({ games, allStarGame, refDate }) {
   )
 }
 
-function TeamStats({ title, stats }) {
+function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
   return (
     <>
-      <SectionTitle title={title} note="rank out of 30" />
+      <SectionTitle title={title} note={note} />
       <div className="tstats-card">
         <div className="tstats">
           {stats.map((s) => (
-            <div key={s.k} className={`tstatrow${s.extreme ? ` tstatrow--${s.extreme}` : ''}`}>
+            <div
+              key={s.k}
+              className={`tstatrow${s.extreme ? ` tstatrow--${s.extreme}` : ''}${s.k === highlightKey ? ' tstatrow--today' : ''}`}
+            >
               <span className="tstatrow__k">{s.k}</span>
               <span className="tstatrow__v">{s.v}</span>
               <span className={`tstatrow__r${s.tone ? ` tstatrow__r--${s.tone}` : ''}`}>{s.rank}</span>

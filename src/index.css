@@ -15971,6 +15971,14 @@ body {
 .tstatrow--worst {
   background: var(--clay-soft);
 }
+/* Today's row on the Record by Day of Week card — the same highlighter-yellow
+   wash as .foulboard__row--outlier's outlier flag, repurposed here to mean
+   "this is today" rather than "this is notable." Applied after best/worst so
+   it can layer on a row that's also this season's best/worst weekday. */
+.tstatrow--today {
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
 @media (max-width: 359px) {
   .tstats {
     grid-template-columns: 1fr;
