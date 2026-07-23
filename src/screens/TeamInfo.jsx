@@ -20,7 +20,7 @@ import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
-import { careerMatchupsFor } from '../api/careerMatchups.js'
+import { careerMatchupsFor, sortByPitcher, matchupLine } from '../api/careerMatchups.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
@@ -1105,24 +1105,6 @@ function OrgTies({ ties }) {
 
 const MATCHUPS_SHOWN = 6
 
-// Groups rows by pitcher (so every batter who's faced a given pitcher stays
-// adjacent on the table, rather than interleaved by raw PA count) while
-// preserving the original "most real history first" ordering: pitcher groups
-// are ranked by their own total PA, and batters within a group are ranked by
-// PA too. Pure re-sort, no data reshaping — same row shape in, same rows out.
-function sortByPitcher(rows) {
-  const byPitcher = new Map()
-  for (const r of rows) {
-    const group = byPitcher.get(r.pitcher.id)
-    if (group) group.push(r)
-    else byPitcher.set(r.pitcher.id, [r])
-  }
-  return [...byPitcher.values()]
-    .map((group) => group.sort((x, y) => y.pa - x.pa))
-    .sort((a, b) => b.reduce((sum, r) => sum + r.pa, 0) - a.reduce((sum, r) => sum + r.pa, 0))
-    .flat()
-}
-
 // Every batter/pitcher pair on the two clubs with real career plate-
 // appearance history against each other, at ANY level either has played (see
 // careerMatchupsFor) — the "Contreras is 0-for-3 vs. tonight's starter"
@@ -1220,23 +1202,6 @@ function MatchupTable({ title, rows, startingIds, levelLabel }) {
       )}
     </div>
   )
-}
-
-// "2-for-7, 1 HR, 3 K — AA, A+" — scorebook shorthand first (the thing a
-// paper scorer already writes), extras only when they're nonzero so a plain
-// 0-for-2 doesn't carry three redundant zero badges, levels last so a pair
-// who's only ever faced off at tonight's own level (the common case) doesn't
-// repeat what the card's own context already implies — only a pair with
-// history at ANOTHER level too keeps the full list, tonight's level included,
-// so a reader can see how much of the sample carries over.
-function matchupLine(r, levelLabel) {
-  const parts = [`${r.h}-for-${r.ab}`]
-  if (r.hr > 0) parts.push(`${r.hr} HR`)
-  if (r.bb > 0) parts.push(`${r.bb} BB`)
-  if (r.k > 0) parts.push(`${r.k} K`)
-  const stat = parts.join(', ')
-  const onlyTonightsLevel = r.levels.length === 1 && r.levels[0] === levelLabel
-  return r.levels.length > 0 && !onlyTonightsLevel ? `${stat} — ${r.levels.join(', ')}` : stat
 }
 
 // A pitcher's roster position is already the plain "P" abbreviation (no
