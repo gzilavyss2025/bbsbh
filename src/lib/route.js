@@ -30,6 +30,7 @@
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
+//   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
@@ -101,6 +102,15 @@ export function parseRoute(url) {
     return { name: 'first-scorebook' }
   // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
+  // Same page, deep-linked straight to one game's gallery (e.g. from the box
+  // score) — skips the club/season picker instead of adding a distinct route name.
+  // A non-numeric segment falls back to the plain browse view (same idea as
+  // the invalid-date fallback above) rather than stranding the page with
+  // neither a picker nor a gallery to show.
+  if (parts.length === 2 && parts[0] === 'photos') {
+    const gamePk = Number(parts[1])
+    return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
+  }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
@@ -230,6 +240,9 @@ export function umpireRankingsPath() {
 }
 export function foulsPath() {
   return '/fouls'
+}
+export function gamePhotosPath(gamePk) {
+  return `/photos/${gamePk}`
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`
