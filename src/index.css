@@ -10098,6 +10098,224 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   BOX SCORE SKELETON (src/components/BoxScoreSkeleton.jsx) — a
+   PastGameFlipCard's back face while a revealed game's feed/win-probability
+   are still in flight. Reuses .flipback's own chrome (border, padding,
+   shadow — see `.skel` sharing that class in the component) so the
+   placeholder is pixel-for-pixel the eventual card's footprint, no layout
+   jump when the real GameResultFace mounts in its place. Grayscale blocks
+   shaped like that layout pulse together as ONE unit (a single animation on
+   .skel__body, not per-bar — matches the plain "everything fades together"
+   skeleton idiom rather than a busier staggered shimmer), plus a small
+   baseball rolling back and forth across the middle of the card on its own
+   z-index, layered above the pulsing bars rather than confined to a strip
+   of its own — a wink at "still rounding the bases" rather than a literal
+   progress bar.
+   --------------------------------------------------------------------------- */
+.skel__body {
+  position: relative; /* the containing block .skel__ball positions itself against */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: skel-pulse 1.5s ease-in-out infinite;
+}
+.skel__bar,
+.skel__circle {
+  display: inline-block;
+  background: var(--rule-soft);
+  border-radius: var(--radius-xs);
+}
+.skel__circle {
+  border-radius: var(--radius-pill);
+}
+.skel__topRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.skel__bar--btn {
+  width: 74px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+}
+.skel__bar--pill {
+  width: 96px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+}
+.skel__linescore {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.skel__team {
+  display: grid;
+  grid-template-columns: 24px 1fr repeat(3, 20px);
+  align-items: center;
+  column-gap: 8px;
+}
+.skel__circle--logo {
+  width: 24px;
+  height: 24px;
+}
+.skel__bar--team {
+  height: 14px;
+  width: 70%;
+}
+.skel__bar--num {
+  height: 14px;
+  width: 100%;
+}
+.skel__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.skel__bar--decision {
+  height: 12px;
+  width: 60%;
+}
+.skel__potg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 4px;
+}
+.skel__circle--shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+.skel__potgLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+.skel__bar--short {
+  height: 12px;
+  width: 40%;
+}
+.skel__bar--long {
+  height: 12px;
+  width: 90%;
+}
+@keyframes skel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+/* .skel__ball only carries POSITION (the roll across the card, `left` +
+   vertical centering) — the SPIN is a separate animation one layer down on
+   .skel__ballFrames (see BoxScoreSkeleton.jsx's header comment for why a
+   flat `rotate()` on this outer element would be the wrong motion: it'd spin
+   the ball around the axis pointing AT the viewer, like a coin, not the
+   axis a ball rolling along this path actually turns on). Splitting position
+   from spin onto two elements is what lets both run as independent
+   `infinite alternate` CSS animations that nonetheless stay in lockstep —
+   same duration/direction, same clock. Positioned against .skel__body (see
+   that rule's `position: relative`) rather than confined to its own bottom
+   strip, so it rolls across the middle of the card, over the top of the
+   pulsing bars — `z-index` lifts it above them, and the drop-shadow is what
+   sells "floating over," not "sitting flush with." */
+.skel__ball {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--fs-hero-xl);
+  height: var(--fs-hero-xl);
+  transform: translateY(-50%);
+  z-index: 2;
+  filter: drop-shadow(0 3px 5px rgba(22, 34, 47, 0.22));
+  animation: skel-roll 2.4s ease-in-out infinite alternate;
+}
+.skel__ballBody {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.skel__ballBody circle {
+  /* fill comes from the SkelBall-defined radialGradient (its highlight/
+     shadow stops are the two rules below) — not set here. */
+  stroke: var(--rule);
+  stroke-width: 3;
+}
+.skel__ballShadeLight {
+  stop-color: var(--paper-3);
+}
+.skel__ballShadeDark {
+  stop-color: var(--rule-soft);
+}
+/* The circular "window": clips the wide frame-strip SVG down to one frame's
+   worth, same idea as a classic sprite-sheet animation's viewport. Circular
+   (not square) so a frame's seam artwork — which is only guaranteed correct
+   inside the ball's own silhouette — can never paint past the ball's edge. */
+.skel__ballWindow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+/* BALL_TOTAL_STEPS slots (BoxScoreSkeleton.jsx — BALL_FRAME_COUNT unique
+   rotation snapshots repeated BALL_SPIN_LOOPS times via <use>, not
+   regenerated) laid out side by side and stepped through via `steps()`, the
+   standard technique for a sprite-sheet rotation — see that file's header
+   comment for why the rotation itself needs to be precomputed 3D frames
+   rather than a flat `rotate()`. 3600% wide = 36 frame-widths (12 frames ×
+   3 loops); the endpoint travels 35 of those 36 steps (the 36th IS the
+   starting frame again, so stopping short of it avoids a same-frame
+   double-step at the loop boundary). Every number here is hardcoded rather
+   than threaded in from JS since `steps()` needs a literal integer — update
+   all three together (JS's BALL_FRAME_COUNT/BALL_SPIN_LOOPS) if any changes. */
+.skel__ballFrames {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3600%;
+  height: 100%;
+  animation: skel-ball-spin 2.4s steps(35) infinite alternate;
+}
+.skel__ballSeam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.skel__ballStitch {
+  stroke: var(--clay);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+@keyframes skel-roll {
+  from { left: 0; }
+  to   { left: calc(100% - var(--fs-hero-xl)); }
+}
+@keyframes skel-ball-spin {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-35 / 36 * 100%)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel__body {
+    animation: none;
+    opacity: 0.8;
+  }
+  .skel__ball {
+    animation: none;
+    left: calc(50% - 28px);
+  }
+  .skel__ballFrames {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
    PLAYER CARD — the shared "baseball card" tile (src/components/
    PerformerCard.jsx): headshot, name + position, team logo + abbreviation,
    stat line. Used by the live Top Performers box, Statcast leaders, the box

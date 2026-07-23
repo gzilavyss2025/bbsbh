@@ -4,7 +4,7 @@ import { gamePath } from '../lib/route.js'
 import { GameCard } from './GameCard.jsx'
 import { FlipCard } from './FlipCard.jsx'
 import { GameResultFace } from './GameResultFace.jsx'
-import { Loader } from './Loader.jsx'
+import { BoxScoreSkeleton } from './BoxScoreSkeleton.jsx'
 
 // A past, Final game's slate card, wrapped in a blackjack-style flip: the
 // front is the ordinary spoiler-free GameCard; the back — only fetched once
@@ -67,7 +67,7 @@ export function PastGameFlipCard({
       )}
       renderBack={() => {
         if (state.loading) {
-          return <Loader size="inline" message="Pulling the box score…" />
+          return <BoxScoreSkeleton />
         }
         if (state.error) {
           return <p className="hint hint--error">Couldn&apos;t load this game.</p>
