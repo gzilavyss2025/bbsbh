@@ -6969,6 +6969,24 @@ body {
   color: var(--text-muted);
 }
 
+/* The uniforms-catalog cross-reference (JerseyMatch, TeamColorLab.jsx) — which
+   real jersey name(s) this tile's treatment corresponds to. */
+.colorlab__jerseymatch {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+
+.colorlab__jerseymatchlabel {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
 /* -------------------------------------------------------------- logo sketch
    Tap a grayscale team mark on a team page to blow it up for pencil tracing.
    Reuses the .scrim backdrop but centers its card instead of docking a sheet. */
