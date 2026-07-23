@@ -759,7 +759,7 @@ function yearByYearCells(st, group, showSaves) {
 // Padres + a third team-less row equal to their sum). Summing every row
 // double-counts that season, so: prefer summing the per-team rows, and only
 // fall back to the lone aggregate row when no team-tagged row exists.
-function levelSeasonStat(rows, group) {
+export function levelSeasonStat(rows, group) {
   const teamRows = (rows ?? []).filter((s) => s.team?.id)
   return aggregateSplits(teamRows.length ? teamRows : rows, group)
 }
