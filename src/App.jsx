@@ -85,11 +85,11 @@ const GamePhotosPage = lazyNamed(
 const ScorecardLab = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/ScorecardLab.jsx'), 'ScorecardLab')
   : null
-// Team Color Lab is a pick-a-background design harness, not a real app
-// screen — dev-only, same reasoning as Scorecard Lab above.
-const TeamColorLab = import.meta.env.DEV
-  ? lazyNamed(() => import('./screens/TeamColorLab.jsx'), 'TeamColorLab')
-  : null
+// Team Color Lab is a pick-a-background design harness — unlike Scorecard Lab
+// above, it carries no score/reveal content, so it's safe to ship to
+// production. Reachable at /team-color-lab but linked from no menu (see
+// lib/route.js) — unlisted, not gated.
+const TeamColorLab = lazyNamed(() => import('./screens/TeamColorLab.jsx'), 'TeamColorLab')
 
 // The current URL, path + query — player/team links carry a `?d=&s=` spoiler
 // cutoff, so the query is part of route identity, not just the path.
@@ -191,7 +191,7 @@ export default function App() {
     content = <GamePhotosPage key={route.gamePk ?? 'browse'} initialGamePk={route.gamePk ?? null} />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
-  } else if (route.name === 'team-color-lab' && TeamColorLab) {
+  } else if (route.name === 'team-color-lab') {
     content = <TeamColorLab />
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />

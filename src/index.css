@@ -2116,6 +2116,38 @@ body {
   box-shadow: var(--inset-cell);
 }
 
+/* Rockies-only: a hand-styled pattern instead of a flat --tint swatch, same
+   recipe as Team Color Lab's own .colorlab__logobox--pinstripe. */
+.gamecard__logobox.gamecard__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.16) 0,
+    rgba(0, 0, 0, 0.16) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+
+/* A diagonal white-to-black sheen over every tile face (background AND mark
+   alike, via this ::after stacking above both) — reads as a glossy, slightly
+   domed badge instead of a flat paint chip. Same recipe as Team Color Lab's
+   .colorlab__logobox--gloss, applied here to every team/treatment rather than
+   only a tinted one, so a plain paper tile gets the same finish as a colored
+   one. */
+.gamecard__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
 .gamecard__logobox .teamlogo {
   width: 100% !important;
   height: 100% !important;

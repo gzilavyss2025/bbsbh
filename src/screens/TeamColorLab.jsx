@@ -4,7 +4,6 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import {
   ALL_MLB_TEAM_IDS,
-  teamAbbr,
   teamFullName,
   teamClubName,
   teamColorSwatches,
@@ -12,6 +11,8 @@ import {
   ALT_COLORS,
   CITY_CONNECT_COLORS,
   TREATMENT_SCALE,
+  MAIN_OVERRIDES,
+  mainOverrideLogoUrl,
 } from '../lib/teams.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
 
@@ -65,71 +66,13 @@ function mainColorTriad(teamId) {
     }))
 }
 
-// A first pass at every club's Main tile as it'd look with a colored
-// background (the real card, and every other row on this page, uses a plain
-// paper fill) — each entry names which of the three swatches above becomes
-// the tile's background, an optional scale-down off the card's normal 1.32
-// edge-bleed (a large/dense mark reading as "the whole tile is this color"
-// against its own brand fill), and whether the mark itself needed a
-// recolor (see public/team-logos/main-overrides/{ABBR}.svg — the mlbstatic
-// CDN mark with specific fills swapped, e.g. Guardians' navy outline ->
-// white, Phillies' red/white swapped) to stay legible against its new
-// background.
-const MAIN_OVERRIDES = {
-  109: { bg: 'secondary' }, // Diamondbacks
-  108: { bg: 'secondary', scale: 0.9 }, // Angels
-  110: { bg: 'secondary' }, // Orioles
-  111: { bg: 'secondary' }, // Red Sox
-  112: { bg: 'secondary', scale: 0.9 }, // Cubs
-  113: { bg: 'secondary' }, // Reds
-  114: { bg: 'primary', recolor: true }, // Guardians — navy border -> white
-  // Rockies — white with a subtle black pinstripe (colorlab__logobox--pinstripe
-  // below) to match their home pinstripe jersey, instead of a flat brand-color
-  // tint like every other override here. `recolor` here isn't a color swap —
-  // it points at a local copy of the mlbstatic mark with the black rim thinned
-  // (a matching-color stroke on the silver inset paths, same weld technique as
-  // the Athletics Alternate seam fix) so it doesn't read too heavy against white.
-  115: { pinstripe: true, recolor: true },
-  116: { bg: 'primary', recolor: true }, // Tigers — navy -> white
-  117: { bg: 'secondary', scale: 0.9 }, // Astros
-  118: { bg: 'primary', recolor: true, scale: 0.85 }, // Royals — navy -> white
-  119: { bg: 'primary', recolor: true, scale: 0.85 }, // Dodgers — blue -> white
-  120: { bg: 'primary', recolor: true, scale: 0.95 }, // Nationals — red -> white
-  121: { bg: 'primary', scale: 0.9 }, // Mets
-  133: { bg: 'primary', recolor: true }, // Athletics — green -> white
-  134: { bg: 'primary', scale: 0.95 }, // Pirates
-  135: { bg: 'primary', recolor: true, scale: 0.85 }, // Padres — dark -> secondary gold
-  136: { bg: 'secondary' }, // Mariners
-  137: { bg: 'secondary', scale: 0.9 }, // Giants
-  138: { bg: 'primary', recolor: true, scale: 0.85 }, // Cardinals — red -> white
-  139: { bg: 'secondary', scale: 0.95 }, // Rays
-  // Rangers — the circular "Texas Rangers" crest badge (main-overrides/TEX.png,
-  // swapped in from Alternate) rather than the mlbstatic mark; it's already
-  // edge-to-edge in its own canvas like the Reds/Astros marks below, so scale
-  // down off the default 1.32 edge-bleed instead of up.
-  140: { bg: 'primary', recolor: true, scale: 0.75 },
-  141: { bg: 'third' }, // Blue Jays
-  142: { bg: 'primary', recolor: true, scale: 0.85 }, // Twins — navy T -> white
-  143: { bg: 'primary', recolor: true }, // Phillies — red/white swapped
-  144: { bg: 'secondary', recolor: true }, // Braves — red -> white (bg matches the navy border)
-  145: { bg: 'secondary' }, // White Sox
-  146: { bg: 'primary' }, // Marlins
-  147: { bg: 'third', recolor: true }, // Yankees — navy -> white
-  158: { bg: 'third' }, // Brewers
-}
-
+// MAIN_OVERRIDES (a first pass at every club's Main tile as it'd look with a
+// colored background — names which swatch becomes the tile fill, an optional
+// scale-down for a large/dense mark, and whether the mark itself needed a
+// recolor) plus mainOverrideLogoUrl now live in teams.js — the home-page game
+// card wears the exact same tile fill/scale/recolor this page prototyped, no
+// second copy to drift.
 const BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
-
-// Every other override here is a hand-edited copy of the vector mlbstatic
-// mark (.svg); the Rangers' is a chroma-keyed raster crop (see MAIN_OVERRIDES).
-const MAIN_OVERRIDE_PNG = new Set([140])
-
-function mainOverrideLogoUrl(teamId) {
-  const abbr = teamAbbr({ id: teamId })
-  if (!abbr) return null
-  const ext = MAIN_OVERRIDE_PNG.has(teamId) ? 'png' : 'svg'
-  return `/team-logos/main-overrides/${abbr}.${ext}`
-}
 
 // A plain "Background" swatch (the common case above — just describes the
 // tile fill, no color identity of its own) gets relabeled to Primary/
@@ -187,11 +130,14 @@ function jerseyMatchesFor(catalog, teamId, treatmentKey) {
     .map((a) => jerseyLabel(a.text, clubName))
 }
 
-// Dev harness for reviewing each club's three logo treatments — Main,
+// Design harness for reviewing each club's three logo treatments — Main,
 // Alternate, City Connect — side by side with their official brand colors.
-// Reached at /team-color-lab, linked from nowhere. Logos and Alternate/City
-// Connect colors are filled in as the user procures them; anything missing
-// renders as a wireframe placeholder rather than blocking the page.
+// Reached at /team-color-lab in production too, but linked from nowhere
+// (unlisted, like /game-notes-debug — see lib/route.js) — no score/reveal
+// content here, so there's no spoiler risk in shipping it. Logos and
+// Alternate/City Connect colors are filled in as the user procures them;
+// anything missing renders as a wireframe placeholder rather than blocking
+// the page.
 export function TeamColorLab() {
   useDocumentTitle('Team Color Lab')
   const teams = [...ALL_MLB_TEAM_IDS].sort((a, b) =>
@@ -219,9 +165,10 @@ export function TeamColorLab() {
         <h1 className="topbar__title">Team Color Lab</h1>
       </header>
       <p className="hint">
-        A dev harness; not linked anywhere in the app. Each club’s Main,
-        Alternate, and City Connect logo treatment with its three brand
-        colors. Missing logos or colors show as a placeholder until supplied.
+        An unlisted design harness — not linked anywhere in the app. Each
+        club’s Main, Alternate, and City Connect logo treatment with its
+        three brand colors. Missing logos or colors show as a placeholder
+        until supplied.
       </p>
 
       <div className="colorlab">

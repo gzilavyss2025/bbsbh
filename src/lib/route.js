@@ -26,7 +26,7 @@
 //   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
-//   '/team-color-lab'                   -> { name: 'team-color-lab' }  (dev only, unlinked)
+//   '/team-color-lab'                   -> { name: 'team-color-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
