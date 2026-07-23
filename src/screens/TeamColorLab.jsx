@@ -120,6 +120,11 @@ const CITY_CONNECT_COLORS = {
     { label: 'Secondary', hex: '#523178', bg: true },
   ], // Diamondbacks
   110: [{ label: 'Secondary', hex: '#E1D2BE', bg: true }], // Orioles
+  144: [
+    { label: 'Primary', hex: '#D32826' },
+    { label: 'Secondary', hex: '#374EA1' },
+    { label: 'Third', hex: '#7BA7D8', bg: true },
+  ], // Braves
   113: [
     { label: 'Primary', hex: '#C6011F' },
     { label: 'Secondary', hex: '#000000', bg: true },
