@@ -54,3 +54,39 @@ export function careerMatchupsFor(data, teamIdA, teamIdB) {
   const rows = data?.matchups?.[key]
   return Array.isArray(rows) ? rows : []
 }
+
+// Groups rows by pitcher (so every batter who's faced a given pitcher stays
+// adjacent on the CareerMatchups table, rather than interleaved by raw PA
+// count — see TeamInfo.jsx's MatchupTable) while preserving the original
+// "most real history first" ordering: pitcher groups are ranked by their own
+// total PA, and batters within a group are ranked by PA too. Pure re-sort, no
+// data reshaping — same row shape in, same rows out.
+export function sortByPitcher(rows) {
+  const byPitcher = new Map()
+  for (const r of rows) {
+    const group = byPitcher.get(r.pitcher.id)
+    if (group) group.push(r)
+    else byPitcher.set(r.pitcher.id, [r])
+  }
+  return [...byPitcher.values()]
+    .map((group) => group.sort((x, y) => y.pa - x.pa))
+    .sort((a, b) => b.reduce((sum, r) => sum + r.pa, 0) - a.reduce((sum, r) => sum + r.pa, 0))
+    .flat()
+}
+
+// "2-for-7, 1 HR, 3 K — AA, A+" — scorebook shorthand first (the thing a
+// paper scorer already writes), extras only when they're nonzero so a plain
+// 0-for-2 doesn't carry three redundant zero badges, levels last so a pair
+// who's only ever faced off at tonight's own level (the common case) doesn't
+// repeat what the card's own context already implies — only a pair with
+// history at ANOTHER level too keeps the full list, tonight's level included,
+// so a reader can see how much of the sample carries over.
+export function matchupLine(r, levelLabel) {
+  const parts = [`${r.h}-for-${r.ab}`]
+  if (r.hr > 0) parts.push(`${r.hr} HR`)
+  if (r.bb > 0) parts.push(`${r.bb} BB`)
+  if (r.k > 0) parts.push(`${r.k} K`)
+  const stat = parts.join(', ')
+  const onlyTonightsLevel = r.levels.length === 1 && r.levels[0] === levelLabel
+  return r.levels.length > 0 && !onlyTonightsLevel ? `${stat} — ${r.levels.join(', ')}` : stat
+}

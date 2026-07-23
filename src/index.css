@@ -4323,53 +4323,46 @@ body {
   color: var(--text-body);
 }
 
-/* Career Matchups (TeamInfo.jsx's CareerMatchups) — a plain scorebook-style
-   stat list, deliberately not FormerTeammates' headshot cards (this is a line
-   off a stat sheet, not a story), riding the same .metriccard/.metriccard__body
-   shell. Each row wraps name-pair + stat line onto its own line at narrow
-   widths rather than truncating either. */
-.matchups__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small stat tables
+   (one per batting direction — "Braves batters vs Padres pitchers" and back),
+   deliberately not FormerTeammates' headshot cards (this is a line off a stat
+   sheet, not a story). Each table rides the shared .standings shell (see
+   .foulboard for the same reuse) rather than inventing new table chrome. */
+.matchuptable {
+  margin-top: var(--space-4);
 }
-.matchups__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 10px;
-  padding: 7px 0;
-  border-bottom: var(--bw-hair) solid var(--border-rule);
+.matchuptable:first-child {
+  margin-top: 0;
 }
-.matchups__row:last-child {
-  border-bottom: none;
+.matchuptable__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
-.matchups__names {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
+.matchuptable__table th.matchuptable__namecol,
+.matchuptable__table td.matchuptable__name {
+  text-align: left;
 }
-/* Scoped through the parent, same reason .umps__namerow .umps__name is —
-   outranks .plink's own font/color/text-transform: inherit reset, which
-   would otherwise win the same-specificity tie by source order. */
-.matchups__names .matchups__name {
-  font-size: var(--fs-small);
+.matchuptable__table td.matchuptable__name {
+  font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.matchups__vs {
-  font-size: var(--fs-caption);
+.matchuptable__table td.matchuptable__line {
+  font-variant-numeric: tabular-nums;
   color: var(--text-caption);
 }
-.matchups__line {
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-  white-space: nowrap;
+/* A batter in tonight's actual starting lineup facing the opposing club's
+   actual probable starter — the one row on this table that's about to play
+   out for real on the user's own scoresheet. Same highlighter-yellow "pay
+   attention" wash as .standings tr.foulboard__row--outlier, set per-<td> so
+   the row's own hairline borders (owned by each cell) stay unbroken. */
+.matchuptable__row--tonight td {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 
 /* ----------------------------------------------------------- defense diamond
@@ -20551,7 +20544,7 @@ body {
 /* ------------------------------------------------------------- foul tracker
    FoulTrackerPage.jsx — season foul-ball boards. Every board is a .metriccard
    wearing the same navy/gold SectionMasthead the rest of the app's card
-   sections use (Lineup Strength, Bullpen Tonight, batting order, …) —
+   sections use (Lineup Strength, Bullpen Health, batting order, …) —
    .foulboard-block only adds page-specific tweaks on top of the shared
    .metriccard/.metricbar rules. Reuses .standings/.ledger-wrap ledger styling
    (same right-aligned mono figures, left-aligned .team cell) for the tables;
@@ -21462,6 +21455,9 @@ button.gamehigh-matchup:active {
 }
 .metricbar__title {
   margin: 0; /* also rendered as an <h3> on the plain page sections — kill UA margin */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: var(--w-bold);
@@ -21469,6 +21465,24 @@ button.gamehigh-matchup:active {
   line-height: var(--lh-solid);
   text-transform: uppercase;
   color: var(--text-on-ink);
+}
+/* The batting-order / opposing-starter / opposing-defense mastheads' club
+   mark (SectionMasthead's `logo` prop) — a decorative flourish, never the
+   sole identifier (the title text sits right next to it), so the image
+   itself carries no alt text. */
+.metricbar__logo {
+  flex: 0 0 auto;
+}
+/* Forced to a solid white silhouette (same `filter` trick as .teamlogo--bw's
+   grayscale) rather than the CDN's own multicolor mark, so most clubs' logo
+   reads as a clean white lockup against the navy bar. NOT applied for the
+   ids in teams.js's MASTHEAD_LOGO_NATURAL_COLOR — a mark whose OWN design
+   already carries a light/white ring or outline (Cubs, Astros, Blue Jays,
+   Brewers) flattens into an unreadable solid blob under this filter, since
+   the filter can't tell that ring apart from the shape it encloses once both
+   become the same color; those four read fine in their real colors as-is. */
+.metricbar__logo--white {
+  filter: brightness(0) invert(1);
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
    masthead as the header of a real card. The CONTAINER owns the border / radius /
@@ -21523,7 +21537,7 @@ button.gamehigh-matchup:active {
 
 /* ------------------------------------------------------- season series strip
    The lineup page's "other meetings this season" widget — SeasonSeriesStrip.jsx.
-   A .metriccard like Lineup Strength / Bullpen Tonight above, so it wears the
+   A .metriccard like Lineup Strength / Bullpen Health above, so it wears the
    same navy/gold masthead; the body swaps the usual stacked layout for a
    horizontally-scrolling row of game cards with always-on square nav buttons
    (this app doesn't use circular chrome elsewhere, so the buttons stay square

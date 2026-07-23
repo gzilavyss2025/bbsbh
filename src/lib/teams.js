@@ -136,7 +136,13 @@ const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
 // returns real, different art, not the base logo echoed back). This gives the
 // sketcher more than one thing to draw for a team instead of the same roundel
 // every time. We use the `-on-light` treatment throughout since every surface
-// that renders a logo is the app's light "paper". There is NO alternate /
+// that renders a logo is the app's light "paper" — including the navy section
+// mastheads on the lineup page, which force the mark to solid white with a CSS
+// filter (see index.css's .metricbar__logo) rather than pulling the CDN's own
+// `-on-dark` variant, which keeps each club's REAL colors (verified live: only
+// a mostly-monochrome mark like the Yankees' actually turns white there; a
+// multicolor mark like the Brewers' does not) — not the uniform white lockup
+// this app wants on that one dark surface. There is NO alternate /
 // per-uniform / home-road mark on this CDN (those paths 404), so this is the
 // full set. `base` is the plain `{id}.svg` default that every existing caller
 // already uses.
@@ -145,6 +151,22 @@ export const LOGO_VARIANTS = [
   { key: 'cap', label: 'Cap', path: 'team-cap-on-light' },
   { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
 ]
+
+// Teams whose `base` mark's own design already bakes in a light/white ring or
+// outline around its main shape (Cubs' white-bordered roundel, Astros' navy
+// circle, the Blue Jays' outlined bird, the Brewers' outlined glove) — verified
+// live by rendering all 30 clubs' base marks through the masthead's white
+// filter (.metricbar__logo--white, index.css): every OTHER club flattens to a
+// clean white silhouette, but these four collapse into an unreadable solid
+// blob, since the filter can't tell that ring apart from the shape it
+// encloses once both become the same color. These four render in their real
+// CDN colors instead, which already read fine directly against the navy bar.
+export const MASTHEAD_LOGO_NATURAL_COLOR = new Set([
+  112, // Cubs
+  117, // Astros
+  141, // Blue Jays
+  158, // Brewers
+])
 
 // Teams whose Alternate mark is a hand-flattened solid-color SVG silhouette
 // (every path recolored to the club's one real brand color straight off the
