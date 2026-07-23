@@ -6813,7 +6813,10 @@ body {
    fun fact (see api/callout-notes.js). Reads as a sentence (caps-exempt below),
    set off a touch louder than a baserunning subnote with the kraft-amber seal
    accent and a small star, so a "leads the club in walks" note catches the eye
-   without shouting. */
+   without shouting. Same var(--surface-card) as its parent .pbp__card, not the
+   brighter var(--surface-inset) chip fill — that read as a mismatched white
+   patch sitting directly on the card's own cream surface (same bug already
+   fixed for .half__pitchkeyfoot). */
 .pbp__callout {
   display: flex;
   align-items: flex-start;
@@ -6822,7 +6825,7 @@ body {
   padding: 4px 8px;
   border-left: 2px solid var(--seal-deep);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--surface-inset);
+  background: var(--surface-card);
   font-family: var(--font-read);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
