@@ -240,12 +240,16 @@ CREATE TABLE IF NOT EXISTS foul_league_innings (
 );
 
 -- League-wide foul rate by pitch type (details.type.code / .description).
+-- `whiffs` (swinging strikes) was added after the table's initial rows were
+-- ingested — see scripts/backfill-foul-pitchtype-whiffs.mjs for the one-time
+-- migration that filled it in for already-ingested games.
 CREATE TABLE IF NOT EXISTS foul_pitch_types (
   code        TEXT PRIMARY KEY,
   season      INTEGER NOT NULL,
   description TEXT NOT NULL,
   pitches     INTEGER NOT NULL DEFAULT 0,
-  fouls       INTEGER NOT NULL DEFAULT 0
+  fouls       INTEGER NOT NULL DEFAULT 0,
+  whiffs      INTEGER NOT NULL DEFAULT 0
 );
 
 -- Foul rate by pitch type, scoped to ONE team's own BATTERS (the pitch types

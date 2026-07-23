@@ -152,7 +152,7 @@ export function aggregateGameFouls(feed) {
   const getPitchType = (code, desc) => {
     let pt = pitchTypes.get(code)
     if (!pt) {
-      pt = { description: desc || '', pitches: 0, fouls: 0 }
+      pt = { description: desc || '', pitches: 0, fouls: 0, whiffs: 0 }
       pitchTypes.set(code, pt)
     } else if (desc && !pt.description) {
       pt.description = desc
@@ -291,6 +291,7 @@ export function aggregateGameFouls(feed) {
         const pt = getPitchType(tcode, desc)
         pt.pitches += 1
         if (isFoul) pt.fouls += 1
+        if (isWhiff) pt.whiffs += 1
         if (battingTeamId != null) {
           const bpt = getTeamPitchType(battingPitchTypes, battingTeamId, tcode, desc)
           bpt.pitches += 1
@@ -507,13 +508,14 @@ const upsertInning = (db) =>
 
 const upsertPitchType = (db) =>
   db.prepare(
-    `INSERT INTO foul_pitch_types (code, season, description, pitches, fouls)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO foul_pitch_types (code, season, description, pitches, fouls, whiffs)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(code) DO UPDATE SET
        season = excluded.season,
        description = excluded.description,
        pitches = foul_pitch_types.pitches + excluded.pitches,
-       fouls = foul_pitch_types.fouls + excluded.fouls`,
+       fouls = foul_pitch_types.fouls + excluded.fouls,
+       whiffs = foul_pitch_types.whiffs + excluded.whiffs`,
   )
 
 const upsertTeamPitchTypeBatting = (db) =>
@@ -594,7 +596,7 @@ async function ingestGame(db, stmts, gamePk, date, season) {
       stmts.inning.run(inning, season, i.pitches, i.fouls, i.pitchesVsStarter, i.foulsVsStarter, i.pitchesVsReliever, i.foulsVsReliever)
     }
     for (const [code, pt] of agg.pitchTypes) {
-      stmts.pitchType.run(code, season, pt.description, pt.pitches, pt.fouls)
+      stmts.pitchType.run(code, season, pt.description, pt.pitches, pt.fouls, pt.whiffs)
     }
     for (const [teamId, byCode] of agg.battingPitchTypes) {
       for (const [code, pt] of byCode) {
@@ -707,7 +709,7 @@ export function exportFouls(db) {
   const byPitchType = db
     .prepare('SELECT * FROM foul_pitch_types ORDER BY pitches DESC')
     .all()
-    .map((r) => ({ code: r.code, description: r.description, pitches: r.pitches, fouls: r.fouls }))
+    .map((r) => ({ code: r.code, description: r.description, pitches: r.pitches, fouls: r.fouls, whiffs: r.whiffs }))
 
   // Every game with a combined total, richest first — the reader trims this to
   // a top N (see src/api/fouls.js's topFoulGames), same "export the full sorted

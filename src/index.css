@@ -20248,6 +20248,66 @@ body {
     min-width: 0;
   }
 }
+/* Baseline sentence above the Most/Fewest split — same "state the average
+   before the ranked outliers" idea as .foulavg__lede, reused as a one-liner
+   scoped to this one card rather than the whole page. No caps-exempt override
+   (see the ALL-CAPS INVARIANT block up top): like .foulavg__lede, this reads
+   as shouted-caps scorebook copy rather than natural-case prose, consistent
+   with every other number-bearing sentence on this page. */
+.foulboard__whiffavg {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+.foulboard__whiffavg b {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Fouls per whiff's Most/Fewest split — one card, two columns. Stacked below
+   740px (same breakpoint as .foultracker__pair above); side by side on
+   desktop with a hairline divider between them, since these are two views of
+   one stat rather than two unrelated boards sharing a row. Deliberately NOT
+   `.ledger-wrap` for the inner scroll container — `.foulboard-block
+   .ledger-wrap` below bleeds a ledger-wrap edge-to-edge under the card's own
+   padding, which is right for a single full-width table but would blow a
+   half-width column out past its own column. */
+.foulboard__whiffsplit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+@media (min-width: 740px) {
+  .foulboard__whiffsplit {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .foulboard__whiffsplit > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .foulboard__whiffcol + .foulboard__whiffcol {
+    padding-left: var(--space-4);
+    border-left: var(--bw-hair) solid var(--border-rule);
+  }
+}
+.foulboard__whiffcol-heading {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.foulboard__whiffcol-hint {
+  font-weight: var(--w-regular);
+}
+.foulboard__whiffcol-scroll {
+  overflow-x: auto;
+}
 .foulboard-block .ledger-wrap {
   margin: 0 calc(-1 * var(--space-4));
 }
@@ -20288,14 +20348,14 @@ body {
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
-/* Kraft-brown variant — reuses the kraft-tape hatch color (--seal-hatch) as a
-   pure decorative fill here, unrelated to that color's spoiler-cover meaning
-   elsewhere in the app (see ADR-0004/CONTEXT.md's Seal) — a pitch family
-   isn't a sealed value, it just borrows the same paper-scorebook brown. */
+/* Navy variant (misleadingly still named `--kraft` from an earlier
+   kraft-tape-brown fill) — that brown sat directly under the card's own
+   navy/gold masthead border and clashed with the gold. `--accent-primary`
+   (navy) is already a guarded text-on-ink pairing (see check-contrast.mjs),
+   and reads as a continuation of the masthead's own navy rather than a
+   competing accent. */
 .foulboard__grouprow--kraft th {
-  /* Darkened past the plain --seal-hatch kraft tone so white text clears
-     WCAG AA (4.5:1) — the plain hatch color alone only holds ~3.7:1. */
-  background: color-mix(in srgb, var(--seal-hatch) 75%, var(--ink-0) 25%);
+  background: var(--accent-primary);
   color: var(--text-on-ink);
   border-top: none;
 }

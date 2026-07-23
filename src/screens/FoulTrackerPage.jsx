@@ -194,12 +194,8 @@ export function FoulTrackerPage() {
           <FoulLeaderBoard
             title="Foul magnets — pitchers"
             rows={boards.pitcherRate}
-            cols={['Foul%', 'Fouls', 'Per whiff']}
-            cells={(p) => [
-              pct1(p.fouls / p.pitches),
-              p.fouls,
-              p.whiffs > 0 ? (p.fouls / p.whiffs).toFixed(1) : '—',
-            ]}
+            cols={['Foul%', 'Fouls']}
+            cells={(p) => [pct1(p.fouls / p.pitches), p.fouls]}
             featured
             favoriteTeamId={highlightTeamId}
             positions={positions}
@@ -207,15 +203,18 @@ export function FoulTrackerPage() {
           <FoulLeaderBoard
             title="Fewest fouls — pitchers"
             rows={boards.pitcherRateLow}
-            cols={['Foul%', 'Fouls', 'Per whiff']}
-            cells={(p) => [
-              pct1(p.fouls / p.pitches),
-              p.fouls,
-              p.whiffs > 0 ? (p.fouls / p.whiffs).toFixed(1) : '—',
-            ]}
+            cols={['Foul%', 'Fouls']}
+            cells={(p) => [pct1(p.fouls / p.pitches), p.fouls]}
             featured
             favoriteTeamId={highlightTeamId}
             positions={positions}
+          />
+
+          <FoulsPerWhiffBoard
+            mostRows={boards.pitcherFoulsPerWhiff}
+            fewestRows={boards.pitcherFoulsPerWhiffLow}
+            avg={boards.pitcherFoulsPerWhiffAvg}
+            favoriteTeamId={highlightTeamId}
           />
 
           <ByInning league={boards.league} />
@@ -249,6 +248,7 @@ function buildBoards(data, teamId = null) {
   const pitchers = filterByTeam(allPitchers, teamId, (p) => p.teamId)
   const qualified = batters.filter((b) => b.g >= minGames)
   const qualifiedP = pitchers.filter((p) => (p.pitches ?? 0) >= 300)
+  const foulsPerWhiffPool = qualifiedP.filter((p) => p.whiffs > 0)
 
   const top = (arr, keyFn, n = 12) => [...arr].sort((a, b) => keyFn(b) - keyFn(a)).slice(0, n)
   const bottom = (arr, keyFn, n = 12) => [...arr].sort((a, b) => keyFn(a) - keyFn(b)).slice(0, n)
@@ -268,6 +268,21 @@ function buildBoards(data, teamId = null) {
     ),
     pitcherRate: top(qualifiedP, (p) => p.fouls / p.pitches),
     pitcherRateLow: bottom(qualifiedP, (p) => p.fouls / p.pitches),
+    // Same qualifiedP pool as pitcherRate above, further restricted to
+    // pitchers who've actually recorded a whiff — the ratio is undefined
+    // (divide-by-zero) otherwise. `foulsPerWhiffAvg` is the SAME pool's
+    // aggregate rate (total fouls / total whiffs, not an average of each
+    // pitcher's own ratio — same sum-then-divide convention as
+    // SeasonAverageCard's avgFoulsPerPA/avgFoulsPerStart below, so a
+    // low-whiff reliever's noisy individual ratio can't skew the baseline
+    // the way a mean-of-ratios would) — the middle the Most/Fewest extremes
+    // are read against.
+    pitcherFoulsPerWhiff: top(foulsPerWhiffPool, (p) => p.fouls / p.whiffs),
+    pitcherFoulsPerWhiffLow: bottom(foulsPerWhiffPool, (p) => p.fouls / p.whiffs),
+    pitcherFoulsPerWhiffAvg:
+      foulsPerWhiffPool.length > 0
+        ? foulsPerWhiffPool.reduce((s, p) => s + p.fouls, 0) / foulsPerWhiffPool.reduce((s, p) => s + p.whiffs, 0)
+        : null,
     league: data?.league ?? null,
     // Only meaningful once a team filter narrows the page to one club — see
     // ByPitchType's team-vs-league branch below.
@@ -346,14 +361,14 @@ function FoulFeatured({ player, cols, cells, favoriteTeamId, positions }) {
   )
 }
 
-// `featured`: pulls rank 1 out into a FoulFeatured headshot card above the
-// table, which then starts numbering at 2 — the featured card IS his row, so
-// the table never shows him twice.
+// `featured`: additionally spotlights rank 1 in a FoulFeatured headshot card
+// above the table — the table still lists him at rank 1 too, so a reader
+// scanning the ledger alone still sees the full ranking.
 function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteTeamId, positions }) {
   if (!rows || rows.length === 0) return null
   const lead = featured ? rows[0] : null
-  const rest = featured ? rows.slice(1) : rows
-  const rankOffset = featured ? 2 : 1
+  const rest = rows
+  const rankOffset = 1
   return (
     <BoardCard title={title}>
       {lead && (
@@ -388,6 +403,91 @@ function FoulLeaderBoard({ title, rows, cols, cells, featured = false, favoriteT
         </div>
       )}
     </BoardCard>
+  )
+}
+
+// Fouls-per-whiff's Most (foul-heavy) and Fewest (whiff-heavy) sides are the
+// SAME underlying ratio read from both ends, not two independent boards — a
+// separate hero card + masthead per side (like every other leaderboard here)
+// duplicated too much chrome for that. One card, two plain compact tables
+// side by side on desktop (stacked on phone, see .foulboard__whiffsplit) —
+// no hero cards, deliberately, since the point of combining these is density.
+// A whiff is the cleaner miss for a pitcher; a foul just keeps the pitch
+// alive (see the two-strike stat in this page's intro), so "Most" reads
+// foul-heavy/less swing-and-miss and "Fewest" reads whiff-heavy/more
+// swing-and-miss — described inline rather than assumed, since which end is
+// "better" isn't obvious the way Foul magnets/Fewest fouls' Foul% is. `avg`
+// (buildBoards' pitcherFoulsPerWhiffAvg) gives the reader a middle to read
+// both extremes against, the same "state the baseline before the outliers"
+// idea as SeasonAverageCard leading the whole page — one sentence, shared by
+// both columns below it, rather than repeating the number per side.
+function FoulsPerWhiffBoard({ mostRows, fewestRows, avg, favoriteTeamId }) {
+  const hasMost = mostRows && mostRows.length > 0
+  const hasFewest = fewestRows && fewestRows.length > 0
+  if (!hasMost && !hasFewest) return null
+  return (
+    <BoardCard title="Fouls per whiff — pitchers">
+      {avg != null && (
+        <p className="foulboard__whiffavg">
+          Qualified pitchers (300+ pitches, 1+ whiff) average <b>{avg.toFixed(1)}</b> fouls per whiff — every ranked
+          pitcher below is well off that middle.
+        </p>
+      )}
+      <div className="foulboard__whiffsplit">
+        {hasMost && (
+          <FoulsPerWhiffColumn
+            heading="Most"
+            hint="foul-heavy"
+            rows={mostRows}
+            favoriteTeamId={favoriteTeamId}
+          />
+        )}
+        {hasFewest && (
+          <FoulsPerWhiffColumn
+            heading="Fewest"
+            hint="whiff-heavy"
+            rows={fewestRows}
+            favoriteTeamId={favoriteTeamId}
+          />
+        )}
+      </div>
+    </BoardCard>
+  )
+}
+
+function FoulsPerWhiffColumn({ heading, hint, rows, favoriteTeamId }) {
+  return (
+    <div className="foulboard__whiffcol">
+      <p className="foulboard__whiffcol-heading">
+        {heading} <span className="foulboard__whiffcol-hint">({hint})</span>
+      </p>
+      <div className="foulboard__whiffcol-scroll">
+        <table className="standings foulboard">
+          <thead>
+            <tr>
+              <th className="team">Player</th>
+              <th>Fouls per whiff</th>
+              <th>Fouls</th>
+              <th>Whiffs</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={r.id} {...favRowProps(r.teamId, favoriteTeamId)}>
+                <td className="team">
+                  <span className="umprank__rank">{i + 1}</span>
+                  <PlayerLink id={r.id} className="foulboard__rowname">{r.name}</PlayerLink>
+                  <span className="foulboard__team">{teamAbbr({ id: r.teamId })}</span>
+                </td>
+                <td>{(r.fouls / r.whiffs).toFixed(1)}</td>
+                <td>{r.fouls}</td>
+                <td>{r.whiffs}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }
 
@@ -853,7 +953,12 @@ function ByPitchType({ league, teamRates }) {
 
   const rows = (league?.byPitchType ?? [])
     .filter((r) => r.pitches >= 500)
-    .map((r) => ({ ...r, rate: r.fouls / r.pitches, category: PITCH_CATEGORY[r.code] ?? 'Other' }))
+    .map((r) => ({
+      ...r,
+      rate: r.fouls / r.pitches,
+      whiffRate: r.pitches > 0 ? (r.whiffs ?? 0) / r.pitches : null,
+      category: PITCH_CATEGORY[r.code] ?? 'Other',
+    }))
   if (rows.length === 0) return null
   const groups = PITCH_CATEGORY_ORDER.map((category) => ({
     category,
@@ -874,7 +979,7 @@ function ByPitchType({ league, teamRates }) {
   )
 }
 
-// Same kraft-brown subheader shape as PitchCategoryGroup below, but split into
+// Same navy subheader shape as PitchCategoryGroup below, but split into
 // two 3-column groups (batters' own vs. pitchers' own): a raw pitch count
 // leads each side (# seen for batters, # thrown for pitchers), then foul% and
 // whiff% follow as plain percentages — no count riding along in either rate
@@ -916,32 +1021,36 @@ function TeamPitchCategoryGroup({ group }) {
   )
 }
 
-// One pitch-family's kraft-brown subheader row (spans the table), its OWN
-// repeated Pitch/Foul%/Pitches column header, then its pitch-type rows — a
-// real <tbody> boundary per group so the row-divider rules (owned by
+// One pitch-family's navy subheader row (spans the table), its OWN
+// repeated Pitch/Pitches/Foul%/Whiff% column header, then its pitch-type
+// rows — a real <tbody> boundary per group so the row-divider rules (owned by
 // .standings/.ledger's shared background gradient) don't have to special-case
 // the subheaders visually. The column header repeats under every category
 // (rather than once at the table's top) since a reader scanning straight to
 // "Breaking balls" shouldn't have to scroll back up to remember which column
-// is which.
+// is which. Pitches leads (the sample size a reader should weigh the two
+// rates against) with Foul%/Whiff% following, same left-to-right order as
+// TeamPitchCategoryGroup's own Seen/Foul%/Whiff% triplet below.
 function PitchCategoryGroup({ group }) {
   return (
     <>
       <tr className="foulboard__grouprow foulboard__grouprow--kraft">
-        <th colSpan={3} scope="rowgroup">
+        <th colSpan={4} scope="rowgroup">
           {group.category}
         </th>
       </tr>
       <tr className="foulboard__subhead">
         <th className="team">Pitch</th>
-        <th>Foul%</th>
         <th>Pitches</th>
+        <th>Foul%</th>
+        <th>Whiff%</th>
       </tr>
       {group.rows.map((r) => (
         <tr key={r.code}>
           <td className="team">{r.description || r.code}</td>
-          <td>{pct1(r.rate)}</td>
           <td>{r.pitches.toLocaleString('en-US')}</td>
+          <td>{pct1(r.rate)}</td>
+          <td>{r.whiffRate == null ? '—' : pct1(r.whiffRate)}</td>
         </tr>
       ))}
     </>
