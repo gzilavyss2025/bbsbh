@@ -97,7 +97,7 @@ const LOGO_OFFSET_Y = 6
 //     byte-for-byte copy with ONLY the colliding fill's hex swapped —
 //     verified against the live CDN source, not reconstructed from memory.
 // A team with no entry here keeps its logo's own natural colors.
-const LOGO_COLOR_OVERRIDES = {
+export const LOGO_COLOR_OVERRIDES = {
   113: { mode: 'flood', color: '#FFFFFF' }, // Reds — base mark is solid red, no black in it to preserve
   118: { mode: 'flood', color: '#FFFFFF' }, // Royals
   119: { mode: 'flood', color: '#FFFFFF' }, // Dodgers
@@ -115,20 +115,33 @@ const LOGO_COLOR_OVERRIDES = {
 
 // A handful of clubs' band background is better off as something OTHER than
 // their TEAM_COLOR_PAIRS primary (teams.js) — a lighter secondary shade that
-// reads better as a big fill, or (Diamondbacks) a literal accent from their
-// own logo art that isn't in that pair at all. Falls through to the team's
-// normal chip primary for every other team.
-const BAND_COLOR_OVERRIDES = {
-  109: '#3EC1CC', // Diamondbacks — the teal from their own "A" logo, not in TEAM_COLOR_PAIRS
+// reads better as a big fill. Falls through to the team's normal chip
+// primary for every other team. A MiLB affiliate's own id (not its parent
+// org's) also works here — e.g. Nashville Sounds below — since a farmhand's
+// club identity/logo can differ entirely from its parent org's.
+export const BAND_COLOR_OVERRIDES = {
+  109: '#E3D4AD', // Diamondbacks — their real secondary sand/desert tone (TEAM_COLOR_PAIRS)
   111: '#0C2340', // Red Sox — secondary navy, not primary red
+  140: '#EBDFCB', // Rangers — their real cream tone, sampled off their own alt mark (ALT_COLORS)
+  144: '#13274F', // Braves — secondary navy, not primary red
+  145: '#C4CED4', // White Sox — their real secondary silver/gray, not primary near-black
+  147: '#132448', // Yankees — their true logo navy, darker than TEAM_COLORS' brighter #003087 accent
   136: '#005C5C', // Mariners — secondary green/teal, not primary navy
   139: '#8FBCE6', // Rays — secondary lighter blue, not primary navy
+  484: '#D9D9D9', // Indianapolis Indians (MiLB) — light gray, not their parent org's near-black
+  556: '#E31837', // Nashville Sounds (MiLB) — their own logo red, sampled off the CDN mark
+  572: '#8A2432', // Wisconsin Timber Rattlers (MiLB) — their own logo maroon, sampled off the CDN mark
+  580: '#C7BEE0', // Winston-Salem Dash (MiLB) — pale tint of their own logo purple
+  6325: '#000000', // Columbus Clingstones (MiLB) — plain black
+  432: '#D0A353', // Rome Emperors (MiLB) — no true yellow in their mark, closest is this laurel gold
+  437: '#FDB913', // Lake County Captains (MiLB) — their own logo gold, sampled off the CDN mark
+  565: '#AD8505', // Quad Cities River Bandits (MiLB) — their own logo bronze/gold, not their parent org's navy
 }
 
 // A team's brand pair for chip/marker chrome, falling back to a neutral
 // graphite pair for a team teamChipColors doesn't know (no teamId handed in,
 // or an unrecognized MiLB id) rather than rendering an undefined color.
-function chipColorsFor(teamId) {
+export function chipColorsFor(teamId) {
   return teamChipColors(teamId) ?? { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 }
 
@@ -142,7 +155,7 @@ function chipColorsFor(teamId) {
 // override color, then feMerge stacks it BEHIND (feMergeNode order = paint
 // order) the original artwork — a same-color halo just outside the mark's
 // existing edge, thickened if the mark already had one of its own (Phillies).
-function RecolorFilter({ id, override }) {
+export function RecolorFilter({ id, override }) {
   if (!override || override.mode === 'swap') return null
   if (override.mode === 'outline') {
     return (

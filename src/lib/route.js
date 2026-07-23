@@ -27,6 +27,7 @@
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/team-color-lab'                   -> { name: 'team-color-lab' }  (unlisted QA page)
+//   '/team-pattern-lab'                 -> { name: 'team-pattern-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
@@ -93,6 +94,9 @@ export function parseRoute(url) {
   // Dev-only team-color swatch harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'team-color-lab')
     return { name: 'team-color-lab' }
+  // Win-probability band pattern review harness — parsed and rendered, but linked from nowhere.
+  if (parts.length === 1 && parts[0] === 'team-pattern-lab')
+    return { name: 'team-pattern-lab' }
   // Unlisted QA page (every club's Game Notes calibration status + a shortcut
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')
