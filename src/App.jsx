@@ -97,6 +97,10 @@ const TeamColorLab = lazyNamed(() => import('./screens/TeamColorLab.jsx'), 'Team
 const UniformNamesPage = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/UniformNamesPage.jsx'), 'UniformNamesPage')
   : null
+// Win-probability band pattern review harness — same footing as Team Color
+// Lab above (no score/reveal content, safe to ship, reachable only by direct
+// URL — see lib/route.js).
+const TeamPatternLab = lazyNamed(() => import('./screens/TeamPatternLab.jsx'), 'TeamPatternLab')
 
 // The current URL, path + query — player/team links carry a `?d=&s=` spoiler
 // cutoff, so the query is part of route identity, not just the path.
@@ -202,6 +206,9 @@ export default function App() {
     content = <TeamColorLab />
   } else if (route.name === 'uniform-names' && UniformNamesPage) {
     content = <UniformNamesPage />
+  } else if (route.name === 'team-pattern-lab') {
+    content = <TeamPatternLab />
+
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
