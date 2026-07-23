@@ -41,7 +41,11 @@ function ipToOuts(ip) {
 // already reveal-clamped) against his season baseline from workload.json.
 // Returns null when there's no baseline (no workload data, MiLB, debut) or
 // the revealed sample is too thin; otherwise
-// { pitchesPerInning, baseline, ratio, laboring }.
+// { pitchesPerInning, baseline, ratio, laboring, ip }. `ip` (the row's own
+// reveal-clamped innings-pitched string, e.g. "2.1") rides along so the
+// Margin Notes text can say what it's measured through — this updates every
+// time revealedThrough advances, since it's read straight off the same
+// reveal-clamped row each render, never a one-time snapshot.
 export function laboringFor(line, workloadEntry) {
   const outs = ipToOuts(line?.ip)
   const pitches = line?.pitches ?? 0
@@ -57,6 +61,7 @@ export function laboringFor(line, workloadEntry) {
     baseline,
     ratio,
     laboring: ratio >= LABOR_RATIO,
+    ip: line.ip,
   }
 }
 
