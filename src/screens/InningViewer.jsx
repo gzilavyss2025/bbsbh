@@ -163,6 +163,19 @@ export function InningViewer({
   const turning = turnStatus !== 'idle'
   const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
 
+  // Runs scored so far in the half currently being STEPPED through (ADR-0016
+  // at-bat stepping) — reported up from PlayByPlay (via HalfInning/InningPage,
+  // see onRunsSoFar) so RollingLine's own cell for this half can build up as
+  // you reveal it one at-bat at a time, instead of staying blank ("·") until
+  // the whole half commits. Reset on every half change so a stale reading
+  // from a half you've navigated away from never lingers — RollingLine only
+  // ever trusts this for the exact half-index it's keyed to anyway (a half
+  // that's since fully committed reads its real total the normal way
+  // instead), but there's no reason to hold onto it a moment longer than
+  // the half it describes stays current.
+  const [runsInProgress, setRunsInProgress] = useState(null)
+  useEffect(() => setRunsInProgress(null), [curIdx])
+
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
   // Keyed on the half itself so navigating (or the turn committing) forces
@@ -191,6 +204,7 @@ export function InningViewer({
         atBatCountFor={atBatCountFor}
         onStepInfo={(info) => setStepInfo({ ...info, forIdx: idx })}
         onSteppedThrough={scrollToStatBox}
+        onRunsSoFar={(runs) => setRunsInProgress({ idx, runs })}
         getDerived={getDerived}
         runExpectancy={runExpectancy}
         winProbPoints={winProbPoints}
@@ -417,6 +431,7 @@ export function InningViewer({
           homeAbbr={meta.home.abbreviation}
           awayName={meta.away.clubName}
           homeName={meta.home.clubName}
+          runsInProgress={runsInProgress}
           curIdx={curIdx}
           onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
           disabled={turning}

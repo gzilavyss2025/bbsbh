@@ -42,7 +42,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // entries list (every entry shown, whether by tapping through or because the
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -93,6 +93,23 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
       onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length })
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // How many runs have scored in the STEPPED-THROUGH portion of this half so
+  // far — reported upward (InningViewer, via HalfInning) so the linescore
+  // grid's own cell for this half can build up as you reveal it one at-bat at
+  // a time, instead of staying blank until the whole half commits. Reveal-
+  // safe by construction: `entries` here is already clamped to `effectiveCap`
+  // (computeHalfInningFeed's own stepCap), so this can never count a run from
+  // an at-bat the user hasn't actually stepped into yet. Each scoring runner
+  // is marked `scored: true` on HIS OWN at-bat card (the trip he reached base
+  // on, not necessarily the play that drove him in), so summing every
+  // entry's own flag — not just the batter of the play that just happened —
+  // correctly totals a multi-run play (a grand slam scores the batter's own
+  // card plus the three baserunners' own earlier cards).
+  useEffect(() => {
+    if (!stepping) return
+    onRunsSoFar?.(entries.filter((e) => e.kind === 'atbat' && e.scored).length)
+  }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll the newly revealed at-bat to the TOP of the viewport on each step
   // (ADR-0016): a step boundary always lands right after a plate-appearance

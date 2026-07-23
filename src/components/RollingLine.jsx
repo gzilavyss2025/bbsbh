@@ -27,6 +27,7 @@ export function RollingLine({
   homeAbbr,
   awayName,
   homeName,
+  runsInProgress,
   curIdx,
   onSelect,
   disabled = false,
@@ -35,8 +36,19 @@ export function RollingLine({
   const cols = []
   for (let n = firstCol; n <= unlocked; n++) cols.push(n)
 
-  const lineFor = (n, half, side) =>
-    halfIndex(n, half) <= revealedThrough ? revealInning(feed, n, side) : null
+  // A half not yet fully committed still builds up its own cell as you STEP
+  // through it (ADR-0016) — `runsInProgress` (InningViewer, reported from
+  // PlayByPlay via HalfInning) carries the half-index it describes alongside
+  // the count, so a stale reading from a half you've since navigated away
+  // from never gets attributed to a different cell. The real, fully-revealed
+  // path always wins once it applies — a half that commits mid-visit reads
+  // its exact total the normal way from then on, not the last partial count.
+  const lineFor = (n, half, side) => {
+    const idx = halfIndex(n, half)
+    if (idx <= revealedThrough) return revealInning(feed, n, side)
+    if (idx === runsInProgress?.idx) return { runs: runsInProgress.runs }
+    return null
+  }
 
   // Team label: the mascot/club name ("BREWERS", "WHITE SOX"), falling back to
   // the abbreviation for a thin MiLB feed that never posted a clubName.

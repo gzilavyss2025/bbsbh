@@ -40,6 +40,7 @@ export function HalfInning({
   revealedAtBatCount,
   onStepInfo,
   onSteppedThrough,
+  onRunsSoFar,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -258,6 +259,7 @@ export function HalfInning({
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
                 onCurrentPitcher={setLivePitcher}
+                onRunsSoFar={onRunsSoFar}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => {
                   onReveal(inning, half)
