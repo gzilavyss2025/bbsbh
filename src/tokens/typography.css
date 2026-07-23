@@ -21,7 +21,7 @@
   --w-regular: 400;
   --w-semibold: 600;
   --w-bold:    700;
-  --w-black:   900;   /* the slate card's '@' watermark only — see index.css */
+  --w-black:   900;   /* the slate card's '@' watermark + the masthead '@' — see index.css */
 
   /* Type scale — compact, second-screen mobile first. Components consume
      these roles rather than inventing local half-pixel steps. */

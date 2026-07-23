@@ -328,7 +328,14 @@ function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSet
     <div className="masthead">
       <div className="masthead__teams">
         <MastheadLogo team={away} treatment={treatment?.away} onSketch={() => onSketch('away')} />
-        <span className="masthead__at" aria-hidden="true">@</span>
+        {/* The same screen-print '@' the slate card uses (Big Shoulders
+            Display, kraft-amber + navy a couple px out of register — see
+            .gamecard__atmark), here an inline mark between the two logos
+            rather than a faint background watermark. */}
+        <span className="masthead__at" aria-hidden="true">
+          <span className="masthead__at-ghost">@</span>
+          <span className="masthead__at-ink">@</span>
+        </span>
         <MastheadLogo team={home} treatment={treatment?.home} onSketch={() => onSketch('home')} />
       </div>
       <div className="masthead__side">
