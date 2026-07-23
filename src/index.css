@@ -714,10 +714,10 @@ body {
 .masthead__teams {
   display: flex;
   align-items: center;
-  /* Tight enough that the '@' reads as sitting between the two marks, not
+  /* Tight enough that the faint '@' reads as sitting between the two marks, not
      floating in its own dead space (the tiles carry their own 4px padding on
      top of this). */
-  gap: 8px;
+  gap: 4px;
 }
 
 /* The date + keep-awake toggle + MLB.TV pill. Allowed to wrap (right-aligned)
@@ -822,7 +822,7 @@ body {
     gap: 10px;
   }
   .masthead__teams {
-    gap: 6px;
+    gap: 2px;
   }
   .masthead__date {
     display: none;
@@ -925,10 +925,10 @@ body {
 /* The '@' between the two club marks. Reuses the slate card's screen-print
    treatment (.gamecard__atmark — Big Shoulders Display, printed twice a couple
    px out of register in kraft-amber + navy, the misregistration real ballpark-
-   program print runs have), but as an inline, full-opacity mark sized to sit
-   between the logos rather than the faint full-bleed watermark behind them. The
-   navy ink layer is in flow (sizes the box); the kraft ghost is an offset copy
-   pinned over it. */
+   program print runs have), at the same faint watermark opacity as the slate
+   card, but here an inline mark sized to sit between the logos rather than a
+   full-bleed watermark behind them. The navy ink layer is in flow (sizes the
+   box); the kraft ghost is an offset copy pinned over it. */
 .masthead__at {
   position: relative;
   display: inline-block;
@@ -947,12 +947,15 @@ body {
   position: absolute;
   inset: 0;
   color: var(--seal);
-  opacity: 0.5;
+  /* Same faint print as the slate card's watermark (.gamecard__atmark-ghost). */
+  opacity: 0.1;
   transform: translate(2px, 1.5px) skewX(-8deg) rotate(-2deg);
 }
 .masthead__at-ink {
   position: relative;
   color: var(--navy);
+  /* Same faint print as the slate card's watermark (.gamecard__atmark-ink). */
+  opacity: 0.07;
 }
 
 /* ---------------------------------------------------------- level toggle
