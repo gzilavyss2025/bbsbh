@@ -1,18 +1,7 @@
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
 import { BreakableLocation } from './BreakableLocation.jsx'
 import { splitName } from '../lib/teamSplits.js'
-import {
-  leagueLogoUrl,
-  favoriteAccentColor,
-  treatmentBgColor,
-  treatmentScale,
-  mainTreatmentTint,
-  mainTreatmentScale,
-  mainTreatmentPinstripe,
-  mainTreatmentPinstripeColor,
-  mainTreatmentRecolor,
-  treatmentPinstripeColor,
-} from '../lib/teams.js'
+import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
 import { doubleHeaderLabel } from '../lib/resultCards.js'
@@ -242,27 +231,17 @@ function TeamMark({ team, side, gamePk, jerseysData }) {
   // Coverage is partial by design — TeamLogo's own fallback chain quietly
   // drops back to the base logo for any team without curated art, or before
   // the uniforms assignment has posted (jerseyTreatmentFor -> null either
-  // way). Never score-revealing: a jersey choice, not a game state.
-  const jerseyVariant = jerseyTreatmentFor(jerseysData, gamePk, team.id) ?? 'base'
-  const isMain = jerseyVariant === 'base'
-  const pinstripeColor = isMain
-    ? mainTreatmentPinstripe(team.id)
-      ? mainTreatmentPinstripeColor(team.id)
-      : null
-    : treatmentPinstripeColor(team.id, jerseyVariant)
-  const pinstripe = !!pinstripeColor
-  const tint = isMain ? mainTreatmentTint(team.id) : treatmentBgColor(team.id, jerseyVariant)
-  const scale = isMain ? mainTreatmentScale(team.id) : treatmentScale(team.id, jerseyVariant)
-  const logoVariant = isMain && mainTreatmentRecolor(team.id) ? 'main-recolor' : jerseyVariant
-  const style =
-    tint || pinstripe
-      ? { '--tint': tint, '--scale': 1.32 * scale, '--pinstripe-color': pinstripe ? pinstripeColor : undefined }
-      : undefined
-  const boxClass = `gamecard__logobox gamecard__logobox--${side}${pinstripe ? ' gamecard__logobox--pinstripe' : ''}`
+  // way). The tile itself is the shared TeamTreatmentMark, the same square
+  // the in-game masthead shows.
   return (
-    <div className={boxClass} style={style}>
-      <TeamLogo teamId={team.id} name={team.name} size={56} variant={logoVariant} />
-    </div>
+    <TeamTreatmentMark
+      teamId={team.id}
+      name={team.name}
+      treatment={jerseyTreatmentFor(jerseysData, gamePk, team.id)}
+      size={56}
+      block="gamecard__logobox"
+      className={`gamecard__logobox--${side}`}
+    />
   )
 }
 

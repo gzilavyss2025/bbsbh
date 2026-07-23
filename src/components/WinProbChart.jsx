@@ -2,12 +2,13 @@ import { useId, useState } from 'react'
 import { winProbSplit } from '../api/winprob.js'
 import {
   teamChipColors,
-  teamLogoUrl,
   treatmentBgColor,
   mainTreatmentPinstripe,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
 } from '../lib/teams.js'
+import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { useWpaLogo } from '../hooks/useWpaLogo.js'
 import { ordinal } from '../lib/format.js'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
@@ -74,140 +75,27 @@ const PLOT_H = PLOT_B - PLOT_T
 // would actually look like in the app.
 export const WPA_PLOT_SIZE = { width: PLOT_W, height: PLOT_H }
 
-// The step-and-repeat band texture: each tile is a SOLID fill of that band's
-// own club color plus one full-opacity copy of that club's own logo, inset
-// with a small margin so neighboring tiles don't touch — compact and tightly
-// packed rather than sparse. `LOGO_ROTATE` + `LOGO_OFFSET` (via
-// patternTransform, see the pattern defs below) tilt and shift the whole
-// tile grid off-axis, so the wallpaper reads as something the eye stumbles
-// into mid-pattern rather than a grid anchored at the plot's top-left corner.
-const LOGO_SIZE = 20
-const LOGO_ROTATE = -14
-const LOGO_OFFSET_X = 8
-const LOGO_OFFSET_Y = 6
-// The tile's vertical margin (horizontal stays a fixed 4px, see LOGO_TILE_X
-// below) — the gap between one logo and the next tile's logo directly above/
-// below it, in the tile pattern's own coordinate system (pre-rotation).
-// Adjustable per (team, treatment) via WPA_LOGO_LAYOUT_OVERRIDES.paddingY
-// below; negative shrinks the tile smaller than the logo itself, so adjacent
-// tiles' marks overlap on purpose — a deliberate choice for a club whose mark
-// wants to run tighter than its own footprint.
-const LOGO_PADDING_Y = 4
-
-// The five global layout numbers above, exported as one object so a caller
-// (Team Color Lab's WPA logo lab, screens/TeamColorLab.jsx) can seed its
-// per-team controls at the same defaults this chart uses for every team
-// without a per-team override.
-export const WPA_LOGO_DEFAULTS = {
-  size: LOGO_SIZE,
-  rotate: LOGO_ROTATE,
-  offsetX: LOGO_OFFSET_X,
-  offsetY: LOGO_OFFSET_Y,
-  paddingY: LOGO_PADDING_Y,
-}
-
-// A handful of clubs' base logo mark is itself (near-)solid in the same hex
-// as their own primary brand color — verified against the actual CDN SVGs,
-// not a guess — so tiled over a same-colored band (below), the mark all but
-// vanishes into its own background. Each entry is a hand-picked fix for one
-// club, in one of three modes:
-//   - 'flood': recolor the WHOLE rendered silhouette (its alpha channel) to
-//     `color` via an SVG filter (feFlood + feComposite) — for a mark that's
-//     genuinely (or close enough to) one flat color throughout, so there's
-//     nothing worth preserving from its original fills.
-//   - 'outline': keep the mark's own original colors, but add (or, per
-//     Phillies, thicken an EXISTING) `color` halo just outside its
-//     silhouette via feMorphology (dilate) + feFlood + feComposite +
-//     feMerge — for a mark that's otherwise fine, just needs a touch more
-//     separation from its own band.
-//   - 'swap': the mark has MULTIPLE distinct original colors and only ONE
-//     of them collides with the band — recoloring the whole silhouette
-//     (flood) would wrongly flatten the colors that were already fine, and
-//     an SVG filter can't reliably isolate one specific original hex from
-//     another at this render size (anti-aliased edges between the two
-//     regions blend into a smear). So `src` points at a small precomputed
-//     variant of the CDN's own SVG (public/team-logo-overrides/), a
-//     byte-for-byte copy with ONLY the colliding fill's hex swapped —
-//     verified against the live CDN source, not reconstructed from memory.
-// A team with no entry here keeps its logo's own natural colors.
-export const LOGO_COLOR_OVERRIDES = {
-  113: { mode: 'flood', color: '#FFFFFF' }, // Reds — base mark is solid red, no black in it to preserve
-  118: { mode: 'flood', color: '#FFFFFF' }, // Royals
-  119: { mode: 'flood', color: '#FFFFFF' }, // Dodgers
-  120: { mode: 'flood', color: '#FFFFFF' }, // Nationals
-  133: { mode: 'flood', color: '#FFFFFF' }, // Athletics
-  135: { mode: 'flood', color: '#FFC425' }, // Padres — their own secondary yellow
-  137: { mode: 'flood', color: '#27251F' }, // Giants — their own secondary near-black
-  138: { mode: 'flood', color: '#FFFFFF' }, // Cardinals
-  147: { mode: 'flood', color: '#FFFFFF' }, // Yankees
-  116: { mode: 'flood', color: '#FFFFFF' }, // Tigers — the "D"
-  142: { mode: 'swap', src: '/team-logo-overrides/142.svg' }, // Twins — navy "T" to white, red kept
-  114: { mode: 'swap', src: '/team-logo-overrides/114.svg' }, // Guardians — navy outer border to white, red kept
-  143: { mode: 'outline', color: '#FFFFFF', radius: 0.6 }, // Phillies — thicken the mark's existing white edge
-}
-
+// The step-and-repeat band texture — each tile a SOLID fill of that band's
+// own club color plus a copy of that club's own logo, the grid tilted and
+// offset so it reads as wallpaper the eye stumbles into mid-pattern rather
+// than one anchored at the plot's corner. All of that geometry (the
+// per-(team, treatment) layout table, its defaults, and the tile placement
+// math) lives in lib/wpaLogo.js alongside the art resolver, pure and
+// unit-tested (test/wpa-logo.test.js); the two dev labs that preview this
+// texture read the same helpers, so a preview can't drift from what ships.
+//
+// The recolor curation there (LOGO_COLOR_OVERRIDES) was verified against each
+// club's stock CDN base mark and only ever reaches that art, never the
+// hand-procured treatment PNGs in public/team-logos/, which already carry
+// their own colors. RecolorFilter below renders whatever entry the resolver
+// hands back.
+//
 // Which logo TREATMENT tiles a club's band is decided PER GAME, not per
 // team — see the `awayTreatment`/`homeTreatment` props below, sourced from
 // that game's real uniform assignment (api/jerseys.js's precomputed
 // gamePk+teamId -> treatment map, the same data GameCard.jsx reads to swap a
 // slate card's logo). A team/game with no posted assignment (MiLB, not yet
 // posted) renders 'main', same as every game before this feature existed.
-//
-// What IS per-team, not per-game, is layout/color FINE-TUNING for a
-// specific (team, treatment) pairing — e.g. a wide City Connect wordmark
-// needing more tile room than the standard crest, or a club whose Alternate
-// reads better on its own brand red than its Main-treatment band color.
-// Both tables below are nested `{ [teamId]: { [treatment]: {...} } }`, same
-// treatment-key vocabulary as Team Color Lab's tiles and
-// api/uniforms.js's JERSEY_TREATMENT_OVERRIDES, so a value copied from Team
-// Color Lab's per-treatment WPA preview (screens/TeamColorLab.jsx) pastes
-// straight in. NOTE: a per-team rotate/offset override breaks the away/home
-// tile grid's shared alignment across the plot seam for THAT team's band
-// only — an accepted tradeoff, not a bug.
-export const WPA_LOGO_LAYOUT_OVERRIDES = {
-  109: {
-    main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'city-connect': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
-  },
-  133: {
-    main: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
-  },
-  144: {
-    alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
-    'city-connect': { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
-  },
-  111: {
-    'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-  },
-  158: {
-    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'city-connect': { size: 69, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -8 },
-  },
-  136: {
-    'city-connect': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'alternate-3': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
-  },
-  139: {
-    'city-connect': { size: 65, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -10 },
-    alternate: { size: 117, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -68 },
-  },
-  141: {
-    'city-connect': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 7 },
-  },
-}
-
-export function wpaLogoLayout(teamId, treatment) {
-  const o = WPA_LOGO_LAYOUT_OVERRIDES[teamId]?.[treatment]
-  return {
-    size: o?.size ?? LOGO_SIZE,
-    rotate: o?.rotate ?? LOGO_ROTATE,
-    offsetX: o?.offsetX ?? LOGO_OFFSET_X,
-    offsetY: o?.offsetY ?? LOGO_OFFSET_Y,
-    paddingY: o?.paddingY ?? LOGO_PADDING_Y,
-  }
-}
 
 // A handful of clubs' band background is better off as something OTHER than
 // their TEAM_COLOR_PAIRS primary (teams.js) — a lighter secondary shade that
@@ -346,7 +234,7 @@ export function chipColorsFor(teamId) {
   return teamChipColors(teamId) ?? { primary: '#6B6558', secondary: '#938C7C', text: '#FBF6E9' }
 }
 
-// The <filter> a LOGO_COLOR_OVERRIDES entry needs, or null for no override /
+// The <filter> a wpaLogoFor `recolor` entry needs, or null for no override /
 // a 'swap' override (that one's already-recolored asset needs no filter at
 // all). 'flood': feFlood paints the override color, feComposite's
 // operator="in" clips that flood to the image's own alpha channel (its
@@ -426,6 +314,21 @@ export function WinProbChart({
     },
   })
 
+  // `awayTreatment`/`homeTreatment` (props) carry that GAME's real worn
+  // uniform treatment — see api/jerseys.js — so the tiled mark actually
+  // matches tonight's jersey rather than always being the club's Main mark.
+  // Callers with no such data (or a MiLB game outside jerseys.json's
+  // coverage) simply omit the prop, and this falls back to 'main'.
+  //
+  // useWpaLogo (hooks/useWpaLogo.js) resolves each band's mark AND whether a
+  // recolor override reaches it, dropping back to the club's Main mark for a
+  // treatment whose art isn't on file yet. Resolved ABOVE the empty-points
+  // early return below, since a hook can't be called conditionally.
+  const awayTreat = awayTreatment ?? 'main'
+  const homeTreat = homeTreatment ?? 'main'
+  const { src: awayLogo, recolor: awayLogoOverride } = useWpaLogo(awayId, awayTreat)
+  const { src: homeLogo, recolor: homeLogoOverride } = useWpaLogo(homeId, homeTreat)
+
   if (!points || points.length === 0) return null
 
   const away = awayAbbr || 'AWY'
@@ -433,43 +336,10 @@ export function WinProbChart({
   const split = winProbSplit(points)
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
-  const awayLogoOverride = LOGO_COLOR_OVERRIDES[awayId]
-  const homeLogoOverride = LOGO_COLOR_OVERRIDES[homeId]
-  // A 'swap' override points at its own precomputed asset (see the
-  // LOGO_COLOR_OVERRIDES block comment); every other case — no override, or
-  // a 'flood'/'outline' override that recolors the ORIGINAL art in place via
-  // filter — uses the normal CDN mark. Null for an unmapped MiLB id, in
-  // which case that band's pattern just has no logo tile and reads as its
-  // flat structural color, same as before this feature existed.
-  //
-  // `awayTreatment`/`homeTreatment` (props) carry that GAME's real worn
-  // uniform treatment — see api/jerseys.js — so the tiled mark actually
-  // matches tonight's jersey rather than always being the club's Main mark.
-  // Callers with no such data (or a MiLB game outside jerseys.json's
-  // coverage) simply omit the prop, and this falls back to 'main'.
-  const awayTreat = awayTreatment ?? 'main'
-  const homeTreat = homeTreatment ?? 'main'
-  const awayLogo =
-    awayLogoOverride?.mode === 'swap'
-      ? awayLogoOverride.src
-      : teamLogoUrl(awayId, awayTreat === 'main' ? 'base' : awayTreat)
-  const homeLogo =
-    homeLogoOverride?.mode === 'swap'
-      ? homeLogoOverride.src
-      : teamLogoUrl(homeId, homeTreat === 'main' ? 'base' : homeTreat)
   const awayLayout = wpaLogoLayout(awayId, awayTreat)
   const homeLayout = wpaLogoLayout(homeId, homeTreat)
-  // Horizontal margin is a fixed 4px; vertical is the per-(team, treatment)
-  // paddingY (wpaLogoLayout above) — the two aren't tied together, so a tile
-  // can go tall-and-loose or short-and-overlapping without also widening.
-  const awayTileW = awayLayout.size + 4
-  const awayTileH = awayLayout.size + awayLayout.paddingY
-  const awayInsetX = 2
-  const awayInsetY = awayLayout.paddingY / 2
-  const homeTileW = homeLayout.size + 4
-  const homeTileH = homeLayout.size + homeLayout.paddingY
-  const homeInsetX = 2
-  const homeInsetY = homeLayout.paddingY / 2
+  const awayTile = wpaTilePlacements(awayLayout)
+  const homeTile = wpaTilePlacements(homeLayout)
   const awayPatternId = `winprob-away-${patternUid}`
   const homePatternId = `winprob-home-${patternUid}`
   const awayRecolorId = `winprob-recolor-away-${patternUid}`
@@ -550,8 +420,8 @@ export function WinProbChart({
       >
         {/* Each band's step-and-repeat texture: a tile of a solid fill of
             that band's own color (BAND_COLOR_OVERRIDES-aware) plus one copy
-            of that club's own logo (LOGO_COLOR_OVERRIDES-aware — see the
-            block comments up top for both). patternTransform (identical on
+            of that club's own logo (wpaLogoFor-resolved — see the block
+            comments up top for both). patternTransform (identical on
             both patterns) tilts + shifts the shared tile grid off-axis, so
             it reads as wallpaper rather than a grid anchored at the plot's
             corner. patternUnits="userSpaceOnUse" plus matching x/y ties both
@@ -568,56 +438,60 @@ export function WinProbChart({
             patternUnits="userSpaceOnUse"
             x={PLOT_L}
             y={PLOT_T}
-            width={awayTileW}
-            height={Math.max(1, awayTileH)}
+            width={awayTile.tileW}
+            height={awayTile.tileH}
             patternTransform={`rotate(${awayLayout.rotate}) translate(${awayLayout.offsetX} ${awayLayout.offsetY})`}
             style={{ overflow: 'visible' }}
           >
             <rect
-              width={awayTileW}
-              height={Math.max(1, awayTileH)}
+              width={awayTile.tileW}
+              height={awayTile.tileH}
               className="winprob__patternbg"
               style={{ '--band-color': awayBandFill }}
             />
-            {awayLogo && (
-              <image
-                href={awayLogo}
-                x={awayInsetX}
-                y={awayInsetY}
-                width={awayLayout.size}
-                height={awayLayout.size}
-                className="winprob__patternlogo"
-                filter={awayLogoOverride && awayLogoOverride.mode !== 'swap' ? `url(#${awayRecolorId})` : undefined}
-              />
-            )}
+            {awayLogo &&
+              awayTile.images.map((img, i) => (
+                <image
+                  key={i}
+                  href={awayLogo}
+                  x={img.x}
+                  y={img.y}
+                  width={awayLayout.size}
+                  height={awayLayout.size}
+                  className="winprob__patternlogo"
+                  filter={awayLogoOverride && awayLogoOverride.mode !== 'swap' ? `url(#${awayRecolorId})` : undefined}
+                />
+              ))}
           </pattern>
           <pattern
             id={homePatternId}
             patternUnits="userSpaceOnUse"
             x={PLOT_L}
             y={PLOT_T}
-            width={homeTileW}
-            height={Math.max(1, homeTileH)}
+            width={homeTile.tileW}
+            height={homeTile.tileH}
             patternTransform={`rotate(${homeLayout.rotate}) translate(${homeLayout.offsetX} ${homeLayout.offsetY})`}
             style={{ overflow: 'visible' }}
           >
             <rect
-              width={homeTileW}
-              height={Math.max(1, homeTileH)}
+              width={homeTile.tileW}
+              height={homeTile.tileH}
               className="winprob__patternbg"
               style={{ '--band-color': homeBandFill }}
             />
-            {homeLogo && (
-              <image
-                href={homeLogo}
-                x={homeInsetX}
-                y={homeInsetY}
-                width={homeLayout.size}
-                height={homeLayout.size}
-                className="winprob__patternlogo"
-                filter={homeLogoOverride && homeLogoOverride.mode !== 'swap' ? `url(#${homeRecolorId})` : undefined}
-              />
-            )}
+            {homeLogo &&
+              homeTile.images.map((img, i) => (
+                <image
+                  key={i}
+                  href={homeLogo}
+                  x={img.x}
+                  y={img.y}
+                  width={homeLayout.size}
+                  height={homeLayout.size}
+                  className="winprob__patternlogo"
+                  filter={homeLogoOverride && homeLogoOverride.mode !== 'swap' ? `url(#${homeRecolorId})` : undefined}
+                />
+              ))}
           </pattern>
         </defs>
 

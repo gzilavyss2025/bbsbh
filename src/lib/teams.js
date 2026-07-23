@@ -648,6 +648,40 @@ export function mainTreatmentRecolor(teamId) {
   return !!MAIN_OVERRIDES[teamId]?.recolor
 }
 
+// Everything one "logo tile" needs to render for a (team, treatment): the
+// mark to show and the fill it sits on.
+//   { logoVariant, tint, pinstripeColor, scale }
+// `tint` is null when the tile is pinstriped (a pattern, not a swatch — see
+// mainTreatmentPinstripe) or when a club has no curated tile for this
+// treatment yet, in which case the caller's own default paper shows through.
+//
+// One resolver because the same tile now appears in three places — the slate
+// card (components/GameCard.jsx), the in-game masthead (screens/GameView.jsx),
+// and Team Color Lab's curation grid — and a club whose mark needs a
+// scale-down or a recolor to read against its own fill needs it in all of
+// them. Treatment vocabulary is the jerseys.json one (api/jerseys.js), with
+// null / 'main' / 'base' all meaning "the club's Main look" since the slate
+// card and the WPA chart spell that default differently.
+export function treatmentTile(teamId, treatment) {
+  const isMain = !treatment || treatment === 'main' || treatment === 'base'
+  if (isMain) {
+    const pinstriped = mainTreatmentPinstripe(teamId)
+    return {
+      logoVariant: mainTreatmentRecolor(teamId) ? 'main-recolor' : 'base',
+      tint: pinstriped ? null : mainTreatmentTint(teamId),
+      pinstripeColor: pinstriped ? mainTreatmentPinstripeColor(teamId) : null,
+      scale: mainTreatmentScale(teamId),
+    }
+  }
+  const pinstripeColor = treatmentPinstripeColor(teamId, treatment)
+  return {
+    logoVariant: treatment,
+    tint: pinstripeColor ? null : treatmentBgColor(teamId, treatment),
+    pinstripeColor,
+    scale: treatmentScale(teamId, treatment),
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Player headshots
 //
