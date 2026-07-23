@@ -1,6 +1,51 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+
+// Dev-only save endpoint for the /uniform-names curation page (see
+// src/screens/UniformNamesPage.jsx + src/api/uniforms.js's
+// fetchUniformNameOverrides). This app has no backend anywhere else — every
+// other page is a static PWA reading statsapi.mlb.com or a committed
+// public/data/*.json file directly — so this is the one deliberate exception,
+// and it's scoped as narrowly as possible: `configureServer` only runs under
+// `vite dev` (never `vite build`/`vite preview`, and never bundled into the
+// client), so it's absent from the deployed app entirely. It POSTs the WHOLE
+// curated overrides object (the page always sends its full up-to-date map,
+// not a single-row patch) straight to public/data/uniform-names.json, the
+// same file the page and src/api/uniforms.js's fetchUniformNameOverrides read
+// back at runtime — a save takes effect immediately, no restart needed.
+function uniformNamesDevSave() {
+  const filePath = fileURLToPath(new URL('./public/data/uniform-names.json', import.meta.url))
+  return {
+    name: 'uniform-names-dev-save',
+    configureServer(server) {
+      server.middlewares.use('/api/dev/uniform-names', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.end('POST only')
+          return
+        }
+        let body = ''
+        req.on('data', (chunk) => {
+          body += chunk
+        })
+        req.on('end', async () => {
+          try {
+            const parsed = JSON.parse(body || '{}')
+            await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`)
+            res.statusCode = 200
+            res.end('ok')
+          } catch (err) {
+            res.statusCode = 400
+            res.end(err.message)
+          }
+        })
+      })
+    },
+  }
+}
 
 // https://vite.dev/config/
 // Multi-agent dev ports: 5173/4173 stay the default (other tooling may
@@ -22,6 +67,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    uniformNamesDevSave(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/tally-baseball-mark-180.png'],
