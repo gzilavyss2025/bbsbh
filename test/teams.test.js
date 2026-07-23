@@ -22,6 +22,11 @@ import {
   mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
+  isMlbTeamId,
+  headshotSources,
+  realHeadshotUrl,
+  milbHeadshotUrl,
+  coachHeadshotUrl,
 } from '../src/lib/teams.js'
 
 // --------------------------------------------------------------------------
@@ -216,4 +221,59 @@ test('treatmentTile gives an uncurated club a usable tile rather than throwing',
   assert.equal(tile.logoVariant, 'alternate')
   assert.equal(tile.pinstripeColor, null)
   assert.equal(tile.scale, 1, 'no curated scale means no overscale adjustment')
+})
+
+// --------------------------------------------------------------------------
+// isMlbTeamId — only the 30 current MLB clubs are "major-league" ids
+// --------------------------------------------------------------------------
+test('isMlbTeamId is true for current MLB clubs, false otherwise', () => {
+  assert.equal(isMlbTeamId(158), true) // Brewers
+  assert.equal(isMlbTeamId(141), true) // Blue Jays
+  assert.equal(isMlbTeamId(144), true) // Braves
+  assert.equal(isMlbTeamId(561), false) // Salt Lake Bees (AAA affiliate)
+  assert.equal(isMlbTeamId(null), false)
+  assert.equal(isMlbTeamId(undefined), false)
+  assert.equal(isMlbTeamId(0), false)
+})
+
+// --------------------------------------------------------------------------
+// headshotSources — the Headshot fallback-rung POLICY (spoiler-irrelevant,
+// but the reason established MLB players stopped showing stale wrong-cap
+// minor-league photos: a major-leaguer (mlb: true) drops the `milb` rung).
+// --------------------------------------------------------------------------
+test('headshotSources: an MLB player gets silo only, NOT the stale milb photo', () => {
+  // George Springer (543807) — his milb variant is a years-old prospect photo
+  // in the wrong cap, so it must never be a rung.
+  const sources = headshotSources(543807, { mlb: true })
+  assert.deepEqual(sources, [realHeadshotUrl(543807)])
+  assert.equal(
+    sources.includes(milbHeadshotUrl(543807)),
+    false,
+    'MLB player must not fall back to his minor-league headshot',
+  )
+})
+
+test('headshotSources: a MiLB / prospect player keeps silo -> milb', () => {
+  // A genuine prospect still gets the milb rung — a real recent face when his
+  // MLB silo 404s.
+  assert.deepEqual(headshotSources(700000, { mlb: false }), [
+    realHeadshotUrl(700000),
+    milbHeadshotUrl(700000),
+  ])
+  // The safe default (unspecified) also keeps milb.
+  assert.deepEqual(headshotSources(700000, {}), [
+    realHeadshotUrl(700000),
+    milbHeadshotUrl(700000),
+  ])
+})
+
+test('headshotSources: coaches use the coach variant only, regardless of mlb', () => {
+  assert.deepEqual(headshotSources(11111, { coach: true, mlb: true }), [
+    coachHeadshotUrl(11111),
+  ])
+})
+
+test('headshotSources: no personId yields no photo rungs', () => {
+  assert.deepEqual(headshotSources(null, { mlb: true }), [])
+  assert.deepEqual(headshotSources(undefined, {}), [])
 })
