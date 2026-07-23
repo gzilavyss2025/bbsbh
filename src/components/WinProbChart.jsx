@@ -131,7 +131,7 @@ export const BAND_COLOR_OVERRIDES = {
   484: '#D9D9D9', // Indianapolis Indians (MiLB) — light gray, not their parent org's near-black
   556: '#E31837', // Nashville Sounds (MiLB) — their own logo red, sampled off the CDN mark
   572: '#8A2432', // Wisconsin Timber Rattlers (MiLB) — their own logo maroon, sampled off the CDN mark
-  580: '#D9D9D9', // Winston-Salem Dash (MiLB) — light gray, not their parent org's near-black
+  580: '#C7BEE0', // Winston-Salem Dash (MiLB) — pale tint of their own logo purple
   6325: '#000000', // Columbus Clingstones (MiLB) — plain black
   432: '#D0A353', // Rome Emperors (MiLB) — no true yellow in their mark, closest is this laurel gold
   437: '#FDB913', // Lake County Captains (MiLB) — their own logo gold, sampled off the CDN mark
