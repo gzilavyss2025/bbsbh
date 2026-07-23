@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { TeamLogo } from './TeamLogo.jsx'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS
@@ -156,8 +157,13 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
 }
 
 // The numbered pitch-by-pitch list beside the diagram: pitch no (as a colored
-// dot matching the zone), pitch type, velo, and how it ended. Shown on the
-// desktop right cell and in the modal. Renders every pitch, plottable or not.
+// dot matching the zone), pitch type, velo, and how it ended, plus a 4th
+// trailing column for the ABS challenge marker (ChallengeMark below) — always
+// rendered (empty when a pitch carries no challenge) so every row supplies
+// all four grid cells .pitchlist's shared column tracks expect; skipping it
+// on a challenge-free row would shift every LATER row's cells left by one
+// track. Shown on the desktop right cell and in the modal. Renders every
+// pitch, plottable or not.
 export function PitchList({ pitchDetails }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
@@ -171,9 +177,45 @@ export function PitchList({ pitchDetails }) {
             {p.mph != null ? `${p.mph} MPH, ` : ''}
             {p.callDesc}
           </span>
+          {p.challenge ? <ChallengeMark challenge={p.challenge} /> : <span />}
         </li>
       ))}
     </ol>
+  )
+}
+
+// The ABS challenge marker on a challenged pitch's row (see api/challenges.js's
+// challengeForPlay): an "ABS" label, then the challenging club's own mark,
+// then a plain solid dot for whether THAT CLUB's challenge succeeded.
+// Deliberately never "good for the batter/pitcher": the color only ever
+// answers one question — did the club whose mark is right next to it get the
+// call it wanted — so it can't mean opposite things on a strike-to-ball
+// overturn vs. a ball-to-strike one. Its own trailing grid column (not
+// inline after the call text) gives it one fixed position down the whole
+// list. Solid dot fill only, no glyph inside — the ABS Challenges card's own
+// pips (.abs__pip) never carry one either, so this stays one dot vocabulary
+// for the whole app rather than a second.
+function ChallengeMark({ challenge }) {
+  const label = `${challenge.playerName ? `${challenge.playerName}'s` : 'A'} challenge ${
+    challenge.outcome === 'success' ? 'succeeded' : 'failed'
+  }`
+  return (
+    <span className="pitchlist__challenge" title={label}>
+      <span className="pitchlist__challengelabel" aria-hidden="true">ABS</span>
+      <TeamLogo
+        teamId={challenge.teamId}
+        name={challenge.playerName}
+        size={13}
+        className="pitchlist__challengelogo"
+      />
+      <span
+        className={`pitchlist__challengedot pitchlist__challengedot--${
+          challenge.outcome === 'success' ? 'win' : 'loss'
+        }`}
+        aria-hidden="true"
+      />
+      <span className="sr-only">{label}</span>
+    </span>
   )
 }
 

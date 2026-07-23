@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { selectPrePitchChanges, selectHalfStartingPitcher } from '../api/select.js'
+import { useMemo, useState } from 'react'
+import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../api/select.js'
+import { computePitcherLines } from '../api/pitchers.js'
 import { highlightsByPlayId } from '../api/highlights.js'
 import { ordinal } from '../lib/format.js'
 import { SealBox } from './SealBox.jsx'
@@ -39,6 +40,7 @@ export function HalfInning({
   revealedAtBatCount,
   onStepInfo,
   onSteppedThrough,
+  onRunsSoFar,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -68,16 +70,41 @@ export function HalfInning({
   const nowPitching = livePitcher ?? enteringPitcher
 
   // "Now pitching" only fits the moment an arm actually takes the mound: the
-  // game's first half for each team, or a live mid-half substitution
-  // (livePitcher set). The far more common case — the same reliever/starter
-  // carrying over from the half before, same team's previous half of the
-  // same parity (a team only pitches every OTHER half) — reads as "Pitching
-  // for..." instead, since nothing just happened.
-  const previousEnteringPitcher =
-    inning > 1 ? selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough) : null
-  const isFreshPitcher =
-    livePitcher != null || inning === 1 || previousEnteringPitcher?.id !== enteringPitcher?.id
+  // game's first half for each team, or a live mid-half substitution. The far
+  // more common case — the same reliever/starter carrying over from the half
+  // before, same team's previous half of the same parity (a team only
+  // pitches every OTHER half) — reads as "Pitching for..." instead, since
+  // nothing just happened. Compares `nowPitching` (livePitcher ?? entering,
+  // i.e. whoever's ACTUALLY on the mound as of what's revealed), not just
+  // whether `livePitcher` is set — PlayByPlay's onCurrentPitcher reports a
+  // value unconditionally, falling back to the half's own starting pitcher
+  // the moment ANY of it is revealed, even with no substitution at all (see
+  // its own header comment) — so `livePitcher != null` alone was true for
+  // nearly every revealed half, not just a genuine mid-half change,
+  // mislabeling a starter who simply carried over from his own previous
+  // start (verified live: Chris Sale continuing from top 5th into top 6th
+  // with no pitching change showed "Now pitching" every time). See
+  // selectIsFreshPitcher's own header comment (select.js) for the fix.
+  const isFreshPitcher = selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitching?.id)
   const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching'
+
+  // How many pitches he'd thrown in THIS GAME entering this half — clamped to
+  // halfIndex(inning, half) - 1 (through the previous half only), which is
+  // always <= the real revealedThrough since this half is only reachable at
+  // all once that half is (ADR-0010's footing), so this needs no separate
+  // gate of its own. computePitcherLines is the same running-line builder the
+  // Pitchers table uses; keyed off `nowPitching` (not just the half's
+  // spoiler-safe starter) so a mid-half relief entry still shows HIS own
+  // count, not the guy he replaced.
+  const enteringPitchLines = useMemo(
+    () => computePitcherLines(feed, halfIndex(inning, half) - 1),
+    [feed, inning, half],
+  )
+  const enteringPitches = nowPitching
+    ? [...enteringPitchLines.away, ...enteringPitchLines.home].find((r) => r.id === nowPitching.id)?.pitches
+    : null
+  const entering =
+    enteringPitches != null ? { pitches: enteringPitches, halfLabel: `the start of the ${ordinal(inning)}` } : null
 
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
@@ -103,6 +130,8 @@ export function HalfInning({
       battingSide={battingSide}
       awayName={awayName}
       homeName={homeName}
+      awayId={awayId}
+      homeId={homeId}
       prospectsData={prospectsData}
       rookiesData={rookiesData}
       isMlb={isMlb}
@@ -132,6 +161,7 @@ export function HalfInning({
             teamName={battingSide === 'away' ? homeName : awayName}
             className="pitchernotice--pbp"
             label={nowPitchingLabel}
+            entering={entering}
           />
         )}
 
@@ -228,6 +258,7 @@ export function HalfInning({
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
                 onCurrentPitcher={setLivePitcher}
+                onRunsSoFar={onRunsSoFar}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => {
                   onReveal(inning, half)
@@ -245,10 +276,13 @@ export function HalfInning({
         </SealBox>
 
         {/* The pitch-color key: a static legend, no game data, so it's
-            spoiler-free and can sit at the foot of the card regardless of
-            reveal state — moved down here from the header so it reads next
-            to the pitch dots it explains rather than beside the team names. */}
-        <PitchColorsKey className="half__pitchkeyfoot" />
+            spoiler-free — moved down here from the header so it reads next
+            to the pitch dots it explains rather than beside the team names.
+            Only worth the desktop-only foot space once there are actually
+            pitch dots on screen to explain (startedRevealing); before that,
+            on the wide layout, it'd just be a lone button sitting under an
+            empty card. */}
+        {startedRevealing && <PitchColorsKey className="half__pitchkeyfoot" />}
       </section>
 
       {/* From the first at-bat step onward (startedRevealing — see above), the

@@ -205,7 +205,12 @@ function healthNotes(id, side, health) {
   const labor = health?.labor?.[id]
   if (labor?.laboring) {
     notes.push({
-      text: `Laboring: ${labor.pitchesPerInning.toFixed(1)} pitches per inning tonight — his season norm is ${labor.baseline.toFixed(1)}.`,
+      // Was "... pitches per inning tonight —" — wrong for a day game, and
+      // didn't say what the rate was measured through. `labor.ip` is this
+      // row's own reveal-clamped innings pitched (see laboringFor,
+      // pitcherHealth.js), so this reads correctly for any start time and
+      // updates on its own as more of his outing is revealed.
+      text: `Laboring: ${labor.pitchesPerInning.toFixed(1)} pitches per inning through ${labor.ip} IP — his season norm is ${labor.baseline.toFixed(1)}.`,
       personId: id,
       side,
       kind: 'laboring',

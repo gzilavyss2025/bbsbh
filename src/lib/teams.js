@@ -168,6 +168,14 @@ export const MASTHEAD_LOGO_NATURAL_COLOR = new Set([
   158, // Brewers
 ])
 
+// The masthead logo's className for `teamId` — the white-filter treatment
+// (see index.css's .metricbar__logo--white) for most clubs, or the plain
+// (unfiltered, real-colored) mark for the small exception set above that
+// flattens into an unreadable blob under that filter.
+export function mastheadLogoClass(teamId) {
+  return MASTHEAD_LOGO_NATURAL_COLOR.has(teamId) ? 'metricbar__logo' : 'metricbar__logo metricbar__logo--white'
+}
+
 // Teams/treatments whose local art is a hand-flattened/recolored SVG (every
 // path recolored off the official multicolor logo) rather than a
 // photographed/cropped PNG like every other curated treatment. Keyed

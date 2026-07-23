@@ -68,6 +68,21 @@ export function humanDate(apiDate) {
   })
 }
 
+// "Fri, Jul 5, 2026" — humanDate plus the year, for the game page's own
+// masthead (GameView.jsx): unlike the slate list humanDate serves elsewhere,
+// this header can be reached long after the fact (a shared deep link, a
+// history/postseason page), where the year isn't implied by "today."
+export function humanDateWithYear(apiDate) {
+  const [y, m, d] = apiDate.split('-').map(Number)
+  const dt = new Date(y, m - 1, d)
+  return dt.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
 // "Fri, June 12, 2026" — the full date line the scorebook header wants, so it
 // can be copied straight onto the sheet. Same parse as humanDate; returns ''
 // for a missing/garbled date (thin MiLB feeds) so callers show the usual "—".

@@ -602,6 +602,27 @@ export function selectHalfStartingPitcher(feed, inning, half, revealedThrough = 
   }
 }
 
+// Whether `nowPitchingId` (HalfInning.jsx's own `nowPitching` — livePitcher ??
+// enteringPitcher, i.e. whoever's ACTUALLY on the mound as of what's
+// revealed) actually just took the mound THIS half, vs. carrying over from
+// the same team's previous half of the same parity (a team only pitches
+// every OTHER half, so "previous" means inning-1, same half). The game's
+// first half for either team (inning === 1) always reads fresh — there's no
+// earlier half of the same parity to have carried over from.
+//
+// Extracted so this decision — previously inlined in HalfInning.jsx and
+// compared against `livePitcher != null` alone — is unit-testable: that
+// earlier check mislabeled every pitcher continuing from his own previous
+// start as "Now pitching" (verified live: Chris Sale continuing from top 5th
+// into top 6th with no pitching change showed "Now pitching" every time),
+// since PlayByPlay's onCurrentPitcher reports a value unconditionally the
+// moment any of a half is revealed, not just on a genuine substitution.
+export function selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitchingId) {
+  if (inning === 1) return true
+  const previous = selectHalfStartingPitcher(feed, inning - 1, half, revealedThrough)
+  return nowPitchingId !== previous?.id
+}
+
 // The game jersey number for a player id, checked across both boxscore sides
 // (the incoming pitcher's side isn't known here). Falls back to '' so callers
 // can drop to gameData's primaryNumber.
@@ -639,6 +660,29 @@ export function selectHasStarted(feed) {
 // the box score's Refresh control once there's nothing left to refresh.
 export function selectIsFinal(feed) {
   return feed?.gameData?.status?.abstractGameState === 'Final'
+}
+
+// Whether a given inning's HOME half was skipped entirely — the away team
+// made the last out in the top with the game already decided (the home team
+// already ahead, so batting the bottom half would be pointless — "the
+// walk-off that wasn't needed"), or a suspended/curtailed game stopped
+// there. Structural fact straight off the feed's own linescore: a completed
+// inning's home entry carries no `runs` key at all when it was never played,
+// vs. `runs: 0` for a played-but-scoreless half — not a score itself, same
+// footing as selectIsFinal, but ONLY trustworthy once the whole game has
+// actually concluded. Mid-game, a not-yet-`runs` bottom entry just means the
+// home team hasn't batted YET, not that it never will — this must never be
+// read before that, or "no bottom half coming" itself leaks that the home
+// team is already leading entering it.
+//
+// Callers must additionally gate this on the TOP half already being fully
+// revealed (halfIndex(inning, 'top') <= revealedThrough) before showing
+// anything derived from it — selectIsFinal alone tells you the *game* is
+// over, not that the user has caught up to this specific half yet.
+export function selectSkippedBottomHalf(feed, inning) {
+  if (!selectIsFinal(feed)) return false
+  const row = (feed?.liveData?.linescore?.innings ?? []).find((i) => i.num === inning)
+  return row != null && row.home?.runs === undefined
 }
 
 // Coarse game-state flags for the delayed/suspended/postponed/warmup banner.

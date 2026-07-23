@@ -14,7 +14,7 @@ import { LogoModal } from '../components/LogoModal.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { LinkScope } from '../lib/nav.jsx'
-import { humanDate } from '../lib/dates.js'
+import { humanDateWithYear } from '../lib/dates.js'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -328,7 +328,7 @@ function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSet
         <MastheadLogo team={home} onSketch={() => onSketch('home')} />
       </div>
       <div className="masthead__side">
-        {date && <span className="masthead__date">{humanDate(date)}</span>}
+        {date && <span className="masthead__date">{humanDateWithYear(date)}</span>}
         {/* Only worth showing (and worth the tap) while the game can actually
             hold the lock — pregame/Final it would just sit there inert. */}
         {isLive && <KeepAwakeToggle on={keepAwake} onToggle={() => onSetKeepAwake(!keepAwake)} />}

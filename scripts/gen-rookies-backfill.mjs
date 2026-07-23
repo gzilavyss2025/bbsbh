@@ -27,7 +27,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { aggregateSplits } from '../src/api/person.js'
+import { levelSeasonStat } from '../src/api/person.js'
 import { ipToOuts } from '../src/api/rehab-policy.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -90,6 +90,13 @@ function statValue(group, agg) {
 // AB/outs first crosses the limit. Returns { crossingSeason, priorTotal }
 // (priorTotal = cumulative total ENTERING the crossing season) or null if his
 // whole career never crosses.
+//
+// Uses levelSeasonStat (not a raw aggregateSplits over the season's rows) —
+// yearByYear can include a synthetic team-less row summing a same-season
+// trade's per-team rows, and aggregateSplits doesn't recognize it as a
+// duplicate, so summing every row double-counts the season. See
+// gen-rookies.mjs's findCrossingSeason for the verified case this caused
+// (Mauricio Dubón stuck permanently open from his mid-2019 trade).
 function findCrossingSeason(yearSplits, group) {
   const bySeason = new Map()
   for (const s of yearSplits) {
@@ -101,7 +108,7 @@ function findCrossingSeason(yearSplits, group) {
   const seasons = [...bySeason.keys()].sort((a, b) => a - b)
   let running = 0
   for (const yr of seasons) {
-    const value = statValue(group, aggregateSplits(bySeason.get(yr), group))
+    const value = statValue(group, levelSeasonStat(bySeason.get(yr), group))
     if (running + value >= LIMIT[group]) return { crossingSeason: yr, priorTotal: running }
     running += value
   }

@@ -1,12 +1,15 @@
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
+import { selectDueUpNext } from '../api/dueup.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill } from '../api/rookies.js'
 import { ordinal } from '../lib/format.js'
+import { mastheadLogoClass } from '../lib/teams.js'
 import { PlayerLink } from './PlayerLink.jsx'
 import { DefenseDiamond } from './DefenseDiamond.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
 import { RookiePill } from './RookiePill.jsx'
+import { TeamLogo } from './TeamLogo.jsx'
 
 // The pre-scoring reference for a half: both teams' lineup cards + the fielding
 // side's alignment as they stand ENTERING it (subs through first pitch only).
@@ -14,7 +17,7 @@ import { RookiePill } from './RookiePill.jsx'
 // phone (staged around the seal), and as a right-column card on the wide layout.
 // Spoiler-free: revealedThrough is threaded straight into defenseEntering/
 // lineupEntering below, which enforce the gate themselves (ADR-0010).
-export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
+export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, awayId, homeId, prospectsData, rookiesData, isMlb, revealedThrough }) {
   return (
     <>
       <LineupSection
@@ -34,6 +37,7 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
         half={half}
         fieldingSide={battingSide === 'away' ? 'home' : 'away'}
         fieldingName={battingSide === 'away' ? homeName : awayName}
+        fieldingTeamId={battingSide === 'away' ? homeId : awayId}
         revealedThrough={revealedThrough}
       />
     </>
@@ -46,13 +50,19 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // defenseEntering itself enforces the reveal gate given revealedThrough (see
 // api/enteringHalf.js's safeToShowEntering), returning null past it, so this
 // is safe to call outside the seal regardless of caller diligence.
-export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, revealedThrough }) {
+export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, revealedThrough }) {
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
   return (
     <section className="halfdefense">
       <h4 className="halfdefense__title">
-        {fieldingName ? `${fieldingName} ` : ''}defense
+        <TeamLogo
+          teamId={fieldingTeamId}
+          name={fieldingName}
+          size={20}
+          className={mastheadLogoClass(fieldingTeamId)}
+        />
+        Defense
       </h4>
       <DefenseDiamond defense={defense} />
     </section>
@@ -66,15 +76,31 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
 // itself enforces the reveal gate given revealedThrough, same as
 // DefenseSection above — it's the reference you copy onto the sheet before
 // scoring.
+//
+// The fielding side (the OTHER team from battingSide) also gets a "due up" /
+// "on deck" / "in the hole" pill on whichever of its own already-listed slots
+// lead off ITS next half — selectDueUpNext (same primitive DueUpNextCard's
+// separate stat-row card uses) carries its own spoiler gate, so this needs no
+// gate of its own: it simply returns null until the preview is safe to show
+// (current half fully revealed), same moment DueUpNextCard's own card would
+// appear.
+const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
+
 export function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
   if ((!away || away.length === 0) && (!home || home.length === 0)) return null
+  const dueUpNext = selectDueUpNext(feed, inning, half, revealedThrough, 3)
+  const upNextLabels = (side) => {
+    if (dueUpNext?.battingSide !== side) return null
+    const bySlot = new Map(dueUpNext.batters.map((b, i) => [b.slot, UP_NEXT_LABELS[i]]))
+    return bySlot
+  }
   return (
     <section className="lineupcard">
       <div className="lineupcard__teams">
-        <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} />
-        <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} />
+        <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
+        <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />
       </div>
     </section>
   )
@@ -84,8 +110,10 @@ export function LineupSection({ feed, inning, half, awayName, homeName, prospect
 // its nine batting slots. Each row reads name(s) on the left and the standing
 // occupant's jersey number + fielding position right-aligned on a shared column.
 // An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
-// than shown as a bare header.
-function LineupTeam({ name, slots, prospectsData, rookiesData, isMlb }) {
+// than shown as a bare header. `upNextLabels`, when set, maps the up-to-three
+// slots leading off this team's own next half to their "Due up"/"On deck"/
+// "In the hole" label (see LineupSection above).
+function LineupTeam({ name, slots, prospectsData, rookiesData, isMlb, upNextLabels }) {
   if (slots.length === 0) return null
   return (
     <div className="lineupteam">
@@ -93,6 +121,7 @@ function LineupTeam({ name, slots, prospectsData, rookiesData, isMlb }) {
       <ol className="lineupcard__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
+          const upNextLabel = upNextLabels?.get(s.slot)
           return (
             <li className="lineupcard__row" key={s.slot}>
               <span className="lineupcard__slot">{s.slot}</span>
@@ -102,6 +131,12 @@ function LineupTeam({ name, slots, prospectsData, rookiesData, isMlb }) {
                 ))}
                 <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
                 <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
+                {upNextLabel && (
+                  <span className="duepill">
+                    {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}
+                    {upNextLabel}
+                  </span>
+                )}
               </span>
               <span className="lineupcard__meta">
                 {cur.jersey ? (

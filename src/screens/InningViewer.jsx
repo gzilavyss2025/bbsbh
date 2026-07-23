@@ -6,6 +6,7 @@ import {
   selectBench,
   selectTeamMeta,
   selectDelays,
+  selectSkippedBottomHalf,
   halfIndex,
 } from '../api/select.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
@@ -163,6 +164,19 @@ export function InningViewer({
   const turning = turnStatus !== 'idle'
   const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
 
+  // Runs scored so far in the half currently being STEPPED through (ADR-0016
+  // at-bat stepping) — reported up from PlayByPlay (via HalfInning/InningPage,
+  // see onRunsSoFar) so RollingLine's own cell for this half can build up as
+  // you reveal it one at-bat at a time, instead of staying blank ("·") until
+  // the whole half commits. Reset on every half change so a stale reading
+  // from a half you've navigated away from never lingers — RollingLine only
+  // ever trusts this for the exact half-index it's keyed to anyway (a half
+  // that's since fully committed reads its real total the normal way
+  // instead), but there's no reason to hold onto it a moment longer than
+  // the half it describes stays current.
+  const [runsInProgress, setRunsInProgress] = useState(null)
+  useEffect(() => setRunsInProgress(null), [curIdx])
+
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
   // Keyed on the half itself so navigating (or the turn committing) forces
@@ -191,6 +205,7 @@ export function InningViewer({
         atBatCountFor={atBatCountFor}
         onStepInfo={(info) => setStepInfo({ ...info, forIdx: idx })}
         onSteppedThrough={scrollToStatBox}
+        onRunsSoFar={(runs) => setRunsInProgress({ idx, runs })}
         getDerived={getDerived}
         runExpectancy={runExpectancy}
         winProbPoints={winProbPoints}
@@ -207,8 +222,16 @@ export function InningViewer({
   // (regulation or an unlocked extra). There the floating button becomes
   // "Box score ›" instead of the next-half label, so the bottom of the 9th
   // never sprouts a "Top 10th ›" that would leak the game going to extras
-  // before it's revealed.
-  const nextIdx = curIdx < maxIdx ? curIdx + 1 : null
+  // before it's revealed. Also null once the CURRENT half is a fully-revealed
+  // top whose bottom half was skipped outright (selectSkippedBottomHalf — the
+  // home team was already ahead, so the game ended right there) — there's no
+  // "Bottom {n}th" to advance to, so this reads as "you've seen everything;
+  // here's the box score" same as the true last half of the game does. Not a
+  // spoiler: the gate on `curIdx <= revealedThrough` means this only ever
+  // fires once the user has themselves fully revealed that top half.
+  const skippedBottomHalf =
+    effHalf === 'top' && curIdx <= revealedThrough && selectSkippedBottomHalf(feed, effInning)
+  const nextIdx = curIdx < maxIdx && !skippedBottomHalf ? curIdx + 1 : null
   const nextLabel =
     nextIdx == null
       ? null
@@ -370,7 +393,7 @@ export function InningViewer({
           </span>
           <button
             onClick={() => requestForwardHalf(Math.min(maxIdx, curIdx + 1))}
-            disabled={curIdx === maxIdx}
+            disabled={curIdx === maxIdx || skippedBottomHalf}
             aria-disabled={turning || undefined}
             aria-label="Next half-inning"
           >
@@ -417,6 +440,7 @@ export function InningViewer({
           homeAbbr={meta.home.abbreviation}
           awayName={meta.away.clubName}
           homeName={meta.home.clubName}
+          runsInProgress={runsInProgress}
           curIdx={curIdx}
           onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
           disabled={turning}
@@ -463,6 +487,7 @@ export function InningViewer({
                   half={effHalf}
                   fieldingSide={effHalf === 'top' ? 'home' : 'away'}
                   fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
+                  fieldingTeamId={effHalf === 'top' ? meta.home.id : meta.away.id}
                   revealedThrough={revealedThrough}
                 />
               </div>

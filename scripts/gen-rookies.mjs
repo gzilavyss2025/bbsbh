@@ -34,7 +34,7 @@ import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
-import { aggregateSplits } from '../src/api/person.js'
+import { levelSeasonStat } from '../src/api/person.js'
 import { ipToOuts } from '../src/api/rehab-policy.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -96,6 +96,16 @@ function statValue(group, agg) {
 // AB/outs first crosses the limit. Returns { crossingSeason, priorTotal }
 // (priorTotal = cumulative total ENTERING the crossing season) or null if his
 // whole career never crosses. Mirrors gen-rookies-backfill.mjs.
+//
+// Uses levelSeasonStat (not a raw aggregateSplits over the season's rows) —
+// yearByYear can include a synthetic team-less row summing a same-season
+// trade's per-team rows, and aggregateSplits doesn't recognize it as a
+// duplicate, so summing every row double-counts the season. That inflation
+// was pinning a false, too-early crossing season for anyone traded during
+// his rookie window (verified live: Mauricio Dubón, traded mid-2019 — the
+// inflated 2019 total falsely crossed 130 AB, but his real 2019 AB total was
+// 106, so findCrossingDate's game-log walk never confirmed it and his record
+// stuck open forever instead of closing on his real crossing date).
 function findCrossingSeason(yearSplits, group) {
   const bySeason = new Map()
   for (const s of yearSplits) {
@@ -107,7 +117,7 @@ function findCrossingSeason(yearSplits, group) {
   const seasons = [...bySeason.keys()].sort((a, b) => a - b)
   let running = 0
   for (const yr of seasons) {
-    const value = statValue(group, aggregateSplits(bySeason.get(yr), group))
+    const value = statValue(group, levelSeasonStat(bySeason.get(yr), group))
     if (running + value >= LIMIT[group]) return { crossingSeason: yr, priorTotal: running }
     running += value
   }

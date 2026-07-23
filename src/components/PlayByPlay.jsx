@@ -42,7 +42,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // entries list (every entry shown, whether by tapping through or because the
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -94,29 +94,79 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll the newly revealed at-bat into view on each step (ADR-0016): a
-  // step boundary always lands right after a plate-appearance card (see
-  // nextStepBoundary), so the last visible entry is the one that just came
-  // in. Skipped when a step count carries over from a PREVIOUS visit (mount
-  // at stepCap > 1, e.g. returning to a half already mid-step) so the page
-  // doesn't jump before the user has tapped anything this visit — but the
-  // very first tap of a still-fully-sealed half (mount at stepCap === 1)
-  // always scrolls: that tap is the only visible change on the page (the
-  // card appears well below the floating bar the user just tapped), so
-  // without this the tap looks like it did nothing. Compared against the RAW
-  // `stepCap` prop, not `effectiveCap` — this is detecting the user's own tap,
-  // which always arrives as the same raw value regardless of how far it gets
-  // bundled forward for display.
-  const lastEntryRef = useRef(null)
-  const prevStepCapRef = useRef(stepCap)
-  const isFirstRenderRef = useRef(true)
+  // How many runs have scored in the STEPPED-THROUGH portion of this half so
+  // far — reported upward (InningViewer, via HalfInning) so the linescore
+  // grid's own cell for this half can build up as you reveal it one at-bat at
+  // a time, instead of staying blank until the whole half commits. Reveal-
+  // safe by construction: `entries` here is already clamped to `effectiveCap`
+  // (computeHalfInningFeed's own stepCap), so this can never count a run from
+  // an at-bat the user hasn't actually stepped into yet. Each scoring runner
+  // is marked `scored: true` on HIS OWN at-bat card (the trip he reached base
+  // on, not necessarily the play that drove him in), so summing every
+  // entry's own flag — not just the batter of the play that just happened —
+  // correctly totals a multi-run play (a grand slam scores the batter's own
+  // card plus the three baserunners' own earlier cards).
   useEffect(() => {
-    const firstTapOfHalf = isFirstRenderRef.current && stepCap === 1
-    isFirstRenderRef.current = false
-    if (stepping && (stepCap !== prevStepCapRef.current || firstTapOfHalf)) {
-      lastEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (!stepping) return
+    onRunsSoFar?.(entries.filter((e) => e.kind === 'atbat' && e.scored).length)
+  }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll the newly revealed at-bat to the TOP of the viewport on each step
+  // (ADR-0016): a step boundary always lands right after a plate-appearance
+  // card (see nextStepBoundary), so the last visible entry is the one that
+  // just came in. Fires on every stepCap change AND on mount — including a
+  // reload that resumes a half already mid-step, not just a tap made THIS
+  // visit — so returning to a partially-stepped half always lands you back
+  // at the newest card rather than at the top of the whole half. Compared
+  // against the RAW `stepCap` prop, not `effectiveCap`, so a single tap that
+  // bundles a leading event note forward still scrolls exactly once.
+  //
+  // Deferred one animation frame and cancelable, rather than calling
+  // scrollIntoView directly in the effect body: this app renders inside
+  // StrictMode, which double-invokes every effect in dev (mount, clean up,
+  // mount again) to surface exactly this class of bug — without the guard,
+  // the first, thrown-away invocation's scroll call was still in flight when
+  // the second, real one fired. `true` (the legacy boolean form, not the
+  // options-object form) is a deliberately DIFFERENT API: it's the one
+  // scrollIntoView signature the spec defines as always instant, with no
+  // "behavior" of its own to be pulled into any CSS/JS smooth-scroll
+  // ambiguity — verified live that `{behavior:'auto'}` was NOT actually
+  // instant here even though computed CSS scroll-behavior read 'auto' too.
+  //
+  // Confirmed live with frame-by-frame sampling: the scroll lands exactly on
+  // target the instant it runs — but on a fresh MOUNT specifically (a reload
+  // resuming a half already mid-step), something else on the page finishes
+  // loading ~100-200ms later and grows the page's height by exactly the
+  // amount the target then drifts down by. A same-visit tap never shows this
+  // (nothing else on the page is still loading by then). A ResizeObserver on
+  // document.body/documentElement never caught it either — verified live
+  // that neither element's OWN box actually resizes even though the page's
+  // scrollHeight does (both are viewport-height-locked, so overflowing
+  // content grows scrollHeight without growing either element's box, and
+  // ResizeObserver only reports box-size changes). Polling every frame
+  // instead sidesteps needing to know WHICH ancestor's box would even fire —
+  // it just re-snaps whenever the target's own on-screen position drifts
+  // from the top, for a short settling window, then stops once it's held
+  // still for a few consecutive frames (or a hard 2s cap either way).
+  const lastEntryRef = useRef(null)
+  useEffect(() => {
+    if (!stepping) return
+    let frame
+    let framesLeft = 120 // ~2s hard cap
+    let stableStreak = 0
+    const settle = () => {
+      const top = lastEntryRef.current?.getBoundingClientRect().top
+      if (top != null && Math.abs(top) > 1) {
+        lastEntryRef.current.scrollIntoView(true)
+        stableStreak = 0
+      } else {
+        stableStreak++
+      }
+      framesLeft--
+      if (stableStreak < 10 && framesLeft > 0) frame = requestAnimationFrame(settle)
     }
-    prevStepCapRef.current = stepCap
+    frame = requestAnimationFrame(settle)
+    return () => cancelAnimationFrame(frame)
   }, [stepping, stepCap])
 
   // Reports the pitcher actually on the mound as of what's visible right now
@@ -354,7 +404,10 @@ function EventNote({ entry }) {
 // left (MLB caps them — see moundVisitsAllowed), drawn as used/open pips
 // (UsagePips) — the same shared component StatBox.jsx's ABS challenge row
 // uses, sized up here (pitchernotice--mv) since this card has no other figure
-// competing for attention.
+// competing for attention. A visible "N left" tail rides alongside the pips,
+// same idiom as the ABS row's own .abs__rec readout — the dots alone don't
+// say which fill state means used vs. still available, so a viewer has to
+// guess (verified feedback: kraft-brown fill read as ambiguous either way).
 function MoundVisitBar({ team, teamId, remaining, allowed }) {
   const used = remaining != null && allowed != null ? Math.max(0, allowed - remaining) : null
   const label =
@@ -364,7 +417,14 @@ function MoundVisitBar({ team, teamId, remaining, allowed }) {
       <TeamLogo teamId={teamId} name={team} size={20} className="pitchernotice__teammark" />
       <span className="pitchernotice__label">Mound visit{team ? ` — ${team}` : ''}</span>
       <span className="pitchernotice__spacer" />
-      {used != null && <UsagePips allowed={allowed} used={used} label={label} />}
+      {used != null && (
+        <>
+          <UsagePips allowed={allowed} used={used} label={label} />
+          <span className="pitchernotice__mvcount" aria-hidden="true">
+            {remaining} left
+          </span>
+        </>
+      )}
     </div>
   )
 }

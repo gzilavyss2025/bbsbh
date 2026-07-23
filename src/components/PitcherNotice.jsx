@@ -11,7 +11,14 @@ import { PlayerLink } from './PlayerLink.jsx'
 // card) comes from the caller's `className`; the inner photo+body layout is
 // this component's. `pitcher` is the { id, name, jersey, hand } shape
 // selectPrePitchChanges / pitchingChangePitcher build.
-export function PitcherNotice({ pitcher, teamName, className = '', label = 'Now pitching' }) {
+//
+// `entering`, when given, is the persistent header's own extra: how many
+// pitches he'd already thrown BEFORE this half — `{ pitches, halfLabel }`,
+// e.g. `{ pitches: 78, halfLabel: 'the start of the 6th' }`. Optional and
+// only ever passed by HalfInning.jsx's persistent card — a pre-pitch/mid-
+// inning change notice (StatBox.jsx / PlayByPlay.jsx's own uses of this same
+// component) has no natural "entering the half" moment to hang it on.
+export function PitcherNotice({ pitcher, teamName, className = '', label = 'Now pitching', entering = null }) {
   if (!pitcher) return null
   return (
     <div className={`pitchernotice ${className}`}>
@@ -31,6 +38,12 @@ export function PitcherNotice({ pitcher, teamName, className = '', label = 'Now 
           </span>
         </span>
       </div>
+      {entering && (
+        <span className="pitchernotice__entering">
+          <span className="pitchernotice__enteringcount">{entering.pitches} pitches</span>
+          <span className="pitchernotice__enteringwhen">at {entering.halfLabel}</span>
+        </span>
+      )}
     </div>
   )
 }

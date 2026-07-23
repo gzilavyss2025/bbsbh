@@ -43,6 +43,7 @@
 
 import { personNameParts, startingPositionAbbr } from './select.js'
 import { defenseEntering } from './defense.js'
+import { challengeForPlay } from './challenges.js'
 
 // Top-level plays that are baserunning events, not plate appearances: the
 // batter's at-bat continues (or restarts next inning) as its own later play.
@@ -508,6 +509,14 @@ const ADVANCE_CODES = {
   // ('walk'), mislabeling the advance "BB" as if Chourio's own plate
   // appearance had driven it.
   defensive_indiff: 'DI',
+  // Same REACH_CODES entry (scorebookCode) already uses for the batter's
+  // OWN reach-on-CI — without this, a runner forced up by someone else's
+  // catcher's-interference call fell all the way through advanceCode's
+  // fallback to the generic ground-out "GO", mislabeling the leg (verified
+  // live: Michael Harris II to 2nd on Mauricio Dubón's catcher interference
+  // showed "GO5" — a ground-out code for a play that was neither a ground
+  // ball nor an out).
+  catcher_interf: 'CI',
 }
 
 function advanceCode(play) {
@@ -559,15 +568,22 @@ export function interruptedCode(eventType) {
 // list. All Statcast-ish, so every field is null-guarded — at MiLB parks with
 // no tracking pX/pZ are simply absent and StrikeZone renders nothing (same
 // degrade as derive.js).
-function pitchCardInfo(play) {
+// `feed` is only needed for challengeForPlay's team-id lookup (challenges.js)
+// — everything else here reads straight off `play`.
+function pitchCardInfo(feed, play) {
   const pitchEvents = (play.playEvents ?? []).filter((e) => e.isPitch)
   const pitches = pitchEvents.map(pitchCallCode)
+  // At most one challenge per play (challengeForPlay's own contract) — pinned
+  // to a pitchNumber, matched against each pitch's own `no` below so only
+  // that one pitch's row carries it.
+  const challenge = challengeForPlay(feed, play)
   const pitchDetails = pitchEvents.map((e, i) => {
     const code = pitchCallCode(e)
     const pd = e.pitchData ?? {}
     const co = pd.coordinates ?? {}
+    const no = e.pitchNumber ?? i + 1
     return {
-      no: e.pitchNumber ?? i + 1,
+      no,
       code,
       cat: pitchDotCategory(code),
       px: typeof co.pX === 'number' ? co.pX : null,
@@ -577,6 +593,7 @@ function pitchCardInfo(play) {
       mph: typeof pd.startSpeed === 'number' ? pd.startSpeed : null,
       type: e.details?.type?.description ?? '',
       callDesc: e.details?.call?.description ?? '',
+      challenge: challenge?.pitchNumber === no ? challenge : null,
     }
   })
   return { pitchEvents, pitches, pitchDetails }
@@ -995,7 +1012,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
 
     if (isRealPA) {
       const batter = resolveBatter(feed, battingSide, batterId, positionEntering.get(batterId))
-      const { pitchEvents, pitches, pitchDetails } = pitchCardInfo(play)
+      const { pitchEvents, pitches, pitchDetails } = pitchCardInfo(feed, play)
       const pitcher = matchupPitcher(feed, play)
 
       const cardIndex = entries.length
@@ -1105,7 +1122,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         })
       }
       const { pitchEvents, pitches, pitchDetails } =
-        isBaserunningPlay && batterId != null ? pitchCardInfo(play) : { pitchEvents: [] }
+        isBaserunningPlay && batterId != null ? pitchCardInfo(feed, play) : { pitchEvents: [] }
       if (pitchEvents.length > 0) {
         // The interruption sentence is the card's own description (there is no
         // batting result to describe); the count at the stoppage is a real
