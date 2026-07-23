@@ -7572,6 +7572,206 @@ body {
   line-height: var(--lh-snug);
 }
 
+/* --------------------------------------------------------------- game photos
+   Unsealed personal tool (screens/GamePhotosPage.jsx) — pick a club (reusing
+   TeamFilterStrip's vsteam__* logo strip), then a game, then browse MLB's
+   high-res CDN originals for it. Own section/row/grid treatment below;
+   .gamefinder__season isn't reused here since the season select rides inline
+   in a sectionhead instead of its own labeled row. */
+
+/* A dashed kraft-adjacent strip (same shape as .asof-banner) rather than a
+   full-bleed prose block — the page needs to flag "nothing here is sealed"
+   without reading as heavier than the actual controls below it. --clay is
+   the app's existing alert color (outs, errors), reused here as a caution
+   rather than an error. */
+.gamephotos__notice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: 4px 0 var(--space-4);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) dashed var(--clay);
+  background: var(--clay-soft);
+}
+.gamephotos__noticetag {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+.gamephotos__notice p {
+  margin: 0;
+  flex: 1 1 220px;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-text);
+  color: var(--text-body);
+}
+
+.gamephotos__section {
+  margin-bottom: var(--space-5);
+}
+
+.gamephotos__sectionhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.gamephotos__sectiontitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.gamephotos__seasonselect {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+}
+
+.gamephotos__resultsmeta {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
+.gamephotos__games {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Room for the focus ring on the first/last row without letting the
+     scrolling container itself clip it. */
+  padding: 2px;
+}
+
+.gamephotos__gamerow {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+.gamephotos__gamerow:hover {
+  border-color: var(--text-caption);
+}
+.gamephotos__gamerow:active {
+  transform: scale(0.99);
+}
+.gamephotos__gamerow.is-active {
+  background: var(--field-soft);
+  border-color: var(--accent-primary);
+}
+.gamephotos__gamematchup {
+  flex: 1 1 auto;
+  font-weight: var(--w-semibold);
+}
+.gamephotos__gamematchup em {
+  font-style: normal;
+  color: var(--text-caption);
+}
+.gamephotos__gamedate {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
+.gamephotos__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.gamephotos__grid li {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.gamephotos__grid a {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gamephotos__grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* A quiet "this opens elsewhere" affordance — invisible until hover/focus, so
+   the grid reads as clean photography rather than a wall of buttons. */
+.gamephotos__expand {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  background: rgba(30, 20, 5, 0.55);
+  color: var(--text-on-ink);
+  font-size: var(--fs-caption);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-standard);
+}
+.gamephotos__grid a:hover .gamephotos__expand,
+.gamephotos__grid a:focus-visible .gamephotos__expand {
+  opacity: 1;
+}
+.gamephotos__grid a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* ---------------------------------------------------------- team color lab
    Dev-only harness (screens/TeamColorLab.jsx) reviewing each club's Main/
    Alternate/City Connect logo treatment against its three official colors. */

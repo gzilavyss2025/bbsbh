@@ -420,6 +420,19 @@ for each generator; the reader modules:
   the nearest prior snapshot bbsbh itself recorded, not Fever's own
   `/api/data/movers` feed.
 
+- `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
+  finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
+  uses for video. MLB serves every editorial photo through img.mlbstatic.com
+  with a Cloudinary resize transform baked into the URL path;
+  `fetchGamePhotos` walks the whole content JSON, strips each URL's transform
+  segment back to the photographer's original upload, and dedupes by photo id.
+  Deliberately NOT reveal-only or SealBox-wrapped — a recap/celebration photo
+  narrates the outcome just by looking at it, same risk as a highlight clip's
+  title, but this is a standalone personal tool outside the scored-game flow
+  (its page carries its own disclaimer instead). See root CLAUDE.md's spoiler
+  section for why that's a deliberate, narrow exception rather than a hole in
+  the rule.
+
 ## Leader boards (live)
 
 - `leaders.js` / `teamLeaders.js` / `statsLevels.js` — ranking is pool-agnostic:
