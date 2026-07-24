@@ -14,13 +14,15 @@ npm install
 npm run dev        # dev server (fixed port 5173, strictPort)
 npm run build      # production build → dist/
 npm run preview    # serve the built app
-npm run lint       # eslint . && check-caps.mjs && check-claude-md.mjs
+npm run lint       # eslint + guard scripts (caps, casing, typography, contrast, claude-md, …)
+npm test           # node:test unit suite (pure logic; CI-gated)
 npm run e2e        # playwright test — verification harness, not a CI suite
 ```
 
-There is no CI-enforced *test* suite (CI runs lint + build). Verify changes by
-running `npm run dev` (or `npm run e2e`, which boots the dev server itself) and
-exercising the game-select → team-info → innings flow against a live or recent game.
+CI (`ci.yml`) runs lint + `npm test` + build. `npm test` is a pure-logic unit suite;
+it is not a substitute for the browser check. Verify user-visible changes by running
+`npm run dev` (or `npm run e2e`, which boots the dev server itself) and exercising the
+game-select → team-info → innings flow against a live or recent game.
 `docs/test-games.md` has a pack of real, verified gamePks with rare in-game events
 (triple play, immaculate inning, position player pitching, suspended/resumed game,
 etc.). `.claude/skills/run.md` documents this loop end to end. `e2e/smoke.spec.js` is
