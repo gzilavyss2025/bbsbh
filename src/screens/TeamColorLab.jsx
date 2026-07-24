@@ -29,8 +29,22 @@ import {
   hasCityConnect,
 } from '../lib/teams.js'
 import { wpaLogoLayout } from '../lib/wpaLogo.js'
-import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
+import {
+  fetchTeamUniformCatalog,
+  classifyUniformAsset,
+  jerseyLabel,
+  fetchUniformNameOverrides,
+  primeUniformNameOverridesCache,
+  uniformDisplayName,
+} from '../api/uniforms.js'
 import { fetchLastOpponent } from '../api/schedule.js'
+
+// Same dev-only save endpoint UniformNamesPage.jsx posts to (vite.config.js's
+// middleware) — this page isn't itself dev-gated (unlike that one, see
+// TeamColorLab's own doc comment below), so a save attempted outside
+// `npm run dev` just fails and shows the same "Save failed" hint, no
+// different from any other of this page's proposed-but-unwired mockups.
+const NAME_SAVE_URL = '/__dev/uniform-names'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
 // everywhere else (components/TeamLogo.jsx) — so only Alternate and City
@@ -164,7 +178,7 @@ function jerseyMatchesFor(catalog, teamId, treatmentKey) {
   const clubName = teamClubName(teamId)
   return assets
     .filter((a) => a.piece === 'J' && classifyUniformAsset(a.text, clubName, a.code) === treatmentKey)
-    .map((a) => ({ label: jerseyLabel(a.text, clubName), code: a.code ?? null }))
+    .map((a) => ({ label: jerseyLabel(a.text, clubName), code: a.code ?? null, text: a.text }))
 }
 
 // Design harness for reviewing each club's three logo treatments — Main,
@@ -255,14 +269,29 @@ export function TeamColorLab() {
   const [posDraft, setPosField, resetPosDraft] = useDraftStore(POS_LAB_KEY)
   const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(HEADER_LAB_KEY)
   const [collapsed, setCollapsed] = useState(loadCollapsed)
+  // The same curated-name save flow as UniformNamesPage.jsx, embedded here so
+  // a jersey's display name can be edited right next to the treatment tile it
+  // actually renders on, instead of cross-referencing a separate page.
+  // `savedNames` is the last-saved public/data/uniform-names.json map;
+  // `nameEdits` is this session's in-progress code -> text edits, same
+  // "merge edits over last-saved so an untouched row survives" save as that
+  // page's own handleSave.
+  const [savedNames, setSavedNames] = useState({})
+  const [nameEdits, setNameEdits] = useState({})
+  const [nameSaveStatus, setNameSaveStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
 
   // One call for all 30 clubs' current-season uniform catalog (verified to
   // accept a comma list — docs/uniforms-and-logos.md), so the jersey-match
   // field below never needs a per-team fetch.
   useEffect(() => {
     let cancelled = false
-    fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()).then((data) => {
-      if (!cancelled) setCatalog(data)
+    Promise.all([
+      fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()),
+      fetchUniformNameOverrides(),
+    ]).then(([catalogData, overrides]) => {
+      if (cancelled) return
+      setCatalog(catalogData)
+      setSavedNames(overrides)
     })
     return () => {
       cancelled = true
@@ -275,6 +304,35 @@ export function TeamColorLab() {
 
   const toggleCollapsed = (teamId) =>
     setCollapsed((was) => ({ ...was, [teamId]: was[teamId] === false ? true : false }))
+
+  const handleNameChange = (code, value) => {
+    setNameEdits((prev) => ({ ...prev, [code]: value }))
+    setNameSaveStatus(null)
+  }
+
+  async function handleSaveNames() {
+    setNameSaveStatus('saving')
+    const merged = { ...savedNames }
+    for (const [code, name] of Object.entries(nameEdits)) {
+      const trimmed = name.trim()
+      if (trimmed) merged[code] = trimmed
+      else delete merged[code]
+    }
+    try {
+      const res = await fetch(NAME_SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged),
+      })
+      if (!res.ok) throw new Error(`save failed: ${res.status}`)
+      primeUniformNameOverridesCache(merged)
+      setSavedNames(merged)
+      setNameEdits({})
+      setNameSaveStatus('saved')
+    } catch {
+      setNameSaveStatus('error')
+    }
+  }
 
   return (
     <div className="screen">
@@ -295,7 +353,20 @@ export function TeamColorLab() {
         tells Claude exactly what to change. Position lets you nudge/rescale
         the main rectangle’s own logo; Header colors is an unwired mockup of
         what a Blue/Gold header recolor could look like for this treatment.
+        Each tile’s name field is the same curated wording{' '}
+        <code>/uniform-names</code> edits — Save writes the whole map to{' '}
+        <code>public/data/uniform-names.json</code> while{' '}
+        <code>npm run dev</code> is running, no effect otherwise.
       </p>
+      <div className="uniformnames__actions">
+        <button className="btn" onClick={handleSaveNames} disabled={nameSaveStatus === 'saving'}>
+          Save
+        </button>
+        {nameSaveStatus === 'saved' && <span className="hint">Saved.</span>}
+        {nameSaveStatus === 'error' && (
+          <span className="hint hint--error">Save failed — is `npm run dev` running?</span>
+        )}
+      </div>
 
       <div className="colorlab__layout">
         <nav className="colorlab__nav" aria-label="Jump to team">
@@ -311,6 +382,9 @@ export function TeamColorLab() {
               key={id}
               teamId={id}
               catalog={catalog}
+              savedNames={savedNames}
+              nameEdits={nameEdits}
+              onNameChange={handleNameChange}
               wpaDraft={wpaDraft[id]}
               onWpaField={(treatment, field, value) => setWpaField(id, treatment, field, value)}
               onWpaReset={(treatment) => resetWpaDraft(id, treatment)}
@@ -339,6 +413,9 @@ function teamAnchorId(teamId) {
 function TeamColorRow({
   teamId,
   catalog,
+  savedNames,
+  nameEdits,
+  onNameChange,
   wpaDraft,
   onWpaField,
   onWpaReset,
@@ -405,6 +482,9 @@ function TeamColorRow({
               treatment={t.key}
               label={t.label}
               catalog={catalog}
+              savedNames={savedNames}
+              nameEdits={nameEdits}
+              onNameChange={onNameChange}
               lastOpponent={lastOpponent}
               wpaDraft={wpaDraft?.[t.key]}
               onWpaField={(field, value) => onWpaField(t.key, field, value)}
@@ -429,6 +509,9 @@ function TreatmentBox({
   treatment,
   label,
   catalog,
+  savedNames,
+  nameEdits,
+  onNameChange,
   lastOpponent,
   wpaDraft,
   onWpaField,
@@ -450,6 +533,15 @@ function TreatmentBox({
   // loading, or for the rare treatment that doesn't resolve to exactly one
   // jersey.
   const displayLabel = jerseyMatches?.length === 1 ? jerseyMatches[0].label : label
+  // The same curated full name UniformNamesPage.jsx edits — that page's
+  // "code" is the jersey catalog asset code, so a treatment with more than
+  // one matching jersey (or no code at all, e.g. no art procured yet for a
+  // future season) has nothing to edit, same gate as displayLabel above.
+  const nameMatch = jerseyMatches?.length === 1 ? jerseyMatches[0] : null
+  const nameCode = nameMatch?.code ?? null
+  const nameValue = nameCode
+    ? nameEdits[nameCode] ?? uniformDisplayName(nameMatch.text, teamClubName(teamId), nameCode, savedNames)
+    : ''
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   const pinstripeColor = treatment === 'main'
@@ -509,7 +601,17 @@ function TreatmentBox({
 
   return (
     <div className="colorlab__treatment">
-      <span className="colorlab__treatmentlabel">{displayLabel}</span>
+      <div className="colorlab__treatmentlabelrow">
+        <span className="colorlab__treatmentlabel">{displayLabel}</span>
+        {nameCode && (
+          <input
+            className="searchbox__input colorlab__nameinput"
+            value={nameValue}
+            placeholder="Display name"
+            onChange={(e) => onNameChange(nameCode, e.target.value)}
+          />
+        )}
+      </div>
       <div className="colorlab__treatmentbox">
         <div className={logoboxClass} style={logoboxStyle}>
           <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />

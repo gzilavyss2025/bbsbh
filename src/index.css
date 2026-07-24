@@ -8358,6 +8358,21 @@ body {
   color: var(--text-caption);
 }
 
+/* Pairs .colorlab__treatmentlabel with its curated-name edit box (the same
+   field UniformNamesPage.jsx's own row edits) on one line, label left, input
+   right — the page-level Save button (colorlab's own .uniformnames__actions,
+   reused as-is) writes every tile's edit at once. */
+.colorlab__treatmentlabelrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.colorlab__nameinput {
+  flex: 0 1 200px;
+}
+
 .colorlab__treatmentbox {
   display: flex;
   flex-wrap: wrap;
