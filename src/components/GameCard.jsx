@@ -255,6 +255,7 @@ function TeamMark({ team, side, gamePk, gameDate, jerseysData }) {
       teamId={team.id}
       name={team.name}
       treatment={treatment}
+      side={side}
       size={56}
       block="gamecard__logobox"
       className={`gamecard__logobox--${side}`}

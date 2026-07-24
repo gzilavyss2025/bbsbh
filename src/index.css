@@ -1506,7 +1506,7 @@ body {
    overflow:hidden does the cropping; --scale lets a club's curated
    per-treatment scale pull a dense mark back down. */
 .masthead__logobox .teamlogo {
-  transform: scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
 }
 
 /* ---------------------------------------------------------------- step nav
@@ -2903,7 +2903,7 @@ body {
      (TeamMark, GameCard.jsx) shrink a dense mark so it doesn't read as "the
      whole tile is this color" against its own new fill — same var Team Color
      Lab's own tiles use. */
-  transform: scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
 }
 
 /* The monogram fallback already is a bordered tile — drop its own chrome so it

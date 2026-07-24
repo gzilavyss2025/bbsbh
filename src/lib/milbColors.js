@@ -318,3 +318,25 @@ export function milbHeaderColorsFor(teamId, variant, draft) {
     font: draft?.font ?? override?.font ?? DEFAULT_HEADER_FONT,
   }
 }
+
+// The real game-card/masthead tile's shape (see teams.js's treatmentTile,
+// which TeamTreatmentMark reads for every MLB club) computed from this
+// module's Home/Away tables instead — the live wiring this lab was staged
+// for. `variant` is the game side ('home'/'away'); anything else falls back
+// to 'away' so a caller that hasn't resolved a side yet still gets a real
+// tile rather than a crash. No `draft` param — unlike the lab's own preview
+// path, the shipped app only ever reads the landed MILB_LOGO_POS_OVERRIDES
+// table.
+export function milbTreatmentTile(teamId, variant) {
+  const side = variant === 'home' ? 'home' : 'away'
+  const pos = milbLogoPosition(teamId, side)
+  return {
+    logoVariant: 'base',
+    tint: pos.pinstripe ? null : pos.bg,
+    offsetX: pos.offsetX,
+    offsetY: pos.offsetY,
+    pinstripeColor: pos.pinstripe ? pos.bg : null,
+    pinstripeBg: null,
+    scale: pos.scale,
+  }
+}
