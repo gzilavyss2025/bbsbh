@@ -34,10 +34,11 @@ function ClubhouseWordmark({ title, compact = false, ...props }) {
       >
         TAL1
       </text>
-      {/* The Y is pulled four viewBox units toward the 1. Its foot ends at
-          y=83, exactly the same baseline used by the text run above. */}
+      {/* Big Shoulders Display's 900-weight cap height begins at y=7.8 for
+          this 94px text run, so the custom Y rounds that to y=8. Its fork
+          and y=83 baseline stay fixed while only the upper arms stretch. */}
       <path
-        d="M147 10h17l9 29 9-29h17l-18 47v26h-16V57Z"
+        d="M147 8h17l9 31 9-31h17l-18 49v26h-16V57Z"
         fill="currentColor"
       />
       <ScorersAsterisk compact={compact} />
