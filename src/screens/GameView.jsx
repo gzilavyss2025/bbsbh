@@ -15,6 +15,11 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { humanDateWithYear } from '../lib/dates.js'
+import { useFollowLive } from '../hooks/useFollowLive.js'
+import { ConsentModal } from '../components/ConsentModal.jsx'
+import { useCopy } from '../copy/copyContext.js'
+import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
+import { trackToggleConsent, TOGGLES, ACTIONS, SURFACES } from '../lib/analytics.js'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -70,6 +75,16 @@ export function GameView({ game, section, onSection }) {
   const { keepAwake, setKeepAwake } = useKeepAwakePreference()
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
   useWakeLock(keepAwake && isLive)
+
+  // Follow Live (ADR-0027) — the per-game "advance with the game" mode. The
+  // toggle rides in the masthead next to Keep-Awake (both only while Live);
+  // turning it ON goes through the consent modal (the spoiler trade), turning it
+  // OFF is immediate (no consent needed to re-seal your pace). The reveal
+  // advancing itself happens in InningViewer, which owns the reveal mark.
+  const { t: copy } = useCopy()
+  const { following, startFollowing, stopFollowing } = useFollowLive(game.gamePk)
+  const [askFollow, setAskFollow] = useState(false)
+  const onFollowToggle = () => (following ? stopFollowing() : setAskFollow(true))
 
   // Where "Innings" returns to: the last half-inning page the user was on, so
   // hopping out to a lineup or the box score and back doesn't lose your place
@@ -158,6 +173,9 @@ export function GameView({ game, section, onSection }) {
         isLive={isLive}
         keepAwake={keepAwake}
         onSetKeepAwake={setKeepAwake}
+        following={following}
+        followLabel={copy('followLive.toggleLabel')}
+        onFollowToggle={onFollowToggle}
         treatment={winProbTreatment}
       />
 
@@ -294,6 +312,8 @@ export function GameView({ game, section, onSection }) {
           highlights={highlightsData}
           runExpectancy={runExpectancyData}
           workload={workloadData}
+          following={following}
+          onStopFollowing={stopFollowing}
         />
       )}
       {feed && step === 3 && (
@@ -312,6 +332,33 @@ export function GameView({ game, section, onSection }) {
           onSection={onSection}
         />
       )}
+
+      {/* Follow Live consent — the in-game spoiler trade. Confirm starts the
+          follow (and records the consent); dismiss just closes. Both emit the
+          score-free toggle_consent analytics event (Task B / ADR-0028). */}
+      {askFollow && (
+        <ConsentModal
+          group="followLive"
+          time={formatResetTime(nextResetAt())}
+          onConfirm={() => {
+            startFollowing()
+            trackToggleConsent({
+              toggle: TOGGLES.FOLLOW_LIVE,
+              action: ACTIONS.CONFIRM,
+              surface: SURFACES.INGAME,
+            })
+            setAskFollow(false)
+          }}
+          onDismiss={() => {
+            trackToggleConsent({
+              toggle: TOGGLES.FOLLOW_LIVE,
+              action: ACTIONS.DISMISS,
+              surface: SURFACES.INGAME,
+            })
+            setAskFollow(false)
+          }}
+        />
+      )}
     </div>
     </LinkScope>
   )
@@ -323,7 +370,20 @@ export function GameView({ game, section, onSection }) {
 // right-aligned opposite them. Tapping a mark opens it enlarged for pencil
 // sketching. The date and the Watch link are both structural, not
 // score-revealing, so they render unconditionally (no seal).
-function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSetKeepAwake, treatment }) {
+function Masthead({
+  away,
+  home,
+  date,
+  gamePk,
+  onSketch,
+  isLive,
+  keepAwake,
+  onSetKeepAwake,
+  following,
+  followLabel,
+  onFollowToggle,
+  treatment,
+}) {
   return (
     <div className="masthead">
       <div className="masthead__teams">
@@ -342,6 +402,9 @@ function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSet
         {date && <span className="masthead__date">{humanDateWithYear(date)}</span>}
         {/* Only worth showing (and worth the tap) while the game can actually
             hold the lock — pregame/Final it would just sit there inert. */}
+        {isLive && (
+          <FollowLiveToggle on={following} label={followLabel} onToggle={onFollowToggle} />
+        )}
         {isLive && <KeepAwakeToggle on={keepAwake} onToggle={() => onSetKeepAwake(!keepAwake)} />}
         {gamePk && <WatchButton gamePk={gamePk} />}
       </div>
@@ -367,6 +430,27 @@ function KeepAwakeToggle({ on, onToggle }) {
       <span className="awaketoggle__icon" aria-hidden="true">
         {on ? '☀' : '☾'}
       </span>
+    </button>
+  )
+}
+
+// Follow Live toggle — same masthead switch convention as KeepAwakeToggle, only
+// shown while the game is Live (there's nothing to follow otherwise). The label
+// comes from the admin-editable copy registry. Turning it on is gated by the
+// consent modal (handled by the parent's onFollowToggle); turning it off is
+// immediate. The ▸▸ glyph reads as "advance/keep up".
+function FollowLiveToggle({ on, label, onToggle }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={`${label || 'Follow live'}: ${on ? 'on' : 'off'}`}
+      title="Keep up with the game as it's played — reveals each half live"
+      className={`followtoggle${on ? ' is-on' : ''}`}
+      onClick={onToggle}
+    >
+      <span className="followtoggle__icon" aria-hidden="true">▸▸</span>
     </button>
   )
 }

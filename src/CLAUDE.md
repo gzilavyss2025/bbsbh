@@ -95,6 +95,16 @@ read the linked ADRs before refactoring:
   appearance at a time via a transient cursor (`atBatCountFor`,
   `useRevealProgress`) that always collapses into a normal `revealTo` commit
   rather than becoming a second spoiler boundary (ADR-0016).
+- **The two opt-in departures** ride through `InningViewer` without touching its
+  guarantees. **Scores Unlocked** (ADR-0026) substitutes a render-only
+  `renderRevealedThrough`/`renderUnlocked` (from `effectiveReveal`) for every
+  render consumer while leaving the persisted `revealedThrough` — what feeds
+  `useRevealProgress`, `RevealCloudSync`, and localStorage — untouched. **Follow
+  Live** (ADR-0027) is the opposite: it merges the finite `selectLiveEdge` into
+  the REAL mark via `mergeRevealedThrough` (a genuine, forward-only fourth
+  ratchet source), gated by `useFollowLive`'s consent flag and cleared on Final.
+  The floor rises (Follow Live), the ceiling rises (Scores Unlocked); they never
+  fight.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own

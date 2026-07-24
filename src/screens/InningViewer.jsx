@@ -7,8 +7,11 @@ import {
   selectTeamMeta,
   selectDelays,
   selectSkippedBottomHalf,
+  selectIsFinal,
   halfIndex,
 } from '../api/select.js'
+import { selectLiveEdge } from '../api/liveEdge.js'
+import { useCopy } from '../copy/copyContext.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { buildMarginNotes } from '../api/pitcher-callouts.js'
@@ -69,7 +72,10 @@ export function InningViewer({
   highlights,
   runExpectancy,
   workload,
+  following = false,
+  onStopFollowing,
 }) {
+  const { t: copy } = useCopy()
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -196,6 +202,36 @@ export function InningViewer({
   // the half it describes stays current.
   const [runsInProgress, setRunsInProgress] = useState(null)
   useEffect(() => setRunsInProgress(null), [curIdx])
+
+  // FOLLOW LIVE (ADR-0027) — the fourth reveal-ratchet source. On every new feed
+  // object (useGameData's ~60s Live poll and a manual Refresh both mint one),
+  // advance the REAL high-water mark to the game's live edge through the SAME
+  // one-way mergeRevealedThrough every other source uses. Deliberately the real
+  // feed + real mergeRevealedThrough — NEVER renderRevealedThrough and NEVER
+  // Infinity: selectLiveEdge returns a finite half-index or null, and a null edge
+  // (pre-first-pitch, or a lean MiLB feed with no allPlays) is dropped by
+  // mergeMark. Scores Unlocked composes cleanly on top: this raises the persisted
+  // FLOOR; effectiveReveal raises the render CEILING — they never fight.
+  //
+  // Auto-follow keeps a caught-up follower pinned to the newest half: the view
+  // only moves when the user is already at the frontier (curIdx >= the pre-merge
+  // mark) — paged back to re-read an earlier half, we leave them there.
+  // replace:true so a long night of following never pollutes the Back button. On
+  // Final, do the last merge, then retire the flag so a stale "following" never
+  // lingers into a later re-view.
+  useEffect(() => {
+    if (!following) return
+    const edge = selectLiveEdge(feed, following) // following === true here
+    if (edge != null) {
+      const caughtUp = curIdx >= revealedThrough
+      mergeRevealedThrough(edge)
+      if (edge > curIdx && caughtUp) {
+        onInning(Math.floor(edge / 2) + 1, edge % 2 === 0 ? 'top' : 'bottom', { replace: true })
+      }
+    }
+    if (selectIsFinal(feed)) onStopFollowing?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feed, following, curIdx, revealedThrough])
 
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
@@ -393,6 +429,20 @@ export function InningViewer({
   return (
     <div className="innings">
       {cloudSync}
+      {/* While Follow Live is on, a strip sits above the innings chrome so it's
+          always visible, and is itself the off switch (same "the banner is the
+          toggle" convention as the slate's Scores Unlocked note). Turning it off
+          never un-reveals — the mark it advanced has already ratcheted. */}
+      {following && (
+        <button
+          type="button"
+          className="followstrip"
+          onClick={() => onStopFollowing?.()}
+          aria-label="Stop following live"
+        >
+          {copy('followLive.banner')}
+        </button>
+      )}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
           stacked on a phone. Refresh no longer sits up here — it moved to the

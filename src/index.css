@@ -23331,3 +23331,57 @@ button.gamehigh-matchup:active {
     transition: none;
   }
 }
+
+/* Follow Live masthead toggle — same pill switch as .awaketoggle beside it, in
+   the kraft-amber seal tint when on (it's a spoiler-lifting control, matching
+   the slate's unlock treatment). */
+.followtoggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+.followtoggle.is-on {
+  background: var(--seal-cover);
+  border-color: var(--seal-cover);
+  color: var(--seal-cover-ink);
+}
+.followtoggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.followtoggle__icon {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-none);
+}
+
+/* Follow Live active strip — the "you are following" banner above the innings
+   chrome, which is itself the off switch (same "banner is the toggle" idea as
+   .slateunlock__note). Full-width so it reads as a mode, not a chip. */
+.followstrip {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+}
+.followstrip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}

@@ -64,6 +64,12 @@ spoiler-free only when restricted to the half the user has reached
   would sprout PH rows on the staging pages late in a game. It also feeds
   `DefenseDiamond` (the scorebook-style opposing-defense drawing on the lineup
   pages).
+- `liveEdge.js` — a THIRD classification, neither reveal-only nor an ordinary
+  spoiler-free selector: `selectLiveEdge(feed, following)` reports only how far
+  the game has progressed (the last play's half-index), never a score, and only
+  when the user has opted to follow (returns null unless `following === true`,
+  and before first pitch / on empty play data). Powers Follow Live (ADR-0027),
+  which merges the finite edge into the reveal ratchet via `mergeRevealedThrough`.
 - `challenges.js` — reveal-only ABS (Automated Ball-Strike) challenge history
   for the R/H/E card's third row (`StatBox`), clamped to the reached half. Each
   club's success/fail outcome list from the pitch-event `reviewDetails`
