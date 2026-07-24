@@ -38,6 +38,30 @@ const VARIANTS = [
   { key: 'away', label: 'Away' },
 ]
 
+// Quick-reuse neutrals for the Position/WPA/Header hex fields — a MiLB
+// affiliate's Away variation, or an unresolved team's placeholder tile,
+// often wants a plain neutral rather than either researched brand color, and
+// typing one from memory invites a typo a click-to-copy value doesn't. Two
+// steps each of cream/off-white/grey (a lighter and a darker), plus pure
+// white/black, a common "road grey" jersey tone, and a navy that recurs as
+// the primary or secondary for a large cluster of researched MiLB affiliates
+// (lib/milbColors.js) — handy as a one-click starting point rather than
+// hunting one of THOSE teams' own swatches down. Page-local, MiLB-lab only;
+// the MLB Team Color Lab has no equivalent list (its per-treatment swatches
+// already cover every color a tile needs there).
+const NEUTRAL_SWATCHES = [
+  { label: 'Cream (light)', hex: '#F6EFDC' },
+  { label: 'Cream (dark)', hex: '#E8DCC0' },
+  { label: 'Off-white (light)', hex: '#FFFDF6' },
+  { label: 'Off-white (dark)', hex: '#F3ECD8' },
+  { label: 'Grey (light)', hex: '#D0D0D0' },
+  { label: 'Grey (dark)', hex: '#4A4A4A' },
+  { label: 'White', hex: '#FFFFFF' },
+  { label: 'Black', hex: '#000000' },
+  { label: 'Road grey', hex: '#9EA2A2' },
+  { label: 'Common navy', hex: '#0C2340' },
+]
+
 function affiliatesStorageKey(level, suffix) {
   return `bbsbh:milb-team-color-lab:${level.key}:${suffix}`
 }
@@ -155,6 +179,8 @@ function MilbTeamColorLabPage({ level }) {
           </a>
         ))}
       </nav>
+
+      <NeutralSwatchesSidebar />
 
       {teams === null ? (
         <p className="hint">Loading affiliate list…</p>
@@ -369,6 +395,24 @@ function ColorSwatch({ label, hex, active }) {
       <span className="colorlab__swatchlabel">{label}</span>
       <span className="colorlab__swatchhex">{hex}</span>
     </div>
+  )
+}
+
+function NeutralSwatchesSidebar() {
+  return (
+    <aside className="milbneutrals" aria-label="Quick-reuse neutral colors">
+      <span className="milbneutrals__title">Neutrals</span>
+      {NEUTRAL_SWATCHES.map((s) => (
+        <div className="milbneutrals__row" key={s.hex}>
+          <div className="milbneutrals__chip" style={{ background: s.hex }} />
+          <span className="milbneutrals__text">
+            <span className="milbneutrals__label">{s.label}</span>
+            <span className="milbneutrals__hex">{s.hex}</span>
+          </span>
+          <CopyIconButton text={s.hex} label={`Copy ${s.label} (${s.hex})`} />
+        </div>
+      ))}
+    </aside>
   )
 }
 
