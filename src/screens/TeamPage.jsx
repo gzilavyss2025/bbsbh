@@ -11,6 +11,12 @@ import {
   fetchTeamRosterIds,
 } from '../api/team.js'
 import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
+import {
+  fetchTeamUniformCatalog,
+  fetchGameJerseys,
+  fetchUniformNameOverrides,
+  buildJerseyCombos,
+} from '../api/uniforms.js'
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
@@ -25,13 +31,15 @@ import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } 
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
-import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
+import { SPORT_LABEL, favoriteAccentColor, teamClubName } from '../lib/teams.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
+import { JerseyCombos } from '../components/JerseyCombos.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -221,7 +229,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage, comebackWinsData] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage, comebackWinsData, uniformCatalog, uniformNameOverrides] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -270,6 +278,11 @@ async function loadTeam(id, asOf) {
         ? loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false }))
         : Promise.resolve({ days: [], cursor: null, hasMore: false }),
       sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
+      // This club's own season uniform catalog + the curated jersey-name map,
+      // for the record-by-jersey strip below. MLB only — /uniforms/team
+      // returns nothing for MiLB (see fetchTeamUniformCatalog).
+      sportId === 1 ? fetchTeamUniformCatalog([id], season) : Promise.resolve({}),
+      sportId === 1 ? fetchUniformNameOverrides() : Promise.resolve({}),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -385,6 +398,30 @@ async function loadTeam(id, asOf) {
     diffTone: runDiffTone(t),
     isMe: t.team.id === id,
   }))
+
+  // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
+  // with its logo treatment and the club's W-L in the games it wore it. The
+  // worn-jersey join needs the per-game uniform assignment, one extra batched
+  // /uniforms/game call over just the games with a VISIBLE result (`won`
+  // already cutoff-gated by fetchTeamSchedule above), so an `asOf` team page
+  // never counts a game past its own spoiler cutoff. Skipped for a club with
+  // no catalog (MiLB) — buildJerseyCombos then returns [].
+  const decidedGames = schedule.filter((g) => g.won != null)
+  const wornByGame =
+    sportId === 1 && decidedGames.length
+      ? await fetchGameJerseys(decidedGames.map((g) => g.gamePk))
+      : {}
+  const jerseyCombos =
+    sportId === 1
+      ? buildJerseyCombos({
+          catalogAssets: uniformCatalog[id] ?? [],
+          clubName: teamClubName(id),
+          schedule,
+          wornByGame,
+          teamId: id,
+          nameOverrides: uniformNameOverrides,
+        })
+      : []
 
   const batting = league.hitting.length
     ? [
@@ -678,6 +715,7 @@ async function loadTeam(id, asOf) {
     postseasonOdds,
     transactionsPage,
     standings: standingsRows,
+    jerseyCombos,
     batting, pitching, comeback, position, pitchers, injured,
     preferredLineup, substitutes, startingPitchers, bullpen,
     affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
@@ -727,7 +765,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, dayOfWeek, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
+  const { team, season, record, dayOfWeek, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, jerseyCombos, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -756,8 +794,18 @@ export function TeamPage({ id, asOf, sportId }) {
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
+          {/* The club's Main "logo card" — its mark on the curated tinted tile
+              (the same treatment tile Team Color Lab prototyped and the slate
+              cards wear), rather than a bare CDN logo. Degrades to the plain
+              mark on paper for a MiLB club with no curated Main override. */}
           <div className="team-hub__logo">
-            <TeamLogo teamId={team.id} name={team.name} size={64} />
+            <TeamTreatmentMark
+              teamId={team.id}
+              name={team.name}
+              treatment="main"
+              size={64}
+              block="team-hub__logobox"
+            />
           </div>
           <div>
             <div className="team-hub__namerow">
@@ -828,6 +876,8 @@ export function TeamPage({ id, asOf, sportId }) {
             </div>
           </>
         )}
+
+        <JerseyCombos combos={jerseyCombos} teamId={team.id} teamName={team.name} />
 
         {teamScore?.season?.score != null && (
           <TeamScoreCard

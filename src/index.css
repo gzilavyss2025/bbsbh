@@ -707,20 +707,31 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 12px;
   margin: 2px 0 16px;
 }
 
 .masthead__teams {
   display: flex;
   align-items: center;
-  gap: 20px;
+  /* Tight enough that the faint '@' reads as sitting between the two marks, not
+     floating in its own dead space (the tiles carry their own 4px padding on
+     top of this). */
+  gap: 4px;
 }
 
+/* The date + keep-awake toggle + MLB.TV pill. Allowed to wrap (right-aligned)
+   so on a narrow phone the pill drops to a second line within this cluster
+   instead of pushing the whole masthead wider than the viewport and forcing a
+   horizontal scroll. `min-width: 0` lets the cluster shrink to its widest
+   single child (the date) so that wrap can actually happen. */
 .masthead__side {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 10px;
+  min-width: 0;
 }
 
 .masthead__date {
@@ -811,7 +822,7 @@ body {
     gap: 10px;
   }
   .masthead__teams {
-    gap: 12px;
+    gap: 2px;
   }
   .masthead__date {
     display: none;
@@ -911,11 +922,46 @@ body {
   box-shadow: none;
 }
 
+/* The '@' between the two club marks. Reuses the slate card's screen-print
+   treatment (.gamecard__atmark — Big Shoulders Display, printed twice a couple
+   px out of register in kraft-amber + navy, the misregistration real ballpark-
+   program print runs have), at the same faint watermark opacity as the slate
+   card, but here an inline mark sized to sit between the logos rather than a
+   full-bleed watermark behind them. The navy ink layer is in flow (sizes the
+   box); the kraft ghost is an offset copy pinned over it. */
 .masthead__at {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
+  position: relative;
+  display: inline-block;
+  flex: none;
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-weight: var(--w-black);
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-solid);
+  /* Render the mark 2x larger than its 24px box WITHOUT changing layout: a
+     transform doesn't affect the flow box, so the two logo tiles (and the 4px
+     gaps to this mark) stay exactly where they are — the '@' just grows out
+     from its own center, overlapping onto the marks like the slate card's
+     behind-the-logos watermark. */
+  transform: scale(2);
+}
+.masthead__at-ink,
+.masthead__at-ghost {
+  display: block;
+  transform: skewX(-8deg) rotate(-2deg);
+}
+.masthead__at-ghost {
+  position: absolute;
+  inset: 0;
+  color: var(--seal);
+  /* Same faint print as the slate card's watermark (.gamecard__atmark-ghost). */
+  opacity: 0.1;
+  transform: translate(2px, 1.5px) skewX(-8deg) rotate(-2deg);
+}
+.masthead__at-ink {
+  position: relative;
+  color: var(--navy);
+  /* Same faint print as the slate card's watermark (.gamecard__atmark-ink). */
+  opacity: 0.07;
 }
 
 /* ---------------------------------------------------------- level toggle
@@ -4364,11 +4410,15 @@ body {
   color: var(--text-body);
 }
 
-/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small stat tables
-   (one per batting direction — "Braves batters vs Padres pitchers" and back),
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small lists (one per
+   batting direction — "Braves batters vs Padres pitchers" and back),
    deliberately not FormerTeammates' headshot cards (this is a line off a stat
-   sheet, not a story). Each table rides the shared .standings shell (see
-   .foulboard for the same reuse) rather than inventing new table chrome. */
+   sheet, not a story). Grouped one heading per opposing pitcher, with the
+   batters he's faced listed beneath, each as a batter→line row. This replaced
+   an earlier three-column batter/pitcher/line table that repeated the pitcher
+   on every row and overflowed a phone's width (horizontal swipe to read the
+   line) — collapsing the pitcher to a group heading leaves a two-part row that
+   fits any width and reads cleaner on desktop too. */
 .matchuptable {
   margin-top: var(--space-4);
 }
@@ -4384,25 +4434,65 @@ body {
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.matchuptable__table th.matchuptable__namecol,
-.matchuptable__table td.matchuptable__name {
-  text-align: left;
+.matchuplist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
-.matchuptable__table td.matchuptable__name {
+/* One opposing pitcher and the batters who've faced him. */
+.matchupgroup__pitcher {
+  margin: 0 0 var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* "vs" prefix ahead of the pitcher's name — a quiet function word, kept small
+   and uppercase so the eye lands on the name, not the label. */
+.matchupgroup__vs {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.matchupgroup__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Batter name on the left, career line on the right; the line is allowed to
+   wrap under a long name (margin-left:auto keeps it right-aligned when it
+   does) so nothing ever forces the row wider than the card. */
+.matchupgroup__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.matchupgroup__batter {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.matchuptable__table td.matchuptable__line {
+.matchupgroup__line {
+  margin-left: auto;
   font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
   color: var(--text-caption);
+  text-align: right;
 }
 /* A batter in tonight's actual starting lineup facing the opposing club's
-   actual probable starter — the one row on this table that's about to play
-   out for real on the user's own scoresheet. Same highlighter-yellow "pay
-   attention" wash as .standings tr.foulboard__row--outlier, set per-<td> so
-   the row's own hairline borders (owned by each cell) stay unbroken. */
-.matchuptable__row--tonight td {
+   actual probable starter — the one row on this list that's about to play out
+   for real on the user's own scoresheet. Same highlighter-yellow "pay
+   attention" wash as .standings tr.foulboard__row--outlier. */
+.matchupgroup__row--tonight {
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 
@@ -14245,6 +14335,163 @@ body {
   font-style: normal;
   color: var(--graphite-soft);
   font-size: var(--fs-caption);
+}
+
+/* The club's Main "logo card" in the team-page hero — its mark on the curated
+   tinted tile (TeamTreatmentMark treatment="main"), same framed/overscaled/
+   glossy recipe as the slate card's .gamecard__logobox and the off-day tile.
+   Fills the header grid's 64px logo column. */
+.team-hub__logobox {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.team-hub__logobox.team-hub__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+.team-hub__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.team-hub__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.team-hub__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-display-lg);
+}
+
+/* ------------------------------------------------- logo & jersey combinations
+   A horizontal, touch-draggable strip on the team page — one card per catalog
+   jersey (its logo treatment tile over the jersey's name, the club's record in
+   games it wore it below). Native overflow-x scroll gives touch/trackpad
+   panning; useDragScroll (JerseyCombos.jsx) adds mouse click-drag. */
+.jerseystrip {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: 2px 0 var(--space-2);
+  /* Momentum panning shouldn't select the card text mid-drag. */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  touch-action: pan-x;
+}
+.jerseystrip:active {
+  cursor: grabbing;
+}
+.jerseycombo {
+  flex: 0 0 auto;
+  width: 104px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3) var(--space-2);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.jerseycombo__logobox {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.jerseycombo__logobox.jerseycombo__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    #fff 1px,
+    #fff 7px
+  );
+}
+.jerseycombo__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.jerseycombo__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.jerseycombo__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-h3);
+}
+.jerseycombo__name {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-compact);
+  color: var(--text-heading);
+  /* Draggable strip: don't let a pointer-drag turn into a text selection. */
+  pointer-events: none;
+}
+.jerseycombo__rec {
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .sitebar__wordmark,

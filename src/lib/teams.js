@@ -742,6 +742,35 @@ export function coachHeadshotUrl(personId, width = 320) {
   return `${HEADSHOT_BASE}/w_${width},q_auto:best/v1/people/${personId}/headshot/67/coach/current`
 }
 
+// The ordered PHOTO rungs of a person's Headshot fallback chain (see
+// components/Headshot.jsx), before the shared team-logo / monogram rungs the
+// component appends. Pure so the rung POLICY is unit-testable on its own
+// (test/teams.test.js) rather than buried in the component's render.
+//   • coaches/managers (`coach`): the `{code}/coach` variant only — a coaching
+//     personId has no silo/milb (both 404).
+//   • MiLB / prospect players (`mlb` false): silo → milb. The milb rung is a
+//     real, RECENT minor-league face for a prospect whose MLB `silo` studio
+//     shot 404s — exactly the case that rung exists for.
+//   • MAJOR-LEAGUE players (`mlb` true): silo ONLY. An established MLB player's
+//     `milb` variant is a years-old prospect photo in the wrong team's cap;
+//     since the MLB `silo` studio shot is the one that can lag or briefly 404
+//     (regeneration, a trade), letting a momentary silo miss fall to that
+//     stale minor-league shot — permanently, once Headshot advances a rung —
+//     showed veterans in their old rookie-ball hats. Dropping the milb rung
+//     for a confirmed MLB player degrades a silo miss to the club logo
+//     (neutral, current) instead. A brand-new call-up with no silo yet shows
+//     the club logo rather than his recent MiLB face — an accepted, rare trade
+//     for never mis-capping a regular.
+// `mlb` is a plain boolean the caller decides (Headshot derives it from the
+// player's ACTUAL team, not the display teamId — a prospect's card tints with
+// his parent MLB org but must still keep the milb rung).
+export function headshotSources(personId, { coach = false, mlb = false } = {}) {
+  if (!personId) return []
+  if (coach) return [coachHeadshotUrl(personId)]
+  if (mlb) return [realHeadshotUrl(personId)]
+  return [realHeadshotUrl(personId), milbHeadshotUrl(personId)]
+}
+
 // ---------------------------------------------------------------------------
 // Team colors
 //
@@ -1070,6 +1099,14 @@ const MLB_TEAM_NAMES = {
 // need to enumerate the whole league (e.g. showing all 30 clubs even ones a
 // given umpire/player hasn't touched this season).
 export const ALL_MLB_TEAM_IDS = Object.keys(MLB_TEAM_NAMES).map(Number)
+
+// True only for a CURRENT MLB club's team id — the 30 ids in MLB_TEAM_NAMES.
+// A MiLB affiliate id, a null/undefined team, or anything else is false. Used
+// to gate the Headshot fallback chain (headshotSources above): a confirmed
+// major-leaguer never falls back to his stale `milb` prospect photo.
+export function isMlbTeamId(teamId) {
+  return teamId != null && MLB_TEAM_NAMES[teamId] != null
+}
 
 // "Pittsburgh" — the club's place name, for prose like "Last game against
 // Pittsburgh". Null for a MiLB id.

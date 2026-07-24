@@ -36,7 +36,13 @@ spoiler-free only when restricted to the half the user has reached
 - `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
   the live feed; spoiler-free but empty until ~first pitch, so it rides the
   feed's fetch/reload in `GameView` and renders on the lineup pages + box
-  score).
+  score). Also `fetchTeamUniformCatalog` (per-team season catalog) and, for the
+  Team Page's record-by-jersey strip (`components/JerseyCombos.jsx`),
+  `fetchGameJerseys` (batched per-game worn-jersey join) + the pure
+  `buildJerseyCombos` (one card per catalog jersey → its logo treatment + the
+  club's W-L in games it wore it, joined by `uniformAssetCode`; the record is
+  gated by the schedule's own cutoff so it can't leak a result the standings
+  don't already show).
 - `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
   **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
   live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call

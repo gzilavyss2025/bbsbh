@@ -49,6 +49,48 @@ export async function fetchGameUniforms(gamePk, options) {
   }
 }
 
+// How many gamePks the /api/v1/uniforms/game endpoint accepts per call — the
+// same batch size gen-jerseys.mjs uses for its own season sweep.
+const GAME_UNIFORM_BATCH = 100
+
+// The JERSEY ('J') asset each team actually WORE in each of a batch of games,
+// for the team-page record-by-jersey rollup (TeamPage.jsx). One
+// /api/v1/uniforms/game call per GAME_UNIFORM_BATCH gamePks (the endpoint
+// takes a comma list — see fetchTeamUniformCatalog / gen-jerseys.mjs). Returns
+// `{ [gamePk]: { [teamId]: { code, text } } }`, one entry per side with a
+// posted jersey; a game with no posted assignment (MiLB, or not yet posted)
+// simply has no key, so a caller joining against it counts only games it can
+// actually attribute to a jersey. Spoiler-free: a uniform choice, not a game
+// state — same footing as fetchGameUniforms above.
+export async function fetchGameJerseys(gamePks, options) {
+  const out = {}
+  if (!gamePks?.length) return out
+  const jerseyAsset = (side) => {
+    const j = (side?.uniformAssets ?? []).find(
+      (a) => a.uniformAssetType?.uniformAssetTypeCode === 'J',
+    )
+    if (!j?.uniformAssetText) return null
+    return { code: j.uniformAssetCode ?? null, text: j.uniformAssetText }
+  }
+  for (let i = 0; i < gamePks.length; i += GAME_UNIFORM_BATCH) {
+    const batch = gamePks.slice(i, i + GAME_UNIFORM_BATCH)
+    try {
+      const data = await getJson(`/api/v1/uniforms/game?gamePks=${batch.join(',')}`, options)
+      for (const game of data.uniforms ?? []) {
+        const perTeam = {}
+        for (const side of [game.home, game.away]) {
+          const worn = jerseyAsset(side)
+          if (side?.id && worn) perTeam[side.id] = worn
+        }
+        if (Object.keys(perTeam).length) out[game.gamePk] = perTeam
+      }
+    } catch {
+      // A bad batch just leaves those games unattributed — never fatal.
+    }
+  }
+  return out
+}
+
 // One printable uniform line — "Alt 2 Navy Blue jersey · Road Grey pants ·
 // Alt Yellow Front hat". Asset labels arrive as "<Club> <desc> <Piece>"
 // ("Brewers Alt 2 Navy Blue Jersey"); the club name is redundant next to a
@@ -272,4 +314,54 @@ export async function fetchUniformNameOverrides() {
 // Save, see it stick."
 export function primeUniformNameOverridesCache(overrides) {
   cachedNameOverrides = overrides
+}
+
+// The fixed logo-treatment order the team page's record-by-jersey strip
+// renders in — Main first, then the alternates in number order, City Connect
+// last; anything unrecognized sorts to the end. Same treatment vocabulary as
+// classifyUniformAsset above.
+const TREATMENT_RANK = {
+  main: 0,
+  alternate: 1,
+  'alternate-2': 2,
+  'alternate-3': 3,
+  'alternate-4': 4,
+  'city-connect': 5,
+}
+
+// Builds the Team Page's "logo + jersey + record" strip (TeamPage.jsx): one
+// entry per JERSEY in the club's uniform catalog, each carrying its logo
+// TREATMENT (classifyUniformAsset — a jersey maps to exactly one logo, though
+// several jerseys can share the same one, e.g. Home White and Road Grey both
+// Main), its curated display name, and the club's W-L in the games it actually
+// wore that jersey. The record is joined by uniformAssetCode against
+// `wornByGame` (fetchGameJerseys) — a game with no attributable jersey, or one
+// whose result isn't visible yet (`won == null`, already cutoff-gated by the
+// caller's schedule fetch), simply isn't counted, so this can't leak a result
+// the standings/schedule strip wouldn't already show. Pure/unit-testable.
+export function buildJerseyCombos({ catalogAssets, clubName, schedule, wornByGame, teamId, nameOverrides }) {
+  const combos = (catalogAssets ?? [])
+    .filter((a) => a.piece === 'J')
+    .map((a) => ({
+      code: a.code,
+      name: uniformDisplayName(a.text, clubName, a.code, nameOverrides),
+      treatment: classifyUniformAsset(a.text, clubName, a.code),
+      wins: 0,
+      losses: 0,
+    }))
+  const byCode = new Map(combos.filter((c) => c.code).map((c) => [c.code, c]))
+  for (const g of schedule ?? []) {
+    if (g.won == null) continue
+    const worn = wornByGame?.[g.gamePk]?.[teamId]
+    const combo = worn?.code ? byCode.get(worn.code) : null
+    if (!combo) continue
+    if (g.won) combo.wins += 1
+    else combo.losses += 1
+  }
+  return combos.sort(
+    (a, b) =>
+      (TREATMENT_RANK[a.treatment] ?? 9) - (TREATMENT_RANK[b.treatment] ?? 9) ||
+      b.wins + b.losses - (a.wins + a.losses) ||
+      a.name.localeCompare(b.name), // caps-js-exempt
+  )
 }

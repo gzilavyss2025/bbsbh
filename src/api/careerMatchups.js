@@ -74,6 +74,28 @@ export function sortByPitcher(rows) {
     .flat()
 }
 
+// Collapses the pitcher-grouped rows (see sortByPitcher — same-pitcher rows
+// are already adjacent) into one entry per pitcher: `{ pitcher, rows }`, order
+// preserved. The table (TeamInfo.jsx's MatchupTable) renders the pitcher once
+// as a group heading instead of repeating his name on every batter row — the
+// three-column "batter / pitcher / line" grid that repetition forced was too
+// wide for a phone (horizontal scroll); a pitcher heading over two-part
+// batter/line rows fits without it. Assumes rows are already sortByPitcher'd;
+// a stray non-adjacent repeat would open a second group for the same pitcher
+// rather than merge, which is fine (the sort guarantees it won't happen).
+export function groupByPitcher(rows) {
+  const groups = []
+  let current = null
+  for (const r of rows) {
+    if (!current || current.pitcher.id !== r.pitcher.id) {
+      current = { pitcher: r.pitcher, rows: [] }
+      groups.push(current)
+    }
+    current.rows.push(r)
+  }
+  return groups
+}
+
 // "2-for-7, 1 HR, 3 K — AA, A+" — scorebook shorthand first (the thing a
 // paper scorer already writes), extras only when they're nonzero so a plain
 // 0-for-2 doesn't carry three redundant zero badges, levels last so a pair

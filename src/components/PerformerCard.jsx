@@ -4,6 +4,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
+import { isMlbTeamId } from '../lib/teams.js'
 import { scorePairsLine } from '../lib/resultCards.js'
 
 // "Tyler Tolbert" -> ["Tyler", "Tolbert"] (everything after the first space).
@@ -52,7 +53,13 @@ export function PerformerCard({ entry }) {
   return (
     <li className="playercard">
       <span className="playercard__shotwrap">
-        <Headshot personId={entry.id} name={entry.name} teamId={entry.parentOrgId ?? entry.teamId} className="playercard__shot" />
+        <Headshot
+          personId={entry.id}
+          name={entry.name}
+          teamId={entry.parentOrgId ?? entry.teamId}
+          isMlb={isMlbTeamId(entry.teamId)}
+          className="playercard__shot"
+        />
         {entry.position && <span className="playercard__posbadge">{entry.position}</span>}
       </span>
       <div className="playercard__body">
