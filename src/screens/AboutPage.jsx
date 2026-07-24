@@ -39,7 +39,7 @@ export function AboutPage({ onBack }) {
       <section className="aboutpage__intro" aria-labelledby="about-title">
         <div className="aboutpage__brand" aria-hidden="true">
           <TallyBaseballMark size={38} />
-          <TallyWordmark height={25} />
+          <TallyWordmark height={25} tight />
         </div>
         <h2 id="about-title" className="aboutpage__title">
           A baseball companion for scorekeeping, delayed watching, and reference.
