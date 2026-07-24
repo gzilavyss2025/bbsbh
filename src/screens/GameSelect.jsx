@@ -444,6 +444,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             <button
               type="button"
               role="switch"
+              data-testid="scores-unlock-switch"
               aria-checked={scoresUnlocked}
               className={`slateunlock__switch${scoresUnlocked ? ' slateunlock__switch--on' : ''}`}
               onClick={() => (scoresUnlocked ? disableUnlock() : setAskUnlock(true))}
@@ -459,6 +460,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               <button
                 type="button"
                 className="slateunlock__note"
+                data-testid="scores-unlock-banner"
                 onClick={disableUnlock}
                 aria-label="Turn off live scores"
               >
