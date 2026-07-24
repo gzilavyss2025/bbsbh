@@ -636,6 +636,22 @@ export function treatmentPinstripeBg(teamId, treatment) {
   return (v && typeof v === 'object' && v.bg) || null
 }
 
+// Per-team, per-treatment header-chrome recolor (blue/gold/font) — promoted
+// out of TeamColorLab's Header colors mockup (TreatmentHeaderPreview) once a
+// proposal is settled, same "propose in the page, land in this table" path
+// TREATMENT_SCALE/TREATMENT_PINSTRIPE_COLOR above already follow. The
+// site-wide theming feature this would drive (neutral pages matching a
+// favorite team, game pages matching the home/batting team) is still
+// undecided — this table only backs the design-lab preview so far, no real
+// component reads it yet.
+export const TREATMENT_HEADER_COLOR_OVERRIDES = {
+  109: { 'city-connect': { blue: '#523178', gold: '#0097A9', font: '#FBF6E9' } }, // Diamondbacks City Connect 2.0
+}
+
+export function treatmentHeaderColorOverride(teamId, treatment) {
+  return TREATMENT_HEADER_COLOR_OVERRIDES[teamId]?.[treatment] ?? null
+}
+
 export function treatmentScale(teamId, treatment) {
   return TREATMENT_SCALE[teamId]?.[treatment] ?? 1
 }

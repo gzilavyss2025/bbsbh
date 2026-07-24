@@ -79,8 +79,22 @@ export const LOGO_COLOR_OVERRIDES = {
 // deliberately routes back to the stock CDN art (ALT_USES_BASE_LOGO and
 // friends), and excludes all procured local art without a second table to
 // keep in sync.
+// A handful of (team, treatment) WPA tiles want a DIFFERENT mark than the
+// one that treatment normally wears everywhere else on the site — the mark
+// itself (teams.js's real per-treatment art) and this tile's own band color
+// (WPA_TREATMENT_BAND_COLOR_OVERRIDES) are untouched; only which logo file
+// gets tiled changes. Value is the `teamLogoUrl` variant to substitute in.
+export const WPA_MARK_SOURCE_OVERRIDES = {
+  // Braves Alt 2 Navy (treatment 'main') — the plain "A" cap mark stays the
+  // club's Main mark everywhere else (card tile, header, etc.); the WPA band
+  // alone swaps in the Atlanta script wordmark, the same art the Road Grey
+  // mark (alternate-3) uses, which reads better repeated small than the cap.
+  144: { main: 'alternate-3' },
+}
+
 export function wpaLogoFor(teamId, treatment = 'main') {
-  const src = teamLogoUrl(teamId, treatment === 'main' ? 'base' : treatment)
+  const markVariant = WPA_MARK_SOURCE_OVERRIDES[teamId]?.[treatment] ?? (treatment === 'main' ? 'base' : treatment)
+  const src = teamLogoUrl(teamId, markVariant)
   const override = LOGO_COLOR_OVERRIDES[teamId]
   if (!override || src !== teamLogoUrl(teamId, 'base')) return { src, recolor: null }
   return { src: override.mode === 'swap' ? override.src : src, recolor: override }

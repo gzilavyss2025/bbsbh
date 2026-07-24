@@ -27,6 +27,7 @@ import {
   hasAlternate3,
   hasAlternate4,
   hasCityConnect,
+  treatmentHeaderColorOverride,
 } from '../lib/teams.js'
 import { wpaLogoLayout } from '../lib/wpaLogo.js'
 import {
@@ -679,12 +680,13 @@ function TreatmentBox({
         teamId={teamId}
         treatment={treatment}
         lastOpponent={lastOpponent}
-        headerColors={headerColorsFor(colors, headerDraft)}
+        headerColors={headerColorsFor(colors, headerDraft, treatmentHeaderColorOverride(teamId, treatment))}
         wpaLayout={wpaLayout}
         wpaBandOverride={{ pinstripe: wpaPinstripe, color: wpaBand }}
       />
       <TreatmentHeaderPreview
         teamId={teamId}
+        treatment={treatment}
         name={name}
         treatmentLabel={displayLabel}
         colors={colors}
@@ -1016,12 +1018,15 @@ const DEFAULT_HEADER_FONT = '#FBF6E9'
 // Shared by TreatmentHeaderPreview below AND TreatmentWpaScenarios above it —
 // so the win-probability scenario mockups' own header bars use the EXACT
 // same resolved Blue/Gold/Font this treatment's Header colors panel shows,
-// not a second computation that could drift from it.
-function headerColorsFor(colors, draft) {
+// not a second computation that could drift from it. Priority: a live
+// page-local draft edit, then a landed TREATMENT_HEADER_COLOR_OVERRIDES
+// entry (teams.js), then this tile's own lead swatches, then the app's
+// current brand pair.
+function headerColorsFor(colors, draft, override) {
   return {
-    blue: draft?.blue ?? colors[0]?.hex ?? DEFAULT_HEADER_BLUE,
-    gold: draft?.gold ?? colors[1]?.hex ?? DEFAULT_HEADER_GOLD,
-    font: draft?.font ?? DEFAULT_HEADER_FONT,
+    blue: draft?.blue ?? override?.blue ?? colors[0]?.hex ?? DEFAULT_HEADER_BLUE,
+    gold: draft?.gold ?? override?.gold ?? colors[1]?.hex ?? DEFAULT_HEADER_GOLD,
+    font: draft?.font ?? override?.font ?? DEFAULT_HEADER_FONT,
   }
 }
 
@@ -1029,19 +1034,21 @@ function headerColorsFor(colors, draft) {
 // recolored to this club's brand for this treatment — NOT wired to any real
 // component. The site-wide theming idea this previews (neutral pages
 // matching a favorite team, game pages matching the home/batting team) is
-// still undecided, so there's no real override table to point at yet — this
-// is a design-lab sketch only, same "propose, don't wire" footing as the WPA
-// preview above it. Blue/Gold/Font are hex text fields seeded from this
-// tile's own two lead swatches (`colors`), persisted the same local-draft
-// way, with a copy icon that hands over the three hexes for whenever the
-// real feature gets built.
-function TreatmentHeaderPreview({ teamId, name, treatmentLabel, colors, draft, onField, onReset }) {
-  const { blue, gold, font } = headerColorsFor(colors, draft)
+// still undecided, so this is a design-lab sketch only, same "propose, don't
+// wire into the real app" footing as the WPA preview above it. Blue/Gold/
+// Font are hex text fields seeded from a landed TREATMENT_HEADER_COLOR_OVERRIDES
+// entry (teams.js) or, absent one, this tile's own two lead swatches
+// (`colors`); edits persist the same local-draft way, with a copy icon that
+// hands over the three hexes plus the table path to land them at.
+function TreatmentHeaderPreview({ teamId, treatment, name, treatmentLabel, colors, draft, onField, onReset }) {
+  const override = treatmentHeaderColorOverride(teamId, treatment)
+  const { blue, gold, font } = headerColorsFor(colors, draft, override)
   const hasDraft = draft && Object.keys(draft).length > 0
   const copyText =
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
-    `Proposed header recolor (design-lab preview only — no real override table wired up yet):\n` +
+    `Where: src/lib/teams.js — TREATMENT_HEADER_COLOR_OVERRIDES[${teamId}].${treatment} ` +
+    `(design-lab preview only — no real component reads this table yet)\n` +
     `blue: ${blue}, gold: ${gold}, font: ${font}`
   return (
     <div className="colorlab__wpapreview colorlab__headerpreview">
