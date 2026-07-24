@@ -330,6 +330,7 @@ export const ALT_COLORS = {
   141: [{ label: 'All Blue', hex: '#041E42', bg: true }], // Blue Jays — jay-head mark (alternate/TOR.png)
   109: [
     { label: 'Primary', hex: '#A71930', bg: true },
+    { label: 'Secondary', hex: '#E3D4AD' },
     { label: 'Third', hex: '#30CED8' },
   ], // Diamondbacks
   112: [
@@ -457,7 +458,11 @@ export const CITY_CONNECT_COLORS = {
 // Team Color Lab prototype only, same footing as ALT_COLORS/CITY_CONNECT_COLORS.
 export const ALT2_COLORS = {
   108: [{ label: 'Red', hex: '#BA0021', bg: true }], // Angels — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Red jersey
-  109: [{ label: 'Background', hex: '#A29E9F', bg: true }], // Diamondbacks — procured mark (alternate-2/AZ.png), Away Grey jersey
+  109: [
+    { label: 'Primary', hex: '#A71930' },
+    { label: 'Secondary', hex: '#000000' },
+    { label: 'Background', hex: '#A29E9F', bg: true },
+  ], // Diamondbacks — procured mark (alternate-2/AZ.png), Away Grey jersey
   111: [
     { label: 'Primary', hex: '#307FE2', bg: true },
     { label: 'Secondary', hex: '#FFD100' },
@@ -579,7 +584,7 @@ export const TREATMENT_SCALE = {
   // down so the whole mark stays inside the tile.
   117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
   118: { alternate: 0.85, 'alternate-2': 0.85 }, // Royals — same KC mark + scale as Main's own override
-  109: { alternate: 1.1 }, // Diamondbacks — bumped up so the top-anchored bleed just barely clips the teal border
+  109: { alternate: 1.1, 'alternate-2': 0.77 }, // Diamondbacks — Alternate bumped up so the top-anchored bleed just barely clips the teal border; Alternate 2 (Away Grey) shrunk off the default
   115: { 'city-connect': 1.15 }, // Rockies — mark reads small against the tint at 1.32 alone
   136: { alternate: 0.95 }, // Mariners — shrunk 5% off the default 1.32 edge-bleed
   120: { alternate: 0.9, 'alternate-3': 0.9 }, // Nationals — same script "W" mark as Alternate, matched to its 10%-shrunk size
@@ -652,7 +657,9 @@ export const MAIN_OVERRIDES = {
   // Cubs — white with the shared black pinstripe (mainTreatmentPinstripe) to
   // match their Home Pinstripe jersey, instead of a flat Secondary tile.
   112: { pinstripe: true, scale: 0.9 },
-  113: { bg: 'secondary' }, // Reds
+  // Reds — the "Reds" script mark (main-overrides/CIN.png, moved over from
+  // the former Alt 1 Red Script jersey's Alternate art)
+  113: { bg: 'secondary', recolor: true },
   114: { bg: 'primary', recolor: true }, // Guardians — navy border -> white
   // Rockies — white with a subtle black pinstripe (mainTreatmentPinstripe
   // below) to match their home pinstripe jersey, instead of a flat
@@ -698,7 +705,7 @@ const MAIN_BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
 
 // Every other override here is a hand-edited copy of the vector mlbstatic
 // mark (.svg); the Rangers' and Mariners' are procured raster art.
-const MAIN_OVERRIDE_PNG = new Set([140, 136, 120])
+const MAIN_OVERRIDE_PNG = new Set([140, 136, 120, 113])
 
 // The locally hand-edited Main-treatment mark for `teamId`, for a team whose
 // MAIN_OVERRIDES entry sets `recolor: true` — served same-origin out of

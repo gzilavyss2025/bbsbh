@@ -159,8 +159,8 @@ export const WPA_LOGO_DEFAULTS = {
 export const WPA_LOGO_LAYOUT_OVERRIDES = {
   109: {
     main: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: -1, rowShift: 0 },
-    alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
-    'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -43, rowShift: 0 },
+    alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 5, rowShift: 0 },
+    'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 12, paddingY: -43, rowShift: 0 },
     'alternate-3': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 1, paddingY: 0, rowShift: 0 },
     'city-connect': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
   },
