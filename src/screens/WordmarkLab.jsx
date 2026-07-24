@@ -1,64 +1,13 @@
-import { useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TallyBaseballMark, TallyWordmark } from '../components/TallyBrand.jsx'
 
-const STAR_OPTIONS = [
-  {
-    id: 'asterisk',
-    name: 'Scorer’s Asterisk',
-    eyebrow: 'Most scorebook',
-    rationale:
-      'Three blunt pen strokes make a six-point mark instead of a typeset star. It feels annotated by a scorer and stays open when enlarged at header size.',
-    detail: 'Solid custom Y · six points · rounded pen strokes',
-  },
-  {
-    id: 'open',
-    name: 'Open Star',
-    eyebrow: 'Most familiar',
-    rationale:
-      'A heavy outlined five-point star reads immediately without the dense center of the current glyph. The compact cut gets a thicker outline and more scale.',
-    detail: 'Solid custom Y · five points · open counter',
-  },
-  {
-    id: 'burst',
-    name: 'Scoreboard Burst',
-    eyebrow: 'Most graphic',
-    rationale:
-      'An eight-point diamond burst trades the souvenir-star silhouette for a sharper scoreboard signal. Broad cardinal points keep the shape obvious when small.',
-    detail: 'Solid custom Y · eight points · diamond construction',
-  },
-]
-
-function StarGlyph({ variant, compact }) {
-  const scale = compact ? 1.28 : 1
-  const transform = `translate(220 23) scale(${scale})`
-
-  if (variant === 'open') {
-    return (
-      <path
-        d="M0-11.5 3.3-4 11.4-3.2 5.2 2.2 7 10.2 0 6-7 10.2-5.2 2.2-11.4-3.2-3.3-4Z"
-        transform={transform}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={compact ? 3.9 : 3.2}
-        strokeLinejoin="round"
-      />
-    )
-  }
-
-  if (variant === 'burst') {
-    return (
-      <path
-        d="M0-12 3-4.7 8.5-8.5 4.7-3 12 0 4.7 3 8.5 8.5 3 4.7 0 12-3 4.7-8.5 8.5-4.7 3-12 0-4.7-3-8.5-8.5-3-4.7Z"
-        transform={transform}
-        fill="currentColor"
-      />
-    )
-  }
-
+function ScorersAsterisk({ compact }) {
+  // Compact placements get a separate optical cut. The previous scales were
+  // 1 / 1.28; both are 10% larger here so the mark gains weight at every size.
+  const scale = compact ? 1.41 : 1.1
   return (
     <g
-      transform={transform}
+      transform={`translate(216 23) scale(${scale})`}
       fill="none"
       stroke="currentColor"
       strokeWidth={compact ? 4.8 : 4}
@@ -71,7 +20,7 @@ function StarGlyph({ variant, compact }) {
   )
 }
 
-function ClubhouseWordmark({ title, star = 'asterisk', compact = false, ...props }) {
+function ClubhouseWordmark({ title, compact = false, ...props }) {
   return (
     <svg viewBox="0 0 244 96" role="img" aria-label={title} {...props}>
       <text
@@ -85,11 +34,13 @@ function ClubhouseWordmark({ title, star = 'asterisk', compact = false, ...props
       >
         TAL1
       </text>
+      {/* The Y is pulled four viewBox units toward the 1. Its foot ends at
+          y=83, exactly the same baseline used by the text run above. */}
       <path
-        d="M151 10h17l9 29 9-29h17l-18 47v26h-16V57Z"
+        d="M147 10h17l9 29 9-29h17l-18 47v26h-16V57Z"
         fill="currentColor"
       />
-      <StarGlyph variant={star} compact={compact} />
+      <ScorersAsterisk compact={compact} />
     </svg>
   )
 }
@@ -98,45 +49,44 @@ function CandidateWordmark({ title = 'Tally', ...props }) {
   return <ClubhouseWordmark title={title} {...props} />
 }
 
-function CandidateLockup({ star, compact = false }) {
+function CandidateLockup({ compact = false }) {
   return (
     <span className={`wordmarklab__lockup${compact ? ' wordmarklab__lockup--compact' : ''}`}>
       <TallyBaseballMark size={compact ? 24 : 30} title="" aria-hidden="true" />
-      <CandidateWordmark star={star} compact={compact} />
+      <CandidateWordmark compact={compact} />
     </span>
   )
 }
 
-function OptionCard({ option, selected, onSelect }) {
+function FocusCard() {
   return (
-    <button
-      type="button"
-      className="wordmarklab__option"
-      data-selected={selected}
-      aria-pressed={selected}
-      onClick={onSelect}
-    >
+    <article className="wordmarklab__option wordmarklab__option--focus" data-selected="true">
       <span className="wordmarklab__optionhead">
         <span>
-          <span className="wordmarklab__eyebrow">{option.eyebrow}</span>
-          <strong>{option.name}</strong>
+          <span className="wordmarklab__eyebrow">Selected direction</span>
+          <strong>Scorer’s Asterisk</strong>
         </span>
-        <span className="wordmarklab__pick">{selected ? 'In context' : 'View'}</span>
+        <span className="wordmarklab__pick">Refined</span>
       </span>
-      <CandidateWordmark star={option.id} className="wordmarklab__optionmark" />
+      <CandidateWordmark className="wordmarklab__optionmark" />
       <span className="wordmarklab__sizerow" aria-label="Small-size comparison">
-        <CandidateWordmark star={option.id} style={{ height: 22 }} />
-        <CandidateWordmark star={option.id} compact style={{ height: 18 }} />
-        <CandidateWordmark star={option.id} compact style={{ height: 16 }} />
+        <CandidateWordmark style={{ height: 22 }} />
+        <CandidateWordmark compact style={{ height: 18 }} />
+        <CandidateWordmark compact style={{ height: 16 }} />
         <span>22 / 18 / 16 px</span>
       </span>
-      <span className="wordmarklab__rationale">{option.rationale}</span>
-      <span className="wordmarklab__detail">{option.detail}</span>
-    </button>
+      <span className="wordmarklab__rationale">
+        The custom Y now closes the gap after the 1 and lands on the same baseline as the other
+        letters. The asterisk is 10% larger in both its standard and compact optical cuts.
+      </span>
+      <span className="wordmarklab__detail">
+        Tight L1Y spacing · shared baseline · enlarged scorer’s mark
+      </span>
+    </article>
   )
 }
 
-function ContextMockups({ star }) {
+function ContextMockups() {
   return (
     <section className="wordmarklab__contexts" aria-labelledby="contexts-title">
       <div className="wordmarklab__sectionhead">
@@ -152,7 +102,7 @@ function ContextMockups({ star }) {
         <article className="wordmarklab__context wordmarklab__context--desktop">
           <span className="wordmarklab__contextlabel">Desktop slate header · 20 px</span>
           <div className="wordmarklab__fakeheader">
-            <CandidateLockup star={star} compact />
+            <CandidateLockup compact />
             <div className="wordmarklab__levels" aria-hidden="true">
               <b>MLB</b><span>AAA</span><span>AA</span><span>A+</span><span>A</span>
               <i>⌕</i><i>≡</i>
@@ -164,7 +114,7 @@ function ContextMockups({ star }) {
           <span className="wordmarklab__contextlabel">390 px mobile header · 18 px</span>
           <div className="wordmarklab__phone">
             <div className="wordmarklab__phonebar">
-              <CandidateLockup star={star} compact />
+              <CandidateLockup compact />
               <span aria-hidden="true">⌕ &nbsp; ≡</span>
             </div>
             <div className="wordmarklab__phonebody">
@@ -179,7 +129,7 @@ function ContextMockups({ star }) {
         <article className="wordmarklab__context wordmarklab__context--page">
           <span className="wordmarklab__contextlabel">Standalone page bar · 22 px</span>
           <div className="wordmarklab__pagebar">
-            <CandidateLockup star={star} />
+            <CandidateLockup />
             <span aria-hidden="true">⌕ &nbsp; ≡</span>
           </div>
           <div className="wordmarklab__pagecontent">
@@ -192,7 +142,7 @@ function ContextMockups({ star }) {
         <article className="wordmarklab__context wordmarklab__context--footer">
           <span className="wordmarklab__contextlabel">Report footer · 16 px</span>
           <div className="wordmarklab__footerbar">
-            <CandidateLockup star={star} compact />
+            <CandidateLockup compact />
             <span>Tally Baseball · score without spoilers</span>
           </div>
         </article>
@@ -202,21 +152,18 @@ function ContextMockups({ star }) {
 }
 
 export function WordmarkLab() {
-  const [selected, setSelected] = useState('asterisk')
-  const selectedOption = STAR_OPTIONS.find((option) => option.id === selected)
-
   return (
     <>
       <SiteHeader />
       <main className="wordmarklab">
         <header className="wordmarklab__intro">
           <div>
-            <span className="wordmarklab__eyebrow">Brand study · glyph refinement</span>
-            <h1>A cleaner Y, three new stars</h1>
+            <span className="wordmarklab__eyebrow">Brand study · optical refinement</span>
+            <h1>Clubhouse L1 scorer’s asterisk</h1>
             <p>
-              Every option keeps the Clubhouse L1 idea, replaces the font’s notched Y with one
-              continuous custom shape, and gives the star an optical-size cut that grows relative
-              to the letters below 20 pixels.
+              The chosen direction, tightened around the details that decide whether it reads as one
+              word: L1Y spacing, a shared baseline, and a stronger scorer’s mark at every working
+              size.
             </p>
           </div>
           <div className="wordmarklab__colorlock">
@@ -241,32 +188,19 @@ export function WordmarkLab() {
           </ul>
         </section>
 
-        <section className="wordmarklab__options" aria-label="Clubhouse L1 star options">
-          {STAR_OPTIONS.map((option) => (
-            <OptionCard
-              key={option.id}
-              option={option}
-              selected={selected === option.id}
-              onSelect={() => setSelected(option.id)}
-            />
-          ))}
+        <section className="wordmarklab__options" aria-label="Selected Clubhouse L1 refinement">
+          <FocusCard />
         </section>
 
-        <div className="wordmarklab__selection">
-          <span>Showing in context</span>
-          <strong>{selectedOption.name}</strong>
-          <p>{selectedOption.rationale}</p>
-        </div>
-
-        <ContextMockups star={selected} />
+        <ContextMockups />
 
         <section className="wordmarklab__recommendation">
           <span className="wordmarklab__eyebrow">My read</span>
-          <h2>Scorer’s Asterisk is the strongest first read.</h2>
+          <h2>The three parts now read as one line.</h2>
           <p>
-            It looks drawn rather than selected from a glyph menu, and its open center holds up when
-            the compact version grows. Open Star is the clearest conventional alternative; the
-            Scoreboard Burst is the bolder, less literal direction.
+            The 1-to-Y gap now follows the tight rhythm of TAL1, the custom Y shares the letters’
+            baseline, and the larger asterisk keeps its identity instead of fading into punctuation
+            in the smallest header and footer placements.
           </p>
         </section>
       </main>
