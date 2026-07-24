@@ -1389,6 +1389,9 @@ body {
   grid-template-columns: repeat(3, 1fr);
   overflow: hidden;
   border: 2px solid var(--field-deep);
+  /* Every grid cell is a real element (the linescore row runs the full three
+     columns), so this only shows through the 1px cell borders — kept at the
+     deep field tone that grounds the whole plate. */
   background: var(--field-deep);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent);
 }
@@ -1410,7 +1413,9 @@ body {
 }
 
 .loader__inning-grid span,
-.loader__plate-window {
+.loader__plate-window,
+.loader__zero,
+.loader__blank {
   display: grid;
   min-height: 23px;
   place-items: center;
@@ -1425,16 +1430,41 @@ body {
   line-height: var(--lh-solid);
 }
 
+/* Rightmost inning box — no border-right; the container edge closes it. The
+   cell directly below it (.loader__blank) draws the row divider with its own
+   border-top, so the boundary lines up with the zero/plate dividers to the
+   left instead of riding a pixel high on a border-bottom here. */
 .loader__inning-grid span:last-child {
   border-right: 0;
+}
+
+/* A static zero under inning 1, same darker-green/off-white treatment as the
+   plate window it sits beside — grounds the plate window (the one cell
+   that's actually animating) as "the rest of the board already reads zero,"
+   rather than looking like an unlabeled odometer on its own. */
+.loader__zero {
+  grid-column: 1;
+  background: var(--field-deep);
+  color: var(--text-on-ink);
 }
 
 .loader__plate-window {
   grid-column: 2;
   overflow: hidden;
-  border-right-color: color-mix(in srgb, var(--paper-2) 74%, transparent);
-  background: var(--paper-2);
-  color: var(--field-deep);
+  /* Keeps its inherited border-right — it now divides the plate window from the
+     blank column-3 cell, matching the "2"/"3" divider directly above. */
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+/* The column-3 cell of the bottom row (below the "3" box). A real cell — same
+   deep-green fill as the zero and plate window beside it — so the row runs the
+   full three columns like a proper linescore. Its border-top sits on the
+   row-2/row-3 boundary, exactly level with the zero/plate dividers. */
+.loader__blank {
+  grid-column: 3;
+  border-right: 0;
+  background: var(--field-deep);
 }
 
 .loader__plate {
@@ -23359,4 +23389,84 @@ button.gamehigh-matchup:active {
   .penboard__row {
     transition: none;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   ANIMATION LAB (src/screens/AnimationLab.jsx) — unlisted QA page cataloging
+   every decorative animation in the app: each entry runs the real component
+   looping/live, then repeats it in a row of frozen frames below so the
+   in-between stages of a loop or one-shot entrance are visible at a glance
+   instead of requiring a stopwatch (see .agents/skills/review-animations for
+   the review rubric this page exists to feed). `.animlab__frame` pauses the
+   ACTUAL animation (not a copy) at a point set via the `--animlab-delay`
+   custom property — a negative animation-delay jumps a paused animation
+   straight to that elapsed time, same trick as a scrubbed video. Add a new
+   `.animlab__frame …` selector below whenever a new animated component is
+   added to this page. */
+.animlab__entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 16px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.animlab__entry:first-of-type {
+  border-top: none;
+}
+.animlab__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.animlab__live {
+  padding: 14px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-md);
+}
+.animlab__stagelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  margin: 6px 0 -2px;
+}
+.animlab__frozen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.animlab__frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.animlab__framebox {
+  padding: 10px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+}
+.animlab__framelabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+/* The freeze itself: every animated element this page knows how to demo,
+   paused and jumped to --animlab-delay (set per .animlab__frame instance in
+   AnimationLab.jsx). Listed selectors only — not a blanket `*` — so pausing a
+   frame here can't reach into unrelated hover/focus transitions. */
+.animlab__frame .loader__plate,
+.animlab__frame .skel__ballFrames,
+.animlab__frame .delaycard,
+.animlab__frame .delayrain__drop,
+.animlab__frame .postponed,
+.animlab__frame .postponed__stamp,
+.animlab__frame .wcall__count-old,
+.animlab__frame .wcall__count-new {
+  animation-play-state: paused;
+  animation-delay: var(--animlab-delay, 0s);
 }
