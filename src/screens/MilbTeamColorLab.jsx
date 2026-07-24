@@ -49,17 +49,20 @@ const VARIANTS = [
 // hunting one of THOSE teams' own swatches down. Page-local, MiLB-lab only;
 // the MLB Team Color Lab has no equivalent list (its per-treatment swatches
 // already cover every color a tile needs there).
+// Ordered light to top, dark to bottom (by plain RGB-average lightness) —
+// a spectrum reads faster than an alphabetical/grouped list when the whole
+// point is "grab the shade I want."
 const NEUTRAL_SWATCHES = [
-  { label: 'Cream (light)', hex: '#F6EFDC' },
-  { label: 'Cream (dark)', hex: '#E8DCC0' },
-  { label: 'Off-white (light)', hex: '#FFFDF6' },
-  { label: 'Off-white (dark)', hex: '#F3ECD8' },
-  { label: 'Grey (light)', hex: '#D0D0D0' },
-  { label: 'Grey (dark)', hex: '#4A4A4A' },
   { label: 'White', hex: '#FFFFFF' },
-  { label: 'Black', hex: '#000000' },
+  { label: 'Off-white (light)', hex: '#FFFDF6' },
+  { label: 'Cream (light)', hex: '#F6EFDC' },
+  { label: 'Off-white (dark)', hex: '#F3ECD8' },
+  { label: 'Cream (dark)', hex: '#E8DCC0' },
+  { label: 'Grey (light)', hex: '#D0D0D0' },
   { label: 'Road grey', hex: '#9EA2A2' },
+  { label: 'Grey (dark)', hex: '#4A4A4A' },
   { label: 'Common navy', hex: '#0C2340' },
+  { label: 'Black', hex: '#000000' },
 ]
 
 function affiliatesStorageKey(level, suffix) {
