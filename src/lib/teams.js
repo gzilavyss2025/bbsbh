@@ -604,6 +604,7 @@ export const TREATMENT_SCALE = {
   },
   141: { 'city-connect': 0.75 }, // Blue Jays — the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile
   158: { alternate: 0.86, 'alternate-2': 0.99 }, // Brewers — Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed; Alt 2 Navy Blue nearly full size
+  144: { 'city-connect': 1.04 }, // Braves — City Connect 2.0 mark nudged up 4% off the default 1.32 edge-bleed
 }
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same
@@ -1309,7 +1310,10 @@ const TEAM_COLOR_EXTRAS = {
     { label: 'Navy', hex: '#0C2340' },
     { label: 'Gray', hex: '#C4CED3' },
   ], // Yankees
-  158: [{ label: 'Powder Blue', hex: '#6CACE4' }], // Brewers (2026 alt road jersey)
+  158: [
+    { label: 'Powder Blue', hex: '#6CACE4' }, // Brewers (2026 alt road jersey)
+    { label: 'Gold', hex: '#FEC52E' }, // Brewers (Road Powder Blue jersey's secondary)
+  ],
 }
 
 // A club's known brand colors as labeled swatches — the real primary +

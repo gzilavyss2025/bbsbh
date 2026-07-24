@@ -74,6 +74,7 @@ const TREATMENTS = [
 const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
   158: { alternate: 4, 'alternate-2': 9 }, // Brewers — Alt 1 Pinstripe and Alt 2 Navy Blue both read better nudged right
+  144: { 'city-connect': 4 }, // Braves — City Connect 2.0 mark nudged right
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS
@@ -92,7 +93,9 @@ const TREATMENT_ORIGIN_Y = {
 // Page-local only, same footing as TREATMENT_OFFSET_X. Left empty — every
 // entry so far comes from a user edit in LogoPositionControls below, copied
 // in by hand.
-const TREATMENT_OFFSET_Y = {}
+const TREATMENT_OFFSET_Y = {
+  144: { 'city-connect': 4 }, // Braves — City Connect 2.0 mark nudged down
+}
 
 // A proposed replacement for a team's Primary swatch, tried out on this page
 // only — teams.js's TEAM_COLOR_PAIRS/TEAM_COLORS (the real app-wide source
