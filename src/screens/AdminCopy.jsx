@@ -4,6 +4,9 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { FIELDS, GROUPS, defaultCopy, fillTokens, sanitizeOverrides } from '../copy/registry.js'
+import { ConsentModal } from '../components/ConsentModal.jsx'
+import { makePreviewResolver } from '../copy/previewResolver.js'
+import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 
 // The admin copy editor (route: /admin, unlinked). Lets the site owner tune the
 // wording — and the humor — of the spoiler-consent pop-ups without a deploy.
@@ -165,6 +168,13 @@ function Editor({ onDirty }) {
   const [status, setStatus] = useState({ state: 'loading', message: 'Loading current copy…' })
   // null = history not loaded yet; [] = loaded, empty; [...] = entries.
   const [history, setHistory] = useState(null)
+  // Which group's REAL ConsentModal is being previewed (group id), or null. The
+  // preview renders the actual ConsentModal with a resolver built from the boxes
+  // as they stand right now — unsaved edits included.
+  const [preview, setPreview] = useState(null)
+  // A sample {time} for the preview, computed once — the real modal fills it
+  // with the viewer's own next-8am; this is a deterministic stand-in.
+  const sampleTime = useMemo(() => formatResetTime(nextResetAt()), [])
 
   // Adopt a stored override map as the new ground truth: fills the boxes and
   // resets the dirty baseline to match.
@@ -338,7 +348,16 @@ function Editor({ onDirty }) {
         const ids = Object.fromEntries(groupFields.map((f) => [f.id.split('.')[1], f.id]))
         return (
           <section key={group.id} className="admincopy__group" aria-label={group.label}>
-            <h2 className="admincopy__groupTitle">{group.label}</h2>
+            <div className="admincopy__groupHead">
+              <h2 className="admincopy__groupTitle">{group.label}</h2>
+              <button
+                type="button"
+                className="admincopy__previewOpen"
+                onClick={() => setPreview(group.id)}
+              >
+                View real modal
+              </button>
+            </div>
             <div className="admincopy__groupGrid">
               <div className="admincopy__fields">
                 {groupFields.map((f) => (
@@ -356,6 +375,21 @@ function Editor({ onDirty }) {
           </section>
         )
       })}
+
+      {/* The actual ConsentModal, rendered with a resolver built from the live
+          box values (unsaved edits included) — a pixel-accurate rehearsal of
+          what users will see, distinct from the always-on inline ModalPreview.
+          Confirm/dismiss are no-ops here: previewing must never fire a real
+          toggle or persist anything, it only closes. */}
+      {preview && (
+        <ConsentModal
+          group={preview}
+          time={sampleTime}
+          resolveText={makePreviewResolver(preview, values, sampleTime)}
+          onConfirm={() => setPreview(null)}
+          onDismiss={() => setPreview(null)}
+        />
+      )}
     </div>
   )
 }
