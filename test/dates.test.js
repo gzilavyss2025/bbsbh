@@ -5,7 +5,7 @@
 // to get off-by-one on.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isWithinDays, timeOfDay } from '../src/lib/dates.js'
+import { isWithinDays, timeOfDay, isFriday } from '../src/lib/dates.js'
 
 const TODAY = new Date(2026, 6, 22) // July 22, 2026
 
@@ -43,4 +43,19 @@ test('timeOfDay degrades to empty string for a missing timestamp', () => {
   assert.equal(timeOfDay(null), '')
   assert.equal(timeOfDay(undefined), '')
   assert.equal(timeOfDay(0), '')
+})
+
+// isFriday — the City Connect default-jersey predictor's day-of-week check.
+test('isFriday is true for a Friday date', () => {
+  assert.equal(isFriday('2026-07-24'), true)
+})
+
+test('isFriday is false for a non-Friday date', () => {
+  assert.equal(isFriday('2026-07-22'), false) // Wednesday
+})
+
+test('isFriday returns false for a missing or garbled date', () => {
+  assert.equal(isFriday(null), false)
+  assert.equal(isFriday(''), false)
+  assert.equal(isFriday('not-a-date'), false)
 })

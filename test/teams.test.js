@@ -16,6 +16,7 @@ import {
   hasAlternate2,
   hasAlternate3,
   hasCityConnect,
+  defaultTreatmentFor,
   mainTreatmentTint,
   mainTreatmentScale,
   mainTreatmentPinstripe,
@@ -147,6 +148,31 @@ test('hasAlternate3 is true only for teams with an ALT3_COLORS entry', () => {
 test('hasCityConnect is false only for NO_CITY_CONNECT teams', () => {
   assert.equal(hasCityConnect(147), false) // Yankees — opted out
   assert.equal(hasCityConnect(158), true) // Brewers
+})
+
+// --------------------------------------------------------------------------
+// defaultTreatmentFor
+// --------------------------------------------------------------------------
+test('defaultTreatmentFor predicts Main (away grey/road) for a road team', () => {
+  // 2026-07-24 is a Friday — even so, the away side never predicts City Connect.
+  assert.equal(defaultTreatmentFor(158, 'away', '2026-07-24'), 'main')
+})
+
+test('defaultTreatmentFor predicts City Connect for a Friday home game when the club has one', () => {
+  assert.equal(defaultTreatmentFor(158, 'home', '2026-07-24'), 'city-connect') // Brewers
+})
+
+test('defaultTreatmentFor predicts Main for a Friday home game when the club has no City Connect', () => {
+  assert.equal(defaultTreatmentFor(147, 'home', '2026-07-24'), 'main') // Yankees — opted out
+})
+
+test('defaultTreatmentFor predicts Main for a home game on any other day of the week', () => {
+  assert.equal(defaultTreatmentFor(158, 'home', '2026-07-23'), 'main') // Thursday
+})
+
+test('defaultTreatmentFor predicts Main for a missing/garbled date', () => {
+  assert.equal(defaultTreatmentFor(158, 'home', null), 'main')
+  assert.equal(defaultTreatmentFor(158, 'home', ''), 'main')
 })
 
 // --------------------------------------------------------------------------
