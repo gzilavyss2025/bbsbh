@@ -41,3 +41,28 @@ Verified `/admin` renders + degrades gracefully with no Clerk in dev.
 Per spec §2b/§3/§7: `src/lib/scoresUnlocked.js` (expiry-not-boolean, 8am local,
 MAX_WINDOW clamp) + hook + the home toggle/consent (copy from the registry) +
 slate score wiring (separate toggle-gated fetch) + banner. ADR-0026.
+
+## Phases 1–2 complete — all seven remaining tasks landed (2026-07-24)
+
+Built from `harmonized-plan.md` (fable synthesis of 7 design-agent specs), in
+order F → D → A → B → C → G → E, one commit each on
+`claude/live-game-spoiler-toggle-mcds2r`. Full suite 582/582, lint + build green.
+
+- **In-game override** (`0187254`) — `effectiveReveal` render-only; mutation test first.
+- **F** (`bc160df`) — consent copy honest ("does not track your scoring"; unconditional 8am).
+- **D** (`9dc0d76`) — ADR-0026 + CONTEXT vocab + CLAUDE pointer (settles ADR numbering).
+- **A** (`9ce1dd6`) — slate score line (toggle-gated fetch; default model score-free; `slateRevealAll`).
+- **B** (`8feaa82`) — score-free `toggle_consent` analytics + ADR-0028.
+- **C** (`35d01cf`) — AdminCopy "View real modal" (previewResolver, blank→default fidelity).
+- **G** (`75a6f00`) — Follow Live: `liveEdge.js`, `useFollowLive` (8am-expiry flag),
+  InningViewer merge effect (real ratchet), masthead toggle + consent + strip, ADR-0027.
+- **E** (`bbaf91d`) — e2e `scores-unlocked.spec.js` (never-writes-reveal-mark invariant).
+
+All five fable-caught bugs fixed in-flight: ADR-number collision (D=0026/G=0027/B=0028),
+follow-flag expiry (no bare '1'), all-final-today `slateRevealAll`, merge-effect deps
+churn, and the score-free-MODEL wording.
+
+Open follow-ups for live verification (need a real in-progress game + browser with
+feed access — blocked in this sandbox): visually confirm the slate score line, the
+in-game unseal, and Follow Live auto-advance via the run skill; a separate
+`e2e/invariants/follow-live.spec.js` against a live game.
