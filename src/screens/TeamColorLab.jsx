@@ -229,7 +229,11 @@ function useDraftStore(key) {
 // Which teams' rows are collapsed — persisted the same way, so a club
 // that's been locked in stays collapsed across reloads instead of tempting
 // another look (and another accidental edit) every time the page is
-// revisited. `{ [teamId]: true }`; a team with no entry renders expanded.
+// revisited. `{ [teamId]: false }` marks a team explicitly EXPANDED; every
+// other team (no entry, or `true`) renders collapsed by default — a fresh
+// visit (empty localStorage) starts every row collapsed rather than firing
+// all 30 teams' lazy lastOpponent fetch + rendering ~120 real WinProbChart
+// scenario mockups at once (see TeamColorRow's own effect below).
 const COLLAPSED_KEY = 'bbsbh:team-color-lab:collapsed'
 
 function loadCollapsed() {
@@ -269,12 +273,7 @@ export function TeamColorLab() {
   }, [collapsed])
 
   const toggleCollapsed = (teamId) =>
-    setCollapsed((was) => {
-      const next = { ...was }
-      if (next[teamId]) delete next[teamId]
-      else next[teamId] = true
-      return next
-    })
+    setCollapsed((was) => ({ ...was, [teamId]: was[teamId] === false ? true : false }))
 
   return (
     <div className="screen">
@@ -320,7 +319,7 @@ export function TeamColorLab() {
               headerDraft={headerDraft[id]}
               onHeaderField={(treatment, field, value) => setHeaderField(id, treatment, field, value)}
               onHeaderReset={(treatment) => resetHeaderDraft(id, treatment)}
-              collapsed={Boolean(collapsed[id])}
+              collapsed={collapsed[id] !== false}
               onToggleCollapsed={() => toggleCollapsed(id)}
             />
           ))}
@@ -501,6 +500,11 @@ function TreatmentBox({
   const wpaPinstripe = wpaDraft?.pinstripe ?? Boolean(wpaPinstripeDefault)
   const wpaBand =
     wpaDraft?.bandColor ?? (wpaPinstripe ? wpaPinstripeDefault ?? DEFAULT_PINSTRIPE_COLOR : wpaBandColor(teamId, treatment))
+  // Same merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% TreatmentWpaPreview's own
+  // fields show — computed once via the shared resolvedWpaLayout helper so
+  // TreatmentWpaScenarios' mockups below render the SAME in-progress draft,
+  // not just what's already saved in WPA_LOGO_LAYOUT_OVERRIDES.
+  const wpaLayout = resolvedWpaLayout(teamId, treatment, wpaDraft)
 
   return (
     <div className="colorlab__treatment">
@@ -530,6 +534,7 @@ function TreatmentBox({
         <LogoPositionControls
           teamId={teamId}
           name={name}
+          treatment={treatment}
           treatmentLabel={displayLabel}
           scale={treatmentScale}
           offsetX={treatmentOffsetX}
@@ -555,6 +560,8 @@ function TreatmentBox({
         treatment={treatment}
         lastOpponent={lastOpponent}
         headerColors={headerColorsFor(colors, headerDraft)}
+        wpaLayout={wpaLayout}
+        wpaBandOverride={{ pinstripe: wpaPinstripe, color: wpaBand }}
       />
       <TreatmentHeaderPreview
         teamId={teamId}
@@ -655,15 +662,29 @@ function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand }) {
 // mockup alongside these fields; dropped in favor of TreatmentWpaScenarios
 // below, which shows the SAME knobs' real effect against a real opponent at
 // three score states instead of one static tile with no sense of scale.
+// The merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% for a (team, treatment) —
+// a WPA-preview draft field wins outright over WPA_LOGO_LAYOUT_OVERRIDES'
+// shipped default, same "draft overrides curated default" pattern as
+// LogoPositionControls. Shared by TreatmentWpaPreview (its own editable
+// fields) AND TreatmentBox (feeds TreatmentWpaScenarios below, so an
+// in-progress edit shows up in the scenario mockups immediately instead of
+// only after it's pasted into wpaLogo.js) — one merge formula, so the two
+// can't drift into showing different numbers for the same draft.
+function resolvedWpaLayout(teamId, treatment, draft) {
+  const d = wpaLogoLayout(teamId, treatment)
+  return {
+    size: draft?.size ?? d.size,
+    rotate: draft?.rotate ?? d.rotate,
+    offsetX: draft?.offsetX ?? d.offsetX,
+    offsetY: draft?.offsetY ?? d.offsetY,
+    paddingX: draft?.paddingX ?? d.paddingX,
+    paddingY: draft?.paddingY ?? d.paddingY,
+    rowShift: draft?.rowShift ?? d.rowShift,
+  }
+}
+
 function TreatmentWpaPreview({ teamId, name, treatment, treatmentLabel, draft, pinstripe, bandColor, onField, onReset }) {
-  const layoutDefaults = wpaLogoLayout(teamId, treatment)
-  const size = draft?.size ?? layoutDefaults.size
-  const rotate = draft?.rotate ?? layoutDefaults.rotate
-  const offsetX = draft?.offsetX ?? layoutDefaults.offsetX
-  const offsetY = draft?.offsetY ?? layoutDefaults.offsetY
-  const paddingX = draft?.paddingX ?? layoutDefaults.paddingX
-  const paddingY = draft?.paddingY ?? layoutDefaults.paddingY
-  const rowShift = draft?.rowShift ?? layoutDefaults.rowShift
+  const { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } = resolvedWpaLayout(teamId, treatment, draft)
   const hasDraft = draft && Object.keys(draft).length > 0
 
   const overrideValue = pinstripe ? `{ pinstripe: true, color: '${bandColor}' }` : `'${bandColor}'`
@@ -750,16 +771,18 @@ const WPA_MOCK_SCENARIOS = [
 // Three side-by-side mockups of the REAL two-team win-probability chart
 // (WinProbChart.jsx itself, not a hand-rolled stand-in — no drift risk) at
 // the three score states above. This tile's own team is the HOME band —
-// whatever this team/treatment already has SAVED in WPA_LOGO_LAYOUT_OVERRIDES/
-// WPA_TREATMENT_BAND_COLOR_OVERRIDES (WinProbChart resolves those tables
-// itself; it has no override-prop hook to feed it an unsaved
-// TreatmentWpaPreview draft), so this shows the shipped look, not an
-// in-progress edit. `lastOpponent` (this team's most recent completed game's
-// rival, TeamColorRow's own lazy fetch) plays the AWAY band on their own
-// Main look, so the split reads as a real, recognizable matchup instead of a
-// placeholder club. Renders nothing until lastOpponent resolves — `undefined`
-// (still fetching) and `null` (never found, e.g. before Opening Day) both
-// skip the row rather than showing a broken half-built chart.
+// `wpaLayout`/`wpaBandOverride` (TreatmentBox's own resolvedWpaLayout() /
+// pinstripe+band merge, the SAME values TreatmentWpaPreview's fields show)
+// feed WinProbChart's homeLayoutOverride/homeBandOverride props, so an
+// in-progress WPA-preview edit shows up here live rather than only once
+// pasted into WPA_LOGO_LAYOUT_OVERRIDES/WPA_TREATMENT_BAND_COLOR_OVERRIDES.
+// `lastOpponent` (this team's most recent completed game's rival,
+// TeamColorRow's own lazy fetch) plays the AWAY band on their own Main
+// look — unaffected by any of this tile's own draft edits — so the split
+// reads as a real, recognizable matchup instead of a placeholder club.
+// Renders nothing until lastOpponent resolves — `undefined` (still
+// fetching) and `null` (never found, e.g. before Opening Day) both skip the
+// row rather than showing a broken half-built chart.
 //
 // `headerColors` (this treatment's resolved Header colors — see
 // headerColorsFor below, shared with TreatmentHeaderPreview so the two can't
@@ -768,7 +791,7 @@ const WPA_MOCK_SCENARIOS = [
 // --text-on-ink tokens, and CSS custom properties cascade, so setting those
 // three as inline style on this wrapper overrides them for everything inside
 // it without touching the real tokens (or any other chart on the page).
-function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors }) {
+function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors, wpaLayout, wpaBandOverride }) {
   if (!lastOpponent) return null
   const homeAbbr = teamAbbr({ id: teamId })
   return (
@@ -786,6 +809,8 @@ function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors }
             awayAbbr={lastOpponent.abbreviation}
             homeAbbr={homeAbbr}
             awayTreatment="main"
+            homeLayoutOverride={wpaLayout}
+            homeBandOverride={wpaBandOverride}
             homeTreatment={treatment}
           />
         </div>
@@ -806,12 +831,24 @@ function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors }
 // page-local only, same footing as TREATMENT_OFFSET_X/TREATMENT_ORIGIN_Y —
 // nothing writes back automatically; the copy icon hands over the literal to
 // paste in by hand.
-function LogoPositionControls({ teamId, name, treatmentLabel, scale, offsetX, offsetY, hasDraft, onField, onReset }) {
+function LogoPositionControls({
+  teamId,
+  name,
+  treatment,
+  treatmentLabel,
+  scale,
+  offsetX,
+  offsetY,
+  hasDraft,
+  onField,
+  onReset,
+}) {
   const copyText =
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
-    `Where: src/lib/teams.js — TREATMENT_SCALE[${teamId}].${treatmentLabel} (scale) / ` +
-    `src/screens/TeamColorLab.jsx — TREATMENT_OFFSET_X[${teamId}] and TREATMENT_OFFSET_Y[${teamId}] (page-local)\n` +
+    `Where: src/lib/teams.js — TREATMENT_SCALE[${teamId}].${treatment} (scale) / ` +
+    `src/screens/TeamColorLab.jsx — TREATMENT_OFFSET_X[${teamId}].${treatment} and ` +
+    `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local)\n` +
     `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}`
   return (
     <div className="colorlab__posinline">
