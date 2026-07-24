@@ -245,7 +245,7 @@ body {
 
 .wordmarklab__options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
@@ -269,6 +269,14 @@ body {
     box-shadow 160ms ease;
 }
 
+.wordmarklab__option--focus {
+  cursor: default;
+}
+
+.wordmarklab__option--focus:active {
+  transform: none;
+}
+
 .wordmarklab__option:active {
   transform: scale(0.985);
 }
@@ -289,6 +297,11 @@ body {
   .wordmarklab__option:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--clay) 55%, var(--border-rule));
+  }
+
+  .wordmarklab__option--focus:hover {
+    transform: none;
+    border-color: var(--clay);
   }
 }
 
