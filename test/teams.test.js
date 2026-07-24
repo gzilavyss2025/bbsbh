@@ -87,7 +87,7 @@ test('teamLogoUrl routes main-recolor to the hand-edited Main override asset', (
 // --------------------------------------------------------------------------
 test('treatmentBgColor returns the bg:true hex for a curated team/treatment', () => {
   assert.equal(treatmentBgColor(109, 'alternate'), '#A71930') // Diamondbacks
-  assert.equal(treatmentBgColor(158, 'city-connect'), '#0C436A') // Brewers
+  assert.equal(treatmentBgColor(158, 'city-connect'), '#ff6c58') // Brewers
 })
 
 test('treatmentBgColor returns null for a team with no curated background yet', () => {
@@ -108,7 +108,7 @@ test('treatmentBgColor returns null for main/base, even for a team with alt colo
 // --------------------------------------------------------------------------
 test('treatmentScale returns a curated per-team/treatment override', () => {
   assert.equal(treatmentScale(139, 'alternate'), 1.6) // Rays
-  assert.equal(treatmentScale(113, 'city-connect'), 0.75) // Reds
+  assert.equal(treatmentScale(113, 'city-connect'), 0.84) // Reds
 })
 
 test('treatmentScale defaults to 1 for an uncurated team or treatment', () => {

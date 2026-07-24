@@ -95,6 +95,8 @@ const TREATMENT_OFFSET_X = {
   144: { 'city-connect': 4, alternate: 6 }, // Braves — City Connect 2.0 and Alt 1 Red marks nudged right
   112: { main: 4 }, // Cubs — Home Pinstripe mark nudged right
   145: { 'city-connect': 3 }, // White Sox — City Connect 2.0 mark nudged right
+  119: { alternate: -2, 'alternate-4': -1 }, // Dodgers — Alt 1 Road Grey "Dodgers" and Road Grey "Los Angeles" both nudged left
+  146: { 'city-connect': -1 }, // Marlins — City Connect 2.0 nudged left
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS
@@ -115,6 +117,8 @@ const TREATMENT_ORIGIN_Y = {
 // in by hand.
 const TREATMENT_OFFSET_Y = {
   144: { 'city-connect': 4, alternate: 1 }, // Braves — City Connect 2.0 mark nudged down, Alt 1 Red mark nudged down slightly
+  119: { alternate: 6, 'alternate-4': 4 }, // Dodgers — Alt 1 Road Grey "Dodgers" and Road Grey "Los Angeles" both nudged down
+  146: { 'alternate-2': 4 }, // Marlins — Alt 1 Black nudged down
 }
 
 // A proposed replacement for a team's Primary swatch, tried out on this page
