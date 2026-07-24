@@ -18,9 +18,12 @@ side effect of React's remount semantics rather than bespoke reset logic.
 
 **Amended by ADR-0026 (mechanism unchanged).** `forceRevealed` — already an
 established input (`StatBox.jsx`, `HalfInning.jsx`) — gains a global source: the
-site-wide Scores Unlocked day pass, which drives the box-score seal
-(`BoxScore.jsx`) and, via `effectiveReveal`'s render mark, every half-inning
-seal. This is not the "reveal the whole game" bypass this ADR rules out: that
+site-wide spoilers-off pass, which drives the box-score seal (`BoxScore.jsx`)
+and, via `effectiveReveal`'s render mark, every half-inning seal. Note the
+companion rule that fell out of shipping this wrong the first time: because
+`SealBox` fires `onReveal` on a force-revealed mount as well as a tap, a global
+source must ALSO suppress the reveal commit, or it silently ratchets the mark for
+anything merely looked at (`effectiveReveal`'s `commitReveals`). This is not the "reveal the whole game" bypass this ADR rules out: that
 prohibition is about the *persisted* reveal mechanism, and the pass never
 advances `revealedThrough`. Reveal stays one-directional and per-half within a
 session; the pass is an ephemeral, expiring render override on top of it, and

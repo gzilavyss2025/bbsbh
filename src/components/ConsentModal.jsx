@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { useCopy } from '../copy/copyContext.js'
 
-// The spoiler-consent modal, shared by every opt-in departure from the spoiler
-// rule (Scores Unlocked now; Follow Live next). All wording comes from the
-// admin-editable copy registry via `group` (e.g. 'scoresUnlocked') — the slots
-// title/body/humorLine/changesNote/resetNote/confirm/dismiss. Slots a group
-// doesn't define (Scores Unlocked has no changesNote) resolve to '' and are
-// skipped, so one component serves both.
+// The spoiler-consent modal — the one place the app's single opt-in departure
+// from the spoiler rule is agreed to (ADR-0026). All wording comes from the
+// admin-editable copy registry via `group` — the slots
+// title/body/changesNote/humorLine/resetNote/confirm/dismiss. A slot the group
+// doesn't define resolves to '' and is skipped, so the component stays usable
+// for any future group without a shape change.
 //
 // Safety-by-default UX: the DISMISS button is rendered first and takes initial
 // focus, so an inattentive Enter/tap keeps things sealed; the affirmative is

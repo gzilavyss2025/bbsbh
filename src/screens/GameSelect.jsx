@@ -103,12 +103,19 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const dateStr = date ?? todayStr
   const isToday = dateStr === todayStr
 
-  // Site-wide "Scores Unlocked" day pass — only offered on today's slate (a
-  // past day already has its own reveal-all treatment). The toggle flips a
-  // global, self-expiring override; the consent modal gates turning it ON.
+  // Site-wide "Scores Unlocked" pass. The toggle is only OFFERED on today's
+  // slate — you can't retroactively consent to a day you've paged back to — but
+  // its EFFECT is date-scoped; see `scoresUnlocked` below. The consent modal
+  // gates turning it on; turning it off is immediate and takes today's consent
+  // back with it.
   const { t: copy } = useCopy()
-  const { unlocked: scoresUnlocked, resetAt, enable: enableUnlock, disable: disableUnlock } =
+  const { passActive, resetAt, spoilersOffFor, enable: enableUnlock, disable: disableUnlock } =
     useScoresUnlocked()
+  // Spoilers are off for THIS slate's date when the pass is running (today) or
+  // when this is a day already consented to and locked in (ADR-0026). A past day
+  // you spoiled keeps showing plainly forever — you agreed to see it, and
+  // pretending otherwise the next morning would be a fiction.
+  const scoresUnlocked = spoilersOffFor(dateStr)
   const [askUnlock, setAskUnlock] = useState(false)
   const resetLabel = formatResetTime(resetAt ?? nextResetAt())
   const goToDate = (apiDate) =>
@@ -136,7 +143,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // separate request whose data never merges into it. Degrades to {} on failure,
   // so a card silently falls back to its ordinary spoiler-free self. Re-fetches
   // on foreground (the score-critical convention) so a checked-in glance is fresh.
-  const showSlateScores = scoresUnlocked && isToday
+  const showSlateScores = scoresUnlocked
   const slateScores = useAsync(
     () => (showSlateScores ? fetchSlateScores(dateStr, sportId) : Promise.resolve({})),
     [showSlateScores, dateStr, sportId],
@@ -271,13 +278,13 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
-  // An active Scores Unlocked pass counts as "reveal all" for today's flip cards
-  // too: the user has already consented to every score on today's slate
-  // (ADR-0026), so the amber pass banner must never sit over a still-sealed slate
-  // when today has gone all-final. Never forced for a paged-back past day — those
-  // keep their own tap-to-reveal-all. Turning the pass off re-seals, because this
-  // derived boolean collapses straight back to `revealedAll` (the tap state).
-  const slateRevealAll = revealedAll || (scoresUnlocked && isToday)
+  // Spoilers-off counts as "reveal all" for this day's flip cards too: the user
+  // has consented to every score on this date (ADR-0026), so the amber banner
+  // must never sit over a still-sealed slate once the day has gone all-final —
+  // and a day locked in from an earlier consent shouldn't ask for the tap again
+  // either. A day never consented to keeps its own tap-to-reveal-all. Turning the
+  // pass off the same day collapses this straight back to `revealedAll`.
+  const slateRevealAll = revealedAll || scoresUnlocked
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
@@ -445,9 +452,9 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               type="button"
               role="switch"
               data-testid="scores-unlock-switch"
-              aria-checked={scoresUnlocked}
-              className={`slateunlock__switch${scoresUnlocked ? ' slateunlock__switch--on' : ''}`}
-              onClick={() => (scoresUnlocked ? disableUnlock() : setAskUnlock(true))}
+              aria-checked={passActive}
+              className={`slateunlock__switch${passActive ? ' slateunlock__switch--on' : ''}`}
+              onClick={() => (passActive ? disableUnlock() : setAskUnlock(true))}
             >
               <span className="slateunlock__track" aria-hidden="true">
                 <span className="slateunlock__thumb" />
@@ -456,7 +463,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                 {copy('scoresUnlocked.toggleLabel')}
               </span>
             </button>
-            {scoresUnlocked && (
+            {passActive && (
               <button
                 type="button"
                 className="slateunlock__note"

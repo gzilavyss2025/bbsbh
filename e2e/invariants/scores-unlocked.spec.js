@@ -1,13 +1,17 @@
 import { test, expect } from '../fixtures.js'
 
-// Scores Unlocked (ADR-0026) — the site-wide, today-only day pass. These specs
-// pin the behavior that keeps the departure honest:
+// Scores Unlocked (ADR-0026) — the app's one opt-in departure from the spoiler
+// rule. These specs pin the behavior that keeps it honest:
 //   1. the toggle is offered only on today's slate, and turning it ON goes
 //      through the consent modal (whose safe DISMISS is default-focused);
-//   2. while the pass is on, opening a game shows scores with NO reveal tap;
-//   3. the banner is the off switch, and turning the pass off re-seals;
-//   4. CRITICAL — the pass NEVER writes the persisted reveal mark
-//      (`bbsbh:reveal:{gamePk}`), so nothing it shows survives the 8am reset.
+//   2. while the pass is on, opening a game shows scores with NO reveal tap, on
+//      every section — and the banner rides along on all of them as the off
+//      switch;
+//   3. consent records the DAY (`bbsbh:spoiledDays`), and turning the pass off
+//      the same day takes that consent back, so a mis-tap costs nothing;
+//   4. CRITICAL — none of it EVER writes the persisted reveal mark
+//      (`bbsbh:reveal:{gamePk}`). What the pass shows is never recorded as
+//      scored, on this device or (via ADR-0022's sync) any other.
 //
 // Selectors are structure, not copy (the consent wording is admin-editable):
 // data-testids on the slate toggle/banner, ConsentModal's own class names, and
@@ -21,14 +25,18 @@ const GAME = '/07072026/milstl-2'
 const GAME_PK = '823035'
 const KEY = `bbsbh:reveal:${GAME_PK}`
 const PASS_KEY = 'bbsbh:scoresUnlocked'
+const DAYS_KEY = 'bbsbh:spoiledDays'
+// The fixture game's own date — what a locked-in consent would name.
+const GAME_DAY = '2026-07-07'
 
 const clearPass = async (page) => {
   await page.evaluate(
-    ([p, k]) => {
+    ([p, k, d]) => {
       window.localStorage.removeItem(p)
       window.localStorage.removeItem(k)
+      window.localStorage.removeItem(d)
     },
-    [PASS_KEY, KEY],
+    [PASS_KEY, KEY, DAYS_KEY],
   )
 }
 
@@ -65,10 +73,17 @@ test('the day pass is offered today, gated by consent, and the banner is the off
   const expiry = await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)
   expect(Number(expiry)).toBeGreaterThan(Date.now())
 
-  // The banner is itself the off switch — one tap re-seals.
+  // Consent records the DAY, not just the pass — that is what survives 8am.
+  const daysOn = await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)
+  expect(JSON.parse(daysOn ?? '[]')).toHaveLength(1)
+
+  // The banner is itself the off switch — one tap re-seals AND takes the day's
+  // consent back, so an accidental tap on confirm costs nothing.
   await banner.click()
   await expect(toggle).toHaveAttribute('aria-checked', 'false')
   expect(await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)).toBeNull()
+  const daysOff = await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)
+  expect(JSON.parse(daysOff ?? '[]')).toHaveLength(0)
 })
 
 test('the day pass is NOT offered on a past day', async ({ page }) => {
@@ -141,5 +156,42 @@ test('with the pass on, the box score unseals too — and still never writes the
   expect(await page.evaluate((k) => window.localStorage.getItem(k), KEY)).toBeNull()
   if (await page.locator('.boxscore').count()) {
     await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toBeVisible()
+  }
+})
+
+// The banner has to ride along on EVERY section of a game, not just the innings
+// view — otherwise you can land on an unsealed lineup or box score from a shared
+// link with nothing saying why, and no way back to sealed without walking to the
+// slate. It is also the off switch on all of them.
+test('with the pass on, the off-switch banner is on every game section', async ({ page }) => {
+  await page.addInitScript(
+    ([p]) => window.localStorage.setItem(p, String(Date.now() + 24 * 3600 * 1000)),
+    [PASS_KEY],
+  )
+  for (const section of ['lineup1', 'lineup2', 'top1', 'boxscore']) {
+    await page.goto(`${GAME}/${section}`)
+    await expect(page.getByTestId('spoilers-off-banner')).toBeVisible()
+  }
+  // And tapping it ends the pass from inside the game.
+  await page.getByTestId('spoilers-off-banner').click()
+  await expect(page.getByTestId('spoilers-off-banner')).toHaveCount(0)
+  expect(await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)).toBeNull()
+})
+
+// A day consented to in the past stays unlocked after its pass expires — that is
+// the whole point of recording the day (spoiledDays.js). The distinguishing
+// detail: NO banner, because there is no live pass to switch off, and a strip
+// offering to would be lying. The reveal mark is still never written.
+test('a day locked in by an earlier consent stays unsealed, with no banner', async ({ page }) => {
+  await page.addInitScript(
+    ([d, day]) => window.localStorage.setItem(d, JSON.stringify([day])),
+    [DAYS_KEY, GAME_DAY],
+  )
+  await page.goto(`${GAME}/boxscore`)
+
+  expect(await page.evaluate((k) => window.localStorage.getItem(k), KEY)).toBeNull()
+  await expect(page.getByTestId('spoilers-off-banner')).toHaveCount(0)
+  if (await page.locator('.boxscore').count()) {
+    await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toHaveCount(0)
   }
 })

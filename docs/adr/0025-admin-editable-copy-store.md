@@ -9,7 +9,7 @@ site matures, without a code change, a deploy, or an AI agent.
 ## The problem
 
 Two new opt-in spoiler departures are being built (see ADR-0026 for Scores
-Unlocked; Follow Live to follow): a home-screen "just show me the scores" pass
+Unlocked): a home-screen "just show me the scores" pass
 and an in-game "follow live" mode. Each puts a consent pop-up in front of the
 user at the exact moment they trade away the spoiler protection the whole app
 exists to provide. The owner wants to iterate on that copy — the explanation,

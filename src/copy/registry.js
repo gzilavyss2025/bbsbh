@@ -27,8 +27,7 @@
 // Groups order the admin panel and let it render section headers. Keep ids
 // stable — they are the Redis field names and the localStorage cache keys.
 export const GROUPS = [
-  { id: 'scoresUnlocked', label: 'Scores Unlocked (home toggle)' },
-  { id: 'followLive', label: 'Follow Live (in-game toggle)' },
+  { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -44,7 +43,7 @@ export const GROUPS = [
 //
 //   {time}   — the concrete local reset time (e.g. "8:00 AM").
 //   {inning} — the half-inning label of the half ALREADY ON SCREEN (e.g.
-//              "Top 7th"). Used only by `followLive.liveEdgeLabel`.
+//              "Top 7th"). Used only by `scoresUnlocked.liveEdgeLabel`.
 //
 // SPOILER GUARD (do not relax): every field here is consent/chrome copy only,
 // and no field may be rendered inside a sealed/reveal-gated surface. A token may
@@ -52,7 +51,7 @@ export const GROUPS = [
 // two above qualify: a clock time is not game data at all, and `{inning}` is the
 // same structural half-inning label the innings chrome already prints for the
 // half the user is looking at — a position in the game, never a run, and only
-// ever filled while the user's Follow Live consent is active. A run/score/result
+// ever filled while the user's spoilers-off consent is active. A run/score/result
 // token must NEVER be added, and no field may be interpolated with any other
 // game data. That is what keeps an admin-editable string incapable of leaking a
 // score. If this panel ever grows to govern other app copy, keep score-bearing
@@ -60,7 +59,9 @@ export const GROUPS = [
 export const TOKENS = Object.freeze(['time', 'inning'])
 
 export const FIELDS = [
-  // ---- Scores Unlocked: the home-screen "just show me the scores" pass ----
+  // ---- Scores Unlocked: the one "just show me the scores" switch. It covers
+  // the whole slate, every game surface, and keeps up with a game in progress —
+  // there is no second per-game mode, and no second consent. ----
   {
     id: 'scoresUnlocked.toggleLabel',
     group: 'scoresUnlocked',
@@ -83,17 +84,17 @@ export const FIELDS = [
     id: 'scoresUnlocked.body',
     group: 'scoresUnlocked',
     label: 'Confirm — explanation',
-    help: 'The main paragraph. Explain that the app hides scores until you reveal them, and that this flips that off for the day.',
+    help: 'The main paragraph. Explain that the app hides scores until you reveal them, and that this flips that off for today.',
     maxLength: 500,
     multiline: true,
     default:
-      'This whole app is built so nothing gets spoiled — every score stays sealed until you decide you are ready for it. But if you are not scoring along right now, and you just want to glance at how the games are going, you can override that. Flip this on and every score shows plainly: no seals, no tapping. It does not track or advance your by-hand scoring — it only shows the numbers for today, then seals them back up again.',
+      'This whole app is built so nothing gets spoiled — every score stays sealed until you decide you are ready for it. But if you are not scoring along right now, and you just want to see how the games are going, you can override that. Flip this on and every score shows plainly: no seals, no tapping, on the slate and inside every game. A game still being played will keep up with itself while you watch.',
   },
   {
     id: 'scoresUnlocked.humorLine',
     group: 'scoresUnlocked',
     label: 'Confirm — the bit',
-    help: 'A lighter line to give the moment some personality. Keep it optional-feeling; the honest part is the explanation above.',
+    help: 'A lighter line to give the moment some personality. Keep it optional-feeling; the honest part is the explanation above and the note about today staying unlocked.',
     maxLength: 200,
     multiline: true,
     default: 'No judgment. Some days you just want the number, not the whole ritual. Your paper scorecard will never know.',
@@ -102,11 +103,11 @@ export const FIELDS = [
     id: 'scoresUnlocked.resetNote',
     group: 'scoresUnlocked',
     label: 'Confirm — the 8am promise',
-    help: 'Must clearly state that this turns itself back off. Use {time} for the reset time.',
+    help: 'Must clearly state that this switches itself off so TOMORROW starts sealed, and that today stays unlocked. Use {time} for the reset time.',
     maxLength: 240,
     multiline: true,
     default:
-      'This only lasts today. No matter what, at {time} the app goes right back to assuming you would rather not have anything spoiled — it re-seals on its own, and you would turn it on again if you still want it.',
+      'This is a one-day thing. At {time} it switches itself off, so tomorrow starts sealed again — you would turn it on if you wanted it. Today stays unlocked though. You already said you were fine seeing it.',
   },
   {
     id: 'scoresUnlocked.confirm',
@@ -130,102 +131,26 @@ export const FIELDS = [
     id: 'scoresUnlocked.banner',
     group: 'scoresUnlocked',
     label: 'Active banner',
-    help: 'The strip shown while scores are unlocked. Use {time} for the reset time. The strip is also the off switch.',
+    help: 'The strip shown while scores are unlocked — it appears on the slate AND on every screen inside a game. Use {time} for the reset time. The strip is also the off switch.',
     maxLength: 80,
     multiline: false,
     default: 'Scores unlocked until {time}',
   },
-
-  // ---- Follow Live: the in-game "advance with the game" mode ----
   {
-    id: 'followLive.toggleLabel',
-    group: 'followLive',
-    label: 'In-game toggle label',
-    help: 'The label next to the Follow Live toggle inside a game.',
-    maxLength: 40,
-    multiline: false,
-    default: 'Follow live',
-  },
-  {
-    id: 'followLive.title',
-    group: 'followLive',
-    label: 'Confirm — title',
-    help: 'Heading of the pop-up shown when you turn on Follow Live inside a game.',
-    maxLength: 80,
-    multiline: false,
-    default: 'Follow this game live?',
-  },
-  {
-    id: 'followLive.body',
-    group: 'followLive',
-    label: 'Confirm — explanation',
-    help: 'Explain that the app normally waits for you to reveal each half, and that this instead keeps jumping to the newest play as it happens.',
-    maxLength: 500,
-    multiline: true,
-    default:
-      'Normally you move through a game at your own pace — each half stays sealed until you reveal it, so a glance never gives away what is coming. Follow live flips that around: the app keeps up with the game for you, revealing each half as it is played and sliding you to the newest pitch. Great for leaving on in the background and checking in.',
-  },
-  {
-    id: 'followLive.humorLine',
-    group: 'followLive',
-    label: 'Confirm — the bit',
-    help: 'A lighter line. Optional in feel; do not let it bury the honest warning below.',
-    maxLength: 200,
-    multiline: true,
-    default: 'Think of it as handing the pencil to someone who refuses to look away.',
-  },
-  {
-    id: 'followLive.changesNote',
-    group: 'followLive',
+    id: 'scoresUnlocked.changesNote',
+    group: 'scoresUnlocked',
     label: 'Confirm — what changes',
-    help: 'Spell out the concrete change: scores appear, extra innings show, and once revealed it cannot be re-sealed.',
+    help: 'Spell out the concrete trade: no seals anywhere today, extra innings included, and that your by-hand scoring is left alone.',
     maxLength: 300,
     multiline: true,
     default:
-      'That means the score is right there, extra innings included — and once a half is revealed this way, there is no re-sealing it. Following live is the same as saying spoilers are fine for this game.',
+      'That means the score is right there wherever you look today, extra innings included. It leaves your by-hand scoring alone — nothing you have not tapped yourself gets marked as scored, on this phone or any other.',
   },
   {
-    id: 'followLive.resetNote',
-    group: 'followLive',
-    label: 'Confirm — the 8am promise',
-    help: 'State that following stops on its own and the app returns to sealed by default. Use {time} for the reset time.',
-    maxLength: 240,
-    multiline: true,
-    default:
-      'And no matter what, by {time} the app is back to assuming you would rather be surprised — nothing stays unsealed into tomorrow on its own.',
-  },
-  {
-    id: 'followLive.confirm',
-    group: 'followLive',
-    label: 'Confirm — accept button',
-    help: 'The button that starts following. Make the spoiler trade unmistakable.',
-    maxLength: 48,
-    multiline: false,
-    default: 'Follow live — spoilers OK',
-  },
-  {
-    id: 'followLive.dismiss',
-    group: 'followLive',
-    label: 'Confirm — decline button',
-    help: 'The safe, default-focused button that keeps you scoring by hand.',
-    maxLength: 48,
-    multiline: false,
-    default: 'Keep scoring by hand',
-  },
-  {
-    id: 'followLive.banner',
-    group: 'followLive',
-    label: 'Active banner',
-    help: 'The strip shown while following a game live. The strip is also the off switch.',
-    maxLength: 80,
-    multiline: false,
-    default: 'Following live — spoilers on',
-  },
-  {
-    id: 'followLive.liveEdgeLabel',
-    group: 'followLive',
+    id: 'scoresUnlocked.liveEdgeLabel',
+    group: 'scoresUnlocked',
     label: 'Caught-up-to-live status',
-    help: 'Shown at the bottom of the innings view when you are following and caught up to the newest half — there is no next half to advance to yet. Use {inning} where the current half should appear (e.g. "Top 7th").',
+    help: 'Shown at the bottom of the innings view when a game you are watching is in progress and you are caught up to the newest half — there is no next half to move to yet. Use {inning} where the current half should appear (e.g. "Top 7th").',
     maxLength: 60,
     multiline: false,
     default: 'Live · {inning} in progress',

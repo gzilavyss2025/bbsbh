@@ -91,10 +91,10 @@ changing CI or that token.
 This is the whole point of the app. **Do not let it drift.** The rule: a
 score-revealing value must never exist in the DOM until the user reveals it — there
 is no fetched-then-hidden node to leak, with one narrow, explicit exception (All-Star
-Rosters shows final scores plainly — ADR-0019). Two **opt-in, consented** departures
-also lift the seal on demand: the site-wide **Scores Unlocked** day pass (an
-ephemeral *render* override that resets at 8am local and never persists — ADR-0026)
-and per-game **Follow Live** (a real, forward-only reveal-ratchet source — ADR-0027).
+Rosters shows final scores plainly — ADR-0019). One **opt-in, consented** departure
+also lifts the seal on demand: the site-wide **Scores Unlocked** switch — a *render*
+override that unseals a day you explicitly agree to spoil (and keeps a live game's
+view current), while never writing the persisted reveal mark — ADR-0026.
 `CONTEXT.md` defines the vocabulary
 (Seal, SealBox, reveal-only module, spoiler-free selector, revealedThrough,
 half-inning, regulation/extra innings, Pitchers table, primary position); `docs/adr/`

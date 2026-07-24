@@ -10,7 +10,6 @@ import { stepToSection } from '../lib/route.js'
 import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { WinProbChart } from '../components/WinProbChart.jsx'
 import { AbsRow } from '../components/StatBox.jsx'
@@ -91,6 +90,7 @@ export function BoxScore({
   loading,
   lastUpdated,
   onSection,
+  spoilersOff = false,
 }) {
   // The masthead above every section (GameView.jsx) already carries this
   // game's date, so the title itself just says "Box score" — no second date
@@ -104,16 +104,6 @@ export function BoxScore({
   // already goes there, live or final.
   const isFinal = selectIsFinal(feed)
 
-  // The site-wide "Scores Unlocked" day pass (ADR-0026) lifts this seal too. The
-  // consent copy promises "every score shows plainly: no seals, no tapping" — the
-  // box score is a score surface inside a game, so leaving it sealed would make
-  // that promise false. Rides SealBox's existing `forceRevealed` input (the same
-  // one StatBox/HalfInning use), so the render-function gate is untouched:
-  // children are still only invoked in the revealed branch (ADR-0001/0002), the
-  // pass only flips WHICH branch renders. Nothing is persisted — this SealBox has
-  // no `onReveal`, and the pass never touches `revealedThrough`.
-  const { unlocked: scoresUnlocked } = useScoresUnlocked()
-
   return (
     <div className="boxscore">
       <div className="boxscore__head">
@@ -125,7 +115,16 @@ export function BoxScore({
         )}
       </div>
 
-      <SealBox label="Tap to reveal the box score" forceRevealed={scoresUnlocked}>
+      {/* The spoilers-off pass (ADR-0026, resolved for this game's date by
+          GameView) lifts this seal too. The consent copy promises "no seals, no
+          tapping" — the box score is a score surface inside a game, so leaving it
+          sealed would make that promise false. Rides SealBox's existing
+          `forceRevealed` input (the same one StatBox/HalfInning use), so the
+          render-function gate is untouched: children are still only invoked in
+          the revealed branch (ADR-0001/0002); the pass only flips WHICH branch
+          renders. Nothing is persisted — this SealBox has no `onReveal`, and the
+          pass never touches `revealedThrough`. */}
+      <SealBox label="Tap to reveal the box score" forceRevealed={spoilersOff}>
         {() => {
           const box = selectBoxscore(feed)
           // Computed here, inside the reveal render, so WPA and the win-prob

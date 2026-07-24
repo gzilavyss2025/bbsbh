@@ -1,6 +1,5 @@
 // Toggle-consent analytics — a single, deliberately narrow event so the site
-// owner can see how often the spoiler-departure toggles (Scores Unlocked,
-// Follow Live) are confirmed vs. declined, and from which surface.
+// owner can see how often the spoilers-off switch is confirmed vs. declined.
 //
 // SPOILER + PRIVACY GUARD: this must NEVER carry a game-identifying or
 // score-revealing value. There is no gamePk, no score, no inning, no
@@ -17,7 +16,6 @@ import { track } from '@vercel/analytics'
 
 export const TOGGLES = Object.freeze({
   SCORES_UNLOCKED: 'scores_unlocked',
-  FOLLOW_LIVE: 'follow_live',
 })
 
 export const ACTIONS = Object.freeze({
@@ -25,9 +23,10 @@ export const ACTIONS = Object.freeze({
   DISMISS: 'dismiss',
 })
 
+// Consent is only ever given from the slate — there is no per-game toggle. The
+// enum stays so the event shape doesn't change if that ever grows again.
 export const SURFACES = Object.freeze({
   SLATE: 'slate',
-  INGAME: 'ingame',
 })
 
 // The ONLY keys that can ever reach the analytics payload. Anything not in this
@@ -39,8 +38,8 @@ const ACTION_VALUES = new Set(Object.values(ACTIONS))
 const SURFACE_VALUES = new Set(Object.values(SURFACES))
 
 // The single event name. One event, distinguished by its `action` prop, so the
-// Vercel dashboard shows one confirm/decline funnel per toggle rather than a
-// sprawl of event names.
+// Vercel dashboard shows one confirm/decline funnel rather than a sprawl of
+// event names.
 export const TOGGLE_CONSENT_EVENT = 'toggle_consent'
 
 // Validate + reduce an input to the exact allowlisted, enumerated props, or

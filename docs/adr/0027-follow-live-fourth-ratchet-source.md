@@ -1,5 +1,42 @@
 # Follow Live — the fourth reveal-ratchet source
 
+> **SUPERSEDED by ADR-0026 (2026-07-24), before either shipped to `main`.**
+> Follow Live no longer exists as a separate feature. It was folded into the one
+> spoilers-off pass, and in the process it stopped being a ratchet source at all.
+>
+> **Why it was merged.** The two features were split on the theory that you might
+> want one without the other: peek at scores while still hand-scoring a game, or
+> follow one game live without spoiling the rest of the slate. The owner's
+> correction was that the second half of that isn't how baseball is actually
+> watched — nobody goes home from the ballpark and hand-scores four more
+> three-hour games, so "follow this one game but keep the others sealed" is a
+> case that doesn't occur. One switch, meaning "I'm fine seeing today", covers it.
+>
+> **Why the ratchet went away with it.** This ADR's central claim was that
+> following live is a *real* reveal and so must advance the persisted mark. Under
+> a single site-wide pass that claim dissolves: everything already renders open
+> via `effectiveReveal`, so there is nothing left for a ratchet to advance. All
+> that remained of Follow Live was auto-navigation to the newest half, the
+> tightened poll, and the caught-up status — none of which touch the mark. The
+> result is strictly safer than what this ADR proposed: the one mechanism that
+> could have permanently corrupted the persisted ratchet, and synced that
+> corruption to every device, no longer exists.
+>
+> **What survived, and where it lives now:** `src/api/liveEdge.js`
+> (`selectLiveEdge`, now a navigation input gated on the pass rather than a
+> per-game flag), `FOLLOW_POLL_MS` in `useGameData.js`, the caught-up status
+> (`scoresUnlocked.liveEdgeLabel`), and the auto-nav guard in `InningViewer`. All
+> are documented in **ADR-0026**.
+>
+> **What was deleted:** `useFollowLive.js`, the `bbsbh:followLive:{gamePk}` key,
+> the masthead Follow Live toggle, the second consent modal and its whole
+> `followLive.*` copy group, and the `follow_live` / `ingame` analytics enums.
+>
+> The record below is kept as written, for the reasoning — not as a description
+> of the code.
+
+---
+
 ADR-0026 added Scores Unlocked, a site-wide ephemeral render override. This is
 the second spoiler departure: **Follow Live**, a per-game, opt-in mode that keeps
 advancing your reveal to the game's live edge as it is played. It is the mirror

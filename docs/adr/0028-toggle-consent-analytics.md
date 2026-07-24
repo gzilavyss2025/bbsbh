@@ -1,6 +1,6 @@
 # Toggle-consent analytics — measuring the spoiler departures, without a score
 
-ADR-0026 (Scores Unlocked) and ADR-0027 (Follow Live) add two opt-in ways to
+ADR-0026 (Scores Unlocked) adds an opt-in way to
 lift the spoiler seal, each gated by a consent modal. The site owner wants to
 know how those land: how often each toggle is confirmed vs. declined, and from
 which surface. This records that — and nothing else.
@@ -20,7 +20,7 @@ which surface. This records that — and nothing else.
   `sanitizeOverrides`: the safety property is structural, not a matter of every
   call site remembering to be careful.
 - **Fired at the two consent handlers.** GameSelect's Scores Unlocked modal and
-  GameView's Follow Live modal each call `trackToggleConsent` on confirm and on
+  the slate's consent modal calls `trackToggleConsent` on confirm and on
   dismiss. No off-switch event (turning a toggle back off) — out of scope; it
   would need an added `action` enum value and a test, and can come later.
 

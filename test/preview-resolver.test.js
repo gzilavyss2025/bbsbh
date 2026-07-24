@@ -32,23 +32,26 @@ test('{time} is filled in the resolved text', () => {
   assert.ok(confirm.includes(TIME), 'sample time present')
 })
 
-test('an undefined slot resolves to empty (ConsentModal then skips it)', () => {
-  // scoresUnlocked has no changesNote field — resolving it must be '' so the
-  // modal omits the paragraph, never renders "undefined".
+test('a slot the group does not define resolves to empty, never "undefined"', () => {
+  // ConsentModal asks for a fixed set of slots and skips the empty ones. A group
+  // that never defines one must resolve to '' so the modal omits the paragraph
+  // rather than printing the string "undefined" into a consent sheet.
   const resolve = makePreviewResolver('scoresUnlocked', { ...DEFAULTS }, TIME)
-  assert.equal(resolve('changesNote'), '')
-  assert.equal(DEFAULTS['scoresUnlocked.changesNote'], undefined)
+  assert.equal(resolve('noSuchSlot'), '')
+  assert.equal(DEFAULTS['scoresUnlocked.noSuchSlot'], undefined)
 })
 
 test('a null/undefined values map is safe (falls back to defaults)', () => {
-  const resolve = makePreviewResolver('followLive', null, TIME)
-  assert.equal(resolve('title'), DEFAULTS['followLive.title'])
+  const resolve = makePreviewResolver('scoresUnlocked', null, TIME)
+  assert.equal(resolve('title'), DEFAULTS['scoresUnlocked.title'])
   assert.equal(resolve('nope'), '')
 })
 
-test('resolves for either group', () => {
-  const resolve = makePreviewResolver('followLive', { ...DEFAULTS }, TIME)
-  assert.equal(resolve('body'), fillOf('followLive.body'))
+test('resolves every slot the consent modal reads', () => {
+  const resolve = makePreviewResolver('scoresUnlocked', { ...DEFAULTS }, TIME)
+  for (const slot of ['title', 'body', 'changesNote', 'humorLine', 'resetNote', 'confirm', 'dismiss']) {
+    assert.equal(resolve(slot), fillOf(`scoresUnlocked.${slot}`), `${slot} resolves`)
+  }
   function fillOf(id) {
     return DEFAULTS[id].replaceAll('{time}', TIME)
   }

@@ -124,3 +124,65 @@ stub trick is worth reusing — it is what turned the reveal-mark bug from
 Scores Unlocked banner/off-switch, the Follow Live consent line naming
 cross-device propagation, the jump-to-frontier chip, `follow-live.spec.js`, and
 live-game verification of Follow Live's auto-advance.
+
+## Phase 3 — merged into ONE switch (2026-07-24)
+
+The owner's call, after the review pass: Follow Live and Scores Unlocked are one
+feature, not two. His reasoning corrected a bad assumption baked into the whole
+split — the case that justified two features ("follow this game live, keep the
+rest of the slate sealed so I can score those later") does not occur, because
+nobody leaves a ballpark and hand-scores four more three-hour games. One switch
+meaning *I'm fine seeing today* covers it.
+
+Two consequences fell out, and both made the design better:
+
+1. **The ratchet went away entirely.** Follow Live's whole justification was that
+   watching live is a *real* reveal and must persist. Under one site-wide pass
+   that dissolves: everything already renders open, so there is nothing left to
+   advance. What remained of Follow Live is auto-navigation, the 15s poll, and
+   the caught-up status — none of which write anything. The mechanism that could
+   permanently corrupt the persisted reveal mark, and cloud-sync that corruption,
+   no longer exists. `useFollowLive.js`, `bbsbh:followLive:{gamePk}`, the masthead
+   toggle, the second consent modal, the whole `followLive.*` copy group and the
+   `follow_live`/`ingame` analytics enums are all deleted.
+2. **8am stopped meaning "everything re-seals".** Also the owner's call: a day you
+   agreed to spoil should STAY spoiled. Re-sealing it the next morning is a
+   fiction. So consent now records the DAY (`src/lib/spoiledDays.js`,
+   `bbsbh:spoiledDays`) and 8am means "the pass stops applying to new days".
+   Whole day, not just games opened — the slate showed you every score the moment
+   you flipped it on. Turning the switch off the SAME day takes the consent back,
+   so a mis-tap still costs nothing; after 8am it's locked in.
+
+Critically, the day list is a set of DATES, never a reveal mark — so even the
+durable half can't touch, advance, or sync `revealedThrough`. The `commitReveals`
+fix from the review pass is what holds that line in code.
+
+**Also in this phase:** the in-game banner that was the review's #1 recommendation.
+It rides under the masthead on EVERY section (both lineups, innings, box score),
+and is the off switch. A locked-in day deliberately shows NO banner — there is
+nothing to switch off, and offering to would be a lie.
+
+**Copy had to change with the promise.** `scoresUnlocked.resetNote` used to say
+"no matter what, at {time}… it re-seals on its own". That stopped being true. The
+new default says the switch turns itself off so tomorrow starts sealed, and that
+today stays unlocked. `test/copy-registry.test.js` now rejects the old phrasing
+outright rather than merely accepting the new one.
+
+**Verification.** Lint clean (0 problems), 630/630 unit (incl. the new
+`test/spoiled-days.test.js`, 14 cases), build green, and a browser pass against
+the statsapi stub over the committed 823035 fixture — seven render scenarios plus
+the full consent → persist → same-day-undo path on the slate:
+
+| state | banner | box seal | innings | reveal mark |
+| --- | --- | --- | --- | --- |
+| pass active | shown | none | open | `null` |
+| day locked in | none | none | open | `null` |
+| neither | none | sealed | sealed + reveal bar | `null` |
+
+Consent wrote `["2026-07-24"]`; tapping the banner off took it straight back out.
+The reveal mark stayed unwritten in every single state.
+
+**Still open:** live-game verification of the auto-nav / 15s poll / caught-up
+status against a game actually in progress (the stub can't exercise it), and the
+question of whether the spoiled-day list should sync across devices now that it's
+durable consent rather than a transient pass — recorded in ADR-0026's Cost accepted.

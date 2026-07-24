@@ -100,16 +100,17 @@ read the linked ADRs before refactoring:
   appearance at a time via a transient cursor (`atBatCountFor`,
   `useRevealProgress`) that always collapses into a normal `revealTo` commit
   rather than becoming a second spoiler boundary (ADR-0016).
-- **The two opt-in departures** ride through `InningViewer` without touching its
-  guarantees. **Scores Unlocked** (ADR-0026) substitutes a render-only
-  `renderRevealedThrough`/`renderUnlocked` (from `effectiveReveal`) for every
-  render consumer while leaving the persisted `revealedThrough` — what feeds
-  `useRevealProgress`, `RevealCloudSync`, and localStorage — untouched. **Follow
-  Live** (ADR-0027) is the opposite: it merges the finite `selectLiveEdge` into
-  the REAL mark via `mergeRevealedThrough` (a genuine, forward-only fourth
-  ratchet source), gated by `useFollowLive`'s consent flag and cleared on Final.
-  The floor rises (Follow Live), the ceiling rises (Scores Unlocked); they never
-  fight.
+- **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
+  `InningViewer` without touching its guarantees. `GameView` resolves
+  `spoilersOffFor(officialDate)` — the pass is running, or this day was consented
+  to — and hands it down; `effectiveReveal` substitutes a render-only
+  `renderRevealedThrough`/`renderUnlocked` for every render consumer while the
+  persisted `revealedThrough` (what feeds `useRevealProgress`, `RevealCloudSync`,
+  and localStorage) stays untouched. Its `commitReveals` is the other half of that
+  and must not be dropped: `SealBox` fires `onReveal` on a force-revealed mount as
+  well as a tap, so without it every half merely LOOKED at ratchets the real mark.
+  `selectLiveEdge` drives navigation only — under the pass everything already
+  renders open, so there is nothing for a ratchet to advance.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own

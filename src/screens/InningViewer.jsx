@@ -29,7 +29,6 @@ import { DefenseSection, LineupSection } from '../components/EnteringReference.j
 import { RosterPanel } from '../components/RosterPanel.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
-import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
@@ -79,8 +78,8 @@ export function InningViewer({
   highlights,
   runExpectancy,
   workload,
-  following = false,
-  onStopFollowing,
+  spoilersOff = false,
+  passActive = false,
 }) {
   const { t: copy } = useCopy()
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
@@ -92,14 +91,14 @@ export function InningViewer({
   const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat } =
     useRevealProgress(feed, regulation, actualCount)
 
-  // The site-wide "Scores Unlocked" day pass (useScoresUnlocked.js / ADR-0026):
-  // an ephemeral, today-only render override that unseals every half without
-  // ever touching the persisted reveal mark. `revealedThrough` / `unlocked`
-  // above stay the real, ratcheted, cloud-synced values — they are what feeds
-  // useRevealProgress, RevealCloudSync, and localStorage, and they must never
-  // see the override (see effectiveReveal's contract). Everything that only
-  // *renders* reads the `render*` values below instead; when the pass is off
-  // they ARE the real values (identity), so the default spoiler-safe path is
+  // The site-wide spoilers-off pass (ADR-0026), resolved by GameView for THIS
+  // game's date and handed down: a render override that unseals every half
+  // without ever touching the persisted reveal mark. `revealedThrough` /
+  // `unlocked` above stay the real, ratcheted, cloud-synced values — they are
+  // what feeds useRevealProgress, RevealCloudSync, and localStorage, and they
+  // must never see the override (see effectiveReveal's contract). Everything
+  // that only *renders* reads the `render*` values below instead; with spoilers
+  // on they ARE the real values (identity), so the default spoiler-safe path is
   // byte-for-byte unchanged.
   //
   // `commitReveals` is the other half of that contract and must not be dropped:
@@ -108,9 +107,8 @@ export function InningViewer({
   // straight down would therefore ratchet the REAL mark for every half viewed
   // under the pass (and cloud-sync it). While unlocked we hand down a no-op
   // instead; there are no seals to tap, so there is no reveal to record.
-  const { unlocked: scoresUnlocked } = useScoresUnlocked()
   const { renderRevealedThrough, renderUnlocked, commitReveals } = effectiveReveal({
-    scoresUnlocked,
+    scoresUnlocked: spoilersOff,
     revealedThrough,
     unlocked,
     actualCount,
@@ -218,35 +216,35 @@ export function InningViewer({
   const [runsInProgress, setRunsInProgress] = useState(null)
   useEffect(() => setRunsInProgress(null), [curIdx])
 
-  // FOLLOW LIVE (ADR-0027) — the fourth reveal-ratchet source. On every new feed
-  // object (useGameData's ~60s Live poll and a manual Refresh both mint one),
-  // advance the REAL high-water mark to the game's live edge through the SAME
-  // one-way mergeRevealedThrough every other source uses. Deliberately the real
-  // feed + real mergeRevealedThrough — NEVER renderRevealedThrough and NEVER
-  // Infinity: selectLiveEdge returns a finite half-index or null, and a null edge
-  // (pre-first-pitch, or a lean MiLB feed with no allPlays) is dropped by
-  // mergeMark. Scores Unlocked composes cleanly on top: this raises the persisted
-  // FLOOR; effectiveReveal raises the render CEILING — they never fight.
+  // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a game
+  // that's actually in progress pulls the VIEW along with it: on every fresh feed
+  // object (useGameData's tightened poll and a manual Refresh both mint one), if
+  // the user is caught up to the frontier, move them to the newest half.
   //
-  // Auto-follow keeps a caught-up follower pinned to the newest half: the view
-  // only moves when the user is already at the frontier (curIdx >= the pre-merge
-  // mark) — paged back to re-read an earlier half, we leave them there.
-  // replace:true so a long night of following never pollutes the Back button. On
-  // Final, do the last merge, then retire the flag so a stale "following" never
-  // lingers into a later re-view.
+  // This is navigation ONLY. It deliberately does not — and must not — touch the
+  // reveal mark: there is nothing for a ratchet to advance, because under the
+  // pass every half already renders open via effectiveReveal. That's the whole
+  // reason this stopped being a second feature with its own consent. What you
+  // watch live is watched under a pass that writes nothing, so your hand-scored
+  // mark is exactly where you left it when the pass ends.
+  //
+  // Only moves a caught-up viewer (curIdx >= the frontier we last sent them to) —
+  // paged back to re-read an earlier half, we leave them alone. replace:true so a
+  // long night never pollutes the Back button. Gated on `passActive` rather than
+  // `spoilersOff`: a day locked in from an earlier consent has no live game left
+  // to follow.
+  const followedIdx = useRef(-1)
   useEffect(() => {
-    if (!following) return
-    const edge = selectLiveEdge(feed, following) // following === true here
-    if (edge != null) {
-      const caughtUp = curIdx >= revealedThrough
-      mergeRevealedThrough(edge)
-      if (edge > curIdx && caughtUp) {
-        onInning(Math.floor(edge / 2) + 1, edge % 2 === 0 ? 'top' : 'bottom', { replace: true })
-      }
+    if (!passActive) return
+    const edge = selectLiveEdge(feed, passActive)
+    if (edge == null || selectIsFinal(feed)) return
+    const caughtUp = curIdx >= followedIdx.current
+    if (edge > curIdx && caughtUp) {
+      followedIdx.current = edge
+      onInning(Math.floor(edge / 2) + 1, edge % 2 === 0 ? 'top' : 'bottom', { replace: true })
     }
-    if (selectIsFinal(feed)) onStopFollowing?.()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feed, following, curIdx, revealedThrough])
+  }, [feed, passActive, curIdx])
 
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
@@ -361,22 +359,23 @@ export function InningViewer({
   const statBoxRef = useRef(null)
   const scrollToStatBox = () => statBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-  // "Caught up to live" (ADR-0027): while following, the half being viewed IS the
-  // live frontier — every played half is revealed and there's no next half yet.
-  // In that state the floating bar's forward action ("Next ›" / the reveal split)
-  // would point at a half that hasn't happened, so we swap it for a calm live
-  // status instead. Uses the SAME consent-gated selectLiveEdge the reveal effect
-  // does; false the instant the game goes Final (the box-score affordance takes
+  // "Caught up to live" (ADR-0026): with the pass running on a game in progress,
+  // the half being viewed IS the live frontier — everything played is open and
+  // there's no next half yet. In that state the floating bar's forward action
+  // ("Next ›" / the reveal split) would point at a half that hasn't happened, so
+  // we swap it for a calm live status instead. Uses the SAME consent-gated
+  // selectLiveEdge the follow effect does; false the instant the game goes Final
+  // (the box-score affordance takes
   // over) or the user pages back off the frontier. Copy is admin-editable
-  // (followLive.liveEdgeLabel); the {inning} token goes through the registry's
-  // own fillTokens — the single substitution choke point — rather than an ad hoc
-  // replace here, so an admin who drops the token gets the gap tidied like every
-  // other field. The value is the structural label of the half ALREADY on
-  // screen, never a score (see registry.js's TOKENS spoiler guard).
-  const liveEdgeIdx = following ? selectLiveEdge(feed, following) : null
+  // (scoresUnlocked.liveEdgeLabel); the {inning} token goes through the
+  // registry's own fillTokens — the single substitution choke point — rather
+  // than an ad hoc replace here, so an admin who drops the token gets the gap
+  // tidied like every other field. The value is the structural label of the half
+  // ALREADY on screen, never a score (see registry.js's TOKENS spoiler guard).
+  const liveEdgeIdx = passActive ? selectLiveEdge(feed, passActive) : null
   const atLiveEdge = liveEdgeIdx != null && curIdx >= liveEdgeIdx && !selectIsFinal(feed)
   const liveEdgeLabel = atLiveEdge
-    ? copy('followLive.liveEdgeLabel', {
+    ? copy('scoresUnlocked.liveEdgeLabel', {
         inning: `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`,
       })
     : ''
@@ -464,20 +463,6 @@ export function InningViewer({
   return (
     <div className="innings">
       {cloudSync}
-      {/* While Follow Live is on, a strip sits above the innings chrome so it's
-          always visible, and is itself the off switch (same "the banner is the
-          toggle" convention as the slate's Scores Unlocked note). Turning it off
-          never un-reveals — the mark it advanced has already ratcheted. */}
-      {following && (
-        <button
-          type="button"
-          className="followstrip"
-          onClick={() => onStopFollowing?.()}
-          aria-label="Stop following live"
-        >
-          {copy('followLive.banner')}
-        </button>
-      )}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
           stacked on a phone. Refresh no longer sits up here — it moved to the

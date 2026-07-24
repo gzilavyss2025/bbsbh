@@ -106,17 +106,20 @@ falls back to whatever `localStorage` already has.
   environment for the `pk_live_…`/`sk_live_…` pair. Upstash has no
   dev/production split — the same Redis database serves both.
 
-**Amended by ADR-0027 (a machine-advanced mark still syncs).** Follow Live means
-the mark can now advance without a tap: `InningViewer` merges the live edge
-through `mergeRevealedThrough` on each fresh feed, and for a signed-in user
-`RevealCloudSync` POSTs each advance like any other. This is deliberate —
-suppressing the POST would make a user's devices lie to each other about what has
-been seen, and both ratchets (`max(current, incoming)`) need no change. It does
-mean following a game on a phone advances the reveal point on a signed-in iPad.
-`api/reveal.js` gains no fields, and neither toggle itself syncs: Scores Unlocked
-never touches the mark at all, and both flags are local-only by design (8am is a
-*local* time, so a desktop enabling a pass must not unseal a phone in another
-timezone).
+**Amended by ADR-0026 (the mark still only advances by hand).** The spoilers-off
+pass (ADR-0026) unseals scores without touching `revealedThrough` at all: it is a
+render override, and `effectiveReveal`'s `commitReveals` stops the reveal commit
+while it is on. So nothing this feature does reaches `RevealCloudSync` — a day
+spent looking at scores on the phone leaves the iPad's reveal point exactly where
+it was, which is correct, because looking is not scoring. `api/reveal.js` gains no
+fields.
 
-**Outstanding:** the Follow Live consent copy does not yet name that
-cross-device propagation. See the ADR-0027 "Known gaps" note.
+An earlier design (ADR-0027, superseded) had a per-game "Follow Live" mode that
+*did* advance the real mark from the live feed, and therefore propagated
+machine-advanced reveals to every signed-in device. That is gone; the mark's only
+sources remain a tap, another tab's `storage` event, and this sync.
+
+The one thing the pass does persist — the set of days consented to
+(`bbsbh:spoiledDays`) — is deliberately **not** synced. It is consent, not scoring
+progress, so it doesn't belong in the reveal mirror; see ADR-0026's "Cost
+accepted" for why that's arguable now that it's durable.

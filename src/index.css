@@ -3365,7 +3365,7 @@ body {
 /* "Caught up to live" status — replaces the forward action in the innings bar
    while following at the live frontier (InningViewer atLiveEdge). Same footprint
    as .btn--next / .revealsplit so the bar never jumps as halves tick over; a
-   soft medal-amber chip (a quieter cousin of the solid kraft .followstrip) with
+   soft medal-amber chip (a quieter cousin of the solid kraft .modestrip) with
    a slow-pulsing dot, reading "the seal is off, and we're current." */
 .liveedge {
   display: flex;
@@ -24549,40 +24549,12 @@ button.gamehigh-matchup:active {
   }
 }
 
-/* Follow Live masthead toggle — same pill switch as .awaketoggle beside it, in
-   the kraft-amber seal tint when on (it's a spoiler-lifting control, matching
-   the slate's unlock treatment). */
-.followtoggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  min-height: 28px;
-  padding: 0;
-  border-radius: var(--radius-pill);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
-  cursor: pointer;
-}
-.followtoggle.is-on {
-  background: var(--seal-cover);
-  border-color: var(--seal-cover);
-  color: var(--seal-cover-ink);
-}
-.followtoggle:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-}
-.followtoggle__icon {
-  font-size: var(--fs-caption);
-  line-height: var(--lh-solid);
-  letter-spacing: var(--ls-none);
-}
-
-/* Follow Live active strip — the "you are following" banner above the innings
-   chrome, which is itself the off switch (same "banner is the toggle" idea as
-   .slateunlock__note). Full-width so it reads as a mode, not a chip. */
-.followstrip {
+/* Spoilers-off active strip — the "scores are showing" banner that sits under
+   the masthead on EVERY section of a game (both lineups, innings, box score), so
+   an unsealed screen always says why it is unsealed. Itself the off switch (same
+   "banner is the toggle" idea as .slateunlock__note). Full-width so it reads as
+   a mode, not a chip. */
+.modestrip {
   display: block;
   width: 100%;
   font-family: var(--font-display);
@@ -24598,7 +24570,7 @@ button.gamehigh-matchup:active {
   margin-bottom: var(--space-2);
   cursor: pointer;
 }
-.followstrip:focus-visible {
+.modestrip:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }

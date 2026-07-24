@@ -24,9 +24,9 @@ test('buildToggleEventProps keeps a well-formed event to exactly the three props
 
 test('buildToggleEventProps STRIPS any game-identifying / score key', () => {
   const out = buildToggleEventProps({
-    toggle: TOGGLES.FOLLOW_LIVE,
+    toggle: TOGGLES.SCORES_UNLOCKED,
     action: ACTIONS.DISMISS,
-    surface: SURFACES.INGAME,
+    surface: SURFACES.SLATE,
     // Everything below must never reach telemetry:
     gamePk: 823035,
     score: '4-2',
@@ -35,7 +35,7 @@ test('buildToggleEventProps STRIPS any game-identifying / score key', () => {
     inning: 7,
     revealedThrough: 13,
   })
-  assert.deepEqual(out, { toggle: 'follow_live', action: 'dismiss', surface: 'ingame' })
+  assert.deepEqual(out, { toggle: 'scores_unlocked', action: 'dismiss', surface: 'slate' })
   for (const forbidden of ['gamePk', 'score', 'awayScore', 'homeScore', 'inning', 'revealedThrough']) {
     assert.ok(!(forbidden in out), `${forbidden} must not survive`)
   }

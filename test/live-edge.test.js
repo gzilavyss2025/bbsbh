@@ -1,9 +1,13 @@
-// Unit coverage for src/api/liveEdge.js (Follow Live / ADR-0027) and the
-// per-game follow flag's fail-closed expiry. The invariants: the edge is null
-// unless the user is actually following AND the game has real play data, it
-// never over-advances past what the linescore confirms, mergeMark drops a null
-// edge, and the stored flag inherits the same 8am-expiry / fail-closed shape as
-// the Scores Unlocked pass so a bare '1'/'true'/stale value never auto-follows.
+// Unit coverage for src/api/liveEdge.js (ADR-0026) — the half the live game has
+// actually reached, which is what keeps a caught-up viewer pinned to the newest
+// half while the spoilers-off pass is running. The invariants: the edge is null
+// unless the user has actually consented AND the game has real play data, it
+// never runs past what the linescore confirms, and a null edge is inert.
+//
+// Note what is NOT here any more: this selector no longer feeds the reveal
+// ratchet. Under the pass every half already renders open, so the edge drives
+// NAVIGATION only and nothing downstream of it writes a mark. mergeMark is still
+// exercised below to pin that a null edge stays a no-op for any caller.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
@@ -33,9 +37,9 @@ function innings(n, homeReached) {
 }
 
 // --------------------------------------------------------------------------
-// The consent gate — no edge unless following === true
+// The consent gate — no edge unless spoilers are actually off
 // --------------------------------------------------------------------------
-test('selectLiveEdge returns null unless following is exactly true', () => {
+test('selectLiveEdge returns null unless the consent flag is exactly true', () => {
   const feed = buildFeed({ plays: [play(3, 'top')], innings: innings(3, false) })
   assert.equal(selectLiveEdge(feed, undefined), null)
   assert.equal(selectLiveEdge(feed, false), null)
@@ -109,12 +113,12 @@ test('mergeMark drops a null edge and keeps the mark', () => {
 })
 
 // --------------------------------------------------------------------------
-// The per-game follow flag inherits fail-closed 8am expiry (no bare '1')
+// The consent that gates this selector is an expiry, never a bare flag
 // --------------------------------------------------------------------------
-test('the follow flag stores an expiry that reads as following, and fails closed on junk', () => {
+test('the pass that gates the edge is an expiry and fails closed on junk', () => {
   const valid = String(nextResetAt())
-  assert.equal(isUnlocked(valid), true) // a fresh flag = following
-  assert.equal(isUnlocked('1'), false) // a bare boolean flag never auto-follows
+  assert.equal(isUnlocked(valid), true) // a fresh pass = spoilers off
+  assert.equal(isUnlocked('1'), false) // a bare boolean flag never unlocks
   assert.equal(isUnlocked('true'), false)
-  assert.equal(isUnlocked(String(Date.now() - 1000)), false) // past = not following
+  assert.equal(isUnlocked(String(Date.now() - 1000)), false) // past = sealed
 })

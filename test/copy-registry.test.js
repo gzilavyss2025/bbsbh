@@ -25,21 +25,32 @@ test('every field has a non-empty default within its own maxLength', () => {
   }
 })
 
-// The in-game Scores Unlocked override reveals real scores, so the default
-// consent copy must be HONEST that turning the pass on does not track or advance
-// your by-hand scoring — it only shows today's numbers, then re-seals. (ADR-0026)
-test('scoresUnlocked consent body is honest that hand-scoring is not tracked', () => {
-  const body = defaultCopy()['scoresUnlocked.body']
-  assert.match(body, /\b(track|advance|tracked|advanced)\b/i)
+// The pass reveals real scores everywhere, so the default consent copy must be
+// HONEST about the one thing it leaves alone: your by-hand scoring. Nothing the
+// pass shows is ever recorded as scored, on this device or any other — that is
+// what effectiveReveal's `commitReveals` enforces in code, and the copy has to
+// say it. (ADR-0026)
+test('scoresUnlocked consent copy is honest that hand-scoring is left alone', () => {
+  const copy = defaultCopy()
+  const said = `${copy['scoresUnlocked.body']} ${copy['scoresUnlocked.changesNote']}`
+  assert.match(said, /\b(scoring|scored)\b/i)
+  assert.match(said, /\b(leaves .* alone|does not track|not tracked|left alone)\b/i)
 })
 
-// Both the slate and in-game consent must promise that regardless of what the
-// user does, the 8am reset returns the app to sealed-by-default — and name the
-// exact time via the one honored {time} token.
-test('scoresUnlocked resetNote promises an unconditional 8am re-seal with {time}', () => {
+// The consent must name what 8am actually does, and it is NOT "everything
+// re-seals" — that would be a lie, since a day you consented to stays unlocked
+// (spoiledDays.js). It must say the switch turns itself off so the NEXT day is
+// sealed, must be honest that today stays open, and must name the exact time via
+// the {time} token.
+test('scoresUnlocked resetNote is honest about what 8am does', () => {
   const note = defaultCopy()['scoresUnlocked.resetNote']
-  assert.match(note, /no matter what|regardless/i)
   assert.match(note, /\{time\}/)
+  // Tomorrow re-seals...
+  assert.match(note, /tomorrow|next day/i)
+  // ...and today does not. The promise the old copy made ("no matter what, it
+  // all re-seals") must never come back — it stopped being true.
+  assert.match(note, /today stays|stays unlocked|stays open/i)
+  assert.doesNotMatch(note, /re-seals on its own/i)
 })
 
 test('field ids are unique and dotted group.slot', () => {
@@ -63,8 +74,8 @@ test('sanitizeOverrides drops unknown ids', () => {
 })
 
 test('sanitizeOverrides keeps a known id with an in-budget string', () => {
-  const out = sanitizeOverrides({ 'followLive.title': 'Watch it live?' })
-  assert.deepEqual(out, { 'followLive.title': 'Watch it live?' })
+  const out = sanitizeOverrides({ 'scoresUnlocked.title': 'Show me everything?' })
+  assert.deepEqual(out, { 'scoresUnlocked.title': 'Show me everything?' })
 })
 
 test('sanitizeOverrides drops a value over the field maxLength', () => {
@@ -83,17 +94,17 @@ test('sanitizeOverrides keeps a value exactly at the maxLength boundary', () => 
 
 test('sanitizeOverrides drops non-string and empty/whitespace values', () => {
   const out = sanitizeOverrides({
-    'followLive.title': 42,
-    'followLive.body': '',
-    'followLive.humorLine': '   ',
-    'followLive.banner': null,
+    'scoresUnlocked.title': 42,
+    'scoresUnlocked.body': '',
+    'scoresUnlocked.humorLine': '   ',
+    'scoresUnlocked.banner': null,
   })
   assert.deepEqual(out, {})
 })
 
 test('sanitizeOverrides trims trailing whitespace but keeps leading', () => {
-  const out = sanitizeOverrides({ 'followLive.banner': '  Following live   ' })
-  assert.equal(out['followLive.banner'], '  Following live')
+  const out = sanitizeOverrides({ 'scoresUnlocked.banner': '  Scores unlocked   ' })
+  assert.equal(out['scoresUnlocked.banner'], '  Scores unlocked')
 })
 
 test('sanitizeOverrides tolerates garbage input without throwing', () => {
@@ -110,11 +121,11 @@ test('sanitizeOverrides strips bidi-override and control characters', () => {
 })
 
 test('sanitizeOverrides drops newlines in a single-line field but keeps them multiline', () => {
-  // followLive.confirm is single-line; followLive.body is multiline.
-  const single = sanitizeOverrides({ 'followLive.confirm': 'Follow\nlive' })
-  assert.equal(single['followLive.confirm'], 'Followlive')
-  const multi = sanitizeOverrides({ 'followLive.body': 'line one\nline two' })
-  assert.equal(multi['followLive.body'], 'line one\nline two')
+  // scoresUnlocked.confirm is single-line; scoresUnlocked.body is multiline.
+  const single = sanitizeOverrides({ 'scoresUnlocked.confirm': 'Show\nscores' })
+  assert.equal(single['scoresUnlocked.confirm'], 'Showscores')
+  const multi = sanitizeOverrides({ 'scoresUnlocked.body': 'line one\nline two' })
+  assert.equal(multi['scoresUnlocked.body'], 'line one\nline two')
 })
 
 test('resolveCopy layers valid overrides over defaults and ignores junk', () => {
