@@ -651,6 +651,13 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = {
     'alternate-2': { blue: '#F5F0E1', gold: '#CE1141', font: '#13274F' }, // Braves Home White
     'city-connect': { blue: '#7BA7D8', gold: '#D32826', font: '#FBF6E9' }, // Braves City Connect 2.0
   },
+  110: {
+    main: { blue: '#DF4601', gold: '#000000', font: '#FBF6E9' }, // Orioles Alt 2 Orange
+    alternate: { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Alt 1 Black
+    'alternate-2': { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Home White
+    'alternate-3': { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Away Grey
+    'city-connect': { blue: '#E1D2BE', gold: '#ff7a29', font: '#000000' }, // Orioles City Connect 2.0
+  },
 }
 
 export function treatmentHeaderColorOverride(teamId, treatment) {
