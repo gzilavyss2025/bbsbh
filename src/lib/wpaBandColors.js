@@ -136,7 +136,7 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     main: '#C4CED4',
     alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
     'alternate-2': '#000000',
-    'city-connect': { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+    'city-connect': '#C8102E',
   },
   116: {
     main: '#0C2340',

@@ -77,6 +77,7 @@ const TREATMENT_OFFSET_X = {
   158: { alternate: 4, 'alternate-2': 9 }, // Brewers — Alt 1 Pinstripe and Alt 2 Navy Blue both read better nudged right
   144: { 'city-connect': 4, alternate: 6 }, // Braves — City Connect 2.0 and Alt 1 Red marks nudged right
   112: { main: 4 }, // Cubs — Home Pinstripe mark nudged right
+  145: { 'city-connect': 3 }, // White Sox — City Connect 2.0 mark nudged right
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS

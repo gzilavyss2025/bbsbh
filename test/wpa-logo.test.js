@@ -80,17 +80,17 @@ test('defaults to main, and degrades to no tile for an unknown club', () => {
 // the club's Main mark (which is the stock CDN logo, so it always exists).
 
 test('a treatment with no art on file falls back to the base mark', () => {
-  // Tigers (116) have no Alternate 3 set up at all — no ALT3_COLORS entry,
+  // Royals (118) have no Alternate 3 set up at all — no ALT3_COLORS entry,
   // no ALT3_USES_BASE_LOGO opt-in — so that URL resolves fine and then 404s.
-  const tried = wpaLogoFor(116, 'alternate-3')
-  assert.equal(tried.src, '/team-logos/alternate-3/DET.png')
-  assert.equal(wpaLogoWithFallback(116, 'alternate-3', false).src, tried.src, 'tries the treatment first')
+  const tried = wpaLogoFor(118, 'alternate-3')
+  assert.equal(tried.src, '/team-logos/alternate-3/KC.png')
+  assert.equal(wpaLogoWithFallback(118, 'alternate-3', false).src, tried.src, 'tries the treatment first')
 
-  const fellBack = wpaLogoWithFallback(116, 'alternate-3', true)
-  assert.equal(fellBack.src, teamLogoUrl(116, 'base'))
+  const fellBack = wpaLogoWithFallback(118, 'alternate-3', true)
+  assert.equal(fellBack.src, teamLogoUrl(118, 'base'))
   // Back on the base mark, so its recolor curation applies again — otherwise
-  // the Tigers' navy "D" would vanish into their own navy band.
-  assert.deepEqual(fellBack.recolor, LOGO_COLOR_OVERRIDES[116])
+  // the Royals' navy "KC" would vanish into their own navy band.
+  assert.deepEqual(fellBack.recolor, LOGO_COLOR_OVERRIDES[118])
 })
 
 test('falling back keeps a swap override pointed at its precomputed asset', () => {

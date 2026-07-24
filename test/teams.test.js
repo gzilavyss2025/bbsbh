@@ -137,7 +137,7 @@ test('hasAlternate2 is true for a team with curated colors or an explicit base-l
 })
 
 test('hasAlternate2 is false for a team with no Alternate 2 set up', () => {
-  assert.equal(hasAlternate2(115), false) // Rockies
+  assert.equal(hasAlternate2(147), false) // Yankees
 })
 
 test('hasAlternate3 is true only for teams with an ALT3_COLORS entry', () => {
