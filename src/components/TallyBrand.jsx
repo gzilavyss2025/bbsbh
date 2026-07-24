@@ -63,7 +63,8 @@ export function TallyWordmark({
 // height. TallyWordmark's tight viewBox removes its surrounding design-space
 // padding here so equal element heights produce equal visible heights. The
 // mark carries no accessible name of its own — the wordmark's label names the
-// pairing — and the wordmark hides on narrow phones via .tally-lockup.
+// pairing. On narrow phones the mark shrinks and the gap tightens (see
+// .tally-lockup's mobile media query) but the wordmark stays visible.
 export function TallyLockup({ height = 22, className = '', title = 'Tally', ...rest }) {
   const markSize = Math.round(height * 1.3)
 
