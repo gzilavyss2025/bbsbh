@@ -75,7 +75,7 @@ const TREATMENTS = [
 const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
   158: { alternate: 4, 'alternate-2': 9 }, // Brewers — Alt 1 Pinstripe and Alt 2 Navy Blue both read better nudged right
-  144: { 'city-connect': 4 }, // Braves — City Connect 2.0 mark nudged right
+  144: { 'city-connect': 4, alternate: 6 }, // Braves — City Connect 2.0 and Alt 1 Red marks nudged right
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS
@@ -95,7 +95,7 @@ const TREATMENT_ORIGIN_Y = {
 // entry so far comes from a user edit in LogoPositionControls below, copied
 // in by hand.
 const TREATMENT_OFFSET_Y = {
-  144: { 'city-connect': 4 }, // Braves — City Connect 2.0 mark nudged down
+  144: { 'city-connect': 4, alternate: 1 }, // Braves — City Connect 2.0 mark nudged down, Alt 1 Red mark nudged down slightly
 }
 
 // A proposed replacement for a team's Primary swatch, tried out on this page

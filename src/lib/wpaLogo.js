@@ -184,7 +184,7 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'city-connect': { size: 71, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -19, paddingY: 0, rowShift: 0 },
   },
   144: {
-    main: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 1, rowShift: 0 },
+    main: { size: 106, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: -61, rowShift: 0 },
     alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
     'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -33, rowShift: 0 },
     'alternate-3': { size: 79, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -41, rowShift: 0 },

@@ -604,7 +604,7 @@ export const TREATMENT_SCALE = {
   },
   141: { 'city-connect': 0.75 }, // Blue Jays — the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile
   158: { alternate: 0.86, 'alternate-2': 0.99 }, // Brewers — Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed; Alt 2 Navy Blue nearly full size
-  144: { 'city-connect': 1.04 }, // Braves — City Connect 2.0 mark nudged up 4% off the default 1.32 edge-bleed
+  144: { 'city-connect': 1.04, alternate: 1.04 }, // Braves — City Connect 2.0 and Alt 1 Red marks both nudged up 4% off the default 1.32 edge-bleed
 }
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same
@@ -646,6 +646,11 @@ export function treatmentPinstripeBg(teamId, treatment) {
 // component reads it yet.
 export const TREATMENT_HEADER_COLOR_OVERRIDES = {
   109: { 'city-connect': { blue: '#523178', gold: '#0097A9', font: '#FBF6E9' } }, // Diamondbacks City Connect 2.0
+  144: {
+    main: { blue: '#13274F', gold: '#CE1141', font: '#FBF6E9' }, // Braves Alt 2 Navy
+    'alternate-2': { blue: '#F5F0E1', gold: '#CE1141', font: '#13274F' }, // Braves Home White
+    'city-connect': { blue: '#7BA7D8', gold: '#D32826', font: '#FBF6E9' }, // Braves City Connect 2.0
+  },
 }
 
 export function treatmentHeaderColorOverride(teamId, treatment) {
