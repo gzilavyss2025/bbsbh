@@ -20,7 +20,15 @@ function ScorersAsterisk({ compact }) {
   )
 }
 
-function ClubhouseWordmark({ title, compact = false, ...props }) {
+function ClubhouseWordmark({ title, compact = false, small = false, ...props }) {
+  // At working header/footer sizes, the font's hinted strokes gain visual
+  // weight while a mechanically scaled path does not. The compact Y widens
+  // its arms and stem, closes slightly toward the 1, and raises the fork so
+  // the five letters still read as one drawn word.
+  const yPath = small
+    ? 'M145 8h19l9 31 9-31h19l-19 46v29h-18V54Z'
+    : 'M147 8h17l9 31 9-31h17l-18 49v26h-16V57Z'
+
   return (
     <svg viewBox="0 0 244 96" role="img" aria-label={title} {...props}>
       <text
@@ -36,9 +44,10 @@ function ClubhouseWordmark({ title, compact = false, ...props }) {
       </text>
       {/* Big Shoulders Display's 900-weight cap height begins at y=7.8 for
           this 94px text run, so the custom Y rounds that to y=8. Its fork
-          and y=83 baseline stay fixed while only the upper arms stretch. */}
+          and y=83 baseline stay fixed while the compact cut adds optical
+          weight and raises the fork for hinted small-size text. */}
       <path
-        d="M147 8h17l9 31 9-31h17l-18 49v26h-16V57Z"
+        d={yPath}
         fill="currentColor"
       />
       <ScorersAsterisk compact={compact} />
@@ -54,7 +63,7 @@ function CandidateLockup({ compact = false }) {
   return (
     <span className={`wordmarklab__lockup${compact ? ' wordmarklab__lockup--compact' : ''}`}>
       <TallyBaseballMark size={compact ? 24 : 30} title="" aria-hidden="true" />
-      <CandidateWordmark compact={compact} />
+      <CandidateWordmark compact={compact} small />
     </span>
   )
 }
@@ -71,17 +80,18 @@ function FocusCard() {
       </span>
       <CandidateWordmark className="wordmarklab__optionmark" />
       <span className="wordmarklab__sizerow" aria-label="Small-size comparison">
-        <CandidateWordmark style={{ height: 22 }} />
-        <CandidateWordmark compact style={{ height: 18 }} />
-        <CandidateWordmark compact style={{ height: 16 }} />
+        <CandidateWordmark small style={{ height: 22 }} />
+        <CandidateWordmark compact small style={{ height: 18 }} />
+        <CandidateWordmark compact small style={{ height: 16 }} />
         <span>22 / 18 / 16 px</span>
       </span>
       <span className="wordmarklab__rationale">
         The custom Y now closes the gap after the 1 and lands on the same baseline as the other
-        letters. The asterisk is 10% larger in both its standard and compact optical cuts.
+        letters. Its compact optical cut gains weight and an earlier fork beside hinted small-size
+        text, while the asterisk stays stronger at every working distance.
       </span>
       <span className="wordmarklab__detail">
-        Tight L1Y spacing · shared baseline · enlarged scorer’s mark
+        Full-size geometry preserved · compact Y optical cut · squared scorer’s mark
       </span>
     </article>
   )
@@ -199,9 +209,9 @@ export function WordmarkLab() {
           <span className="wordmarklab__eyebrow">My read</span>
           <h2>The three parts now read as one line.</h2>
           <p>
-            The 1-to-Y gap now follows the tight rhythm of TAL1, the custom Y shares the letters’
-            baseline, and the larger asterisk keeps its identity instead of fading into punctuation
-            in the smallest header and footer placements.
+            The full-size Y keeps its original geometry, while the compact cut adds the weight and
+            earlier fork needed beside hinted small-size text. The scorer’s asterisk keeps its
+            identity instead of fading into punctuation in header and footer placements.
           </p>
         </section>
       </main>
