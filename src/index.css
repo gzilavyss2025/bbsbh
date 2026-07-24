@@ -8392,6 +8392,30 @@ body {
   }
 }
 
+/* MilbTeamColorLab.jsx's page-level "copy all pending changes" button —
+   sits above the team list, always rendered (not scroll-pinned) so it's
+   found right after a session of poking at several teams' controls. Only
+   mounts once at least one team/variant has a live draft (see
+   AllChangesButton); its CopyIconButton reuses .copybox__iconbtn. */
+.milballchanges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  background: var(--seal-amber-soft, var(--paper-1));
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.milballchanges__text {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
 .colorlab {
   display: flex;
   flex-direction: column;

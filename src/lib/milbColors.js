@@ -201,18 +201,44 @@ export const MILB_COLOR_LAB_LEVELS = [
 // Team Color Lab.
 
 // `{ [teamId]: { [variant]: { scale, offsetX, offsetY, bg, pinstripe } } }`
-export const MILB_LOGO_POS_OVERRIDES = {}
+export const MILB_LOGO_POS_OVERRIDES = {
+  402: {
+    home: { scale: 1, offsetX: 0, offsetY: 0, bg: '#0072CE', pinstripe: false },
+    away: { scale: 1, offsetX: 0, offsetY: 0, bg: '#D0D0D0', pinstripe: false },
+  }, // Akron RubberDucks
+  498: {
+    home: { scale: 0.85, offsetX: 0, offsetY: 2, bg: '#ec3b46', pinstripe: false },
+    away: { scale: 0.85, offsetX: 0, offsetY: 0, bg: '#9EA2A2', pinstripe: false },
+  }, // Chattanooga Lookouts
+}
 
 // `{ [teamId]: { [variant]: { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } } }`
-export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {}
+export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {
+  402: {
+    home: { size: 62, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: -8, rowShift: 0 },
+    away: { size: 62, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: -8, rowShift: 0 },
+  }, // Akron RubberDucks
+  5015: { away: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: 4, rowShift: 0 } }, // Biloxi Shuckers
+  498: {
+    home: { size: 46, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: 3, rowShift: 0 },
+    away: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 3, rowShift: 0 },
+  }, // Chattanooga Lookouts
+}
 
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
-export const MILB_WPA_BAND_COLOR_OVERRIDES = {}
+export const MILB_WPA_BAND_COLOR_OVERRIDES = {
+  402: { home: '#0072CE', away: '#010101' }, // Akron RubberDucks
+  5015: { away: '#e2b880' }, // Biloxi Shuckers
+  498: { home: '#ec3b46', away: '#9EA2A2' }, // Chattanooga Lookouts
+}
 
 // `{ [teamId]: { [variant]: { blue, gold, font } } }` — same "design-lab
 // sketch, not wired to any real component" footing as teams.js's
 // TREATMENT_HEADER_COLOR_OVERRIDES.
-export const MILB_HEADER_COLOR_OVERRIDES = {}
+export const MILB_HEADER_COLOR_OVERRIDES = {
+  402: { home: { blue: '#0072CE', gold: '#010101', font: '#FBF6E9' } }, // Akron RubberDucks
+  5015: { away: { blue: '#0f69b1', gold: '#e2b880', font: '#FBF6E9' } }, // Biloxi Shuckers
+}
 
 // The resolved Scale/X/Y/Background/Pinstripe for a (team, variant)'s main
 // logo-box tile — a draft (MilbTeamColorLab's own local edit) wins outright

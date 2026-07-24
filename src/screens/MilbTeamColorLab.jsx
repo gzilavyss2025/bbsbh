@@ -8,6 +8,10 @@ import { fetchLastOpponent } from '../api/schedule.js'
 import { teamAbbr } from '../lib/teams.js'
 import {
   MILB_COLOR_LAB_LEVELS,
+  MILB_LOGO_POS_OVERRIDES,
+  MILB_WPA_LOGO_LAYOUT_OVERRIDES,
+  MILB_WPA_BAND_COLOR_OVERRIDES,
+  MILB_HEADER_COLOR_OVERRIDES,
   milbColorPair,
   milbHasResearchedColor,
   milbLogoPosition,
@@ -110,6 +114,160 @@ function teamAnchorId(teamId) {
   return `milb-colorlab-team-${teamId}`
 }
 
+// The same three copy-text builders each VariantBox sub-panel uses for its
+// own single-variant CopyIconButton (LogoPositionControls/WpaPreview/
+// HeaderPreview below), lifted to standalone functions so the page-level
+// "copy all changes" button (buildAllChangesText) can reuse them verbatim
+// instead of re-deriving the snippet format and drifting from it.
+function buildPosCopyText(name, teamId, variant, variantLabel, pos) {
+  return (
+    `Team: ${name} (id ${teamId}, MiLB)\n` +
+    `Variant: ${variantLabel}\n` +
+    `Where: src/lib/milbColors.js — MILB_LOGO_POS_OVERRIDES[${teamId}].${variant}\n` +
+    `MILB_LOGO_POS_OVERRIDES[${teamId}] = { ...MILB_LOGO_POS_OVERRIDES[${teamId}], ` +
+    `${variant}: { scale: ${pos.scale}, offsetX: ${pos.offsetX}, offsetY: ${pos.offsetY}, ` +
+    `bg: '${pos.bg}', pinstripe: ${pos.pinstripe} } }`
+  )
+}
+
+function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe, bandColor) {
+  const overrideValue = pinstripe ? `{ pinstripe: true, color: '${bandColor}' }` : `'${bandColor}'`
+  return (
+    `Team: ${name} (id ${teamId}, MiLB)\n` +
+    `Variant: ${variantLabel}\n` +
+    `Where: src/lib/milbColors.js — MILB_WPA_LOGO_LAYOUT_OVERRIDES[${teamId}].${variant} / ` +
+    `MILB_WPA_BAND_COLOR_OVERRIDES[${teamId}].${variant}\n` +
+    `MILB_WPA_LOGO_LAYOUT_OVERRIDES[${teamId}] = { ...MILB_WPA_LOGO_LAYOUT_OVERRIDES[${teamId}], ` +
+    `${variant}: { size: ${layout.size}, rotate: ${layout.rotate}, offsetX: ${layout.offsetX}, offsetY: ${layout.offsetY}, ` +
+    `paddingX: ${layout.paddingX}, paddingY: ${layout.paddingY}, rowShift: ${layout.rowShift} } }\n` +
+    `MILB_WPA_BAND_COLOR_OVERRIDES[${teamId}] = { ...MILB_WPA_BAND_COLOR_OVERRIDES[${teamId}], ` +
+    `${variant}: ${overrideValue} }`
+  )
+}
+
+function buildHeaderCopyText(name, teamId, variant, variantLabel, colors) {
+  const { blue, gold, font } = colors
+  return (
+    `Team: ${name} (id ${teamId}, MiLB)\n` +
+    `Variant: ${variantLabel}\n` +
+    `Where: src/lib/milbColors.js — MILB_HEADER_COLOR_OVERRIDES[${teamId}].${variant} ` +
+    `(design-lab preview only — no real component reads this table yet)\n` +
+    `blue: ${blue}, gold: ${gold}, font: ${font}`
+  )
+}
+
+// Scans every team's three draft stores (position/WPA/header — all
+// per-team-per-variant, see useDraftStore) and concatenates the same
+// copy-text snippet each individual field's own CopyIconButton would
+// produce, in team-list order. This is the one button meant to be pasted
+// into a Claude prompt after a session of poking around several teams —
+// answers "what all did I change" without the user having to remember and
+// re-open every row's individual copy icon by hand.
+function buildAllChangesText(teams, posDraft, wpaDraft, headerDraft) {
+  const sections = []
+  for (const t of teams) {
+    for (const v of VARIANTS) {
+      const pd = posDraft[t.id]?.[v.key]
+      if (pd && Object.keys(pd).length > 0) {
+        const pos = milbLogoPosition(t.id, v.key, pd)
+        sections.push(buildPosCopyText(t.name, t.id, v.key, v.label, pos))
+      }
+      const wd = wpaDraft[t.id]?.[v.key]
+      if (wd && Object.keys(wd).length > 0) {
+        const layout = milbWpaLogoLayout(t.id, v.key, wd)
+        const pinstripe = milbWpaBandPinstripeColor(t.id, v.key, wd)
+        const band = milbWpaBandColor(t.id, v.key, wd)
+        sections.push(buildWpaCopyText(t.name, t.id, v.key, v.label, layout, Boolean(pinstripe), pinstripe ?? band))
+      }
+      const hd = headerDraft[t.id]?.[v.key]
+      if (hd && Object.keys(hd).length > 0) {
+        const colors = milbHeaderColorsFor(t.id, v.key, hd)
+        sections.push(buildHeaderCopyText(t.name, t.id, v.key, v.label, colors))
+      }
+    }
+  }
+  return sections.join('\n\n')
+}
+
+// True when every field the user actually touched in `fields` (a draft
+// object — only the keys the user edited, not a full resolved object) has
+// the exact same value already sitting in `landed` (the corresponding raw
+// MILB_*_OVERRIDES[teamId][variant] entry, or undefined if nothing's been
+// landed for that variant yet). Numbers compare with float tolerance so a
+// round-tripped `0.85` doesn't false-negative against itself.
+function draftFieldsMatchLanded(fields, landed) {
+  if (!landed) return false
+  return Object.entries(fields).every(([k, v]) =>
+    typeof v === 'number' ? Math.abs((landed[k] ?? NaN) - v) < 1e-9 : landed[k] === v,
+  )
+}
+
+// WPA drafts are a single flat object (size/rotate/offsetX/offsetY/paddingX/
+// paddingY/rowShift + bandColor + pinstripe — see WpaPreview's onField
+// calls) that in landed code splits across two separate tables
+// (MILB_WPA_LOGO_LAYOUT_OVERRIDES for layout, MILB_WPA_BAND_COLOR_OVERRIDES
+// for color/pinstripe, same as milbWpaBandColor/milbWpaBandPinstripeColor's
+// own resolution). Flatten the landed pair into the same shape before
+// diffing so one draftFieldsMatchLanded call still works.
+function wpaDraftMatchesLanded(teamId, variant, fields) {
+  const layout = MILB_WPA_LOGO_LAYOUT_OVERRIDES[teamId]?.[variant]
+  const bandOverride = MILB_WPA_BAND_COLOR_OVERRIDES[teamId]?.[variant]
+  const isPinstripeObj = bandOverride && typeof bandOverride === 'object'
+  const landedFlat = {
+    ...layout,
+    pinstripe: isPinstripeObj ? Boolean(bandOverride.pinstripe) : false,
+    bandColor: isPinstripeObj ? bandOverride.color : bandOverride,
+  }
+  return draftFieldsMatchLanded(fields, landedFlat)
+}
+
+// Once a session's edits have actually been landed into src/lib/milbColors.js
+// (a real code change, not just a browser draft), the matching draft is
+// stale — it no longer represents a *pending* change, just a record of one
+// that already happened. Runs whenever any draft store changes (including
+// right after the initial load-from-localStorage on a page refresh) and
+// silently drops any (team, variant) draft whose every touched field now
+// equals the landed override, so "Copy N pending changes" only ever counts
+// changes still waiting to be landed.
+function useAutoClearLandedDrafts({
+  posDraft,
+  resetPosDraft,
+  wpaDraft,
+  resetWpaDraft,
+  headerDraft,
+  resetHeaderDraft,
+}) {
+  useEffect(() => {
+    for (const [teamId, variants] of Object.entries(posDraft)) {
+      for (const [variant, fields] of Object.entries(variants)) {
+        if (fields && Object.keys(fields).length > 0 && draftFieldsMatchLanded(fields, MILB_LOGO_POS_OVERRIDES[teamId]?.[variant])) {
+          resetPosDraft(teamId, variant)
+        }
+      }
+    }
+  }, [posDraft, resetPosDraft])
+
+  useEffect(() => {
+    for (const [teamId, variants] of Object.entries(wpaDraft)) {
+      for (const [variant, fields] of Object.entries(variants)) {
+        if (fields && Object.keys(fields).length > 0 && wpaDraftMatchesLanded(teamId, variant, fields)) {
+          resetWpaDraft(teamId, variant)
+        }
+      }
+    }
+  }, [wpaDraft, resetWpaDraft])
+
+  useEffect(() => {
+    for (const [teamId, variants] of Object.entries(headerDraft)) {
+      for (const [variant, fields] of Object.entries(variants)) {
+        if (fields && Object.keys(fields).length > 0 && draftFieldsMatchLanded(fields, MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant])) {
+          resetHeaderDraft(teamId, variant)
+        }
+      }
+    }
+  }, [headerDraft, resetHeaderDraft])
+}
+
 function MilbTeamColorLabPage({ level }) {
   useDocumentTitle(`Team Color Lab — ${level.label} (MiLB)`)
   const [teams, setTeams] = useState(null) // [{ id, name }] | null while loading
@@ -118,6 +276,7 @@ function MilbTeamColorLabPage({ level }) {
   const [posDraft, setPosField, resetPosDraft] = useDraftStore(affiliatesStorageKey(level, 'logopos'))
   const [wpaDraft, setWpaField, resetWpaDraft] = useDraftStore(affiliatesStorageKey(level, 'wpa'))
   const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(affiliatesStorageKey(level, 'headercolors'))
+  useAutoClearLandedDrafts({ posDraft, resetPosDraft, wpaDraft, resetWpaDraft, headerDraft, resetHeaderDraft })
 
   useEffect(() => {
     let cancelled = false
@@ -184,6 +343,10 @@ function MilbTeamColorLabPage({ level }) {
       </nav>
 
       <NeutralSwatchesSidebar />
+
+      {teams !== null && (
+        <AllChangesButton teams={teams} posDraft={posDraft} wpaDraft={wpaDraft} headerDraft={headerDraft} />
+      )}
 
       {teams === null ? (
         <p className="hint">Loading affiliate list…</p>
@@ -401,6 +564,27 @@ function ColorSwatch({ label, hex, active }) {
   )
 }
 
+// Sits above the team list, always visible regardless of scroll position,
+// so it's reachable right after a session of poking at several teams'
+// controls without hunting back up the page. Counts sections instead of
+// teams (a team with both a Home position tweak and an Away band-color
+// tweak counts as 2) so the number tracks buildAllChangesText's own output
+// 1:1 — pasting the copy and counting blank-line-separated blocks should
+// always match what this button reported.
+function AllChangesButton({ teams, posDraft, wpaDraft, headerDraft }) {
+  const text = buildAllChangesText(teams, posDraft, wpaDraft, headerDraft)
+  const count = text ? text.split('\n\n').length : 0
+  if (count === 0) return null
+  return (
+    <div className="milballchanges">
+      <CopyIconButton text={text} label={`Copy all ${count} pending change(s) across every team`} />
+      <span className="milballchanges__text">
+        Copy all {count} pending change{count === 1 ? '' : 's'}
+      </span>
+    </div>
+  )
+}
+
 function NeutralSwatchesSidebar() {
   return (
     <aside className="milbneutrals" aria-label="Quick-reuse neutral colors">
@@ -420,13 +604,7 @@ function NeutralSwatchesSidebar() {
 }
 
 function LogoPositionControls({ teamId, name, variant, variantLabel, pos, hasDraft, onField, onReset }) {
-  const copyText =
-    `Team: ${name} (id ${teamId}, MiLB)\n` +
-    `Variant: ${variantLabel}\n` +
-    `Where: src/lib/milbColors.js — MILB_LOGO_POS_OVERRIDES[${teamId}].${variant}\n` +
-    `MILB_LOGO_POS_OVERRIDES[${teamId}] = { ...MILB_LOGO_POS_OVERRIDES[${teamId}], ` +
-    `${variant}: { scale: ${pos.scale}, offsetX: ${pos.offsetX}, offsetY: ${pos.offsetY}, ` +
-    `bg: '${pos.bg}', pinstripe: ${pos.pinstripe} } }`
+  const copyText = buildPosCopyText(name, teamId, variant, variantLabel, pos)
   return (
     <div className="colorlab__posinline">
       <div className="colorlab__wpapreviewhead">
@@ -471,17 +649,7 @@ function LogoPositionControls({ teamId, name, variant, variantLabel, pos, hasDra
 
 function WpaPreview({ teamId, name, variant, variantLabel, layout, pinstripe, bandColor, draft, onField, onReset }) {
   const hasDraft = draft && Object.keys(draft).length > 0
-  const overrideValue = pinstripe ? `{ pinstripe: true, color: '${bandColor}' }` : `'${bandColor}'`
-  const copyText =
-    `Team: ${name} (id ${teamId}, MiLB)\n` +
-    `Variant: ${variantLabel}\n` +
-    `Where: src/lib/milbColors.js — MILB_WPA_LOGO_LAYOUT_OVERRIDES[${teamId}].${variant} / ` +
-    `MILB_WPA_BAND_COLOR_OVERRIDES[${teamId}].${variant}\n` +
-    `MILB_WPA_LOGO_LAYOUT_OVERRIDES[${teamId}] = { ...MILB_WPA_LOGO_LAYOUT_OVERRIDES[${teamId}], ` +
-    `${variant}: { size: ${layout.size}, rotate: ${layout.rotate}, offsetX: ${layout.offsetX}, offsetY: ${layout.offsetY}, ` +
-    `paddingX: ${layout.paddingX}, paddingY: ${layout.paddingY}, rowShift: ${layout.rowShift} } }\n` +
-    `MILB_WPA_BAND_COLOR_OVERRIDES[${teamId}] = { ...MILB_WPA_BAND_COLOR_OVERRIDES[${teamId}], ` +
-    `${variant}: ${overrideValue} }`
+  const copyText = buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe, bandColor)
 
   return (
     <div className="colorlab__wpapreview">
@@ -585,12 +753,7 @@ function WpaScenarios({ teamId, name, variant, lastOpponent, headerColors, wpaLa
 function HeaderPreview({ teamId, name, variant, variantLabel, colors, draft, onField, onReset }) {
   const { blue, gold, font } = colors
   const hasDraft = draft && Object.keys(draft).length > 0
-  const copyText =
-    `Team: ${name} (id ${teamId}, MiLB)\n` +
-    `Variant: ${variantLabel}\n` +
-    `Where: src/lib/milbColors.js — MILB_HEADER_COLOR_OVERRIDES[${teamId}].${variant} ` +
-    `(design-lab preview only — no real component reads this table yet)\n` +
-    `blue: ${blue}, gold: ${gold}, font: ${font}`
+  const copyText = buildHeaderCopyText(name, teamId, variant, variantLabel, colors)
   return (
     <div className="colorlab__wpapreview colorlab__headerpreview">
       <div className="colorlab__wpapreviewhead">
