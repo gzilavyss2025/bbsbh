@@ -18,10 +18,11 @@ function CandidateWordmark({ title = 'Tally', ...props }) {
 }
 
 function CandidateLockup({ compact = false }) {
+  const markSize = compact ? 24 : 30
   return (
     <span className={`wordmarklab__lockup${compact ? ' wordmarklab__lockup--compact' : ''}`}>
-      <TallyBaseballMark size={compact ? 24 : 30} title="" aria-hidden="true" />
-      <CandidateWordmark />
+      <TallyBaseballMark size={markSize} title="" aria-hidden="true" />
+      <CandidateWordmark height={markSize} tight />
     </span>
   )
 }

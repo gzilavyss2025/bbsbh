@@ -39,7 +39,7 @@ export function ReportFooter() {
       <div className="sitefooter__legal">
         <p className="sitefooter__brand">
           <TallyBaseballMark size={18} />
-          <TallyWordmark height={14} />
+          <TallyWordmark height={14} tight />
           <span>Baseball</span>
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
