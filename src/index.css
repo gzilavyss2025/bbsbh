@@ -826,8 +826,7 @@ body {
 }
 
 /* The primary signature needs enough mass for its scorecard cuts to read as
-   deliberate geometry. On narrow screens, the sport mark takes over rather
-   than crushing the full wordmark into an illegible thumbnail. */
+   deliberate geometry. */
 .tally-lockup {
   display: inline-flex;
   align-items: center;
@@ -846,16 +845,12 @@ body {
 
 @media (max-width: 600px) {
   .tally-lockup {
-    gap: 0;
+    gap: 6px;
   }
 
   .tally-lockup__mark {
     width: 34px;
     height: 34px;
-  }
-
-  .tally-lockup__wordmark {
-    display: none;
   }
 }
 
