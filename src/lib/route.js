@@ -27,9 +27,12 @@
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/team-color-lab'                   -> { name: 'team-color-lab' }  (unlisted QA page)
+//   '/team-color-lab-aaa|aa|higha|a'    -> { name: 'team-color-lab-{level}' }  (unlisted QA pages, MiLB)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/team-pattern-lab'                 -> { name: 'team-pattern-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
+//   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
+//   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
@@ -95,6 +98,19 @@ export function parseRoute(url) {
   // Dev-only team-color swatch harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'team-color-lab')
     return { name: 'team-color-lab' }
+  // Simplified MiLB counterparts of team-color-lab above — one per full-
+  // season level (Triple-A/Double-A/High-A/Single-A), Home/Away only, no
+  // MLB treatment catalog. Cross-linked to each other, never to the MLB
+  // page — see lib/milbColors.js's MILB_COLOR_LAB_LEVELS and
+  // screens/MilbTeamColorLab.jsx.
+  if (parts.length === 1 && parts[0] === 'team-color-lab-aaa')
+    return { name: 'team-color-lab-aaa' }
+  if (parts.length === 1 && parts[0] === 'team-color-lab-aa')
+    return { name: 'team-color-lab-aa' }
+  if (parts.length === 1 && parts[0] === 'team-color-lab-higha')
+    return { name: 'team-color-lab-higha' }
+  if (parts.length === 1 && parts[0] === 'team-color-lab-a')
+    return { name: 'team-color-lab-a' }
   // Dev-only uniform-name curation page (App.jsx gates the actual component
   // to import.meta.env.DEV, same as scorecard-lab below) — parsed here
   // regardless so a stray production visit falls through to 'home' instead of
@@ -108,6 +124,13 @@ export function parseRoute(url) {
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')
     return { name: 'game-notes-debug' }
+  // Unlisted QA page cataloging every decorative animation in the app, live +
+  // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
+  if (parts.length === 1 && parts[0] === 'animation-lab')
+    return { name: 'animation-lab' }
+  // Unlisted Tally brand study — no score/reveal content, safe to ship.
+  if (parts.length === 1 && parts[0] === 'wordmark-lab')
+    return { name: 'wordmark-lab' }
   // Personal scorebook archive, reached from the site menu or a direct link.
   if (parts.length === 1 && parts[0] === 'first-scorebook')
     return { name: 'first-scorebook' }

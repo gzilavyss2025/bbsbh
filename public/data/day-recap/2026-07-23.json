@@ -1,0 +1,947 @@
+{
+  "version": 1,
+  "date": "2026-07-23",
+  "generatedAt": "2026-07-24T13:45:44.600Z",
+  "bySportId": {
+    "1": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 681546,
+            "name": "James Outman",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "parentOrgId": 116,
+            "position": "CF",
+            "stat": "1-3, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/kcdet/boxscore",
+              "awayAbbr": "KC",
+              "homeAbbr": "DET",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 682988,
+            "name": "Tyler Locklear",
+            "teamId": 109,
+            "teamAbbr": "AZ",
+            "parentOrgId": 109,
+            "position": "1B",
+            "stat": "3-5, HR, 2B, 3 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07232026/azstl/boxscore",
+              "awayAbbr": "AZ",
+              "homeAbbr": "STL",
+              "awayScore": 10,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 693307,
+            "name": "Dillon Dingler",
+            "teamId": 116,
+            "teamAbbr": "DET",
+            "parentOrgId": 116,
+            "position": "C",
+            "stat": "2-3, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/kcdet/boxscore",
+              "awayAbbr": "KC",
+              "homeAbbr": "DET",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 642086,
+            "name": "Dominic Smith",
+            "teamId": 144,
+            "teamAbbr": "ATL",
+            "parentOrgId": 144,
+            "position": "DH",
+            "stat": "1-3, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/sdatl/boxscore",
+              "awayAbbr": "SD",
+              "homeAbbr": "ATL",
+              "awayScore": 5,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 543807,
+            "name": "George Springer",
+            "teamId": 141,
+            "teamAbbr": "TOR",
+            "parentOrgId": 141,
+            "position": "DH",
+            "stat": "2-3, 2B, 1 RBI",
+            "game": {
+              "boxScorePath": "/07232026/tbtor/boxscore",
+              "awayAbbr": "TB",
+              "homeAbbr": "TOR",
+              "awayScore": 1,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 668909,
+            "name": "Gavin Williams",
+            "teamId": 114,
+            "teamAbbr": "CLE",
+            "parentOrgId": 114,
+            "position": "P",
+            "stat": "7.0 IP, 2 H, 0 ER, 11 K",
+            "game": {
+              "boxScorePath": "/07232026/mincle/boxscore",
+              "awayAbbr": "MIN",
+              "homeAbbr": "CLE",
+              "awayScore": 3,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 670059,
+            "name": "Colin Holderman",
+            "teamId": 114,
+            "teamAbbr": "CLE",
+            "parentOrgId": 114,
+            "position": "P",
+            "stat": "2.0 IP, 0 H, 0 ER, 0 K",
+            "game": {
+              "boxScorePath": "/07232026/mincle/boxscore",
+              "awayAbbr": "MIN",
+              "homeAbbr": "CLE",
+              "awayScore": 3,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 669456,
+            "name": "Shane Bieber",
+            "teamId": 141,
+            "teamAbbr": "TOR",
+            "parentOrgId": 141,
+            "position": "P",
+            "stat": "7.0 IP, 3 H, 1 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07232026/tbtor/boxscore",
+              "awayAbbr": "TB",
+              "homeAbbr": "TOR",
+              "awayScore": 1,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 671737,
+            "name": "Taj Bradley",
+            "teamId": 142,
+            "teamAbbr": "MIN",
+            "parentOrgId": 142,
+            "position": "P",
+            "stat": "7.0 IP, 2 H, 1 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07232026/mincle/boxscore",
+              "awayAbbr": "MIN",
+              "homeAbbr": "CLE",
+              "awayScore": 3,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 677976,
+            "name": "Randy Dobnak",
+            "teamId": 118,
+            "teamAbbr": "KC",
+            "parentOrgId": 118,
+            "position": "P",
+            "stat": "5.0 IP, 4 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07232026/kcdet/boxscore",
+              "awayAbbr": "KC",
+              "homeAbbr": "DET",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      }
+    },
+    "11": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 695336,
+            "name": "Thomas Saggese",
+            "teamId": 235,
+            "teamAbbr": "MEM",
+            "parentOrgId": 138,
+            "position": "SS",
+            "stat": "3-5, HR, 2B, 3 RBI, 3 R",
+            "game": {
+              "boxScorePath": "/07232026/durmem/boxscore",
+              "awayAbbr": "DUR",
+              "homeAbbr": "MEM",
+              "awayScore": 5,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 688457,
+            "name": "Gavin Cross",
+            "teamId": 541,
+            "teamAbbr": "OMA",
+            "parentOrgId": 118,
+            "position": "LF-RF",
+            "stat": "2-5, HR, 5 RBI, 1 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/omasl/boxscore",
+              "awayAbbr": "OMA",
+              "homeAbbr": "SL",
+              "awayScore": 12,
+              "homeScore": 9
+            },
+            "prospectRank": null,
+            "orgProspectRank": 25
+          },
+          {
+            "id": 807742,
+            "name": "Colton Ledbetter",
+            "teamId": 235,
+            "teamAbbr": "MEM",
+            "parentOrgId": 138,
+            "position": "RF",
+            "stat": "3-4, 2 2B, 2 RBI, 1 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/durmem/boxscore",
+              "awayAbbr": "DUR",
+              "homeAbbr": "MEM",
+              "awayScore": 5,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 600869,
+            "name": "Jeimer Candelario",
+            "teamId": 561,
+            "teamAbbr": "SL",
+            "parentOrgId": 108,
+            "position": "DH",
+            "stat": "3-5, HR, 3 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/omasl/boxscore",
+              "awayAbbr": "OMA",
+              "homeAbbr": "SL",
+              "awayScore": 12,
+              "homeScore": 9
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 694224,
+            "name": "Gabriel Gonzalez",
+            "teamId": 1960,
+            "teamAbbr": "STP",
+            "parentOrgId": 142,
+            "position": "PH",
+            "stat": "1-1, 2B, 2 RBI",
+            "game": {
+              "boxScorePath": "/07232026/colstp/boxscore",
+              "awayAbbr": "COL",
+              "homeAbbr": "STP",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": 6
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 666155,
+            "name": "Chuck King",
+            "teamId": 1410,
+            "teamAbbr": "LHV",
+            "parentOrgId": 143,
+            "position": "P",
+            "stat": "8.0 IP, 5 H, 1 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07232026/lhvind/boxscore",
+              "awayAbbr": "LHV",
+              "homeAbbr": "IND",
+              "awayScore": 3,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 694341,
+            "name": "Brendan Beck",
+            "teamId": 531,
+            "teamAbbr": "SWB",
+            "parentOrgId": 147,
+            "position": "P",
+            "stat": "6.1 IP, 3 H, 0 ER, 7 K",
+            "game": {
+              "boxScorePath": "/07232026/syrswb/boxscore",
+              "awayAbbr": "SYR",
+              "homeAbbr": "SWB",
+              "awayScore": 0,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": 21
+          },
+          {
+            "id": 608334,
+            "name": "Carson Fulmer",
+            "teamId": 529,
+            "teamAbbr": "TAC",
+            "parentOrgId": 136,
+            "position": "P",
+            "stat": "6.0 IP, 7 H, 0 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07232026/tacrno/boxscore",
+              "awayAbbr": "TAC",
+              "homeAbbr": "RNO",
+              "awayScore": 7,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 682620,
+            "name": "Richard Gallardo",
+            "teamId": 422,
+            "teamAbbr": "BUF",
+            "parentOrgId": 141,
+            "position": "P",
+            "stat": "4.0 IP, 3 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07232026/rocbuf/boxscore",
+              "awayAbbr": "ROC",
+              "homeAbbr": "BUF",
+              "awayScore": 5,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 687288,
+            "name": "Devereaux Harrison",
+            "teamId": 422,
+            "teamAbbr": "BUF",
+            "parentOrgId": 141,
+            "position": "P",
+            "stat": "3.0 IP, 1 H, 0 ER, 2 K",
+            "game": {
+              "boxScorePath": "/07232026/rocbuf/boxscore",
+              "awayAbbr": "ROC",
+              "homeAbbr": "BUF",
+              "awayScore": 5,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      }
+    },
+    "12": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 685313,
+            "name": "Elijah Dunham",
+            "teamId": 559,
+            "teamAbbr": "RCT",
+            "parentOrgId": 108,
+            "position": "DH",
+            "stat": "2-2, 2B, 1 RBI",
+            "game": {
+              "boxScorePath": "/07232026/knxrct/boxscore",
+              "awayAbbr": "KNX",
+              "homeAbbr": "RCT",
+              "awayScore": 4,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 815394,
+            "name": "Theo Gillen",
+            "teamId": 421,
+            "teamAbbr": "MTG",
+            "parentOrgId": 139,
+            "position": "CF",
+            "stat": "1-2, 2B, 1 RBI, 2 R, 2 SB",
+            "game": {
+              "boxScorePath": "/07232026/birmtg/boxscore",
+              "awayAbbr": "BIR",
+              "homeAbbr": "MTG",
+              "awayScore": 4,
+              "homeScore": 6
+            },
+            "prospectRank": 9,
+            "orgProspectRank": 1
+          },
+          {
+            "id": 822578,
+            "name": "Brandon Butterworth",
+            "teamId": 418,
+            "teamAbbr": "CHE",
+            "parentOrgId": 110,
+            "position": "3B",
+            "stat": "3-5, HR, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/eriche/boxscore",
+              "awayAbbr": "ERI",
+              "homeAbbr": "CHE",
+              "awayScore": 8,
+              "homeScore": 7
+            },
+            "prospectRank": null,
+            "orgProspectRank": 30
+          },
+          {
+            "id": 686540,
+            "name": "Owen Cobb",
+            "teamId": 1956,
+            "teamAbbr": "SOM",
+            "parentOrgId": 147,
+            "position": "SS",
+            "stat": "3-3, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/somnh-2/boxscore",
+              "awayAbbr": "SOM",
+              "homeAbbr": "NH",
+              "awayScore": 8,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 814528,
+            "name": "Sam Kulasingam",
+            "teamId": 1350,
+            "teamAbbr": "NWA",
+            "parentOrgId": 118,
+            "position": "1B-3B",
+            "stat": "2-4, 2B, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/sprnwa/boxscore",
+              "awayAbbr": "SPR",
+              "homeAbbr": "NWA",
+              "awayScore": 5,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 805074,
+            "name": "Yunior Marte",
+            "teamId": 3410,
+            "teamAbbr": "RIC",
+            "parentOrgId": 137,
+            "position": "P",
+            "stat": "7.0 IP, 4 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07232026/hfdric/boxscore",
+              "awayAbbr": "HFD",
+              "homeAbbr": "RIC",
+              "awayScore": 3,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": 25
+          },
+          {
+            "id": 695003,
+            "name": "Randel Clemente",
+            "teamId": 440,
+            "teamAbbr": "SPR",
+            "parentOrgId": 138,
+            "position": "P",
+            "stat": "2.0 IP, 1 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07232026/sprnwa/boxscore",
+              "awayAbbr": "SPR",
+              "homeAbbr": "NWA",
+              "awayScore": 5,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 691776,
+            "name": "Josh Hartle",
+            "teamId": 402,
+            "teamAbbr": "AKR",
+            "parentOrgId": 114,
+            "position": "P",
+            "stat": "5.2 IP, 2 H, 0 ER, 8 K",
+            "game": {
+              "boxScorePath": "/07232026/altakr/boxscore",
+              "awayAbbr": "ALT",
+              "homeAbbr": "AKR",
+              "awayScore": 1,
+              "homeScore": 0
+            },
+            "prospectRank": null,
+            "orgProspectRank": 25
+          },
+          {
+            "id": 827292,
+            "name": "John Holobetz",
+            "teamId": 546,
+            "teamAbbr": "POR",
+            "parentOrgId": 111,
+            "position": "P",
+            "stat": "5.0 IP, 3 H, 0 ER, 10 K",
+            "game": {
+              "boxScorePath": "/07232026/porbng/boxscore",
+              "awayAbbr": "POR",
+              "homeAbbr": "BNG",
+              "awayScore": 3,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": 12
+          },
+          {
+            "id": 811310,
+            "name": "Nigel Belgrave",
+            "teamId": 4124,
+            "teamAbbr": "PNS",
+            "parentOrgId": 146,
+            "position": "P",
+            "stat": "1.2 IP, 0 H, 0 ER, 1 K",
+            "game": {
+              "boxScorePath": "/07232026/colpns/boxscore",
+              "awayAbbr": "COL",
+              "homeAbbr": "PNS",
+              "awayScore": 3,
+              "homeScore": 4
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      }
+    },
+    "13": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 808090,
+            "name": "José Mejía",
+            "teamId": 419,
+            "teamAbbr": "HIL",
+            "parentOrgId": 109,
+            "position": "3B",
+            "stat": "2-3, HR, 4 RBI, 2 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/vanhil/boxscore",
+              "awayAbbr": "VAN",
+              "homeAbbr": "HIL",
+              "awayScore": 5,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 691794,
+            "name": "Cody Schrier",
+            "teamId": 554,
+            "teamAbbr": "BEL",
+            "parentOrgId": 146,
+            "position": "1B",
+            "stat": "1-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/qcbel/boxscore",
+              "awayAbbr": "QC",
+              "homeAbbr": "BEL",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 688875,
+            "name": "Trace Willhoite",
+            "teamId": 453,
+            "teamAbbr": "BRK",
+            "parentOrgId": 121,
+            "position": "1B",
+            "stat": "3-4, HR, 2B, 2 RBI, 3 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/brkjs/boxscore",
+              "awayAbbr": "BRK",
+              "homeAbbr": "JS",
+              "awayScore": 5,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 701594,
+            "name": "Chris Brito",
+            "teamId": 565,
+            "teamAbbr": "QC",
+            "parentOrgId": 118,
+            "position": "1B",
+            "stat": "3-4, HR, 2B, 2 RBI, 1 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/qcbel/boxscore",
+              "awayAbbr": "QC",
+              "homeAbbr": "BEL",
+              "awayScore": 2,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 802531,
+            "name": "Trent Farquhar",
+            "teamId": 427,
+            "teamAbbr": "JS",
+            "parentOrgId": 143,
+            "position": "SS",
+            "stat": "1-2, 1 RBI, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/brkjs/boxscore",
+              "awayAbbr": "BRK",
+              "homeAbbr": "JS",
+              "awayScore": 5,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 841138,
+            "name": "Luke Schafer",
+            "teamId": 460,
+            "teamAbbr": "TRI",
+            "parentOrgId": 108,
+            "position": "P",
+            "stat": "3.0 IP, 1 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07232026/trispo/boxscore",
+              "awayAbbr": "TRI",
+              "homeAbbr": "SPO",
+              "awayScore": 7,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 827640,
+            "name": "Lucas Elissalt",
+            "teamId": 582,
+            "teamAbbr": "WM",
+            "parentOrgId": 116,
+            "position": "P",
+            "stat": "5.0 IP, 1 H, 0 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07232026/wmpeo/boxscore",
+              "awayAbbr": "WM",
+              "homeAbbr": "PEO",
+              "awayScore": 0,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": 16
+          },
+          {
+            "id": 807993,
+            "name": "Nicolas Carreno",
+            "teamId": 453,
+            "teamAbbr": "BRK",
+            "parentOrgId": 121,
+            "position": "P",
+            "stat": "6.0 IP, 3 H, 1 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07232026/brkjs/boxscore",
+              "awayAbbr": "BRK",
+              "homeAbbr": "JS",
+              "awayScore": 5,
+              "homeScore": 6
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 823369,
+            "name": "Yhoiker Fajardo",
+            "teamId": 443,
+            "teamAbbr": "PEO",
+            "parentOrgId": 138,
+            "position": "P",
+            "stat": "4.2 IP, 2 H, 0 ER, 8 K",
+            "game": {
+              "boxScorePath": "/07232026/wmpeo/boxscore",
+              "awayAbbr": "WM",
+              "homeAbbr": "PEO",
+              "awayScore": 0,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": 11
+          },
+          {
+            "id": 813268,
+            "name": "Jake Curtis",
+            "teamId": 580,
+            "teamAbbr": "WS",
+            "parentOrgId": 145,
+            "position": "P",
+            "stat": "5.0 IP, 2 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07232026/gbows/boxscore",
+              "awayAbbr": "GBO",
+              "homeAbbr": "WS",
+              "awayScore": 0,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      }
+    },
+    "14": {
+      "topPerformers": {
+        "batters": [
+          {
+            "id": 816152,
+            "name": "DJ Layton",
+            "teamId": 548,
+            "teamAbbr": "DEL",
+            "parentOrgId": 110,
+            "position": "SS",
+            "stat": "2-4, 2B, 1 RBI, 3 R, 1 SB",
+            "game": {
+              "boxScorePath": "/07232026/delhc-2/boxscore",
+              "awayAbbr": "DEL",
+              "homeAbbr": "HC",
+              "awayScore": 13,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 808307,
+            "name": "Kleyver Salazar",
+            "teamId": 414,
+            "teamAbbr": "SAL",
+            "parentOrgId": 111,
+            "position": "DH",
+            "stat": "3-3, HR, 2B, 3 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07232026/augsal/boxscore",
+              "awayAbbr": "AUG",
+              "homeAbbr": "SAL",
+              "awayScore": 7,
+              "homeScore": 8
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 832420,
+            "name": "Edian Espinal",
+            "teamId": 570,
+            "teamAbbr": "LAK",
+            "parentOrgId": 116,
+            "position": "DH",
+            "stat": "1-3, HR, 2 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/juplak/boxscore",
+              "awayAbbr": "JUP",
+              "homeAbbr": "LAK",
+              "awayScore": 3,
+              "homeScore": 5
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 815195,
+            "name": "Wilder Dalis",
+            "teamId": 259,
+            "teamAbbr": "FRE",
+            "parentOrgId": 115,
+            "position": "SS",
+            "stat": "3-4, HR, 2 2B, 4 RBI, 2 R",
+            "game": {
+              "boxScorePath": "/07232026/rcfre/boxscore",
+              "awayAbbr": "RC",
+              "homeAbbr": "FRE",
+              "awayScore": 6,
+              "homeScore": 17
+            },
+            "prospectRank": null,
+            "orgProspectRank": 18
+          },
+          {
+            "id": 803290,
+            "name": "Estevan Moreno",
+            "teamId": 401,
+            "teamAbbr": "IE",
+            "parentOrgId": 136,
+            "position": "3B",
+            "stat": "3-4, HR, 2B, 1 RBI, 1 R",
+            "game": {
+              "boxScorePath": "/07232026/stkie/boxscore",
+              "awayAbbr": "STK",
+              "homeAbbr": "IE",
+              "awayScore": 3,
+              "homeScore": 1
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ],
+        "pitchers": [
+          {
+            "id": 694855,
+            "name": "Riley Cooper",
+            "teamId": 548,
+            "teamAbbr": "DEL",
+            "parentOrgId": 110,
+            "position": "P",
+            "stat": "2.1 IP, 0 H, 0 ER, 3 K",
+            "game": {
+              "boxScorePath": "/07232026/delhc/boxscore",
+              "awayAbbr": "DEL",
+              "homeAbbr": "HC",
+              "awayScore": 10,
+              "homeScore": 9
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 834581,
+            "name": "Blake Morgan",
+            "teamId": 233,
+            "teamAbbr": "CHS",
+            "parentOrgId": 139,
+            "position": "P",
+            "stat": "7.0 IP, 4 H, 0 ER, 5 K",
+            "game": {
+              "boxScorePath": "/07232026/wilchs/boxscore",
+              "awayAbbr": "WIL",
+              "homeAbbr": "CHS",
+              "awayScore": 0,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 809826,
+            "name": "Merit Jones",
+            "teamId": 509,
+            "teamAbbr": "FTM",
+            "parentOrgId": 142,
+            "position": "P",
+            "stat": "5.0 IP, 4 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07232026/sluftm-2/boxscore",
+              "awayAbbr": "SLU",
+              "homeAbbr": "FTM",
+              "awayScore": 1,
+              "homeScore": 3
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 828672,
+            "name": "Jagger Beck",
+            "teamId": 3712,
+            "teamAbbr": "FAY",
+            "parentOrgId": 117,
+            "position": "P",
+            "stat": "6.0 IP, 1 H, 0 ER, 6 K",
+            "game": {
+              "boxScorePath": "/07232026/fayfbg/boxscore",
+              "awayAbbr": "FAY",
+              "homeAbbr": "FBG",
+              "awayScore": 10,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          },
+          {
+            "id": 820902,
+            "name": "Carlos Carra",
+            "teamId": 249,
+            "teamAbbr": "WIL",
+            "parentOrgId": 158,
+            "position": "P",
+            "stat": "4.2 IP, 1 H, 0 ER, 4 K",
+            "game": {
+              "boxScorePath": "/07232026/wilchs/boxscore",
+              "awayAbbr": "WIL",
+              "homeAbbr": "CHS",
+              "awayScore": 0,
+              "homeScore": 2
+            },
+            "prospectRank": null,
+            "orgProspectRank": null
+          }
+        ]
+      }
+    }
+  }
+}

@@ -406,7 +406,7 @@ function WorstCallDiagram({ edge, expanded }) {
 // remounts this card via the parent's own key, same as the rest of the box
 // score), never loops — a live box score re-flashing on its own all game
 // would be exhausting to sit next to.
-function CountBlink({ before, after }) {
+export function CountBlink({ before, after }) {
   return (
     <div className="wcall__count">
       <span className="wcall__count-label">Count</span>
