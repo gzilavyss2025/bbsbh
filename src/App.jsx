@@ -105,6 +105,27 @@ const UniformNamesPage = import.meta.env.DEV
 // Lab above (no score/reveal content, safe to ship, reachable only by direct
 // URL — see lib/route.js).
 const TeamPatternLab = lazyNamed(() => import('./screens/TeamPatternLab.jsx'), 'TeamPatternLab')
+// Simplified MiLB counterparts of Team Color Lab above — one route per
+// full-season level, Home/Away only, never cross-linked to the MLB page
+// (see lib/milbColors.js's MILB_COLOR_LAB_LEVELS and
+// screens/MilbTeamColorLab.jsx). Same "no score/reveal content, safe to
+// ship, unlisted" footing.
+const MilbTeamColorLabAAA = lazyNamed(
+  () => import('./screens/MilbTeamColorLab.jsx'),
+  'MilbTeamColorLabAAA',
+)
+const MilbTeamColorLabAA = lazyNamed(
+  () => import('./screens/MilbTeamColorLab.jsx'),
+  'MilbTeamColorLabAA',
+)
+const MilbTeamColorLabHighA = lazyNamed(
+  () => import('./screens/MilbTeamColorLab.jsx'),
+  'MilbTeamColorLabHighA',
+)
+const MilbTeamColorLabA = lazyNamed(
+  () => import('./screens/MilbTeamColorLab.jsx'),
+  'MilbTeamColorLabA',
+)
 
 // The current URL, path + query — player/team links carry a `?d=&s=` spoiler
 // cutoff, so the query is part of route identity, not just the path.
@@ -216,7 +237,14 @@ export default function App() {
     content = <UniformNamesPage />
   } else if (route.name === 'team-pattern-lab') {
     content = <TeamPatternLab />
-
+  } else if (route.name === 'team-color-lab-aaa') {
+    content = <MilbTeamColorLabAAA />
+  } else if (route.name === 'team-color-lab-aa') {
+    content = <MilbTeamColorLabAA />
+  } else if (route.name === 'team-color-lab-higha') {
+    content = <MilbTeamColorLabHighA />
+  } else if (route.name === 'team-color-lab-a') {
+    content = <MilbTeamColorLabA />
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {

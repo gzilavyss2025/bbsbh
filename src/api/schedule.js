@@ -457,10 +457,13 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
 // final. Falls back to last season if the current one has no finals yet
 // (pre-Opening-Day, or the off-season). Degrades to null with nothing found
 // in either season or on a fetch failure (fetchTeamSchedule's own
-// degrade-to-[] path).
-export async function fetchLastOpponent(teamId, season = new Date().getFullYear()) {
+// degrade-to-[] path). `sportId` defaults to MLB (1, fetchTeamSchedule's own
+// default) — MilbTeamColorLab.jsx (screens/) passes the affiliate's real
+// level (11/12/13/14), since a MiLB teamId has no games under sportId 1 and
+// would otherwise always resolve to null.
+export async function fetchLastOpponent(teamId, season = new Date().getFullYear(), sportId = 1) {
   for (const s of [season, season - 1]) {
-    const games = await fetchTeamSchedule(teamId, s)
+    const games = await fetchTeamSchedule(teamId, s, sportId)
     for (let i = games.length - 1; i >= 0; i--) {
       if (games[i].won !== null) return games[i].opponent
     }

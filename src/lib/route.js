@@ -27,6 +27,7 @@
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/team-color-lab'                   -> { name: 'team-color-lab' }  (unlisted QA page)
+//   '/team-color-lab-aaa|aa|higha|a'    -> { name: 'team-color-lab-{level}' }  (unlisted QA pages, MiLB)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/team-pattern-lab'                 -> { name: 'team-pattern-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
@@ -97,6 +98,19 @@ export function parseRoute(url) {
   // Dev-only team-color swatch harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'team-color-lab')
     return { name: 'team-color-lab' }
+  // Simplified MiLB counterparts of team-color-lab above — one per full-
+  // season level (Triple-A/Double-A/High-A/Single-A), Home/Away only, no
+  // MLB treatment catalog. Cross-linked to each other, never to the MLB
+  // page — see lib/milbColors.js's MILB_COLOR_LAB_LEVELS and
+  // screens/MilbTeamColorLab.jsx.
+  if (parts.length === 1 && parts[0] === 'team-color-lab-aaa')
+    return { name: 'team-color-lab-aaa' }
+  if (parts.length === 1 && parts[0] === 'team-color-lab-aa')
+    return { name: 'team-color-lab-aa' }
+  if (parts.length === 1 && parts[0] === 'team-color-lab-higha')
+    return { name: 'team-color-lab-higha' }
+  if (parts.length === 1 && parts[0] === 'team-color-lab-a')
+    return { name: 'team-color-lab-a' }
   // Dev-only uniform-name curation page (App.jsx gates the actual component
   // to import.meta.env.DEV, same as scorecard-lab below) — parsed here
   // regardless so a stray production visit falls through to 'home' instead of
