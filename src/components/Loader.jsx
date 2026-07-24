@@ -48,9 +48,11 @@ export function Loader({ message = 'Stepping up to the plate…', size = 'page',
             <span>2</span>
             <span>3</span>
           </div>
+          <span className="loader__zero">0</span>
           <div className="loader__plate-window">
             <span className="loader__plate" key={number}>{number}</span>
           </div>
+          <span className="loader__blank" />
         </div>
       </div>
       <span className="loader__label">{message}</span>

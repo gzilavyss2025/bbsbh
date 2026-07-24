@@ -79,8 +79,22 @@ export const LOGO_COLOR_OVERRIDES = {
 // deliberately routes back to the stock CDN art (ALT_USES_BASE_LOGO and
 // friends), and excludes all procured local art without a second table to
 // keep in sync.
+// A handful of (team, treatment) WPA tiles want a DIFFERENT mark than the
+// one that treatment normally wears everywhere else on the site — the mark
+// itself (teams.js's real per-treatment art) and this tile's own band color
+// (WPA_TREATMENT_BAND_COLOR_OVERRIDES) are untouched; only which logo file
+// gets tiled changes. Value is the `teamLogoUrl` variant to substitute in.
+export const WPA_MARK_SOURCE_OVERRIDES = {
+  // Braves Alt 2 Navy (treatment 'main') — the plain "A" cap mark stays the
+  // club's Main mark everywhere else (card tile, header, etc.); the WPA band
+  // alone swaps in the Atlanta script wordmark, the same art the Road Grey
+  // mark (alternate-3) uses, which reads better repeated small than the cap.
+  144: { main: 'alternate-3' },
+}
+
 export function wpaLogoFor(teamId, treatment = 'main') {
-  const src = teamLogoUrl(teamId, treatment === 'main' ? 'base' : treatment)
+  const markVariant = WPA_MARK_SOURCE_OVERRIDES[teamId]?.[treatment] ?? (treatment === 'main' ? 'base' : treatment)
+  const src = teamLogoUrl(teamId, markVariant)
   const override = LOGO_COLOR_OVERRIDES[teamId]
   if (!override || src !== teamLogoUrl(teamId, 'base')) return { src, recolor: null }
   return { src: override.mode === 'swap' ? override.src : src, recolor: override }
@@ -159,8 +173,8 @@ export const WPA_LOGO_DEFAULTS = {
 export const WPA_LOGO_LAYOUT_OVERRIDES = {
   109: {
     main: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: -1, rowShift: 0 },
-    alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
-    'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -43, rowShift: 0 },
+    alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 5, rowShift: 0 },
+    'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 12, paddingY: -43, rowShift: 0 },
     'alternate-3': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 1, paddingY: 0, rowShift: 0 },
     'city-connect': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
   },
@@ -170,7 +184,7 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'city-connect': { size: 71, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -19, paddingY: 0, rowShift: 0 },
   },
   144: {
-    main: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 1, rowShift: 0 },
+    main: { size: 106, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: -61, rowShift: 0 },
     alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
     'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -33, rowShift: 0 },
     'alternate-3': { size: 79, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -41, rowShift: 0 },
@@ -178,12 +192,15 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   },
   111: {
     main: { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -1, paddingY: 3, rowShift: 0 },
-    alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 5, rowShift: 0 },
+    'alternate-2': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 3, rowShift: 0 },
+    'alternate-3': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 3, rowShift: 0 },
+    'city-connect': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 5, rowShift: 0 },
   },
   158: {
-    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 43, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 3, rowShift: 0 },
     'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-3': { size: 30, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 2, rowShift: 0 },
     'city-connect': { size: 69, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -8 },
   },
   136: {
@@ -206,9 +223,9 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'city-connect': { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
   },
   112: {
-    main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 2, rowShift: 0 },
     alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
+    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: 1, rowShift: 0 },
     'alternate-3': { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   },
   115: {

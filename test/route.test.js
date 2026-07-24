@@ -65,6 +65,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/top-games': 'top-games',
     '/scorecard-lab': 'scorecard-lab',
     '/game-notes-debug': 'game-notes-debug',
+    '/wordmark-lab': 'wordmark-lab',
     '/first-scorebook': 'first-scorebook',
     '/photos': 'photos',
   }

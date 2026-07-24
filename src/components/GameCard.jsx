@@ -158,7 +158,7 @@ export function GameCard({
 // has set one — the make-up date the game moved to (rescheduleGameDate, a
 // spoiler-free calendar date, never a score). Replaces both the corner delay
 // pill and the readiness strip: neither applies to a game that isn't happening.
-function PostponedBanner({ game, status }) {
+export function PostponedBanner({ game, status }) {
   const makeup = rescheduleLabel(game)
   return (
     <div className="postponed" role="status">

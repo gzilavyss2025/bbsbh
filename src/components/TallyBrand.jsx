@@ -1,42 +1,86 @@
 import { useId } from 'react'
 
-// Tally's identity is built from the same modular gaps as a printed scorecard.
-// The wordmark ships as a pre-rendered PNG (public/brand/tally-wordmark.png)
-// rather than an inline SVG mask — the mask version rendered fine in a live
-// browser but came out garbled ("TAILLY") through the OG-image Playwright
-// rasterizer, so a baked raster is the one asset that reads correctly
-// everywhere it's used, including scripts/og-image.html.
-const WORDMARK_ASPECT = 1851 / 458 // native public/brand/tally-wordmark.png size
+// One complete outlined drawing: TAL1 comes from the approved 900-weight font
+// geometry and measured kerning, followed by the custom continuous Y and the
+// scorer's asterisk. No live text remains, so every letter rasterizes together
+// at header, page-bar, and footer sizes.
+const WORDMARK_WIDTH = 244
+const WORDMARK_HEIGHT = 96
+const WORDMARK_INK_TOP = 8
+const WORDMARK_INK_HEIGHT = 75
 
-export function TallyWordmark({ height = 20, title = 'Tally', ...rest }) {
+export function TallyWordmark({
+  height = 20,
+  title = 'Tally',
+  className = '',
+  tight = false,
+  ...rest
+}) {
+  const viewBox = tight
+    ? `0 ${WORDMARK_INK_TOP} ${WORDMARK_WIDTH} ${WORDMARK_INK_HEIGHT}`
+    : `0 0 ${WORDMARK_WIDTH} ${WORDMARK_HEIGHT}`
+  const aspect = WORDMARK_WIDTH / (tight ? WORDMARK_INK_HEIGHT : WORDMARK_HEIGHT)
+
   return (
-    <img
-      src="/brand/tally-wordmark.png"
-      width={Math.round(height * WORDMARK_ASPECT)}
+    <svg
+      width={Math.round(height * aspect)}
       height={height}
-      alt={title}
+      viewBox={viewBox}
+      role="img"
+      aria-label={title}
+      className={`tally-wordmark ${className}`.trim()}
       {...rest}
-    />
+    >
+      <g fill="currentColor">
+        <path
+          d="M269 0V1336H12V1600H826V1336H569V0Z"
+          transform="translate(1 83) scale(.047 -.047)"
+        />
+        <path
+          d="M20 0 242 1600H714L936 0H628L594 334H362L328 0ZM390 598H566L530 952L506 1336H450L426 952Z"
+          transform="translate(35.109 83) scale(.047 -.047)"
+        />
+        <path
+          d="M80 0V1600H380V264H774V0Z"
+          transform="translate(79.293 83) scale(.047 -.047)"
+        />
+        <path
+          d="M168 0V1336H66L60 1442L232 1600H468V0Z"
+          transform="translate(116.337 83) scale(.047 -.047)"
+        />
+        <path d="M147 8h17l9 31 9-31h17l-18 49v26h-16V57Z" />
+      </g>
+      <g transform="translate(216 23) scale(1.1)" fill="currentColor">
+        <path d="M-2-11H2V11H-2Z" />
+        <path d="m-10.502-3.769 2.004-3.462 19 11-2.004 3.462Z" />
+        <path d="m-8.498 7.231-2.004-3.462 19-11 2.004 3.462Z" />
+      </g>
+    </svg>
   )
 }
 
-// The full lockup — baseball mark to the left of the wordmark, sized so the
-// mark reads at roughly 1.3x the wordmark's cap height (a plain equal-height
-// pairing left the mark looking undersized next to the wordmark's own
-// baked-in padding). The mark carries no accessible name of its own — the
-// wordmark's alt text is the pairing's one label — and hides on a narrow
-// phone via .tally-lockup (see index.css), leaving just the mark as the
-// compact home button.
+// The full lockup — baseball mark and visible wordmark ink share one optical
+// height. TallyWordmark's tight viewBox removes its surrounding design-space
+// padding here so equal element heights produce equal visible heights. The
+// mark carries no accessible name of its own — the wordmark's label names the
+// pairing — and the wordmark hides on narrow phones via .tally-lockup.
 export function TallyLockup({ height = 22, className = '', title = 'Tally', ...rest }) {
+  const markSize = Math.round(height * 1.3)
+
   return (
     <span className={`tally-lockup ${className}`.trim()} {...rest}>
       <TallyBaseballMark
-        size={Math.round(height * 1.3)}
+        size={markSize}
         title=""
         aria-hidden="true"
         className="tally-lockup__mark"
       />
-      <TallyWordmark height={height} title={title} className="tally-lockup__wordmark" />
+      <TallyWordmark
+        height={markSize}
+        title={title}
+        className="tally-lockup__wordmark"
+        tight
+      />
     </span>
   )
 }

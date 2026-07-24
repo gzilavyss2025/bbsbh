@@ -121,6 +121,628 @@ body {
   background-attachment: fixed, scroll, scroll;
 }
 
+/* ---------------------------------------------------------- wordmark lab
+   Unlisted brand-study page. The option cards are intentionally restrained:
+   paper, ink, and the existing clay token only, so the letter construction
+   has to carry the identity without a new palette doing the work. */
+.wordmarklab {
+  width: min(1120px, calc(100% - var(--space-6)));
+  margin: 0 auto;
+  padding: var(--space-7) 0 var(--space-9);
+}
+
+.wordmarklab__intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-7);
+  padding: var(--space-5) 0 var(--space-6);
+  border-bottom: var(--bw-thin) solid var(--border-rule);
+}
+
+.wordmarklab__intro h1,
+.wordmarklab__sectionhead h2,
+.wordmarklab__current h2,
+.wordmarklab__recommendation h2 {
+  margin: var(--space-1) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+.wordmarklab__intro h1 {
+  font-size: var(--fs-display-md);
+  letter-spacing: var(--ls-tight-display);
+}
+
+.wordmarklab__intro p,
+.wordmarklab__sectionhead p,
+.wordmarklab__selection p,
+.wordmarklab__recommendation p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--text-muted);
+  line-height: var(--lh-prose);
+}
+
+.wordmarklab__eyebrow,
+.wordmarklab__contextlabel,
+.wordmarklab__selection > span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.wordmarklab__colorlock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: max-content;
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.wordmarklab__colorlock > span {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--clay);
+  box-shadow: inset 0 0 0 var(--bw-hair) color-mix(in srgb, var(--clay-deep) 35%, transparent);
+}
+
+.wordmarklab__colorlock strong,
+.wordmarklab__colorlock small {
+  display: block;
+}
+
+.wordmarklab__colorlock strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.wordmarklab__colorlock small {
+  margin-top: 2px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.wordmarklab__current {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(210px, 0.7fr) minmax(300px, 1.3fr);
+  align-items: center;
+  gap: var(--space-6);
+  margin: var(--space-7) 0;
+  padding: var(--space-5);
+  border-left: 3px double var(--clay);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: color-mix(in srgb, var(--surface-card) 72%, transparent);
+}
+
+.wordmarklab__current h2,
+.wordmarklab__recommendation h2 {
+  font-size: var(--fs-h2);
+}
+
+.wordmarklab__current > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.wordmarklab__current ul {
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+.wordmarklab__options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.wordmarklab__option {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-5);
+  border: var(--bw-thin) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 160ms var(--ease-out),
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.wordmarklab__option--focus {
+  cursor: default;
+}
+
+.wordmarklab__option--focus:active {
+  transform: none;
+}
+
+.wordmarklab__option:active {
+  transform: scale(0.985);
+}
+
+.wordmarklab__option:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.wordmarklab__option[data-selected="true"] {
+  border-color: var(--clay);
+  box-shadow:
+    var(--shadow-card),
+    inset 0 0 0 var(--bw-hair) var(--clay);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wordmarklab__option:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--clay) 55%, var(--border-rule));
+  }
+
+  .wordmarklab__option--focus:hover {
+    transform: none;
+    border-color: var(--clay);
+  }
+}
+
+.wordmarklab__optionhead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.wordmarklab__optionhead strong {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-title);
+  color: var(--text-heading);
+}
+
+.wordmarklab__pick {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.wordmarklab__option[data-selected="true"] .wordmarklab__pick {
+  background: var(--clay);
+}
+
+.wordmarklab__optionmark {
+  display: block;
+  width: min(100%, 390px);
+  height: 92px;
+  color: var(--clay);
+}
+
+.wordmarklab__sizerow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 34px;
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.wordmarklab__sizerow svg {
+  display: block;
+  width: auto;
+  flex: none;
+  color: var(--clay);
+}
+
+.wordmarklab__sizerow > span {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.wordmarklab__rationale {
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+.wordmarklab__detail {
+  margin-top: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.wordmarklab__selection {
+  display: grid;
+  grid-template-columns: max-content minmax(160px, 0.45fr) minmax(280px, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-7) 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--clay-soft);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--clay) 35%, var(--border-rule));
+}
+
+.wordmarklab__selection strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--clay-deep);
+}
+
+.wordmarklab__selection p {
+  font-size: var(--fs-small);
+}
+
+.wordmarklab__sectionhead {
+  margin-bottom: var(--space-4);
+}
+
+.wordmarklab__sectionhead h2 {
+  font-size: var(--fs-title-lg);
+}
+
+.wordmarklab__contextgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.wordmarklab__context {
+  min-width: 0;
+  overflow: hidden;
+  border: var(--bw-thin) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--bg-canvas);
+  box-shadow: var(--shadow-card);
+}
+
+.wordmarklab__contextlabel {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.wordmarklab__fakeheader,
+.wordmarklab__pagebar,
+.wordmarklab__phonebar,
+.wordmarklab__footerbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.wordmarklab__fakeheader {
+  min-height: 64px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.wordmarklab__lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--clay);
+}
+
+.wordmarklab__lockup > svg:first-child {
+  flex: none;
+}
+
+.wordmarklab__lockup > svg:last-child {
+  width: auto;
+  height: 22px;
+}
+
+.wordmarklab__lockup--compact > svg:last-child {
+  height: 20px;
+}
+
+.wordmarklab__levels {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+
+.wordmarklab__levels span,
+.wordmarklab__levels b {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.wordmarklab__levels b {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  border-color: var(--accent-primary);
+}
+
+.wordmarklab__levels i {
+  margin-left: var(--space-1);
+  font-size: var(--fs-title-sm);
+  font-style: normal;
+  color: var(--text-caption);
+}
+
+.wordmarklab__context--mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wordmarklab__context--mobile .wordmarklab__contextlabel {
+  width: 100%;
+}
+
+.wordmarklab__phone {
+  width: min(390px, calc(100% - var(--space-6)));
+  min-height: 250px;
+  margin: var(--space-4) auto;
+  overflow: hidden;
+  border: 5px solid var(--ink-0);
+  border-radius: 28px;
+  background:
+    linear-gradient(90deg, transparent 31px, var(--rule-grid) 32px, transparent 33px),
+    linear-gradient(transparent 31px, var(--rule-grid) 32px, transparent 33px),
+    var(--bg-canvas);
+  background-size: 32px 32px;
+}
+
+.wordmarklab__phonebar {
+  min-height: 54px;
+  padding: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: color-mix(in srgb, var(--bg-page) 92%, transparent);
+}
+
+.wordmarklab__phonebar .wordmarklab__lockup > svg:last-child {
+  height: 18px;
+}
+
+.wordmarklab__phonebar > span,
+.wordmarklab__pagebar > span {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  color: var(--text-caption);
+}
+
+.wordmarklab__phonebody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+}
+
+.wordmarklab__phonebody > span {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-transform: uppercase;
+}
+
+.wordmarklab__phonebody > strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  text-transform: uppercase;
+}
+
+.wordmarklab__phonebody i {
+  display: block;
+  width: 100%;
+  height: 38px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.wordmarklab__pagebar {
+  min-height: 68px;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.wordmarklab__pagecontent {
+  min-height: 182px;
+  padding: var(--space-6) var(--space-5);
+}
+
+.wordmarklab__pagecontent > span {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.wordmarklab__pagecontent > strong {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  text-transform: uppercase;
+}
+
+.wordmarklab__pagecontent > div {
+  width: 76%;
+  height: 62px;
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.wordmarklab__context--footer {
+  grid-column: 1 / -1;
+}
+
+.wordmarklab__footerbar {
+  min-height: 72px;
+  padding: var(--space-4);
+  color: var(--text-caption);
+  font-size: var(--fs-small);
+}
+
+.wordmarklab__footerbar .wordmarklab__lockup > svg:last-child {
+  height: 16px;
+}
+
+.wordmarklab__recommendation {
+  margin-top: var(--space-7);
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: var(--shadow-raised);
+}
+
+.wordmarklab__recommendation .wordmarklab__eyebrow,
+.wordmarklab__recommendation h2,
+.wordmarklab__recommendation p {
+  color: var(--text-on-ink);
+}
+
+.wordmarklab__recommendation p {
+  opacity: 0.82;
+}
+
+@media (max-width: 820px) {
+  .wordmarklab__intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .wordmarklab__current {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wordmarklab__current ul {
+    grid-column: 1 / -1;
+  }
+
+  .wordmarklab__selection {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .wordmarklab__contextgrid {
+    grid-template-columns: 1fr;
+  }
+
+  .wordmarklab__context--footer {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .wordmarklab {
+    width: min(100% - var(--space-4), 1120px);
+    padding-top: var(--space-4);
+  }
+
+  .wordmarklab__intro h1 {
+    font-size: var(--fs-display);
+  }
+
+  .wordmarklab__colorlock {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .wordmarklab__current,
+  .wordmarklab__options {
+    grid-template-columns: 1fr;
+  }
+
+  .wordmarklab__current > img {
+    width: auto;
+    max-height: 36px;
+  }
+
+  .wordmarklab__current ul {
+    grid-column: auto;
+  }
+
+  .wordmarklab__option {
+    padding: var(--space-4);
+  }
+
+  .wordmarklab__optionmark {
+    height: 74px;
+  }
+
+  .wordmarklab__fakeheader {
+    align-items: flex-start;
+  }
+
+  .wordmarklab__levels span:nth-of-type(n + 3),
+  .wordmarklab__levels i {
+    display: none;
+  }
+
+  .wordmarklab__footerbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmarklab__option {
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .wordmarklab__option:active,
+  .wordmarklab__option:hover {
+    transform: none;
+  }
+}
+
 .app {
   min-height: 100%;
 }
@@ -218,6 +840,10 @@ body {
   align-items: center;
   gap: 10px;
   min-width: 0;
+}
+
+.tally-wordmark {
+  color: var(--clay);
 }
 
 .tally-lockup > svg {
@@ -1396,6 +2022,9 @@ body {
   grid-template-columns: repeat(3, 1fr);
   overflow: hidden;
   border: 2px solid var(--field-deep);
+  /* Every grid cell is a real element (the linescore row runs the full three
+     columns), so this only shows through the 1px cell borders — kept at the
+     deep field tone that grounds the whole plate. */
   background: var(--field-deep);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent);
 }
@@ -1417,7 +2046,9 @@ body {
 }
 
 .loader__inning-grid span,
-.loader__plate-window {
+.loader__plate-window,
+.loader__zero,
+.loader__blank {
   display: grid;
   min-height: 23px;
   place-items: center;
@@ -1432,16 +2063,41 @@ body {
   line-height: var(--lh-solid);
 }
 
+/* Rightmost inning box — no border-right; the container edge closes it. The
+   cell directly below it (.loader__blank) draws the row divider with its own
+   border-top, so the boundary lines up with the zero/plate dividers to the
+   left instead of riding a pixel high on a border-bottom here. */
 .loader__inning-grid span:last-child {
   border-right: 0;
+}
+
+/* A static zero under inning 1, same darker-green/off-white treatment as the
+   plate window it sits beside — grounds the plate window (the one cell
+   that's actually animating) as "the rest of the board already reads zero,"
+   rather than looking like an unlabeled odometer on its own. */
+.loader__zero {
+  grid-column: 1;
+  background: var(--field-deep);
+  color: var(--text-on-ink);
 }
 
 .loader__plate-window {
   grid-column: 2;
   overflow: hidden;
-  border-right-color: color-mix(in srgb, var(--paper-2) 74%, transparent);
-  background: var(--paper-2);
-  color: var(--field-deep);
+  /* Keeps its inherited border-right — it now divides the plate window from the
+     blank column-3 cell, matching the "2"/"3" divider directly above. */
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+/* The column-3 cell of the bottom row (below the "3" box). A real cell — same
+   deep-green fill as the zero and plate window beside it — so the row runs the
+   full three columns like a proper linescore. Its border-top sits on the
+   row-2/row-3 boundary, exactly level with the zero/plate dividers. */
+.loader__blank {
+  grid-column: 3;
+  border-right: 0;
+  background: var(--field-deep);
 }
 
 .loader__plate {
@@ -8437,6 +9093,25 @@ body {
   color: var(--text-caption);
 }
 
+/* Pairs .colorlab__treatmentlabel with its curated-name edit box (the same
+   field UniformNamesPage.jsx's own row edits) on one line, label left, input
+   right — the page-level Save button (colorlab's own .uniformnames__actions,
+   reused as-is) writes every tile's edit at once. A treatment covering more
+   than one catalog jersey (e.g. Main, when a club wears both Home White and
+   Road Grey under the same mark) gets one DUPLICATE .colorlab__treatment card
+   per jersey instead of two fields crammed into one row — see
+   TeamColorRow's own flatMap — so this row only ever holds a single field. */
+.colorlab__treatmentlabelrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.colorlab__nameinput {
+  flex: 0 1 200px;
+}
+
 .colorlab__treatmentbox {
   display: flex;
   flex-wrap: wrap;
@@ -8587,6 +9262,28 @@ body {
 .colorlab__posinlinefields input:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* The Background/Stripe hex field needs room for a full "#rrggbb" (or an
+   rgba(...) pinstripe line color) — wider than the Scale/X/Y number boxes
+   next to it, which only ever hold a couple digits. */
+.colorlab__posinlinefields .colorlab__posbgfield input {
+  width: 84px;
+}
+
+/* The Pinstripe toggle — checkbox + label read left-to-right instead of
+   stacked like the fields above it, same footing as the WPA preview's own
+   Pinstripe checkbox (.colorlab__wpapreviewcheck). */
+.colorlab__posinlinefields label.colorlab__poscheck {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.colorlab__posinlinefields .colorlab__poscheck input {
+  width: auto;
+  border: none;
+  padding: 0;
 }
 
 .colorlab__swatchcell {
@@ -23904,4 +24601,84 @@ button.gamehigh-matchup:active {
 .followstrip:focus-visible {
   outline: none;
   box-shadow: var(--ring);
+}
+
+/* ---------------------------------------------------------------------------
+   ANIMATION LAB (src/screens/AnimationLab.jsx) — unlisted QA page cataloging
+   every decorative animation in the app: each entry runs the real component
+   looping/live, then repeats it in a row of frozen frames below so the
+   in-between stages of a loop or one-shot entrance are visible at a glance
+   instead of requiring a stopwatch (see .agents/skills/review-animations for
+   the review rubric this page exists to feed). `.animlab__frame` pauses the
+   ACTUAL animation (not a copy) at a point set via the `--animlab-delay`
+   custom property — a negative animation-delay jumps a paused animation
+   straight to that elapsed time, same trick as a scrubbed video. Add a new
+   `.animlab__frame …` selector below whenever a new animated component is
+   added to this page. */
+.animlab__entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 16px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.animlab__entry:first-of-type {
+  border-top: none;
+}
+.animlab__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.animlab__live {
+  padding: 14px;
+  background: var(--surface-inset);
+  border-radius: var(--radius-md);
+}
+.animlab__stagelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  margin: 6px 0 -2px;
+}
+.animlab__frozen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.animlab__frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.animlab__framebox {
+  padding: 10px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+}
+.animlab__framelabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+/* The freeze itself: every animated element this page knows how to demo,
+   paused and jumped to --animlab-delay (set per .animlab__frame instance in
+   AnimationLab.jsx). Listed selectors only — not a blanket `*` — so pausing a
+   frame here can't reach into unrelated hover/focus transitions. */
+.animlab__frame .loader__plate,
+.animlab__frame .skel__ballFrames,
+.animlab__frame .delaycard,
+.animlab__frame .delayrain__drop,
+.animlab__frame .postponed,
+.animlab__frame .postponed__stamp,
+.animlab__frame .wcall__count-old,
+.animlab__frame .wcall__count-new {
+  animation-play-state: paused;
+  animation-delay: var(--animlab-delay, 0s);
 }
