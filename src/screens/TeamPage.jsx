@@ -23,7 +23,7 @@ import { fetchWarData } from '../api/war.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../api/teamScore.js'
-import { fetchComebackWins, leagueComebackWinsFor } from '../api/comebackWins.js'
+import { fetchComebackWins, comebackRatesFor } from '../api/comebackWins.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
@@ -454,20 +454,14 @@ async function loadTeam(id, asOf) {
       ]
     : null
 
-  // Comeback wins — wins after the team's win probability fell below 10/20/30%
-  // (nested). Ranked against the league like batting/pitching, but shown ONLY
-  // when this club has at least one such win: sub30 is the widest bucket, so
-  // sub30 === 0 means all three are zero and the card is hidden.
-  const comebackRows = leagueComebackWinsFor(comebackWinsData, season)
-  const myComeback = comebackRows.find((r) => r.teamId === id)?.stat
+  // Comeback wins — how often the club clawed back after its win probability
+  // fell below 10/20/30% at some point (nested), as a RATE against the pooled
+  // MLB baseline (see api/comebackWins.js). Shown ONLY when the club has at
+  // least one such win: sub30 is the widest bucket, so sub30 === 0 means all
+  // three are zero and the card is hidden.
+  const comebackData = comebackRatesFor(comebackWinsData, id, season)
   const comeback =
-    myComeback && myComeback.sub30 > 0
-      ? [
-          statRank(comebackRows, id, 'sub10', '< 10%', false),
-          statRank(comebackRows, id, 'sub20', '< 20%', false),
-          statRank(comebackRows, id, 'sub30', '< 30%', false),
-        ]
-      : null
+    comebackData && comebackData.thresholds.some((t) => t.wins > 0) ? comebackData : null
 
   const position = roster
     .filter((r) => r.position?.type !== 'Pitcher')
@@ -920,13 +914,7 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {batting && <TeamStats title="Team batting" stats={batting} />}
         {pitching && <TeamStats title="Team pitching" stats={pitching} />}
-        {comeback && (
-          <TeamStats
-            title="Comeback wins"
-            stats={comeback}
-            caption="Wins after the team's chance of winning the game fell below 10%, 20%, or 30% at some point, then rallied."
-          />
-        )}
+        {comeback && <ComebackCard data={comeback} clubName={teamClubName(team)} />}
 
         <TeamLeaders
           pool={leaderPool}
@@ -1251,12 +1239,11 @@ function SeriesStrip({ games, allStarGame, refDate }) {
   )
 }
 
-function TeamStats({ title, stats, note = 'rank out of 30', highlightKey, caption }) {
+function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
   return (
     <>
       <SectionTitle title={title} note={note} />
       <div className="tstats-card">
-        {caption && <p className="tstats__caption">{caption}</p>}
         <div className="tstats">
           {stats.map((s) => (
             <div
@@ -1268,6 +1255,75 @@ function TeamStats({ title, stats, note = 'rank out of 30', highlightKey, captio
               <span className={`tstatrow__r${s.tone ? ` tstatrow__r--${s.tone}` : ''}`}>{s.rank}</span>
             </div>
           ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// Comeback wins — one row per depth (≤10/20/30% win probability). Each row reads
+// as a rate: "won N of M times they sank this low," with the fill bar showing
+// that rate against a tick for the pooled MLB average, so a club that claws back
+// more (or less) than a typical team is legible at a glance. Bars use a fixed
+// 0–100% scale (comebacks ARE rare — the short fill is honest), with a floor so a
+// non-zero rate never renders invisible.
+const CBK_LABELS = {
+  sub10: 'Down to ≤10%',
+  sub20: 'Down to ≤20%',
+  sub30: 'Down to ≤30%',
+}
+function pctLabel(rate) {
+  return rate == null ? DASH : `${Math.round(rate * 100)}%`
+}
+function ComebackCard({ data, clubName }) {
+  return (
+    <>
+      <SectionTitle title="Comeback wins" note="rate vs. MLB avg" />
+      <div className="tstats-card cbk">
+        <p className="cbk__gloss">
+          How often {clubName || 'they'} rallied to win after their chance of winning the game
+          sank this low — against the MLB average.
+        </p>
+        <div className="cbk__rows">
+          {data.thresholds.map((t) => {
+            // Above average by a clear margin gets the fill inked positive; the
+            // league tick sits at the pooled baseline for a direct read.
+            const beatsLeague = t.rate != null && t.leagueRate != null && t.rate > t.leagueRate
+            const fill = t.rate == null ? 0 : Math.max(t.rate * 100, t.rate > 0 ? 3 : 0)
+            return (
+              <div key={t.key} className="cbk__row">
+                <div className="cbk__head">
+                  <span className="cbk__label">{CBK_LABELS[t.key]}</span>
+                  <span className="cbk__frac">
+                    {t.wins}
+                    <span className="cbk__of"> of {t.att || DASH}</span>
+                    {t.rank === 1 && t.wins > 0 && (
+                      <span className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</span>
+                    )}
+                  </span>
+                </div>
+                <div className="cbk__track">
+                  <div
+                    className={`cbk__fill${beatsLeague ? ' cbk__fill--over' : ''}`}
+                    style={{ width: `${fill}%` }}
+                  />
+                  {t.leagueRate != null && (
+                    <span
+                      className="cbk__tick"
+                      style={{ left: `${t.leagueRate * 100}%` }}
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                <div className="cbk__foot">
+                  <span className={`cbk__rate${beatsLeague ? ' cbk__rate--over' : ''}`}>
+                    {pctLabel(t.rate)}
+                  </span>
+                  <span className="cbk__league">MLB {pctLabel(t.leagueRate)}</span>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </>

@@ -16157,17 +16157,6 @@ body {
   border: var(--bw-hair) solid var(--seal);
   border-radius: var(--radius-sm);
 }
-/* One-line plain-language gloss above a stats grid (Comeback wins), so the
-   bare < 10% / < 20% / < 30% thresholds read as "their chance of winning the
-   game," not something the viewer has to infer. */
-.tstats__caption {
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-body);
-  color: var(--text-caption);
-  padding: 8px 8px 4px;
-  margin: 0;
-}
 .tstats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -16247,6 +16236,122 @@ body {
   .tstatrow:nth-child(2) {
     border-top: var(--bw-hair) solid var(--border-hairline);
   }
+}
+/* Comeback wins card (ComebackCard) — one row per depth (≤10/20/30% win
+   probability), each read as a RATE: "won N of M times they sank this low," with
+   a fill bar for the club's own comeback rate and a tick at the pooled MLB
+   baseline, so "better/worse than a typical club" is legible without a rank
+   table. Fixed 0–100% bar scale (comebacks ARE rare, so the short fill is the
+   honest picture). Reuses the .tstats-card chrome. */
+.cbk__gloss {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+  padding: 8px 8px 2px;
+  margin: 0;
+}
+.cbk__rows {
+  display: flex;
+  flex-direction: column;
+}
+.cbk__row {
+  padding: 9px 8px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.cbk__row:first-child {
+  border-top: none;
+}
+.cbk__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.cbk__label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  color: var(--text-muted);
+}
+.cbk__frac {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+.cbk__of {
+  font-weight: var(--w-regular);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.cbk__badge {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--field-deep);
+  background: var(--field-soft);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  margin-left: 7px;
+}
+.cbk__track {
+  position: relative;
+  height: 10px;
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+}
+.cbk__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--seal);
+  border-radius: var(--radius-pill);
+}
+.cbk__fill--over {
+  background: var(--accent-positive);
+}
+/* The pooled MLB-average rate, a thin upright marker poking just proud of the
+   track so "we clear the league mark" reads at a glance. */
+.cbk__tick {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text-muted);
+  border-radius: var(--radius-pill);
+}
+.cbk__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 5px;
+}
+.cbk__rate {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+.cbk__rate--over {
+  color: var(--field-deep);
+}
+.cbk__league {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
 }
 .rankchip {
   font-family: var(--font-mono);
