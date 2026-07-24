@@ -36,7 +36,6 @@ import { teamLogoUrl } from './teams.js'
 // wpaLogoFor below. It is NOT a blanket per-club rule, because most
 // treatments don't wear the base mark at all.
 export const LOGO_COLOR_OVERRIDES = {
-  113: { mode: 'flood', color: '#FFFFFF' }, // Reds — base mark is solid red, no black in it to preserve
   118: { mode: 'flood', color: '#FFFFFF' }, // Royals
   119: { mode: 'flood', color: '#FFFFFF' }, // Dodgers
   120: { mode: 'flood', color: '#FFFFFF' }, // Nationals
@@ -90,6 +89,12 @@ export const WPA_MARK_SOURCE_OVERRIDES = {
   // alone swaps in the Atlanta script wordmark, the same art the Road Grey
   // mark (alternate-3) uses, which reads better repeated small than the cap.
   144: { main: 'alternate-3' },
+  // Reds Home White (treatment 'main') — the card/header Main tile wears the
+  // locally recolored "Reds" script mark (MAIN_OVERRIDES' recolor: true,
+  // teams.js's mainOverrideLogoUrl), not the plain CDN wishbone-C; the WPA
+  // band was still defaulting to the base mark and needs the same swap to
+  // match.
+  113: { main: 'main-recolor' },
 }
 
 export function wpaLogoFor(teamId, treatment = 'main') {
@@ -195,6 +200,7 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 5, rowShift: 0 },
     'alternate-2': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 3, rowShift: 0 },
     'alternate-3': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 3, rowShift: 0 },
+    'alternate-4': { size: 52, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     'city-connect': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 5, rowShift: 0 },
   },
   158: {
@@ -231,15 +237,22 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   115: {
     main: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 6, rowShift: 0 },
     alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 4, rowShift: 0 },
+    'alternate-2': { size: 68, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 13, paddingY: -12, rowShift: 0 },
     'city-connect': { size: 49, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -12 },
   },
   113: {
-    alternate: { size: 63, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -3, paddingY: 2, rowShift: 0 },
+    main: { size: 48, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
+    alternate: { size: 63, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: -19, rowShift: 0 },
+    'alternate-2': { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -2, paddingY: 1, rowShift: 0 },
+    'alternate-3': { size: 43, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -2, rowShift: 0 },
     'city-connect': { size: 48, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -5, rowShift: 0 },
   },
   114: {
     main: { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 1, rowShift: 0 },
+    'alternate-2': { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 1, rowShift: 0 },
+    'alternate-3': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 4, rowShift: 0 },
+    'city-connect': { size: 64, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 14, paddingY: -19, rowShift: 0 },
   },
   145: {
     main: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -7, paddingY: 4, rowShift: 0 },
@@ -249,6 +262,7 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   },
   116: {
     main: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 4, rowShift: 0 },
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -3, paddingY: 2, rowShift: 0 },
   },
   117: {
     'city-connect': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: 2, rowShift: 0 },
