@@ -8,6 +8,7 @@ import {
   WPA_PLOT_SIZE,
   wpaBandColor,
   wpaBandPinstripeColor,
+  wpaBandPinstripeBg,
 } from '../lib/wpaBandColors.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import {
@@ -363,6 +364,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
   const wpaPinstripe = wpaDraft?.pinstripe ?? Boolean(wpaPinstripeDefault)
   const wpaBand =
     wpaDraft?.bandColor ?? (wpaPinstripe ? wpaPinstripeDefault ?? DEFAULT_PINSTRIPE_COLOR : wpaBandColor(teamId, treatment))
+  const wpaPinstripeBg = wpaBandPinstripeBg(teamId, treatment)
 
   return (
     <div className="colorlab__treatment">
@@ -398,6 +400,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
           treatmentLabel={label}
           draft={wpaDraft}
           pinstripe={wpaPinstripe}
+          pinstripeBg={wpaPinstripeBg}
           bandColor={wpaBand}
           onField={onWpaField}
           onReset={onWpaReset}
@@ -527,6 +530,7 @@ function TreatmentWpaPreview({
   treatmentLabel,
   draft,
   pinstripe,
+  pinstripeBg,
   bandColor,
   onField,
   onReset,
@@ -644,7 +648,7 @@ function TreatmentWpaPreview({
         >
           <defs>
             <RecolorFilter id={recolorId} override={logoOverride} />
-            {pinstripe && <PinstripePattern id={pinstripeId} color={bandColor} />}
+            {pinstripe && <PinstripePattern id={pinstripeId} color={bandColor} bg={pinstripeBg ?? undefined} />}
             <pattern
               id={patternId}
               patternUnits="userSpaceOnUse"

@@ -9,6 +9,7 @@ import {
   mainTreatmentPinstripe,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
+  treatmentPinstripeBg,
 } from './teams.js'
 
 // The real chart's own band area, in the SAME px units as its desktop
@@ -206,4 +207,18 @@ export function wpaBandPinstripeColor(teamId, treatment) {
   if (override) return null // an explicit flat hex override wins outright, no pinstripe
   if (treatment === 'main') return mainTreatmentPinstripe(teamId) ? mainTreatmentPinstripeColor(teamId) : null
   return treatmentPinstripeColor(teamId, treatment)
+}
+
+// The colored fill under a pinstriped WPA band's lines, or null for the
+// plain-white default (same white-implied convention wpaBandPinstripeColor's
+// own doc comment names) — same two-tier default: an explicit WPA override's
+// own `bg` wins outright, else this falls through to teams.js's
+// treatmentPinstripeBg (White Sox City Connect's red), so a colored-pinstripe
+// tile on the left renders with the same colored pinstripe here too.
+export function wpaBandPinstripeBg(teamId, treatment) {
+  const override = WPA_TREATMENT_BAND_COLOR_OVERRIDES[teamId]?.[treatment]
+  if (override && typeof override === 'object') return override.bg ?? null
+  if (override) return null
+  if (treatment === 'main') return null // MAIN_OVERRIDES' pinstripe has no colored-bg variant
+  return treatmentPinstripeBg(teamId, treatment)
 }
