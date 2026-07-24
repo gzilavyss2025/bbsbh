@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { winProbSplit } from '../api/winprob.js'
-import { wpaBandColor, wpaBandPinstripeColor, chipColorsFor } from '../lib/wpaBandColors.js'
+import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../lib/wpaBandColors.js'
 import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
 import { useWpaLogo } from '../hooks/useWpaLogo.js'
 import { ordinal } from '../lib/format.js'
@@ -97,10 +97,10 @@ const PLOT_H = PLOT_B - PLOT_T
 // background doesn't apply to an SVG shape's `fill`. Tiled small (4x4) since
 // the WPA band's own logo tile is itself tiny.
 const PINSTRIPE_TILE = 4
-export function PinstripePattern({ id, color }) {
+export function PinstripePattern({ id, color, bg = '#fff' }) {
   return (
     <pattern id={id} patternUnits="userSpaceOnUse" width={PINSTRIPE_TILE} height={PINSTRIPE_TILE}>
-      <rect width={PINSTRIPE_TILE} height={PINSTRIPE_TILE} fill="#fff" />
+      <rect width={PINSTRIPE_TILE} height={PINSTRIPE_TILE} fill={bg} />
       <rect width={1} height={PINSTRIPE_TILE} fill={color} />
     </pattern>
   )
@@ -225,6 +225,8 @@ export function WinProbChart({
   // renders pinstriped here too.
   const awayPinstripe = wpaBandPinstripeColor(awayId, awayTreat)
   const homePinstripe = wpaBandPinstripeColor(homeId, homeTreat)
+  const awayPinstripeBg = wpaBandPinstripeBg(awayId, awayTreat)
+  const homePinstripeBg = wpaBandPinstripeBg(homeId, homeTreat)
   const awayPinstripeId = `winprob-pinstripe-away-${patternUid}`
   const homePinstripeId = `winprob-pinstripe-home-${patternUid}`
   const awayBandFill = awayPinstripe ? `url(#${awayPinstripeId})` : wpaBandColor(awayId, awayTreat)
@@ -303,8 +305,12 @@ export function WinProbChart({
         <defs>
           <RecolorFilter id={awayRecolorId} override={awayLogoOverride} />
           <RecolorFilter id={homeRecolorId} override={homeLogoOverride} />
-          {awayPinstripe && <PinstripePattern id={awayPinstripeId} color={awayPinstripe} />}
-          {homePinstripe && <PinstripePattern id={homePinstripeId} color={homePinstripe} />}
+          {awayPinstripe && (
+            <PinstripePattern id={awayPinstripeId} color={awayPinstripe} bg={awayPinstripeBg ?? undefined} />
+          )}
+          {homePinstripe && (
+            <PinstripePattern id={homePinstripeId} color={homePinstripe} bg={homePinstripeBg ?? undefined} />
+          )}
           <pattern
             id={awayPatternId}
             patternUnits="userSpaceOnUse"

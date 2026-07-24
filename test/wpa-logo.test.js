@@ -39,13 +39,13 @@ test('a procured treatment PNG renders as-is, never flooded to a flat color', ()
 })
 
 test("a 'swap' override never redirects a treatment away from its own art", () => {
-  // Twins (142) — swap mode, pointing at a precomputed base-mark variant.
-  const swapped = LOGO_COLOR_OVERRIDES[142]
+  // Guardians (114) — swap mode, pointing at a precomputed base-mark variant.
+  const swapped = LOGO_COLOR_OVERRIDES[114]
   assert.equal(swapped.mode, 'swap')
-  assert.equal(wpaLogoFor(142, 'main').src, swapped.src)
+  assert.equal(wpaLogoFor(114, 'main').src, swapped.src)
 
-  const alt = wpaLogoFor(142, 'alternate')
-  assert.equal(alt.src, '/team-logos/alternate/MIN.png')
+  const alt = wpaLogoFor(114, 'alternate')
+  assert.equal(alt.src, '/team-logos/alternate/CLE.png')
   assert.equal(alt.recolor, null)
 })
 
@@ -80,13 +80,13 @@ test('defaults to main, and degrades to no tile for an unknown club', () => {
 // the club's Main mark (which is the stock CDN logo, so it always exists).
 
 test('a treatment with no art on file falls back to the base mark', () => {
-  // Tigers (116) wear an Alternate in real games but have no alternate/DET.png
-  // on disk — that URL resolves fine and then 404s.
-  const tried = wpaLogoFor(116, 'alternate')
-  assert.equal(tried.src, '/team-logos/alternate/DET.png')
-  assert.equal(wpaLogoWithFallback(116, 'alternate', false).src, tried.src, 'tries the treatment first')
+  // Tigers (116) have no Alternate 3 set up at all — no ALT3_COLORS entry,
+  // no ALT3_USES_BASE_LOGO opt-in — so that URL resolves fine and then 404s.
+  const tried = wpaLogoFor(116, 'alternate-3')
+  assert.equal(tried.src, '/team-logos/alternate-3/DET.png')
+  assert.equal(wpaLogoWithFallback(116, 'alternate-3', false).src, tried.src, 'tries the treatment first')
 
-  const fellBack = wpaLogoWithFallback(116, 'alternate', true)
+  const fellBack = wpaLogoWithFallback(116, 'alternate-3', true)
   assert.equal(fellBack.src, teamLogoUrl(116, 'base'))
   // Back on the base mark, so its recolor curation applies again — otherwise
   // the Tigers' navy "D" would vanish into their own navy band.

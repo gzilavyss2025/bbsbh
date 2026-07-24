@@ -9,6 +9,7 @@ import {
   mainTreatmentPinstripe,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
+  treatmentPinstripeBg,
 } from './teams.js'
 
 // The real chart's own band area, in the SAME px units as its desktop
@@ -63,14 +64,21 @@ export const BAND_COLOR_OVERRIDES = {
 export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
   109: {
     main: '#E3D4AD',
-    alternate: '#E3D4AD',
+    alternate: '#A71930',
+    'alternate-2': '#A29E9F',
+    'alternate-3': '#000000',
     'city-connect': '#523178',
   },
   133: {
     main: '#003831',
+    alternate: '#EFB21E',
+    'city-connect': '#003831',
   },
   144: {
+    main: '#13274F',
     alternate: '#CE1141',
+    'alternate-2': '#F5F0E1',
+    'alternate-3': '#A2AAAD',
     'city-connect': '#7BA7D8',
   },
   111: {
@@ -80,6 +88,7 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
   },
   158: {
     alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+    'alternate-2': '#12284B',
     'city-connect': '#ff6c58',
   },
   136: {
@@ -95,6 +104,10 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     'city-connect': '#161827',
   },
   110: {
+    main: '#DF4601',
+    alternate: '#000000',
+    'alternate-2': '#FFFFFF',
+    'alternate-3': '#9EA2A2',
     'city-connect': '#E1D2BE',
   },
   112: {
@@ -103,7 +116,44 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     'alternate-2': '#7698CE',
   },
   115: {
+    main: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+    alternate: '#33006F',
     'city-connect': '#8ABFEB',
+  },
+  113: {
+    'city-connect': '#000000',
+  },
+  114: {
+    alternate: '#00385D',
+  },
+  116: {
+    main: '#0C2340',
+  },
+  117: {
+    'city-connect': '#CEC8B2',
+  },
+  118: {
+    main: '#004687',
+    alternate: '#6DADF4',
+    'city-connect': '#FFFFFF',
+  },
+  119: {
+    main: '#005A9C',
+    alternate: '#FFFFFF',
+  },
+  134: {
+    main: '#27251F',
+  },
+  143: {
+    main: '#E81828',
+  },
+  146: {
+    'alternate-2': '#000000',
+    'alternate-3': '#009CA7',
+    'city-connect': '#000000',
+  },
+  147: {
+    alternate: '#C4CED3',
   },
 }
 
@@ -157,4 +207,18 @@ export function wpaBandPinstripeColor(teamId, treatment) {
   if (override) return null // an explicit flat hex override wins outright, no pinstripe
   if (treatment === 'main') return mainTreatmentPinstripe(teamId) ? mainTreatmentPinstripeColor(teamId) : null
   return treatmentPinstripeColor(teamId, treatment)
+}
+
+// The colored fill under a pinstriped WPA band's lines, or null for the
+// plain-white default (same white-implied convention wpaBandPinstripeColor's
+// own doc comment names) — same two-tier default: an explicit WPA override's
+// own `bg` wins outright, else this falls through to teams.js's
+// treatmentPinstripeBg (White Sox City Connect's red), so a colored-pinstripe
+// tile on the left renders with the same colored pinstripe here too.
+export function wpaBandPinstripeBg(teamId, treatment) {
+  const override = WPA_TREATMENT_BAND_COLOR_OVERRIDES[teamId]?.[treatment]
+  if (override && typeof override === 'object') return override.bg ?? null
+  if (override) return null
+  if (treatment === 'main') return null // MAIN_OVERRIDES' pinstripe has no colored-bg variant
+  return treatmentPinstripeBg(teamId, treatment)
 }

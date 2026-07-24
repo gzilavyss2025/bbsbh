@@ -25,11 +25,12 @@ import { treatmentTile } from '../lib/teams.js'
 const EDGE_BLEED = 1.32
 
 export function TeamTreatmentMark({ teamId, name, treatment, size, block, className = '' }) {
-  const { logoVariant, tint, pinstripeColor, scale } = treatmentTile(teamId, treatment)
+  const { logoVariant, tint, pinstripeColor, pinstripeBg, scale } = treatmentTile(teamId, treatment)
   const style = {
     '--tint': tint || undefined,
     '--scale': EDGE_BLEED * scale,
     '--pinstripe-color': pinstripeColor || undefined,
+    '--pinstripe-bg': pinstripeBg || undefined,
   }
   const cls = [block, pinstripeColor ? `${block}--pinstripe` : '', className].filter(Boolean).join(' ')
   return (

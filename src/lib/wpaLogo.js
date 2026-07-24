@@ -158,16 +158,23 @@ export const WPA_LOGO_DEFAULTS = {
 // only — an accepted tradeoff, not a bug.
 export const WPA_LOGO_LAYOUT_OVERRIDES = {
   109: {
-    main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    main: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: -1, rowShift: 0 },
+    alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
+    'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -43, rowShift: 0 },
+    'alternate-3': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 1, paddingY: 0, rowShift: 0 },
     'city-connect': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 0 },
   },
   133: {
     main: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
+    alternate: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: -2, rowShift: 0 },
+    'city-connect': { size: 71, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -19, paddingY: 0, rowShift: 0 },
   },
   144: {
+    main: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 1, rowShift: 0 },
     alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
-    'city-connect': { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
+    'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -33, rowShift: 0 },
+    'alternate-3': { size: 79, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -41, rowShift: 0 },
+    'city-connect': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -1, paddingY: -4, rowShift: 0 },
   },
   111: {
     main: { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
@@ -176,6 +183,7 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   },
   158: {
     alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     'city-connect': { size: 69, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -8 },
   },
   136: {
@@ -191,7 +199,11 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'city-connect': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 7 },
   },
   110: {
-    'city-connect': { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    main: { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 1, paddingY: 1, rowShift: 0 },
+    alternate: { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 1, rowShift: 0 },
+    'alternate-2': { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
+    'alternate-3': { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 2, rowShift: 0 },
+    'city-connect': { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
   },
   112: {
     main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
@@ -199,7 +211,44 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
   },
   115: {
+    main: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 6, rowShift: 0 },
+    alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 4, rowShift: 0 },
     'city-connect': { size: 49, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -12 },
+  },
+  113: {
+    'city-connect': { size: 48, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -5, rowShift: 0 },
+  },
+  114: {
+    alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 1, rowShift: 0 },
+  },
+  116: {
+    main: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 4, rowShift: 0 },
+  },
+  117: {
+    'city-connect': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: 2, rowShift: 0 },
+  },
+  118: {
+    main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 12, paddingY: 4, rowShift: 0 },
+    alternate: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: 4, rowShift: 0 },
+    'city-connect': { size: 63, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -5, paddingY: 4, rowShift: 0 },
+  },
+  119: {
+    main: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 7, rowShift: 0 },
+    alternate: { size: 53, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: 0, rowShift: 0 },
+  },
+  134: {
+    main: { size: 25, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 5, rowShift: 0 },
+  },
+  143: {
+    main: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 7, rowShift: 0 },
+  },
+  146: {
+    'alternate-2': { size: 53, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-3': { size: 61, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -4, paddingY: 0, rowShift: 0 },
+    'city-connect': { size: 65, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: -6, rowShift: 0 },
+  },
+  147: {
+    alternate: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: 4, rowShift: 0 },
   },
 }
 

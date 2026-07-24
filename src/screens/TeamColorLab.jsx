@@ -8,6 +8,7 @@ import {
   WPA_PLOT_SIZE,
   wpaBandColor,
   wpaBandPinstripeColor,
+  wpaBandPinstripeBg,
 } from '../lib/wpaBandColors.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import {
@@ -26,6 +27,7 @@ import {
   mainOverrideLogoUrl,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
+  treatmentPinstripeBg,
   hasAlternate2,
   hasAlternate3,
   hasAlternate4,
@@ -324,6 +326,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
       ? mainTreatmentPinstripeColor(teamId)
       : null
     : treatmentPinstripeColor(teamId, treatment)
+  const pinstripeBg = treatment === 'main' ? null : treatmentPinstripeBg(teamId, treatment)
   // Main picks its tile background from one of the three official swatches
   // (MAIN_OVERRIDES names which) or a literal `bgHex` (Brewers); Alternate/
   // City Connect flag whichever of their user-supplied swatches is the
@@ -346,6 +349,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
           '--offset-x': `${treatmentOffsetX}%`,
           '--origin-y': treatmentOriginY,
           '--pinstripe-color': pinstripeColor ?? undefined,
+          '--pinstripe-bg': pinstripeBg ?? undefined,
         }
       : undefined
   const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${pinstripeColor ? ' colorlab__logobox--pinstripe' : ''}`
@@ -360,6 +364,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
   const wpaPinstripe = wpaDraft?.pinstripe ?? Boolean(wpaPinstripeDefault)
   const wpaBand =
     wpaDraft?.bandColor ?? (wpaPinstripe ? wpaPinstripeDefault ?? DEFAULT_PINSTRIPE_COLOR : wpaBandColor(teamId, treatment))
+  const wpaPinstripeBg = wpaBandPinstripeBg(teamId, treatment)
 
   return (
     <div className="colorlab__treatment">
@@ -395,6 +400,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
           treatmentLabel={label}
           draft={wpaDraft}
           pinstripe={wpaPinstripe}
+          pinstripeBg={wpaPinstripeBg}
           bandColor={wpaBand}
           onField={onWpaField}
           onReset={onWpaReset}
@@ -524,6 +530,7 @@ function TreatmentWpaPreview({
   treatmentLabel,
   draft,
   pinstripe,
+  pinstripeBg,
   bandColor,
   onField,
   onReset,
@@ -641,7 +648,7 @@ function TreatmentWpaPreview({
         >
           <defs>
             <RecolorFilter id={recolorId} override={logoOverride} />
-            {pinstripe && <PinstripePattern id={pinstripeId} color={bandColor} />}
+            {pinstripe && <PinstripePattern id={pinstripeId} color={bandColor} bg={pinstripeBg ?? undefined} />}
             <pattern
               id={patternId}
               patternUnits="userSpaceOnUse"
