@@ -180,6 +180,7 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '118_jersey_4_2026': 'main', // Royals Alt 1 Royal Blue — worn with the plain Main mark
   '118_jersey_2_2026': 'alternate-2', // Royals Away Grey — worn with the Alternate 2 mark
   '158_jersey_4_2026': 'alternate-2', // Brewers Alt 2 Navy Blue — worn with the Alternate 2 mark
+  '158_jersey_2_2026': 'alternate-3', // Brewers Road Powder Blue — worn with the Alternate 3 mark, not plain Main (its own naming-convention guess for a "Road …" label)
   '108_jersey_2_2026': 'alternate', // Angels Away Grey — worn with the Alternate mark, not plain Main
   '138_jersey_3_2026': 'alternate-2', // Cardinals Alt 1 Cream — worn with the Alternate 2 mark
   '136_jersey_1_2026': 'alternate', // Mariners Home White — worn with the Alternate mark, not plain Main
@@ -208,6 +209,7 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '111_jersey_4_2026': 'alternate-2', // Red Sox Alt 2 Yellow — worn with the Alternate 2 mark
   '111_jersey_6_2026': 'alternate-3', // Red Sox Alt White Marathon "Boston" — worn with the Alternate 3 mark
   '113_jersey_4_2026': 'alternate-2', // Reds Alt 2 Black "CINCY" — worn with the Alternate 2 mark
+  '113_jersey_2_2026': 'alternate-3', // Reds Away Grey — worn with the Alternate 3 mark, not plain Main (Main is the "Reds" script Home White mark)
   '114_jersey_3_2026': 'alternate-2', // Guardians Alt 1 Red — worn with the Alternate 2 mark
   '116_jersey_4_2026': 'alternate-2', // Tigers Alt 2 Navy — worn with the Alternate 2 mark
   '117_jersey_4_2026': 'alternate-2', // Astros Alt Blue — worn with the Alternate 2 mark
@@ -221,6 +223,21 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '140_jersey_3_2026': 'alternate-3', // Rangers Alt 1 Baby Blue — worn with the Alternate 3 mark
   '142_jersey_3_2026': 'alternate-2', // Twins Alt 1 Cream "Twin Cities" — worn with the Alternate 2 mark
   '143_jersey_4_2026': 'alternate-2', // Phillies Alt 2 Baby Blue — worn with the Alternate 2 mark
+  '133_jersey_2_2026': 'alternate-2', // Athletics Road Grey — worn with the Alternate 2 mark, not plain Main (Main is Home White)
+  '114_jersey_2_2026': 'alternate-3', // Guardians Away Grey — worn with the Alternate 3 mark, not plain Main (Main is Home White)
+  '116_jersey_2_2026': 'alternate-3', // Tigers Away Grey — worn with the Alternate 3 mark, not plain Main (Main is Home White)
+  '117_jersey_2_2026': 'alternate-3', // Astros Road Grey — worn with the Alternate 3 mark, not plain Main (Main is Home White)
+  '119_jersey_2_2026': 'alternate-4', // Dodgers Road Grey "Los Angeles" — worn with the Alternate 4 mark, not plain Main (Main is Home White; jersey_3's own "Dodgers" Road Grey already has its own Alternate slot)
+  '121_jersey_2_2026': 'alternate-3', // Mets Away Grey — worn with the Alternate 3 mark, not plain Main (Main is Home Pinstripe)
+  '134_jersey_2_2026': 'alternate-3', // Pirates Road Grey — worn with the Alternate 3 mark, not plain Main (Main is Home White)
+  '135_jersey_2_2026': 'alternate-4', // Padres Away Brown — worn with the Alternate 4 mark, not plain Main (Main is Home White Pinstripe)
+  '139_jersey_2_2026': 'alternate-3', // Rays Away Blue — worn with the Alternate 3 mark, not plain Main (Main is Home White)
+  '140_jersey_2_2026': 'alternate-4', // Rangers Away Grey — worn with the Alternate 4 mark, not plain Main (Main is Home White)
+  '142_jersey_2_2026': 'alternate-3', // Twins Away Grey — worn with the Alternate 3 mark, not plain Main (Main is Home White)
+  '143_jersey_2_2026': 'alternate-3', // Phillies Away Grey — worn with the Alternate 3 mark, not plain Main (Main is Home Pinstripe)
+  '115_jersey_2_2026': 'alternate-2', // Rockies Away Grey — worn with the Alternate 2 mark, not plain Main (Main is Home Pinstripe)
+  '111_jersey_2_2026': 'alternate-4', // Red Sox Away Grey — worn with the Alternate 4 mark, not plain Main (Main is Home White)
+  '138_jersey_2_2026': 'alternate-3', // Cardinals Road Grey — worn with the Alternate 3 mark, not plain Main (Main is Home White)
 }
 
 // Which logo TREATMENT ('main' | 'alternate' | 'alternate-2' | 'alternate-3' |

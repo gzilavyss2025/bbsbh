@@ -27,10 +27,25 @@ import {
   hasAlternate3,
   hasAlternate4,
   hasCityConnect,
+  treatmentHeaderColorOverride,
 } from '../lib/teams.js'
 import { wpaLogoLayout } from '../lib/wpaLogo.js'
-import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
+import {
+  fetchTeamUniformCatalog,
+  classifyUniformAsset,
+  jerseyLabel,
+  fetchUniformNameOverrides,
+  primeUniformNameOverridesCache,
+  uniformDisplayName,
+} from '../api/uniforms.js'
 import { fetchLastOpponent } from '../api/schedule.js'
+
+// Same dev-only save endpoint UniformNamesPage.jsx posts to (vite.config.js's
+// middleware) — this page isn't itself dev-gated (unlike that one, see
+// TeamColorLab's own doc comment below), so a save attempted outside
+// `npm run dev` just fails and shows the same "Save failed" hint, no
+// different from any other of this page's proposed-but-unwired mockups.
+const NAME_SAVE_URL = '/__dev/uniform-names'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
 // everywhere else (components/TeamLogo.jsx) — so only Alternate and City
@@ -59,6 +74,10 @@ const TREATMENTS = [
 // these tiles large enough for the off-center weight to matter yet.
 const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
+  158: { alternate: 4, 'alternate-2': 9 }, // Brewers — Alt 1 Pinstripe and Alt 2 Navy Blue both read better nudged right
+  144: { 'city-connect': 4, alternate: 6 }, // Braves — City Connect 2.0 and Alt 1 Red marks nudged right
+  112: { main: 4 }, // Cubs — Home Pinstripe mark nudged right
+  145: { 'city-connect': 3 }, // White Sox — City Connect 2.0 mark nudged right
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS
@@ -77,7 +96,9 @@ const TREATMENT_ORIGIN_Y = {
 // Page-local only, same footing as TREATMENT_OFFSET_X. Left empty — every
 // entry so far comes from a user edit in LogoPositionControls below, copied
 // in by hand.
-const TREATMENT_OFFSET_Y = {}
+const TREATMENT_OFFSET_Y = {
+  144: { 'city-connect': 4, alternate: 1 }, // Braves — City Connect 2.0 mark nudged down, Alt 1 Red mark nudged down slightly
+}
 
 // A proposed replacement for a team's Primary swatch, tried out on this page
 // only — teams.js's TEAM_COLOR_PAIRS/TEAM_COLORS (the real app-wide source
@@ -163,7 +184,7 @@ function jerseyMatchesFor(catalog, teamId, treatmentKey) {
   const clubName = teamClubName(teamId)
   return assets
     .filter((a) => a.piece === 'J' && classifyUniformAsset(a.text, clubName, a.code) === treatmentKey)
-    .map((a) => ({ label: jerseyLabel(a.text, clubName), code: a.code ?? null }))
+    .map((a) => ({ label: jerseyLabel(a.text, clubName), code: a.code ?? null, text: a.text }))
 }
 
 // Design harness for reviewing each club's three logo treatments — Main,
@@ -185,7 +206,7 @@ function jerseyMatchesFor(catalog, teamId, treatmentKey) {
 const WPA_LAB_KEY = 'bbsbh:team-color-lab:wpa'
 
 // Same per-(team, treatment) draft, for the main rectangle's own logo
-// position (LogoPositionControls) — `{ scale, offsetX, offsetY }`.
+// position (LogoPositionControls) — `{ scale, offsetX, offsetY, bg }`.
 const POS_LAB_KEY = 'bbsbh:team-color-lab:logopos'
 
 // Same again, for the header-recolor mockup (TreatmentHeaderPreview) —
@@ -254,14 +275,29 @@ export function TeamColorLab() {
   const [posDraft, setPosField, resetPosDraft] = useDraftStore(POS_LAB_KEY)
   const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(HEADER_LAB_KEY)
   const [collapsed, setCollapsed] = useState(loadCollapsed)
+  // The same curated-name save flow as UniformNamesPage.jsx, embedded here so
+  // a jersey's display name can be edited right next to the treatment tile it
+  // actually renders on, instead of cross-referencing a separate page.
+  // `savedNames` is the last-saved public/data/uniform-names.json map;
+  // `nameEdits` is this session's in-progress code -> text edits, same
+  // "merge edits over last-saved so an untouched row survives" save as that
+  // page's own handleSave.
+  const [savedNames, setSavedNames] = useState({})
+  const [nameEdits, setNameEdits] = useState({})
+  const [nameSaveStatus, setNameSaveStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
 
   // One call for all 30 clubs' current-season uniform catalog (verified to
   // accept a comma list — docs/uniforms-and-logos.md), so the jersey-match
   // field below never needs a per-team fetch.
   useEffect(() => {
     let cancelled = false
-    fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()).then((data) => {
-      if (!cancelled) setCatalog(data)
+    Promise.all([
+      fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()),
+      fetchUniformNameOverrides(),
+    ]).then(([catalogData, overrides]) => {
+      if (cancelled) return
+      setCatalog(catalogData)
+      setSavedNames(overrides)
     })
     return () => {
       cancelled = true
@@ -274,6 +310,35 @@ export function TeamColorLab() {
 
   const toggleCollapsed = (teamId) =>
     setCollapsed((was) => ({ ...was, [teamId]: was[teamId] === false ? true : false }))
+
+  const handleNameChange = (code, value) => {
+    setNameEdits((prev) => ({ ...prev, [code]: value }))
+    setNameSaveStatus(null)
+  }
+
+  async function handleSaveNames() {
+    setNameSaveStatus('saving')
+    const merged = { ...savedNames }
+    for (const [code, name] of Object.entries(nameEdits)) {
+      const trimmed = name.trim()
+      if (trimmed) merged[code] = trimmed
+      else delete merged[code]
+    }
+    try {
+      const res = await fetch(NAME_SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(merged),
+      })
+      if (!res.ok) throw new Error(`save failed: ${res.status}`)
+      primeUniformNameOverridesCache(merged)
+      setSavedNames(merged)
+      setNameEdits({})
+      setNameSaveStatus('saved')
+    } catch {
+      setNameSaveStatus('error')
+    }
+  }
 
   return (
     <div className="screen">
@@ -292,9 +357,23 @@ export function TeamColorLab() {
         tile’s WPA band color. Missing logos or colors show as a placeholder
         until supplied; every proposed edit here comes with a copy icon that
         tells Claude exactly what to change. Position lets you nudge/rescale
-        the main rectangle’s own logo; Header colors is an unwired mockup of
+        the main rectangle’s own logo and its Background field tries a new
+        tile-fill hex; Header colors is an unwired mockup of
         what a Blue/Gold header recolor could look like for this treatment.
+        Each tile’s name field is the same curated wording{' '}
+        <code>/uniform-names</code> edits — Save writes the whole map to{' '}
+        <code>public/data/uniform-names.json</code> while{' '}
+        <code>npm run dev</code> is running, no effect otherwise.
       </p>
+      <div className="uniformnames__actions">
+        <button className="btn" onClick={handleSaveNames} disabled={nameSaveStatus === 'saving'}>
+          Save
+        </button>
+        {nameSaveStatus === 'saved' && <span className="hint">Saved.</span>}
+        {nameSaveStatus === 'error' && (
+          <span className="hint hint--error">Save failed — is `npm run dev` running?</span>
+        )}
+      </div>
 
       <div className="colorlab__layout">
         <nav className="colorlab__nav" aria-label="Jump to team">
@@ -310,6 +389,9 @@ export function TeamColorLab() {
               key={id}
               teamId={id}
               catalog={catalog}
+              savedNames={savedNames}
+              nameEdits={nameEdits}
+              onNameChange={handleNameChange}
               wpaDraft={wpaDraft[id]}
               onWpaField={(treatment, field, value) => setWpaField(id, treatment, field, value)}
               onWpaReset={(treatment) => resetWpaDraft(id, treatment)}
@@ -338,6 +420,9 @@ function teamAnchorId(teamId) {
 function TeamColorRow({
   teamId,
   catalog,
+  savedNames,
+  nameEdits,
+  onNameChange,
   wpaDraft,
   onWpaField,
   onWpaReset,
@@ -396,26 +481,45 @@ function TeamColorRow({
       </button>
       {!collapsed && (
         <div className="colorlab__treatments">
-          {treatments.map((t) => (
-            <TreatmentBox
-              key={t.key}
-              teamId={teamId}
-              name={name}
-              treatment={t.key}
-              label={t.label}
-              catalog={catalog}
-              lastOpponent={lastOpponent}
-              wpaDraft={wpaDraft?.[t.key]}
-              onWpaField={(field, value) => onWpaField(t.key, field, value)}
-              onWpaReset={() => onWpaReset(t.key)}
-              posDraft={posDraft?.[t.key]}
-              onPosField={(field, value) => onPosField(t.key, field, value)}
-              onPosReset={() => onPosReset(t.key)}
-              headerDraft={headerDraft?.[t.key]}
-              onHeaderField={(field, value) => onHeaderField(t.key, field, value)}
-              onHeaderReset={() => onHeaderReset(t.key)}
-            />
-          ))}
+          {treatments.flatMap((t) => {
+            // A treatment sometimes covers more than one catalog jersey — most
+            // often Main, when a club has no Away-jersey override and wears
+            // both Home White and Road Grey under the same plain mark (see
+            // jerseyMatchesFor's own doc comment). Rather than cramming N name
+            // fields into one shared tile, duplicate the tile once per jersey
+            // — same colors/logo/WPA draft (they genuinely share the same
+            // treatment), just headed by that ONE jersey's own name, so
+            // scrolling the page surfaces every jersey that still needs
+            // reviewing instead of hiding a second one inside the first's box.
+            // `null` (no catalog match yet, or the catalog hasn't loaded) still
+            // renders exactly one tile, with the generic Main/Alternate/City
+            // Connect label and no name field — unchanged from before.
+            const matches = jerseyMatchesFor(catalog, teamId, t.key)
+            const jerseyItems = matches?.length ? matches : [null]
+            return jerseyItems.map((jerseyMatch) => (
+              <TreatmentBox
+                key={jerseyMatch ? `${t.key}:${jerseyMatch.code ?? jerseyMatch.label}` : t.key}
+                teamId={teamId}
+                name={name}
+                treatment={t.key}
+                label={t.label}
+                jerseyMatch={jerseyMatch}
+                savedNames={savedNames}
+                nameEdits={nameEdits}
+                onNameChange={onNameChange}
+                lastOpponent={lastOpponent}
+                wpaDraft={wpaDraft?.[t.key]}
+                onWpaField={(field, value) => onWpaField(t.key, field, value)}
+                onWpaReset={() => onWpaReset(t.key)}
+                posDraft={posDraft?.[t.key]}
+                onPosField={(field, value) => onPosField(t.key, field, value)}
+                onPosReset={() => onPosReset(t.key)}
+                headerDraft={headerDraft?.[t.key]}
+                onHeaderField={(field, value) => onHeaderField(t.key, field, value)}
+                onHeaderReset={() => onHeaderReset(t.key)}
+              />
+            ))
+          })}
         </div>
       )}
     </section>
@@ -427,7 +531,10 @@ function TreatmentBox({
   name,
   treatment,
   label,
-  catalog,
+  jerseyMatch,
+  savedNames,
+  nameEdits,
+  onNameChange,
   lastOpponent,
   wpaDraft,
   onWpaField,
@@ -440,15 +547,22 @@ function TreatmentBox({
   onHeaderReset,
 }) {
   const colors = colorsFor(teamId, treatment)
-  const jerseyMatches = jerseyMatchesFor(catalog, teamId, treatment)
-  // Every club is down to one jersey per logo treatment now, so the tile
-  // reads better headed by that jersey's own name (e.g. "Road Grey") than
-  // the generic Main/Alternate/City Connect bucket it lives in — the whole
-  // point of this page is recognizing at a glance which one you already
-  // locked in. Falls back to the generic label while the catalog is still
-  // loading, or for the rare treatment that doesn't resolve to exactly one
-  // jersey.
-  const displayLabel = jerseyMatches?.length === 1 ? jerseyMatches[0].label : label
+  // One tile per jersey this treatment covers (TeamColorRow's own flatMap
+  // duplicates the tile when there's more than one — see its doc comment) —
+  // so this box only ever has ITS OWN single jersey, if any, to head and name.
+  // `jerseyMatch` is null while the catalog hasn't loaded yet, or for a
+  // treatment with no catalog jersey at all; both fall back to the generic
+  // Main/Alternate/City Connect bucket label with no name field to edit.
+  const displayLabel = jerseyMatch?.label ?? label
+  // The same curated full name UniformNamesPage.jsx edits for this jersey. No
+  // code (no art procured for a future-season jersey yet) means nothing to
+  // edit against.
+  const nameField = jerseyMatch?.code
+    ? {
+        code: jerseyMatch.code,
+        value: nameEdits[jerseyMatch.code] ?? uniformDisplayName(jerseyMatch.text, teamClubName(teamId), jerseyMatch.code, savedNames),
+      }
+    : null
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   const pinstripeColor = treatment === 'main'
@@ -470,25 +584,35 @@ function TreatmentBox({
   const tint = override?.bgHex ?? (activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined)
   // A LogoPositionControls draft wins outright over every hardcoded default
   // below it — same "draft overrides curated default" pattern as the WPA
-  // preview's own size/rotate/offset fields.
+  // preview's own size/rotate/offset fields. `bg`/`pinstripe` are the same
+  // draft-wins-over-curated pattern applied to the tile's own background, so
+  // a proposed background — flat or pinstriped — can be tried live right
+  // next to the position knobs it's usually tuned alongside. Pinstripe seeds
+  // from whatever's already curated (`pinstripeColor`, computed above) so
+  // toggling starts from the tile's real current look, same as the WPA
+  // preview's own pinstripe checkbox.
   const treatmentScale = posDraft?.scale ?? override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
   const treatmentOffsetX = posDraft?.offsetX ?? TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
   const treatmentOffsetY = posDraft?.offsetY ?? TREATMENT_OFFSET_Y[teamId]?.[treatment] ?? 0
   const treatmentOriginY = TREATMENT_ORIGIN_Y[teamId]?.[treatment] ?? 'center'
+  const bgPinstripe = posDraft?.pinstripe ?? Boolean(pinstripeColor)
+  const treatmentBg = bgPinstripe
+    ? posDraft?.bg || pinstripeColor || DEFAULT_PINSTRIPE_COLOR
+    : posDraft?.bg || tint
   const hasPosDraft = posDraft && Object.keys(posDraft).length > 0
   const logoboxStyle =
-    tint || override || pinstripeColor || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
+    treatmentBg || override || bgPinstripe || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
       ? {
-          '--tint': tint,
+          '--tint': bgPinstripe ? undefined : treatmentBg,
           '--scale': 1.32 * treatmentScale,
           '--offset-x': `${treatmentOffsetX}%`,
           '--offset-y': `${treatmentOffsetY}%`,
           '--origin-y': treatmentOriginY,
-          '--pinstripe-color': pinstripeColor ?? undefined,
+          '--pinstripe-color': bgPinstripe ? treatmentBg : undefined,
           '--pinstripe-bg': pinstripeBg ?? undefined,
         }
       : undefined
-  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${pinstripeColor ? ' colorlab__logobox--pinstripe' : ''}`
+  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${bgPinstripe ? ' colorlab__logobox--pinstripe' : ''}`
 
   // The WPA preview's effective pinstripe state + color: a draft toggle/typed
   // value if present, else the real chart's own fallback chain
@@ -508,7 +632,17 @@ function TreatmentBox({
 
   return (
     <div className="colorlab__treatment">
-      <span className="colorlab__treatmentlabel">{displayLabel}</span>
+      <div className="colorlab__treatmentlabelrow">
+        <span className="colorlab__treatmentlabel">{displayLabel}</span>
+        {nameField && (
+          <input
+            className="searchbox__input colorlab__nameinput"
+            value={nameField.value}
+            placeholder="Display name"
+            onChange={(e) => onNameChange(nameField.code, e.target.value)}
+          />
+        )}
+      </div>
       <div className="colorlab__treatmentbox">
         <div className={logoboxClass} style={logoboxStyle}>
           <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />
@@ -539,6 +673,8 @@ function TreatmentBox({
           scale={treatmentScale}
           offsetX={treatmentOffsetX}
           offsetY={treatmentOffsetY}
+          bg={treatmentBg ?? ''}
+          pinstripe={bgPinstripe}
           hasDraft={hasPosDraft}
           onField={onPosField}
           onReset={onPosReset}
@@ -559,12 +695,13 @@ function TreatmentBox({
         teamId={teamId}
         treatment={treatment}
         lastOpponent={lastOpponent}
-        headerColors={headerColorsFor(colors, headerDraft)}
+        headerColors={headerColorsFor(colors, headerDraft, treatmentHeaderColorOverride(teamId, treatment))}
         wpaLayout={wpaLayout}
         wpaBandOverride={{ pinstripe: wpaPinstripe, color: wpaBand }}
       />
       <TreatmentHeaderPreview
         teamId={teamId}
+        treatment={treatment}
         name={name}
         treatmentLabel={displayLabel}
         colors={colors}
@@ -831,6 +968,35 @@ function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors, 
 // page-local only, same footing as TREATMENT_OFFSET_X/TREATMENT_ORIGIN_Y —
 // nothing writes back automatically; the copy icon hands over the literal to
 // paste in by hand.
+// Which teams.js swatch table backs a treatment's background color — so the
+// Background field's copy text can point at the exact array to edit, the
+// same way TREATMENT_SCALE/TREATMENT_OFFSET_X/Y already do for position.
+// 'main' has no entry: its background is either MAIN_OVERRIDES' `bgHex`
+// literal or one of TEAM_COLOR_PAIRS' three swatches by role (`bg`), so the
+// copy text spells both out instead of naming one array.
+const TREATMENT_COLOR_TABLE_NAME = {
+  alternate: 'ALT_COLORS',
+  'alternate-2': 'ALT2_COLORS',
+  'alternate-3': 'ALT3_COLORS',
+  'alternate-4': 'ALT4_COLORS',
+  'city-connect': 'CITY_CONNECT_COLORS',
+}
+
+function bgOverrideLocation(teamId, treatment, pinstripe) {
+  if (pinstripe) {
+    return treatment === 'main'
+      ? `src/lib/teams.js — MAIN_OVERRIDES[${teamId}].pinstripe: true (the line color itself is the shared default unless mainTreatmentPinstripeColor curates a per-team one)`
+      : `src/lib/teams.js — TREATMENT_PINSTRIPE_COLOR[${teamId}].${treatment} (a plain string for the line color, or { color, bg } to also set the fill under the stripes)`
+  }
+  const table = TREATMENT_COLOR_TABLE_NAME[treatment]
+  if (table) return `src/lib/teams.js — ${table}[${teamId}], the swatch flagged \`bg: true\` (background)`
+  return (
+    `src/lib/teams.js — MAIN_OVERRIDES[${teamId}].bgHex (a literal), or if it should ` +
+    `instead track one of the club's three brand swatches, MAIN_OVERRIDES[${teamId}].bg ` +
+    `('primary'/'secondary'/'third', see TEAM_COLOR_PAIRS/TEAM_COLORS/TEAM_COLOR_EXTRAS)`
+  )
+}
+
 function LogoPositionControls({
   teamId,
   name,
@@ -839,6 +1005,8 @@ function LogoPositionControls({
   scale,
   offsetX,
   offsetY,
+  bg,
+  pinstripe,
   hasDraft,
   onField,
   onReset,
@@ -848,8 +1016,10 @@ function LogoPositionControls({
     `Treatment: ${treatmentLabel}\n` +
     `Where: src/lib/teams.js — TREATMENT_SCALE[${teamId}].${treatment} (scale) / ` +
     `src/screens/TeamColorLab.jsx — TREATMENT_OFFSET_X[${teamId}].${treatment} and ` +
-    `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local)\n` +
-    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}`
+    `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local) / ` +
+    `${bgOverrideLocation(teamId, treatment, pinstripe)}\n` +
+    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}, ` +
+    (pinstripe ? `pinstripe: true, color: ${bg || '(none)'}` : `background: ${bg || '(none)'}`)
   return (
     <div className="colorlab__posinline">
       <div className="colorlab__wpapreviewhead">
@@ -879,6 +1049,14 @@ function LogoPositionControls({
           <span>Y</span>
           <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
         </label>
+        <label className="colorlab__posbgfield">
+          <span>{pinstripe ? 'Stripe' : 'Background'}</span>
+          <input type="text" value={bg} placeholder="#hex" onChange={(e) => onField('bg', e.target.value)} />
+        </label>
+        <label className="colorlab__posbgfield colorlab__poscheck">
+          <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
+          <span>Pinstripe</span>
+        </label>
       </div>
     </div>
   )
@@ -896,12 +1074,15 @@ const DEFAULT_HEADER_FONT = '#FBF6E9'
 // Shared by TreatmentHeaderPreview below AND TreatmentWpaScenarios above it —
 // so the win-probability scenario mockups' own header bars use the EXACT
 // same resolved Blue/Gold/Font this treatment's Header colors panel shows,
-// not a second computation that could drift from it.
-function headerColorsFor(colors, draft) {
+// not a second computation that could drift from it. Priority: a live
+// page-local draft edit, then a landed TREATMENT_HEADER_COLOR_OVERRIDES
+// entry (teams.js), then this tile's own lead swatches, then the app's
+// current brand pair.
+function headerColorsFor(colors, draft, override) {
   return {
-    blue: draft?.blue ?? colors[0]?.hex ?? DEFAULT_HEADER_BLUE,
-    gold: draft?.gold ?? colors[1]?.hex ?? DEFAULT_HEADER_GOLD,
-    font: draft?.font ?? DEFAULT_HEADER_FONT,
+    blue: draft?.blue ?? override?.blue ?? colors[0]?.hex ?? DEFAULT_HEADER_BLUE,
+    gold: draft?.gold ?? override?.gold ?? colors[1]?.hex ?? DEFAULT_HEADER_GOLD,
+    font: draft?.font ?? override?.font ?? DEFAULT_HEADER_FONT,
   }
 }
 
@@ -909,19 +1090,21 @@ function headerColorsFor(colors, draft) {
 // recolored to this club's brand for this treatment — NOT wired to any real
 // component. The site-wide theming idea this previews (neutral pages
 // matching a favorite team, game pages matching the home/batting team) is
-// still undecided, so there's no real override table to point at yet — this
-// is a design-lab sketch only, same "propose, don't wire" footing as the WPA
-// preview above it. Blue/Gold/Font are hex text fields seeded from this
-// tile's own two lead swatches (`colors`), persisted the same local-draft
-// way, with a copy icon that hands over the three hexes for whenever the
-// real feature gets built.
-function TreatmentHeaderPreview({ teamId, name, treatmentLabel, colors, draft, onField, onReset }) {
-  const { blue, gold, font } = headerColorsFor(colors, draft)
+// still undecided, so this is a design-lab sketch only, same "propose, don't
+// wire into the real app" footing as the WPA preview above it. Blue/Gold/
+// Font are hex text fields seeded from a landed TREATMENT_HEADER_COLOR_OVERRIDES
+// entry (teams.js) or, absent one, this tile's own two lead swatches
+// (`colors`); edits persist the same local-draft way, with a copy icon that
+// hands over the three hexes plus the table path to land them at.
+function TreatmentHeaderPreview({ teamId, treatment, name, treatmentLabel, colors, draft, onField, onReset }) {
+  const override = treatmentHeaderColorOverride(teamId, treatment)
+  const { blue, gold, font } = headerColorsFor(colors, draft, override)
   const hasDraft = draft && Object.keys(draft).length > 0
   const copyText =
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
-    `Proposed header recolor (design-lab preview only — no real override table wired up yet):\n` +
+    `Where: src/lib/teams.js — TREATMENT_HEADER_COLOR_OVERRIDES[${teamId}].${treatment} ` +
+    `(design-lab preview only — no real component reads this table yet)\n` +
     `blue: ${blue}, gold: ${gold}, font: ${font}`
   return (
     <div className="colorlab__wpapreview colorlab__headerpreview">

@@ -187,7 +187,7 @@ test('primeUniformNameOverridesCache makes fetchUniformNameOverrides return the 
 const BREWERS = 158
 const CATALOG = [
   { text: 'Brewers Home White Jersey', piece: 'J', code: '158_jersey_1_2026' },
-  { text: 'Brewers Away Grey Jersey', piece: 'J', code: '158_jersey_2_2026' },
+  { text: 'Brewers Road Powder Blue Jersey', piece: 'J', code: '158_jersey_2_2026' },
   { text: 'Brewers Alt 1 Pinstripe Jersey', piece: 'J', code: '158_jersey_3_2026' },
   // A non-jersey piece the builder must ignore.
   { text: 'Brewers Road Grey Pants', piece: 'P', code: '158_pants_1_2026' },
@@ -265,7 +265,7 @@ test('buildJerseyCombos orders Main before alternates and returns [] for an empt
   })
   assert.deepEqual(
     combos.map((c) => c.treatment),
-    ['main', 'main', 'alternate'],
+    ['main', 'alternate', 'alternate-3'],
   )
   assert.deepEqual(
     buildJerseyCombos({ catalogAssets: [], clubName: 'Brewers', schedule: [], wornByGame: {}, teamId: BREWERS }),
