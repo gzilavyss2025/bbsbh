@@ -140,14 +140,17 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 score, so the spoiler rule still holds on return; a same-device tab picks up
 another tab's reveal via a `storage` listener in `useRevealProgress.js`.
 
-**Two narrow, opt-in exceptions (`api/`).** Link previews: a thin Vercel edge
+**Three narrow, opt-in exceptions (`api/`).** Link previews: a thin Vercel edge
 layer (`api/og.js`, `api/preview.js`, `api/_lib/cards.js`) renders dynamic Open
 Graph cards for shared deep links, since crawlers don't run our JS.
 Crawler-only, fails safe to the static default card, never renders/fetches a
 score — see ADR-0012. Multi-device reveal sync: signing in (Clerk, off unless
 `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
 own devices via `api/reveal.js` + Upstash Redis — never a score, ratcheted
-server- and client-side, inert if unconfigured — see ADR-0022.
+server- and client-side, inert if unconfigured — see ADR-0022. Admin-editable
+copy: `api/copy.js` + `src/copy/` store the consent-pop-up wording (never a
+score, closed registry, public-cached read, allowlisted write) so the owner
+tunes it without a deploy — inert if unconfigured, see ADR-0025.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

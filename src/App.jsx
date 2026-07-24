@@ -17,6 +17,7 @@ function lazyNamed(loader, name) {
 }
 
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
+const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
 const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
@@ -178,6 +179,8 @@ export default function App() {
     content = <StandingsPage />
   } else if (route.name === 'fouls') {
     content = <FoulTrackerPage />
+  } else if (route.name === 'admin') {
+    content = <AdminCopyPage onBack={() => go('/')} />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {

@@ -22882,3 +22882,197 @@ button.gamehigh-matchup:active {
     transition: none;
   }
 }
+
+/* ============================================================
+   ADMIN COPY EDITOR — the unlinked /admin panel where the site owner tunes
+   the spoiler-consent wording (see src/screens/AdminCopy.jsx). Owner-only, so
+   the styling is functional rather than expressive; it reuses the semantic
+   tokens like every other surface.
+   ============================================================ */
+.admincopy__body {
+  padding-bottom: var(--space-6);
+}
+.admincopy__notice,
+.admincopy__lede {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  margin: var(--space-3) 0;
+}
+.admincopy__savebar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-2) 0;
+  background: var(--bg-canvas);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.admincopy__save {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+}
+.admincopy__save:disabled {
+  opacity: 0.5;
+}
+.admincopy__status {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.admincopy__status--error {
+  color: var(--accent-negative);
+}
+.admincopy__status--saved {
+  color: var(--field);
+}
+.admincopy__group {
+  margin-top: var(--space-5);
+}
+.admincopy__groupTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.admincopy__groupGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+.admincopy__field {
+  margin-bottom: var(--space-4);
+}
+.admincopy__label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.admincopy__help {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  margin: var(--space-1) 0 var(--space-2);
+}
+.admincopy__input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+.admincopy__fieldMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.admincopy__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.admincopy__count--over {
+  color: var(--accent-negative);
+}
+.admincopy__reset {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+.admincopy__reset:disabled {
+  opacity: 0.4;
+  text-decoration: none;
+}
+.admincopy__preview {
+  padding: var(--space-3);
+  background: var(--bg-canvas);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-md);
+}
+.admincopy__previewCard {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+.admincopy__previewTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  margin: 0 0 var(--space-2);
+}
+.admincopy__previewBody,
+.admincopy__previewHumor,
+.admincopy__previewReset {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  margin: 0 0 var(--space-2);
+}
+.admincopy__previewHumor {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.admincopy__previewReset {
+  color: var(--text-muted);
+}
+.admincopy__previewButtons {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.admincopy__previewBtn {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
+.admincopy__previewBtn--dismiss {
+  color: var(--text-body);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+.admincopy__previewBtn--confirm {
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+}
+@media (min-width: 720px) {
+  .admincopy__groupGrid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .admincopy__preview {
+    position: sticky;
+    top: var(--space-6);
+  }
+}

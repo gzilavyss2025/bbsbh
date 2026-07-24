@@ -19,6 +19,7 @@
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
 //   '/fouls'                            -> { name: 'fouls' }
+//   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
@@ -87,6 +88,12 @@ export function parseRoute(url) {
     return { name: 'all-star-legacy' }
   if (parts.length === 1 && parts[0] === 'standings') return { name: 'standings' }
   if (parts.length === 1 && parts[0] === 'fouls') return { name: 'fouls' }
+  // Admin copy editor — the site owner tunes consent-pop-up wording here. Not
+  // linked from anywhere in the app; reachable by URL and gated to a Clerk
+  // admin (see AdminCopy.jsx + api/copy.js). Parsed regardless so a stray
+  // production visit renders the (locked) panel rather than falling through to
+  // the generic game route.
+  if (parts.length === 1 && parts[0] === 'admin') return { name: 'admin' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
   if (parts.length === 1 && parts[0] === 'top-games') return { name: 'top-games' }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
