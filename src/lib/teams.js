@@ -342,7 +342,10 @@ export const ALT_COLORS = {
     { label: 'Primary', hex: '#DF4601' },
     { label: 'Secondary', hex: '#000000', bg: true },
   ], // Orioles
-  111: [{ label: 'Background', hex: '#0C2340', bg: true }], // Red Sox — Alt 1 Red jersey
+  111: [
+    { label: 'Primary', hex: '#BD3039' },
+    { label: 'Secondary', hex: '#0C2340', bg: true },
+  ], // Red Sox — Alt 1 Red jersey
   113: [
     { label: 'Primary', hex: '#C6011F', bg: true },
     { label: 'Secondary', hex: '#000000' },
@@ -515,7 +518,11 @@ export const ALT3_COLORS = {
   108: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Angels — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Alt 2 White (Blue Trim) Pullover jersey
   109: [{ label: 'Background', hex: '#000000', bg: true }], // Diamondbacks — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Alt 1 Black jersey
   110: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Orioles — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
-  111: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Red Sox — same mark as Alternate (alternate-3/BOS.png, copied), Alt White Marathon "Boston" jersey
+  111: [
+    { label: 'Background', hex: '#FFFFFF', bg: true },
+    { label: 'Primary', hex: '#BD3039' },
+    { label: 'Secondary', hex: '#0C2340' },
+  ], // Red Sox — same mark as Alternate (alternate-3/BOS.png, copied), Alt White Marathon "Boston" jersey
   112: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Cubs — same mark as Alternate (alternate-3/CHC.png, copied from alternate/CHC.png), Away Grey jersey
   119: [{ label: 'Gold', hex: '#FFD100', bg: true }], // Dodgers — same mark as Alternate (alternate-3/LAD.png, copied), "Gold Series" jersey
   135: [{ label: 'Sand', hex: '#C2B280', bg: true }], // Padres — same mark as Alternate (alternate-3/SD.png, copied), Alt 3 Sand Camouflage jersey
