@@ -474,29 +474,45 @@ function TeamColorRow({
       </button>
       {!collapsed && (
         <div className="colorlab__treatments">
-          {treatments.map((t) => (
-            <TreatmentBox
-              key={t.key}
-              teamId={teamId}
-              name={name}
-              treatment={t.key}
-              label={t.label}
-              catalog={catalog}
-              savedNames={savedNames}
-              nameEdits={nameEdits}
-              onNameChange={onNameChange}
-              lastOpponent={lastOpponent}
-              wpaDraft={wpaDraft?.[t.key]}
-              onWpaField={(field, value) => onWpaField(t.key, field, value)}
-              onWpaReset={() => onWpaReset(t.key)}
-              posDraft={posDraft?.[t.key]}
-              onPosField={(field, value) => onPosField(t.key, field, value)}
-              onPosReset={() => onPosReset(t.key)}
-              headerDraft={headerDraft?.[t.key]}
-              onHeaderField={(field, value) => onHeaderField(t.key, field, value)}
-              onHeaderReset={() => onHeaderReset(t.key)}
-            />
-          ))}
+          {treatments.flatMap((t) => {
+            // A treatment sometimes covers more than one catalog jersey — most
+            // often Main, when a club has no Away-jersey override and wears
+            // both Home White and Road Grey under the same plain mark (see
+            // jerseyMatchesFor's own doc comment). Rather than cramming N name
+            // fields into one shared tile, duplicate the tile once per jersey
+            // — same colors/logo/WPA draft (they genuinely share the same
+            // treatment), just headed by that ONE jersey's own name, so
+            // scrolling the page surfaces every jersey that still needs
+            // reviewing instead of hiding a second one inside the first's box.
+            // `null` (no catalog match yet, or the catalog hasn't loaded) still
+            // renders exactly one tile, with the generic Main/Alternate/City
+            // Connect label and no name field — unchanged from before.
+            const matches = jerseyMatchesFor(catalog, teamId, t.key)
+            const jerseyItems = matches?.length ? matches : [null]
+            return jerseyItems.map((jerseyMatch) => (
+              <TreatmentBox
+                key={jerseyMatch ? `${t.key}:${jerseyMatch.code ?? jerseyMatch.label}` : t.key}
+                teamId={teamId}
+                name={name}
+                treatment={t.key}
+                label={t.label}
+                jerseyMatch={jerseyMatch}
+                savedNames={savedNames}
+                nameEdits={nameEdits}
+                onNameChange={onNameChange}
+                lastOpponent={lastOpponent}
+                wpaDraft={wpaDraft?.[t.key]}
+                onWpaField={(field, value) => onWpaField(t.key, field, value)}
+                onWpaReset={() => onWpaReset(t.key)}
+                posDraft={posDraft?.[t.key]}
+                onPosField={(field, value) => onPosField(t.key, field, value)}
+                onPosReset={() => onPosReset(t.key)}
+                headerDraft={headerDraft?.[t.key]}
+                onHeaderField={(field, value) => onHeaderField(t.key, field, value)}
+                onHeaderReset={() => onHeaderReset(t.key)}
+              />
+            ))
+          })}
         </div>
       )}
     </section>
@@ -508,7 +524,7 @@ function TreatmentBox({
   name,
   treatment,
   label,
-  catalog,
+  jerseyMatch,
   savedNames,
   nameEdits,
   onNameChange,
@@ -524,29 +540,22 @@ function TreatmentBox({
   onHeaderReset,
 }) {
   const colors = colorsFor(teamId, treatment)
-  const jerseyMatches = jerseyMatchesFor(catalog, teamId, treatment)
-  // Most clubs are down to one jersey per logo treatment, so the tile reads
-  // better headed by that jersey's own name (e.g. "Road Grey") than the
-  // generic Main/Alternate/City Connect bucket it lives in — the whole point
-  // of this page is recognizing at a glance which one you already locked in.
-  // Falls back to the generic label while the catalog is still loading, or
-  // for a treatment that doesn't resolve to exactly one jersey — Main is the
-  // common multi-match case (a club with no Away-jersey override, like the
-  // Athletics, wears its Home White AND Road Grey both under plain Main).
-  const displayLabel = jerseyMatches?.length === 1 ? jerseyMatches[0].label : label
-  // The same curated full names UniformNamesPage.jsx edits, one editable
-  // field per jersey this tile's treatment actually covers (usually one; two
-  // for a Main bucket holding both Home and Away, see displayLabel above). A
-  // match with no code (no art procured for a future-season jersey yet) has
-  // nothing to edit against.
-  const clubName = teamClubName(teamId)
-  const nameFields = (jerseyMatches ?? [])
-    .filter((m) => m.code)
-    .map((m) => ({
-      code: m.code,
-      jerseyLabel: m.label,
-      value: nameEdits[m.code] ?? uniformDisplayName(m.text, clubName, m.code, savedNames),
-    }))
+  // One tile per jersey this treatment covers (TeamColorRow's own flatMap
+  // duplicates the tile when there's more than one — see its doc comment) —
+  // so this box only ever has ITS OWN single jersey, if any, to head and name.
+  // `jerseyMatch` is null while the catalog hasn't loaded yet, or for a
+  // treatment with no catalog jersey at all; both fall back to the generic
+  // Main/Alternate/City Connect bucket label with no name field to edit.
+  const displayLabel = jerseyMatch?.label ?? label
+  // The same curated full name UniformNamesPage.jsx edits for this jersey. No
+  // code (no art procured for a future-season jersey yet) means nothing to
+  // edit against.
+  const nameField = jerseyMatch?.code
+    ? {
+        code: jerseyMatch.code,
+        value: nameEdits[jerseyMatch.code] ?? uniformDisplayName(jerseyMatch.text, teamClubName(teamId), jerseyMatch.code, savedNames),
+      }
+    : null
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   const pinstripeColor = treatment === 'main'
@@ -608,20 +617,13 @@ function TreatmentBox({
     <div className="colorlab__treatment">
       <div className="colorlab__treatmentlabelrow">
         <span className="colorlab__treatmentlabel">{displayLabel}</span>
-        {nameFields.length > 0 && (
-          <div className="colorlab__nameedits">
-            {nameFields.map((f) => (
-              <label key={f.code} className="colorlab__nameeditfield">
-                {nameFields.length > 1 && <span className="colorlab__nameeditlabel">{f.jerseyLabel}</span>}
-                <input
-                  className="searchbox__input colorlab__nameinput"
-                  value={f.value}
-                  placeholder="Display name"
-                  onChange={(e) => onNameChange(f.code, e.target.value)}
-                />
-              </label>
-            ))}
-          </div>
+        {nameField && (
+          <input
+            className="searchbox__input colorlab__nameinput"
+            value={nameField.value}
+            placeholder="Display name"
+            onChange={(e) => onNameChange(nameField.code, e.target.value)}
+          />
         )}
       </div>
       <div className="colorlab__treatmentbox">

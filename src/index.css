@@ -8358,39 +8358,19 @@ body {
   color: var(--text-caption);
 }
 
-/* Pairs .colorlab__treatmentlabel with its curated-name edit box(es) (the
-   same field(s) UniformNamesPage.jsx's own rows edit) on one line, label
-   left, input(s) right — the page-level Save button (colorlab's own
-   .uniformnames__actions, reused as-is) writes every tile's edit at once. */
+/* Pairs .colorlab__treatmentlabel with its curated-name edit box (the same
+   field UniformNamesPage.jsx's own row edits) on one line, label left, input
+   right — the page-level Save button (colorlab's own .uniformnames__actions,
+   reused as-is) writes every tile's edit at once. A treatment covering more
+   than one catalog jersey (e.g. Main, when a club wears both Home White and
+   Road Grey under the same mark) gets one DUPLICATE .colorlab__treatment card
+   per jersey instead of two fields crammed into one row — see
+   TeamColorRow's own flatMap — so this row only ever holds a single field. */
 .colorlab__treatmentlabelrow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-}
-
-/* Stacks one edit field per jersey a Main-style tile's treatment actually
-   covers — usually one, but a club with no Away-jersey override wears both
-   Home and Road under plain Main, so that bucket needs two. */
-.colorlab__nameedits {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-1);
-}
-
-.colorlab__nameeditfield {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Only shown when a tile has more than one edit field, so each one reads
-   which jersey it names instead of two unlabeled boxes stacked together. */
-.colorlab__nameeditlabel {
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
-  white-space: nowrap;
 }
 
 .colorlab__nameinput {
