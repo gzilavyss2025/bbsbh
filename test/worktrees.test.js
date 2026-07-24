@@ -192,3 +192,43 @@ test('gatherFacts reports no upstream for a genuinely never-pushed branch', () =
   assert.equal(facts.upstream, null)
   assert.equal(classifyWorktree(facts).stale, false)
 })
+
+test('gatherFacts counts commits origin/main has gained since the branch was cut', () => {
+  const facts = gatherFacts(
+    { root: '/wt', branch: 'claude/long-open-pr', isPrimary: false },
+    fakeGit({
+      'rev-parse --abbrev-ref origin/HEAD': 'origin/main',
+      'for-each-ref': 'origin/claude/long-open-pr',
+      'rev-parse --verify --quiet': 'aaaaaaa',
+      'merge-base --is-ancestor': null, // unmerged
+      'status --porcelain': '',
+      'rev-list --count HEAD..origin/main': '16',
+    }),
+  )
+  assert.equal(facts.behind, 16)
+  assert.equal(classifyWorktree(facts).stale, false)
+})
+
+test('gatherFacts reports zero behind for a branch caught up with origin/main', () => {
+  const facts = gatherFacts(
+    { root: '/wt', branch: 'claude/just-synced', isPrimary: false },
+    fakeGit({
+      'rev-parse --abbrev-ref origin/HEAD': 'origin/main',
+      'for-each-ref': 'origin/claude/just-synced',
+      'status --porcelain': '',
+      'rev-list --count HEAD..origin/main': '0',
+    }),
+  )
+  assert.equal(facts.behind, 0)
+})
+
+test('gatherFacts reports zero behind for a detached (branchless) worktree', () => {
+  const facts = gatherFacts(
+    { root: '/wt', branch: null, isPrimary: false },
+    fakeGit({
+      'rev-parse --abbrev-ref origin/HEAD': 'origin/main',
+      'status --porcelain': '',
+    }),
+  )
+  assert.equal(facts.behind, 0)
+})
