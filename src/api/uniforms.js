@@ -202,6 +202,25 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '144_jersey_2_2026': 'alternate-3', // Braves Road Grey — worn with the Alternate 3 mark, not plain Main
   '145_jersey_1_2026': 'alternate', // White Sox Home Pinstripe — worn with the Alternate mark, not plain Main
   '145_jersey_3_2026': 'alternate-2', // White Sox Alt 1 Black "Sox" — worn with the Alternate 2 mark
+  '145_jersey_4_2026': 'alternate-3', // White Sox Alt 2 "Southside" — worn with the Alternate 3 mark
+  '108_jersey_3_2026': 'alternate-2', // Angels Alt 1 Red — worn with the Alternate 2 mark
+  '108_jersey_4_2026': 'alternate-3', // Angels Alt 2 White (Blue Trim) Pullover — worn with the Alternate 3 mark
+  '111_jersey_4_2026': 'alternate-2', // Red Sox Alt 2 Yellow — worn with the Alternate 2 mark
+  '111_jersey_6_2026': 'alternate-3', // Red Sox Alt White Marathon "Boston" — worn with the Alternate 3 mark
+  '113_jersey_4_2026': 'alternate-2', // Reds Alt 2 Black "CINCY" — worn with the Alternate 2 mark
+  '114_jersey_3_2026': 'alternate-2', // Guardians Alt 1 Red — worn with the Alternate 2 mark
+  '116_jersey_4_2026': 'alternate-2', // Tigers Alt 2 Navy — worn with the Alternate 2 mark
+  '117_jersey_4_2026': 'alternate-2', // Astros Alt Blue — worn with the Alternate 2 mark
+  '119_jersey_4_2026': 'alternate-2', // Dodgers Alt 2 All Blue "Los Angeles" — worn with the Alternate 2 mark
+  '119_jersey_6_2026': 'alternate-3', // Dodgers "Gold Series" — worn with the Alternate 3 mark
+  '121_jersey_4_2026': 'alternate-2', // Mets Alt 2 Blue Pullover "New York" — worn with the Alternate 2 mark
+  '134_jersey_4_2026': 'alternate-2', // Pirates Alt 2 Black "Pittsburgh" — worn with the Alternate 2 mark
+  '135_jersey_4_2026': 'alternate-2', // Padres Alt 2 Green Camouflage — worn with the Alternate 2 mark
+  '135_jersey_6_2026': 'alternate-3', // Padres Alt 3 Sand Camouflage — worn with the Alternate 3 mark
+  '139_jersey_4_2026': 'alternate-2', // Rays Alt 2 White "Devil Rays" — worn with the Alternate 2 mark
+  '140_jersey_3_2026': 'alternate-3', // Rangers Alt 1 Baby Blue — worn with the Alternate 3 mark
+  '142_jersey_3_2026': 'alternate-2', // Twins Alt 1 Cream "Twin Cities" — worn with the Alternate 2 mark
+  '143_jersey_4_2026': 'alternate-2', // Phillies Alt 2 Baby Blue — worn with the Alternate 2 mark
 }
 
 // Which logo TREATMENT ('main' | 'alternate' | 'alternate-2' | 'alternate-3' |

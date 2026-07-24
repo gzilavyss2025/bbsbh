@@ -90,7 +90,7 @@ test('treatmentBgColor returns the bg:true hex for a curated team/treatment', ()
 })
 
 test('treatmentBgColor returns null for a team with no curated background yet', () => {
-  assert.equal(treatmentBgColor(116, 'alternate'), null) // Tigers — no ALT_COLORS entry
+  assert.equal(treatmentBgColor(116, 'alternate-4'), null) // Tigers — no ALT4_COLORS entry
 })
 
 test('treatmentBgColor returns null for a pinstriped tile with no flat bg swatch', () => {
@@ -136,7 +136,7 @@ test('hasAlternate2 is true for a team with curated colors or an explicit base-l
 })
 
 test('hasAlternate2 is false for a team with no Alternate 2 set up', () => {
-  assert.equal(hasAlternate2(111), false) // Red Sox
+  assert.equal(hasAlternate2(115), false) // Rockies
 })
 
 test('hasAlternate3 is true only for teams with an ALT3_COLORS entry', () => {
