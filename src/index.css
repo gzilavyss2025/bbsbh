@@ -2844,7 +2844,7 @@ body {
   backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
   -webkit-backface-visibility: hidden;
   width: 100%;
-  max-width: 108px;
+  max-width: 130px;
   aspect-ratio: 1 / 1;
   justify-self: center;
   display: flex;
