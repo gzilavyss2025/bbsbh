@@ -14398,6 +14398,7 @@ body {
    panning; useDragScroll (JerseyCombos.jsx) adds mouse click-drag. */
 .jerseystrip {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -14413,8 +14414,11 @@ body {
   cursor: grabbing;
 }
 .jerseycombo {
-  flex: 0 0 auto;
-  width: 104px;
+  flex: 1 1 0;
+  min-width: 90px;
+  /* Grow to fill the row instead of scrolling at a fixed 104px, but keep
+     the original card's proportions (104x123) as it scales up. */
+  aspect-ratio: 104 / 123;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -14488,6 +14492,7 @@ body {
   pointer-events: none;
 }
 .jerseycombo__rec {
+  margin-top: auto;
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
   color: var(--text-muted);
