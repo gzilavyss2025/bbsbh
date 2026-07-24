@@ -29,11 +29,11 @@ const OPTIONS = [
   },
   {
     id: 'clubhouse',
-    name: 'Clubhouse Tall',
-    eyebrow: 'Most athletic',
+    name: 'Clubhouse L1',
+    eyebrow: 'New direction',
     rationale:
-      'Taller, narrower letterforms borrow the confidence of jersey names. The paired L stems read like scorebook columns and make the middle feel intentional.',
-    detail: 'Tall display · 2.8:1 · paired score columns',
+      'The second L becomes a 1, turning the middle into L1—the scorebook notation baked into the name. The underline annotates that pair instead of merely decorating it.',
+    detail: 'Tall display · L1 scorebook notation · annotated pair',
   },
 ]
 
@@ -112,9 +112,29 @@ function ClubhouseWordmark({ title, ...props }) {
         fontWeight="900"
         letterSpacing="1"
       >
-        TALLY
+        TAL
       </text>
-      <rect x="130" y="87" width="52" height="5" rx="2.5" fill="currentColor" />
+      <text
+        x="137"
+        y="83"
+        fill="currentColor"
+        fontFamily="Big Shoulders Display, IBM Plex Sans Condensed, sans-serif"
+        fontSize="94"
+        fontWeight="900"
+      >
+        1
+      </text>
+      <text
+        x="174"
+        y="83"
+        fill="currentColor"
+        fontFamily="Big Shoulders Display, IBM Plex Sans Condensed, sans-serif"
+        fontSize="94"
+        fontWeight="900"
+      >
+        Y
+      </text>
+      <rect x="95" y="87" width="77" height="5" rx="2.5" fill="currentColor" />
     </svg>
   )
 }
@@ -229,7 +249,7 @@ function ContextMockups({ variant }) {
 }
 
 export function WordmarkLab() {
-  const [selected, setSelected] = useState(OPTIONS[0].id)
+  const [selected, setSelected] = useState('clubhouse')
   const selectedOption = OPTIONS.find((option) => option.id === selected)
 
   return (
@@ -288,11 +308,11 @@ export function WordmarkLab() {
 
         <section className="wordmarklab__recommendation">
           <span className="wordmarklab__eyebrow">My read</span>
-          <h2>Scorebook Cut is the strongest next round.</h2>
+          <h2>Clubhouse L1 is the most ownable idea.</h2>
           <p>
-            It preserves the recognizable DNA of the current mark, but turns the “hard to describe”
-            piece into a repeatable brand move: one rule, one height, one reason. Diamond Counter is
-            the best alternate if the priority shifts toward maximum simplicity.
+            The substitution works because it is not a baseball ornament placed beside the name—the
+            scorebook language is the name. The next refinement is optical: make the 1 unmistakable
+            without letting a first-time reader stop at “Tal-one-y.”
           </p>
         </section>
       </main>
