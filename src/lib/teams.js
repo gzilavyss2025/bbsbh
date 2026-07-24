@@ -370,7 +370,10 @@ export const ALT_COLORS = {
   119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers — Alt 1 Road Grey "Dodgers" jersey
   121: [{ label: 'Black', hex: '#000000', bg: true }], // Mets — procured mark (alternate/NYM.png), Alt 1 Black jersey
   134: [{ label: 'Black', hex: '#27251F', bg: true }], // Pirates — same plain CDN mark as Main (ALT_USES_BASE_LOGO above), Alt 1 Black "P" jersey
-  142: [{ label: 'Navy', hex: '#002B5C', bg: true }], // Twins — same plain CDN mark as Main (ALT_USES_BASE_LOGO above), Alt 2 Navy jersey
+  142: [
+    { label: 'Navy', hex: '#002B5C' },
+    { label: 'Background', hex: '#E8DCC0', bg: true },
+  ], // Twins — same plain CDN mark as Main (ALT_USES_BASE_LOGO above), Alt 2 Navy jersey
   143: [{ label: 'Cream', hex: '#F5F0E1', bg: true }], // Phillies — procured mark (alternate/PHI.png), Alt 1 Cream jersey
   133: [
     { label: 'Primary', hex: '#003831' },
@@ -453,8 +456,8 @@ export const CITY_CONNECT_COLORS = {
   138: [{ label: 'Primary', hex: '#C41E3A', bg: true }], // Cardinals — "The Lou" mark on their standard red
   146: [{ label: 'Background', hex: '#000000', bg: true }], // Marlins
   158: [
-    { label: 'Primary', hex: '#0C436A', bg: true },
-    { label: 'Secondary', hex: '#ff6c58' },
+    { label: 'Primary', hex: '#0C436A' },
+    { label: 'Secondary', hex: '#ff6c58', bg: true },
   ], // Brewers
   141: [{ label: 'Background', hex: '#161827', bg: true }], // Blue Jays
   137: [{ label: 'Background', hex: '#27251F', bg: true }], // Giants — script "SF" mark, near-black brand secondary (temporary, pending real City Connect background)
@@ -493,12 +496,15 @@ export const ALT2_COLORS = {
   114: [{ label: 'Red', hex: '#E31937', bg: true }], // Guardians — same mark as Alternate (alternate-2/CLE.png, copied), Alt 1 Red jersey
   116: [{ label: 'Navy', hex: '#0C2340', bg: true }], // Tigers — same recolored-white Old English "D" as Main (alternate-2/DET.svg, ALT_LOGO_SVG above), Alt 2 Navy jersey
   117: [{ label: 'Navy', hex: '#002D62', bg: true }], // Astros — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt Blue jersey
-  119: [{ label: 'Blue', hex: '#005A9C', bg: true }], // Dodgers — same mark as Alternate (alternate-2/LAD.png, copied), Alt 2 All Blue jersey
+  119: [
+    { label: 'Blue', hex: '#005A9C' },
+    { label: 'Background', hex: '#FFFDF6', bg: true },
+  ], // Dodgers — same mark as Alternate (alternate-2/LAD.png, copied), Alt 2 All Blue jersey
   121: [{ label: 'Blue', hex: '#002D72', bg: true }], // Mets — same mark as Alternate (alternate-2/NYM.png, copied), Alt 2 Blue Pullover jersey
   134: [{ label: 'Gold', hex: '#FDB827', bg: true }], // Pirates — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 2 Black "Pittsburgh" jersey
   135: [{ label: 'Green', hex: '#4B5320', bg: true }], // Padres — same mark as Alternate (alternate-2/SD.png, copied), Alt 2 Green Camouflage jersey
   139: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Rays — same mark as Alternate (alternate-2/TB.png, copied), Alt 2 White "Devil Rays" jersey
-  142: [{ label: 'Cream', hex: '#F5F0E1', bg: true }], // Twins — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Cream "Twin Cities" jersey
+  142: [{ label: 'Cream', hex: '#E8DCC0', bg: true }], // Twins — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Cream "Twin Cities" jersey
   143: [{ label: 'Baby Blue', hex: '#8ECAE6', bg: true }], // Phillies — same mark as Alternate (alternate-2/PHI.png, copied), Alt 2 Baby Blue jersey
   110: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Orioles — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Home White jersey
   112: [{ label: 'Background', hex: '#7698CE', bg: true }], // Cubs
@@ -541,7 +547,10 @@ export const ALT3_COLORS = {
     { label: 'Secondary', hex: '#0C2340' },
   ], // Red Sox — same mark as Alternate (alternate-3/BOS.png, copied), Alt White Marathon "Boston" jersey
   112: [{ label: 'Blue', hex: '#0E3386', bg: true }], // Cubs — same mark as Alternate (alternate-3/CHC.png, copied from alternate/CHC.png), Away Grey jersey
-  119: [{ label: 'Gold', hex: '#FFD100', bg: true }], // Dodgers — same mark as Alternate (alternate-3/LAD.png, copied), "Gold Series" jersey
+  119: [
+    { label: 'Gold', hex: '#FFD100' },
+    { label: 'Background', hex: '#F6EFDC', bg: true },
+  ], // Dodgers — same mark as Alternate (alternate-3/LAD.png, copied), "Gold Series" jersey
   135: [{ label: 'Sand', hex: '#C2B280', bg: true }], // Padres — same mark as Alternate (alternate-3/SD.png, copied), Alt 3 Sand Camouflage jersey
   136: [{ label: 'Background', hex: '#000000', bg: true }], // Mariners
   140: [{ label: 'Baby Blue', hex: '#8ECAE6', bg: true }], // Rangers — same mark as Alternate (alternate-3/TEX.png, copied), Alt 1 Baby Blue jersey
@@ -623,12 +632,12 @@ export function treatmentBgColor(teamId, treatment) {
 export const TREATMENT_SCALE = {
   139: { alternate: 1.6 }, // Rays — mark reads small against the tint at 1.32 alone
   116: { alternate: 1.03 }, // Tigers — Old English "D" mark, barely bumped up off the default 1.32 edge-bleed
-  114: { 'city-connect': 0.97 }, // Guardians — "CLE" wordmark, barely shrunk off the default 1.32 edge-bleed
-  113: { 'city-connect': 0.75 }, // Reds — the "C" mark already touches all four
+  114: { 'city-connect': 0.76 }, // Guardians — "CLE" wordmark, barely shrunk off the default 1.32 edge-bleed
+  113: { 'city-connect': 0.84 }, // Reds — the "C" mark already touches all four
   // edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink
   // down so the whole mark stays inside the tile.
   117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
-  118: { alternate: 0.85, 'alternate-2': 0.85 }, // Royals — same KC mark + scale as Main's own override
+  118: { alternate: 0.85, 'alternate-2': 0.85, 'city-connect': 0.81 }, // Royals — same KC mark + scale as Main's own override
   109: { alternate: 1.1, 'alternate-2': 0.77 }, // Diamondbacks — Alternate bumped up so the top-anchored bleed just barely clips the teal border; Alternate 2 (Away Grey) shrunk off the default
   115: { 'city-connect': 1.15 }, // Rockies — mark reads small against the tint at 1.32 alone
   136: { alternate: 0.95 }, // Mariners — shrunk 5% off the default 1.32 edge-bleed
@@ -646,6 +655,9 @@ export const TREATMENT_SCALE = {
   158: { alternate: 0.86, 'alternate-2': 0.99 }, // Brewers — Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed; Alt 2 Navy Blue nearly full size
   144: { 'city-connect': 1.04, alternate: 1.04 }, // Braves — City Connect 2.0 and Alt 1 Red marks both nudged up 4% off the default 1.32 edge-bleed
   145: { 'city-connect': 1.07 }, // White Sox — City Connect 2.0 mark reads small against the tint at 1.32 alone
+  119: { alternate: 0.94, 'alternate-4': 0.81 }, // Dodgers
+  146: { 'alternate-2': 1.03, 'alternate-3': 1.04, 'city-connect': 0.8 }, // Marlins
+  142: { alternate: 0.85, 'alternate-2': 0.85, 'alternate-3': 0.85 }, // Twins
 }
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same
@@ -686,11 +698,54 @@ export function treatmentPinstripeBg(teamId, treatment) {
 // undecided — this table only backs the design-lab preview so far, no real
 // component reads it yet.
 export const TREATMENT_HEADER_COLOR_OVERRIDES = {
-  109: { 'city-connect': { blue: '#523178', gold: '#0097A9', font: '#FBF6E9' } }, // Diamondbacks City Connect 2.0
-  116: { alternate: { blue: '#FA4616', gold: '#0C2340', font: '#FBF6E9' } }, // Tigers Alt 1 Orange
+  109: {
+    main: { blue: '#A71930', gold: '#30CED8', font: '#FBF6E9' }, // Diamondbacks Home Cream
+    alternate: { blue: '#A71930', gold: '#30CED8', font: '#FBF6E9' }, // Diamondbacks Alt 2 Red
+    'alternate-2': { blue: '#A29E9F', gold: '#A71930', font: '#000000' }, // Diamondbacks Away Grey
+    'alternate-3': { blue: '#000000', gold: '#30CED8', font: '#FBF6E9' }, // Diamondbacks Alt 1 Black
+    'city-connect': { blue: '#523178', gold: '#0097A9', font: '#FBF6E9' }, // Diamondbacks City Connect 2.0
+  },
+  133: {
+    'alternate-2': { blue: '#003831', gold: '#9EA2A2', font: '#FBF6E9' }, // Athletics Road Grey
+  },
+  116: {
+    alternate: { blue: '#FA4616', gold: '#0C2340', font: '#FBF6E9' }, // Tigers Alt 1 Orange
+    'alternate-3': { blue: '#9EA2A2', gold: '#0C2340', font: '#FBF6E9' }, // Tigers Away Grey
+  },
+  117: {
+    alternate: { blue: '#EB6E1F', gold: '#002D62', font: '#FBF6E9' }, // Astros Alt Orange
+    'alternate-2': { blue: '#002D62', gold: '#EB6E1F', font: '#FBF6E9' }, // Astros Alt Blue
+    'alternate-3': { blue: '#002D62', gold: '#EB6E1F', font: '#FBF6E9' }, // Astros Road Grey
+  },
+  118: {
+    'city-connect': { blue: '#FFFFFF', gold: '#B5824A', font: '#004687' }, // Royals City Connect 2.0
+  },
+  108: {
+    alternate: { blue: '#003263', gold: '#BA0021', font: '#FBF6E9' }, // Angels Away Grey
+    'alternate-3': { blue: '#BA0021', gold: '#B5824A', font: '#FBF6E9' }, // Angels Alt 2 White (Blue Trim) Pullover
+  },
+  119: {
+    main: { blue: '#005A9C', gold: '#EF3E42', font: '#FBF6E9' }, // Dodgers Home White
+    alternate: { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers Alt 1 Road Grey "Dodgers"
+    'alternate-3': { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers "Gold Series"
+    'alternate-4': { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers Road Grey "Los Angeles"
+    'city-connect': { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers City Connect
+  },
+  146: {
+    'alternate-3': { blue: '#009CA7', gold: '#000000', font: '#FBF6E9' }, // Marlins Alt 2 Teal
+  },
+  158: {
+    'city-connect': { blue: '#0C436A', gold: '#ff6c58', font: '#FBF6E9' }, // Brewers City Connect 2.0
+  },
+  142: {
+    alternate: { blue: '#002B5C', gold: '#D31145', font: '#FBF6E9' }, // Twins Alt 2 Navy
+    'alternate-2': { blue: '#002B5C', gold: '#D31145', font: '#FBF6E9' }, // Twins Alt 1 Cream "Twin Cities"
+    'alternate-3': { blue: '#9EA2A2', gold: '#D31145', font: '#FBF6E9' }, // Twins Away Grey
+  },
   115: {
-    main: { blue: '#C4CED4', gold: '#33006F', font: '#000000' }, // Rockies Home Pinstripe
-    alternate: { blue: '#33006F', gold: '#000000', font: '#FBF6E9' }, // Rockies Alt 1 Purple
+    main: { blue: '#33006F', gold: '#C4CED4', font: '#FBF6E9' }, // Rockies Home Pinstripe
+    alternate: { blue: '#33006F', gold: '#C4CED4', font: '#FBF6E9' }, // Rockies Alt 1 Purple
+    'alternate-2': { blue: '#9EA2A2', gold: '#33006F', font: '#FBF6E9' }, // Rockies Away Grey
   },
   114: {
     main: { blue: '#00385D', gold: '#E50022', font: '#FBF6E9' }, // Guardians Home White
@@ -702,6 +757,7 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = {
   144: {
     main: { blue: '#13274F', gold: '#CE1141', font: '#FBF6E9' }, // Braves Alt 2 Navy
     'alternate-2': { blue: '#F5F0E1', gold: '#CE1141', font: '#13274F' }, // Braves Home White
+    'alternate-3': { blue: '#A2AAAD', gold: '#CE1141', font: '#FBF6E9' }, // Braves Road Grey
     'city-connect': { blue: '#7BA7D8', gold: '#D32826', font: '#FBF6E9' }, // Braves City Connect 2.0
   },
   111: {
@@ -714,6 +770,7 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = {
   },
   113: {
     'alternate-3': { blue: '#C6011F', gold: '#000000', font: '#FBF6E9' }, // Reds Away Grey
+    'city-connect': { blue: '#000000', gold: '#C6011F', font: '#FBF6E9' }, // Reds City Connect 2.0
   },
   110: {
     main: { blue: '#DF4601', gold: '#000000', font: '#FBF6E9' }, // Orioles Alt 2 Orange
@@ -796,7 +853,7 @@ export const MAIN_OVERRIDES = {
   143: { bg: 'primary', recolor: true }, // Phillies — red/white swapped
   144: { bg: 'secondary', recolor: true }, // Braves — red -> white (bg matches the navy border)
   145: { bg: 'secondary' }, // White Sox
-  146: { bg: 'third' }, // Marlins — Slate Gray
+  146: { bg: 'primary' }, // Marlins — matches the club's own Primary blue (#00A3E0)
   // Yankees — white with the shared black pinstripe (mainTreatmentPinstripe)
   // to match their home pinstripe jersey, instead of a flat navy tile. No
   // `recolor` — the plain mlbstatic mark is already navy, so this wears the
