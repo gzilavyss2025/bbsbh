@@ -16280,10 +16280,15 @@ body {
 .cbk__frac {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cbk__rate {
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   color: var(--text-heading);
-  white-space: nowrap;
+}
+.cbk__rate--over {
+  color: var(--field-deep);
 }
 .cbk__of {
   font-weight: var(--w-regular);
@@ -16302,56 +16307,35 @@ body {
   padding: 1px 7px;
   margin-left: 7px;
 }
-.cbk__track {
-  position: relative;
-  height: 10px;
-  background: var(--bg-page);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-pill);
+/* One depth's distribution rail — reuses the .team-score__track/dot/tooltip
+   visuals (all 30 clubs plotted 0 → the MLB leader). */
+.cbk__rail {
+  margin: 2px 1px 0;
 }
-.cbk__fill {
+/* The pooled MLB-average rate, an upright marker behind the dots (rendered
+   before them in the DOM so a club dot always paints on top). */
+.cbk__avg {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  background: var(--seal);
-  border-radius: var(--radius-pill);
+  top: 6px;
+  height: 14px;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--rule);
 }
-.cbk__fill--over {
-  background: var(--accent-positive);
-}
-/* The pooled MLB-average rate, a thin upright marker poking just proud of the
-   track so "we clear the league mark" reads at a glance. */
-.cbk__tick {
-  position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--text-muted);
-  border-radius: var(--radius-pill);
-}
-.cbk__foot {
+/* 0% (left) → the MLB leader's rate (right), with the average called out so the
+   rail's scale is legible without reading the gloss. */
+.cbk__scale {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-top: 5px;
-}
-.cbk__rate {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  color: var(--text-body);
-}
-.cbk__rate--over {
-  color: var(--field-deep);
-}
-.cbk__league {
+  margin-top: 3px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
   color: var(--text-caption);
+}
+.cbk__scale-avg {
+  color: var(--graphite-soft);
 }
 .rankchip {
   font-family: var(--font-mono);

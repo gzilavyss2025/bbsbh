@@ -103,6 +103,16 @@ test('comebackRatesFor: rate is wins/att, baseline is pooled Σwins/Σatt', () =
   assert.equal(s10.pct, 10)
 })
 
+test('comebackRatesFor: field plots every club, maxRate is the leader', () => {
+  const s10 = comebackRatesFor(DATA, 110, 2026).thresholds.find((t) => t.key === 'sub10')
+  // 110: 1/4 = 0.25; 111: 0/5 = 0 → both plotted, leader is 0.25.
+  assert.deepEqual(
+    s10.field.sort((a, b) => a.teamId - b.teamId),
+    [{ teamId: 110, rate: 0.25 }, { teamId: 111, rate: 0 }],
+  )
+  assert.equal(s10.maxRate, 0.25)
+})
+
 test('comebackRatesFor: count-rank with ties shares the best rank', () => {
   const out = comebackRatesFor(DATA, 110, 2026)
   // 110 leads every bucket outright over 111 → rank 1, untied.

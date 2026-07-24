@@ -58,17 +58,20 @@ const THRESHOLDS = [
 // wins it pulled out of that hole (`wins`), how many times it fell that low at
 // all (`att`), its own comeback RATE (wins/att), and the pooled MLB baseline
 // rate (Σwins/Σatt across every club) so the club's rate reads against a "what's
-// normal" mark. `rank`/`of`/`tied` rank the club by raw comeback-win COUNT (a
-// robust, sample-size-proof ordering — a rate rank would let a 1-of-1 team top
-// the board), enough for the card to badge a league lead. Returns null when the
-// file has no row for the club, or `rate: null` on a threshold it never reached.
-// `att` is absent in the pre-attempts v1 file, so a missing denominator degrades
-// to a null rate rather than dividing by undefined.
+// normal" mark. `field` is every club's rate at that depth and `maxRate` the
+// league leader's, so the card can plot all 30 clubs on a rail scaled 0 → the
+// #1 club. `rank`/`of`/`tied` rank the club by raw comeback-win COUNT (a robust,
+// sample-size-proof ordering — a rate rank would let a 1-of-1 team top the
+// board), enough for the card to badge a league lead. Returns null when the file
+// has no row for the club, or `rate: null` on a threshold it never reached. `att`
+// is absent in the pre-attempts v1 file, so a missing denominator degrades to a
+// null rate rather than dividing by undefined.
 export function comebackRatesFor(data, teamId, season) {
   const byTeamId = data?.seasons?.[season]?.byTeamId
   const mine = byTeamId?.[teamId]
   if (!byTeamId || !mine) return null
-  const rows = Object.values(byTeamId)
+  const entries = Object.entries(byTeamId)
+  const rows = entries.map(([, b]) => b)
   const thresholds = THRESHOLDS.map(({ key, attKey, pct }) => {
     const wins = mine[key] ?? 0
     const att = mine[attKey] ?? 0
@@ -79,6 +82,12 @@ export function comebackRatesFor(data, teamId, season) {
       leagueWins += r[key] ?? 0
       leagueAtt += r[attKey] ?? 0
     }
+    // Every club's rate at this depth (clubs with a real denominator), for the
+    // all-30 rail; maxRate is the leader's, the rail's right edge.
+    const field = entries
+      .filter(([, r]) => (r[attKey] ?? 0) > 0)
+      .map(([tid, r]) => ({ teamId: Number(tid), rate: (r[key] ?? 0) / r[attKey] }))
+    const maxRate = field.reduce((m, r) => (r.rate > m ? r.rate : m), 0)
     // Rank by comeback-win count, ties sharing the best (lowest) rank — 1 + the
     // number of clubs strictly ahead. `tied` when another club matches the count.
     const ahead = rows.filter((r) => (r[key] ?? 0) > wins).length
@@ -90,6 +99,8 @@ export function comebackRatesFor(data, teamId, season) {
       att,
       rate: hasAtt && att > 0 ? wins / att : null,
       leagueRate: leagueAtt > 0 ? leagueWins / leagueAtt : null,
+      field,
+      maxRate,
       rank: ahead + 1,
       of: rows.length,
       tied,
