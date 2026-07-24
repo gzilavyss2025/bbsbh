@@ -40,6 +40,9 @@ export function GameView({ game, section, onSection }) {
   // starter lines, win probability, pitcher roles, prospects, callouts,
   // broadcast, former teammates) lives in one hook — see useGameData for the
   // per-fetch sequencing/keying/caching rationale.
+  // Follow Live is resolved first so the feed poll can tighten its cadence
+  // (FOLLOW_POLL_MS) while following — see useGameData's second argument.
+  const { following, startFollowing, stopFollowing } = useFollowLive(game.gamePk)
   const {
     feedState,
     feed,
@@ -65,7 +68,7 @@ export function GameView({ game, section, onSection }) {
     lineupValuesData,
     winProbTreatment,
     started,
-  } = useGameData(game)
+  } = useGameData(game, following)
 
   // Screen Wake Lock — keeps the phone's display on during a live game so it
   // stays readable propped up next to a scorebook (see useWakeLock). Opt-in
@@ -82,7 +85,6 @@ export function GameView({ game, section, onSection }) {
   // OFF is immediate (no consent needed to re-seal your pace). The reveal
   // advancing itself happens in InningViewer, which owns the reveal mark.
   const { t: copy } = useCopy()
-  const { following, startFollowing, stopFollowing } = useFollowLive(game.gamePk)
   const [askFollow, setAskFollow] = useState(false)
   const onFollowToggle = () => (following ? stopFollowing() : setAskFollow(true))
 
