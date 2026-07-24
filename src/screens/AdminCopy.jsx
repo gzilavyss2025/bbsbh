@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth, useUser } from '@clerk/clerk-react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -100,24 +100,95 @@ function Field({ field, value, onChange, onReset }) {
   )
 }
 
+// Version history — the last few saved states, newest first. Restoring loads a
+// past version into the boxes (leaving the editor dirty); the admin reviews and
+// saves to apply it. Cheap recoverability for a solo owner iterating on copy.
+function HistoryPanel({ history, onRestore, onClose }) {
+  const fmt = (at) => {
+    const t = Number(at)
+    if (!Number.isFinite(t)) return 'unknown time'
+    try {
+      return new Date(t).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+    } catch {
+      return 'unknown time'
+    }
+  }
+  return (
+    <section className="admincopy__history" aria-label="Version history">
+      <div className="admincopy__historyHead">
+        <h3 className="admincopy__historyTitle">Version history</h3>
+        <button type="button" className="admincopy__history-open" onClick={onClose}>
+          Close
+        </button>
+      </div>
+      {history === 'loading' && <p className="admincopy__help">Loading…</p>}
+      {Array.isArray(history) && history.length === 0 && (
+        <p className="admincopy__help">No saved versions yet — history starts with your next save.</p>
+      )}
+      {Array.isArray(history) && history.length > 0 && (
+        <ul className="admincopy__historyList">
+          {history.map((entry, i) => {
+            const count = entry?.copy ? Object.keys(entry.copy).length : 0
+            return (
+              <li key={`${entry?.at ?? 'x'}-${i}`} className="admincopy__historyItem">
+                <span className="admincopy__historyWhen">{fmt(entry?.at)}</span>
+                <span className="admincopy__historyCount">
+                  {count ? `${count} custom` : 'all default'}
+                </span>
+                <button
+                  type="button"
+                  className="admincopy__reset"
+                  onClick={() => onRestore(entry?.copy || {})}
+                >
+                  Restore
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 // The editor body — only rendered for a confirmed admin, so Clerk hooks here
 // always have a provider (main.jsx only mounts one when Clerk is enabled).
-function Editor() {
+function Editor({ onDirty }) {
   const { getToken } = useAuth()
   const defaults = useMemo(defaultCopy, [])
   // values[id] is the current text in each box: an override, or the default.
   const [values, setValues] = useState(defaults)
+  // The last-persisted override map — what's actually in the store. Used to
+  // compute "dirty" and to seed the boxes; kept apart from `values` so a
+  // restore-from-history can leave the editor dirty without lying about storage.
+  const [baseline, setBaseline] = useState({})
   const [status, setStatus] = useState({ state: 'loading', message: 'Loading current copy…' })
+  // null = history not loaded yet; [] = loaded, empty; [...] = entries.
+  const [history, setHistory] = useState(null)
+
+  // Adopt a stored override map as the new ground truth: fills the boxes and
+  // resets the dirty baseline to match.
+  const adoptStored = useCallback(
+    (overrides) => {
+      const clean = sanitizeOverrides(overrides)
+      setValues({ ...defaults, ...clean })
+      setBaseline(clean)
+    },
+    [defaults],
+  )
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch('/api/copy')
+        // `no-store` is essential HERE (unlike the public CopyProvider fetch):
+        // the editor must read the TRUE current state, never the browser's
+        // 60s-cached public GET. Reading stale would make the next Save — which
+        // replaces the whole map — silently revert fields the admin never touched.
+        const res = await fetch('/api/copy', { cache: 'no-store' })
         const data = res.ok ? await res.json() : {}
-        const overrides = sanitizeOverrides(data?.copy)
         if (cancelled) return
-        setValues({ ...defaults, ...overrides })
+        adoptStored(data?.copy)
         setStatus({ state: 'idle', message: '' })
       } catch {
         if (cancelled) return
@@ -128,7 +199,7 @@ function Editor() {
     return () => {
       cancelled = true
     }
-  }, [defaults])
+  }, [adoptStored])
 
   const onChange = useCallback((id, text) => {
     setValues((prev) => ({ ...prev, [id]: text }))
@@ -155,6 +226,25 @@ function Editor() {
 
   const anyOverLimit = FIELDS.some((f) => (values[f.id] ?? '').length > f.maxLength)
 
+  // Dirty = the desired payload differs from what's actually stored. Drives the
+  // unsaved-changes guard (parent) and the beforeunload warning.
+  const dirty = useMemo(
+    () => JSON.stringify(overridePayload) !== JSON.stringify(baseline),
+    [overridePayload, baseline],
+  )
+  useEffect(() => {
+    onDirty?.(dirty)
+  }, [dirty, onDirty])
+  useEffect(() => {
+    if (!dirty) return undefined
+    const warn = (e) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [dirty])
+
   const save = useCallback(async () => {
     setStatus({ state: 'saving', message: 'Saving…' })
     try {
@@ -165,7 +255,12 @@ function Editor() {
         body: JSON.stringify({ copy: overridePayload }),
       })
       if (res.ok) {
-        setStatus({ state: 'saved', message: 'Saved. Live within a minute.' })
+        const data = await res.json().catch(() => ({}))
+        // Seed the boxes from what the server actually STORED (already trimmed +
+        // sanitized), so the display matches storage exactly and dirty clears.
+        adoptStored(data?.copy ?? overridePayload)
+        setHistory(null) // stale now — reload next time it's opened
+        setStatus({ state: 'saved', message: 'Saved. New visitors see it within a minute.' })
         return
       }
       if (res.status === 403) {
@@ -180,7 +275,30 @@ function Editor() {
     } catch {
       setStatus({ state: 'error', message: 'Save failed — network error.' })
     }
-  }, [getToken, overridePayload])
+  }, [getToken, overridePayload, adoptStored])
+
+  const loadHistory = useCallback(async () => {
+    setHistory('loading')
+    try {
+      const token = await getToken()
+      const res = await fetch('/api/copy?history=1', {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      })
+      const data = res.ok ? await res.json() : {}
+      setHistory(Array.isArray(data?.history) ? data.history : [])
+    } catch {
+      setHistory([])
+    }
+  }, [getToken])
+
+  // Restore populates the boxes from a past version but deliberately does NOT
+  // touch the baseline — so the editor goes dirty and the admin must review and
+  // Save to actually apply it. No silent rewrite.
+  const restore = useCallback((copy) => {
+    setValues((prev) => ({ ...prev, ...defaults, ...sanitizeOverrides(copy) }))
+    setStatus({ state: 'idle', message: 'Loaded a previous version — review, then Save to apply.' })
+  }, [defaults])
 
   const overrideCount = Object.keys(overridePayload).length
 
@@ -197,9 +315,12 @@ function Editor() {
           type="button"
           className="admincopy__save"
           onClick={save}
-          disabled={status.state === 'saving' || anyOverLimit}
+          disabled={status.state === 'saving' || anyOverLimit || !dirty}
         >
-          Save {overrideCount ? `(${overrideCount} custom)` : '(all default)'}
+          {dirty ? `Save${overrideCount ? ` (${overrideCount} custom)` : ''}` : 'Saved'}
+        </button>
+        <button type="button" className="admincopy__history-open" onClick={loadHistory}>
+          Version history
         </button>
         {status.message && (
           <span className={`admincopy__status admincopy__status--${status.state}`}>
@@ -207,6 +328,10 @@ function Editor() {
           </span>
         )}
       </div>
+
+      {history !== null && (
+        <HistoryPanel history={history} onRestore={restore} onClose={() => setHistory(null)} />
+      )}
 
       {GROUPS.map((group) => {
         const groupFields = FIELDS.filter((f) => f.group === group.id)
@@ -237,7 +362,7 @@ function Editor() {
 
 // Gate: signed in? admin? Only then mount the Editor. Uses Clerk hooks, so it is
 // only ever rendered under a ClerkProvider (see AdminCopyPage).
-function AdminGate() {
+function AdminGate({ onDirty }) {
   const { isLoaded, isSignedIn, user } = useUser()
   if (!isLoaded) return <Notice>Checking your access…</Notice>
   if (!isSignedIn) {
@@ -252,15 +377,25 @@ function AdminGate() {
       </Notice>
     )
   }
-  return <Editor />
+  return <Editor onDirty={onDirty} />
 }
 
 export function AdminCopyPage({ onBack }) {
   useDocumentTitle('Copy editor')
+  // Track unsaved edits so leaving via the in-app back button can confirm first
+  // (the beforeunload handler in Editor covers tab-close/reload separately).
+  const dirtyRef = useRef(false)
+  const guardedBack = useCallback(() => {
+    if (dirtyRef.current) {
+      const ok = window.confirm('You have unsaved copy changes. Discard them and leave?')
+      if (!ok) return
+    }
+    onBack?.()
+  }, [onBack])
   return (
-    <Shell onBack={onBack}>
+    <Shell onBack={guardedBack}>
       {isClerkEnabled ? (
-        <AdminGate />
+        <AdminGate onDirty={(d) => (dirtyRef.current = d)} />
       ) : (
         <Notice>
           The copy editor needs sign-in configured (Clerk) on this deploy. The app still runs on the

@@ -37,6 +37,18 @@ slate-provided seed, else via `resolveGame` (scans the date's slate across level
 and matches the abbreviation slug) for cold loads / shared links. `vercel.json`
 rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 
+## Admin-editable copy (`src/copy/`)
+
+The wording of the spoiler-consent surfaces is admin-editable, not hard-coded.
+`src/copy/registry.js` is the closed source of truth (ids, defaults, length
+caps, the `{time}` token, `sanitizeOverrides`); `CopyProvider.jsx` +
+`copyContext.js` resolve `defaults ← localStorage cache ← live /api/copy` and
+expose `useCopy().t(id, { time })`, always falling back to defaults. The unlinked
+`/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated editor (with
+version history). It stores UI text only — never a score — see ADR-0025 and the
+"no backend exceptions" prose in the root `CLAUDE.md`. When adding a new consent
+string, add a registry field; never inline the literal in a component.
+
 ## Fetching (`src/hooks/useAsync.js`)
 
 The `useAsync` hook runs a promise on mount/deps-change and exposes

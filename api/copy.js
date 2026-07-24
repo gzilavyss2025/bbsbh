@@ -32,6 +32,13 @@ export const config = { runtime: 'nodejs' }
 // One hash holds every override, site-wide (copy is global, not per-user).
 const COPY_KEY = 'copy:overrides'
 
+// A capped list of prior states, newest first, so a bad save is recoverable —
+// the owner's workflow is frequent solo wording iteration with no other
+// version control. Each entry is a JSON string { at, by, copy }. Undo is just
+// re-saving a historical `copy` map through the normal POST path.
+const COPY_HISTORY_KEY = 'copy:history'
+const COPY_HISTORY_MAX = 20
+
 function jsonResponse(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status,
@@ -43,7 +50,16 @@ function getRedis() {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN
   if (!url || !token) return null
-  return new Redis({ url, token })
+  // `automaticDeserialization: false` is DELIBERATE and specific to the copy
+  // store (api/reveal.js keeps the default because it stores an integer). Our
+  // values are arbitrary admin-authored strings: with the default on,
+  // @upstash/redis JSON-parses a value like "42", "true", or "null" on read
+  // and hands back a number/boolean/null, which sanitizeOverrides then drops as
+  // "not a string" — a silent data-loss bug where a perfectly good humor line
+  // vanishes after saving. Off, every value round-trips as the exact string we
+  // stored. The history list (JSON we stringify ourselves) is parsed by hand
+  // below for the same reason.
+  return new Redis({ url, token, automaticDeserialization: false })
 }
 
 // Parse COPY_ADMIN_USER_IDS ("user_abc,user_def") into a Set. An unset/empty
@@ -75,8 +91,35 @@ export default async function handler(req) {
   }
 
   const redis = getRedis()
+  const { searchParams } = new URL(req.url)
+  const wantHistory = searchParams.get('history') === '1'
 
   if (req.method === 'GET') {
+    // The history list is admin-only (it records who changed what, when); the
+    // current copy map is public.
+    if (wantHistory) {
+      if (!redis) return jsonResponse({ error: 'copy store not configured' }, 501)
+      const userId = await authenticateAdmin(req)
+      if (!userId) return jsonResponse({ error: 'forbidden' }, 403)
+      let entries = []
+      try {
+        const raw = (await redis.lrange(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)) || []
+        entries = raw
+          .map((s) => {
+            try {
+              const e = JSON.parse(s)
+              return { at: e.at, by: e.by, copy: sanitizeOverrides(e.copy) }
+            } catch {
+              return null
+            }
+          })
+          .filter(Boolean)
+      } catch {
+        entries = []
+      }
+      return jsonResponse({ history: entries }, 200, { 'cache-control': 'private, no-store' })
+    }
+
     // Public read. No Redis -> empty overrides, app uses defaults.
     let stored = {}
     if (redis) {
@@ -110,12 +153,25 @@ export default async function handler(req) {
   }
 
   // The client sends the FULL desired override map (only non-default fields).
-  // Sanitize to known ids + in-budget strings, then replace the stored hash so
-  // that clearing a field (dropping it from the map) actually removes it.
+  // Sanitize to known ids + in-budget strings.
   const clean = sanitizeOverrides(body?.copy)
   try {
-    await redis.del(COPY_KEY)
-    if (Object.keys(clean).length) await redis.hset(COPY_KEY, clean)
+    // Snapshot the current state for the history list BEFORE mutating.
+    const prev = sanitizeOverrides((await redis.hgetall(COPY_KEY)) || {})
+    // Keys being removed by this save (present before, absent now).
+    const staleKeys = Object.keys(prev).filter((id) => !(id in clean))
+
+    // Apply as a transaction, and crucially WITHOUT a `del` first: we hset the
+    // new values and hdel only the removed keys, so a mid-write crash leaves the
+    // previous copy intact rather than wiping every override (a failed `del` +
+    // `hset` pair would have reset the whole site to defaults). A GET can never
+    // observe an empty hash mid-save either.
+    const tx = redis.multi()
+    tx.lpush(COPY_HISTORY_KEY, JSON.stringify({ at: Date.now(), by: userId, copy: prev }))
+    tx.ltrim(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)
+    if (Object.keys(clean).length) tx.hset(COPY_KEY, clean)
+    if (staleKeys.length) tx.hdel(COPY_KEY, ...staleKeys)
+    await tx.exec()
   } catch {
     return jsonResponse({ error: 'write failed' }, 502)
   }

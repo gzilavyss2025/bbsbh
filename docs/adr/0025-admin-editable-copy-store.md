@@ -66,6 +66,38 @@ workflow section).
   length-clamped on both ends, admin-editable copy cannot grow new keys, inject
   markup, or carry an oversized payload into the UI.
 
+## Amendment: hardening + version history (post-review)
+
+A design review of the first cut surfaced several fixes, now folded in:
+
+- **`automaticDeserialization: false`** on the copy store's Redis client. The
+  default JSON-parses a stored value like `"42"`/`"true"` on read, which
+  `sanitizeOverrides` would then drop as a non-string — silent loss of a valid
+  admin-authored line. The flag is local to `api/copy.js`; `api/reveal.js`
+  deliberately keeps the default (it stores an integer).
+- **Crash-safe writes.** The POST no longer does `del` then `hset` (a mid-write
+  failure would wipe every override to defaults). It snapshots the previous map,
+  then in one transaction `hset`s the new values and `hdel`s only removed keys —
+  a failure leaves the prior copy intact, and no GET can observe an empty hash.
+- **Control/bidi character stripping** in `sanitizeOverrides`. The consent
+  buttons must be visually unmistakable; a pasted U+202E (RLO) or other bidi/
+  control char could reorder or disguise button text. Newlines survive only in
+  multiline fields. React already handles markup/XSS; this covers reordering.
+- **Version history.** Each save pushes the previous map to a capped
+  `copy:history` list (`{ at, by, copy }`, newest first, admin-only GET
+  `?history=1`). One bad save is recoverable — the owner's workflow is frequent
+  solo iteration with no other version control. "Restore" loads a past version
+  into the editor (leaving it dirty) so the admin reviews and saves to apply it;
+  no silent rewrite.
+- **Editor reads `no-store`** (never the 60s public cache) and re-seeds from the
+  POST response, so a save can't silently revert untouched fields; an
+  unsaved-changes guard covers the in-app back button and tab close.
+- **Consent-copy-only guard.** Registry fields are chrome/consent copy only,
+  never interpolated with game data beyond `{time}` and never rendered inside a
+  sealed surface — the property that keeps an editable string incapable of
+  leaking a score. Enforced by convention + the comment atop `FIELDS`; keep it
+  if the panel ever grows to govern other app copy.
+
 ## Cost accepted
 
 `api/copy.js` is the second end-user-authenticated `api/` function and reuses

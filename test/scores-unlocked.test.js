@@ -4,6 +4,7 @@
 // garbage/past/over-window value, and the reset is always within a sane window.
 // Assertions are written against LOCAL wall-clock (getHours) and constructed
 // from local Dates, so they hold regardless of the runner's timezone.
+import { execFileSync } from 'node:child_process'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -109,4 +110,36 @@ test('formatResetTime yields a non-empty clock string for a valid expiry', () =>
 test('formatResetTime is empty for garbage', () => {
   assert.equal(formatResetTime('nope'), '')
   assert.equal(formatResetTime(null), '')
+})
+
+// DST ----------------------------------------------------------------------
+// The module comment justifies MAX_WINDOW_MS = 26h by "a DST fall-back night is
+// 25 wall-clock hours." The runner's own TZ (UTC in CI) has no DST, so we prove
+// it in a child Node process pinned to a US zone. This is the case that would
+// break a naive 24h clamp.
+function windowHoursIn(tz, y, monthIndex, day, hour) {
+  const modUrl = new URL('../src/lib/scoresUnlocked.js', import.meta.url).href
+  const code = `
+    const { nextResetAt } = await import(${JSON.stringify(modUrl)});
+    const now = new Date(${y}, ${monthIndex}, ${day}, ${hour}, 0, 1);
+    process.stdout.write(String(nextResetAt(now) - now.getTime()));
+  `
+  const out = execFileSync(process.execPath, ['--input-type=module', '-e', code], {
+    env: { ...process.env, TZ: tz },
+    encoding: 'utf8',
+  })
+  return Number(out) / 3_600_000
+}
+
+test('DST fall-back night: 8am→8am spans ~25h and stays within MAX_WINDOW', () => {
+  // US fall-back 2026: Sun Nov 1, 2:00am → 1:00am. now = Oct 31 8:00:01 local.
+  const h = windowHoursIn('America/New_York', 2026, 9, 31, 8)
+  assert.ok(Math.abs(h - 25) < 0.01, `expected ~25h, got ${h}`)
+  assert.ok(h * 3_600_000 <= MAX_WINDOW_MS, '25h night must fit the 26h clamp')
+})
+
+test('DST spring-forward night: 8am→8am spans ~23h', () => {
+  // US spring-forward 2026: Sun Mar 8, 2:00am → 3:00am. now = Mar 7 8:00:01 local.
+  const h = windowHoursIn('America/New_York', 2026, 2, 7, 8)
+  assert.ok(Math.abs(h - 23) < 0.01, `expected ~23h, got ${h}`)
 })

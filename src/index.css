@@ -22938,6 +22938,59 @@ button.gamehigh-matchup:active {
 .admincopy__status--saved {
   color: var(--field);
 }
+.admincopy__history-open {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+.admincopy__history {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+}
+.admincopy__historyHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.admincopy__historyTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  margin: 0;
+}
+.admincopy__historyList {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+}
+.admincopy__historyItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.admincopy__historyWhen {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  flex: 1;
+}
+.admincopy__historyCount {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
 .admincopy__group {
   margin-top: var(--space-5);
 }

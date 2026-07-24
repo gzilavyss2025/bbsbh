@@ -85,6 +85,20 @@ test('sanitizeOverrides tolerates garbage input without throwing', () => {
   assert.deepEqual(sanitizeOverrides(123), {})
 })
 
+test('sanitizeOverrides strips bidi-override and control characters', () => {
+  // A right-to-left override (U+202E) embedded in a button label must not survive.
+  const out = sanitizeOverrides({ 'scoresUnlocked.confirm': 'Show ‮scores' })
+  assert.equal(out['scoresUnlocked.confirm'], 'Show scores')
+})
+
+test('sanitizeOverrides drops newlines in a single-line field but keeps them multiline', () => {
+  // followLive.confirm is single-line; followLive.body is multiline.
+  const single = sanitizeOverrides({ 'followLive.confirm': 'Follow\nlive' })
+  assert.equal(single['followLive.confirm'], 'Followlive')
+  const multi = sanitizeOverrides({ 'followLive.body': 'line one\nline two' })
+  assert.equal(multi['followLive.body'], 'line one\nline two')
+})
+
 test('resolveCopy layers valid overrides over defaults and ignores junk', () => {
   const resolved = resolveCopy({
     'scoresUnlocked.title': 'Custom title',
@@ -101,9 +115,17 @@ test('fillTokens substitutes {time} when provided', () => {
   assert.equal(fillTokens('Scores until {time}', { time: '8:00 AM' }), 'Scores until 8:00 AM')
 })
 
-test('fillTokens strips {time} when no time is given', () => {
-  assert.equal(fillTokens('Scores until {time}'), 'Scores until ')
-  assert.equal(fillTokens('Scores until {time}', {}), 'Scores until ')
+test('fillTokens strips {time} and tidies the gap when no time is given', () => {
+  // Trailing token -> no dangling space.
+  assert.equal(fillTokens('Scores until {time}'), 'Scores until')
+  assert.equal(fillTokens('Scores until {time}', {}), 'Scores until')
+  // Mid-sentence token -> collapsed, no double space, punctuation kept tight.
+  assert.equal(fillTokens('By {time} the app re-seals.'), 'By the app re-seals.')
+  assert.equal(fillTokens('reset at {time}, always'), 'reset at, always')
+})
+
+test('fillTokens uses function-form replacement so $-patterns in time are literal', () => {
+  assert.equal(fillTokens('at {time}', { time: '$& $`' }), 'at $& $`')
 })
 
 test('fillTokens leaves token-free text unchanged and handles non-strings', () => {

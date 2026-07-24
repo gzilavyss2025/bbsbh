@@ -3,8 +3,9 @@
 // three very different consumers can share ONE definition of what a copy key
 // is, what it defaults to, and what a valid value looks like:
 //
-//   - the runtime (src/hooks/useCopy.js) reads DEFAULTS for instant, offline,
-//     backend-free rendering — the app works identically with no copy store;
+//   - the runtime (src/copy/CopyProvider.jsx + copyContext.js) reads DEFAULTS
+//     for instant, offline, backend-free rendering — the app works identically
+//     with no copy store;
 //   - the admin panel (src/screens/AdminCopy.jsx) renders one labelled field
 //     per FIELD, with its help text, group, and length budget;
 //   - the write endpoint (api/copy.js) validates an incoming override map
@@ -39,6 +40,13 @@ export const GROUPS = [
 // the concrete local reset time (e.g. "8:00 AM"). It is optional in any value;
 // the admin can move it, keep it, or drop it. No other tokens are honored, so
 // editable copy can never smuggle in markup or arbitrary substitution.
+//
+// SPOILER GUARD (do not relax): every field here is consent/chrome copy only.
+// A field must NEVER be interpolated with game data (only `{time}` is allowed),
+// and no field may be rendered inside a sealed/reveal-gated surface. This is
+// what keeps an admin-editable string categorically incapable of leaking a
+// score. If this panel ever grows to govern other app copy, keep score-bearing
+// contexts out of the registry entirely — see ADR-0025.
 export const FIELDS = [
   // ---- Scores Unlocked: the home-screen "just show me the scores" pass ----
   {
@@ -233,12 +241,31 @@ export function sanitizeOverrides(raw) {
     const field = FIELD_BY_ID.get(id)
     if (!field) continue
     if (typeof value !== 'string') continue
-    const trimmed = value.replace(/\s+$/g, '')
-    if (trimmed.length === 0) continue // empty = "use the default", not stored
-    if (trimmed.length > field.maxLength) continue
-    out[id] = trimmed
+    const cleaned = stripControlChars(value, field.multiline).replace(/[ \t]+$/g, '')
+    if (cleaned.length === 0) continue // empty = "use the default", not stored
+    if (cleaned.length > field.maxLength) continue
+    out[id] = cleaned
   }
   return out
+}
+
+// Remove control and bidirectional-override characters before a value is
+// stored or rendered. This matters most in the consent modals, where the
+// decline vs. accept buttons must be visually unmistakable: a stray or
+// maliciously-pasted U+202E (right-to-left override) or similar could reorder
+// or disguise button text. React already escapes markup, so this is purely
+// about invisible/reordering characters, not XSS. Newlines are allowed only in
+// multiline fields (single-line labels/buttons never legitimately contain one);
+// tabs and every C0/C1 control and bidi-format char are always dropped.
+function stripControlChars(value, allowNewlines) {
+  // Bidi format chars: LRM/RLM, the embedding/override set (U+202A–202E), and
+  // the isolate set (U+2066–2069). C0 controls (optionally keeping U+000A
+  // newline for multiline fields), DEL, and C1 controls.
+  const bidi = '\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069'
+  const c0 = allowNewlines ? '\\u0000-\\u0009\\u000B-\\u001F' : '\\u0000-\\u001F'
+  // eslint-disable-next-line no-control-regex
+  const controls = new RegExp(`[${c0}\\u007F-\\u009F${bidi}]`, 'g')
+  return value.replace(controls, '')
 }
 
 // The runtime copy map: defaults with any valid overrides layered on top.
@@ -251,6 +278,16 @@ export function resolveCopy(overrides) {
 // non-string input yields ''. A value with no token is returned unchanged.
 export function fillTokens(text, { time } = {}) {
   if (typeof text !== 'string') return ''
-  if (typeof time !== 'string' || !time) return text.replace(/\{time\}/g, '')
-  return text.replace(/\{time\}/g, time)
+  // Function-form replacement so a `time` containing `$&`/`$'` (special
+  // replacement patterns) can't expand — fillTokens is a generic exported util.
+  if (typeof time === 'string' && time) return text.replace(/\{time\}/g, () => time)
+  // No time to substitute: drop the token AND tidy the gap it leaves, so a
+  // string like "Show scores until {time}" reads "Show scores until", not
+  // "Show scores until " (or "… at  today" for a mid-sentence token).
+  return text
+    .replace(/\{time\}/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/[ \t]+([.,!?;:])/g, '$1')
+    .replace(/[ \t]+$/gm, '')
+    .trim()
 }
