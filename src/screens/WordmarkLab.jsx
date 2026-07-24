@@ -1,52 +1,20 @@
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TallyBaseballMark, TallyWordmark } from '../components/TallyBrand.jsx'
 
-function ScorersAsterisk() {
+function LegacyWordmark({ height = 42 }) {
+  const aspect = 1851 / 458
   return (
-    <g
-      transform="translate(216 23) scale(1.1)"
-      fill="currentColor"
-    >
-      <path d="M-2-11H2V11H-2Z" />
-      <path d="m-10.502-3.769 2.004-3.462 19 11-2.004 3.462Z" />
-      <path d="m-8.498 7.231-2.004-3.462 19-11 2.004 3.462Z" />
-    </g>
-  )
-}
-
-function ClubhouseWordmark({ title, ...props }) {
-  return (
-    <svg viewBox="0 0 244 96" role="img" aria-label={title} {...props}>
-      {/* TAL1 is outlined from the same 900-weight font geometry and exact
-          browser-measured kerning as the approved large mark. Keeping every
-          letter as fixed geometry prevents live type hinting from separating
-          the custom Y at working header and footer sizes. */}
-      <g fill="currentColor">
-        <path
-          d="M269 0V1336H12V1600H826V1336H569V0Z"
-          transform="translate(1 83) scale(.047 -.047)"
-        />
-        <path
-          d="M20 0 242 1600H714L936 0H628L594 334H362L328 0ZM390 598H566L530 952L506 1336H450L426 952Z"
-          transform="translate(35.109 83) scale(.047 -.047)"
-        />
-        <path
-          d="M80 0V1600H380V264H774V0Z"
-          transform="translate(79.293 83) scale(.047 -.047)"
-        />
-        <path
-          d="M168 0V1336H66L60 1442L232 1600H468V0Z"
-          transform="translate(116.337 83) scale(.047 -.047)"
-        />
-        <path d="M147 8h17l9 31 9-31h17l-18 49v26h-16V57Z" />
-      </g>
-      <ScorersAsterisk />
-    </svg>
+    <img
+      src="/brand/tally-wordmark.png"
+      width={Math.round(height * aspect)}
+      height={height}
+      alt="Previous Tally wordmark"
+    />
   )
 }
 
 function CandidateWordmark({ title = 'Tally', ...props }) {
-  return <ClubhouseWordmark title={title} {...props} />
+  return <TallyWordmark title={title} {...props} />
 }
 
 function CandidateLockup({ compact = false }) {
@@ -180,7 +148,7 @@ export function WordmarkLab() {
             <span className="wordmarklab__eyebrow">Current mark</span>
             <h2 id="current-title">What the redraw needs to solve</h2>
           </div>
-          <TallyWordmark height={42} />
+          <LegacyWordmark height={42} />
           <ul>
             <li>Uneven stencil cuts interrupt different letters in different ways.</li>
             <li>The thin Y and small A counter lose definition first.</li>

@@ -1,22 +1,47 @@
 import { useId } from 'react'
 
-// Tally's identity is built from the same modular gaps as a printed scorecard.
-// The wordmark ships as a pre-rendered PNG (public/brand/tally-wordmark.png)
-// rather than an inline SVG mask — the mask version rendered fine in a live
-// browser but came out garbled ("TAILLY") through the OG-image Playwright
-// rasterizer, so a baked raster is the one asset that reads correctly
-// everywhere it's used, including scripts/og-image.html.
-const WORDMARK_ASPECT = 1851 / 458 // native public/brand/tally-wordmark.png size
+// One complete outlined drawing: TAL1 comes from the approved 900-weight font
+// geometry and measured kerning, followed by the custom continuous Y and the
+// scorer's asterisk. No live text remains, so every letter rasterizes together
+// at header, page-bar, and footer sizes.
+const WORDMARK_ASPECT = 244 / 96
 
-export function TallyWordmark({ height = 20, title = 'Tally', ...rest }) {
+export function TallyWordmark({ height = 20, title = 'Tally', className = '', ...rest }) {
   return (
-    <img
-      src="/brand/tally-wordmark.png"
+    <svg
       width={Math.round(height * WORDMARK_ASPECT)}
       height={height}
-      alt={title}
+      viewBox="0 0 244 96"
+      role="img"
+      aria-label={title}
+      className={`tally-wordmark ${className}`.trim()}
       {...rest}
-    />
+    >
+      <g fill="currentColor">
+        <path
+          d="M269 0V1336H12V1600H826V1336H569V0Z"
+          transform="translate(1 83) scale(.047 -.047)"
+        />
+        <path
+          d="M20 0 242 1600H714L936 0H628L594 334H362L328 0ZM390 598H566L530 952L506 1336H450L426 952Z"
+          transform="translate(35.109 83) scale(.047 -.047)"
+        />
+        <path
+          d="M80 0V1600H380V264H774V0Z"
+          transform="translate(79.293 83) scale(.047 -.047)"
+        />
+        <path
+          d="M168 0V1336H66L60 1442L232 1600H468V0Z"
+          transform="translate(116.337 83) scale(.047 -.047)"
+        />
+        <path d="M147 8h17l9 31 9-31h17l-18 49v26h-16V57Z" />
+      </g>
+      <g transform="translate(216 23) scale(1.1)" fill="currentColor">
+        <path d="M-2-11H2V11H-2Z" />
+        <path d="m-10.502-3.769 2.004-3.462 19 11-2.004 3.462Z" />
+        <path d="m-8.498 7.231-2.004-3.462 19-11 2.004 3.462Z" />
+      </g>
+    </svg>
   )
 }
 
