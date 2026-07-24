@@ -11,7 +11,7 @@ function ScorersAsterisk({ compact }) {
       fill="none"
       stroke="currentColor"
       strokeWidth={compact ? 4.8 : 4}
-      strokeLinecap="round"
+      strokeLinecap="butt"
     >
       <path d="M0-11V11" />
       <path d="m-9.5-5.5 19 11" />
