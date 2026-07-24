@@ -35,11 +35,17 @@ function edgeFromPlays(plays) {
 // bottom has been reached, otherwise only the top). Used to clamp the plays edge
 // so a stray future-half play can never over-advance a live follower. Null when
 // there's no linescore to read — the plays edge then stands on its own.
+//
+// Checks the VALUE, not just key presence: an unverified assumption is that a
+// live (non-Final) feed always omits `home.runs` entirely for an unreached
+// half rather than posting it as `null` — if MLB ever does the latter, a bare
+// `hasOwnProperty` check would misread the half as reached and the clamp would
+// stop constraining the live edge for that inning.
 function edgeFromLinescore(feed) {
   const innings = feed?.liveData?.linescore?.innings ?? []
   if (innings.length === 0) return null
   const last = innings[innings.length - 1]
-  const homeReached = last?.home && Object.prototype.hasOwnProperty.call(last.home, 'runs')
+  const homeReached = typeof last?.home?.runs === 'number'
   return halfIndex(innings.length, homeReached ? 'bottom' : 'top')
 }
 
