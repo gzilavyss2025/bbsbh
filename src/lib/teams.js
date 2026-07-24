@@ -450,12 +450,18 @@ export const CITY_CONNECT_COLORS = {
 // CHC.png, moved from city-connect/ — Cubs have no separate City Connect
 // look, this mark belongs here instead) on a plain blue tile. Cardinals: the
 // same bird-on-bat mark as ALT_COLORS' Alternate, re-paired with a cream tile
-// for their Alt 1 Cream jersey.
+// for their Alt 1 Cream jersey. Red Sox: their own procured mark
+// (public/team-logos/alternate-2/BOS.png, no longer a copy of ALT_COLORS'
+// Alternate art) for the Alt 2 Yellow jersey — Primary blue tile, Secondary
+// gold for the mark's own outline.
 // Team Color Lab prototype only, same footing as ALT_COLORS/CITY_CONNECT_COLORS.
 export const ALT2_COLORS = {
   108: [{ label: 'Red', hex: '#BA0021', bg: true }], // Angels — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Red jersey
   109: [{ label: 'Background', hex: '#A29E9F', bg: true }], // Diamondbacks — procured mark (alternate-2/AZ.png), Away Grey jersey
-  111: [{ label: 'Yellow', hex: '#FFC72C', bg: true }], // Red Sox — same mark as Alternate (alternate-2/BOS.png, copied), Alt 2 Yellow jersey
+  111: [
+    { label: 'Primary', hex: '#307FE2', bg: true },
+    { label: 'Secondary', hex: '#FFD100' },
+  ], // Red Sox — new procured mark (alternate-2/BOS.png), Alt 2 Yellow jersey
   113: [{ label: 'Black', hex: '#000000', bg: true }], // Reds — same mark as Alternate (alternate-2/CIN.png, copied), Alt 2 Black "CINCY" jersey
   114: [{ label: 'Red', hex: '#E50022', bg: true }], // Guardians — same mark as Alternate (alternate-2/CLE.png, copied), Alt 1 Red jersey
   116: [{ label: 'Navy', hex: '#0C2340', bg: true }], // Tigers — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 2 Navy jersey
