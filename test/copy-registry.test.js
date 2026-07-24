@@ -24,6 +24,23 @@ test('every field has a non-empty default within its own maxLength', () => {
   }
 })
 
+// The in-game Scores Unlocked override reveals real scores, so the default
+// consent copy must be HONEST that turning the pass on does not track or advance
+// your by-hand scoring — it only shows today's numbers, then re-seals. (ADR-0026)
+test('scoresUnlocked consent body is honest that hand-scoring is not tracked', () => {
+  const body = defaultCopy()['scoresUnlocked.body']
+  assert.match(body, /\b(track|advance|tracked|advanced)\b/i)
+})
+
+// Both the slate and in-game consent must promise that regardless of what the
+// user does, the 8am reset returns the app to sealed-by-default — and name the
+// exact time via the one honored {time} token.
+test('scoresUnlocked resetNote promises an unconditional 8am re-seal with {time}', () => {
+  const note = defaultCopy()['scoresUnlocked.resetNote']
+  assert.match(note, /no matter what|regardless/i)
+  assert.match(note, /\{time\}/)
+})
+
 test('field ids are unique and dotted group.slot', () => {
   const seen = new Set()
   for (const id of FIELD_IDS) {

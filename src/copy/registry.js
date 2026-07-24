@@ -75,7 +75,7 @@ export const FIELDS = [
     maxLength: 500,
     multiline: true,
     default:
-      'This whole app is built so nothing gets spoiled — every score stays sealed until you decide you are ready for it. But if you are not scoring along right now, and you just want to glance at how the games are going, you can override that. Flip this on and every score shows plainly: no seals, no tapping.',
+      'This whole app is built so nothing gets spoiled — every score stays sealed until you decide you are ready for it. But if you are not scoring along right now, and you just want to glance at how the games are going, you can override that. Flip this on and every score shows plainly: no seals, no tapping. It does not track or advance your by-hand scoring — it only shows the numbers for today, then seals them back up again.',
   },
   {
     id: 'scoresUnlocked.humorLine',
@@ -84,7 +84,7 @@ export const FIELDS = [
     help: 'A lighter line to give the moment some personality. Keep it optional-feeling; the honest part is the explanation above.',
     maxLength: 200,
     multiline: true,
-    default: 'No judgment. Some days you just want the number. We get it.',
+    default: 'No judgment. Some days you just want the number, not the whole ritual. Your paper scorecard will never know.',
   },
   {
     id: 'scoresUnlocked.resetNote',
@@ -94,7 +94,7 @@ export const FIELDS = [
     maxLength: 240,
     multiline: true,
     default:
-      'This only lasts today. At {time} the app goes right back to assuming you would rather not have anything spoiled — you will have to turn it on again if you still want it.',
+      'This only lasts today. No matter what, at {time} the app goes right back to assuming you would rather not have anything spoiled — it re-seals on its own, and you would turn it on again if you still want it.',
   },
   {
     id: 'scoresUnlocked.confirm',
