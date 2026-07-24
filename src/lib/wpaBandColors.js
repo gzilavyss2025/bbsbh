@@ -82,13 +82,16 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     'city-connect': '#7BA7D8',
   },
   111: {
-    main: '#F5F0E1',
-    alternate: '#0C2340',
+    main: '#A9A9A9',
+    alternate: '#BD3039',
+    'alternate-2': '#307FE2',
+    'alternate-3': '#FFFFFF',
     'city-connect': '#5A8D84',
   },
   158: {
     alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
     'alternate-2': '#12284B',
+    'alternate-3': '#6CACE4',
     'city-connect': '#ff6c58',
   },
   136: {
@@ -133,7 +136,7 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     main: '#C4CED4',
     alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
     'alternate-2': '#000000',
-    'city-connect': { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+    'city-connect': '#C8102E',
   },
   116: {
     main: '#0C2340',

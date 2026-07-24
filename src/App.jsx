@@ -75,6 +75,7 @@ const GameNotesDebugPage = lazyNamed(
 // Unlisted animation QA page — no score/reveal content, safe to ship, reachable
 // only by direct URL (see lib/route.js), same footing as Team Color Lab above.
 const AnimationLab = lazyNamed(() => import('./screens/AnimationLab.jsx'), 'AnimationLab')
+const WordmarkLab = lazyNamed(() => import('./screens/WordmarkLab.jsx'), 'WordmarkLab')
 const FirstScorebookPage = lazyNamed(
   () => import('./screens/FirstScorebookPage.jsx'),
   'FirstScorebookPage',
@@ -218,6 +219,8 @@ export default function App() {
     content = <GameNotesDebugPage />
   } else if (route.name === 'animation-lab') {
     content = <AnimationLab />
+  } else if (route.name === 'wordmark-lab') {
+    content = <WordmarkLab />
   } else if (route.name === 'first-scorebook') {
     content = <FirstScorebookPage />
   } else if (route.name === 'photos') {
