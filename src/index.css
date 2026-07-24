@@ -1506,7 +1506,7 @@ body {
    overflow:hidden does the cropping; --scale lets a club's curated
    per-treatment scale pull a dense mark back down. */
 .masthead__logobox .teamlogo {
-  transform: scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
 }
 
 /* ---------------------------------------------------------------- step nav
@@ -2903,7 +2903,7 @@ body {
      (TeamMark, GameCard.jsx) shrink a dense mark so it doesn't read as "the
      whole tile is this color" against its own new fill — same var Team Color
      Lab's own tiles use. */
-  transform: scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
 }
 
 /* The monogram fallback already is a bordered tile — drop its own chrome so it
@@ -9036,6 +9036,32 @@ body {
 }
 
 .milballchanges__text {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* TeamColorLab.jsx's page-level "copy all pending changes" button — same
+   look/behavior as MilbTeamColorLab.jsx's .milballchanges, kept as its own
+   rule since this page's classes are all colorlab__-prefixed. Sits above the
+   team list, always rendered (not scroll-pinned) so it's found right after a
+   session of poking at several teams' controls. Only mounts once at least
+   one team/treatment has a live draft (see AllChangesButton); its
+   CopyIconButton reuses .copybox__iconbtn. */
+.colorlab__allchanges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  background: var(--seal-amber-soft, var(--paper-1));
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.colorlab__allchanges__text {
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
