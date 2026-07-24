@@ -658,6 +658,9 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = {
     'alternate-2': { blue: '#F5F0E1', gold: '#CE1141', font: '#13274F' }, // Braves Home White
     'city-connect': { blue: '#7BA7D8', gold: '#D32826', font: '#FBF6E9' }, // Braves City Connect 2.0
   },
+  111: {
+    'alternate-3': { blue: '#BD3039', gold: '#0C2340', font: '#FBF6E9' }, // Red Sox Alt White Marathon "Boston"
+  },
   110: {
     main: { blue: '#DF4601', gold: '#000000', font: '#FBF6E9' }, // Orioles Alt 2 Orange
     alternate: { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Alt 1 Black

@@ -192,8 +192,10 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   },
   111: {
     main: { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -1, paddingY: 3, rowShift: 0 },
-    alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 5, rowShift: 0 },
+    'alternate-2': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 3, rowShift: 0 },
+    'alternate-3': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 3, rowShift: 0 },
+    'city-connect': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 5, rowShift: 0 },
   },
   158: {
     alternate: { size: 43, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 3, rowShift: 0 },

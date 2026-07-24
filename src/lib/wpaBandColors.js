@@ -82,8 +82,10 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     'city-connect': '#7BA7D8',
   },
   111: {
-    main: '#F5F0E1',
-    alternate: '#0C2340',
+    main: '#A9A9A9',
+    alternate: '#BD3039',
+    'alternate-2': '#307FE2',
+    'alternate-3': '#FFFFFF',
     'city-connect': '#5A8D84',
   },
   158: {
