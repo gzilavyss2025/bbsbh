@@ -96,7 +96,11 @@ admin PAT (`GH_BOT_TOKEN`) — see `docs/testing.md` before changing CI or that 
 This is the whole point of the app. **Do not let it drift.** The rule: a
 score-revealing value must never exist in the DOM until the user reveals it —
 there is no fetched-then-hidden node to leak, with one narrow, explicit
-exception (All-Star Rosters shows final scores plainly — see ADR-0019). `CONTEXT.md` defines the vocabulary
+exception (All-Star Rosters shows final scores plainly — see ADR-0019). Two
+**opt-in, consented** departures also lift the seal on demand: the site-wide
+**Scores Unlocked** day pass (an ephemeral *render* override that resets at 8am
+local and never persists — ADR-0026) and per-game **Follow Live** (a real,
+forward-only reveal-ratchet source — ADR-0027). `CONTEXT.md` defines the vocabulary
 (Seal, SealBox, reveal-only module, spoiler-free selector, revealedThrough,
 half-inning, regulation/extra innings, Pitchers table, primary position);
 `docs/adr/` records *why* each mechanism is shaped as it is — read the linked ADR
@@ -140,14 +144,17 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 score, so the spoiler rule still holds on return; a same-device tab picks up
 another tab's reveal via a `storage` listener in `useRevealProgress.js`.
 
-**Two narrow, opt-in exceptions (`api/`).** Link previews: a thin Vercel edge
+**Three narrow, opt-in exceptions (`api/`).** Link previews: a thin Vercel edge
 layer (`api/og.js`, `api/preview.js`, `api/_lib/cards.js`) renders dynamic Open
 Graph cards for shared deep links, since crawlers don't run our JS.
 Crawler-only, fails safe to the static default card, never renders/fetches a
 score — see ADR-0012. Multi-device reveal sync: signing in (Clerk, off unless
 `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
 own devices via `api/reveal.js` + Upstash Redis — never a score, ratcheted
-server- and client-side, inert if unconfigured — see ADR-0022.
+server- and client-side, inert if unconfigured — see ADR-0022. Admin-editable
+copy: `api/copy.js` + `src/copy/` store the consent-pop-up wording (never a
+score, closed registry, public-cached read, allowlisted write) so the owner
+tunes it without a deploy — inert if unconfigured, see ADR-0025.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

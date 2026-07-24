@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useNav } from '../lib/nav.js'
 import { slatePath } from '../lib/route.js'
-import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
+import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -28,6 +28,12 @@ import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import { FILTER_CHIPS, reorderGameOfTheNight } from '../lib/resultCards.js'
+import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
+import { ConsentModal } from '../components/ConsentModal.jsx'
+import { useCopy } from '../copy/copyContext.js'
+import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
+import { slateScoreLine } from '../lib/slateScoreLine.js'
+import { trackToggleConsent, TOGGLES, ACTIONS, SURFACES } from '../lib/analytics.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -96,6 +102,15 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const todayStr = toApiDate(new Date())
   const dateStr = date ?? todayStr
   const isToday = dateStr === todayStr
+
+  // Site-wide "Scores Unlocked" day pass — only offered on today's slate (a
+  // past day already has its own reveal-all treatment). The toggle flips a
+  // global, self-expiring override; the consent modal gates turning it ON.
+  const { t: copy } = useCopy()
+  const { unlocked: scoresUnlocked, resetAt, enable: enableUnlock, disable: disableUnlock } =
+    useScoresUnlocked()
+  const [askUnlock, setAskUnlock] = useState(false)
+  const resetLabel = formatResetTime(resetAt ?? nextResetAt())
   const goToDate = (apiDate) =>
     navigate(apiDate === todayStr ? '/' : slatePath(apiDate))
   const pageDay = (n) => {
@@ -114,6 +129,21 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const scoreFor = (gamePk) =>
     gameScoreVisible ? gameScoreFor(gameScores.data, gamePk) : null
+
+  // Slate score line — fetched ONLY while the Scores Unlocked pass is on AND we
+  // are on today's slate (a past day has its own reveal-all path). The default
+  // slate model stays score-free (see fetchSchedule/normalizeGame); this rides a
+  // separate request whose data never merges into it. Degrades to {} on failure,
+  // so a card silently falls back to its ordinary spoiler-free self. Re-fetches
+  // on foreground (the score-critical convention) so a checked-in glance is fresh.
+  const showSlateScores = scoresUnlocked && isToday
+  const slateScores = useAsync(
+    () => (showSlateScores ? fetchSlateScores(dateStr, sportId) : Promise.resolve({})),
+    [showSlateScores, dateStr, sportId],
+    { refetchOnForeground: showSlateScores },
+  )
+  const liveLineFor = (game) =>
+    showSlateScores ? slateScoreLine(slateScores.data?.[game.gamePk], game) : null
 
   // The favorite team is always an MLB club (FavoriteTeamModal only offers
   // those), so on a MiLB level its own game never appears — pin its current
@@ -241,10 +271,17 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
+  // An active Scores Unlocked pass counts as "reveal all" for today's flip cards
+  // too: the user has already consented to every score on today's slate
+  // (ADR-0026), so the amber pass banner must never sit over a still-sealed slate
+  // when today has gone all-final. Never forced for a paged-back past day — those
+  // keep their own tap-to-reveal-all. Turning the pass off re-seals, because this
+  // derived boolean collapses straight back to `revealedAll` (the tap state).
+  const slateRevealAll = revealedAll || (scoresUnlocked && isToday)
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
-  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, revealedAll)
+  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, slateRevealAll)
 
   // The slate's actual render order: `sorted` (soonest → latest, favorite
   // pinned first) with the crowned "Game of the Night" game promoted to the
@@ -397,6 +434,41 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             ›
           </button>
         </div>
+
+        {/* Live-scores day pass — today's slate only. Off: a switch that opens
+            the consent modal. On: the switch reads unlocked and a kraft-amber
+            banner (also the off switch) states the 8am reset. Past days already
+            have their own reveal-all treatment, so this is hidden there. */}
+        {isToday && (
+          <div className="slateunlock">
+            <button
+              type="button"
+              role="switch"
+              data-testid="scores-unlock-switch"
+              aria-checked={scoresUnlocked}
+              className={`slateunlock__switch${scoresUnlocked ? ' slateunlock__switch--on' : ''}`}
+              onClick={() => (scoresUnlocked ? disableUnlock() : setAskUnlock(true))}
+            >
+              <span className="slateunlock__track" aria-hidden="true">
+                <span className="slateunlock__thumb" />
+              </span>
+              <span className="slateunlock__label">
+                {copy('scoresUnlocked.toggleLabel')}
+              </span>
+            </button>
+            {scoresUnlocked && (
+              <button
+                type="button"
+                className="slateunlock__note"
+                data-testid="scores-unlock-banner"
+                onClick={disableUnlock}
+                aria-label="Turn off live scores"
+              >
+                {copy('scoresUnlocked.banner', { time: resetLabel })}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Signed-in only, and only when the cloud scorebook has entries —
@@ -438,7 +510,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         </div>
       )}
 
-      {finals.length > 0 && !revealedAll && (
+      {finals.length > 0 && !slateRevealAll && (
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
@@ -491,7 +563,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     <PastGameFlipCard
                       game={g}
                       dateStr={dateStr}
-                      revealed={revealedAll}
+                      revealed={slateRevealAll}
                       pinnedTeamId={pinnedTeamId}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
@@ -505,6 +577,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                       pinnedTeamId={pinnedTeamId}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
+                      liveLine={liveLineFor(g)}
                       onSelect={() => onPick(g, dateStr)}
                       onBoxScore={null}
                     />
@@ -543,6 +616,30 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           onClose={() => setShowWelcome(false)}
           gameScoreVisible={gameScoreVisible}
           onSetGameScoreVisible={setGameScoreVisible}
+        />
+      )}
+
+      {askUnlock && (
+        <ConsentModal
+          group="scoresUnlocked"
+          time={formatResetTime(nextResetAt())}
+          onConfirm={() => {
+            enableUnlock()
+            trackToggleConsent({
+              toggle: TOGGLES.SCORES_UNLOCKED,
+              action: ACTIONS.CONFIRM,
+              surface: SURFACES.SLATE,
+            })
+            setAskUnlock(false)
+          }}
+          onDismiss={() => {
+            trackToggleConsent({
+              toggle: TOGGLES.SCORES_UNLOCKED,
+              action: ACTIONS.DISMISS,
+              surface: SURFACES.SLATE,
+            })
+            setAskUnlock(false)
+          }}
         />
       )}
     </div>

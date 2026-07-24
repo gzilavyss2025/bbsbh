@@ -77,7 +77,14 @@
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose)
      - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap`
-     - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc` */
+     - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
+     - the spoiler-consent modal's explainer prose — `.consent__body`,
+       `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
+       buttons stay uppercase, same split as the Game Score modal)
+     - the copy editor's natural-case fields + preview — `.admincopy__lede`,
+       `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`,
+       `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
+       and previews sentence-case copy; labels + preview title stay uppercase) */
 #root * {
   text-transform: uppercase;
 }
@@ -2570,6 +2577,36 @@ body {
 .gamecard__gamescore {
   font-weight: var(--w-regular);
   color: var(--text-muted);
+}
+
+/* "Scores Unlocked" score + inning line (ADR-0026). Rendered below the matchup
+   only while the day pass is on, so it wears the same kraft-amber seal treatment
+   as the slate's unlock banner — a deliberate "this is the thing you unsealed"
+   tint, distinct from the card's own team colors above, which stay untouched.
+   All content is uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…). */
+.gamecard__unlockline {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+}
+
+.gamecard__unlockscore {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+}
+
+.gamecard__unlockinning {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  opacity: 0.85;
 }
 
 /* Scorebook-readiness pill: four small checkbox pips for whether the basics
@@ -23215,4 +23252,470 @@ button.gamehigh-matchup:active {
   .penboard__row {
     transition: none;
   }
+}
+
+/* ============================================================
+   ADMIN COPY EDITOR — the unlinked /admin panel where the site owner tunes
+   the spoiler-consent wording (see src/screens/AdminCopy.jsx). Owner-only, so
+   the styling is functional rather than expressive; it reuses the semantic
+   tokens like every other surface.
+   ============================================================ */
+.admincopy__body {
+  padding-bottom: var(--space-6);
+}
+.admincopy__notice,
+.admincopy__lede {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  margin: var(--space-3) 0;
+}
+.admincopy__savebar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-2) 0;
+  background: var(--bg-canvas);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.admincopy__save {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+}
+.admincopy__save:disabled {
+  opacity: 0.5;
+}
+.admincopy__status {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.admincopy__status--error {
+  color: var(--accent-negative);
+}
+.admincopy__status--saved {
+  color: var(--field);
+}
+.admincopy__history-open {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+.admincopy__history {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+}
+.admincopy__historyHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.admincopy__historyTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  margin: 0;
+}
+.admincopy__historyList {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+}
+.admincopy__historyItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.admincopy__historyWhen {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  flex: 1;
+}
+.admincopy__historyCount {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.admincopy__group {
+  margin-top: var(--space-5);
+}
+/* The group heading and its "View real modal" button share a row: the title
+   grows, the button stays its own width on the right. */
+.admincopy__groupHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.admincopy__groupTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  margin: 0;
+}
+.admincopy__previewOpen {
+  flex: none;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+.admincopy__groupGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+.admincopy__field {
+  margin-bottom: var(--space-4);
+}
+.admincopy__label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.admincopy__help {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  margin: var(--space-1) 0 var(--space-2);
+}
+.admincopy__input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+.admincopy__fieldMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.admincopy__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.admincopy__count--over {
+  color: var(--accent-negative);
+}
+.admincopy__reset {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  background: none;
+  border: none;
+  text-decoration: underline;
+}
+.admincopy__reset:disabled {
+  opacity: 0.4;
+  text-decoration: none;
+}
+.admincopy__preview {
+  padding: var(--space-3);
+  background: var(--bg-canvas);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-md);
+}
+.admincopy__previewCard {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+.admincopy__previewTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  margin: 0 0 var(--space-2);
+}
+.admincopy__previewBody,
+.admincopy__previewHumor,
+.admincopy__previewReset {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  margin: 0 0 var(--space-2);
+}
+.admincopy__previewHumor {
+  color: var(--text-muted);
+  font-style: italic;
+}
+.admincopy__previewReset {
+  color: var(--text-muted);
+}
+.admincopy__previewButtons {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.admincopy__previewBtn {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
+.admincopy__previewBtn--dismiss {
+  color: var(--text-body);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+.admincopy__previewBtn--confirm {
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+}
+@media (min-width: 720px) {
+  .admincopy__groupGrid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .admincopy__preview {
+    position: sticky;
+    top: var(--space-6);
+  }
+}
+
+/* ============================================================
+   CONSENT MODAL — the shared spoiler-consent sheet (ConsentModal.jsx), used by
+   Scores Unlocked and Follow Live. Reuses .scrim/.sheet; these style its body.
+   ============================================================ */
+.consent__title {
+  margin: 0 0 var(--space-3);
+}
+.consent__body,
+.consent__changes,
+.consent__reset {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  margin: 0 0 var(--space-3);
+}
+.consent__humor {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+.consent__reset {
+  color: var(--text-muted);
+}
+.consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.consent__btn {
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+}
+.consent__btn--dismiss {
+  color: var(--text-body);
+  background: none;
+  border: var(--bw-rule) solid var(--border-rule);
+}
+.consent__btn--confirm {
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: var(--bw-rule) solid transparent;
+}
+/* The consent modal's honest explanatory paragraphs read as natural sentences,
+   not shouted app chrome — same shouted-title / natural-body split as the Game
+   Score modal. Titles and buttons stay uppercase. */
+#root .consent__body,
+#root .consent__changes,
+#root .consent__reset,
+#root .consent__humor {
+  text-transform: none; /* caps-exempt: consent explainer prose reads as sentences */
+}
+/* The copy editor: the admin types and previews natural-case copy, so the
+   inputs, help/lede prose, and the modal preview's body prose must render as
+   typed. The field labels, group titles, and preview title stay uppercase. */
+#root .admincopy__lede,
+#root .admincopy__help,
+#root .admincopy__input,
+#root .admincopy__historyWhen,
+#root .admincopy__previewBody,
+#root .admincopy__previewHumor,
+#root .admincopy__previewReset {
+  text-transform: none; /* caps-exempt: admin edits + previews natural-case copy, not chrome */
+}
+
+/* Live-scores day pass toggle on the slate (GameSelect). A switch + label; when
+   on, a kraft-amber note states the 8am reset. */
+.slateunlock {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+.slateunlock__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: 0;
+}
+.slateunlock__track {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  transition: background 0.15s ease;
+}
+.slateunlock__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease;
+}
+.slateunlock__switch--on .slateunlock__track {
+  background: var(--seal-cover);
+  border-color: var(--seal-cover);
+}
+.slateunlock__switch--on .slateunlock__thumb {
+  transform: translateX(16px);
+}
+.slateunlock__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+.slateunlock__note {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .slateunlock__track,
+  .slateunlock__thumb {
+    transition: none;
+  }
+}
+
+/* Follow Live masthead toggle — same pill switch as .awaketoggle beside it, in
+   the kraft-amber seal tint when on (it's a spoiler-lifting control, matching
+   the slate's unlock treatment). */
+.followtoggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+.followtoggle.is-on {
+  background: var(--seal-cover);
+  border-color: var(--seal-cover);
+  color: var(--seal-cover-ink);
+}
+.followtoggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.followtoggle__icon {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-none);
+}
+
+/* Follow Live active strip — the "you are following" banner above the innings
+   chrome, which is itself the off switch (same "banner is the toggle" idea as
+   .slateunlock__note). Full-width so it reads as a mode, not a chip. */
+.followstrip {
+  display: block;
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+}
+.followstrip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }

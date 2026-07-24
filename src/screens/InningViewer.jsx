@@ -7,8 +7,11 @@ import {
   selectTeamMeta,
   selectDelays,
   selectSkippedBottomHalf,
+  selectIsFinal,
   halfIndex,
 } from '../api/select.js'
+import { selectLiveEdge } from '../api/liveEdge.js'
+import { useCopy } from '../copy/copyContext.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { buildMarginNotes } from '../api/pitcher-callouts.js'
@@ -25,6 +28,8 @@ import { MarginNotes } from '../components/MarginNotes.jsx'
 import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
 import { RosterPanel } from '../components/RosterPanel.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
+import { effectiveReveal } from '../hooks/revealProgressCore.js'
+import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
@@ -67,7 +72,10 @@ export function InningViewer({
   highlights,
   runExpectancy,
   workload,
+  following = false,
+  onStopFollowing,
 }) {
+  const { t: copy } = useCopy()
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
@@ -76,6 +84,23 @@ export function InningViewer({
   // read from `revealedThrough`; any half at or below it renders unsealed.
   const { revealedThrough, revealTo, mergeRevealedThrough, unlocked, getDerived, atBatCountFor, revealAtBat } =
     useRevealProgress(feed, regulation, actualCount)
+
+  // The site-wide "Scores Unlocked" day pass (useScoresUnlocked.js / ADR-0026):
+  // an ephemeral, today-only render override that unseals every half without
+  // ever touching the persisted reveal mark. `revealedThrough` / `unlocked`
+  // above stay the real, ratcheted, cloud-synced values — they are what feeds
+  // useRevealProgress, RevealCloudSync, and localStorage, and they must never
+  // see the override (see effectiveReveal's contract). Everything that only
+  // *renders* reads the `render*` values below instead; when the pass is off
+  // they ARE the real values (identity), so the default spoiler-safe path is
+  // byte-for-byte unchanged.
+  const { unlocked: scoresUnlocked } = useScoresUnlocked()
+  const { renderRevealedThrough, renderUnlocked } = effectiveReveal({
+    scoresUnlocked,
+    revealedThrough,
+    unlocked,
+    actualCount,
+  })
 
   // The spoiler-free identity the cloud scorebook index stores alongside the
   // high-water mark (see api/reveal.js + ContinueScoring.jsx): enough to draw
@@ -143,7 +168,7 @@ export function InningViewer({
 
   // The page being shown, as a half-index clamped to what's unlocked. The last
   // navigable page is the bottom of the last unlocked inning.
-  const maxIdx = halfIndex(unlocked, 'bottom')
+  const maxIdx = halfIndex(renderUnlocked, 'bottom')
   const curIdx = Math.min(
     Math.max(0, halfIndex(inning || 1, half === 'bottom' ? 'bottom' : 'top')),
     maxIdx,
@@ -178,6 +203,36 @@ export function InningViewer({
   const [runsInProgress, setRunsInProgress] = useState(null)
   useEffect(() => setRunsInProgress(null), [curIdx])
 
+  // FOLLOW LIVE (ADR-0027) — the fourth reveal-ratchet source. On every new feed
+  // object (useGameData's ~60s Live poll and a manual Refresh both mint one),
+  // advance the REAL high-water mark to the game's live edge through the SAME
+  // one-way mergeRevealedThrough every other source uses. Deliberately the real
+  // feed + real mergeRevealedThrough — NEVER renderRevealedThrough and NEVER
+  // Infinity: selectLiveEdge returns a finite half-index or null, and a null edge
+  // (pre-first-pitch, or a lean MiLB feed with no allPlays) is dropped by
+  // mergeMark. Scores Unlocked composes cleanly on top: this raises the persisted
+  // FLOOR; effectiveReveal raises the render CEILING — they never fight.
+  //
+  // Auto-follow keeps a caught-up follower pinned to the newest half: the view
+  // only moves when the user is already at the frontier (curIdx >= the pre-merge
+  // mark) — paged back to re-read an earlier half, we leave them there.
+  // replace:true so a long night of following never pollutes the Back button. On
+  // Final, do the last merge, then retire the flag so a stale "following" never
+  // lingers into a later re-view.
+  useEffect(() => {
+    if (!following) return
+    const edge = selectLiveEdge(feed, following) // following === true here
+    if (edge != null) {
+      const caughtUp = curIdx >= revealedThrough
+      mergeRevealedThrough(edge)
+      if (edge > curIdx && caughtUp) {
+        onInning(Math.floor(edge / 2) + 1, edge % 2 === 0 ? 'top' : 'bottom', { replace: true })
+      }
+    }
+    if (selectIsFinal(feed)) onStopFollowing?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feed, following, curIdx, revealedThrough])
+
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
   // Keyed on the half itself so navigating (or the turn committing) forces
@@ -194,7 +249,7 @@ export function InningViewer({
         half={pageHalf}
         meta={meta}
         isMlb={isMlb}
-        revealedThrough={revealedThrough}
+        revealedThrough={renderRevealedThrough}
         onReveal={revealTo}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
@@ -232,7 +287,7 @@ export function InningViewer({
   // spoiler: the gate on `curIdx <= revealedThrough` means this only ever
   // fires once the user has themselves fully revealed that top half.
   const skippedBottomHalf =
-    effHalf === 'top' && curIdx <= revealedThrough && selectSkippedBottomHalf(feed, effInning)
+    effHalf === 'top' && curIdx <= renderRevealedThrough && selectSkippedBottomHalf(feed, effInning)
   const nextIdx = curIdx < maxIdx && !skippedBottomHalf ? curIdx + 1 : null
   const nextLabel =
     nextIdx == null
@@ -246,7 +301,7 @@ export function InningViewer({
   // the viewer exactly where they are — a completed half unlocks in place, no
   // scroll or focus jump (the results appear above the button, which flips to
   // Next right under the thumb).
-  const currentSealed = curIdx > revealedThrough
+  const currentSealed = curIdx > renderRevealedThrough
   // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
   // as two side-by-side choices — reveal just the next plate appearance, or
   // the whole half at once. Keyed on the half actually being shown, not a
@@ -304,8 +359,8 @@ export function InningViewer({
   // Every pitcher who has appeared in a revealed half-inning, with running lines
   // (see api/pitchers.js). Recomputed as the reveal mark advances.
   const pitcherLines = useMemo(
-    () => computePitcherLines(feed, revealedThrough),
-    [feed, revealedThrough],
+    () => computePitcherLines(feed, renderRevealedThrough),
+    [feed, renderRevealedThrough],
   )
 
   // The workload file describes "now" — its availability rules only apply to
@@ -329,11 +384,11 @@ export function InningViewer({
   // pitcherLines itself.
   const marginNotes = useMemo(
     () =>
-      buildMarginNotes(feed, revealedThrough, callouts, { away: rosters.away.name, home: rosters.home.name }, {
+      buildMarginNotes(feed, renderRevealedThrough, callouts, { away: rosters.away.name, home: rosters.home.name }, {
         workload,
         gameDate: workloadGameDate,
       }),
-    [feed, revealedThrough, callouts, rosters, workload, workloadGameDate],
+    [feed, renderRevealedThrough, callouts, rosters, workload, workloadGameDate],
   )
 
   // The win-probability line "so far" — only the plays through the revealed
@@ -342,15 +397,15 @@ export function InningViewer({
   // nothing sealed is plotted. Empty until at least one half is revealed, and at
   // MiLB parks with no win-prob feed — the chart then renders nothing.
   const winProbPoints = useMemo(
-    () => selectWinProbPath(winProbability, { throughHalf: revealedThrough }),
-    [winProbability, revealedThrough],
+    () => selectWinProbPath(winProbability, { throughHalf: renderRevealedThrough }),
+    [winProbability, renderRevealedThrough],
   )
   // The biggest-swing ledger — same reveal-only selector, same
   // revealedThrough clamp, so it only ever covers revealed halves and grows
   // one entry per reveal (never hinting what's ahead).
   const winProbBigPlays = useMemo(
-    () => selectWinProbBigPlays(winProbability, { throughHalf: revealedThrough }),
-    [winProbability, revealedThrough],
+    () => selectWinProbBigPlays(winProbability, { throughHalf: renderRevealedThrough }),
+    [winProbability, renderRevealedThrough],
   )
 
   if (!started) {
@@ -374,6 +429,20 @@ export function InningViewer({
   return (
     <div className="innings">
       {cloudSync}
+      {/* While Follow Live is on, a strip sits above the innings chrome so it's
+          always visible, and is itself the off switch (same "the banner is the
+          toggle" convention as the slate's Scores Unlocked note). Turning it off
+          never un-reveals — the mark it advanced has already ratcheted. */}
+      {following && (
+        <button
+          type="button"
+          className="followstrip"
+          onClick={() => onStopFollowing?.()}
+          aria-label="Stop following live"
+        >
+          {copy('followLive.banner')}
+        </button>
+      )}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
           stacked on a phone. Refresh no longer sits up here — it moved to the
@@ -436,8 +505,8 @@ export function InningViewer({
         <RollingLine
           feed={feed}
           regulation={regulation}
-          unlocked={unlocked}
-          revealedThrough={revealedThrough}
+          unlocked={renderUnlocked}
+          revealedThrough={renderRevealedThrough}
           awayAbbr={meta.away.abbreviation}
           homeAbbr={meta.home.abbreviation}
           awayName={meta.away.clubName}
@@ -481,7 +550,7 @@ export function InningViewer({
                 { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
               ]}
             />
-            {safeToShowEntering(revealedThrough, effInning, effHalf) && (
+            {safeToShowEntering(renderRevealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">
                 <DefenseSection
                   feed={feed}
@@ -490,12 +559,12 @@ export function InningViewer({
                   fieldingSide={effHalf === 'top' ? 'home' : 'away'}
                   fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
                   fieldingTeamId={effHalf === 'top' ? meta.home.id : meta.away.id}
-                  revealedThrough={revealedThrough}
+                  revealedThrough={renderRevealedThrough}
                 />
               </div>
             )}
           </div>
-          {safeToShowEntering(revealedThrough, effInning, effHalf) && (
+          {safeToShowEntering(renderRevealedThrough, effInning, effHalf) && (
             <div className="innings__ref-lineups">
               <h3 className="innings__reference-title">Lineups</h3>
               <LineupSection
@@ -507,7 +576,7 @@ export function InningViewer({
                 prospectsData={prospectsData}
                 rookiesData={rookiesData}
                 isMlb={isMlb}
-                revealedThrough={revealedThrough}
+                revealedThrough={renderRevealedThrough}
               />
             </div>
           )}
@@ -517,7 +586,7 @@ export function InningViewer({
           <RosterPanel
             title={rosters.away.name}
             roster={rosters.away}
-            revealedThrough={revealedThrough}
+            revealedThrough={renderRevealedThrough}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
             isMlb={isMlb}
@@ -525,7 +594,7 @@ export function InningViewer({
           <RosterPanel
             title={rosters.home.name}
             roster={rosters.home}
-            revealedThrough={revealedThrough}
+            revealedThrough={renderRevealedThrough}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
             isMlb={isMlb}

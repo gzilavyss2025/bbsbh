@@ -54,6 +54,36 @@ A substitution, pitching change, or pinch-hitter logged before a
 half-inning's own first pitch — the same information a broadcast would
 announce before the half starts.
 
+**Scores Unlocked**:
+The site-wide, opt-in "day pass" that un-gates every score for TODAY only,
+after an explicit consent tap. Stored as an expiry timestamp (the next local
+8:00am) — never a score — and it fails closed on anything stale, garbled, or
+past. It resets on its own at 8am local, returning the app to sealed-by-default
+(ADR-0026).
+_Avoid_: spoiler mode, unlock-all
+
+**Effective reveal** (render override):
+The render-time reveal mark the Scores Unlocked pass substitutes for
+`revealedThrough` (see `effectiveReveal`). It unseals the screen for viewing
+ONLY — it is never persisted, never ratcheted, and never crosses to another
+device; the real high-water mark it shadows is left untouched, so flipping the
+pass off drops straight back to it (ADR-0026).
+_Avoid_: fake reveal, temporary reveal
+
+**Follow Live**:
+The per-game, opt-in mode that keeps advancing your reveal to the game's live
+edge as it is played, after an explicit consent tap. Unlike Scores Unlocked it
+is a genuine reveal-ratchet source — it moves the persisted mark forward (never
+backward) — so what it reveals stays revealed (ADR-0027).
+_Avoid_: auto-reveal, live mode
+
+**Live edge**:
+The furthest half-inning the actual game has reached so far — the half of the
+most recent completed play. Follow Live advances the reveal mark toward it; it
+reports only how far the GAME has progressed, which the user has opted to
+follow, never a score (`selectLiveEdge`, `src/api/liveEdge.js`).
+_Avoid_: current play, latest inning
+
 ### Game structure
 
 **Half-inning**:
