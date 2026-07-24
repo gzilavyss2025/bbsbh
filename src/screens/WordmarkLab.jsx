@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TallyBaseballMark, TallyWordmark } from '../components/TallyBrand.jsx'
 
@@ -101,6 +101,29 @@ function BaselineWordmark({ title, ...props }) {
 }
 
 function ClubhouseWordmark({ title, ...props }) {
+  const lRef = useRef(null)
+  const oneRef = useRef(null)
+  const [underline, setUnderline] = useState({ x: 93, width: 71 })
+
+  useEffect(() => {
+    let active = true
+    const measure = () => {
+      if (!active || !lRef.current || !oneRef.current) return
+      const lBox = lRef.current.getBBox()
+      const oneBox = oneRef.current.getBBox()
+      const start = lBox.x
+      const end = oneBox.x + oneBox.width
+      const overhang = (end - start) * 0.03
+      setUnderline({ x: start - overhang, width: end - start + overhang * 2 })
+    }
+
+    const fontsReady = document.fonts?.ready ?? Promise.resolve()
+    fontsReady.then(measure)
+    return () => {
+      active = false
+    }
+  }, [])
+
   return (
     <svg viewBox="0 0 280 96" role="img" aria-label={title} {...props}>
       <text
@@ -110,31 +133,22 @@ function ClubhouseWordmark({ title, ...props }) {
         fontFamily="Big Shoulders Display, IBM Plex Sans Condensed, sans-serif"
         fontSize="94"
         fontWeight="900"
-        letterSpacing="1"
+        letterSpacing="-0.75"
       >
-        TAL
+        <tspan>T</tspan>
+        <tspan>A</tspan>
+        <tspan ref={lRef}>L</tspan>
+        <tspan ref={oneRef}>1</tspan>
+        <tspan>Y</tspan>
       </text>
-      <text
-        x="137"
-        y="83"
+      <rect
+        x={underline.x}
+        y="87"
+        width={underline.width}
+        height="5"
+        rx="2.5"
         fill="currentColor"
-        fontFamily="Big Shoulders Display, IBM Plex Sans Condensed, sans-serif"
-        fontSize="94"
-        fontWeight="900"
-      >
-        1
-      </text>
-      <text
-        x="174"
-        y="83"
-        fill="currentColor"
-        fontFamily="Big Shoulders Display, IBM Plex Sans Condensed, sans-serif"
-        fontSize="94"
-        fontWeight="900"
-      >
-        Y
-      </text>
-      <rect x="95" y="87" width="77" height="5" rx="2.5" fill="currentColor" />
+      />
     </svg>
   )
 }
