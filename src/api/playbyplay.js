@@ -396,6 +396,16 @@ const REACH_CODES = {
   hit_by_pitch: 'HBP',
   fielders_choice: 'FC',
   fielders_choice_out: 'FC',
+  // A force out retires a PRECEDING runner while the batter reaches 1st
+  // safely by rule (a batter also put out on the play is a double play, its
+  // own eventType — see DOUBLE_PLAY_EVENTS below) — the batter's own
+  // scorebook mark is "FC", same as a true fielder's choice. Verified
+  // against gamePk 823035 ("Grounds into a force out… to 1st"): eventType
+  // `force_out`, batter's own runner entry `end: '1B'`, no `isOut`. Without
+  // this entry scorebookCode fell to the generic out-fallback, and since the
+  // batter himself carries no putout/assist credits there, it silently
+  // returned an empty code — a blank diamond with no label at all.
+  force_out: 'FC',
   catcher_interf: 'CI',
 }
 
@@ -620,6 +630,7 @@ const NATURAL_BASE = {
   single: 1, double: 2, triple: 3, home_run: 4,
   walk: 1, intent_walk: 1, hit_by_pitch: 1,
   fielders_choice: 1, fielders_choice_out: 1, catcher_interf: 1, field_error: 1,
+  force_out: 1,
 }
 
 // The fielder charged with an error anywhere on this play (Error position,

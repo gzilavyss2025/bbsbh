@@ -49,6 +49,48 @@ export async function fetchGameUniforms(gamePk, options) {
   }
 }
 
+// How many gamePks the /api/v1/uniforms/game endpoint accepts per call — the
+// same batch size gen-jerseys.mjs uses for its own season sweep.
+const GAME_UNIFORM_BATCH = 100
+
+// The JERSEY ('J') asset each team actually WORE in each of a batch of games,
+// for the team-page record-by-jersey rollup (TeamPage.jsx). One
+// /api/v1/uniforms/game call per GAME_UNIFORM_BATCH gamePks (the endpoint
+// takes a comma list — see fetchTeamUniformCatalog / gen-jerseys.mjs). Returns
+// `{ [gamePk]: { [teamId]: { code, text } } }`, one entry per side with a
+// posted jersey; a game with no posted assignment (MiLB, or not yet posted)
+// simply has no key, so a caller joining against it counts only games it can
+// actually attribute to a jersey. Spoiler-free: a uniform choice, not a game
+// state — same footing as fetchGameUniforms above.
+export async function fetchGameJerseys(gamePks, options) {
+  const out = {}
+  if (!gamePks?.length) return out
+  const jerseyAsset = (side) => {
+    const j = (side?.uniformAssets ?? []).find(
+      (a) => a.uniformAssetType?.uniformAssetTypeCode === 'J',
+    )
+    if (!j?.uniformAssetText) return null
+    return { code: j.uniformAssetCode ?? null, text: j.uniformAssetText }
+  }
+  for (let i = 0; i < gamePks.length; i += GAME_UNIFORM_BATCH) {
+    const batch = gamePks.slice(i, i + GAME_UNIFORM_BATCH)
+    try {
+      const data = await getJson(`/api/v1/uniforms/game?gamePks=${batch.join(',')}`, options)
+      for (const game of data.uniforms ?? []) {
+        const perTeam = {}
+        for (const side of [game.home, game.away]) {
+          const worn = jerseyAsset(side)
+          if (side?.id && worn) perTeam[side.id] = worn
+        }
+        if (Object.keys(perTeam).length) out[game.gamePk] = perTeam
+      }
+    } catch {
+      // A bad batch just leaves those games unattributed — never fatal.
+    }
+  }
+  return out
+}
+
 // One printable uniform line — "Alt 2 Navy Blue jersey · Road Grey pants ·
 // Alt Yellow Front hat". Asset labels arrive as "<Club> <desc> <Piece>"
 // ("Brewers Alt 2 Navy Blue Jersey"); the club name is redundant next to a
@@ -128,7 +170,7 @@ export async function fetchTeamUniformCatalog(teamIds, season, options) {
 // lab shows and what the live card renders.
 export const JERSEY_TREATMENT_OVERRIDES = {
   '112_jersey_4_2026': 'alternate-2', // Cubs Alt 2 Baby Blue — worn with the Alternate 2 mark (moved off City Connect)
-  '112_jersey_2_2026': 'alternate', // Cubs Away Grey — worn with the Alternate mark, not plain Main
+  '112_jersey_2_2026': 'alternate-3', // Cubs Away Grey — worn with the Alternate 3 mark, not plain Main
   '133_jersey_4_2026': 'city-connect', // Athletics Alt 2 Yellow "Sacramento" — worn with the City Connect mark
   '144_jersey_4_2026': 'main', // Braves Alt 2 Navy — worn with the plain Main mark
   '146_jersey_3_2026': 'alternate-2', // Marlins Alt 1 Black — worn with the Alternate 2 mark
@@ -151,6 +193,34 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '120_jersey_2_2026': 'alternate', // Nationals Road Grey — worn with the Alternate mark, not plain Main
   '120_jersey_3_2026': 'alternate-2', // Nationals Alt 1 Red "W" — worn with the Alternate 2 mark
   '120_jersey_4_2026': 'alternate-3', // Nationals Alt 2 Blue — worn with the Alternate 3 mark
+  '109_jersey_2_2026': 'alternate-2', // Diamondbacks Away Grey — worn with the Alternate 2 mark
+  '109_jersey_3_2026': 'alternate-3', // Diamondbacks Alt 1 Black — worn with the Alternate 3 mark
+  '110_jersey_4_2026': 'main', // Orioles Alt 2 Orange — worn with the plain Main mark
+  '110_jersey_1_2026': 'alternate-2', // Orioles Home White — worn with the Alternate 2 mark, not plain Main
+  '110_jersey_2_2026': 'alternate-3', // Orioles Away Grey — worn with the Alternate 3 mark, not plain Main
+  '144_jersey_1_2026': 'alternate-2', // Braves Home White — worn with the Alternate 2 mark, not plain Main
+  '144_jersey_2_2026': 'alternate-3', // Braves Road Grey — worn with the Alternate 3 mark, not plain Main
+  '145_jersey_1_2026': 'alternate', // White Sox Home Pinstripe — worn with the Alternate mark, not plain Main
+  '145_jersey_3_2026': 'alternate-2', // White Sox Alt 1 Black "Sox" — worn with the Alternate 2 mark
+  '145_jersey_4_2026': 'alternate-3', // White Sox Alt 2 "Southside" — worn with the Alternate 3 mark
+  '108_jersey_3_2026': 'alternate-2', // Angels Alt 1 Red — worn with the Alternate 2 mark
+  '108_jersey_4_2026': 'alternate-3', // Angels Alt 2 White (Blue Trim) Pullover — worn with the Alternate 3 mark
+  '111_jersey_4_2026': 'alternate-2', // Red Sox Alt 2 Yellow — worn with the Alternate 2 mark
+  '111_jersey_6_2026': 'alternate-3', // Red Sox Alt White Marathon "Boston" — worn with the Alternate 3 mark
+  '113_jersey_4_2026': 'alternate-2', // Reds Alt 2 Black "CINCY" — worn with the Alternate 2 mark
+  '114_jersey_3_2026': 'alternate-2', // Guardians Alt 1 Red — worn with the Alternate 2 mark
+  '116_jersey_4_2026': 'alternate-2', // Tigers Alt 2 Navy — worn with the Alternate 2 mark
+  '117_jersey_4_2026': 'alternate-2', // Astros Alt Blue — worn with the Alternate 2 mark
+  '119_jersey_4_2026': 'alternate-2', // Dodgers Alt 2 All Blue "Los Angeles" — worn with the Alternate 2 mark
+  '119_jersey_6_2026': 'alternate-3', // Dodgers "Gold Series" — worn with the Alternate 3 mark
+  '121_jersey_4_2026': 'alternate-2', // Mets Alt 2 Blue Pullover "New York" — worn with the Alternate 2 mark
+  '134_jersey_4_2026': 'alternate-2', // Pirates Alt 2 Black "Pittsburgh" — worn with the Alternate 2 mark
+  '135_jersey_4_2026': 'alternate-2', // Padres Alt 2 Green Camouflage — worn with the Alternate 2 mark
+  '135_jersey_6_2026': 'alternate-3', // Padres Alt 3 Sand Camouflage — worn with the Alternate 3 mark
+  '139_jersey_4_2026': 'alternate-2', // Rays Alt 2 White "Devil Rays" — worn with the Alternate 2 mark
+  '140_jersey_3_2026': 'alternate-3', // Rangers Alt 1 Baby Blue — worn with the Alternate 3 mark
+  '142_jersey_3_2026': 'alternate-2', // Twins Alt 1 Cream "Twin Cities" — worn with the Alternate 2 mark
+  '143_jersey_4_2026': 'alternate-2', // Phillies Alt 2 Baby Blue — worn with the Alternate 2 mark
 }
 
 // Which logo TREATMENT ('main' | 'alternate' | 'alternate-2' | 'alternate-3' |
@@ -272,4 +342,54 @@ export async function fetchUniformNameOverrides() {
 // Save, see it stick."
 export function primeUniformNameOverridesCache(overrides) {
   cachedNameOverrides = overrides
+}
+
+// The fixed logo-treatment order the team page's record-by-jersey strip
+// renders in — Main first, then the alternates in number order, City Connect
+// last; anything unrecognized sorts to the end. Same treatment vocabulary as
+// classifyUniformAsset above.
+const TREATMENT_RANK = {
+  main: 0,
+  alternate: 1,
+  'alternate-2': 2,
+  'alternate-3': 3,
+  'alternate-4': 4,
+  'city-connect': 5,
+}
+
+// Builds the Team Page's "logo + jersey + record" strip (TeamPage.jsx): one
+// entry per JERSEY in the club's uniform catalog, each carrying its logo
+// TREATMENT (classifyUniformAsset — a jersey maps to exactly one logo, though
+// several jerseys can share the same one, e.g. Home White and Road Grey both
+// Main), its curated display name, and the club's W-L in the games it actually
+// wore that jersey. The record is joined by uniformAssetCode against
+// `wornByGame` (fetchGameJerseys) — a game with no attributable jersey, or one
+// whose result isn't visible yet (`won == null`, already cutoff-gated by the
+// caller's schedule fetch), simply isn't counted, so this can't leak a result
+// the standings/schedule strip wouldn't already show. Pure/unit-testable.
+export function buildJerseyCombos({ catalogAssets, clubName, schedule, wornByGame, teamId, nameOverrides }) {
+  const combos = (catalogAssets ?? [])
+    .filter((a) => a.piece === 'J')
+    .map((a) => ({
+      code: a.code,
+      name: uniformDisplayName(a.text, clubName, a.code, nameOverrides),
+      treatment: classifyUniformAsset(a.text, clubName, a.code),
+      wins: 0,
+      losses: 0,
+    }))
+  const byCode = new Map(combos.filter((c) => c.code).map((c) => [c.code, c]))
+  for (const g of schedule ?? []) {
+    if (g.won == null) continue
+    const worn = wornByGame?.[g.gamePk]?.[teamId]
+    const combo = worn?.code ? byCode.get(worn.code) : null
+    if (!combo) continue
+    if (g.won) combo.wins += 1
+    else combo.losses += 1
+  }
+  return combos.sort(
+    (a, b) =>
+      (TREATMENT_RANK[a.treatment] ?? 9) - (TREATMENT_RANK[b.treatment] ?? 9) ||
+      b.wins + b.losses - (a.wins + a.losses) ||
+      a.name.localeCompare(b.name), // caps-js-exempt
+  )
 }

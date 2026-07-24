@@ -14,13 +14,15 @@ npm install
 npm run dev        # dev server (fixed port 5173, strictPort)
 npm run build      # production build → dist/
 npm run preview    # serve the built app
-npm run lint       # eslint . && check-caps.mjs && check-claude-md.mjs
+npm run lint       # eslint + guard scripts (caps, casing, typography, contrast, claude-md, …)
+npm test           # node:test unit suite (pure logic; CI-gated)
 npm run e2e        # playwright test — verification harness, not a CI suite
 ```
 
-There is no CI-enforced *test* suite (CI runs lint + build). Verify changes by
-running `npm run dev` (or `npm run e2e`, which boots the dev server itself) and
-exercising the game-select → team-info → innings flow against a live or recent game.
+CI (`ci.yml`) runs lint + `npm test` + build. `npm test` is a pure-logic unit suite;
+it is not a substitute for the browser check. Verify user-visible changes by running
+`npm run dev` (or `npm run e2e`, which boots the dev server itself) and exercising the
+game-select → team-info → innings flow against a live or recent game.
 `docs/test-games.md` has a pack of real, verified gamePks with rare in-game events
 (triple play, immaculate inning, position player pitching, suspended/resumed game,
 etc.). `.claude/skills/run.md` documents this loop end to end. `e2e/smoke.spec.js` is
@@ -190,14 +192,18 @@ don't run these by hand.
   non-PA plays (the `count`-is-post-pitch off-by-one). App reads it via
   `src/api/fouls.js` (Foul Tracker page, player-page card).
 - `gen-comeback-wins.mjs` → `public/data/comeback-wins.json` — per-team,
-  per-season COMEBACK WIN counts: wins in which the club's win probability fell
-  below 10/20/30% at some point (nested: `sub10 <= sub20 <= sub30`). SQLite-backed
-  (`comeback-wins` group, ADR-0021) APPEND-ONLY incremental sweep of newly-Final
-  MLB regular-season games like `gen-game-score.mjs` (`--days` trailing window /
-  backfill); `comeback_ingested_games` is the idempotency guard. Per game it takes
-  the WINNER's minimum win prob (home share directly; away = `100 − home max`) from
-  the MLB-only `/winProbability` endpoint. App reads it via
-  `src/api/comebackWins.js` (Team Page's ranked "Comeback wins" card).
+  per-season COMEBACK counts that form a RATE: for each Final game BOTH sides'
+  minimum win prob is bucketed, so whichever side fell below 10/20/30% counts an
+  ATTEMPT (`att10/att20/att30`) and, if it won, a comeback WIN (`sub10/sub20/
+  sub30`) — the club's claw-back rate is `sub/att`, `sub <= att`, both pairs
+  nested. SQLite-backed (`comeback-wins` group, ADR-0021) APPEND-ONLY incremental
+  sweep of newly-Final MLB regular-season games like `gen-game-score.mjs`
+  (`--days` trailing window / backfill); `comeback_ingested_games` is the
+  idempotency guard. Both minimums come from the MLB-only `/winProbability`
+  endpoint (home share directly; away = `100 − home max`). A schema change (the
+  `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
+  old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
+  Page's "Comeback wins" card — team rate vs. the pooled MLB average).
 - `gen-jerseys.mjs` → `public/data/jerseys.json` — what each MLB club wore in
   every game, from `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the
   live feed carries zero uniform data). SQLite-backed (`jerseys` group,

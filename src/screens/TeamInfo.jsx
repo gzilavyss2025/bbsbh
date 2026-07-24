@@ -20,7 +20,12 @@ import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
-import { careerMatchupsFor, sortByPitcher, matchupLine } from '../api/careerMatchups.js'
+import {
+  careerMatchupsFor,
+  sortByPitcher,
+  groupByPitcher,
+  matchupLine,
+} from '../api/careerMatchups.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
@@ -1144,47 +1149,57 @@ function CareerMatchups({ pairs, startingIds, teamA, teamB, levelLabel }) {
   )
 }
 
-// One direction's table (e.g. "Braves batters vs Padres pitchers") — rows
-// already grouped by pitcher (sortByPitcher). Each table shows/hides
-// independently since one direction commonly has far more real history than
-// the other (a club's long-tenured regulars vs. a just-called-up opener).
+// One direction's list (e.g. "Braves batters vs Padres pitchers") — rows
+// already grouped by pitcher (sortByPitcher), then collapsed one heading per
+// pitcher (groupByPitcher) so his name isn't repeated down every row. That
+// repetition is what forced a three-column "batter / pitcher / line" table
+// too wide for a phone (the reported horizontal-swipe bug); a pitcher heading
+// over two-part batter→line rows fits any width with no scroll, and reads
+// cleaner on desktop too. Each list shows/hides independently since one
+// direction commonly has far more real history than the other (a club's
+// long-tenured regulars vs. a just-called-up opener). Slice by MATCHUP (row)
+// count first so "Show N more" still counts matchups, then group the slice.
 function MatchupTable({ title, rows, startingIds, levelLabel }) {
   const [showAll, setShowAll] = useState(false)
   if (rows.length === 0) return null
   const shown = showAll ? rows : rows.slice(0, MATCHUPS_SHOWN)
   const hidden = rows.length - shown.length
+  const groups = groupByPitcher(shown)
   return (
     <div className="matchuptable">
       <h4 className="matchuptable__title">{title}</h4>
-      <div className="ledger-wrap">
-        <table className="standings matchuptable__table">
-          <thead>
-            <tr>
-              <th className="matchuptable__namecol">Batter</th>
-              <th className="matchuptable__namecol">Pitcher</th>
-              <th>Line</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((r) => {
-              const tonight = startingIds?.has(r.batter.id) && startingIds?.has(r.pitcher.id)
-              return (
-                <tr
-                  key={`${r.batter.id}-${r.pitcher.id}`}
-                  className={tonight ? 'matchuptable__row--tonight' : undefined}
-                >
-                  <td className="matchuptable__name">
-                    <PlayerLink id={r.batter.id}>{r.batter.name}</PlayerLink>
-                  </td>
-                  <td className="matchuptable__name">
-                    <PlayerLink id={r.pitcher.id}>{r.pitcher.name}</PlayerLink>
-                  </td>
-                  <td className="matchuptable__line">{matchupLine(r, levelLabel)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <div className="matchuplist">
+        {groups.map((g) => {
+          const pitcherStarting = startingIds?.has(g.pitcher.id)
+          return (
+            <div className="matchupgroup" key={g.pitcher.id}>
+              <p className="matchupgroup__pitcher">
+                <span className="matchupgroup__vs">vs</span>{' '}
+                <PlayerLink id={g.pitcher.id}>{g.pitcher.name}</PlayerLink>
+              </p>
+              <ul className="matchupgroup__rows">
+                {g.rows.map((r) => {
+                  const tonight = pitcherStarting && startingIds?.has(r.batter.id)
+                  return (
+                    <li
+                      key={r.batter.id}
+                      className={
+                        tonight
+                          ? 'matchupgroup__row matchupgroup__row--tonight'
+                          : 'matchupgroup__row'
+                      }
+                    >
+                      <PlayerLink id={r.batter.id} className="matchupgroup__batter">
+                        {r.batter.name}
+                      </PlayerLink>
+                      <span className="matchupgroup__line">{matchupLine(r, levelLabel)}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )
+        })}
       </div>
       {hidden > 0 && (
         <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>

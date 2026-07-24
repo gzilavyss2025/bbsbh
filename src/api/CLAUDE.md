@@ -36,7 +36,13 @@ spoiler-free only when restricted to the half the user has reached
 - `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
   the live feed; spoiler-free but empty until ~first pitch, so it rides the
   feed's fetch/reload in `GameView` and renders on the lineup pages + box
-  score).
+  score). Also `fetchTeamUniformCatalog` (per-team season catalog) and, for the
+  Team Page's record-by-jersey strip (`components/JerseyCombos.jsx`),
+  `fetchGameJerseys` (batched per-game worn-jersey join) + the pure
+  `buildJerseyCombos` (one card per catalog jersey → its logo treatment + the
+  club's W-L in games it wore it, joined by `uniformAssetCode`; the record is
+  gated by the schedule's own cutoff so it can't leak a result the standings
+  don't already show).
 - `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
   **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
   live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call
@@ -414,13 +420,18 @@ for each generator; the reader modules:
   the same-cutoff Season Surprise snapshot; both drivers remain visible and a
   club enters the league Grade pool only when both exist. See
   `docs/season-grade.md` and ADR-0020.
-- `comebackWins.js` — the Team Page's ranked "Comeback wins" card, from
+- `comebackWins.js` — the Team Page's "Comeback wins" card, from
   `public/data/comeback-wins.json` (`gen-comeback-wins.mjs`). Per-team,
-  per-season counts of wins after the club's win prob fell below 10/20/30%
-  (nested). `comebackWinsFor` selects one club; `leagueComebackWinsFor` returns
-  every club as `{ teamId, stat }` rows so `TeamPage`'s `statRank` ranks each
-  threshold out of 30. Spoiler-free (a Final-games aggregate, same footing as
-  WAR) — no `SealBox`; the card renders only when a bucket is non-zero.
+  per-season comeback WINS (`sub10/20/30`) over ATTEMPTS (`att10/20/30`, times
+  the club fell that low win or lose) after its win prob dropped below 10/20/30%
+  (both nested). `comebackRatesFor(data, teamId, season)` is what the card uses:
+  per threshold the club's `wins`/`att`/`rate` (`sub/att`) plus the pooled MLB
+  baseline `leagueRate` (`Σsub/Σatt`) and a count-based `rank`/`of`/`tied` (raw
+  win count, sample-size-proof — a rate rank would let a 1-of-1 club top it).
+  `comebackWinsFor` selects one raw row; `leagueComebackWinsFor` is the legacy
+  `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
+  Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
+  only when the club has at least one comeback win.
 - `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
   prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
   opinion, deliberately NOT a callout family (see docs/callouts.md's

@@ -1,14 +1,9 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CopyIconButton } from '../components/CopyBox.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
-import { PinstripePattern, RecolorFilter } from '../components/WinProbChart.jsx'
-import {
-  DEFAULT_PINSTRIPE_COLOR,
-  WPA_PLOT_SIZE,
-  wpaBandColor,
-  wpaBandPinstripeColor,
-} from '../lib/wpaBandColors.js'
+import { WinProbChart } from '../components/WinProbChart.jsx'
+import { DEFAULT_PINSTRIPE_COLOR, wpaBandColor, wpaBandPinstripeColor } from '../lib/wpaBandColors.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import {
   ALL_MLB_TEAM_IDS,
@@ -16,6 +11,7 @@ import {
   teamClubName,
   teamColorSwatches,
   teamLogoUrl,
+  teamAbbr,
   ALT_COLORS,
   ALT2_COLORS,
   ALT3_COLORS,
@@ -26,14 +22,15 @@ import {
   mainOverrideLogoUrl,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
+  treatmentPinstripeBg,
   hasAlternate2,
   hasAlternate3,
   hasAlternate4,
   hasCityConnect,
 } from '../lib/teams.js'
-import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
-import { useWpaLogo } from '../hooks/useWpaLogo.js'
+import { wpaLogoLayout } from '../lib/wpaLogo.js'
 import { fetchTeamUniformCatalog, classifyUniformAsset, jerseyLabel } from '../api/uniforms.js'
+import { fetchLastOpponent } from '../api/schedule.js'
 
 // Main already has a reliable source — the mlbstatic CDN this app uses
 // everywhere else (components/TeamLogo.jsx) — so only Alternate and City
@@ -73,6 +70,14 @@ const TREATMENT_OFFSET_X = {
 const TREATMENT_ORIGIN_Y = {
   109: { alternate: '10%' }, // Diamondbacks — anchored just below the top so the teal border only just clips, most of the bleed still goes to the bottom
 }
+
+// Per-team, per-treatment vertical nudge (percent of the tile's own height,
+// negative = up) — the Y counterpart to TREATMENT_OFFSET_X above, same
+// CSS-custom-property mechanism (--offset-y on .colorlab__logoimg/.teamlogo).
+// Page-local only, same footing as TREATMENT_OFFSET_X. Left empty — every
+// entry so far comes from a user edit in LogoPositionControls below, copied
+// in by hand.
+const TREATMENT_OFFSET_Y = {}
 
 // A proposed replacement for a team's Primary swatch, tried out on this page
 // only — teams.js's TEAM_COLOR_PAIRS/TEAM_COLORS (the real app-wide source
@@ -179,9 +184,61 @@ function jerseyMatchesFor(catalog, teamId, treatmentKey) {
 // layout/color proposal rather than one pick per team.
 const WPA_LAB_KEY = 'bbsbh:team-color-lab:wpa'
 
-function loadWpaDraft() {
+// Same per-(team, treatment) draft, for the main rectangle's own logo
+// position (LogoPositionControls) — `{ scale, offsetX, offsetY }`.
+const POS_LAB_KEY = 'bbsbh:team-color-lab:logopos'
+
+// Same again, for the header-recolor mockup (TreatmentHeaderPreview) —
+// `{ blue, gold, font }`. Nothing reads this outside the page; see that
+// component's own doc comment for why.
+const HEADER_LAB_KEY = 'bbsbh:team-color-lab:headercolors'
+
+// The shared shape behind all three stores above: `{ [teamId]: { [treatment]:
+// { ...fields } } }` in localStorage, one load-on-mount + write-on-change
+// pair per store. Centralized here so WPA/position/header drafts can't drift
+// into three slightly different persistence bugs.
+function useDraftStore(key) {
+  const [draft, setDraft] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(key) || '{}')
+    } catch {
+      return {}
+    }
+  })
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(draft))
+  }, [key, draft])
+  const setField = (teamId, treatment, field, value) =>
+    setDraft((was) => ({
+      ...was,
+      [teamId]: {
+        ...was[teamId],
+        [treatment]: { ...was[teamId]?.[treatment], [field]: value },
+      },
+    }))
+  const reset = (teamId, treatment) =>
+    setDraft((was) => {
+      if (!was[teamId]) return was
+      const nextTeam = { ...was[teamId] }
+      delete nextTeam[treatment]
+      return { ...was, [teamId]: nextTeam }
+    })
+  return [draft, setField, reset]
+}
+
+// Which teams' rows are collapsed — persisted the same way, so a club
+// that's been locked in stays collapsed across reloads instead of tempting
+// another look (and another accidental edit) every time the page is
+// revisited. `{ [teamId]: false }` marks a team explicitly EXPANDED; every
+// other team (no entry, or `true`) renders collapsed by default — a fresh
+// visit (empty localStorage) starts every row collapsed rather than firing
+// all 30 teams' lazy lastOpponent fetch + rendering ~120 real WinProbChart
+// scenario mockups at once (see TeamColorRow's own effect below).
+const COLLAPSED_KEY = 'bbsbh:team-color-lab:collapsed'
+
+function loadCollapsed() {
   try {
-    return JSON.parse(localStorage.getItem(WPA_LAB_KEY) || '{}')
+    return JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '{}')
   } catch {
     return {}
   }
@@ -193,7 +250,10 @@ export function TeamColorLab() {
     teamFullName(a).localeCompare(teamFullName(b)),
   )
   const [catalog, setCatalog] = useState({})
-  const [wpaDraft, setWpaDraft] = useState(loadWpaDraft)
+  const [wpaDraft, setWpaField, resetWpaDraft] = useDraftStore(WPA_LAB_KEY)
+  const [posDraft, setPosField, resetPosDraft] = useDraftStore(POS_LAB_KEY)
+  const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(HEADER_LAB_KEY)
+  const [collapsed, setCollapsed] = useState(loadCollapsed)
 
   // One call for all 30 clubs' current-season uniform catalog (verified to
   // accept a comma list — docs/uniforms-and-logos.md), so the jersey-match
@@ -209,24 +269,11 @@ export function TeamColorLab() {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem(WPA_LAB_KEY, JSON.stringify(wpaDraft))
-  }, [wpaDraft])
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed))
+  }, [collapsed])
 
-  const setWpaField = (teamId, treatment, field, value) =>
-    setWpaDraft((was) => ({
-      ...was,
-      [teamId]: {
-        ...was[teamId],
-        [treatment]: { ...was[teamId]?.[treatment], [field]: value },
-      },
-    }))
-  const resetWpaDraft = (teamId, treatment) =>
-    setWpaDraft((was) => {
-      if (!was[teamId]) return was
-      const nextTeam = { ...was[teamId] }
-      delete nextTeam[treatment]
-      return { ...was, [teamId]: nextTeam }
-    })
+  const toggleCollapsed = (teamId) =>
+    setCollapsed((was) => ({ ...was, [teamId]: was[teamId] === false ? true : false }))
 
   return (
     <div className="screen">
@@ -244,7 +291,9 @@ export function TeamColorLab() {
         jersey(s) map to each treatment. Click a swatch to try it as that
         tile’s WPA band color. Missing logos or colors show as a placeholder
         until supplied; every proposed edit here comes with a copy icon that
-        tells Claude exactly what to change.
+        tells Claude exactly what to change. Position lets you nudge/rescale
+        the main rectangle’s own logo; Header colors is an unwired mockup of
+        what a Blue/Gold header recolor could look like for this treatment.
       </p>
 
       <div className="colorlab__layout">
@@ -264,6 +313,14 @@ export function TeamColorLab() {
               wpaDraft={wpaDraft[id]}
               onWpaField={(treatment, field, value) => setWpaField(id, treatment, field, value)}
               onWpaReset={(treatment) => resetWpaDraft(id, treatment)}
+              posDraft={posDraft[id]}
+              onPosField={(treatment, field, value) => setPosField(id, treatment, field, value)}
+              onPosReset={(treatment) => resetPosDraft(id, treatment)}
+              headerDraft={headerDraft[id]}
+              onHeaderField={(treatment, field, value) => setHeaderField(id, treatment, field, value)}
+              onHeaderReset={(treatment) => resetHeaderDraft(id, treatment)}
+              collapsed={collapsed[id] !== false}
+              onToggleCollapsed={() => toggleCollapsed(id)}
             />
           ))}
         </div>
@@ -278,8 +335,40 @@ function teamAnchorId(teamId) {
   return `colorlab-team-${teamId}`
 }
 
-function TeamColorRow({ teamId, catalog, wpaDraft, onWpaField, onWpaReset }) {
+function TeamColorRow({
+  teamId,
+  catalog,
+  wpaDraft,
+  onWpaField,
+  onWpaReset,
+  posDraft,
+  onPosField,
+  onPosReset,
+  headerDraft,
+  onHeaderField,
+  onHeaderReset,
+  collapsed,
+  onToggleCollapsed,
+}) {
   const name = teamFullName(teamId)
+  // The real rival for this row's WPA scenario mockups (TreatmentWpaScenarios
+  // below) — fetched once, lazily: `undefined` means "haven't tried yet",
+  // skipped entirely while the row is collapsed so a fresh page load doesn't
+  // fire 30 schedule requests up front (unlike the one batched uniform-
+  // catalog fetch above, there's no multi-team schedule endpoint to spread
+  // this over). Stays cached in this row's own state once it resolves —
+  // re-collapsing/expanding the row never re-fetches.
+  const [lastOpponent, setLastOpponent] = useState(undefined)
+  useEffect(() => {
+    if (collapsed || lastOpponent !== undefined) return
+    let cancelled = false
+    fetchLastOpponent(teamId).then((opp) => {
+      if (!cancelled) setLastOpponent(opp ?? null)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [collapsed, teamId, lastOpponent])
   // Alternate 2/3 are opt-in per team (unlike Main/Alternate/City Connect,
   // which every club eventually gets) — skip the tile entirely for a team
   // with none set up, rather than showing an empty placeholder. City Connect
@@ -294,29 +383,72 @@ function TeamColorRow({ teamId, catalog, wpaDraft, onWpaField, onWpaReset }) {
   )
   return (
     <section className="colorlab__row" id={teamAnchorId(teamId)}>
-      <h2 className="colorlab__teamname">{name}</h2>
-      <div className="colorlab__treatments">
-        {treatments.map((t) => (
-          <TreatmentBox
-            key={t.key}
-            teamId={teamId}
-            name={name}
-            treatment={t.key}
-            label={t.label}
-            catalog={catalog}
-            wpaDraft={wpaDraft?.[t.key]}
-            onWpaField={(field, value) => onWpaField(t.key, field, value)}
-            onWpaReset={() => onWpaReset(t.key)}
-          />
-        ))}
-      </div>
+      <button
+        type="button"
+        className="colorlab__teamtoggle"
+        onClick={onToggleCollapsed}
+        aria-expanded={!collapsed}
+      >
+        <span className="colorlab__teamname">{name}</span>
+        <span className="colorlab__teamchevron" aria-hidden="true">
+          {collapsed ? '▸' : '▾'}
+        </span>
+      </button>
+      {!collapsed && (
+        <div className="colorlab__treatments">
+          {treatments.map((t) => (
+            <TreatmentBox
+              key={t.key}
+              teamId={teamId}
+              name={name}
+              treatment={t.key}
+              label={t.label}
+              catalog={catalog}
+              lastOpponent={lastOpponent}
+              wpaDraft={wpaDraft?.[t.key]}
+              onWpaField={(field, value) => onWpaField(t.key, field, value)}
+              onWpaReset={() => onWpaReset(t.key)}
+              posDraft={posDraft?.[t.key]}
+              onPosField={(field, value) => onPosField(t.key, field, value)}
+              onPosReset={() => onPosReset(t.key)}
+              headerDraft={headerDraft?.[t.key]}
+              onHeaderField={(field, value) => onHeaderField(t.key, field, value)}
+              onHeaderReset={() => onHeaderReset(t.key)}
+            />
+          ))}
+        </div>
+      )}
     </section>
   )
 }
 
-function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpaField, onWpaReset }) {
+function TreatmentBox({
+  teamId,
+  name,
+  treatment,
+  label,
+  catalog,
+  lastOpponent,
+  wpaDraft,
+  onWpaField,
+  onWpaReset,
+  posDraft,
+  onPosField,
+  onPosReset,
+  headerDraft,
+  onHeaderField,
+  onHeaderReset,
+}) {
   const colors = colorsFor(teamId, treatment)
   const jerseyMatches = jerseyMatchesFor(catalog, teamId, treatment)
+  // Every club is down to one jersey per logo treatment now, so the tile
+  // reads better headed by that jersey's own name (e.g. "Road Grey") than
+  // the generic Main/Alternate/City Connect bucket it lives in — the whole
+  // point of this page is recognizing at a glance which one you already
+  // locked in. Falls back to the generic label while the catalog is still
+  // loading, or for the rare treatment that doesn't resolve to exactly one
+  // jersey.
+  const displayLabel = jerseyMatches?.length === 1 ? jerseyMatches[0].label : label
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   const pinstripeColor = treatment === 'main'
@@ -324,6 +456,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
       ? mainTreatmentPinstripeColor(teamId)
       : null
     : treatmentPinstripeColor(teamId, treatment)
+  const pinstripeBg = treatment === 'main' ? null : treatmentPinstripeBg(teamId, treatment)
   // Main picks its tile background from one of the three official swatches
   // (MAIN_OVERRIDES names which) or a literal `bgHex` (Brewers); Alternate/
   // City Connect flag whichever of their user-supplied swatches is the
@@ -335,17 +468,24 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
       : colors.findIndex((c) => c?.bg)
 
   const tint = override?.bgHex ?? (activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined)
-  const treatmentScale = override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
-  const treatmentOffsetX = TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
+  // A LogoPositionControls draft wins outright over every hardcoded default
+  // below it — same "draft overrides curated default" pattern as the WPA
+  // preview's own size/rotate/offset fields.
+  const treatmentScale = posDraft?.scale ?? override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
+  const treatmentOffsetX = posDraft?.offsetX ?? TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
+  const treatmentOffsetY = posDraft?.offsetY ?? TREATMENT_OFFSET_Y[teamId]?.[treatment] ?? 0
   const treatmentOriginY = TREATMENT_ORIGIN_Y[teamId]?.[treatment] ?? 'center'
+  const hasPosDraft = posDraft && Object.keys(posDraft).length > 0
   const logoboxStyle =
-    tint || override || pinstripeColor || treatmentOffsetX || treatmentOriginY !== 'center'
+    tint || override || pinstripeColor || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
       ? {
           '--tint': tint,
           '--scale': 1.32 * treatmentScale,
           '--offset-x': `${treatmentOffsetX}%`,
+          '--offset-y': `${treatmentOffsetY}%`,
           '--origin-y': treatmentOriginY,
           '--pinstripe-color': pinstripeColor ?? undefined,
+          '--pinstripe-bg': pinstripeBg ?? undefined,
         }
       : undefined
   const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${pinstripeColor ? ' colorlab__logobox--pinstripe' : ''}`
@@ -360,75 +500,78 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
   const wpaPinstripe = wpaDraft?.pinstripe ?? Boolean(wpaPinstripeDefault)
   const wpaBand =
     wpaDraft?.bandColor ?? (wpaPinstripe ? wpaPinstripeDefault ?? DEFAULT_PINSTRIPE_COLOR : wpaBandColor(teamId, treatment))
+  // Same merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% TreatmentWpaPreview's own
+  // fields show — computed once via the shared resolvedWpaLayout helper so
+  // TreatmentWpaScenarios' mockups below render the SAME in-progress draft,
+  // not just what's already saved in WPA_LOGO_LAYOUT_OVERRIDES.
+  const wpaLayout = resolvedWpaLayout(teamId, treatment, wpaDraft)
 
   return (
     <div className="colorlab__treatment">
-      <span className="colorlab__treatmentlabel">{label}</span>
-      <div className="colorlab__treatmentrow">
-        <div className="colorlab__treatmentbox">
-          <div className={logoboxClass} style={logoboxStyle}>
-            <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />
-          </div>
-          <div className="colorlab__swatchrow">
-            {slots.map((s, i) => (
-              <ColorSwatch
-                key={i}
-                swatch={s}
-                active={i === activeBgIndex}
-                wpaSelected={Boolean(!wpaPinstripe && s && wpaBand.toLowerCase() === s.hex.toLowerCase())} // caps-js-exempt
-                onPickWpaBand={
-                  s
-                    ? () => {
-                        onWpaField('pinstripe', false)
-                        onWpaField('bandColor', s.hex)
-                      }
-                    : undefined
-                }
-              />
-            ))}
-          </div>
+      <span className="colorlab__treatmentlabel">{displayLabel}</span>
+      <div className="colorlab__treatmentbox">
+        <div className={logoboxClass} style={logoboxStyle}>
+          <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />
         </div>
-        <TreatmentWpaPreview
+        <div className="colorlab__swatchrow">
+          {slots.map((s, i) => (
+            <ColorSwatch
+              key={i}
+              swatch={s}
+              active={i === activeBgIndex}
+              wpaSelected={Boolean(!wpaPinstripe && s && wpaBand.toLowerCase() === s.hex.toLowerCase())} // caps-js-exempt
+              onPickWpaBand={
+                s
+                  ? () => {
+                      onWpaField('pinstripe', false)
+                      onWpaField('bandColor', s.hex)
+                    }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+        <LogoPositionControls
           teamId={teamId}
           name={name}
           treatment={treatment}
-          treatmentLabel={label}
-          draft={wpaDraft}
-          pinstripe={wpaPinstripe}
-          bandColor={wpaBand}
-          onField={onWpaField}
-          onReset={onWpaReset}
+          treatmentLabel={displayLabel}
+          scale={treatmentScale}
+          offsetX={treatmentOffsetX}
+          offsetY={treatmentOffsetY}
+          hasDraft={hasPosDraft}
+          onField={onPosField}
+          onReset={onPosReset}
         />
       </div>
-      <JerseyMatch matches={jerseyMatches} teamId={teamId} name={name} treatmentLabel={label} />
-    </div>
-  )
-}
-
-// The uniforms-CATALOG cross-reference for this tile — which real jersey
-// name(s) a scorer would see this club actually wear when this treatment is
-// the one on the field. `null` while the catalog is still loading; an empty
-// array is a loaded catalog with nothing in this bucket. The copy icon next
-// to a matched jersey hands over exactly what to edit if the mapping is
-// wrong — classifyUniformAsset's naming-convention guess, or a
-// JERSEY_TREATMENT_OVERRIDES entry keyed by that jersey's own catalog code
-// (both in src/api/uniforms.js) — without the matching itself being editable
-// on this page (a wrong guess is rare enough that hand-editing the source
-// table is simpler than a second UI to keep in sync with it).
-function JerseyMatch({ matches, teamId, name, treatmentLabel }) {
-  if (matches === null) return null
-  const copyText =
-    `Team: ${name} (id ${teamId})\n` +
-    `Treatment: ${treatmentLabel}\n` +
-    `Jersey(s) currently matched to it: ${matches.length ? matches.map((m) => m.label).join(' · ') : '(none)'}\n` +
-    `Where: src/api/uniforms.js — classifyUniformAsset's naming-convention guess, or ` +
-    `add/edit a JERSEY_TREATMENT_OVERRIDES entry keyed by uniformAssetCode ` +
-    `(${matches.length ? matches.map((m) => m.code ?? '—').join(', ') : 'n/a'}) to force a different treatment`
-  return (
-    <div className="colorlab__jerseymatch">
-      <span className="colorlab__jerseymatchlabel">Jersey</span>
-      <span>{matches.length ? matches.map((m) => m.label).join(' · ') : '—'}</span>
-      <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} jersey-match context`} />
+      <TreatmentWpaPreview
+        teamId={teamId}
+        name={name}
+        treatment={treatment}
+        treatmentLabel={displayLabel}
+        draft={wpaDraft}
+        pinstripe={wpaPinstripe}
+        bandColor={wpaBand}
+        onField={onWpaField}
+        onReset={onWpaReset}
+      />
+      <TreatmentWpaScenarios
+        teamId={teamId}
+        treatment={treatment}
+        lastOpponent={lastOpponent}
+        headerColors={headerColorsFor(colors, headerDraft)}
+        wpaLayout={wpaLayout}
+        wpaBandOverride={{ pinstripe: wpaPinstripe, color: wpaBand }}
+      />
+      <TreatmentHeaderPreview
+        teamId={teamId}
+        name={name}
+        treatmentLabel={displayLabel}
+        colors={colors}
+        draft={headerDraft}
+        onField={onHeaderField}
+        onReset={onHeaderReset}
+      />
     </div>
   )
 }
@@ -505,62 +648,44 @@ function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand }) {
   )
 }
 
-// A compact live preview of THIS treatment tiled the way the real
-// win-probability chart (WinProbChart.jsx) would render it — one per
-// treatment tile, not one per team, since a real game can wear ANY of a
-// club's treatments (the chart now reads that from that night's actual
-// uniform, api/jerseys.js) rather than always tiling Main. Size/rotate/
-// offset/band-color edits here are a LOCAL proposal (persisted to
-// localStorage so a reload doesn't lose it, same as Team Pattern Lab's
-// per-team feedback) — nothing here writes to WinProbChart.jsx itself; the
-// copy icon hands over the exact WPA_LOGO_LAYOUT_OVERRIDES /
-// WPA_TREATMENT_BAND_COLOR_OVERRIDES entries to paste in by hand. Band
-// color can also be set by clicking a swatch in the tile's own color row
-// (see ColorSwatch's onPickWpaBand) instead of typing a hex here.
-function TreatmentWpaPreview({
-  teamId,
-  name,
-  treatment,
-  treatmentLabel,
-  draft,
-  pinstripe,
-  bandColor,
-  onField,
-  onReset,
-}) {
-  const uid = useId()
-  const layoutDefaults = wpaLogoLayout(teamId, treatment)
-  const size = draft?.size ?? layoutDefaults.size
-  const rotate = draft?.rotate ?? layoutDefaults.rotate
-  const offsetX = draft?.offsetX ?? layoutDefaults.offsetX
-  const offsetY = draft?.offsetY ?? layoutDefaults.offsetY
-  const paddingX = draft?.paddingX ?? layoutDefaults.paddingX
-  const paddingY = draft?.paddingY ?? layoutDefaults.paddingY
-  const rowShift = draft?.rowShift ?? layoutDefaults.rowShift
+// The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs for
+// THIS treatment's WPA band — one per treatment tile, not one per team,
+// since a real game can wear ANY of a club's treatments (the chart reads
+// that from that night's actual uniform, api/jerseys.js) rather than always
+// tiling Main. A LOCAL proposal (persisted to localStorage so a reload
+// doesn't lose it, same as Team Pattern Lab's per-team feedback) — nothing
+// here writes to wpaLogo.js/wpaBandColors.js automatically; the copy icon
+// hands over the exact WPA_LOGO_LAYOUT_OVERRIDES / WPA_TREATMENT_BAND_COLOR_OVERRIDES
+// entries to paste in by hand. Band color can also be set by clicking a
+// swatch in the tile's own color row (see ColorSwatch's onPickWpaBand)
+// instead of typing a hex here. Used to carry its own live single-tile SVG
+// mockup alongside these fields; dropped in favor of TreatmentWpaScenarios
+// below, which shows the SAME knobs' real effect against a real opponent at
+// three score states instead of one static tile with no sense of scale.
+// The merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% for a (team, treatment) —
+// a WPA-preview draft field wins outright over WPA_LOGO_LAYOUT_OVERRIDES'
+// shipped default, same "draft overrides curated default" pattern as
+// LogoPositionControls. Shared by TreatmentWpaPreview (its own editable
+// fields) AND TreatmentBox (feeds TreatmentWpaScenarios below, so an
+// in-progress edit shows up in the scenario mockups immediately instead of
+// only after it's pasted into wpaLogo.js) — one merge formula, so the two
+// can't drift into showing different numbers for the same draft.
+function resolvedWpaLayout(teamId, treatment, draft) {
+  const d = wpaLogoLayout(teamId, treatment)
+  return {
+    size: draft?.size ?? d.size,
+    rotate: draft?.rotate ?? d.rotate,
+    offsetX: draft?.offsetX ?? d.offsetX,
+    offsetY: draft?.offsetY ?? d.offsetY,
+    paddingX: draft?.paddingX ?? d.paddingX,
+    paddingY: draft?.paddingY ?? d.paddingY,
+    rowShift: draft?.rowShift ?? d.rowShift,
+  }
+}
+
+function TreatmentWpaPreview({ teamId, name, treatment, treatmentLabel, draft, pinstripe, bandColor, onField, onReset }) {
+  const { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } = resolvedWpaLayout(teamId, treatment, draft)
   const hasDraft = draft && Object.keys(draft).length > 0
-
-  // Same resolver the real chart uses (hooks/useWpaLogo.js), so this preview
-  // can't drift from it — including the rule that a recolor override never
-  // touches a treatment's own procured art (only the stock CDN base mark),
-  // and the drop back to the club's Main mark when there's no art on file for
-  // this treatment yet. The tile on the LEFT is the one that still says "No
-  // logo yet" — that's the panel whose job is flagging the gap; this one
-  // shows what a real game would render.
-  const { src: logo, recolor: logoOverride } = useWpaLogo(teamId, treatment)
-
-  // Same tile math as the real chart, too (wpaTilePlacements) — the two
-  // paddings are independent, and either can go negative to overlap adjacent
-  // tiles' logos on purpose. `images` is one placement per row the tile
-  // needs — one by default, two once a row shift is dialed in — so a shifted
-  // grid previews exactly as it would ship.
-  const { tileW, tileH, images } = wpaTilePlacements({ size, paddingX, paddingY, rowShift })
-  const patternId = `wpaprev-pattern-${uid}`
-  const recolorId = `wpaprev-recolor-${uid}`
-  const pinstripeId = `wpaprev-pinstripe-${uid}`
-  // Pinstripe uses the SAME `bandColor` value as the flat-fill case, just as
-  // the line color instead of the tile fill — one text field covers both
-  // modes rather than a second color input that'd sit unused half the time.
-  const bandFill = pinstripe ? `url(#${pinstripeId})` : bandColor
 
   const overrideValue = pinstripe ? `{ pinstripe: true, color: '${bandColor}' }` : `'${bandColor}'`
   const copyText =
@@ -585,97 +710,251 @@ function TreatmentWpaPreview({
         )}
         <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} WPA context`} />
       </div>
-      <div className="colorlab__wpapreviewbody">
-        <div className="colorlab__wpapreviewfields">
+      <div className="colorlab__wpapreviewfields">
+        <label>
+          <span>Size</span>
+          <input type="number" value={size} onChange={(e) => onField('size', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>Rotate</span>
+          <input type="number" value={rotate} onChange={(e) => onField('rotate', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>X</span>
+          <input type="number" value={offsetX} onChange={(e) => onField('offsetX', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>Y</span>
+          <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>H-Pad</span>
+          <input type="number" value={paddingX} onChange={(e) => onField('paddingX', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>V-Pad</span>
+          <input type="number" value={paddingY} onChange={(e) => onField('paddingY', Number(e.target.value))} />
+        </label>
+        {/* Percent of a tile's width each row steps sideways from the one
+            above it — 0 (the shipped default) is a plain grid, 50 the
+            brickwork half-drop. */}
+        <label>
+          <span>Shift %</span>
+          <input type="number" value={rowShift} onChange={(e) => onField('rowShift', Number(e.target.value))} />
+        </label>
+        <label className="colorlab__wpapreviewcolor">
+          <span>{pinstripe ? 'Stripe' : 'Band'}</span>
+          <input type="text" value={bandColor} onChange={(e) => onField('bandColor', e.target.value)} />
+        </label>
+        <label className="colorlab__wpapreviewcolor colorlab__wpapreviewcheck">
+          <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
+          <span>Pinstripe</span>
+        </label>
+      </div>
+    </div>
+  )
+}
+
+// Three fixed win-probability states — a losing team gets a small band, a
+// tied game splits evenly, a winning team gets a large one — so the "how
+// does this tile's band actually read at different score states" question
+// TreatmentWpaPreview's single always-50/50-ish live edit can't answer gets
+// answered directly. `homePct` feeds a single real data point (plus
+// WinProbChart's own synthetic 50%-at-first-pitch origin), so each mockup
+// draws as a real, if short, win-prob line rather than a flat cut.
+const WPA_MOCK_SCENARIOS = [
+  { key: 'losing', label: 'Losing', homePct: 20 },
+  { key: 'tied', label: '50/50', homePct: 50 },
+  { key: 'winning', label: 'Winning', homePct: 80 },
+]
+
+// Three side-by-side mockups of the REAL two-team win-probability chart
+// (WinProbChart.jsx itself, not a hand-rolled stand-in — no drift risk) at
+// the three score states above. This tile's own team is the HOME band —
+// `wpaLayout`/`wpaBandOverride` (TreatmentBox's own resolvedWpaLayout() /
+// pinstripe+band merge, the SAME values TreatmentWpaPreview's fields show)
+// feed WinProbChart's homeLayoutOverride/homeBandOverride props, so an
+// in-progress WPA-preview edit shows up here live rather than only once
+// pasted into WPA_LOGO_LAYOUT_OVERRIDES/WPA_TREATMENT_BAND_COLOR_OVERRIDES.
+// `lastOpponent` (this team's most recent completed game's rival,
+// TeamColorRow's own lazy fetch) plays the AWAY band on their own Main
+// look — unaffected by any of this tile's own draft edits — so the split
+// reads as a real, recognizable matchup instead of a placeholder club.
+// Renders nothing until lastOpponent resolves — `undefined` (still
+// fetching) and `null` (never found, e.g. before Opening Day) both skip the
+// row rather than showing a broken half-built chart.
+//
+// `headerColors` (this treatment's resolved Header colors — see
+// headerColorsFor below, shared with TreatmentHeaderPreview so the two can't
+// drift) recolors each mockup's OWN real .winprob__head bar, not a second
+// fake header: WinProbChart's header reads the plain --navy/--seal/
+// --text-on-ink tokens, and CSS custom properties cascade, so setting those
+// three as inline style on this wrapper overrides them for everything inside
+// it without touching the real tokens (or any other chart on the page).
+function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors, wpaLayout, wpaBandOverride }) {
+  if (!lastOpponent) return null
+  const homeAbbr = teamAbbr({ id: teamId })
+  return (
+    <div
+      className="colorlab__wpascenarios"
+      style={{ '--navy': headerColors.blue, '--seal': headerColors.gold, '--text-on-ink': headerColors.font }}
+    >
+      {WPA_MOCK_SCENARIOS.map((s) => (
+        <div className="colorlab__wpascenario" key={s.key}>
+          <span className="colorlab__wpascenariolabel">{s.label}</span>
+          <WinProbChart
+            points={[{ home: s.homePct, inning: 1, half: 'top' }]}
+            awayId={lastOpponent.id}
+            homeId={teamId}
+            awayAbbr={lastOpponent.abbreviation}
+            homeAbbr={homeAbbr}
+            awayTreatment="main"
+            homeLayoutOverride={wpaLayout}
+            homeBandOverride={wpaBandOverride}
+            homeTreatment={treatment}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// A compact numeric-precision editor for the SAME scale/offset knobs the
+// main rectangle's own logo already renders with (TREATMENT_SCALE in
+// teams.js, TREATMENT_OFFSET_X/TREATMENT_OFFSET_Y above) — the "move it
+// around" counterpart to TreatmentWpaPreview's Size/X/Y fields, for the one
+// non-tiled mark this page shows per treatment instead of a repeating WPA
+// pattern. Rendered INSIDE .colorlab__treatmentbox (unlike the WPA/header
+// previews, which get their own boxed card) — a dashed divider instead of
+// its own border, so it reads as a third column of the logo+swatches card
+// it's positioning rather than a separate proposal. A draft here is
+// page-local only, same footing as TREATMENT_OFFSET_X/TREATMENT_ORIGIN_Y —
+// nothing writes back automatically; the copy icon hands over the literal to
+// paste in by hand.
+function LogoPositionControls({
+  teamId,
+  name,
+  treatment,
+  treatmentLabel,
+  scale,
+  offsetX,
+  offsetY,
+  hasDraft,
+  onField,
+  onReset,
+}) {
+  const copyText =
+    `Team: ${name} (id ${teamId})\n` +
+    `Treatment: ${treatmentLabel}\n` +
+    `Where: src/lib/teams.js — TREATMENT_SCALE[${teamId}].${treatment} (scale) / ` +
+    `src/screens/TeamColorLab.jsx — TREATMENT_OFFSET_X[${teamId}].${treatment} and ` +
+    `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local)\n` +
+    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}`
+  return (
+    <div className="colorlab__posinline">
+      <div className="colorlab__wpapreviewhead">
+        <span className="colorlab__wpapreviewlabel">Position</span>
+        {hasDraft && (
+          <button type="button" className="colorlab__wparesetbtn" onClick={onReset}>
+            Reset
+          </button>
+        )}
+        <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} logo-position context`} />
+      </div>
+      <div className="colorlab__posinlinefields">
+        <label>
+          <span>Scale</span>
+          <input
+            type="number"
+            step="0.01"
+            value={scale}
+            onChange={(e) => onField('scale', Number(e.target.value))}
+          />
+        </label>
+        <label>
+          <span>X</span>
+          <input type="number" value={offsetX} onChange={(e) => onField('offsetX', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>Y</span>
+          <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
+        </label>
+      </div>
+    </div>
+  )
+}
+
+// Seeds for the header mockup below when neither a draft nor this tile's own
+// lead swatches (`colors`, passed in from TreatmentBox) supply one — the
+// app's current navy/kraft-amber brand pair (see --navy/--seal, tokens/
+// colors.css) and its light on-ink text color (--paper-2), copied as literals
+// since a JS default can't reach into CSS custom properties.
+const DEFAULT_HEADER_BLUE = '#1B2A3A'
+const DEFAULT_HEADER_GOLD = '#B5824A'
+const DEFAULT_HEADER_FONT = '#FBF6E9'
+
+// Shared by TreatmentHeaderPreview below AND TreatmentWpaScenarios above it —
+// so the win-probability scenario mockups' own header bars use the EXACT
+// same resolved Blue/Gold/Font this treatment's Header colors panel shows,
+// not a second computation that could drift from it.
+function headerColorsFor(colors, draft) {
+  return {
+    blue: draft?.blue ?? colors[0]?.hex ?? DEFAULT_HEADER_BLUE,
+    gold: draft?.gold ?? colors[1]?.hex ?? DEFAULT_HEADER_GOLD,
+    font: draft?.font ?? DEFAULT_HEADER_FONT,
+  }
+}
+
+// A rough mockup of what the app's navy/gold header chrome could look like
+// recolored to this club's brand for this treatment — NOT wired to any real
+// component. The site-wide theming idea this previews (neutral pages
+// matching a favorite team, game pages matching the home/batting team) is
+// still undecided, so there's no real override table to point at yet — this
+// is a design-lab sketch only, same "propose, don't wire" footing as the WPA
+// preview above it. Blue/Gold/Font are hex text fields seeded from this
+// tile's own two lead swatches (`colors`), persisted the same local-draft
+// way, with a copy icon that hands over the three hexes for whenever the
+// real feature gets built.
+function TreatmentHeaderPreview({ teamId, name, treatmentLabel, colors, draft, onField, onReset }) {
+  const { blue, gold, font } = headerColorsFor(colors, draft)
+  const hasDraft = draft && Object.keys(draft).length > 0
+  const copyText =
+    `Team: ${name} (id ${teamId})\n` +
+    `Treatment: ${treatmentLabel}\n` +
+    `Proposed header recolor (design-lab preview only — no real override table wired up yet):\n` +
+    `blue: ${blue}, gold: ${gold}, font: ${font}`
+  return (
+    <div className="colorlab__wpapreview colorlab__headerpreview">
+      <div className="colorlab__wpapreviewhead">
+        <span className="colorlab__wpapreviewlabel">Header colors</span>
+        {hasDraft && (
+          <button type="button" className="colorlab__wparesetbtn" onClick={onReset}>
+            Reset
+          </button>
+        )}
+        <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} header-color context`} />
+      </div>
+      <div className="colorlab__headerpreviewbody">
+        <div className="colorlab__headerfields">
           <label>
-            <span>Size</span>
-            <input type="number" value={size} onChange={(e) => onField('size', Number(e.target.value))} />
+            <span>Blue</span>
+            <input type="text" value={blue} onChange={(e) => onField('blue', e.target.value)} />
           </label>
           <label>
-            <span>Rotate</span>
-            <input type="number" value={rotate} onChange={(e) => onField('rotate', Number(e.target.value))} />
+            <span>Gold</span>
+            <input type="text" value={gold} onChange={(e) => onField('gold', e.target.value)} />
           </label>
           <label>
-            <span>X</span>
-            <input type="number" value={offsetX} onChange={(e) => onField('offsetX', Number(e.target.value))} />
-          </label>
-          <label>
-            <span>Y</span>
-            <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
-          </label>
-          <label>
-            <span>H-Pad</span>
-            <input type="number" value={paddingX} onChange={(e) => onField('paddingX', Number(e.target.value))} />
-          </label>
-          <label>
-            <span>V-Pad</span>
-            <input type="number" value={paddingY} onChange={(e) => onField('paddingY', Number(e.target.value))} />
-          </label>
-          {/* Percent of a tile's width each row steps sideways from the one
-              above it — 0 (the shipped default) is a plain grid, 50 the
-              brickwork half-drop. */}
-          <label>
-            <span>Shift %</span>
-            <input type="number" value={rowShift} onChange={(e) => onField('rowShift', Number(e.target.value))} />
-          </label>
-          <label className="colorlab__wpapreviewcolor">
-            <span>{pinstripe ? 'Stripe' : 'Band'}</span>
-            <input type="text" value={bandColor} onChange={(e) => onField('bandColor', e.target.value)} />
-          </label>
-          <label className="colorlab__wpapreviewcolor colorlab__wpapreviewcheck">
-            <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
-            <span>Pinstripe</span>
+            <span>Font</span>
+            <input type="text" value={font} onChange={(e) => onField('font', e.target.value)} />
           </label>
         </div>
-        {/* True desktop size (WPA_PLOT_SIZE — the real chart's own band area,
-            in the same px units it actually renders at) rather than a
-            shrunken thumbnail, so a size/rotate/offset tweak here looks
-            exactly like it would in the app — including a Size well past
-            100, which only ever looked identical to ~100 in the old
-            3-tile-wide thumbnail. */}
-        <svg
-          className="colorlab__wpapreviewsvg"
-          viewBox={`0 0 ${WPA_PLOT_SIZE.width} ${WPA_PLOT_SIZE.height}`}
-          role="img"
-          aria-label={`${name} ${treatmentLabel} win-probability logo pattern, true size`}
+        <div
+          className="colorlab__headerbar"
+          style={{ '--header-blue': blue, '--header-gold': gold, '--header-font': font }}
         >
-          <defs>
-            <RecolorFilter id={recolorId} override={logoOverride} />
-            {pinstripe && <PinstripePattern id={pinstripeId} color={bandColor} />}
-            <pattern
-              id={patternId}
-              patternUnits="userSpaceOnUse"
-              x={0}
-              y={0}
-              width={tileW}
-              height={tileH}
-              patternTransform={`rotate(${rotate}) translate(${offsetX} ${offsetY})`}
-              style={{ overflow: 'visible' }}
-            >
-              <rect width={tileW} height={tileH} className="winprob__patternbg" style={{ '--band-color': bandFill }} />
-              {logo &&
-                images.map((img, i) => (
-                  <image
-                    key={i}
-                    href={logo}
-                    x={img.x}
-                    y={img.y}
-                    width={size}
-                    height={size}
-                    className="winprob__patternlogo"
-                    filter={logoOverride && logoOverride.mode !== 'swap' ? `url(#${recolorId})` : undefined}
-                  />
-                ))}
-            </pattern>
-          </defs>
-          <rect
-            x={0}
-            y={0}
-            width={WPA_PLOT_SIZE.width}
-            height={WPA_PLOT_SIZE.height}
-            style={{ fill: `url(#${patternId})` }}
-          />
-        </svg>
+          <span className="colorlab__headerbar__title">{name}</span>
+        </div>
       </div>
     </div>
   )

@@ -878,8 +878,8 @@ body {
     to right,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
-    #fff 1px,
-    #fff 7px
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
   );
 }
 
@@ -2217,8 +2217,8 @@ body {
     to right,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
-    #fff 1px,
-    #fff 7px
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
   );
 }
 
@@ -2362,8 +2362,8 @@ body {
     to right,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
-    #fff 1px,
-    #fff 7px
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
   );
 }
 /* Same diagonal gloss sheen as .gamecard__logobox::after, so an off-day tile
@@ -4489,11 +4489,15 @@ body {
   color: var(--text-body);
 }
 
-/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small stat tables
-   (one per batting direction — "Braves batters vs Padres pitchers" and back),
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small lists (one per
+   batting direction — "Braves batters vs Padres pitchers" and back),
    deliberately not FormerTeammates' headshot cards (this is a line off a stat
-   sheet, not a story). Each table rides the shared .standings shell (see
-   .foulboard for the same reuse) rather than inventing new table chrome. */
+   sheet, not a story). Grouped one heading per opposing pitcher, with the
+   batters he's faced listed beneath, each as a batter→line row. This replaced
+   an earlier three-column batter/pitcher/line table that repeated the pitcher
+   on every row and overflowed a phone's width (horizontal swipe to read the
+   line) — collapsing the pitcher to a group heading leaves a two-part row that
+   fits any width and reads cleaner on desktop too. */
 .matchuptable {
   margin-top: var(--space-4);
 }
@@ -4509,25 +4513,65 @@ body {
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.matchuptable__table th.matchuptable__namecol,
-.matchuptable__table td.matchuptable__name {
-  text-align: left;
+.matchuplist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
-.matchuptable__table td.matchuptable__name {
+/* One opposing pitcher and the batters who've faced him. */
+.matchupgroup__pitcher {
+  margin: 0 0 var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* "vs" prefix ahead of the pitcher's name — a quiet function word, kept small
+   and uppercase so the eye lands on the name, not the label. */
+.matchupgroup__vs {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.matchupgroup__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Batter name on the left, career line on the right; the line is allowed to
+   wrap under a long name (margin-left:auto keeps it right-aligned when it
+   does) so nothing ever forces the row wider than the card. */
+.matchupgroup__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.matchupgroup__batter {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.matchuptable__table td.matchuptable__line {
+.matchupgroup__line {
+  margin-left: auto;
   font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
   color: var(--text-caption);
+  text-align: right;
 }
 /* A batter in tonight's actual starting lineup facing the opposing club's
-   actual probable starter — the one row on this table that's about to play
-   out for real on the user's own scoresheet. Same highlighter-yellow "pay
-   attention" wash as .standings tr.foulboard__row--outlier, set per-<td> so
-   the row's own hairline borders (owned by each cell) stay unbroken. */
-.matchuptable__row--tonight td {
+   actual probable starter — the one row on this list that's about to play out
+   for real on the user's own scoresheet. Same highlighter-yellow "pay
+   attention" wash as .standings tr.foulboard__row--outlier. */
+.matchupgroup__row--tonight {
   background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
 }
 
@@ -8335,39 +8379,67 @@ body {
   color: var(--text-heading);
 }
 
+/* Same collapse-button shape as the lineup page's RosterPanel
+   (.roster__toggle/.roster__chevron), but raised onto its own card surface
+   (same --surface-card/--shadow-card as .colorlab__treatmentbox below) so
+   one team's boundary reads clearly against the next while scrolling
+   through all 30 — not just a plain-background label easy to skim past. */
+.colorlab__teamtoggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  text-align: left;
+}
+
+.colorlab__teamchevron {
+  color: var(--text-caption);
+  font-size: var(--fs-title-sm);
+}
+
 .colorlab__treatments {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
+/* One jersey set's whole card — label plus every sub-panel below it (logo+
+   swatches+position, WPA preview, header colors) — so the boundary between
+   one treatment and the next reads at a glance scrolling down a team's
+   row, the same reasoning as .colorlab__teamtoggle's own card one level up.
+   Its sub-panels keep --paper-1 (the plain page color) rather than matching
+   this card's own --surface-card, so they read as recessed content sitting
+   inside the raised card instead of blending into it. */
 .colorlab__treatment {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
 }
 
 .colorlab__treatmentlabel {
   font-family: var(--font-display);
-  font-size: var(--fs-compact);
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
 }
 
-/* Wraps the existing logo+swatches box AND the per-treatment WPA preview
-   (TreatmentWpaPreview, TeamColorLab.jsx) side by side — wraps to stack on
-   narrow viewports rather than squeezing both into one row. */
-.colorlab__treatmentrow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
-
 .colorlab__treatmentbox {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-3);
@@ -8411,8 +8483,8 @@ body {
     to right,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
-    #fff 1px,
-    #fff 7px
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
   );
 }
 
@@ -8447,7 +8519,7 @@ body {
   height: 100% !important;
   object-fit: contain;
   border-radius: 0;
-  transform: translateX(var(--offset-x, 0)) scale(var(--scale, 1.32));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
   transform-origin: center var(--origin-y, center);
 }
 
@@ -8473,6 +8545,48 @@ body {
 .colorlab__swatchrow {
   display: flex;
   gap: var(--space-3);
+}
+
+/* LogoPositionControls (TeamColorLab.jsx) — a third column INSIDE
+   .colorlab__treatmentbox, beside the logo tile + swatches it's
+   positioning, rather than its own boxed card like the WPA/header previews
+   below. A dashed-free hairline divider (not a full border) is enough
+   separation given it already sits inside the treatmentbox's own border. */
+.colorlab__posinline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: var(--space-3);
+  border-left: var(--bw-hair) solid var(--border-rule);
+}
+
+.colorlab__posinlinefields {
+  display: flex;
+  gap: 6px;
+}
+
+.colorlab__posinlinefields label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.colorlab__posinlinefields input {
+  width: 44px;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 1px var(--space-1);
+}
+
+.colorlab__posinlinefields input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .colorlab__swatchcell {
@@ -8552,31 +8666,16 @@ body {
   color: var(--text-muted);
 }
 
-/* The uniforms-catalog cross-reference (JerseyMatch, TeamColorLab.jsx) — which
-   real jersey name(s) this tile's treatment corresponds to. */
-.colorlab__jerseymatch {
-  display: flex;
-  gap: var(--space-2);
-  font-size: var(--fs-compact);
-  color: var(--text-muted);
-}
-
-.colorlab__jerseymatchlabel {
-  flex: 0 0 auto;
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--text-caption);
-}
-
-/* Per-TREATMENT win-probability chart preview (TreatmentWpaPreview,
-   TeamColorLab.jsx) — a compact live preview of this exact tile's mark
-   tiled the way WinProbChart.jsx would render it, sitting beside the
-   existing logo+swatches box (see .colorlab__treatmentrow above) since a
-   real game can wear any of a club's treatments, not just Main. */
+/* The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs
+   (TreatmentWpaPreview, TeamColorLab.jsx) for this exact treatment's WPA
+   band, below the logo+swatches box. Also the base class TreatmentHeaderPreview
+   extends (.colorlab__headerpreview) — both are full-width proposal cards
+   inside a treatment's own .colorlab__treatment card. Used to carry a live
+   single-tile SVG mockup beside these fields; dropped in favor of
+   TreatmentWpaScenarios (its own three-mockup row further down), so these
+   fields alone now get the card's full width instead of a narrow sidebar. */
 .colorlab__wpapreview {
-  flex: 0 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -8584,14 +8683,6 @@ body {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--paper-1);
-}
-
-/* Controls (left) beside the true-size chart preview (right) — see
-   .colorlab__wpapreviewsvg below for why "true size" matters. */
-.colorlab__wpapreviewbody {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
 }
 
 .colorlab__wpapreviewhead {
@@ -8610,13 +8701,22 @@ body {
   color: var(--text-caption);
 }
 
+/* Same filled-primary look as the site's own action buttons (.btn--next) —
+   accent-primary navy background, text-on-ink white, the same pairing
+   already validated in scripts/check-contrast.mjs ("inverse text on ink
+   chip") — instead of the plain outlined surface-card button this used to
+   be, so this internal lab's buttons read as intentional, not unstyled. */
 .colorlab__wparesetbtn {
-  border: var(--bw-hair) solid var(--border-rule);
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  border: var(--bw-hair) solid var(--accent-primary);
   border-radius: var(--radius-xs);
-  background: var(--surface-card);
-  color: var(--text-body);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-semibold);
   font-size: var(--fs-compact);
-  padding: 2px var(--space-1);
+  padding: 0 var(--space-1);
   cursor: pointer;
 }
 
@@ -8625,27 +8725,13 @@ body {
   outline-offset: 2px;
 }
 
-/* WPA_PLOT_SIZE's own px dimensions (WinProbChart.jsx) — the real chart's
-   band area at true desktop size, not a shrunken thumbnail, so a Size well
-   past 100 (previously indistinguishable from ~100 in a tiny 3-tile-wide
-   box) reads as it actually would in the app. max-width keeps it from
-   overflowing a narrow viewport; the SVG's own viewBox keeps the tile
-   pattern's proportions correct at any rendered width. */
-.colorlab__wpapreviewsvg {
-  display: block;
-  flex: 1 1 304px;
-  width: 304px;
-  max-width: 100%;
-  height: 136px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-}
-
+/* No more single-tile SVG mockup beside these — just the fields, now given
+   the whole card's width to lay out across (auto-fill instead of a fixed
+   2-column grid built for a 112px sidebar). */
 .colorlab__wpapreviewfields {
-  flex: 0 0 112px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: var(--space-2);
   align-content: start;
 }
 
@@ -8692,6 +8778,98 @@ body {
 .colorlab__wpapreviewfields input:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* TreatmentWpaScenarios (TeamColorLab.jsx) — three REAL WinProbChart
+   instances (its own .winprob card, unstyled here) side by side, one per
+   score state. Equal-thirds on a wide viewport, stacking on a narrow one —
+   same wrap behavior as every other multi-column row on this page. */
+.colorlab__wpascenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.colorlab__wpascenario {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.colorlab__wpascenariolabel {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.colorlab__headerpreviewbody {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.colorlab__headerfields {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-3);
+}
+
+.colorlab__headerfields label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.colorlab__headerfields input {
+  width: 90px;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 2px var(--space-1);
+}
+
+.colorlab__headerfields input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* The mockup bar itself — an unwired sketch of the app's navy/gold header
+   chrome recolored to a club's own Blue/Gold/Font, NOT the real
+   .topbar/.sitebar (those stay plain navy-on-paper; see
+   TreatmentHeaderPreview's own doc comment for why this is preview-only).
+   Sized to what the real site chrome actually looks like (--tap-min's 44px
+   tap-target height + a hair, --fs-title-sm — the same size .topbar--slate's
+   own condensed title uses) rather than an oversized banner. */
+.colorlab__headerbar {
+  flex: 1 1 280px;
+  min-width: 220px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-bottom: 3px solid var(--header-gold, var(--seal));
+  border-radius: var(--radius-sm);
+  background: var(--header-blue, var(--navy));
+}
+
+.colorlab__headerbar__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--header-font, #fff);
 }
 
 /* ---------------------------------------------------------- uniform names
@@ -8847,17 +9025,27 @@ body {
 }
 
 /* Compact icon-only copy affordance for inline placement next to a single
-   line (Team Color Lab's per-jersey match row) rather than a full CopyBox
-   block. */
+   line (Team Color Lab's per-jersey match row, its WPA/position/header
+   panel heads) rather than a full CopyBox block. Fixed square (matching
+   .colorlab__wparesetbtn's own 22px height, same filled accent-primary/
+   text-on-ink treatment) and flex-centered rather than text padding, so the
+   ⧉ glyph sits dead-center instead of drifting off-axis at different label
+   lengths beside it. Only this page uses CopyIconButton today (its sibling
+   CopyBox is the one other pages reuse), so recoloring it site-wide is safe. */
 .copybox__iconbtn {
   flex: 0 0 auto;
-  border: var(--bw-hair) solid var(--border-rule);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: var(--bw-hair) solid var(--accent-primary);
   border-radius: var(--radius-xs);
-  background: var(--surface-card);
-  color: var(--text-body);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
   font-size: var(--fs-compact);
   line-height: var(--lh-solid);
-  padding: 2px 5px;
+  padding: 0;
   cursor: pointer;
 }
 
@@ -14372,6 +14560,168 @@ body {
   font-size: var(--fs-caption);
 }
 
+/* The club's Main "logo card" in the team-page hero — its mark on the curated
+   tinted tile (TeamTreatmentMark treatment="main"), same framed/overscaled/
+   glossy recipe as the slate card's .gamecard__logobox and the off-day tile.
+   Fills the header grid's 64px logo column. */
+.team-hub__logobox {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.team-hub__logobox.team-hub__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.team-hub__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.team-hub__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.team-hub__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-display-lg);
+}
+
+/* ------------------------------------------------- logo & jersey combinations
+   A horizontal, touch-draggable strip on the team page — one card per catalog
+   jersey (its logo treatment tile over the jersey's name, the club's record in
+   games it wore it below). Native overflow-x scroll gives touch/trackpad
+   panning; useDragScroll (JerseyCombos.jsx) adds mouse click-drag. */
+.jerseystrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: 2px 0 var(--space-2);
+  /* Momentum panning shouldn't select the card text mid-drag. */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  touch-action: pan-x;
+}
+.jerseystrip:active {
+  cursor: grabbing;
+}
+.jerseycombo {
+  flex: 1 1 0;
+  min-width: 90px;
+  /* Grow to fill the row instead of scrolling at a fixed 104px, but keep
+     the original card's proportions (104x123) as it scales up. */
+  aspect-ratio: 104 / 123;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3) var(--space-2);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.jerseycombo__logobox {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.jerseycombo__logobox.jerseycombo__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.jerseycombo__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.jerseycombo__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.jerseycombo__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-h3);
+}
+.jerseycombo__name {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-compact);
+  color: var(--text-heading);
+  /* Draggable strip: don't let a pointer-drag turn into a text selection. */
+  pointer-events: none;
+}
+.jerseycombo__rec {
+  margin-top: auto;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
 .sitebar__wordmark,
 .topbar__home svg,
 .topbar__home img,
@@ -16096,6 +16446,14 @@ body {
 .tstatrow--worst {
   background: var(--clay-soft);
 }
+/* Today's row on the Record by Day of Week card — the same highlighter-yellow
+   wash as .foulboard__row--outlier's outlier flag, repurposed here to mean
+   "this is today" rather than "this is notable." Applied after best/worst so
+   it can layer on a row that's also this season's best/worst weekday. */
+.tstatrow--today {
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
 @media (max-width: 359px) {
   .tstats {
     grid-template-columns: 1fr;
@@ -16106,6 +16464,126 @@ body {
   .tstatrow:nth-child(2) {
     border-top: var(--bw-hair) solid var(--border-hairline);
   }
+}
+/* Comeback wins card (ComebackCard) — one row per depth (≤10/20/30% win
+   probability), each read as a RATE: "won N of M times they sank this low," with
+   a fill bar for the club's own comeback rate and a tick at the pooled MLB
+   baseline, so "better/worse than a typical club" is legible without a rank
+   table. Fixed 0–100% bar scale (comebacks ARE rare, so the short fill is the
+   honest picture). Reuses the .tstats-card chrome. */
+.cbk__gloss {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+  padding: 8px 8px 2px;
+  margin: 0;
+}
+.cbk__rows {
+  display: flex;
+  flex-direction: column;
+}
+.cbk__row {
+  padding: 9px 8px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.cbk__row:first-child {
+  border-top: none;
+}
+.cbk__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.cbk__label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  color: var(--text-muted);
+}
+.cbk__frac {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cbk__rate {
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.cbk__rate--over {
+  color: var(--field-deep);
+}
+.cbk__of {
+  font-weight: var(--w-regular);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.cbk__badge {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--field-deep);
+  background: var(--field-soft);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  margin-left: 7px;
+}
+/* One depth's distribution rail — reuses the .team-score__track/dot/tooltip
+   visuals (all 30 clubs plotted 0 → the MLB leader). */
+.cbk__rail {
+  margin: 2px 1px 0;
+}
+/* The pooled MLB-average rate — a bold dashed reference line with a flag cap so
+   it reads clearly through the dot cloud (rendered before the dots in the DOM so
+   a club dot still paints on top where they overlap). Dark ink, not a data
+   color, so it says "benchmark," not "a team." */
+.cbk__avg {
+  position: absolute;
+  top: 2px;
+  height: 22px;
+  width: 2px;
+  margin-left: -1px;
+  background: repeating-linear-gradient(
+    var(--ink-1) 0,
+    var(--ink-1) 3px,
+    transparent 3px,
+    transparent 5px
+  );
+}
+/* Downward flag at the top so the eye lands on the line even in a dense rail. */
+.cbk__avg::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--ink-1);
+}
+/* 0% (left) → the MLB leader's rate (right), with the average called out so the
+   rail's scale is legible without reading the gloss. */
+.cbk__scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+/* Tie the label to the dark reference line — same ink, slightly bolder. */
+.cbk__scale-avg {
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
 }
 .rankchip {
   font-family: var(--font-mono);

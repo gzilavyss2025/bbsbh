@@ -47,6 +47,17 @@ export function monthDayYear(apiDate) {
   return m ? `${Number(m[2])}/${Number(m[3])}/${m[1]}` : ''
 }
 
+// Whether an apiDate ("YYYY-MM-DD") falls on a Friday — used to predict a
+// Friday-night City Connect jersey before the game's actual worn jersey has
+// posted (see lib/teams.js's defaultTreatmentFor). Same manual y/m/d parse as
+// the rest of this file so the weekday can't drift across a DST edge; returns
+// false for a missing/garbled date.
+export function isFriday(apiDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(apiDate ?? '')) return false
+  const [y, m, d] = apiDate.split('-').map(Number)
+  return new Date(y, m - 1, d).getDay() === 5
+}
+
 // "MON" — 3-letter uppercase weekday abbreviation, for a compact date badge
 // (foul tracker's single-game-highs link). Same no-Date-round-trip approach
 // as monthDay/monthDayYear; returns '' for a missing/garbled date.

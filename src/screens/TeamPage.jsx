@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -11,13 +11,19 @@ import {
   fetchTeamRosterIds,
 } from '../api/team.js'
 import { fetchAllStarRosterIds, fetchPersonStats } from '../api/person-fetch.js'
+import {
+  fetchTeamUniformCatalog,
+  fetchGameJerseys,
+  fetchUniformNameOverrides,
+  buildJerseyCombos,
+} from '../api/uniforms.js'
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../api/teamScore.js'
-import { fetchComebackWins, leagueComebackWinsFor } from '../api/comebackWins.js'
+import { fetchComebackWins, comebackRatesFor } from '../api/comebackWins.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js'
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
@@ -25,13 +31,16 @@ import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } 
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
-import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
+import { SPORT_LABEL, favoriteAccentColor, teamClubName } from '../lib/teams.js'
+import { beeswarmRows } from '../lib/beeswarm.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
+import { JerseyCombos } from '../components/JerseyCombos.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -155,6 +164,37 @@ function comparePitchers(a, b) {
     Number(a.jersey) - Number(b.jersey)
   )
 }
+// Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
+const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// Record by day of week, off the same cutoff-gated `schedule` rows the
+// Schedule section below already renders (fetchTeamSchedule only sets `won`
+// once a game is Final AND on/before the asOf cutoff — see api/schedule.js —
+// so this reads no further ahead than the rest of the page). Days with no
+// decided games yet show DASH rather than "0-0".
+function dayOfWeekRecord(games) {
+  const tally = DOW_LABELS.map(() => ({ wins: 0, losses: 0 }))
+  for (const g of games) {
+    if (g.won == null) continue
+    const dow = new Date(`${g.apiDate}T00:00:00Z`).getUTCDay()
+    if (g.won) tally[dow].wins++
+    else tally[dow].losses++
+  }
+  return DOW_LABELS.map((label, i) => {
+    const { wins, losses } = tally[i]
+    const total = wins + losses
+    return {
+      k: label,
+      v: total ? `${wins}-${losses}` : DASH,
+      rank: total ? (wins / total).toFixed(3).replace(/^0/, '') : DASH,
+    }
+  })
+}
+// Same UTC-parse convention as dayOfWeekRecord's own apiDate → weekday
+// mapping (and isoToday() itself), so "today" lines up with whichever row
+// that same calendar date would have tallied into.
+function todayDowLabel() {
+  return DOW_LABELS[new Date(`${isoToday()}T00:00:00Z`).getUTCDay()]
+}
 function runDiff(rec) {
   const d = rec.runDifferential
   if (!Number.isFinite(d)) return DASH
@@ -190,7 +230,7 @@ async function loadTeam(id, asOf) {
   // same org-wide leaderboard (see the Prospects section below).
   const orgId = sportId === 1 ? id : team.parentOrgId ?? null
 
-  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage, comebackWinsData] =
+  const [roster, fullRoster, leaderPool, ilRoster, standings, league, allStarIds, warData, seasonScores, teamScores, postseasonOddsData, affiliates, complexAffiliates, prospectsSnapshot, schedule, allStarGame, manager, rookiesData, transactionsPage, comebackWinsData, uniformCatalog, uniformNameOverrides] =
     await Promise.all([
       fetchTeamRoster(id, season, { sportId }),
       // 40Man superset of the active roster above — the Roster super-section
@@ -239,6 +279,11 @@ async function loadTeam(id, asOf) {
         ? loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false }))
         : Promise.resolve({ days: [], cursor: null, hasMore: false }),
       sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
+      // This club's own season uniform catalog + the curated jersey-name map,
+      // for the record-by-jersey strip below. MLB only — /uniforms/team
+      // returns nothing for MiLB (see fetchTeamUniformCatalog).
+      sportId === 1 ? fetchTeamUniformCatalog([id], season) : Promise.resolve({}),
+      sportId === 1 ? fetchUniformNameOverrides() : Promise.resolve({}),
     ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
@@ -355,6 +400,30 @@ async function loadTeam(id, asOf) {
     isMe: t.team.id === id,
   }))
 
+  // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
+  // with its logo treatment and the club's W-L in the games it wore it. The
+  // worn-jersey join needs the per-game uniform assignment, one extra batched
+  // /uniforms/game call over just the games with a VISIBLE result (`won`
+  // already cutoff-gated by fetchTeamSchedule above), so an `asOf` team page
+  // never counts a game past its own spoiler cutoff. Skipped for a club with
+  // no catalog (MiLB) — buildJerseyCombos then returns [].
+  const decidedGames = schedule.filter((g) => g.won != null)
+  const wornByGame =
+    sportId === 1 && decidedGames.length
+      ? await fetchGameJerseys(decidedGames.map((g) => g.gamePk))
+      : {}
+  const jerseyCombos =
+    sportId === 1
+      ? buildJerseyCombos({
+          catalogAssets: uniformCatalog[id] ?? [],
+          clubName: teamClubName(id),
+          schedule,
+          wornByGame,
+          teamId: id,
+          nameOverrides: uniformNameOverrides,
+        })
+      : []
+
   const batting = league.hitting.length
     ? [
         statRank(league.hitting, id, 'runs', 'Runs', false),
@@ -386,20 +455,14 @@ async function loadTeam(id, asOf) {
       ]
     : null
 
-  // Comeback wins — wins after the team's win probability fell below 10/20/30%
-  // (nested). Ranked against the league like batting/pitching, but shown ONLY
-  // when this club has at least one such win: sub30 is the widest bucket, so
-  // sub30 === 0 means all three are zero and the card is hidden.
-  const comebackRows = leagueComebackWinsFor(comebackWinsData, season)
-  const myComeback = comebackRows.find((r) => r.teamId === id)?.stat
+  // Comeback wins — how often the club clawed back after its win probability
+  // fell below 10/20/30% at some point (nested), as a RATE against the pooled
+  // MLB baseline (see api/comebackWins.js). Shown ONLY when the club has at
+  // least one such win: sub30 is the widest bucket, so sub30 === 0 means all
+  // three are zero and the card is hidden.
+  const comebackData = comebackRatesFor(comebackWinsData, id, season)
   const comeback =
-    myComeback && myComeback.sub30 > 0
-      ? [
-          statRank(comebackRows, id, 'sub10', '< 10%', false),
-          statRank(comebackRows, id, 'sub20', '< 20%', false),
-          statRank(comebackRows, id, 'sub30', '< 30%', false),
-        ]
-      : null
+    comebackData && comebackData.thresholds.some((t) => t.wins > 0) ? comebackData : null
 
   const position = roster
     .filter((r) => r.position?.type !== 'Pitcher')
@@ -630,11 +693,14 @@ async function loadTeam(id, asOf) {
       (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
     )
 
+  const dayOfWeek = schedule.some((g) => g.won != null) ? dayOfWeekRecord(schedule) : null
+
   return {
     team, season, sportId,
     record: myRec
       ? { wins: myRec.wins, losses: myRec.losses, rank: myRec.divisionRank, div: team.division?.name }
       : null,
+    dayOfWeek,
     seasonScore,
     teamScore,
     leagueGradeScores,
@@ -644,6 +710,7 @@ async function loadTeam(id, asOf) {
     postseasonOdds,
     transactionsPage,
     standings: standingsRows,
+    jerseyCombos,
     batting, pitching, comeback, position, pitchers, injured,
     preferredLineup, substitutes, startingPitchers, bullpen,
     affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
@@ -693,7 +760,7 @@ export function TeamPage({ id, asOf, sportId }) {
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
+  const { team, season, record, dayOfWeek, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, jerseyCombos, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -722,8 +789,18 @@ export function TeamPage({ id, asOf, sportId }) {
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
+          {/* The club's Main "logo card" — its mark on the curated tinted tile
+              (the same treatment tile Team Color Lab prototyped and the slate
+              cards wear), rather than a bare CDN logo. Degrades to the plain
+              mark on paper for a MiLB club with no curated Main override. */}
           <div className="team-hub__logo">
-            <TeamLogo teamId={team.id} name={team.name} size={64} />
+            <TeamTreatmentMark
+              teamId={team.id}
+              name={team.name}
+              treatment="main"
+              size={64}
+              block="team-hub__logobox"
+            />
           </div>
           <div>
             <div className="team-hub__namerow">
@@ -795,6 +872,8 @@ export function TeamPage({ id, asOf, sportId }) {
           </>
         )}
 
+        <JerseyCombos combos={jerseyCombos} teamId={team.id} teamName={team.name} />
+
         {teamScore?.season?.score != null && (
           <TeamScoreCard
             snapshot={teamScore}
@@ -830,9 +909,13 @@ export function TeamPage({ id, asOf, sportId }) {
           </>
         )}
 
+        {dayOfWeek && (
+          <TeamStats title="Record by Day of Week" stats={dayOfWeek} note="win pct" highlightKey={todayDowLabel()} />
+        )}
+
         {batting && <TeamStats title="Team batting" stats={batting} />}
         {pitching && <TeamStats title="Team pitching" stats={pitching} />}
-        {comeback && <TeamStats title="Comeback wins" stats={comeback} />}
+        {comeback && <ComebackCard data={comeback} teamId={id} clubName={teamClubName(team)} />}
 
         <TeamLeaders
           pool={leaderPool}
@@ -1157,19 +1240,147 @@ function SeriesStrip({ games, allStarGame, refDate }) {
   )
 }
 
-function TeamStats({ title, stats }) {
+function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
   return (
     <>
-      <SectionTitle title={title} note="rank out of 30" />
+      <SectionTitle title={title} note={note} />
       <div className="tstats-card">
         <div className="tstats">
           {stats.map((s) => (
-            <div key={s.k} className={`tstatrow${s.extreme ? ` tstatrow--${s.extreme}` : ''}`}>
+            <div
+              key={s.k}
+              className={`tstatrow${s.extreme ? ` tstatrow--${s.extreme}` : ''}${s.k === highlightKey ? ' tstatrow--today' : ''}`}
+            >
               <span className="tstatrow__k">{s.k}</span>
               <span className="tstatrow__v">{s.v}</span>
               <span className={`tstatrow__r${s.tone ? ` tstatrow__r--${s.tone}` : ''}`}>{s.rank}</span>
             </div>
           ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// Comeback wins — one rail per depth (≤10/20/30% win probability). Each rail is a
+// distribution plot of all 30 clubs' comeback RATE at that depth (wins ÷ times
+// they sank that low), scaled 0 → the MLB leader, so the dot cloud IS the league
+// context: this club's dot (●) reads against the whole field and a tick at the
+// pooled MLB average. The numeric line keeps the honest sample size (N of M).
+const CBK_LABELS = {
+  sub10: 'Down to ≤10%',
+  sub20: 'Down to ≤20%',
+  sub30: 'Down to ≤30%',
+}
+function pctLabel(rate) {
+  return rate == null ? DASH : `${Math.round(rate * 100)}%`
+}
+// One depth's rail: every club plotted 0 → the league leader (maxRate), this
+// club's dot emphasized, a tick at the MLB average. Reuses the team-score rail's
+// dot/tooltip visuals + the shared beeswarm packer (via a 0–10 pseudo-score, so
+// a dot lands at rate ÷ maxRate of the width) so it can't drift from that rail.
+function ComebackRail({ t, teamId, clubName }) {
+  const [activeId, setActiveId] = useState(null)
+  const dismissTimer = useRef(null)
+  useEffect(() => () => window.clearTimeout(dismissTimer.current), [])
+
+  const max = t.maxRate > 0 ? t.maxRate : 1
+  const toPct = (rate) => (rate / max) * 100
+  const dots = beeswarmRows(
+    t.field
+      .filter((r) => r.teamId !== teamId)
+      .map((r) => ({ ...r, score: (r.rate / max) * 10 })),
+  )
+  const active = activeId != null ? t.field.find((r) => r.teamId === activeId) : null
+  const show = (id) => setActiveId(id)
+  const hide = () => setActiveId(null)
+  const tap = (id) => {
+    setActiveId(id)
+    window.clearTimeout(dismissTimer.current)
+    dismissTimer.current = window.setTimeout(
+      () => setActiveId((current) => (current === id ? null : current)),
+      2200,
+    )
+  }
+  const nameFor = (tid) => (tid === teamId ? clubName : teamClubName(tid)) ?? DASH
+
+  return (
+    <div className="team-score__track team-score__track--compact cbk__rail">
+      <div className="team-score__track-base" />
+      {t.leagueRate != null && (
+        <div className="cbk__avg" style={{ left: `${toPct(t.leagueRate)}%` }} aria-hidden="true" />
+      )}
+      {active && (
+        <div className="team-score__tooltip" style={{ left: `${toPct(active.rate)}%` }}>
+          {nameFor(active.teamId)} · {pctLabel(active.rate)}
+        </div>
+      )}
+      {dots.map((r) => (
+        <button
+          key={r.teamId}
+          type="button"
+          className="team-score__dot"
+          style={{ left: `${toPct(r.rate)}%`, top: `calc(11px + ${r.rowOffset}px)` }}
+          aria-label={`${nameFor(r.teamId)} ${pctLabel(r.rate)}`}
+          onMouseEnter={() => show(r.teamId)}
+          onMouseLeave={hide}
+          onFocus={() => show(r.teamId)}
+          onBlur={hide}
+          onClick={(e) => {
+            e.stopPropagation()
+            tap(r.teamId)
+          }}
+        />
+      ))}
+      {t.rate != null && (
+        <button
+          type="button"
+          className="team-score__dot team-score__dot--us"
+          style={{ left: `${toPct(t.rate)}%`, top: '11px' }}
+          aria-label={`${clubName || 'This team'} ${pctLabel(t.rate)}`}
+          onClick={(e) => e.stopPropagation()}
+          tabIndex={-1}
+        />
+      )}
+    </div>
+  )
+}
+function ComebackCard({ data, teamId, clubName }) {
+  return (
+    <>
+      <SectionTitle title="Comeback wins" note="all 30 teams" />
+      <div className="tstats-card cbk">
+        <p className="cbk__gloss">
+          How often {clubName || 'they'} rallied to win after their chance of winning the game
+          sank this low. Each rail plots all 30 clubs from 0% to the MLB leader; ● is{' '}
+          {clubName || 'this club'}, and the tick marks the MLB average.
+        </p>
+        <div className="cbk__rows">
+          {data.thresholds.map((t) => {
+            const beatsLeague = t.rate != null && t.leagueRate != null && t.rate > t.leagueRate
+            return (
+              <div key={t.key} className="cbk__row">
+                <div className="cbk__head">
+                  <span className="cbk__label">{CBK_LABELS[t.key]}</span>
+                  <span className="cbk__frac">
+                    <span className={`cbk__rate${beatsLeague ? ' cbk__rate--over' : ''}`}>
+                      {pctLabel(t.rate)}
+                    </span>
+                    <span className="cbk__of"> · {t.wins} of {t.att || DASH}</span>
+                    {t.rank === 1 && t.wins > 0 && (
+                      <span className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</span>
+                    )}
+                  </span>
+                </div>
+                <ComebackRail t={t} teamId={teamId} clubName={clubName} />
+                <div className="cbk__scale">
+                  <span>0%</span>
+                  <span className="cbk__scale-avg">MLB avg {pctLabel(t.leagueRate)}</span>
+                  <span>{pctLabel(t.maxRate)}</span>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </>

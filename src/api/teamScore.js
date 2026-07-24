@@ -109,3 +109,20 @@ export function leagueRankNoTies(rows, teamId) {
 export function rankedNoTies(rows) {
   return [...rows].sort(compareRowsNoTies).map((r, i) => ({ ...r, rank: i + 1 }))
 }
+
+// Buckets a Season Grade pool into thirds by RANK (not a fixed score cutoff)
+// — top third 'high', bottom third 'low', the rest 'mid' — for the Standings
+// page's percentile pill. Rank-based so the three tones always split the
+// CURRENT pool evenly, even as the league-wide spread of grades drifts across
+// a season.
+export function gradeTiersByTeamId(rows) {
+  const ranked = rankedNoTies(rows)
+  const of = ranked.length
+  const third = of / 3
+  const byTeamId = new Map()
+  for (const r of ranked) {
+    const tier = r.rank <= third ? 'high' : r.rank > of - third ? 'low' : 'mid'
+    byTeamId.set(r.teamId, tier)
+  }
+  return byTeamId
+}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '../scripts/gen-team-score.mjs'
-import { leagueSeasonGradesFor, teamScoreFor } from '../src/api/teamScore.js'
+import { leagueSeasonGradesFor, teamScoreFor, gradeTiersByTeamId } from '../src/api/teamScore.js'
 import { seasonGradeFromScores, seasonGradeFor } from '../src/api/seasonGradeFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 
@@ -138,4 +138,26 @@ test('league Season Grades require both inputs and never look past the cutoff', 
     { teamId: 1, score: 7.4, tiebreak: [3.2, 2.1] },
     { teamId: 2, score: 7, tiebreak: [-1.5, -0.6] },
   ])
+})
+
+test('Season Grade tiers split a nine-team pool into even thirds by rank, not by score', () => {
+  const rows = Array.from({ length: 9 }, (_, i) => ({ teamId: i + 1, score: 9 - i, tiebreak: [] }))
+  const tiers = gradeTiersByTeamId(rows)
+  assert.deepEqual([...tiers.entries()], [
+    [1, 'high'], [2, 'high'], [3, 'high'],
+    [4, 'mid'], [5, 'mid'], [6, 'mid'],
+    [7, 'low'], [8, 'low'], [9, 'low'],
+  ])
+})
+
+test('Season Grade tiers handle a pool size not divisible by three without losing a team', () => {
+  const rows = Array.from({ length: 8 }, (_, i) => ({ teamId: i + 1, score: 8 - i, tiebreak: [] }))
+  const tiers = gradeTiersByTeamId(rows)
+  const counts = { high: 0, mid: 0, low: 0 }
+  for (const tier of tiers.values()) counts[tier] += 1
+  assert.equal(tiers.size, 8)
+  assert.equal(counts.high + counts.mid + counts.low, 8)
+  // Best-ranked team is always 'high', worst-ranked is always 'low'.
+  assert.equal(tiers.get(1), 'high')
+  assert.equal(tiers.get(8), 'low')
 })
