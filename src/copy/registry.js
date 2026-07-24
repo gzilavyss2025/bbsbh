@@ -209,6 +209,15 @@ export const FIELDS = [
     multiline: false,
     default: 'Following live — spoilers on',
   },
+  {
+    id: 'followLive.liveEdgeLabel',
+    group: 'followLive',
+    label: 'Caught-up-to-live status',
+    help: 'Shown at the bottom of the innings view when you are following and caught up to the newest half — there is no next half to advance to yet. Use {inning} where the current half should appear (e.g. "Top 7th").',
+    maxLength: 60,
+    multiline: false,
+    default: 'Live · {inning} in progress',
+  },
 ]
 
 // Fast id -> field lookup, and the set of valid ids the API validates against.

@@ -346,6 +346,23 @@ export function InningViewer({
   const statBoxRef = useRef(null)
   const scrollToStatBox = () => statBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
+  // "Caught up to live" (ADR-0027): while following, the half being viewed IS the
+  // live frontier — every played half is revealed and there's no next half yet.
+  // In that state the floating bar's forward action ("Next ›" / the reveal split)
+  // would point at a half that hasn't happened, so we swap it for a calm live
+  // status instead. Uses the SAME consent-gated selectLiveEdge the reveal effect
+  // does; false the instant the game goes Final (the box-score affordance takes
+  // over) or the user pages back off the frontier. Copy is admin-editable
+  // (followLive.liveEdgeLabel), with {inning} filled here to the half on screen.
+  const liveEdgeIdx = following ? selectLiveEdge(feed, following) : null
+  const atLiveEdge = liveEdgeIdx != null && curIdx >= liveEdgeIdx && !selectIsFinal(feed)
+  const liveEdgeLabel = atLiveEdge
+    ? copy('followLive.liveEdgeLabel').replace(
+        '{inning}',
+        `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`,
+      )
+    : ''
+
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link
   // past what's unlocked) to the half actually being shown, via replaceState so
   // Back never revisits the bogus address. Without this the URL, the stepnav's
@@ -625,7 +642,12 @@ export function InningViewer({
           lastUpdated={lastUpdated}
           className="refreshbtn--float"
         />
-        {currentSealed ? (
+        {atLiveEdge ? (
+          <div className="liveedge" role="status" aria-live="polite">
+            <span className="liveedge__dot" aria-hidden="true" />
+            <span className="liveedge__label">{liveEdgeLabel}</span>
+          </div>
+        ) : currentSealed ? (
           <div className="revealsplit">
             <button
               type="button"
