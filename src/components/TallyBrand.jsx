@@ -4,14 +4,28 @@ import { useId } from 'react'
 // geometry and measured kerning, followed by the custom continuous Y and the
 // scorer's asterisk. No live text remains, so every letter rasterizes together
 // at header, page-bar, and footer sizes.
-const WORDMARK_ASPECT = 244 / 96
+const WORDMARK_WIDTH = 244
+const WORDMARK_HEIGHT = 96
+const WORDMARK_INK_TOP = 8
+const WORDMARK_INK_HEIGHT = 75
 
-export function TallyWordmark({ height = 20, title = 'Tally', className = '', ...rest }) {
+export function TallyWordmark({
+  height = 20,
+  title = 'Tally',
+  className = '',
+  tight = false,
+  ...rest
+}) {
+  const viewBox = tight
+    ? `0 ${WORDMARK_INK_TOP} ${WORDMARK_WIDTH} ${WORDMARK_INK_HEIGHT}`
+    : `0 0 ${WORDMARK_WIDTH} ${WORDMARK_HEIGHT}`
+  const aspect = WORDMARK_WIDTH / (tight ? WORDMARK_INK_HEIGHT : WORDMARK_HEIGHT)
+
   return (
     <svg
-      width={Math.round(height * WORDMARK_ASPECT)}
+      width={Math.round(height * aspect)}
       height={height}
-      viewBox="0 0 244 96"
+      viewBox={viewBox}
       role="img"
       aria-label={title}
       className={`tally-wordmark ${className}`.trim()}
@@ -45,23 +59,28 @@ export function TallyWordmark({ height = 20, title = 'Tally', className = '', ..
   )
 }
 
-// The full lockup — baseball mark to the left of the wordmark, sized so the
-// mark reads at roughly 1.3x the wordmark's cap height (a plain equal-height
-// pairing left the mark looking undersized next to the wordmark's own
-// baked-in padding). The mark carries no accessible name of its own — the
-// wordmark's alt text is the pairing's one label — and hides on a narrow
-// phone via .tally-lockup (see index.css), leaving just the mark as the
-// compact home button.
+// The full lockup — baseball mark and visible wordmark ink share one optical
+// height. TallyWordmark's tight viewBox removes its surrounding design-space
+// padding here so equal element heights produce equal visible heights. The
+// mark carries no accessible name of its own — the wordmark's label names the
+// pairing — and the wordmark hides on narrow phones via .tally-lockup.
 export function TallyLockup({ height = 22, className = '', title = 'Tally', ...rest }) {
+  const markSize = Math.round(height * 1.3)
+
   return (
     <span className={`tally-lockup ${className}`.trim()} {...rest}>
       <TallyBaseballMark
-        size={Math.round(height * 1.3)}
+        size={markSize}
         title=""
         aria-hidden="true"
         className="tally-lockup__mark"
       />
-      <TallyWordmark height={height} title={title} className="tally-lockup__wordmark" />
+      <TallyWordmark
+        height={markSize}
+        title={title}
+        className="tally-lockup__wordmark"
+        tight
+      />
     </span>
   )
 }
