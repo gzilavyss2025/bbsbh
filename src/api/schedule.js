@@ -446,3 +446,24 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
     return []
   }
 }
+
+// The opponent from a team's most recently COMPLETED game — Team Color Lab's
+// WPA scenario mockups (screens/TeamColorLab.jsx) use this so the "away" band
+// in its win/tie/lose previews shows a real, recognizable rival instead of a
+// placeholder club. Reuses fetchTeamSchedule's own season list (already
+// sorted ascending, already carrying `won`/`opponent`, no `resultsCutoff` —
+// this page has no score/reveal content to protect) rather than a second
+// schedule shape; the last entry with a decided `won` is the most recent
+// final. Falls back to last season if the current one has no finals yet
+// (pre-Opening-Day, or the off-season). Degrades to null with nothing found
+// in either season or on a fetch failure (fetchTeamSchedule's own
+// degrade-to-[] path).
+export async function fetchLastOpponent(teamId, season = new Date().getFullYear()) {
+  for (const s of [season, season - 1]) {
+    const games = await fetchTeamSchedule(teamId, s)
+    for (let i = games.length - 1; i >= 0; i--) {
+      if (games[i].won !== null) return games[i].opponent
+    }
+  }
+  return null
+}
