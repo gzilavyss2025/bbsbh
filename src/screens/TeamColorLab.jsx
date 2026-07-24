@@ -583,29 +583,35 @@ function TreatmentBox({
   const tint = override?.bgHex ?? (activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined)
   // A LogoPositionControls draft wins outright over every hardcoded default
   // below it — same "draft overrides curated default" pattern as the WPA
-  // preview's own size/rotate/offset fields. `bg` is the same draft-wins-over-
-  // curated pattern applied to the tile's own background swatch, so a
-  // proposed background can be tried live right next to the position knobs
-  // it's usually tuned alongside.
+  // preview's own size/rotate/offset fields. `bg`/`pinstripe` are the same
+  // draft-wins-over-curated pattern applied to the tile's own background, so
+  // a proposed background — flat or pinstriped — can be tried live right
+  // next to the position knobs it's usually tuned alongside. Pinstripe seeds
+  // from whatever's already curated (`pinstripeColor`, computed above) so
+  // toggling starts from the tile's real current look, same as the WPA
+  // preview's own pinstripe checkbox.
   const treatmentScale = posDraft?.scale ?? override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
   const treatmentOffsetX = posDraft?.offsetX ?? TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
   const treatmentOffsetY = posDraft?.offsetY ?? TREATMENT_OFFSET_Y[teamId]?.[treatment] ?? 0
   const treatmentOriginY = TREATMENT_ORIGIN_Y[teamId]?.[treatment] ?? 'center'
-  const treatmentBg = posDraft?.bg || tint
+  const bgPinstripe = posDraft?.pinstripe ?? Boolean(pinstripeColor)
+  const treatmentBg = bgPinstripe
+    ? posDraft?.bg || pinstripeColor || DEFAULT_PINSTRIPE_COLOR
+    : posDraft?.bg || tint
   const hasPosDraft = posDraft && Object.keys(posDraft).length > 0
   const logoboxStyle =
-    treatmentBg || override || pinstripeColor || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
+    treatmentBg || override || bgPinstripe || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
       ? {
-          '--tint': treatmentBg,
+          '--tint': bgPinstripe ? undefined : treatmentBg,
           '--scale': 1.32 * treatmentScale,
           '--offset-x': `${treatmentOffsetX}%`,
           '--offset-y': `${treatmentOffsetY}%`,
           '--origin-y': treatmentOriginY,
-          '--pinstripe-color': pinstripeColor ?? undefined,
+          '--pinstripe-color': bgPinstripe ? treatmentBg : undefined,
           '--pinstripe-bg': pinstripeBg ?? undefined,
         }
       : undefined
-  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${pinstripeColor ? ' colorlab__logobox--pinstripe' : ''}`
+  const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${bgPinstripe ? ' colorlab__logobox--pinstripe' : ''}`
 
   // The WPA preview's effective pinstripe state + color: a draft toggle/typed
   // value if present, else the real chart's own fallback chain
@@ -667,6 +673,7 @@ function TreatmentBox({
           offsetX={treatmentOffsetX}
           offsetY={treatmentOffsetY}
           bg={treatmentBg ?? ''}
+          pinstripe={bgPinstripe}
           hasDraft={hasPosDraft}
           onField={onPosField}
           onReset={onPosReset}
@@ -974,7 +981,12 @@ const TREATMENT_COLOR_TABLE_NAME = {
   'city-connect': 'CITY_CONNECT_COLORS',
 }
 
-function bgOverrideLocation(teamId, treatment) {
+function bgOverrideLocation(teamId, treatment, pinstripe) {
+  if (pinstripe) {
+    return treatment === 'main'
+      ? `src/lib/teams.js — MAIN_OVERRIDES[${teamId}].pinstripe: true (the line color itself is the shared default unless mainTreatmentPinstripeColor curates a per-team one)`
+      : `src/lib/teams.js — TREATMENT_PINSTRIPE_COLOR[${teamId}].${treatment} (a plain string for the line color, or { color, bg } to also set the fill under the stripes)`
+  }
   const table = TREATMENT_COLOR_TABLE_NAME[treatment]
   if (table) return `src/lib/teams.js — ${table}[${teamId}], the swatch flagged \`bg: true\` (background)`
   return (
@@ -993,6 +1005,7 @@ function LogoPositionControls({
   offsetX,
   offsetY,
   bg,
+  pinstripe,
   hasDraft,
   onField,
   onReset,
@@ -1003,8 +1016,9 @@ function LogoPositionControls({
     `Where: src/lib/teams.js — TREATMENT_SCALE[${teamId}].${treatment} (scale) / ` +
     `src/screens/TeamColorLab.jsx — TREATMENT_OFFSET_X[${teamId}].${treatment} and ` +
     `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local) / ` +
-    `${bgOverrideLocation(teamId, treatment)}\n` +
-    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}, background: ${bg || '(none)'}`
+    `${bgOverrideLocation(teamId, treatment, pinstripe)}\n` +
+    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}, ` +
+    (pinstripe ? `pinstripe: true, color: ${bg || '(none)'}` : `background: ${bg || '(none)'}`)
   return (
     <div className="colorlab__posinline">
       <div className="colorlab__wpapreviewhead">
@@ -1034,9 +1048,13 @@ function LogoPositionControls({
           <span>Y</span>
           <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
         </label>
-        <label>
-          <span>Background</span>
+        <label className="colorlab__posbgfield">
+          <span>{pinstripe ? 'Stripe' : 'Background'}</span>
           <input type="text" value={bg} placeholder="#hex" onChange={(e) => onField('bg', e.target.value)} />
+        </label>
+        <label className="colorlab__posbgfield colorlab__poscheck">
+          <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
+          <span>Pinstripe</span>
         </label>
       </div>
     </div>

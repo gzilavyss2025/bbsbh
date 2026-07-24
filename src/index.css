@@ -8529,6 +8529,28 @@ body {
   outline-offset: 2px;
 }
 
+/* The Background/Stripe hex field needs room for a full "#rrggbb" (or an
+   rgba(...) pinstripe line color) — wider than the Scale/X/Y number boxes
+   next to it, which only ever hold a couple digits. */
+.colorlab__posinlinefields .colorlab__posbgfield input {
+  width: 84px;
+}
+
+/* The Pinstripe toggle — checkbox + label read left-to-right instead of
+   stacked like the fields above it, same footing as the WPA preview's own
+   Pinstripe checkbox (.colorlab__wpapreviewcheck). */
+.colorlab__posinlinefields label.colorlab__poscheck {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.colorlab__posinlinefields .colorlab__poscheck input {
+  width: auto;
+  border: none;
+  padding: 0;
+}
+
 .colorlab__swatchcell {
   display: flex;
   flex-direction: column;
