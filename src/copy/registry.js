@@ -36,17 +36,29 @@ export const GROUPS = [
 // be (enforced client- AND server-side), whether it is multiline (a textarea
 // vs. a single-line input in the panel), and the shipped default text.
 //
-// `{time}` is the ONLY interpolation token the runtime substitutes — it becomes
-// the concrete local reset time (e.g. "8:00 AM"). It is optional in any value;
-// the admin can move it, keep it, or drop it. No other tokens are honored, so
-// editable copy can never smuggle in markup or arbitrary substitution.
+// TOKENS is the CLOSED set of interpolation tokens the runtime substitutes (see
+// fillTokens below). Each is optional in any value — the admin can move it, keep
+// it, or drop it, and a token with nothing to fill is stripped along with the
+// gap it leaves. Nothing outside this set is honored, so editable copy can never
+// smuggle in markup or arbitrary substitution.
 //
-// SPOILER GUARD (do not relax): every field here is consent/chrome copy only.
-// A field must NEVER be interpolated with game data (only `{time}` is allowed),
-// and no field may be rendered inside a sealed/reveal-gated surface. This is
-// what keeps an admin-editable string categorically incapable of leaking a
+//   {time}   — the concrete local reset time (e.g. "8:00 AM").
+//   {inning} — the half-inning label of the half ALREADY ON SCREEN (e.g.
+//              "Top 7th"). Used only by `followLive.liveEdgeLabel`.
+//
+// SPOILER GUARD (do not relax): every field here is consent/chrome copy only,
+// and no field may be rendered inside a sealed/reveal-gated surface. A token may
+// be added ONLY if its value is categorically incapable of carrying a score. The
+// two above qualify: a clock time is not game data at all, and `{inning}` is the
+// same structural half-inning label the innings chrome already prints for the
+// half the user is looking at — a position in the game, never a run, and only
+// ever filled while the user's Follow Live consent is active. A run/score/result
+// token must NEVER be added, and no field may be interpolated with any other
+// game data. That is what keeps an admin-editable string incapable of leaking a
 // score. If this panel ever grows to govern other app copy, keep score-bearing
 // contexts out of the registry entirely — see ADR-0025.
+export const TOKENS = Object.freeze(['time', 'inning'])
+
 export const FIELDS = [
   // ---- Scores Unlocked: the home-screen "just show me the scores" pass ----
   {
@@ -274,7 +286,9 @@ function stripControlChars(value, allowNewlines) {
   // U+000A newline for multiline fields), DEL, and C1 controls.
   const bidi = '\\u061C\\u200B-\\u200F\\u202A-\\u202E\\u2060\\u2066-\\u2069\\uFEFF'
   const c0 = allowNewlines ? '\\u0000-\\u0009\\u000B-\\u001F' : '\\u0000-\\u001F'
-  // eslint-disable-next-line no-control-regex
+  // Built via the RegExp constructor (the newline rule varies by field), so
+  // no-control-regex — which only inspects regex *literals* — can't fire here
+  // and needs no disable directive. Keep it a constructor call if you edit this.
   const controls = new RegExp(`[${c0}\\u007F-\\u009F${bidi}]`, 'g')
   return value.replace(controls, '')
 }
@@ -285,18 +299,32 @@ export function resolveCopy(overrides) {
   return { ...defaultCopy(), ...sanitizeOverrides(overrides) }
 }
 
-// Substitute the one honored token, {time}, into a resolved string. Missing or
-// non-string input yields ''. A value with no token is returned unchanged.
-export function fillTokens(text, { time } = {}) {
+// Substitute the honored TOKENS into a resolved string. Missing or non-string
+// input yields ''. A value with no token is returned unchanged. A token the
+// caller has no value for is DROPPED along with the gap it leaves, so a string
+// like "Show scores until {time}" reads "Show scores until", not "Show scores
+// until " (or "… at  today" for a mid-sentence token). The tidy pass runs only
+// when something was actually stripped, so a fully-substituted string keeps the
+// admin's exact spacing.
+export function fillTokens(text, tokens = {}) {
   if (typeof text !== 'string') return ''
-  // Function-form replacement so a `time` containing `$&`/`$'` (special
-  // replacement patterns) can't expand — fillTokens is a generic exported util.
-  if (typeof time === 'string' && time) return text.replace(/\{time\}/g, () => time)
-  // No time to substitute: drop the token AND tidy the gap it leaves, so a
-  // string like "Show scores until {time}" reads "Show scores until", not
-  // "Show scores until " (or "… at  today" for a mid-sentence token).
-  return text
-    .replace(/\{time\}/g, '')
+  let out = text
+  let stripped = false
+  for (const name of TOKENS) {
+    if (!out.includes(`{${name}}`)) continue
+    const pattern = new RegExp(`\\{${name}\\}`, 'g')
+    const value = tokens?.[name]
+    if (typeof value === 'string' && value) {
+      // Function-form replacement so a value containing `$&`/`$'` (special
+      // replacement patterns) can't expand — fillTokens is a generic exported util.
+      out = out.replace(pattern, () => value)
+    } else {
+      out = out.replace(pattern, '')
+      stripped = true
+    }
+  }
+  if (!stripped) return out
+  return out
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/[ \t]+([.,!?;:])/g, '$1')
     .replace(/[ \t]+$/gm, '')

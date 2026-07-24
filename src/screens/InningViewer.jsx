@@ -40,6 +40,13 @@ const RevealCloudSync = isClerkEnabled
   ? lazy(() => import('../components/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
   : null
 
+// Stand-in for `revealTo` while the Scores Unlocked pass is on (see
+// effectiveReveal's `commitReveals`). Module-scope so its identity is stable
+// across renders, and a real function rather than undefined because HalfInning
+// calls onReveal directly, not via `?.()` — the same reason InningPage.jsx keeps
+// its own `noop` for the page-turn preview.
+const noopReveal = () => {}
+
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
 // then the bottom of the 1st, …), a single SealBox whose one tap reveals that
 // half's whole stat line at once (§7b). Navigating between halves remounts the
@@ -94,13 +101,21 @@ export function InningViewer({
   // *renders* reads the `render*` values below instead; when the pass is off
   // they ARE the real values (identity), so the default spoiler-safe path is
   // byte-for-byte unchanged.
+  //
+  // `commitReveals` is the other half of that contract and must not be dropped:
+  // a half rendering revealed mounts its SealBox force-revealed, and SealBox
+  // fires onReveal on ANY transition to shown — flag included. Handing revealTo
+  // straight down would therefore ratchet the REAL mark for every half viewed
+  // under the pass (and cloud-sync it). While unlocked we hand down a no-op
+  // instead; there are no seals to tap, so there is no reveal to record.
   const { unlocked: scoresUnlocked } = useScoresUnlocked()
-  const { renderRevealedThrough, renderUnlocked } = effectiveReveal({
+  const { renderRevealedThrough, renderUnlocked, commitReveals } = effectiveReveal({
     scoresUnlocked,
     revealedThrough,
     unlocked,
     actualCount,
   })
+  const commitReveal = commitReveals ? revealTo : noopReveal
 
   // The spoiler-free identity the cloud scorebook index stores alongside the
   // high-water mark (see api/reveal.js + ContinueScoring.jsx): enough to draw
@@ -250,7 +265,7 @@ export function InningViewer({
         meta={meta}
         isMlb={isMlb}
         revealedThrough={renderRevealedThrough}
-        onReveal={revealTo}
+        onReveal={commitReveal}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         callouts={callouts}
@@ -353,14 +368,17 @@ export function InningViewer({
   // status instead. Uses the SAME consent-gated selectLiveEdge the reveal effect
   // does; false the instant the game goes Final (the box-score affordance takes
   // over) or the user pages back off the frontier. Copy is admin-editable
-  // (followLive.liveEdgeLabel), with {inning} filled here to the half on screen.
+  // (followLive.liveEdgeLabel); the {inning} token goes through the registry's
+  // own fillTokens — the single substitution choke point — rather than an ad hoc
+  // replace here, so an admin who drops the token gets the gap tidied like every
+  // other field. The value is the structural label of the half ALREADY on
+  // screen, never a score (see registry.js's TOKENS spoiler guard).
   const liveEdgeIdx = following ? selectLiveEdge(feed, following) : null
   const atLiveEdge = liveEdgeIdx != null && curIdx >= liveEdgeIdx && !selectIsFinal(feed)
   const liveEdgeLabel = atLiveEdge
-    ? copy('followLive.liveEdgeLabel').replace(
-        '{inning}',
-        `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`,
-      )
+    ? copy('followLive.liveEdgeLabel', {
+        inning: `${effHalf === 'top' ? 'Top' : 'Bottom'} ${ordinal(effInning)}`,
+      })
     : ''
 
   // Normalize an out-of-range URL (a mistyped /top12 deep link, a legacy link

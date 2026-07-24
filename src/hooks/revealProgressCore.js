@@ -69,12 +69,29 @@ export function unlockedInnings(regulation, actualCount, revealedThrough) {
 // 'Infinity' → -1, so it would fail *closed* rather than leak, but there's no
 // reason to court it). The last real half-index, halfIndex(actualCount,
 // 'bottom'), reveals every half cleanly with an ordinary integer.
+//
+// `commitReveals` is the OTHER half of the contract, and it is load-bearing: the
+// caller MUST stop committing reveals while the pass is on. A render mark alone
+// is not enough, because a half that renders revealed mounts its `SealBox`
+// force-revealed, and `SealBox` fires `onReveal` whenever it becomes shown — by
+// tap OR by the flag (see SealBox.jsx). Wire that straight through to `revealTo`
+// and the pass ratchets the REAL mark for every half the user merely looks at:
+// written to localStorage, and for a signed-in user propagated to every other
+// device by RevealCloudSync. That is exactly what ADR-0026 promises can never
+// happen, and what the consent copy means by "it does not track or advance your
+// by-hand scoring". So it is false while unlocked. Nothing is lost: under the
+// pass there are no seals to tap, so there is no genuine reveal to record.
 export function effectiveReveal({ scoresUnlocked, revealedThrough, unlocked, actualCount }) {
   if (!scoresUnlocked) {
-    return { renderRevealedThrough: revealedThrough, renderUnlocked: unlocked }
+    return {
+      renderRevealedThrough: revealedThrough,
+      renderUnlocked: unlocked,
+      commitReveals: true,
+    }
   }
   return {
     renderRevealedThrough: Math.max(revealedThrough, halfIndex(actualCount, 'bottom')),
     renderUnlocked: actualCount,
+    commitReveals: false,
   }
 }

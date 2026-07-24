@@ -112,3 +112,34 @@ test('with the pass on, a game unseals without a tap — and NEVER writes the re
     await expect(page.locator('.rhe')).toHaveCount(0)
   }
 })
+
+// The box score is a score surface INSIDE a game, so the pass's promise ("every
+// score shows plainly: no seals, no tapping") has to hold here too — it did not
+// until BoxScore.jsx was wired to SealBox's forceRevealed. Same render-only
+// footing as the innings view: unsealed while the pass is on, sealed again the
+// moment it is off, and the persisted mark untouched throughout.
+test('with the pass on, the box score unseals too — and still never writes the mark', async ({
+  page,
+}) => {
+  await page.addInitScript(
+    ([p]) => window.localStorage.setItem(p, String(Date.now() + 24 * 3600 * 1000)),
+    [PASS_KEY],
+  )
+  await page.goto(`${GAME}/boxscore`)
+
+  expect(await page.evaluate((k) => window.localStorage.getItem(k), KEY)).toBeNull()
+
+  // Guarded like the innings assertions above: only meaningful once the feed has
+  // actually rendered the box-score surface.
+  if (await page.locator('.boxscore').count()) {
+    await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toHaveCount(0)
+  }
+
+  // Pass off -> the seal is back, and nothing was ever persisted.
+  await clearPass(page)
+  await page.goto(`${GAME}/boxscore`)
+  expect(await page.evaluate((k) => window.localStorage.getItem(k), KEY)).toBeNull()
+  if (await page.locator('.boxscore').count()) {
+    await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toBeVisible()
+  }
+})

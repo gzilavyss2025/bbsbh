@@ -2,14 +2,15 @@
 // of admin-editable UI strings. These tests pin the safety properties the
 // admin panel and api/copy.js both lean on: a stored/POSTed override map can
 // only ever set a KNOWN id to an in-budget string, everything resolves to a
-// renderable default, and the one honored token substitutes correctly. If any
-// of these loosen, untrusted copy could inject an unknown key or an oversized
-// value into a consent modal.
+// renderable default, and the closed set of honored tokens substitutes
+// correctly. If any of these loosen, untrusted copy could inject an unknown key
+// or an oversized value into a consent modal.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   FIELDS,
   FIELD_IDS,
+  TOKENS,
   defaultCopy,
   fillTokens,
   resolveCopy,
@@ -149,4 +150,37 @@ test('fillTokens leaves token-free text unchanged and handles non-strings', () =
   assert.equal(fillTokens('no token here', { time: '8:00 AM' }), 'no token here')
   assert.equal(fillTokens(null), '')
   assert.equal(fillTokens(undefined, { time: '8:00 AM' }), '')
+})
+
+// {inning} is the second honored token (registry TOKENS). It goes through the
+// SAME choke point as {time} rather than an ad hoc replace at the call site, so
+// an admin who drops it gets the gap tidied like every other field.
+test('fillTokens substitutes {inning} and tidies it away when absent', () => {
+  assert.equal(
+    fillTokens('Live · {inning} in progress', { inning: 'Top 7th' }),
+    'Live · Top 7th in progress',
+  )
+  assert.equal(fillTokens('Live · {inning} in progress'), 'Live · in progress')
+  assert.equal(fillTokens('now batting: {inning}', { inning: '$& $`' }), 'now batting: $& $`')
+})
+
+test('fillTokens fills both tokens together and honors each independently', () => {
+  assert.equal(
+    fillTokens('{inning}, sealing at {time}', { inning: 'Bottom 9th', time: '8:00 AM' }),
+    'Bottom 9th, sealing at 8:00 AM',
+  )
+  // One provided, one not: the missing one is stripped and tidied, the provided
+  // one is left exactly as given.
+  assert.equal(fillTokens('{inning} until {time}', { inning: 'Top 1st' }), 'Top 1st until')
+  assert.equal(fillTokens('{inning} until {time}', { time: '8:00 AM' }), 'until 8:00 AM')
+})
+
+// The closed-set guarantee: anything not in TOKENS is left alone, so editable
+// copy can never trigger a substitution the registry hasn't sanctioned.
+test('fillTokens ignores unregistered tokens entirely', () => {
+  assert.deepEqual([...TOKENS], ['time', 'inning'])
+  assert.equal(
+    fillTokens('the score is {score}', { score: '4-2', time: '8:00 AM' }),
+    'the score is {score}',
+  )
 })

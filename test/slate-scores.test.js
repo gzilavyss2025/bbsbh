@@ -146,6 +146,23 @@ test('slateScoreLine: a lean feed with no runs yields no line', () => {
   assert.equal(slateScoreLine({ awayScore: null, homeScore: null }, game('Live')), null)
 })
 
+// A game that hasn't started has no score to show, whatever the schedule row
+// carries. MLB posting `score: 0` for both sides pre-game would otherwise put a
+// nonsense "MIL 0 – AZ 0" under a first-pitch time; gating on the coarse
+// abstractState makes that impossible without having to trust the pre-game
+// payload's undocumented shape.
+test('slateScoreLine: a Preview game yields no line even with posted zeroes', () => {
+  assert.equal(
+    slateScoreLine({ awayScore: 0, homeScore: 0, currentInning: null }, game('Preview')),
+    null,
+  )
+})
+
+test('slateScoreLine: an unknown or absent game state yields no line', () => {
+  assert.equal(slateScoreLine({ awayScore: 4, homeScore: 2 }, game(undefined)), null)
+  assert.equal(slateScoreLine({ awayScore: 4, homeScore: 2 }, null), null)
+})
+
 test('slateScoreLine: no entry yields no line', () => {
   assert.equal(slateScoreLine(undefined, game('Live')), null)
 })

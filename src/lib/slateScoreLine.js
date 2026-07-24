@@ -25,15 +25,23 @@ function liveInningLabel(entry) {
 // already carries that — no duplication). Returns null when there is nothing
 // meaningful to show (no entry, or a lean feed with no runs posted), so the card
 // renders exactly as it does today.
+//
+// Only a game that has actually STARTED gets a line. The schedule row's shape
+// before first pitch isn't something we can assume (the MLB feed is
+// undocumented — verify against a real response, never guess), and a row that
+// posts `score: 0` for both sides pre-game would otherwise render a nonsense
+// "MIL 0 – AZ 0" under a first-pitch time. Gating on the coarse abstractState the
+// spoiler-free model already carries makes that impossible either way.
 export function slateScoreLine(entry, game) {
   if (!entry) return null
+  const state = game?.abstractState
+  if (state !== 'Live' && state !== 'Final') return null
   const a = entry.awayScore
   const h = entry.homeScore
   if (!Number.isFinite(a) || !Number.isFinite(h)) return null
   const awayAbbr = game?.away?.abbreviation || 'AWAY'
   const homeAbbr = game?.home?.abbreviation || 'HOME'
   const score = `${awayAbbr} ${a} – ${homeAbbr} ${h}`
-  const state = game?.abstractState
   let inning = null
   if (state === 'Final') {
     const n = entry.currentInning

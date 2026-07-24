@@ -103,7 +103,37 @@ test('effectiveReveal is the identity when the day pass is off', () => {
     unlocked: 9,
     actualCount: 11,
   })
-  assert.deepEqual(out, { renderRevealedThrough: 3, renderUnlocked: 9 })
+  assert.deepEqual(out, { renderRevealedThrough: 3, renderUnlocked: 9, commitReveals: true })
+})
+
+// The other half of the pass's contract — the part a render mark alone cannot
+// deliver. A half that renders revealed mounts its SealBox force-revealed, and
+// SealBox fires onReveal on ANY transition to shown, flag included, not just a
+// tap. If the caller keeps wiring that to `revealTo` while the pass is on, then
+// merely LOOKING at a half ratchets the real mark — persisted, and cloud-synced
+// to every signed-in device — which is exactly what ADR-0026 says can never
+// happen. Browser-confirmed before the fix: opening /top1 under an active pass
+// wrote `bbsbh:reveal:{gamePk}` = "0".
+test('effectiveReveal stops committing reveals while the pass is on', () => {
+  assert.equal(
+    effectiveReveal({ scoresUnlocked: true, revealedThrough: -1, unlocked: 9, actualCount: 9 })
+      .commitReveals,
+    false,
+  )
+  // Off, reveals commit normally — the default path must be untouched.
+  assert.equal(
+    effectiveReveal({ scoresUnlocked: false, revealedThrough: -1, unlocked: 9, actualCount: 9 })
+      .commitReveals,
+    true,
+  )
+  // Still false for a user who has already revealed by hand: the pass suspends
+  // RECORDING, it doesn't erase what was recorded — the render mark still covers
+  // their real progress via the Math.max above.
+  assert.equal(
+    effectiveReveal({ scoresUnlocked: true, revealedThrough: 5, unlocked: 9, actualCount: 11 })
+      .commitReveals,
+    false,
+  )
 })
 
 test('effectiveReveal reveals every half and unlocks every inning when on', () => {

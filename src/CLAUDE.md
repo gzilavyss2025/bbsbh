@@ -40,14 +40,19 @@ rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 ## Admin-editable copy (`src/copy/`)
 
 The wording of the spoiler-consent surfaces is admin-editable, not hard-coded.
-`src/copy/registry.js` is the closed source of truth (ids, defaults, length
-caps, the `{time}` token, `sanitizeOverrides`); `CopyProvider.jsx` +
-`copyContext.js` resolve `defaults ← localStorage cache ← live /api/copy` and
-expose `useCopy().t(id, { time })`, always falling back to defaults. The unlinked
-`/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated editor (with
-version history). It stores UI text only — never a score — see ADR-0025 and the
-"no backend exceptions" prose in the root `CLAUDE.md`. When adding a new consent
-string, add a registry field; never inline the literal in a component.
+`src/copy/registry.js` is the closed source of truth (ids, defaults, length caps,
+`sanitizeOverrides`, and `TOKENS` — the closed `{time}`/`{inning}` substitution
+set, whose header records why a score-bearing token may never join it);
+`CopyProvider.jsx` + `copyContext.js` resolve
+`defaults ← localStorage cache ← live /api/copy` and expose
+`useCopy().t(id, tokens)`, always falling back to defaults. Every substitution
+goes through `fillTokens` — never an ad hoc `.replace` at a call site, which
+skips both the closed-set check and the drop-the-token-and-tidy-the-gap path.
+The unlinked `/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated
+editor (with version history). It stores UI text only — never a score — see
+ADR-0025 and the "no backend exceptions" prose in the root `CLAUDE.md`. When
+adding a new consent string, add a registry field; never inline the literal in a
+component.
 
 ## Fetching (`src/hooks/useAsync.js`)
 

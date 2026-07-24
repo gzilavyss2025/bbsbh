@@ -1,7 +1,46 @@
 # Design spec: Follow Live + "Just show me the scores" (today-scoped)
 
-Status: ready-for-human
-Type: design spec / feature proposal (no implementation in this PR)
+Status: **implemented (PR #362) — read the amendments below before trusting the
+body of this document**
+Type: design spec / feature proposal
+
+> **Amendments (2026-07-24, post-implementation review).** Everything below the
+> line is the spec as written *before* the build, preserved as-is for its
+> reasoning. Where it and the shipped code disagree, the code plus `docs/adr/`
+> are authoritative. The differences:
+>
+> 1. **ADR numbers moved.** §9 proposes ADR-0025 = Follow Live, 0026 = Scores
+>    Unlocked. The admin copy store — a decision locked after this spec was
+>    written — took 0025, so the real numbering is **0025 copy store, 0026 Scores
+>    Unlocked, 0027 Follow Live, 0028 toggle-consent analytics**.
+> 2. **Poll cadence (§2a, §11 Q2): 15s, not the recommended 60s.**
+>    `FOLLOW_POLL_MS` in `useGameData.js` tightens the Live poll while following;
+>    rationale in ADR-0027.
+> 3. **Scores Unlocked scope (§11 Q1): the window, not the date.** The slate line
+>    is today-only; the in-game render override applies to any game opened during
+>    the window, box score included. See ADR-0026.
+> 4. **Consent copy is admin-editable.** §4's wording is not hard-coded — it
+>    lives in `src/copy/registry.js`, tunable at `/admin` (ADR-0025). The strings
+>    quoted in §4 are approximately, not exactly, what shipped.
+> 5. **A second copy token exists.** §4 assumes only `{time}`; the caught-up
+>    status label added `{inning}` (a structural half label, never a score). The
+>    closed set is `registry.js`'s `TOKENS`.
+> 6. **Shipped as one PR, not two.** §10 phases the two features into separate
+>    PRs; they landed together on one branch.
+>
+> **Specified but NOT built** — carried forward as the next phase: the in-game
+> Scores Unlocked banner/off-switch (§5), the Follow Live consent line naming
+> cross-device propagation (§3, §9), the "Live: Bot 7 ›" jump-to-frontier chip
+> (§2a, §11 Q4), and `e2e/invariants/follow-live.spec.js` (§8). Each is recorded
+> as a "Known gaps" entry in ADR-0026/0027.
+>
+> §11's open questions resolved as: **Q1** window-scoped; **Q2** 15s; **Q3**
+> accept the cloud propagation (the consent line naming it is still outstanding);
+> **Q4** instant `replace` jump, no chip yet; **Q5** 8am hard-coded; **Q6** no —
+> keep-awake stayed its own toggle beside Follow Live rather than riding its
+> confirm; **Q7** score + half-inning only.
+
+---
 
 Two related, **opt-in departures** from the spoiler rule:
 

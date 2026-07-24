@@ -105,3 +105,18 @@ falls back to whatever `localStorage` already has.
   `VITE_CLERK_PUBLISHABLE_KEY`/`CLERK_SECRET_KEY` in Vercel's Production
   environment for the `pk_live_…`/`sk_live_…` pair. Upstash has no
   dev/production split — the same Redis database serves both.
+
+**Amended by ADR-0027 (a machine-advanced mark still syncs).** Follow Live means
+the mark can now advance without a tap: `InningViewer` merges the live edge
+through `mergeRevealedThrough` on each fresh feed, and for a signed-in user
+`RevealCloudSync` POSTs each advance like any other. This is deliberate —
+suppressing the POST would make a user's devices lie to each other about what has
+been seen, and both ratchets (`max(current, incoming)`) need no change. It does
+mean following a game on a phone advances the reveal point on a signed-in iPad.
+`api/reveal.js` gains no fields, and neither toggle itself syncs: Scores Unlocked
+never touches the mark at all, and both flags are local-only by design (8am is a
+*local* time, so a desktop enabling a pass must not unseal a phone in another
+timezone).
+
+**Outstanding:** the Follow Live consent copy does not yet name that
+cross-device propagation. See the ADR-0027 "Known gaps" note.
