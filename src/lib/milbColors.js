@@ -206,6 +206,7 @@ export const MILB_LOGO_POS_OVERRIDES = {
     home: { scale: 1, offsetX: 0, offsetY: 0, bg: '#0072CE', pinstripe: false },
     away: { scale: 1, offsetX: 0, offsetY: 0, bg: '#D0D0D0', pinstripe: false },
   }, // Akron RubberDucks
+  342: { away: { scale: 1, offsetX: 0, offsetY: 0, bg: '#D0D0D0', pinstripe: false } }, // Albuquerque Isotopes
   5368: { home: { scale: 1, offsetX: 0, offsetY: 0, bg: '#003A70', pinstripe: false } }, // Amarillo Sod Poodles
   505: {
     home: { scale: 1, offsetX: -15, offsetY: 0, bg: '#bc0b35', pinstripe: false },
@@ -215,6 +216,14 @@ export const MILB_LOGO_POS_OVERRIDES = {
     home: { scale: 0.89, offsetX: 0, offsetY: 5, bg: '#231f20', pinstripe: false },
     away: { scale: 0.89, offsetX: 0, offsetY: 5, bg: '#9EA2A2', pinstripe: false },
   }, // Birmingham Barons
+  422: {
+    home: { scale: 1.12, offsetX: 7, offsetY: 7, bg: '#CE1141', pinstripe: false },
+    away: { scale: 1.12, offsetX: 7, offsetY: 7, bg: '#0054A4', pinstripe: false },
+  }, // Buffalo Bisons
+  494: {
+    home: { scale: 0.85, offsetX: -7, offsetY: 0, bg: '#000000', pinstripe: false },
+    away: { scale: 0.85, offsetX: -7, offsetY: 0, bg: '#D0D0D0', pinstripe: false },
+  }, // Charlotte Knights
   498: {
     home: { scale: 0.87, offsetX: -7, offsetY: 7, bg: '#ec3b46', pinstripe: false },
     away: { scale: 0.85, offsetX: 0, offsetY: 0, bg: '#9EA2A2', pinstripe: false },
@@ -227,10 +236,18 @@ export const MILB_LOGO_POS_OVERRIDES = {
     home: { scale: 1, offsetX: 0, offsetY: 0, bg: '#f58b6d', pinstripe: false },
     away: { scale: 1, offsetX: 0, offsetY: 0, bg: '#000000', pinstripe: false },
   }, // Columbus Clingstones
+  445: {
+    home: { scale: 1.13, offsetX: -7, offsetY: 0, bg: '#002A5C', pinstripe: false },
+    away: { scale: 1.13, offsetX: -7, offsetY: 0, bg: '#68ACDB', pinstripe: false },
+  }, // Columbus Clippers
   482: {
     home: { scale: 1, offsetX: 0, offsetY: 0, bg: '#FFFFFF', pinstripe: false },
     away: { scale: 1, offsetX: 0, offsetY: 0, bg: '#D0D0D0', pinstripe: false },
   }, // Corpus Christi Hooks
+  234: {
+    home: { scale: 1, offsetX: -12, offsetY: 11, bg: '#0054A4', pinstripe: false },
+    away: { scale: 1, offsetX: -12, offsetY: 11, bg: '#B15C12', pinstripe: false },
+  }, // Durham Bulls
   106: {
     home: { scale: 0.91, offsetX: 0, offsetY: 5, bg: '#231f20', pinstripe: false },
     away: { scale: 0.91, offsetX: 0, offsetY: 5, bg: '#d10c47', pinstripe: false },
@@ -310,6 +327,10 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {
     home: { size: 62, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: -8, rowShift: 0 },
     away: { size: 62, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: -8, rowShift: 0 },
   }, // Akron RubberDucks
+  342: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Albuquerque Isotopes
   452: {
     home: { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 2, rowShift: 0 },
     away: { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 2, rowShift: 0 },
@@ -331,6 +352,14 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {
     home: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 2, rowShift: 0 },
     away: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 3, rowShift: 0 },
   }, // Birmingham Barons
+  422: {
+    home: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Buffalo Bisons
+  494: {
+    home: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Charlotte Knights
   498: {
     home: { size: 46, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: 3, rowShift: 0 },
     away: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 3, rowShift: 0 },
@@ -343,10 +372,18 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {
     home: { size: 46, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 2, rowShift: 0 },
     away: { size: 46, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 2, rowShift: 0 },
   }, // Columbus Clingstones
+  445: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: -1, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: -1, rowShift: 0 },
+  }, // Columbus Clippers
   482: {
     home: { size: 46, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 4, rowShift: 0 },
     away: { size: 46, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 4, rowShift: 0 },
   }, // Corpus Christi Hooks
+  234: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Durham Bulls
   106: {
     home: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 13, paddingY: 1, rowShift: 0 },
     away: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 13, paddingY: 1, rowShift: 0 },
@@ -428,16 +465,21 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
 export const MILB_WPA_BAND_COLOR_OVERRIDES = {
   402: { home: '#0072CE', away: '#010101' }, // Akron RubberDucks
+  342: { home: '#000000', away: '#D0D0D0' }, // Albuquerque Isotopes
   452: { home: '#b21921', away: '#231f20' }, // Altoona Curve
   5368: { home: '#00A9E0', away: '#00A9E0' }, // Amarillo Sod Poodles
   574: { home: '#ba0c2f', away: '#000000' }, // Arkansas Travelers
   5015: { away: '#e2b880' }, // Biloxi Shuckers
   505: { home: '#bc0b35', away: '#0f213e' }, // Binghamton Rumble Ponies
   247: { home: '#231f20', away: '#be0940' }, // Birmingham Barons
+  422: { home: '#0054A4', away: '#0054A4' }, // Buffalo Bisons
+  494: { home: '#000000', away: '#000000' }, // Charlotte Knights
   498: { home: '#ec3b46', away: '#9EA2A2' }, // Chattanooga Lookouts
   418: { home: '#010101', away: '#010101' }, // Chesapeake Baysox
   6325: { home: '#f58b6d', away: '#000000' }, // Columbus Clingstones
+  445: { home: '#002A5C', away: '#68ACDB' }, // Columbus Clippers
   482: { home: '#FFFFFF', away: '#D0D0D0' }, // Corpus Christi Hooks
+  234: { home: '#0054A4', away: '#B15C12' }, // Durham Bulls
   106: { home: '#231f20', away: '#d10c47' }, // Erie SeaWolves
   540: { home: '#326295', away: '#F3ECD8' }, // Frisco RoughRiders
   547: { home: '#d10c47', away: '#042e61' }, // Harrisburg Senators
@@ -466,15 +508,18 @@ export const MILB_HEADER_COLOR_OVERRIDES = {
   402: { home: { blue: '#0072CE', gold: '#010101', font: '#FBF6E9' } }, // Akron RubberDucks
   5368: { away: { blue: '#003A70', gold: '#00A9E0', font: '#FBF6E9' } }, // Amarillo Sod Poodles
   5015: { away: { blue: '#0f69b1', gold: '#e2b880', font: '#FBF6E9' } }, // Biloxi Shuckers
+  422: { home: { blue: '#0054A4', gold: '#CE1141', font: '#FBF6E9' } }, // Buffalo Bisons
   418: { away: { blue: '#010101', gold: '#FC4C02', font: '#FBF6E9' } }, // Chesapeake Baysox
   6325: {
     home: { blue: '#000000', gold: '#f58b6d', font: '#FBF6E9' },
     away: { blue: '#000000', gold: '#f58b6d', font: '#FBF6E9' },
   }, // Columbus Clingstones
+  445: { away: { blue: '#002A5C', gold: '#68ACDB', font: '#FBF6E9' } }, // Columbus Clippers
   482: {
     home: { blue: '#012b5d', gold: '#4f91ca', font: '#FBF6E9' },
     away: { blue: '#012b5d', gold: '#4f91ca', font: '#FBF6E9' },
   }, // Corpus Christi Hooks
+  234: { away: { blue: '#0054A4', gold: '#B15C12', font: '#FBF6E9' } }, // Durham Bulls
   106: { away: { blue: '#231f20', gold: '#d10c47', font: '#FBF6E9' } }, // Erie SeaWolves
   421: { home: { blue: '#0b2b76', gold: '#febe28', font: '#FBF6E9' } }, // Montgomery Biscuits
   546: {
