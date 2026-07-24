@@ -36,6 +36,7 @@ import { execFileSync } from 'node:child_process'
  * @param {boolean} facts.onBaseFirstParent is HEAD a commit origin/<base> itself
  *                                          passed through (its first-parent chain)
  * @param {number} facts.dirty              count of uncommitted files
+ * @param {number} facts.behind             commits origin/<base> has that HEAD lacks
  */
 export function classifyWorktree(facts) {
   const { branch, base, isPrimary, upstream, upstreamExists, merged, onBaseFirstParent, dirty } = facts
@@ -149,6 +150,12 @@ export function gatherFacts(wt, run = tryGit) {
         ?.split('\n')
         .includes(run(['rev-parse', 'HEAD'], root)) === true,
     dirty: dirtyOut ? dirtyOut.split('\n').filter(Boolean).length : 0,
+    // How far this worktree's branch has drifted from origin/<base> — distinct
+    // from `merged` (an ancestry check). An active branch is commonly BOTH
+    // unmerged into base AND missing commits base has gained since the branch
+    // was cut; this counts the latter, so a long-lived PR branch can be told
+    // apart from one still current.
+    behind: branch ? Number(run(['rev-list', '--count', `HEAD..origin/${base}`], root)) || 0 : 0,
   }
 }
 
@@ -162,24 +169,31 @@ if (process.argv[1] && process.argv[1].endsWith('worktrees.mjs')) {
 
   const rows = worktrees.map((wt) => {
     const facts = gatherFacts(wt)
-    return { ...wt, ...classifyWorktree(facts), dirty: facts.dirty }
+    return { ...wt, ...classifyWorktree(facts), dirty: facts.dirty, behind: facts.behind }
   })
 
   const stale = rows.filter((r) => r.stale)
   const blocked = rows.filter((r) => r.dirty > 0 && r.status.startsWith('merged,'))
+  // Active, unmerged branches that origin/<base> has since moved past — the
+  // PR #362 case: a long-open branch silently drifts as other work lands on
+  // main, so a merge/build surprise only surfaces once someone finally looks.
+  // Stale ones are excluded; they're already flagged for removal above and a
+  // behind-count on a branch about to be deleted is just noise.
+  const behind = rows.filter((r) => !r.stale && !r.isPrimary && r.branch && r.behind > 0)
 
   // --brief is for the SessionStart hook, which already prints a dev-server
   // report and a stale-checkout warning. A 20-line table on top of that is
   // noise the maintainer learns to scroll past, so summarise there and keep the
   // full listing for /clean-worktrees and manual runs.
   const brief = process.argv.includes('--brief')
-  if (brief && stale.length === 0 && blocked.length === 0) process.exit(0)
+  if (brief && stale.length === 0 && blocked.length === 0 && behind.length === 0) process.exit(0)
 
   console.log(`worktrees: ${rows.length} total, ${stale.length} stale (safe to remove).`)
   if (!brief) {
     for (const r of rows) {
       const dirtyNote = r.dirty > 0 ? `  [${r.dirty} uncommitted file(s)]` : ''
-      console.log(`  ${r.root}  [${r.branch ?? 'detached'}]  — ${r.status}${dirtyNote}`)
+      const behindNote = !r.stale && r.behind > 0 ? `  [${r.behind} behind origin/main]` : ''
+      console.log(`  ${r.root}  [${r.branch ?? 'detached'}]  — ${r.status}${dirtyNote}${behindNote}`)
     }
   }
 
@@ -194,5 +208,13 @@ if (process.argv[1] && process.argv[1].endsWith('worktrees.mjs')) {
     console.log(
       `worktrees: run the /clean-worktrees skill to review and remove the ${stale.length} stale one(s).`,
     )
+  }
+
+  if (behind.length > 0) {
+    console.log(`worktrees: ${behind.length} active branch(es) are behind origin/main:`)
+    for (const r of behind) {
+      console.log(`  ${r.root}  [${r.branch}]  — ${r.behind} commit(s) behind`)
+    }
+    console.log('worktrees: merge origin/main into these before opening/updating their PRs.')
   }
 }
