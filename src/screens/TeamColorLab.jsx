@@ -26,6 +26,7 @@ import {
   mainOverrideLogoUrl,
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
+  treatmentPinstripeBg,
   hasAlternate2,
   hasAlternate3,
   hasAlternate4,
@@ -324,6 +325,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
       ? mainTreatmentPinstripeColor(teamId)
       : null
     : treatmentPinstripeColor(teamId, treatment)
+  const pinstripeBg = treatment === 'main' ? null : treatmentPinstripeBg(teamId, treatment)
   // Main picks its tile background from one of the three official swatches
   // (MAIN_OVERRIDES names which) or a literal `bgHex` (Brewers); Alternate/
   // City Connect flag whichever of their user-supplied swatches is the
@@ -346,6 +348,7 @@ function TreatmentBox({ teamId, name, treatment, label, catalog, wpaDraft, onWpa
           '--offset-x': `${treatmentOffsetX}%`,
           '--origin-y': treatmentOriginY,
           '--pinstripe-color': pinstripeColor ?? undefined,
+          '--pinstripe-bg': pinstripeBg ?? undefined,
         }
       : undefined
   const logoboxClass = `colorlab__logobox colorlab__logobox--gloss${pinstripeColor ? ' colorlab__logobox--pinstripe' : ''}`

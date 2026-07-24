@@ -61,15 +61,20 @@ test('teamLogoUrl returns null without a teamId, even for alternate/city-connect
 test('teamLogoUrl routes alternate-2/alternate-3 to the curated local asset', () => {
   assert.equal(teamLogoUrl(158, 'alternate-2'), localLogoUrl(158, 'alternate-2')) // Brewers
   assert.equal(teamLogoUrl(146, 'alternate-3'), localLogoUrl(146, 'alternate-3')) // Marlins
+  assert.equal(teamLogoUrl(133, 'alternate'), localLogoUrl(133, 'alternate')) // Athletics — curated ATH.png
 })
 
 test('teamLogoUrl falls back to the plain CDN base logo for an ALT_USES_BASE_LOGO team', () => {
-  assert.equal(teamLogoUrl(133, 'alternate'), 'https://www.mlbstatic.com/team-logos/133.svg') // Athletics
   assert.equal(teamLogoUrl(108, 'alternate'), 'https://www.mlbstatic.com/team-logos/108.svg') // Angels
 })
 
 test('teamLogoUrl falls back to the plain CDN base logo for an ALT2_USES_BASE_LOGO team', () => {
   assert.equal(teamLogoUrl(118, 'alternate-2'), 'https://www.mlbstatic.com/team-logos/118.svg') // Royals
+})
+
+test('teamLogoUrl falls back to the plain CDN base logo for an ALT3_USES_BASE_LOGO team', () => {
+  assert.equal(teamLogoUrl(109, 'alternate-3'), 'https://www.mlbstatic.com/team-logos/109.svg') // Diamondbacks
+  assert.equal(teamLogoUrl(110, 'alternate-3'), 'https://www.mlbstatic.com/team-logos/110.svg') // Orioles
 })
 
 test('teamLogoUrl routes main-recolor to the hand-edited Main override asset', () => {
@@ -131,7 +136,7 @@ test('hasAlternate2 is true for a team with curated colors or an explicit base-l
 })
 
 test('hasAlternate2 is false for a team with no Alternate 2 set up', () => {
-  assert.equal(hasAlternate2(109), false) // Diamondbacks
+  assert.equal(hasAlternate2(111), false) // Red Sox
 })
 
 test('hasAlternate3 is true only for teams with an ALT3_COLORS entry', () => {

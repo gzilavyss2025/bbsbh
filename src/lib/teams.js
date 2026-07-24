@@ -193,8 +193,8 @@ const ALT_LOGO_SVG = new Set([
 // hand-cropped PNG, no recolored SVG. The tile still tints with ALT_COLORS'
 // curated background; only the mark itself is the stock CDN art.
 const ALT_USES_BASE_LOGO = new Set([
-  133, // Athletics — no curated Alternate art; the real multicolor A's mark on the secondary gold tile
   108, // Angels — same plain CDN mark as Main, just re-paired with a grey tile for their Away Grey jersey
+  145, // White Sox — same plain CDN mark as Main, re-paired with a pinstripe tile for their Home Pinstripe jersey
 ])
 
 // Teams with no real City Connect uniform at all (as opposed to one whose art
@@ -202,6 +202,7 @@ const ALT_USES_BASE_LOGO = new Set([
 // rather than showing an empty placeholder that implies one is coming.
 const NO_CITY_CONNECT = new Set([
   147, // Yankees — opted out of the program
+  112, // Cubs — their City Connect mark moved to Alternate 2 (see ALT2_COLORS below); no separate CC look
 ])
 
 export function hasCityConnect(teamId) {
@@ -211,6 +212,14 @@ export function hasCityConnect(teamId) {
 // Same idea as ALT_USES_BASE_LOGO, but for the Alternate 2 treatment.
 const ALT2_USES_BASE_LOGO = new Set([
   118, // Royals — the plain CDN mark is already navy #004687 (Main's own is a locally recolored white copy)
+  110, // Orioles — same plain CDN mark as Main, re-paired with a white tile for their Home White jersey
+  145, // White Sox — same plain CDN mark as Main, re-paired with a black tile for their Alt 1 Black "Sox" jersey
+])
+
+// Same idea as ALT_USES_BASE_LOGO, but for the Alternate 3 treatment.
+const ALT3_USES_BASE_LOGO = new Set([
+  109, // Diamondbacks — same plain CDN mark as Main, re-paired with a black tile for their Alt 1 Black jersey
+  110, // Orioles — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
 ])
 
 // Same idea as ALT_USES_BASE_LOGO, but for the Alternate 4 treatment.
@@ -239,6 +248,7 @@ export function teamLogoUrl(teamId, variant = 'base') {
   if (!teamId) return null
   if (variant === 'alternate' && ALT_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
   if (variant === 'alternate-2' && ALT2_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
+  if (variant === 'alternate-3' && ALT3_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
   if (variant === 'alternate-4' && ALT4_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
   if (
     variant === 'alternate' ||
@@ -282,6 +292,13 @@ export function leagueLogoUrl() {
 export const ALT_COLORS = {
   108: [{ label: 'Silver', hex: '#C4CED4', bg: true }], // Angels — same plain CDN mark as Main, on grey for Away Grey
   120: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Nationals — Road Grey jersey
+  // White Sox — same plain CDN mark as Main (ALT_USES_BASE_LOGO above), on a
+  // pinstripe tile (TREATMENT_PINSTRIPE_COLOR below) for their Home Pinstripe
+  // jersey; no `bg` flag on either swatch since the tile isn't a flat fill.
+  145: [
+    { label: 'Primary', hex: '#27251F' },
+    { label: 'Secondary', hex: '#C4CED4' },
+  ],
   138: [{ label: 'Background', hex: '#9DDFFF', bg: true }], // Cardinals — the bird-on-bat mark
   115: [{ label: 'Primary', hex: '#33006F', bg: true }], // Rockies
   118: [{ label: 'Baby Blue', hex: '#6DADF4', bg: true }], // Royals
@@ -377,7 +394,10 @@ export const CITY_CONNECT_COLORS = {
     { label: 'Primary', hex: '#892535', bg: true },
     { label: 'Secondary', hex: '#EBDFCB' },
   ], // Rangers — both sampled off the png itself (red field, cream T)
-  145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox
+  // White Sox — procured mark (city-connect/CWS.png), a red pinstripe tile
+  // (TREATMENT_PINSTRIPE_COLOR below) instead of a flat fill; no `bg` flag,
+  // same footing as the Alternate entry above.
+  145: [{ label: 'Red', hex: '#C8102E' }],
   138: [{ label: 'Primary', hex: '#C41E3A', bg: true }], // Cardinals — "The Lou" mark on their standard red
   146: [{ label: 'Background', hex: '#000000', bg: true }], // Marlins
   158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
@@ -401,7 +421,11 @@ export const CITY_CONNECT_COLORS = {
 // for their Alt 1 Cream jersey.
 // Team Color Lab prototype only, same footing as ALT_COLORS/CITY_CONNECT_COLORS.
 export const ALT2_COLORS = {
+  109: [{ label: 'Background', hex: '#A29E9F', bg: true }], // Diamondbacks — procured mark (alternate-2/AZ.png), Away Grey jersey
+  110: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Orioles — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Home White jersey
   112: [{ label: 'Background', hex: '#7698CE', bg: true }], // Cubs
+  144: [{ label: 'Background', hex: '#F5F0E1', bg: true }], // Braves — procured mark (alternate-2/ATL.png), off-white for their Home White jersey
+  145: [{ label: 'Background', hex: '#000000', bg: true }], // White Sox — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Black "Sox" jersey
   118: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Royals
   120: [{ label: 'Background', hex: '#BD032B', bg: true }], // Nationals — outlined script "W" mark (alternate-2/WSH.png), Alt 1 Red "W" jersey
   136: [{ label: 'Primary', hex: '#0C2C56', bg: true }], // Mariners — the outlined-S mark, for their Away Navy jersey
@@ -428,7 +452,11 @@ export const ALT2_COLORS = {
 // alternate-3/MIA.png, the throwback "F" marlin) on its own teal tile.
 // Mariners: the cream "S" mark for their Steelheads alt, on black.
 export const ALT3_COLORS = {
+  109: [{ label: 'Background', hex: '#000000', bg: true }], // Diamondbacks — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Alt 1 Black jersey
+  110: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Orioles — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
+  112: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Cubs — same mark as Alternate (alternate-3/CHC.png, copied from alternate/CHC.png), Away Grey jersey
   136: [{ label: 'Background', hex: '#000000', bg: true }], // Mariners
+  144: [{ label: 'Grey', hex: '#A2AAAD', bg: true }], // Braves — procured mark (alternate-3/ATL.png), Away Greys jersey
   146: [{ label: 'Background', hex: '#009CA7', bg: true }], // Marlins
   141: [{ label: 'Background', hex: '#C22028', bg: true }], // Blue Jays — Canada Red jay-on-maple-leaf mark (alternate-3/TOR.png), Alt 4 Canada Red jersey
   120: [{ label: 'Navy', hex: '#14225A', bg: true }], // Nationals — same script "W" mark as Alternate 1 (alternate-3/WSH.png), Alt 2 Blue jersey
@@ -443,16 +471,16 @@ export const ALT4_COLORS = {
 
 // Whether `teamId` has an Alternate 2/3/4 set up at all — either curated
 // colors (ALT2_COLORS/ALT3_COLORS/ALT4_COLORS) or an explicit plain-CDN-mark
-// opt-in (ALT2_USES_BASE_LOGO/ALT4_USES_BASE_LOGO). All are opt-in per team
-// (unlike Main/Alternate/City Connect, which every club eventually gets), so
-// Team Color Lab skips rendering the tile entirely for a team with neither,
-// rather than showing an empty placeholder.
+// opt-in (ALT2_USES_BASE_LOGO/ALT3_USES_BASE_LOGO/ALT4_USES_BASE_LOGO). All
+// are opt-in per team (unlike Main/Alternate/City Connect, which every club
+// eventually gets), so Team Color Lab skips rendering the tile entirely for
+// a team with neither, rather than showing an empty placeholder.
 export function hasAlternate2(teamId) {
   return !!(ALT2_COLORS[teamId] || ALT2_USES_BASE_LOGO.has(teamId))
 }
 
 export function hasAlternate3(teamId) {
-  return !!ALT3_COLORS[teamId]
+  return !!(ALT3_COLORS[teamId] || ALT3_USES_BASE_LOGO.has(teamId))
 }
 
 export function hasAlternate4(teamId) {
@@ -512,17 +540,32 @@ export const TREATMENT_SCALE = {
 }
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same
-// hand-styled white-with-line pattern as MAIN_OVERRIDES' `pinstripe`
+// hand-styled line-on-a-fill pattern as MAIN_OVERRIDES' `pinstripe`
 // (mainTreatmentPinstripe/mainTreatmentPinstripeColor), just for Alternate/
-// City Connect/Alternate 2 instead of Main. The value is the line color
-// itself (no separate boolean flag needed) — the shared black default
-// (mainTreatmentPinstripeColor's own default) unless a team needs its own.
+// City Connect/Alternate 2 instead of Main. A plain string is just the line
+// color, white fill implied (the common case — the shared black default
+// every other pinstriped tile uses); `{ color, bg }` swaps in a colored fill
+// under the stripes instead of white (White Sox City Connect's red).
 export const TREATMENT_PINSTRIPE_COLOR = {
   158: { alternate: 'rgba(0, 0, 0, 0.16)' }, // Brewers Alternate — same plain black pinstripe as Rockies/every other pinstriped tile
+  145: {
+    alternate: 'rgba(0, 0, 0, 0.16)', // White Sox Alternate — same plain black-on-white pinstripe, Home Pinstripe jersey
+    'city-connect': { color: 'rgba(0, 0, 0, 0.16)', bg: '#C8102E' }, // White Sox City Connect — black pinstripe over the mark's own red
+  },
 }
 
 export function treatmentPinstripeColor(teamId, treatment) {
-  return TREATMENT_PINSTRIPE_COLOR[teamId]?.[treatment] ?? null
+  const v = TREATMENT_PINSTRIPE_COLOR[teamId]?.[treatment]
+  if (v && typeof v === 'object') return v.color
+  return v ?? null
+}
+
+// The colored fill under a pinstriped non-Main tile's lines, or null for the
+// plain-white default every other pinstriped tile gets (see
+// treatmentPinstripeColor above for the same string-vs-object split).
+export function treatmentPinstripeBg(teamId, treatment) {
+  const v = TREATMENT_PINSTRIPE_COLOR[teamId]?.[treatment]
+  return (v && typeof v === 'object' && v.bg) || null
 }
 
 export function treatmentScale(teamId, treatment) {
@@ -650,10 +693,12 @@ export function mainTreatmentRecolor(teamId) {
 
 // Everything one "logo tile" needs to render for a (team, treatment): the
 // mark to show and the fill it sits on.
-//   { logoVariant, tint, pinstripeColor, scale }
+//   { logoVariant, tint, pinstripeColor, pinstripeBg, scale }
 // `tint` is null when the tile is pinstriped (a pattern, not a swatch — see
 // mainTreatmentPinstripe) or when a club has no curated tile for this
 // treatment yet, in which case the caller's own default paper shows through.
+// `pinstripeBg` is null for the plain-white-fill default every pinstriped
+// tile gets except White Sox City Connect (see treatmentPinstripeBg above).
 //
 // One resolver because the same tile now appears in three places — the slate
 // card (components/GameCard.jsx), the in-game masthead (screens/GameView.jsx),
@@ -670,6 +715,7 @@ export function treatmentTile(teamId, treatment) {
       logoVariant: mainTreatmentRecolor(teamId) ? 'main-recolor' : 'base',
       tint: pinstriped ? null : mainTreatmentTint(teamId),
       pinstripeColor: pinstriped ? mainTreatmentPinstripeColor(teamId) : null,
+      pinstripeBg: null,
       scale: mainTreatmentScale(teamId),
     }
   }
@@ -678,6 +724,7 @@ export function treatmentTile(teamId, treatment) {
     logoVariant: treatment,
     tint: pinstripeColor ? null : treatmentBgColor(teamId, treatment),
     pinstripeColor,
+    pinstripeBg: pinstripeColor ? treatmentPinstripeBg(teamId, treatment) : null,
     scale: treatmentScale(teamId, treatment),
   }
 }

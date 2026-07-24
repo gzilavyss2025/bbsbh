@@ -170,7 +170,7 @@ export async function fetchTeamUniformCatalog(teamIds, season, options) {
 // lab shows and what the live card renders.
 export const JERSEY_TREATMENT_OVERRIDES = {
   '112_jersey_4_2026': 'alternate-2', // Cubs Alt 2 Baby Blue — worn with the Alternate 2 mark (moved off City Connect)
-  '112_jersey_2_2026': 'alternate', // Cubs Away Grey — worn with the Alternate mark, not plain Main
+  '112_jersey_2_2026': 'alternate-3', // Cubs Away Grey — worn with the Alternate 3 mark, not plain Main
   '133_jersey_4_2026': 'city-connect', // Athletics Alt 2 Yellow "Sacramento" — worn with the City Connect mark
   '144_jersey_4_2026': 'main', // Braves Alt 2 Navy — worn with the plain Main mark
   '146_jersey_3_2026': 'alternate-2', // Marlins Alt 1 Black — worn with the Alternate 2 mark
@@ -193,6 +193,15 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '120_jersey_2_2026': 'alternate', // Nationals Road Grey — worn with the Alternate mark, not plain Main
   '120_jersey_3_2026': 'alternate-2', // Nationals Alt 1 Red "W" — worn with the Alternate 2 mark
   '120_jersey_4_2026': 'alternate-3', // Nationals Alt 2 Blue — worn with the Alternate 3 mark
+  '109_jersey_2_2026': 'alternate-2', // Diamondbacks Away Grey — worn with the Alternate 2 mark
+  '109_jersey_3_2026': 'alternate-3', // Diamondbacks Alt 1 Black — worn with the Alternate 3 mark
+  '110_jersey_4_2026': 'main', // Orioles Alt 2 Orange — worn with the plain Main mark
+  '110_jersey_1_2026': 'alternate-2', // Orioles Home White — worn with the Alternate 2 mark, not plain Main
+  '110_jersey_2_2026': 'alternate-3', // Orioles Away Grey — worn with the Alternate 3 mark, not plain Main
+  '144_jersey_1_2026': 'alternate-2', // Braves Home White — worn with the Alternate 2 mark, not plain Main
+  '144_jersey_2_2026': 'alternate-3', // Braves Road Grey — worn with the Alternate 3 mark, not plain Main
+  '145_jersey_1_2026': 'alternate', // White Sox Home Pinstripe — worn with the Alternate mark, not plain Main
+  '145_jersey_3_2026': 'alternate-2', // White Sox Alt 1 Black "Sox" — worn with the Alternate 2 mark
 }
 
 // Which logo TREATMENT ('main' | 'alternate' | 'alternate-2' | 'alternate-3' |
