@@ -28,6 +28,10 @@ import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import { FILTER_CHIPS, reorderGameOfTheNight } from '../lib/resultCards.js'
+import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
+import { ConsentModal } from '../components/ConsentModal.jsx'
+import { useCopy } from '../copy/copyContext.js'
+import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -96,6 +100,15 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const todayStr = toApiDate(new Date())
   const dateStr = date ?? todayStr
   const isToday = dateStr === todayStr
+
+  // Site-wide "Scores Unlocked" day pass — only offered on today's slate (a
+  // past day already has its own reveal-all treatment). The toggle flips a
+  // global, self-expiring override; the consent modal gates turning it ON.
+  const { t: copy } = useCopy()
+  const { unlocked: scoresUnlocked, resetAt, enable: enableUnlock, disable: disableUnlock } =
+    useScoresUnlocked()
+  const [askUnlock, setAskUnlock] = useState(false)
+  const resetLabel = formatResetTime(resetAt ?? nextResetAt())
   const goToDate = (apiDate) =>
     navigate(apiDate === todayStr ? '/' : slatePath(apiDate))
   const pageDay = (n) => {
@@ -397,6 +410,34 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             ›
           </button>
         </div>
+
+        {/* Live-scores day pass — today's slate only. Off: a switch that opens
+            the consent modal. On: the switch reads unlocked and a kraft-amber
+            banner (also the off switch) states the 8am reset. Past days already
+            have their own reveal-all treatment, so this is hidden there. */}
+        {isToday && (
+          <div className="slateunlock">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={scoresUnlocked}
+              className={`slateunlock__switch${scoresUnlocked ? ' slateunlock__switch--on' : ''}`}
+              onClick={() => (scoresUnlocked ? disableUnlock() : setAskUnlock(true))}
+            >
+              <span className="slateunlock__track" aria-hidden="true">
+                <span className="slateunlock__thumb" />
+              </span>
+              <span className="slateunlock__label">
+                {copy('scoresUnlocked.toggleLabel')}
+              </span>
+            </button>
+            {scoresUnlocked && (
+              <span className="slateunlock__note">
+                {copy('scoresUnlocked.banner', { time: resetLabel })}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Signed-in only, and only when the cloud scorebook has entries —
@@ -543,6 +584,18 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           onClose={() => setShowWelcome(false)}
           gameScoreVisible={gameScoreVisible}
           onSetGameScoreVisible={setGameScoreVisible}
+        />
+      )}
+
+      {askUnlock && (
+        <ConsentModal
+          group="scoresUnlocked"
+          time={formatResetTime(nextResetAt())}
+          onConfirm={() => {
+            enableUnlock()
+            setAskUnlock(false)
+          }}
+          onDismiss={() => setAskUnlock(false)}
         />
       )}
     </div>

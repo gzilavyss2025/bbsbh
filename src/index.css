@@ -23129,3 +23129,128 @@ button.gamehigh-matchup:active {
     top: var(--space-6);
   }
 }
+
+/* ============================================================
+   CONSENT MODAL — the shared spoiler-consent sheet (ConsentModal.jsx), used by
+   Scores Unlocked and Follow Live. Reuses .scrim/.sheet; these style its body.
+   ============================================================ */
+.consent__title {
+  margin: 0 0 var(--space-3);
+}
+.consent__body,
+.consent__changes,
+.consent__reset {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  margin: 0 0 var(--space-3);
+}
+.consent__humor {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+.consent__reset {
+  color: var(--text-muted);
+}
+.consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.consent__btn {
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+}
+.consent__btn--dismiss {
+  color: var(--text-body);
+  background: none;
+  border: var(--bw-rule) solid var(--border-rule);
+}
+.consent__btn--confirm {
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border: var(--bw-rule) solid transparent;
+}
+
+/* Live-scores day pass toggle on the slate (GameSelect). A switch + label; when
+   on, a kraft-amber note states the 8am reset. */
+.slateunlock {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+.slateunlock__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: 0;
+}
+.slateunlock__track {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  transition: background 0.15s ease;
+}
+.slateunlock__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: transform 0.15s ease;
+}
+.slateunlock__switch--on .slateunlock__track {
+  background: var(--seal-cover);
+  border-color: var(--seal-cover);
+}
+.slateunlock__switch--on .slateunlock__thumb {
+  transform: translateX(16px);
+}
+.slateunlock__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+.slateunlock__note {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--seal-cover-ink);
+  background: var(--seal-cover);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .slateunlock__track,
+  .slateunlock__thumb {
+    transition: none;
+  }
+}
