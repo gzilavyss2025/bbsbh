@@ -1,5 +1,6 @@
 import { TeamLogo } from './TeamLogo.jsx'
-import { treatmentTile } from '../lib/teams.js'
+import { treatmentTile, isMlbTeamId } from '../lib/teams.js'
+import { milbTreatmentTile } from '../lib/milbColors.js'
 
 // A club's mark on the tinted tile of whatever uniform treatment it's wearing
 // — the "square" the slate card and the in-game masthead both show. The look
@@ -24,11 +25,25 @@ import { treatmentTile } from '../lib/teams.js'
 // Never score-revealing: a jersey choice, not a game state.
 const EDGE_BLEED = 1.32
 
-export function TeamTreatmentMark({ teamId, name, treatment, size, block, className = '' }) {
-  const { logoVariant, tint, pinstripeColor, pinstripeBg, scale } = treatmentTile(teamId, treatment)
+const NO_TILE = { logoVariant: 'base', tint: null, offsetX: 0, offsetY: 0, pinstripeColor: null, pinstripeBg: null, scale: 1 }
+
+export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, className = '' }) {
+  // A MiLB affiliate reads its tile from milbColors.js's Home/Away tables
+  // instead — the MLB per-treatment system above has no coverage for it (see
+  // milbColors.js's module doc for why the two stay separate). That table is
+  // keyed by game side, so a caller with no game context (Team Hub's club
+  // page, JerseyCombos' lab preview) gets the old plain-paper tile rather
+  // than an arbitrary guessed side.
+  const { logoVariant, tint, offsetX, offsetY, pinstripeColor, pinstripeBg, scale } = isMlbTeamId(teamId)
+    ? { offsetX: 0, offsetY: 0, ...treatmentTile(teamId, treatment) }
+    : side
+      ? milbTreatmentTile(teamId, side)
+      : NO_TILE
   const style = {
     '--tint': tint || undefined,
     '--scale': EDGE_BLEED * scale,
+    '--offset-x': offsetX ? `${offsetX}%` : undefined,
+    '--offset-y': offsetY ? `${offsetY}%` : undefined,
     '--pinstripe-color': pinstripeColor || undefined,
     '--pinstripe-bg': pinstripeBg || undefined,
   }

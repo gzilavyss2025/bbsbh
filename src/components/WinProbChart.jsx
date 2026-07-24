@@ -2,6 +2,8 @@ import { useId, useState } from 'react'
 import { winProbSplit } from '../api/winprob.js'
 import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../lib/wpaBandColors.js'
 import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { isMlbTeamId } from '../lib/teams.js'
+import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../lib/milbColors.js'
 import { useWpaLogo } from '../hooks/useWpaLogo.js'
 import { ordinal } from '../lib/format.js'
 
@@ -210,14 +212,21 @@ export function WinProbChart({
   const split = winProbSplit(points)
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
-  const awayLayout = wpaLogoLayout(awayId, awayTreat)
+  // A MiLB affiliate (awayId/homeId isn't one of the 30 MLB clubs) reads its
+  // band/logo-tile geometry from milbColors.js's Home/Away tables instead of
+  // this file's MLB per-treatment ones — same "which system owns this team"
+  // split as TeamTreatmentMark's tile (components/TeamTreatmentMark.jsx). The
+  // role ('away'/'home') is fixed by which prop this is, not guessed.
+  const awayMilb = !isMlbTeamId(awayId)
+  const homeMilb = !isMlbTeamId(homeId)
+  const awayLayout = awayMilb ? milbWpaLogoLayout(awayId, 'away') : wpaLogoLayout(awayId, awayTreat)
   // `homeLayoutOverride` — Team Color Lab's TreatmentWpaPreview draft
   // (merged over the shipped WPA_LOGO_LAYOUT_OVERRIDES default, same shape
   // wpaLogoLayout returns) — lets that page's scenario mockups show an
   // in-progress edit live, without a second, drift-prone tile-rendering
   // path. No other caller passes it, so every real game chart is
   // unaffected.
-  const homeLayout = homeLayoutOverride ?? wpaLogoLayout(homeId, homeTreat)
+  const homeLayout = homeLayoutOverride ?? (homeMilb ? milbWpaLogoLayout(homeId, 'home') : wpaLogoLayout(homeId, homeTreat))
   const awayTile = wpaTilePlacements(awayLayout)
   const homeTile = wpaTilePlacements(homeLayout)
   const awayPatternId = `winprob-away-${patternUid}`
@@ -231,23 +240,36 @@ export function WinProbChart({
   // white-with-line pattern instead of a flat fill) wins outright when set —
   // same tables Team Color Lab's logo box reads, so a pinstriped tile there
   // renders pinstriped here too.
-  const awayPinstripe = wpaBandPinstripeColor(awayId, awayTreat)
+  const awayPinstripe = awayMilb ? milbWpaBandPinstripeColor(awayId, 'away') : wpaBandPinstripeColor(awayId, awayTreat)
   // `homeBandOverride` — `{ pinstripe, color }`, the SAME live draft state
   // as homeLayoutOverride above (Team Color Lab's TreatmentWpaPreview +
   // ColorSwatch pick), standing in for the wpaBandPinstripeColor/wpaBandColor
   // table lookup below it. pinstripeBg isn't part of the draft (not
   // editable there), so it still always reads the real table.
-  const homePinstripe = homeBandOverride ? (homeBandOverride.pinstripe ? homeBandOverride.color : null) : wpaBandPinstripeColor(homeId, homeTreat)
-  const awayPinstripeBg = wpaBandPinstripeBg(awayId, awayTreat)
-  const homePinstripeBg = wpaBandPinstripeBg(homeId, homeTreat)
+  const homePinstripe = homeBandOverride
+    ? (homeBandOverride.pinstripe ? homeBandOverride.color : null)
+    : homeMilb
+      ? milbWpaBandPinstripeColor(homeId, 'home')
+      : wpaBandPinstripeColor(homeId, homeTreat)
+  // MiLB pinstripe bands have no colored-bg variant (milbColors.js's Home/Away
+  // system, unlike the MLB one, never pairs a pinstripe with anything but a
+  // plain white fill) — only the MLB lookup can return one.
+  const awayPinstripeBg = awayMilb ? null : wpaBandPinstripeBg(awayId, awayTreat)
+  const homePinstripeBg = homeMilb ? null : wpaBandPinstripeBg(homeId, homeTreat)
   const awayPinstripeId = `winprob-pinstripe-away-${patternUid}`
   const homePinstripeId = `winprob-pinstripe-home-${patternUid}`
-  const awayBandFill = awayPinstripe ? `url(#${awayPinstripeId})` : wpaBandColor(awayId, awayTreat)
+  const awayBandFill = awayPinstripe
+    ? `url(#${awayPinstripeId})`
+    : awayMilb
+      ? milbWpaBandColor(awayId, 'away')
+      : wpaBandColor(awayId, awayTreat)
   const homeBandFill = homePinstripe
     ? `url(#${homePinstripeId})`
     : homeBandOverride
       ? homeBandOverride.color
-      : wpaBandColor(homeId, homeTreat)
+      : homeMilb
+        ? milbWpaBandColor(homeId, 'home')
+        : wpaBandColor(homeId, homeTreat)
 
   // Prepend a synthetic even-game origin so the line starts on the midfield 50%
   // (the score is 0–0 at first pitch); its inning matches the first real play so
