@@ -16312,15 +16312,33 @@ body {
 .cbk__rail {
   margin: 2px 1px 0;
 }
-/* The pooled MLB-average rate, an upright marker behind the dots (rendered
-   before them in the DOM so a club dot always paints on top). */
+/* The pooled MLB-average rate — a bold dashed reference line with a flag cap so
+   it reads clearly through the dot cloud (rendered before the dots in the DOM so
+   a club dot still paints on top where they overlap). Dark ink, not a data
+   color, so it says "benchmark," not "a team." */
 .cbk__avg {
   position: absolute;
-  top: 6px;
-  height: 14px;
-  width: 1px;
-  margin-left: -0.5px;
-  background: var(--rule);
+  top: 2px;
+  height: 22px;
+  width: 2px;
+  margin-left: -1px;
+  background: repeating-linear-gradient(
+    var(--ink-1) 0,
+    var(--ink-1) 3px,
+    transparent 3px,
+    transparent 5px
+  );
+}
+/* Downward flag at the top so the eye lands on the line even in a dense rail. */
+.cbk__avg::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--ink-1);
 }
 /* 0% (left) → the MLB leader's rate (right), with the average called out so the
    rail's scale is legible without reading the gloss. */
@@ -16328,14 +16346,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-top: 3px;
+  margin-top: 4px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
+/* Tie the label to the dark reference line — same ink, slightly bolder. */
 .cbk__scale-avg {
-  color: var(--graphite-soft);
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
 }
 .rankchip {
   font-family: var(--font-mono);
