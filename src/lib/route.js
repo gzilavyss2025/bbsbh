@@ -30,6 +30,7 @@
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/team-pattern-lab'                 -> { name: 'team-pattern-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
+//   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
@@ -108,6 +109,10 @@ export function parseRoute(url) {
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')
     return { name: 'game-notes-debug' }
+  // Unlisted QA page cataloging every decorative animation in the app, live +
+  // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
+  if (parts.length === 1 && parts[0] === 'animation-lab')
+    return { name: 'animation-lab' }
   // Personal scorebook archive, reached from the site menu or a direct link.
   if (parts.length === 1 && parts[0] === 'first-scorebook')
     return { name: 'first-scorebook' }
