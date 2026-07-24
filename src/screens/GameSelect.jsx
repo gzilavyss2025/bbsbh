@@ -33,6 +33,7 @@ import { ConsentModal } from '../components/ConsentModal.jsx'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 import { slateScoreLine } from '../lib/slateScoreLine.js'
+import { trackToggleConsent, TOGGLES, ACTIONS, SURFACES } from '../lib/analytics.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -622,9 +623,21 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           time={formatResetTime(nextResetAt())}
           onConfirm={() => {
             enableUnlock()
+            trackToggleConsent({
+              toggle: TOGGLES.SCORES_UNLOCKED,
+              action: ACTIONS.CONFIRM,
+              surface: SURFACES.SLATE,
+            })
             setAskUnlock(false)
           }}
-          onDismiss={() => setAskUnlock(false)}
+          onDismiss={() => {
+            trackToggleConsent({
+              toggle: TOGGLES.SCORES_UNLOCKED,
+              action: ACTIONS.DISMISS,
+              surface: SURFACES.SLATE,
+            })
+            setAskUnlock(false)
+          }}
         />
       )}
     </div>
