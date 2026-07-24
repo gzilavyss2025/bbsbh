@@ -247,6 +247,61 @@ export const MILB_LOGO_POS_OVERRIDES = {
     home: { scale: 0.96, offsetX: 8, offsetY: 0, bg: '#002c76', pinstripe: false },
     away: { scale: 0.96, offsetX: 8, offsetY: 0, bg: '#009a49', pinstripe: false },
   }, // Hartford Yard Goats
+  553: {
+    home: { scale: 0.86, offsetX: -8, offsetY: 7, bg: '#FFFFFF', pinstripe: false },
+    away: { scale: 0.86, offsetX: -8, offsetY: 7, bg: '#D0D0D0', pinstripe: false },
+  }, // Knoxville Smokies
+  237: {
+    home: { scale: 1, offsetX: 13, offsetY: 0, bg: '#0069aa', pinstripe: false },
+    away: { scale: 1, offsetX: 13, offsetY: 0, bg: '#fbb034', pinstripe: false },
+  }, // Midland RockHounds
+  421: {
+    home: { scale: 0.9, offsetX: 8, offsetY: 5, bg: '#febe28', pinstripe: false },
+    away: { scale: 0.9, offsetX: 8, offsetY: 5, bg: '#0b2b76', pinstripe: false },
+  }, // Montgomery Biscuits
+  463: {
+    home: { scale: 0.77, offsetX: 0, offsetY: 0, bg: '#c6021e', pinstripe: false },
+    away: { scale: 0.77, offsetX: 0, offsetY: 0, bg: '#0f254b', pinstripe: false },
+  }, // New Hampshire Fisher Cats
+  1350: {
+    home: { scale: 0.86, offsetX: -9, offsetY: 6, bg: '#002d6a', pinstripe: false },
+    away: { scale: 0.86, offsetX: -9, offsetY: 6, bg: '#a20534', pinstripe: false },
+  }, // Northwest Arkansas Naturals
+  4124: {
+    home: { scale: 0.97, offsetX: -8, offsetY: 5, bg: '#003087', pinstripe: false },
+    away: { scale: 0.97, offsetX: -8, offsetY: 5, bg: '#e20177', pinstripe: false },
+  }, // Pensacola Blue Wahoos
+  546: {
+    home: { scale: 0.82, offsetX: -5, offsetY: 6, bg: '#e03a3e', pinstripe: false },
+    away: { scale: 0.82, offsetX: -5, offsetY: 6, bg: '#cbccce', pinstripe: false },
+  }, // Portland Sea Dogs
+  522: {
+    home: { scale: 0.96, offsetX: -13, offsetY: 6, bg: '#d10c47', pinstripe: false },
+    away: { scale: 0.96, offsetX: -13, offsetY: 6, bg: '#042d60', pinstripe: false },
+  }, // Reading Fightin Phils
+  3410: {
+    home: { scale: 1.6, offsetX: 0, offsetY: 3, bg: '#d41041', pinstripe: false },
+    away: { scale: 1.6, offsetX: 0, offsetY: 3, bg: '#231f20', pinstripe: false },
+  }, // Richmond Flying Squirrels
+  559: {
+    home: { scale: 1.09, offsetX: 20, offsetY: 13, bg: '#e93c49', pinstripe: false },
+    away: { scale: 1.09, offsetX: 20, offsetY: 13, bg: '#3378c2', pinstripe: false },
+  }, // Rocket City Trash Pandas
+  510: {
+    home: { scale: 0.99, offsetX: 3, offsetY: 0, bg: '#081f3f', pinstripe: false },
+  }, // San Antonio Missions
+  1956: {
+    home: { scale: 1, offsetX: 0, offsetY: 0, bg: '#FFFFFF', pinstripe: false },
+    away: { scale: 1, offsetX: 0, offsetY: 0, bg: '#D0D0D0', pinstripe: false },
+  }, // Somerset Patriots
+  260: {
+    home: { scale: 1.06, offsetX: -10, offsetY: 22, bg: '#005294', pinstripe: false },
+    away: { scale: 1.06, offsetX: -10, offsetY: 22, bg: '#221e1f', pinstripe: false },
+  }, // Tulsa Drillers
+  3898: {
+    home: { scale: 1, offsetX: -15, offsetY: 0, bg: '#032c5b', pinstripe: false },
+    away: { scale: 1, offsetX: -15, offsetY: 0, bg: '#e1143b', pinstripe: false },
+  }, // Wichita Wind Surge
 }
 
 // `{ [teamId]: { [variant]: { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } } }`
@@ -308,6 +363,66 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = {
     home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   }, // Hartford Yard Goats
+  553: {
+    home: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Knoxville Smokies
+  237: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Midland RockHounds
+  421: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Montgomery Biscuits
+  463: {
+    home: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // New Hampshire Fisher Cats
+  1350: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Northwest Arkansas Naturals
+  4124: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Pensacola Blue Wahoos
+  546: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 8, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 6, rowShift: 0 },
+  }, // Portland Sea Dogs
+  522: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 2, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 0, rowShift: 0 },
+  }, // Reading Fightin Phils
+  3410: {
+    home: { size: 82, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: -37, rowShift: 0 },
+    away: { size: 82, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: -37, rowShift: 0 },
+  }, // Richmond Flying Squirrels
+  559: {
+    home: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Rocket City Trash Pandas
+  510: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // San Antonio Missions
+  1956: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Somerset Patriots
+  440: {
+    home: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 55, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Springfield Cardinals
+  260: {
+    home: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    away: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+  }, // Tulsa Drillers
+  3898: {
+    home: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -2, rowShift: 0 },
+    away: { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -5, rowShift: 0 },
+  }, // Wichita Wind Surge
 }
 
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
@@ -327,6 +442,21 @@ export const MILB_WPA_BAND_COLOR_OVERRIDES = {
   540: { home: '#326295', away: '#F3ECD8' }, // Frisco RoughRiders
   547: { home: '#d10c47', away: '#042e61' }, // Harrisburg Senators
   538: { home: '#002c76', away: '#009a49' }, // Hartford Yard Goats
+  553: { home: '#FFFFFF', away: '#D0D0D0' }, // Knoxville Smokies
+  237: { home: '#0069aa', away: '#fbb034' }, // Midland RockHounds
+  421: { home: '#febe28', away: '#0b2b76' }, // Montgomery Biscuits
+  463: { home: '#c6021e', away: '#0f254b' }, // New Hampshire Fisher Cats
+  1350: { home: '#002d6a', away: '#a20534' }, // Northwest Arkansas Naturals
+  4124: { home: '#003087', away: '#e20177' }, // Pensacola Blue Wahoos
+  546: { home: '#e03a3e', away: '#cbccce' }, // Portland Sea Dogs
+  522: { home: '#d10c47', away: '#042d60' }, // Reading Fightin Phils
+  3410: { home: '#d41041', away: '#231f20' }, // Richmond Flying Squirrels
+  559: { home: '#e93c49', away: '#3378c2' }, // Rocket City Trash Pandas
+  510: { away: '#ceaa78' }, // San Antonio Missions
+  1956: { home: '#FFFFFF', away: '#D0D0D0' }, // Somerset Patriots
+  440: { home: '#d30e45', away: '#002c5d' }, // Springfield Cardinals
+  260: { home: '#005294', away: '#221e1f' }, // Tulsa Drillers
+  3898: { home: '#032c5b', away: '#e1143b' }, // Wichita Wind Surge
 }
 
 // `{ [teamId]: { [variant]: { blue, gold, font } } }` — same "design-lab
@@ -346,6 +476,11 @@ export const MILB_HEADER_COLOR_OVERRIDES = {
     away: { blue: '#012b5d', gold: '#4f91ca', font: '#FBF6E9' },
   }, // Corpus Christi Hooks
   106: { away: { blue: '#231f20', gold: '#d10c47', font: '#FBF6E9' } }, // Erie SeaWolves
+  421: { home: { blue: '#0b2b76', gold: '#febe28', font: '#FBF6E9' } }, // Montgomery Biscuits
+  546: {
+    home: { blue: '#e03a3e', gold: '#000000', font: '#FBF6E9' },
+    away: { blue: '#e03a3e', gold: '#000000', font: '#FBF6E9' },
+  }, // Portland Sea Dogs
 }
 
 // The resolved Scale/X/Y/Background/Pinstripe for a (team, variant)'s main
