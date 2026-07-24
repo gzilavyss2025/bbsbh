@@ -59,6 +59,7 @@ const TREATMENTS = [
 // these tiles large enough for the off-center weight to matter yet.
 const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
+  158: { alternate: 4, 'alternate-2': 9 }, // Brewers — Alt 1 Pinstripe and Alt 2 Navy Blue both read better nudged right
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS

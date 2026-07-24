@@ -245,6 +245,7 @@ const ALT3_USES_BASE_LOGO = new Set([
   110, // Orioles — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
   108, // Angels — same plain CDN mark as Main, re-paired with a white tile for their Alt 2 White Pullover jersey
   145, // White Sox — same plain CDN mark as Main, re-paired with a grey tile for their Alt 2 "Southside" jersey
+  158, // Brewers — same plain CDN mark as Main, re-paired with a powder blue tile for their Road Powder Blue jersey
 ])
 
 // Same idea as ALT_USES_BASE_LOGO, but for the Alternate 4 treatment.
@@ -433,7 +434,10 @@ export const CITY_CONNECT_COLORS = {
   145: [{ label: 'Red', hex: '#C8102E' }],
   138: [{ label: 'Primary', hex: '#C41E3A', bg: true }], // Cardinals — "The Lou" mark on their standard red
   146: [{ label: 'Background', hex: '#000000', bg: true }], // Marlins
-  158: [{ label: 'Primary', hex: '#0C436A', bg: true }], // Brewers
+  158: [
+    { label: 'Primary', hex: '#0C436A', bg: true },
+    { label: 'Secondary', hex: '#ff6c58' },
+  ], // Brewers
   141: [{ label: 'Background', hex: '#161827', bg: true }], // Blue Jays
   137: [{ label: 'Background', hex: '#27251F', bg: true }], // Giants — script "SF" mark, near-black brand secondary (temporary, pending real City Connect background)
 }
@@ -522,6 +526,7 @@ export const ALT3_COLORS = {
   146: [{ label: 'Background', hex: '#009CA7', bg: true }], // Marlins
   141: [{ label: 'Background', hex: '#C22028', bg: true }], // Blue Jays — Canada Red jay-on-maple-leaf mark (alternate-3/TOR.png), Alt 4 Canada Red jersey
   120: [{ label: 'Navy', hex: '#14225A', bg: true }], // Nationals — same script "W" mark as Alternate 1 (alternate-3/WSH.png), Alt 2 Blue jersey
+  158: [{ label: 'Powder Blue', hex: '#6CACE4', bg: true }], // Brewers — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Road Powder Blue jersey
 }
 
 // A fourth Alternate treatment. Blue Jays: same plain CDN mark as Main
@@ -598,7 +603,7 @@ export const TREATMENT_SCALE = {
     'alternate-2': 0.85, // same badge/canvas as Alternate, just recolored — same edge-bleed fix applies
   },
   141: { 'city-connect': 0.75 }, // Blue Jays — the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile
-  158: { alternate: 0.8 }, // Brewers — the wheat/laurel-and-ball mark shrunk 20% off the default 1.32 edge-bleed
+  158: { alternate: 0.86, 'alternate-2': 0.99 }, // Brewers — Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed; Alt 2 Navy Blue nearly full size
 }
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same

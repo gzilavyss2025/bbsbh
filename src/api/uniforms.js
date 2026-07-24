@@ -180,6 +180,7 @@ export const JERSEY_TREATMENT_OVERRIDES = {
   '118_jersey_4_2026': 'main', // Royals Alt 1 Royal Blue — worn with the plain Main mark
   '118_jersey_2_2026': 'alternate-2', // Royals Away Grey — worn with the Alternate 2 mark
   '158_jersey_4_2026': 'alternate-2', // Brewers Alt 2 Navy Blue — worn with the Alternate 2 mark
+  '158_jersey_2_2026': 'alternate-3', // Brewers Road Powder Blue — worn with the Alternate 3 mark, not plain Main (its own naming-convention guess for a "Road …" label)
   '108_jersey_2_2026': 'alternate', // Angels Away Grey — worn with the Alternate mark, not plain Main
   '138_jersey_3_2026': 'alternate-2', // Cardinals Alt 1 Cream — worn with the Alternate 2 mark
   '136_jersey_1_2026': 'alternate', // Mariners Home White — worn with the Alternate mark, not plain Main
