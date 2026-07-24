@@ -523,7 +523,7 @@ export const ALT3_COLORS = {
     { label: 'Primary', hex: '#BD3039' },
     { label: 'Secondary', hex: '#0C2340' },
   ], // Red Sox — same mark as Alternate (alternate-3/BOS.png, copied), Alt White Marathon "Boston" jersey
-  112: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Cubs — same mark as Alternate (alternate-3/CHC.png, copied from alternate/CHC.png), Away Grey jersey
+  112: [{ label: 'Blue', hex: '#0E3386', bg: true }], // Cubs — same mark as Alternate (alternate-3/CHC.png, copied from alternate/CHC.png), Away Grey jersey
   119: [{ label: 'Gold', hex: '#FFD100', bg: true }], // Dodgers — same mark as Alternate (alternate-3/LAD.png, copied), "Gold Series" jersey
   135: [{ label: 'Sand', hex: '#C2B280', bg: true }], // Padres — same mark as Alternate (alternate-3/SD.png, copied), Alt 3 Sand Camouflage jersey
   136: [{ label: 'Background', hex: '#000000', bg: true }], // Mariners
@@ -661,6 +661,9 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = {
   111: {
     'alternate-3': { blue: '#BD3039', gold: '#0C2340', font: '#FBF6E9' }, // Red Sox Alt White Marathon "Boston"
   },
+  112: {
+    'alternate-2': { blue: '#7698CE', gold: '#CC3433', font: '#FBF6E9' }, // Cubs Alt 2 Baby Blue
+  },
   110: {
     main: { blue: '#DF4601', gold: '#000000', font: '#FBF6E9' }, // Orioles Alt 2 Orange
     alternate: { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Alt 1 Black
@@ -700,7 +703,7 @@ export const MAIN_OVERRIDES = {
   111: { bg: 'secondary' }, // Red Sox
   // Cubs — white with the shared black pinstripe (mainTreatmentPinstripe) to
   // match their Home Pinstripe jersey, instead of a flat Secondary tile.
-  112: { pinstripe: true, scale: 0.9 },
+  112: { pinstripe: true, scale: 0.89 },
   // Reds — the "Reds" script mark (main-overrides/CIN.png, moved over from
   // the former Alt 1 Red Script jersey's Alternate art)
   113: { bg: 'secondary', recolor: true },

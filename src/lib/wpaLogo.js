@@ -223,9 +223,9 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     'city-connect': { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
   },
   112: {
-    main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
+    main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 2, rowShift: 0 },
     alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
+    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: 1, rowShift: 0 },
     'alternate-3': { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   },
   115: {

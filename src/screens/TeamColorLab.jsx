@@ -76,6 +76,7 @@ const TREATMENT_OFFSET_X = {
   139: { alternate: -12 }, // Rays — the enlarged mark reads better shifted left
   158: { alternate: 4, 'alternate-2': 9 }, // Brewers — Alt 1 Pinstripe and Alt 2 Navy Blue both read better nudged right
   144: { 'city-connect': 4, alternate: 6 }, // Braves — City Connect 2.0 and Alt 1 Red marks nudged right
+  112: { main: 4 }, // Cubs — Home Pinstripe mark nudged right
 }
 
 // Per-team, per-treatment vertical anchor for the edge-bleed scale-up — CSS
@@ -204,7 +205,7 @@ function jerseyMatchesFor(catalog, teamId, treatmentKey) {
 const WPA_LAB_KEY = 'bbsbh:team-color-lab:wpa'
 
 // Same per-(team, treatment) draft, for the main rectangle's own logo
-// position (LogoPositionControls) — `{ scale, offsetX, offsetY }`.
+// position (LogoPositionControls) — `{ scale, offsetX, offsetY, bg }`.
 const POS_LAB_KEY = 'bbsbh:team-color-lab:logopos'
 
 // Same again, for the header-recolor mockup (TreatmentHeaderPreview) —
@@ -355,7 +356,8 @@ export function TeamColorLab() {
         tile’s WPA band color. Missing logos or colors show as a placeholder
         until supplied; every proposed edit here comes with a copy icon that
         tells Claude exactly what to change. Position lets you nudge/rescale
-        the main rectangle’s own logo; Header colors is an unwired mockup of
+        the main rectangle’s own logo and its Background field tries a new
+        tile-fill hex; Header colors is an unwired mockup of
         what a Blue/Gold header recolor could look like for this treatment.
         Each tile’s name field is the same curated wording{' '}
         <code>/uniform-names</code> edits — Save writes the whole map to{' '}
@@ -581,16 +583,20 @@ function TreatmentBox({
   const tint = override?.bgHex ?? (activeBgIndex >= 0 ? colors[activeBgIndex]?.hex : undefined)
   // A LogoPositionControls draft wins outright over every hardcoded default
   // below it — same "draft overrides curated default" pattern as the WPA
-  // preview's own size/rotate/offset fields.
+  // preview's own size/rotate/offset fields. `bg` is the same draft-wins-over-
+  // curated pattern applied to the tile's own background swatch, so a
+  // proposed background can be tried live right next to the position knobs
+  // it's usually tuned alongside.
   const treatmentScale = posDraft?.scale ?? override?.scale ?? TREATMENT_SCALE[teamId]?.[treatment] ?? 1
   const treatmentOffsetX = posDraft?.offsetX ?? TREATMENT_OFFSET_X[teamId]?.[treatment] ?? 0
   const treatmentOffsetY = posDraft?.offsetY ?? TREATMENT_OFFSET_Y[teamId]?.[treatment] ?? 0
   const treatmentOriginY = TREATMENT_ORIGIN_Y[teamId]?.[treatment] ?? 'center'
+  const treatmentBg = posDraft?.bg || tint
   const hasPosDraft = posDraft && Object.keys(posDraft).length > 0
   const logoboxStyle =
-    tint || override || pinstripeColor || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
+    treatmentBg || override || pinstripeColor || treatmentOffsetX || treatmentOffsetY || treatmentScale !== 1 || treatmentOriginY !== 'center'
       ? {
-          '--tint': tint,
+          '--tint': treatmentBg,
           '--scale': 1.32 * treatmentScale,
           '--offset-x': `${treatmentOffsetX}%`,
           '--offset-y': `${treatmentOffsetY}%`,
@@ -660,6 +666,7 @@ function TreatmentBox({
           scale={treatmentScale}
           offsetX={treatmentOffsetX}
           offsetY={treatmentOffsetY}
+          bg={treatmentBg ?? ''}
           hasDraft={hasPosDraft}
           onField={onPosField}
           onReset={onPosReset}
@@ -953,6 +960,30 @@ function TreatmentWpaScenarios({ teamId, treatment, lastOpponent, headerColors, 
 // page-local only, same footing as TREATMENT_OFFSET_X/TREATMENT_ORIGIN_Y —
 // nothing writes back automatically; the copy icon hands over the literal to
 // paste in by hand.
+// Which teams.js swatch table backs a treatment's background color — so the
+// Background field's copy text can point at the exact array to edit, the
+// same way TREATMENT_SCALE/TREATMENT_OFFSET_X/Y already do for position.
+// 'main' has no entry: its background is either MAIN_OVERRIDES' `bgHex`
+// literal or one of TEAM_COLOR_PAIRS' three swatches by role (`bg`), so the
+// copy text spells both out instead of naming one array.
+const TREATMENT_COLOR_TABLE_NAME = {
+  alternate: 'ALT_COLORS',
+  'alternate-2': 'ALT2_COLORS',
+  'alternate-3': 'ALT3_COLORS',
+  'alternate-4': 'ALT4_COLORS',
+  'city-connect': 'CITY_CONNECT_COLORS',
+}
+
+function bgOverrideLocation(teamId, treatment) {
+  const table = TREATMENT_COLOR_TABLE_NAME[treatment]
+  if (table) return `src/lib/teams.js — ${table}[${teamId}], the swatch flagged \`bg: true\` (background)`
+  return (
+    `src/lib/teams.js — MAIN_OVERRIDES[${teamId}].bgHex (a literal), or if it should ` +
+    `instead track one of the club's three brand swatches, MAIN_OVERRIDES[${teamId}].bg ` +
+    `('primary'/'secondary'/'third', see TEAM_COLOR_PAIRS/TEAM_COLORS/TEAM_COLOR_EXTRAS)`
+  )
+}
+
 function LogoPositionControls({
   teamId,
   name,
@@ -961,6 +992,7 @@ function LogoPositionControls({
   scale,
   offsetX,
   offsetY,
+  bg,
   hasDraft,
   onField,
   onReset,
@@ -970,8 +1002,9 @@ function LogoPositionControls({
     `Treatment: ${treatmentLabel}\n` +
     `Where: src/lib/teams.js — TREATMENT_SCALE[${teamId}].${treatment} (scale) / ` +
     `src/screens/TeamColorLab.jsx — TREATMENT_OFFSET_X[${teamId}].${treatment} and ` +
-    `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local)\n` +
-    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}`
+    `TREATMENT_OFFSET_Y[${teamId}].${treatment} (page-local) / ` +
+    `${bgOverrideLocation(teamId, treatment)}\n` +
+    `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}, background: ${bg || '(none)'}`
   return (
     <div className="colorlab__posinline">
       <div className="colorlab__wpapreviewhead">
@@ -1000,6 +1033,10 @@ function LogoPositionControls({
         <label>
           <span>Y</span>
           <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
+        </label>
+        <label>
+          <span>Background</span>
+          <input type="text" value={bg} placeholder="#hex" onChange={(e) => onField('bg', e.target.value)} />
         </label>
       </div>
     </div>
