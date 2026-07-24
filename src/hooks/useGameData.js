@@ -28,7 +28,7 @@ import { fetchLineupValues } from '../api/lineupStrength.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
 import { apiDateToUrl } from '../lib/route.js'
-import { SPORT_IDS } from '../lib/teams.js'
+import { SPORT_IDS, defaultTreatmentFor } from '../lib/teams.js'
 
 // How often to re-poll for newly-posted highlight clips during a live game
 // (see the `highlights` fetch below). Matches GameNotesButton's
@@ -392,17 +392,22 @@ export function useGameData(game) {
   // same nightly precompute GameCard.jsx already reads to swap a slate
   // card's logo (api/jerseys.js), not a second live fetch. Same deferred
   // tier as the other same-origin static reads above; a game outside the
-  // file's coverage (MiLB, not posted yet) resolves both sides to 'main'.
+  // file's coverage (MiLB, not posted yet) falls back to defaultTreatmentFor's
+  // predicted look rather than a flat 'main' for both sides.
   const jerseysQuery = useAsync(
     () => (enrichmentReady ? fetchJerseysData() : Promise.resolve(null)),
     [enrichmentReady],
   )
   const winProbTreatment = useMemo(
     () => ({
-      away: jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.away.id) ?? 'main',
-      home: jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.home.id) ?? 'main',
+      away:
+        jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.away.id) ??
+        defaultTreatmentFor(game.away.id, 'away', officialDate),
+      home:
+        jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.home.id) ??
+        defaultTreatmentFor(game.home.id, 'home', officialDate),
     }),
-    [jerseysQuery.data, game.gamePk, game.away.id, game.home.id],
+    [jerseysQuery.data, game.gamePk, game.away.id, game.home.id, officialDate],
   )
 
   return {

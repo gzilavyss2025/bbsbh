@@ -1,7 +1,7 @@
 import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
 import { BreakableLocation } from './BreakableLocation.jsx'
 import { splitName } from '../lib/teamSplits.js'
-import { leagueLogoUrl, favoriteAccentColor } from '../lib/teams.js'
+import { leagueLogoUrl, favoriteAccentColor, defaultTreatmentFor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
 import { humanDate } from '../lib/dates.js'
 import { doubleHeaderLabel } from '../lib/resultCards.js'
@@ -78,8 +78,20 @@ export function GameCard({
             <span className="gamecard__atmark-ghost">@</span>
             <span className="gamecard__atmark-ink">@</span>
           </span>
-          <TeamMark team={game.away} side="away" gamePk={game.gamePk} jerseysData={jerseysData} />
-          <TeamMark team={game.home} side="home" gamePk={game.gamePk} jerseysData={jerseysData} />
+          <TeamMark
+            team={game.away}
+            side="away"
+            gamePk={game.gamePk}
+            gameDate={game.gameDate}
+            jerseysData={jerseysData}
+          />
+          <TeamMark
+            team={game.home}
+            side="home"
+            gamePk={game.gamePk}
+            gameDate={game.gameDate}
+            jerseysData={jerseysData}
+          />
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
         </div>
@@ -225,19 +237,24 @@ function ReadyPill({ game }) {
 // below: every tile (Main, Alternate, City Connect alike) gets its curated
 // background + scale + optional recolored mark from teams.js, so a team's
 // mark always reads legibly against its own fill.
-function TeamMark({ team, side, gamePk, jerseysData }) {
+function TeamMark({ team, side, gamePk, gameDate, jerseysData }) {
   // Swaps to a team's curated Alternate/City Connect mark when that's what
   // it's actually wearing this game (scripts/gen-jerseys.mjs, nightly).
   // Coverage is partial by design — TeamLogo's own fallback chain quietly
-  // drops back to the base logo for any team without curated art, or before
-  // the uniforms assignment has posted (jerseyTreatmentFor -> null either
-  // way). The tile itself is the shared TeamTreatmentMark, the same square
-  // the in-game masthead shows.
+  // drops back to the base logo for any team without curated art. Before the
+  // night's uniform assignment has posted (jerseyTreatmentFor -> null),
+  // defaultTreatmentFor predicts the look instead: away grey/road by
+  // default, City Connect for a Friday home game if the club has one. The
+  // tile itself is the shared TeamTreatmentMark, the same square the
+  // in-game masthead shows.
+  const treatment =
+    jerseyTreatmentFor(jerseysData, gamePk, team.id) ??
+    defaultTreatmentFor(team.id, side, (gameDate ?? '').slice(0, 10))
   return (
     <TeamTreatmentMark
       teamId={team.id}
       name={team.name}
-      treatment={jerseyTreatmentFor(jerseysData, gamePk, team.id)}
+      treatment={treatment}
       size={56}
       block="gamecard__logobox"
       className={`gamecard__logobox--${side}`}

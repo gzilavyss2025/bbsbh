@@ -1,6 +1,7 @@
 // Static configuration that never needs a network call.
 
 import { readableTextColor } from './contrast.js'
+import { isFriday } from './dates.js'
 
 // The user scores Brewers games most often, so we pin them to the top of the
 // slate. teamId 158 is the Milwaukee Brewers in the MLB Stats API.
@@ -211,6 +212,19 @@ const NO_CITY_CONNECT = new Set([
 
 export function hasCityConnect(teamId) {
   return !NO_CITY_CONNECT.has(teamId)
+}
+
+// Predictive fallback tile for a game whose actual worn jersey hasn't posted
+// yet (jerseyTreatmentFor/api/jerseys.js returns null pre-game) — a best
+// guess, not a fact, so jerseyTreatmentFor's real data always overrides it
+// the moment it posts. Away always predicts the plain Main mark (the away
+// grey/road look — several clubs' Main tile is already re-paired with a grey
+// fill for exactly that jersey, see ALT_USES_BASE_LOGO above). A home game on
+// a Friday predicts City Connect for any club that has one, since Friday is
+// most clubs' scheduled City Connect night.
+export function defaultTreatmentFor(teamId, side, apiDate) {
+  if (side === 'home' && isFriday(apiDate) && hasCityConnect(teamId)) return 'city-connect'
+  return 'main'
 }
 
 // Same idea as ALT_USES_BASE_LOGO, but for the Alternate 2 treatment.
