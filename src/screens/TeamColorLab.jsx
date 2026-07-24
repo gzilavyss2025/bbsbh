@@ -525,23 +525,28 @@ function TreatmentBox({
 }) {
   const colors = colorsFor(teamId, treatment)
   const jerseyMatches = jerseyMatchesFor(catalog, teamId, treatment)
-  // Every club is down to one jersey per logo treatment now, so the tile
-  // reads better headed by that jersey's own name (e.g. "Road Grey") than
-  // the generic Main/Alternate/City Connect bucket it lives in — the whole
-  // point of this page is recognizing at a glance which one you already
-  // locked in. Falls back to the generic label while the catalog is still
-  // loading, or for the rare treatment that doesn't resolve to exactly one
-  // jersey.
+  // Most clubs are down to one jersey per logo treatment, so the tile reads
+  // better headed by that jersey's own name (e.g. "Road Grey") than the
+  // generic Main/Alternate/City Connect bucket it lives in — the whole point
+  // of this page is recognizing at a glance which one you already locked in.
+  // Falls back to the generic label while the catalog is still loading, or
+  // for a treatment that doesn't resolve to exactly one jersey — Main is the
+  // common multi-match case (a club with no Away-jersey override, like the
+  // Athletics, wears its Home White AND Road Grey both under plain Main).
   const displayLabel = jerseyMatches?.length === 1 ? jerseyMatches[0].label : label
-  // The same curated full name UniformNamesPage.jsx edits — that page's
-  // "code" is the jersey catalog asset code, so a treatment with more than
-  // one matching jersey (or no code at all, e.g. no art procured yet for a
-  // future season) has nothing to edit, same gate as displayLabel above.
-  const nameMatch = jerseyMatches?.length === 1 ? jerseyMatches[0] : null
-  const nameCode = nameMatch?.code ?? null
-  const nameValue = nameCode
-    ? nameEdits[nameCode] ?? uniformDisplayName(nameMatch.text, teamClubName(teamId), nameCode, savedNames)
-    : ''
+  // The same curated full names UniformNamesPage.jsx edits, one editable
+  // field per jersey this tile's treatment actually covers (usually one; two
+  // for a Main bucket holding both Home and Away, see displayLabel above). A
+  // match with no code (no art procured for a future-season jersey yet) has
+  // nothing to edit against.
+  const clubName = teamClubName(teamId)
+  const nameFields = (jerseyMatches ?? [])
+    .filter((m) => m.code)
+    .map((m) => ({
+      code: m.code,
+      jerseyLabel: m.label,
+      value: nameEdits[m.code] ?? uniformDisplayName(m.text, clubName, m.code, savedNames),
+    }))
   const slots = [0, 1, 2].map((i) => colors[i] ?? null)
   const override = treatment === 'main' ? MAIN_OVERRIDES[teamId] : null
   const pinstripeColor = treatment === 'main'
@@ -603,13 +608,20 @@ function TreatmentBox({
     <div className="colorlab__treatment">
       <div className="colorlab__treatmentlabelrow">
         <span className="colorlab__treatmentlabel">{displayLabel}</span>
-        {nameCode && (
-          <input
-            className="searchbox__input colorlab__nameinput"
-            value={nameValue}
-            placeholder="Display name"
-            onChange={(e) => onNameChange(nameCode, e.target.value)}
-          />
+        {nameFields.length > 0 && (
+          <div className="colorlab__nameedits">
+            {nameFields.map((f) => (
+              <label key={f.code} className="colorlab__nameeditfield">
+                {nameFields.length > 1 && <span className="colorlab__nameeditlabel">{f.jerseyLabel}</span>}
+                <input
+                  className="searchbox__input colorlab__nameinput"
+                  value={f.value}
+                  placeholder="Display name"
+                  onChange={(e) => onNameChange(f.code, e.target.value)}
+                />
+              </label>
+            ))}
+          </div>
         )}
       </div>
       <div className="colorlab__treatmentbox">
