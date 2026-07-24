@@ -2579,6 +2579,36 @@ body {
   color: var(--text-muted);
 }
 
+/* "Scores Unlocked" score + inning line (ADR-0026). Rendered below the matchup
+   only while the day pass is on, so it wears the same kraft-amber seal treatment
+   as the slate's unlock banner — a deliberate "this is the thing you unsealed"
+   tint, distinct from the card's own team colors above, which stay untouched.
+   All content is uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…). */
+.gamecard__unlockline {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+}
+
+.gamecard__unlockscore {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+}
+
+.gamecard__unlockinning {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  opacity: 0.85;
+}
+
 /* Scorebook-readiness pill: four small checkbox pips for whether the basics
    you'd pencil in pre-game (each team's lineup, the umpires, both starters)
    are posted yet, in a fixed left-to-right order — unlabeled, since pip

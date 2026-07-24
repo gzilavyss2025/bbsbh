@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useNav } from '../lib/nav.js'
 import { slatePath } from '../lib/route.js'
-import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
+import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -32,6 +32,7 @@ import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { ConsentModal } from '../components/ConsentModal.jsx'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
+import { slateScoreLine } from '../lib/slateScoreLine.js'
 
 // Same lazy pattern as SiteHeader.jsx: AccountButton (and ContinueScoring's
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
@@ -127,6 +128,21 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const scoreFor = (gamePk) =>
     gameScoreVisible ? gameScoreFor(gameScores.data, gamePk) : null
+
+  // Slate score line — fetched ONLY while the Scores Unlocked pass is on AND we
+  // are on today's slate (a past day has its own reveal-all path). The default
+  // slate model stays score-free (see fetchSchedule/normalizeGame); this rides a
+  // separate request whose data never merges into it. Degrades to {} on failure,
+  // so a card silently falls back to its ordinary spoiler-free self. Re-fetches
+  // on foreground (the score-critical convention) so a checked-in glance is fresh.
+  const showSlateScores = scoresUnlocked && isToday
+  const slateScores = useAsync(
+    () => (showSlateScores ? fetchSlateScores(dateStr, sportId) : Promise.resolve({})),
+    [showSlateScores, dateStr, sportId],
+    { refetchOnForeground: showSlateScores },
+  )
+  const liveLineFor = (game) =>
+    showSlateScores ? slateScoreLine(slateScores.data?.[game.gamePk], game) : null
 
   // The favorite team is always an MLB club (FavoriteTeamModal only offers
   // those), so on a MiLB level its own game never appears — pin its current
@@ -254,10 +270,17 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
   const [revealedAll, setRevealedAll] = useState(false)
   useEffect(() => setRevealedAll(false), [dateStr, sportId])
+  // An active Scores Unlocked pass counts as "reveal all" for today's flip cards
+  // too: the user has already consented to every score on today's slate
+  // (ADR-0026), so the amber pass banner must never sit over a still-sealed slate
+  // when today has gone all-final. Never forced for a paged-back past day — those
+  // keep their own tap-to-reveal-all. Turning the pass off re-seals, because this
+  // derived boolean collapses straight back to `revealedAll` (the tap state).
+  const slateRevealAll = revealedAll || (scoresUnlocked && isToday)
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
-  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, revealedAll)
+  const cardMetaByGamePk = useDayCardMeta(finals, dateStr, slateRevealAll)
 
   // The slate's actual render order: `sorted` (soonest → latest, favorite
   // pinned first) with the crowned "Game of the Night" game promoted to the
@@ -484,7 +507,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         </div>
       )}
 
-      {finals.length > 0 && !revealedAll && (
+      {finals.length > 0 && !slateRevealAll && (
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
@@ -537,7 +560,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     <PastGameFlipCard
                       game={g}
                       dateStr={dateStr}
-                      revealed={revealedAll}
+                      revealed={slateRevealAll}
                       pinnedTeamId={pinnedTeamId}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
@@ -551,6 +574,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                       pinnedTeamId={pinnedTeamId}
                       prospectCount={pCount}
                       gameScore={scoreFor(g.gamePk)}
+                      liveLine={liveLineFor(g)}
                       onSelect={() => onPick(g, dateStr)}
                       onBoxScore={null}
                     />

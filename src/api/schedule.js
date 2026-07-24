@@ -7,8 +7,13 @@ import { matchupSlug } from '../lib/route.js'
 import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
 
-// Normalize a raw schedule game into the shape our cards need.
-function normalizeGame(game, sportId) {
+// Normalize a raw schedule game into the shape our cards need. Exported so
+// test/slate-scores.test.js can pin the spoiler-critical invariant that this
+// model NEVER carries a score-bearing field (score/isWinner/runs/linescore),
+// even when handed a raw schedule row that does — the raw payload is dropped
+// after normalization, and score-bearing slate data rides a SEPARATE fetch
+// (fetchSlateScores) called only while the Scores Unlocked pass is active.
+export function normalizeGame(game, sportId) {
   const away = game.teams?.away
   const home = game.teams?.home
   return {
@@ -389,6 +394,43 @@ export async function fetchSeasonSeries(teamAId, teamBId, season, sportId = 1) {
     )
   } catch {
     return []
+  }
+}
+
+// The TODAY-slate score line, fetched ONLY while the site-wide "Scores Unlocked"
+// day pass is active (ADR-0026). Deliberately a SEPARATE request from the
+// default fetchSchedule, whose normalized model (normalizeGame) carries no score
+// at all: keeping the DEFAULT slate score-free means a render-gate bug has
+// nothing to leak. This one asks for the score-bearing set (each side's runs off
+// `teams.*.score`, plus the live inning/half off `linescore`) — the same footing
+// as fetchSeasonSeries above, which already returns Final scores. Returns a
+// { [gamePk]: { awayScore, homeScore, currentInning, inningState } } map;
+// degrades to {} on any failure and to null-valued fields on a lean MiLB feed,
+// per the graceful-degradation convention. NEVER call this unless the pass is on
+// (GameSelect gates it on `scoresUnlocked && isToday`).
+const SLATE_SCORES_FIELDS =
+  'dates,games,gamePk,teams,away,home,score,linescore,currentInning,inningState'
+
+export async function fetchSlateScores(dateStr, sportId = 1) {
+  if (!dateStr) return {}
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=linescore&fields=${SLATE_SCORES_FIELDS}`,
+    )
+    const out = {}
+    for (const d of data.dates ?? []) {
+      for (const g of d.games ?? []) {
+        out[g.gamePk] = {
+          awayScore: g.teams?.away?.score ?? null,
+          homeScore: g.teams?.home?.score ?? null,
+          currentInning: g.linescore?.currentInning ?? null,
+          inningState: g.linescore?.inningState ?? null,
+        }
+      }
+    }
+    return out
+  } catch {
+    return {}
   }
 }
 
