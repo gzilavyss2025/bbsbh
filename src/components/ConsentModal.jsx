@@ -17,17 +17,17 @@ import { useCopy } from '../copy/copyContext.js'
 // `resolveText` is an optional escape hatch: the admin copy panel passes its own
 // resolver (built from unsaved edits) to preview the REAL modal with in-progress
 // wording. Left undefined, the modal reads the live published copy.
+let consentTitleSeq = 0
+
 export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText }) {
   const { t } = useCopy()
   const text = (slot) => (resolveText ? resolveText(slot) : t(`${group}.${slot}`, { time }))
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onDismiss()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onDismiss])
-
+  const sheetRef = useRef(null)
   const dismissRef = useRef(null)
+  // Stable unique id for aria-labelledby (avoids a duplicate aria-label + <h2>).
+  const titleId = useRef(`consent-title-${(consentTitleSeq += 1)}`).current
+
   useEffect(() => {
     const trigger = document.activeElement
     dismissRef.current?.focus()
@@ -36,13 +36,47 @@ export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText })
     }
   }, [])
 
+  // Keydown handled ON the dialog (not window) so we can trap focus and stop the
+  // Escape from also reaching any global slate handler. aria-modal="true" is a
+  // promise that Tab can't wander into the page behind the scrim — enforce it.
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation()
+      onDismiss()
+      return
+    }
+    if (e.key !== 'Tab' || !sheetRef.current) return
+    const focusable = sheetRef.current.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+
   const humor = text('humorLine')
   const changes = text('changesNote')
 
   return (
     <div className="scrim" onClick={(e) => e.target.classList.contains('scrim') && onDismiss()}>
-      <div className="sheet consent" role="dialog" aria-modal="true" aria-label={text('title')}>
-        <h2 className="sheet__title consent__title">{text('title')}</h2>
+      <div
+        ref={sheetRef}
+        className="sheet consent"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onKeyDown={onKeyDown}
+      >
+        <h2 id={titleId} className="sheet__title consent__title">
+          {text('title')}
+        </h2>
         <p className="sheet__body consent__body">{text('body')}</p>
         {changes && <p className="sheet__body consent__changes">{changes}</p>}
         {humor && <p className="consent__humor">{humor}</p>}

@@ -258,10 +258,12 @@ export function sanitizeOverrides(raw) {
 // multiline fields (single-line labels/buttons never legitimately contain one);
 // tabs and every C0/C1 control and bidi-format char are always dropped.
 function stripControlChars(value, allowNewlines) {
-  // Bidi format chars: LRM/RLM, the embedding/override set (U+202A–202E), and
-  // the isolate set (U+2066–2069). C0 controls (optionally keeping U+000A
-  // newline for multiline fields), DEL, and C1 controls.
-  const bidi = '\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069'
+  // Bidi + invisible format chars: Arabic letter mark (U+061C), zero-width
+  // space/joiners + LRM/RLM (U+200B–200F), the embedding/override set
+  // (U+202A–202E), word joiner (U+2060), the isolate set (U+2066–2069), and the
+  // BOM/zero-width no-break space (U+FEFF). C0 controls (optionally keeping
+  // U+000A newline for multiline fields), DEL, and C1 controls.
+  const bidi = '\\u061C\\u200B-\\u200F\\u202A-\\u202E\\u2060\\u2066-\\u2069\\uFEFF'
   const c0 = allowNewlines ? '\\u0000-\\u0009\\u000B-\\u001F' : '\\u0000-\\u001F'
   // eslint-disable-next-line no-control-regex
   const controls = new RegExp(`[${c0}\\u007F-\\u009F${bidi}]`, 'g')

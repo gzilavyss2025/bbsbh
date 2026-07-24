@@ -117,6 +117,25 @@ test('formatResetTime is empty for garbage', () => {
 // 25 wall-clock hours." The runner's own TZ (UTC in CI) has no DST, so we prove
 // it in a child Node process pinned to a US zone. This is the case that would
 // break a naive 24h clamp.
+const TZ = 'America/New_York'
+
+// Whether the runner actually has IANA tzdata for our test zone. A minimal
+// container without tzdata silently falls back to UTC (no DST), which would make
+// the assertions below fail on a CORRECT implementation. Probe once and skip
+// rather than red-fail in that environment.
+function zoneObservesDst(tz) {
+  try {
+    const jan = new Date(2026, 0, 1).toLocaleString('en-US', { timeZone: tz, timeZoneName: 'short' })
+    const jul = new Date(2026, 6, 1).toLocaleString('en-US', { timeZone: tz, timeZoneName: 'short' })
+    // EST in January vs EDT in July only if tzdata is present.
+    return jan.includes('EST') && jul.includes('EDT')
+  } catch {
+    return false
+  }
+}
+const DST_AVAILABLE = zoneObservesDst(TZ)
+const dstSkip = DST_AVAILABLE ? false : `IANA tzdata for ${TZ} unavailable on this runner`
+
 function windowHoursIn(tz, y, monthIndex, day, hour) {
   const modUrl = new URL('../src/lib/scoresUnlocked.js', import.meta.url).href
   const code = `
@@ -131,15 +150,15 @@ function windowHoursIn(tz, y, monthIndex, day, hour) {
   return Number(out) / 3_600_000
 }
 
-test('DST fall-back night: 8am→8am spans ~25h and stays within MAX_WINDOW', () => {
+test('DST fall-back night: 8am→8am spans ~25h and stays within MAX_WINDOW', { skip: dstSkip }, () => {
   // US fall-back 2026: Sun Nov 1, 2:00am → 1:00am. now = Oct 31 8:00:01 local.
-  const h = windowHoursIn('America/New_York', 2026, 9, 31, 8)
+  const h = windowHoursIn(TZ, 2026, 9, 31, 8)
   assert.ok(Math.abs(h - 25) < 0.01, `expected ~25h, got ${h}`)
   assert.ok(h * 3_600_000 <= MAX_WINDOW_MS, '25h night must fit the 26h clamp')
 })
 
-test('DST spring-forward night: 8am→8am spans ~23h', () => {
+test('DST spring-forward night: 8am→8am spans ~23h', { skip: dstSkip }, () => {
   // US spring-forward 2026: Sun Mar 8, 2:00am → 3:00am. now = Mar 7 8:00:01 local.
-  const h = windowHoursIn('America/New_York', 2026, 2, 7, 8)
+  const h = windowHoursIn(TZ, 2026, 2, 7, 8)
   assert.ok(Math.abs(h - 23) < 0.01, `expected ~23h, got ${h}`)
 })

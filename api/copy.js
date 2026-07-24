@@ -73,13 +73,29 @@ function adminIds() {
   )
 }
 
+// Optional authorizedParties hardening: set CLERK_AUTHORIZED_PARTIES to the
+// app's own origin(s) (comma-separated) so a token minted for a different azp
+// can't be replayed here. Left unset, verifyToken skips the check — the
+// allowlist below still bounds writes to enumerated user ids.
+function authorizedParties() {
+  const raw = process.env.CLERK_AUTHORIZED_PARTIES || ''
+  const parties = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  return parties.length ? parties : undefined
+}
+
 async function authenticateAdmin(req) {
   const secretKey = process.env.CLERK_SECRET_KEY
   if (!secretKey) return null
   const auth = req.headers.get('authorization') || ''
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
   if (!token) return null
-  const { data, errors } = await verifyToken(token, { secretKey })
+  const { data, errors } = await verifyToken(token, {
+    secretKey,
+    authorizedParties: authorizedParties(),
+  })
   if (errors || !data?.sub) return null
   if (!adminIds().has(data.sub)) return null
   return data.sub

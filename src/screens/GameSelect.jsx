@@ -432,9 +432,14 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               </span>
             </button>
             {scoresUnlocked && (
-              <span className="slateunlock__note">
+              <button
+                type="button"
+                className="slateunlock__note"
+                onClick={disableUnlock}
+                aria-label="Turn off live scores"
+              >
                 {copy('scoresUnlocked.banner', { time: resetLabel })}
-              </span>
+              </button>
             )}
           </div>
         )}

@@ -77,7 +77,14 @@
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose)
      - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap`
-     - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc` */
+     - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
+     - the spoiler-consent modal's explainer prose — `.consent__body`,
+       `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
+       buttons stay uppercase, same split as the Game Score modal)
+     - the copy editor's natural-case fields + preview — `.admincopy__lede`,
+       `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`,
+       `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
+       and previews sentence-case copy; labels + preview title stay uppercase) */
 #root * {
   text-transform: uppercase;
 }
@@ -23183,6 +23190,27 @@ button.gamehigh-matchup:active {
   background: var(--seal-cover);
   border: var(--bw-rule) solid transparent;
 }
+/* The consent modal's honest explanatory paragraphs read as natural sentences,
+   not shouted app chrome — same shouted-title / natural-body split as the Game
+   Score modal. Titles and buttons stay uppercase. */
+#root .consent__body,
+#root .consent__changes,
+#root .consent__reset,
+#root .consent__humor {
+  text-transform: none; /* caps-exempt: consent explainer prose reads as sentences */
+}
+/* The copy editor: the admin types and previews natural-case copy, so the
+   inputs, help/lede prose, and the modal preview's body prose must render as
+   typed. The field labels, group titles, and preview title stay uppercase. */
+#root .admincopy__lede,
+#root .admincopy__help,
+#root .admincopy__input,
+#root .admincopy__historyWhen,
+#root .admincopy__previewBody,
+#root .admincopy__previewHumor,
+#root .admincopy__previewReset {
+  text-transform: none; /* caps-exempt: admin edits + previews natural-case copy, not chrome */
+}
 
 /* Live-scores day pass toggle on the slate (GameSelect). A switch + label; when
    on, a kraft-amber note states the 8am reset. */
@@ -23219,7 +23247,7 @@ button.gamehigh-matchup:active {
   height: 16px;
   border-radius: var(--radius-pill);
   background: var(--surface-card);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-card);
   transition: transform 0.15s ease;
 }
 .slateunlock__switch--on .slateunlock__track {
@@ -23245,6 +23273,7 @@ button.gamehigh-matchup:active {
   text-transform: uppercase;
   color: var(--seal-cover-ink);
   background: var(--seal-cover);
+  border: none;
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-2);
 }
