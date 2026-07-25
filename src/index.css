@@ -6986,22 +6986,36 @@ body {
    own full-width row below the name/hand line instead of squeezing beside
    it on the same row as the headshot — otherwise the "pitching for"/name
    text has to share that row with a right-pinned column and wraps/truncates
-   sooner than it needs to. Scoped to :has(.pitchernotice__entering) since
-   only this persistent card (HalfInning.jsx) ever passes the `entering`
-   prop — the mid-half change notices (PlayByPlay/StatBox) don't, and are
-   untouched here. Indented by the headshot's width + gap so it lines up
-   under the name rather than bleeding under the photo. */
+   sooner than it needs to. A grid (rather than flex-wrap) so the photo gets
+   its own fixed-width column and the body/entering blocks share the SAME
+   second column — a flex-wrap attempt here forced the body onto its own
+   full-width row too (a wrapped flex item's hypothetical size for the line-
+   break decision is its flex-basis, not its post-shrink size, so `flex: 1 1
+   100%` on the body pushed it below the photo instead of keeping it beside
+   it — only the explicitly margin-shifted entering block landed in the
+   right column). Scoped to :has(.pitchernotice__entering) since only this
+   persistent card (HalfInning.jsx) ever passes the `entering` prop — the
+   mid-half change notices (PlayByPlay/StatBox) don't, and are untouched
+   here. */
 @media (max-width: 739.98px) {
   .pitchernotice:has(.pitchernotice__entering) {
-    flex-wrap: wrap;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__shot {
+    grid-row: 1 / 3;
   }
   .pitchernotice:has(.pitchernotice__entering) .pitchernotice__body {
-    flex: 1 1 100%;
+    grid-column: 2;
+    grid-row: 1;
   }
   .pitchernotice:has(.pitchernotice__entering) .pitchernotice__entering {
-    flex: 1 1 100%;
-    margin-left: calc(var(--shot-sm-w) + 12px);
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: 0;
     align-items: flex-start;
     text-align: left;
   }
