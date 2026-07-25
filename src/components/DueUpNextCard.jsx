@@ -1,5 +1,4 @@
 import { selectDueUpNext } from '../api/dueup.js'
-import { mastheadLogoClass } from '../lib/teams.js'
 import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
@@ -20,7 +19,7 @@ export function DueUpNextCard({ feed, inning, half, revealedThrough, awayId, hom
   return (
     <div className="dueup">
       <span className="dueup__title">
-        <TeamLogo teamId={teamId} name={teamName} size={16} className={mastheadLogoClass(teamId)} />
+        <TeamLogo teamId={teamId} name={teamName} size={16} variant="mono" className="metricbar__logo" />
         Due up next for the {teamName}
       </span>
       <div className="dueup__row">
