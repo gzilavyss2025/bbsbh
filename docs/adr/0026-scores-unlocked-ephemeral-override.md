@@ -157,21 +157,49 @@ Two costs worth naming:
 - **A consented day can't be un-consented after 8am.** That is the design (you
   did agree), but it means a mis-tap discovered the next morning has no undo. The
   same-day off switch is the mitigation.
-- **The day list doesn't sync.** ADR-0022 mirrors the reveal mark across a signed-in
-  user's devices; the spoiled-day list is local-only, so a day spoiled on the
-  phone still shows sealed on the iPad. Local-only was right when this was a
-  transient pass keyed to a *local* 8am; now that it's durable consent, syncing it
-  is arguable. Left local deliberately — it keeps `api/reveal.js` unchanged and
-  bounds any bug to one device — and recorded here as the obvious next question.
+- **The day list syncs, and needed a different merge shape than the reveal mark.**
+  A day spoiled on the phone shows spoiled on the iPad (`api/spoiled-days.js` +
+  `SpoiledDaysCloudSync.jsx`, same Clerk + Upstash stack as ADR-0022). The reveal
+  mark can sync with a monotonic ratchet because it only moves one way; a day SET
+  cannot. A plain union would have been monotonic too — and would have resurrected
+  a day the user just took back, because the stale remote 'on' outlives the local
+  removal, silently reversing the same-day undo this design promises. So the wire
+  format is a per-day STATE map (`'on' | 'off'`), a withdrawal travels as an
+  explicit 'off', and last write wins per day. That is sound because a day is only
+  mutable while it is "today" on some device: past days are frozen and converge,
+  and any disagreement about today self-heals the next time the switch is touched.
+  Absence on the wire means "no opinion", never "erase" — otherwise a fresh device
+  with an empty list would wipe the user's history on first sign-in.
+  - Still not a reveal mark, and still cannot become one. Separate key, separate
+    shape, separate endpoint. Signed out, or on a deploy without the store, the
+    endpoint is never called and the list stays local — the offline-first
+    contract is unchanged.
+
+## Verified against a live game (2026-07-25)
+
+The live-following behaviour was watched against KC@DET (gamePk 824244) while it
+was actually in progress, by proxying the browser's statsapi requests out through
+the shell so each poll fetched genuinely fresh data:
+
+- **Auto-advance.** Opened at `/top1`; the app moved itself to `/top9`, the live
+  frontier.
+- **Cadence.** Feed fetches landed 16/15/15/15 seconds apart — `FOLLOW_POLL_MS`,
+  not the 60s default.
+- **Caught-up status.** Rendered "LIVE · TOP 9TH IN PROGRESS", the `{inning}`
+  token filled with the half actually on screen.
+- **The paged-back guard.** After auto-navigating to top 9, paging back to top 8
+  and sitting through two full poll windows left the view on top 8 — a reader who
+  deliberately goes back is not yanked forward.
+- **The invariant.** `bbsbh:reveal:824244` stayed unwritten across every poll, the
+  auto-navigation, and the manual paging. This is the bug this ADR's
+  `commitReveals` rule exists to prevent, confirmed clean against a live feed.
 
 ## Known gaps (deliberately recorded, not yet closed)
 
-- **No live-game browser verification yet.** Every state is pinned by the pure
-  suites and by `e2e/invariants/scores-unlocked.spec.js`, and all of them were
-  driven in a real browser against a stubbed feed (see the implementation log),
-  but the live-following behaviour — the auto-nav to a new half, the 15s poll,
-  the caught-up status — has never been watched against a game actually in
-  progress. Do that before treating the auto-nav feel as settled.
+- **The sync component itself is untested end-to-end.** Its merge logic is pinned
+  by unit tests and the endpoint is smoke-tested (501 unconfigured, 405 on a bad
+  method), but the actual two-device round trip needs a Clerk-configured deploy,
+  which the dev sandbox has no way to stand up. Watch the first real sign-in.
 - **No marker for a locked-in day.** A past day you spoiled renders open with
   nothing indicating that you're the reason. Correct (there's nothing to switch
   off) but a quiet note on that day's slate might read better than silence.

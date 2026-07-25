@@ -186,3 +186,55 @@ The reveal mark stayed unwritten in every single state.
 status against a game actually in progress (the stub can't exercise it), and the
 question of whether the spoiled-day list should sync across devices now that it's
 durable consent rather than a transient pass — recorded in ADR-0026's Cost accepted.
+
+## Phase 4 — live verification + cross-device sync (2026-07-25)
+
+**Live-game verification, finally done.** The one gap the sandbox seemed to
+foreclose. Chromium can't reach statsapi through the proxy, but the shell can —
+so the harness proxies every statsapi request the browser makes out through
+`curl` and fulfils it with the real response. Each 15s poll therefore fetched
+genuinely fresh data, which is what made the live behaviour testable at all.
+
+Against KC@DET (gamePk 824244), in progress:
+
+- opened `/top1` → the app auto-advanced itself to `/top9`, the live frontier;
+- feed fetches 16/15/15/15s apart — `FOLLOW_POLL_MS`, not the 60s default;
+- caught-up status read "LIVE · TOP 9TH IN PROGRESS", `{inning}` filled correctly;
+- paged back to top 8, sat through two poll windows, stayed on top 8 — the guard
+  against yanking a paged-back reader holds;
+- `bbsbh:reveal:824244` unwritten throughout. That is the `commitReveals` bug
+  confirmed clean against a live feed, which is the only place it could have
+  come back.
+
+A first attempt at the paged-back test was INVALID and worth recording: the
+`/back/i` selector matched the site-home button and navigated to the slate, so
+"stayed put" meant nothing. Redone against `aria-label="Back one half-inning"`.
+
+**Cross-device sync for the spoiled-day list** (`api/spoiled-days.js` +
+`SpoiledDaysCloudSync.jsx`). The design decision worth keeping: the reveal mark
+syncs with a monotonic ratchet because it only moves one way, and a day SET
+cannot use that shape. A plain union is monotonic too — and would resurrect a day
+the user just took back, because the stale remote 'on' outlives the local
+removal, silently reversing the same-day undo. So the wire format is a per-day
+`'on' | 'off'` state map, a withdrawal travels as an explicit 'off', and last
+write wins per day. Sound because a day is only mutable while it is "today" on
+some device: past days are frozen and converge; disagreement about today
+self-heals on the next touch. Absence means "no opinion", never "erase", so a
+fresh device signing in can't wipe the history.
+
+Also fixed a latent gap while wiring it: two mounted `useScoresUnlocked`
+instances in the same tab couldn't see each other's writes (the browser fires
+`storage` only in OTHER tabs). The hook now dispatches a same-tab `StorageEvent`
+after each local change, so the existing listener is the single refresh path for
+every source — another tab, this tab, or the cloud merge.
+
+**Verification.** Lint clean, 668/668 (7 new sync-merge cases), build green.
+Endpoint smoke-tested with env stripped: 501 unconfigured, 405 on a bad method;
+6 serverless functions against Hobby's cap of 12. Browser re-checked with Clerk
+off: consent → `["2026-07-25"]`, undo → `[]`, banner correct, **zero**
+`/api/spoiled-days` calls, no page errors — the sync is properly inert without
+Clerk.
+
+**Still untested:** the two-device round trip itself needs a Clerk-configured
+deploy the sandbox can't stand up. Merge logic is unit-pinned and the endpoint is
+smoke-tested, but watch the first real sign-in.

@@ -4,6 +4,7 @@ import { toApiDate } from '../lib/dates.js'
 import {
   SPOILED_DAYS_KEY,
   addSpoiledDay,
+  applyRemoteStates,
   isDaySpoiled,
   parseSpoiledDays,
   removeSpoiledDay,
@@ -67,6 +68,21 @@ function dropKey(key) {
   }
 }
 
+// A same-tab echo of the `storage` event. The browser fires `storage` only in
+// OTHER tabs, so without this, two mounted instances of this hook (the slate and
+// a game view, or the cloud-sync component) would not see each other's writes
+// until a reload. Dispatching the event ourselves lets the listener below serve
+// as the single refresh path for every source — another tab, this tab, or the
+// cloud merge — instead of each one needing its own wiring.
+function notifyLocalChange(key) {
+  try {
+    window.dispatchEvent(new StorageEvent('storage', { key }))
+  } catch {
+    // StorageEvent unavailable (very old browsers) — cross-instance updates
+    // degrade to next-render/next-load. Nothing is lost, only immediacy.
+  }
+}
+
 export function useScoresUnlocked() {
   const [expiry, setExpiry] = useState(() => readKey(SCORES_UNLOCKED_KEY))
   const [days, setDays] = useState(() => parseSpoiledDays(readKey(SPOILED_DAYS_KEY)))
@@ -97,6 +113,8 @@ export function useScoresUnlocked() {
       writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
       return next
     })
+    notifyLocalChange(SCORES_UNLOCKED_KEY)
+    notifyLocalChange(SPOILED_DAYS_KEY)
   }, [])
 
   // Turning the pass off the same day takes the consent back — this is what makes
@@ -109,6 +127,20 @@ export function useScoresUnlocked() {
     const today = toApiDate(new Date())
     setDays((prev) => {
       const next = removeSpoiledDay(prev, today)
+      writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
+      return next
+    })
+    notifyLocalChange(SCORES_UNLOCKED_KEY)
+    notifyLocalChange(SPOILED_DAYS_KEY)
+  }, [])
+
+  // The only way a remote state map reaches local state (SpoiledDaysCloudSync).
+  // Deliberately NOT a union: an explicit 'off' from another device removes the
+  // day here, which is what lets a same-day undo propagate instead of being
+  // silently reversed by stale remote state. See spoiledDays.js's sync header.
+  const mergeRemoteDays = useCallback((remote) => {
+    setDays((prev) => {
+      const next = applyRemoteStates(prev, remote)
       writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
       return next
     })
@@ -160,6 +192,7 @@ export function useScoresUnlocked() {
     resetAt: passActive ? Number(expiry) : null,
     spoiledDays: days,
     spoilersOffFor,
+    mergeRemoteDays,
     enable,
     disable,
   }

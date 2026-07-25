@@ -9,9 +9,12 @@ import {
   addSpoiledDay,
   isDaySpoiled,
   isDayString,
+  applyRemoteStates,
+  isDayState,
   parseSpoiledDays,
   removeSpoiledDay,
   serializeSpoiledDays,
+  statesFromDays,
 } from '../src/lib/spoiledDays.js'
 
 // --------------------------------------------------------------------------
@@ -126,4 +129,65 @@ test('serializeSpoiledDays round-trips through parseSpoiledDays', () => {
 test('serializeSpoiledDays normalizes junk on the way OUT too', () => {
   assert.equal(serializeSpoiledDays(['2026-07-24', 'nope', 7]), '["2026-07-24"]')
   assert.equal(serializeSpoiledDays(null), '[]')
+})
+
+// --------------------------------------------------------------------------
+// Cross-device sync — a state map, not a set (see the module header for why)
+// --------------------------------------------------------------------------
+test('applyRemoteStates adds days the server says are on', () => {
+  assert.deepEqual(
+    applyRemoteStates(['2026-07-24'], { '2026-07-25': 'on' }),
+    ['2026-07-25', '2026-07-24'],
+  )
+})
+
+// THE reason this is a state map and not a union. Consent on the phone, sync,
+// then undo on the phone: a union would pull the stale "on" back in on the next
+// fetch and silently reverse the undo. An explicit 'off' has to win.
+test('applyRemoteStates removes a day the server says is off', () => {
+  assert.deepEqual(applyRemoteStates(['2026-07-25', '2026-07-24'], { '2026-07-25': 'off' }), [
+    '2026-07-24',
+  ])
+})
+
+test('applyRemoteStates leaves days the server says nothing about alone', () => {
+  assert.deepEqual(applyRemoteStates(['2026-07-24'], { '2026-07-22': 'on' }), [
+    '2026-07-24',
+    '2026-07-22',
+  ])
+  assert.deepEqual(applyRemoteStates(['2026-07-24'], {}), ['2026-07-24'])
+})
+
+test('applyRemoteStates degrades to no change on a garbled response', () => {
+  const local = ['2026-07-24']
+  for (const bad of [null, undefined, 'nope', 42, []]) {
+    assert.deepEqual(applyRemoteStates(local, bad), local, `${JSON.stringify(bad)} is inert`)
+  }
+  // Malformed keys and states are skipped individually, not fatal.
+  assert.deepEqual(
+    applyRemoteStates(local, { 'not-a-day': 'on', '2026-07-23': 'maybe', '2026-07-22': 'on' }),
+    ['2026-07-24', '2026-07-22'],
+  )
+})
+
+test('applyRemoteStates never invents a day from an off row', () => {
+  // An 'off' for a day we never had is a no-op, not an add.
+  assert.deepEqual(applyRemoteStates([], { '2026-07-25': 'off' }), [])
+})
+
+test('statesFromDays reports only what this device holds, as on', () => {
+  assert.deepEqual(statesFromDays(['2026-07-25', '2026-07-24']), {
+    '2026-07-25': 'on',
+    '2026-07-24': 'on',
+  })
+  // Absence must mean "no opinion" — a fresh device publishes nothing rather
+  // than telling the server to erase the user's history.
+  assert.deepEqual(statesFromDays([]), {})
+  assert.deepEqual(statesFromDays(null), {})
+})
+
+test('isDayState accepts only the two wire states', () => {
+  assert.equal(isDayState('on'), true)
+  assert.equal(isDayState('off'), true)
+  for (const bad of ['ON', '1', true, null, undefined, '']) assert.equal(isDayState(bad), false)
 })

@@ -144,7 +144,9 @@ render or fetch a score. Link previews (`api/og.js` + `api/preview.js` +
 safe to the static default card — ADR-0012. Multi-device reveal sync (Clerk, off
 unless `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
 own devices via `api/reveal.js` + Upstash Redis, ratcheted both sides, inert if
-unconfigured — ADR-0022. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
+unconfigured — ADR-0022; its companion `api/spoiled-days.js` mirrors which DAYS the
+user consented to spoil (consent, never a mark — a per-day on/off state map, since
+that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
 consent-pop-up wording (never a score, closed registry, public-cached read,
 allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
 ADR-0025.

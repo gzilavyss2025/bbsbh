@@ -76,8 +76,9 @@ A date the user explicitly agreed to see plainly. Recorded on consent
 (`bbsbh:spoiledDays`), it outlives the 8am reset — you already agreed, so
 pretending the next morning that the day might still be hand-scored would be a
 fiction. It is a set of DATES, never a reveal mark, so it can't touch what you
-scored by hand. Turning the switch off the same day takes the consent back
-(ADR-0026).
+scored by hand. Turning the switch off the same day takes the consent back, and
+the list mirrors across a signed-in user's devices as a per-day on/off state —
+so a withdrawal travels the same way a consent does (ADR-0026).
 _Avoid_: unlocked day, burned day
 
 **Live edge**:

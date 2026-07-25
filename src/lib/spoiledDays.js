@@ -94,3 +94,54 @@ export function removeSpoiledDay(days, dateStr) {
   const current = Array.isArray(days) ? days : []
   return normalize(current.filter((d) => d !== dateStr))
 }
+
+// ---------------------------------------------------------------------------
+// Cross-device sync (ADR-0022's companion; see SpoiledDaysCloudSync.jsx)
+// ---------------------------------------------------------------------------
+// The reveal mark syncs with a monotonic ratchet — max(local, remote) — because
+// it can only ever move one way. A day SET cannot use that shape. A plain union
+// would be monotonic too, but it would resurrect a day the user just took back:
+// consent on the phone, sync, undo on the phone, and the next fetch unions the
+// server's stale "on" straight back in, silently reversing the undo. That is the
+// one thing the same-day undo exists to prevent.
+//
+// So the wire format is a per-day STATE map — { 'YYYY-MM-DD': 'on' | 'off' } —
+// not a set. An explicit 'off' propagates a withdrawal the way an explicit 'on'
+// propagates a consent, and last write wins per day. That is safe here for a
+// reason specific to this data: a day is only ever mutable while it is "today"
+// on some device, so the only rows that can disagree are today's, and any
+// disagreement self-heals the next time the user touches the switch. Every past
+// day is frozen — no client writes it again — so those rows converge and stay.
+//
+// Note the direction of the risk: an 'on' can only ever originate from a real
+// consent tap on some device of this user's, and an 'off' only ever re-seals.
+// Neither state can unseal a day the user never agreed to.
+export function isDayState(value) {
+  return value === 'on' || value === 'off'
+}
+
+// Apply a remote state map to the local day list. Unknown days, malformed keys
+// and malformed states are ignored, so a garbled server response degrades to
+// "no change" rather than to a wrong answer. A day the server says nothing about
+// is left exactly as it is locally.
+export function applyRemoteStates(days, remote) {
+  let out = Array.isArray(days) ? [...days] : []
+  if (!remote || typeof remote !== 'object') return normalize(out)
+  for (const [day, state] of Object.entries(remote)) {
+    if (!isDayString(day) || !isDayState(state)) continue
+    if (state === 'on') out.push(day)
+    else out = out.filter((d) => d !== day)
+  }
+  return normalize(out)
+}
+
+// The state map this device would publish for the days it knows about. Only days
+// present locally are reported as 'on'; a withdrawal is posted as its own
+// explicit 'off' at the moment it happens (see the hook), not inferred from
+// absence — absence has to keep meaning "no opinion", or a fresh device with an
+// empty list would tell the server to erase every day the user ever consented to.
+export function statesFromDays(days) {
+  const out = {}
+  for (const day of normalize(days)) out[day] = 'on'
+  return out
+}

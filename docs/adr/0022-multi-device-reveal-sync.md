@@ -120,6 +120,9 @@ machine-advanced reveals to every signed-in device. That is gone; the mark's onl
 sources remain a tap, another tab's `storage` event, and this sync.
 
 The one thing the pass does persist — the set of days consented to
-(`bbsbh:spoiledDays`) — is deliberately **not** synced. It is consent, not scoring
-progress, so it doesn't belong in the reveal mirror; see ADR-0026's "Cost
-accepted" for why that's arguable now that it's durable.
+(`bbsbh:spoiledDays`) — DOES sync, but on its own key, shape and endpoint
+(`api/spoiled-days.js`), not through the reveal mirror. It is consent, not scoring
+progress, and it needed a different merge rule: this ADR's ratchet works because a
+mark only moves one way, whereas a day set has to be able to move back (the
+same-day undo), so it syncs as a per-day `'on' | 'off'` state map rather than a
+max or a union. See ADR-0026.
