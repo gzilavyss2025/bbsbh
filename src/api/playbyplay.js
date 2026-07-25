@@ -417,6 +417,31 @@ const HIT_EVENTS = new Set(['single', 'double', 'triple', 'home_run'])
 const SAC_FLY_EVENTS = new Set(['sac_fly', 'sac_fly_double_play'])
 const SAC_BUNT_EVENTS = new Set(['sac_bunt', 'sac_bunt_double_play'])
 
+// The FULL fielding chain for a ground-ball double/triple play, walked across
+// EVERY runner retired on the play (in the order they were put out) rather
+// than just the batter's own assist+putout pair — his own credits alone read
+// "6-3" for a 4-6-3 double play, silently dropping the second baseman who
+// started it (verified against a live 4-6-3: the front runner's own entry
+// carries assist-6/putout-4, the batter's carries assist-4/putout-3 — the
+// relay fielder shows up as BOTH the front runner's putout and the batter's
+// assist, so consecutive duplicates collapse to one mention: 6, 4, 4, 3 →
+// "6-4-3"). Runners are ordered by their own `movement.outNumber`, the same
+// half-inning out sequence number runnerOutCode reads.
+function fullChain(play) {
+  const outRunners = (play.runners ?? [])
+    .filter((r) => r.movement?.isOut && (r.credits ?? []).some((c) => /putout|assist/.test(c.credit ?? '')))
+    .sort((a, b) => (a.movement?.outNumber ?? 0) - (b.movement?.outNumber ?? 0))
+  const codes = []
+  for (const r of outRunners) {
+    for (const c of r.credits ?? []) {
+      if (!/putout|assist/.test(c.credit ?? '')) continue
+      const code = c.position?.code ?? ''
+      if (code && codes[codes.length - 1] !== code) codes.push(code)
+    }
+  }
+  return codes.join('-')
+}
+
 // The Numbers Game #22-style scorebook denotation for a batter's own plate
 // appearance — shown above the per-play diamond. Either how he reached (1B,
 // 2B, HR, BB, E6, FC…) or how he was retired (K, F8, L7, 6-3…). Returns a
@@ -500,6 +525,13 @@ function scorebookCode(play, batterRunner) {
   // himself) is the scorebook's "unassisted" play: 3U, 6U, etc, not a bare
   // position number.
   const code = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
+  // A batter grounding into a double/triple play gets the FULL relay chain
+  // (fullChain, above) rather than just his own assist+putout pair — and the
+  // double-play case reads "GIDP" over the chain, on its own line, the way a
+  // scorer pencils "GIDP" above the fielding numbers rather than running them
+  // together as one cramped "DP 6-3".
+  if (dpTag === 'DP ') return { code: `GIDP\n${fullChain(play) || code}`, codeKind: 'out' }
+  if (dpTag === 'TP ') return { code: `${dpTag}${fullChain(play) || code}`, codeKind: 'out' }
   return { code: `${dpTag}${code}`, codeKind: 'out' }
 }
 
