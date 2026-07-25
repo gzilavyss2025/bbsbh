@@ -6982,6 +6982,45 @@ body {
   color: var(--text-caption);
 }
 
+/* On a phone, the persistent Now Pitching card's "entering" figure gets its
+   own full-width row below the name/hand line instead of squeezing beside
+   it on the same row as the headshot — otherwise the "pitching for"/name
+   text has to share that row with a right-pinned column and wraps/truncates
+   sooner than it needs to. A grid (rather than flex-wrap) so the photo gets
+   its own fixed-width column and the body/entering blocks share the SAME
+   second column — a flex-wrap attempt here forced the body onto its own
+   full-width row too (a wrapped flex item's hypothetical size for the line-
+   break decision is its flex-basis, not its post-shrink size, so `flex: 1 1
+   100%` on the body pushed it below the photo instead of keeping it beside
+   it — only the explicitly margin-shifted entering block landed in the
+   right column). Scoped to :has(.pitchernotice__entering) since only this
+   persistent card (HalfInning.jsx) ever passes the `entering` prop — the
+   mid-half change notices (PlayByPlay/StatBox) don't, and are untouched
+   here. */
+@media (max-width: 739.98px) {
+  .pitchernotice:has(.pitchernotice__entering) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__shot {
+    grid-row: 1 / 3;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__body {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__entering {
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: 0;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
    side by side from the wide breakpoint up (see media query below).
    margin-top at every width: .innings__grid's own flex gap (see its
@@ -11471,6 +11510,59 @@ body {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
+}
+
+/* On a phone, both the hero star's and the #2/#3 rows' stat line drops to
+   its own full-width row below the name/meta lines instead of squeezing
+   beside them in the same row as the headshot — a big extra-base-hit line
+   otherwise fights the name column for width (see the .stars3__heroStat
+   comment above; the same squeeze hits the compact rows below it). A grid
+   (not flex-wrap) so the photo gets its own fixed column and the copy/stat
+   blocks share the SAME second column — see the identical reasoning on
+   .pitchernotice's own phone-only override just above the "Row 2" comment
+   for why a flex-wrap + flex-basis:100% attempt here would instead push the
+   name/meta block below the photo rather than beside it. */
+@media (max-width: 739.98px) {
+  .stars3__hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .shot.stars3__heroShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__heroCopy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__heroStat {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    text-align: left;
+  }
+
+  .stars3__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 8px;
+    row-gap: 2px;
+    align-items: start;
+  }
+  .shot.stars3__rowShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__rowWho {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__rowStat {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+  }
 }
 
 /* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
