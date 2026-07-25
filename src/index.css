@@ -10871,7 +10871,12 @@ body {
   width: 34%;
   text-align: left !important;
   padding-left: 0 !important;
-  white-space: normal;
+  /* !important: needed to beat ".bs__grid th, .bs__grid td"'s nowrap, which
+     outranks a bare .bs__nameCol on specificity alone (element+class beats
+     class). Without it a long surname next to a wide position tag (e.g. a
+     pinch-runner's "18 | PR-RF") can't wrap and instead overflows onto the
+     tag beside it — reported as clipped/overlapping text on mobile. */
+  white-space: normal !important;
 }
 
 .bs__player {
