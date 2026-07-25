@@ -14279,6 +14279,15 @@ body {
   display: block;
   object-fit: contain;
 }
+/* The slate's team-logo nav banner (GameSelect) reuses this strip to jump
+   straight to a club's team page rather than to highlight one — nothing is
+   ever "picked" (selectedTeamId is always null), so the ordinary
+   grayscale-until-active treatment above would leave every logo permanently
+   dim. This modifier keeps them full color. */
+.teamfilterstrip--nav .vsteam__team .teamlogo {
+  filter: none;
+  opacity: 1;
+}
 .vsteam__grid {
   margin-top: 2px;
 }
