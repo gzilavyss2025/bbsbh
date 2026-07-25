@@ -12,6 +12,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
+import { scorecardPlays, scorecardCenterCode } from '../src/api/loadScorecard.js'
 
 function person(id, last, first) {
   return { id, fullName: `${first} ${last}`, lastName: last, firstName: first, useName: first, primaryNumber: String(id) }
@@ -114,4 +115,28 @@ test("the forced lead runner's own out notation is unaffected — still his own 
   assert.equal(mckinstry.outNumber, 1)
   assert.equal(mckinstry.outAt, 2)
   assert.equal(mckinstry.outCode, 'DP 6-4')
+})
+
+// The SCORECARD SHEET is a second consumer of the very same card, and its
+// diamond center is a single-line chip (.sc-ab__center, `white-space: nowrap`)
+// in a 90px box — so the two-line play-by-play mark must not reach it intact,
+// or it renders as one unwrapped "GIDP 6-4-3" run overhanging the box. The
+// sheet gets the chain alone; the "DP" it drops is already in the outcome box
+// beside it (classifyOut).
+test("the scorecard sheet's diamond center takes the GIDP chain alone, not the two-line play-by-play mark", () => {
+  const grid = scorecardPlays(buildFeed(), 'top')
+  const vierling = grid.slots
+    .flatMap((s) => Object.values(s.cells))
+    .find((c) => c.batter.last === 'Vierling')
+  assert.equal(vierling.code, 'GIDP\n6-4-3') // untouched for the play-by-play
+  assert.equal(vierling.centerCode, '6-4-3')
+  assert.ok(!vierling.centerCode.includes('\n'))
+  assert.equal(vierling.outType, 'DP')
+})
+
+test('a single-line out code passes through to the scorecard center unchanged', () => {
+  assert.equal(scorecardCenterCode('6-3'), '6-3')
+  assert.equal(scorecardCenterCode('F8'), 'F8')
+  assert.equal(scorecardCenterCode(''), '')
+  assert.equal(scorecardCenterCode(null), '')
 })

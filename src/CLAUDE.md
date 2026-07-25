@@ -88,7 +88,7 @@ read the linked ADRs before refactoring:
   content — underneath the active one during the animation. `SealBox`'s own
   render-function gate (ADR-0002) is what keeps that preview spoiler-safe;
   `InningPage.jsx`'s `presentationOnly` flag only mutes side-effecting
-  callbacks (`onReveal`/`onStepInfo`/`onSteppedThrough`) so the preview can't
+  callbacks (`onReveal`/`onStepInfo`) so the preview can't
   itself advance `revealedThrough` or double-report a step. Not a second
   reveal boundary — see ADR-0024.
 
