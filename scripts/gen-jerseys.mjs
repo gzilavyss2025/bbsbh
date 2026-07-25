@@ -7,21 +7,27 @@
 // spoiler rule.
 //
 // Also regenerates public/data/jerseys.json — a small derived export, keyed
-// `${gamePk}:${teamId}` -> 'alternate' | 'alternate-2' | 'alternate-3' |
-// 'city-connect', for the home-page game cards to swap in a team's curated
-// logo when that's what it's wearing (src/api/jerseys.js). 'main' (standard home/away)
-// entries are dropped: the only question a reader ever asks is "is there a
-// non-main treatment for this game/team". No team-id filtering — coverage of
-// which teams have curated logo art at all is a public/ file-existence fact,
-// decided once in src/lib/teams.js's teamLogoUrl fallback, not duplicated
-// here as a whitelist that would drift every time new logo art is added.
-// The export only re-derives (full table scan + rewrite) when this run
-// actually recorded a row — an already-recorded (gamePk, teamId) is never
-// re-upserted, so a no-op night would otherwise rewrite an identical file.
-//
-// v2 idea (not built): once enough per-team history accumulates, guess a
-// likely pre-posting treatment (e.g. from day-of-week pattern) and correct it
-// once the real assignment posts, instead of always falling back to main.
+// `${gamePk}:${teamId}` -> 'main' | 'alternate' | 'alternate-2' |
+// 'alternate-3' | 'city-connect', for the home-page game cards to swap in a
+// team's curated logo when that's what it's wearing (src/api/jerseys.js).
+// 'main' entries are kept explicitly, not dropped: `defaultTreatmentFor`
+// (teams.js) predicts a treatment for a game whose real assignment hasn't
+// posted yet — an away-side "main" guess, or a home Friday club's guess of
+// "city-connect" — and a confirmed-but-standard jersey is the one case that
+// guess can get wrong (a team whose City Connect is a Friday habit doesn't
+// wear it EVERY Friday; a pinstripe club's own Main tile is styled to match
+// its *home* look, so an away "main" guess reads wrong until overridden). A
+// dropped 'main' row is indistinguishable from "not posted yet" and would
+// leave that wrong guess standing forever once the game goes Final — keeping
+// the row lets `jerseyTreatmentFor`'s real data always win over the guess,
+// matching what that function's own doc comment already promises. No
+// team-id filtering — coverage of which teams have curated logo art at all
+// is a public/ file-existence fact, decided once in src/lib/teams.js's
+// teamLogoUrl fallback, not duplicated here as a whitelist that would drift
+// every time new logo art is added. The export only re-derives (full table
+// scan + rewrite) when this run actually recorded a row — an already-
+// recorded (gamePk, teamId) is never re-upserted, so a no-op night would
+// otherwise rewrite an identical file.
 //
 // Writes straight to the shared SQLite layer (scripts/lib/db.js, ADR-0021),
 // its own `jerseys` group (scripts/data/jerseys.sql), one row per (game,
@@ -84,9 +90,9 @@ function normalizeAssets(side) {
     .filter((a) => a.text)
 }
 
-// Pure/unit-testable: rows -> { "${gamePk}:${teamId}": 'alternate' | 'alternate-2' | 'alternate-3' | 'city-connect' }.
-// Drops 'main' entries and any row whose payload has no jersey ('J') asset or
-// fails to parse — a bad/degraded row is just skipped, never fatal.
+// Pure/unit-testable: rows -> { "${gamePk}:${teamId}": 'main' | 'alternate' | 'alternate-2' | 'alternate-3' | 'city-connect' }.
+// Drops any row whose payload has no jersey ('J') asset or fails to parse —
+// a bad/degraded row is just skipped, never fatal.
 export function buildJerseysExport(rows) {
   const out = {}
   for (const row of rows) {
@@ -99,7 +105,6 @@ export function buildJerseysExport(rows) {
     const jersey = Array.isArray(assets) ? assets.find((a) => a.piece === 'J') : null
     if (!jersey?.text) continue
     const treatment = classifyUniformAsset(jersey.text, teamClubName(row.team_id), jersey.code)
-    if (treatment === 'main') continue
     out[`${row.game_pk}:${row.team_id}`] = treatment
   }
   return out
@@ -206,7 +211,7 @@ async function main() {
     await mkdir(dirname(jerseysJsonPath), { recursive: true })
     await writeFile(jerseysJsonPath, JSON.stringify(exported))
     console.log(
-      `wrote public/data/jerseys.json (${Object.keys(exported).length} non-main treatment(s))`,
+      `wrote public/data/jerseys.json (${Object.keys(exported).length} treatment(s))`,
     )
   } else {
     console.log(`no changes (${notPosted} not posted yet, ${total} total rows)`)

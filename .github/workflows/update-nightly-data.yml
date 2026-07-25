@@ -20,6 +20,15 @@ name: Update nightly data
 # step's `git add` list or the fail-check below — harmless on a clean
 # fast-forward push, but its always-unstaged output broke the push-race
 # rebase retry the first time two nightly runs collided (2026-07-21).
+# gen-jerseys.mjs had the same class of bug from the day it was added: the
+# `git add` list staged scripts/data/jerseys.sql (the SQL dump) but never
+# public/data/jerseys.json (the derived export src/api/jerseys.js actually
+# reads), so every night's real jersey/logo-treatment classification was
+# computed and written to the runner's working tree, then silently discarded
+# at commit time — the deployed jerseys.json never advanced past its last
+# hand-run backfill. The slate card's per-game logo swap fell back to
+# defaultTreatmentFor's side-only guess for every game since, with no
+# generator failure to surface it. Fixed 2026-07-25.
 # scripts/warm-previews.mjs (added 2026-07-22) is the one step here that
 # ISN'T a gen-*.mjs data generator — it writes no public/data/* file, so it
 # deliberately has no entry in the commit step's `git add` list, only in the
@@ -163,7 +172,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race, same shape as

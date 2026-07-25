@@ -217,7 +217,11 @@ export function hasCityConnect(teamId) {
 // Predictive fallback tile for a game whose actual worn jersey hasn't posted
 // yet (jerseyTreatmentFor/api/jerseys.js returns null pre-game) — a best
 // guess, not a fact, so jerseyTreatmentFor's real data always overrides it
-// the moment it posts. Away always predicts the plain Main mark (the away
+// the moment it posts, including a confirmed-standard game (gen-jerseys.mjs
+// stores 'main' explicitly rather than omitting it, precisely so a guess
+// this function gets wrong — e.g. a Friday city-connect club that wore its
+// plain jersey that night — doesn't stand uncorrected once Final). Away
+// always predicts the plain Main mark (the away
 // grey/road look — several clubs' Main tile is already re-paired with a grey
 // fill for exactly that jersey, see ALT_USES_BASE_LOGO above). A home game on
 // a Friday predicts City Connect for any club that has one, since Friday is

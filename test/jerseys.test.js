@@ -14,13 +14,14 @@ const row = (gamePk, teamId, assets) => ({
 // --------------------------------------------------------------------------
 // buildJerseysExport
 // --------------------------------------------------------------------------
-test('buildJerseysExport keeps alternate/city-connect, drops main', () => {
+test('buildJerseysExport keeps main alongside alternate/city-connect', () => {
   const rows = [
     row(1, 158, [{ text: 'Brewers Home Cream', piece: 'J' }]), // main
     row(2, 120, [{ text: 'Nationals Alt 1 Red "W" Jersey', piece: 'J' }]),
     row(3, 143, [{ text: 'Phillies City Connect', piece: 'J' }]),
   ]
   assert.deepEqual(buildJerseysExport(rows), {
+    '1:158': 'main',
     '2:120': 'alternate',
     '3:143': 'city-connect',
   })
