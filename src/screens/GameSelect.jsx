@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useNav } from '../lib/nav.js'
-import { slatePath } from '../lib/route.js'
+import { slatePath, teamPath } from '../lib/route.js'
 import { fetchSchedule, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
@@ -16,6 +16,7 @@ import { GameCard } from '../components/GameCard.jsx'
 import { DerbyCard } from '../components/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
 import { LevelNav } from '../components/LevelNav.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 import { TallyLockup } from '../components/TallyBrand.jsx'
 import { SiteSearchButton } from '../components/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/SiteMenu.jsx'
@@ -369,6 +370,27 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           </div>
         </div>
       </header>
+
+      {/* This level's whole club set, in the same finger-scrollable logo strip
+          League Leaders uses to highlight a team (TeamFilterStrip) — minus
+          the pinned "MLB" reset button (showMlbPin=false), since there's no
+          "every team" state to return to here. Tapping a logo jumps straight
+          to that club's team page rather than picking a highlight, so
+          selectedTeamId is always null (nothing is ever "active") and
+          teamfilterstrip--nav keeps every logo full-color instead of
+          dimming everything the strip's filter callers grayscale until
+          picked (see index.css). Sourced from levelTeams (fetchTeams(sportId)
+          above), so it re-lists automatically on every level switch. */}
+      {levelTeams.data?.length > 0 && (
+        <TeamFilterStrip
+          teams={levelTeams.data}
+          selectedTeamId={null}
+          onSelect={(id) => navigate(teamPath(id))}
+          showMlbPin={false}
+          ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
+          className="teamfilterstrip--nav"
+        />
+      )}
 
       {/* The date stepper's own solid banner, divided from the game cards by
           a bottom rule — deliberately NOT sticky (see the comment on
