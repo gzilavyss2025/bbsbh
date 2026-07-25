@@ -7450,9 +7450,14 @@ body {
 
 /* This is a phone-first app, so "mobile" is the default breakpoint below
    740px — hide the "Pitch colors" legend button/modal there; it still shows
-   at the wider breakpoint. */
+   at the wider breakpoint. Selector combines both classes (rather than just
+   .half__pitchkeyfoot) so its specificity beats the unconditional
+   `.pitchkeybtn { display: inline-flex }` base rule declared later in this
+   file — with equal (0,1,0) specificity on .half__pitchkeyfoot alone, the
+   later, unconditional rule was winning the cascade and the button was
+   leaking onto mobile despite this "hide" rule. */
 @media (max-width: 739.98px) {
-  .half__pitchkeyfoot {
+  .pitchkeybtn.half__pitchkeyfoot {
     display: none;
   }
 }
