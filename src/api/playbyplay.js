@@ -696,8 +696,15 @@ const FORCED_OUT_EVENTS = new Set([
 
 function runnerOutCode(play, runnerEntry) {
   const et = runnerEntry.details?.eventType ?? play.result?.eventType ?? ''
+  // Exact-matched, not a substring test: the feed also tags an outfielder's
+  // assist with a SECOND credit, `f_assist_of` (for outfield-assist totals),
+  // on the very same throw as his `f_assist` — a substring match on "assist"
+  // catches both and doubles that fielder up in the chain (verified against
+  // gamePk 817477's bottom 2nd, Cameron Sisneros out at 2nd on the throw:
+  // right fielder 9 credited f_assist AND f_assist_of for the one throw to
+  // short, which rendered "9-9-6" instead of "9-6").
   const chain = (runnerEntry.credits ?? [])
-    .filter((c) => /putout|assist/.test(c.credit ?? ''))
+    .filter((c) => c.credit === 'f_putout' || c.credit === 'f_assist')
     .map((c) => c.position?.code ?? '')
     .join('-')
   let tag = ''
@@ -1027,7 +1034,21 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       const pitcher = matchupPitcher(feed, play)
 
       const cardIndex = entries.length
-      const batterRunner = runners.find((r) => r.details?.runner?.id === batterId)
+      // A batter who reaches safely and is then thrown out stretching for an
+      // extra base (singled, out at 2nd on the throw) gets TWO runners[]
+      // entries on this SAME play: his own plate-appearance result
+      // (`movement.start` null — he started this leg from home) and a later,
+      // separate leg for the extra-base attempt (`movement.start` set — he
+      // was already standing on a base when THAT leg happened). Prefer the
+      // start-null entry here so scorebookCode reads his own hit, not the
+      // out that came after it (see `stretchOut` below, which reads the
+      // other one). Verified against gamePk 817477's bottom 2nd (Cameron
+      // Sisneros singles, out at 2nd on the throw): two entries, same
+      // playIndex, reach-then-out in that order — falling back to the bare
+      // `.find()` keeps this a no-op for the common one-entry case.
+      const batterRunner =
+        runners.find((r) => r.details?.runner?.id === batterId && r.movement?.start == null) ??
+        runners.find((r) => r.details?.runner?.id === batterId)
       const card = {
         kind: 'atbat',
         batterId,
@@ -1088,6 +1109,18 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
 
       if (batterRunner?.movement?.isOut) {
         card.outNumber = batterRunner.movement.outNumber
+      }
+      // The stretching-out leg itself (see batterRunner's doc above) — drawn
+      // on his own diamond the same way any other runner's caught-advancing
+      // out is (a capped path + the fielding chain, by the base he was
+      // retired at); his own hit is already covered by scorebookCode above.
+      const stretchOut = runners.find(
+        (r) => r.details?.runner?.id === batterId && r.movement?.isOut && r.movement?.start != null,
+      )
+      if (stretchOut) {
+        card.outNumber = stretchOut.movement.outNumber
+        card.outAt = BASE_NUM[stretchOut.movement.outBase] ?? null
+        card.outCode = runnerOutCode(play, stretchOut)
       }
     } else {
       // A top-level baserunning play with no plate appearance of its own — an
@@ -1233,17 +1266,36 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // runner on their own, so those carry no slot. An out on the bases
     // doesn't advance him.
     const batterSlot = isRealPA ? battingSlot(feed, battingSide, batterId) : null
-    // The feed can split one runner's multi-base move on a single play into
-    // separate legs (2nd→3rd, 3rd→home). Keep only the furthest destination
-    // per runner per play, so a two-base advance is labeled once, at its end.
-    // How he advanced is read from the runner's OWN movement event, not the
-    // play's batting result: a steal / wild pitch / passed ball / balk during
-    // another batter's PA is recorded on the runner (details.eventType), so it
-    // must be tagged SB/WP/PB/BK rather than the batter's BB/K/GO. Such a
-    // self-advance credits no hitter (slot null); an advance driven by the
-    // batter's plate appearance credits his lineup slot.
+    // The feed can split one runner's multi-base move into separate legs, and
+    // NOT only across separate plays: when a wild pitch / steal happens mid-
+    // count during the FOLLOWING batter's plate appearance, that batter's own
+    // play carries the earlier runner's whole rest-of-the-way chain in its
+    // OWN runners[] array — one entry per leg, each with its own eventType,
+    // in chronological order (verified against gamePk 818039's bottom 5th:
+    // Yerlin Confidan's single-play `runners[]` holds Alfredo Duno's 1B→2B
+    // wild-pitch leg, then his 2B→3B steal leg, then his 3B→score leg off
+    // the single itself — three entries, one runner, one play). A single
+    // play can also stretch a steal into a further base on a throwing error
+    // the same way (gamePk 817477's top 2nd: Ben McLaughlin's 1B→2B steal
+    // leg, then a separate 2B→3B error leg on the same play). So: give EVERY
+    // entry its own notation — comparing each leg's base against how far
+    // this runner has progressed SO FAR (across earlier plays and any
+    // earlier leg already processed this same play) rather than collapsing a
+    // play down to one "furthest" leg, which used to silently drop every
+    // intermediate leg's own code (a runner who WP'd to 2nd then stole 3rd
+    // used to show only his eventual "reached home" notation, with no trace
+    // of the WP or the SB). How he advanced is read from the runner's OWN
+    // movement event, not the play's batting result: a steal / wild pitch /
+    // passed ball / balk during another batter's PA is recorded on the
+    // runner (details.eventType), so it must be tagged SB/WP/PB/BK rather
+    // than the batter's BB/K/GO. Such a self-advance credits no hitter (slot
+    // null); an advance driven by the batter's plate appearance credits his
+    // lineup slot.
     if (visible) {
-      const endBase = new Map() // runnerId -> { base, code, slot } furthest this play
+      // The batter's own natural reach base (his top-of-diamond code already
+      // explains it) — a further base on this same play only gets a leg
+      // notation once he's past it.
+      const naturalBase = NATURAL_BASE[play.result?.eventType] ?? 1
       for (const r of runners) {
         const rid = r.details?.runner?.id
         if (rid == null || r.movement?.isOut) continue
@@ -1251,28 +1303,22 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         if (base === 0) continue
         // Credit a pinch runner's advance to the batter whose card he inherited.
         const canon = rootRunner(rid)
-        if (base <= (endBase.get(canon)?.base ?? 0)) continue
+        // Not a genuine leg — this entry doesn't move him past where he
+        // already stands, whether from an earlier play or an earlier leg
+        // within THIS same play (processed in feed order above).
+        if (base <= (progress.get(canon) ?? 0)) continue
         const rEt = r.details?.eventType
         const code = legAdvanceCode(play, r)
         const slot = rEt && NO_SLOT_CREDIT_EVENT_TYPES.has(rEt) ? null : batterSlot
-        // The feed flags each scoring runner's leg earned/unearned; carry it so
-        // an unearned run can be circled on the diamond (see finalizeTrip).
-        endBase.set(canon, { base, code, slot, earned: r.details?.earned })
-      }
-      // The batter's own natural reach base (his top-of-diamond code already
-      // explains it) — a further base on this same play only gets a leg
-      // notation once he's past it.
-      const naturalBase = NATURAL_BASE[play.result?.eventType] ?? 1
-      for (const [rid, info] of endBase) {
-        if (info.base > (progress.get(rid) ?? 0)) progress.set(rid, info.base)
+        progress.set(canon, base)
         // A run (base 4) records whether it was earned — false only when the
         // feed explicitly says so, so a clean run is never mistakenly circled.
-        if (info.base === 4) earnedByBatter.set(rid, info.earned !== false)
-        if (rid !== batterId) {
-          const m = legs.get(rid) ?? {}
-          m[info.base] = { code: info.code, slot: info.slot }
-          legs.set(rid, m)
-        } else if (info.base > naturalBase) {
+        if (base === 4) earnedByBatter.set(canon, r.details?.earned !== false)
+        if (canon !== batterId) {
+          const m = legs.get(canon) ?? {}
+          m[base] = { code, slot }
+          legs.set(canon, m)
+        } else if (base > naturalBase) {
           // A bonus base on the batter's own trip — attribute it to this
           // play's error (the fielder who's actually charged, even if the
           // feed's own error credit landed on a different runner's leg —
@@ -1280,9 +1326,9 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           // same code his fellow baserunners would get for this play. No
           // slot superscript here — that notes which TEAMMATE's at-bat
           // drove a runner over, and a batter can't drive himself.
-          const m = legs.get(rid) ?? {}
-          m[info.base] = { code: playErrorCredit(play) ?? info.code, slot: null }
-          legs.set(rid, m)
+          const m = legs.get(canon) ?? {}
+          m[base] = { code: playErrorCredit(play) ?? code, slot: null }
+          legs.set(canon, m)
         }
       }
     }
