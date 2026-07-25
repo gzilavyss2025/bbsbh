@@ -10,11 +10,26 @@ import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName } from '../lib/teams.js'
 // regardless of how far the club list has been scrolled. Selecting a club is
 // a highlight PICK, not a data filter — the caller decides what "highlighted"
 // means (see LeadersPage/AllStarRostersPage's effectiveTeamId).
+//
+// `teams` defaults to every current MLB club (id + full name), but a caller
+// can pass its own list instead — the slate's team-logo banner (GameSelect)
+// passes the current level's own clubs (fetchTeams(sportId)), so the same
+// strip scrolls AAA/AA/A+/A logos there without an MLB-only id map.
+// `showMlbPin` hides the pinned "MLB" reset button (and its divider) for a
+// caller like that banner, which has no "every team" state to reset to —
+// it's a straight navigation strip, not a filter.
 const CLUBS = ALL_MLB_TEAM_IDS
   .map((id) => ({ id, name: teamFullName(id) }))
   .sort((a, b) => a.name.localeCompare(b.name))
 
-export function TeamFilterStrip({ selectedTeamId, onSelect, ariaLabel, className = '' }) {
+export function TeamFilterStrip({
+  teams = CLUBS,
+  selectedTeamId,
+  onSelect,
+  ariaLabel,
+  showMlbPin = true,
+  className = '',
+}) {
   const stripRef = useRef(null)
   const activeRef = useRef(null)
 
@@ -38,26 +53,30 @@ export function TeamFilterStrip({ selectedTeamId, onSelect, ariaLabel, className
   return (
     <div className={`vsteam__tray teamfilterstrip ${className}`.trim()}>
       <div className="teamfilterstrip__row" role="tablist" aria-label={ariaLabel}>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={isAll}
-          title="MLB"
-          className={`vsteam__team teamfilterstrip__pin${isAll ? ' is-active' : ''}`}
-          onClick={() => onSelect(null)}
-        >
-          <img
-            src={leagueLogoUrl()}
-            alt=""
-            className="teamfilterstrip__mlblogo"
-            width={36}
-            height={36}
-            aria-hidden="true"
-          />
-        </button>
-        <span className="teamfilterstrip__divider" aria-hidden="true" />
+        {showMlbPin && (
+          <>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isAll}
+              title="MLB"
+              className={`vsteam__team teamfilterstrip__pin${isAll ? ' is-active' : ''}`}
+              onClick={() => onSelect(null)}
+            >
+              <img
+                src={leagueLogoUrl()}
+                alt=""
+                className="teamfilterstrip__mlblogo"
+                width={36}
+                height={36}
+                aria-hidden="true"
+              />
+            </button>
+            <span className="teamfilterstrip__divider" aria-hidden="true" />
+          </>
+        )}
         <div className="vsteam__strip" ref={stripRef}>
-          {CLUBS.map((t) => {
+          {teams.map((t) => {
             const active = t.id === selectedTeamId
             return (
               <button
