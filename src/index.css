@@ -11512,6 +11512,59 @@ body {
   color: var(--text-muted);
 }
 
+/* On a phone, both the hero star's and the #2/#3 rows' stat line drops to
+   its own full-width row below the name/meta lines instead of squeezing
+   beside them in the same row as the headshot — a big extra-base-hit line
+   otherwise fights the name column for width (see the .stars3__heroStat
+   comment above; the same squeeze hits the compact rows below it). A grid
+   (not flex-wrap) so the photo gets its own fixed column and the copy/stat
+   blocks share the SAME second column — see the identical reasoning on
+   .pitchernotice's own phone-only override just above the "Row 2" comment
+   for why a flex-wrap + flex-basis:100% attempt here would instead push the
+   name/meta block below the photo rather than beside it. */
+@media (max-width: 739.98px) {
+  .stars3__hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .shot.stars3__heroShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__heroCopy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__heroStat {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    text-align: left;
+  }
+
+  .stars3__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 8px;
+    row-gap: 2px;
+    align-items: start;
+  }
+  .shot.stars3__rowShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__rowWho {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__rowStat {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+  }
+}
+
 /* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
    (src/components/TopPerformersBox.jsx). A desktop-width slate sits it in the
    .slate-body rail beside the game grid (see .slate-body > .topperfbox
