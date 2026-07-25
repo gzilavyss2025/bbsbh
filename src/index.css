@@ -6982,6 +6982,31 @@ body {
   color: var(--text-caption);
 }
 
+/* On a phone, the persistent Now Pitching card's "entering" figure gets its
+   own full-width row below the name/hand line instead of squeezing beside
+   it on the same row as the headshot — otherwise the "pitching for"/name
+   text has to share that row with a right-pinned column and wraps/truncates
+   sooner than it needs to. Scoped to :has(.pitchernotice__entering) since
+   only this persistent card (HalfInning.jsx) ever passes the `entering`
+   prop — the mid-half change notices (PlayByPlay/StatBox) don't, and are
+   untouched here. Indented by the headshot's width + gap so it lines up
+   under the name rather than bleeding under the photo. */
+@media (max-width: 739.98px) {
+  .pitchernotice:has(.pitchernotice__entering) {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__body {
+    flex: 1 1 100%;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__entering {
+    flex: 1 1 100%;
+    margin-left: calc(var(--shot-sm-w) + 12px);
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
    side by side from the wide breakpoint up (see media query below).
    margin-top at every width: .innings__grid's own flex gap (see its
