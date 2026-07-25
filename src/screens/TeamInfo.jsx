@@ -51,7 +51,7 @@ import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL, mastheadLogoClass } from '../lib/teams.js'
+import { SPORT_LABEL } from '../lib/teams.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -615,7 +615,8 @@ function TeamSections({
               teamId={meta.id}
               name={meta.teamName}
               size={20}
-              className={mastheadLogoClass(meta.id)}
+              variant="mono"
+              className="metricbar__logo"
             />
           }
         />
@@ -742,7 +743,8 @@ function TeamSections({
                 teamId={oppMeta.id}
                 name={oppMeta.teamName}
                 size={20}
-                className={mastheadLogoClass(oppMeta.id)}
+                variant="mono"
+                className="metricbar__logo"
               />
             }
           />
@@ -809,7 +811,8 @@ function OpposingStarterCard({
             teamId={teamId}
             name={teamName}
             size={20}
-            className={mastheadLogoClass(teamId)}
+            variant="mono"
+            className="metricbar__logo"
           />
         }
       />

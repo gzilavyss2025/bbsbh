@@ -5,7 +5,11 @@
 // Each base he advanced to on a LATER play is annotated outside that base with
 // how he got there and which lineup spot drove him (GO⁵, 1B³…). A runner
 // thrown out on the bases gets his path capped with a short perpendicular
-// stroke and the out type (CS, 4-6…) by that base.
+// stroke and the out type (CS, 4-6…) by that base — following the actual
+// basepath through every base he legally touched first, even one thrown out
+// two bases past where he last stood safely (2nd, out at home).
+import { outLegBases } from './playDiamondGeometry.js'
+
 const HOME = [50, 80]
 const FIRST = [80, 50]
 const SECOND = [50, 20]
@@ -66,7 +70,8 @@ function perpStroke(a, b, p, len = 6) {
 }
 
 export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, size = 108 }) {
-  const traveled = scored ? 4 : reached
+  const { traveled: outTraveled, legA, legB } = outLegBases(reached, outAt)
+  const traveled = scored ? 4 : outTraveled
   // An UNEARNED run is circled, the scorer's convention — a red ring around the
   // solid diamond. Only meaningful when he scored.
   const unearned = scored && !earned
@@ -77,15 +82,13 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
   let outHalf = null
   let outTick = null
   if (outAt != null) {
+    const a = BASES[legA]
+    const b = BASES[legB]
     if (outAt > reached) {
-      const a = BASES[reached]
-      const b = BASES[outAt]
       const m = mid(a, b)
       outHalf = [a, m]
       outTick = perpStroke(a, b, m)
     } else {
-      const a = BASES[Math.max(0, outAt - 1)]
-      const b = BASES[outAt]
       outTick = perpStroke(a, b, b)
     }
   }

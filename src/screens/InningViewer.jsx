@@ -273,14 +273,12 @@ export function InningViewer({
         highlights={highlights}
         atBatCountFor={atBatCountFor}
         onStepInfo={(info) => setStepInfo({ ...info, forIdx: idx })}
-        onSteppedThrough={scrollToStatBox}
         onRunsSoFar={(runs) => setRunsInProgress({ idx, runs })}
         getDerived={getDerived}
         runExpectancy={runExpectancy}
         winProbPoints={winProbPoints}
         winProbBigPlays={winProbBigPlays}
         winProbTreatment={winProbTreatment}
-        statBoxRef={statBoxRef}
         presentationOnly={presentationOnly}
       />
     )
@@ -352,26 +350,19 @@ export function InningViewer({
   const revealNextAtBat = () =>
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
 
-  // Where the R/H/E/LOB totals land (Row 3 below) — scrolled into view once
-  // a user finishes stepping through a half one at-bat at a time (see
-  // HalfInning's onSteppedThrough), since by then PlayByPlay's own per-step
-  // scroll (ADR-0016) has carried them well past this row.
-  const statBoxRef = useRef(null)
-  const scrollToStatBox = () => statBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-
   // "Caught up to live" (ADR-0026): with the pass running on a game in progress,
   // the half being viewed IS the live frontier — everything played is open and
   // there's no next half yet. In that state the floating bar's forward action
   // ("Next ›" / the reveal split) would point at a half that hasn't happened, so
   // we swap it for a calm live status instead. Uses the SAME consent-gated
   // selectLiveEdge the follow effect does; false the instant the game goes Final
-  // (the box-score affordance takes
-  // over) or the user pages back off the frontier. Copy is admin-editable
-  // (scoresUnlocked.liveEdgeLabel); the {inning} token goes through the
-  // registry's own fillTokens — the single substitution choke point — rather
-  // than an ad hoc replace here, so an admin who drops the token gets the gap
-  // tidied like every other field. The value is the structural label of the half
-  // ALREADY on screen, never a score (see registry.js's TOKENS spoiler guard).
+  // (the box-score affordance takes over) or the user pages back off the
+  // frontier. Copy is admin-editable (scoresUnlocked.liveEdgeLabel); the
+  // {inning} token goes through the registry's own fillTokens — the single
+  // substitution choke point — rather than an ad hoc replace here, so an admin
+  // who drops the token gets the gap tidied like every other field. The value is
+  // the structural label of the half ALREADY on screen, never a score (see
+  // registry.js's TOKENS spoiler guard).
   const liveEdgeIdx = passActive ? selectLiveEdge(feed, passActive) : null
   const atLiveEdge = liveEdgeIdx != null && curIdx >= liveEdgeIdx && !selectIsFinal(feed)
   const liveEdgeLabel = atLiveEdge

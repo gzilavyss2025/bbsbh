@@ -6,9 +6,12 @@ import { teamLogoUrl } from '../lib/teams.js'
 // aria-hidden and purely visual.
 //
 // `variant` picks which mark to draw ('base' | 'primary' | 'cap' | 'wordmark' |
-// 'alternate' | 'city-connect'). The last two resolve to a locally curated
-// asset (teamLogoUrl -> localLogoUrl, teams.js) rather than the mlbstatic CDN,
-// and coverage is partial by design — that's what the fallback below is for.
+// 'alternate' | 'city-connect' | 'mono'). The last three resolve to a LOCAL
+// asset (teamLogoUrl, teams.js) rather than the mlbstatic CDN — the curated
+// jersey-treatment art, and the precomputed one-color knockout mark the navy
+// section mastheads wear (ADR-0025) — and coverage of all three is partial by
+// design, which is what the fallback below is for: a club with no knockout art
+// yet wears its full-color mark on the bar rather than nothing.
 // Fallback degrades in two steps, consistent with the app's "MiLB data is
 // rendered defensively" rule:
 //   • a variant that fails to load -> retry the plain base logo;

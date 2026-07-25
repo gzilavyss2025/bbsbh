@@ -36,7 +36,6 @@ import { teamLogoUrl } from './teams.js'
 // wpaLogoFor below. It is NOT a blanket per-club rule, because most
 // treatments don't wear the base mark at all.
 export const LOGO_COLOR_OVERRIDES = {
-  113: { mode: 'flood', color: '#FFFFFF' }, // Reds — base mark is solid red, no black in it to preserve
   118: { mode: 'flood', color: '#FFFFFF' }, // Royals
   119: { mode: 'flood', color: '#FFFFFF' }, // Dodgers
   120: { mode: 'flood', color: '#FFFFFF' }, // Nationals
@@ -90,6 +89,12 @@ export const WPA_MARK_SOURCE_OVERRIDES = {
   // alone swaps in the Atlanta script wordmark, the same art the Road Grey
   // mark (alternate-3) uses, which reads better repeated small than the cap.
   144: { main: 'alternate-3' },
+  // Reds Home White (treatment 'main') — the card/header Main tile wears the
+  // locally recolored "Reds" script mark (MAIN_OVERRIDES' recolor: true,
+  // teams.js's mainOverrideLogoUrl), not the plain CDN wishbone-C; the WPA
+  // band was still defaulting to the base mark and needs the same swap to
+  // match.
+  113: { main: 'main-recolor' },
 }
 
 export function wpaLogoFor(teamId, treatment = 'main') {
@@ -172,7 +177,7 @@ export const WPA_LOGO_DEFAULTS = {
 // only — an accepted tradeoff, not a bug.
 export const WPA_LOGO_LAYOUT_OVERRIDES = {
   109: {
-    main: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: -1, rowShift: 0 },
+    main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: -1, rowShift: 0 },
     alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 5, rowShift: 0 },
     'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 12, paddingY: -43, rowShift: 0 },
     'alternate-3': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 1, paddingY: 0, rowShift: 0 },
@@ -181,23 +186,26 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   133: {
     main: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 2 },
     alternate: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: -2, rowShift: 0 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     'city-connect': { size: 71, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -19, paddingY: 0, rowShift: 0 },
   },
   144: {
     main: { size: 106, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: -61, rowShift: 0 },
     alternate: { size: 100, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -50 },
     'alternate-2': { size: 73, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -33, rowShift: 0 },
-    'alternate-3': { size: 79, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -41, rowShift: 0 },
-    'city-connect': { size: 59, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -7, paddingY: -9, rowShift: 0 },
+    'alternate-3': { size: 85, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: -45, rowShift: 0 },
+    'city-connect': { size: 59, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -5, paddingY: -6, rowShift: 0 },
   },
   111: {
     main: { size: 39, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -1, paddingY: 3, rowShift: 0 },
-    alternate: { size: 47, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 5, rowShift: 0 },
+    alternate: { size: 38, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: 5, rowShift: 0 },
     'alternate-2': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 3, rowShift: 0 },
     'alternate-3': { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 3, rowShift: 0 },
-    'city-connect': { size: 36, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 5, rowShift: 0 },
+    'alternate-4': { size: 52, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'city-connect': { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 0, paddingY: 5, rowShift: 0 },
   },
   158: {
+    main: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     alternate: { size: 43, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 3, rowShift: 0 },
     'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     'alternate-3': { size: 30, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 2, rowShift: 0 },
@@ -225,21 +233,28 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   112: {
     main: { size: 51, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 2, rowShift: 0 },
     alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingY: 4 },
-    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: 1, rowShift: 0 },
+    'alternate-2': { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 3, paddingY: 2, rowShift: 0 },
     'alternate-3': { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   },
   115: {
     main: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 6, rowShift: 0 },
     alternate: { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 4, rowShift: 0 },
+    'alternate-2': { size: 68, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 13, paddingY: -12, rowShift: 0 },
     'city-connect': { size: 49, rotate: -14, offsetX: 8, offsetY: 6, paddingY: -12 },
   },
   113: {
-    alternate: { size: 63, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -3, paddingY: 2, rowShift: 0 },
+    main: { size: 48, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 2, rowShift: 0 },
+    alternate: { size: 63, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: -19, rowShift: 0 },
+    'alternate-2': { size: 60, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -2, paddingY: 1, rowShift: 0 },
+    'alternate-3': { size: 43, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -2, rowShift: 0 },
     'city-connect': { size: 48, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: -5, rowShift: 0 },
   },
   114: {
     main: { size: 34, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     alternate: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 7, paddingY: 1, rowShift: 0 },
+    'alternate-2': { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 6, paddingY: 1, rowShift: 0 },
+    'alternate-3': { size: 40, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 4, rowShift: 0 },
+    'city-connect': { size: 64, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 14, paddingY: -19, rowShift: 0 },
   },
   145: {
     main: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -7, paddingY: 4, rowShift: 0 },
@@ -249,9 +264,22 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
   },
   116: {
     main: { size: 41, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 2, paddingY: 4, rowShift: 0 },
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -3, paddingY: 2, rowShift: 0 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-3': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   },
   117: {
+    main: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-3': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     'city-connect': { size: 44, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 8, paddingY: 2, rowShift: 0 },
+  },
+  108: {
+    main: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-3': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   },
   118: {
     main: { size: 37, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 12, paddingY: 4, rowShift: 0 },
@@ -269,12 +297,21 @@ export const WPA_LOGO_LAYOUT_OVERRIDES = {
     main: { size: 42, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 5, paddingY: 7, rowShift: 0 },
   },
   146: {
+    main: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    alternate: { size: 50, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 1, paddingY: 2, rowShift: 0 },
     'alternate-2': { size: 53, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
     'alternate-3': { size: 61, rotate: -14, offsetX: 8, offsetY: 6, paddingX: -4, paddingY: 0, rowShift: 0 },
-    'city-connect': { size: 65, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: -6, rowShift: 0 },
+    'city-connect': { size: 65, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 10, paddingY: -7, rowShift: 0 },
   },
   147: {
     alternate: { size: 35, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 9, paddingY: 4, rowShift: 0 },
+  },
+  142: {
+    main: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    alternate: { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-2': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'alternate-3': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
+    'city-connect': { size: 45, rotate: -14, offsetX: 8, offsetY: 6, paddingX: 4, paddingY: 4, rowShift: 0 },
   },
 }
 

@@ -116,7 +116,7 @@ read the linked ADRs before refactoring:
   content — underneath the active one during the animation. `SealBox`'s own
   render-function gate (ADR-0002) is what keeps that preview spoiler-safe;
   `InningPage.jsx`'s `presentationOnly` flag only mutes side-effecting
-  callbacks (`onReveal`/`onStepInfo`/`onSteppedThrough`) so the preview can't
+  callbacks (`onReveal`/`onStepInfo`) so the preview can't
   itself advance `revealedThrough` or double-report a step. Not a second
   reveal boundary — see ADR-0024.
 
@@ -152,6 +152,16 @@ paper, navy ink, pencil graphite, kraft-tape amber for seals. Use the semantic C
 variables (`--surface-card`, `--accent-negative`, `--seal-cover`, etc.) rather than
 raw hex. Numbers render as mono tabular figures; structural labels are condensed
 uppercase.
+
+**Team marks on a dark surface are ART, not a filter.** The navy section
+mastheads (`SectionMasthead`'s `logo` prop — Batting order, Starting pitcher,
+Defense, Due up next) ask `TeamLogo` for the `mono` variant: a one-color
+knockout mark precomputed per club by `scripts/gen-mono-logos.mjs` into
+`public/data/logos/mono/`. Don't reach for `filter: brightness(0) invert(1)` to
+whiten a logo — that's what this replaced, and it flattens every mark whose
+interior detail is drawn in a light fill into an unreadable blob. Read ADR-0025
+before changing how any of these render; the conversion itself lives in
+`src/lib/logoMono.js`.
 
 Type size, weight, leading, and tracking must use the semantic roles in
 `tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc values in

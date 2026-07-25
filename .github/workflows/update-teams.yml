@@ -1,6 +1,7 @@
 name: Update teams data
 
-# Weekly refresh of public/data/teams.json from statsapi (see scripts/gen-teams.mjs).
+# Weekly refresh of public/data/teams.json from statsapi (see scripts/gen-teams.mjs),
+# plus the one-color club marks derived from it (scripts/gen-mono-logos.mjs).
 # Team/org structure — realignment, expansion, affiliate shuffles — is a
 # roughly once-a-decade event, so weekly (vs war.json's nightly) is plenty.
 # Pushing to main triggers Vercel's normal auto-deploy.
@@ -26,10 +27,15 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/gen-teams.mjs
+      # The one-color masthead marks (scripts/gen-mono-logos.mjs, ADR-0025) are
+      # built from the teams.json just written, so they ride the same schedule:
+      # a rebrand or a new affiliate lands in both at once, and until it does
+      # that club simply wears its full-color mark on the navy bar.
+      - run: node scripts/gen-mono-logos.mjs
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/teams.json
+          git add public/data/teams.json public/data/logos/mono
           git diff --cached --quiet || git commit -m "Update teams data"
           git push

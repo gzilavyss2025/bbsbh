@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { realHeadshotUrl } from '../lib/teams.js'
+import { realHeadshotUrl, teamLogoUrl, teamTintColor } from '../lib/teams.js'
 import { PlayerLink } from './PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
@@ -10,7 +10,9 @@ import { PlayerLink } from './PlayerLink.jsx'
 // (PlayByPlay). The outer card chrome (the statbox card vs. the inline feed
 // card) comes from the caller's `className`; the inner photo+body layout is
 // this component's. `pitcher` is the { id, name, jersey, hand } shape
-// selectPrePitchChanges / pitchingChangePitcher build.
+// selectPrePitchChanges / pitchingChangePitcher build. `teamId` (optional) is
+// the club he's pitching for — passed through to PitcherPhoto for its
+// logo fallback.
 //
 // `entering`, when given, is the persistent header's own extra: how many
 // pitches he'd already thrown BEFORE this half — `{ pitches, halfLabel }`,
@@ -18,11 +20,11 @@ import { PlayerLink } from './PlayerLink.jsx'
 // only ever passed by HalfInning.jsx's persistent card — a pre-pitch/mid-
 // inning change notice (StatBox.jsx / PlayByPlay.jsx's own uses of this same
 // component) has no natural "entering the half" moment to hang it on.
-export function PitcherNotice({ pitcher, teamName, className = '', label = 'Now pitching', entering = null }) {
+export function PitcherNotice({ pitcher, teamId = null, teamName, className = '', label = 'Now pitching', entering = null }) {
   if (!pitcher) return null
   return (
     <div className={`pitchernotice ${className}`}>
-      <PitcherPhoto personId={pitcher.id} />
+      <PitcherPhoto personId={pitcher.id} name={pitcher.name} teamId={teamId} />
       <div className="pitchernotice__body">
         <span className="pitchernotice__now">
           {label}{teamName ? ` for the ${teamName}` : ''}
@@ -48,21 +50,49 @@ export function PitcherNotice({ pitcher, teamName, className = '', label = 'Now 
   )
 }
 
-// The entering pitcher's headshot, degrading to a plain baseball emoji rather
-// than the mlbstatic CDN's own generic silhouette placeholder — realHeadshotUrl
-// (unlike the usual headshotUrl) 404s for a personId with no real photo on file
-// instead of silently serving that placeholder, so a true photo miss is
-// distinguishable here (see lib/teams.js). A true network error degrades the
-// same way.
-export function PitcherPhoto({ personId }) {
+// The entering pitcher's headshot. realHeadshotUrl (unlike the usual
+// headshotUrl) 404s for a personId with no real photo on file instead of
+// silently serving the mlbstatic CDN's own generic silhouette placeholder, so
+// a true photo miss is distinguishable here (see lib/teams.js). A true
+// network error degrades the same way. On a miss, degrades to a centered
+// team logo (when `teamId` is known — same treatment as Headshot.jsx's own
+// logo rung) rather than a faceless placeholder, then to a plain monogram
+// once neither a photo nor a team is available.
+export function PitcherPhoto({ personId, name, teamId = null }) {
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [personId])
+  const [logoFailed, setLogoFailed] = useState(false)
+  useEffect(() => {
+    setFailed(false)
+    setLogoFailed(false)
+  }, [personId, teamId])
   const url = personId && !failed ? realHeadshotUrl(personId) : null
+  const logoUrl = !url && teamId && !logoFailed ? teamLogoUrl(teamId) : null
+  const bg = teamTintColor(teamId)
 
   if (!url) {
+    if (logoUrl) {
+      return (
+        <span
+          className="pitchernotice__shot pitchernotice__shot--logo"
+          style={bg ? { backgroundColor: bg } : undefined}
+          aria-hidden="true"
+        >
+          <img
+            key={logoUrl}
+            src={logoUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            onError={() => setLogoFailed(true)}
+            aria-hidden="true"
+          />
+        </span>
+      )
+    }
+    const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
     return (
       <span className="pitchernotice__shot pitchernotice__shot--fallback" aria-hidden="true">
-        ⚾
+        {monogram}
       </span>
     )
   }

@@ -379,7 +379,7 @@ function Masthead({
   return (
     <div className="masthead">
       <div className="masthead__teams">
-        <MastheadLogo team={away} treatment={treatment?.away} onSketch={() => onSketch('away')} />
+        <MastheadLogo team={away} treatment={treatment?.away} side="away" onSketch={() => onSketch('away')} />
         {/* The same screen-print '@' the slate card uses (Big Shoulders
             Display, kraft-amber + navy a couple px out of register — see
             .gamecard__atmark), here an inline mark between the two logos
@@ -388,7 +388,7 @@ function Masthead({
           <span className="masthead__at-ghost">@</span>
           <span className="masthead__at-ink">@</span>
         </span>
-        <MastheadLogo team={home} treatment={treatment?.home} onSketch={() => onSketch('home')} />
+        <MastheadLogo team={home} treatment={treatment?.home} side="home" onSketch={() => onSketch('home')} />
       </div>
       <div className="masthead__side">
         {date && <span className="masthead__date">{humanDateWithYear(date)}</span>}
@@ -498,7 +498,7 @@ function gameTitle(game, step, inning, half) {
 // a frame edge to edge.
 const MASTHEAD_MARK = 40
 
-function MastheadLogo({ team, treatment, onSketch }) {
+function MastheadLogo({ team, treatment, side, onSketch }) {
   return (
     <button
       type="button"
@@ -510,6 +510,7 @@ function MastheadLogo({ team, treatment, onSketch }) {
         teamId={team.id}
         name={team.name}
         treatment={treatment}
+        side={side}
         size={MASTHEAD_MARK}
         block="masthead__logobox"
       />

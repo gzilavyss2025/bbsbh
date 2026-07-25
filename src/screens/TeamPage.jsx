@@ -28,6 +28,7 @@ import { fetchPostseasonOdds, postseasonOddsFor } from '../api/postseasonOdds.js
 import { parentOrgHistory } from '../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../api/person-fetch.js'
 import { rankTeam, ordinal, rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../api/person.js'
+import { lastName } from '../api/select.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
@@ -622,7 +623,7 @@ async function loadTeam(id, asOf) {
     bestByPosition[pos] = {
       position: pos,
       id: best.person.id,
-      last: nickname(firstLast(best.person)),
+      last: lastName(best.person),
       gs: gsAt(best, pos),
     }
     claimed.add(best.person.id)
@@ -634,7 +635,7 @@ async function loadTeam(id, asOf) {
       const pid = r.person?.id
       if (!pid || claimed.has(pid)) continue
       const gs = gsAt(r, pos)
-      if (gs > 0 && (!best || gs > best.gs)) best = { position: pos, id: pid, last: nickname(firstLast(r.person)), gs }
+      if (gs > 0 && (!best || gs > best.gs)) best = { position: pos, id: pid, last: lastName(r.person), gs }
     }
     if (best) {
       bestByPosition[pos] = best

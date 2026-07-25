@@ -72,6 +72,7 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
   133: {
     main: '#003831',
     alternate: '#EFB21E',
+    'alternate-2': '#9EA2A2',
     'city-connect': '#003831',
   },
   144: {
@@ -82,13 +83,15 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     'city-connect': '#7BA7D8',
   },
   111: {
-    main: '#A9A9A9',
+    main: '#FFFFFF',
     alternate: '#BD3039',
     'alternate-2': '#307FE2',
     'alternate-3': '#FFFFFF',
+    'alternate-4': '#9EA2A2',
     'city-connect': '#5A8D84',
   },
   158: {
+    main: '#FCEDD6',
     alternate: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
     'alternate-2': '#12284B',
     'alternate-3': '#6CACE4',
@@ -122,15 +125,22 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
   115: {
     main: { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
     alternate: '#33006F',
+    'alternate-2': '#9EA2A2',
     'city-connect': '#8ABFEB',
   },
   113: {
+    main: '#C6011F',
     alternate: '#C6011F',
+    'alternate-2': '#000000',
+    'alternate-3': '#9EA2A2',
     'city-connect': '#000000',
   },
   114: {
     main: '#00385D',
     alternate: '#00385D',
+    'alternate-2': '#E31937',
+    'alternate-3': '#9EA2A2',
+    'city-connect': '#00385D',
   },
   145: {
     main: '#C4CED4',
@@ -140,8 +150,15 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
   },
   116: {
     main: '#0C2340',
+    alternate: '#FA4616',
+    'alternate-2': '#0C2340',
+    'alternate-3': '#9EA2A2',
   },
   117: {
+    main: '#002D62',
+    alternate: '#EB6E1F',
+    'alternate-2': '#002D62',
+    'alternate-3': '#9EA2A2',
     'city-connect': '#CEC8B2',
   },
   118: {
@@ -160,12 +177,27 @@ export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = {
     main: '#E81828',
   },
   146: {
+    main: '#00A3E0',
+    alternate: '#FFFFFF',
     'alternate-2': '#000000',
     'alternate-3': '#009CA7',
     'city-connect': '#000000',
   },
   147: {
     alternate: '#C4CED3',
+  },
+  108: {
+    main: '#003263',
+    alternate: '#C4CED4',
+    'alternate-2': '#BA0021',
+    'alternate-3': '#FFFFFF',
+  },
+  142: {
+    main: '#002B5C',
+    alternate: '#002B5C',
+    'alternate-2': '#E8DCC0',
+    'alternate-3': '#9EA2A2',
+    'city-connect': '#002B5C',
   },
 }
 
