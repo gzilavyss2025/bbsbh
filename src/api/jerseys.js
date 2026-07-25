@@ -2,12 +2,14 @@
 // same-origin file (public/data/jerseys.json) rather than the live uniforms
 // endpoint. That file is regenerated nightly by scripts/gen-jerseys.mjs (see
 // .github/workflows/update-nightly-data.yml) — this module just reads it.
-// Keyed `${gamePk}:${teamId}` -> 'alternate' | 'alternate-2' | 'alternate-3' |
-// 'city-connect'; a standard home/away jersey or a game whose assignment
-// hasn't posted yet simply has no key. Degrades to an empty object before the
-// file exists or on any fetch failure — a missed logo swap, never a broken
-// page. Cached in-memory for the session since the file only changes once a
-// day.
+// Keyed `${gamePk}:${teamId}` -> 'main' | 'alternate' | 'alternate-2' |
+// 'alternate-3' | 'city-connect'; only a game whose assignment hasn't posted
+// yet has no key — a confirmed standard jersey is stored as 'main' rather
+// than omitted, so it can override GameCard's predictive
+// `defaultTreatmentFor` guess (teams.js) once the real assignment is known.
+// Degrades to an empty object before the file exists or on any fetch
+// failure — a missed logo swap, never a broken page. Cached in-memory for
+// the session since the file only changes once a day.
 //
 // `inFlight` memoizes the request itself, not just its result: GameCard calls
 // this once per card on the home slate, all on the same mount tick, and
@@ -36,9 +38,10 @@ export async function fetchJerseysData() {
   return inFlight
 }
 
-// 'alternate' | 'alternate-2' | 'alternate-3' | 'city-connect' | null — null covers a standard jersey, an
-// unposted assignment, and a missing/failed fetch alike, so callers can treat
-// it as "just show the base logo" without distinguishing why.
+// 'main' | 'alternate' | 'alternate-2' | 'alternate-3' | 'city-connect' | null
+// — null covers an unposted assignment and a missing/failed fetch alike, so
+// callers can treat it as "no confirmed data yet, fall back to a guess"
+// without distinguishing why.
 export function jerseyTreatmentFor(data, gamePk, teamId) {
   if (!gamePk || !teamId) return null
   return data?.[`${gamePk}:${teamId}`] ?? null

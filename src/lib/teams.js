@@ -137,13 +137,12 @@ const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
 // returns real, different art, not the base logo echoed back). This gives the
 // sketcher more than one thing to draw for a team instead of the same roundel
 // every time. We use the `-on-light` treatment throughout since every surface
-// that renders a logo is the app's light "paper" — including the navy section
-// mastheads on the lineup page, which force the mark to solid white with a CSS
-// filter (see index.css's .metricbar__logo) rather than pulling the CDN's own
-// `-on-dark` variant, which keeps each club's REAL colors (verified live: only
-// a mostly-monochrome mark like the Yankees' actually turns white there; a
-// multicolor mark like the Brewers' does not) — not the uniform white lockup
-// this app wants on that one dark surface. There is NO alternate /
+// that renders a logo is the app's light "paper"; the one dark surface, the
+// navy section mastheads, wears the locally precomputed `mono` mark below
+// rather than the CDN's own `-on-dark` variant, which keeps each club's REAL
+// colors (verified live: only a mostly-monochrome mark like the Yankees'
+// actually turns white there; a multicolor mark like the Brewers' does not) —
+// not the uniform one-color lockup this app wants. There is NO alternate /
 // per-uniform / home-road mark on this CDN (those paths 404), so this is the
 // full set. `base` is the plain `{id}.svg` default that every existing caller
 // already uses.
@@ -153,29 +152,15 @@ export const LOGO_VARIANTS = [
   { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
 ]
 
-// Teams whose `base` mark's own design already bakes in a light/white ring or
-// outline around its main shape (Cubs' white-bordered roundel, Astros' navy
-// circle, the Blue Jays' outlined bird, the Brewers' outlined glove) — verified
-// live by rendering all 30 clubs' base marks through the masthead's white
-// filter (.metricbar__logo--white, index.css): every OTHER club flattens to a
-// clean white silhouette, but these four collapse into an unreadable solid
-// blob, since the filter can't tell that ring apart from the shape it
-// encloses once both become the same color. These four render in their real
-// CDN colors instead, which already read fine directly against the navy bar.
-export const MASTHEAD_LOGO_NATURAL_COLOR = new Set([
-  112, // Cubs
-  117, // Astros
-  141, // Blue Jays
-  158, // Brewers
-])
-
-// The masthead logo's className for `teamId` — the white-filter treatment
-// (see index.css's .metricbar__logo--white) for most clubs, or the plain
-// (unfiltered, real-colored) mark for the small exception set above that
-// flattens into an unreadable blob under that filter.
-export function mastheadLogoClass(teamId) {
-  return MASTHEAD_LOGO_NATURAL_COLOR.has(teamId) ? 'metricbar__logo' : 'metricbar__logo metricbar__logo--white'
-}
+// The `mono` variant is NOT on this CDN — it's the one-color knockout mark the
+// navy section mastheads wear, precomputed from the base art by
+// scripts/gen-mono-logos.mjs and served same-origin from here (see
+// src/lib/logoMono.js for how it's built, ADR-0025 for why). Coverage tracks
+// public/data/teams.json, so a brand-new affiliate can be missing until that
+// generator next runs — which is what TeamLogo's variant -> base fallback is
+// for: that club just wears its full-color mark on the bar until the art
+// exists.
+const MONO_LOGO_BASE = '/data/logos/mono'
 
 // Teams/treatments whose local art is a hand-flattened/recolored SVG (every
 // path recolored off the official multicolor logo) rather than a
@@ -217,7 +202,11 @@ export function hasCityConnect(teamId) {
 // Predictive fallback tile for a game whose actual worn jersey hasn't posted
 // yet (jerseyTreatmentFor/api/jerseys.js returns null pre-game) — a best
 // guess, not a fact, so jerseyTreatmentFor's real data always overrides it
-// the moment it posts. Away always predicts the plain Main mark (the away
+// the moment it posts, including a confirmed-standard game (gen-jerseys.mjs
+// stores 'main' explicitly rather than omitting it, precisely so a guess
+// this function gets wrong — e.g. a Friday city-connect club that wore its
+// plain jersey that night — doesn't stand uncorrected once Final). Away
+// always predicts the plain Main mark (the away
 // grey/road look — several clubs' Main tile is already re-paired with a grey
 // fill for exactly that jersey, see ALT_USES_BASE_LOGO above). A home game on
 // a Friday predicts City Connect for any club that has one, since Friday is
@@ -303,6 +292,7 @@ export function teamLogoUrl(teamId, variant = 'base') {
   // handful of clubs whose base mark doesn't read against its new tinted
   // tile (e.g. a navy-outlined mark on a navy fill).
   if (variant === 'main-recolor') return mainOverrideLogoUrl(teamId)
+  if (variant === 'mono') return `${MONO_LOGO_BASE}/${teamId}.svg`
   if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
   const v = LOGO_VARIANTS.find((x) => x.key === variant)
   return v ? `${LOGO_BASE}/${v.path}/${teamId}.svg` : `${LOGO_BASE}/${teamId}.svg`

@@ -120,6 +120,18 @@ function classifyOut(eventType, desc = '') {
   return ''
 }
 
+// What the scorecard sheet pencils in the DIAMOND CENTER, given a card's
+// scorebook `code`. The play-by-play surface can break a code across lines —
+// a GIDP reads "GIDP" over its relay chain (see scorebookCode) — but the
+// sheet's center is a single-line chip (.sc-ab__center is `white-space:
+// nowrap`) inside a 90px box, so a multi-line code arrives there as one
+// unwrapped run that overhangs the box. Take the fielding chain alone: the
+// box's top-left corner already carries the play KIND ("DP", via classifyOut),
+// which is exactly how the paper sheet splits the two.
+export function scorecardCenterCode(code) {
+  return (code ?? '').split('\n').pop()
+}
+
 // Every plate appearance of the batting team, laid onto the scorecard grid by
 // batting-order slot (row) × COLUMN. Columns are the innings, but an inning in
 // which some slot batted more than once (the team batting around) widens into
@@ -166,6 +178,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
       if (!slot || slot < 1 || slot > 9) continue
       const s = slotData[slot - 1]
       card.outType = card.codeKind === 'out' ? classifyOut(card.eventType, descByAtBat.get(card.atBatIndex)) : ''
+      card.centerCode = scorecardCenterCode(card.code)
       // Each pitch sorted into its ball / strike column (in-play = 'X'), the
       // same two-column ladder the live play-by-play card uses.
       card.ladder = pitchLadder(card.pitches ?? [])

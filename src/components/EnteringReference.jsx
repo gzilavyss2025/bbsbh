@@ -4,7 +4,6 @@ import { selectDueUpNext } from '../api/dueup.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill } from '../api/rookies.js'
 import { ordinal } from '../lib/format.js'
-import { mastheadLogoClass } from '../lib/teams.js'
 import { PlayerLink } from './PlayerLink.jsx'
 import { DefenseDiamond } from './DefenseDiamond.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
@@ -60,7 +59,8 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
           teamId={fieldingTeamId}
           name={fieldingName}
           size={20}
-          className={mastheadLogoClass(fieldingTeamId)}
+          variant="mono"
+          className="metricbar__logo"
         />
         Defense
       </h4>

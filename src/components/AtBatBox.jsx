@@ -16,7 +16,9 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 // Empty template (no `atbat`) renders every zone blank. With an `atbat` (a
 // computeHalfInningFeed entry enriched by api/loadScorecard.js) the box fills:
 //  • outType / code / codeKind — the outcome box, colored by kind
-//  • code — the fielding chain penciled in the diamond center (outs only)
+//  • centerCode — the fielding chain penciled in the diamond center (outs
+//    only): `code` with any play-by-play line break flattened away, since
+//    this sheet's center chip is single-line (see scorecardCenterCode)
 //  • rbi, reached/scored/legNotations/outAt/outCode/outNumber — the diamond
 //  • subBefore — a rule down the box's leading edge where a sub took over
 
@@ -48,14 +50,17 @@ export function AtBatBox({ atbat = null }) {
         ? ''
         : atbat?.code ?? ''
   // Diamond center (pencil): the fielding chain for an out — 4-3, F7, L3,
-  // 6-3 — where the fielders that recorded it are named; or an interrupted
+  // 6-4-3 — where the fielders that recorded it are named; or an interrupted
   // at-bat's carry-over mark ("CS →"), penciled mid-diamond the way the
-  // scorer writes it.
+  // scorer writes it. `centerCode`, not the raw `code`, so a GIDP's two-line
+  // play-by-play mark ("GIDP" over the chain) doesn't arrive here as one
+  // unwrappable run — the outcome box above already reads "DP".
+  const centerText = atbat?.centerCode ?? atbat?.code ?? ''
   const center =
     kind === 'out' && !atbat?.calledLooking
-      ? atbat?.code ?? ''
+      ? centerText
       : kind === 'interrupted'
-        ? atbat?.code ?? ''
+        ? centerText
         : ''
 
   return (

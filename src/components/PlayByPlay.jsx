@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   computeHalfInningFeed,
   pitchLadder,
@@ -42,7 +42,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // entries list (every entry shown, whether by tapping through or because the
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -111,64 +111,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     onRunsSoFar?.(entries.filter((e) => e.kind === 'atbat' && e.scored).length)
   }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll the newly revealed at-bat to the TOP of the viewport on each step
-  // (ADR-0016): a step boundary always lands right after a plate-appearance
-  // card (see nextStepBoundary), so the last visible entry is the one that
-  // just came in. Fires on every stepCap change AND on mount — including a
-  // reload that resumes a half already mid-step, not just a tap made THIS
-  // visit — so returning to a partially-stepped half always lands you back
-  // at the newest card rather than at the top of the whole half. Compared
-  // against the RAW `stepCap` prop, not `effectiveCap`, so a single tap that
-  // bundles a leading event note forward still scrolls exactly once.
-  //
-  // Deferred one animation frame and cancelable, rather than calling
-  // scrollIntoView directly in the effect body: this app renders inside
-  // StrictMode, which double-invokes every effect in dev (mount, clean up,
-  // mount again) to surface exactly this class of bug — without the guard,
-  // the first, thrown-away invocation's scroll call was still in flight when
-  // the second, real one fired. `true` (the legacy boolean form, not the
-  // options-object form) is a deliberately DIFFERENT API: it's the one
-  // scrollIntoView signature the spec defines as always instant, with no
-  // "behavior" of its own to be pulled into any CSS/JS smooth-scroll
-  // ambiguity — verified live that `{behavior:'auto'}` was NOT actually
-  // instant here even though computed CSS scroll-behavior read 'auto' too.
-  //
-  // Confirmed live with frame-by-frame sampling: the scroll lands exactly on
-  // target the instant it runs — but on a fresh MOUNT specifically (a reload
-  // resuming a half already mid-step), something else on the page finishes
-  // loading ~100-200ms later and grows the page's height by exactly the
-  // amount the target then drifts down by. A same-visit tap never shows this
-  // (nothing else on the page is still loading by then). A ResizeObserver on
-  // document.body/documentElement never caught it either — verified live
-  // that neither element's OWN box actually resizes even though the page's
-  // scrollHeight does (both are viewport-height-locked, so overflowing
-  // content grows scrollHeight without growing either element's box, and
-  // ResizeObserver only reports box-size changes). Polling every frame
-  // instead sidesteps needing to know WHICH ancestor's box would even fire —
-  // it just re-snaps whenever the target's own on-screen position drifts
-  // from the top, for a short settling window, then stops once it's held
-  // still for a few consecutive frames (or a hard 2s cap either way).
-  const lastEntryRef = useRef(null)
-  useEffect(() => {
-    if (!stepping) return
-    let frame
-    let framesLeft = 120 // ~2s hard cap
-    let stableStreak = 0
-    const settle = () => {
-      const top = lastEntryRef.current?.getBoundingClientRect().top
-      if (top != null && Math.abs(top) > 1) {
-        lastEntryRef.current.scrollIntoView(true)
-        stableStreak = 0
-      } else {
-        stableStreak++
-      }
-      framesLeft--
-      if (stableStreak < 10 && framesLeft > 0) frame = requestAnimationFrame(settle)
-    }
-    frame = requestAnimationFrame(settle)
-    return () => cancelAnimationFrame(frame)
-  }, [stepping, stepCap])
-
   // Reports the pitcher actually on the mound as of what's visible right now
   // (the persistent "Now Pitching" card HalfInning renders above the seal) —
   // the last revealed pitching-substitution entry within the stepping window,
@@ -226,9 +168,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   return (
     <div className="pbp">
       {visibleEntries.map((entry, i) => {
-        const isLast = i === visibleEntries.length - 1
-        const scrollRef = isLast ? lastEntryRef : null
-
         let node
         if (entry.kind !== 'event') {
           node = (
@@ -245,7 +184,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // can't be resolved.
           const pitcher = pitchingChangePitcher(feed, entry.playerId)
           node = pitcher ? (
-            <PitcherNotice pitcher={pitcher} teamName={pitchingName} className="pitchernotice--pbp" />
+            <PitcherNotice
+              pitcher={pitcher}
+              teamId={pitchingTeamId}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
           ) : (
             <EventNote entry={entry} />
           )
@@ -269,7 +213,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // entrant, so it shouldn't read as a lesser plain text line.
           const fielder = defensiveChangeFielder(feed, entry.playerId, entry.position)
           node = fielder ? (
-            <FielderNotice fielder={fielder} teamName={pitchingName} className="pitchernotice--pbp" />
+            <FielderNotice
+              fielder={fielder}
+              teamId={pitchingTeamId}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
           ) : (
             <EventNote entry={entry} />
           )
@@ -288,6 +237,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <PinchRunNotice
               runner={runner}
               replaced={replaced}
+              teamId={battingTeamId}
               teamName={battingName}
               className="pitchernotice--pbp"
             />
@@ -304,6 +254,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <EventCard
               code={EVENT_CODES[entry.eventType]}
               runnerId={entry.playerId}
+              teamId={BASERUNNER_EVENTS.has(entry.eventType) ? battingTeamId : pitchingTeamId}
               segments={entry.segments}
             />
           )
@@ -314,7 +265,6 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
         return (
           <div
             className="pbp__entry"
-            ref={scrollRef}
             key={entry.kind === 'event' ? `event-${i}` : `${entry.batterId}-${i}`}
           >
             {node}
@@ -355,6 +305,19 @@ const EVENT_CODES = {
   // EventNote's generic fallback icon.
   runner_placed: 'RP', defensive_indiff: 'DI',
 }
+
+// Which side EventCard's one named person belongs to, for its headshot's team
+// logo fallback: a steal/pickoff/placement is about the BASERUNNER (batting
+// team); a wild pitch/passed ball/balk is about the pitcher or catcher
+// (pitching team). Defensive indifference has no single player it's really
+// "about" — defaults to the pitching team below along with the WP/PB/BK group.
+const BASERUNNER_EVENTS = new Set([
+  'stolen_base_2b', 'stolen_base_3b', 'stolen_base_home',
+  'caught_stealing_2b', 'caught_stealing_3b', 'caught_stealing_home',
+  'pickoff_1b', 'pickoff_2b', 'pickoff_3b',
+  'pickoff_caught_stealing_2b', 'pickoff_caught_stealing_3b', 'pickoff_caught_stealing_home',
+  'runner_placed',
+])
 
 // The play-by-play prose for a baserunning event (steal, caught stealing, wild
 // pitch…), rendered as a secondary line beneath the batter's own description on
@@ -448,11 +411,11 @@ function EjectionBar({ text }) {
 // instead of an emoji, plus the one clear person the event is actually about
 // when the feed names one (a runner stealing, the pitcher on a balk/wild
 // pitch, the catcher on a passed ball).
-function EventCard({ code, runnerId, segments }) {
+function EventCard({ code, runnerId, teamId, segments }) {
   return (
     <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
       <span className="pitchernotice__code">{code}</span>
-      {runnerId != null && <PitcherPhoto personId={runnerId} />}
+      {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
       <span className="pitchernotice__eventtext">
         {segments.map((seg, i) =>
           seg.id != null ? (

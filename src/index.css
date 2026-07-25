@@ -1574,15 +1574,18 @@ body {
   position: absolute;
   inset: 0;
   color: var(--seal);
-  /* Same faint print as the slate card's watermark (.gamecard__atmark-ghost). */
-  opacity: 0.1;
+  /* Slightly stronger than the slate card's watermark (.gamecard__atmark-ghost,
+     opacity 0.1) — at the small inline size here between two logo tiles, the
+     same faint print read as too light to make out against the logos. */
+  opacity: 0.18;
   transform: translate(2px, 1.5px) skewX(-8deg) rotate(-2deg);
 }
 .masthead__at-ink {
   position: relative;
   color: var(--navy);
-  /* Same faint print as the slate card's watermark (.gamecard__atmark-ink). */
-  opacity: 0.07;
+  /* Slightly stronger than the slate card's watermark (.gamecard__atmark-ink,
+     opacity 0.07) — see .masthead__at-ghost above. */
+  opacity: 0.14;
 }
 
 /* ---------------------------------------------------------- level toggle
@@ -6900,6 +6903,22 @@ body {
   line-height: var(--lh-solid);
   background: var(--surface-inset);
 }
+/* No real photo on file, but a team's known — his club's logo, centered and
+   scaled up past the frame's edges, same "printed badge" treatment as the
+   base .shot--logo rule (Headshot.jsx). */
+.pitchernotice__shot--logo {
+  display: grid;
+  place-items: center;
+  background: var(--surface-inset);
+}
+.pitchernotice__shot--logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.6);
+  filter: none;
+}
 
 .pitchernotice__body {
   display: flex;
@@ -6980,6 +6999,45 @@ body {
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+
+/* On a phone, the persistent Now Pitching card's "entering" figure gets its
+   own full-width row below the name/hand line instead of squeezing beside
+   it on the same row as the headshot — otherwise the "pitching for"/name
+   text has to share that row with a right-pinned column and wraps/truncates
+   sooner than it needs to. A grid (rather than flex-wrap) so the photo gets
+   its own fixed-width column and the body/entering blocks share the SAME
+   second column — a flex-wrap attempt here forced the body onto its own
+   full-width row too (a wrapped flex item's hypothetical size for the line-
+   break decision is its flex-basis, not its post-shrink size, so `flex: 1 1
+   100%` on the body pushed it below the photo instead of keeping it beside
+   it — only the explicitly margin-shifted entering block landed in the
+   right column). Scoped to :has(.pitchernotice__entering) since only this
+   persistent card (HalfInning.jsx) ever passes the `entering` prop — the
+   mid-half change notices (PlayByPlay/StatBox) don't, and are untouched
+   here. */
+@media (max-width: 739.98px) {
+  .pitchernotice:has(.pitchernotice__entering) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__shot {
+    grid-row: 1 / 3;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__body {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__entering {
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: 0;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 /* Row 2: the stat card beside the win-probability chart — stacked on a phone,
@@ -7392,9 +7450,14 @@ body {
 
 /* This is a phone-first app, so "mobile" is the default breakpoint below
    740px — hide the "Pitch colors" legend button/modal there; it still shows
-   at the wider breakpoint. */
+   at the wider breakpoint. Selector combines both classes (rather than just
+   .half__pitchkeyfoot) so its specificity beats the unconditional
+   `.pitchkeybtn { display: inline-flex }` base rule declared later in this
+   file — with equal (0,1,0) specificity on .half__pitchkeyfoot alone, the
+   later, unconditional rule was winning the cascade and the button was
+   leaking onto mobile despite this "hide" rule. */
 @media (max-width: 739.98px) {
-  .half__pitchkeyfoot {
+  .pitchkeybtn.half__pitchkeyfoot {
     display: none;
   }
 }
@@ -7508,8 +7571,11 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: max-content;
   font-size: var(--fs-title-sm);
   line-height: var(--lh-solid);
+  text-align: center;
+  white-space: pre-line;
 }
 
 /* The backwards-K still needs its mirror flip, combined with the centering
@@ -10871,7 +10937,12 @@ body {
   width: 34%;
   text-align: left !important;
   padding-left: 0 !important;
-  white-space: normal;
+  /* !important: needed to beat ".bs__grid th, .bs__grid td"'s nowrap, which
+     outranks a bare .bs__nameCol on specificity alone (element+class beats
+     class). Without it a long surname next to a wide position tag (e.g. a
+     pinch-runner's "18 | PR-RF") can't wrap and instead overflows onto the
+     tag beside it — reported as clipped/overlapping text on mobile. */
+  white-space: normal !important;
 }
 
 .bs__player {
@@ -11471,6 +11542,59 @@ body {
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-muted);
+}
+
+/* On a phone, both the hero star's and the #2/#3 rows' stat line drops to
+   its own full-width row below the name/meta lines instead of squeezing
+   beside them in the same row as the headshot — a big extra-base-hit line
+   otherwise fights the name column for width (see the .stars3__heroStat
+   comment above; the same squeeze hits the compact rows below it). A grid
+   (not flex-wrap) so the photo gets its own fixed column and the copy/stat
+   blocks share the SAME second column — see the identical reasoning on
+   .pitchernotice's own phone-only override just above the "Row 2" comment
+   for why a flex-wrap + flex-basis:100% attempt here would instead push the
+   name/meta block below the photo rather than beside it. */
+@media (max-width: 739.98px) {
+  .stars3__hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .shot.stars3__heroShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__heroCopy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__heroStat {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    text-align: left;
+  }
+
+  .stars3__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 8px;
+    row-gap: 2px;
+    align-items: start;
+  }
+  .shot.stars3__rowShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__rowWho {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__rowStat {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+  }
 }
 
 /* Slate "Top Performers" kraft box — the day's top 5 batters/pitchers by WPA
@@ -15367,8 +15491,12 @@ body {
    games it wore it below). Native overflow-x scroll gives touch/trackpad
    panning; useDragScroll (JerseyCombos.jsx) adds mouse click-drag. */
 .jerseystrip {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  /* Fixed column tracks (not flex-grow) so a trailing, partially-filled row
+     keeps the same card width as full rows — flex-wrap stretches a shorter
+     last row's cards wider (and, via aspect-ratio, taller), throwing off the
+     vertical rhythm between rows. */
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: var(--space-3);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -15384,8 +15512,6 @@ body {
   cursor: grabbing;
 }
 .jerseycombo {
-  flex: 1 1 0;
-  min-width: 90px;
   /* Grow to fill the row instead of scrolling at a fixed 104px, but keep
      the original card's proportions (104x123) as it scales up. */
   aspect-ratio: 104 / 123;
@@ -23582,20 +23708,16 @@ button.gamehigh-matchup:active {
 /* The batting-order / opposing-starter / opposing-defense mastheads' club
    mark (SectionMasthead's `logo` prop) — a decorative flourish, never the
    sole identifier (the title text sits right next to it), so the image
-   itself carries no alt text. */
+   itself carries no alt text.
+
+   The one-color white lockup these wear is the ART, not a treatment applied
+   here: callers ask TeamLogo for the `mono` variant, a knockout mark
+   precomputed per club by scripts/gen-mono-logos.mjs. This used to be a
+   `filter: brightness(0) invert(1)` on the full-color CDN mark, which crushed
+   every logo whose interior detail is drawn in a light fill into an
+   unreadable solid blob — see ADR-0025 and src/lib/logoMono.js. */
 .metricbar__logo {
   flex: 0 0 auto;
-}
-/* Forced to a solid white silhouette (same `filter` trick as .teamlogo--bw's
-   grayscale) rather than the CDN's own multicolor mark, so most clubs' logo
-   reads as a clean white lockup against the navy bar. NOT applied for the
-   ids in teams.js's MASTHEAD_LOGO_NATURAL_COLOR — a mark whose OWN design
-   already carries a light/white ring or outline (Cubs, Astros, Blue Jays,
-   Brewers) flattens into an unreadable solid blob under this filter, since
-   the filter can't tell that ring apart from the shape it encloses once both
-   become the same color; those four read fine in their real colors as-is. */
-.metricbar__logo--white {
-  filter: brightness(0) invert(1);
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
    masthead as the header of a real card. The CONTAINER owns the border / radius /

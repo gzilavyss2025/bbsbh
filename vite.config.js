@@ -189,6 +189,12 @@ export default defineConfig({
           // the lineup pages' bullpen board, so they stay off the install.
           '**/data/fouls.json',
           '**/data/workload.json',
+          // The precomputed one-color club marks (~150 files, ~1.7 MB all
+          // told — scripts/gen-mono-logos.mjs). One game shows exactly two of
+          // them, so precaching the whole league's art on every install would
+          // be pure cost; the CacheFirst rule below keeps the ones actually
+          // seen available offline.
+          '**/data/logos/mono/*.svg',
           // pdfjs (the What's Brewing PDF parser) is a heavy chunk + worker
           // (~365 KB + 1.3 MB) loaded ONLY when a user opens the Brewers'
           // What's Brewing modal (see src/api/whatsBrewing.js). Keep it out of
@@ -214,6 +220,23 @@ export default defineConfig({
               expiration: {
                 maxEntries: 14,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            // The one-color club marks (excluded from precache above). Static
+            // art that only changes when a club rebrands, and carries no game
+            // data at all — CacheFirst, so a revisited team's mark comes off
+            // disk and the two marks a game needs survive going offline at the
+            // park. A rebrand lands on the next expiry.
+            urlPattern: ({ url }) => /^\/data\/logos\/mono\/\d+\.svg$/.test(url.pathname),
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-team-marks',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
               },
             },
           },
