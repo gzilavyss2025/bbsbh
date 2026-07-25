@@ -449,6 +449,25 @@ Re-run only to fold in a new season.
 
 ## Assets / off-app
 
+- `gen-mono-logos.mjs` → `public/data/logos/mono/{teamId}.svg` — a ONE-COLOR
+  knockout version of every club's mlbstatic mark, worn by the navy section
+  mastheads (Batting order / Starting pitcher / Defense / Due up next) on the
+  lineup, innings, and box score pages. Replaces a `filter: brightness(0)
+  invert(1)` that flattened any mark with light interior detail into an
+  unreadable blob — see ADR-0025 and `src/lib/logoMono.js`, which holds the pure
+  ink-vs-paper conversion this script fetches for (`test/logo-mono.test.js` pins
+  it). Runs on the WEEKLY `update-teams.yml` right after `gen-teams.mjs`, whose
+  `teams.json` is its team list, so coverage can't drift from the club set.
+  Partial coverage is fine by design: a club with no file falls through
+  `TeamLogo`'s variant → base chain to its full-color mark, so a new affiliate
+  self-heals on the next run. The ink/paper split is a heuristic over art nobody
+  controls — after a run that adds clubs, use **`--sheet`**
+  (`.scratch/mono-logos/contact-sheet.html`, gitignored) and LOOK at every mark
+  beside its original; a bad conversion is a wrong-looking logo, not a crash,
+  and a blank cell means that file doesn't decode as an image at all.
+  `--ids=158,498` spot-checks a few. Kept OUT of the PWA precache (~1.7 MB for
+  the league, two marks per game) with a CacheFirst runtime rule instead — see
+  `vite.config.js`.
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
 - `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +

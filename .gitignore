@@ -33,3 +33,7 @@ pnpm-debug.log*
 
 # fetched Game Notes PDFs (large, re-fetch fresh per session — see .scratch/game-notes/README.md)
 .scratch/game-notes/pdfs/
+
+# the mono-logo contact sheet (a --sheet artifact for eyeballing a regeneration,
+# not app content — see scripts/gen-mono-logos.mjs)
+.scratch/mono-logos/

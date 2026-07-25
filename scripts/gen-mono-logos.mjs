@@ -1,0 +1,159 @@
+// Regenerates public/data/logos/mono/{teamId}.svg — a ONE-COLOR knockout
+// version of every club's mlbstatic mark, for the navy section mastheads on the
+// lineup / innings / box score pages (see src/lib/logoMono.js for what
+// "knockout" means here and ADR-0025 for why the app precomputes this art
+// instead of whitening the CDN mark with a CSS filter at render time).
+//
+// Precomputed rather than converted in the browser for the same reasons the
+// other build-time-fetch data is (src/api/CLAUDE.md): no per-logo round trip on
+// a page that already fetches a live feed, no logo popping in after paint, and
+// no remote SVG markup injected into the DOM. The output is plain art served
+// same-origin, so the app just points an <img> at it.
+//
+// Reads public/data/teams.json (every active club at each searchable level,
+// written by gen-teams.mjs) rather than re-enumerating statsapi, so the two
+// files can't cover different team sets. Run it AFTER gen-teams.mjs — that's
+// how .github/workflows/update-teams.yml wires them, which is also the cadence
+// this needs: a club's mark only changes when it rebrands or a new affiliate
+// appears, and until this file exists for a team the app falls back to the
+// full-color CDN mark on its own.
+//
+//   node scripts/gen-mono-logos.mjs            # every club in teams.json
+//   node scripts/gen-mono-logos.mjs --ids=158,498   # spot-check a few
+//   node scripts/gen-mono-logos.mjs --sheet    # + a contact sheet to eyeball
+//
+// --sheet writes .scratch/mono-logos/contact-sheet.html (gitignored): every
+// club's original mark beside its knockout, on navy and re-inked through a CSS
+// mask. The conversion is a heuristic over art nobody controls, so LOOK at the
+// sheet after a run that adds clubs — a mark that converts badly is a
+// wrong-looking logo, not a crash. A blank cell means that file failed to
+// decode as an image at all, which is the failure mode strict XML parsing
+// gives you (see namespaceDecls in logoMono.js).
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { monoLogoSvg } from '../src/lib/logoMono.js'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
+const outDir = join(here, '..', 'public', 'data', 'logos', 'mono')
+// Kept OUT of public/ — it's a review artifact, not something to ship in the
+// build (and at ~4 MB of inlined art it would dwarf everything else there).
+const sheetDir = join(here, '..', '.scratch', 'mono-logos')
+const sheetPath = join(sheetDir, 'contact-sheet.html')
+
+const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
+const CONCURRENCY = 8
+
+const args = process.argv.slice(2)
+const onlyIds = (() => {
+  const raw = args.find((a) => a.startsWith('--ids='))?.slice('--ids='.length)
+  if (!raw) return null
+  return new Set(raw.split(',').map((s) => Number(s.trim())).filter(Boolean))
+})()
+const wantSheet = args.includes('--sheet')
+
+async function mapConcurrent(items, limit, fn) {
+  const out = new Array(items.length)
+  let next = 0
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      for (;;) {
+        const i = next++
+        if (i >= items.length) return
+        out[i] = await fn(items[i])
+      }
+    }),
+  )
+  return out
+}
+
+async function teamList() {
+  const { bySportId } = JSON.parse(await readFile(teamsPath, 'utf8'))
+  const byId = new Map()
+  for (const teams of Object.values(bySportId ?? {})) {
+    for (const t of teams) {
+      if (!t?.id) continue
+      if (onlyIds && !onlyIds.has(t.id)) continue
+      if (!byId.has(t.id)) byId.set(t.id, t.name ?? String(t.id))
+    }
+  }
+  return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => a.id - b.id)
+}
+
+async function convert(team) {
+  let svg
+  try {
+    const res = await fetch(`${LOGO_BASE}/${team.id}.svg`)
+    // A club with no art on the CDN isn't an error — MiLB coverage has always
+    // been partial, and the app falls back on its own (see TeamLogo.jsx).
+    if (!res.ok) return { ...team, skipped: `HTTP ${res.status}` }
+    svg = await res.text()
+  } catch (err) {
+    return { ...team, skipped: `fetch failed (${err.message})` }
+  }
+  const mono = monoLogoSvg(svg, { maskId: `ink-${team.id}` })
+  if (!mono) return { ...team, skipped: 'not convertible' }
+  return { ...team, svg, mono }
+}
+
+function contactSheet(rows) {
+  const cells = rows
+    .map(
+      (r) => `<tr><th>${r.name} <small>#${r.id}</small></th>
+<td class="paper">${r.svg ?? ''}</td>
+<td class="navy">${r.mono ?? `<em>${r.skipped}</em>`}</td>
+<td class="paper">${r.mono ? `<i class="tint" style="--mark:url(&quot;data:image/svg+xml,${encodeURIComponent(r.mono)}&quot;)"></i>` : ''}</td></tr>`,
+    )
+    .join('\n')
+  return `<!doctype html><meta charset="utf-8"><title>Mono logo contact sheet</title><style>
+body{font:13px/1.3 system-ui;background:#f6f1e4;margin:0;padding:16px;color:#12233f}
+table{border-collapse:collapse}
+th{text-align:right;padding-right:10px;font-weight:600;white-space:nowrap}
+th small{opacity:.5;font-weight:400}
+td{width:80px;height:60px;text-align:center;vertical-align:middle;border:1px solid #d8cfb8}
+td svg{width:40px;height:40px;vertical-align:middle}
+.navy{background:#12233f;color:#fff}.paper{background:#f6f1e4}
+/* The same art used as a CSS mask instead of an <img>: the mark's own alpha is
+   the mask, so one asset re-inks to any color. Inlined as a data: URI because
+   a mask image is CORS-checked and this sheet is opened straight off disk. */
+.tint{display:inline-block;width:40px;height:40px;vertical-align:middle;background:#12233f;
+  -webkit-mask:var(--mark) center/contain no-repeat;mask:var(--mark) center/contain no-repeat}
+em{opacity:.6;font-size:11px}
+thead td{height:auto;font-weight:700;padding:4px;width:auto}
+</style><table><thead><tr><th></th><td class="paper">CDN art</td><td class="navy">knockout on navy</td><td class="paper">as a CSS mask, navy ink</td></tr></thead>
+${cells}</table>`
+}
+
+const teams = await teamList()
+const rows = await mapConcurrent(teams, CONCURRENCY, convert)
+
+await mkdir(outDir, { recursive: true })
+
+// Rewrite the directory from scratch each run so a club that rebrands into
+// unconvertible art (or leaves the team list) can't leave a stale mark behind
+// that the app would keep rendering.
+const written = new Set()
+for (const row of rows) {
+  if (!row.mono) continue
+  await writeFile(join(outDir, `${row.id}.svg`), row.mono)
+  written.add(`${row.id}.svg`)
+}
+if (!onlyIds) {
+  for (const name of await readdir(outDir)) {
+    if (name.endsWith('.svg') && !written.has(name)) await rm(join(outDir, name))
+  }
+}
+
+if (wantSheet) {
+  await mkdir(sheetDir, { recursive: true })
+  await writeFile(sheetPath, contactSheet(rows))
+}
+
+const skipped = rows.filter((r) => r.skipped)
+console.log(`wrote ${written.size} mono logos to ${outDir}`)
+if (skipped.length) {
+  console.log(`skipped ${skipped.length} (app falls back to the full-color mark):`)
+  for (const s of skipped) console.log(`  ${s.id} ${s.name} — ${s.skipped}`)
+}
+if (wantSheet) console.log(`contact sheet: ${sheetPath}`)

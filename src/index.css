@@ -23582,20 +23582,16 @@ button.gamehigh-matchup:active {
 /* The batting-order / opposing-starter / opposing-defense mastheads' club
    mark (SectionMasthead's `logo` prop) — a decorative flourish, never the
    sole identifier (the title text sits right next to it), so the image
-   itself carries no alt text. */
+   itself carries no alt text.
+
+   The one-color white lockup these wear is the ART, not a treatment applied
+   here: callers ask TeamLogo for the `mono` variant, a knockout mark
+   precomputed per club by scripts/gen-mono-logos.mjs. This used to be a
+   `filter: brightness(0) invert(1)` on the full-color CDN mark, which crushed
+   every logo whose interior detail is drawn in a light fill into an
+   unreadable solid blob — see ADR-0025 and src/lib/logoMono.js. */
 .metricbar__logo {
   flex: 0 0 auto;
-}
-/* Forced to a solid white silhouette (same `filter` trick as .teamlogo--bw's
-   grayscale) rather than the CDN's own multicolor mark, so most clubs' logo
-   reads as a clean white lockup against the navy bar. NOT applied for the
-   ids in teams.js's MASTHEAD_LOGO_NATURAL_COLOR — a mark whose OWN design
-   already carries a light/white ring or outline (Cubs, Astros, Blue Jays,
-   Brewers) flattens into an unreadable solid blob under this filter, since
-   the filter can't tell that ring apart from the shape it encloses once both
-   become the same color; those four read fine in their real colors as-is. */
-.metricbar__logo--white {
-  filter: brightness(0) invert(1);
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
    masthead as the header of a real card. The CONTAINER owns the border / radius /
