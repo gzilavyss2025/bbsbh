@@ -1574,15 +1574,18 @@ body {
   position: absolute;
   inset: 0;
   color: var(--seal);
-  /* Same faint print as the slate card's watermark (.gamecard__atmark-ghost). */
-  opacity: 0.1;
+  /* Slightly stronger than the slate card's watermark (.gamecard__atmark-ghost,
+     opacity 0.1) — at the small inline size here between two logo tiles, the
+     same faint print read as too light to make out against the logos. */
+  opacity: 0.18;
   transform: translate(2px, 1.5px) skewX(-8deg) rotate(-2deg);
 }
 .masthead__at-ink {
   position: relative;
   color: var(--navy);
-  /* Same faint print as the slate card's watermark (.gamecard__atmark-ink). */
-  opacity: 0.07;
+  /* Slightly stronger than the slate card's watermark (.gamecard__atmark-ink,
+     opacity 0.07) — see .masthead__at-ghost above. */
+  opacity: 0.14;
 }
 
 /* ---------------------------------------------------------- level toggle
