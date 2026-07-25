@@ -8,11 +8,11 @@ import { PlayerLink } from './PlayerLink.jsx'
 // defensiveChangeFielder builds. A defensive SWITCH (a player already in the
 // game moving to a new position, no new entrant) stays a plain one-line
 // EventNote in PlayByPlay — there's no "entering" moment to make a card of.
-export function FielderNotice({ fielder, teamName, className = '' }) {
+export function FielderNotice({ fielder, teamId = null, teamName, className = '' }) {
   if (!fielder) return null
   return (
     <div className={`pitchernotice ${className}`}>
-      <PitcherPhoto personId={fielder.id} />
+      <PitcherPhoto personId={fielder.id} name={fielder.name} teamId={teamId} />
       <div className="pitchernotice__body">
         <span className="pitchernotice__now">
           Now playing{fielder.position ? ` ${fielder.position}` : ''}

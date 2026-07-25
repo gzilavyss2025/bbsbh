@@ -6900,6 +6900,22 @@ body {
   line-height: var(--lh-solid);
   background: var(--surface-inset);
 }
+/* No real photo on file, but a team's known — his club's logo, centered and
+   scaled up past the frame's edges, same "printed badge" treatment as the
+   base .shot--logo rule (Headshot.jsx). */
+.pitchernotice__shot--logo {
+  display: grid;
+  place-items: center;
+  background: var(--surface-inset);
+}
+.pitchernotice__shot--logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.6);
+  filter: none;
+}
 
 .pitchernotice__body {
   display: flex;

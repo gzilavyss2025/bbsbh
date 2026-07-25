@@ -158,6 +158,7 @@ export function HalfInning({
         {(revealed || isNextToReveal) && nowPitching && (
           <PitcherNotice
             pitcher={nowPitching}
+            teamId={battingSide === 'away' ? homeId : awayId}
             teamName={battingSide === 'away' ? homeName : awayName}
             className="pitchernotice--pbp"
             label={nowPitchingLabel}
@@ -211,7 +212,9 @@ export function HalfInning({
             feed={feed}
             inning={inning}
             half={half}
+            battingId={battingSide === 'away' ? awayId : homeId}
             battingName={battingSide === 'away' ? awayName : homeName}
+            pitchingId={battingSide === 'away' ? homeId : awayId}
             pitchingName={battingSide === 'away' ? homeName : awayName}
           />
         )}
@@ -253,6 +256,7 @@ export function HalfInning({
                 pitchingName={battingSide === 'away' ? homeName : awayName}
                 pitchingTeamId={battingSide === 'away' ? homeId : awayId}
                 battingName={battingSide === 'away' ? awayName : homeName}
+                battingTeamId={battingSide === 'away' ? awayId : homeId}
                 callouts={callouts}
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
@@ -313,7 +317,7 @@ export function HalfInning({
 // drops this whole block once stepping starts (startedRevealing). Anything
 // that still can't resolve to a card (e.g. a pre-pitch pinch RUNNER,
 // vanishingly rare) falls to the plain text list.
-function PrePitchChanges({ feed, inning, half, battingName, pitchingName }) {
+function PrePitchChanges({ feed, inning, half, battingId, battingName, pitchingId, pitchingName }) {
   const changes = selectPrePitchChanges(feed, inning, half)
   const cards = changes.filter((c) => c.fielder || c.batter)
   const rest = changes.filter((c) => c.text)
@@ -326,6 +330,7 @@ function PrePitchChanges({ feed, inning, half, battingName, pitchingName }) {
             <BatterNotice
               key={`c-${i}`}
               batter={c.batter}
+              teamId={battingId}
               teamName={battingName}
               className="pitchernotice--pbp"
             />
@@ -335,6 +340,7 @@ function PrePitchChanges({ feed, inning, half, battingName, pitchingName }) {
           <FielderNotice
             key={`c-${i}`}
             fielder={c.fielder}
+            teamId={pitchingId}
             teamName={pitchingName}
             className="pitchernotice--pbp"
           />
