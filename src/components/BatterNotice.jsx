@@ -8,11 +8,11 @@ import { PlayerLink } from './PlayerLink.jsx'
 // used pre-pitch (see HalfInning.jsx's PrePitchChanges); once the half is
 // revealed the pinch-hitter owns his own at-bat card instead. `batter` is the
 // { id, name, jersey } shape selectPrePitchChanges builds.
-export function BatterNotice({ batter, teamName, className = '' }) {
+export function BatterNotice({ batter, teamId = null, teamName, className = '' }) {
   if (!batter) return null
   return (
     <div className={`pitchernotice ${className}`}>
-      <PitcherPhoto personId={batter.id} />
+      <PitcherPhoto personId={batter.id} name={batter.name} teamId={teamId} />
       <div className="pitchernotice__body">
         <span className="pitchernotice__now">
           Now batting{teamName ? ` for the ${teamName}` : ''}

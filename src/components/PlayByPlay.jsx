@@ -42,7 +42,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // entries list (every entry shown, whether by tapping through or because the
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -245,7 +245,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // can't be resolved.
           const pitcher = pitchingChangePitcher(feed, entry.playerId)
           node = pitcher ? (
-            <PitcherNotice pitcher={pitcher} teamName={pitchingName} className="pitchernotice--pbp" />
+            <PitcherNotice
+              pitcher={pitcher}
+              teamId={pitchingTeamId}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
           ) : (
             <EventNote entry={entry} />
           )
@@ -269,7 +274,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // entrant, so it shouldn't read as a lesser plain text line.
           const fielder = defensiveChangeFielder(feed, entry.playerId, entry.position)
           node = fielder ? (
-            <FielderNotice fielder={fielder} teamName={pitchingName} className="pitchernotice--pbp" />
+            <FielderNotice
+              fielder={fielder}
+              teamId={pitchingTeamId}
+              teamName={pitchingName}
+              className="pitchernotice--pbp"
+            />
           ) : (
             <EventNote entry={entry} />
           )
@@ -288,6 +298,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <PinchRunNotice
               runner={runner}
               replaced={replaced}
+              teamId={battingTeamId}
               teamName={battingName}
               className="pitchernotice--pbp"
             />
@@ -304,6 +315,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <EventCard
               code={EVENT_CODES[entry.eventType]}
               runnerId={entry.playerId}
+              teamId={BASERUNNER_EVENTS.has(entry.eventType) ? battingTeamId : pitchingTeamId}
               segments={entry.segments}
             />
           )
@@ -355,6 +367,19 @@ const EVENT_CODES = {
   // EventNote's generic fallback icon.
   runner_placed: 'RP', defensive_indiff: 'DI',
 }
+
+// Which side EventCard's one named person belongs to, for its headshot's team
+// logo fallback: a steal/pickoff/placement is about the BASERUNNER (batting
+// team); a wild pitch/passed ball/balk is about the pitcher or catcher
+// (pitching team). Defensive indifference has no single player it's really
+// "about" — defaults to the pitching team below along with the WP/PB/BK group.
+const BASERUNNER_EVENTS = new Set([
+  'stolen_base_2b', 'stolen_base_3b', 'stolen_base_home',
+  'caught_stealing_2b', 'caught_stealing_3b', 'caught_stealing_home',
+  'pickoff_1b', 'pickoff_2b', 'pickoff_3b',
+  'pickoff_caught_stealing_2b', 'pickoff_caught_stealing_3b', 'pickoff_caught_stealing_home',
+  'runner_placed',
+])
 
 // The play-by-play prose for a baserunning event (steal, caught stealing, wild
 // pitch…), rendered as a secondary line beneath the batter's own description on
@@ -448,11 +473,11 @@ function EjectionBar({ text }) {
 // instead of an emoji, plus the one clear person the event is actually about
 // when the feed names one (a runner stealing, the pitcher on a balk/wild
 // pitch, the catcher on a passed ball).
-function EventCard({ code, runnerId, segments }) {
+function EventCard({ code, runnerId, teamId, segments }) {
   return (
     <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
       <span className="pitchernotice__code">{code}</span>
-      {runnerId != null && <PitcherPhoto personId={runnerId} />}
+      {runnerId != null && <PitcherPhoto personId={runnerId} teamId={teamId} />}
       <span className="pitchernotice__eventtext">
         {segments.map((seg, i) =>
           seg.id != null ? (

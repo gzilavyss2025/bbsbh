@@ -8,11 +8,11 @@ import { PlayerLink } from './PlayerLink.jsx'
 // computeHalfInningFeed's prSubs bookkeeping) — that's the retroactive record
 // of who's on base now; this is the announcement as it happens. `runner` /
 // `replaced` are the { id, name, jersey } shapes pinchRunningPlayers builds.
-export function PinchRunNotice({ runner, replaced, teamName, className = '' }) {
+export function PinchRunNotice({ runner, replaced, teamId = null, teamName, className = '' }) {
   if (!runner) return null
   return (
     <div className={`pitchernotice ${className}`}>
-      <PitcherPhoto personId={runner.id} />
+      <PitcherPhoto personId={runner.id} name={runner.name} teamId={teamId} />
       <div className="pitchernotice__body">
         <span className="pitchernotice__now">Pinch running{teamName ? ` for the ${teamName}` : ''}</span>
         <span className="pitchernotice__pitcher">
