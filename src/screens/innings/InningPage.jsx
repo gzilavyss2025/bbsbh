@@ -22,9 +22,9 @@ function noop() {}
 // SealBox's own render-function-only-once-revealed gate (ADR-0002) is what
 // keeps a sealed preview spoiler-safe, not this flag — but mutes every
 // callback that would otherwise feed back into useRevealProgress state
-// (onReveal, onStepInfo, onSteppedThrough), so a preview mount/unmount can
-// never itself advance the reveal mark or double-report a step. It is not a
-// second reveal boundary; see ADR-0024.
+// (onReveal, onStepInfo), so a preview mount/unmount can never itself advance
+// the reveal mark or double-report a step. It is not a second reveal
+// boundary; see ADR-0024.
 export function InningPage({
   feed,
   inning,
@@ -42,14 +42,12 @@ export function InningPage({
   highlights,
   atBatCountFor,
   onStepInfo,
-  onSteppedThrough,
   onRunsSoFar,
   getDerived,
   runExpectancy,
   winProbPoints,
   winProbBigPlays,
   winProbTreatment,
-  statBoxRef,
   presentationOnly = false,
 }) {
   const idx = halfIndex(inning, half)
@@ -91,14 +89,13 @@ export function InningPage({
           highlights={highlights}
           revealedAtBatCount={atBatCountFor(inning, half)}
           onStepInfo={presentationOnly ? undefined : onStepInfo}
-          onSteppedThrough={presentationOnly ? undefined : onSteppedThrough}
           onRunsSoFar={presentationOnly ? undefined : onRunsSoFar}
         />
       </div>
 
       {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
           beside the win-probability chart. */}
-      <div className="innings__row2" ref={presentationOnly ? undefined : statBoxRef}>
+      <div className="innings__row2">
         {/* Left column: the stat card, then a preview of who's due up when
             the OTHER team's next half starts — dueup.js's own gate keeps
             this null until that half is actually the user's next one to

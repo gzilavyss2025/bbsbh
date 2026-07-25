@@ -17,11 +17,11 @@ shows the same kraft cover (or, being `coverless` and driven only by
 Nothing about the preview changes what's safe to render.
 
 What the preview *would* otherwise get wrong is side effects: `InningPage`'s
-`presentationOnly` flag exists solely to mute `onReveal`/`onStepInfo`/
-`onSteppedThrough` so a preview mounting, animating, and unmounting can never
-itself advance `revealedThrough`, record an at-bat step, or fire a scroll —
-state that belongs only to the one interactive instance the user is actually
-looking at. `onReveal` is swapped for a no-op rather than `undefined`
+`presentationOnly` flag exists solely to mute `onReveal`/`onStepInfo` so a
+preview mounting, animating, and unmounting can never itself advance
+`revealedThrough` or record an at-bat step — state that belongs only to the
+one interactive instance the user is actually looking at. `onReveal` is
+swapped for a no-op rather than `undefined`
 specifically because `HalfInning` calls it directly (not via `?.()`) from
 both `SealBox`'s reveal effect and `PlayByPlay`'s `onStepComplete` — a
 preview page that happens to mount already-revealed (e.g. turning forward
