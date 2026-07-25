@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { fetchSeasonSeries } from '../api/schedule.js'
 import { seasonSeriesCells } from '../api/seasonSeries.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -37,19 +37,14 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   // .seasonseries__cell--otherpark).
   const currentHomeId = cells.find((c) => c.isCurrent)?.homeId
 
-  // Land on the current game centered in the strip rather than wherever it
-  // falls chronologically — with a full multi-leg series (see the August leg
-  // in the real-game case study) it can be several cards deep.
-  useEffect(() => {
-    currentCellRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
-  }, [cells.length])
-
   // Nav arrows (and the room they take up) only make sense once the strip
   // actually overflows its card — a short series that already fits shouldn't
   // show dead controls flanking a lopsided gap of white space. Re-checked on
   // resize since the wide desktop spread can fit every game the narrow phone
-  // layout would need to scroll through.
-  useEffect(() => {
+  // layout would need to scroll through. A layout effect (not a plain
+  // effect) so this resolves — and the nav arrows mount, if needed — before
+  // the browser paints, in the same pass as the centering below.
+  useLayoutEffect(() => {
     const el = stripRef.current
     if (!el) return
     const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
@@ -62,6 +57,16 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
       window.removeEventListener('resize', check)
     }
   }, [cells.length])
+
+  // Land on the current game centered in the strip rather than wherever it
+  // falls chronologically — with a full multi-leg series (see the August leg
+  // in the real-game case study) it can be several cards deep. Depends on
+  // `canScroll` too: the nav arrows above narrow the strip's width once they
+  // mount, and centering against the pre-arrows width would leave the
+  // current cell off-center once they appear.
+  useLayoutEffect(() => {
+    currentCellRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [cells.length, canScroll])
 
   if (cells.length < 2) return null
 
