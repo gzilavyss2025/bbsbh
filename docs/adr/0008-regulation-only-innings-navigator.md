@@ -10,3 +10,13 @@ the prior inning's bottom is at or below `revealedThrough`. `RollingLine`'s
 boxscore holds only `regulation` columns, so once extras unlock it scrolls
 that window forward (dropping inning 1 when inning 10 appears, etc.) while
 R/H/E totals stay cumulative over every revealed inning.
+
+**Amended by ADR-0026 (default path untouched).** Extras have one *consented*
+bypass: under the spoilers-off pass `effectiveReveal` returns
+`renderUnlocked = actualCount`, so every inning the game actually has is
+navigable — agreeing to see a day plainly is agreeing to know it went to extras.
+It is a RENDER value; the real `unlocked` is untouched, so the moment the pass no
+longer covers that date the window is back to `regulation` + whatever the user
+genuinely revealed. For a user who never consents, this ADR's rule is unchanged:
+`unlockedInnings` still gates on the real mark, and `RollingLine` still holds only
+`regulation` columns.

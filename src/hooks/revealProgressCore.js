@@ -46,3 +46,52 @@ export function unlockedInnings(regulation, actualCount, revealedThrough) {
   while (u < actualCount && revealedThrough >= halfIndex(u, 'bottom')) u++
   return u
 }
+
+// Render-time reveal override for the site-wide "Scores Unlocked" day pass
+// (useScoresUnlocked.js / ADR-0026). When the pass is OFF this is the identity:
+// the real high-water mark and the real extras-unlock count pass straight
+// through. When it's ON, every real half renders as revealed — the RENDER mark
+// advances to the game's final half and every inning the game actually has is
+// unlocked (extras included: opting into spoilers for the day is opting into
+// them, ADR-0008's protection is a *default-mode* guard the pass deliberately
+// lifts).
+//
+// This is the whole spoiler-safety contract of the pass, so read it carefully:
+// the values returned here are for RENDERING ONLY. They must never be fed back
+// to the ratchet (mergeMark), written to localStorage, or handed to the cloud
+// sync — the caller keeps the untouched `revealedThrough` for all of that. The
+// pass unseals the screen for today without persisting a single half you didn't
+// reveal by hand, so flipping it off (or the 8am reset) drops straight back to
+// the real mark with nothing leaked into storage or across devices.
+//
+// Finite, deliberately not Infinity: an Infinity render mark could reach an
+// array index or be stringified into a storage value (parseRevealMark rejects
+// 'Infinity' → -1, so it would fail *closed* rather than leak, but there's no
+// reason to court it). The last real half-index, halfIndex(actualCount,
+// 'bottom'), reveals every half cleanly with an ordinary integer.
+//
+// `commitReveals` is the OTHER half of the contract, and it is load-bearing: the
+// caller MUST stop committing reveals while the pass is on. A render mark alone
+// is not enough, because a half that renders revealed mounts its `SealBox`
+// force-revealed, and `SealBox` fires `onReveal` whenever it becomes shown — by
+// tap OR by the flag (see SealBox.jsx). Wire that straight through to `revealTo`
+// and the pass ratchets the REAL mark for every half the user merely looks at:
+// written to localStorage, and for a signed-in user propagated to every other
+// device by RevealCloudSync. That is exactly what ADR-0026 promises can never
+// happen, and what the consent copy means by "it does not track or advance your
+// by-hand scoring". So it is false while unlocked. Nothing is lost: under the
+// pass there are no seals to tap, so there is no genuine reveal to record.
+export function effectiveReveal({ scoresUnlocked, revealedThrough, unlocked, actualCount }) {
+  if (!scoresUnlocked) {
+    return {
+      renderRevealedThrough: revealedThrough,
+      renderUnlocked: unlocked,
+      commitReveals: true,
+    }
+  }
+  return {
+    renderRevealedThrough: Math.max(revealedThrough, halfIndex(actualCount, 'bottom')),
+    renderUnlocked: actualCount,
+    commitReveals: false,
+  }
+}

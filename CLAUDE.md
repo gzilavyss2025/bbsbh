@@ -91,7 +91,11 @@ changing CI or that token.
 This is the whole point of the app. **Do not let it drift.** The rule: a
 score-revealing value must never exist in the DOM until the user reveals it — there
 is no fetched-then-hidden node to leak, with one narrow, explicit exception (All-Star
-Rosters shows final scores plainly — ADR-0019). `CONTEXT.md` defines the vocabulary
+Rosters shows final scores plainly — ADR-0019). One **opt-in, consented** departure
+also lifts the seal on demand: the site-wide **Scores Unlocked** switch — a *render*
+override that unseals a day you explicitly agree to spoil (and keeps a live game's
+view current), while never writing the persisted reveal mark — ADR-0026.
+`CONTEXT.md` defines the vocabulary
 (Seal, SealBox, reveal-only module, spoiler-free selector, revealedThrough,
 half-inning, regulation/extra innings, Pitchers table, primary position); `docs/adr/`
 records *why* each mechanism is shaped as it is — read the linked ADR before
@@ -134,13 +138,18 @@ under `bbsbh:reveal:{gamePk}` — only that half-index, never a score, so the sp
 rule still holds on return; a same-device tab picks up another tab's reveal via a
 `storage` listener in `useRevealProgress.js`.
 
-**Two narrow, opt-in exceptions (`api/`)**, both Vercel edge functions that never
+**Three narrow, opt-in exceptions (`api/`)**, all Vercel edge functions that never
 render or fetch a score. Link previews (`api/og.js` + `api/preview.js` +
 `api/_lib/cards.js`) render dynamic Open Graph cards for shared deep links, failing
 safe to the static default card — ADR-0012. Multi-device reveal sync (Clerk, off
 unless `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
 own devices via `api/reveal.js` + Upstash Redis, ratcheted both sides, inert if
-unconfigured — ADR-0022.
+unconfigured — ADR-0022; its companion `api/spoiled-days.js` mirrors which DAYS the
+user consented to spoil (consent, never a mark — a per-day on/off state map, since
+that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
+consent-pop-up wording (never a score, closed registry, public-cached read,
+allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
+ADR-0025.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

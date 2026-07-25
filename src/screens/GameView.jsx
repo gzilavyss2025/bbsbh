@@ -15,6 +15,9 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { humanDateWithYear } from '../lib/dates.js'
+import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
+import { useCopy } from '../copy/copyContext.js'
+import { formatResetTime } from '../lib/scoresUnlocked.js'
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -35,6 +38,10 @@ export function GameView({ game, section, onSection }) {
   // starter lines, win probability, pitcher roles, prospects, callouts,
   // broadcast, former teammates) lives in one hook — see useGameData for the
   // per-fetch sequencing/keying/caching rationale.
+  // The spoilers-off pass is resolved first: while it's running, the feed poll
+  // tightens its cadence so a live game you're watching stays current — see
+  // useGameData's second argument.
+  const { passActive, resetAt, spoilersOffFor, disable: endPass } = useScoresUnlocked()
   const {
     feedState,
     feed,
@@ -60,7 +67,7 @@ export function GameView({ game, section, onSection }) {
     lineupValuesData,
     winProbTreatment,
     started,
-  } = useGameData(game)
+  } = useGameData(game, passActive)
 
   // Screen Wake Lock — keeps the phone's display on during a live game so it
   // stays readable propped up next to a scorebook (see useWakeLock). Opt-in
@@ -70,6 +77,18 @@ export function GameView({ game, section, onSection }) {
   const { keepAwake, setKeepAwake } = useKeepAwakePreference()
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
   useWakeLock(keepAwake && isLive)
+
+  // Should THIS game render plainly? Two ways to get there, and the difference
+  // matters for what the chrome says (ADR-0026):
+  //   - the pass is running right now — any game opened during the window is
+  //     open, and the banner below offers the off switch;
+  //   - or this game's day is one the user already consented to spoil, locked in
+  //     when that day's pass expired. Nothing to turn off; that day is simply
+  //     spoiled now, and saying otherwise would be a lie.
+  // Consent itself lives on the slate — there is no per-game toggle, because
+  // there is no longer a per-game mode to consent to.
+  const { t: copy } = useCopy()
+  const spoilersOff = spoilersOffFor(officialDate)
 
   // Where "Innings" returns to: the last half-inning page the user was on, so
   // hopping out to a lineup or the box score and back doesn't lose your place
@@ -160,6 +179,25 @@ export function GameView({ game, section, onSection }) {
         onSetKeepAwake={setKeepAwake}
         treatment={winProbTreatment}
       />
+
+      {/* The spoilers-off strip, on EVERY section of the game (both lineups,
+          innings, box score) — not just the innings view, so you can never be
+          looking at an unsealed screen with nothing on it saying why. It is
+          itself the off switch, the same "the banner is the toggle" convention
+          the slate uses. Shown only while the pass is actually running: for a
+          day that's already locked in there is nothing to switch off, so a strip
+          offering to would be lying. */}
+      {passActive && (
+        <button
+          type="button"
+          className="modestrip"
+          data-testid="spoilers-off-banner"
+          onClick={endPass}
+          aria-label="Turn off live scores"
+        >
+          {copy('scoresUnlocked.banner', { time: formatResetTime(resetAt) })}
+        </button>
+      )}
 
       {/* Delayed/suspended/postponed is structural game state, not a score —
           safe to render unconditionally, same as the masthead date above. Sits
@@ -294,6 +332,8 @@ export function GameView({ game, section, onSection }) {
           highlights={highlightsData}
           runExpectancy={runExpectancyData}
           workload={workloadData}
+          spoilersOff={spoilersOff}
+          passActive={passActive}
         />
       )}
       {feed && step === 3 && (
@@ -310,8 +350,10 @@ export function GameView({ game, section, onSection }) {
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
           onSection={onSection}
+          spoilersOff={spoilersOff}
         />
       )}
+
     </div>
     </LinkScope>
   )
@@ -323,7 +365,17 @@ export function GameView({ game, section, onSection }) {
 // right-aligned opposite them. Tapping a mark opens it enlarged for pencil
 // sketching. The date and the Watch link are both structural, not
 // score-revealing, so they render unconditionally (no seal).
-function Masthead({ away, home, date, gamePk, onSketch, isLive, keepAwake, onSetKeepAwake, treatment }) {
+function Masthead({
+  away,
+  home,
+  date,
+  gamePk,
+  onSketch,
+  isLive,
+  keepAwake,
+  onSetKeepAwake,
+  treatment,
+}) {
   return (
     <div className="masthead">
       <div className="masthead__teams">

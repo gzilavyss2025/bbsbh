@@ -34,3 +34,11 @@ This keeps ADR-0002's "no reveal-the-whole-game bypass, strictly
 per-half-inning" and ADR-0001's reveal-only isolation intact: at-bat stepping
 changes how a user walks through the one existing half-inning-granular
 `SealBox`, not how much the app is willing to commit as revealed at once.
+
+**Amended by ADR-0026 (staging cursor is inert while unlocked).** The at-bat
+cursor stages a *sealed* half. Under the Scores Unlocked pass every half renders
+revealed (`renderRevealedThrough`), so `currentSealed` is false and the split
+"Next at-bat / Whole {half}" bar never appears — there is nothing to step
+through. The cursor itself is untouched: it keys on the real half being shown
+and resumes exactly where it was when the pass is turned off or expires, because
+the pass never wrote to `revealedThrough` or the at-bat mark.

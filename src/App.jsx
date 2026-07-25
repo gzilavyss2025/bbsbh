@@ -3,6 +3,7 @@ import { GameSelect } from './screens/GameSelect.jsx'
 import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
+import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/Loader.jsx'
 import {
   parseRoute,
@@ -16,7 +17,21 @@ function lazyNamed(loader, name) {
   return lazy(() => loader().then((module) => ({ default: module[name] })))
 }
 
+// Headless cross-device sync for the spoiled-day list (ADR-0026). Imports
+// @clerk/clerk-react at its top, so — like RevealCloudSync and AccountButton —
+// it is only ever dynamically imported, and only on a deploy that configures
+// Clerk. Mounted app-wide rather than per screen: the consent it syncs is
+// site-wide, not per game.
+const SpoiledDaysCloudSync = isClerkEnabled
+  ? lazy(() =>
+      import('./components/SpoiledDaysCloudSync.jsx').then((m) => ({
+        default: m.SpoiledDaysCloudSync,
+      })),
+    )
+  : null
+
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
+const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
 const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
@@ -203,6 +218,8 @@ export default function App() {
     content = <StandingsPage />
   } else if (route.name === 'fouls') {
     content = <FoulTrackerPage />
+  } else if (route.name === 'admin') {
+    content = <AdminCopyPage onBack={() => go('/')} />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {
@@ -296,6 +313,11 @@ export default function App() {
   // name anywhere can navigate without threading a prop through the tree.
   return (
     <NavProvider navigate={go}>
+      {SpoiledDaysCloudSync && (
+        <Suspense fallback={null}>
+          <SpoiledDaysCloudSync />
+        </Suspense>
+      )}
       <Suspense
         fallback={
           <div className="app">

@@ -37,6 +37,23 @@ slate-provided seed, else via `resolveGame` (scans the date's slate across level
 and matches the abbreviation slug) for cold loads / shared links. `vercel.json`
 rewrites all non-asset paths to `index.html` so those links resolve on Vercel.
 
+## Admin-editable copy (`src/copy/`)
+
+The wording of the spoiler-consent surfaces is admin-editable, not hard-coded.
+`src/copy/registry.js` is the closed source of truth (ids, defaults, length caps,
+`sanitizeOverrides`, and `TOKENS` — the closed `{time}`/`{inning}` substitution
+set, whose header records why a score-bearing token may never join it);
+`CopyProvider.jsx` + `copyContext.js` resolve
+`defaults ← localStorage cache ← live /api/copy` and expose
+`useCopy().t(id, tokens)`, always falling back to defaults. Every substitution
+goes through `fillTokens` — never an ad hoc `.replace` at a call site, which
+skips both the closed-set check and the drop-the-token-and-tidy-the-gap path.
+The unlinked `/admin` route (`screens/AdminCopy.jsx`) is the Clerk-admin-gated
+editor (with version history). It stores UI text only — never a score — see
+ADR-0025 and the "no backend exceptions" prose in the root `CLAUDE.md`. When
+adding a new consent string, add a registry field; never inline the literal in a
+component.
+
 ## Fetching (`src/hooks/useAsync.js`)
 
 The `useAsync` hook runs a promise on mount/deps-change and exposes
@@ -83,6 +100,17 @@ read the linked ADRs before refactoring:
   appearance at a time via a transient cursor (`atBatCountFor`,
   `useRevealProgress`) that always collapses into a normal `revealTo` commit
   rather than becoming a second spoiler boundary (ADR-0016).
+- **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
+  `InningViewer` without touching its guarantees. `GameView` resolves
+  `spoilersOffFor(officialDate)` — the pass is running, or this day was consented
+  to — and hands it down; `effectiveReveal` substitutes a render-only
+  `renderRevealedThrough`/`renderUnlocked` for every render consumer while the
+  persisted `revealedThrough` (what feeds `useRevealProgress`, `RevealCloudSync`,
+  and localStorage) stays untouched. Its `commitReveals` is the other half of that
+  and must not be dropped: `SealBox` fires `onReveal` on a force-revealed mount as
+  well as a tap, so without it every half merely LOOKED at ratchets the real mark.
+  `selectLiveEdge` drives navigation only — under the pass everything already
+  renders open, so there is nothing for a ratchet to advance.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own

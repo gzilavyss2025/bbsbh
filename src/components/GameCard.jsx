@@ -21,6 +21,12 @@ export function GameCard({
   pinnedTeamId,
   prospectCount = 0,
   gameScore = null,
+  // Pre-formatted { score, inning } for the "Scores Unlocked" day pass, or null
+  // (the default) — see api/schedule.js fetchSlateScores + lib/slateScoreLine.js.
+  // Null keeps this card byte-identical to today; the caller (GameSelect) passes
+  // a value only while the pass is on AND for today's slate. Every other caller
+  // (Top Games, All-Star Rosters) leaves it null.
+  liveLine = null,
   dateLabel = null,
   onSelect,
   onBoxScore,
@@ -95,6 +101,19 @@ export function GameCard({
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
         </div>
+        {/* Additive score line, present ONLY under an active Scores Unlocked
+            pass (liveLine non-null). It renders BELOW the matchup — the team
+            colors, cap/jersey marks, and names above are untouched — so a card
+            keeps its identity and just gains today's number. All tokens are
+            uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…), no exemption. */}
+        {liveLine && (
+          <div className="gamecard__unlockline">
+            <span className="gamecard__unlockscore">{liveLine.score}</span>
+            {liveLine.inning && (
+              <span className="gamecard__unlockinning">{liveLine.inning}</span>
+            )}
+          </div>
+        )}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
           {/* Only shown in a cross-level list (Top Games, All-Star Rosters —

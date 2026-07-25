@@ -105,3 +105,24 @@ falls back to whatever `localStorage` already has.
   `VITE_CLERK_PUBLISHABLE_KEY`/`CLERK_SECRET_KEY` in Vercel's Production
   environment for the `pk_live_…`/`sk_live_…` pair. Upstash has no
   dev/production split — the same Redis database serves both.
+
+**Amended by ADR-0026 (the mark still only advances by hand).** The spoilers-off
+pass (ADR-0026) unseals scores without touching `revealedThrough` at all: it is a
+render override, and `effectiveReveal`'s `commitReveals` stops the reveal commit
+while it is on. So nothing this feature does reaches `RevealCloudSync` — a day
+spent looking at scores on the phone leaves the iPad's reveal point exactly where
+it was, which is correct, because looking is not scoring. `api/reveal.js` gains no
+fields.
+
+An earlier design (ADR-0027, superseded) had a per-game "Follow Live" mode that
+*did* advance the real mark from the live feed, and therefore propagated
+machine-advanced reveals to every signed-in device. That is gone; the mark's only
+sources remain a tap, another tab's `storage` event, and this sync.
+
+The one thing the pass does persist — the set of days consented to
+(`bbsbh:spoiledDays`) — DOES sync, but on its own key, shape and endpoint
+(`api/spoiled-days.js`), not through the reveal mirror. It is consent, not scoring
+progress, and it needed a different merge rule: this ADR's ratchet works because a
+mark only moves one way, whereas a day set has to be able to move back (the
+same-day undo), so it syncs as a per-day `'on' | 'off'` state map rather than a
+max or a union. See ADR-0026.

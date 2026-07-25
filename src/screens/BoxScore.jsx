@@ -90,6 +90,7 @@ export function BoxScore({
   loading,
   lastUpdated,
   onSection,
+  spoilersOff = false,
 }) {
   // The masthead above every section (GameView.jsx) already carries this
   // game's date, so the title itself just says "Box score" — no second date
@@ -114,7 +115,16 @@ export function BoxScore({
         )}
       </div>
 
-      <SealBox label="Tap to reveal the box score">
+      {/* The spoilers-off pass (ADR-0026, resolved for this game's date by
+          GameView) lifts this seal too. The consent copy promises "no seals, no
+          tapping" — the box score is a score surface inside a game, so leaving it
+          sealed would make that promise false. Rides SealBox's existing
+          `forceRevealed` input (the same one StatBox/HalfInning use), so the
+          render-function gate is untouched: children are still only invoked in
+          the revealed branch (ADR-0001/0002); the pass only flips WHICH branch
+          renders. Nothing is persisted — this SealBox has no `onReveal`, and the
+          pass never touches `revealedThrough`. */}
+      <SealBox label="Tap to reveal the box score" forceRevealed={spoilersOff}>
         {() => {
           const box = selectBoxscore(feed)
           // Computed here, inside the reveal render, so WPA and the win-prob

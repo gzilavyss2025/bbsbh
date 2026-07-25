@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import App from './App.jsx'
+import { CopyProvider } from './copy/CopyProvider.jsx'
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import './index.css'
 
@@ -14,7 +15,11 @@ import './index.css'
 // the same lazy pattern at their own call sites.
 async function mount() {
   const root = createRoot(document.getElementById('root'))
-  let content = <App />
+  let content = (
+    <CopyProvider>
+      <App />
+    </CopyProvider>
+  )
   if (isClerkEnabled) {
     // clerkAppearance.js rides the same dynamic gate: it only ever loads
     // alongside the SDK it themes.
@@ -28,7 +33,9 @@ async function mount() {
         appearance={clerkAppearance}
         localization={clerkLocalization}
       >
-        <App />
+        <CopyProvider>
+          <App />
+        </CopyProvider>
       </ClerkProvider>
     )
   }

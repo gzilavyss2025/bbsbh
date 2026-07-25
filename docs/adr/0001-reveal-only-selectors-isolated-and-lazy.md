@@ -21,3 +21,15 @@ too, taking the half being revealed and returning the starting nine plus subs
 its first pitch), a caller-gated pre-pitch selector like `selectPrePitchChanges`
 (ADR-0003) rather than a reveal-only one. Sub timing is still spoiler-adjacent,
 so the caller must gate them to `halfIndex <= revealedThrough + 1`.
+
+**Amended by ADR-0026/0027 (no change to the contract).** The two consented
+spoiler departures add no reveal-only call site and relax nothing here. Scores
+Unlocked feeds a render-only mark (`effectiveReveal`) into the same components,
+so a reveal-only selector still runs only inside a `SealBox`'s revealed branch —
+the pass changes *which* branch renders, not the lazy-invocation rule.
+`selectLiveEdge` (`src/api/liveEdge.js`) is deliberately **not** reveal-only: it
+reports how far the game has progressed (a half-index) and never touches
+runs/hits/errors, so it is safe to call at render top-level — but it is not
+plain spoiler-free either, since "how far along the game is" is itself
+information. It is guarded instead by its consent argument (null unless
+`following === true`), a third classification catalogued in `src/api/CLAUDE.md`.

@@ -43,13 +43,21 @@ const HIGHLIGHTS_POLL_MS = 5 * 60 * 1000
 // every score-revealing render path stays gated by SealBox/revealedThrough.
 const FEED_POLL_MS = 60 * 1000
 
+// A tighter cadence used ONLY while the spoilers-off pass is running (ADR-0026).
+// Someone with the pass on is watching, not scoring — pitch-level freshness is
+// the point, and 60s leaves the current half feeling frozen between polls when
+// pitches land every ~20s. Scoped to the consented window: with the pass off, a
+// live game polls at FEED_POLL_MS as it always has, so the extra network and
+// battery cost is only paid where it was asked for.
+const FOLLOW_POLL_MS = 15 * 1000
+
 // Owns every data fetch a game page needs: the feed itself plus the roughly
 // nine independent lookups derived from or alongside it (managers, weather,
 // starter lines, win probability, pitcher roles, prospects, callouts,
 // broadcast, former teammates). Pulling this out of GameView keeps that
 // component free to focus on section-routing and rendering; this hook is the
 // one place that reasons about fetch sequencing/keying/caching.
-export function useGameData(game) {
+export function useGameData(game, spoilersOff = false) {
   // The uniform assignment rides the SAME fetch/reload as the feed: it's empty
   // until around first pitch, so each live Refresh must re-pull it, and
   // useAsync's reload keeps the last-good pair so a flaky refetch never blanks
@@ -194,15 +202,16 @@ export function useGameData(game) {
     return () => clearInterval(id)
   }, [isLive, highlights.reload])
 
-  // Auto-refresh the feed itself while the game is Live — see FEED_POLL_MS.
+  // Auto-refresh the feed itself while the game is Live — see FEED_POLL_MS, or
+  // the tighter FOLLOW_POLL_MS while the spoilers-off pass is running.
   // feedState.reload is useAsync's stale-while-revalidate `run`, so a
   // transient poll failure keeps showing the last-good feed rather than
   // blanking the page (AsyncStatus's staleErrorMessage in GameView).
   useEffect(() => {
     if (!isLive) return
-    const id = setInterval(feedState.reload, FEED_POLL_MS)
+    const id = setInterval(feedState.reload, spoilersOff ? FOLLOW_POLL_MS : FEED_POLL_MS)
     return () => clearInterval(id)
-  }, [isLive, feedState.reload])
+  }, [isLive, spoilersOff, feedState.reload])
 
   // Each pitcher's inferred role (SP/CL/RP) from season stats — the same
   // gamesStarted-ratio/saves heuristic the team page badges pitchers with

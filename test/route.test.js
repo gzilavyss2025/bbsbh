@@ -60,6 +60,7 @@ test('single-segment named routes resolve to their route name', () => {
     '/all-star-rosters': 'all-star-rosters',
     '/all-star-legacy': 'all-star-legacy',
     '/standings': 'standings',
+    '/admin': 'admin',
     '/umpires': 'umpire-rankings',
     '/top-games': 'top-games',
     '/scorecard-lab': 'scorecard-lab',

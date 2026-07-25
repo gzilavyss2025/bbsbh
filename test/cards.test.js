@@ -35,7 +35,12 @@ test('falls through to null only once every level has settled', async () => {
   const result = await firstNonNull([delay(10, null), delay(120, null)])
   const elapsed = Date.now() - start
   assert.equal(result, null)
-  assert.ok(elapsed >= 120, `expected to wait for the slowest miss (120ms) before giving up, took ${elapsed}ms`)
+  // The intent: firstNonNull waits for the SLOW miss (120ms), never bailing at
+  // the fast one (10ms). Assert well past 10ms rather than the exact 120ms — a
+  // real setTimeout(120) can be measured a hair under 120ms by Date.now()
+  // (timer/clock rounding), which flaked CI at 119ms. 100ms still proves it
+  // didn't give up early while tolerating that sub-millisecond jitter.
+  assert.ok(elapsed >= 100, `expected to wait for the slow miss (~120ms), took ${elapsed}ms`)
 })
 
 test('a rejected promise counts as a miss, not an unhandled rejection', async () => {
