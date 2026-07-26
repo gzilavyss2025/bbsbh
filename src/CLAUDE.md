@@ -94,7 +94,14 @@ read the linked ADRs before refactoring:
   `regulation` innings up front, unlocking extras one at a time as `revealedThrough`
   advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator
   (away row = tops, home row = bottoms, current half inked as selected); its
-  Back/Next controls cover the full unlocked range.
+  Back/Next controls cover the full unlocked range. Each extra half opens with
+  the **placed runner's own card** (`PlacedRunnerCard.jsx`, `kind: 'placed'`) —
+  the at-bat frame minus the pitch ladder and RBI chip, an `AR` pill where a
+  batting result would go, and `PlayDiamond`'s `placedAt` dotting the bases he
+  was given. Deliberately a THIRD entry kind: `nextStepBoundary` and this file's
+  `hasAtBat` guard both key on `kind === 'atbat'` and stay correct only if a
+  placement doesn't answer to it. Never surface the placement above the seal —
+  he is by rule the previous half's last batter.
 - **At-bat stepping**: a sealed half's floating-bar button splits into "Next
   at-bat" / "Rest of half" choices, stepping `PlayByPlay`'s cards one plate
   appearance at a time via a transient cursor (`atBatCountFor`,

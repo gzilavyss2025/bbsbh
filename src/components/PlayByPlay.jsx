@@ -20,6 +20,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
+import { PlacedRunnerCard } from './PlacedRunnerCard.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { UsagePips } from './UsagePips.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
@@ -106,9 +107,17 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // entry's own flag — not just the batter of the play that just happened —
   // correctly totals a multi-run play (a grand slam scores the batter's own
   // card plus the three baserunners' own earlier cards).
+  //
+  // The extra-innings placed runner counts here too, on his own 'placed' card.
+  // He has no plate appearance, but a run is a run — and before he had a card
+  // at all his was silently dropped from this sum, so every extra half he
+  // scored in built a linescore cell one short (verified against gamePk
+  // 777747's bottom 10: a walk-off grand slam totalled 3).
   useEffect(() => {
     if (!stepping) return
-    onRunsSoFar?.(entries.filter((e) => e.kind === 'atbat' && e.scored).length)
+    onRunsSoFar?.(
+      entries.filter((e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored).length,
+    )
   }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reports the pitcher actually on the mound as of what's visible right now
@@ -169,7 +178,13 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     <div className="pbp">
       {visibleEntries.map((entry, i) => {
         let node
-        if (entry.kind !== 'event') {
+        if (entry.kind === 'placed') {
+          // The extra-innings automatic runner. A card, not a notification —
+          // he's a live baserunner whose trip is notated like everyone
+          // else's — but not a plate appearance either, so it renders the
+          // at-bat frame with the pitch ladder and RBI chip taken away.
+          node = <PlacedRunnerCard entry={entry} />
+        } else if (entry.kind !== 'event') {
           node = (
             <AtBatCard
               entry={entry}
@@ -265,7 +280,11 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
         return (
           <div
             className="pbp__entry"
-            key={entry.kind === 'event' ? `event-${i}` : `${entry.batterId}-${i}`}
+            key={
+              entry.kind === 'event'
+                ? `event-${i}`
+                : `${entry.kind === 'placed' ? entry.runnerId : entry.batterId}-${i}`
+            }
           >
             {node}
           </div>

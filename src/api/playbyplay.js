@@ -1072,6 +1072,67 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
             })
           }
         }
+      } else if (et === 'runner_placed' && e.player?.id != null) {
+        // The extra-innings automatic runner, placed on 2nd to begin the half.
+        // He takes no plate appearance — no pitches, no result, no RBI — but
+        // he is a live baserunner from the first pitch on, so he gets a CARD
+        // rather than the sub-line under the leadoff batter he used to get.
+        // That card is the whole point: registering him in `originIndex` is
+        // what gives the advancement bookkeeping below somewhere to write his
+        // legs, his out on the bases, and his run. Without one, every bit of
+        // his trip was computed and then dropped on the floor for want of an
+        // origin card — no diamond, no run in the stepped tally, and a pinch
+        // runner FOR him resolving to nothing (see rootRunner/prAlias).
+        //
+        // `kind: 'placed'`, deliberately a THIRD kind rather than an at-bat
+        // card carrying a flag. Two guards elsewhere key on `kind === 'atbat'`
+        // and are correct as written only if a placement doesn't answer to it:
+        // nextStepBoundary (a placement is not a step of its own — it bundles
+        // forward with the leadoff plate appearance, exactly as today's event
+        // note does, so no already-stored step count changes meaning) and
+        // PlayByPlay's `hasAtBat` (a live half whose only fetched content is
+        // the placement must not read as a whole revealed half).
+        //
+        // Field paths verified live against gamePk 777747's 10th, both halves:
+        // `player.id` is the runner, `base` the base he's given (2), the event
+        // is a non-pitch `action` nested at the head of the half's first plate
+        // appearance. `runner_placed` stays in BASERUNNING_NOTE_EVENT_TYPES —
+        // callout-notes.js reads that same exported set — so the duplicate
+        // sub-line is suppressed by taking this branch first, not by narrowing
+        // the set out from under that caller.
+        const runnerId = e.player.id
+        const runner = resolveBatter(feed, battingSide, runnerId, positionEntering.get(runnerId))
+        const base = e.base ?? 2
+        const cardIndex = entries.length
+        entries.push({
+          kind: 'placed',
+          runnerId,
+          runner,
+          base,
+          // The scorer's mark for the automatic runner, in the slot a batting
+          // result would occupy. Books differ (AR / XIR / GR); AR is the most
+          // widely used, and the card's own sentence explains it besides.
+          code: 'AR',
+          descSegments: linkifyNames(
+            trimLeadingName(e.details?.description, runner.fullName),
+            nameIndex,
+          ),
+          outNumber: null,
+          outAt: null,
+          outCode: '',
+          // Seeded to the base he's GIVEN, not 0 — that's what makes his first
+          // real leg (2nd → 3rd) register as a leg at 3 instead of being
+          // discarded as "not past where he already stands". The two legs
+          // below it are never notated: he didn't run them, and the diamond
+          // draws them as the dotted ghost path instead (PlayDiamond's
+          // `placedAt`).
+          reached: base,
+          scored: false,
+          earned: true,
+          legNotations: {},
+        })
+        originIndex.set(runnerId, cardIndex)
+        progress.set(runnerId, base)
       } else if (BASERUNNING_NOTE_EVENT_TYPES.has(et) && e.details?.description) {
         // `e.player.id` on a baserunning playEvent is the runner it's about (the
         // stealer / picked-off man) — verified against a live steal — so a

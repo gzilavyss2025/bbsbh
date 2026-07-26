@@ -103,7 +103,13 @@ spoiler-free only when restricted to the half the user has reached
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches
-  DO count.
+  DO count. `computeHalfInningFeed` emits three entry kinds — `atbat`, `event`,
+  and `placed`, the extra-innings automatic runner. His card exists so he can
+  enter `originIndex` with `progress` seeded to the base he was given: that
+  registration is what lets the shared advancement bookkeeping write his legs,
+  his out on the bases, and his run onto a card, instead of computing the whole
+  trip and discarding it for want of an origin. See
+  `.scratch/placed-runner-card/PRD.md`.
 
 Related research docs (read before wiring a new source):
 - `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open

@@ -7786,6 +7786,33 @@ body {
   white-space: nowrap;
 }
 
+/* The extra-innings automatic runner's mark ("AR"), in the top-right slot the
+   RBI chip would take on an at-bat card — where a scorer writes it, in the
+   place a batting result would otherwise go. Penciled graphite in the pill
+   shape the roster/lineup pills already use (.rookiepill), deliberately NOT
+   the RBI chip's green: nothing here was earned. The dashed border is the
+   same given-not-run motif the diamond's dotted ghost path carries. See
+   PlacedRunnerCard.jsx. */
+/* The placement card itself: the at-bat card's frame — its diamond has to sit
+   in the same place and read the same way — with a dashed leading edge, the
+   one structural cue that this row isn't a plate appearance. */
+.pbp__card--placed {
+  border-left: var(--bw-heavy) dashed var(--graphite-soft);
+}
+
+.pbp__placed {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  background: var(--bg-page);
+  border: var(--bw-hair) dashed var(--graphite-soft);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
 /* Numbers Game #22-style ball/strike lanes beside the diamond: two adjacent
    thin columns — a light "ball" lane and a shaded "strike" lane — stretched
    to a common height, each listing its pitch numbers stacked from the top
