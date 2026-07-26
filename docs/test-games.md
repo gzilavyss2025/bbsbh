@@ -72,6 +72,25 @@ Good for anything that assumes a game's `gameDate` maps cleanly to a single
 calendar day of play, and for boxscore/pitcher-line completeness across a
 game that spanned a multi-day break.
 
+## Sacrifice the batter was not retired on
+
+**2026-07-25 BLX @ CHA (AA, sportId 12)** — gamePk `818035`
+Route base: `/07252026/blxcha/`
+
+Bottom of the 8th (atBatIndex 70): "Carlos Sanchez hits a sacrifice bunt.
+Fielding error by third baseman Andrew Fischer. Kien Vu to 2nd. Carlos Sanchez
+to 1st." A sacrifice is still credited when a misplay is all that kept the
+batter from being retired, so the feed carries `eventType: sac_bunt` with
+`result.isOut: false` and a lone `f_fielding_error` credit on the batter's own
+leg — no putout, no out number. Good for `scorebookCode`'s sacrifice branch
+(`SAC E5`, a reach, not the "SAC 5U" unassisted putout the error credit used to
+be mistaken for) and for anything that assumes a sacrifice means an out.
+
+Its no-error twin is **2026-07-20 SF @ KC** — gamePk `824087`, bottom of the
+9th: two `sac_bunt` plays where nobody was retired and no error was charged
+(the defense never played the batter), each carrying only an `f_fielded_ball`
+credit → `SAC FC`.
+
 ## MiLB thin-data example
 
 **2025-07-06 TOL @ COL (AAA, sportId 11)** — gamePk `781572`

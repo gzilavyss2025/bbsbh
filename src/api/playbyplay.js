@@ -442,6 +442,45 @@ function fullChain(play) {
   return codes.join('-')
 }
 
+// The fielders who actually RETIRED somebody on this runner's leg, in feed
+// order — his putout and assist credits, and nothing else. Everything else the
+// feed hangs on `credits` records no out at all: `f_fielding_error` when the
+// fielder booted it, `f_fielded_ball` when he picked the ball up and made no
+// play. Letting those into the fielding chain invents a putout nobody made —
+// a sacrifice bunt the third baseman threw away came out "SAC 5U", which reads
+// as an unassisted putout BY that third baseman on a play where every runner
+// was safe (verified against gamePk 818035's bottom 8th; the no-error twin is
+// gamePk 824087's bottom 9th, an f_fielded_ball-only bunt that read "SAC 2U").
+// Exact-matched rather than a substring test on "assist" for the same reason
+// runnerOutCode is: an outfielder's throw carries `f_assist_of` alongside his
+// `f_assist` and would double him up in the chain.
+function outChain(runner) {
+  return (runner?.credits ?? [])
+    .filter((c) => c.credit === 'f_putout' || c.credit === 'f_assist')
+    .map((c) => c.position?.code ?? '')
+}
+
+// "E5" for whichever fielder was charged with an error on this runner's own
+// leg; '' when none was.
+function errorCodeFor(runner) {
+  const errCred = (runner?.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
+  return errCred ? `E${errCred.position?.code ?? ''}` : ''
+}
+
+// The mark for a SACRIFICE the batter was not retired on. He still gets the
+// sacrifice — the rule credits one when a runner advances on a bunt or fly the
+// batter would have been put out on but for the misplay — but there is no
+// putout to pencil, so the tag carries how he REACHED instead: the charged
+// error ("SAC E5"), or "FC" when the defense simply never played him (no out,
+// no error). Same shape as the reached-on-a-strikeout mark ("K E2", "K WP")
+// and, like it, a REACH kind: an out code is centered inside the diamond, and
+// centering one here contradicted a diamond already showing the batter safe at
+// first.
+function sacReachCode(tag, batterRunner) {
+  const err = errorCodeFor(batterRunner)
+  return { code: `${tag} ${err || 'FC'}`, codeKind: err ? 'error' : 'reach' }
+}
+
 // The Numbers Game #22-style scorebook denotation for a batter's own plate
 // appearance — shown above the per-play diamond. Either how he reached (1B,
 // 2B, HR, BB, E6, FC…) or how he was retired (K, F8, L7, 6-3…). Returns a
@@ -453,11 +492,10 @@ function scorebookCode(play, batterRunner) {
   if (REACH_CODES[et]) return { code: REACH_CODES[et], codeKind: HIT_EVENTS.has(et) ? 'hit' : 'reach' }
 
   const desc = play.result?.description ?? ''
-  const chain = (batterRunner?.credits ?? []).map((c) => c.position?.code ?? '')
+  const chain = outChain(batterRunner)
 
   if (et === 'field_error') {
-    const errPos = (batterRunner?.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
-    return { code: `E${errPos?.position?.code ?? ''}`, codeKind: 'error' }
+    return { code: errorCodeFor(batterRunner) || 'E', codeKind: 'error' }
   }
   // Every strikeout is a K — swinging, on a foul tip, on a foul bunt, a checked
   // swing — keyed off the eventType, not one description phrasing (a foul-tip K
@@ -481,10 +519,7 @@ function scorebookCode(play, batterRunner) {
       let how = ''
       if (/wild pitch/i.test(desc)) how = 'WP'
       else if (/passed ball/i.test(desc)) how = 'PB'
-      else {
-        const errPos = (batterRunner.credits ?? []).find((c) => /error/.test(c.credit ?? ''))
-        if (errPos) how = `E${errPos.position?.code ?? ''}`
-      }
+      else how = errorCodeFor(batterRunner)
       return { code: how ? `K ${how}` : 'K', codeKind: 'reach' }
     }
     if (/called out on strikes/i.test(desc)) return { calledLooking: true, codeKind: 'out' }
@@ -496,10 +531,17 @@ function scorebookCode(play, batterRunner) {
   // without it a sac fly's "hits a sacrifice fly to center fielder…" missed the
   // /flies (out|into)/ test and fell through to the unassisted-putout branch,
   // coming out as a bogus infield "8U".
+  // Either can also come back with the batter SAFE — a sacrifice is credited
+  // on a misplay that would otherwise have retired him — so both check that
+  // before writing an out (see sacReachCode). Same test the strikeout branch
+  // above uses.
+  const reachedOnSac = batterRunner && !batterRunner.movement?.isOut && !!batterRunner.movement?.end
   if (SAC_FLY_EVENTS.has(et) || /sacrifice fly/i.test(desc)) {
+    if (reachedOnSac) return sacReachCode('SF', batterRunner)
     return { code: `SF${chain[chain.length - 1] ?? ''}`, codeKind: 'out' }
   }
   if (SAC_BUNT_EVENTS.has(et) || /sacrifice (bunt|hit)/i.test(desc)) {
+    if (reachedOnSac) return sacReachCode('SAC', batterRunner)
     const c = chain.length === 1 ? `${chain[0]}U` : chain.join('-')
     return { code: c ? `SAC ${c}` : 'SAC', codeKind: 'out' }
   }
