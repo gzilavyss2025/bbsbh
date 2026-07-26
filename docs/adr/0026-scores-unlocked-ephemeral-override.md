@@ -197,9 +197,16 @@ the shell so each poll fetched genuinely fresh data:
 ## Known gaps (deliberately recorded, not yet closed)
 
 - **The sync component itself is untested end-to-end.** Its merge logic is pinned
-  by unit tests and the endpoint is smoke-tested (501 unconfigured, 405 on a bad
-  method), but the actual two-device round trip needs a Clerk-configured deploy,
-  which the dev sandbox has no way to stand up. Watch the first real sign-in.
+  by unit tests and the endpoint now has request-level coverage against the Node
+  shape Vercel really passes (`test/api-handlers.test.js`), but the actual
+  two-device round trip needs a Clerk-configured deploy, which the dev sandbox
+  has no way to stand up. Watch the first real sign-in.
+  - The first deploy of this endpoint 500'd on every request, along with
+    `api/copy.js` and the long-shipped `api/reveal.js`: all three were written
+    against the Web fetch request shape while declaring the Node runtime. See
+    ADR-0022's amendment and `api/_lib/nodeHandler.js`. The reason it wasn't
+    caught pre-merge is worth remembering — the smoke test called the handler
+    with a `Request`, which is not what production passes.
 - **No marker for a locked-in day.** A past day you spoiled renders open with
   nothing indicating that you're the reason. Correct (there's nothing to switch
   off) but a quiet note on that day's slate might read better than silence.

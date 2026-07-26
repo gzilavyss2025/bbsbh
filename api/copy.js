@@ -24,6 +24,7 @@
 import { verifyToken } from '@clerk/backend'
 import { Redis } from '@upstash/redis'
 import { sanitizeOverrides } from '../src/copy/registry.js'
+import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -39,11 +40,8 @@ const COPY_KEY = 'copy:overrides'
 const COPY_HISTORY_KEY = 'copy:history'
 const COPY_HISTORY_MAX = 20
 
-function jsonResponse(body, status = 200, extraHeaders = {}) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json', ...extraHeaders },
-  })
+function reply(res, body, status = 200, extraHeaders = {}) {
+  return jsonResponse(res, body, status, extraHeaders)
 }
 
 function getRedis() {
@@ -89,7 +87,7 @@ function authorizedParties() {
 async function authenticateAdmin(req) {
   const secretKey = process.env.CLERK_SECRET_KEY
   if (!secretKey) return null
-  const auth = req.headers.get('authorization') || ''
+  const auth = getHeader(req, 'authorization')
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
   if (!token) return null
   const { data, errors } = await verifyToken(token, {
@@ -101,22 +99,22 @@ async function authenticateAdmin(req) {
   return data.sub
 }
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return jsonResponse({ error: 'method not allowed' }, 405)
+    return reply(res, { error: 'method not allowed' }, 405)
   }
 
   const redis = getRedis()
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = requestUrl(req)
   const wantHistory = searchParams.get('history') === '1'
 
   if (req.method === 'GET') {
     // The history list is admin-only (it records who changed what, when); the
     // current copy map is public.
     if (wantHistory) {
-      if (!redis) return jsonResponse({ error: 'copy store not configured' }, 501)
+      if (!redis) return reply(res, { error: 'copy store not configured' }, 501)
       const userId = await authenticateAdmin(req)
-      if (!userId) return jsonResponse({ error: 'forbidden' }, 403)
+      if (!userId) return reply(res, { error: 'forbidden' }, 403)
       let entries = []
       try {
         const raw = (await redis.lrange(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)) || []
@@ -133,7 +131,7 @@ export default async function handler(req) {
       } catch {
         entries = []
       }
-      return jsonResponse({ history: entries }, 200, { 'cache-control': 'private, no-store' })
+      return reply(res, { history: entries }, 200, { 'cache-control': 'private, no-store' })
     }
 
     // Public read. No Redis -> empty overrides, app uses defaults.
@@ -145,7 +143,7 @@ export default async function handler(req) {
         stored = {}
       }
     }
-    return jsonResponse(
+    return reply(res, 
       { copy: sanitizeOverrides(stored) },
       200,
       // Copy is global and non-secret: let the CDN and browser hold it briefly
@@ -156,16 +154,14 @@ export default async function handler(req) {
   }
 
   // POST — admin write.
-  if (!redis) return jsonResponse({ error: 'copy store not configured' }, 501)
+  if (!redis) return reply(res, { error: 'copy store not configured' }, 501)
 
   const userId = await authenticateAdmin(req)
-  if (!userId) return jsonResponse({ error: 'forbidden' }, 403)
+  if (!userId) return reply(res, { error: 'forbidden' }, 403)
 
-  let body
-  try {
-    body = await req.json()
-  } catch {
-    return jsonResponse({ error: 'invalid body' }, 400)
+  const body = await readJsonBody(req)
+  if (body == null) {
+    return reply(res, { error: 'invalid body' }, 400)
   }
 
   // The client sends the FULL desired override map (only non-default fields).
@@ -189,8 +185,8 @@ export default async function handler(req) {
     if (staleKeys.length) tx.hdel(COPY_KEY, ...staleKeys)
     await tx.exec()
   } catch {
-    return jsonResponse({ error: 'write failed' }, 502)
+    return reply(res, { error: 'write failed' }, 502)
   }
 
-  return jsonResponse({ copy: clean }, 200, { 'cache-control': 'no-store' })
+  return reply(res, { copy: clean }, 200, { 'cache-control': 'no-store' })
 }

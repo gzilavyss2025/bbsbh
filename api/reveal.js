@@ -12,6 +12,7 @@
 
 import { verifyToken } from '@clerk/backend'
 import { Redis } from '@upstash/redis'
+import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 
 // Node.js runtime, NOT edge (unlike og.js/preview.js) — @clerk/backend's
 // verifyToken pulls in @clerk/shared internals that Vercel's edge sandbox
@@ -21,13 +22,10 @@ import { Redis } from '@upstash/redis'
 // supports the same as edge — only the `config.runtime` value changes.
 export const config = { runtime: 'nodejs' }
 
-function jsonResponse(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    // Per-user, auth-gated data — never let a shared cache (or the browser)
-    // hold one user's reveal progress and hand it to another request.
-    headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
-  })
+// Per-user, auth-gated data — never let a shared cache (or the browser) hold one
+// user's reveal progress and hand it to another request.
+function reply(res, body, status = 200) {
+  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
 }
 
 // A revealedThrough is a half-index; even a marathon extra-inning game stays
@@ -50,7 +48,7 @@ return cur`
 async function authenticate(req) {
   const secretKey = process.env.CLERK_SECRET_KEY
   if (!secretKey) return null
-  const auth = req.headers.get('authorization') || ''
+  const auth = getHeader(req, 'authorization')
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
   if (!token) return null
   const { data, errors } = await verifyToken(token, { secretKey })
@@ -93,34 +91,34 @@ function sanitizeSnapshot(game) {
   }
 }
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return jsonResponse({ error: 'method not allowed' }, 405)
+    return reply(res, { error: 'method not allowed' }, 405)
   }
 
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = requestUrl(req)
   const wantRecent = searchParams.get('recent') === '1'
   const gamePk = searchParams.get('gamePk')
   if (!wantRecent && (!gamePk || !/^\d+$/.test(gamePk))) {
-    return jsonResponse({ error: 'gamePk required' }, 400)
+    return reply(res, { error: 'gamePk required' }, 400)
   }
 
   const redis = getRedis()
-  if (!redis) return jsonResponse({ error: 'sync not configured' }, 501)
+  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
 
   const userId = await authenticate(req)
-  if (!userId) return jsonResponse({ error: 'unauthorized' }, 401)
+  if (!userId) return reply(res, { error: 'unauthorized' }, 401)
 
   // GET ?recent=1 — the scorebook index, newest first.
   if (wantRecent) {
-    if (req.method !== 'GET') return jsonResponse({ error: 'method not allowed' }, 405)
+    if (req.method !== 'GET') return reply(res, { error: 'method not allowed' }, 405)
     const all = (await redis.hgetall(`scorebook:${userId}`)) || {}
     const games = Object.entries(all)
       .map(([pk, v]) => (v && typeof v === 'object' ? { gamePk: Number(pk), ...v } : null))
       .filter(Boolean)
       .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
       .slice(0, 12)
-    return jsonResponse({ games })
+    return reply(res, { games })
   }
 
   const key = `reveal:${userId}:${gamePk}`
@@ -128,19 +126,17 @@ export default async function handler(req) {
   if (req.method === 'GET') {
     const current = await redis.get(key)
     const revealedThrough = Number.isInteger(current) ? current : -1
-    return jsonResponse({ revealedThrough })
+    return reply(res, { revealedThrough })
   }
 
   // POST — ratchet: the stored value can only ever increase.
-  let body
-  try {
-    body = await req.json()
-  } catch {
-    return jsonResponse({ error: 'invalid body' }, 400)
+  const body = await readJsonBody(req)
+  if (body == null) {
+    return reply(res, { error: 'invalid body' }, 400)
   }
   const incoming = body?.revealedThrough
   if (!Number.isInteger(incoming) || incoming < 0 || incoming > MAX_REVEALED_THROUGH) {
-    return jsonResponse({ error: 'revealedThrough out of range' }, 400)
+    return reply(res, { error: 'revealedThrough out of range' }, 400)
   }
   const next = Number(await redis.eval(RATCHET_SCRIPT, [key], [incoming]))
 
@@ -162,5 +158,5 @@ export default async function handler(req) {
     if (stale.length) await redis.hdel(bookKey, ...stale)
   }
 
-  return jsonResponse({ revealedThrough: next })
+  return reply(res, { revealedThrough: next })
 }

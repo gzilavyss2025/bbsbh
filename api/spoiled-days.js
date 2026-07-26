@@ -32,24 +32,22 @@
 import { verifyToken } from '@clerk/backend'
 import { Redis } from '@upstash/redis'
 import { isDayState, isDayString, MAX_SPOILED_DAYS } from '../src/lib/spoiledDays.js'
+import { getHeader, jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
 export const config = { runtime: 'nodejs' }
 
-function jsonResponse(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    // Per-user, auth-gated data — never let a shared cache (or the browser) hold
-    // one user's consent record and hand it to another request.
-    headers: { 'content-type': 'application/json', 'cache-control': 'private, no-store' },
-  })
+// Per-user, auth-gated data — never let a shared cache (or the browser) hold one
+// user's consent record and hand it to another request.
+function reply(res, body, status = 200) {
+  return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
 }
 
 async function authenticate(req) {
   const secretKey = process.env.CLERK_SECRET_KEY
   if (!secretKey) return null
-  const auth = req.headers.get('authorization') || ''
+  const auth = getHeader(req, 'authorization')
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
   if (!token) return null
   const { data, errors } = await verifyToken(token, { secretKey })
@@ -86,16 +84,16 @@ async function trim(redis, key, stored) {
   if (stale.length) await redis.hdel(key, ...stale)
 }
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return jsonResponse({ error: 'method not allowed' }, 405)
+    return reply(res, { error: 'method not allowed' }, 405)
   }
 
   const redis = getRedis()
-  if (!redis) return jsonResponse({ error: 'sync not configured' }, 501)
+  if (!redis) return reply(res, { error: 'sync not configured' }, 501)
 
   const userId = await authenticate(req)
-  if (!userId) return jsonResponse({ error: 'unauthorized' }, 401)
+  if (!userId) return reply(res, { error: 'unauthorized' }, 401)
 
   const key = `spoiled:${userId}`
 
@@ -106,20 +104,18 @@ export default async function handler(req) {
     } catch {
       stored = {}
     }
-    return jsonResponse({ days: stored })
+    return reply(res, { days: stored })
   }
 
   // POST — publish this device's decision about ONE day.
-  let body
-  try {
-    body = await req.json()
-  } catch {
-    return jsonResponse({ error: 'invalid body' }, 400)
+  const body = await readJsonBody(req)
+  if (body == null) {
+    return reply(res, { error: 'invalid body' }, 400)
   }
   const day = body?.day
   const state = body?.state
   if (!isDayString(day) || !isDayState(state)) {
-    return jsonResponse({ error: 'day and state required' }, 400)
+    return reply(res, { error: 'day and state required' }, 400)
   }
 
   await redis.hset(key, { [day]: state })
@@ -130,5 +126,5 @@ export default async function handler(req) {
   } catch {
     stored = { [day]: state }
   }
-  return jsonResponse({ days: stored })
+  return reply(res, { days: stored })
 }
