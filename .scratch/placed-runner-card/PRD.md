@@ -1,7 +1,8 @@
 # Placed runner in extra innings — a card of his own
 
-Status: needs-triage
-Research pass, July 2026. No product code changed yet.
+Status: ready-for-human
+Research pass, July 2026 — **implemented in the same PR**; §7 records what
+shipped and how the open questions in §6 were answered.
 
 ## The ask
 
@@ -224,6 +225,31 @@ Nothing here moves a seal.
    follow-up?
 4. This is a MiLB-visible feature (the screenshot is AA). Placement rules match
    at every level bbsbh covers, so no level gating is proposed — confirm.
+
+## 7. What shipped
+
+Built in the same PR as this research. The plan in §4 held; the deltas worth
+recording:
+
+- **`AR`, as a pill, in the RBI chip's top-right slot** — not the code slot over
+  the diamond. That's where a scorer writes the mark (in the place a batting
+  result would go) and it keeps the diamond uncluttered. Penciled graphite with
+  a dashed border, deliberately not the RBI chip's green: nothing was earned
+  here. The card also takes a dashed leading edge, the one structural cue that
+  the row isn't a plate appearance.
+- **The scored diamond fills solid, with the ghost legs overdrawn in paper
+  colour** (§3's recommendation, not the partial fill). Verified against the
+  real thing in both states: stranded reads as dotted-then-inked, scored reads
+  as a filled diamond with the given bases still legible through it, inside the
+  red unearned ring the feed's `earned: false` fires on its own.
+- **The printable scorecard sheet (`AtBatBox`/`ScorecardSheet`) is untouched** —
+  a separate surface, left for a follow-up. Question 3 in §6 is still open.
+- Nothing needed doing for the batted-around case, the pinch-runner case, or the
+  stepCap gate. All three fell out of `originIndex` registration, and all three
+  have tests pinning them (`test/placed-runner.test.js`, 11 cases).
+
+Verified in the browser against gamePk 777747, both halves of the 10th — see
+`docs/test-games.md`.
 
 ## Sources
 

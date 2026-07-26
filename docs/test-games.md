@@ -61,6 +61,16 @@ Bottom of the 10th: Christian Yelich hits a walk-off grand slam. Final MIL
 `InningViewer`) plus a game that ends mid-inning (no bottom-of-9 tie regular
 ending) combined with a big single-play swing in win probability.
 
+Also the canonical **placed runner** game — both halves of the 10th, the two
+cases side by side. Top: Trevor Story is placed at 2nd, takes 3rd on Abraham
+Toro's single, and is stranded there (dotted ghost path, one inked leg,
+`1B⁸`). Bottom: Joey Ortiz is placed, takes 3rd, and scores on the slam — his
+run alone rides `earned: false` (the official-scoring rule treats the
+automatic runner as having reached on an error), so his is the circled
+unearned diamond. The bottom half is also the regression case for the run
+tally: four runs score, and before the placed runner had a card of his own the
+stepped linescore cell counted three.
+
 ## Suspended and resumed game
 
 **2025-05-19 CLE @ MIN** (suspended, resumed 2025-05-21) — gamePk `777861`

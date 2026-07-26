@@ -69,9 +69,23 @@ function perpStroke(a, b, p, len = 6) {
   ]
 }
 
-export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, size = 108 }) {
+// The extra-innings automatic runner is GIVEN his first bases — he never ran
+// them — so the scorer's convention leaves that stretch of the diamond
+// un-inked: a dotted path from home to the base he was placed on, with
+// everything beyond it drawn normally. `placedAt` is that base number (2 under
+// the current rule; kept a base rather than a boolean so a different placement
+// needs no second prop). On a run the polygon still fills solid — a filled
+// diamond means "he scored" everywhere else in the app and that has to hold —
+// with the ghost legs overdrawn on top in paper colour so the given bases stay
+// legible through the fill. His run is unearned by rule, so the red circle is
+// already there reinforcing it.
+const GHOST_DASH = '3 3'
+
+export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, placedAt = null, size = 108 }) {
   const { traveled: outTraveled, legA, legB } = outLegBases(reached, outAt)
   const traveled = scored ? 4 : outTraveled
+  // Legs [0, ghostLegs) were given, not run: dotted, never inked solid.
+  const ghostLegs = placedAt != null ? Math.min(placedAt, 4) : 0
   // An UNEARNED run is circled, the scorer's convention — a red ring around the
   // solid diamond. Only meaningful when he scored.
   const unearned = scored && !earned
@@ -123,20 +137,37 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
             strokeWidth={1.5}
             strokeLinejoin="round"
           />
-          {Array.from({ length: traveled }).map((_, i) => (
-            <line
-              key={i}
-              x1={BASES[i][0]}
-              y1={BASES[i][1]}
-              x2={BASES[i + 1][0]}
-              y2={BASES[i + 1][1]}
-              stroke="var(--graphite)"
-              strokeWidth={3}
-              strokeLinecap="round"
-            />
-          ))}
+          {Array.from({ length: traveled }).map((_, i) =>
+            i < ghostLegs ? null : (
+              <line
+                key={i}
+                x1={BASES[i][0]}
+                y1={BASES[i][1]}
+                x2={BASES[i + 1][0]}
+                y2={BASES[i + 1][1]}
+                stroke="var(--graphite)"
+                strokeWidth={3}
+                strokeLinecap="round"
+              />
+            ),
+          )}
         </>
       )}
+      {/* The given bases. Drawn last so they read over a scored diamond's
+          solid fill (paper colour there, graphite over the open outline). */}
+      {Array.from({ length: ghostLegs }).map((_, i) => (
+        <line
+          key={`ghost-${i}`}
+          x1={BASES[i][0]}
+          y1={BASES[i][1]}
+          x2={BASES[i + 1][0]}
+          y2={BASES[i + 1][1]}
+          stroke={scored ? 'var(--paper-2)' : 'var(--graphite-soft)'}
+          strokeWidth={scored ? 2 : 2.5}
+          strokeLinecap="round"
+          strokeDasharray={GHOST_DASH}
+        />
+      ))}
       {outHalf && (
         <line
           x1={outHalf[0][0]}
