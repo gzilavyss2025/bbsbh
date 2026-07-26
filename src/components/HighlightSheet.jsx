@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { highlightPlaybacks } from '../api/highlights.js'
+import { ModalPortal } from './ModalPortal.jsx'
 
 // The video-highlight bottom sheet: opened from a "Watch highlight" button on
 // an already-revealed play (see PlayByPlay.jsx). Reuses the app's existing
@@ -7,6 +8,11 @@ import { highlightPlaybacks } from '../api/highlights.js'
 // than inventing new gesture/animation mechanics — dismiss via backdrop tap,
 // Escape, or the close button; focus moves into the sheet on open and back to
 // the trigger on close.
+//
+// The ModalPortal wrapper is not optional: this sheet is declared inside a
+// half-inning page, whose `.turnscene` ancestor isolates its stacking context,
+// so without the portal the floating Refresh pill and reveal bar paint over
+// the video (and eat taps aimed at it). See ModalPortal.jsx.
 //
 // Spoiler note: by the time this is open, the play it belongs to is already
 // revealed prose on the card above it, so the clip's own title/description
@@ -34,35 +40,37 @@ export function HighlightSheet({ item, onClose }) {
   const title = item.title || item.headline || 'Highlight'
 
   return (
-    <div
-      className="scrim"
-      onClick={(e) => e.target.classList.contains('scrim') && onClose()}
-    >
-      <div className="sheet hlsheet" role="dialog" aria-modal="true" aria-label={title}>
-        <div className="hlsheet__head">
-          <h2 className="sheet__title">{title}</h2>
-          <button ref={closeRef} className="hlsheet__close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
+    <ModalPortal>
+      <div
+        className="scrim"
+        onClick={(e) => e.target.classList.contains('scrim') && onClose()}
+      >
+        <div className="sheet hlsheet" role="dialog" aria-modal="true" aria-label={title}>
+          <div className="hlsheet__head">
+            <h2 className="sheet__title">{title}</h2>
+            <button ref={closeRef} className="hlsheet__close" onClick={onClose} aria-label="Close">
+              ✕
+            </button>
+          </div>
 
-        <div className="hlsheet__video">
-          {hls || mp4 ? (
-            // playsInline keeps this from taking over the whole screen on
-            // iPhone Safari; no poster (see the spoiler note above). HLS
-            // plays natively in Safari, so no hls.js dependency is needed for
-            // this app's primary target — mp4Avc is the fallback <source>.
-            <video controls playsInline preload="none">
-              {hls && <source src={hls} type="application/vnd.apple.mpegurl" />}
-              {mp4 && <source src={mp4} type="video/mp4" />}
-            </video>
-          ) : (
-            <p className="hlsheet__empty">This clip isn’t playable right now.</p>
-          )}
-        </div>
+          <div className="hlsheet__video">
+            {hls || mp4 ? (
+              // playsInline keeps this from taking over the whole screen on
+              // iPhone Safari; no poster (see the spoiler note above). HLS
+              // plays natively in Safari, so no hls.js dependency is needed for
+              // this app's primary target — mp4Avc is the fallback <source>.
+              <video controls playsInline preload="none">
+                {hls && <source src={hls} type="application/vnd.apple.mpegurl" />}
+                {mp4 && <source src={mp4} type="video/mp4" />}
+              </video>
+            ) : (
+              <p className="hlsheet__empty">This clip isn’t playable right now.</p>
+            )}
+          </div>
 
-        {item.description && <p className="hlsheet__desc">{item.description}</p>}
+          {item.description && <p className="hlsheet__desc">{item.description}</p>}
+        </div>
       </div>
-    </div>
+    </ModalPortal>
   )
 }

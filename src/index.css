@@ -5672,7 +5672,13 @@ body {
    as before this feature existed); a preview of the destination half, only
    ever present mid-turn, is absolutely positioned to sit exactly underneath
    it. Stacking is local to .turnscene and kept below .pagenav's z-index: 20
-   (the floating bar must never be covered by an in-flight turn). */
+   (the floating bar must never be covered by an in-flight turn).
+
+   Corollary: `isolation: isolate` traps EVERY descendant z-index under this
+   box, a `.scrim` dialog's 100 included — so a modal opened from inside a
+   half-inning page paints below the floating bar unless it portals out to
+   <body> first. That's what ModalPortal.jsx is for; the highlight sheet, the
+   pitch-zone modal, and the pitch-color key all go through it. */
 .turnscene {
   position: relative;
   isolation: isolate;

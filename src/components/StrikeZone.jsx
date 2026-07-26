@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { TeamLogo } from './TeamLogo.jsx'
+import { ModalPortal } from './ModalPortal.jsx'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS
@@ -286,31 +287,35 @@ function PitchColorsModal({ onClose }) {
     }
   }, [])
 
+  // Portalled for the same stacking-context reason as StrikeZoneModal below —
+  // the "Pitch colors" button sits in the half's header, inside `.turnscene`.
   return (
-    <div
-      className="scrim scrim--center"
-      onClick={(e) => e.target.classList.contains('scrim') && onClose()}
-    >
-      <div className="pcmodal" role="dialog" aria-modal="true" aria-label="Pitch color key">
-        <div className="pcmodal__head">
-          <span className="pcmodal__ttl">Pitch colors</span>
-          <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+    <ModalPortal>
+      <div
+        className="scrim scrim--center"
+        onClick={(e) => e.target.classList.contains('scrim') && onClose()}
+      >
+        <div className="pcmodal" role="dialog" aria-modal="true" aria-label="Pitch color key">
+          <div className="pcmodal__head">
+            <span className="pcmodal__ttl">Pitch colors</span>
+            <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
+              ✕
+            </button>
+          </div>
+          <p className="pcmodal__hint">
+            How every pitch dot — in the sequence ladder and each strike-zone plot — is colored.
+          </p>
+          <ul className="pcmodal__list">
+            {PITCH_CATS.map((c) => (
+              <li className="pcmodal__row" key={c.cat}>
+                <i className={`strikezone__sw strikezone__sw--${c.cat}`} />
+                {c.label}
+              </li>
+            ))}
+          </ul>
         </div>
-        <p className="pcmodal__hint">
-          How every pitch dot — in the sequence ladder and each strike-zone plot — is colored.
-        </p>
-        <ul className="pcmodal__list">
-          {PITCH_CATS.map((c) => (
-            <li className="pcmodal__row" key={c.cat}>
-              <i className={`strikezone__sw strikezone__sw--${c.cat}`} />
-              {c.label}
-            </li>
-          ))}
-        </ul>
       </div>
-    </div>
+    </ModalPortal>
   )
 }
 
@@ -319,6 +324,10 @@ function PitchColorsModal({ onClose }) {
 // (backdrop tap / close button / Escape) and the same focus hand-off. All the
 // content it shows is reveal-only pitch detail already in the revealed card, so
 // the modal carries nothing the seal hasn't released.
+//
+// Portalled to <body>: an at-bat card lives inside a half-inning page, whose
+// `.turnscene` ancestor isolates its stacking context, so an unportalled scrim
+// renders BELOW the fixed floating bar (`.pagenav`). See ModalPortal.jsx.
 export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -337,28 +346,30 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
 
   const name = `${batter?.last ?? ''}${batter?.first ? `, ${batter.first}` : ''}`.trim()
   return (
-    <div
-      className="scrim scrim--center"
-      onClick={(e) => e.target.classList.contains('scrim') && onClose()}
-    >
-      <div className="szmodal" role="dialog" aria-modal="true" aria-label={`Pitch zone for ${name || 'this at-bat'}`}>
-        <div className="szmodal__head">
-          <div className="szmodal__ttl">
-            <span className="szmodal__eyebrow">Pitch zone</span>
-            <span className="szmodal__name">{name || 'At-bat'}</span>
-            {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
+    <ModalPortal>
+      <div
+        className="scrim scrim--center"
+        onClick={(e) => e.target.classList.contains('scrim') && onClose()}
+      >
+        <div className="szmodal" role="dialog" aria-modal="true" aria-label={`Pitch zone for ${name || 'this at-bat'}`}>
+          <div className="szmodal__head">
+            <div className="szmodal__ttl">
+              <span className="szmodal__eyebrow">Pitch zone</span>
+              <span className="szmodal__name">{name || 'At-bat'}</span>
+              {pitcher ? <span className="szmodal__vs">vs {pitcher}</span> : null}
+            </div>
+            <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
+              ✕
+            </button>
           </div>
-          <button ref={closeRef} className="szmodal__close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+          <div className="szmodal__body">
+            <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
+            <PitchList pitchDetails={pitchDetails} />
+          </div>
+          <StrikeZoneLegend />
         </div>
-        <div className="szmodal__body">
-          <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
-          <PitchList pitchDetails={pitchDetails} />
-        </div>
-        <StrikeZoneLegend />
       </div>
-    </div>
+    </ModalPortal>
   )
 }
 
