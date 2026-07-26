@@ -126,3 +126,23 @@ progress, and it needed a different merge rule: this ADR's ratchet works because
 mark only moves one way, whereas a day set has to be able to move back (the
 same-day undo), so it syncs as a per-day `'on' | 'off'` state map rather than a
 max or a union. See ADR-0026.
+
+**Amended (2026-07-25): the endpoint never actually ran in production.**
+`api/reveal.js` was written against the Web fetch shape — `new URL(req.url)`,
+`req.headers.get()`, `await req.json()`, `return new Response()` — but declares
+`export const config = { runtime: 'nodejs' }`. Vercel's Node runtime passes
+Node's `(req, res)`, where `req.url` is a bare path, so every request died at the
+first line of real work with `TypeError: Invalid URL` (`input:
+'/api/reveal?gamePk=1'`). Multi-device sync had therefore never worked on a
+deploy, from the day it shipped.
+
+It hid for so long because the client treats sync as strictly optional:
+`RevealCloudSync` swallows any error and leaves localStorage authoritative, so a
+500 is indistinguishable from "this deploy has no sync configured", which is a
+supported state. **A graceful degrade can mask a hard failure indefinitely** —
+these endpoints need request-level tests (`test/api-handlers.test.js`) and a
+post-deploy check, not just a module-level import smoke test, which exercises a
+request shape production never passes.
+
+Fixed by `api/_lib/nodeHandler.js`, a shape-agnostic adapter shared by all three
+Node functions.
