@@ -109,7 +109,9 @@ spoiler-free only when restricted to the half the user has reached
   registration is what lets the shared advancement bookkeeping write his legs,
   his out on the bases, and his run onto a card, instead of computing the whole
   trip and discarding it for want of an origin. See
-  `.scratch/placed-runner-card/PRD.md`.
+  `.scratch/placed-runner-card/PRD.md`. `legAdvanceCode`'s per-runner advance
+  codes (`ADVANCE_CODES`) have a couple of rare, deliberately-unresolved
+  fallback gaps — see `docs/unresolved-scoring-conventions.md`.
 
 Related research docs (read before wiring a new source):
 - `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open

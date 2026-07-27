@@ -49,6 +49,15 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // defenseEntering itself enforces the reveal gate given revealedThrough (see
 // api/enteringHalf.js's safeToShowEntering), returning null past it, so this
 // is safe to call outside the seal regardless of caller diligence.
+//
+// The title names the MOMENT, not just the topic — "Defensive alignment
+// entering the Top 7th" rather than the bare word "Defense", which read as
+// current/live once this card moved below the play-by-play on reveal
+// (ADR-0010), sitting under a card that might already show a mid-inning
+// defensive change. "Defensive alignment" also reads less ambiguously than
+// "Defense" on its own, which doubles as this app's own runs-allowed sense
+// elsewhere (StatBox's R/H/E row) — see
+// .scratch/pbp-scoring-review/issues/05-substitution-surface-asymmetries.md.
 export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, revealedThrough }) {
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
@@ -62,7 +71,7 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
           variant="mono"
           className="metricbar__logo"
         />
-        Defense
+        Defensive alignment entering the {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
       </h4>
       <DefenseDiamond defense={defense} />
     </section>
@@ -84,6 +93,14 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
 // gate of its own: it simply returns null until the preview is safe to show
 // (current half fully revealed), same moment DueUpNextCard's own card would
 // appear.
+//
+// Carries its own "entering the Top 7th" masthead now (same treatment as
+// DefenseSection's, .lineupcard__title mirrors .halfdefense__title) rather
+// than relying on a caller-supplied title — the wide layout used to bolt on
+// its own bare "Lineups" heading (InningViewer.jsx) while the phone's inline
+// placement (HalfInning.jsx's .halfentering) had no title at all, so the two
+// layouts disagreed on whether this needed a heading, and neither one named
+// the moment.
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
 export function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
@@ -98,6 +115,9 @@ export function LineupSection({ feed, inning, half, awayName, homeName, prospect
   }
   return (
     <section className="lineupcard">
+      <h4 className="lineupcard__title">
+        Lineups entering the {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
+      </h4>
       <div className="lineupcard__teams">
         <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
         <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />

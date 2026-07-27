@@ -1,4 +1,14 @@
-Status: needs-triage
+Status: fixed. A: mid-inning pinch hitter now gets a "now batting" notice
+card (playbyplay.js's new `pinch_hitting` event + BatterNotice in
+PlayByPlay.jsx), matching every other substitution type. B: retitled —
+"Defense" → "Defensive alignment entering the Top/Bottom {ordinal}"
+(EnteringReference.jsx's DefenseSection), and the lineup cards gained the
+same self-contained masthead ("Lineups entering the Top/Bottom {ordinal}"),
+replacing the wide-layout-only bare "Lineups" heading that the phone layout
+never had at all. Researched terminology ("Defensive alignment" over the
+bare "Defense", which the app also uses for the runs-allowed sense
+elsewhere) before landing on the copy. Not yet browser-verified (no free
+reserved dev port this session).
 
 # Two substitution surfaces read inconsistently once a half is revealed
 

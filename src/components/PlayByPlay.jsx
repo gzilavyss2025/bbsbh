@@ -11,6 +11,7 @@ import {
   pitchingChangePitcher,
   defensiveChangeFielder,
   pinchRunningPlayers,
+  pinchHittingBatter,
   nextStepBoundary,
 } from '../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
@@ -20,6 +21,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
+import { BatterNotice } from './BatterNotice.jsx'
 import { PlacedRunnerCard } from './PlacedRunnerCard.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { UsagePips } from './UsagePips.jsx'
@@ -245,6 +247,24 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           ) : (
             <EventNote entry={entry} />
           )
+        } else if (entry.eventType === 'pinch_hitting') {
+          // A pinch hitter entering mid-flow gets the same "now batting"
+          // headshot card the pre-pitch staged list shows (BatterNotice),
+          // on the BATTING team's side — the same symmetry every other
+          // substitution type already has (pitching change, defensive
+          // sub/switch, pinch runner), rather than showing up with no
+          // announcement of his own, just his own at-bat card a moment later.
+          const batter = pinchHittingBatter(feed, entry.playerId)
+          node = batter ? (
+            <BatterNotice
+              batter={batter}
+              teamId={battingTeamId}
+              teamName={battingName}
+              className="pitchernotice--pbp"
+            />
+          ) : (
+            <EventNote entry={entry} />
+          )
         } else if (EVENT_CODES[entry.eventType]) {
           // A baserunning/misc event with no plate appearance of its own
           // (steal, caught stealing, pickoff, wild pitch, passed ball, balk) —
@@ -292,6 +312,7 @@ const EVENT_ICONS = {
   defensive_switch: '🧤',
   ejection: '🚫',
   pinch_running: '🏃',
+  pinch_hitting: '🏏',
 }
 
 // The real scorer's shorthand for a baserunning/misc event with no plate

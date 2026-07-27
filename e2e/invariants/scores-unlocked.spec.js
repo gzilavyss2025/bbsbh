@@ -5,8 +5,9 @@ import { test, expect } from '../fixtures.js'
 //   1. the toggle is offered only on today's slate, and turning it ON goes
 //      through the consent modal (whose safe DISMISS is default-focused);
 //   2. while the pass is on, opening a game shows scores with NO reveal tap, on
-//      every section — and the banner rides along on all of them as the off
-//      switch;
+//      every section — and the in-game banner rides along on all of them as
+//      the off switch (the slate's own toggle is its own off switch instead —
+//      no separate banner there, see the .daystate chip in GameSelect.jsx);
 //   3. consent records the DAY (`bbsbh:spoiledDays`), and turning the pass off
 //      the same day takes that consent back, so a mis-tap costs nothing;
 //   4. CRITICAL — none of it EVER writes the persisted reveal mark
@@ -14,7 +15,7 @@ import { test, expect } from '../fixtures.js'
 //      scored, on this device or (via ADR-0022's sync) any other.
 //
 // Selectors are structure, not copy (the consent wording is admin-editable):
-// data-testids on the slate toggle/banner, ConsentModal's own class names, and
+// the data-testid on the slate toggle, ConsentModal's own class names, and
 // the same `.rhe`/sealed-cell proxies the other invariants specs use.
 //
 // Note: the innings-content checks need the live MLB feed. Where a run
@@ -40,7 +41,7 @@ const clearPass = async (page) => {
   )
 }
 
-test('the day pass is offered today, gated by consent, and the banner is the off switch', async ({
+test('the day pass is offered today, gated by consent, and the switch is its own off switch', async ({
   page,
 }) => {
   await page.goto('/')
@@ -64,12 +65,10 @@ test('the day pass is offered today, gated by consent, and the banner is the off
   await expect(toggle).toHaveAttribute('aria-checked', 'false')
   expect(await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)).toBeNull()
 
-  // Confirm turns it on: the pass expiry is written and the banner appears.
+  // Confirm turns it on: the pass expiry is written and the switch reads on.
   await toggle.click()
   await page.locator('.consent__btn--confirm').click()
   await expect(toggle).toHaveAttribute('aria-checked', 'true')
-  const banner = page.getByTestId('scores-unlock-banner')
-  await expect(banner).toBeVisible()
   const expiry = await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)
   expect(Number(expiry)).toBeGreaterThan(Date.now())
 
@@ -77,9 +76,9 @@ test('the day pass is offered today, gated by consent, and the banner is the off
   const daysOn = await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)
   expect(JSON.parse(daysOn ?? '[]')).toHaveLength(1)
 
-  // The banner is itself the off switch — one tap re-seals AND takes the day's
-  // consent back, so an accidental tap on confirm costs nothing.
-  await banner.click()
+  // The switch is itself the off switch — one more tap re-seals AND takes the
+  // day's consent back, so an accidental tap on confirm costs nothing.
+  await toggle.click()
   await expect(toggle).toHaveAttribute('aria-checked', 'false')
   expect(await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)).toBeNull()
   const daysOff = await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)

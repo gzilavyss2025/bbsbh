@@ -21,15 +21,24 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    this sheet's center chip is single-line (see scorecardCenterCode)
 //  • rbi, reached/scored/legNotations/outAt/outCode/outNumber — the diamond
 //  • subBefore — a rule down the box's leading edge where a sub took over
+//
+// An extra-innings automatic runner (`kind: 'placed'`) is not a plate
+// appearance — no pitches, no RBI, no outcome of his own — but he's a real
+// baserunner, so his box reads "AR" up top and his diamond draws the given
+// bases as PlayDiamond's dotted `placedAt` ghost path, same as the live
+// play-by-play's PlacedRunnerCard.
 
 // How many strike pips fit in one strike column before overflowing into the
 // second — the box is 90px tall, so a foul-heavy at-bat past this spills right.
 const STRIKE_COL_CAP = 7
 
 export function AtBatBox({ atbat = null }) {
+  const isPlaced = atbat?.kind === 'placed'
   const kind = atbat?.codeKind ?? ''
   // The pitch ladder split into its three columns: balls (white), then two
   // strike columns — strikes fill the first and overflow into the second.
+  // The placed runner faced no pitches, so his ladder is empty like the
+  // template's.
   const ladder = atbat?.ladder ?? []
   const balls = ladder.filter((p) => p.side === 'ball')
   const strikes = ladder.filter((p) => p.side === 'strike')
@@ -40,9 +49,13 @@ export function AtBatBox({ atbat = null }) {
   // Outcome box (top-left): the out category for an out, otherwise the result
   // code itself (hit / error / reach). A called third strike reads a backwards
   // K. An interrupted at-bat has no result, so its outcome box stays blank —
-  // the carry-over mark goes in the diamond instead (below).
-  const outcome =
-    kind === 'out'
+  // the carry-over mark goes in the diamond instead (below). The placed
+  // runner isn't a batting result at all — his box reads "AR" (automatic
+  // runner), the mark scorers put where a batting result would go, same
+  // pill PlacedRunnerCard shows on the live play-by-play.
+  const outcome = isPlaced
+    ? 'AR'
+    : kind === 'out'
       ? atbat?.calledLooking
         ? 'ꓘ'
         : atbat?.outType ?? ''
@@ -54,7 +67,8 @@ export function AtBatBox({ atbat = null }) {
   // at-bat's carry-over mark ("CS →"), penciled mid-diamond the way the
   // scorer writes it. `centerCode`, not the raw `code`, so a GIDP's two-line
   // play-by-play mark ("GIDP" over the chain) doesn't arrive here as one
-  // unwrappable run — the outcome box above already reads "DP".
+  // unwrappable run — the outcome box above already reads "DP". Nothing goes
+  // here for the placed runner — "AR" already sits in the outcome box above.
   const centerText = atbat?.centerCode ?? atbat?.code ?? ''
   const center =
     kind === 'out' && !atbat?.calledLooking
@@ -62,6 +76,12 @@ export function AtBatBox({ atbat = null }) {
       : kind === 'interrupted'
         ? centerText
         : ''
+  // A pinch runner who took over for the placed runner (or, on a normal
+  // at-bat, for the batter himself once he reached) inherits this card —
+  // same red PR mark the live play-by-play diamond draws, by the base he
+  // took over at.
+  const pinchRunners = atbat?.pinchRunners
+  const prBase = pinchRunners?.length ? pinchRunners[pinchRunners.length - 1].base : null
 
   return (
     <div className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''}`}>
@@ -74,7 +94,7 @@ export function AtBatBox({ atbat = null }) {
           >
             {outcome}
           </span>
-          <span className="sc-ab__rbi">{atbat?.rbi ? atbat.rbi : ''}</span>
+          <span className="sc-ab__rbi">{!isPlaced && atbat?.rbi ? atbat.rbi : ''}</span>
         </div>
         <div className="sc-ab__diamond">
           <PlayDiamond
@@ -84,6 +104,8 @@ export function AtBatBox({ atbat = null }) {
             legNotations={atbat?.legNotations ?? {}}
             outAt={atbat?.outAt ?? null}
             outCode={atbat?.outCode ?? ''}
+            prBase={prBase}
+            placedAt={isPlaced ? atbat.base : null}
             size={52}
           />
           {center && (

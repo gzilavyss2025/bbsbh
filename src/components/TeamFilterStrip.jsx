@@ -28,6 +28,8 @@ export function TeamFilterStrip({
   onSelect,
   ariaLabel,
   showMlbPin = true,
+  showArrows = false,
+  centerTeamId = null,
   className = '',
 }) {
   const stripRef = useRef(null)
@@ -47,6 +49,22 @@ export function TeamFilterStrip({
       behavior: 'smooth',
     })
   }, [selectedTeamId])
+
+  // A nav strip like GameSelect's never has a "picked" club (the effect
+  // above never fires there), but it still wants to land on the user's
+  // favorite team on arrival — jump straight there with no animation, same
+  // as if the page had always been scrolled there.
+  useEffect(() => {
+    const strip = stripRef.current
+    if (!strip || centerTeamId == null) return
+    const btn = strip.querySelector(`[data-team-id="${centerTeamId}"]`)
+    if (!btn) return
+    strip.scrollLeft = btn.offsetLeft - strip.clientWidth / 2 + btn.clientWidth / 2
+  }, [centerTeamId, teams])
+
+  const scrollByStrip = (dir) => {
+    stripRef.current?.scrollBy({ left: dir * stripRef.current.clientWidth * 0.8, behavior: 'smooth' })
+  }
 
   const isAll = selectedTeamId == null
 
@@ -75,6 +93,16 @@ export function TeamFilterStrip({
             <span className="teamfilterstrip__divider" aria-hidden="true" />
           </>
         )}
+        {showArrows && (
+          <button
+            type="button"
+            className="teamfilterstrip__arrow teamfilterstrip__arrow--left"
+            aria-label="Scroll teams left"
+            onClick={() => scrollByStrip(-1)}
+          >
+            ‹
+          </button>
+        )}
         <div className="vsteam__strip" ref={stripRef}>
           {teams.map((t) => {
             const active = t.id === selectedTeamId
@@ -85,6 +113,7 @@ export function TeamFilterStrip({
                 role="tab"
                 aria-selected={active}
                 title={t.name}
+                data-team-id={t.id}
                 ref={active ? activeRef : null}
                 className={`vsteam__team${active ? ' is-active' : ''}`}
                 onClick={() => onSelect(t.id)}
@@ -94,6 +123,16 @@ export function TeamFilterStrip({
             )
           })}
         </div>
+        {showArrows && (
+          <button
+            type="button"
+            className="teamfilterstrip__arrow teamfilterstrip__arrow--right"
+            aria-label="Scroll teams right"
+            onClick={() => scrollByStrip(1)}
+          >
+            ›
+          </button>
+        )}
       </div>
     </div>
   )

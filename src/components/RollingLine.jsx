@@ -63,17 +63,17 @@ export function RollingLine({
   // the batting half would leak the fielding half's errors before it's revealed.
   const totals = (battingHalf, side) => {
     const fieldingHalf = battingHalf === 'top' ? 'bottom' : 'top'
-    let r = 0, h = 0, e = 0, any = false
+    let r = 0, h = 0, e = 0
     for (let n = 1; n <= unlocked; n++) {
       if (halfIndex(n, battingHalf) <= revealedThrough) {
         const l = revealInning(feed, n, side)
-        if (l) { any = true; r += l.runs; h += l.hits }
+        if (l) { r += l.runs; h += l.hits }
       }
       if (halfIndex(n, fieldingHalf) <= revealedThrough) {
         e += revealInning(feed, n, side)?.errors ?? 0
       }
     }
-    return { r, h, e, any }
+    return { r, h, e }
   }
 
   return (
@@ -154,9 +154,9 @@ export function RollingLine({
                       </td>
                     )
                   })}
-                  <td className="rolling__tot">{t.any ? t.r : '·'}</td>
-                  <td className="rolling__tot">{t.any ? t.h : '·'}</td>
-                  <td className="rolling__tot">{t.any ? t.e : '·'}</td>
+                  <td className="rolling__tot">{t.r}</td>
+                  <td className="rolling__tot">{t.h}</td>
+                  <td className="rolling__tot">{t.e}</td>
                 </tr>
               )
             })}

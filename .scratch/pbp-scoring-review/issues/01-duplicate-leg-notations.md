@@ -1,4 +1,6 @@
-Status: needs-triage
+Status: fixed — collapse consecutive same-code/same-slot legs within a play,
+verified against gamePk 824735 (Rafaela, Alonso) + regression test in
+test/multi-leg-advancement.test.js.
 
 # One continuous multi-base advance is notated at every base it passes, not just where it ends
 
