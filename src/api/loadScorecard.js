@@ -95,7 +95,18 @@ const NON_AB_EVENTS = new Set([
   'intent_walk',
   'hit_by_pitch',
   'sac_fly',
+  // A sac fly that also turns a double play (a second runner retired on the
+  // same play) is still excluded from at-bats by rule (9.02(a)(1)/9.08(d)) —
+  // classifyOut and playbyplay.js's SAC_FLY_EVENTS already mark the batter's
+  // own trip as the sacrifice, so this must agree or he's charged both a
+  // sacrifice AND an at-bat for one plate appearance.
+  'sac_fly_double_play',
   'sac_bunt',
+  // sac_bunt_double_play is deliberately NOT listed here — unlike the fly
+  // ball case, a sacrifice bunt is not credited at all when a runner is
+  // retired advancing on it, so whether this is an at-bat depends on how MLB
+  // actually scored it, which this eventType name doesn't say on its own.
+  // See docs/unresolved-scoring-conventions.md.
   'catcher_interf',
 ])
 

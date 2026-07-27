@@ -57,9 +57,33 @@ the lead runner's) doesn't distinguish which case this was.
 letter to the trailing runner's leg; it depends on intent the feed doesn't
 expose.
 
+## `sac_bunt_double_play` — is it an at-bat?
+
+**Where:** `src/api/loadScorecard.js`, `NON_AB_EVENTS`.
+
+**The question:** `sac_fly_double_play` is unambiguous — Rule 9.02(a)(1)
+excludes a sacrifice fly from at-bats and 9.08(d) still credits one even when
+another runner is doubled off, so it was added to `NON_AB_EVENTS` outright (see
+`.scratch/pbp-scoring-review/issues/04-sacrifice-double-play-charges-an-at-bat.md`).
+A sacrifice BUNT is different: the rule does NOT credit a sacrifice when a
+runner is retired attempting to advance on the bunt. The feed's eventType
+name (`sac_bunt_double_play`) describes the batter's intent, not necessarily
+how MLB's official scorer actually ruled it — so whether this counts as an
+at-bat depends on a fact the eventType alone doesn't carry.
+
+**Why it's unresolved:** neither appeared in a three-day sweep of the MLB
+slate (2026-07 window), so there's no real gamePk to check against an
+official boxscore's AB column yet. Deliberately left out of `NON_AB_EVENTS`
+rather than guessed — resolve by finding a real occurrence and checking what
+MLB's own boxscore charged.
+
 ## How these got triaged
 
-Both surfaced in `.scratch/pbp-scoring-review/issues/03-remaining-advance-code-fallbacks.md`
-(PR #403's follow-up review). Decision: leave the `'GO'` fallback in place
-rather than swap in an equally-wrong fixed code — revisit if a future feed
-field (or a clearer scoring-committee ruling) narrows the ambiguity.
+All three surfaced in `.scratch/pbp-scoring-review/issues/` (PR #403's
+follow-up review: `03-remaining-advance-code-fallbacks.md`,
+`04-sacrifice-double-play-charges-an-at-bat.md`). Decision on the advance
+codes: leave the `'GO'` fallback in place rather than swap in an
+equally-wrong fixed code — revisit if a future feed field (or a clearer
+scoring-committee ruling) narrows the ambiguity. Decision on the sac bunt:
+leave it uncounted as neither AB nor sacrifice-excluded until a real example
+turns up.
