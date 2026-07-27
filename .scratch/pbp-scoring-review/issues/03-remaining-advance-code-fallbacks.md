@@ -1,4 +1,10 @@
-Status: needs-triage
+Status: triaged — deliberate gap, not fixed. Researched against
+livebaseballscorecards.com and official-scorer/SABR-adjacent guides; neither
+assigns a fixed letter to either case (livebaseballscorecards.com doesn't
+code advances at all, and the rulebook-adjacent sources score both
+descriptively/by intent, which the feed doesn't expose). Decision: keep the
+'GO' fallback rather than swap in an equally-wrong guessed code. Tracked
+long-term at docs/unresolved-scoring-conventions.md instead of closed here.
 
 # Two advance-code fallbacks still pencil "GO" for something that wasn't a ground out
 

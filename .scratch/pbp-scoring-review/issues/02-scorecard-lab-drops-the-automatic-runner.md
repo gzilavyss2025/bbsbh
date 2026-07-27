@@ -1,4 +1,8 @@
-Status: needs-triage
+Status: fixed — option (1): scorecardPlays now keeps `kind: 'placed'` cards
+and gives the runner a cell in his own slot row; AtBatBox renders it (AR
+outcome, placedAt ghost path, prBase for a pinch runner). Regression tests
+in test/scorecard-placed-runner.test.js. Not yet browser-verified (no free
+reserved dev port this session).
 
 # The Scorecard Lab grid's R column disagrees with its own scoreboard in extra innings
 

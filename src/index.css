@@ -7280,6 +7280,29 @@ body {
   border-top: var(--bw-hair) dashed var(--border-rule);
 }
 
+/* Names the moment ("Lineups entering the Top 7th") — same navy masthead
+   treatment as .halfdefense__title (deliberately identical rules, not just a
+   similar look: the two cards read as one matched pair, phone and wide
+   layout alike, rather than Defense having a title and Lineups improvising
+   its own). Replaces the old .innings__reference-title, which only existed
+   on the wide layout and left the phone's inline copy with no title at all. */
+.lineupcard__title {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
 /* Away over home, each a self-contained nine-slot list. Stacked so a long name
    with its number/position never has to wrap in a cramped column on a phone. */
 .lineupcard__teams {
@@ -13613,28 +13636,24 @@ body {
     box-shadow: var(--shadow-card);
     overflow: hidden;
   }
-  .innings__reference-title {
-    margin: 0;
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    min-height: 20px; /* matches the Defense masthead's own 20px logo, so both bars share one height */
-    font-family: var(--font-display);
-    font-size: var(--fs-label);
-    font-weight: var(--w-bold);
-    text-transform: uppercase;
-    letter-spacing: var(--ls-label);
-    color: var(--text-on-ink);
-    background: var(--navy);
-    border-bottom: 3px solid var(--seal);
-  }
+  /* Same flush-masthead recipe as .innings__ref-defense above: the outer card
+     supplies no padding of its own, so .lineupcard__title's own inset sits
+     flush against the card's edges (border-radius: 0 squares its corners off
+     against the card's), and .lineupcard__teams gets the inset instead —
+     mirrors .innings__ref-defense .defdiamond's own padding reset. */
   .innings__ref-lineups .lineupcard {
     margin-top: 0;
-    padding: 12px 14px;
-    border: none;
+    padding-top: 0;
+    border-top: none;
     border-radius: 0;
     background: none;
     box-shadow: none;
+  }
+  .innings__ref-lineups .lineupcard__title {
+    border-radius: 0;
+  }
+  .innings__ref-lineups .lineupcard__teams {
+    padding: 0 10px 12px;
   }
 
   /* Rosters sit two-up beneath the reading pane. */

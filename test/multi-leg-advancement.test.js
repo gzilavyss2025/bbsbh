@@ -84,6 +84,76 @@ test('a runner who takes a wild pitch then steals a base during a LATER batter\'
   assert.equal(ellisCard.scored, true)
 })
 
+test('one continuous advance split into consecutive same-play legs collapses to a single notation at the furthest base, not one per base passed', () => {
+  const feed = buildFeed()
+  feed.liveData.plays.allPlays.push(
+    {
+      about: { inning: 3, halfInning: 'top' },
+      matchup: { pitcher: { id: 200 }, batter: { id: 5 } },
+      result: { type: 'atBat', eventType: 'single', description: 'Ed Ellis singles.' },
+      count: { outs: 0 },
+      playEvents: [{ isPitch: true, pitchNumber: 1, details: { call: { code: 'X' } } }],
+      runners: [
+        {
+          details: { runner: { id: 5 }, eventType: 'single' },
+          movement: { start: null, end: '1B', isOut: false },
+        },
+      ],
+    },
+    {
+      about: { inning: 3, halfInning: 'top' },
+      matchup: { pitcher: { id: 200 }, batter: { id: 6 } },
+      result: { type: 'atBat', eventType: 'single', description: 'Finn Frye singles. Ed Ellis to 2nd.' },
+      count: { outs: 0 },
+      playEvents: [{ isPitch: true, pitchNumber: 1, details: { call: { code: 'X' } } }],
+      runners: [
+        {
+          details: { runner: { id: 5 }, eventType: 'single' },
+          movement: { start: '1B', end: '2B', isOut: false },
+        },
+        {
+          details: { runner: { id: 6 }, eventType: 'single' },
+          movement: { start: null, end: '1B', isOut: false },
+        },
+      ],
+    },
+    {
+      // One single batted-ball advance, but the feed reports it as two
+      // consecutive runners[] entries for the same runner (2nd->3rd, then
+      // 3rd->home) — both driven by this same play's single, same code,
+      // same crediting slot. That's one hit, not two, and should pencil one
+      // mark at the base the advance actually ended (home), not a second
+      // identical mark at 3rd along the way.
+      about: { inning: 3, halfInning: 'top' },
+      matchup: { pitcher: { id: 200 }, batter: { id: 7 } },
+      result: { type: 'atBat', eventType: 'single', description: 'Gil Gore singles. Ed Ellis scores.' },
+      count: { outs: 0 },
+      playEvents: [{ isPitch: true, pitchNumber: 1, details: { call: { code: 'X' } } }],
+      runners: [
+        {
+          details: { runner: { id: 5 }, eventType: 'single' },
+          movement: { start: '2B', end: '3B', isOut: false },
+        },
+        {
+          details: { runner: { id: 5 }, eventType: 'single', isScoringEvent: true, earned: true },
+          movement: { start: '3B', end: 'score', isOut: false },
+        },
+        {
+          details: { runner: { id: 7 }, eventType: 'single' },
+          movement: { start: null, end: '1B', isOut: false },
+        },
+      ],
+    },
+  )
+
+  const entries = computeHalfInningFeed(feed, 3, 'top', 'away')
+  const ellisCard = entries.find((e) => e.kind === 'atbat' && e.batterId === 5)
+  assert.ok(ellisCard, 'Ellis\'s own at-bat card should exist')
+  assert.equal(ellisCard.legNotations[3], undefined, 'the intermediate 3rd-base leg is collapsed, not penciled twice')
+  assert.equal(ellisCard.legNotations[4]?.code, '1B', 'the advance is marked once, at the base it actually ended')
+  assert.equal(ellisCard.scored, true)
+})
+
 test('a batter thrown out stretching for an extra base on his own hit gets an out mark on his own diamond, with the duplicate outfield-assist credit collapsed', () => {
   const feed = buildFeed()
   feed.liveData.plays.allPlays.push({

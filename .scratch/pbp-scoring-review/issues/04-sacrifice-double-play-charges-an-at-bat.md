@@ -1,4 +1,9 @@
-Status: needs-triage
+Status: partially fixed — `sac_fly_double_play` added to `NON_AB_EVENTS`
+(unambiguous per 9.02(a)(1)/9.08(d)), regression test in
+test/scorecard-sac-double-play.test.js. `sac_bunt_double_play` deliberately
+left out — tracked as an open judgment call in
+docs/unresolved-scoring-conventions.md pending a real example to check
+against an official boxscore.
 
 # `sac_fly_double_play` / `sac_bunt_double_play` are charged an at-bat on the Scorecard Lab grid
 

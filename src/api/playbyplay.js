@@ -298,6 +298,20 @@ export function pinchRunningPlayers(feed, pinchId, replacedId) {
   return { runner: nameOf(pinchId), replaced: nameOf(replacedId) }
 }
 
+// The incoming pinch hitter's card fields for a mid-inning "now batting" note
+// (see BatterNotice) — same "Last, First" + jersey shape as
+// pitchingChangePitcher/defensiveChangeFielder, no hand/position since
+// BatterNotice shows neither.
+export function pinchHittingBatter(feed, playerId) {
+  if (playerId == null) return null
+  const person = feed?.gameData?.players?.[`ID${playerId}`] ?? {}
+  const { last, first, useName } = personNameParts(person)
+  const name = last
+    ? `${last}${first ? `, ${useName || first}` : ''}`
+    : person.fullName ?? ''
+  return { id: playerId, name, jersey: person.primaryNumber ?? '' }
+}
+
 // The surname to use when a baserunning note has to NAME the runner it's
 // about. Exported because the box-score roll-up builds the same note shape
 // from the raw feed (api/callout-notes.js's buildGameCallouts) and the two
@@ -679,6 +693,12 @@ function advanceCode(play) {
   const et = play.result?.eventType
   if (ADVANCE_CODES[et]) return ADVANCE_CODES[et]
   if (/(flies|fly ball|pops|lines|line drive|sacrifice fly)/i.test(play.result?.description ?? '')) return 'FO'
+  // Two rare runner-level eventTypes ('other_out' — advancing on an uncaught
+  // third strike whose recovery throw goes elsewhere; 'caught_stealing_3b' —
+  // a trail runner taking a base while the lead man is thrown out) still
+  // land here and read as this ground-out fallback, which is wrong (no ball
+  // was put in play). Left as a documented gap rather than a guessed code —
+  // see docs/unresolved-scoring-conventions.md.
   return 'GO'
 }
 
@@ -1176,6 +1196,25 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
             })
           }
         }
+      } else if (et === 'offensive_substitution' && e.player?.id != null) {
+        // A pinch hitter entering mid-flow — its own "now batting" notice at
+        // the moment he's announced, matching every OTHER substitution type
+        // (a fresh fielder, a pitching change, a pinch runner) rather than
+        // showing up with no announcement of his own, just his own at-bat
+        // card a moment later (see BatterNotice, PlayByPlay.jsx). Unlike the
+        // pinch-runner branch above there is no origin card to strike
+        // through — he isn't replacing anyone already carded, he simply bats
+        // next — so this is a plain notification, same shape as
+        // pinch_running's fallback text/segments.
+        const text = sentenceCaseEventText(e.details?.description ?? '')
+        entries.push({
+          kind: 'event',
+          eventType: 'pinch_hitting',
+          midAtBat: pitchInPlay,
+          playerId: e.player.id,
+          text,
+          segments: linkifyNames(text, nameIndex),
+        })
       } else if (et === 'runner_placed' && e.player?.id != null) {
         // The extra-innings automatic runner, placed on 2nd to begin the half.
         // He takes no plate appearance — no pitches, no result, no RBI — but
@@ -1551,6 +1590,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       // explains it) — a further base on this same play only gets a leg
       // notation once he's past it.
       const naturalBase = NATURAL_BASE[play.result?.eventType] ?? 1
+      // One continuous advance can still arrive as several same-play legs
+      // (2nd-to-3rd, then 3rd-to-home off the same hit) rather than the
+      // genuinely different-eventType legs the per-leg notation above exists
+      // for (WP then SB, SB then E5). Track the immediately preceding leg
+      // written for each runner WITHIN THIS PLAY ONLY, so a leg whose code
+      // and slot match it collapses onto the furthest base instead of
+      // penciling the same mark twice.
+      const playLastLeg = new Map()
       for (const r of runners) {
         const rid = r.details?.runner?.id
         if (rid == null || r.movement?.isOut) continue
@@ -1569,10 +1616,13 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // A run (base 4) records whether it was earned — false only when the
         // feed explicitly says so, so a clean run is never mistakenly circled.
         if (base === 4) earnedByBatter.set(canon, r.details?.earned !== false)
+        const prevLeg = playLastLeg.get(canon)
         if (canon !== batterId) {
           const m = legs.get(canon) ?? {}
+          if (prevLeg && prevLeg.code === code && prevLeg.slot === slot) delete m[prevLeg.base]
           m[base] = { code, slot }
           legs.set(canon, m)
+          playLastLeg.set(canon, { base, code, slot })
         } else if (base > naturalBase) {
           // A bonus base on the batter's own trip — attribute it to this
           // play's error (the fielder who's actually charged, even if the
@@ -1582,8 +1632,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           // slot superscript here — that notes which TEAMMATE's at-bat
           // drove a runner over, and a batter can't drive himself.
           const m = legs.get(canon) ?? {}
-          m[base] = { code: playErrorCredit(play) ?? code, slot: null }
+          const ownCode = playErrorCredit(play) ?? code
+          if (prevLeg && prevLeg.code === ownCode && prevLeg.slot === null) delete m[prevLeg.base]
+          m[base] = { code: ownCode, slot: null }
           legs.set(canon, m)
+          playLastLeg.set(canon, { base, code: ownCode, slot: null })
         }
       }
     }
