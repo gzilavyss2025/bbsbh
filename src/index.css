@@ -16984,68 +16984,6 @@ body {
     min-height: 0;
   }
 }
-.postseason-odds {
-  display: grid;
-  gap: 8px;
-  margin: 0 0 14px;
-  padding: 9px 10px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-}
-.postseason-odds__head {
-  display: flex;
-  gap: 8px;
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-.postseason-odds__values {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.postseason-odds__value {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  padding: 4px 7px;
-}
-.postseason-odds__value + .postseason-odds__value {
-  border-left: var(--bw-hair) solid var(--border-rule);
-}
-.postseason-odds__value > span {
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-.postseason-odds__value strong {
-  color: var(--text-heading);
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-variant-numeric: tabular-nums;
-  line-height: var(--lh-score);
-}
-.postseason-odds__meta {
-  border-top: var(--bw-hair) solid var(--rule-soft);
-  padding-top: 7px;
-  color: var(--graphite-soft);
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-}
-@media (max-width: 420px) {
-  .postseason-odds__value {
-    padding-inline: 5px;
-  }
-  .postseason-odds__value strong {
-    font-size: var(--fs-title-md);
-  }
-}
 /* ---------------------------------------------------- team transactions
    The team page's roster-move feed, one story per swipeable card in a
    horizontal deck (see .scratch/team-transactions/ for the original locked
@@ -18481,6 +18419,35 @@ body {
     min-width: 0;
   }
 }
+/* Roster super-section's Season / Last 10 Games toggle, in the SectionTitle
+   `action` slot — a two-button segmented control, same caps/tracking as
+   .tlead__seeall so it reads as part of the same header row. */
+.roster-super__toggle {
+  display: flex;
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.roster-super__toggle-btn {
+  border: none;
+  background: none;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.roster-super__toggle-btn + .roster-super__toggle-btn {
+  border-left: var(--bw-hair) solid var(--seal);
+}
+.roster-super__toggle-btn.is-active {
+  background: var(--seal);
+  color: var(--seal-ink);
+}
+
 .roster-sub__title {
   margin: 0 0 8px;
   font-family: var(--font-display);
@@ -21936,6 +21903,63 @@ body {
 #root .gsfactor__note,
 #root .gsexample__line {
   text-transform: none; /* caps-exempt: Game Score modal's explainer prose + factor glosses read as natural sentences */
+}
+
+/* ---------------------------------------------------- postseason odds pill
+   The Standings section's "Postseason Odds" trigger (SectionTitle's action
+   slot) — same interactive-pill contract as .attendance__glyph--open (kraft
+   seal fill, seal-ink text, pill radius) rather than a plain text link, since
+   the ask was specifically a pill. Opens PostseasonOddsModal. */
+.psodds-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-pill);
+  background: var(--seal);
+  color: var(--seal-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.psodds-pill:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Same bottom-sheet + head/close chrome as .gsmodal (.sheet, .gsmodal__head,
+   .gsmodal__close, all reused as-is) — only the subtitle and table below the
+   head are specific to this modal. */
+.psoddsmodal {
+  max-height: 86vh;
+  overflow-y: auto;
+}
+.psoddsmodal__sub {
+  margin: 0 0 14px;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* The table itself reuses .standings/.ledger-wrap wholesale (base cell
+   styling + the is-me favorite-team tint) — .psoddstable only needs the
+   team-name cell's logo+name pairing, everything else rides the shared
+   ledger skin. */
+.psoddstable td.team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.psoddsmodal__meta {
+  margin: 10px 0 0;
+  color: var(--graphite-soft);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
 }
 
 /* ------------------------------------------------------- team score modal

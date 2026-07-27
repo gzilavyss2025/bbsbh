@@ -20,6 +20,7 @@ import {
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
+import { fetchRecentFormGames, buildRecentForm } from '../api/recentForm.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../api/teamScore.js'
@@ -32,7 +33,7 @@ import { lastName } from '../api/select.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
-import { SPORT_LABEL, favoriteAccentColor, teamClubName } from '../lib/teams.js'
+import { SPORT_LABEL, SPORT_IDS, favoriteAccentColor, teamClubName } from '../lib/teams.js'
 import { beeswarmRows } from '../lib/beeswarm.js'
 import { gamePath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -59,7 +60,7 @@ import { InjuredMark } from '../components/InjuredMark.jsx'
 import { RookiePill } from '../components/RookiePill.jsx'
 import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/TeamTransactionsCard.jsx'
-import { PostseasonOddsCard } from '../components/PostseasonOddsCard.jsx'
+import { PostseasonOddsModal } from '../components/PostseasonOddsModal.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
@@ -164,6 +165,18 @@ function comparePitchers(a, b) {
     (b.war ?? -Infinity) - (a.war ?? -Infinity) ||
     Number(a.jersey) - Number(b.jersey)
   )
+}
+// Same SP/RP/CL inference as person.js's pitcherRole, kept local since the
+// Last 10 Games projection needs it against two differently-shaped stat
+// sources (fullPitchers' own flat gs/appearances/saves fields, and a raw
+// statsapi AAA stat line) rather than a single roster-entry shape.
+function roleFromCounts(gamesStarted, gamesPitched, saves) {
+  const g = Number(gamesPitched) || 0
+  if (g === 0) return null
+  const gs = Number(gamesStarted) || 0
+  if (gs / g >= 0.5) return 'SP'
+  if ((Number(saves) || 0) >= 8) return 'CL'
+  return 'RP'
 }
 // Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
 const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -385,7 +398,6 @@ async function loadTeam(id, asOf) {
   const leagueSeasonScores = sportId === 1 ? leagueScoresFor(teamScores, season, scoreCutoff, 'season') : []
   const leagueSurpriseScores = sportId === 1 ? leagueSurpriseScoresFor(seasonScores, season, scoreCutoff) : []
   const leagueFormScores = sportId === 1 ? leagueScoresFor(teamScores, season, scoreCutoff, 'currentForm') : []
-  const postseasonOdds = sportId === 1 ? postseasonOddsFor(postseasonOddsData, id, season, scoreCutoff) : null
   const standingsRows = (div?.teamRecords ?? []).map((t) => ({
     id: t.team.id,
     name: nickname(t.team.name),
@@ -400,6 +412,17 @@ async function loadTeam(id, asOf) {
     diffTone: runDiffTone(t),
     isMe: t.team.id === id,
   }))
+  // Postseason Odds — the whole division's snapshot (one row per team the
+  // standings table above already lists, same order), shown in a modal off
+  // the Standings section's pill rather than a single-team card lower on the
+  // page (see PostseasonOddsModal). A team with no snapshot yet (early
+  // season, or MiLB) drops out rather than showing an all-dash row.
+  const divisionPostseasonOdds =
+    sportId === 1
+      ? standingsRows
+          .map((s) => ({ ...s, ...postseasonOddsFor(postseasonOddsData, s.id, season, scoreCutoff) }))
+          .filter((r) => r.playoffPct != null)
+      : []
 
   // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
   // with its logo treatment and the club's W-L in the games it wore it. The
@@ -677,7 +700,11 @@ async function loadTeam(id, asOf) {
   // list, each tagged with which IL (10/15/60-day; MiLB shows 7/60/full-season).
   // Filter to IL status codes (D<n> or ILF) and derive the badge from the code.
   // Spoiler-free — roster membership reveals nothing about the score. Degrades to
-  // an empty list when no IL is posted (the section then hides).
+  // an empty list when no IL is posted (the section then hides). Computed here
+  // (rather than lower, with the rest of the roster-listing sections) because
+  // the Last 10 Games projection below also needs it, to exclude an injured
+  // player from "current roster" eligibility — unlike the season Preferred
+  // Lineup, which deliberately keeps him (see that card's own comment above).
   const injured = ilRoster
     .filter((r) => /^D\d+$/.test(r.status?.code ?? '') || r.status?.code === 'ILF')
     .map((r) => {
@@ -693,6 +720,93 @@ async function loadTeam(id, asOf) {
     .sort(
       (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
     )
+  const currentInjuredIds = new Set(injured.map((p) => p.id))
+
+  // "Last 10 Games" roster view — same four subsections as the Preferred
+  // Lineup card above, but built from actual starts/appearances in the
+  // club's last 10 COMPLETED games rather than season-cumulative stats (see
+  // src/api/recentForm.js). Restricted to players NOT currently on the IL —
+  // a player who started half the window before landing there this week
+  // doesn't belong in a "who's available right now" projection, even though
+  // he still counts toward it in his own game logs. A shared badge-info
+  // lookup keyed by id lets both views reuse the same RosterList/
+  // DefenseDiamond rendering without recomputing name/jersey/WAR/prospect/
+  // rookie per view.
+  const rosterMetaById = new Map(
+    fullRoster
+      .filter((r) => r.person?.id)
+      .map((r) => {
+        const isPitcher = r.position?.type === 'Pitcher' || isTwoWay(r.person)
+        return [
+          r.person.id,
+          {
+            id: r.person.id,
+            name: firstLast(r.person),
+            last: lastName(r.person),
+            jersey: r.jerseyNumber ?? '',
+            allStar: allStarIds.has(r.person.id),
+            war: sportId === 1 ? (isPitcher ? warPit[r.person.id] : warBat[r.person.id]) ?? null : undefined,
+            prospect: prospectBadge(prospectsSnapshot, r.person.id),
+            rookie: showRookiePill(rookiesData, r.person.id, sportId === 1),
+          },
+        ]
+      }),
+  )
+  const eligibleFullRoster = fullRoster.filter((r) => r.person?.id && !currentInjuredIds.has(r.person.id))
+  const recentFormGames = await fetchRecentFormGames(schedule)
+  const recentForm = buildRecentForm(recentFormGames, eligibleFullRoster)
+  const recentPreferredLineup = recentForm.preferredLineupIds
+    .map(({ position, id }) => {
+      const meta = rosterMetaById.get(id)
+      return meta ? { position, id, last: meta.last } : null
+    })
+    .filter(Boolean)
+  const recentSubstitutes = recentForm.substituteIds.map((id) => rosterMetaById.get(id)).filter(Boolean)
+
+  // Pitchers who threw not one pitch anywhere in the window — a rookie
+  // call-up who's never appeared in the majors, or someone just back from a
+  // rehab assignment. Rather than dropping them from the projection
+  // entirely, infer a role from whatever stat line IS on file: his own
+  // season MLB line first (already hydrated onto fullRoster/fullPitchers —
+  // this is also how a recent trade acquisition's prior-team stats surface,
+  // via rosterPitchingStat's preferTeamSplits fallback), and only for a true
+  // zero — no MLB games at all this season — fall back to a live AAA lookup.
+  // Appended after the real window data, never reordering it; each only
+  // fills a slot if the corresponding list hasn't already hit its cap.
+  const pitcherStatById = new Map(fullPitchers.map((p) => [p.id, p]))
+  const appearedPitcherIds = new Set(recentForm.pitcherAppearanceIds)
+  const silentPitchers = eligibleFullRoster.filter(
+    (r) =>
+      r.person?.id &&
+      (r.position?.type === 'Pitcher' || isTwoWay(r.person)) &&
+      !appearedPitcherIds.has(r.person.id),
+  )
+  const inferredRoles = await Promise.all(
+    silentPitchers.map(async (r) => {
+      const id = r.person.id
+      const mlbStat = pitcherStatById.get(id)
+      if (mlbStat?.appearances > 0) {
+        return { id, role: roleFromCounts(mlbStat.gs, mlbStat.appearances, mlbStat.saves) }
+      }
+      const splits = await fetchPersonStats(id, {
+        type: 'season', group: 'pitching', season, sportId: SPORT_IDS.AAA,
+      })
+      const stat = splits[0]?.stat
+      if (!stat) return { id, role: null }
+      return {
+        id,
+        role: roleFromCounts(stat.gamesStarted, stat.gamesPitched ?? stat.gamesPlayed, stat.saves),
+      }
+    }),
+  )
+  const recentStartingPitchers = recentForm.startingPitcherIds.map((id) => rosterMetaById.get(id)).filter(Boolean)
+  const recentBullpen = recentForm.bullpenIds.map((id) => rosterMetaById.get(id)).filter(Boolean)
+  for (const { id, role } of inferredRoles) {
+    const meta = rosterMetaById.get(id)
+    if (!meta) continue
+    if (role === 'SP' && recentStartingPitchers.length < 5) recentStartingPitchers.push(meta)
+    else if ((role === 'RP' || role === 'CL') && recentBullpen.length < 8) recentBullpen.push(meta)
+  }
 
   const dayOfWeek = schedule.some((g) => g.won != null) ? dayOfWeekRecord(schedule) : null
 
@@ -708,12 +822,13 @@ async function loadTeam(id, asOf) {
     leagueSeasonScores,
     leagueSurpriseScores,
     leagueFormScores,
-    postseasonOdds,
+    divisionPostseasonOdds,
     transactionsPage,
     standings: standingsRows,
     jerseyCombos,
     batting, pitching, comeback, position, pitchers, injured,
     preferredLineup, substitutes, startingPitchers, bullpen,
+    recentPreferredLineup, recentSubstitutes, recentStartingPitchers, recentBullpen,
     affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool,
     manager,
   }
@@ -748,6 +863,11 @@ export function TeamPage({ id, asOf, sportId }) {
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
   useDocumentTitle(data?.team?.name || null)
   const back = () => window.history.back()
+  // Postseason Odds modal — a plain boolean rather than the team-keyed
+  // pattern below is fine here: it's a transient dialog, not persisted
+  // per-team UI state, so it's safe (and correct) for it to close on any
+  // client-side team nav same as every other modal in the app.
+  const [showPostseasonOdds, setShowPostseasonOdds] = useState(false)
   // Store which team's list was expanded rather than a free-floating boolean,
   // so client-side navigation naturally starts every newly visited club at
   // the top-10 preview without a prop-syncing effect.
@@ -757,11 +877,18 @@ export function TeamPage({ id, asOf, sportId }) {
   // team-keyed pattern as the prospects preview above.
   const [expandedInjuredTeamId, setExpandedInjuredTeamId] = useState(null)
   const showInjured = expandedInjuredTeamId === teamId
+  // The Roster section's Season / Last 10 Games toggle — both views are
+  // already prefetched in loadTeam, so flipping it is a pure client-side
+  // swap, no reload. Last 10 Games is the default; this stores which team's
+  // view was switched BACK to Season (same team-keyed pattern as the
+  // prospects/IL expand state above), so client-side navigation to a
+  // different team naturally resets to the Last 10 Games default.
+  const [seasonRosterTeamId, setSeasonRosterTeamId] = useState(null)
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
 
-  const { team, season, record, dayOfWeek, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, postseasonOdds, standings, jerseyCombos, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
+  const { team, season, record, dayOfWeek, seasonScore, teamScore, leagueGradeScores, leagueSeasonScores, leagueSurpriseScores, leagueFormScores, divisionPostseasonOdds, standings, jerseyCombos, batting, pitching, comeback, position, pitchers, injured, preferredLineup, substitutes, startingPitchers, bullpen, recentPreferredLineup, recentSubstitutes, recentStartingPitchers, recentBullpen, affiliationHistory, affiliates, prospects, schedule, allStarGame, leaderPool, manager, transactionsPage } = data
   const isMilb = (team.sport?.id ?? 1) !== 1
   // Flags a Team Leaders / Preferred Lineup entry with the IL cross — cheap
   // to build fresh each render (injured is a handful of rows), no
@@ -773,6 +900,25 @@ export function TeamPage({ id, asOf, sportId }) {
     id: p.id,
     hurt: injuredIds.has(p.id),
   }))
+  const recentPreferredLineupDefense = recentPreferredLineup.map((p) => ({
+    position: p.position,
+    last: p.last,
+    id: p.id,
+    hurt: injuredIds.has(p.id),
+  }))
+  const hasRecentRoster =
+    recentPreferredLineup.length > 0 ||
+    recentSubstitutes.length > 0 ||
+    recentStartingPitchers.length > 0 ||
+    recentBullpen.length > 0
+  // Defaults to Last 10 Games whenever that data exists; a club with no
+  // completed games yet (or every boxscore fetch failing) has no recent data
+  // to default to, so it always renders the season card instead.
+  const showRecentRoster = hasRecentRoster && seasonRosterTeamId !== teamId
+  const rosterLineup = showRecentRoster ? recentPreferredLineupDefense : preferredLineupDefense
+  const rosterSubs = showRecentRoster ? recentSubstitutes : substitutes
+  const rosterSP = showRecentRoster ? recentStartingPitchers : startingPitchers
+  const rosterBullpen = showRecentRoster ? recentBullpen : bullpen
   // On a MiLB affiliate page, lead the Affiliates section with a card for the
   // parent MLB club (which fetchAffiliates deliberately omits from the farm
   // tree). Location is unavailable from the static team record, so the card
@@ -836,7 +982,21 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {standings.length > 0 && (
           <>
-            <SectionTitle title={team.division?.name || 'Standings'} note={asOf ? 'entering today' : ''} />
+            <SectionTitle
+              title={team.division?.name || 'Standings'}
+              note={asOf ? 'entering today' : ''}
+              action={
+                divisionPostseasonOdds.length > 0 && (
+                  <button
+                    type="button"
+                    className="psodds-pill"
+                    onClick={() => setShowPostseasonOdds(true)}
+                  >
+                    Postseason Odds
+                  </button>
+                )
+              }
+            />
             <div className="ledger-wrap">
               <table className="standings">
                 <thead>
@@ -954,11 +1114,36 @@ export function TeamPage({ id, asOf, sportId }) {
           }
         />
 
-        {postseasonOdds && <PostseasonOddsCard snapshot={postseasonOdds} />}
-
         {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
           <>
-            <SectionTitle title="Roster" note="preferred lineup" />
+            <SectionTitle
+              title="Roster"
+              note={!hasRecentRoster ? 'preferred lineup' : ''}
+              action={
+                hasRecentRoster && (
+                  <div className="roster-super__toggle" role="tablist" aria-label="Roster projection basis">
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={!showRecentRoster}
+                      className={`roster-super__toggle-btn${!showRecentRoster ? ' is-active' : ''}`}
+                      onClick={() => setSeasonRosterTeamId(teamId)}
+                    >
+                      Season
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={showRecentRoster}
+                      className={`roster-super__toggle-btn${showRecentRoster ? ' is-active' : ''}`}
+                      onClick={() => setSeasonRosterTeamId(null)}
+                    >
+                      Last 10 Games
+                    </button>
+                  </div>
+                )
+              }
+            />
             {/* One bordered soft-cream card (same convention as .tstats-card)
                 around all the projection subsections, so they read as one
                 group distinct from the actual 40-man list further down. */}
@@ -967,19 +1152,19 @@ export function TeamPage({ id, asOf, sportId }) {
                 {/* Left column: the defensive nine, with the bench (Top
                     Substitutes) stacked directly beneath it. */}
                 <div className="roster-super__col">
-                  {preferredLineup.length > 0 && (
+                  {rosterLineup.length > 0 && (
                     <section className="roster-sub">
                       <h4 className="roster-sub__title">Preferred Lineup</h4>
-                      <DefenseDiamond defense={preferredLineupDefense} />
+                      <DefenseDiamond defense={rosterLineup} />
                     </section>
                   )}
-                  {substitutes.length > 0 && (
+                  {rosterSubs.length > 0 && (
                     <section className="roster-sub">
                       <h4 className="roster-sub__title">Top Substitutes</h4>
                       <RosterList
                         season={season}
                         showProspect={isMilb}
-                        rows={substitutes.map((p) => ({
+                        rows={rosterSubs.map((p) => ({
                           ...p,
                           hurt: injuredIds.has(p.id),
                         }))}
@@ -990,26 +1175,26 @@ export function TeamPage({ id, asOf, sportId }) {
                 {/* Right column: the two pitching staffs, Starting Pitchers
                     over Bullpen. */}
                 <div className="roster-super__col">
-                  {startingPitchers.length > 0 && (
+                  {rosterSP.length > 0 && (
                     <section className="roster-sub">
                       <h4 className="roster-sub__title">Starting Pitchers</h4>
                       <RosterList
                         season={season}
                         showProspect={isMilb}
-                        rows={startingPitchers.map((p) => ({
+                        rows={rosterSP.map((p) => ({
                           ...p,
                           hurt: injuredIds.has(p.id),
                         }))}
                       />
                     </section>
                   )}
-                  {bullpen.length > 0 && (
+                  {rosterBullpen.length > 0 && (
                     <section className="roster-sub">
                       <h4 className="roster-sub__title">Bullpen</h4>
                       <RosterList
                         season={season}
                         showProspect={isMilb}
-                        rows={bullpen.map((p) => ({
+                        rows={rosterBullpen.map((p) => ({
                           ...p,
                           hurt: injuredIds.has(p.id),
                         }))}
@@ -1148,6 +1333,14 @@ export function TeamPage({ id, asOf, sportId }) {
               )}
             </div>
           </>
+        )}
+
+        {showPostseasonOdds && (
+          <PostseasonOddsModal
+            divisionName={team.division?.name || 'Standings'}
+            rows={divisionPostseasonOdds}
+            onClose={() => setShowPostseasonOdds(false)}
+          />
         )}
       </div>
     </LinkScope>
