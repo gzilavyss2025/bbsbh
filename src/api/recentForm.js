@@ -130,12 +130,19 @@ export function buildRecentForm(games, fullRoster) {
   const preferredLineupIds = LINEUP_POSITIONS.map((pos) => bestByPosition[pos]).filter(Boolean)
 
   // Top Substitutes — hitters who didn't win a lineup spot, ranked by games
-  // played in the window, capped at 6 (same cap as the season card).
-  const substituteIds = [...gamesPlayedByHitter.entries()]
-    .filter(([id, games2]) => !claimed.has(id) && games2 > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([id]) => id)
+  // played in the window, capped at 6 (same cap as the season card). A
+  // roster hitter who didn't appear in ANY of the window's games (a bench
+  // bat who happened to sit the whole stretch, or just returned from a rehab
+  // stint) still belongs here rather than vanishing entirely — appended
+  // after the ranked group since there's no window data to rank him by.
+  const zeroGameHitterIds = [...hitterIds].filter((id) => !claimed.has(id) && !gamesPlayedByHitter.has(id))
+  const substituteIds = [
+    ...[...gamesPlayedByHitter.entries()]
+      .filter(([id, games2]) => !claimed.has(id) && games2 > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id]) => id),
+    ...zeroGameHitterIds,
+  ].slice(0, 6)
 
   // Starting Pitchers — top 5 by starts in the window, ties broken by the
   // more recent start.
@@ -157,5 +164,12 @@ export function buildRecentForm(games, fullRoster) {
     .sort((a, b) => b[1].appearances - a[1].appearances || b[1].outs - a[1].outs)
   const bullpenIds = (closerEntry ? [closerEntry[0], ...setupCrew.map(([id]) => id)] : setupCrew.map(([id]) => id)).slice(0, 8)
 
-  return { preferredLineupIds, substituteIds, startingPitcherIds, bullpenIds }
+  // Every current-roster pitcher who threw not one pitch in the window (a
+  // true zero, not just "didn't start") — the caller (TeamPage.jsx) infers a
+  // role for these from AAA/prior-team stats and folds them into the lists
+  // above, since a rookie call-up or a just-returned rehabber genuinely has
+  // no window data to rank by either.
+  const pitcherAppearanceIds = [...pitchStats.keys()]
+
+  return { preferredLineupIds, substituteIds, startingPitcherIds, bullpenIds, pitcherAppearanceIds }
 }

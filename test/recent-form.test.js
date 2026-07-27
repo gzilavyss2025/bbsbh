@@ -65,7 +65,17 @@ test('a bench player who started elsewhere ranks as a substitute by games played
   ]
   const { preferredLineupIds, substituteIds } = buildRecentForm(games, FULL_ROSTER)
   assert.equal(preferredLineupIds.find((p) => p.position === 'SS').id, 2)
-  assert.deepEqual(substituteIds, [3])
+  // 3 actually played (ranked first); 1 (the catcher, idle the whole window)
+  // still shows up — appended after the ranked group, not dropped.
+  assert.deepEqual(substituteIds, [3, 1])
+})
+
+test('a roster hitter who appeared in NONE of the window games still lands in Top Substitutes', () => {
+  const games = [{ apiDate: '2026-07-20', side: 'home', box: box('home', [starter(2, 6, 'SS')]) }]
+  const { substituteIds } = buildRecentForm(games, FULL_ROSTER)
+  // 2 claimed the SS spot; 1 (catcher) and 3 (the other SS) both sat the
+  // whole window and never claimed a spot, so both still show up.
+  assert.deepEqual(substituteIds, [1, 3])
 })
 
 test('starting pitchers rank by starts in the window, capped at 5', () => {
@@ -126,12 +136,22 @@ test('no saves in the window means no closer — everyone ranks by appearances/i
   assert.deepEqual(bullpenIds, [20, 21]) // 20's 2 innings outrank 21's 1
 })
 
-test('empty window degrades to every list empty, no throw', () => {
+test('a pitcher who threw not one pitch in the window is exposed for the caller to infer a role for', () => {
+  const roster = [pitcher(10), pitcher(20)]
+  const games = [
+    { apiDate: '2026-07-20', side: 'home', box: box('home', [pitchLine(10, { started: true, outs: 18 })]) },
+  ]
+  const { pitcherAppearanceIds } = buildRecentForm(games, roster)
+  assert.deepEqual(pitcherAppearanceIds, [10]) // 20 never took the mound — not in this list
+})
+
+test('empty window degrades to every roster hitter as a substitute and every other list empty, no throw', () => {
   const result = buildRecentForm([], FULL_ROSTER)
   assert.deepEqual(result, {
     preferredLineupIds: [],
-    substituteIds: [],
+    substituteIds: [1, 2, 3], // no games at all — every hitter is idle, none ranked
     startingPitcherIds: [],
     bullpenIds: [],
+    pitcherAppearanceIds: [],
   })
 })
