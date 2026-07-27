@@ -14,7 +14,7 @@ earlier sections — append.
 | 1 | Lab framework + JSON stores + write-back | **merged** | `claude/identity-lab-framework` | #416 |
 | 2 | Jersey audit view + hex copy/paste | **merged** | `claude/jersey-audit-hex-copy` | #418 |
 | 3 | Logo upload pipeline (MLB) | **merged** | `claude/logo-upload-pipeline` | #419 |
-| 4 | MiLB home/away logo art | **open** | `claude/milb-logo-art` | #TBD |
+| 4 | MiLB home/away logo art | **open** | `claude/milb-logo-art` | #420 |
 | 5 | MiLB colour reconciliation | not started | — | — |
 | 6 | Theming + uniform display | not started | — | — |
 | 7 | Docs + cleanup | not started | — | — |
@@ -163,7 +163,7 @@ in the lab's own hint text and in `src/lib/CLAUDE.md`.
 
 ## PR 2 — Jersey audit view, season-staleness banner, hex copy/paste
 
-Branch: `claude/jersey-audit-hex-copy` · PR: #TBD · Merged: open
+Branch: `claude/jersey-audit-hex-copy` · PR: #420 · Merged: open
 
 Based on `origin/main` @ `4388da1` (PR 1 had already merged as #416).
 
@@ -438,7 +438,7 @@ uploads, as PR 2 flagged; this PR ships the pipeline, not the art.
 
 ## PR 4 — MiLB home/away logo art
 
-Branch: `claude/milb-logo-art` · PR: #TBD · Merged: open
+Branch: `claude/milb-logo-art` · PR: #420 · Merged: open
 
 Based on `origin/main` @ `4b9b940` (PR 3 had already merged as #419).
 
