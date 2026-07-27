@@ -67,3 +67,28 @@ export function selectLiveEdge(feed, spoilersOff) {
   const lineEdge = edgeFromLinescore(feed)
   return lineEdge == null ? playEdge : Math.min(playEdge, lineEdge)
 }
+
+// Whether a fresh live-edge reading should pull the viewer's NAVIGATION along
+// with it. InningViewer keeps two refs across polls: `prevEdge` (what this
+// selector reported last time it ran) and `prevSeenIdx` (where the viewer WAS
+// SITTING as of that same last check — not where they are right now).
+//
+// Two cases:
+//   - First read since activating (`prevEdge == null`): jump straight to the
+//     current edge — that's the "catch me up to live" promise of turning
+//     Follow Live on.
+//   - Every read after: only jump when the edge just advanced past a half the
+//     viewer was ALREADY sitting on as of the previous check. Using last
+//     check's position rather than curIdx (now) is the whole fix: a viewer
+//     who fell behind and just paged themselves forward to catch up shows the
+//     same curIdx a genuinely-watching viewer would, but `prevSeenIdx` still
+//     reflects where they were BEFORE that catch-up, so the two are told
+//     apart. Without this, the instant they arrive at the half the game had
+//     already moved past, a live edge that advanced again in the meantime
+//     immediately flings them further — the "sends you all over" complaint.
+//     A manual catch-up costs at most one poll interval of quiet before
+//     auto-follow re-engages, which is the point, not a bug.
+export function shouldFollowLiveEdge(edge, prevEdge, prevSeenIdx, curIdx) {
+  if (edge == null) return false
+  return prevEdge == null ? edge > curIdx : prevSeenIdx === prevEdge && edge > prevEdge
+}

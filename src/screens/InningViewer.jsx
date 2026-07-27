@@ -10,7 +10,7 @@ import {
   selectIsFinal,
   halfIndex,
 } from '../api/select.js'
-import { selectLiveEdge } from '../api/liveEdge.js'
+import { selectLiveEdge, shouldFollowLiveEdge } from '../api/liveEdge.js'
 import { useCopy } from '../copy/copyContext.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
@@ -216,10 +216,14 @@ export function InningViewer({
   const [runsInProgress, setRunsInProgress] = useState(null)
   useEffect(() => setRunsInProgress(null), [curIdx])
 
-  // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a game
-  // that's actually in progress pulls the VIEW along with it: on every fresh feed
-  // object (useGameData's tightened poll and a manual Refresh both mint one), if
-  // the user is caught up to the frontier, move them to the newest half.
+  // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
+  // turning over for real — the game moving forward while you're actually
+  // watching it — pulls the VIEW along with it. Catching yourself up by
+  // paging forward through halves you fell behind on is your own navigation
+  // and never gets overtaken by a further jump the moment you arrive; see
+  // `shouldFollowLiveEdge` (liveEdge.js) for why two refs (not just curIdx)
+  // are needed to tell those apart, and the git history on this effect for
+  // the "sends you all over" complaint it replaced.
   //
   // This is navigation ONLY. It deliberately does not — and must not — touch the
   // reveal mark: there is nothing for a ratchet to advance, because under the
@@ -228,23 +232,31 @@ export function InningViewer({
   // watch live is watched under a pass that writes nothing, so your hand-scored
   // mark is exactly where you left it when the pass ends.
   //
-  // Only moves a caught-up viewer (curIdx >= the frontier we last sent them to) —
-  // paged back to re-read an earlier half, we leave them alone. replace:true so a
-  // long night never pollutes the Back button. Gated on `passActive` rather than
-  // `spoilersOff`: a day locked in from an earlier consent has no live game left
-  // to follow.
-  const followedIdx = useRef(-1)
+  // replace:true so a long night never pollutes the Back button. Gated on
+  // `passActive` rather than `spoilersOff`: a day locked in from an earlier
+  // consent has no live game left to follow. Both refs reset on deactivation
+  // so turning Follow Live back on re-triggers the initial catch-up-to-live
+  // jump rather than reusing a stale reading.
+  const lastEdgeRef = useRef(null)
+  const lastSeenIdxRef = useRef(null)
   useEffect(() => {
-    if (!passActive) return
+    if (!passActive) {
+      lastEdgeRef.current = null
+      lastSeenIdxRef.current = null
+      return
+    }
     const edge = selectLiveEdge(feed, passActive)
     if (edge == null || selectIsFinal(feed)) return
-    const caughtUp = curIdx >= followedIdx.current
-    if (edge > curIdx && caughtUp) {
-      followedIdx.current = edge
+    const prevEdge = lastEdgeRef.current
+    const prevSeenIdx = lastSeenIdxRef.current
+    const follow = shouldFollowLiveEdge(edge, prevEdge, prevSeenIdx, curIdx)
+    lastEdgeRef.current = edge
+    lastSeenIdxRef.current = follow ? edge : curIdx
+    if (follow) {
       onInning(Math.floor(edge / 2) + 1, edge % 2 === 0 ? 'top' : 'bottom', { replace: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [feed, passActive, curIdx])
+  }, [feed, passActive])
 
   // Builds one InningPage instance for a given half-index — shared by the
   // active (interactive) render and, mid-turn, the inert preview render.
