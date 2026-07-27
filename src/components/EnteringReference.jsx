@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { defenseEntering } from '../api/defense.js'
 import { lineupEntering } from '../api/battingorder.js'
 import { selectDueUpNext } from '../api/dueup.js'
@@ -59,11 +60,17 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // elsewhere (StatBox's R/H/E row) — see
 // .scratch/pbp-scoring-review/issues/05-substitution-surface-asymmetries.md.
 export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, revealedThrough }) {
+  const [open, setOpen] = useState(true)
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
   return (
     <section className="halfdefense">
-      <h4 className="halfdefense__title">
+      <button
+        type="button"
+        className="halfdefense__title"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
         <TeamLogo
           teamId={fieldingTeamId}
           name={fieldingName}
@@ -72,8 +79,11 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
           className="metricbar__logo"
         />
         Defensive alignment entering the {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
-      </h4>
-      <DefenseDiamond defense={defense} />
+        <span className="halfdefense__chevron" aria-hidden="true">
+          {open ? '▾' : '▸'}
+        </span>
+      </button>
+      {open && <DefenseDiamond defense={defense} />}
     </section>
   )
 }
@@ -104,6 +114,7 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
 export function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
+  const [open, setOpen] = useState(true)
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
   if ((!away || away.length === 0) && (!home || home.length === 0)) return null
@@ -115,13 +126,23 @@ export function LineupSection({ feed, inning, half, awayName, homeName, prospect
   }
   return (
     <section className="lineupcard">
-      <h4 className="lineupcard__title">
+      <button
+        type="button"
+        className="lineupcard__title"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
         Lineups entering the {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
-      </h4>
-      <div className="lineupcard__teams">
-        <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
-        <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />
-      </div>
+        <span className="lineupcard__chevron" aria-hidden="true">
+          {open ? '▾' : '▸'}
+        </span>
+      </button>
+      {open && (
+        <div className="lineupcard__teams">
+          <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
+          <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />
+        </div>
+      )}
     </section>
   )
 }
