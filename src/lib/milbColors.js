@@ -1,7 +1,12 @@
 import { WPA_LOGO_DEFAULTS } from './wpaLogo.js'
 import { DEFAULT_PINSTRIPE_COLOR } from './wpaBandColors.js'
-import { byTeam, byTreatment } from './tuningStore.js'
-import MILB_COLORS from './data/milb-colors.json' with { type: 'json' }
+import { byTreatment } from './tuningStore.js'
+import {
+  MILB_COLORS,
+  MILB_RESEARCHED_PAIRS,
+  milbColorPair,
+  milbHasResearchedColor,
+} from './brandColors.js'
 import MILB_TREATMENT_TUNING from './data/milb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
@@ -15,46 +20,30 @@ import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 // exactly two variations, Home and Away, no exceptions, built from ONE
 // researched primary/secondary pair per team.
 //
-// The pairs below are WEB RESEARCH, not an official source (statsapi carries
-// no color field for any team, MLB or MiLB, and neither MLB nor MiLB publish
-// one) — see .scratch/milb-team-colors/README.md for the full methodology,
-// per-team confidence ratings, and known gaps. Re-verify before leaning on
-// any single value here for something more permanent than a QA lab.
+// Those pairs are WEB RESEARCH, not an official source (statsapi carries no
+// color field for any team, MLB or MiLB, and neither MLB nor MiLB publish
+// one). Each entry carries its own `confidence`, `source`, and `note` so the
+// caveat travels with the value instead of living in a separate README —
+// re-verify before leaning on any single one for something more permanent
+// than a QA lab. Three affiliates (482 Corpus Christi, 553 Knoxville, 1956
+// Somerset) are marked `"found": false` with no pair at all: research turned
+// up color NAMES only, and an invented hex is worse than the fallback.
 //
-// Both tables now live on disk as src/lib/data/milb-colors.json (the
-// researched pair per affiliate) and src/lib/data/milb-treatment-tuning.json
-// (the Home/Away hand-tuning that used to sit here as four literals), so the
-// Team Identity Lab can write an edit straight back rather than handing over a
+// Both tables live on disk as src/lib/data/milb-colors.json (the researched
+// pair per affiliate) and src/lib/data/milb-treatment-tuning.json (the
+// Home/Away hand-tuning that used to sit here as four literals), so the Team
+// Identity Lab can write an edit straight back rather than handing over a
 // snippet to paste (ADR-0029). They're re-exported raw for that lab; every
-// resolver in this file reads the derived tables below. See src/lib/CLAUDE.md
-// for the schema.
+// resolver in this file reads the derived tables. See src/lib/CLAUDE.md for
+// the schema.
 export { MILB_COLORS, MILB_TREATMENT_TUNING }
 
-// Five affiliates where research either found no hex at all, or only a
-// single low-confidence/likely-stale source with unresolved conflicts
-// (Portland Sea Dogs, Knoxville Smokies, Corpus Christi Hooks, Somerset
-// Patriots, Columbus Clingstones — see the stash README) are left OUT of
-// MILB_RESEARCHED_PAIRS on purpose, so milbColorPair's fallback below
-// renders them with an explicit neutral placeholder rather than a
-// possibly-wrong invented color.
-export const MILB_RESEARCHED_PAIRS = byTeam(MILB_COLORS, (e) => e.pair)
-
-// Same neutral graphite pair wpaBandColors.js's chipColorsFor falls back to
-// for an unrecognized team — reused here rather than inventing a second
-// "unknown team" color, for the 5 affiliates research couldn't confidently
-// resolve (see the doc comment above).
-const NEUTRAL_FALLBACK_PAIR = ['#6B6558', '#938C7C']
-
-export function milbColorPair(teamId) {
-  return MILB_RESEARCHED_PAIRS[teamId] ?? NEUTRAL_FALLBACK_PAIR
-}
-
-// Whether `teamId` has a real researched color (vs. the neutral fallback) —
-// surfaced in the lab so an unresolved team is visibly flagged rather than
-// looking indistinguishable from a confidently-researched one.
-export function milbHasResearchedColor(teamId) {
-  return Boolean(MILB_RESEARCHED_PAIRS[teamId])
-}
+// The affiliate -> color-pair chain itself lives in brandColors.js, one layer
+// down, because teams.js's headshot tint reads the exact same chain and this
+// module can't be imported from there without closing a cycle (see that file's
+// header). Re-exported here so every existing MiLB caller — the lab, the
+// tile resolvers below — still has one import for "MiLB colors".
+export { MILB_RESEARCHED_PAIRS, milbColorPair, milbHasResearchedColor }
 
 // The two variations, no exceptions: Home wears the primary as its main
 // color with the secondary as accent; Away swaps the pair — same two hexes,

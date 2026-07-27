@@ -24,13 +24,49 @@ between the two variations.
 Keeping these separate is deliberate. Forcing parity would mean inventing data
 one side doesn't have.
 
+## The one colour chain
+
+Both vocabularies bottom out in the same three-step resolution, in
+`brandColors.js`:
+
+```
+1. the affiliate's own researched pair   (data/milb-colors.json)
+2. its parent MLB org's pair             (via MILB_PARENT_ORG)
+3. NEUTRAL_FALLBACK_PAIR                 (milbColorPair only)
+```
+
+`milbBrandPair` is steps 1–2 and returns **null** when neither hits;
+`milbColorPair` adds step 3. One ordering, two endings — a caller that must paint
+something reads the second, a caller whose contract is "no known colour, render
+something else" (`teamTintColor`, `teamStripeGradient`, `teamChipColors`) reads
+the first. Do not add a third ending.
+
+Until July 2026 there were **two** mechanisms that could not agree: the headshot
+tint jumped straight to step 2 and never saw the affiliate (a Durham Bulls
+headshot tinted with its parent Rays' colour), while the logo tile read step 1
+and had no step 2 at all. Collapsing them is why every MiLB headshot,
+`PitcherNotice`, and off-day card now reads as the affiliate's own identity.
+
+`brandColors.js` sits *below* both `teams.js` and `milbColors.js` because
+`milbColors.js` already reaches `teams.js` transitively through `wpaLogo.js` —
+putting the chain in either one and importing the other closes an import cycle.
+
+An affiliate research never resolved a hex for carries `"found": false` and **no
+`pair`**, so it falls to step 2 rather than wearing an invented colour; three do
+today (482 Corpus Christi, 553 Knoxville, 1956 Somerset). `milbHasResearchedColor`
+is deliberately step-1-only, so the lab still flags a club that is merely
+borrowing its org's pair. Methodology and confidence definitions live in
+`.scratch/milb-team-colors/README.md`; every per-team caveat lives in the store's
+own `note`.
+
 ## Where a value lives
 
 | Module | Owns |
 | --- | --- |
-| `teams.js` | Club names/abbreviations/ids, logo URL builders, the brand-colour tables (`TEAM_COLOR_PAIRS`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
+| `brandColors.js` | `TEAM_COLOR_PAIRS`, `MILB_PARENT_ORG`, the researched MiLB pairs, and **the one affiliate→colour chain** both layers read |
+| `teams.js` | Club names/abbreviations/ids, logo URL builders, the MLB-only colour tables (`TEAM_COLORS`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
 | `logoArt.js` | The curated-art standard: the PNG header reader, the rejection reasons, and the treatment→directory allowlist an upload resolves through |
-| `milbColors.js` | The MiLB counterpart: researched pairs, the Home/Away resolvers, `milbTreatmentTile` |
+| `milbColors.js` | The MiLB counterpart: the Home/Away resolvers and `milbTreatmentTile` (it re-exports the chain rather than owning it) |
 | `wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
 | `wpaBandColors.js` | That band's fill/pinstripe resolution |
 | `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0025) |
@@ -51,7 +87,7 @@ Lab can write an edit straight back instead of handing over a snippet to paste
 | --- | --- |
 | `mlb-treatment-tuning.json` | `teams.js` |
 | `milb-treatment-tuning.json` | `milbColors.js` |
-| `milb-colors.json` | `milbColors.js` |
+| `milb-colors.json` | `brandColors.js` |
 | `wpa-tuning.json` | `wpaLogo.js`, `wpaBandColors.js` |
 
 Every store has the same outer shape:
@@ -65,6 +101,19 @@ kept as data so a 900-line JSON diff still says which club moved and why a value
 is odd. **No resolver reads either one** — they exist for humans, and the lab
 renders `note` as an editable field so rationale is authored in the tool rather
 than lost on the first write.
+
+`milb-colors.json` is the one store with no `treatments` — an affiliate has a
+single identity, not a per-treatment one:
+
+```json
+{ "546": { "name": "…", "level": "Double-A", "pair": ["#e03a3e", "#003263"],
+           "third": "#cbccce", "confidence": "low", "source": "…", "note": "…" } }
+```
+
+`pair` is the only field a resolver reads. `third`/`confidence`/`source`/`note`
+are provenance, and `found: false` (mutually exclusive with `pair`, enforced by
+the dev-save validator and by `test/identity-lab-stores.test.js`) marks a club
+research resolved nothing for.
 
 `tuningStore.js` holds the readers. Each consuming module rebuilds the exact
 `{ [teamId]: { [treatment]: value } }` table it used to declare inline, so every

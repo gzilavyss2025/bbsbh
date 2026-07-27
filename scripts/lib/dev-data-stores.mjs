@@ -91,25 +91,49 @@ function isTreatmentStore(parsed) {
   return null
 }
 
-// milb-colors.json: one researched primary/secondary pair per affiliate. Kept
-// stricter than the tuning stores because a malformed pair here would recolor
-// real MiLB surfaces rather than a lab preview (PR 5 wires the fallback chain).
+// The three confidence ratings the research pass assigned — high (2+ sources
+// agreed), medium (a single aggregator), low (conflicting sources, a likely
+// mislabel, or names-only). A free-string rating would drift into a fourth
+// meaning nobody defined, so the set is closed.
+const CONFIDENCE_LEVELS = new Set(['high', 'medium', 'low'])
+
+// milb-colors.json: one researched primary/secondary pair per affiliate, plus
+// the provenance that travels with it (`third`, `confidence`, `source`,
+// `note`) and `found: false` for an affiliate research resolved no hex for at
+// all. Kept stricter than the tuning stores because a malformed pair here
+// recolors real MiLB surfaces — the headshot tint and the logo tile both read
+// this through brandColors.js's chain — not just a lab preview.
 function isMilbColorStore(parsed) {
   if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
   for (const [teamId, entry] of Object.entries(parsed)) {
     if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
     if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
     if (typeof entry.name !== 'string' || !entry.name) return `team ${teamId} has no name`
-    if (entry.level !== undefined && entry.level !== null && typeof entry.level !== 'string') {
-      return `team ${teamId}'s level is not a string`
+    for (const field of ['level', 'source', 'note']) {
+      const v = entry[field]
+      if (v !== undefined && v !== null && typeof v !== 'string') {
+        return `team ${teamId}'s ${field} is not a string`
+      }
     }
-    if (entry.note !== undefined && typeof entry.note !== 'string') {
-      return `team ${teamId}'s note is not a string`
+    if (entry.confidence !== undefined && !CONFIDENCE_LEVELS.has(entry.confidence)) {
+      return `team ${teamId}'s confidence is not high/medium/low`
+    }
+    if (entry.found !== undefined && typeof entry.found !== 'boolean') {
+      return `team ${teamId}'s found is not a boolean`
+    }
+    if (entry.third !== undefined && !isColorish(entry.third)) {
+      return `team ${teamId}'s third is not a color`
     }
     if (entry.pair !== undefined) {
       if (!Array.isArray(entry.pair) || entry.pair.length !== 2 || !entry.pair.every(isColorish)) {
         return `team ${teamId}'s pair is not two colors`
       }
+    }
+    // The one cross-field rule, and the reason it's here rather than in a
+    // test: `found: false` is how an unresolved club stays visibly unresolved.
+    // An entry carrying both would silently claim a pair research never found.
+    if (entry.found === false && entry.pair !== undefined) {
+      return `team ${teamId} is marked found:false but carries a pair`
     }
   }
   return null
