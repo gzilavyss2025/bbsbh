@@ -799,10 +799,11 @@ export function TeamPage({ id, asOf, sportId }) {
   const showInjured = expandedInjuredTeamId === teamId
   // The Roster section's Season / Last 10 Games toggle — both views are
   // already prefetched in loadTeam, so flipping it is a pure client-side
-  // swap, no reload. Stores which team's view was switched (same team-keyed
-  // pattern as the prospects/IL expand state above), so client-side
-  // navigation to a different team naturally resets to the Season default.
-  const [recentRosterTeamId, setRecentRosterTeamId] = useState(null)
+  // swap, no reload. Last 10 Games is the default; this stores which team's
+  // view was switched BACK to Season (same team-keyed pattern as the
+  // prospects/IL expand state above), so client-side navigation to a
+  // different team naturally resets to the Last 10 Games default.
+  const [seasonRosterTeamId, setSeasonRosterTeamId] = useState(null)
 
   const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
   if (gate) return gate
@@ -819,7 +820,6 @@ export function TeamPage({ id, asOf, sportId }) {
     id: p.id,
     hurt: injuredIds.has(p.id),
   }))
-  const showRecentRoster = recentRosterTeamId === teamId
   const recentPreferredLineupDefense = recentPreferredLineup.map((p) => ({
     position: p.position,
     last: p.last,
@@ -831,6 +831,10 @@ export function TeamPage({ id, asOf, sportId }) {
     recentSubstitutes.length > 0 ||
     recentStartingPitchers.length > 0 ||
     recentBullpen.length > 0
+  // Defaults to Last 10 Games whenever that data exists; a club with no
+  // completed games yet (or every boxscore fetch failing) has no recent data
+  // to default to, so it always renders the season card instead.
+  const showRecentRoster = hasRecentRoster && seasonRosterTeamId !== teamId
   const rosterLineup = showRecentRoster ? recentPreferredLineupDefense : preferredLineupDefense
   const rosterSubs = showRecentRoster ? recentSubstitutes : substitutes
   const rosterSP = showRecentRoster ? recentStartingPitchers : startingPitchers
@@ -1031,7 +1035,7 @@ export function TeamPage({ id, asOf, sportId }) {
                       role="tab"
                       aria-selected={!showRecentRoster}
                       className={`roster-super__toggle-btn${!showRecentRoster ? ' is-active' : ''}`}
-                      onClick={() => setRecentRosterTeamId(null)}
+                      onClick={() => setSeasonRosterTeamId(teamId)}
                     >
                       Season
                     </button>
@@ -1040,7 +1044,7 @@ export function TeamPage({ id, asOf, sportId }) {
                       role="tab"
                       aria-selected={showRecentRoster}
                       className={`roster-super__toggle-btn${showRecentRoster ? ' is-active' : ''}`}
-                      onClick={() => setRecentRosterTeamId(teamId)}
+                      onClick={() => setSeasonRosterTeamId(null)}
                     >
                       Last 10 Games
                     </button>
