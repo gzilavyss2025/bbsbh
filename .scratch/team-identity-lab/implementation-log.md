@@ -16,7 +16,7 @@ earlier sections — append.
 | 3 | Logo upload pipeline (MLB) | **merged** | `claude/logo-upload-pipeline` | #419 |
 | 4 | MiLB home/away logo art | **merged** | `claude/milb-logo-art` | #420 |
 | 5 | MiLB colour reconciliation | **merged** | `claude/milb-color-reconciliation` | #421 |
-| 6 | Theming + uniform display | **open** | `claude/team-theming-uniforms` | #422 |
+| 6 | Theming + uniform display | **open** | `claude/team-theming-uniforms` | #423 |
 | 7 | Docs + cleanup | not started | — | — |
 
 Update the row **and** append a section below when a PR opens or merges.
@@ -695,7 +695,7 @@ preserved without a second chain. `teamTintColor`, `resolveTeamColorPair`
 
 ## PR 6 — Theming, uniform display, the contrast guard, and ADR-0030
 
-Branch: `claude/team-theming-uniforms` · PR: #422 · Merged: open
+Branch: `claude/team-theming-uniforms` · PR: #423 · Merged: open
 
 Based on `origin/main` @ `ff9ce29` (PRs 1-5 had all merged, as #416, #418, #419,
 #420, #421).
