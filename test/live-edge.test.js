@@ -11,7 +11,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import { selectLiveEdge } from '../src/api/liveEdge.js'
+import { selectLiveEdge, shouldFollowLiveEdge } from '../src/api/liveEdge.js'
 import { halfIndex } from '../src/api/select.js'
 import { mergeMark } from '../src/hooks/revealProgressCore.js'
 import { isUnlocked, nextResetAt } from '../src/lib/scoresUnlocked.js'
@@ -110,6 +110,59 @@ test('a real Final feed reports its final half (823035 → bottom 9)', () => {
 // --------------------------------------------------------------------------
 test('mergeMark drops a null edge and keeps the mark', () => {
   assert.equal(mergeMark(6, selectLiveEdge(buildFeed({ plays: [] }), true)), 6)
+})
+
+// --------------------------------------------------------------------------
+// shouldFollowLiveEdge — InningViewer's navigation decision (option C: only
+// jump on a half turning over while you're actually watching it, never when
+// you page forward into a half the game already left behind). `prevSeenIdx`
+// is where the viewer was sitting as of the PREVIOUS check, not `curIdx` —
+// that distinction is the whole point, see the header comment in liveEdge.js.
+// --------------------------------------------------------------------------
+test('a null edge never follows', () => {
+  assert.equal(shouldFollowLiveEdge(null, 4, 4, 4), false)
+})
+
+test('first read since activation jumps straight to the edge, from anywhere', () => {
+  assert.equal(shouldFollowLiveEdge(6, null, null, 2), true)
+  assert.equal(shouldFollowLiveEdge(6, null, null, 6), false) // already there — nothing to do
+})
+
+test('a half turning over while the viewer was already sitting on it follows', () => {
+  // As of the last check the viewer was at 4, matching the then-current edge —
+  // genuinely watching. It just turned over to 5.
+  assert.equal(shouldFollowLiveEdge(5, 4, 4, 4), true)
+})
+
+test('a viewer who fell behind never gets pulled while reading', () => {
+  // Last check: edge was 4, viewer was seen at 2 (already behind). Edge has
+  // since moved to 6 while they're still reading half 2 — must not fire
+  // regardless of where curIdx happens to be right now.
+  assert.equal(shouldFollowLiveEdge(6, 4, 2, 2), false)
+})
+
+test('catching up by paging forward is never overtaken by the live edge that got there first', () => {
+  // The viewer fell behind (last seen at 2 while edge was 6), then paged
+  // themselves all the way forward to curIdx 6 (matching that edge) between
+  // polls. The NEXT poll finds the game has moved again, to 7. Even though
+  // curIdx (6) now equals prevEdge (6), prevSeenIdx (2) does not — this was
+  // their own catch-up nav, not settled watching, so it must not fire. This
+  // is the exact "sends you all over" case: without prevSeenIdx, a bare
+  // curIdx === prevEdge check would wrongly fire here.
+  assert.equal(shouldFollowLiveEdge(7, 6, 2, 6), false)
+})
+
+test('auto-follow resumes once a check confirms the viewer has genuinely settled', () => {
+  // A later poll finds no further change (edge still 6, viewer still at 6) —
+  // that check itself doesn't follow (nothing advanced) but DOES record them
+  // as settled. The poll after that, a real turnover to 7 while they're still
+  // there, follows normally.
+  assert.equal(shouldFollowLiveEdge(6, 6, 6, 6), false)
+  assert.equal(shouldFollowLiveEdge(7, 6, 6, 6), true)
+})
+
+test('an unchanged edge never re-fires', () => {
+  assert.equal(shouldFollowLiveEdge(4, 4, 4, 4), false)
 })
 
 // --------------------------------------------------------------------------
