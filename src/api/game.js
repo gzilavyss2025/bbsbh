@@ -23,8 +23,10 @@ export async function fetchGameFeed(gamePk, options) {
 // consumers — `computeThreeStars` + `computePlayOfTheGame` in boxscore.js (which
 // read the per-play delta `homeTeamWinProbabilityAdded`) AND `selectWinProbPath`
 // in winprob.js → the WinProbChart line, which reads the CUMULATIVE
-// `homeTeamWinProbability` plus `about.isScoringPlay` — so the `fields=`
-// allowlist prunes the payload while keeping every field those three read. The
+// `homeTeamWinProbability` plus `about.isScoringPlay` and `about.atBatIndex`
+// (the at-bat-stepping clamp, ADR-0016 — see its `stepHalfIndex`/
+// `throughAtBatIndex` doc) — so the `fields=` allowlist prunes the payload
+// while keeping every field those three read. The
 // MLB `fields=` filter matches key names at any depth, so a nested read like
 // `about.isScoringPlay` needs BOTH `about` and `isScoringPlay` listed. `matchup`
 // keeps BOTH `batter` and `pitcher` (three stars credit the pitcher the inverse

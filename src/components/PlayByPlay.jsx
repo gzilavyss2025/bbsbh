@@ -13,6 +13,7 @@ import {
   pinchRunningPlayers,
   pinchHittingBatter,
   nextStepBoundary,
+  lastVisibleAtBatIndex,
 } from '../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
@@ -38,13 +39,19 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // `stepCap` (ADR-0016, at-bat stepping): when not null, only the first
 // `stepCap` entries render — the caller (HalfInning/InningViewer's floating
 // bar) drives the cap forward one plate appearance at a time. Each render
-// reports back either `onStepInfo({ nextCap, isLastStep })` — the cap the
-// NEXT "reveal next at-bat" tap should pass, computed via nextStepBoundary so
-// one tap bundles a leading event note (a sub, a mound visit) with the
-// plate appearance it precedes — or, once `stepCap` has caught up to the full
-// entries list (every entry shown, whether by tapping through or because the
-// very first step happened to be the whole half), `onStepComplete()` once, so
-// the caller can promote this half to a normal full commit.
+// reports back either `onStepInfo({ nextCap, isLastStep, lastAtBatIndex })` —
+// `nextCap` is the cap the NEXT "reveal next at-bat" tap should pass, computed
+// via nextStepBoundary so one tap bundles a leading event note (a sub, a mound
+// visit) with the plate appearance it precedes; `lastAtBatIndex` is the
+// `about.atBatIndex` (same field the /winProbability array carries) of the
+// last completed at-bat entry actually on screen, so InningViewer can clamp
+// the win-probability chart to grow one point per step instead of jumping a
+// whole half at once (see api/winprob.js's `stepHalfIndex`/`throughAtBatIndex`)
+// — null before the first visible at-bat card (a fresh half's opening entries
+// can be leading event notes only). Or, once `stepCap` has caught up to the
+// full entries list (every entry shown, whether by tapping through or because
+// the very first step happened to be the whole half), `onStepComplete()` once,
+// so the caller can promote this half to a normal full commit.
 export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
@@ -93,7 +100,8 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
       onStepComplete?.()
     } else {
       const nextCap = nextStepBoundary(entries, effectiveCap)
-      onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length })
+      const lastAtBatIndex = lastVisibleAtBatIndex(entries, effectiveCap)
+      onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length, lastAtBatIndex })
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 

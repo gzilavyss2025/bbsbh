@@ -428,21 +428,39 @@ export function InningViewer({
     [feed, renderRevealedThrough, callouts, rosters, workload, workloadGameDate],
   )
 
-  // The win-probability line "so far" — only the plays through the revealed
-  // half. Same reveal gate as the running line and Pitchers table (a
-  // reveal-only selector clamped to revealedThrough; see api/winprob.js), so
-  // nothing sealed is plotted. Empty until at least one half is revealed, and at
-  // MiLB parks with no win-prob feed — the chart then renders nothing.
+  // The win-probability line "so far" — the plays through the revealed half,
+  // PLUS (when the half on screen is being stepped through one at-bat at a
+  // time rather than committed whole, ADR-0016) the plays of that one half up
+  // to whichever at-bat PlayByPlay has actually rendered. `curStepInfo` is
+  // reported back up from inside PlayByPlay's own SealBox reveal function (see
+  // its onStepInfo doc) — this component never computes that boundary itself,
+  // only relays it, so the reveal-only rule (ADR-0001) still holds. Passing
+  // `curIdx` as `stepHalfIndex` unconditionally is safe even outside a step:
+  // api/winprob.js's clamp only acts on it once `throughAtBatIndex` is also
+  // non-null, which is exactly when `curStepInfo` exists. Empty until at least
+  // one half is revealed/stepped into, and at MiLB parks with no win-prob feed
+  // — the chart then renders nothing.
   const winProbPoints = useMemo(
-    () => selectWinProbPath(winProbability, { throughHalf: renderRevealedThrough }),
-    [winProbability, renderRevealedThrough],
+    () =>
+      selectWinProbPath(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: curIdx,
+        throughAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
+      }),
+    [winProbability, renderRevealedThrough, curIdx, curStepInfo],
   )
-  // The biggest-swing ledger — same reveal-only selector, same
-  // revealedThrough clamp, so it only ever covers revealed halves and grows
-  // one entry per reveal (never hinting what's ahead).
+  // The biggest-swing ledger — same reveal-only selector, same clamp
+  // (committed halves plus the in-progress step), so it only ever covers
+  // plays already on screen and grows one entry at a time right along with
+  // the chart above (never hinting what's ahead).
   const winProbBigPlays = useMemo(
-    () => selectWinProbBigPlays(winProbability, { throughHalf: renderRevealedThrough }),
-    [winProbability, renderRevealedThrough],
+    () =>
+      selectWinProbBigPlays(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: curIdx,
+        throughAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
+      }),
+    [winProbability, renderRevealedThrough, curIdx, curStepInfo],
   )
 
   if (!started) {

@@ -16,17 +16,20 @@ import { selectWinProbPath, winProbSplit, selectWinProbBigPlays } from '../src/a
 
 // A tiny win-probability array shaped like the /winProbability endpoint's rows:
 // one entry per completed play, carrying the cumulative home win % and `about`.
+// atBatIndex counts up play-by-play, same field play-by-play.js's own entries
+// carry off `play.about.atBatIndex` — the join key the at-bat-stepping clamp
+// (stepHalfIndex/throughAtBatIndex) matches against.
 function buildWinProb() {
-  const row = (home, inning, isTopInning, isScoringPlay, description) => ({
+  const row = (home, inning, isTopInning, isScoringPlay, description, atBatIndex) => ({
     homeTeamWinProbability: home,
-    about: { inning, isTopInning, isScoringPlay },
+    about: { inning, isTopInning, isScoringPlay, atBatIndex },
     result: { description },
   })
   return [
-    row(52, 1, true, false, 'Flyout'),
-    row(58, 1, false, true, 'RBI single'), // home takes the lead, bottom 1
-    row(46, 2, true, true, 'Two-run double'), // away answers, top 2
-    row(70, 2, false, true, 'Three-run homer'), // home pulls away, bottom 2
+    row(52, 1, true, false, 'Flyout', 0),
+    row(58, 1, false, true, 'RBI single', 1), // home takes the lead, bottom 1
+    row(46, 2, true, true, 'Two-run double', 2), // away answers, top 2
+    row(70, 2, false, true, 'Three-run homer', 3), // home pulls away, bottom 2
   ]
 }
 
@@ -39,10 +42,11 @@ test('WIN_PROB_FIELDS covers every field selectWinProbPath reads', () => {
   // (`isScoringPlay`) present. This is the exact set winprob.js dereferences.
   const required = [
     'homeTeamWinProbability', // e.homeTeamWinProbability — the chart line
-    'about', // e.about.{inning,isTopInning,isScoringPlay}
+    'about', // e.about.{inning,isTopInning,isScoringPlay,atBatIndex}
     'inning',
     'isTopInning',
     'isScoringPlay',
+    'atBatIndex', // the at-bat-stepping clamp (stepHalfIndex/throughAtBatIndex)
     'result', // e.result.description
     'description',
   ]
@@ -75,6 +79,70 @@ test('selectWinProbPath clamps to the revealed half (throughHalf)', () => {
   const points = selectWinProbPath(buildWinProb(), { throughHalf: 1 })
   assert.equal(points.length, 2)
   assert.deepEqual(points.map((p) => p.home), [52, 58])
+})
+
+// --------------------------------------------------------------------------
+// At-bat stepping (ADR-0016): stepHalfIndex/throughAtBatIndex grow the line
+// one point at a time within the ONE half being stepped through, without
+// ever reaching past what PlayByPlay has actually rendered for it.
+// --------------------------------------------------------------------------
+test('selectWinProbPath plots the in-progress step within the stepped half', () => {
+  // throughHalf=0 (only top 1 committed); bottom 1 is being stepped through
+  // and its one at-bat (atBatIndex 1) has been revealed.
+  const points = selectWinProbPath(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 1,
+    throughAtBatIndex: 1,
+  })
+  assert.deepEqual(points.map((p) => p.home), [52, 58])
+})
+
+test('selectWinProbPath never plots past the reported step boundary', () => {
+  // Bottom 1 is halfIndex 1; even though top 2 (idx 2) and bottom 2 (idx 3)
+  // exist in the data, throughAtBatIndex=1 must not surface them.
+  const points = selectWinProbPath(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 1,
+    throughAtBatIndex: 1,
+  })
+  assert.equal(points.length, 2)
+})
+
+test('selectWinProbPath ignores stepHalfIndex without a throughAtBatIndex', () => {
+  // Passing curIdx unconditionally (InningViewer's own usage) must be a no-op
+  // until a real boundary is reported — not stepHalfIndex alone.
+  const points = selectWinProbPath(buildWinProb(), { throughHalf: 0, stepHalfIndex: 1 })
+  assert.deepEqual(points.map((p) => p.home), [52])
+})
+
+test('selectWinProbPath applies the step clamp only to the named half', () => {
+  // stepHalfIndex targets bottom 1 (idx 1); a boundary that happens to match
+  // an atBatIndex in a DIFFERENT, not-yet-reached half (top 2, idx 2) must not
+  // leak that half's point in.
+  const points = selectWinProbPath(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 1,
+    throughAtBatIndex: 2,
+  })
+  assert.deepEqual(points.map((p) => p.home), [52, 58])
+})
+
+test('selectWinProbBigPlays grows with the in-progress step too', () => {
+  // Both plotted points clear minSwing=1 (deltas from even: +2 top 1, +6
+  // bottom 1) — newest (the in-progress step's own point) first.
+  const plays = selectWinProbBigPlays(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 1,
+    throughAtBatIndex: 1,
+    minSwing: 1,
+  })
+  assert.deepEqual(
+    plays.map((p) => [p.inning, p.half, p.delta]),
+    [
+      [1, 'bottom', 6],
+      [1, 'top', 2],
+    ],
+  )
 })
 
 test('selectWinProbPath skips entries with a missing/non-numeric win %', () => {
