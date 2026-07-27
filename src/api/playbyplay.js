@@ -1291,6 +1291,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           runnerId: rid,
           runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(e.details.description, nameIndex),
+          midAtBat: pitchInPlay,
         })
       }
     }
@@ -1317,6 +1318,26 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       const batter = resolveBatter(feed, battingSide, batterId, positionEntering.get(batterId))
       const { pitchEvents, pitches, pitchDetails } = pitchCardInfo(feed, play)
       const pitcher = matchupPitcher(feed, play)
+
+      // A baserunning event nested in THIS play's own events (a steal, wild
+      // pitch, passed ball…) happened DURING this plate appearance, before its
+      // own batted-ball result — hoist each into its own leading notification
+      // card (the same EventCard family a standalone, no-PA baserunning play
+      // already gets — see the `else` branch below), positioned right before
+      // the at-bat card it occurred inside of, instead of only ever
+      // surfacing as a sub-line once the batter's own result is already
+      // decided. `card.baserunningNotes` below is left populated too —
+      // callout-notes.js's steal-leader call-out still reads it — this only
+      // adds the narrative card, it doesn't replace that bookkeeping.
+      for (const n of baserunningNotes) {
+        entries.push({
+          kind: 'event',
+          eventType: n.eventType,
+          midAtBat: n.midAtBat,
+          playerId: n.runnerId,
+          segments: n.segments,
+        })
+      }
 
       const cardIndex = entries.length
       // A batter who reaches safely and is then thrown out stretching for an
