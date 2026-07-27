@@ -173,14 +173,28 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
 
   for (const inning of innings) {
     for (const card of computeHalfInningFeed(feed, inning, half, battingSide)) {
-      if (card.kind !== 'atbat') continue
+      // The extra-innings automatic runner (`kind: 'placed'`) took no plate
+      // appearance, but he has a real battingOrder — he's by rule the
+      // previous half's last batter — so `battingSlot` resolves him a row
+      // same as any hitter. Give him a cell there rather than dropping his
+      // card: without one his run reached the linescore's own R column but
+      // never this grid's, disagreeing with the scoreboard on the same
+      // sheet. Normalize his card onto the same `batterId`/`batter` shape
+      // the rest of this loop reads, so nothing downstream needs to branch.
+      const isPlaced = card.kind === 'placed'
+      if (card.kind !== 'atbat' && !isPlaced) continue
+      if (isPlaced) {
+        card.batterId = card.runnerId
+        card.batter = card.runner
+      }
       const slot = battingSlot(feed, battingSide, card.batterId)
       if (!slot || slot < 1 || slot > 9) continue
       const s = slotData[slot - 1]
       card.outType = card.codeKind === 'out' ? classifyOut(card.eventType, descByAtBat.get(card.atBatIndex)) : ''
       card.centerCode = scorecardCenterCode(card.code)
       // Each pitch sorted into its ball / strike column (in-play = 'X'), the
-      // same two-column ladder the live play-by-play card uses.
+      // same two-column ladder the live play-by-play card uses. The placed
+      // runner faced no pitches, so this is an empty ladder for him.
       card.ladder = pitchLadder(card.pitches ?? [])
       ;(s.byInning[inning] ??= []).push(card)
       // Which occupant of the slot this card belongs to (0 = starter), plus his
@@ -208,7 +222,9 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */) {
       // but no at-bat or plate appearance was charged, so it counts toward
       // nothing. Its eventType is the baserunning event's
       // (caught_stealing_2b…), which NON_AB_EVENTS alone wouldn't exclude.
-      if (!card.interrupted && !NON_AB_EVENTS.has(card.eventType)) { s.ab += 1; occ.ab += 1 }
+      // The placed runner is excluded the same way — he's not a plate
+      // appearance at all, official or otherwise.
+      if (!isPlaced && !card.interrupted && !NON_AB_EVENTS.has(card.eventType)) { s.ab += 1; occ.ab += 1 }
       if (card.scored) { s.r += 1; occ.r += 1 }
       s.rbi += card.rbi ?? 0
       occ.rbi += card.rbi ?? 0
