@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../api/select.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { highlightsByPlayId } from '../api/highlights.js'
@@ -54,36 +54,35 @@ export function HalfInning({
   const startedRevealing = revealed || revealedAtBatCount > 0
 
   // Persistent "Now Pitching" card (in addition to Margin Notes — see
-  // InningViewer): who's actually on the mound as of what's been revealed,
-  // shown at the top of the half for as long as this half is reachable
-  // (revealed || isNextToReveal — same gate as everything else above the
-  // seal, ADR-0010's footing). `enteringPitcher` is the spoiler-safe default
-  // (the half's starting pitcher, from selectHalfStartingPitcher — correct
-  // even before any of the half is revealed); `livePitcher` overrides it once
-  // PlayByPlay reports a pitching change it has actually revealed (see its
-  // onCurrentPitcher). The `.inning` wrapper's key={inning-half} remount
-  // (InningViewer, ADR-0002) resets this state fresh on every half, so it
-  // never carries a stale pitcher across navigation.
-  const enteringPitcher = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
-  const [livePitcher, setLivePitcher] = useState(null)
-  const nowPitching = livePitcher ?? enteringPitcher
+  // InningViewer): the arm this half OPENS with, shown at the top of the half
+  // for as long as it's reachable (revealed || isNextToReveal — same gate as
+  // everything else above the seal, ADR-0010's footing), from
+  // selectHalfStartingPitcher (spoiler-safe, correct before any of the half is
+  // revealed).
+  //
+  // It names the half's STARTING pitcher and keeps naming him, deliberately.
+  // A mid-half change belongs in the feed, at the moment it happens, and
+  // already renders there as this same PitcherNotice card (PlayByPlay's
+  // `pitching_substitution` branch). This header used to be overridden by a
+  // `livePitcher` that PlayByPlay reported back as changes were revealed —
+  // which put the reliever's card in TWO places at once and, on a half
+  // revealed all at once, pinned the last arm of the inning above at-bat cards
+  // the starter had pitched: the top of the page contradicting the first card
+  // under it. The same "header, not feed" division is why computeHalfInningFeed
+  // drops a PRE-pitch change from the feed (see its anyPitchInHalf guard) and
+  // why PrePitchChanges drops one from the staged list; the live override was
+  // the one piece pulling the other way.
+  const nowPitching = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
 
   // "Now pitching" only fits the moment an arm actually takes the mound: the
-  // game's first half for each team, or a live mid-half substitution. The far
+  // game's first half for each team, or one that opens with a change. The far
   // more common case — the same reliever/starter carrying over from the half
-  // before, same team's previous half of the same parity (a team only
-  // pitches every OTHER half) — reads as "Pitching for..." instead, since
-  // nothing just happened. Compares `nowPitching` (livePitcher ?? entering,
-  // i.e. whoever's ACTUALLY on the mound as of what's revealed), not just
-  // whether `livePitcher` is set — PlayByPlay's onCurrentPitcher reports a
-  // value unconditionally, falling back to the half's own starting pitcher
-  // the moment ANY of it is revealed, even with no substitution at all (see
-  // its own header comment) — so `livePitcher != null` alone was true for
-  // nearly every revealed half, not just a genuine mid-half change,
-  // mislabeling a starter who simply carried over from his own previous
-  // start (verified live: Chris Sale continuing from top 5th into top 6th
-  // with no pitching change showed "Now pitching" every time). See
-  // selectIsFreshPitcher's own header comment (select.js) for the fix.
+  // before, same team's previous half of the same parity (a team only pitches
+  // every OTHER half) — reads as "Pitching for..." instead, since nothing just
+  // happened. See selectIsFreshPitcher (select.js); the comparison is against
+  // the previous same-parity half's own starter, so with the header pinned to
+  // this half's starter the label is now a fixed structural fact rather than
+  // something that flips as you step.
   const isFreshPitcher = selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitching?.id)
   const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching'
 
@@ -92,9 +91,7 @@ export function HalfInning({
   // always <= the real revealedThrough since this half is only reachable at
   // all once that half is (ADR-0010's footing), so this needs no separate
   // gate of its own. computePitcherLines is the same running-line builder the
-  // Pitchers table uses; keyed off `nowPitching` (not just the half's
-  // spoiler-safe starter) so a mid-half relief entry still shows HIS own
-  // count, not the guy he replaced.
+  // Pitchers table uses.
   const enteringPitchLines = useMemo(
     () => computePitcherLines(feed, halfIndex(inning, half) - 1),
     [feed, inning, half],
@@ -260,7 +257,6 @@ export function HalfInning({
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
-                onCurrentPitcher={setLivePitcher}
                 onRunsSoFar={onRunsSoFar}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => onReveal(inning, half)}

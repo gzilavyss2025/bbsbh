@@ -196,10 +196,41 @@ test("the caught runner's out still lands on his origin card, not the interrupte
 
 test('at-bat stepping treats the interrupted card as its own step', () => {
   const entries = computeHalfInningFeed(buildFeed(), 7, 'bottom', 'home')
-  // From after Sánchez's card, one tap bundles the pinch-run note with Lara's
-  // interrupted card — the half's true final step, not a stranded note.
-  assert.equal(nextStepBoundary(entries, 1), 3)
+  // The pinch-run note was announced after Sánchez singled and before a pitch
+  // was thrown to Lara, so it closes SÁNCHEZ's step — you learn who ran for
+  // him the moment you finish charting his single, not a tap later alongside
+  // the play that ended the half.
+  assert.equal(nextStepBoundary(entries, 0), 2)
+  // Lara's interrupted card is then its own final step, not a stranded note.
+  assert.equal(nextStepBoundary(entries, 2), 3)
   assert.equal(nextStepBoundary(entries, 3), entries.length)
+})
+
+test('the pinch runner is penciled onto the origin card as soon as his notice shows', () => {
+  // Stepped to exactly Sánchez's single + the pinch-run notice (cap 2, the
+  // boundary above): the notice is on the page, so the strike-through-and-
+  // pencil-in it describes has to be on Sánchez's card too. That annotation
+  // rides the visibility gate, and this step deliberately ends MID-play —
+  // after the caught-stealing play's leading notes, before its own card — so
+  // the gate has to key on the notice's own position, not the whole play's.
+  const entries = computeHalfInningFeed(buildFeed(), 7, 'bottom', 'home', 2)
+  const sanchez = entries[0]
+  assert.deepEqual(
+    sanchez.pinchRunners?.map((p) => ({ id: p.id, base: p.base })),
+    [{ id: 2, base: 1 }],
+  )
+  // …while the play that notice leads stays sealed: its out has not landed.
+  // (Fully revealed, this same card reads outNumber 3 / outCode "CS 2-6".)
+  assert.equal(sanchez.outNumber, null)
+  assert.equal(sanchez.outCode, undefined)
+  assert.equal(sanchez.outAt, undefined)
+})
+
+test('a pinch-run notice beyond the step window leaves the origin card alone', () => {
+  // Cap 1 — Sánchez's single only. The notice hasn't been reached, so neither
+  // has the pencil-in.
+  const entries = computeHalfInningFeed(buildFeed(), 7, 'bottom', 'home', 1)
+  assert.equal(entries[0].pinchRunners, undefined)
 })
 
 test('a pitch-less baserunning play still falls back to a standalone event note', () => {

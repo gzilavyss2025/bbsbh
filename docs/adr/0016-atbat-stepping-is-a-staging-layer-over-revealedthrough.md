@@ -22,13 +22,45 @@ links both let a user jump straight to any unlocked half, sealed or not, so
 the cursor tracks by half-index and reads back 0 for any half other than the
 one it belongs to). Each render inside the seal reports back either the cap
 the next "Next at-bat" tap should use (`PlayByPlay`'s `onStepInfo`, via
-`nextStepBoundary` — bundling a leading event note with the plate appearance
-it precedes, so one tap reads as "reveal the next batter" not "reveal the
-next note") or, once every entry has been shown, `onStepComplete`. That
+`nextStepBoundary`) or, once every entry has been shown, `onStepComplete`. That
 always collapses into a normal full `revealTo` commit — whether by tapping
 through every card or because "Whole {half}" was tapped directly at any
 point mid-step — so `revealedThrough`, and everything gated on it, is never
 left stuck behind what's actually on screen.
+
+## What one step contains
+
+A step is **one plate appearance plus the announcements that follow it** —
+`nextStepBoundary` walks to the next `atbat` card and then keeps going over
+the `event` notes trailing it. Not the other way round, and that ordering is
+the whole point.
+
+statsapi nests a stoppage at the head of the plate appearance that *follows*
+it: in a three-day sweep of the MLB slate, 655 of 678 substitution and
+mound-visit `playEvents` sat before their own play's first pitch, and none
+trailed after its last. So the notes sitting between two at-bat cards are the
+announcements made once the *earlier* batter was retired. Ending a step just
+before them stranded a pitching change with the new pitcher's first batter:
+one tap produced the change and what it produced, together — the reverse of
+how a scorer works, which is finish the batter, pencil the change, then see
+who comes up.
+
+The exception is a stoppage that landed **between pitches** of the following
+plate appearance (a mound visit during an at-bat — the other 23). That one
+genuinely interrupted the at-bat it sits in, so `computeHalfInningFeed` marks
+it `midAtBat` and it leads the next step instead of closing the previous one.
+
+Two consequences worth keeping in mind when touching this:
+
+- A step routinely ends **mid-play** — after a play's leading notes, before
+  its own at-bat card. `computeHalfInningFeed`'s per-play `visible` gate is
+  therefore false exactly when those notes ARE on screen, so any annotation
+  that belongs to a *note* rather than to the play's outcome has to key on the
+  note's own index instead. The pinch-runner pencil-in on the origin card is
+  the live case: without that, "Peraza runs for Schanuel" appears a full tap
+  before Schanuel's name is struck through.
+- Notes at the head of a half have no earlier at-bat to attach to, so they
+  still bundle *forward* into the first step, exactly as every note used to.
 
 This keeps ADR-0002's "no reveal-the-whole-game bypass, strictly
 per-half-inning" and ADR-0001's reveal-only isolation intact: at-bat stepping
