@@ -25,6 +25,30 @@ export async function saveStores(payloads) {
   }
 }
 
+// The same middleware's binary route: POST the raw PNG bytes of one club mark,
+// with the team and treatment in the query string. The client never names a
+// destination — the server resolves the directory from the treatment allowlist
+// and the filename from teamAbbr (scripts/lib/dev-logo-upload.mjs).
+//
+// Resolves `{ file, url, caveat }` on success or `{ error }` with a reason to
+// put in front of the owner, since "why did my file bounce" is the entire
+// question this endpoint has to answer well.
+export async function uploadLogo({ teamId, treatment, bytes }) {
+  const query = `teamId=${encodeURIComponent(teamId)}&treatment=${encodeURIComponent(treatment)}`
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/team-logo?${query}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/png' },
+      body: bytes,
+    })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `upload failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the upload endpoint — is `npm run dev` running?' }
+  }
+}
+
 // Merge a draft's touched fields into a team-keyed store, returning a NEW store
 // object — the lab always posts the whole file, so an untouched team/treatment
 // has to survive the merge rather than being dropped.

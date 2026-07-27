@@ -95,3 +95,10 @@ logos, the honest path is a small curated set of SVGs checked into `public/`
 entries alongside `LOGO_VARIANTS` with a "local asset" flag. The uniforms
 catalog above can supply the *labels* (which alternates exist per team) even
 though it carries no imagery.
+
+**What was built** (as of 2026-07-27): exactly that, at
+`public/team-logos/{treatment}/{ABBR}.png` — now to a checked standard
+(512×512 PNG, under 400 KB) and procurable by dropping a file onto a tile in
+`/identity-lab` rather than by hand. The standard, the upload contract, and why
+uploading art doesn't always change what a tile wears are in `src/lib/CLAUDE.md`;
+the endpoint and its isolation are ADR-0029.

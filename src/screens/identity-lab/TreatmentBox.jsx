@@ -4,6 +4,7 @@ import { WpaPreview } from './editors/WpaPreview.jsx'
 import { WpaScenarios } from './editors/WpaScenarios.jsx'
 import { HeaderPreview } from './editors/HeaderPreview.jsx'
 import { copyHex, copyPalette, useHexClipboard } from './hexClipboard.js'
+import { LogoDropZone } from './LogoDropZone.jsx'
 
 // One tile: the mark on its curated fill, that fill's swatches, and the three
 // editors stacked under it. The profile resolves every value (its own tables,
@@ -15,10 +16,15 @@ import { copyHex, copyPalette, useHexClipboard } from './hexClipboard.js'
 // for MiLB (no uniform catalog to name a jersey from — see src/api/CLAUDE.md),
 // and its swatches simply arrive without a `onPickWpaBand` handler, so they
 // render as plain chips instead of "try this as the band color" buttons.
+// `upload` is the same idea for the logo drop target: MLB art is filed by club
+// abbreviation under a treatment directory, so its tiles pass one; MiLB's
+// home/away art is keyed by team id in directories that don't exist yet (PR 4),
+// so its tiles pass nothing and render exactly as before.
 export function TreatmentBox({
   label,
   nameField,
   logoBox,
+  upload,
   swatches,
   position,
   wpa,
@@ -62,9 +68,17 @@ export function TreatmentBox({
         <PaletteButtons name={position.name} treatmentLabel={position.treatmentLabel} value={palette} onPaste={pastePalette} />
       </div>
       <div className="colorlab__treatmentbox">
-        <div className={logoBox.className} style={logoBox.style}>
-          {logoBox.children}
-        </div>
+        {upload ? (
+          <LogoDropZone {...upload} label={`${position.name} ${label}`}>
+            <div className={logoBox.className} style={logoBox.style}>
+              {logoBox.children}
+            </div>
+          </LogoDropZone>
+        ) : (
+          <div className={logoBox.className} style={logoBox.style}>
+            {logoBox.children}
+          </div>
+        )}
         <div className="colorlab__swatchrow">
           {swatches.map((swatch, i) => (
             <ColorSwatch key={i} {...swatch} />

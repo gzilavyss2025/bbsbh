@@ -9651,6 +9651,71 @@ body {
   );
 }
 
+/* The logo tile as a drop target (LogoDropZone.jsx, dev-only). The tile itself
+   is unchanged — this wraps it in a column that adds the Replace-art button and
+   the result line under it, so a rejected file explains itself right where it
+   was dropped instead of in a page-level status area. The max-width keeps a
+   long "why it bounced" message from stretching the treatment box's flex row. */
+.colorlab__logodrop {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 190px;
+}
+
+.colorlab__logodropzone {
+  position: relative;
+  border-radius: var(--radius-md);
+}
+
+/* Dragging over the tile. An outline rather than a border so the tile's own
+   108px frame doesn't shift under the pointer mid-drop. */
+.colorlab__logodropzone--over {
+  outline: 2px dashed var(--accent-primary);
+  outline-offset: 3px;
+}
+
+.colorlab__logodropbadge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2px;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
+  pointer-events: none;
+}
+
+/* The file picker behind the Replace-art button. Not `display: none` — a hidden
+   input still has to be reachable for a click() to open the picker. */
+.colorlab__logodropinput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.colorlab__logodropmsg {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
+.colorlab__logodropmsg--error {
+  color: var(--accent-negative);
+}
+
+.colorlab__logodropmsg--ok {
+  color: var(--accent-positive);
+}
+
 .colorlab__swatchrow {
   display: flex;
   gap: var(--space-3);

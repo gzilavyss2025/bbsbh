@@ -29,6 +29,7 @@ one side doesn't have.
 | Module | Owns |
 | --- | --- |
 | `teams.js` | Club names/abbreviations/ids, logo URL builders, the brand-colour tables (`TEAM_COLOR_PAIRS`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
+| `logoArt.js` | The curated-art standard: the PNG header reader, the rejection reasons, and the treatment→directory allowlist an upload resolves through |
 | `milbColors.js` | The MiLB counterpart: researched pairs, the Home/Away resolvers, `milbTreatmentTile` |
 | `wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
 | `wpaBandColors.js` | That band's fill/pinstripe resolution |
@@ -92,6 +93,44 @@ four layers that keep it out of production.
 A few values have no home in a store yet and still land by hand from an editor's
 copy icon: the flat background hex for a non-Main MLB treatment lives in
 `ALT_COLORS` and friends, which are still JS literals.
+
+## The curated art (`public/team-logos/`)
+
+The mlbstatic CDN carries no alternate or City Connect marks, so each one is
+hand-procured art checked into `public/team-logos/{treatment}/{ABBR}.png`.
+`logoArt.js` holds the standard those files meet — **512×512, PNG, under
+400 KB** — derived from the art already on disk rather than invented.
+
+Drag a PNG onto a tile in `/identity-lab` and it lands there. **The upload
+contract**, in one place because PR 4's MiLB art builds directly on it:
+
+| | |
+| --- | --- |
+| Endpoint | `POST /__dev/team-logo?teamId={id}&treatment={key}`, raw PNG bytes as the body |
+| Destination | resolved server-side — directory from `LOGO_TREATMENT_DIRS`, filename from `teamAbbr`. **A request never supplies a path.** |
+| Rejected | not a PNG, not exactly 512×512, over the cap — each with the reason, shown inline on the tile |
+| Accepted-with-a-note | a PNG carrying no alpha channel (six committed files have none and render fine, so it's said once, not refused) |
+| Response | `{ file, url, caveat }` |
+| Side effect | `src/lib/data/logo-art.json` is rebuilt from disk |
+
+Validation reads the PNG header by hand — width and height are big-endian
+uint32s at bytes 16 and 20 of the IHDR chunk — so there is **no image library
+and no new dependency**. The same functions run in the browser (instant, specific
+rejection) and in Node (the authoritative check), so the two can't disagree.
+
+Two things that surprise people:
+
+- **`logo-art.json` is a record, not a source.** No resolver reads it;
+  `localLogoUrl` still has no whitelist, and a missing file still just 404s and
+  degrades. The manifest exists so `test/logo-upload.test.js` can catch a file
+  added or deleted by hand — regenerate with `node scripts/gen-logo-art.mjs`.
+- **Uploading art doesn't always change the tile.** `teams.js` decides what a
+  tile wears, and for a club in one of the `*_USES_BASE_LOGO` sets (plain CDN
+  mark), one filed under `ALT_LOGO_SVG`, or a Main tile with no `recolor`
+  override, that isn't the uploaded `.png`. The lab says so on the tile after a
+  successful upload rather than leaving you staring at an unchanged mark.
+
+Existing `.svg` art stays as it is — the standard governs new uploads.
 
 ## The rule that must not drift
 

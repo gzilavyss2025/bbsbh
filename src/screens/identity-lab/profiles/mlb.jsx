@@ -34,6 +34,7 @@ import {
   hasCityConnect,
   treatmentHeaderColorOverride,
 } from '../../../lib/teams.js'
+import { logoUploadTarget } from '../../../lib/logoArt.js'
 import {
   fetchTeamUniformCatalog,
   classifyUniformAsset,
@@ -328,13 +329,22 @@ function buildAllChangesText(teams, drafts, extras) {
 
 // ---------------------------------------------------------------------------
 
-function TreatmentLogo({ teamId, name, treatment, override }) {
-  const url =
-    treatment === 'main'
-      ? override?.recolor
-        ? mainOverrideLogoUrl(teamId)
-        : null
-      : teamLogoUrl(teamId, treatment)
+// Which URL the app itself would render for this tile — the CDN base mark for a
+// plain Main, a hand-recolored override, a procured local file, or (for a club
+// in one of teams.js's *_USES_BASE_LOGO sets) the CDN mark again. `null` means
+// Main's plain TeamLogo, which builds its own URL.
+function treatmentLogoUrl(teamId, treatment, override) {
+  if (treatment === 'main') return override?.recolor ? mainOverrideLogoUrl(teamId) : null
+  return teamLogoUrl(teamId, treatment)
+}
+
+// `version` counts uploads onto this tile. Vite serves public/ off disk, so a
+// dropped file is live immediately — but the browser has the old bytes cached
+// under the same URL, so without a changing query the tile would keep showing
+// the mark that was just replaced.
+function TreatmentLogo({ teamId, name, treatment, override, version = 0 }) {
+  const base = treatmentLogoUrl(teamId, treatment, override)
+  const url = base && version > 0 ? `${base}?v=${version}` : base
   const [failed, setFailed] = useState(false)
   useEffect(() => setFailed(false), [url])
 
@@ -360,6 +370,22 @@ function TreatmentLogo({ teamId, name, treatment, override }) {
       decoding="async"
       onError={() => setFailed(true)}
     />
+  )
+}
+
+// A tile whose art file is NOT what the app resolves for it — a club in one of
+// teams.js's *_USES_BASE_LOGO sets (the plain CDN mark), one whose art is
+// filed as .svg (ALT_LOGO_SVG / the main-overrides default), or a Main tile
+// with no `recolor` override. The upload still lands in the right place, but
+// the tile keeps rendering what teams.js says, so say so rather than leaving
+// the owner staring at an unchanged mark wondering whether the save worked.
+function uploadCaveat(teamId, treatment, override, target) {
+  if (!target) return null
+  const resolved = treatmentLogoUrl(teamId, treatment, override)
+  if (resolved === target.url) return null
+  return (
+    `teams.js still renders ${resolved ?? 'the plain CDN mark'} for this tile — ` +
+    'see MAIN_OVERRIDES / ALT_LOGO_SVG / the *_USES_BASE_LOGO sets'
   )
 }
 
@@ -399,6 +425,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
 
 function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, drafts, on }) {
   const colors = colorsFor(teamId, treatment)
+  const [artVersion, setArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
   // The same curated full name the Uniform Names page edits for this jersey. No
   // code (no art procured for a future-season jersey yet) means nothing to edit
@@ -449,7 +476,21 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       logoBox={{
         className: `colorlab__logobox colorlab__logobox--gloss${bgPinstripe ? ' colorlab__logobox--pinstripe' : ''}`,
         style: logoboxStyle,
-        children: <TreatmentLogo teamId={teamId} name={name} treatment={treatment} override={override} />,
+        children: (
+          <TreatmentLogo
+            teamId={teamId}
+            name={name}
+            treatment={treatment}
+            override={override}
+            version={artVersion}
+          />
+        ),
+      }}
+      upload={{
+        teamId,
+        treatment,
+        caveat: uploadCaveat(teamId, treatment, override, logoUploadTarget(teamId, treatment)),
+        onUploaded: () => setArtVersion((v) => v + 1),
       }}
       swatches={slots.map((s, i) => ({
         swatch: s,
@@ -653,7 +694,10 @@ export const mlbProfile = {
       <code>src/lib/data/*.json</code> and{' '}
       <code>public/data/uniform-names.json</code> while <code>npm run dev</code>{' '}
       is running; each editor’s copy icon still spells out what it would change,
-      for the few values whose table hasn’t moved into a store yet.
+      for the few values whose table hasn’t moved into a store yet. Drop a
+      512×512 PNG (under 400 KB) on any tile — or use Replace art — to procure
+      that club’s mark for that treatment; it lands in{' '}
+      <code>public/team-logos/</code> and shows immediately.
     </>
   ),
   useTeams: () =>
