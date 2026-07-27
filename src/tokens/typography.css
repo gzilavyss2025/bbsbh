@@ -50,7 +50,8 @@
   --fs-hero-lg: 32px;
   --fs-hero-xl: 56px;
   --fs-hero-2xl: 64px;
-  --fs-watermark: 158px;   /* the slate card's '@' watermark only — see index.css */
+  --fs-watermark: 158px;   /* the slate card's '@' watermark — see index.css */
+  --fs-watermark-sm: 78px; /* the same watermark, re-sized for the game masthead's smaller tiles */
 
   /* Line heights */
   --lh-zero:   0;
