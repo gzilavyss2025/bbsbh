@@ -10,7 +10,7 @@
 // defined by a light fill — an outline ring, knocked-out lettering, negative
 // space painted white rather than left transparent — flattened into an
 // unreadable solid blob (the Cubs' roundel, the Astros' circle, Biloxi's
-// oyster, Chattanooga's octagon). See ADR-0025.
+// oyster, Chattanooga's octagon). See ADR-0031.
 //
 // The fix is to re-ink the art rather than filter it: classify each fill as
 // INK (part of the mark) or KNOCKOUT (the paper it sits on), then rebuild the

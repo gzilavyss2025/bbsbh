@@ -179,7 +179,7 @@ export const LOGO_VARIANTS = [
 // The `mono` variant is NOT on this CDN — it's the one-color knockout mark the
 // navy section mastheads wear, precomputed from the base art by
 // scripts/gen-mono-logos.mjs and served same-origin from here (see
-// src/lib/logoMono.js for how it's built, ADR-0025 for why). Coverage tracks
+// src/lib/logoMono.js for how it's built, ADR-0031 for why). Coverage tracks
 // public/data/teams.json, so a brand-new affiliate can be missing until that
 // generator next runs — which is what TeamLogo's variant -> base fallback is
 // for: that club just wears its full-color mark on the bar until the art
@@ -1217,7 +1217,7 @@ const TEAM_COLOR_EXTRAS = {
 // distinctiveness accent (TEAM_COLORS), and any researched extras
 // (TEAM_COLOR_EXTRAS) — deduped by hex so a club whose accent or extra just
 // restates an earlier swatch doesn't repeat it. MLB-only, empty array for a
-// MiLB id. Built for the team-color-lab dev page
+// MiLB id. Built for the Team Identity Lab dev page
 // (src/screens/identity-lab/) — not used by any spoiler-facing surface.
 export function teamColorSwatches(teamId) {
   const [primary, secondary] = TEAM_COLOR_PAIRS[teamId] ?? []

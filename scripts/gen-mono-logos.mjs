@@ -1,7 +1,7 @@
 // Regenerates public/data/logos/mono/{teamId}.svg — a ONE-COLOR knockout
 // version of every club's mlbstatic mark, for the navy section mastheads on the
 // lineup / innings / box score pages (see src/lib/logoMono.js for what
-// "knockout" means here and ADR-0025 for why the app precomputes this art
+// "knockout" means here and ADR-0031 for why the app precomputes this art
 // instead of whitening the CDN mark with a CSS filter at render time).
 //
 // Precomputed rather than converted in the browser for the same reasons the

@@ -1,5 +1,5 @@
 // The one-color knockout conversion behind the navy section mastheads
-// (src/lib/logoMono.js, ADR-0025). Every case here is a shape real mlbstatic
+// (src/lib/logoMono.js, ADR-0031). Every case here is a shape real mlbstatic
 // art actually takes — each was found by converting all ~150 clubs' marks and
 // looking at the result, and the last two are live bugs the first pass shipped:
 // a mark whose interior is a saturated cream turning into a solid blob, and a

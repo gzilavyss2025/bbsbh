@@ -16,8 +16,8 @@ earlier sections — append.
 | 3 | Logo upload pipeline (MLB) | **merged** | `claude/logo-upload-pipeline` | #419 |
 | 4 | MiLB home/away logo art | **merged** | `claude/milb-logo-art` | #420 |
 | 5 | MiLB colour reconciliation | **merged** | `claude/milb-color-reconciliation` | #421 |
-| 6 | Theming + uniform display | **open** | `claude/team-theming-uniforms` | #423 |
-| 7 | Docs + cleanup | not started | — | — |
+| 6 | Theming + uniform display | **merged** | `claude/team-theming-uniforms` | #423 |
+| 7 | Docs + cleanup | **merged** | `claude/identity-lab-docs` | — |
 
 Update the row **and** append a section below when a PR opens or merges.
 
@@ -882,3 +882,115 @@ rather than at commit time.
 - If a future surface wants theming, it sets the same three properties and adds
   a fallback; it does not get a second resolver. If it wants a colour that
   depends on anything but `(teamId, treatment)`, that is a new ADR.
+
+---
+
+## PR 7 — Docs and cleanup
+
+Branch: `claude/identity-lab-docs` · PR: (opening) · Merged: open
+
+Based on `origin/main` @ `665f5ee` (PRs 1-6 had all merged — #416, #418, #419,
+#420, #421, #423 — confirmed by fetching `origin/main` directly rather than
+trusting this file's own status board, which still read PR 5 "open" and PR 6
+"not started" at the time this PR started; both were stale).
+
+### What landed
+
+**The ADR-0025 collision, resolved.** `docs/adr/0025-one-color-team-marks-are-
+precomputed-knockouts.md` → `0031-one-color-team-marks-are-precomputed-
+knockouts.md` (0025-admin-editable-copy-store.md keeps its number — it's the
+older ADR and is itself cross-referenced by ADR-0026 and ADR-0029, so
+renumbering it would have touched more files). Every `ADR-0025` reference that
+actually meant the logo-mono ADR was updated to `ADR-0031`: `.github/workflows/
+update-teams.yml`, `scripts/CLAUDE.md`, `src/CLAUDE.md`, `src/index.css` (×3),
+`docs/adr/0030-club-theming-is-identity-only.md` (×2), `src/lib/CLAUDE.md`
+(×2), `src/lib/logoMono.js`, `test/logo-mono.test.js`,
+`scripts/gen-mono-logos.mjs`, `src/lib/teams.js`, `src/components/TeamLogo.jsx`.
+Two references genuinely meant the copy-store ADR (root `CLAUDE.md:152`,
+`docs/adr/0029-...:5`, and one line in `src/CLAUDE.md` this pass's own sed
+first mis-touched then reverted) and were left/restored at `ADR-0025`. The two
+historical scratch docs that narrate the collision itself
+(`.scratch/team-identity-lab/PRD.md`, `.scratch/team-identity-lab/prompts/
+07-docs-cleanup.md`) were left as the record of what the collision was, not
+live references.
+
+**The stale scratch doc, rewritten as history.**
+`.scratch/gamecard-team-colors/issues/01-solid-tile-colors.md`'s `Status:`
+moved from `needs-triage` to `wontfix`, and its prose now leads with "this is a
+past experiment, code since removed" rather than describing
+`GAMECARD_TILE_COLORS`/`gameCardTileColor()` as present-tense live code (they
+were already gone before this effort began — PRD §1.3). The hand-picked
+per-team colour table stays, since re-deriving it would be wasted work if this
+idea resurfaces.
+
+**`src/lib/CLAUDE.md` reconciled against what actually landed**, not rewritten
+from scratch — PRs 1-6 had already kept it current as they went (each PR's own
+notes above call this out; PR 6 explicitly says "PR 7's cleanup list gained
+nothing from this PR"). Read start to finish against the PRD §7's cleanup
+checklist; one real gap found and filled: **`TeamLogo`'s own variant → base →
+monogram fallback chain wasn't documented anywhere in this file** — the colour
+chain (`brandColors.js`) was, but the separate, orthogonal fallback the
+`TeamLogo` component itself walks (a 404'd variant retries the base mlbstatic
+mark; no id or a failing base draws a monogram) wasn't. Added a short section
+for it, keyed to `src/components/TeamLogo.jsx`'s own comment block. Everything
+else the PR prompt asked for — the MLB/MiLB treatment vs. variation split, the
+tuning-table JSON stores and where they're read, both fallback chains, the
+jersey-feed/static-heuristic boundary (MiLB has none), the 512×512 PNG
+standard, the dev-only write-back — was already there.
+
+**One stray comment corrected in passing**: `src/lib/teams.js`'s
+`teamColorSwatches` doc comment still said "Built for the team-color-lab dev
+page" pointing at `src/screens/identity-lab/` — the old screen name next to the
+new directory. Renamed to "Team Identity Lab dev page" for consistency; not
+otherwise in scope, but a one-line fix directly adjacent to work this PR was
+already doing.
+
+### Verification of "no stale route reference"
+
+Grepped the whole repo (outside `.scratch/`) for `team-color-lab`,
+`team-pattern-lab`, `TeamColorLab`, `MilbTeamColorLab`, `TeamPatternLab`. Six
+non-scratch hits, all legitimate: `src/lib/route.js` and
+`src/screens/identity-lab/index.jsx` explain what the retired routes were
+replaced by (past tense, "replaced /team-color-lab..."); `test/route.test.js`
+names the literal retired path strings it asserts fall through to home;
+`scripts/lib/schema.sql` and `scripts/gen-jerseys.mjs` reference a
+**hypothetical future** "team-color-lab correlation page" unrelated to this
+effort's renamed lab; `docs/adr/0025-admin-editable-copy-store.md` cites
+`team-color-lab` as a historical precedent for an unlisted dev route, correctly
+past-tense. Nothing reads as if the old routes are current.
+
+### Deviations from the PRD
+
+- **This file's own status board was wrong before this PR started** — PR 5 was
+  marked "open" and PR 6 "not started" even though both had merged (#421,
+  #423). Fixed as part of this PR's own status-board update rather than filed
+  as a separate finding, since PRD §9's standing rule ("fetch and inventory ...
+  before choosing a base") is exactly what caught it: `git log origin/main`
+  showed both merge commits before any doc was touched.
+- **No new ADR number needed beyond the rename.** The PRD's "next free number is
+  0029" (§1.9) was already stale by the time this PR started — PRs 1 and 6 had
+  taken 0029 and 0030 for their own work. The collision fix took 0031, the true
+  next-free number as of this PR.
+
+### Things deliberately left alone
+
+- **`JERSEY_TREATMENT_OVERRIDES` season-key staleness** (PRD §1.5) — still
+  unfixed, still flagged live by PR 2's audit banner (69/69 current as of
+  2026-07-27, 0 stale). Out of scope for every PR in this effort; a future pass
+  starts at PR 2's `profiles/audit.jsx`.
+- **The 3 unresolved MiLB colour teams** (482 Corpus Christi, 553 Knoxville,
+  1956 Somerset) — PR 5 left them `"found": false` by design; the stub
+  `.scratch/milb-team-colors/README.md` names what each source did and didn't
+  have. Adding a pair later is a one-line store edit.
+
+### Verification
+
+- `npm run lint && npm test` pass (813, unchanged from PR 6 — no source
+  behaviour changed, only comments/docs/scratch prose).
+- `npm run build` clean.
+- Grepped for every renumbered ADR reference (`ADR-0025`, `ADR-0031`) across
+  the repo and confirmed each now names the ADR it actually means — no doc
+  cites `ADR-0025` for the logo-mono knockout-mark rule, and no doc cites
+  `ADR-0031` for the copy-store rule.
+- No dev server started — cleanup only, no user-visible change, per the PR
+  prompt's own verification section.

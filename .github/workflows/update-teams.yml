@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 20
       - run: node scripts/gen-teams.mjs
-      # The one-color masthead marks (scripts/gen-mono-logos.mjs, ADR-0025) are
+      # The one-color masthead marks (scripts/gen-mono-logos.mjs, ADR-0031) are
       # built from the teams.json just written, so they ride the same schedule:
       # a rebrand or a new affiliate lands in both at once, and until it does
       # that club simply wears its full-color mark on the navy bar.
