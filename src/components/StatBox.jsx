@@ -60,8 +60,8 @@ export function StatBox({
   placeholder = false,
   awayAbbr,
   homeAbbr,
-  awayLocation,
-  homeLocation,
+  awayFranchise,
+  homeFranchise,
   runExpectancy = null,
 }) {
   if (!revealed && placeholder) return null
@@ -121,8 +121,8 @@ export function StatBox({
                 hpName={hpName}
                 awayId={awayId}
                 homeId={homeId}
-                awayLocation={awayLocation || awayAbbr || 'Away'}
-                homeLocation={homeLocation || homeAbbr || 'Home'}
+                awayFranchise={awayFranchise || awayAbbr || 'Away'}
+                homeFranchise={homeFranchise || homeAbbr || 'Home'}
                 totalMissedCalls={rollingMissed}
               />
               {/* Statcast superlatives for the half — the game-notes numbers
@@ -305,7 +305,7 @@ export function AbsRow({ teamId, abbr, outcomes }) {
 // row renders nothing until there's at least one missed call with favor
 // behind it (which, since both are derived from the same hasFavor branch in
 // selectUmpireFavor, also guarantees worstCall is set whenever net is).
-function UmpireFavorRow({ data, hpName, awayId, homeId, awayLocation, homeLocation, totalMissedCalls }) {
+function UmpireFavorRow({ data, hpName, awayId, homeId, awayFranchise, homeFranchise, totalMissedCalls }) {
   if (!data) return null
   const { favorAway, favorHome, worstCall } = data
   const net = favorAway != null && favorHome != null ? favorAway - favorHome : null
@@ -319,8 +319,8 @@ function UmpireFavorRow({ data, hpName, awayId, homeId, awayLocation, homeLocati
           net={net}
           awayId={awayId}
           homeId={homeId}
-          awayLocation={awayLocation}
-          homeLocation={homeLocation}
+          awayFranchise={awayFranchise}
+          homeFranchise={homeFranchise}
           totalMissedCalls={totalMissedCalls}
         />
       </div>
@@ -492,7 +492,7 @@ function favorTier(magnitude) {
   return 'outlier'
 }
 
-function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMissedCalls }) {
+function FavorMeter({ net, awayId, homeId, awayFranchise, homeFranchise, totalMissedCalls }) {
   if (net == null) return null
   const even = Math.abs(net) < FAVOR_EVEN_FLOOR
   const towardAway = net > 0
@@ -524,11 +524,11 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMiss
             — so the colored mark unambiguously points at who the lean
             favors, on top of the fill's own direction/color. Neither dims
             when it's an even split. */}
-        <TeamLogo teamId={awayId} name={awayLocation} size={28} bw={!even && !towardAway} />
+        <TeamLogo teamId={awayId} name={awayFranchise} size={28} bw={!even && !towardAway} />
         <div
           className="favormeter__track"
           role="img"
-          aria-label={favorMeterLabel(net, awayLocation, homeLocation, totalMissedCalls)}
+          aria-label={favorMeterLabel(net, awayFranchise, homeFranchise, totalMissedCalls)}
         >
           <span className="favormeter__mid" aria-hidden="true" />
           {!even && (
@@ -539,7 +539,7 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMiss
             />
           )}
         </div>
-        <TeamLogo teamId={homeId} name={homeLocation} size={28} bw={!even && towardAway} />
+        <TeamLogo teamId={homeId} name={homeFranchise} size={28} bw={!even && towardAway} />
       </div>
       <div className="favormeter__caption" aria-hidden="true">
         {even ? (
@@ -550,7 +550,7 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMiss
             <strong className="favormeter__value">
               +{Math.abs(net).toFixed(1)} <span className="favormeter__unit">runs</span>
             </strong>
-            <span className="favormeter__label">for {towardAway ? awayLocation : homeLocation}</span>
+            <span className="favormeter__label">for {towardAway ? awayFranchise : homeFranchise}</span>
           </>
         )}
       </div>
@@ -558,11 +558,11 @@ function FavorMeter({ net, awayId, homeId, awayLocation, homeLocation, totalMiss
   )
 }
 
-function favorMeterLabel(net, awayLocation, homeLocation, totalMissedCalls) {
+function favorMeterLabel(net, awayFranchise, homeFranchise, totalMissedCalls) {
   const countSuffix = totalMissedCalls != null ? `, ${totalMissedCalls} missed calls total` : ''
   if (Math.abs(net) < FAVOR_EVEN_FLOOR) return `Missed calls have been even so far${countSuffix}`
   const tierLabel = FAVOR_TIERS[favorTier(Math.abs(net))]
-  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayLocation : homeLocation} — ${tierLabel}${countSuffix}`
+  return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayFranchise : homeFranchise} — ${tierLabel}${countSuffix}`
 }
 
 function Stat({ k, v, tone }) {

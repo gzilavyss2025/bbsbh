@@ -367,12 +367,24 @@ export function selectTeamMeta(feed, side) {
     // The spelled-out nickname ("Diamondbacks"), distinct from teamName, which
     // can be a marketing short form ("D-backs"). Falls back to teamName/name.
     clubName: gdTeam.clubName ?? box.clubName ?? gdTeam.teamName ?? gdTeam.name ?? '',
-    // The city/region name ("Milwaukee") — grammar-safe where a nickname
-    // would need "the" (StatBox's favor caption: "for Milwaukee" needs no
-    // article, "for Brewers" reads wrong without one, and every MLB
-    // nickname is plural so there's no clean rule-free way to add "the"
-    // only when needed). Falls back the same way clubName does.
-    locationName: gdTeam.locationName ?? box.locationName ?? gdTeam.name ?? '',
+    // The place name the club is actually CALLED by ("Milwaukee", "Colorado") —
+    // grammar-safe where a nickname would need "the" (StatBox's favor caption:
+    // "for Milwaukee" needs no article, "for Brewers" reads wrong without one,
+    // and every MLB nickname is plural so there's no clean rule-free way to add
+    // "the" only when needed). Deliberately `franchiseName` and NOT
+    // `locationName`: locationName is the host CITY, which diverges from the
+    // club's name whenever it's named for a state/region or plays outside its
+    // namesake city — "Denver" Rockies, "Bronx" Yankees, "Anaheim" Angels,
+    // "Des Moines" Iowa Cubs. franchiseName is exactly `name` minus clubName at
+    // every level (verified against MLB + AAA feeds, July 2026). Falls back
+    // through locationName, then the same way clubName does.
+    franchiseName:
+      gdTeam.franchiseName ??
+      box.franchiseName ??
+      gdTeam.locationName ??
+      box.locationName ??
+      gdTeam.name ??
+      '',
     abbreviation: gdTeam.abbreviation ?? box.abbreviation ?? '',
     probablePitcher: pitcher,
   }
