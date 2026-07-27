@@ -1192,6 +1192,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
               noteIndex,
               id: pinchId,
               ...personNameParts(person),
+              jersey: person.primaryNumber ?? '',
               base: e.base ?? null,
             })
           }
@@ -1519,7 +1520,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       if (stepCap != null && p.noteIndex >= stepCap) continue
       const card = entries[p.cardIndex]
       card.pinchRunners = card.pinchRunners ?? []
-      card.pinchRunners.push({ id: p.id, last: p.last, first: p.first, base: p.base })
+      card.pinchRunners.push({ id: p.id, last: p.last, first: p.first, jersey: p.jersey, base: p.base })
     }
 
     // A runner other than this play's batter can also be put out here — a

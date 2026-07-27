@@ -6010,6 +6010,13 @@ body {
 .abs {
   margin-top: 10px;
 }
+/* Flush by default — .statbox (the innings view's mobile stat card, the one
+   context that renders this unscoped) has no padding of its own, so this
+   already spans the card's full width; no border-radius here lets it read as
+   a header rather than a pill floating inset with "ears" on every side. The
+   two OTHER contexts that reuse this markup override the radius back in for
+   their own standalone-card shape: .bs__abscard (box score) rounds only the
+   top corners to match its own card, .abscard (desktop) also stays square. */
 .abs__title {
   display: block;
   padding: 8px 10px;
@@ -6021,7 +6028,7 @@ body {
   color: var(--text-on-ink);
   background: var(--navy);
   border-bottom: 3px solid var(--seal);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   margin-bottom: 8px;
 }
 .abs__rows {
@@ -6809,20 +6816,51 @@ body {
   display: contents;
 }
 
-/* Same reference, once the half is revealed: its OWN standalone card below
-   the play-by-play's card (see HalfInning.jsx) rather than sharing it, so the
-   just-scored at-bats read as their own distinct unit. .half has no padding
-   of its own (children supply their own insets — see .lineupteam__name/
-   .halfdefense__title), so this card needs it directly; .lineupcard's own
-   top divider is then redundant (nothing above it to divide from within this
-   card), same reset .innings__ref-lineups already applies to its copy. */
+/* Same reference, once the half is revealed: below the play-by-play's card
+   (see HalfInning.jsx), so the just-scored at-bats read as their own distinct
+   unit. Lineups and Defense now read as two separate standalone cards here —
+   the same recipe the wide layout's .innings__ref-lineups/.innings__ref-defense
+   already use below (own border/radius/shadow, a flush masthead relying on
+   that card's own overflow:hidden to round its corners, no ambient parent
+   padding to fight) — rather than sharing one outer card, which used to leave
+   both titles floating as independently-rounded pills inset on all sides
+   instead of spanning their card's full width. This wrapper keeps the "half"
+   class only so other .half-scoped rules still reach in (.half .defdiamond
+   below); it supplies none of its own frame — .lineupcard/.halfdefense do
+   that directly. margin-top spaces it from the play-by-play card above;
+   margin-bottom does the same from the Insights card below — on a phone the
+   two sit back to back with no gap otherwise (they're not flex siblings of
+   the same .innings__grid instance here, so its own gap doesn't reach this
+   seam; a plain margin does regardless of that). */
 .halfentering {
-  padding: 12px 14px;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
 }
-.halfentering .lineupcard {
+.halfentering .lineupcard,
+.halfentering .halfdefense {
   margin-top: 0;
   padding-top: 0;
-  border-top: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.halfentering .lineupcard__title,
+.halfentering .halfdefense__title {
+  border-radius: 0;
+}
+.halfentering .lineupcard__teams {
+  padding: 0 10px 12px;
 }
 
 .innings__reference {
@@ -7162,6 +7200,28 @@ body {
   color: var(--field);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+}
+
+/* The "PR" badge beside the entering pinch runner's jersey number — same red
+   the diamond's own PR mark uses (.pbp__pr). */
+.pitchernotice__prtag {
+  color: var(--clay-deep);
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+}
+
+/* Who the entering runner replaced and where — a second line below the name
+   row, same caption weight as the pitching-change card's other trailing
+   detail (.pitchernotice__mvcount). Condensed display face like the rest of
+   this card's text, not --font-read (that's reserved for full sentences
+   straight from the feed, e.g. .pitchernotice__eventtext). */
+.pitchernotice__forline {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
 }
 
 /* How many pitches he'd already thrown entering this half (PitcherNotice's
@@ -7846,13 +7906,19 @@ body {
   font-size: var(--fs-caption);
 }
 
-/* Red "PR" penciled just above the base a pinch runner took over at. */
+/* Red "PR" penciled beside the base a pinch runner took over at, his jersey
+   number stacked on the line below (see PlayDiamond's PR_LABELS). */
 .pbp__pr {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-title);
   fill: var(--clay-deep);
+}
+
+.pbp__prnum {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
 }
 
 .pbp__top {
@@ -8094,6 +8160,16 @@ body {
   flex: none;
   color: var(--seal-deep);
   font-size: var(--fs-caption);
+}
+
+/* In the play-by-play feed, match the pitching-change notice card's total
+   horizontal inset from the .half edge: the notice sits directly in
+   .statgrid's 14px padding plus its own 14px margin (28px total); the
+   callout sits one level deeper, inside .pbp__card's own 6px padding, so 8px
+   more here reaches that same 28px and the two cards read the same width. */
+.pbp__card .pbp__callout {
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 /* ---------------------------------------------------------------- roster */
