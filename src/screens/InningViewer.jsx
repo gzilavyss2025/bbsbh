@@ -577,7 +577,6 @@ export function InningViewer({
           </div>
           {safeToShowEntering(renderRevealedThrough, effInning, effHalf) && (
             <div className="innings__ref-lineups">
-              <h3 className="innings__reference-title">Lineups</h3>
               <LineupSection
                 feed={feed}
                 inning={effInning}
