@@ -1466,11 +1466,10 @@ body {
 }
 
 .masthead__teams {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  /* Tight enough that the faint '@' reads as sitting between the two marks, not
-     floating in its own dead space (the tiles carry their own 4px padding on
-     top of this). */
   gap: 4px;
 }
 
@@ -1584,6 +1583,8 @@ body {
 }
 
 .masthead__logo {
+  position: relative;
+  z-index: 1;
   padding: 4px;
   background: none;
   border: none;
@@ -1676,49 +1677,45 @@ body {
   box-shadow: none;
 }
 
-/* The '@' between the two club marks. Reuses the slate card's screen-print
-   treatment (.gamecard__atmark — Big Shoulders Display, printed twice a couple
-   px out of register in kraft-amber + navy, the misregistration real ballpark-
-   program print runs have), at the same faint watermark opacity as the slate
-   card, but here an inline mark sized to sit between the logos rather than a
-   full-bleed watermark behind them. The navy ink layer is in flow (sizes the
-   box); the kraft ghost is an offset copy pinned over it. */
+/* The '@' behind the two club marks — the exact same screen-print watermark
+   treatment as the slate card (.gamecard__atmark: Big Shoulders Display,
+   printed twice a couple px out of register in kraft-amber + navy, the
+   misregistration real ballpark-program print runs have), just re-centered on
+   this row's own (smaller) box instead of the slate card's. Sized off the
+   64px logobox the same way the slate card's 158px watermark is sized off its
+   own ~130px tile, so the two read at the same visual weight; the tiles'
+   `.masthead__logo` sits at z-index: 1 (above this mark's z-index: 0) and
+   `.masthead__teams` clips it (`overflow: hidden`), same two roles
+   .gamecard__logobox and .gamecard__teams play for the slate card's mark. */
 .masthead__at {
-  position: relative;
-  display: inline-block;
-  flex: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
   font-family: "Big Shoulders Display", var(--font-display);
   font-weight: var(--w-black);
-  font-size: var(--fs-title-lg);
+  font-size: var(--fs-watermark-sm);
   line-height: var(--lh-solid);
-  /* Render the mark 2x larger than its 24px box WITHOUT changing layout: a
-     transform doesn't affect the flow box, so the two logo tiles (and the 4px
-     gaps to this mark) stay exactly where they are — the '@' just grows out
-     from its own center, overlapping onto the marks like the slate card's
-     behind-the-logos watermark. */
-  transform: scale(2);
+  pointer-events: none;
+  /* Same descent/ascent centering nudge as .gamecard__atmark-*, scaled down
+     from -12px for a 158px glyph to -6px for this 78px one. */
+  transform: translate(-50%, calc(-50% - 6px)) skewX(-8deg) rotate(-2deg);
 }
 .masthead__at-ink,
 .masthead__at-ghost {
   display: block;
-  transform: skewX(-8deg) rotate(-2deg);
 }
 .masthead__at-ghost {
   position: absolute;
   inset: 0;
   color: var(--seal);
-  /* Slightly stronger than the slate card's watermark (.gamecard__atmark-ghost,
-     opacity 0.1) — at the small inline size here between two logo tiles, the
-     same faint print read as too light to make out against the logos. */
-  opacity: 0.18;
-  transform: translate(2px, 1.5px) skewX(-8deg) rotate(-2deg);
+  opacity: 0.1;
+  transform: translate(2px, 1.5px);
 }
 .masthead__at-ink {
   position: relative;
   color: var(--navy);
-  /* Slightly stronger than the slate card's watermark (.gamecard__atmark-ink,
-     opacity 0.07) — see .masthead__at-ghost above. */
-  opacity: 0.14;
+  opacity: 0.07;
 }
 
 /* ---------------------------------------------------------- level toggle
