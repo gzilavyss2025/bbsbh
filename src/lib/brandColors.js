@@ -21,11 +21,12 @@
 
 import { byTeam } from './tuningStore.js'
 import MILB_COLORS from './data/milb-colors.json' with { type: 'json' }
+import MLB_TEAM_COLORS from './data/mlb-team-colors.json' with { type: 'json' }
 
 // Re-exported raw for the Team Identity Lab, which reads, edits, and POSTs the
 // whole store as one file (ADR-0029). Every resolver below reads the derived
 // table instead. Schema in src/lib/CLAUDE.md.
-export { MILB_COLORS }
+export { MILB_COLORS, MLB_TEAM_COLORS }
 
 // Each MLB club's REAL primary + secondary brand colors — distinct from
 // teams.js's TEAM_COLORS, which deliberately picks ONE rival-distinguishing
@@ -35,39 +36,12 @@ export { MILB_COLORS }
 // StatBox.jsx), not a subtle single-hue tint. Verified against
 // teamcolorcodes.com/mlb-color-codes (2026-07-16), not picked from memory — that
 // accent table is hand-picked for a DIFFERENT purpose (distinctiveness), so
-// this couldn't reuse its data even if it wanted to.
-export const TEAM_COLOR_PAIRS = {
-  108: ['#003263', '#BA0021'], // Angels
-  109: ['#A71930', '#E3D4AD'], // Diamondbacks
-  110: ['#DF4601', '#000000'], // Orioles
-  111: ['#BD3039', '#0C2340'], // Red Sox
-  112: ['#0E3386', '#CC3433'], // Cubs
-  113: ['#C6011F', '#000000'], // Reds
-  114: ['#00385D', '#E50022'], // Guardians
-  115: ['#333366', '#C4CED4'], // Rockies
-  116: ['#0C2340', '#FA4616'], // Tigers
-  117: ['#002D62', '#EB6E1F'], // Astros
-  118: ['#004687', '#BD9B60'], // Royals
-  119: ['#005A9C', '#EF3E42'], // Dodgers
-  120: ['#AB0003', '#14225A'], // Nationals
-  121: ['#002D72', '#FF5910'], // Mets
-  133: ['#003831', '#EFB21E'], // Athletics
-  134: ['#27251F', '#FDB827'], // Pirates
-  135: ['#2F241D', '#FFC425'], // Padres
-  136: ['#0C2C56', '#005C5C'], // Mariners
-  137: ['#FD5A1E', '#27251F'], // Giants
-  138: ['#C41E3A', '#0C2340'], // Cardinals
-  139: ['#092C5C', '#8FBCE6'], // Rays
-  140: ['#003278', '#C0111F'], // Rangers
-  141: ['#134A8E', '#1D2D5C'], // Blue Jays
-  142: ['#002B5C', '#D31145'], // Twins
-  143: ['#E81828', '#002D72'], // Phillies
-  144: ['#CE1141', '#13274F'], // Braves
-  145: ['#27251F', '#C4CED4'], // White Sox
-  146: ['#00A3E0', '#EF3340'], // Marlins
-  147: ['#003087', '#E4002C'], // Yankees
-  158: ['#12284B', '#FFC52F'], // Brewers
-}
+// this couldn't reuse its data even if it wanted to. Sourced from
+// mlb-team-colors.json (ADR-0029) so the Team Identity Lab can edit and save a
+// club's triad directly — see src/lib/CLAUDE.md.
+export const TEAM_COLOR_PAIRS = byTeam(MLB_TEAM_COLORS, (e) =>
+  e.primary && e.secondary ? [e.primary, e.secondary] : undefined,
+)
 
 // Every current MiLB affiliate's teamId -> its parent MLB org's teamId — step 2
 // of the chain above, and the reason a farmhand at an affiliate research never

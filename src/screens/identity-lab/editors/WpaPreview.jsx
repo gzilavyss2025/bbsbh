@@ -16,6 +16,7 @@ export function WpaPreview({
   layout,
   pinstripe,
   bandColor,
+  bandBg,
   hasDraft,
   copyText,
   onField,
@@ -74,6 +75,23 @@ export function WpaPreview({
           <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
           <span>Pinstripe</span>
         </label>
+        {/* The colored fill under the stripes — same White Sox City Connect
+            case the Position panel's own Fill field covers, mirrored here so
+            the WPA band can carry it too. `bandBg` is undefined only when a
+            profile (MiLB) never supplies one at all — gated the same
+            defensive way as that field rather than solely on `pinstripe`, so
+            an uncontrolled-input warning can't happen there. */}
+        {pinstripe && bandBg !== undefined && (
+          <label className="colorlab__wpapreviewcolor">
+            <span>Fill</span>
+            <input
+              type="text"
+              value={bandBg}
+              placeholder="#hex (white)"
+              onChange={(e) => onField('bandBg', e.target.value)}
+            />
+          </label>
+        )}
       </div>
     </div>
   )

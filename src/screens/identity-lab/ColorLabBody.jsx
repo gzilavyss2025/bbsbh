@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react'
 import { AllChangesButton, TeamLabList } from './LabShell.jsx'
 import { TeamLabRow } from './TeamLabRow.jsx'
 import { useDraftStore } from './useDraftStore.js'
+import { useTeamDraftStore } from './useTeamDraftStore.js'
 import { useAutoClearLandedDrafts } from './useAutoClearLandedDrafts.js'
 import { saveStores } from './saveStores.js'
+
+// MiLB's profile has no team-level colors dimension (only MLB's Main triad
+// does) — a no-op matcher so the auto-clear sweep never crashes reaching for a
+// `matchesLanded.colors` a profile doesn't define; it's never called for real
+// since nothing writes into the colors draft for a profile that doesn't wire
+// `on.colorField` in the first place.
+const NEVER_LANDED = () => false
 
 // The body both colour dimensions share — MLB's treatment catalog and a MiLB
 // level's Home/Away pair. It owns the plumbing that was duplicated between the
@@ -28,12 +36,19 @@ export function ColorLabBody({ profile }) {
   const [posDraft, setPosField, resetPosDraft] = useDraftStore(profile.storeKey('logopos'))
   const [wpaDraft, setWpaField, resetWpaDraft] = useDraftStore(profile.storeKey('wpa'))
   const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(profile.storeKey('headercolors'))
+  const [colorsDraft, setColorField, resetColorsDraft] = useTeamDraftStore(profile.storeKey('colors'))
   const [saveStatus, setSaveStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
 
   useAutoClearLandedDrafts([
     { draft: posDraft, reset: resetPosDraft, matchesLanded: profile.matchesLanded.pos },
     { draft: wpaDraft, reset: resetWpaDraft, matchesLanded: profile.matchesLanded.wpa },
     { draft: headerDraft, reset: resetHeaderDraft, matchesLanded: profile.matchesLanded.header },
+    {
+      draft: colorsDraft,
+      reset: resetColorsDraft,
+      matchesLanded: profile.matchesLanded.colors ?? NEVER_LANDED,
+      teamScoped: true,
+    },
   ])
 
   const collapsedKey = profile.storeKey('collapsed')
@@ -44,14 +59,14 @@ export function ColorLabBody({ profile }) {
   const toggleCollapsed = (teamId) =>
     setCollapsed((was) => ({ ...was, [teamId]: was[teamId] === false ? true : false }))
 
-  const drafts = { pos: posDraft, wpa: wpaDraft, header: headerDraft }
+  const drafts = { pos: posDraft, wpa: wpaDraft, header: headerDraft, colors: colorsDraft }
 
   // Save lands every pending draft in the JSON stores on disk (ADR-0029) —
   // the same files this module's resolvers read, so the tiles re-render off the
   // landed value and useAutoClearLandedDrafts then drops the now-redundant
   // drafts on Vite's hot reload. Only fields the stores actually own are
   // written; a flat background hex for a non-Main MLB treatment still belongs
-  // to the colour tables (ALT_COLORS and friends), which PR 5 moves, so its
+  // to the colour tables (ALT_COLORS and friends), still JS literals, so its
   // copy snippet remains the way to land it.
   async function handleSave() {
     setSaveStatus('saving')
@@ -99,6 +114,7 @@ export function ColorLabBody({ profile }) {
                   pos: posDraft[team.id],
                   wpa: wpaDraft[team.id],
                   header: headerDraft[team.id],
+                  colors: colorsDraft[team.id],
                 }}
                 on={{
                   posField: (treatment, field, value) => setPosField(team.id, treatment, field, value),
@@ -107,6 +123,8 @@ export function ColorLabBody({ profile }) {
                   wpaReset: (treatment) => resetWpaDraft(team.id, treatment),
                   headerField: (treatment, field, value) => setHeaderField(team.id, treatment, field, value),
                   headerReset: (treatment) => resetHeaderDraft(team.id, treatment),
+                  colorField: (field, value) => setColorField(team.id, field, value),
+                  colorReset: () => resetColorsDraft(team.id),
                 }}
               />
             )}

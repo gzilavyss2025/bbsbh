@@ -74,3 +74,18 @@ export function mergeDraftIntoStore(store, draft, apply, { name } = {}) {
   }
   return next
 }
+
+// The team-level counterpart to mergeDraftIntoStore, for a store with no
+// `treatments` nesting at all (mlb-team-colors.json) — same "merge this
+// session's touched fields into a full copy of the store" contract, minus the
+// per-treatment layer. `apply(record, fields, teamId)` returns the team entry
+// to write.
+export function mergeTeamDraftIntoStore(store, draft, apply, { name } = {}) {
+  const next = structuredClone(store)
+  for (const [teamId, fields] of Object.entries(draft)) {
+    if (!fields || Object.keys(fields).length === 0) continue
+    const entry = next[teamId] ?? { name: name?.(Number(teamId)) ?? `Team ${teamId}` }
+    next[teamId] = apply(entry, fields, Number(teamId))
+  }
+  return next
+}

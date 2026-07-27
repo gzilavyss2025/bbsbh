@@ -10,6 +10,9 @@ import { useEffect } from 'react'
 //
 // `stores` is one entry per draft store:
 //   { draft, reset, matchesLanded(teamId, treatment, fields) -> boolean }
+// or, for a team-level draft (useTeamDraftStore.js — a value that isn't
+// per-treatment, e.g. mlb-team-colors.json's Primary/Secondary/Third):
+//   { draft, reset, matchesLanded(teamId, fields) -> boolean, teamScoped: true }
 //
 // Runs after every render rather than on a dependency list, because
 // useDraftStore's `reset` is a fresh closure each render (so a dep list on it
@@ -18,7 +21,14 @@ import { useEffect } from 'react'
 // on the next pass, and one that didn't is left alone.
 export function useAutoClearLandedDrafts(stores) {
   useEffect(() => {
-    for (const { draft, reset, matchesLanded } of stores) {
+    for (const { draft, reset, matchesLanded, teamScoped } of stores) {
+      if (teamScoped) {
+        for (const [teamId, fields] of Object.entries(draft)) {
+          if (!fields || Object.keys(fields).length === 0) continue
+          if (matchesLanded(Number(teamId), fields)) reset(teamId)
+        }
+        continue
+      }
       for (const [teamId, byTreatment] of Object.entries(draft)) {
         for (const [treatment, fields] of Object.entries(byTreatment)) {
           if (!fields || Object.keys(fields).length === 0) continue

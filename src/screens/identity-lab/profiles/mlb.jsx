@@ -5,13 +5,18 @@
    copy text, and tiles in one readable file. */
 import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
-import { DEFAULT_PINSTRIPE_COLOR, wpaBandColor, wpaBandPinstripeColor } from '../../../lib/wpaBandColors.js'
+import {
+  DEFAULT_PINSTRIPE_COLOR,
+  wpaBandColor,
+  wpaBandPinstripeColor,
+  wpaBandPinstripeBg,
+} from '../../../lib/wpaBandColors.js'
 import { WPA_TUNING, wpaLogoLayout } from '../../../lib/wpaLogo.js'
+import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import {
   ALL_MLB_TEAM_IDS,
   teamFullName,
   teamClubName,
-  teamColorSwatches,
   teamLogoUrl,
   ALT_COLORS,
   ALT2_COLORS,
@@ -50,7 +55,7 @@ import {
 } from '../../../api/uniforms.js'
 import { TreatmentBox } from '../TreatmentBox.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
-import { mergeDraftIntoStore } from '../saveStores.js'
+import { mergeDraftIntoStore, mergeTeamDraftIntoStore } from '../saveStores.js'
 
 // The MLB dimension: each club's logo treatments side by side with their brand
 // colors, the catalog jersey(s) each maps to, and that treatment's WPA band.
@@ -81,26 +86,28 @@ function treatmentsForTeam(teamId) {
   )
 }
 
-// A proposed replacement for a team's Primary swatch, tried out in this lab
-// only — teams.js's TEAM_COLOR_PAIRS/TEAM_COLORS (the real app-wide source
-// every other surface reads) is untouched. Applied to the Main triad;
-// teams.js's ALT_COLORS[115] carries the same hex as a literal so the Main and
-// Alternate tiles here can't drift onto two different "Primary" purples.
-const PRIMARY_OVERRIDE = {
-  115: '#33006F', // Rockies — proposed purple
-}
+// The Main triad's three role keys, in tile order — the same field names
+// mlb-team-colors.json stores them under (ADR-0029) and the Team Identity
+// Lab's own draft/save plumbing reads and writes. 'third' is deliberately
+// often blank (16 of 30 clubs have never had one entered) rather than
+// invented — an empty editable swatch, not a placeholder hex.
+const COLOR_ROLES = ['primary', 'secondary', 'third']
+const COLOR_ROLE_LABELS = { primary: 'Primary', secondary: 'Secondary', third: 'Third' }
 
-// The three official colors for a team's Main treatment are already known for
-// every current MLB club (TEAM_COLOR_PAIRS' primary/secondary + the TEAM_COLORS
-// accent) — reuse that instead of asking for colors this lab already has.
-function mainColorTriad(teamId) {
-  const labels = ['Primary', 'Secondary', 'Third']
-  return teamColorSwatches(teamId)
-    .slice(0, 3)
-    .map((s, i) => ({
-      label: labels[i],
-      hex: i === 0 && PRIMARY_OVERRIDE[teamId] ? PRIMARY_OVERRIDE[teamId] : s.hex,
-    }))
+// A team's Main-treatment Primary/Secondary/Third, landed value with any live
+// draft layered on top — mlb-team-colors.json is the one source both the tile
+// and teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS resolvers read (src/lib/CLAUDE.md),
+// so an edit here and the real app tint can never disagree. Always three
+// slots, in role order, even when a role is blank — editing needs a stable
+// slot-to-role mapping, which a dedup/filter (the old teamColorSwatches) can't
+// guarantee.
+function resolveColorTriad(teamId, draft) {
+  const landed = MLB_TEAM_COLORS[teamId] ?? {}
+  return COLOR_ROLES.map((role) => ({
+    role,
+    label: COLOR_ROLE_LABELS[role],
+    hex: draft?.[role] ?? landed[role] ?? '',
+  }))
 }
 
 const BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
@@ -114,7 +121,7 @@ const BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
 // Primary/Secondary, a distinct identity unrelated to their Main triad) is left
 // alone.
 function withMainRoleLabels(teamId, colors) {
-  const triad = mainColorTriad(teamId)
+  const triad = resolveColorTriad(teamId, null).filter((c) => c.hex)
   return colors.map((c) => {
     if (c.label !== 'Background') return c
     const match = triad.find((m) => m.hex.toLowerCase() === c.hex.toLowerCase()) // caps-js-exempt
@@ -123,7 +130,7 @@ function withMainRoleLabels(teamId, colors) {
 }
 
 function colorsFor(teamId, treatmentKey) {
-  if (treatmentKey === 'main') return mainColorTriad(teamId)
+  if (treatmentKey === 'main') return resolveColorTriad(teamId, null).filter((c) => c.hex)
   const colors =
     treatmentKey === 'alternate'
       ? ALT_COLORS[teamId]
@@ -171,7 +178,11 @@ function resolvePositionState(teamId, treatment, posDraft, colors) {
         ? mainTreatmentPinstripeColor(teamId)
         : null
       : treatmentPinstripeColor(teamId, treatment)
-  const pinstripeBg = treatment === 'main' ? null : treatmentPinstripeBg(teamId, treatment)
+  // undefined (not '') for Main — the data model has no fill-color concept for
+  // Main's pinstripe (MAIN_OVERRIDES' pinstripe is line-color only), and
+  // LogoPositionControls gates its new "Fill" field on this being defined.
+  const pinstripeBg =
+    treatment === 'main' ? undefined : posDraft?.pinstripeBg ?? treatmentPinstripeBg(teamId, treatment) ?? ''
   const activeBgIndex = override?.bgHex || pinstripeColor
     ? -1
     : override
@@ -192,7 +203,10 @@ function resolveWpaBandState(teamId, treatment, wpaDraft) {
   const pinstripeDefault = wpaBandPinstripeColor(teamId, treatment)
   const pinstripe = wpaDraft?.pinstripe ?? Boolean(pinstripeDefault)
   const band = wpaDraft?.bandColor ?? (pinstripe ? pinstripeDefault ?? DEFAULT_PINSTRIPE_COLOR : wpaBandColor(teamId, treatment))
-  return { pinstripe, band }
+  // The colored fill under the stripes — not named `bg`, which the Position
+  // panel's own unrelated field already owns on this same tile.
+  const bandBg = wpaDraft?.bandBg ?? wpaBandPinstripeBg(teamId, treatment) ?? ''
+  return { pinstripe, band, bandBg }
 }
 
 // The merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% for a (team, treatment) — a
@@ -239,7 +253,7 @@ function headerColorsFor(colors, draft, override) {
 // ---------------------------------------------------------------------------
 // Copy-text builders. Kept even though Save now lands most of these directly:
 // the background hex for a non-Main treatment lands in the colour tables
-// (ALT_COLORS and friends), which are still JS literals until PR 5, and the
+// (ALT_COLORS and friends), which are still JS literals, and the
 // "copy all changes" button is still how a session's worth of poking gets
 // summarized into a prompt.
 
@@ -262,7 +276,7 @@ function bgOverrideLocation(teamId, treatment, pinstripe) {
   return (
     `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.main.bgHex (a literal), or if it should ` +
     `instead track one of the club's three brand swatches, ${teamId}.treatments.main.bg ` +
-    `('primary'/'secondary'/'third', see TEAM_COLOR_PAIRS/TEAM_COLORS/TEAM_COLOR_EXTRAS)`
+    `('primary'/'secondary'/'third', see src/lib/data/mlb-team-colors.json)`
   )
 }
 
@@ -302,14 +316,30 @@ function buildHeaderCopyText(name, teamId, treatment, treatmentLabel, colors) {
   )
 }
 
-// Scans every team's three draft stores and concatenates the same copy-text
+function buildColorsCopyText(name, teamId, triad) {
+  const byRole = Object.fromEntries(triad.map((c) => [c.role, c.hex]))
+  return (
+    `Team: ${name} (id ${teamId})\n` +
+    `Where: src/lib/data/mlb-team-colors.json — ${teamId}\n` +
+    `primary: ${byRole.primary || '(none)'}, secondary: ${byRole.secondary || '(none)'}, ` +
+    `third: ${byRole.third || '(none)'}`
+  )
+}
+
+// Scans every team's four draft stores and concatenates the same copy-text
 // snippet each individual field's own copy icon would produce, in team-list
 // order — answers "what all did I change" without re-opening every row.
+// Colors is team-level, not per-treatment, so it's checked once per team
+// rather than inside the treatment loop below.
 function buildAllChangesText(teams, drafts, extras) {
   const sections = []
   for (const team of teams) {
     const teamId = team.id
     const name = teamFullName(teamId)
+    const cd = drafts.colors[teamId]
+    if (cd && Object.keys(cd).length > 0) {
+      sections.push(buildColorsCopyText(name, teamId, resolveColorTriad(teamId, cd)))
+    }
     for (const t of treatmentsForTeam(teamId)) {
       const matches = jerseyMatchesFor(extras.catalog, teamId, t.key)
       const treatmentLabel = matches?.[0]?.label ?? t.label
@@ -462,6 +492,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
           pos: drafts.pos?.[t.key],
           wpa: drafts.wpa?.[t.key],
           header: drafts.header?.[t.key],
+          colors: drafts.colors,
         }}
         on={on}
       />
@@ -470,7 +501,9 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
 }
 
 function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, wearDates, drafts, on }) {
-  const colors = colorsFor(teamId, treatment)
+  const isMain = treatment === 'main'
+  const colors = isMain ? resolveColorTriad(teamId, drafts.colors) : colorsFor(teamId, treatment)
+  const hasColorsDraft = isMain && drafts.colors && Object.keys(drafts.colors).length > 0
   const [artVersion, setArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
   // The same curated full name the Uniform Names page edits for this jersey. No
@@ -507,11 +540,11 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
           '--offset-y': `${treatmentOffsetYValue}%`,
           '--origin-y': originY,
           '--pinstripe-color': bgPinstripe ? treatmentBg : undefined,
-          '--pinstripe-bg': pinstripeBg ?? undefined,
+          '--pinstripe-bg': pinstripeBg || undefined,
         }
       : undefined
 
-  const { pinstripe: wpaPinstripe, band: wpaBand } = resolveWpaBandState(teamId, treatment, drafts.wpa)
+  const { pinstripe: wpaPinstripe, band: wpaBand, bandBg: wpaBandBg } = resolveWpaBandState(teamId, treatment, drafts.wpa)
   const wpaLayout = resolvedWpaLayout(teamId, treatment, drafts.wpa)
   const headerLanded = treatmentHeaderColorOverride(teamId, treatment)
   const headerColors = headerColorsFor(colors, drafts.header, headerLanded)
@@ -543,8 +576,8 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       swatches={slots.map((s, i) => ({
         swatch: s,
         active: i === activeBgIndex,
-        wpaSelected: Boolean(!wpaPinstripe && s && wpaBand.toLowerCase() === s.hex.toLowerCase()), // caps-js-exempt
-        onPickWpaBand: s
+        wpaSelected: Boolean(!wpaPinstripe && s?.hex && wpaBand.toLowerCase() === s.hex.toLowerCase()), // caps-js-exempt
+        onPickWpaBand: s?.hex
           ? () => {
               // Clicking a swatch always means "flat fill", so it explicitly
               // clears pinstripe rather than recoloring the stripes.
@@ -552,7 +585,9 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
               on.wpaField(treatment, 'bandColor', s.hex)
             }
           : undefined,
+        editable: isMain ? { value: s?.hex ?? '', onChange: (hex) => on.colorField(COLOR_ROLES[i], hex) } : undefined,
       }))}
+      colorsPanel={isMain ? { hasDraft: hasColorsDraft, onReset: on.colorReset } : undefined}
       position={{
         name,
         treatmentLabel: displayLabel,
@@ -561,6 +596,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         offsetY: treatmentOffsetYValue,
         bg: treatmentBg ?? '',
         pinstripe: bgPinstripe,
+        pinstripeBg,
         hasDraft: hasPosDraft,
         copyText: buildPosCopyText(
           name,
@@ -582,6 +618,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         layout: wpaLayout,
         pinstripe: wpaPinstripe,
         bandColor: wpaBand,
+        bandBg: wpaBandBg,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
         copyText: buildWpaCopyText(name, teamId, treatment, displayLabel, wpaLayout, wpaPinstripe, wpaBand),
         onField: (field, value) => on.wpaField(treatment, field, value),
@@ -594,7 +631,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         lastOpponent,
         headerColors,
         wpaLayout,
-        wpaBandOverride: { pinstripe: wpaPinstripe, color: wpaBand },
+        wpaBandOverride: { pinstripe: wpaPinstripe, color: wpaBand, bg: wpaBandBg },
       }}
       header={{
         name,
@@ -657,7 +694,7 @@ function useMlbExtras() {
 // Which store fields a position draft lands in. `bg` only has a home here for
 // Main (MAIN_OVERRIDES' bgHex) and for a pinstripe line color; a flat
 // background for any other treatment belongs to ALT_COLORS and friends, which
-// are still JS literals — the copy snippet covers those until PR 5 moves them.
+// are still JS literals — the copy snippet covers those.
 function applyPositionDraft(record, fields, treatment) {
   const next = { ...record }
   if (fields.scale !== undefined) next.scale = fields.scale
@@ -676,6 +713,10 @@ function applyPositionDraft(record, fields, treatment) {
     }
   }
   if (fields.bg !== undefined && !fields.pinstripe && treatment === 'main') next.bgHex = fields.bg
+  if (treatment !== 'main' && fields.pinstripeBg !== undefined) {
+    if (fields.pinstripeBg) next.pinstripeBg = fields.pinstripeBg
+    else delete next.pinstripeBg
+  }
   return next
 }
 
@@ -708,20 +749,30 @@ function buildSaves(drafts, extras) {
         if (fields[key] !== undefined) layout[key] = fields[key]
       }
       if (Object.keys(layout).length) next.layout = layout
-      if (fields.pinstripe !== undefined || fields.bandColor !== undefined) {
+      if (fields.pinstripe !== undefined || fields.bandColor !== undefined || fields.bandBg !== undefined) {
         const pinstripe = fields.pinstripe ?? (typeof next.band === 'object' && next.band?.pinstripe) ?? false
         const color = fields.bandColor ?? (typeof next.band === 'object' ? next.band?.color : next.band)
-        next.band = pinstripe ? { pinstripe: true, color } : color
+        const bg = fields.bandBg ?? (typeof next.band === 'object' ? next.band?.bg : undefined)
+        next.band = pinstripe ? (bg ? { pinstripe: true, color, bg } : { pinstripe: true, color }) : color
       }
       return next
     },
     { name },
   )
 
+  const colors = mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, (record, fields) => {
+    const next = { ...record }
+    for (const role of COLOR_ROLES) {
+      if (fields[role] !== undefined) next[role] = fields[role]
+    }
+    return next
+  }, { name })
+
   return [
     { key: 'uniform-names', body: merged },
     { key: 'mlb-treatment-tuning', body: tuning },
     { key: 'wpa-tuning', body: wpa },
+    { key: 'mlb-team-colors', body: colors },
   ]
 }
 
@@ -738,9 +789,11 @@ export const mlbProfile = {
       treatment tiled in the win-probability chart (the real chart picks a
       game’s treatment from that night’s actual uniform — see{' '}
       <code>api/jerseys.js</code> — so any tile here could be the one that shows
-      up), and which catalog jersey(s) map to each treatment. Click a swatch to
-      try it as that tile’s WPA band color. Missing logos or colors show as a
-      placeholder until supplied. Save writes every pending change straight to{' '}
+      up), and which catalog jersey(s) map to each treatment. A Main tile’s
+      Primary/Secondary/Third are editable directly on the swatch — type a hex
+      to change it. Click a swatch to try it as that tile’s WPA band color.
+      Missing logos or colors show as a placeholder until supplied. Save
+      writes every pending change straight to{' '}
       <code>src/lib/data/*.json</code> and{' '}
       <code>public/data/uniform-names.json</code> while <code>npm run dev</code>{' '}
       is running; each editor’s copy icon still spells out what it would change,
@@ -764,11 +817,12 @@ export const mlbProfile = {
       ),
     wpa: (teamId, treatment, fields) => {
       const layout = resolvedWpaLayout(teamId, treatment, null)
-      const { pinstripe, band } = resolveWpaBandState(teamId, treatment, null)
-      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band })
+      const { pinstripe, band, bandBg } = resolveWpaBandState(teamId, treatment, null)
+      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg })
     },
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
+    colors: (teamId, fields) => draftFieldsMatchLanded(fields, MLB_TEAM_COLORS[teamId]),
   },
   buildAllChangesText,
   buildSaves,
