@@ -679,6 +679,12 @@ function advanceCode(play) {
   const et = play.result?.eventType
   if (ADVANCE_CODES[et]) return ADVANCE_CODES[et]
   if (/(flies|fly ball|pops|lines|line drive|sacrifice fly)/i.test(play.result?.description ?? '')) return 'FO'
+  // Two rare runner-level eventTypes ('other_out' — advancing on an uncaught
+  // third strike whose recovery throw goes elsewhere; 'caught_stealing_3b' —
+  // a trail runner taking a base while the lead man is thrown out) still
+  // land here and read as this ground-out fallback, which is wrong (no ball
+  // was put in play). Left as a documented gap rather than a guessed code —
+  // see docs/unresolved-scoring-conventions.md.
   return 'GO'
 }
 
