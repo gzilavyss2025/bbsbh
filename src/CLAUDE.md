@@ -144,7 +144,9 @@ read the linked ADRs before refactoring:
 
 Every mid-inning "something happened" moment in `PlayByPlay.jsx` sorts into one
 of three tiers — a fresh/changed actor (`PitcherNotice`/`FielderNotice`/
-`PinchRunNotice`), a team/administrative event (mound visit, ejection), or a
+`PinchRunNotice`/`BatterNotice` — a mid-inning pinch hitter gets the same "now
+batting" notice the pre-pitch staged list shows, for symmetry with every other
+substitution type), a team/administrative event (mound visit, ejection), or a
 baserunning/misc event with no plate appearance of its own (steal, wild pitch,
 balk, …) — and all three render in the *same* kraft-amber
 `.pitchernotice.pitchernotice--pbp` card, distinguished by what's inside (a

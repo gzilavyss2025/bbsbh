@@ -298,6 +298,20 @@ export function pinchRunningPlayers(feed, pinchId, replacedId) {
   return { runner: nameOf(pinchId), replaced: nameOf(replacedId) }
 }
 
+// The incoming pinch hitter's card fields for a mid-inning "now batting" note
+// (see BatterNotice) — same "Last, First" + jersey shape as
+// pitchingChangePitcher/defensiveChangeFielder, no hand/position since
+// BatterNotice shows neither.
+export function pinchHittingBatter(feed, playerId) {
+  if (playerId == null) return null
+  const person = feed?.gameData?.players?.[`ID${playerId}`] ?? {}
+  const { last, first, useName } = personNameParts(person)
+  const name = last
+    ? `${last}${first ? `, ${useName || first}` : ''}`
+    : person.fullName ?? ''
+  return { id: playerId, name, jersey: person.primaryNumber ?? '' }
+}
+
 // The surname to use when a baserunning note has to NAME the runner it's
 // about. Exported because the box-score roll-up builds the same note shape
 // from the raw feed (api/callout-notes.js's buildGameCallouts) and the two
@@ -1182,6 +1196,25 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
             })
           }
         }
+      } else if (et === 'offensive_substitution' && e.player?.id != null) {
+        // A pinch hitter entering mid-flow — its own "now batting" notice at
+        // the moment he's announced, matching every OTHER substitution type
+        // (a fresh fielder, a pitching change, a pinch runner) rather than
+        // showing up with no announcement of his own, just his own at-bat
+        // card a moment later (see BatterNotice, PlayByPlay.jsx). Unlike the
+        // pinch-runner branch above there is no origin card to strike
+        // through — he isn't replacing anyone already carded, he simply bats
+        // next — so this is a plain notification, same shape as
+        // pinch_running's fallback text/segments.
+        const text = sentenceCaseEventText(e.details?.description ?? '')
+        entries.push({
+          kind: 'event',
+          eventType: 'pinch_hitting',
+          midAtBat: pitchInPlay,
+          playerId: e.player.id,
+          text,
+          segments: linkifyNames(text, nameIndex),
+        })
       } else if (et === 'runner_placed' && e.player?.id != null) {
         // The extra-innings automatic runner, placed on 2nd to begin the half.
         // He takes no plate appearance — no pitches, no result, no RBI — but

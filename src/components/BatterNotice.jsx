@@ -1,13 +1,18 @@
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 
-// The "now batting" notification card for a pinch-hitter announced before a
-// half's first pitch — same headshot + label + name layout as PitcherNotice /
-// FielderNotice (shares its .pitchernotice CSS and PitcherPhoto), on the
-// BATTING team's side since a pinch-hitter is an offensive substitution. Only
-// used pre-pitch (see HalfInning.jsx's PrePitchChanges); once the half is
-// revealed the pinch-hitter owns his own at-bat card instead. `batter` is the
-// { id, name, jersey } shape selectPrePitchChanges builds.
+// The "now batting" notification card for a pinch hitter — same headshot +
+// label + name layout as PitcherNotice/FielderNotice (shares its
+// .pitchernotice CSS and PitcherPhoto), on the BATTING team's side since a
+// pinch hitter is an offensive substitution. Two callers, same card: staged
+// pre-pitch (HalfInning.jsx's PrePitchChanges, `batter` shaped by
+// selectPrePitchChanges) and mid-inning, live in the feed
+// (PlayByPlay.jsx, `batter` shaped by playbyplay.js's pinchHittingBatter) —
+// same symmetry every other substitution type already has (a pitching
+// change, a defensive sub/switch, a pinch runner). Either way `batter` is
+// the { id, name, jersey } shape; his own at-bat card still follows right
+// after, same as any other substitution's live card is followed by its own
+// later cards.
 export function BatterNotice({ batter, teamId = null, teamName, className = '' }) {
   if (!batter) return null
   return (
