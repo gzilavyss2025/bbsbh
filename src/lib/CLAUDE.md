@@ -64,7 +64,7 @@ own `note`.
 | Module | Owns |
 | --- | --- |
 | `brandColors.js` | `TEAM_COLOR_PAIRS`, `MILB_PARENT_ORG`, the researched MiLB pairs, and **the one affiliate→colour chain** both layers read |
-| `teams.js` | Club names/abbreviations/ids, logo URL builders, the MLB-only colour tables (`TEAM_COLORS`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
+| `teams.js` | Club names/abbreviations/ids, logo URL builders, the MLB-only colour tables (`TEAM_COLORS` — the distinctiveness accent — plus `teamColorExtras`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
 | `logoArt.js` | The curated-art standard: the PNG header reader, the rejection reasons, and the treatment→directory allowlist an upload resolves through |
 | `milbColors.js` | The MiLB counterpart: the Home/Away resolvers and `milbTreatmentTile` (it re-exports the chain rather than owning it) |
 | `wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
@@ -88,6 +88,7 @@ Lab can write an edit straight back instead of handing over a snippet to paste
 | `mlb-treatment-tuning.json` | `teams.js` |
 | `milb-treatment-tuning.json` | `milbColors.js` |
 | `milb-colors.json` | `brandColors.js` |
+| `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
 | `wpa-tuning.json` | `wpaLogo.js`, `wpaBandColors.js` |
 
 Every store has the same outer shape:
@@ -102,15 +103,39 @@ is odd. **No resolver reads either one** — they exist for humans, and the lab
 renders `note` as an editable field so rationale is authored in the tool rather
 than lost on the first write.
 
-`milb-colors.json` is the one store with no `treatments` — an affiliate has a
-single identity, not a per-treatment one:
+**Two stores have no `treatments`** — they hold a fact about the CLUB, not about
+one of its jersey treatments. `test/identity-lab-stores.test.js` keeps them in
+its `TEAM_LEVEL_STORES` list so they still get every outer-shape guard.
+
+`milb-colors.json` — an affiliate has a single identity, not a per-treatment one:
 
 ```json
 { "546": { "name": "…", "level": "Double-A", "pair": ["#e03a3e", "#003263"],
            "third": "#cbccce", "confidence": "low", "source": "…", "note": "…" } }
 ```
 
-`pair` is the only field a resolver reads. `third`/`confidence`/`source`/`note`
+`mlb-team-colors.json` — a club's brand colours, the store behind
+`TEAM_COLOR_PAIRS`, `TEAM_COLORS`, and `teamColorExtras`:
+
+```json
+{ "158": { "name": "…", "primary": "#12284B", "secondary": "#FFC52F",
+           "accent": "#FFC52F",
+           "extras": [{ "label": "Powder Blue", "hex": "#6CACE4" }], "note": "…" } }
+```
+
+**`accent` is not a third brand colour**, and conflating the two is the mistake
+this schema exists to prevent. It is the hand-picked *distinctiveness* hex — the
+one that makes two clubs on a slate card tell apart — so for 27 of 30 clubs it
+deliberately restates that club's own `primary` or `secondary`, and only the
+Guardians, Rays, and Blue Jays carry a hue the pair doesn't. A club's real
+third-or-later colours are `extras`, researched against Wikipedia infoboxes and
+teamcolorcodes.com and skipped rather than guessed where sources disagreed (14
+clubs have one). Every colour field is optional; **a role the club lacks is an
+absent field, never `""`** — the dev-save validator rejects the empty string, and
+the lab's `applyColorsDraft` deletes rather than blanks
+(`src/screens/identity-lab/profiles/mlbColorRoles.js`).
+
+In `milb-colors.json`, `pair` is the only field a resolver reads. `third`/`confidence`/`source`/`note`
 are provenance, and `found: false` (mutually exclusive with `pair`, enforced by
 the dev-save validator and by `test/identity-lab-stores.test.js`) marks a club
 research resolved nothing for.

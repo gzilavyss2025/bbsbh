@@ -335,18 +335,23 @@ export function leagueLogoUrl() {
 
 // Alternate/City Connect tile-background colors — hand-curated together with
 // each team's curated logo file (localLogoUrl above), since these marks don't
-// carry an official three-color set the way Main's Primary/Secondary/Third
-// triad does (mlb-team-colors.json). Single source of truth for Team Identity
-// Lab's swatch tiles AND the
+// carry an official Primary/Secondary/Accent set the way Main does
+// (mlb-team-colors.json). Single source of truth for Team Identity Lab's swatch
+// tiles AND the
 // home-page game card's jersey-variant background (treatmentBgColor below) —
 // moved here so both read the same curated set rather than drifting. Each
 // entry is a small swatch list; the one flagged `bg: true` is the color
 // actually used as a fill. A team with no entry here has no known background
 // yet — callers should leave their surface plain rather than render nothing.
-// Rockies' hex mirrors the Team Identity Lab's own proposed Primary override (that
-// page's PRIMARY_OVERRIDE) — kept as a literal here since this is a narrow,
-// opt-in background only shown when the Alternate treatment itself is shown,
-// not a promotion of that proposal into the app's real teamPrimaryColor.
+//
+// The Rockies' #33006F is deliberately NOT their Main Primary (#333366): it is
+// a proposed purple that stays scoped to this narrow, opt-in Alternate
+// background rather than being promoted into the app-wide brand pair. The Team
+// Identity Lab used to mirror it onto the Main tile through a lab-only
+// PRIMARY_OVERRIDE; that override is gone, so the lab now shows the two hexes
+// as what they are — a Main Primary and a separate Alternate fill. Promoting
+// the purple means editing 115.primary in mlb-team-colors.json on purpose, and
+// it would retint every surface teamPrimaryColor feeds.
 export const ALT_COLORS = {
   108: [{ label: 'Silver', hex: '#C4CED4', bg: true }], // Angels — same plain CDN mark as Main, on grey for Away Grey
   120: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Nationals — Road Grey jersey
@@ -403,7 +408,7 @@ export const ALT_COLORS = {
   137: [
     { label: 'Secondary', hex: '#27251F' },
     { label: 'Third', hex: '#EFD19F', bg: true },
-  ], // Giants — same Secondary/Third pair as Main; background is Third (Cream)
+  ], // Giants — Main's Secondary plus its researched Cream extra; background is the Cream
   139: [
     { label: 'Primary', hex: '#092C5C' },
     { label: 'Secondary', hex: '#8FBCE6', bg: true },
@@ -742,7 +747,7 @@ export function treatmentTuningRecord(teamId, treatment) {
 // Color Lab as a prototype-only "what if every club's default tile had a
 // colored background" pass (see that page's own history), now promoted here
 // so the real home-page game card can share it: `bg` names which of the
-// team's Primary/Secondary/Third triad (mlb-team-colors.json,
+// team's Primary/Secondary/Accent triad (mlb-team-colors.json,
 // mainColorForRole below) fills the tile; `recolor` swaps the mlbstatic base
 // mark for a
 // locally hand-edited one (mainOverrideLogoUrl below) when the CDN mark's own
@@ -775,14 +780,18 @@ export const MAIN_OVERRIDES = Object.fromEntries(
 )
 
 // A team's triad color by role name — 'primary'/'secondary' from
-// TEAM_COLOR_PAIRS, 'third' from TEAM_COLORS — the named-field counterpart to
+// TEAM_COLOR_PAIRS, 'accent' from TEAM_COLORS — the named-field counterpart to
 // the old array-indexed teamColorSwatches() lookup, so a Main tile's `bg` role
 // override (MAIN_OVERRIDES) always reads the exact same value the Team
 // Identity Lab's editable triad shows and saves, never a differently-deduped one.
+// 'third' is accepted as the pre-rename spelling of 'accent': no entry in
+// mlb-treatment-tuning.json uses it (only 'primary' and 'secondary' appear
+// today), but `bg` is hand-authored in that JSON, so an older spelling resolves
+// rather than silently going null.
 function mainColorForRole(teamId, role) {
   if (role === 'primary') return TEAM_COLOR_PAIRS[teamId]?.[0] ?? null
   if (role === 'secondary') return TEAM_COLOR_PAIRS[teamId]?.[1] ?? null
-  if (role === 'third') return TEAM_COLORS[teamId] ?? null
+  if (role === 'accent' || role === 'third') return TEAM_COLORS[teamId] ?? null
   return null
 }
 
@@ -978,10 +987,34 @@ export function headshotSources(personId, { coach = false, mlb = false } = {}) {
 // every possible matchup gets two clearly distinct hues (a run of same-
 // division rivals can still share a color family). MLB clubs only — MiLB team
 // ids have no entry and callers must degrade (see teamTintColor). Sourced from
-// mlb-team-colors.json's `third` field (ADR-0029) — the same store the Team
-// Identity Lab's editable Third swatch reads and writes, so this table and
+// mlb-team-colors.json's `accent` field (ADR-0029) — the same store the Team
+// Identity Lab's editable Accent swatch reads and writes, so this table and
 // that swatch can never disagree.
-const TEAM_COLORS = byTeam(MLB_TEAM_COLORS, (e) => e.third)
+//
+// The field is `accent`, NOT `third`, and the distinction is load-bearing: for
+// 27 of 30 clubs this hex deliberately restates the club's own primary or
+// secondary, because the pick optimizes for "tells two clubs apart" rather than
+// "a third color the club owns". A real third-or-later brand color lives in
+// `extras` (teamColorExtras below) and must never be conflated with this one.
+const TEAM_COLORS = byTeam(MLB_TEAM_COLORS, (e) => e.accent)
+
+// Extra current-era brand colors beyond a club's primary/secondary/accent —
+// only for clubs with a well-documented third-or-later color in their CURRENT
+// identity (no retro/throwback-only palettes: e.g. the White Sox's navy/red
+// "Southside" alternate and the Brewers'/Marlins'/Blue Jays' pre-rebrand
+// palettes are deliberately excluded). Cross-checked against Wikipedia team
+// infoboxes and teamcolorcodes.com (2026-07-17); skipped rather than guessed
+// wherever sources disagreed on the hex (e.g. Orioles' gray, Royals' powder
+// blue). A club with no entry simply has no documented color beyond the pair
+// plus accent — 14 of 30 have one today.
+//
+// Decorative and lab-facing only; no spoiler-facing surface reads it. Held as
+// data in mlb-team-colors.json (ADR-0029) rather than as a JS literal so this
+// research survives an edit in the Team Identity Lab instead of being a table
+// the lab can only read and then silently drop.
+export function teamColorExtras(teamId) {
+  return MLB_TEAM_COLORS[teamId]?.extras ?? []
+}
 
 // `hex` -> `rgba(r, g, b, alpha)` so a team color can sit as a soft tint
 // behind a headshot rather than a solid brand-colored block. `teamId` may be

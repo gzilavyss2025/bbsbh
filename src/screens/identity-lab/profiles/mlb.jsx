@@ -17,6 +17,7 @@ import {
   ALL_MLB_TEAM_IDS,
   teamFullName,
   teamClubName,
+  teamColorExtras,
   teamLogoUrl,
   ALT_COLORS,
   ALT2_COLORS,
@@ -56,6 +57,12 @@ import {
 import { TreatmentBox } from '../TreatmentBox.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore, mergeTeamDraftIntoStore } from '../saveStores.js'
+import {
+  COLOR_ROLES,
+  COLOR_ROLE_LABELS,
+  applyColorsDraft,
+  colorsDraftMatchesLanded,
+} from './mlbColorRoles.js'
 
 // The MLB dimension: each club's logo treatments side by side with their brand
 // colors, the catalog jersey(s) each maps to, and that treatment's WPA band.
@@ -86,15 +93,14 @@ function treatmentsForTeam(teamId) {
   )
 }
 
-// The Main triad's three role keys, in tile order — the same field names
-// mlb-team-colors.json stores them under (ADR-0029) and the Team Identity
-// Lab's own draft/save plumbing reads and writes. 'third' is deliberately
-// often blank (16 of 30 clubs have never had one entered) rather than
-// invented — an empty editable swatch, not a placeholder hex.
-const COLOR_ROLES = ['primary', 'secondary', 'third']
-const COLOR_ROLE_LABELS = { primary: 'Primary', secondary: 'Secondary', third: 'Third' }
+// The Main triad's three role keys live in mlbColorRoles.js alongside the
+// clear-a-swatch rules that have to agree with them — see that file for why the
+// third role is `accent` rather than `third`, and why an Accent chip repeating
+// the Primary or Secondary is correct rather than a duplicate to dedupe away.
+// A club's real third-or-later brand colors are the separate `extras` list
+// (teamColorExtras), appended after the triad by mainSwatches below.
 
-// A team's Main-treatment Primary/Secondary/Third, landed value with any live
+// A team's Main-treatment Primary/Secondary/Accent, landed value with any live
 // draft layered on top — mlb-team-colors.json is the one source both the tile
 // and teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS resolvers read (src/lib/CLAUDE.md),
 // so an edit here and the real app tint can never disagree. Always three
@@ -110,27 +116,48 @@ function resolveColorTriad(teamId, draft) {
   }))
 }
 
-const BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
+// The Main tile's full swatch row: the three editable role slots, then the
+// club's researched extras (teamColorExtras — Angels Silver, Giants Cream…).
+// Extras are read-only and deduped against the triad, since an extra whose hex
+// merely restates a role IS redundant — unlike the Accent slot, which has to
+// hold its position even when it repeats, or editing loses its stable
+// slot-to-role mapping. Showing them at all is the point of storing them:
+// before, an extra reached the tile only by the accident of a dedupe dropping
+// the accent, so most of the research was invisible.
+function mainSwatches(teamId, draft) {
+  const triad = resolveColorTriad(teamId, draft)
+  const seen = new Set(triad.map((c) => c.hex.toLowerCase()).filter(Boolean)) // caps-js-exempt
+  const extras = []
+  for (const e of teamColorExtras(teamId)) {
+    const key = e.hex.toLowerCase() // caps-js-exempt
+    if (seen.has(key)) continue
+    seen.add(key)
+    extras.push({ role: null, label: e.label, hex: e.hex })
+  }
+  return [...triad, ...extras]
+}
+
+const BG_ROLE_INDEX = { primary: 0, secondary: 1, accent: 2, third: 2 }
 
 // A plain "Background" swatch (the common case — just describes the tile fill,
-// no color identity of its own) gets relabeled to Primary/Secondary/Third when
-// its hex is one of that same club's Main-treatment colors (e.g. the Brewers'
-// Alternate background is their Main Third, Powder Blue) — same color, so it
-// should read as the same swatch, not a second unrelated one. An entry with its
-// own explicit label already (e.g. Diamondbacks City Connect's
-// Primary/Secondary, a distinct identity unrelated to their Main triad) is left
-// alone.
+// no color identity of its own) gets relabeled to Primary/Secondary/Accent (or
+// a researched extra's own name) when its hex is one of that same club's
+// Main-treatment colors — e.g. the Brewers' Alternate background is their Main
+// Powder Blue extra. Same color, so it should read as the same swatch, not a
+// second unrelated one. An entry with its own explicit label already (e.g.
+// Diamondbacks City Connect's Primary/Secondary, a distinct identity unrelated
+// to their Main triad) is left alone.
 function withMainRoleLabels(teamId, colors) {
-  const triad = resolveColorTriad(teamId, null).filter((c) => c.hex)
+  const main = mainSwatches(teamId, null).filter((c) => c.hex)
   return colors.map((c) => {
     if (c.label !== 'Background') return c
-    const match = triad.find((m) => m.hex.toLowerCase() === c.hex.toLowerCase()) // caps-js-exempt
+    const match = main.find((m) => m.hex.toLowerCase() === c.hex.toLowerCase()) // caps-js-exempt
     return match ? { ...c, label: match.label } : c
   })
 }
 
 function colorsFor(teamId, treatmentKey) {
-  if (treatmentKey === 'main') return resolveColorTriad(teamId, null).filter((c) => c.hex)
+  if (treatmentKey === 'main') return mainSwatches(teamId, null).filter((c) => c.hex)
   const colors =
     treatmentKey === 'alternate'
       ? ALT_COLORS[teamId]
@@ -242,10 +269,13 @@ const DEFAULT_HEADER_ON_BAR = '#FBF6E9'
 // Header colors panel shows. Priority: a live draft edit, then a landed
 // TREATMENT_HEADER_COLOR_OVERRIDES entry, then this tile's own lead swatches,
 // then the app's brand pair.
+// `||` rather than `??` on the swatch hexes: a Main role the owner has cleared
+// is `''`, not nullish, so `??` would hand an empty string to the preview
+// instead of falling through to the default bar/accent.
 function headerColorsFor(colors, draft, override) {
   return {
-    bar: draft?.bar ?? override?.bar ?? colors[0]?.hex ?? DEFAULT_HEADER_BAR,
-    accent: draft?.accent ?? override?.accent ?? colors[1]?.hex ?? DEFAULT_HEADER_ACCENT,
+    bar: draft?.bar ?? override?.bar ?? (colors[0]?.hex || DEFAULT_HEADER_BAR),
+    accent: draft?.accent ?? override?.accent ?? (colors[1]?.hex || DEFAULT_HEADER_ACCENT),
     onBar: draft?.onBar ?? override?.onBar ?? DEFAULT_HEADER_ON_BAR,
   }
 }
@@ -276,7 +306,7 @@ function bgOverrideLocation(teamId, treatment, pinstripe) {
   return (
     `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.main.bgHex (a literal), or if it should ` +
     `instead track one of the club's three brand swatches, ${teamId}.treatments.main.bg ` +
-    `('primary'/'secondary'/'third', see src/lib/data/mlb-team-colors.json)`
+    `('primary'/'secondary'/'accent', see src/lib/data/mlb-team-colors.json)`
   )
 }
 
@@ -322,7 +352,7 @@ function buildColorsCopyText(name, teamId, triad) {
     `Team: ${name} (id ${teamId})\n` +
     `Where: src/lib/data/mlb-team-colors.json — ${teamId}\n` +
     `primary: ${byRole.primary || '(none)'}, secondary: ${byRole.secondary || '(none)'}, ` +
-    `third: ${byRole.third || '(none)'}`
+    `accent: ${byRole.accent || '(none)'}`
   )
 }
 
@@ -502,7 +532,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
 
 function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, wearDates, drafts, on }) {
   const isMain = treatment === 'main'
-  const colors = isMain ? resolveColorTriad(teamId, drafts.colors) : colorsFor(teamId, treatment)
+  const colors = isMain ? mainSwatches(teamId, drafts.colors) : colorsFor(teamId, treatment)
   const hasColorsDraft = isMain && drafts.colors && Object.keys(drafts.colors).length > 0
   const [artVersion, setArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
@@ -517,7 +547,11 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         onChange: (value) => extras.onNameChange(jerseyMatch.code, value),
       }
     : null
-  const slots = [0, 1, 2].map((i) => colors[i] ?? null)
+  // Main already comes back as three role slots plus however many extras the
+  // club has researched, so it needs no padding; every other treatment is a
+  // curated list of up to three, padded so an absent one renders as an explicit
+  // empty slot rather than collapsing the row.
+  const slots = isMain ? colors : [0, 1, 2].map((i) => colors[i] ?? null)
 
   const {
     override,
@@ -585,7 +619,13 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
               on.wpaField(treatment, 'bandColor', s.hex)
             }
           : undefined,
-        editable: isMain ? { value: s?.hex ?? '', onChange: (hex) => on.colorField(COLOR_ROLES[i], hex) } : undefined,
+        // Only the three role slots are editable — an extra is research, shown
+        // and copyable but not retyped here, and `i` past the triad has no role
+        // to write to.
+        editable:
+          isMain && i < COLOR_ROLES.length
+            ? { value: s?.hex ?? '', onChange: (hex) => on.colorField(COLOR_ROLES[i], hex) }
+            : undefined,
       }))}
       colorsPanel={isMain ? { hasDraft: hasColorsDraft, onReset: on.colorReset } : undefined}
       position={{
@@ -760,13 +800,7 @@ function buildSaves(drafts, extras) {
     { name },
   )
 
-  const colors = mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, (record, fields) => {
-    const next = { ...record }
-    for (const role of COLOR_ROLES) {
-      if (fields[role] !== undefined) next[role] = fields[role]
-    }
-    return next
-  }, { name })
+  const colors = mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, applyColorsDraft, { name })
 
   return [
     { key: 'uniform-names', body: merged },
@@ -790,8 +824,11 @@ export const mlbProfile = {
       game’s treatment from that night’s actual uniform — see{' '}
       <code>api/jerseys.js</code> — so any tile here could be the one that shows
       up), and which catalog jersey(s) map to each treatment. A Main tile’s
-      Primary/Secondary/Third are editable directly on the swatch — type a hex
-      to change it. Click a swatch to try it as that tile’s WPA band color.
+      Primary/Secondary/Accent are editable directly on the swatch — type a hex
+      to change it, or clear it to say the club has no such color. Accent is the
+      “tells two clubs apart” pick, so for most clubs it restates the Primary or
+      Secondary on purpose; any researched extra colors follow it, read-only.
+      Click a swatch to try it as that tile’s WPA band color.
       Missing logos or colors show as a placeholder until supplied. Save
       writes every pending change straight to{' '}
       <code>src/lib/data/*.json</code> and{' '}
@@ -822,7 +859,7 @@ export const mlbProfile = {
     },
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
-    colors: (teamId, fields) => draftFieldsMatchLanded(fields, MLB_TEAM_COLORS[teamId]),
+    colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
   },
   buildAllChangesText,
   buildSaves,

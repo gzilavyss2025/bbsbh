@@ -154,10 +154,16 @@ function WearDates({ dates, onOpen, name, label }) {
 // Every chip is ALSO a "copy this hex" button (the owner's hex copy/paste
 // request) — for MLB, that's on top of its existing "use as WPA band" click
 // rather than instead of it, so nothing already wired to this button stops
-// working. `editable`, when supplied (the Main tile's Primary/Secondary/Third
+// working. `editable`, when supplied (the Main tile's Primary/Secondary/Accent
 // only — see profiles/mlb.jsx), turns the hex text from a read-only label into
 // a text input the owner can retype directly; the click-to-copy chip button
 // is untouched, a separate element with no conflict.
+//
+// A `swatch` with an empty `hex` is an editable role the owner has CLEARED —
+// distinct from a null `swatch`, which is a slot the club has no colour for at
+// all. It keeps its input (there'd be no way to type a colour back in
+// otherwise) but drops the copy button, since copying an empty string and
+// announcing "Copy Primary ()" is worse than having nothing to click.
 function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand, editable }) {
   const [copied, setCopied] = useState(false)
   if (!swatch) {
@@ -177,14 +183,18 @@ function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand, editable }) {
   const cellClass = `colorlab__swatchcell${active ? ' colorlab__swatchcell--active' : ''}${wpaSelected ? ' colorlab__swatchcell--wpaselected' : ''}`
   return (
     <div className={cellClass}>
-      <button
-        type="button"
-        className="colorlab__swatchchip colorlab__swatchchip--btn"
-        style={{ background: swatch.hex }}
-        onClick={handleClick}
-        aria-label={`Copy ${swatch.label} (${swatch.hex})${onPickWpaBand ? ", or use as this tile's WPA band color" : ''}`}
-        title={onPickWpaBand ? 'Copy hex / use as WPA band color' : 'Copy hex'}
-      />
+      {swatch.hex ? (
+        <button
+          type="button"
+          className="colorlab__swatchchip colorlab__swatchchip--btn"
+          style={{ background: swatch.hex }}
+          onClick={handleClick}
+          aria-label={`Copy ${swatch.label} (${swatch.hex})${onPickWpaBand ? ", or use as this tile's WPA band color" : ''}`}
+          title={onPickWpaBand ? 'Copy hex / use as WPA band color' : 'Copy hex'}
+        />
+      ) : (
+        <div className="colorlab__swatchchip colorlab__swatchchip--placeholder" />
+      )}
       <span className="colorlab__swatchlabel">{copied ? 'Copied!' : swatch.label}</span>
       {editable ? (
         <input

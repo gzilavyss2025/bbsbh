@@ -139,20 +139,34 @@ function isMilbColorStore(parsed) {
   return null
 }
 
-// mlb-team-colors.json: one club's Primary/Secondary/Third brand colors — the
-// Team Identity Lab's editable counterpart to teams.js's real TEAM_COLOR_PAIRS/
-// TEAM_COLORS resolvers, which read this store (src/lib/CLAUDE.md). Team-level,
-// no `treatments` — same footing as milb-colors.json, since a club's triad
-// doesn't vary by treatment the way a logo tile's tuning does.
+// mlb-team-colors.json: one club's Primary/Secondary/Accent brand colors plus
+// any researched `extras` — the Team Identity Lab's editable counterpart to
+// teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras resolvers, which
+// read this store (src/lib/CLAUDE.md). Team-level, no `treatments` — same
+// footing as milb-colors.json, since a club's triad doesn't vary by treatment
+// the way a logo tile's tuning does.
+//
+// A role the club doesn't have is an ABSENT field, never `''` — isColorish
+// rejects the empty string on purpose, and the lab's applyColorsDraft deletes
+// rather than blanks (src/screens/identity-lab/profiles/mlbColorRoles.js), so
+// the two halves agree on what "cleared" writes.
 function isMlbTeamColorStore(parsed) {
   if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
   for (const [teamId, entry] of Object.entries(parsed)) {
     if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
     if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
     if (typeof entry.name !== 'string' || !entry.name) return `team ${teamId} has no name`
-    for (const field of ['primary', 'secondary', 'third']) {
+    for (const field of ['primary', 'secondary', 'accent']) {
       const v = entry[field]
       if (v !== undefined && !isColorish(v)) return `team ${teamId}'s ${field} is not a color`
+    }
+    if (entry.extras !== undefined) {
+      if (!Array.isArray(entry.extras)) return `team ${teamId}'s extras is not a list`
+      for (const extra of entry.extras) {
+        if (!isPlainObject(extra) || hasPoisonKey(extra)) return `team ${teamId} has a malformed extra`
+        if (typeof extra.label !== 'string' || !extra.label) return `team ${teamId} has an unlabeled extra`
+        if (!isColorish(extra.hex)) return `team ${teamId}'s "${extra.label}" extra is not a color`
+      }
     }
     if (entry.note !== undefined && typeof entry.note !== 'string') {
       return `team ${teamId}'s note is not a string`
