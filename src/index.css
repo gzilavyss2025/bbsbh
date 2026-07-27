@@ -990,7 +990,14 @@ body {
   line-height: var(--lh-solid);
   cursor: pointer;
   box-shadow: var(--shadow-card);
-  transition: transform var(--dur-fast) var(--ease-standard);
+  transition: transform var(--dur-fast) var(--ease-standard), background 0.12s ease,
+    border-color 0.12s ease, color 0.12s ease;
+}
+
+.datenav button:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
 }
 
 .datenav button:active {
@@ -1042,20 +1049,139 @@ body {
 }
 
 /* One-tap return to today once the date has been paged away from. Kept small —
-   a quiet secondary chip beside the date, not a button competing with it. */
+   a quiet secondary chip beside the date, not a button competing with it. Same
+   rectangular shape as the date stepper's own arrow buttons (above) and the
+   Reveal All chip (.daystate below), so all three read as one species of
+   control rather than Today being an odd pill among rectangles. It's a
+   <button> inside .datenav, so the hover-inverts/press-scales feedback above
+   already applies here for free — no separate :hover/:active needed. */
 .datenav__today {
   min-height: 20px;
   padding: 1px 7px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
-  color: var(--field);
+  color: var(--text-body);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
+    transform 0.08s ease;
+}
+
+/* Day-state row on the slate (GameSelect): whichever of {Live Scores, Reveal
+   All} applies to the current date, riding beside the date stepper instead
+   of stacking below it. Two families, matching the app's existing kraft
+   vocabulary rather than inventing a third: Live Scores OFF is a quiet ghost
+   chip (same rectangular shape + hover-inverts/press-scales as .datenav__today
+   and the arrow buttons above); Live Scores ON promotes to the flat kraft
+   "mode" fill .modestrip elsewhere in the app also uses for "an unsealed
+   screen says why it's unsealed" (a MODE you're in); Reveal All reuses
+   .btn--reveal's hatched "peel the tape" texture (an ACTION you take) rather
+   than a third look. At phone width the ON/action states run edge-to-edge as
+   a strip (see the negative-margin bleed below); the 740px block further
+   down turns them into contained rounded chips once there's room beside the
+   date stepper. Defined here (ahead of the 740px block) rather than down by
+   the old .slateunlock location, so the desktop overrides there — same
+   selector, equal specificity — actually win the cascade by source order. */
+.daystate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.daystate__chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
+    filter 0.12s ease, transform 0.08s ease;
+}
+.daystate__chip:active {
+  transform: scale(0.98);
+}
+
+/* OFF — the default, most-common state, so it stays ordinary chrome rather
+   than banner weight. */
+.daystate__chip--live {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.daystate__chip--live:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* ON — edge-to-edge kraft strip at phone width; the 740px block below turns
+   this into a contained rounded chip instead. */
+.daystate__chip--live-on {
+  width: 100%;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 8px var(--app-gutter);
+  border-top: var(--bw-hair) solid var(--seal-hatch);
+  border-bottom: var(--bw-hair) solid var(--seal-hatch);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.daystate__chip--live-on:hover {
+  filter: brightness(0.95);
+}
+
+/* The switch glyph: a small pill track, the dot sliding via currentColor so
+   it never needs its own ON/OFF color rules beyond the chip's own. */
+.daystate__dot {
+  position: relative;
+  width: 20px;
+  height: 12px;
+  flex: none;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-pill);
+}
+.daystate__dot::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  transition: transform 0.15s ease;
+}
+.daystate__chip--live-on .daystate__dot::before {
+  transform: translateX(8px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .daystate__dot::before {
+    transition: none;
+  }
+}
+
+/* Reveal All rides in this row on desktop, replacing the old full-width
+   .revealall__top banner (see RevealAllBar in GameSelect.jsx) — hidden below
+   740px, where the floating bottom bar (same component) keeps the action in
+   thumb reach on a long scroll instead of duplicating it up here. */
+.daystate__chip--reveal {
+  display: none;
 }
 
 /* --------------------------------------------------------------- site bar
@@ -10848,7 +10974,7 @@ body {
 }
 /* Refresh (when the game isn't Final — see BoxScore.jsx) rides here inline
    once there's room; on a phone it hides in favor of the floating pill
-   (.pagenav--boxscore below), same split as .revealall__top/.pagenav--revealall. */
+   (.pagenav--boxscore below), same split as .daystate__chip--reveal/.pagenav--revealall. */
 .boxscore__headright .refreshbtn {
   display: none;
 }
@@ -11793,34 +11919,21 @@ body {
    an instant swap for free — no separate reduced-motion override needed here.
    --------------------------------------------------------------------------- */
 /* "Reveal all games" — the single unlock for every flip card at once (see
-   PastPreview.jsx's RevealAllBar). Phone-first default: hide the inline top
-   button and rely on the floating bottom bar instead (same
-   .pagenav/.btn--reveal convention InningViewer uses for "Reveal {half}"),
-   so the action stays in thumb reach on a long single-column list. The wide-
-   layout override (below, in the 740px block) flips this: inline button
-   shown, floating bar hidden — there's no long scroll to reach for there. */
-.revealall__top {
-  display: none;
-  width: 100%;
-  margin: 12px 0;
-  /* .btn--reveal doesn't set a flex layout on its own, so switching this
-     button to inline-flex (for the wide-layout override below) needs its own
-     explicit centering — a flex container defaults to flex-start, which is
-     what was making the label read left-justified instead of centered. */
-  align-items: center;
-  justify-content: center;
-}
+   RevealAllBar in GameSelect.jsx). Phone-first: only the floating bottom bar
+   (same .pagenav/.btn--reveal convention InningViewer uses for "Reveal
+   {half}") renders here, keeping the action in thumb reach on a long single-
+   column list. The desktop equivalent now lives inline in the header's
+   .daystate row instead of a separate full-width banner — see
+   .daystate__chip--reveal in the 740px block below, which hides this
+   floating bar there since there's no long scroll to reach for. */
 /* Match the kraft "Tap to reveal" cover's font (.cover__main) — .btn's own
    base font-family (--font-body) read as a visibly different typeface next
-   to the SealBox cover sitting right beside it. */
-.revealall__top,
-.pagenav--revealall .btn {
+   to the SealBox cover sitting right beside it. Shared with
+   .daystate__chip--reveal so the desktop chip matches. */
+.pagenav--revealall .btn,
+.daystate__chip--reveal {
   font-family: var(--font-display);
   letter-spacing: var(--ls-xwide);
-}
-.pagenav--revealall {
-  /* .pagenav already positions/backgrounds the floating bar; nothing else
-     needed at phone width. */
 }
 
 /* The revealed slate's category filter (ResultFilterBar, GameSelect.jsx) —
@@ -13278,13 +13391,55 @@ body {
     background: var(--bg-canvas);
   }
 
-  /* ---- slate: two game cards per row. The date stepper holds a phone-ish
-     width, centered, instead of stretching across the sheet. (The level toggle
-     now rides in the topbar row beside the title, so it's no longer centered
-     here.) */
+  /* ---- slate: the date stepper and the day-state row (Live Scores toggle
+     and/or Reveal All) share one row instead of stacking, closing the dead
+     vertical gap between them. A 3-column grid (not flex space-between)
+     keeps the date stepper truly centered whether or not the third column is
+     occupied: on a plain day with neither control, the outer 1fr columns
+     still balance evenly and the date stepper doesn't drift toward whichever
+     side a control would have occupied. */
+  .slatehead {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: var(--space-3);
+  }
+
   .datenav--row {
+    grid-column: 2;
     max-width: 560px;
-    margin-inline: auto;
+  }
+
+  /* Rides in the grid's third column, right of the centered date stepper,
+     instead of dropping to its own row below (base rule further up still
+     stacks it on phone width). Both chips can be present at once (today,
+     every game gone Final, pass still off — see the JSX comment), so this
+     stays a row that can hold either or both rather than a single slot. */
+  .daystate {
+    grid-column: 3;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 0;
+  }
+  /* Once it's a contained row item instead of a lone full-bleed strip, the
+     ON state and Reveal All both become rounded chips like everything else
+     in this row, instead of the phone-width edge-to-edge banner/hatched
+     full-width button. */
+  .daystate__chip--live-on {
+    width: auto;
+    margin: 0;
+    padding: 4px 10px;
+    border: var(--bw-hair) solid var(--seal-hatch);
+    border-radius: var(--radius-sm);
+  }
+  .daystate__chip--reveal {
+    display: inline-flex;
+    width: auto;
+    min-height: 28px;
+    margin-top: 0;
+    padding: 0 12px;
+    font-size: var(--fs-caption);
   }
 
   .gamelist {
@@ -13305,11 +13460,10 @@ body {
     display: block;
   }
 
-  /* "Reveal all games" rides as a normal inline button up top once there's
-     room for it; the mobile floating bottom bar (below) hides here. */
-  .revealall__top {
-    display: inline-flex;
-  }
+  /* "Reveal all games" rides inline in the header's .daystate row once
+     there's room for it (see the .daystate__chip--reveal override above);
+     the mobile floating bottom bar hides here since there's no long scroll
+     to reach for. */
   .pagenav--revealall {
     display: none;
   }
@@ -14339,6 +14493,42 @@ body {
 .teamfilterstrip--nav .vsteam__team .teamlogo {
   filter: none;
   opacity: 1;
+}
+/* The nav strip's own native scrollbar would otherwise sit right under the
+   logos, fighting the tray's bottom edge — hide it, since the mask-faded
+   edges above already signal "more to scroll" and the arrow buttons below
+   give non-touch users an explicit way to move the strip. */
+.teamfilterstrip--nav .vsteam__strip {
+  scrollbar-width: none;
+}
+.teamfilterstrip--nav .vsteam__strip::-webkit-scrollbar {
+  display: none;
+}
+.teamfilterstrip__arrow {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 8px 2px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.teamfilterstrip__arrow:active {
+  transform: scale(0.94);
+}
+/* A touchscreen already swipes the strip directly. Match the photo/rank-strip
+   convention by reserving these compact step buttons for a mouse or trackpad. */
+@media (hover: none), (pointer: coarse) {
+  .teamfilterstrip__arrow {
+    display: none;
+  }
 }
 .vsteam__grid {
   margin-top: 2px;
@@ -24789,83 +24979,12 @@ button.gamehigh-matchup:active {
   text-transform: none; /* caps-exempt: admin edits + previews natural-case copy, not chrome */
 }
 
-/* Live-scores day pass toggle on the slate (GameSelect). A switch + label; when
-   on, a kraft-amber note states the 8am reset. */
-.slateunlock {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
-  margin-top: var(--space-2);
-}
-.slateunlock__switch {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: none;
-  border: none;
-  padding: 0;
-}
-.slateunlock__track {
-  position: relative;
-  display: inline-block;
-  width: 38px;
-  height: 22px;
-  border-radius: var(--radius-pill);
-  background: var(--paper-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  transition: background 0.15s ease;
-}
-.slateunlock__thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  transition: transform 0.15s ease;
-}
-.slateunlock__switch--on .slateunlock__track {
-  background: var(--seal-cover);
-  border-color: var(--seal-cover);
-}
-.slateunlock__switch--on .slateunlock__thumb {
-  transform: translateX(16px);
-}
-.slateunlock__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-body);
-}
-.slateunlock__note {
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--seal-cover-ink);
-  background: var(--seal-cover);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-2);
-}
-@media (prefers-reduced-motion: reduce) {
-  .slateunlock__track,
-  .slateunlock__thumb {
-    transition: none;
-  }
-}
 
 /* Spoilers-off active strip — the "scores are showing" banner that sits under
    the masthead on EVERY section of a game (both lineups, innings, box score), so
    an unsealed screen always says why it is unsealed. Itself the off switch (same
-   "banner is the toggle" idea as .slateunlock__note). Full-width so it reads as
-   a mode, not a chip. */
+   "banner is the toggle" idea as .daystate__chip--live-on). Full-width so it
+   reads as a mode, not a chip. */
 .modestrip {
   display: block;
   width: 100%;
