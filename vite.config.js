@@ -8,6 +8,12 @@ import {
   resolveStoreFile,
   serializeStore,
 } from './scripts/lib/dev-data-stores.mjs'
+import {
+  DEV_LOGO_MAX_BODY_BYTES,
+  DEV_LOGO_ROUTE,
+  saveLogoUpload,
+} from './scripts/lib/dev-logo-upload.mjs'
+import { describeLogoCaveat } from './src/lib/logoArt.js'
 
 // Dev-only save endpoint for the curation surfaces — the Team Identity Lab
 // (/identity-lab) and the Uniform Names page — writing straight back to the
@@ -26,20 +32,117 @@ import {
 // literal. The file it writes is the same one the app imports/fetches back, so
 // a save takes effect immediately, no restart needed.
 //
+// One route on the same mount takes bytes instead of JSON: /__dev/team-logo,
+// which writes a curated club mark into public/team-logos/{treatment}/. Its
+// destination is resolved the same way — from a numeric team id and a treatment
+// KEY, never a path (scripts/lib/dev-logo-upload.mjs). Vite serves public/
+// directly in dev, so an uploaded mark is live on the next request.
+//
 // The route lives under `/__dev/…` rather than `/api/…` because this repo's
 // `api/` directory is reserved for the real backend exceptions (OG previews,
 // reveal sync, copy — see root CLAUDE.md), which are Vercel edge functions, not
 // Vite dev middleware; a shared `/api/` prefix would misleadingly suggest this
 // is another one.
+
+// Buffer a request body, or answer 413 and give up. Resolves null when nothing
+// usable arrived (too large, or the socket went away) — in which case the
+// response has already been sent or the connection is gone, and the caller
+// must not write to it.
+function readBody(req, res, maxBytes) {
+  return new Promise((resolve) => {
+    const chunks = []
+    let size = 0
+    let done = false
+    req.on('data', (chunk) => {
+      if (done) return
+      size += chunk.length
+      if (size > maxBytes) {
+        done = true
+        res.statusCode = 413
+        res.end('body too large')
+        req.destroy()
+        resolve(null)
+        return
+      }
+      chunks.push(chunk)
+    })
+    req.on('end', () => {
+      if (done) return
+      done = true
+      resolve(Buffer.concat(chunks))
+    })
+    req.on('error', () => {
+      if (done) return
+      done = true
+      resolve(null)
+    })
+  })
+}
+
+async function handleStoreSave(req, res, store) {
+  const body = await readBody(req, res, DEV_DATA_MAX_BODY_BYTES)
+  if (!body) return
+  let parsed
+  try {
+    parsed = JSON.parse(body.toString('utf8') || '{}')
+  } catch (err) {
+    res.statusCode = 400
+    res.end(`invalid JSON: ${err.message}`)
+    return
+  }
+  const problem = store.validate(parsed)
+  if (problem) {
+    res.statusCode = 400
+    res.end(problem)
+    return
+  }
+  try {
+    await writeFile(resolveStoreFile(store), serializeStore(parsed))
+    res.statusCode = 200
+    res.end('ok')
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
+// The team and treatment ride in the query string because the body is the PNG
+// itself. Both are re-resolved server-side against the treatment allowlist and
+// teamAbbr — the strings here are only ever compared, never joined into a path.
+async function handleLogoUpload(req, res, query) {
+  const params = new URLSearchParams(query)
+  const teamId = Number(params.get('teamId'))
+  const treatment = params.get('treatment') ?? ''
+  const bytes = await readBody(req, res, DEV_LOGO_MAX_BODY_BYTES)
+  if (!bytes) return
+  try {
+    const { problem, status, target } = await saveLogoUpload({ teamId, treatment, bytes })
+    if (problem) {
+      res.statusCode = status ?? 400
+      res.end(problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({ file: target.file, url: target.url, caveat: describeLogoCaveat(bytes) }))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
 function devDataSave() {
   return {
     name: 'dev-data-save',
     configureServer(server) {
       server.middlewares.use('/__dev', (req, res) => {
-        // `req.url` is the remainder after the mount point, e.g. '/wpa-tuning'.
-        const key = (req.url || '').split('?')[0].replace(/^\/+|\/+$/g, '')
-        const store = devDataStore(key)
-        if (!store) {
+        // `req.url` is the remainder after the mount point, e.g. '/wpa-tuning'
+        // or '/team-logo?teamId=140&treatment=alternate'.
+        const [routePath, query = ''] = (req.url || '').split('?')
+        const key = routePath.replace(/^\/+|\/+$/g, '')
+        const isLogo = key === DEV_LOGO_ROUTE
+        const store = isLogo ? null : devDataStore(key)
+        if (!isLogo && !store) {
           res.statusCode = 404
           res.end('unknown store')
           return
@@ -49,43 +152,8 @@ function devDataSave() {
           res.end('POST only')
           return
         }
-        let body = ''
-        let tooLarge = false
-        req.on('data', (chunk) => {
-          if (tooLarge) return
-          body += chunk
-          if (Buffer.byteLength(body) > DEV_DATA_MAX_BODY_BYTES) {
-            tooLarge = true
-            res.statusCode = 413
-            res.end('body too large')
-            req.destroy()
-          }
-        })
-        req.on('end', async () => {
-          if (tooLarge) return
-          let parsed
-          try {
-            parsed = JSON.parse(body || '{}')
-          } catch (err) {
-            res.statusCode = 400
-            res.end(`invalid JSON: ${err.message}`)
-            return
-          }
-          const problem = store.validate(parsed)
-          if (problem) {
-            res.statusCode = 400
-            res.end(problem)
-            return
-          }
-          try {
-            await writeFile(resolveStoreFile(store), serializeStore(parsed))
-            res.statusCode = 200
-            res.end('ok')
-          } catch (err) {
-            res.statusCode = 500
-            res.end(err.message)
-          }
-        })
+        if (isLogo) handleLogoUpload(req, res, query)
+        else handleStoreSave(req, res, store)
       })
     },
   }

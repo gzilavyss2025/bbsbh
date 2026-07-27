@@ -468,6 +468,15 @@ Re-run only to fold in a new season.
   `--ids=158,498` spot-checks a few. Kept OUT of the PWA precache (~1.7 MB for
   the league, two marks per game) with a CacheFirst runtime rule instead — see
   `vite.config.js`.
+- `gen-logo-art.mjs` → `src/lib/data/logo-art.json` — the coverage manifest for the
+  curated club marks under `public/team-logos/`. Fetches nothing; the source of
+  truth is the working tree. Normally you never run it: the Team Identity Lab's
+  `/__dev/team-logo` upload rewrites the manifest itself after every drop
+  (`lib/dev-logo-upload.mjs`, ADR-0029). It exists for the two cases an upload
+  can't cover — the first build, and art added or deleted by hand.
+  `test/logo-upload.test.js` compares the committed manifest against disk and
+  names this script when they disagree, so a hand-dropped file can't sit
+  unrecorded.
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
 - `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +
@@ -536,6 +545,12 @@ process automatically.
   when Claude works in that directory, so the always-loaded root stays cheap. When
   it fails, move detail into the relevant nested file or `docs/*` and leave a pointer
   in root — don't just raise the cap.
+- `check-dist-dev-routes.mjs` — post-build (not part of `npm run lint`, since it
+  inspects `dist/`): fails if a dev-only save endpoint string reaches the
+  production bundle, and equally if `dist/team-logos/` comes out empty. Both
+  halves of the same question — the endpoint that WRITES curated art must never
+  ship, the art itself always must. Layer 4 of ADR-0029; run it as
+  `npm run build && npm run check:dist-dev`.
 - `check-report-pages.mjs` — fails if `SiteMenu.jsx` (the hamburger menu) or
   `SiteFooter.jsx` (the slate's "More Baseball" list) stops importing the shared
   `REPORT_PAGES` array from `src/lib/reportPages.js` — the guard against those two

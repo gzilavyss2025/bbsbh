@@ -52,6 +52,41 @@ proven mechanism rather than inventing a new one.
   team/treatment/field moved.
 - **Body cap of 256 KB**, carried over from the original implementation.
 
+## The one route that takes bytes: `/__dev/team-logo`
+
+Curated club marks (`public/team-logos/{treatment}/{ABBR}.png`) had the same
+problem the tuning tables had, one step worse: adding one meant dropping a file
+into a directory by hand and hoping it matched the others. The lab now takes a
+drag-and-drop onto the tile itself. Same mount, same boundary, three differences
+worth recording:
+
+- **Its own branch, not a `DEV_DATA_STORES` entry.** The JSON stores take a
+  parsed object and a per-store validator; this takes raw bytes and a PNG
+  header check. One allowlist whose entries meant two different things is how a
+  validator eventually gets skipped, so the logo route is checked by name
+  (`DEV_LOGO_ROUTE`) before the store lookup runs, and a unit test pins that the
+  two never overlap. What they DO share is the body reader and its cap.
+- **The destination is resolved from two allowlisted components, not one key.**
+  A request carries a numeric team id and a treatment key in the query string —
+  the body is the image. The directory comes from `LOGO_TREATMENT_DIRS`' own
+  literal and the filename from `teamAbbr`, which returns `''` for anything that
+  isn't one of the 30 MLB clubs. `resolveLogoFile()` then asserts the resolved
+  path is *equal to* the one those literals spell, not merely under the art root,
+  so a `..` anywhere lands somewhere else and throws. Same defense-in-depth role
+  as `resolveStoreFile()`.
+- **Validated without an image library.** A PNG stores width and height as
+  big-endian uint32s at bytes 16 and 20 of the IHDR chunk, which is the whole of
+  what the 512×512 standard needs to check — so `src/lib/logoArt.js` reads those
+  bytes directly and adds no dependency. It is environment-neutral on purpose:
+  the browser runs it to reject a bad file instantly with a reason, the server
+  runs the same functions to decide. The standard itself (512×512, PNG, 400 KB)
+  was measured off the art already committed, not chosen.
+
+The endpoint also rewrites `src/lib/data/logo-art.json`, a coverage manifest
+rebuilt from the directory rather than patched — which is what lets a unit test
+catch a file added or deleted by hand. Nothing reads the manifest at runtime;
+`localLogoUrl` still has no whitelist and a missing file still 404s and degrades.
+
 ## Why the tables became JSON first
 
 Rewriting `.js` source programmatically — AST surgery, or regex codegen against a
@@ -86,7 +121,10 @@ alone:
    greps `dist/` for the string `/__dev` and fails the build if it appears. It
    runs in CI's `lint-and-build` job right after `npm run build` (it needs the
    artifact, so it can't live in `npm run lint`). Layers 1–3 are code you have to
-   read correctly; this one checks the bytes that actually ship.
+   read correctly; this one checks the bytes that actually ship. It also asserts
+   the opposite for the logo route: `dist/team-logos/` must be non-empty. The
+   endpoint that WRITES curated art is dev-only; the art itself is ordinary
+   static content the deployed app renders on every slate card.
 
 The only lab-related string that survives into `dist/` today is the route name
 itself, from layer 3 — by design.
@@ -102,6 +140,8 @@ files, and the lab renders no reveal-gated content.
 ## Cost accepted
 
 A dev server that can write to the working tree is a real capability, and the
-honest mitigation is that it is scoped to five files in two directories, only
-while a developer is running `npm run dev` on their own machine. The risk it
-replaces — dozens of hand-transcribed values per session — was not smaller.
+honest mitigation is that it is scoped to five named files in two directories,
+plus one `{ABBR}.png` per club per treatment directory, only while a developer is
+running `npm run dev` on their own machine. The risk it replaces — dozens of
+hand-transcribed values per session, and art dropped into a directory unchecked —
+was not smaller.

@@ -12,8 +12,8 @@ earlier sections — append.
 | --- | --- | --- | --- | --- |
 | 0 | Plan + handoff docs | **merged?** | `claude/team-identity-lab-plan` | — |
 | 1 | Lab framework + JSON stores + write-back | **merged** | `claude/identity-lab-framework` | #416 |
-| 2 | Jersey audit view + hex copy/paste | **open** | `claude/jersey-audit-hex-copy` | — |
-| 3 | Logo upload pipeline (MLB) | not started | — | — |
+| 2 | Jersey audit view + hex copy/paste | **merged** | `claude/jersey-audit-hex-copy` | #418 |
+| 3 | Logo upload pipeline (MLB) | **open** | `claude/logo-upload-pipeline` | #419 |
 | 4 | MiLB home/away logo art | not started | — | — |
 | 5 | MiLB colour reconciliation | not started | — | — |
 | 6 | Theming + uniform display | not started | — | — |
@@ -273,3 +273,163 @@ a hand-typed edit.
   `useHexClipboard()`/`copyHex`/`copyPalette` directly. If a later PR needs
   the clipboard outside `TreatmentBox` (e.g. the audit view growing its own
   copy affordance), reuse this module rather than inventing a second one.
+
+---
+
+## PR 3 — Logo upload pipeline (MLB)
+
+Branch: `claude/logo-upload-pipeline` · PR: #419 · Merged: open
+
+Based on `origin/main` @ `a479798` (PRs 1 and 2 had both merged, as #416 and
+#418).
+
+### The upload contract — read this first, PR 4 builds on it
+
+```
+POST /__dev/team-logo?teamId={id}&treatment={key}
+body:     the raw PNG bytes (Content-Type: image/png)
+200:      { "file": "public/team-logos/alternate/TEX.png",
+            "url":  "/team-logos/alternate/TEX.png",
+            "caveat": null | "no alpha channel — …" }
+400:      the reason, as plain text, verbatim from describeLogoRejection()
+413:      the body exceeded the stream guard (cap + 64 KB) before validation
+```
+
+- **The request never supplies a path.** The directory comes from
+  `LOGO_TREATMENT_DIRS` in `src/lib/logoArt.js` (a lab treatment key → the one
+  directory it may write into) and the filename from `teamAbbr`, which returns
+  `''` for anything that isn't one of the 30 MLB clubs — so an MiLB id has no
+  destination today, which is exactly the boundary PR 4 moves. `resolveLogoFile()`
+  then asserts the resolved absolute path is **equal to** the one those literals
+  spell, not merely under the art root, so a `..` anywhere throws.
+- **The standard is 512×512 PNG, under 400 KB**, checked by reading the IHDR
+  header bytes directly — no image library, no new dependency. Same functions run
+  in the browser for instant rejection and in Node authoritatively.
+- **Every successful upload rewrites `src/lib/data/logo-art.json`** from the
+  directory contents, keyed `{ dir: { filename: { teamId, bytes, width, height,
+  alpha } } }`. Filename-keyed, not team-id-keyed, because `main-overrides/`
+  carries both `WSH.png` and `WSH.svg` — and because PR 4's MiLB art, named
+  `{teamId}.png`, keys the same way with no reconciliation.
+- **PR 4's likely shape:** add `milb-home`/`milb-away` to `LOGO_TREATMENT_DIRS`,
+  and replace the `teamAbbr`-only filename resolution in `logoUploadTarget` with
+  a per-directory choice of abbreviation vs. team id. Everything else — the
+  validator, the guard, the manifest, the drop zone, `TreatmentBox`'s `upload`
+  prop — is already generic.
+
+### What landed
+
+**The standard, adopted.** `src/lib/logoArt.js` holds it, and the three
+1280×1280 files were downscaled to 512×512 (see the deviation below). Every one
+of the 79 committed PNGs now meets it, pinned by a test that reads the manifest
+rather than trusting the claim.
+
+**The endpoint.** `/__dev/team-logo`, a second branch of PR 1's `devDataSave()`
+middleware, with `scripts/lib/dev-logo-upload.mjs` as its filesystem half. It is
+deliberately NOT a `DEV_DATA_STORES` entry — the JSON stores take a parsed object
+and a per-store validator, this takes bytes and a header check, and one allowlist
+whose entries mean two things is how a validator eventually gets skipped. A unit
+test pins that the two key spaces don't overlap. What they do share is the body
+reader, factored out of the JSON path in the same shape (413, then destroy).
+
+**Drag-and-drop, on any MLB tile.** `LogoDropZone.jsx` wraps the tile's own logo
+box, so the drop target is the thing you are looking at. Also a "Replace art"
+button over a hidden file input — same code path, and it makes the flow
+scriptable in Playwright, which is how the browser verification below ran.
+Rejections are inline, on the tile, naming the reason. After a successful upload
+the tile re-requests at `?v={n}`.
+
+**The coverage manifest**, plus `scripts/gen-logo-art.mjs` for the initial build
+and for hand-adds, and a test asserting the committed manifest deep-equals what
+is on disk.
+
+**Isolation extended.** `check-dist-dev-routes.mjs` now checks both directions:
+no dev-endpoint string in `dist/`, AND `dist/team-logos/` non-empty — the
+endpoint must not ship, the art always must. Both failure modes were exercised by
+planting a string and by moving the directory aside.
+
+### Deviations from the PRD
+
+- **There were three 1280×1280 files, not one.** PRD §1.8 and the PR prompt name
+  `alternate/TEX.png` as the sole outlier; `alternate-2/TEX.png` and
+  `alternate-3/TEX.png` are also 1280×1280 (`alternate` and `alternate-3` are
+  byte-identical files). All three were downscaled — leaving two would have meant
+  shipping art the endpoint refuses, and the manifest test would have failed on
+  them. Corrected count: 76 of the 79 committed PNGs complied, not 93 of 94 (that
+  figure counted the 15 `.svg` files as compliant PNGs).
+- **The "transparent" half of the standard is a caveat, not a rejection.** Six
+  committed PNGs carry no alpha channel (`alternate-2/SEA`, `alternate-2/WSH`,
+  `city-connect/TEX`, `city-connect/WSH`, `main-overrides/SEA`,
+  `main-overrides/WSH`) and render correctly — flat art on a solid tile doesn't
+  need one. Enforcing alpha would reject art the app is already shipping, so an
+  alpha-less upload passes with a note. Dimensions, format, and size are hard
+  rejections exactly as specified.
+- **`alternate-4` is on the destination allowlist** even though the directory
+  doesn't exist (PRD §1.6 — verified correct, not a bug). The lab renders
+  alternate-4 tiles for five clubs, so an upload creates the directory rather
+  than being turned away. Nothing else about that treatment changed.
+- **A generator script was added** (`gen-logo-art.mjs`) alongside the
+  endpoint-writes-it-itself requirement. The endpoint still writes the manifest
+  on every upload; the script exists because the manifest had to be built once
+  before any upload existed, and because a hand-added file otherwise leaves the
+  test with no fix to point at.
+- **No e2e spec.** Same call PR 2 made: `test/logo-upload.test.js` covers the
+  validator and the allowlist as pure logic, and the browser pass below was a
+  one-off verification. A spec would have to write real art into the working tree
+  and restore it, the way `e2e/uniform-names.spec.js` does — worth adding with
+  PR 4 if that file count grows.
+
+### The tile-vs-teams.js gap (worth knowing before uploading)
+
+An upload always lands in the right file, but `teams.js` decides what a tile
+actually *wears*, and for three cases that isn't the uploaded `.png`: a club in
+one of the `*_USES_BASE_LOGO` sets (renders the plain CDN mark), one filed under
+`ALT_LOGO_SVG`, or a Main tile with no `recolor` override. Rather than fix or
+hide this, the lab detects the mismatch and says so on the tile after a
+successful upload, naming the tables to edit. **PR 2's eight missing City Connect
+files (Tigers, Angels, Dodgers, Twins, Mets, Phillies, Pirates, Padres) are all
+clean cases** — no `*_USES_BASE_LOGO` entry, no SVG — so dropping art on those
+tiles works with no teams.js edit at all. They remain the highest-value first
+uploads, as PR 2 flagged; this PR ships the pipeline, not the art.
+
+### Verification
+
+- `npm run lint` clean; `npm test` 783 pass (was 766 — 17 new in
+  `test/logo-upload.test.js`); `npm run build` + `npm run check:dist-dev` clean.
+- **The validator is tested against real PNGs**, assembled in the test with a
+  CRC32 and a zlib IDAT rather than hand-written header bytes — a fixture that
+  faked the bytes would only be checking itself. All four cases from the PR
+  prompt: a valid 512×512, a wrong-size PNG, a JPEG renamed `.png`, and an
+  oversized-but-otherwise-valid file (written with `deflate level: 0` so it is
+  genuinely over the cap). Plus empty/truncated input, and traversal-shaped,
+  prototype-poisoning, MiLB, and non-integer destinations.
+- **The drift test was proved to fail**, not assumed: copying one file to a new
+  name made the manifest test fail with the "run `node scripts/gen-logo-art.mjs`"
+  message, and removing it restored green.
+- **A real upload, through the real UI, against a live dev server.** Replaced the
+  Brewers' Alternate mark by driving the file input: the two rejection paths
+  showed their reasons inline ("NOT A PNG — …", "256X256 — THE STANDARD IS
+  EXACTLY 512X512"), the good file saved, and the tile re-requested at
+  `?v=1` and repainted without a restart. `git status` showed exactly one changed
+  art file plus the manifest entry moving to `bytes: 2864`. Reverted afterward
+  (`git checkout` + regenerate), and the tree is back to the three TEX files.
+- **Both consumers checked live** on a real game where the Rangers wore
+  `alternate-3` (gamePk 822870, 2026-07-26): the downscaled mark renders cleanly
+  on the slate card and the in-game masthead. Old-vs-new were also rendered side
+  by side at tile size and at 2.4×— indistinguishable at the size the app draws
+  them.
+- **The JSON-store path was re-verified after the body-reader refactor**:
+  `e2e/uniform-names.spec.js` (4 tests, including the 400 and 413 paths) passes
+  against this worktree's server.
+- Dev server: <http://localhost:5169/identity-lab?nointro> (5170-5173 were held
+  by other worktrees).
+
+### Notes for the next PR
+
+- `logoUploadTarget()` is the one function PR 4 has to change; everything
+  downstream of it is already keyed off whatever it returns.
+- `TreatmentBox` now takes an optional `upload` prop. MiLB tiles pass nothing
+  today, so wiring PR 4's drop target is a matter of passing it from
+  `profiles/milb.jsx` — the component work is done.
+- The manifest is keyed by directory then filename, which already accommodates
+  `{teamId}.png` names without a schema change.
+- `docs/uniforms-and-logos.md`'s §2 recommendation is now marked as built.
