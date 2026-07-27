@@ -3,7 +3,11 @@
 The three stars (`computeThreeStars`, `src/api/boxscore.js`), the slate Top
 Performers boards, and the past-day Winners/Losers split
 (`src/api/topPerformers.js`) originally ranked players by summed
-win-probability added alone. WPA is the right backbone — it *is* the game's
+win-probability added alone. (The slate Top Performers box and the
+Winners/Losers split are both gone now — removed 2026-07-27, see ADR-0011 —
+but `performanceScore.js` and `computePlayOfTheGame` below survive as the
+three stars' and dayHighlights' shared ranking logic, which is why this ADR
+is kept rather than deleted.) WPA is the right backbone — it *is* the game's
 story — but it has a known blind spot: once a game is decided there is no win
 probability left to move, so dominance in a blowout scores near zero. The
 real case that exposed it: 2026-07-08, Dylan Cease carried a no-hitter into
