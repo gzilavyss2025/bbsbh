@@ -52,6 +52,8 @@ import {
   jerseyLabel,
   fetchUniformNameOverrides,
   primeUniformNameOverridesCache,
+  uniformNameOverridesLoaded,
+  uniformNamesSaveBody,
   uniformDisplayName,
 } from '../../../api/uniforms.js'
 import { TreatmentBox } from '../TreatmentBox.jsx'
@@ -696,17 +698,24 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
 function useMlbExtras() {
   const [catalog, setCatalog] = useState({})
   const [savedNames, setSavedNames] = useState({})
+  const [namesLoaded, setNamesLoaded] = useState(false)
   const [nameEdits, setNameEdits] = useState({})
 
+  // Deliberately NOT one Promise.all over both fetches. The catalog comes from
+  // statsapi and the names from a same-origin static file, so a statsapi
+  // outage used to reject the combined promise and leave `savedNames` at its
+  // initial `{}` for the whole session — which Save then wrote over the real
+  // file. They're independent facts; they load independently, and a failure in
+  // either degrades only its own half.
   useEffect(() => {
     let cancelled = false
-    Promise.all([
-      fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()),
-      fetchUniformNameOverrides(),
-    ]).then(([catalogData, overrides]) => {
+    fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear())
+      .then((catalogData) => !cancelled && setCatalog(catalogData))
+      .catch(() => {}) // no catalog means no jersey matches, not a broken page
+    fetchUniformNameOverrides().then((overrides) => {
       if (cancelled) return
-      setCatalog(catalogData)
       setSavedNames(overrides)
+      setNamesLoaded(uniformNameOverridesLoaded())
     })
     return () => {
       cancelled = true
@@ -716,7 +725,13 @@ function useMlbExtras() {
   return {
     catalog,
     savedNames,
+    namesLoaded,
     nameEdits,
+    // Pending jersey-name edits that Save will refuse to write, because the
+    // current names never loaded. The colour/tuning stores still save fine, so
+    // without this the page would report a flat "Saved." while quietly dropping
+    // the one edit the owner can see on screen.
+    blockedNameEdits: !namesLoaded && Object.keys(nameEdits).length > 0,
     onNameChange: (code, value) => setNameEdits((prev) => ({ ...prev, [code]: value })),
     afterSave: (payloads) => {
       const names = payloads.find((p) => p.key === 'uniform-names')?.body
@@ -761,12 +776,12 @@ function applyPositionDraft(record, fields, treatment) {
 }
 
 function buildSaves(drafts, extras) {
-  const merged = { ...extras.savedNames }
-  for (const [code, name] of Object.entries(extras.nameEdits)) {
-    const trimmed = name.trim()
-    if (trimmed) merged[code] = trimmed
-    else delete merged[code]
-  }
+  // null when the names never loaded or nothing was edited — that payload is
+  // then dropped entirely rather than posted, because a uniform-names write
+  // overwrites the whole file (uniformNamesSaveBody).
+  const merged = uniformNamesSaveBody(extras.savedNames, extras.nameEdits, {
+    loaded: extras.namesLoaded,
+  })
 
   const name = (teamId) => teamFullName(teamId)
   const tuning = mergeDraftIntoStore(
@@ -803,7 +818,7 @@ function buildSaves(drafts, extras) {
   const colors = mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, applyColorsDraft, { name })
 
   return [
-    { key: 'uniform-names', body: merged },
+    ...(merged ? [{ key: 'uniform-names', body: merged }] : []),
     { key: 'mlb-treatment-tuning', body: tuning },
     { key: 'wpa-tuning', body: wpa },
     { key: 'mlb-team-colors', body: colors },

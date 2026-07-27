@@ -85,6 +85,16 @@ export function ColorLabBody({ profile }) {
           Save
         </button>
         {saveStatus === 'saved' && <span className="hint">Saved.</span>}
+        {/* The colour/tuning stores landed, but the jersey-name edits didn't:
+            the current names never loaded, so writing them would erase every
+            other name on file (src/api/uniforms.js's uniformNamesSaveBody).
+            Said out loud, because a flat "Saved." next to a name edit that
+            silently vanished is the same lie in a smaller costume. */}
+        {saveStatus === 'saved' && extras.blockedNameEdits && (
+          <span className="hint hint--error">
+            Jersey names not saved — the current names never loaded. Reload the page.
+          </span>
+        )}
         {saveStatus === 'error' && (
           <span className="hint hint--error">Save failed — is `npm run dev` running?</span>
         )}

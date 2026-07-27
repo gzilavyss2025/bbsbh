@@ -338,16 +338,28 @@ export function uniformDisplayName(text, clubName, code, overrides) {
 // so a missing file (nothing curated yet) just falls back to
 // uniformDisplayName's own default everywhere.
 let cachedNameOverrides
+let nameOverridesLoaded = false
 export async function fetchUniformNameOverrides() {
   if (cachedNameOverrides !== undefined) return cachedNameOverrides
   try {
     const res = await fetch('/data/uniform-names.json')
     if (!res.ok) throw new Error(`uniform-names.json ${res.status}`)
     cachedNameOverrides = await res.json()
+    nameOverridesLoaded = true
   } catch {
     cachedNameOverrides = {}
   }
   return cachedNameOverrides
+}
+
+// Whether the map above came from the FILE rather than from the catch. Every
+// render consumer is right to ignore this — degrading to `{}` and falling back
+// to the derived default is exactly what they want. A WRITER can't: it POSTs
+// the whole map, so `{}` from the catch and `{}` from a genuinely empty file
+// produce the same request, and the first one deletes the file's real contents.
+// See uniformNamesSaveBody.
+export function uniformNameOverridesLoaded() {
+  return nameOverridesLoaded
 }
 
 // Syncs the module cache above to a freshly saved map — call right after a
@@ -359,6 +371,45 @@ export async function fetchUniformNameOverrides() {
 // Save, see it stick."
 export function primeUniformNameOverridesCache(overrides) {
   cachedNameOverrides = overrides
+  // A just-saved map is by definition known-good provenance — without this, a
+  // second Save in the same session after a first-load failure would still be
+  // refused even though we now know exactly what's on disk.
+  nameOverridesLoaded = true
+}
+
+// The body a uniform-names Save should POST, or `null` for "don't send this
+// request at all".
+//
+// Both writers (UniformNamesPage.jsx and the Team Identity Lab's MLB profile)
+// overwrite the WHOLE file, so every name they omit is deleted. Both also seed
+// their saved-map state to `{}` and fill it from a fetch that can fail — and
+// when it does, an unguarded Save writes that `{}` straight over every curated
+// name on disk. The dev-save validator can't catch it, because `{}` is a
+// legitimate map (everything cleared).
+//
+// Two refusals, both about provenance rather than the value:
+//   - `loaded: false` — this editor never read the file, so it has nothing to
+//     say about its contents.
+//   - no edits — there is nothing to write, and a no-op whole-file overwrite is
+//     all risk and no benefit.
+// Trimming happens here so an all-whitespace box reads as "cleared this name"
+// in both writers rather than in one of them.
+export function uniformNamesSaveBody(savedNames, edits, { loaded }) {
+  if (!loaded) return null
+  const merged = { ...savedNames }
+  let touched = false
+  for (const [code, name] of Object.entries(edits ?? {})) {
+    const trimmed = name.trim()
+    if (trimmed) {
+      if (merged[code] === trimmed) continue
+      merged[code] = trimmed
+    } else {
+      if (!(code in merged)) continue
+      delete merged[code]
+    }
+    touched = true
+  }
+  return touched ? merged : null
 }
 
 // The fixed logo-treatment order the team page's record-by-jersey strip
