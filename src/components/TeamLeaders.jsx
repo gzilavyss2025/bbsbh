@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react'
 import { computeLeaders } from '../api/teamLeaders.js'
 import { splitDisplayName } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
-import { SPORT_LABEL, favoriteAccentColor } from '../lib/teams.js'
+import { SPORT_LABEL, favoriteAccentColor, isMlbTeamId } from '../lib/teams.js'
 import { SectionTitle } from './SectionTitle.jsx'
 import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
@@ -87,7 +87,13 @@ function FeaturedLeader({
   const { first, last } = splitDisplayName(entry.name)
   return (
     <div className={classes} style={favStyle}>
-      <Headshot personId={entry.id} name={entry.name} teamId={teamId} className="tlead__shot" />
+      <Headshot
+        personId={entry.id}
+        name={entry.name}
+        teamId={teamId}
+        isMlb={isMlbTeamId(entry.teamId)}
+        className="tlead__shot"
+      />
       <div className="tlead__who">
         {/* Two-line hero name (first name, then LAST NAME + position/IL mark) —
             same idiom as PlayerPage's splitDisplayName hero — so a long

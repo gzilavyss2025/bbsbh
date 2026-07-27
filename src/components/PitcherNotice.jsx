@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { realHeadshotUrl, teamLogoUrl, teamTintColor } from '../lib/teams.js'
+import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../lib/teams.js'
 import { PlayerLink } from './PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
@@ -50,22 +50,26 @@ export function PitcherNotice({ pitcher, teamId = null, teamName, className = ''
   )
 }
 
-// The entering pitcher's headshot. realHeadshotUrl (unlike the usual
-// headshotUrl) 404s for a personId with no real photo on file instead of
-// silently serving the mlbstatic CDN's own generic silhouette placeholder, so
-// a true photo miss is distinguishable here (see lib/teams.js). A true
-// network error degrades the same way. On a miss, degrades to a centered
-// team logo (when `teamId` is known — same treatment as Headshot.jsx's own
-// logo rung) rather than a faceless placeholder, then to a plain monogram
-// once neither a photo nor a team is available.
+// The entering pitcher's headshot. Walks the same ordered fallback chain as
+// Headshot.jsx (`headshotSources` — silo, then milb for a MiLB/unknown club,
+// never milb for a confirmed MLB player, see that file's header for the
+// policy this guards). `teamId` is always the actual club he's playing for
+// here (every PlayByPlay/HalfInning caller passes the real game team id, not
+// a display/parent-org id), so `isMlbTeamId(teamId)` is the correct gate
+// directly. On a full photo miss, degrades to a centered team logo (when
+// `teamId` is known — same treatment as Headshot.jsx's own logo rung) rather
+// than a faceless placeholder, then to a plain monogram once neither a photo
+// nor a team is available.
 export function PitcherPhoto({ personId, name, teamId = null }) {
-  const [failed, setFailed] = useState(false)
+  const mlb = isMlbTeamId(teamId)
+  const sources = headshotSources(personId, { mlb })
+  const [rung, setRung] = useState(0)
   const [logoFailed, setLogoFailed] = useState(false)
   useEffect(() => {
-    setFailed(false)
+    setRung(0)
     setLogoFailed(false)
-  }, [personId, teamId])
-  const url = personId && !failed ? realHeadshotUrl(personId) : null
+  }, [personId, teamId, mlb])
+  const url = sources[rung] ?? null
   const logoUrl = !url && teamId && !logoFailed ? teamLogoUrl(teamId) : null
   const bg = teamTintColor(teamId)
 
@@ -104,7 +108,7 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
         alt=""
         loading="lazy"
         decoding="async"
-        onError={() => setFailed(true)}
+        onError={() => setRung((r) => r + 1)}
         aria-hidden="true"
       />
     </span>
