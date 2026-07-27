@@ -187,6 +187,16 @@ export function moundVisitsAllowed(inning) {
 // the feed nests a change at the head of the plate appearance AFTER the one
 // the visit closed; every case in the sweep was same-play, but the rule
 // doesn't promise that and neither does the feed.
+//
+// A trip left pending at the END of one of this club's earlier defensive
+// halves (no isPitch/pitching_substitution before the half's last play) must
+// settle there, not ride forward — the club's NEXT defensive half is one or
+// more entire opposite-side halves later (a team only fields every other
+// half), and those plays are skipped below without touching `pending`. Left
+// unflushed, that stale trip would be resolved by the first pitch or change
+// of a LATER half — a trip that has nothing to do with it — silently
+// shifting `used` for every half after. So a half boundary for THIS side
+// forces the settle itself, same as a genuine pitch or substitution would.
 export function moundVisitRemainings(feed, inning, half, battingSide) {
   const defenseSide = battingSide === 'away' ? 'home' : 'away'
   const allowed = moundVisitsAllowed(inning)
@@ -211,6 +221,9 @@ export function moundVisitRemainings(feed, inning, half, battingSide) {
     const playIdx = ph === 'bottom' ? pi * 2 : pi * 2 - 1
     if (playIdx > targetIdx) break
     if ((ph === 'top' ? 'home' : 'away') !== defenseSide) continue
+    // A new half for this side arrived with the previous one's trip still
+    // open — nothing more is coming to resolve it, so it stands as charged.
+    if (pending && pending.playIdx !== playIdx) settle(true)
     for (const e of p.playEvents ?? []) {
       if (e.isPitch) {
         settle(true) // he stayed in and threw — that trip was a real visit

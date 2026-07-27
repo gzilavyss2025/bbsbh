@@ -74,3 +74,57 @@ test('visits by the other club never touch this club’s tally', () => {
   // defense, which never took the mound this half.
   assert.deepEqual(moundVisitRemainings(feed, 5, 'top', 'home'), [])
 })
+
+test('a trip left open at the end of an EARLIER half for this club still counts', () => {
+  // Top 4 (home defends): a visit trails the half's only play with nothing
+  // after it — no pitch, no pitching change, because the half simply ended.
+  // That trip was real and must be charged, but the walk doesn't reach the
+  // end of top 4 directly — it moves straight into bottom 4 (away defends,
+  // skipped entirely for home's tally) and only comes back to processing a
+  // home-defense play in top 5. A pending visit that survives that gap and
+  // gets resolved by whatever top 5 happens to do first is being resolved by
+  // the wrong trip.
+  const feed = {
+    liveData: {
+      plays: {
+        allPlays: [
+          {
+            about: { inning: 4, halfInning: 'top' },
+            playEvents: [
+              { isPitch: true, details: { call: { code: 'B' } } },
+              { details: { eventType: 'mound_visit' } },
+            ],
+          },
+          {
+            about: { inning: 4, halfInning: 'bottom' },
+            playEvents: [{ isPitch: true, details: { call: { code: 'B' } } }],
+          },
+          {
+            // Top 5 opens with a fresh reliever — no visit preceded him. If
+            // top 4's leftover trip is still "pending" here, this substitution
+            // wrongly reads as the trip that produced it and un-charges it.
+            about: { inning: 5, halfInning: 'top' },
+            playEvents: [
+              { details: { eventType: 'pitching_substitution' } },
+              { isPitch: true, details: { call: { code: 'B' } } },
+            ],
+          },
+          {
+            // A genuine, fully-resolved visit in top 5 itself.
+            about: { inning: 5, halfInning: 'top' },
+            playEvents: [
+              { isPitch: true, details: { call: { code: 'B' } } },
+              { details: { eventType: 'mound_visit' } },
+              { isPitch: true, details: { call: { code: 'B' } } },
+            ],
+          },
+        ],
+      },
+    },
+  }
+  const allowed = moundVisitsAllowed(5)
+  // Two visits charged by the time top 5's own trip resolves: top 4's
+  // leftover (flushed at the half boundary) plus top 5's own — allowed - 2,
+  // not allowed - 1 (which would mean top 4's trip was silently dropped).
+  assert.deepEqual(moundVisitRemainings(feed, 5, 'top', 'away'), [allowed - 2])
+})
