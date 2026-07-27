@@ -1551,6 +1551,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       // explains it) — a further base on this same play only gets a leg
       // notation once he's past it.
       const naturalBase = NATURAL_BASE[play.result?.eventType] ?? 1
+      // One continuous advance can still arrive as several same-play legs
+      // (2nd-to-3rd, then 3rd-to-home off the same hit) rather than the
+      // genuinely different-eventType legs the per-leg notation above exists
+      // for (WP then SB, SB then E5). Track the immediately preceding leg
+      // written for each runner WITHIN THIS PLAY ONLY, so a leg whose code
+      // and slot match it collapses onto the furthest base instead of
+      // penciling the same mark twice.
+      const playLastLeg = new Map()
       for (const r of runners) {
         const rid = r.details?.runner?.id
         if (rid == null || r.movement?.isOut) continue
@@ -1569,10 +1577,13 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // A run (base 4) records whether it was earned — false only when the
         // feed explicitly says so, so a clean run is never mistakenly circled.
         if (base === 4) earnedByBatter.set(canon, r.details?.earned !== false)
+        const prevLeg = playLastLeg.get(canon)
         if (canon !== batterId) {
           const m = legs.get(canon) ?? {}
+          if (prevLeg && prevLeg.code === code && prevLeg.slot === slot) delete m[prevLeg.base]
           m[base] = { code, slot }
           legs.set(canon, m)
+          playLastLeg.set(canon, { base, code, slot })
         } else if (base > naturalBase) {
           // A bonus base on the batter's own trip — attribute it to this
           // play's error (the fielder who's actually charged, even if the
@@ -1582,8 +1593,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           // slot superscript here — that notes which TEAMMATE's at-bat
           // drove a runner over, and a batter can't drive himself.
           const m = legs.get(canon) ?? {}
-          m[base] = { code: playErrorCredit(play) ?? code, slot: null }
+          const ownCode = playErrorCredit(play) ?? code
+          if (prevLeg && prevLeg.code === ownCode && prevLeg.slot === null) delete m[prevLeg.base]
+          m[base] = { code: ownCode, slot: null }
           legs.set(canon, m)
+          playLastLeg.set(canon, { base, code: ownCode, slot: null })
         }
       }
     }
