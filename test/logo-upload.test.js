@@ -7,6 +7,7 @@ import {
   LOGO_MAX_BYTES,
   LOGO_SIZE,
   LOGO_TREATMENT_DIRS,
+  MILB_LOGO_DIRS,
   describeLogoCaveat,
   describeLogoRejection,
   logoUploadTarget,
@@ -160,6 +161,31 @@ test('a real club and treatment resolve to the one file they may write', () => {
   assert.equal(logoUploadTarget(147, 'city-connect').file, 'public/team-logos/city-connect/NYY.png')
 })
 
+test('a MiLB affiliate resolves to its id-keyed file under milb-home/milb-away', () => {
+  assert.deepEqual(logoUploadTarget(234, 'milb-home'), {
+    teamId: 234,
+    treatment: 'milb-home',
+    abbr: null,
+    dir: 'milb-home',
+    name: '234.png',
+    file: 'public/team-logos/milb-home/234.png',
+    url: '/team-logos/milb-home/234.png',
+  })
+  assert.equal(logoUploadTarget(234, 'milb-away').file, 'public/team-logos/milb-away/234.png')
+  // MiLB has no closed team-id catalog to check an id against (unlike the
+  // MLB-abbreviation path above, which only resolves for the 30 real clubs) —
+  // any positive integer id, including an MLB club's own, is a valid MiLB
+  // destination.
+  assert.equal(logoUploadTarget(140, 'milb-home').file, 'public/team-logos/milb-home/140.png')
+})
+
+test('a non-positive or non-integer id has no MiLB destination either', () => {
+  assert.equal(logoUploadTarget(0, 'milb-home'), null)
+  assert.equal(logoUploadTarget(-5, 'milb-home'), null)
+  assert.equal(logoUploadTarget(NaN, 'milb-home'), null)
+  assert.equal(logoUploadTarget(234.5, 'milb-home'), null)
+})
+
 test('an unknown treatment has no destination at all', () => {
   assert.equal(logoUploadTarget(140, 'alternate-9'), null)
   assert.equal(logoUploadTarget(140, ''), null)
@@ -205,6 +231,15 @@ test('every allowlisted treatment directory is a bare directory name', () => {
 test('a destination outside the art directories throws rather than resolving', () => {
   const repoRoot = path.resolve(import.meta.dirname, '..')
   assert.equal(resolveLogoFile(logoUploadTarget(140, 'alternate')), path.join(repoRoot, 'public/team-logos/alternate/TEX.png'))
+  assert.equal(
+    resolveLogoFile(logoUploadTarget(234, 'milb-home')),
+    path.join(repoRoot, 'public/team-logos/milb-home/234.png'),
+  )
+  assert.throws(
+    () => resolveLogoFile({ dir: 'milb-home', name: '02.png', file: 'public/team-logos/milb-home/02.png' }),
+    /escapes the art directories/,
+    'a leading-zero id is not a bare positive integer',
+  )
   assert.throws(
     () => resolveLogoFile({ dir: 'alternate', name: 'TEX.png', file: 'public/team-logos/alternate/../../../TEX.png' }),
     /escapes the art directories/,
@@ -270,9 +305,22 @@ test('every committed PNG meets the standard the endpoint enforces', () => {
 
 test('the manifest names a real club for every file filed under an MLB abbreviation', () => {
   for (const [dir, files] of Object.entries(LOGO_ART)) {
+    if (MILB_LOGO_DIRS.includes(dir)) continue // id-keyed, checked separately below
     for (const [name, entry] of Object.entries(files)) {
       const abbr = name.replace(/\.(png|svg)$/, '')
       assert.equal(entry.teamId, teamIdForAbbr(abbr), `${dir}/${name} names the wrong club`)
+    }
+  }
+})
+
+// Ships with zero art (PRD — MiLB has no team-id catalog to source uploads
+// from yet), so this passes vacuously today; it pins the id-keyed shape for
+// the first real upload rather than relying on the abbreviation test above,
+// which is deliberately skipped for these two directories.
+test('the manifest names the right team id for every file filed under milb-home/milb-away', () => {
+  for (const dir of MILB_LOGO_DIRS) {
+    for (const [name, entry] of Object.entries(LOGO_ART[dir] ?? {})) {
+      assert.equal(entry.teamId, Number(name.replace(/\.(png|svg)$/, '')), `${dir}/${name} names the wrong team`)
     }
   }
 })

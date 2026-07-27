@@ -315,6 +315,9 @@ export function teamLogoUrl(teamId, variant = 'base') {
   // handful of clubs whose base mark doesn't read against its new tinted
   // tile (e.g. a navy-outlined mark on a navy fill).
   if (variant === 'main-recolor') return mainOverrideLogoUrl(teamId)
+  // MiLB's own two variations (milbColors.js's milbTreatmentTile), keyed by
+  // team id rather than abbreviation — see logoArt.js's MILB_LOGO_DIRS.
+  if (variant === 'milb-home' || variant === 'milb-away') return `/team-logos/${variant}/${teamId}.png`
   if (variant === 'mono') return `${MONO_LOGO_BASE}/${teamId}.svg`
   if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
   const v = LOGO_VARIANTS.find((x) => x.key === variant)

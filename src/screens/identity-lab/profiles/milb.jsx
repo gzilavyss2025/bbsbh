@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { CopyIconButton } from '../../../components/CopyBox.jsx'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { teamLogoUrl } from '../../../lib/teams.js'
 import {
   MILB_COLOR_LAB_LEVELS,
   MILB_TREATMENT_TUNING,
@@ -14,6 +15,7 @@ import {
   MILB_WPA_BAND_COLOR_OVERRIDES,
   MILB_HEADER_COLOR_OVERRIDES,
   milbColorPair,
+  milbHasLogoArt,
   milbHasResearchedColor,
   milbLogoPosition,
   milbWpaLogoLayout,
@@ -164,6 +166,34 @@ function wpaLandedFlat(teamId, variant) {
 
 // ---------------------------------------------------------------------------
 
+// The curated Home/Away mark for (teamId, variant) when the manifest says one
+// exists, falling back to the plain CDN mark otherwise — the lab's own preview
+// of exactly what milbTreatmentTile resolves for a real tile. `version` busts
+// the browser's cache for the same URL right after a same-session upload
+// replaces the file (mirrors profiles/mlb.jsx's TreatmentLogo); `hasArt` alone
+// drives the initial render so a page reload after someone else's upload also
+// shows the curated mark immediately, no upload required this session.
+function MilbTreatmentLogo({ teamId, name, variant, hasArt, version }) {
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [teamId, variant, hasArt])
+  if (!hasArt || failed) return <TeamLogo teamId={teamId} name={name} size={64} />
+  const base = teamLogoUrl(teamId, `milb-${variant}`)
+  const url = version > 0 ? `${base}?v=${version}` : base
+  return (
+    <img
+      key={url}
+      src={url}
+      alt=""
+      width={64}
+      height={64}
+      loading="eager"
+      decoding="async"
+      onError={() => setFailed(true)}
+      aria-hidden="true"
+    />
+  )
+}
+
 function MilbTiles({ team, lastOpponent, drafts, on }) {
   return VARIANTS.map((v) => (
     <MilbTile
@@ -185,6 +215,8 @@ function MilbTiles({ team, lastOpponent, drafts, on }) {
 
 function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
   const [primary, secondary] = milbColorPair(teamId)
+  const [artVersion, setArtVersion] = useState(0)
+  const hasArt = artVersion > 0 || milbHasLogoArt(teamId, variant)
   const pos = milbLogoPosition(teamId, variant, drafts.pos)
   const wpaPinstripe = milbWpaBandPinstripeColor(teamId, variant, drafts.wpa)
   const wpaBand = milbWpaBandColor(teamId, variant, drafts.wpa)
@@ -206,7 +238,21 @@ function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
           '--pinstripe-color': pos.pinstripe ? pos.bg : undefined,
           '--pinstripe-bg': undefined,
         },
-        children: <TeamLogo teamId={teamId} name={name} size={64} />,
+        children: (
+          <MilbTreatmentLogo
+            teamId={teamId}
+            name={name}
+            variant={variant}
+            hasArt={hasArt}
+            version={artVersion}
+          />
+        ),
+      }}
+      upload={{
+        teamId,
+        treatment: `milb-${variant}`,
+        caveat: null,
+        onUploaded: () => setArtVersion((v) => v + 1),
       }}
       swatches={[
         { swatch: { label: 'Primary', hex: primary }, active: pos.bg.toLowerCase() === primary.toLowerCase() }, // caps-js-exempt
@@ -338,15 +384,28 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
       (against that team’s most recent opponent) at three score states; Header
       colors is an unwired mockup. Save writes every pending change straight to{' '}
       <code>src/lib/data/milb-treatment-tuning.json</code> while{' '}
-      <code>npm run dev</code> is running.
+      <code>npm run dev</code> is running. Drop a 512×512 PNG (under 400 KB) on
+      either tile — or use Replace art — to give that side its own mark instead
+      of today’s shared, tinted CDN logo; it lands in{' '}
+      <code>public/team-logos/milb-home/</code> or{' '}
+      <code>public/team-logos/milb-away/</code>, keyed by team id, and shows
+      immediately. A team missing either side’s art is flagged below.
     </>
   ),
   useTeams: () => useAffiliates(level.sportId),
   useExtras: () => ({ afterSave: () => {} }),
   Tiles: MilbTiles,
   sidebar: <NeutralSwatchesSidebar />,
-  rowBadge: (teamId) =>
-    milbHasResearchedColor(teamId) ? null : <span className="hint hint--error">no researched color</span>,
+  rowBadge: (teamId) => {
+    const gaps = []
+    if (!milbHasResearchedColor(teamId)) gaps.push('no researched color')
+    const hasHomeArt = milbHasLogoArt(teamId, 'home')
+    const hasAwayArt = milbHasLogoArt(teamId, 'away')
+    if (!hasHomeArt && !hasAwayArt) gaps.push('no logo art')
+    else if (!hasHomeArt) gaps.push('no home art')
+    else if (!hasAwayArt) gaps.push('no away art')
+    return gaps.length ? <span className="hint hint--error">{gaps.join(' · ')}</span> : null
+  },
   matchesLanded: {
     pos: (teamId, variant, fields) =>
       draftFieldsMatchLanded(fields, MILB_LOGO_POS_OVERRIDES[teamId]?.[variant]),
