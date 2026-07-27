@@ -1,0 +1,171 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import path from 'node:path'
+
+import {
+  DEV_DATA_STORES,
+  DEV_DATA_MAX_BODY_BYTES,
+  devDataStore,
+  resolveStoreFile,
+  serializeStore,
+} from '../scripts/lib/dev-data-stores.mjs'
+
+// The allowlist behind vite.config.js's devDataSave() middleware (ADR-0029).
+// It is a security boundary — a request supplies a store KEY, never a path — so
+// these pin both halves: that only known keys resolve, and that a malformed body
+// is rejected before anything is written.
+
+// --------------------------------------------------------------------------
+// The allowlist itself
+// --------------------------------------------------------------------------
+
+test('every store writes inside the repo, to a real data path', () => {
+  const repoRoot = path.resolve(import.meta.dirname, '..')
+  for (const [key, store] of Object.entries(DEV_DATA_STORES)) {
+    const abs = resolveStoreFile(store)
+    assert.ok(abs.startsWith(repoRoot), `${key} escapes the repo`)
+    assert.ok(
+      store.file.startsWith('src/lib/data/') || store.file.startsWith('public/data/'),
+      `${key} writes outside the data directories: ${store.file}`,
+    )
+    assert.equal(typeof store.validate, 'function', `${key} has no validator`)
+  }
+})
+
+test('an unknown key resolves to no store at all', () => {
+  assert.equal(devDataStore('nope'), null)
+  assert.equal(devDataStore(''), null)
+  assert.equal(devDataStore('../../etc/passwd'), null)
+  assert.equal(devDataStore('src/lib/data/wpa-tuning.json'), null)
+})
+
+// The lookup must not fall through to Object.prototype: 'constructor' is a real
+// property of every object literal, so a naive `STORES[key]` would hand back a
+// function and the middleware would try to read `.file` off it.
+test('a prototype key is not a store', () => {
+  assert.equal(devDataStore('__proto__'), null)
+  assert.equal(devDataStore('constructor'), null)
+  assert.equal(devDataStore('toString'), null)
+})
+
+// store.file is always a literal from the allowlist, so this is defense in
+// depth: it's what makes a careless future entry fail loudly at request time
+// rather than quietly writing over source or CI config.
+test('a store path outside the two data directories throws rather than resolving', () => {
+  assert.throws(() => resolveStoreFile({ file: '../outside.json' }), /writable data directories/)
+  assert.throws(() => resolveStoreFile({ file: 'src/lib/data/../../../../x.json' }), /writable data directories/)
+  assert.throws(() => resolveStoreFile({ file: 'src/lib/teams.js' }), /writable data directories/)
+  assert.throws(() => resolveStoreFile({ file: '.github/workflows/ci.yml' }), /writable data directories/)
+  assert.throws(() => resolveStoreFile({ file: 'src/lib/data/nested/deep.json' }), /writable data directories/)
+})
+
+test('the body cap is a real ceiling, not a per-request setting', () => {
+  assert.equal(DEV_DATA_MAX_BODY_BYTES, 256 * 1024)
+})
+
+// --------------------------------------------------------------------------
+// Validators — a null return means "accepted"; a string is the 400's reason.
+// --------------------------------------------------------------------------
+
+const tuning = DEV_DATA_STORES['mlb-treatment-tuning'].validate
+const colors = DEV_DATA_STORES['milb-colors'].validate
+const names = DEV_DATA_STORES['uniform-names'].validate
+
+test('a real tuning store shape is accepted', () => {
+  assert.equal(
+    tuning({
+      158: {
+        name: 'Milwaukee Brewers',
+        treatments: {
+          main: { bgHex: '#FFF5EA', note: 'cream, not one of the three brand swatches' },
+          alternate: { scale: 0.86, offsetX: 4, pinstripeColor: 'rgba(0, 0, 0, 0.16)' },
+          'city-connect': { header: { blue: '#0C436A', gold: '#ff6c58', font: '#FBF6E9' } },
+        },
+      },
+    }),
+    null,
+  )
+})
+
+test('a tuning store with a team-level field (wpa-tuning bandColor) is accepted', () => {
+  assert.equal(tuning({ 109: { name: 'Arizona Diamondbacks', bandColor: '#E3D4AD', treatments: {} } }), null)
+})
+
+test('an empty store is accepted — every entry can legitimately be cleared', () => {
+  assert.equal(tuning({}), null)
+})
+
+test('a tuning store rejects a non-object, an array, and a non-team key', () => {
+  assert.match(tuning([]), /object keyed by team id/)
+  assert.match(tuning(null), /object keyed by team id/)
+  assert.match(tuning('x'), /object keyed by team id/)
+  assert.match(tuning({ brewers: { treatments: {} } }), /not a team id/)
+})
+
+test('a tuning store rejects a bad treatment key or a non-object record', () => {
+  assert.match(tuning({ 158: { treatments: { 'Main Uniform!': {} } } }), /bad treatment key/)
+  assert.match(tuning({ 158: { treatments: { main: 'blue' } } }), /is not an object/)
+  assert.match(tuning({ 158: { treatments: [] } }), /treatments is not an object/)
+})
+
+test('a tuning store rejects a value too deep to be a tuning field', () => {
+  assert.match(
+    tuning({ 158: { treatments: { main: { header: { blue: { nested: true } } } } } }),
+    /is not a tuning value/,
+  )
+  assert.match(tuning({ 158: { treatments: { main: { scale: 'NaN-ish'.repeat(200) } } } }), /not a tuning value/)
+})
+
+// JSON can carry these keys, so the validators reject them rather than letting
+// a save write a file that poisons Object.prototype on the next import. Built
+// with JSON.parse, not an object literal: `{ __proto__: … }` in source SETS the
+// prototype instead of creating the own property a posted body would have.
+test('a tuning store rejects prototype-poisoning keys at every level', () => {
+  assert.match(tuning(JSON.parse('{"__proto__":{"treatments":{}}}')), /object keyed by team id/)
+  assert.match(tuning(JSON.parse('{"158":{"__proto__":{},"treatments":{}}}')), /is not an object/)
+  assert.match(
+    tuning(JSON.parse('{"158":{"treatments":{"__proto__":{}}}}')),
+    /treatments is not an object/,
+  )
+  assert.match(
+    tuning(JSON.parse('{"158":{"treatments":{"main":{"__proto__":{}}}}}')),
+    /main is not an object/,
+  )
+})
+
+test('a milb-colors entry needs a name and a two-color pair', () => {
+  assert.equal(
+    colors({ 234: { name: 'Durham Bulls', level: 'Triple-A', pair: ['#0054A4', '#B15C12'] } }),
+    null,
+  )
+  assert.equal(colors({ 234: { name: 'Durham Bulls', level: null } }), null) // an unresolved club
+  assert.match(colors({ 234: { pair: ['#0054A4', '#B15C12'] } }), /has no name/)
+  assert.match(colors({ 234: { name: 'Durham Bulls', pair: ['#0054A4'] } }), /not two colors/)
+  assert.match(colors({ 234: { name: 'Durham Bulls', pair: '#0054A4' } }), /not two colors/)
+  assert.match(colors({ 234: { name: 'Durham Bulls', pair: [1, 2] } }), /not two colors/)
+})
+
+test('uniform names must stay a flat code -> string map', () => {
+  assert.equal(names({ '158_jersey_1_2026': 'Home Cream' }), null)
+  assert.equal(names({}), null)
+  assert.match(names(['not', 'a', 'map']), /flat \{ uniformAssetCode: string \} map/)
+  assert.match(names({ '158_jersey_1_2026': { nested: true } }), /flat \{ uniformAssetCode: string \} map/)
+  assert.match(names({ '158_jersey_1_2026': 3 }), /flat \{ uniformAssetCode: string \} map/)
+})
+
+// --------------------------------------------------------------------------
+// Serialization — what actually lands on disk
+// --------------------------------------------------------------------------
+
+test('a team-keyed store is written sorted by team id, 2-space, trailing newline', () => {
+  const out = serializeStore({ 158: { name: 'Brewers' }, 109: { name: 'Diamondbacks' }, 1956: {} })
+  assert.equal(out, `${JSON.stringify({ 109: { name: 'Diamondbacks' }, 158: { name: 'Brewers' }, 1956: {} }, null, 2)}\n`)
+  // Numeric, not lexical: 1956 sorts after 158, and 109 comes first.
+  assert.ok(out.indexOf('"109"') < out.indexOf('"158"'))
+  assert.ok(out.indexOf('"158"') < out.indexOf('"1956"'))
+})
+
+test('a store with non-numeric keys keeps the order it was posted in', () => {
+  const posted = { b_jersey_2: 'Away', a_jersey_1: 'Home' }
+  assert.equal(serializeStore(posted), `${JSON.stringify(posted, null, 2)}\n`)
+})

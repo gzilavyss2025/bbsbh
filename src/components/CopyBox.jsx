@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 // A block of pre-formatted context plus a copy-to-clipboard button — the
-// pattern first used on Team Pattern Lab (screens/TeamPatternLab.jsx) for
+// pattern first used on the Team Identity Lab (screens/identity-lab/profiles/pattern.jsx) for
 // handing a review note back to Claude without retyping which team/file/
 // table it's about. `label` is the button's accessible name only (not
 // rendered); the visible button text is always "Copy"/"Copied!".
@@ -31,7 +31,7 @@ export function CopyBox({ text, label }) {
 }
 
 // A compact icon-only variant for inline placement next to a single line of
-// content (e.g. Team Color Lab's per-jersey match row) rather than its own
+// content (e.g. Team Identity Lab's per-jersey match row) rather than its own
 // boxed block — same clipboard behavior, no visible text/pre wrapper.
 export function CopyIconButton({ text, label }) {
   const [copied, setCopied] = useState(false)

@@ -1,0 +1,924 @@
+{
+  "102": {
+    "name": "Round Rock Express",
+    "level": "Triple-A",
+    "pair": [
+      "#091F40",
+      "#A31F37"
+    ]
+  },
+  "103": {
+    "name": "Lake Elsinore Storm",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#C8102E"
+    ]
+  },
+  "105": {
+    "name": "Sacramento River Cats",
+    "level": "Triple-A",
+    "pair": [
+      "#000000",
+      "#800032"
+    ]
+  },
+  "106": {
+    "name": "Erie SeaWolves",
+    "level": "Double-A",
+    "pair": [
+      "#231f20",
+      "#d10c47"
+    ],
+    "note": "source mislabeled — re-verify before leaning on this pair"
+  },
+  "233": {
+    "name": "Charleston RiverDogs",
+    "level": "Single-A",
+    "pair": [
+      "#091F2C",
+      "#F2A900"
+    ]
+  },
+  "234": {
+    "name": "Durham Bulls",
+    "level": "Triple-A",
+    "pair": [
+      "#0054A4",
+      "#B15C12"
+    ]
+  },
+  "235": {
+    "name": "Memphis Redbirds",
+    "level": "Triple-A",
+    "pair": [
+      "#D31245",
+      "#002B5C"
+    ]
+  },
+  "237": {
+    "name": "Midland RockHounds",
+    "level": "Double-A",
+    "pair": [
+      "#0069aa",
+      "#fbb034"
+    ]
+  },
+  "238": {
+    "name": "Oklahoma City Comets",
+    "level": "Triple-A",
+    "pair": [
+      "#005DAA",
+      "#EF3E42"
+    ]
+  },
+  "247": {
+    "name": "Birmingham Barons",
+    "level": "Double-A",
+    "pair": [
+      "#231f20",
+      "#be0940"
+    ]
+  },
+  "249": {
+    "name": "Wilson Warbirds",
+    "level": "Single-A",
+    "pair": [
+      "#091F2C",
+      "#00677F"
+    ]
+  },
+  "259": {
+    "name": "Fresno Grizzlies",
+    "level": "Single-A",
+    "pair": [
+      "#BA0C2F",
+      "#010101"
+    ]
+  },
+  "260": {
+    "name": "Tulsa Drillers",
+    "level": "Double-A",
+    "pair": [
+      "#005294",
+      "#221e1f"
+    ]
+  },
+  "279": {
+    "name": "Palm Beach Cardinals",
+    "level": "Single-A",
+    "pair": [
+      "#BA0C2F",
+      "#0C2340"
+    ]
+  },
+  "342": {
+    "name": "Albuquerque Isotopes",
+    "level": "Triple-A",
+    "pair": [
+      "#000000",
+      "#F61D30"
+    ]
+  },
+  "400": {
+    "name": "Las Vegas Aviators",
+    "level": "Triple-A",
+    "pair": [
+      "#0A2240",
+      "#FF4D00"
+    ]
+  },
+  "401": {
+    "name": "Inland Empire 66ers",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#69B3E7"
+    ]
+  },
+  "402": {
+    "name": "Akron RubberDucks",
+    "level": "Double-A",
+    "pair": [
+      "#010101",
+      "#0072CE"
+    ]
+  },
+  "403": {
+    "name": "Everett AquaSox",
+    "level": "High-A",
+    "pair": [
+      "#041E42",
+      "#00B5E2"
+    ]
+  },
+  "414": {
+    "name": "Salem RidgeYaks",
+    "level": "Single-A",
+    "pair": [
+      "#0C2340",
+      "#0072CE"
+    ]
+  },
+  "416": {
+    "name": "Louisville Bats",
+    "level": "Triple-A",
+    "pair": [
+      "#EC1B2B",
+      "#151240"
+    ]
+  },
+  "418": {
+    "name": "Chesapeake Baysox",
+    "level": "Double-A",
+    "pair": [
+      "#010101",
+      "#FC4C02"
+    ]
+  },
+  "419": {
+    "name": "Hillsboro Hops",
+    "level": "High-A",
+    "pair": [
+      "#051C2C",
+      "#7BAFD4"
+    ]
+  },
+  "421": {
+    "name": "Montgomery Biscuits",
+    "level": "Double-A",
+    "pair": [
+      "#febe28",
+      "#0b2b76"
+    ]
+  },
+  "422": {
+    "name": "Buffalo Bisons",
+    "level": "Triple-A",
+    "pair": [
+      "#CE1141",
+      "#0054A4"
+    ]
+  },
+  "424": {
+    "name": "Dunedin Blue Jays",
+    "level": "Single-A",
+    "pair": [
+      "#003DA5",
+      "#041E42"
+    ]
+  },
+  "426": {
+    "name": "Wilmington Blue Rocks",
+    "level": "High-A",
+    "pair": [
+      "#8BB8E8",
+      "#041E42"
+    ]
+  },
+  "427": {
+    "name": "Jersey Shore BlueClaws",
+    "level": "High-A",
+    "pair": [
+      "#BA0C2F",
+      "#041E42"
+    ]
+  },
+  "428": {
+    "name": "Greenville Drive",
+    "level": "High-A",
+    "pair": [
+      "#C8102E",
+      "#0C2340"
+    ]
+  },
+  "431": {
+    "name": "Gwinnett Stripers",
+    "level": "Triple-A",
+    "pair": [
+      "#0D223F",
+      "#73AA4F"
+    ]
+  },
+  "432": {
+    "name": "Rome Emperors",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#DA291C"
+    ]
+  },
+  "435": {
+    "name": "Vancouver Canadians",
+    "level": "High-A",
+    "pair": [
+      "#D50032",
+      "#9D2235"
+    ]
+  },
+  "436": {
+    "name": "Fredericksburg Nationals",
+    "level": "Single-A",
+    "pair": [
+      "#BA0C2F",
+      "#041E42"
+    ]
+  },
+  "437": {
+    "name": "Lake County Captains",
+    "level": "High-A",
+    "pair": [
+      "#051C2C",
+      "#F2A900"
+    ]
+  },
+  "440": {
+    "name": "Springfield Cardinals",
+    "level": "Double-A",
+    "pair": [
+      "#d30e45",
+      "#002c5d"
+    ]
+  },
+  "443": {
+    "name": "Peoria Chiefs",
+    "level": "High-A",
+    "pair": [
+      "#0C2340",
+      "#BA0C2F"
+    ]
+  },
+  "445": {
+    "name": "Columbus Clippers",
+    "level": "Triple-A",
+    "pair": [
+      "#002A5C",
+      "#68ACDB"
+    ]
+  },
+  "448": {
+    "name": "Hickory Crawdads",
+    "level": "Single-A",
+    "pair": [
+      "#E4002B",
+      "#A6192E"
+    ]
+  },
+  "450": {
+    "name": "Daytona Tortugas",
+    "level": "Single-A",
+    "pair": [
+      "#004E42",
+      "#78BE21"
+    ]
+  },
+  "451": {
+    "name": "Iowa Cubs",
+    "level": "Triple-A",
+    "pair": [
+      "#0E3386",
+      "#D12325"
+    ]
+  },
+  "452": {
+    "name": "Altoona Curve",
+    "level": "Double-A",
+    "pair": [
+      "#b21921",
+      "#231f20"
+    ]
+  },
+  "453": {
+    "name": "Brooklyn Cyclones",
+    "level": "High-A",
+    "pair": [
+      "#13294B",
+      "#002D72"
+    ]
+  },
+  "456": {
+    "name": "Great Lakes Loons",
+    "level": "High-A",
+    "pair": [
+      "#AF272F",
+      "#010101"
+    ]
+  },
+  "459": {
+    "name": "Dayton Dragons",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#007A33"
+    ]
+  },
+  "460": {
+    "name": "Tri-City Dust Devils",
+    "level": "High-A",
+    "pair": [
+      "#041E42",
+      "#B9975B"
+    ]
+  },
+  "461": {
+    "name": "Eugene Emeralds",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#007A53"
+    ]
+  },
+  "463": {
+    "name": "New Hampshire Fisher Cats",
+    "level": "Double-A",
+    "pair": [
+      "#c6021e",
+      "#0f254b"
+    ]
+  },
+  "476": {
+    "name": "San Jose Giants",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#FA4616"
+    ]
+  },
+  "477": {
+    "name": "Greensboro Grasshoppers",
+    "level": "High-A",
+    "pair": [
+      "#00843D",
+      "#010101"
+    ]
+  },
+  "478": {
+    "name": "Augusta GreenJackets",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#007A53"
+    ]
+  },
+  "479": {
+    "name": "Jupiter Hammerheads",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#0077C8"
+    ]
+  },
+  "481": {
+    "name": "Hill City Howlers",
+    "level": "Single-A",
+    "pair": [
+      "#002F6C",
+      "#BA0C2F"
+    ]
+  },
+  "484": {
+    "name": "Indianapolis Indians",
+    "level": "Triple-A",
+    "pair": [
+      "#00243A",
+      "#CD2132"
+    ]
+  },
+  "486": {
+    "name": "Spokane Indians",
+    "level": "High-A",
+    "pair": [
+      "#BA0C2F",
+      "#041E42"
+    ]
+  },
+  "487": {
+    "name": "Kannapolis Cannon Ballers",
+    "level": "Single-A",
+    "pair": [
+      "#003A70",
+      "#CB333B"
+    ]
+  },
+  "492": {
+    "name": "Cedar Rapids Kernels",
+    "level": "High-A",
+    "pair": [
+      "#041E42",
+      "#009A44"
+    ]
+  },
+  "493": {
+    "name": "Frederick Keys",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#FC4C02"
+    ]
+  },
+  "494": {
+    "name": "Charlotte Knights",
+    "level": "Triple-A",
+    "pair": [
+      "#000000",
+      "#00AEDB"
+    ]
+  },
+  "498": {
+    "name": "Chattanooga Lookouts",
+    "level": "Double-A",
+    "pair": [
+      "#ec3b46",
+      "#000000"
+    ]
+  },
+  "499": {
+    "name": "Lansing Lugnuts",
+    "level": "High-A",
+    "pair": [
+      "#C8102E",
+      "#010101"
+    ]
+  },
+  "505": {
+    "name": "Binghamton Rumble Ponies",
+    "level": "Double-A",
+    "pair": [
+      "#bc0b35",
+      "#0f213e"
+    ]
+  },
+  "507": {
+    "name": "St. Lucie Mets",
+    "level": "Single-A",
+    "pair": [
+      "#002D72",
+      "#FC4C02"
+    ]
+  },
+  "509": {
+    "name": "Fort Myers Mighty Mussels",
+    "level": "Single-A",
+    "pair": [
+      "#0C2340",
+      "#24125F"
+    ]
+  },
+  "510": {
+    "name": "San Antonio Missions",
+    "level": "Double-A",
+    "pair": [
+      "#081f3f",
+      "#ceaa78"
+    ]
+  },
+  "512": {
+    "name": "Toledo Mud Hens",
+    "level": "Triple-A",
+    "pair": [
+      "#002A5C",
+      "#E71629"
+    ]
+  },
+  "516": {
+    "name": "Visalia Rawhide",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#BA0C2F"
+    ]
+  },
+  "521": {
+    "name": "Myrtle Beach Pelicans",
+    "level": "Single-A",
+    "pair": [
+      "#0072CE",
+      "#0C2340"
+    ]
+  },
+  "522": {
+    "name": "Reading Fightin Phils",
+    "level": "Double-A",
+    "pair": [
+      "#d10c47",
+      "#042d60"
+    ]
+  },
+  "524": {
+    "name": "Stockton Ports",
+    "level": "Single-A",
+    "pair": [
+      "#C8102E",
+      "#002D72"
+    ]
+  },
+  "526": {
+    "name": "Rancho Cucamonga Quakes",
+    "level": "Single-A",
+    "pair": [
+      "#BA0C2F",
+      "#0C2340"
+    ]
+  },
+  "529": {
+    "name": "Tacoma Rainiers",
+    "level": "Triple-A",
+    "pair": [
+      "#002D5A",
+      "#EB1750"
+    ]
+  },
+  "531": {
+    "name": "Scranton/Wilkes-Barre RailRiders",
+    "level": "Triple-A",
+    "pair": [
+      "#003366",
+      "#840026"
+    ]
+  },
+  "533": {
+    "name": "Worcester Red Sox",
+    "level": "Triple-A",
+    "pair": [
+      "#00275C",
+      "#E41134"
+    ]
+  },
+  "534": {
+    "name": "Rochester Red Wings",
+    "level": "Triple-A",
+    "pair": [
+      "#EE3124",
+      "#FFD200"
+    ]
+  },
+  "537": {
+    "name": "Hudson Valley Renegades",
+    "level": "High-A",
+    "pair": [
+      "#0C2340",
+      "#97999B"
+    ]
+  },
+  "538": {
+    "name": "Hartford Yard Goats",
+    "level": "Double-A",
+    "pair": [
+      "#002c76",
+      "#009a49"
+    ]
+  },
+  "540": {
+    "name": "Frisco RoughRiders",
+    "level": "Double-A",
+    "pair": [
+      "#862633",
+      "#326295"
+    ]
+  },
+  "541": {
+    "name": "Omaha Storm Chasers",
+    "level": "Triple-A",
+    "pair": [
+      "#004A8D",
+      "#B9976A"
+    ]
+  },
+  "547": {
+    "name": "Harrisburg Senators",
+    "level": "Double-A",
+    "pair": [
+      "#d10c47",
+      "#042e61"
+    ]
+  },
+  "548": {
+    "name": "Delmarva Shorebirds",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#F9423A"
+    ]
+  },
+  "550": {
+    "name": "South Bend Cubs",
+    "level": "High-A",
+    "pair": [
+      "#002F6C",
+      "#C8102E"
+    ]
+  },
+  "552": {
+    "name": "Syracuse Mets",
+    "level": "Triple-A",
+    "pair": [
+      "#004B8D",
+      "#F47D30"
+    ]
+  },
+  "554": {
+    "name": "Beloit Sky Carp",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#00A3E0"
+    ]
+  },
+  "556": {
+    "name": "Nashville Sounds",
+    "level": "Triple-A",
+    "pair": [
+      "#071D49",
+      "#C8102E"
+    ]
+  },
+  "559": {
+    "name": "Rocket City Trash Pandas",
+    "level": "Double-A",
+    "pair": [
+      "#e93c49",
+      "#3378c2"
+    ]
+  },
+  "561": {
+    "name": "Salt Lake Bees",
+    "level": "Triple-A",
+    "pair": [
+      "#000000",
+      "#FDB913"
+    ]
+  },
+  "564": {
+    "name": "Jacksonville Jumbo Shrimp",
+    "level": "Triple-A",
+    "pair": [
+      "#002D62",
+      "#007DC3"
+    ]
+  },
+  "565": {
+    "name": "Quad Cities River Bandits",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#003594"
+    ]
+  },
+  "566": {
+    "name": "Clearwater Threshers",
+    "level": "Single-A",
+    "pair": [
+      "#BA0C2F",
+      "#236192"
+    ]
+  },
+  "568": {
+    "name": "Norfolk Tides",
+    "level": "Triple-A",
+    "pair": [
+      "#009A44",
+      "#010101"
+    ]
+  },
+  "570": {
+    "name": "Lakeland Flying Tigers",
+    "level": "Single-A",
+    "pair": [
+      "#0C2340",
+      "#B94700"
+    ]
+  },
+  "572": {
+    "name": "Wisconsin Timber Rattlers",
+    "level": "High-A",
+    "pair": [
+      "#862633",
+      "#010101"
+    ]
+  },
+  "573": {
+    "name": "Asheville Tourists",
+    "level": "High-A",
+    "pair": [
+      "#0C2340",
+      "#236192"
+    ]
+  },
+  "574": {
+    "name": "Arkansas Travelers",
+    "level": "Double-A",
+    "pair": [
+      "#ba0c2f",
+      "#000000"
+    ]
+  },
+  "580": {
+    "name": "Winston-Salem Dash",
+    "level": "High-A",
+    "pair": [
+      "#010101",
+      "#5F249F"
+    ]
+  },
+  "582": {
+    "name": "West Michigan Whitecaps",
+    "level": "High-A",
+    "pair": [
+      "#0C2340",
+      "#012169"
+    ]
+  },
+  "584": {
+    "name": "Fort Wayne TinCaps",
+    "level": "High-A",
+    "pair": [
+      "#2C5234",
+      "#7A9A01"
+    ]
+  },
+  "587": {
+    "name": "Tampa Tarpons",
+    "level": "Single-A",
+    "pair": [
+      "#091F2C",
+      "#009CDE"
+    ]
+  },
+  "1350": {
+    "name": "Northwest Arkansas Naturals",
+    "level": "Double-A",
+    "pair": [
+      "#002d6a",
+      "#a20534"
+    ]
+  },
+  "1410": {
+    "name": "Lehigh Valley IronPigs",
+    "level": "Triple-A",
+    "pair": [
+      "#05173C",
+      "#C90116"
+    ]
+  },
+  "1960": {
+    "name": "St. Paul Saints",
+    "level": "Triple-A",
+    "pair": [
+      "#001489",
+      "#DA291C"
+    ]
+  },
+  "2310": {
+    "name": "Reno Aces",
+    "level": "Triple-A",
+    "pair": [
+      "#00285A",
+      "#D21146"
+    ]
+  },
+  "2498": {
+    "name": "Bowling Green Hot Rods",
+    "level": "High-A",
+    "pair": [
+      "#0C2340",
+      "#FF6A14"
+    ]
+  },
+  "3390": {
+    "name": "Bradenton Marauders",
+    "level": "Single-A",
+    "pair": [
+      "#010101",
+      "#FFC72C"
+    ]
+  },
+  "3410": {
+    "name": "Richmond Flying Squirrels",
+    "level": "Double-A",
+    "pair": [
+      "#d41041",
+      "#231f20"
+    ],
+    "note": "pre-2026 refresh colors — see the stash README"
+  },
+  "3705": {
+    "name": "Columbia Fireflies",
+    "level": "Single-A",
+    "pair": [
+      "#002855",
+      "#326295"
+    ]
+  },
+  "3712": {
+    "name": "Fayetteville Woodpeckers",
+    "level": "Single-A",
+    "pair": [
+      "#101820",
+      "#C8102E"
+    ]
+  },
+  "3898": {
+    "name": "Wichita Wind Surge",
+    "level": "Double-A",
+    "pair": [
+      "#032c5b",
+      "#e1143b"
+    ]
+  },
+  "4124": {
+    "name": "Pensacola Blue Wahoos",
+    "level": "Double-A",
+    "pair": [
+      "#003087",
+      "#041e42"
+    ]
+  },
+  "4904": {
+    "name": "El Paso Chihuahuas",
+    "level": "Triple-A",
+    "pair": [
+      "#000000",
+      "#A71930"
+    ]
+  },
+  "5015": {
+    "name": "Biloxi Shuckers",
+    "level": "Double-A",
+    "pair": [
+      "#0f69b1",
+      "#e2b880"
+    ]
+  },
+  "5368": {
+    "name": "Amarillo Sod Poodles",
+    "level": "Double-A",
+    "pair": [
+      "#003A70",
+      "#00A9E0"
+    ]
+  },
+  "5434": {
+    "name": "Sugar Land Space Cowboys",
+    "level": "Triple-A",
+    "pair": [
+      "#082439",
+      "#38C2CD"
+    ]
+  },
+  "6324": {
+    "name": "Hub City Spartanburgers",
+    "level": "High-A",
+    "pair": [
+      "#0C2340",
+      "#78BE21"
+    ]
+  },
+  "6482": {
+    "name": "Ontario Tower Buzzers",
+    "level": "Single-A",
+    "pair": [
+      "#0032A0",
+      "#92C1E9"
+    ]
+  }
+}

@@ -250,7 +250,7 @@ function ReadyPill({ game }) {
 // minimum) read as if it colored the whole tile even against a light fill.
 // That first attempt's hand-picked color list is preserved in
 // .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md for reference,
-// but it's not what's live now — Team Color Lab separately solved the same
+// but it's not what's live now — Team Identity Lab separately solved the same
 // dense-mark problem (a per-team edge-bleed scale-down, MAIN_OVERRIDES in
 // teams.js) for its own Main-tile prototype, and that's the version wired in
 // below: every tile (Main, Alternate, City Connect alike) gets its curated

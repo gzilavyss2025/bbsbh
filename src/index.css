@@ -2964,7 +2964,7 @@ body {
    in GameCard.jsx and .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md.
    `--tint`/`--scale` below are instead set narrowly, only when TeamMark swaps
    in a curated Alternate/City Connect mark — same vars, same fallback
-   pattern as Team Color Lab's own .colorlab__logobox.) */
+   pattern as Team Identity Lab's own .colorlab__logobox.) */
 .gamecard__logobox {
   position: relative;
   z-index: 1;
@@ -3000,7 +3000,7 @@ body {
 
 /* A diagonal white-to-black sheen over every tile face (background AND mark
    alike, via this ::after stacking above both) — reads as a glossy, slightly
-   domed badge instead of a flat paint chip. Same recipe as Team Color Lab's
+   domed badge instead of a flat paint chip. Same recipe as Team Identity Lab's
    .colorlab__logobox--gloss, applied here to every team/treatment rather than
    only a tinted one, so a plain paper tile gets the same finish as a colored
    one. */
@@ -9284,7 +9284,7 @@ body {
 }
 
 /* ---------------------------------------------------------- team color lab
-   Dev-only harness (screens/TeamColorLab.jsx) reviewing each club's Main/
+   Dev-only harness (screens/identity-lab/) reviewing each club's Main/
    Alternate/City Connect logo treatment against its three official colors. */
 .colorlab__layout {
   display: block;
@@ -9339,13 +9339,13 @@ body {
 
 /* A pinned right-hand list of quick-reuse neutral hex values (cream/
    off-white/grey variants, white, black, road grey, a common navy) for
-   MilbTeamColorLab.jsx's Position/WPA/Header hex fields — several MiLB
+   the MiLB dimension's Position/WPA/Header hex fields — several MiLB
    affiliates' Away variation, or an unresolved team's placeholder, wants a
    plain neutral rather than either researched brand color, and typing one
    from memory invites a typo a click-to-copy value doesn't. Mirrors
-   .colorlab__nav's fixed-card treatment, opposite side; MLB's Team Color Lab
-   has no such list (its per-treatment swatches already cover every color a
-   tile needs). Hidden below the width where it'd overlap centered content,
+   .colorlab__nav's fixed-card treatment, opposite side; the lab's MLB
+   dimension has no such list (its per-treatment swatches already cover every
+   color a tile needs). Hidden below the width where it'd overlap centered content,
    same breakpoint as .colorlab__nav. */
 .milbneutrals {
   display: none;
@@ -9421,37 +9421,13 @@ body {
   }
 }
 
-/* MilbTeamColorLab.jsx's page-level "copy all pending changes" button —
-   sits above the team list, always rendered (not scroll-pinned) so it's
-   found right after a session of poking at several teams' controls. Only
-   mounts once at least one team/variant has a live draft (see
-   AllChangesButton); its CopyIconButton reuses .copybox__iconbtn. */
-.milballchanges {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-3);
-  background: var(--seal-amber-soft, var(--paper-1));
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  width: fit-content;
-}
-
-.milballchanges__text {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-
-/* TeamColorLab.jsx's page-level "copy all pending changes" button — same
-   look/behavior as MilbTeamColorLab.jsx's .milballchanges, kept as its own
-   rule since this page's classes are all colorlab__-prefixed. Sits above the
-   team list, always rendered (not scroll-pinned) so it's found right after a
-   session of poking at several teams' controls. Only mounts once at least
-   one team/treatment has a live draft (see AllChangesButton); its
-   CopyIconButton reuses .copybox__iconbtn. */
+/* The Team Identity Lab's page-level "copy all pending changes" button — sits
+   above the team list, always rendered (not scroll-pinned) so it's found right
+   after a session of poking at several teams' controls. Only mounts once at
+   least one team/treatment has a live draft (see AllChangesButton); its
+   CopyIconButton reuses .copybox__iconbtn. The MiLB dimension used to carry an
+   identical .milballchanges rule of its own; consolidating the labs collapsed
+   the two into this one. */
 .colorlab__allchanges {
   display: flex;
   align-items: center;
@@ -9587,7 +9563,7 @@ body {
    here looks like it would in the actual game card, not a flat comparison
    swatch. Fill defaults to the card's plain paper, same as Alternate/City
    Connect; a Main-treatment background mockup (MAIN_OVERRIDES in
-   TeamColorLab.jsx) sets --tint inline to try a brand color instead. */
+   the Team Identity Lab) sets --tint inline to try a brand color instead. */
 .colorlab__logobox {
   flex: 0 0 auto;
   position: relative;
@@ -9604,7 +9580,7 @@ body {
   box-shadow: var(--inset-cell);
 }
 
-/* A Main tile with MAIN_OVERRIDES' `pinstripe` flag (TeamColorLab.jsx) —
+/* A Main tile with MAIN_OVERRIDES' `pinstripe` flag (the Team Identity Lab) —
    white with a subtle vertical pinstripe echoing that club's own home
    jersey, instead of a flat brand-color --tint like every other override.
    --pinstripe-color (mainTreatmentPinstripeColor) picks the line color per
@@ -9680,7 +9656,7 @@ body {
   gap: var(--space-3);
 }
 
-/* LogoPositionControls (TeamColorLab.jsx) — a third column INSIDE
+/* LogoPositionControls (the Team Identity Lab) — a third column INSIDE
    .colorlab__treatmentbox, beside the logo tile + swatches it's
    positioning, rather than its own boxed card like the WPA/header previews
    below. A dashed-free hairline divider (not a full border) is enough
@@ -9764,7 +9740,7 @@ body {
 }
 
 /* Marks which swatch a Main-treatment background mockup (MAIN_OVERRIDES,
-   TeamColorLab.jsx) actually used as the tile's --tint, so it's clear at a
+   the Team Identity Lab) actually used as the tile's --tint, so it's clear at a
    glance which of the three colors above is driving the box beside it. */
 .colorlab__swatchcell--active .colorlab__swatchchip {
   box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive);
@@ -9822,7 +9798,7 @@ body {
 }
 
 /* The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs
-   (TreatmentWpaPreview, TeamColorLab.jsx) for this exact treatment's WPA
+   (TreatmentWpaPreview, the Team Identity Lab) for this exact treatment's WPA
    band, below the logo+swatches box. Also the base class TreatmentHeaderPreview
    extends (.colorlab__headerpreview) — both are full-width proposal cards
    inside a treatment's own .colorlab__treatment card. Used to carry a live
@@ -9935,7 +9911,7 @@ body {
   outline-offset: 2px;
 }
 
-/* TreatmentWpaScenarios (TeamColorLab.jsx) — three REAL WinProbChart
+/* TreatmentWpaScenarios (the Team Identity Lab) — three REAL WinProbChart
    instances (its own .winprob card, unstyled here) side by side, one per
    score state. Equal-thirds on a wide viewport, stacking on a narrow one —
    same wrap behavior as every other multi-column row on this page. */
@@ -10074,7 +10050,7 @@ body {
 }
 
 /* ------------------------------------------------------------ team pattern lab
-   Dev-only harness (screens/TeamPatternLab.jsx) reviewing every club's
+   Dev-only harness (screens/identity-lab/profiles/pattern.jsx) reviewing every club's
    win-probability band pattern (WinProbChart.jsx) at full size, one league
    level at a time. */
 .patternlab__filters {
@@ -10140,9 +10116,9 @@ body {
 }
 
 /* Shared copy-to-clipboard block (components/CopyBox.jsx) — a pre-formatted
-   context block plus a copy button, first built for Team Pattern Lab below
-   and reused wherever a lab page needs to hand exact edit context back to
-   Claude (e.g. Team Color Lab's WPA logo lab, TeamColorLab.jsx). */
+   context block plus a copy button, first built for the WPA-pattern review grid
+   below and reused wherever a lab page needs to hand exact edit context back to
+   Claude (every Team Identity Lab editor, the compiled pattern feedback). */
 .copybox {
   position: relative;
   border: var(--bw-hair) solid var(--border-rule);
@@ -10180,7 +10156,7 @@ body {
 }
 
 /* Compact icon-only copy affordance for inline placement next to a single
-   line (Team Color Lab's per-jersey match row, its WPA/position/header
+   line (Team Identity Lab's per-jersey match row, its WPA/position/header
    panel heads) rather than a full CopyBox block. Fixed square (matching
    .colorlab__wparesetbtn's own 22px height, same filled accent-primary/
    text-on-ink treatment) and flex-centered rather than text padding, so the

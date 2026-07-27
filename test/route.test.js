@@ -38,6 +38,23 @@ test('a bare 8-digit path is the slate paged to that day', () => {
   assert.deepEqual(parseRoute('/07052026'), { name: 'home', date: '2026-07-05' })
 })
 
+// The five routes the Team Identity Lab replaced were unlisted and linked from
+// nowhere, so they were dropped outright rather than redirected. A stale
+// bookmark must land on the slate — never on the generic game route, which
+// would try to resolve 'team-color-lab' as a date.
+test('the retired lab routes fall through to the home slate', () => {
+  for (const stale of [
+    '/team-color-lab',
+    '/team-color-lab-aaa',
+    '/team-color-lab-aa',
+    '/team-color-lab-higha',
+    '/team-color-lab-a',
+    '/team-pattern-lab',
+  ]) {
+    assert.deepEqual(parseRoute(stale), { name: 'home' }, stale)
+  }
+})
+
 test('an impossible calendar date falls through to today rather than erroring', () => {
   // '13452026' is 8 digits but not a real date — no `date`, just today's slate.
   assert.deepEqual(parseRoute('/13452026'), { name: 'home' })
@@ -64,6 +81,8 @@ test('single-segment named routes resolve to their route name', () => {
     '/umpires': 'umpire-rankings',
     '/top-games': 'top-games',
     '/scorecard-lab': 'scorecard-lab',
+    '/identity-lab': 'identity-lab',
+    '/uniform-names': 'uniform-names',
     '/game-notes-debug': 'game-notes-debug',
     '/wordmark-lab': 'wordmark-lab',
     '/first-scorebook': 'first-scorebook',

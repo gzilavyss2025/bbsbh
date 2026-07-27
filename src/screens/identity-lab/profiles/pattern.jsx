@@ -1,35 +1,32 @@
+/* eslint-disable react-refresh/only-export-components -- a profile module's
+   public surface is its descriptor object, not the components inside it; the
+   components are local by design. Fast Refresh falls back to a full reload for
+   this dev-only lab, which is a fine trade for keeping each dimension's data,
+   copy text, and tiles in one readable file. */
 import { useEffect, useId, useState } from 'react'
-import { CopyBox } from '../components/CopyBox.jsx'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { RecolorFilter } from '../components/WinProbChart.jsx'
-import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { BAND_COLOR_OVERRIDES, chipColorsFor } from '../lib/wpaBandColors.js'
-import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
-import { wpaLogoFor, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { CopyBox } from '../../../components/CopyBox.jsx'
+import { RecolorFilter } from '../../../components/WinProbChart.jsx'
+import { BAND_COLOR_OVERRIDES, chipColorsFor } from '../../../lib/wpaBandColors.js'
+import { ALL_MLB_TEAM_IDS, teamFullName } from '../../../lib/teams.js'
+import { wpaLogoFor, wpaTilePlacements } from '../../../lib/wpaLogo.js'
 
-// Design harness for reviewing the win-probability chart's tiled band pattern
-// (WinProbChart.jsx) for every club at every level — MLB plus all four full-
-// season MiLB affiliate tiers (AAA/AA/A+/A; complex/rookie leagues have no
-// stable per-club identity to review here, so they're left out). Reached at
-// /team-pattern-lab in production, linked from nowhere (unlisted, like
-// /team-color-lab — see lib/route.js). No score/reveal content, so no
-// spoiler risk in shipping it.
+// The WPA-pattern dimension: every club's win-probability band pattern (color +
+// tiled logo, see components/WinProbChart.jsx) at full size, one league level at
+// a time — MLB plus all four full-season MiLB tiers.
 //
-// Each team's box is the SAME tile math WinProbChart.jsx uses for one band —
-// its own brand color plus a full-opacity tiling of its own logo — just
-// stretched to fill the whole card instead of a sliver of a win% area, so a
-// reviewer can judge a club's pattern on its own rather than squinting at a
-// thin wedge of a real game's chart.
+// Each card is the SAME tile math the real chart uses for one band — its own
+// brand color plus a full-opacity tiling of its own logo — just stretched to
+// fill the card instead of a sliver of a win% area, so a club's pattern can be
+// judged on its own rather than squinting at a thin wedge of a real game's
+// chart. Deliberately bigger than the real chart's own tile
+// (WPA_LOGO_DEFAULTS.size): this grid is a magnified review surface, and the
+// colour dimensions' per-treatment WPA box is the true-size one. The tile math
+// itself is the shared wpaTilePlacements (row shift included, though it's off by
+// default), so a club's pattern reads here the way it reads in a real chart.
 //
 // The copy box + per-team feedback field exist so a review pass can happen
-// off-screen: read down the grid, type what should change under each team,
-// then copy the compiled block at the bottom into a message to Claude.
-// Deliberately bigger than the real chart's own tile (WPA_LOGO_DEFAULTS.size)
-// — this grid is a magnified review surface, not a true-size preview; Team
-// Color Lab's per-treatment WPA box is the true-size one. The tile math
-// itself is the shared wpaTilePlacements (row shift included, though it's off
-// by default), so a club's pattern reads here the way it reads in a real
-// chart.
+// off-screen: read down the grid, type what should change under each team, then
+// copy the compiled block at the bottom into a message to Claude.
 const LOGO_SIZE = 30
 const LOGO_PADDING = 6
 const LOGO_ROTATE = -14
@@ -45,7 +42,7 @@ const LEAGUE_FILTERS = [
   { key: 'a', label: 'Single-A', sportId: 14 },
 ]
 
-const FEEDBACK_KEY = 'bbsbh:team-pattern-lab:feedback'
+const FEEDBACK_KEY = 'bbsbh:identity-lab:pattern:feedback'
 
 function loadFeedback() {
   try {
@@ -55,8 +52,7 @@ function loadFeedback() {
   }
 }
 
-export function TeamPatternLab() {
-  useDocumentTitle('Team Pattern Lab')
+function PatternLabBody() {
   const [leagueKey, setLeagueKey] = useState('mlb')
   const [milbTeams, setMilbTeams] = useState(null) // sportId -> [{ id, name }]
   const [feedback, setFeedback] = useState(loadFeedback)
@@ -101,19 +97,7 @@ export function TeamPatternLab() {
     .join('\n\n')
 
   return (
-    <div className="screen">
-      <SiteHeader />
-      <header className="topbar">
-        <h1 className="topbar__title">Team Pattern Lab</h1>
-      </header>
-      <p className="hint">
-        An unlisted design harness — not linked anywhere in the app. Each
-        club’s win-probability band pattern (color + tiled logo, see{' '}
-        <code>src/components/WinProbChart.jsx</code>) at full size, one
-        league level at a time. Type feedback under a team, then copy the
-        compiled block at the bottom into a message to Claude.
-      </p>
-
+    <>
       <div className="patternlab__filters" role="group" aria-label="Filter by league">
         {LEAGUE_FILTERS.map((l) => (
           <button
@@ -150,25 +134,25 @@ export function TeamPatternLab() {
           <p className="hint">Nothing typed yet — notes you add above will collect here.</p>
         )}
       </section>
-    </div>
+    </>
   )
 }
 
 function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
   const patternUid = useId()
   const colors = chipColorsFor(teamId)
-  // This harness reviews the club's Main pattern only, resolved through the
-  // same wpaLogoFor (lib/wpaLogo.js) the real chart uses — a 'swap' override
-  // points at its own precomputed recolored asset, every other case uses the
-  // normal CDN mark recolored in place via the filter below.
+  // This dimension reviews the club's Main pattern only, resolved through the
+  // same wpaLogoFor the real chart uses — a 'swap' override points at its own
+  // precomputed recolored asset, every other case uses the normal CDN mark
+  // recolored in place via the filter below.
   const { src: logo, recolor: logoOverride } = wpaLogoFor(teamId, 'main')
   const bandColor = BAND_COLOR_OVERRIDES[teamId] ?? colors.primary
   const patternId = `patternlab-${patternUid}`
   const recolorId = `patternlab-recolor-${patternUid}`
   const copyText =
     `Team: ${name} (id ${teamId}, ${leagueLabel})\n` +
-    `Where: src/components/WinProbChart.jsx — this club's band pattern ` +
-    `(BAND_COLOR_OVERRIDES / LOGO_COLOR_OVERRIDES, keyed by teamId ${teamId})`
+    `Where: src/lib/data/wpa-tuning.json — ${teamId}.bandColor (this club's Main band fill) / ` +
+    `src/lib/wpaLogo.js — LOGO_COLOR_OVERRIDES[${teamId}] (whether its mark may be recolored)`
 
   return (
     <div className="patternlab__card">
@@ -222,4 +206,20 @@ function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
       />
     </div>
   )
+}
+
+export const patternProfile = {
+  key: 'pattern',
+  label: 'WPA patterns',
+  title: 'Team Identity Lab — WPA patterns',
+  hint: (
+    <>
+      An unlisted, dev-only design harness — not linked anywhere in the app. Each
+      club’s win-probability band pattern (color + tiled logo, see{' '}
+      <code>src/components/WinProbChart.jsx</code>) at full size, one league
+      level at a time. Type feedback under a team, then copy the compiled block
+      at the bottom into a message to Claude.
+    </>
+  ),
+  Body: PatternLabBody,
 }

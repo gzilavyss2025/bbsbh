@@ -1,0 +1,1246 @@
+{
+  "108": {
+    "name": "Los Angeles Angels",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#003263"
+      },
+      "alternate": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#C4CED4"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#BA0021"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      }
+    }
+  },
+  "109": {
+    "name": "Arizona Diamondbacks",
+    "bandColor": "#E3D4AD",
+    "note": "their real secondary sand/desert tone (TEAM_COLOR_PAIRS)",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 3,
+          "paddingY": -1,
+          "rowShift": 0
+        },
+        "band": "#E3D4AD"
+      },
+      "alternate": {
+        "layout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#A71930"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 73,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 12,
+          "paddingY": -43,
+          "rowShift": 0
+        },
+        "band": "#A29E9F"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 44,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 1,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 0
+        },
+        "band": "#523178"
+      }
+    }
+  },
+  "110": {
+    "name": "Baltimore Orioles",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 1,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#DF4601"
+      },
+      "alternate": {
+        "layout": {
+          "size": 36,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 39,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 2,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 2,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#E1D2BE"
+      }
+    }
+  },
+  "111": {
+    "name": "Boston Red Sox",
+    "bandColor": "#0C2340",
+    "note": "secondary navy, not primary red",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 39,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -1,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      },
+      "alternate": {
+        "layout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#BD3039"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 36,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 0,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": "#307FE2"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 34,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 0,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#5A8D84"
+      }
+    }
+  },
+  "112": {
+    "name": "Chicago Cubs",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 51,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": {
+          "pinstripe": true,
+          "color": "rgba(0, 0, 0, 0.16)"
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 4
+        },
+        "band": "#0E3386"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 50,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 3,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#7698CE"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      }
+    }
+  },
+  "113": {
+    "name": "Cincinnati Reds",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 48,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 2,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#C6011F"
+      },
+      "alternate": {
+        "layout": {
+          "size": 63,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": -19,
+          "rowShift": 0
+        },
+        "band": "#C6011F"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -2,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": -2,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 48,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": -5,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      }
+    }
+  },
+  "114": {
+    "name": "Cleveland Guardians",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 34,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#00385D"
+      },
+      "alternate": {
+        "layout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#00385D"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#E31937"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 2,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 64,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 14,
+          "paddingY": -19,
+          "rowShift": 0
+        },
+        "band": "#00385D"
+      }
+    }
+  },
+  "115": {
+    "name": "Colorado Rockies",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 6,
+          "rowShift": 0
+        },
+        "band": {
+          "pinstripe": true,
+          "color": "rgba(0, 0, 0, 0.16)"
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#33006F"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 13,
+          "paddingY": -12,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 49,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": -12
+        },
+        "band": "#8ABFEB"
+      }
+    }
+  },
+  "116": {
+    "name": "Detroit Tigers",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 2,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0C2340"
+      },
+      "alternate": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -3,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#FA4616"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0C2340"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      }
+    }
+  },
+  "117": {
+    "name": "Houston Astros",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002D62"
+      },
+      "alternate": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#EB6E1F"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002D62"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 44,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#CEC8B2"
+      }
+    }
+  },
+  "118": {
+    "name": "Kansas City Royals",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 12,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#004687"
+      },
+      "alternate": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#6DADF4"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 63,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -5,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      }
+    }
+  },
+  "119": {
+    "name": "Los Angeles Dodgers",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 7,
+          "rowShift": 0
+        },
+        "band": "#005A9C"
+      },
+      "alternate": {
+        "layout": {
+          "size": 53,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 3,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      }
+    }
+  },
+  "133": {
+    "name": "Athletics",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 35,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 2
+        },
+        "band": "#003831"
+      },
+      "alternate": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 0,
+          "paddingY": -2,
+          "rowShift": 0
+        },
+        "band": "#EFB21E"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 71,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -19,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#003831"
+      }
+    }
+  },
+  "134": {
+    "name": "Pittsburgh Pirates",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 25,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#27251F"
+      }
+    }
+  },
+  "136": {
+    "name": "Seattle Mariners",
+    "bandColor": "#005C5C",
+    "note": "secondary green/teal, not primary navy",
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 4
+        },
+        "band": "#203F79"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 34,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 4
+        },
+        "band": "#000000"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 0
+        },
+        "band": "#0C2C56"
+      }
+    }
+  },
+  "139": {
+    "name": "Tampa Bay Rays",
+    "bandColor": "#8FBCE6",
+    "note": "secondary lighter blue, not primary navy",
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": -10
+        },
+        "band": "#7bc35e"
+      },
+      "alternate": {
+        "layout": {
+          "size": 117,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": -68
+        },
+        "band": "#8FBCE6"
+      }
+    }
+  },
+  "140": {
+    "name": "Texas Rangers",
+    "bandColor": "#EBDFCB",
+    "note": "their real cream tone, sampled off their own alt mark (ALT_COLORS)",
+    "treatments": {}
+  },
+  "141": {
+    "name": "Toronto Blue Jays",
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 50,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": 7
+        },
+        "band": "#161827"
+      }
+    }
+  },
+  "142": {
+    "name": "Minnesota Twins",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002B5C"
+      },
+      "alternate": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002B5C"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#E8DCC0"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002B5C"
+      }
+    }
+  },
+  "143": {
+    "name": "Philadelphia Phillies",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 7,
+          "rowShift": 0
+        },
+        "band": "#E81828"
+      }
+    }
+  },
+  "144": {
+    "name": "Atlanta Braves",
+    "bandColor": "#13274F",
+    "note": "secondary navy, not primary red",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 106,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": -61,
+          "rowShift": 0
+        },
+        "band": "#13274F"
+      },
+      "alternate": {
+        "layout": {
+          "size": 100,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": -50
+        },
+        "band": "#CE1141"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 73,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -33,
+          "rowShift": 0
+        },
+        "band": "#F5F0E1"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 85,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -45,
+          "rowShift": 0
+        },
+        "band": "#A2AAAD"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 59,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -5,
+          "paddingY": -6,
+          "rowShift": 0
+        },
+        "band": "#7BA7D8"
+      }
+    }
+  },
+  "145": {
+    "name": "Chicago White Sox",
+    "bandColor": "#C4CED4",
+    "note": "their real secondary silver/gray, not primary near-black",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -7,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#C4CED4"
+      },
+      "alternate": {
+        "layout": {
+          "size": 53,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -11,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": {
+          "pinstripe": true,
+          "color": "rgba(0, 0, 0, 0.16)"
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 49,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 59,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -5,
+          "paddingY": -3,
+          "rowShift": 0
+        },
+        "band": "#C8102E"
+      }
+    }
+  },
+  "146": {
+    "name": "Miami Marlins",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#00A3E0"
+      },
+      "alternate": {
+        "layout": {
+          "size": 50,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 1,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 53,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 61,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": -4,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#009CA7"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -7,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      }
+    }
+  },
+  "147": {
+    "name": "New York Yankees",
+    "bandColor": "#132448",
+    "note": "their true logo navy, darker than TEAM_COLORS' brighter #003087 accent",
+    "treatments": {
+      "alternate": {
+        "layout": {
+          "size": 35,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#C4CED3"
+      }
+    }
+  },
+  "158": {
+    "name": "Milwaukee Brewers",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#FCEDD6"
+      },
+      "alternate": {
+        "layout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": {
+          "pinstripe": true,
+          "color": "rgba(0, 0, 0, 0.16)"
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 50,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#12284B"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 30,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#6CACE4"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 69,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingY": -8
+        },
+        "band": "#ff6c58"
+      }
+    }
+  },
+  "432": {
+    "name": "Rome Emperors",
+    "bandColor": "#D0A353",
+    "note": "no true yellow in their mark, closest is this laurel gold",
+    "treatments": {}
+  },
+  "437": {
+    "name": "Lake County Captains",
+    "bandColor": "#FDB913",
+    "note": "their own logo gold, sampled off the CDN mark",
+    "treatments": {}
+  },
+  "484": {
+    "name": "Indianapolis Indians",
+    "bandColor": "#D9D9D9",
+    "note": "light gray, not their parent org's near-black",
+    "treatments": {}
+  },
+  "556": {
+    "name": "Nashville Sounds",
+    "bandColor": "#E31837",
+    "note": "their own logo red, sampled off the CDN mark",
+    "treatments": {}
+  },
+  "565": {
+    "name": "Quad Cities River Bandits",
+    "bandColor": "#AD8505",
+    "note": "their own logo bronze/gold, not their parent org's navy",
+    "treatments": {}
+  },
+  "572": {
+    "name": "Wisconsin Timber Rattlers",
+    "bandColor": "#8A2432",
+    "note": "their own logo maroon, sampled off the CDN mark",
+    "treatments": {}
+  },
+  "580": {
+    "name": "Winston-Salem Dash",
+    "bandColor": "#C7BEE0",
+    "note": "pale tint of their own logo purple",
+    "treatments": {}
+  },
+  "6325": {
+    "name": "Columbus Clingstones",
+    "bandColor": "#000000",
+    "note": "plain black",
+    "treatments": {}
+  }
+}

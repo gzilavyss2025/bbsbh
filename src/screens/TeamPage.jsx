@@ -791,7 +791,7 @@ export function TeamPage({ id, asOf, sportId }) {
 
         <header className="team-hub__id">
           {/* The club's Main "logo card" — its mark on the curated tinted tile
-              (the same treatment tile Team Color Lab prototyped and the slate
+              (the same treatment tile Team Identity Lab prototyped and the slate
               cards wear), rather than a bare CDN logo. Degrades to the plain
               mark on paper for a MiLB club with no curated Main override. */}
           <div className="team-hub__logo">

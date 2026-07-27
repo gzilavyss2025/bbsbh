@@ -29,3 +29,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      # Needs the artifact, so it can't live in `npm run lint`: asserts the
+      # dev-only write-back endpoint never reached the shipped bundle. See
+      # docs/adr/0029-dev-only-data-write-back.md.
+      - run: npm run check:dist-dev

@@ -489,8 +489,8 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
   }
 }
 
-// The opponent from a team's most recently COMPLETED game — Team Color Lab's
-// WPA scenario mockups (screens/TeamColorLab.jsx) use this so the "away" band
+// The opponent from a team's most recently COMPLETED game — the Team Identity
+// Lab's WPA scenario mockups (screens/identity-lab/) use this so the "away" band
 // in its win/tie/lose previews shows a real, recognizable rival instead of a
 // placeholder club. Reuses fetchTeamSchedule's own season list (already
 // sorted ascending, already carrying `won`/`opponent`, no `resultsCutoff` —
@@ -500,7 +500,7 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
 // (pre-Opening-Day, or the off-season). Degrades to null with nothing found
 // in either season or on a fetch failure (fetchTeamSchedule's own
 // degrade-to-[] path). `sportId` defaults to MLB (1, fetchTeamSchedule's own
-// default) — MilbTeamColorLab.jsx (screens/) passes the affiliate's real
+// default) — the lab's MiLB dimensions pass the affiliate's real
 // level (11/12/13/14), since a MiLB teamId has no games under sportId 1 and
 // would otherwise always resolve to null.
 export async function fetchLastOpponent(teamId, season = new Date().getFullYear(), sportId = 1) {
