@@ -85,11 +85,32 @@ test('MiLB treatment keys are only the two variations that dimension has', () =>
   }
 })
 
-test('a milb-colors pair is exactly two hex colors', () => {
+// An entry either carries a real pair or is explicitly `found: false` — never
+// both, and never neither. That's the whole guard against an unresolved club
+// quietly acquiring an invented hex, so it's asserted on the committed file
+// rather than only in the dev-save validator.
+test('a milb-colors entry is either two hex colors or an explicit found:false', () => {
   for (const [teamId, entry] of Object.entries(MILB_COLORS)) {
-    assert.ok(Array.isArray(entry.pair), `${teamId} has no pair`)
+    if (entry.found === false) {
+      assert.equal(entry.pair, undefined, `${teamId} is found:false but carries a pair`)
+      assert.ok(entry.note, `${teamId} is found:false with no note explaining why`)
+      continue
+    }
+    assert.ok(Array.isArray(entry.pair), `${teamId} has no pair and no found:false`)
     assert.equal(entry.pair.length, 2, `${teamId}'s pair is not two colors`)
     for (const hex of entry.pair) assert.match(hex, /^#[0-9a-fA-F]{6}$/, `${teamId}: ${hex}`) // caps-js-exempt
+  }
+})
+
+test('a milb-colors third color and confidence rating are well-formed', () => {
+  for (const [teamId, entry] of Object.entries(MILB_COLORS)) {
+    if (entry.third !== undefined) {
+      assert.match(entry.third, /^#[0-9a-fA-F]{6}$/, `${teamId}: ${entry.third}`) // caps-js-exempt
+    }
+    assert.ok(
+      ['high', 'medium', 'low'].includes(entry.confidence),
+      `${teamId}'s confidence is "${entry.confidence}"`,
+    )
   }
 })
 
@@ -192,8 +213,17 @@ test('offset and origin default to no nudge for an untuned team or treatment', (
   assert.equal(treatmentOriginY(158, 'main'), 'center')
 })
 
+// MILB_RESEARCHED_PAIRS is step 1 of the chain, so its keys are exactly the
+// entries that HAVE a pair — three short of the store's 120 affiliates, which
+// is the point: the unresolved three must not appear here at all, or they'd
+// short-circuit the parent-org fallback with an undefined pair.
 test('every researched MiLB pair survives the move to milb-colors.json', () => {
-  assert.equal(Object.keys(MILB_RESEARCHED_PAIRS).length, Object.keys(MILB_COLORS).length)
+  const withPair = Object.values(MILB_COLORS).filter((e) => e.pair).length
+  assert.equal(Object.keys(MILB_RESEARCHED_PAIRS).length, withPair)
+  assert.equal(Object.keys(MILB_COLORS).length, withPair + 3)
   assert.deepEqual(MILB_RESEARCHED_PAIRS[234], ['#0054A4', '#B15C12']) // Durham Bulls
   assert.equal(MILB_RESEARCHED_PAIRS[999999], undefined)
+  for (const teamId of [482, 553, 1956]) {
+    assert.equal(MILB_RESEARCHED_PAIRS[teamId], undefined, `${teamId} should have no researched pair`)
+  }
 })

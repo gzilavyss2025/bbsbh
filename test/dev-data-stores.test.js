@@ -145,6 +145,38 @@ test('a milb-colors entry needs a name and a two-color pair', () => {
   assert.match(colors({ 234: { name: 'Durham Bulls', pair: [1, 2] } }), /not two colors/)
 })
 
+test('a milb-colors entry carries its provenance, checked rather than waved through', () => {
+  assert.equal(
+    colors({
+      546: {
+        name: 'Portland Sea Dogs',
+        level: 'Double-A',
+        pair: ['#e03a3e', '#003263'],
+        third: '#cbccce',
+        confidence: 'low',
+        source: 'sportsfancovers.com',
+        note: 'CONFLICTING sources: …', // caps-js-exempt
+      },
+    }),
+    null,
+  )
+  assert.match(colors({ 234: { name: 'Durham Bulls', confidence: 'pretty sure' } }), /high\/medium\/low/)
+  assert.match(colors({ 234: { name: 'Durham Bulls', third: 42 } }), /third is not a color/)
+  assert.match(colors({ 234: { name: 'Durham Bulls', source: 42 } }), /source is not a string/)
+  assert.match(colors({ 234: { name: 'Durham Bulls', found: 'no' } }), /found is not a boolean/)
+})
+
+test('a milb-colors entry may not be found:false AND carry a pair', () => {
+  // The cross-field rule that keeps an unresolved club visibly unresolved —
+  // an entry claiming both would put an invented hex on step 1 of the chain
+  // while still reading as "research found nothing" everywhere else.
+  assert.equal(colors({ 482: { name: 'Corpus Christi Hooks', found: false } }), null)
+  assert.match(
+    colors({ 482: { name: 'Corpus Christi Hooks', found: false, pair: ['#002D62', '#EB6E1F'] } }),
+    /found:false but carries a pair/,
+  )
+})
+
 test('uniform names must stay a flat code -> string map', () => {
   assert.equal(names({ '158_jersey_1_2026': 'Home Cream' }), null)
   assert.equal(names({}), null)

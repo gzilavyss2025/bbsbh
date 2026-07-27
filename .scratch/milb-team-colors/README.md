@@ -1,79 +1,96 @@
-# MiLB team hex colors — research stash
+# MiLB team hex colors — research stash (RETIRED)
 
-Speculative research for a **future project**, not wired into the app. `bbsbh` has
-no MLB-club-only `TEAM_COLOR_PAIRS` equivalent for MiLB — `src/lib/teams.js`
-currently resolves any MiLB team id to its **parent MLB org's** color via
-`MILB_PARENT_ORG` (see `gen-milb-team-colors.mjs`), because no clean per-team MiLB
-color source existed. This stash is a first pass at closing that gap, in case a
-future project wants each MiLB club's own colors instead of the parent org's.
+**The data is gone from here. It lives at `src/lib/data/milb-colors.json` and is
+wired into the app.** Retired 2026-07-27 by Team Identity Lab PR 5
+(`.scratch/team-identity-lab/PRD.md` §5).
 
-## What's here
+Keeping this file for the two things the data store shouldn't carry: how the
+research was done, and what the confidence ratings mean. Everything per-team —
+the hexes, `third`, `confidence`, `source`, and every caveat note below — moved
+into the store itself, one field per entry, so the warning travels with the
+value instead of living in a README nobody opens.
 
-`milb-colors.json` — all 120 full-season MiLB affiliates (from
-`public/data/affiliates.json`, 2026 season), keyed by MLB Stats API team id, with
-`primary`/`secondary`/`third` hex, a `confidence` rating, and a `source`.
+## What happened to it
+
+The stash held 120 affiliates; the app had already landed 115 of them (the pairs
+were copied across in an earlier pass). A diff on 2026-07-27 found **zero hex
+disagreements across all 115 shared entries** — the live table already *was* this
+research. So PR 5 was not a merge. It was:
+
+- the `third`/`confidence`/`source`/`note` metadata the earlier copy dropped,
+  restored onto all 120 entries;
+- the 5 missing teams resolved or explicitly marked unresolved (below);
+- one fallback chain replacing two (`src/lib/brandColors.js`).
 
 ## How it was built
 
 Confirmed first: **statsapi.mlb.com carries no color field for any team, MLB or
 MiLB**, and MLB/MiLB do not publish an official public hex/Pantone spec sheet. So
-this leans on the same kind of third-party color-aggregator sites the existing
-MLB-club colors in `teams.js` cite (`teamcolorcodes.com`) — except for MiLB,
+this leaned on the same kind of third-party color-aggregator sites the MLB-club
+colors in `src/lib/brandColors.js` cite (`teamcolorcodes.com`) — except for MiLB,
 `teamcolorcodes.com` doesn't have per-team pages, and `sportsfancovers.com`
-(which does) had an expired SSL cert during this research pass, so results are
-**search-snippet excerpts of that site**, not a direct fetch — treat accordingly.
+(which does) had an expired SSL cert during the research pass, so those results
+are **search-snippet excerpts of that site**, not a direct fetch — treat
+accordingly.
 
 Four parallel research agents each covered one full level (Triple-A, Double-A,
 High-A, Single-A, ~30 teams each), pulling from whatever source actually had
 per-team hex data:
+
 - **Triple-A** → Wikipedia infobox `{{Color box}}` values
 - **Double-A** → sportsfancovers.com (via search snippets)
 - **High-A / Single-A** → trucolor.net league portfolio pages
 
-No hex was invented by any agent — where only color *names* were found (not a
-hex code), the team is marked `"found": false` in the JSON rather than guessed.
+**No hex was invented.** Where only color *names* were found, the team is marked
+`"found": false` rather than guessed — three still are (below).
 
 ## Confidence levels
+
+These are the `confidence` field's three values, and the only three:
 
 - **high** — 2+ independent sources agreed on the same hex values
 - **medium** — single-source (one aggregator), plausible but unverified
 - **low** — conflicting sources, or a likely mislabel, or names-only (no hex)
 
-Every entry in this file is single-sourced unless flagged `high`. **Re-verify
-against the team's own site/brand guide before using any of this in a real
-feature** — this is a snapshot, not a maintained source, and several MiLB teams
-rebrand or relocate every year.
+Today's spread: 6 high, 107 medium, 7 low. **Every entry is single-sourced unless
+flagged `high`.** Re-verify against a team's own site or brand guide before
+leaning on any one of them for something more permanent — this was a snapshot in
+July 2026, not a maintained source, and several MiLB clubs rebrand or relocate
+every year.
 
-## Known gaps / unresolved conflicts (as of 2026-07-24)
+## Still unresolved — where a future pass should start
 
-- **546 Portland Sea Dogs** — two sources disagree on the entire navy family
-  (not a rounding difference). Not usable as-is.
-- **553 Knoxville Smokies**, **482 Corpus Christi Hooks**, **1956 Somerset
-  Patriots** — only color *names* found, no hex at all (recent rebrands, not yet
-  covered by aggregators).
-- **106 Erie SeaWolves** — a source hex is mislabeled as "Navy Blue" when it's
-  actually red/magenta; the color itself may be fine but don't trust the label.
-- **3410 Richmond Flying Squirrels** — colors on file are the *pre-2026* identity;
-  team debuted a refresh for the 2026 season ("Radiant Red"/"Squirrels Silver")
-  that has no hex documented anywhere yet.
-- **6325 Columbus Clingstones** — brand-new 2026 expansion team; hex source
-  wasn't cleanly identified, lowest-confidence entry in the set.
-- Several other 2025/2026 rebrands/relocations (Quad Cities River Bandits, Great
-  Lakes Loons, Wilmington Blue Rocks, Eugene Emeralds, Jersey Shore BlueClaws,
-  Rome Emperors, Hub City Spartanburgers, Salem RidgeYaks, Hill City Howlers,
-  Ontario Tower Buzzers, Wilson Warbirds, Rancho Cucamonga Quakes, Inland Empire
-  66ers) are included with hex values dated to the new identity, but are worth a
-  spot-check since they're the newest and least-covered entries.
+Three clubs carry `"found": false` and no pair. They fall through to their parent
+org's colors and the Team Identity Lab flags each one "no researched color":
 
-## If a future project picks this up
+| Team | Why |
+| --- | --- |
+| 482 Corpus Christi Hooks | Rebranded 2025; color names only (navy, light blue, red, white, silver) |
+| 553 Knoxville Smokies | Rebranded from Tennessee Smokies for 2026; names only (royal blue, light blue, red, gold) |
+| 1956 Somerset Patriots | Names only (navy, maroon, silver, white) |
 
-1. Re-run search/fetch on the flagged teams above first — those are the known
-   holes.
-2. Spot-check a sample of "medium" confidence entries against a second source
-   (team's own site CSS, official brand guide PDF, or a working
-   `sportsfancovers.com`/`teamcolorcodes.com` fetch) before trusting the set
-   wholesale.
-3. If this graduates into `src/lib/teams.js`, follow the existing
-   `TEAM_COLOR_PAIRS` pattern (MLB clubs only today) — comment the source and
-   verification date the way that block already does, and decide whether MiLB
-   colors should extend `MILB_PARENT_ORG` or replace it.
+Two more were resolved by PR 5 but are worth re-checking, and both are flagged
+`confidence: low` in the store with the reasoning in their `note`:
+
+- **546 Portland Sea Dogs** — two sources disagreed on the entire navy family.
+  Resolved toward the sportsfancovers reading (`#e03a3e`/`#003263`), owner-
+  approved. The conflict is recorded, not settled by a new source.
+- **6325 Columbus Clingstones** — brand-new 2026 club, source page never cleanly
+  identified. Took the hand-tuned lab value, which matched the research reading
+  closely in swapped roles.
+
+Also still flagged in the store: **106 Erie SeaWolves** (a source hex mislabeled
+as "Navy Blue" when it's red/magenta — the hex may be fine, the label is not) and
+**3410 Richmond Flying Squirrels** (pre-2026 colors; the team's 2026 refresh,
+"Radiant Red"/"Squirrels Silver", has no documented hex anywhere yet).
+
+Beyond those, the newest identities are the least-covered and worth a spot-check:
+Quad Cities River Bandits, Great Lakes Loons, Wilmington Blue Rocks, Eugene
+Emeralds, Jersey Shore BlueClaws, Rome Emperors, Hub City Spartanburgers, Salem
+RidgeYaks, Hill City Howlers, Ontario Tower Buzzers, Wilson Warbirds, Rancho
+Cucamonga Quakes, Inland Empire 66ers.
+
+## Editing any of this now
+
+Don't hand-edit the JSON. Run `npm run dev`, open `/identity-lab`, and use the
+MiLB dimension — see `src/lib/CLAUDE.md`.

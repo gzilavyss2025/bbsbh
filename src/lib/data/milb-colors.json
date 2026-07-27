@@ -5,7 +5,10 @@
     "pair": [
       "#091F40",
       "#A31F37"
-    ]
+    ],
+    "third": "#A2A9AD",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "103": {
     "name": "Lake Elsinore Storm",
@@ -13,7 +16,10 @@
     "pair": [
       "#010101",
       "#C8102E"
-    ]
+    ],
+    "third": "#75787B",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "105": {
     "name": "Sacramento River Cats",
@@ -21,7 +27,10 @@
     "pair": [
       "#000000",
       "#800032"
-    ]
+    ],
+    "third": "#CDB478",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "106": {
     "name": "Erie SeaWolves",
@@ -30,7 +39,9 @@
       "#231f20",
       "#d10c47"
     ],
-    "note": "source mislabeled — re-verify before leaning on this pair"
+    "third": "#fbaf4a",
+    "confidence": "low",
+    "note": "Source labeled #d10c47 as 'Navy Blue' which is wrong (it's red/magenta) — likely a mislabel in the aggregator table; hex itself may still be right, name is not."
   },
   "233": {
     "name": "Charleston RiverDogs",
@@ -38,7 +49,10 @@
     "pair": [
       "#091F2C",
       "#F2A900"
-    ]
+    ],
+    "third": "#A2AAAD",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "234": {
     "name": "Durham Bulls",
@@ -46,7 +60,10 @@
     "pair": [
       "#0054A4",
       "#B15C12"
-    ]
+    ],
+    "third": "#000000",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "235": {
     "name": "Memphis Redbirds",
@@ -54,7 +71,10 @@
     "pair": [
       "#D31245",
       "#002B5C"
-    ]
+    ],
+    "third": "#FFE512",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "237": {
     "name": "Midland RockHounds",
@@ -62,7 +82,9 @@
     "pair": [
       "#0069aa",
       "#fbb034"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "238": {
     "name": "Oklahoma City Comets",
@@ -70,7 +92,11 @@
     "pair": [
       "#005DAA",
       "#EF3E42"
-    ]
+    ],
+    "third": "#89D1F4",
+    "confidence": "medium",
+    "source": "Wikipedia",
+    "note": "renamed from Dodgers 2025"
   },
   "247": {
     "name": "Birmingham Barons",
@@ -78,7 +104,10 @@
     "pair": [
       "#231f20",
       "#be0940"
-    ]
+    ],
+    "third": "#ffffff",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "249": {
     "name": "Wilson Warbirds",
@@ -86,7 +115,11 @@
     "pair": [
       "#091F2C",
       "#00677F"
-    ]
+    ],
+    "third": "#862633",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "new relocation/rebrand; color names broadly match SportsLogos.net but not exactly"
   },
   "259": {
     "name": "Fresno Grizzlies",
@@ -94,7 +127,10 @@
     "pair": [
       "#BA0C2F",
       "#010101"
-    ]
+    ],
+    "third": "#946037",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "260": {
     "name": "Tulsa Drillers",
@@ -102,7 +138,10 @@
     "pair": [
       "#005294",
       "#221e1f"
-    ]
+    ],
+    "third": "#818285",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "279": {
     "name": "Palm Beach Cardinals",
@@ -110,7 +149,10 @@
     "pair": [
       "#BA0C2F",
       "#0C2340"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "342": {
     "name": "Albuquerque Isotopes",
@@ -118,7 +160,10 @@
     "pair": [
       "#000000",
       "#F61D30"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "400": {
     "name": "Las Vegas Aviators",
@@ -126,7 +171,10 @@
     "pair": [
       "#0A2240",
       "#FF4D00"
-    ]
+    ],
+    "third": "#F5A800",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "401": {
     "name": "Inland Empire 66ers",
@@ -134,7 +182,11 @@
     "pair": [
       "#010101",
       "#69B3E7"
-    ]
+    ],
+    "third": "#FA4616",
+    "confidence": "high",
+    "source": "trucolor.net; confirmed SportsLogos.net",
+    "note": "new Mariners affiliation identity"
   },
   "402": {
     "name": "Akron RubberDucks",
@@ -142,7 +194,10 @@
     "pair": [
       "#010101",
       "#0072CE"
-    ]
+    ],
+    "third": "#FF8200",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "403": {
     "name": "Everett AquaSox",
@@ -150,7 +205,9 @@
     "pair": [
       "#041E42",
       "#00B5E2"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "414": {
     "name": "Salem RidgeYaks",
@@ -158,7 +215,10 @@
     "pair": [
       "#0C2340",
       "#0072CE"
-    ]
+    ],
+    "third": "#B9975B",
+    "confidence": "high",
+    "source": "trucolor.net; matched independent search snippet"
   },
   "416": {
     "name": "Louisville Bats",
@@ -166,7 +226,10 @@
     "pair": [
       "#EC1B2B",
       "#151240"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "418": {
     "name": "Chesapeake Baysox",
@@ -174,7 +237,11 @@
     "pair": [
       "#010101",
       "#FC4C02"
-    ]
+    ],
+    "third": "#00BFB2",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)",
+    "note": "2025-present identity"
   },
   "419": {
     "name": "Hillsboro Hops",
@@ -182,7 +249,10 @@
     "pair": [
       "#051C2C",
       "#7BAFD4"
-    ]
+    ],
+    "third": "#78BE21",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "421": {
     "name": "Montgomery Biscuits",
@@ -190,7 +260,10 @@
     "pair": [
       "#febe28",
       "#0b2b76"
-    ]
+    ],
+    "third": "#d4721c",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "422": {
     "name": "Buffalo Bisons",
@@ -198,7 +271,10 @@
     "pair": [
       "#CE1141",
       "#0054A4"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "424": {
     "name": "Dunedin Blue Jays",
@@ -206,7 +282,10 @@
     "pair": [
       "#003DA5",
       "#041E42"
-    ]
+    ],
+    "third": "#DA291C",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "426": {
     "name": "Wilmington Blue Rocks",
@@ -214,7 +293,10 @@
     "pair": [
       "#8BB8E8",
       "#041E42"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2026-present, multi-color palette (gray/buff/celery also documented)"
   },
   "427": {
     "name": "Jersey Shore BlueClaws",
@@ -222,7 +304,11 @@
     "pair": [
       "#BA0C2F",
       "#041E42"
-    ]
+    ],
+    "third": "#0072CE",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2026-present"
   },
   "428": {
     "name": "Greenville Drive",
@@ -230,7 +316,10 @@
     "pair": [
       "#C8102E",
       "#0C2340"
-    ]
+    ],
+    "third": "#7C878E",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "431": {
     "name": "Gwinnett Stripers",
@@ -238,7 +327,10 @@
     "pair": [
       "#0D223F",
       "#73AA4F"
-    ]
+    ],
+    "third": "#CE0F43",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "432": {
     "name": "Rome Emperors",
@@ -246,7 +338,11 @@
     "pair": [
       "#010101",
       "#DA291C"
-    ]
+    ],
+    "third": "#CBA052",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2026-present, new relocation/rebrand"
   },
   "435": {
     "name": "Vancouver Canadians",
@@ -254,7 +350,10 @@
     "pair": [
       "#D50032",
       "#9D2235"
-    ]
+    ],
+    "third": "#010101",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "436": {
     "name": "Fredericksburg Nationals",
@@ -262,7 +361,10 @@
     "pair": [
       "#BA0C2F",
       "#041E42"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "437": {
     "name": "Lake County Captains",
@@ -270,7 +372,11 @@
     "pair": [
       "#051C2C",
       "#F2A900"
-    ]
+    ],
+    "third": "#CB333B",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2025-present"
   },
   "440": {
     "name": "Springfield Cardinals",
@@ -278,7 +384,10 @@
     "pair": [
       "#d30e45",
       "#002c5d"
-    ]
+    ],
+    "third": "#ffe615",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "443": {
     "name": "Peoria Chiefs",
@@ -286,7 +395,9 @@
     "pair": [
       "#0C2340",
       "#BA0C2F"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "445": {
     "name": "Columbus Clippers",
@@ -294,7 +405,10 @@
     "pair": [
       "#002A5C",
       "#68ACDB"
-    ]
+    ],
+    "third": "#B9BDBF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "448": {
     "name": "Hickory Crawdads",
@@ -302,7 +416,10 @@
     "pair": [
       "#E4002B",
       "#A6192E"
-    ]
+    ],
+    "third": "#6CACE4",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "450": {
     "name": "Daytona Tortugas",
@@ -310,7 +427,10 @@
     "pair": [
       "#004E42",
       "#78BE21"
-    ]
+    ],
+    "third": "#8BB8E8",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "451": {
     "name": "Iowa Cubs",
@@ -318,7 +438,10 @@
     "pair": [
       "#0E3386",
       "#D12325"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "452": {
     "name": "Altoona Curve",
@@ -326,7 +449,10 @@
     "pair": [
       "#b21921",
       "#231f20"
-    ]
+    ],
+    "third": "#bc823c",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "453": {
     "name": "Brooklyn Cyclones",
@@ -334,7 +460,11 @@
     "pair": [
       "#13294B",
       "#002D72"
-    ]
+    ],
+    "third": "#D50032",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2025-present"
   },
   "456": {
     "name": "Great Lakes Loons",
@@ -342,7 +472,11 @@
     "pair": [
       "#AF272F",
       "#010101"
-    ]
+    ],
+    "third": "#006747",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "very recent (2026) rebrand"
   },
   "459": {
     "name": "Dayton Dragons",
@@ -350,7 +484,9 @@
     "pair": [
       "#010101",
       "#007A33"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "460": {
     "name": "Tri-City Dust Devils",
@@ -358,7 +494,9 @@
     "pair": [
       "#041E42",
       "#B9975B"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "461": {
     "name": "Eugene Emeralds",
@@ -366,7 +504,11 @@
     "pair": [
       "#010101",
       "#007A53"
-    ]
+    ],
+    "third": "#44D62C",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "brand-new 2026 identity"
   },
   "463": {
     "name": "New Hampshire Fisher Cats",
@@ -374,7 +516,10 @@
     "pair": [
       "#c6021e",
       "#0f254b"
-    ]
+    ],
+    "third": "#d6d6d6",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "476": {
     "name": "San Jose Giants",
@@ -382,7 +527,10 @@
     "pair": [
       "#010101",
       "#FA4616"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "477": {
     "name": "Greensboro Grasshoppers",
@@ -390,7 +538,10 @@
     "pair": [
       "#00843D",
       "#010101"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2024-present"
   },
   "478": {
     "name": "Augusta GreenJackets",
@@ -398,7 +549,10 @@
     "pair": [
       "#010101",
       "#007A53"
-    ]
+    ],
+    "third": "#78BE21",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "479": {
     "name": "Jupiter Hammerheads",
@@ -406,7 +560,10 @@
     "pair": [
       "#010101",
       "#0077C8"
-    ]
+    ],
+    "third": "#D50032",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "481": {
     "name": "Hill City Howlers",
@@ -414,7 +571,18 @@
     "pair": [
       "#002F6C",
       "#BA0C2F"
-    ]
+    ],
+    "third": "#89734C",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "new relocation/rebrand"
+  },
+  "482": {
+    "name": "Corpus Christi Hooks",
+    "level": "Double-A",
+    "found": false,
+    "confidence": "low",
+    "note": "Rebranded 2025 to a darker blue. Color names only (navy, light blue, red, white, silver) — no hex found."
   },
   "484": {
     "name": "Indianapolis Indians",
@@ -422,7 +590,11 @@
     "pair": [
       "#00243A",
       "#CD2132"
-    ]
+    ],
+    "third": "#F4B530",
+    "confidence": "medium",
+    "source": "Wikipedia",
+    "note": "new 2025 logo set"
   },
   "486": {
     "name": "Spokane Indians",
@@ -430,7 +602,9 @@
     "pair": [
       "#BA0C2F",
       "#041E42"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "487": {
     "name": "Kannapolis Cannon Ballers",
@@ -438,7 +612,10 @@
     "pair": [
       "#003A70",
       "#CB333B"
-    ]
+    ],
+    "third": "#62B5E5",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "492": {
     "name": "Cedar Rapids Kernels",
@@ -446,7 +623,9 @@
     "pair": [
       "#041E42",
       "#009A44"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "493": {
     "name": "Frederick Keys",
@@ -454,7 +633,9 @@
     "pair": [
       "#010101",
       "#FC4C02"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net; name-matched MiLB.com 2026 rebrand article"
   },
   "494": {
     "name": "Charlotte Knights",
@@ -462,7 +643,10 @@
     "pair": [
       "#000000",
       "#00AEDB"
-    ]
+    ],
+    "third": "#B99E67",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "498": {
     "name": "Chattanooga Lookouts",
@@ -470,7 +654,10 @@
     "pair": [
       "#ec3b46",
       "#000000"
-    ]
+    ],
+    "third": "#ffffff",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "499": {
     "name": "Lansing Lugnuts",
@@ -478,7 +665,9 @@
     "pair": [
       "#C8102E",
       "#010101"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "505": {
     "name": "Binghamton Rumble Ponies",
@@ -486,7 +675,10 @@
     "pair": [
       "#bc0b35",
       "#0f213e"
-    ]
+    ],
+    "third": "#8a9392",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "507": {
     "name": "St. Lucie Mets",
@@ -494,7 +686,10 @@
     "pair": [
       "#002D72",
       "#FC4C02"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "509": {
     "name": "Fort Myers Mighty Mussels",
@@ -502,7 +697,10 @@
     "pair": [
       "#0C2340",
       "#24125F"
-    ]
+    ],
+    "third": "#7D55C7",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "510": {
     "name": "San Antonio Missions",
@@ -510,7 +708,10 @@
     "pair": [
       "#081f3f",
       "#ceaa78"
-    ]
+    ],
+    "third": "#f4192e",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "512": {
     "name": "Toledo Mud Hens",
@@ -518,7 +719,10 @@
     "pair": [
       "#002A5C",
       "#E71629"
-    ]
+    ],
+    "third": "#FDB913",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "516": {
     "name": "Visalia Rawhide",
@@ -526,7 +730,10 @@
     "pair": [
       "#010101",
       "#BA0C2F"
-    ]
+    ],
+    "third": "#B9975B",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "521": {
     "name": "Myrtle Beach Pelicans",
@@ -534,7 +741,10 @@
     "pair": [
       "#0072CE",
       "#0C2340"
-    ]
+    ],
+    "third": "#FFC72C",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "522": {
     "name": "Reading Fightin Phils",
@@ -542,7 +752,10 @@
     "pair": [
       "#d10c47",
       "#042d60"
-    ]
+    ],
+    "third": "#fbbc9b",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "524": {
     "name": "Stockton Ports",
@@ -550,7 +763,10 @@
     "pair": [
       "#C8102E",
       "#002D72"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "526": {
     "name": "Rancho Cucamonga Quakes",
@@ -558,7 +774,10 @@
     "pair": [
       "#BA0C2F",
       "#0C2340"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "high",
+    "source": "trucolor.net; confirmed SportsLogos.net (new Angels affiliation)"
   },
   "529": {
     "name": "Tacoma Rainiers",
@@ -566,7 +785,10 @@
     "pair": [
       "#002D5A",
       "#EB1750"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "531": {
     "name": "Scranton/Wilkes-Barre RailRiders",
@@ -574,7 +796,10 @@
     "pair": [
       "#003366",
       "#840026"
-    ]
+    ],
+    "third": "#D4AF37",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "533": {
     "name": "Worcester Red Sox",
@@ -582,7 +807,10 @@
     "pair": [
       "#00275C",
       "#E41134"
-    ]
+    ],
+    "third": "#FFD300",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "534": {
     "name": "Rochester Red Wings",
@@ -590,7 +818,10 @@
     "pair": [
       "#EE3124",
       "#FFD200"
-    ]
+    ],
+    "third": "#000000",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "537": {
     "name": "Hudson Valley Renegades",
@@ -598,7 +829,10 @@
     "pair": [
       "#0C2340",
       "#97999B"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2025-present"
   },
   "538": {
     "name": "Hartford Yard Goats",
@@ -606,7 +840,10 @@
     "pair": [
       "#002c76",
       "#009a49"
-    ]
+    ],
+    "third": "#b7985e",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "540": {
     "name": "Frisco RoughRiders",
@@ -614,7 +851,10 @@
     "pair": [
       "#862633",
       "#326295"
-    ]
+    ],
+    "third": "#1c2e43",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "541": {
     "name": "Omaha Storm Chasers",
@@ -622,7 +862,21 @@
     "pair": [
       "#004A8D",
       "#B9976A"
-    ]
+    ],
+    "third": "#000000",
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "546": {
+    "name": "Portland Sea Dogs",
+    "level": "Double-A",
+    "pair": [
+      "#e03a3e",
+      "#003263"
+    ],
+    "third": "#cbccce",
+    "confidence": "low",
+    "note": "CONFLICTING sources: trucolor.net gave Navy #0C2340/Red #C8102E/Gray #C1C6C8 (\"2026-present\"); sportsfancovers.com gave Red #e03a3e/Navy #003263/Gray #cbccce. Different navy families — not a rounding difference. Do not use without re-verifying against the team's own site. RESOLVED 2026-07-27 toward the sportsfancovers reading (owner-approved, PRD §2 item 6): its red is the #e03a3e already hand-tuned as this club's Home background in the lab. Still low confidence — the conflict above is recorded, not settled by a new source."
   },
   "547": {
     "name": "Harrisburg Senators",
@@ -630,7 +884,10 @@
     "pair": [
       "#d10c47",
       "#042e61"
-    ]
+    ],
+    "third": "#cab77a",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "548": {
     "name": "Delmarva Shorebirds",
@@ -638,7 +895,10 @@
     "pair": [
       "#010101",
       "#F9423A"
-    ]
+    ],
+    "third": "#8D9093",
+    "confidence": "high",
+    "source": "trucolor.net; matched independent search snippet"
   },
   "550": {
     "name": "South Bend Cubs",
@@ -646,7 +906,10 @@
     "pair": [
       "#002F6C",
       "#C8102E"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2024 refresh, differs slightly from Chicago Cubs' #0E3386"
   },
   "552": {
     "name": "Syracuse Mets",
@@ -654,7 +917,17 @@
     "pair": [
       "#004B8D",
       "#F47D30"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "553": {
+    "name": "Knoxville Smokies",
+    "level": "Double-A",
+    "found": false,
+    "confidence": "low",
+    "note": "Rebranded from Tennessee Smokies for 2026. Color names only (royal blue, light blue, red, gold) — no hex found for new identity."
   },
   "554": {
     "name": "Beloit Sky Carp",
@@ -662,7 +935,10 @@
     "pair": [
       "#010101",
       "#00A3E0"
-    ]
+    ],
+    "third": "#F9423A",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "556": {
     "name": "Nashville Sounds",
@@ -670,7 +946,10 @@
     "pair": [
       "#071D49",
       "#C8102E"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "559": {
     "name": "Rocket City Trash Pandas",
@@ -678,7 +957,10 @@
     "pair": [
       "#e93c49",
       "#3378c2"
-    ]
+    ],
+    "third": "#bcbec0",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "561": {
     "name": "Salt Lake Bees",
@@ -686,7 +968,10 @@
     "pair": [
       "#000000",
       "#FDB913"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "high",
+    "source": "Wikipedia; cross-checked sportsfancovers.com"
   },
   "564": {
     "name": "Jacksonville Jumbo Shrimp",
@@ -694,7 +979,10 @@
     "pair": [
       "#002D62",
       "#007DC3"
-    ]
+    ],
+    "third": "#EF3E42",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "565": {
     "name": "Quad Cities River Bandits",
@@ -702,7 +990,11 @@
     "pair": [
       "#010101",
       "#003594"
-    ]
+    ],
+    "third": "#9A7611",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "very recent (2026) rebrand — watch for updates"
   },
   "566": {
     "name": "Clearwater Threshers",
@@ -710,7 +1002,10 @@
     "pair": [
       "#BA0C2F",
       "#236192"
-    ]
+    ],
+    "third": "#13294B",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "568": {
     "name": "Norfolk Tides",
@@ -718,7 +1013,10 @@
     "pair": [
       "#009A44",
       "#010101"
-    ]
+    ],
+    "third": "#FA4616",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "570": {
     "name": "Lakeland Flying Tigers",
@@ -726,7 +1024,10 @@
     "pair": [
       "#0C2340",
       "#B94700"
-    ]
+    ],
+    "third": "#CDA177",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "572": {
     "name": "Wisconsin Timber Rattlers",
@@ -734,7 +1035,11 @@
     "pair": [
       "#862633",
       "#010101"
-    ]
+    ],
+    "third": "#8D9093",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2023-present"
   },
   "573": {
     "name": "Asheville Tourists",
@@ -742,7 +1047,10 @@
     "pair": [
       "#0C2340",
       "#236192"
-    ]
+    ],
+    "third": "#6ECEB2",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "574": {
     "name": "Arkansas Travelers",
@@ -750,7 +1058,10 @@
     "pair": [
       "#ba0c2f",
       "#000000"
-    ]
+    ],
+    "third": "#c1c6c8",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "580": {
     "name": "Winston-Salem Dash",
@@ -758,7 +1069,10 @@
     "pair": [
       "#010101",
       "#5F249F"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2025-present"
   },
   "582": {
     "name": "West Michigan Whitecaps",
@@ -766,7 +1080,11 @@
     "pair": [
       "#0C2340",
       "#012169"
-    ]
+    ],
+    "third": "#69B3E7",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2024-present"
   },
   "584": {
     "name": "Fort Wayne TinCaps",
@@ -774,7 +1092,11 @@
     "pair": [
       "#2C5234",
       "#7A9A01"
-    ]
+    ],
+    "third": "#DA291C",
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2025-present"
   },
   "587": {
     "name": "Tampa Tarpons",
@@ -782,7 +1104,10 @@
     "pair": [
       "#091F2C",
       "#009CDE"
-    ]
+    ],
+    "third": "#98A4AE",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "1350": {
     "name": "Northwest Arkansas Naturals",
@@ -790,7 +1115,10 @@
     "pair": [
       "#002d6a",
       "#a20534"
-    ]
+    ],
+    "third": "#016993",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "1410": {
     "name": "Lehigh Valley IronPigs",
@@ -798,7 +1126,17 @@
     "pair": [
       "#05173C",
       "#C90116"
-    ]
+    ],
+    "third": "#C2C8CA",
+    "confidence": "medium",
+    "source": "Wikipedia"
+  },
+  "1956": {
+    "name": "Somerset Patriots",
+    "level": "Double-A",
+    "found": false,
+    "confidence": "low",
+    "note": "Color names only (navy, maroon, silver, white) — no hex found."
   },
   "1960": {
     "name": "St. Paul Saints",
@@ -806,7 +1144,10 @@
     "pair": [
       "#001489",
       "#DA291C"
-    ]
+    ],
+    "third": "#FFC72C",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "2310": {
     "name": "Reno Aces",
@@ -814,7 +1155,10 @@
     "pair": [
       "#00285A",
       "#D21146"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "2498": {
     "name": "Bowling Green Hot Rods",
@@ -822,7 +1166,10 @@
     "pair": [
       "#0C2340",
       "#FF6A14"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2022-present"
   },
   "3390": {
     "name": "Bradenton Marauders",
@@ -830,7 +1177,10 @@
     "pair": [
       "#010101",
       "#FFC72C"
-    ]
+    ],
+    "third": "#FFFFFF",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "3410": {
     "name": "Richmond Flying Squirrels",
@@ -839,7 +1189,9 @@
       "#d41041",
       "#231f20"
     ],
-    "note": "pre-2026 refresh colors — see the stash README"
+    "third": "#bbbaba",
+    "confidence": "low",
+    "note": "STALE: these are the pre-2026 colors. Team debuted a refreshed 2026 look (\"Radiant Red\"/\"Squirrels Silver\") but no hex found for the refresh yet."
   },
   "3705": {
     "name": "Columbia Fireflies",
@@ -847,7 +1199,10 @@
     "pair": [
       "#002855",
       "#326295"
-    ]
+    ],
+    "third": "#E0E722",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "3712": {
     "name": "Fayetteville Woodpeckers",
@@ -855,7 +1210,10 @@
     "pair": [
       "#101820",
       "#C8102E"
-    ]
+    ],
+    "third": "#545859",
+    "confidence": "medium",
+    "source": "trucolor.net"
   },
   "3898": {
     "name": "Wichita Wind Surge",
@@ -863,7 +1221,10 @@
     "pair": [
       "#032c5b",
       "#e1143b"
-    ]
+    ],
+    "third": "#6eaedd",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "4124": {
     "name": "Pensacola Blue Wahoos",
@@ -871,7 +1232,10 @@
     "pair": [
       "#003087",
       "#041e42"
-    ]
+    ],
+    "third": "#ce0058",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "4904": {
     "name": "El Paso Chihuahuas",
@@ -879,7 +1243,10 @@
     "pair": [
       "#000000",
       "#A71930"
-    ]
+    ],
+    "third": "#E1A95F",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "5015": {
     "name": "Biloxi Shuckers",
@@ -887,7 +1254,10 @@
     "pair": [
       "#0f69b1",
       "#e2b880"
-    ]
+    ],
+    "third": "#d85a74",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "5368": {
     "name": "Amarillo Sod Poodles",
@@ -895,7 +1265,10 @@
     "pair": [
       "#003A70",
       "#00A9E0"
-    ]
+    ],
+    "third": "#C8102E",
+    "confidence": "medium",
+    "source": "sportsfancovers.com (search snippet)"
   },
   "5434": {
     "name": "Sugar Land Space Cowboys",
@@ -903,7 +1276,10 @@
     "pair": [
       "#082439",
       "#38C2CD"
-    ]
+    ],
+    "third": "#E47E3E",
+    "confidence": "medium",
+    "source": "Wikipedia"
   },
   "6324": {
     "name": "Hub City Spartanburgers",
@@ -911,7 +1287,21 @@
     "pair": [
       "#0C2340",
       "#78BE21"
-    ]
+    ],
+    "confidence": "medium",
+    "source": "trucolor.net",
+    "note": "2025-present, new relocation/rebrand"
+  },
+  "6325": {
+    "name": "Columbus Clingstones",
+    "level": "Double-A",
+    "pair": [
+      "#f58b6d",
+      "#000000"
+    ],
+    "third": "#00843D",
+    "confidence": "low",
+    "note": "Brand-new 2026 team; source page for this hex set was not clearly identified — verify against official site before use. RESOLVED 2026-07-27: promoted the lab's hand-tuned Home/Away background (#f58b6d/#000000), which closely matches the research reading (#FF8D6D/#010101) in swapped roles. No hex invented."
   },
   "6482": {
     "name": "Ontario Tower Buzzers",
@@ -919,6 +1309,10 @@
     "pair": [
       "#0032A0",
       "#92C1E9"
-    ]
+    ],
+    "third": "#EF3340",
+    "confidence": "high",
+    "source": "trucolor.net; matched MLB.com/CBS LA coverage",
+    "note": "new relocation/rebrand"
   }
 }

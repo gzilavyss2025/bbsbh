@@ -14,8 +14,8 @@ earlier sections — append.
 | 1 | Lab framework + JSON stores + write-back | **merged** | `claude/identity-lab-framework` | #416 |
 | 2 | Jersey audit view + hex copy/paste | **merged** | `claude/jersey-audit-hex-copy` | #418 |
 | 3 | Logo upload pipeline (MLB) | **merged** | `claude/logo-upload-pipeline` | #419 |
-| 4 | MiLB home/away logo art | **open** | `claude/milb-logo-art` | #420 |
-| 5 | MiLB colour reconciliation | not started | — | — |
+| 4 | MiLB home/away logo art | **merged** | `claude/milb-logo-art` | #420 |
+| 5 | MiLB colour reconciliation | **open** | `claude/milb-color-reconciliation` | #421 |
 | 6 | Theming + uniform display | not started | — | — |
 | 7 | Docs + cleanup | not started | — | — |
 
@@ -547,3 +547,146 @@ art" without expanding a single tile.
   `'milb-home'`/`'milb-away'`.
 - PR 5's colour reconciliation is unrelated to this PR's manifest — `tint`
   still comes from `milbLogoPosition`'s `bg`, untouched here.
+
+---
+
+## PR 5 — MiLB colour reconciliation, one fallback chain, stash retired
+
+Branch: `claude/milb-color-reconciliation` · PR: #421 · Merged: open
+
+Based on `origin/main` @ `2f9fcf2` (PRs 1-4 had all merged, as #416, #418, #419,
+#420).
+
+### The merge really was a no-op — re-confirmed, then skipped
+
+Re-ran the diff PRD §1.2 records, on the actual files rather than trusting the
+note: 120 stash entries, 115 live, **0 in live but not in stash, 0 hex
+disagreements across the 115 shared**. Nothing was merged. All 115 live pairs
+are byte-for-byte unchanged in the new file, asserted by the build script rather
+than eyeballed.
+
+### What landed
+
+**`src/lib/data/milb-colors.json` is now 120 entries** carrying the metadata the
+earlier copy dropped: `third` (101 entries), `confidence` (all 120 — 6 high,
+107 medium, 7 low), `source` (113), and `note` (31). The two known-bad flags
+survived — **106 Erie SeaWolves** (mislabeled source) and **3410 Richmond**
+(pre-2026 identity) — and where both files carried a note, the stash's fuller
+text won, so the retired README is no longer load-bearing.
+
+**The 5 gaps, per PRD §5, no hex invented:**
+
+| Team | Outcome |
+| --- | --- |
+| 6325 Columbus Clingstones | Promoted the lab's `#f58b6d`/`#000000`. `confidence: low`, note records that it matches the research reading `#FF8D6D`/`#010101` in swapped roles. |
+| 546 Portland Sea Dogs | Promoted `#e03a3e` as primary. `confidence: low`, the conflict note preserved verbatim with the resolution appended. |
+| 482 Corpus Christi, 553 Knoxville, 1956 Somerset | `"found": false`, no `pair`. |
+
+**Portland's secondary is a judgement call worth reviewing.** The prompt named
+only the primary (`#e03a3e`). "Resolves toward the sportsfancovers reading" was
+taken to mean that whole reading — Red `#e03a3e` / Navy `#003263` / Gray
+`#cbccce` — so the pair is `['#e03a3e', '#003263']` with `third: '#cbccce'`,
+mirroring the stash's own primary/secondary/third ordering. Nothing user-visible
+turns on it either way: 546 has landed `MILB_LOGO_POS_OVERRIDES` bgs for both
+sides (`#e03a3e`/`#cbccce`) that win over the pair, and the tint reads `pair[0]`.
+
+**One chain, in `src/lib/brandColors.js` (new).**
+
+```
+1. the affiliate's own researched pair   (data/milb-colors.json)
+2. its parent MLB org's pair             (via MILB_PARENT_ORG)
+3. NEUTRAL_FALLBACK_PAIR                 (milbColorPair only)
+```
+
+`milbBrandPair` is steps 1-2 and returns **null**; `milbColorPair` adds step 3.
+One ordering, two endings — every caller's existing null-vs-neutral contract is
+preserved without a second chain. `teamTintColor`, `resolveTeamColorPair`
+(behind `teamStripeGradient`/`teamPrimaryColor`/`teamChipColors`), and
+`milbTreatmentTile` all read it now.
+
+### Deviations from the PRD
+
+- **A new module was needed, and this is the one structural surprise.**
+  `milbColors.js` already reaches `teams.js` transitively (`milbColors.js` →
+  `wpaLogo.js` → `teams.js`), so putting the chain in either file and importing
+  the other closes an import cycle. `TEAM_COLOR_PAIRS` and the generated
+  `MILB_PARENT_ORG` block moved verbatim into `brandColors.js`, a leaf that
+  imports only `tuningStore.js` and the JSON; `milbColors.js` re-exports the
+  chain so no existing consumer changed its import. **`MILB_PARENT_ORG` stays**
+  as instructed — same data, same generator, one file over.
+  `scripts/gen-milb-team-colors.mjs` was retargeted and re-run: it rewrites the
+  block in the new home and the tree is unchanged afterward.
+- **Step 2 hands back the parent org's `TEAM_COLOR_PAIRS` primary, not its
+  `TEAM_COLORS` accent** — that is what PRD §5.1 spells out. For the 3 clubs on
+  step 2 the tint therefore moves from the org's rival-distinguishing accent to
+  its true primary (Corpus Christi: Astros orange `#EB6E1F` → Astros navy
+  `#002D62`). Deliberate, and the accent table is untouched for the 30 MLB clubs.
+- **`OffDaySection` is NOT affected**, contrary to the PR prompt's framing. It
+  reads `favoriteAccentColor` and the `mainTreatment*` resolvers, all MLB-only
+  tables that return null for a MiLB id. It never touched `teamTintColor` or the
+  pair chain. Checked, not assumed.
+- **Two existing assertions in `test/identity-lab-stores.test.js` had to change**
+  because the data model did — both were tightened, not loosened. "every entry
+  has a pair" became "every entry has a pair **or** an explicit `found: false`,
+  never both, and a `found: false` entry must carry a note explaining why"; the
+  115-vs-115 count became 117 pairs vs 120 entries with the three unresolved ids
+  named.
+
+### What actually changes on screen
+
+- **117 of 120 affiliates** now tint their headshots (and their box-score favor
+  stripe / chip colours) with **their own** colour instead of their parent org's.
+  The other 3 fall to step 2.
+- **Zero MiLB logo tiles move.** Computed across all 120 affiliates × both
+  sides: every one either has its own researched pair already or a landed
+  `MILB_LOGO_POS_OVERRIDES` bg that wins. The treatment-tile path is unchanged
+  in practice — the chain only *unified* it.
+- The 3 unresolved clubs keep their `#FFFFFF`/`#D0D0D0` placeholder tiles and
+  are still flagged "no researched color" in the lab.
+
+### Verification
+
+- `npm run lint` clean; `npm test` **802 pass** (was 788 — 14 new across the new
+  `test/milb-color-chain.test.js` and additions to `dev-data-stores` /
+  `identity-lab-stores`). `npm run build` + `npm run check:dist-dev` clean.
+- **The chain tests were proved to fail without the change**, not assumed:
+  reverting `teamTintColor`/`resolveTeamColorPair` to the parent-org-first form
+  failed 4 of the 11 new tests — the three step-1/step-2 behaviour pins plus the
+  tint's exact rgba. Restoring turned them green.
+- **Read off the real DOM, on real MiLB games** (2026-07-26, dev server), not
+  from the resolver: Memphis's lineup page (Durham's starter) painted
+  `rgba(0, 84, 164, 0.22)` = Durham's own `#0054A4` — it painted
+  `rgba(245, 209, 48, 0.22)` (the parent Rays' accent) with the change
+  temporarily reverted, same page, same session. Corpus Christi's page
+  (Amarillo's starter) painted Amarillo's own `#003A70`; Amarillo's page
+  (Corpus's starter, the `found: false` club) painted Astros `#002D62` —
+  **step 2 confirmed in the browser, not just in a test.**
+  gamePks 816176 (`/07262026/durmem/…`) and 817480 (`/07262026/amacc/…`).
+- **A MiLB team page's headshots did NOT change**, and that's correct:
+  `TeamPage` passes the parent org's id to `TeamLeaders` on purpose (org-wide
+  leaders). Worth knowing before someone reports it as a miss.
+- **The lab, Double-A dimension**: exactly 3 rows flagged "no researched color ·
+  no logo art" (Corpus Christi, Knoxville, Somerset), 27 flagged "no logo art"
+  only. Portland and Columbus no longer carry the colour flag. No console errors.
+- Dev server: <http://localhost:5165/07262026/durmem/lineup2?nointro> — **port
+  5165, off-band.** All five reserved ports (5169-5173) were held by other active
+  worktrees this session, and 5174-5178 belong to the sibling tally-nfl repo.
+  The lab is at <http://localhost:5165/identity-lab?nointro>.
+
+### Notes for the next PR
+
+- **PR 6's header-triad rename lands in two places now**, not one:
+  `milb-treatment-tuning.json`'s `header` records and `mlb-treatment-tuning.json`'s.
+  `brandColors.js` carries no header colours, so it is not involved.
+- **PR 7's cleanup list:** `.scratch/milb-team-colors/` is now a README-only stub
+  (methodology + confidence definitions + the unresolved list). Its data file is
+  gone. Nothing else points at it — `milbColors.js`'s "see the stash README"
+  pointer was removed with this PR.
+- **The 3 clubs still unresolved are 482 Corpus Christi Hooks, 553 Knoxville
+  Smokies, and 1956 Somerset Patriots.** All three are 2025/2026 rebrands where
+  research found colour NAMES only. A future pass starts there; the stub README
+  lists what each source did and didn't have. Adding a pair is a one-line store
+  edit — drop the `"found": false`, add `"pair"` — and the validator enforces
+  that the two are mutually exclusive.
+- `brandColors.js` is where a third fallback rung would go if one is ever
+  wanted. Don't add one to a caller.
