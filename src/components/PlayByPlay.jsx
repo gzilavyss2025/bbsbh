@@ -521,7 +521,12 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
             ),
           )}
         </div>
-        {baserunningNotes?.map((note, i) => (
+        {/* A normal at-bat's own baserunning notes (a WP/PB/SB during the
+            count) now get their own leading EventCard, hoisted out in
+            computeHalfInningFeed — this sub-line only still fires for the
+            rare interrupted-at-bat case (an inning-ending baserunning play
+            mid-count), which isn't split out that way. */}
+        {entry.interrupted && baserunningNotes?.map((note, i) => (
           <BaserunningNote key={i} segments={note.segments} />
         ))}
         {calloutNotes.map((note, i) => (
