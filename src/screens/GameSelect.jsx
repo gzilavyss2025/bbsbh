@@ -470,36 +470,47 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           </button>
         </div>
 
-        {/* Live-scores day pass — today's slate only. Off: a switch that opens
-            the consent modal. On: the switch reads unlocked and a kraft-amber
-            banner (also the off switch) states the 8am reset. Past days already
-            have their own reveal-all treatment, so this is hidden there. */}
-        {isToday && (
-          <div className="slateunlock">
-            <button
-              type="button"
-              role="switch"
-              data-testid="scores-unlock-switch"
-              aria-checked={passActive}
-              className={`slateunlock__switch${passActive ? ' slateunlock__switch--on' : ''}`}
-              onClick={() => (passActive ? disableUnlock() : setAskUnlock(true))}
-            >
-              <span className="slateunlock__track" aria-hidden="true">
-                <span className="slateunlock__thumb" />
-              </span>
-              <span className="slateunlock__label">
-                {copy('scoresUnlocked.toggleLabel')}
-              </span>
-            </button>
-            {passActive && (
+        {/* Day-state chip row: whichever of {Live Scores, Reveal All} applies
+            to this date rides beside the date stepper instead of stacking
+            below it. Not mutually exclusive — today, once every game on it
+            has gone Final (see showPastDayTreatment), BOTH can apply at once
+            (the pass is still off and the day hasn't been reveal-alled), so
+            this holds up to two chips rather than assuming only one. */}
+        {(isToday || (finals.length > 0 && !slateRevealAll)) && (
+          <div className="daystate">
+            {/* Live-scores day pass — today's slate only. The reset time is no
+                longer spelled out visually (it's implied: the pass always
+                clears at 8am), but stays in the accessible name for screen
+                reader users. Tapping again while on turns it off — the chip
+                is its own off-switch, no separate banner needed. */}
+            {isToday && (
               <button
                 type="button"
-                className="slateunlock__note"
-                data-testid="scores-unlock-banner"
-                onClick={disableUnlock}
-                aria-label="Turn off live scores"
+                role="switch"
+                data-testid="scores-unlock-switch"
+                aria-checked={passActive}
+                aria-label={
+                  passActive
+                    ? `Live scores — on, resets ${resetLabel}`
+                    : 'Live scores — off'
+                }
+                className={`daystate__chip daystate__chip--live${passActive ? ' daystate__chip--live-on' : ''}`}
+                onClick={() => (passActive ? disableUnlock() : setAskUnlock(true))}
               >
-                {copy('scoresUnlocked.banner', { time: resetLabel })}
+                <span className="daystate__dot" aria-hidden="true" />
+                {copy('scoresUnlocked.toggleLabel')}
+              </button>
+            )}
+            {finals.length > 0 && !slateRevealAll && (
+              <button
+                type="button"
+                className="btn btn--reveal daystate__chip--reveal"
+                onClick={() => setRevealedAll(true)}
+              >
+                <span className="btn__ball" aria-hidden="true">
+                  ⚾️
+                </span>{' '}
+                Reveal all results
               </button>
             )}
           </div>
@@ -681,24 +692,22 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   )
 }
 
-// The single "reveal all results" control for a past day's flip cards — a top
-// button (wide layout) plus a mobile-only fixed bottom bar duplicate, the same
+// The mobile-only fixed bottom bar duplicate of the header's "Reveal all
+// results" chip (see .daystate in the slatehead render above) — the same
 // floating-bar convention InningViewer uses for "Reveal {half}"
-// (.pagenav/.btn--reveal). One tap flips every Final game's card, which also
+// (.pagenav/.btn--reveal), so the action stays in thumb reach on a long
+// single-column list. Desktop has no floating duplicate: the header chip is
+// already inline and reachable there, same split as .pagenav--boxscore's
+// Refresh control. One tap flips every Final game's card, which also
 // triggers useDayCardMeta's batched classification pass — there's no
 // per-card unlock.
 function RevealAllBar({ onReveal }) {
   return (
-    <>
-      <button type="button" className="btn btn--reveal revealall__top" onClick={onReveal}>
+    <div className="pagenav pagenav--revealall">
+      <button type="button" className="btn btn--reveal" onClick={onReveal}>
         <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
       </button>
-      <div className="pagenav pagenav--revealall">
-        <button type="button" className="btn btn--reveal" onClick={onReveal}>
-          <span className="btn__ball" aria-hidden="true">⚾️</span> Reveal all results
-        </button>
-      </div>
-    </>
+    </div>
   )
 }
 
