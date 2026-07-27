@@ -1050,10 +1050,11 @@ body {
 
 /* One-tap return to today once the date has been paged away from. Kept small —
    a quiet secondary chip beside the date, not a button competing with it. Same
-   rectangular shape and hover-inverts/press-scales feedback as the date
-   stepper's own arrow buttons (above) and the Reveal All chip (.daystate
-   below), so all three read as one species of control rather than Today
-   being an odd pill among rectangles. */
+   rectangular shape as the date stepper's own arrow buttons (above) and the
+   Reveal All chip (.daystate below), so all three read as one species of
+   control rather than Today being an odd pill among rectangles. It's a
+   <button> inside .datenav, so the hover-inverts/press-scales feedback above
+   already applies here for free — no separate :hover/:active needed. */
 .datenav__today {
   min-height: 20px;
   padding: 1px 7px;
@@ -1069,14 +1070,6 @@ body {
   cursor: pointer;
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
     transform 0.08s ease;
-}
-.datenav__today:hover {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-}
-.datenav__today:active {
-  transform: scale(0.94);
 }
 
 /* Day-state row on the slate (GameSelect): whichever of {Live Scores, Reveal
