@@ -43,7 +43,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // entries list (every entry shown, whether by tapping through or because the
 // very first step happened to be the whole half), `onStepComplete()` once, so
 // the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onCurrentPitcher, onRunsSoFar }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -120,28 +120,14 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     )
   }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reports the pitcher actually on the mound as of what's visible right now
-  // (the persistent "Now Pitching" card HalfInning renders above the seal) —
-  // the last revealed pitching-substitution entry within the stepping window,
-  // falling back to the half's starting pitcher (the first at-bat card's own
-  // `pitcher`) when no substitution has been revealed yet. Bounded to
-  // `effectiveCap`/`entries` exactly like every retroactive annotation in this
-  // file, so it never reports a change the user hasn't stepped to yet.
-  const pitcherWindow = stepping ? entries.slice(0, effectiveCap) : entries
-  let currentPitcherId = null
-  for (let i = pitcherWindow.length - 1; i >= 0; i--) {
-    const e = pitcherWindow[i]
-    if (e.kind === 'event' && e.eventType === 'pitching_substitution') {
-      currentPitcherId = e.playerId
-      break
-    }
-  }
-  if (currentPitcherId == null) {
-    currentPitcherId = pitcherWindow.find((e) => e.kind === 'atbat')?.pitcher?.id ?? null
-  }
-  useEffect(() => {
-    onCurrentPitcher?.(currentPitcherId != null ? pitchingChangePitcher(feed, currentPitcherId) : null)
-  }, [currentPitcherId]) // eslint-disable-line react-hooks/exhaustive-deps
+  // (This file used to report the currently-revealed pitcher back up to
+  // HalfInning, which overrode its persistent "Now Pitching" header. That put
+  // a mid-half reliever's card in two places at once and, on a half revealed
+  // all at once, hoisted the LAST arm of the inning above at-bat cards the
+  // starter had pitched. The header now names the half's starting pitcher and
+  // only that; a mid-half change belongs here, in chronological place, where
+  // the `pitching_substitution` branch below already renders it as the same
+  // card. See HalfInning.jsx's nowPitching.)
 
   if (entries.length === 0) return null
   const visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
@@ -311,11 +297,19 @@ const EVENT_ICONS = {
 // The real scorer's shorthand for a baserunning/misc event with no plate
 // appearance of its own — the same abbreviation a scorer pencils on paper,
 // captioning EventCard instead of an emoji.
+//
+// A pickoff is PK, not PO, and the tags here must keep matching the two places
+// in api/playbyplay.js that write the same event onto a diamond —
+// runnerOutCode's out notation ("PK 1-3") and interruptedCode's carry-over
+// mark ("PK →"). Two spellings for one event on the same page reads as two
+// different events, and "PO" is doubly wrong here: it's already this app's
+// mark for a POP OUT (loadScorecard.js's classifyOut), besides being the
+// scorebook's own abbreviation for a putout.
 const EVENT_CODES = {
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   caught_stealing_2b: 'CS', caught_stealing_3b: 'CS', caught_stealing_home: 'CS',
-  pickoff_1b: 'PO', pickoff_2b: 'PO', pickoff_3b: 'PO',
-  pickoff_caught_stealing_2b: 'PO', pickoff_caught_stealing_3b: 'PO', pickoff_caught_stealing_home: 'PO',
+  pickoff_1b: 'PK', pickoff_2b: 'PK', pickoff_3b: 'PK',
+  pickoff_caught_stealing_2b: 'PK', pickoff_caught_stealing_3b: 'PK', pickoff_caught_stealing_home: 'PK',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
   // Not observed as a standalone top-level play in either sampled game (both
   // always nested inside a real plate appearance) — included for the same

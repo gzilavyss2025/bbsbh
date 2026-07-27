@@ -115,7 +115,11 @@ const STOPPAGE_EVENTS = new Set([
 ])
 
 // Position abbreviation -> lowercase phrase, for "now playing {phrase}" on a
-// defensive-substitution notice. No DH entry — a DH never takes the field.
+// defensive-substitution notice. DH is here even though a DH never takes the
+// field: a defensive SWITCH routinely moves a fielder INTO the DH slot (8 of
+// them in a three-day MLB sweep), and the card has to name the slot he moved
+// into or it renders "Now playing for the Orioles" with the position missing.
+// Kept in step with select.js's own copy for the pre-pitch staged card.
 const POSITION_LOWER = {
   C: 'catcher',
   '1B': 'first base',
@@ -126,6 +130,7 @@ const POSITION_LOWER = {
   CF: 'center field',
   RF: 'right field',
   P: 'pitcher',
+  DH: 'designated hitter',
 }
 
 // statsapi event descriptions arrive Title-Cased ("Defensive Substitution:
@@ -159,16 +164,56 @@ export function moundVisitsAllowed(inning) {
 
 // Mound-visit accounting for the notification bar. A visit is charged to the
 // DEFENSIVE club. Walks every play through (inning, half) inclusive and, for
-// the club fielding THIS half (the opposite of battingSide), returns the
-// running "visits remaining" AFTER each of its mound visits that happened in
-// this half, in order — so the bar on each mound-visit card shows how many
-// that club had left right after it. Remaining never goes negative.
+// the club fielding THIS half (the opposite of battingSide), returns one entry
+// per mound visit IN this half, in order — the running "visits remaining"
+// after it, or null for a trip that wasn't charged. One entry per visit either
+// way: the caller (PlayByPlay) walks its mound-visit cards positionally.
+// Remaining never goes negative.
+//
+// THE TRIP THAT REMOVES THE PITCHER ISN'T A VISIT. MLB's rule is explicit —
+// "a manager or coach who visits the mound and removes the pitcher is not
+// charged with a visit" — but statsapi logs that trip as a `mound_visit`
+// playEvent all the same, sitting immediately ahead of the
+// `pitching_substitution` it produced. In a three-day sweep of the MLB slate
+// 66 of 214 mound-visit events (31%) were that trip. Charging them isn't
+// slightly high, it's impossible: four club-games in that sweep reached SIX
+// against an allowance of five, so the pip row was showing clubs out of visits
+// they still had (gamePk 823843's home club read 6 used where the rule-correct
+// figure is 2).
+//
+// A visit is the removal trip when a pitching change follows it before the
+// club's next pitch — he never threw again, so the manager came for the ball.
+// Tracked as a pending visit rather than a peek at the next playEvent because
+// the feed nests a change at the head of the plate appearance AFTER the one
+// the visit closed; every case in the sweep was same-play, but the rule
+// doesn't promise that and neither does the feed.
+//
+// A trip left pending at the END of one of this club's earlier defensive
+// halves (no isPitch/pitching_substitution before the half's last play) must
+// settle there, not ride forward — the club's NEXT defensive half is one or
+// more entire opposite-side halves later (a team only fields every other
+// half), and those plays are skipped below without touching `pending`. Left
+// unflushed, that stale trip would be resolved by the first pitch or change
+// of a LATER half — a trip that has nothing to do with it — silently
+// shifting `used` for every half after. So a half boundary for THIS side
+// forces the settle itself, same as a genuine pitch or substitution would.
 export function moundVisitRemainings(feed, inning, half, battingSide) {
   const defenseSide = battingSide === 'away' ? 'home' : 'away'
   const allowed = moundVisitsAllowed(inning)
   const targetIdx = half === 'bottom' ? inning * 2 : inning * 2 - 1 // 1-based half order
   let used = 0
   const inHalf = []
+  // The visit whose trip hasn't resolved yet — charged once he throws another
+  // pitch, uncharged if a pitching change lands first. `inHalf` is its slot,
+  // reserved in order at the moment the visit happens and filled on settle, so
+  // a visit that resolves during a later play still reports in the right place.
+  let pending = null // { playIdx, slot }
+  const settle = (charged) => {
+    if (!pending) return
+    if (charged) used += 1
+    if (pending.slot != null) inHalf[pending.slot] = charged ? Math.max(0, allowed - used) : null
+    pending = null
+  }
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const pi = p.about?.inning
     const ph = p.about?.halfInning // 'top' | 'bottom'
@@ -176,13 +221,24 @@ export function moundVisitRemainings(feed, inning, half, battingSide) {
     const playIdx = ph === 'bottom' ? pi * 2 : pi * 2 - 1
     if (playIdx > targetIdx) break
     if ((ph === 'top' ? 'home' : 'away') !== defenseSide) continue
+    // A new half for this side arrived with the previous one's trip still
+    // open — nothing more is coming to resolve it, so it stands as charged.
+    if (pending && pending.playIdx !== playIdx) settle(true)
     for (const e of p.playEvents ?? []) {
-      if (e.details?.eventType === 'mound_visit') {
-        used += 1
-        if (playIdx === targetIdx) inHalf.push(Math.max(0, allowed - used))
+      if (e.isPitch) {
+        settle(true) // he stayed in and threw — that trip was a real visit
+        continue
+      }
+      const et = e.details?.eventType
+      if (et === 'pitching_substitution') {
+        settle(false) // the manager came for the ball; not charged
+      } else if (et === 'mound_visit') {
+        settle(true) // two trips with no pitch between: the earlier one stands
+        pending = { playIdx, slot: playIdx === targetIdx ? inHalf.push(null) - 1 : null }
       }
     }
   }
+  settle(true) // a trip still open at the target half had no change after it
   return inHalf
 }
 
@@ -240,6 +296,17 @@ export function pinchRunningPlayers(feed, pinchId, replacedId) {
     return { id, name, jersey: person.primaryNumber ?? '' }
   }
   return { runner: nameOf(pinchId), replaced: nameOf(replacedId) }
+}
+
+// The surname to use when a baserunning note has to NAME the runner it's
+// about. Exported because the box-score roll-up builds the same note shape
+// from the raw feed (api/callout-notes.js's buildGameCallouts) and the two
+// must not drift — a call-out that reads correctly on the at-bat card and
+// anonymously in the roll-up is the same bug in the other direction.
+export function runnerLastName(feed, id) {
+  if (id == null) return ''
+  const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
+  return personNameParts(person).last || person.fullName || ''
 }
 
 // Swinging strike, swinging strike (blocked). Shared with derive.js.
@@ -586,6 +653,11 @@ const ADVANCE_CODES = {
   sac_fly: 'SF', sac_bunt: 'SAC',
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
+  // A bases-loaded balk — the one that forces a run in — is its own
+  // runner-level eventType, NOT the plain `balk` above (found in a July 2026
+  // sweep of the MLB slate). It's a balk on the scoresheet either way; without
+  // this key the leg fell through to advanceCode's ground-out "GO".
+  forced_balk: 'BK',
   field_error: 'E', error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
   // Verified against gamePk 777747's bottom of the 10th (Brice Turang
   // 1B->2B during Jackson Chourio's walk): without this entry,
@@ -879,14 +951,33 @@ export function firstRispPAIndexByBatter(feed) {
 // in api/callout-notes.js.)
 
 // At-bat-mode stepping (ADR-0016): the entries index marking the end of the
-// NEXT step from `fromCount` — every leading event note (a mound visit, a
-// sub) up to and including the next plate-appearance card, so one tap reads
-// as "reveal the next batter" rather than "reveal the next note." Returns
-// entries.length when no at-bat card remains after fromCount (trailing
+// NEXT step from `fromCount` — everything up to and including the next
+// plate-appearance card, PLUS the announcements that follow it, so one tap
+// reads as "reveal the next batter, and whatever the managers did after him."
+// Returns entries.length when no at-bat card remains after fromCount (trailing
 // notes with nobody left to bat, e.g. a closing ejection).
+//
+// Trailing, not leading, is the whole point. The feed nests a stoppage at the
+// head of the plate appearance that FOLLOWS it — in a three-day sweep of the
+// MLB slate, 655 of 678 substitution/mound-visit playEvents sat before their
+// own play's first pitch and NONE trailed after its last — so the notes
+// sitting between two at-bat cards are the announcements made once the earlier
+// batter was retired. Ending a step just before them stranded the change with
+// the new pitcher's first batter: you tapped, and got the substitution and
+// what it produced in the same breath, which is not the order a scorer works
+// in (finish the batter, pencil the change, then see the next batter).
+//
+// The exception is an `event` marked `midAtBat` — a stoppage that landed
+// BETWEEN pitches of the following plate appearance (a mound visit during an
+// at-bat, the other 23 of those 678). That one genuinely belongs to the at-bat
+// it interrupted, so it stops the trailing sweep and leads the next step
+// instead, exactly as every note used to.
 export function nextStepBoundary(entries, fromCount) {
   for (let i = fromCount; i < entries.length; i++) {
-    if (entries[i].kind === 'atbat') return i + 1
+    if (entries[i].kind !== 'atbat') continue
+    let end = i + 1
+    while (end < entries.length && entries[end].kind === 'event' && !entries[end].midAtBat) end += 1
+    return end
   }
   return entries.length
 }
@@ -994,17 +1085,26 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // advance instead of leaving a bare mark on the diamond.
     const baserunningNotes = []
     // A pinch runner's strike-through-and-pencil-in on the ORIGIN card (the
-    // batter he's running for) is exactly the kind of retroactive annotation
-    // the `visible` gate below exists for — it must not appear on that
-    // earlier, already-revealed card until the pinch-running notification
-    // itself is within the visible step window (ADR-0016), so stepping
-    // through "he walked" doesn't silently show who ran for him before that
-    // notification card has actually been reached. Collected here, applied
-    // after `visible` is known for this play, same pattern as baserunningNotes.
+    // batter he's running for) is a retroactive annotation, so it must not
+    // appear on that earlier, already-revealed card until the pinch-running
+    // notification itself is within the visible step window (ADR-0016) —
+    // stepping through "he walked" must not silently show who ran for him
+    // before that notification card has been reached. Each entry carries the
+    // index of its own notification, NOT the enclosing play's visibility:
+    // since nextStepBoundary sweeps trailing notes into the previous at-bat's
+    // step, a step routinely ends MID-play, after this notice and before the
+    // card of the play it leads. Gating on the play would then show "Peraza
+    // runs for Schanuel" a full step before Schanuel's own card was struck
+    // through — the two halves of one substitution, split across two taps.
     const pendingPinchRunnerCards = []
+    // Whether a pitch has been thrown in THIS play yet — a stoppage after one
+    // interrupted the at-bat in progress rather than following the previous
+    // one, which is what decides the step it belongs to (see nextStepBoundary).
+    let pitchInPlay = false
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) {
         anyPitchInHalf = true
+        pitchInPlay = true
         continue
       }
       const et = e.details?.eventType
@@ -1026,6 +1126,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         entries.push({
           kind: 'event',
           eventType: et,
+          midAtBat: pitchInPlay,
           text,
           playerId: e.player?.id ?? null,
           position:
@@ -1041,9 +1142,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // text/segments are a fallback only (EventNote), for the vanishingly
         // unlikely case the incoming runner isn't in gameData.players.
         const text = sentenceCaseEventText(e.details?.description ?? '')
+        const noteIndex = entries.length
         entries.push({
           kind: 'event',
           eventType: 'pinch_running',
+          midAtBat: pitchInPlay,
           pinchId: e.player?.id ?? null,
           replacedId: e.replacedPlayer?.id ?? null,
           base: e.base ?? null,
@@ -1056,7 +1159,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // his earlier trip — this bookkeeping must stay immediate regardless
         // of stepCap, or later baserunning on this same pinch runner couldn't
         // resolve back to the right origin card. The actual card annotation
-        // (pendingPinchRunnerCards) is deferred to the `visible` check below.
+        // (pendingPinchRunnerCards) is deferred to the step check below.
         const pinchId = e.player?.id
         const replacedId = e.replacedPlayer?.id
         if (pinchId != null && replacedId != null) {
@@ -1066,6 +1169,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
             const person = feed?.gameData?.players?.[`ID${pinchId}`] ?? {}
             pendingPinchRunnerCards.push({
               cardIndex,
+              noteIndex,
               id: pinchId,
               ...personNameParts(person),
               base: e.base ?? null,
@@ -1137,9 +1241,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // `e.player.id` on a baserunning playEvent is the runner it's about (the
         // stealer / picked-off man) — verified against a live steal — so a
         // leader call-out on a steal can key on the RUNNER, not the batter.
+        // `runnerLast` rides along for the same reason the call-out keys on
+        // him: these notes hang on the card of whoever was BATTING, so a
+        // call-out about the runner has to name him or it reads as the
+        // batter's (see api/callout-notes.js's steal families).
+        const rid = e.player?.id ?? null
         baserunningNotes.push({
           eventType: et,
-          runnerId: e.player?.id ?? null,
+          runnerId: rid,
+          runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(e.details.description, nameIndex),
         })
       }
@@ -1294,9 +1404,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         !notes.some((n) => n.eventType === play.result?.eventType)
       ) {
         const outRunner = runners.find((r) => r.movement?.isOut) ?? runners[0]
+        const rid = outRunner?.details?.runner?.id ?? null
         notes.push({
           eventType: play.result.eventType,
-          runnerId: outRunner?.details?.runner?.id ?? null,
+          runnerId: rid,
+          runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(play.result.description, nameIndex),
         })
       }
@@ -1340,6 +1452,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           entries.push({
             kind: 'event',
             eventType: n.eventType,
+            // No pitch was thrown in this play at all — that's why there's no
+            // card to hang the prose on — so it interrupted no at-bat and
+            // steps with the one before it (see nextStepBoundary).
+            midAtBat: false,
             playerId: n.runnerId,
             segments: n.segments,
           })
@@ -1353,14 +1469,18 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     const visible = stepCap == null || entries.length <= stepCap
 
     // See pendingPinchRunnerCards above — only pencil the incoming runner
-    // onto the origin card once the pinch-running notification that
-    // announces him is itself within the visible step window.
-    if (visible) {
-      for (const p of pendingPinchRunnerCards) {
-        const card = entries[p.cardIndex]
-        card.pinchRunners = card.pinchRunners ?? []
-        card.pinchRunners.push({ id: p.id, last: p.last, first: p.first, base: p.base })
-      }
+    // onto the origin card once the pinch-running notification that announces
+    // him is itself within the visible step window. Keyed on that NOTICE's
+    // own index rather than the enclosing play's `visible`: a step ends after
+    // the notes trailing an at-bat and before the card of the play they lead
+    // (nextStepBoundary), so `visible` is false for that play precisely when
+    // the notice IS on screen — which would show the swap announced and the
+    // struck-through name a whole tap apart.
+    for (const p of pendingPinchRunnerCards) {
+      if (stepCap != null && p.noteIndex >= stepCap) continue
+      const card = entries[p.cardIndex]
+      card.pinchRunners = card.pinchRunners ?? []
+      card.pinchRunners.push({ id: p.id, last: p.last, first: p.first, base: p.base })
     }
 
     // A runner other than this play's batter can also be put out here — a

@@ -59,3 +59,40 @@ test('selectPrePitchChanges self-gates to the reached half', () => {
   // every current caller: compute unconditionally.
   assert.equal(selectPrePitchChanges(feed, 3, 'top').length, 1)
 })
+
+test('a pre-pitch defensive switch to DH still says what he switched to', () => {
+  // select.js keeps its own copy of POSITION_LOWER (avoiding a circular import
+  // with playbyplay.js — see its header comment) with the same DH entry added
+  // in PR #403 for the mid-inning path (playbyplay-pitching-change.test.js's
+  // "a switch to DH still says what he switched to"). Only the mid-inning copy
+  // had a test; this pins the pre-pitch copy so the two can't silently drift
+  // back apart — a defensive switch announced before the half's first pitch
+  // moving a fielder to DH must not render the position blank.
+  const feed = {
+    gameData: {
+      players: { ID100: { lastFirstName: 'Doe, John', primaryNumber: '42' } },
+    },
+    liveData: {
+      plays: {
+        allPlays: [
+          {
+            about: { inning: 3, halfInning: 'top' },
+            playEvents: [
+              {
+                isPitch: false,
+                details: { eventType: 'defensive_switch' },
+                player: { id: 100 },
+                position: { abbreviation: 'DH' },
+              },
+              { isPitch: true },
+            ],
+          },
+        ],
+      },
+    },
+  }
+
+  const changes = selectPrePitchChanges(feed, 3, 'top', 3)
+  assert.equal(changes.length, 1)
+  assert.equal(changes[0].fielder.position, 'designated hitter')
+})

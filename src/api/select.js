@@ -488,8 +488,10 @@ const PRE_PITCH_EVENT_TYPES = new Set([
 // Position abbreviation -> lowercase phrase, for the "now playing {phrase}"
 // fielder-entry card below — mirrors api/playbyplay.js's own copy of this map
 // (kept separate rather than imported to avoid a select.js <-> playbyplay.js
-// circular import; both are 9 fixed baseball positions, not a value that
-// drifts). No DH entry — a DH never takes the field.
+// circular import; both are fixed baseball positions, not a value that
+// drifts). DH is included even though a DH never takes the field — a defensive
+// SWITCH routinely moves a fielder INTO that slot, and the card has to name
+// what he switched to; see the fuller note on playbyplay.js's copy.
 const POSITION_LOWER = {
   C: 'catcher',
   '1B': 'first base',
@@ -500,6 +502,7 @@ const POSITION_LOWER = {
   CF: 'center field',
   RF: 'right field',
   P: 'pitcher',
+  DH: 'designated hitter',
 }
 
 // `revealedThrough` (a half-index; see halfIndex) is an OPTIONAL internal gate,

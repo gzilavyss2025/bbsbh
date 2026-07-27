@@ -44,3 +44,44 @@ test('a runner advancing on someone else\'s catcher-interference reach is tagged
   assert.ok(ashbyCard, 'Ashby\'s own at-bat card should exist')
   assert.equal(ashbyCard.legNotations[2]?.code, 'CI')
 })
+
+test('a runner forced over by a bases-loaded balk is tagged BK, not GO', () => {
+  const feed = buildFeed()
+  // The feed spells the bases-loaded balk — the one that forces a run in — as
+  // its OWN runner-level eventType, `forced_balk`, not the plain `balk`
+  // ADVANCE_CODES already carries (found in a July 2026 sweep of the MLB
+  // slate). Without its own entry the leg fell through legAdvanceCode to
+  // advanceCode's generic ground-out "GO", penciling a batted-ball code by the
+  // base of a runner nobody put a ball in play for.
+  feed.liveData.plays.allPlays.push(
+    {
+      about: { inning: 4, halfInning: 'top' },
+      matchup: { pitcher: { id: 200 }, batter: { id: 1 } },
+      result: { type: 'atBat', eventType: 'single' },
+      count: { outs: 0 },
+      playEvents: [{ isPitch: true, pitchNumber: 1, details: { call: { code: 'X' } } }],
+    },
+    {
+      about: { inning: 4, halfInning: 'top' },
+      matchup: { pitcher: { id: 200 }, batter: { id: 2 } },
+      result: {
+        type: 'atBat',
+        eventType: 'walk',
+        description: 'Ben Bell walks. Aaron Ashby to 2nd.',
+      },
+      count: { outs: 0 },
+      playEvents: [{ isPitch: true, pitchNumber: 1, details: { call: { code: 'B' } } }],
+      runners: [
+        {
+          details: { runner: { id: 1 }, eventType: 'forced_balk' },
+          movement: { start: '1B', end: '2B', isOut: false },
+        },
+      ],
+    },
+  )
+
+  const entries = computeHalfInningFeed(feed, 4, 'top', 'away')
+  const ashbyCard = entries.find((e) => e.kind === 'atbat' && e.batterId === 1)
+  assert.ok(ashbyCard, 'Ashby\'s own at-bat card should exist')
+  assert.equal(ashbyCard.legNotations[2]?.code, 'BK')
+})

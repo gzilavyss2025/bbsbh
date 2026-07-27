@@ -29,7 +29,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 // it comes, is unearned by rule and the feed says so, so the existing red
 // circled-run ring fires on its own.
 export function PlacedRunnerCard({ entry }) {
-  const { runner, base, code, descSegments, reached, scored, earned, legNotations, outAt, outCode, pinchRunners } = entry
+  const { runner, base, code, descSegments, reached, scored, earned, legNotations, outNumber, outAt, outCode, pinchRunners } = entry
   // Same strike-through-and-pencil-in as an at-bat card: a pinch runner for
   // the placed runner inherits this card (rootRunner/prAlias resolve to it),
   // and the diamond's red PR sits by the base he took over at.
@@ -89,6 +89,19 @@ export function PlacedRunnerCard({ entry }) {
               prBase={prBase}
               placedAt={base}
             />
+            {/* The out-sequence circle, same badge an at-bat card carries. The
+                automatic runner is retired on the bases often (doubled off,
+                forced at 3rd on the leadoff bunt) and computeHalfInningFeed's
+                runner-out attribution writes his outNumber/outAt/outCode onto
+                THIS card like any other origin card — without the badge the
+                diamond showed the capped path and the tag chain but not which
+                out of the inning it was, the one piece of his trip that
+                didn't get notated like everyone else's. */}
+            {outNumber != null && (
+              <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
+                {outNumber}
+              </span>
+            )}
           </div>
         </div>
       </div>

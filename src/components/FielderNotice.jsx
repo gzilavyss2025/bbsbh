@@ -1,13 +1,18 @@
 import { PitcherPhoto } from './PitcherNotice.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 
-// The "now playing" notification card for a mid-inning defensive substitution
-// — same headshot + label + name layout as PitcherNotice (shares its
-// .pitchernotice CSS and PitcherPhoto), just for a fresh fielder rather than a
-// fresh pitcher. `fielder` is the { id, name, jersey, position } shape
-// defensiveChangeFielder builds. A defensive SWITCH (a player already in the
-// game moving to a new position, no new entrant) stays a plain one-line
-// EventNote in PlayByPlay — there's no "entering" moment to make a card of.
+// The "now playing" notification card for a defensive change — same headshot +
+// label + name layout as PitcherNotice (shares its .pitchernotice CSS and
+// PitcherPhoto), just for a fielder rather than a pitcher. `fielder` is the
+// { id, name, jersey, position } shape that defensiveChangeFielder
+// (playbyplay.js, a mid-inning change) and selectPrePitchChanges (select.js,
+// one announced before a half's first pitch) both build.
+//
+// It covers a defensive SWITCH — a player already in the game moving to a new
+// position — as well as a fresh entrant. A switch has no "entering" moment,
+// but it moves where a scorer's pencil goes just as much as a new face does,
+// so PlayByPlay cards both rather than dropping the switch to a plain
+// EventNote (ADR-0017's tiering: a fresh-or-CHANGED actor is a card).
 export function FielderNotice({ fielder, teamId = null, teamName, className = '' }) {
   if (!fielder) return null
   return (
