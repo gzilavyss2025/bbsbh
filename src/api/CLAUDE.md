@@ -42,7 +42,15 @@ spoiler-free only when restricted to the half the user has reached
   `buildJerseyCombos` (one card per catalog jersey → its logo treatment + the
   club's W-L in games it wore it, joined by `uniformAssetCode`; the record is
   gated by the schedule's own cutoff so it can't leak a result the standings
-  don't already show).
+  don't already show). A MiLB club has no catalog at all, so its Team Page gets
+  the two-card Home/Away form of that strip instead, with no record — there is
+  no per-game MiLB jersey feed to attribute one to.
+- `jerseys.js` — the nightly `gamePk:teamId → treatment` export
+  (`public/data/jerseys.json`). `jerseyTreatmentFor` swaps a slate card's logo,
+  drives the WPA band, and since ADR-0030 picks the lineup page's club theme.
+  `jerseyWearDates` joins it to a dated team schedule — neither half carries
+  what the other has — for `/identity-lab`'s per-tile links into a real game's
+  photo gallery.
 - `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
   **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
   live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call

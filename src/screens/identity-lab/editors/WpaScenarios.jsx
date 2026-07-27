@@ -51,7 +51,7 @@ export function WpaScenarios({
   return (
     <div
       className="colorlab__wpascenarios"
-      style={{ '--navy': headerColors.blue, '--seal': headerColors.gold, '--text-on-ink': headerColors.font }}
+      style={{ '--navy': headerColors.bar, '--seal': headerColors.accent, '--text-on-ink': headerColors.onBar }}
     >
       {WPA_MOCK_SCENARIOS.map((s) => (
         <div className="colorlab__wpascenario" key={s.key}>

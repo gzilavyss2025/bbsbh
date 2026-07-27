@@ -677,14 +677,23 @@ export function treatmentPinstripeBg(teamId, treatment) {
   return (v && typeof v === 'object' && v.bg) || null
 }
 
-// Per-team, per-treatment header-chrome recolor (blue/gold/font) — promoted
-// out of the Team Identity Lab's Header colors mockup (TreatmentHeaderPreview) once a
-// proposal is settled, same "propose in the page, land in this table" path
-// TREATMENT_SCALE/TREATMENT_PINSTRIPE_COLOR above already follow. The
-// site-wide theming feature this would drive (neutral pages matching a
-// favorite team, game pages matching the home/batting team) is still
-// undecided — this table only backs the design-lab preview so far, no real
-// component reads it yet.
+// Per-team, per-treatment header-chrome recolor — `{ bar, accent, onBar }`:
+// the bar's fill, its kraft-tape bottom edge, and the ink on it. Promoted out
+// of the Team Identity Lab's Header colors editor once a proposal is settled,
+// same "propose in the page, land in this table" path
+// TREATMENT_SCALE/TREATMENT_PINSTRIPE_COLOR above already follow.
+//
+// This table SHIPS now: it dresses the lineup page's club-name bar and section
+// mastheads in whatever jersey that club is wearing that game (ADR-0030).
+// Coverage is partial by design — a (team, treatment) with no entry falls back
+// to the app's default navy chrome. Read it through `lib/headerTheme.js`, never
+// directly; `scripts/check-contrast.mjs` asserts every entry's `onBar` clears
+// WCAG AA against its `bar`, which is what makes a hand-tuned pair safe to
+// ship.
+//
+// The names are deliberately semantic rather than the `{ blue, gold, font }`
+// they started as: those named the DEFAULT navy chrome's own colors, which
+// stops meaning anything once a club's bar is red.
 export const TREATMENT_HEADER_COLOR_OVERRIDES = byTreatment((f) => f.header, {
   includeMain: true,
 })

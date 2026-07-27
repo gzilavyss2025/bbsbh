@@ -4382,6 +4382,74 @@ body {
   margin: 4px 0 16px;
 }
 
+/* ------------------------------------------------------------- club theming
+   ADR-0030. `.is-themed` on a .teaminfo (phone page) or a .teampanel (one
+   column of the wide spread) carries three custom properties resolved from the
+   jersey that club is wearing tonight — lib/headerTheme.js. Every themed rule
+   below reads them WITH the default as its fallback, so an unthemed page (most
+   of them — coverage is partial) renders byte-identically to how it did before
+   this feature existed.
+
+   Deliberately scoped to this subtree. The innings viewer and the box score
+   carry the seal metaphor — kraft amber on manila, navy chrome around it — and
+   recoloring those would put a club's brand in a fight with the spoiler UI's
+   own visual language. The properties simply never reach them.
+
+   The club-name bar is the one surface that CHANGES shape when themed: unthemed
+   it's a plain heading on the page canvas, themed it becomes a real bar so the
+   colour has something to sit in. */
+.teaminfo.is-themed > .teaminfo__head,
+.teampanel.is-themed > .teaminfo__head {
+  padding: 10px var(--space-4);
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.teaminfo.is-themed > .teaminfo__head .teaminfo__name,
+.teampanel.is-themed > .teaminfo__head .teaminfo__name,
+.teaminfo.is-themed > .teaminfo__head .teaminfo__namelink,
+.teampanel.is-themed > .teaminfo__head .teaminfo__namelink {
+  color: var(--bar-text, var(--text-heading));
+}
+/* Away/Home and the Game Notes button ride the same bar, so they take its ink
+   too — at the muted weight they already read at, via a partial alpha over the
+   bar rather than a second hand-picked hex the contrast guard couldn't see. */
+.teaminfo.is-themed > .teaminfo__head .teaminfo__side,
+.teampanel.is-themed > .teaminfo__head .teaminfo__side {
+  color: var(--bar-text, var(--text-caption));
+  opacity: 0.78;
+}
+.teaminfo.is-themed > .teaminfo__head .notesbtn,
+.teampanel.is-themed > .teaminfo__head .notesbtn {
+  color: var(--bar-text, var(--text-body));
+  border-color: color-mix(in srgb, var(--bar-text, currentColor) 45%, transparent);
+}
+
+/* The section mastheads on a themed page — same three properties, same
+   fallbacks, so this single rule covers Batting order / Starting pitcher /
+   Defense and every .metriccard header on the page at once. */
+.is-themed .metricbar {
+  background: var(--bar-fill, var(--navy));
+  border-bottom-color: var(--bar-accent, var(--seal));
+}
+.is-themed .metricbar__title {
+  color: var(--bar-text, var(--text-on-ink));
+}
+
+/* A masthead's club mark is the MONO knockout art — a flat, single-ink white
+   silhouette (ADR-0025, lib/logoMono.js). On a light bar that disappears, so a
+   theme whose ink is dark re-inks the mark to match.
+
+   This is NOT the `filter: brightness(0) invert(1)` whitening ADR-0025 exists
+   to forbid. That failure mode is filtering FULL-COLOR art: a mark whose
+   interior detail is drawn in a light fill flattens into an unreadable blob.
+   The mono asset has already been through that reduction — it is one opaque
+   shape plus transparency — so darkening it is exact, losing nothing there was
+   left to lose. Applied only here, only to art that is already a silhouette. */
+.is-themed--dark .metricbar__logo {
+  filter: brightness(0);
+}
+
 .teaminfo__headright {
   display: flex;
   align-items: center;
@@ -10054,12 +10122,12 @@ body {
   outline-offset: 2px;
 }
 
-/* The mockup bar itself — an unwired sketch of the app's navy/gold header
-   chrome recolored to a club's own Blue/Gold/Font, NOT the real
-   .topbar/.sitebar (those stay plain navy-on-paper; see
-   TreatmentHeaderPreview's own doc comment for why this is preview-only).
-   Sized to what the real site chrome actually looks like (--tap-min's 44px
-   tap-target height + a hair, --fs-title-sm — the same size .topbar--slate's
+/* The editor's own bar — the app's default navy/gold header chrome recolored
+   to a club's Bar/Accent/On-bar. What it previews is real since ADR-0030: the
+   same triad dresses .teaminfo__head and that side's .metricbar mastheads on
+   the lineup page. It is NOT the .topbar/.sitebar, which stay plain
+   navy-on-paper. Sized to what the real site chrome actually looks like
+   (--tap-min's 44px tap-target height + a hair, --fs-title-sm — .topbar--slate's
    own condensed title uses) rather than an oversized banner. */
 .colorlab__headerbar {
   flex: 1 1 280px;
@@ -10069,9 +10137,9 @@ body {
   align-items: center;
   justify-content: center;
   border: var(--bw-hair) solid var(--border-rule);
-  border-bottom: 3px solid var(--header-gold, var(--seal));
+  border-bottom: 3px solid var(--header-accent, var(--seal));
   border-radius: var(--radius-sm);
-  background: var(--header-blue, var(--navy));
+  background: var(--header-bar, var(--navy));
 }
 
 .colorlab__headerbar__title {
@@ -10080,7 +10148,89 @@ body {
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
-  color: var(--header-font, #fff);
+  color: var(--header-onbar, #fff);
+}
+
+/* The per-tile "worn on" dates (TreatmentBox's WearDates) — each a link into
+   that game's photo gallery, so a curated tile can be checked against a real
+   photograph of the uniform. Small and dense on purpose: it's a reference
+   affordance under the tile, not a section of its own. */
+.colorlab__weardates {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+.colorlab__weardates-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  flex: none;
+}
+
+.colorlab__weardates-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.colorlab__weardate {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  padding: 2px 6px;
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.colorlab__weardate:hover {
+  border-color: var(--accent-primary);
+}
+.colorlab__weardate:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.colorlab__weardates-hint {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* Whether this tile's triad is LANDED (the lineup page really wears it) or
+   still just a proposal the app answers with default navy chrome. Coverage of
+   the header tables is partial by design, and an unlanded preview looks
+   identical to a landed one, so the lab states which it is. */
+.colorlab__headercoverage {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.colorlab__headercoverage--on {
+  color: var(--accent-positive);
+}
+
+/* The live WCAG read on Bar vs On bar — the same ratio scripts/check-contrast.mjs
+   asserts over the landed store, so a pair that would fail `npm run lint`
+   says so while it's still being typed. */
+.colorlab__headercontrast {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.colorlab__headercontrast--fail {
+  color: var(--accent-negative);
+  font-weight: var(--w-semibold);
 }
 
 /* ---------------------------------------------------------- uniform names

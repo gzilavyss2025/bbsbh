@@ -79,7 +79,7 @@ test('a real tuning store shape is accepted', () => {
         treatments: {
           main: { bgHex: '#FFF5EA', note: 'cream, not one of the three brand swatches' },
           alternate: { scale: 0.86, offsetX: 4, pinstripeColor: 'rgba(0, 0, 0, 0.16)' },
-          'city-connect': { header: { blue: '#0C436A', gold: '#ff6c58', font: '#FBF6E9' } },
+          'city-connect': { header: { bar: '#0C436A', accent: '#ff6c58', onBar: '#FBF6E9' } },
         },
       },
     }),
@@ -110,7 +110,7 @@ test('a tuning store rejects a bad treatment key or a non-object record', () => 
 
 test('a tuning store rejects a value too deep to be a tuning field', () => {
   assert.match(
-    tuning({ 158: { treatments: { main: { header: { blue: { nested: true } } } } } }),
+    tuning({ 158: { treatments: { main: { header: { bar: { nested: true } } } } } }),
     /is not a tuning value/,
   )
   assert.match(tuning({ 158: { treatments: { main: { scale: 'NaN-ish'.repeat(200) } } } }), /not a tuning value/)

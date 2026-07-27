@@ -5,6 +5,7 @@ import { WpaScenarios } from './editors/WpaScenarios.jsx'
 import { HeaderPreview } from './editors/HeaderPreview.jsx'
 import { copyHex, copyPalette, useHexClipboard } from './hexClipboard.js'
 import { LogoDropZone } from './LogoDropZone.jsx'
+import { monthDayYear } from '../../lib/dates.js'
 
 // One tile: the mark on its curated fill, that fill's swatches, and the three
 // editors stacked under it. The profile resolves every value (its own tables,
@@ -25,6 +26,7 @@ export function TreatmentBox({
   nameField,
   logoBox,
   upload,
+  wearDates,
   swatches,
   position,
   wpa,
@@ -32,15 +34,14 @@ export function TreatmentBox({
   header,
 }) {
   // The whole set the owner asked to move between mockups in one paste — the
-  // header triad plus this tile's own fill/pinstripe state. Named
-  // bar/accent/onBar/bg/pinstripe (PRD §"PR 2") rather than the store's
-  // current blue/gold/font (PR 6 renames those; this clipboard is the
-  // semantic shape early since it's an ephemeral in-page value, not a store
-  // write).
+  // header triad plus this tile's own fill/pinstripe state. This clipboard
+  // named the fields bar/accent/onBar before the store did; now that the store
+  // carries the same names (ADR-0030), the two sides pass straight through
+  // with no mapping between them.
   const palette = {
-    bar: header.colors.blue,
-    accent: header.colors.gold,
-    onBar: header.colors.font,
+    bar: header.colors.bar,
+    accent: header.colors.accent,
+    onBar: header.colors.onBar,
     bg: position.bg,
     pinstripe: position.pinstripe,
   }
@@ -48,9 +49,9 @@ export function TreatmentBox({
     if (!clip) return
     if (clip.bg !== undefined) position.onField('bg', clip.bg)
     if (clip.pinstripe !== undefined) position.onField('pinstripe', clip.pinstripe)
-    if (clip.bar !== undefined) header.onField('blue', clip.bar)
-    if (clip.accent !== undefined) header.onField('gold', clip.accent)
-    if (clip.onBar !== undefined) header.onField('font', clip.onBar)
+    if (clip.bar !== undefined) header.onField('bar', clip.bar)
+    if (clip.accent !== undefined) header.onField('accent', clip.accent)
+    if (clip.onBar !== undefined) header.onField('onBar', clip.onBar)
   }
 
   return (
@@ -85,10 +86,51 @@ export function TreatmentBox({
           ))}
         </div>
         <LogoPositionControls {...position} />
+        {wearDates && <WearDates {...wearDates} label={label} name={position.name} />}
       </div>
       <WpaPreview {...wpa} />
       <WpaScenarios {...scenarios} />
       <HeaderPreview {...header} />
+    </div>
+  )
+}
+
+// The dates this club actually wore this jersey, as small buttons into that
+// game's photo gallery (`/photos/{gamePk}` — GamePhotosPage, deep-linked). The
+// swatches above say what a tile is SUPPOSED to look like; this is how you
+// check that against a photograph of the real uniform, which is the only source
+// that settles an argument about a hex.
+//
+// Most-recent first and capped (see jerseyWearDates) — a club wears one jersey
+// far too often for a full list to be a glance. `dates` is null while the
+// join's two halves are still loading, [] for a jersey with no posted wear yet
+// (a brand-new jersey, or any MiLB tile — that feed doesn't exist).
+//
+// The gallery it links to is deliberately NOT spoiler-safe and says so on its
+// own page: a celebration photo narrates the result. That's an existing,
+// consented property of that page, and this is a dev-only lab, so the link goes
+// straight there rather than growing a second warning.
+function WearDates({ dates, onOpen, name, label }) {
+  if (dates == null) return <p className="colorlab__weardates-hint">Loading worn dates…</p>
+  if (dates.length === 0) {
+    return <p className="colorlab__weardates-hint">No posted wear this season.</p>
+  }
+  return (
+    <div className="colorlab__weardates">
+      <span className="colorlab__weardates-label">Worn</span>
+      <div className="colorlab__weardates-list">
+        {dates.map((d) => (
+          <button
+            key={d.gamePk}
+            type="button"
+            className="colorlab__weardate"
+            onClick={() => onOpen(d.gamePk)}
+            title={`Open the game photos for ${name} — ${label}, ${monthDayYear(d.apiDate)}`}
+          >
+            {monthDayYear(d.apiDate)}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

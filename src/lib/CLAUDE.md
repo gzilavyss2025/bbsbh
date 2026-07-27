@@ -181,9 +181,45 @@ Two things that surprise people:
 
 Existing `.svg` art stays as it is — the standard governs new uploads.
 
+## Club theming (`headerTheme.js`)
+
+The lineup page (`screens/TeamInfo.jsx`) dresses its club-name bar and that
+side's section mastheads in the header colours of the jersey the club is wearing
+that game — **ADR-0030**. `headerThemeFor(teamId, treatment)` is the one
+resolver between the two header tables and that one surface; it answers `null`
+for an uncovered pair, and the CSS fallbacks (`var(--bar-fill, var(--navy))`)
+keep an unthemed page byte-identical to how it rendered before the feature
+existed. Coverage is partial on purpose (67 pairs today) — the resolver never
+synthesises a triad, because an unreviewed colour pair on a real page is exactly
+what the guard below can't vouch for.
+
+The triad is `{ bar, accent, onBar }`: the bar's fill, its kraft-tape bottom
+edge, the ink on it. It was `{ blue, gold, font }` until ADR-0030 — names that
+described the *default navy chrome's* own colours and stopped meaning anything
+once a club's bar was red.
+
+**`scripts/check-contrast.mjs` asserts `onBar` against `bar` at WCAG AA for
+every entry in both stores**, and `test/header-theme.test.js` repeats it. That
+guard is what makes a hand-tuned pair safe to ship: nothing else catches a
+combination that reads fine to whoever picked it. `accent` is deliberately not
+asserted — it's a rule against the page, not text against the bar. Retune a
+failing pair; never lower the threshold.
+
+Two things worth knowing before changing any of it:
+
+- **MLB is keyed by treatment, MiLB by game side** — the same split the rest of
+  this file keeps. `TeamInfo` picks the key with `isMlbTeamId`; the resolver
+  reads whichever table the id belongs to.
+- **A themed masthead re-inks its mono club mark** (`filter: brightness(0)` when
+  `onBarTone` is dark), because a white knockout vanishes on a light bar. That
+  is NOT the filter-whitening ADR-0025 forbids — see ADR-0030's last section for
+  why an already-flat silhouette is the one safe case.
+
 ## The rule that must not drift
 
 **Theming's only inputs are `(teamId, treatment)`.** Identity, never state. The
 tempting future violation is obvious — "tint the page by whoever's leading" —
 and it *would* be a spoiler (root `CLAUDE.md`). Nothing in this directory may
-read a score, an inning, or a win probability to decide a colour.
+read a score, an inning, or a win probability to decide a colour. ADR-0030
+records the reasoning; `test/header-theme.test.js` asserts it structurally, so
+wiring a feed into `headerTheme.js` fails a test rather than a review.

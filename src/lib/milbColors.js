@@ -92,9 +92,11 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
 export const MILB_WPA_BAND_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.band)
 
-// `{ [teamId]: { [variant]: { blue, gold, font } } }` — same "design-lab
-// sketch, not wired to any real component" footing as teams.js's
-// TREATMENT_HEADER_COLOR_OVERRIDES.
+// `{ [teamId]: { [variant]: { bar, accent, onBar } } }` — the MiLB half of the
+// header chrome a themed lineup page wears (ADR-0030), same shape and same
+// role as teams.js's TREATMENT_HEADER_COLOR_OVERRIDES. `lib/headerTheme.js` is
+// what both of them resolve through; nothing else should read either table
+// directly except the lab that authors them.
 export const MILB_HEADER_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.header)
 
 // The resolved Scale/X/Y/Background/Pinstripe for a (team, variant)'s main
@@ -158,21 +160,21 @@ export function milbWpaBandColor(teamId, variant, draft) {
   return milbVariantColors(teamId, variant).bg
 }
 
-// Seeds for the header-colors mockup when neither a draft nor a landed
+// Seeds for the lab's header editor when neither a draft nor a landed
 // MILB_HEADER_COLOR_OVERRIDES entry supplies one — this variant's own
 // resolved bg/accent, so the mockup starts from a real color instead of the
 // app's generic navy/gold pair (unlike TreatmentHeaderPreview's MLB
 // equivalent, which falls back to the app's brand pair only when a team has
 // no swatches of its own at all — every MiLB team always has at least the
 // neutral fallback pair, so that last-resort branch never applies here).
-const DEFAULT_HEADER_FONT = '#FBF6E9' // --paper-2, same literal teams.js's MLB mockup uses
+const DEFAULT_HEADER_ON_BAR = '#FBF6E9' // --paper-2, same literal teams.js's MLB mockup uses
 export function milbHeaderColorsFor(teamId, variant, draft) {
   const override = MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant]
   const { bg, accent } = milbVariantColors(teamId, variant)
   return {
-    blue: draft?.blue ?? override?.blue ?? bg,
-    gold: draft?.gold ?? override?.gold ?? accent,
-    font: draft?.font ?? override?.font ?? DEFAULT_HEADER_FONT,
+    bar: draft?.bar ?? override?.bar ?? bg,
+    accent: draft?.accent ?? override?.accent ?? accent,
+    onBar: draft?.onBar ?? override?.onBar ?? DEFAULT_HEADER_ON_BAR,
   }
 }
 

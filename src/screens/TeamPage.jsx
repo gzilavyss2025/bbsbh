@@ -41,7 +41,7 @@ import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
-import { JerseyCombos } from '../components/JerseyCombos.jsx'
+import { JerseyCombos, MilbUniformStrip } from '../components/JerseyCombos.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
@@ -873,7 +873,15 @@ export function TeamPage({ id, asOf, sportId }) {
           </>
         )}
 
-        <JerseyCombos combos={jerseyCombos} teamId={team.id} teamName={team.name} />
+        {/* MLB gets the per-jersey catalog strip with its records; a MiLB
+            affiliate gets the same strip in its two-card Home/Away form, since
+            there is no uniform feed to build a catalog (or a per-jersey record)
+            from — see JerseyCombos. */}
+        {isMilb ? (
+          <MilbUniformStrip teamId={team.id} teamName={team.name} />
+        ) : (
+          <JerseyCombos combos={jerseyCombos} teamId={team.id} teamName={team.name} />
+        )}
 
         {teamScore?.season?.score != null && (
           <TeamScoreCard
