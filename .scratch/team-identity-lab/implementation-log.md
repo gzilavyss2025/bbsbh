@@ -13,7 +13,7 @@ earlier sections — append.
 | 0 | Plan + handoff docs | **merged?** | `claude/team-identity-lab-plan` | — |
 | 1 | Lab framework + JSON stores + write-back | **merged** | `claude/identity-lab-framework` | #416 |
 | 2 | Jersey audit view + hex copy/paste | **merged** | `claude/jersey-audit-hex-copy` | #418 |
-| 3 | Logo upload pipeline (MLB) | **open** | `claude/logo-upload-pipeline` | — |
+| 3 | Logo upload pipeline (MLB) | **open** | `claude/logo-upload-pipeline` | #419 |
 | 4 | MiLB home/away logo art | not started | — | — |
 | 5 | MiLB colour reconciliation | not started | — | — |
 | 6 | Theming + uniform display | not started | — | — |
@@ -278,7 +278,7 @@ a hand-typed edit.
 
 ## PR 3 — Logo upload pipeline (MLB)
 
-Branch: `claude/logo-upload-pipeline` · PR: #TBD · Merged: open
+Branch: `claude/logo-upload-pipeline` · PR: #419 · Merged: open
 
 Based on `origin/main` @ `a479798` (PRs 1 and 2 had both merged, as #416 and
 #418).
