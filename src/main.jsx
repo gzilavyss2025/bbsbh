@@ -7,6 +7,25 @@ import { CopyProvider } from './copy/CopyProvider.jsx'
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import './index.css'
 
+// Every deploy renames the content-hashed chunk files (see App.jsx's per-route
+// `lazy()` imports), so a tab left open across one gets a failed dynamic
+// import — "Failed to fetch dynamically imported module" — the next time it
+// navigates to a route it hasn't loaded yet. Vite fires this event for
+// exactly that case; reload once to pick up the new manifest instead of
+// leaving the screen blank. The sessionStorage flag stops a reload loop if
+// the failure is persistent rather than a one-off stale deploy; it's cleared
+// a few seconds after a clean load so the NEXT deploy can trigger a reload
+// too.
+const PRELOAD_RELOAD_FLAG = 'bbsbh:reloaded-after-preload-error'
+window.addEventListener('vite:preloadError', () => {
+  if (sessionStorage.getItem(PRELOAD_RELOAD_FLAG)) return
+  sessionStorage.setItem(PRELOAD_RELOAD_FLAG, '1')
+  window.location.reload()
+})
+window.addEventListener('load', () => {
+  setTimeout(() => sessionStorage.removeItem(PRELOAD_RELOAD_FLAG), 10_000)
+})
+
 // @clerk/clerk-react is dynamically imported so its whole SDK is only ever
 // fetched when a deploy actually sets VITE_CLERK_PUBLISHABLE_KEY — every user
 // on every other deploy pays zero bytes for it (this app is phone-first, and
