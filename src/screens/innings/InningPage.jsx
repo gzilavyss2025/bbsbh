@@ -113,8 +113,8 @@ export function InningPage({
             battingSide={battingSide}
             awayAbbr={meta.away.abbreviation}
             homeAbbr={meta.home.abbreviation}
-            awayLocation={meta.away.locationName || meta.away.abbreviation}
-            homeLocation={meta.home.locationName || meta.home.abbreviation}
+            awayFranchise={meta.away.franchiseName || meta.away.abbreviation}
+            homeFranchise={meta.home.franchiseName || meta.home.abbreviation}
             getDerived={getDerived}
             revealed={revealed}
             runExpectancy={runExpectancy}

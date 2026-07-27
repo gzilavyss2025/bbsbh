@@ -107,7 +107,7 @@ test('array selectors degrade to an empty array, never undefined', () => {
 
 test('selectTeamMeta degrades every string field to empty, not undefined', () => {
   const meta = selectTeamMeta({}, 'home')
-  for (const key of ['name', 'teamName', 'clubName', 'locationName', 'abbreviation']) {
+  for (const key of ['name', 'teamName', 'clubName', 'franchiseName', 'abbreviation']) {
     assert.equal(meta[key], '', key)
   }
   assert.equal(meta.probablePitcher, null)
