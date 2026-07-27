@@ -164,16 +164,46 @@ export function moundVisitsAllowed(inning) {
 
 // Mound-visit accounting for the notification bar. A visit is charged to the
 // DEFENSIVE club. Walks every play through (inning, half) inclusive and, for
-// the club fielding THIS half (the opposite of battingSide), returns the
-// running "visits remaining" AFTER each of its mound visits that happened in
-// this half, in order — so the bar on each mound-visit card shows how many
-// that club had left right after it. Remaining never goes negative.
+// the club fielding THIS half (the opposite of battingSide), returns one entry
+// per mound visit IN this half, in order — the running "visits remaining"
+// after it, or null for a trip that wasn't charged. One entry per visit either
+// way: the caller (PlayByPlay) walks its mound-visit cards positionally.
+// Remaining never goes negative.
+//
+// THE TRIP THAT REMOVES THE PITCHER ISN'T A VISIT. MLB's rule is explicit —
+// "a manager or coach who visits the mound and removes the pitcher is not
+// charged with a visit" — but statsapi logs that trip as a `mound_visit`
+// playEvent all the same, sitting immediately ahead of the
+// `pitching_substitution` it produced. In a three-day sweep of the MLB slate
+// 66 of 214 mound-visit events (31%) were that trip. Charging them isn't
+// slightly high, it's impossible: four club-games in that sweep reached SIX
+// against an allowance of five, so the pip row was showing clubs out of visits
+// they still had (gamePk 823843's home club read 6 used where the rule-correct
+// figure is 2).
+//
+// A visit is the removal trip when a pitching change follows it before the
+// club's next pitch — he never threw again, so the manager came for the ball.
+// Tracked as a pending visit rather than a peek at the next playEvent because
+// the feed nests a change at the head of the plate appearance AFTER the one
+// the visit closed; every case in the sweep was same-play, but the rule
+// doesn't promise that and neither does the feed.
 export function moundVisitRemainings(feed, inning, half, battingSide) {
   const defenseSide = battingSide === 'away' ? 'home' : 'away'
   const allowed = moundVisitsAllowed(inning)
   const targetIdx = half === 'bottom' ? inning * 2 : inning * 2 - 1 // 1-based half order
   let used = 0
   const inHalf = []
+  // The visit whose trip hasn't resolved yet — charged once he throws another
+  // pitch, uncharged if a pitching change lands first. `inHalf` is its slot,
+  // reserved in order at the moment the visit happens and filled on settle, so
+  // a visit that resolves during a later play still reports in the right place.
+  let pending = null // { playIdx, slot }
+  const settle = (charged) => {
+    if (!pending) return
+    if (charged) used += 1
+    if (pending.slot != null) inHalf[pending.slot] = charged ? Math.max(0, allowed - used) : null
+    pending = null
+  }
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const pi = p.about?.inning
     const ph = p.about?.halfInning // 'top' | 'bottom'
@@ -182,12 +212,20 @@ export function moundVisitRemainings(feed, inning, half, battingSide) {
     if (playIdx > targetIdx) break
     if ((ph === 'top' ? 'home' : 'away') !== defenseSide) continue
     for (const e of p.playEvents ?? []) {
-      if (e.details?.eventType === 'mound_visit') {
-        used += 1
-        if (playIdx === targetIdx) inHalf.push(Math.max(0, allowed - used))
+      if (e.isPitch) {
+        settle(true) // he stayed in and threw — that trip was a real visit
+        continue
+      }
+      const et = e.details?.eventType
+      if (et === 'pitching_substitution') {
+        settle(false) // the manager came for the ball; not charged
+      } else if (et === 'mound_visit') {
+        settle(true) // two trips with no pitch between: the earlier one stands
+        pending = { playIdx, slot: playIdx === targetIdx ? inHalf.push(null) - 1 : null }
       }
     }
   }
+  settle(true) // a trip still open at the target half had no change after it
   return inHalf
 }
 
