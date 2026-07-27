@@ -11,7 +11,7 @@ earlier sections — append.
 | PR | Title | Status | Branch | PR # |
 | --- | --- | --- | --- | --- |
 | 0 | Plan + handoff docs | **merged?** | `claude/team-identity-lab-plan` | — |
-| 1 | Lab framework + JSON stores + write-back | **open** | `claude/identity-lab-framework` | — |
+| 1 | Lab framework + JSON stores + write-back | **open** | `claude/identity-lab-framework` | #416 |
 | 2 | Jersey audit view + hex copy/paste | not started | — | — |
 | 3 | Logo upload pipeline (MLB) | not started | — | — |
 | 4 | MiLB home/away logo art | not started | — | — |
@@ -55,7 +55,7 @@ already deleted, and `TeamInfo` is the lineup page rather than the club hub.
 
 ## PR 1 — Lab framework, JSON stores, and dev write-back
 
-Branch: `claude/identity-lab-framework` · PR: (open) · Merged: open
+Branch: `claude/identity-lab-framework` · PR: #416 · Merged: open
 
 Based on `origin/main` @ `8064f11` (PR 0 had already merged as #414).
 
