@@ -6007,13 +6007,13 @@ body {
 .abs {
   margin-top: 10px;
 }
-/* Flush by default — .statbox (the innings view's mobile stat card, the one
-   context that renders this unscoped) has no padding of its own, so this
-   already spans the card's full width; no border-radius here lets it read as
-   a header rather than a pill floating inset with "ears" on every side. The
-   two OTHER contexts that reuse this markup override the radius back in for
-   their own standalone-card shape: .bs__abscard (box score) rounds only the
-   top corners to match its own card, .abscard (desktop) also stays square. */
+/* The title's bottom corners square off and sit flush against the rows
+   below, so the navy header and the row panel read as ONE attached card
+   rather than a header floating loose above a separately-bordered box (which
+   this used to be inside .statbox, its inset-padded default context — see
+   .abs__rows below). .bs__abscard (box score) already wants this same
+   joined look; .abscard (desktop) is the one context that still wants the
+   header floating separately, and overrides both back apart below. */
 .abs__title {
   display: block;
   padding: 8px 10px;
@@ -6025,37 +6025,25 @@ body {
   color: var(--text-on-ink);
   background: var(--navy);
   border-bottom: 3px solid var(--seal);
-  border-radius: 0;
-  margin-bottom: 8px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  margin-bottom: 0;
 }
 .abs__rows {
   display: flex;
   flex-direction: column;
   background: var(--paper-2);
   border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   box-shadow: var(--inset-cell);
   overflow: hidden;
 }
-/* The box score's own ABS Challenges card (BoxAbs, BoxScore.jsx) reads as one
-   complete card — the navy title's bottom corners square off and sit flush
-   against the rows below, rather than floating above them as its own
-   separately rounded pill (the innings view's copy of this same .abs/
-   .abs__title markup keeps that floating "ears" look). */
 .bs__abscard {
   /* Now an independent card in its own right (BoxScoreBody's .bs__col),
      not the batting/pitching card's tail — the column's own flex gap
      (var(--space-4)) spaces it from its neighbors, so the base .abs rule's
      own margin-top would double that gap. */
   margin-top: 0;
-}
-.bs__abscard .abs__title {
-  margin-bottom: 0;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-.bs__abscard .abs__rows {
-  border-top: none;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 }
 .abs__row + .abs__row {
   border-top: var(--bw-hair) solid var(--border-rule);
@@ -6636,12 +6624,15 @@ body {
    half" season-context cards above the seal: starter team record, the
    leading-after checkpoint, an inning's run-differential story. Same card
    anatomy as the box score's .bs__noteCard (avatar beside a star-marked
-   sentence), sat with the pre-pitch staging content. */
+   sentence), sat with the pre-pitch staging content. Horizontal margin (not
+   just margin-bottom): flush against .half's own border (which carries no
+   padding of its own) reads wider than the "now pitching"/"due up" cards
+   above it — same 14px inset those follow (see .pitchernotice--pbp/.upnext). */
 .prehalf {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 8px;
-  margin-bottom: 12px;
+  margin: 0 14px 12px;
 }
 .prehalf__card {
   display: flex;
@@ -6842,22 +6833,14 @@ body {
   box-shadow: none;
   overflow: visible;
 }
+/* Both cards already carry their own border/radius/shadow (base .lineupcard/
+   .halfdefense rules above) — this wrapper's own flex gap spaces them apart,
+   so just drop the base rule's 14px horizontal inset (there's no ambient
+   .half card here to inset from; each card already spans .halfentering's
+   full width). */
 .halfentering .lineupcard,
 .halfentering .halfdefense {
-  margin-top: 0;
-  padding-top: 0;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-.halfentering .lineupcard__title,
-.halfentering .halfdefense__title {
-  border-radius: 0;
-}
-.halfentering .lineupcard__teams {
-  padding: 0 10px 12px;
+  margin: 0;
 }
 
 .innings__reference {
@@ -7437,10 +7420,19 @@ body {
   }
 }
 
+/* A self-contained, clickable card — same 14px horizontal inset off .half's
+   own borderless edge as the "now pitching"/"due up"/pre-half callout cards
+   above it (see .pitchernotice--pbp), rather than a bare navy header sitting
+   directly on the page with unbordered rows below (what this used to be:
+   a dashed divider, no card of its own). Tapping the title (see
+   LineupSection, EnteringReference.jsx) collapses .lineupcard__teams. */
 .lineupcard {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  margin: 12px 14px 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
 
 /* Names the moment ("Lineups entering the Top 7th") — same navy masthead
@@ -7448,27 +7440,41 @@ body {
    similar look: the two cards read as one matched pair, phone and wide
    layout alike, rather than Defense having a title and Lineups improvising
    its own). Replaces the old .innings__reference-title, which only existed
-   on the wide layout and left the phone's inline copy with no title at all. */
+   on the wide layout and left the phone's inline copy with no title at all.
+   A <button> (LineupSection) toggling .lineupcard__teams below — reset off
+   the browser's own button chrome so it still reads as a plain masthead. */
 .lineupcard__title {
-  margin: 0 0 8px;
+  width: 100%;
+  margin: 0;
   padding: 8px 10px;
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  font: inherit;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-on-ink);
   background: var(--navy);
+  border: none;
   border-bottom: 3px solid var(--seal);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lineupcard__chevron {
+  margin-left: auto;
+  color: var(--text-on-ink);
+  opacity: 0.8;
 }
 
 /* Away over home, each a self-contained nine-slot list. Stacked so a long name
    with its number/position never has to wrap in a cramped column on a phone. */
 .lineupcard__teams {
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -7587,28 +7593,44 @@ body {
 
 /* The fielding team's live alignment for the half, below the feed — the lineup
    page's defense diamond, now building up substitutions as innings are revealed
-   (reveal-only, see api/defense.js). */
+   (reveal-only, see api/defense.js). Same self-contained clickable card as
+   .lineupcard above (same 14px inset, same reasoning) — collapses the diamond
+   below via the title button (DefenseSection, EnteringReference.jsx). */
 .halfdefense {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
+  margin: 12px 14px 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
 
 .halfdefense__title {
-  margin: 0 0 8px;
+  width: 100%;
+  margin: 0;
   padding: 8px 10px;
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  font: inherit;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-on-ink);
   background: var(--navy);
+  border: none;
   border-bottom: 3px solid var(--seal);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+  text-align: left;
+  cursor: pointer;
+}
+
+.halfdefense__chevron {
+  margin-left: auto;
+  color: var(--text-on-ink);
+  opacity: 0.8;
 }
 
 /* The box score's own Defense card (BoxDefense, BoxScore.jsx) reads as one
@@ -7619,40 +7641,46 @@ body {
    .halfdefense/.defdiamond markup, EnteringReference.jsx, keeps that
    floating "ears" look). */
 .bs__defensecard.halfdefense {
-  /* Now an independent card in its own right (BoxScoreBody's .bs__col),
-     below BoxAbs but no longer its nested continuation — the column's own
-     flex gap (var(--space-4)) spaces the two apart, so the base .halfdefense
-     rule's own dashed divider + margin/padding would draw a second, redundant
-     seam on top of that gap. */
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
+  /* Now an independent card in its own right (BoxScoreBody's .bs__col), below
+     BoxAbs but no longer its nested continuation — the column's own flex gap
+     (var(--space-4)) spaces the two apart, so the base .halfdefense rule's
+     own margin/border/shadow would draw a second, redundant card around this
+     one's own title+diamond "joined ears" look (see .bs__defensecard
+     .defdiamond below) rather than sitting flush in the column. */
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 .bs__defensecard .halfdefense__title {
+  /* A plain <h4> here, not the innings view's collapsible <button> copy —
+     restore the non-interactive cursor the base rule's button reset assumes. */
   margin-bottom: 0;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: default;
 }
 .bs__defensecard .defdiamond {
   border-top: none;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
-/* On a phone, .halfdefense (and the diamond inside it) sits INSIDE .half's own
-   bordered/shadowed card (the pre-reveal reference band staged above the seal
-   — see HalfInning.jsx) — the diamond's own card border there just doubles
-   against .half's, right at the bottom edge. The wide layout's copy
-   (.innings__ref-defense) stands alone with no outer card, so it keeps the
-   diamond's normal border/shadow; only the nested phone copy drops them,
-   relying on .halfdefense's dashed divider above for separation instead.
-   Horizontal inset matches its siblings' own 8px (.lineupteam__name,
-   .halfdefense__title); the bottom keeps real padding since — unlike the
-   removed border — this is the LAST thing in the card, and the DH line needs
-   room to breathe before .half's own bottom edge. */
+/* On a phone, .halfdefense is itself now a card (see above) nested inside
+   .half's own bordered/shadowed card (the pre-reveal reference band staged
+   above the seal — see HalfInning.jsx) — the diamond's own card border would
+   double against .halfdefense's own, right at the bottom edge. The wide
+   layout's copy (.innings__ref-defense) drops the diamond's border for the
+   same reason against ITS OWN wrapper card instead (see below); only this
+   selector's own .half-nested copy needs the reset here. Horizontal inset
+   matches its siblings' own 8px (.lineupteam__name, .halfdefense__title); the
+   bottom keeps real padding since — unlike the removed border — this is the
+   LAST thing in the card, and the DH line needs room to breathe before
+   .halfdefense's own bottom edge. */
 .half .defdiamond {
   border: none;
   box-shadow: none;
   background: none;
-  padding: 0 var(--space-2) var(--space-4);
+  padding: 12px var(--space-2) var(--space-4);
 }
 
 .stat {
@@ -13663,6 +13691,15 @@ body {
   .abscard .abs {
     margin-top: 0;
   }
+  /* Unlike the base rule's joined-card look (title's bottom corners squared
+     flush against the rows), this context already gives .abscard itself the
+     card chrome and floats the title flush off it via the negative margin
+     above — restore the rows' own full rounded pill/border so they don't
+     read as attached to nothing. */
+  .abscard .abs__rows {
+    border-top: var(--bw-hair) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+  }
 
   /* Reference band: pitchers + fielding defense on the left, both lineups on
      the right. Both inline entering copies (staged around the seal, and the
@@ -13709,9 +13746,11 @@ body {
     overflow: hidden;
   }
   .innings__ref-defense .halfdefense {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
   .innings__ref-defense .halfdefense__title {
     border-radius: 0;
@@ -13721,7 +13760,7 @@ body {
     border-radius: 0;
     box-shadow: none;
     background: none;
-    padding: 0 10px 12px;
+    padding: 12px 10px;
   }
   /* Same recipe for the Lineups card. */
   .innings__ref-lineups {
@@ -13738,9 +13777,8 @@ body {
      against the card's), and .lineupcard__teams gets the inset instead —
      mirrors .innings__ref-defense .defdiamond's own padding reset. */
   .innings__ref-lineups .lineupcard {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
+    margin: 0;
+    border: none;
     border-radius: 0;
     background: none;
     box-shadow: none;
@@ -13749,7 +13787,7 @@ body {
     border-radius: 0;
   }
   .innings__ref-lineups .lineupcard__teams {
-    padding: 0 10px 12px;
+    padding: 12px 10px;
   }
 
   /* Rosters sit two-up beneath the reading pane. */
