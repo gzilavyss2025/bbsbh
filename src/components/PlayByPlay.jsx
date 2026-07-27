@@ -311,11 +311,19 @@ const EVENT_ICONS = {
 // The real scorer's shorthand for a baserunning/misc event with no plate
 // appearance of its own — the same abbreviation a scorer pencils on paper,
 // captioning EventCard instead of an emoji.
+//
+// A pickoff is PK, not PO, and the tags here must keep matching the two places
+// in api/playbyplay.js that write the same event onto a diamond —
+// runnerOutCode's out notation ("PK 1-3") and interruptedCode's carry-over
+// mark ("PK →"). Two spellings for one event on the same page reads as two
+// different events, and "PO" is doubly wrong here: it's already this app's
+// mark for a POP OUT (loadScorecard.js's classifyOut), besides being the
+// scorebook's own abbreviation for a putout.
 const EVENT_CODES = {
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   caught_stealing_2b: 'CS', caught_stealing_3b: 'CS', caught_stealing_home: 'CS',
-  pickoff_1b: 'PO', pickoff_2b: 'PO', pickoff_3b: 'PO',
-  pickoff_caught_stealing_2b: 'PO', pickoff_caught_stealing_3b: 'PO', pickoff_caught_stealing_home: 'PO',
+  pickoff_1b: 'PK', pickoff_2b: 'PK', pickoff_3b: 'PK',
+  pickoff_caught_stealing_2b: 'PK', pickoff_caught_stealing_3b: 'PK', pickoff_caught_stealing_home: 'PK',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
   // Not observed as a standalone top-level play in either sampled game (both
   // always nested inside a real plate appearance) — included for the same

@@ -586,6 +586,11 @@ const ADVANCE_CODES = {
   sac_fly: 'SF', sac_bunt: 'SAC',
   stolen_base_2b: 'SB', stolen_base_3b: 'SB', stolen_base_home: 'SB',
   wild_pitch: 'WP', passed_ball: 'PB', balk: 'BK',
+  // A bases-loaded balk — the one that forces a run in — is its own
+  // runner-level eventType, NOT the plain `balk` above (found in a July 2026
+  // sweep of the MLB slate). It's a balk on the scoresheet either way; without
+  // this key the leg fell through to advanceCode's ground-out "GO".
+  forced_balk: 'BK',
   field_error: 'E', error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
   // Verified against gamePk 777747's bottom of the 10th (Brice Turang
   // 1B->2B during Jackson Chourio's walk): without this entry,
