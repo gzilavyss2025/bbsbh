@@ -424,13 +424,19 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           teamfilterstrip--nav keeps every logo full-color instead of
           dimming everything the strip's filter callers grayscale until
           picked (see index.css). Sourced from levelTeams (fetchTeams(sportId)
-          above), so it re-lists automatically on every level switch. */}
+          above), so it re-lists automatically on every level switch.
+          showArrows gives non-touch users a click target to scrub through the
+          strip; centerTeamId lands on the favorite team on arrival (only
+          meaningful when it's actually in this level's club set — an MLB
+          favorite scrolled to a minor-league level's strip just no-ops). */}
       {levelTeams.data?.length > 0 && (
         <TeamFilterStrip
           teams={levelTeams.data}
           selectedTeamId={null}
           onSelect={(id) => navigate(teamPath(id))}
           showMlbPin={false}
+          showArrows
+          centerTeamId={favoriteTeamId}
           ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
           className="teamfilterstrip--nav"
         />

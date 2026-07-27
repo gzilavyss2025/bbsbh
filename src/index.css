@@ -14321,6 +14321,34 @@ body {
   filter: none;
   opacity: 1;
 }
+/* The nav strip's own native scrollbar would otherwise sit right under the
+   logos, fighting the tray's bottom edge — hide it, since the mask-faded
+   edges above already signal "more to scroll" and the arrow buttons below
+   give non-touch users an explicit way to move the strip. */
+.teamfilterstrip--nav .vsteam__strip {
+  scrollbar-width: none;
+}
+.teamfilterstrip--nav .vsteam__strip::-webkit-scrollbar {
+  display: none;
+}
+.teamfilterstrip__arrow {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  margin: 8px 2px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.teamfilterstrip__arrow:active {
+  transform: scale(0.94);
+}
 .vsteam__grid {
   margin-top: 2px;
 }
