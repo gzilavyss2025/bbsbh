@@ -3,6 +3,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { LabShell } from './LabShell.jsx'
 import { ColorLabBody } from './ColorLabBody.jsx'
 import { mlbProfile } from './profiles/mlb.jsx'
+import { auditProfile } from './profiles/audit.jsx'
 import { milbProfiles } from './profiles/milb.jsx'
 import { patternProfile } from './profiles/pattern.jsx'
 
@@ -17,7 +18,7 @@ import { patternProfile } from './profiles/pattern.jsx'
 // src/lib/data/*.json through a Vite dev middleware that doesn't exist in a
 // production build (ADR-0029), so shipping it would ship a button that can only
 // fail. Carries no score or reveal content either way.
-const PROFILES = [mlbProfile, ...milbProfiles, patternProfile]
+const PROFILES = [mlbProfile, auditProfile, ...milbProfiles, patternProfile]
 
 // Which dimension was last open, so returning to the lab lands where the last
 // session left off rather than always on MLB — the small thing the five

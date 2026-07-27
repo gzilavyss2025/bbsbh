@@ -9856,6 +9856,21 @@ body {
   outline-offset: 2px;
 }
 
+.colorlab__wparesetbtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* TreatmentBox's Copy/Paste palette pair — sits in .colorlab__treatmentlabelrow
+   beside the treatment label, so it reads as acting on the WHOLE tile below it
+   rather than belonging to one of the position/header editors it moves values
+   between. */
+.colorlab__palettebtns {
+  display: flex;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+}
+
 /* No more single-tile SVG mockup beside these — just the fields, now given
    the whole card's width to lay out across (auto-fill instead of a fixed
    2-column grid built for a 112px sidebar). */
@@ -10047,6 +10062,126 @@ body {
 
 .uniformnames__input:disabled {
   opacity: 0.5;
+}
+
+/* ------------------------------------------------------------ jersey audit
+   Dev-only harness (screens/identity-lab/profiles/audit.jsx) — one row per
+   catalog jersey, read-only, answering which logo treatment it resolves to
+   and whether that came from a curated override or the naming heuristic. */
+.audit__banner {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-body);
+  margin-bottom: var(--space-3);
+}
+
+.audit__banner--warn {
+  border-color: var(--accent-negative);
+  background: var(--bg-canvas);
+  color: var(--accent-negative);
+}
+
+.audit__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  color: var(--text-body);
+}
+
+.audittable__scroll {
+  overflow-x: auto;
+}
+
+.audittable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-compact);
+}
+
+.audittable th,
+.audittable td {
+  padding: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.audittable th {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+.audittable__team {
+  white-space: nowrap;
+  font-weight: var(--w-semibold);
+}
+
+.audittable__raw {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--font-mono);
+  max-width: 220px;
+}
+
+.audittable__rawtext {
+  color: var(--text-body);
+}
+
+.audittable__rawcode {
+  color: var(--text-muted);
+}
+
+.audittable__via {
+  display: inline-block;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-compact);
+}
+
+.audittable__via--override {
+  background: var(--paper-1);
+  color: var(--text-caption);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+
+.audittable__via--heuristic {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.audittile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.audittile .colorlab__logobox {
+  width: 56px;
+  height: 56px;
+}
+
+.audittile__art {
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.audittile__art--error {
+  color: var(--accent-negative);
+  font-weight: var(--w-semibold);
 }
 
 /* ------------------------------------------------------------ team pattern lab
