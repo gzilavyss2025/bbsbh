@@ -67,6 +67,85 @@ test('five fouls is not a marathon', () => {
   assert.equal(notes.find((n) => n.kind === 'marathonAb'), undefined)
 })
 
+// --- steal call-outs name the RUNNER, not the card's batter ------------------
+//
+// A steal happens during somebody ELSE's plate appearance, so its call-out
+// hangs on that batter's card. The play card renders a bare sentence under the
+// batter's name (PlayByPlay.jsx passes CalloutNote only `text`; Margin Notes
+// and the box score's Insights card draw `personId`'s headshot and name
+// instead), so an unattributed "Leads the Mets in steals" reads as the
+// batter's. Pinned here because the note is keyed on the runner correctly and
+// still rendered wrong — the two halves have to stay in step.
+
+const STEAL_BUNDLE = {
+  ...BUNDLE,
+  leaders: { 55: { team: 'Away Club', cats: { sb: '32' } } },
+  streaks: { 55: { stolenBase: 10 } },
+}
+// Runner 55 stole once already this game, never caught.
+const STEAL_PROGRESS = {
+  byPlay: new Map([[7, { sb: new Map([[55, { n: 1, caughtBefore: false }]]) }]]),
+}
+const stealEntry = {
+  atBatIndex: 7,
+  batterId: 99, // the man at the plate — NOT the stealer
+  eventType: 'walk',
+  baserunningNotes: [{ eventType: 'stolen_base_2b', runnerId: 55, runnerLast: 'Bae' }],
+}
+
+test('the steal leader call-out names the runner who stole', () => {
+  const notes = buildCallouts(stealEntry, {
+    bundle: STEAL_BUNDLE,
+    battingSide: 'away',
+    progress: STEAL_PROGRESS,
+  })
+  const n = notes.find((x) => x.kind === 'leader' && x.cat === 'sb')
+  assert.ok(n, 'expected a steal leader note')
+  assert.equal(n.personId, 55) // keyed on the runner…
+  assert.match(n.text, /^Bae leads the Away Club in steals/) // …and says so
+  assert.match(n.text, /No\. 33 this season/) // 32 entering + tonight's one
+})
+
+test('the steal-streak call-out names the runner who stole', () => {
+  const notes = buildCallouts(stealEntry, {
+    bundle: STEAL_BUNDLE,
+    battingSide: 'away',
+    progress: STEAL_PROGRESS,
+  })
+  const n = notes.find((x) => x.kind === 'sbStreak')
+  assert.ok(n, 'expected a steal-streak note')
+  assert.equal(n.personId, 55)
+  assert.match(n.text, /^Bae has now stolen 11 straight without being caught$/)
+})
+
+test('a runner who steals twice in one plate appearance gets one card, not two', () => {
+  // 2nd then 3rd on the same at-bat (gamePk 826849's top 1st): two SB notes,
+  // one runner. `sbSnap.n` already counts both, so a second pass can only
+  // repeat the identical sentence — and the play card has no dedupe of its own.
+  const notes = buildCallouts(
+    {
+      ...stealEntry,
+      baserunningNotes: [
+        { eventType: 'stolen_base_2b', runnerId: 55, runnerLast: 'Bae' },
+        { eventType: 'stolen_base_3b', runnerId: 55, runnerLast: 'Bae' },
+      ],
+    },
+    { bundle: STEAL_BUNDLE, battingSide: 'away', progress: STEAL_PROGRESS },
+  )
+  assert.equal(notes.filter((n) => n.kind === 'sbStreak').length, 1)
+  assert.equal(notes.filter((n) => n.kind === 'leader' && n.cat === 'sb').length, 1)
+})
+
+test('a steal call-out falls back to a role word, never a bare pronoun', () => {
+  // No runnerLast (a thin feed with no gameData record for him): "He" under
+  // the batter's own name would be the exact ambiguity this guards against.
+  const notes = buildCallouts(
+    { ...stealEntry, baserunningNotes: [{ eventType: 'stolen_base_2b', runnerId: 55 }] },
+    { bundle: STEAL_BUNDLE, battingSide: 'away', progress: STEAL_PROGRESS },
+  )
+  for (const n of notes) assert.match(n.text, /^The runner /)
+})
+
 // --- foulVolume pre-half note ------------------------------------------------
 
 function volumeFeed({ pitcherIds }) {

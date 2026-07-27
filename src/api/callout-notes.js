@@ -36,6 +36,7 @@ import {
   BASERUNNING_NOTE_EVENT_TYPES,
   FOUL_CODES,
   pitchCallCode,
+  runnerLastName,
 } from './playbyplay.js'
 import { personNameParts, dayWordFor, dayWord, selectPrePitchChanges, halfIndex } from './select.js'
 import { availabilityFor } from './workload.js'
@@ -569,9 +570,33 @@ export function buildCallouts(
   // A steal narrated on this card — keyed on the RUNNER (who may not be the
   // batter), from the baserunning note's own runner id. Both the team-leader
   // count and his no-caught run fold in tonight's steals through this play.
+  //
+  // Both texts NAME him, the same way the pitcher's strikeout note just above
+  // names the pitcher, and for the same reason: the play card renders a bare
+  // sentence under the BATTER's name (PlayByPlay.jsx hands CalloutNote only
+  // `text` — unlike Margin Notes and the box score's Insights card, which draw
+  // `personId`'s headshot and name beside the note). An unattributed "Leads
+  // the Mets in steals" sitting under whoever happened to be at the plate
+  // reads as HIS, and a steal call-out is by definition never about him. The
+  // roll-up rewrites both of these into its own attributed wording, so the
+  // name here only ever reaches the play card.
+  //
+  // Once per RUNNER, not once per steal event: a runner who takes both 2nd and
+  // 3rd during one plate appearance leaves two SB notes on the same card
+  // (verified against gamePk 826849's top 1st, Cody Miller stealing 2nd then
+  // 3rd on Machado's at-bat), and `sbSnap.n` is already this play's whole
+  // steal count for him — so a second pass can only re-render the identical
+  // sentence. The roll-up's dedupeKey catches that on the box score; the play
+  // card has no dedupe of its own.
+  const sbSeen = new Set()
   for (const bn of entry.baserunningNotes ?? []) {
     if (!SB_EVENTS.has(bn.eventType) || bn.runnerId == null) continue
+    if (sbSeen.has(bn.runnerId)) continue
+    sbSeen.add(bn.runnerId)
     const sbSnap = snap?.sb?.get(bn.runnerId)
+    // Falls back to a role word, never to "He" — a bare pronoun under the
+    // batter's own name is the very ambiguity this exists to remove.
+    const who = bn.runnerLast || 'The runner'
     const L = leaders[bn.runnerId]
     const v = L?.cats?.sb
     if (v != null) {
@@ -580,8 +605,8 @@ export function buildCallouts(
       notes.push({
         text:
           total != null
-            ? `Leads the ${L.team} in steals — that's No. ${total} this season`
-            : `Leads the ${L.team} in steals (${v})`,
+            ? `${who} leads the ${L.team} in steals — that's No. ${total} this season`
+            : `${who} leads the ${L.team} in steals (${v})`,
         personId: bn.runnerId,
         side: battingSide,
         kind: 'leader',
@@ -595,7 +620,7 @@ export function buildCallouts(
     const run = streaks[bn.runnerId]?.stolenBase
     if (run && sbSnap && !sbSnap.caughtBefore) {
       notes.push({
-        text: `That's ${run + sbSnap.n} straight steals without being caught`,
+        text: `${who} has now stolen ${run + sbSnap.n} straight without being caught`,
         personId: bn.runnerId,
         side: battingSide,
         kind: 'sbStreak',
@@ -1834,9 +1859,18 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
       pitcherId != null
         ? { id: pitcherId, ...personNameParts(pitcherPerson), hand: pitcherPerson.pitchHand?.code ?? '' }
         : null
+    // Same note shape computeHalfInningFeed builds, `runnerLast` included —
+    // the roll-up rewrites the steal families into its own attributed wording
+    // below, but building a thinner note here is how the two paths drift, and
+    // the last drift of exactly this kind is what left the play card's steal
+    // call-outs unattributed in the first place.
     const baserunningNotes = (play.playEvents ?? [])
       .filter((e) => !e.isPitch && BASERUNNING_NOTE_EVENT_TYPES.has(e.details?.eventType))
-      .map((e) => ({ eventType: e.details.eventType, runnerId: e.player?.id ?? null }))
+      .map((e) => ({
+        eventType: e.details.eventType,
+        runnerId: e.player?.id ?? null,
+        runnerLast: runnerLastName(feed, e.player?.id ?? null),
+      }))
     const entry = {
       eventType: play.result?.eventType ?? null,
       batterId: play.matchup?.batter?.id,

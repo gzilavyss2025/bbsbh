@@ -242,6 +242,17 @@ export function pinchRunningPlayers(feed, pinchId, replacedId) {
   return { runner: nameOf(pinchId), replaced: nameOf(replacedId) }
 }
 
+// The surname to use when a baserunning note has to NAME the runner it's
+// about. Exported because the box-score roll-up builds the same note shape
+// from the raw feed (api/callout-notes.js's buildGameCallouts) and the two
+// must not drift — a call-out that reads correctly on the at-bat card and
+// anonymously in the roll-up is the same bug in the other direction.
+export function runnerLastName(feed, id) {
+  if (id == null) return ''
+  const person = feed?.gameData?.players?.[`ID${id}`] ?? {}
+  return personNameParts(person).last || person.fullName || ''
+}
+
 // Swinging strike, swinging strike (blocked). Shared with derive.js.
 export const WHIFF_CODES = new Set(['S', 'W'])
 // Foul, foul bunt, foul tip. Shared with derive.js's per-half foul counters
@@ -1142,9 +1153,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // `e.player.id` on a baserunning playEvent is the runner it's about (the
         // stealer / picked-off man) — verified against a live steal — so a
         // leader call-out on a steal can key on the RUNNER, not the batter.
+        // `runnerLast` rides along for the same reason the call-out keys on
+        // him: these notes hang on the card of whoever was BATTING, so a
+        // call-out about the runner has to name him or it reads as the
+        // batter's (see api/callout-notes.js's steal families).
+        const rid = e.player?.id ?? null
         baserunningNotes.push({
           eventType: et,
-          runnerId: e.player?.id ?? null,
+          runnerId: rid,
+          runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(e.details.description, nameIndex),
         })
       }
@@ -1299,9 +1316,11 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         !notes.some((n) => n.eventType === play.result?.eventType)
       ) {
         const outRunner = runners.find((r) => r.movement?.isOut) ?? runners[0]
+        const rid = outRunner?.details?.runner?.id ?? null
         notes.push({
           eventType: play.result.eventType,
-          runnerId: outRunner?.details?.runner?.id ?? null,
+          runnerId: rid,
+          runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(play.result.description, nameIndex),
         })
       }
