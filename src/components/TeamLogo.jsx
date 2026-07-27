@@ -9,7 +9,7 @@ import { teamLogoUrl } from '../lib/teams.js'
 // 'alternate' | 'city-connect' | 'mono'). The last three resolve to a LOCAL
 // asset (teamLogoUrl, teams.js) rather than the mlbstatic CDN — the curated
 // jersey-treatment art, and the precomputed one-color knockout mark the navy
-// section mastheads wear (ADR-0025) — and coverage of all three is partial by
+// section mastheads wear (ADR-0031) — and coverage of all three is partial by
 // design, which is what the fallback below is for: a club with no knockout art
 // yet wears its full-color mark on the bar rather than nothing.
 // Fallback degrades in two steps, consistent with the app's "MiLB data is

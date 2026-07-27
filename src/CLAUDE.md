@@ -190,7 +190,7 @@ Defense, Due up next) ask `TeamLogo` for the `mono` variant: a one-color
 knockout mark precomputed per club by `scripts/gen-mono-logos.mjs` into
 `public/data/logos/mono/`. Don't reach for `filter: brightness(0) invert(1)` to
 whiten a logo — that's what this replaced, and it flattens every mark whose
-interior detail is drawn in a light fill into an unreadable blob. Read ADR-0025
+interior detail is drawn in a light fill into an unreadable blob. Read ADR-0031
 before changing how any of these render; the conversion itself lives in
 `src/lib/logoMono.js`.
 

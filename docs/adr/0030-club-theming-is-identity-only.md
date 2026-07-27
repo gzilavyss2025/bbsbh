@@ -91,11 +91,11 @@ gap is visible where the tuning happens.
 ## The one thing that surprised us: the club mark
 
 A themed masthead carries the club's **mono** mark — the one-colour knockout art
-of ADR-0025, drawn white for a navy bar. On a light bar (several clubs' greys and
+of ADR-0031, drawn white for a navy bar. On a light bar (several clubs' greys and
 creams) that mark disappears, and no text-contrast rule would catch it.
 
 The fix is `filter: brightness(0)` on the mark when the theme's ink is dark
-(`onBarTone`). **This is not the filter-whitening ADR-0025 exists to forbid.**
+(`onBarTone`). **This is not the filter-whitening ADR-0031 exists to forbid.**
 That failure mode is filtering *full-colour* art: a mark whose interior detail is
 drawn in a light fill flattens into an unreadable blob. The mono asset has
 already been through exactly that reduction — it is one opaque shape plus

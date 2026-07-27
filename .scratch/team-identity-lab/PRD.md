@@ -1,8 +1,9 @@
 # Team Identity Lab — PRD
 
-Status: ready-for-agent
+Status: complete
 Owner: Gary
 Planned: 2026-07-27
+Completed: 2026-07-27 (PR 7)
 Base at planning time: `origin/main` @ `14ae212`
 
 Rework of the unshipped "Team Color Lab" effort (three unlinked dev/QA screens,

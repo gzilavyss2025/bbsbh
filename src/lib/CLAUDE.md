@@ -69,7 +69,7 @@ own `note`.
 | `milbColors.js` | The MiLB counterpart: the Home/Away resolvers and `milbTreatmentTile` (it re-exports the chain rather than owning it) |
 | `wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
 | `wpaBandColors.js` | That band's fill/pinstripe resolution |
-| `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0025) |
+| `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
 
 `treatmentTile(teamId, treatment)` is the single resolver behind the slate card
 (`GameCard`), the in-game masthead (`GameView`), and the lab's own grid — a club
@@ -181,6 +181,18 @@ Two things that surprise people:
 
 Existing `.svg` art stays as it is — the standard governs new uploads.
 
+## `TeamLogo`'s own fallback chain
+
+Curated-art coverage is partial by design (§ above), so the component every
+consumer renders through (`src/components/TeamLogo.jsx`) degrades in its own
+two steps, independent of the colour chain: a requested `variant` that 404s
+retries the plain `base` mlbstatic mark; no id, no base mark, or the base also
+failing draws a single-letter monogram. Never a broken-image icon, and asking
+for a mark a club happens to lack (the same 8-club City Connect gap PR 2/3
+found, or a not-yet-uploaded MiLB side) quietly falls back rather than
+erroring. This is orthogonal to `logo-art.json` — the manifest is a record for
+`test/logo-upload.test.js`, not something `TeamLogo` consults.
+
 ## Club theming (`headerTheme.js`)
 
 The lineup page (`screens/TeamInfo.jsx`) dresses its club-name bar and that
@@ -212,7 +224,7 @@ Two things worth knowing before changing any of it:
   reads whichever table the id belongs to.
 - **A themed masthead re-inks its mono club mark** (`filter: brightness(0)` when
   `onBarTone` is dark), because a white knockout vanishes on a light bar. That
-  is NOT the filter-whitening ADR-0025 forbids — see ADR-0030's last section for
+  is NOT the filter-whitening ADR-0031 forbids — see ADR-0030's last section for
   why an already-flat silhouette is the one safe case.
 
 ## The rule that must not drift

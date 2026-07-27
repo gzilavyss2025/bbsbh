@@ -1,16 +1,25 @@
-Status: needs-triage
+Status: wontfix
 
-# Solid per-team logo-tile colors on the slate card — parked, revisit Monday 2026-07-20
+# Solid per-team logo-tile colors on the slate card — historical record, code since removed
+
+**This describes a past experiment, not live code.** `GAMECARD_TILE_COLORS` and
+`gameCardTileColor()` were removed from `src/lib/teams.js` before the Team
+Identity Lab effort began (verified 2026-07-27 — zero hits in `src/`,
+`scripts/`, `test/`, `e2e/`); the slate card still fills with the
+`teamTintColor` wash described below. Nothing here should be treated as
+something to wire up — the hand-picked color table is kept only because
+re-deriving it would be wasted effort if this idea comes back.
 
 ## Summary
 
-The slate's `GameCard` logo tiles (`.gamecard__logobox`) currently fill with
+The slate's `GameCard` logo tiles (`.gamecard__logobox`) fill with
 a soft ~22%-alpha wash of each team's brand color (`teamTintColor`,
 `src/lib/teams.js`). The user asked for a SOLID (no alpha) fill instead,
 hand-specifying one color per MLB club. Implemented as a draft
 (`GAMECARD_TILE_COLORS` + `gameCardTileColor(teamId)` in `src/lib/teams.js`),
 but **not wired into `TeamMark`** (`src/components/GameCard.jsx`) — reverted
-back to the `teamTintColor` wash for now.
+back to the `teamTintColor` wash, and the draft code was later deleted
+outright.
 
 ## Why it was reverted
 
@@ -80,13 +89,12 @@ picked yet:
 - Or: the wash (current, live) might just be right and the solid ask doesn't
   hold up in practice — worth confirming that read before spending more time.
 
-## Where the code is
+## Where the code was
 
-- `src/lib/teams.js` — `GAMECARD_TILE_COLORS` + `gameCardTileColor(teamId)`,
-  defined but unused (kept as the color reference above, not dead-code
-  cleanup fodder).
-- `src/components/GameCard.jsx` — `TeamMark` has a comment pointing here;
-  the one-line change to re-enable is
-  `const tint = gameCardTileColor(team.id) ?? teamTintColor(team.id)`.
+- `src/lib/teams.js` — `GAMECARD_TILE_COLORS` + `gameCardTileColor(teamId)`
+  are gone. Reviving this would mean re-adding both from the table above, not
+  restoring a comment-pointed one-liner.
+- `src/components/GameCard.jsx` — `TeamMark` no longer has a comment pointing
+  here either.
 
 ## Comments

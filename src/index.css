@@ -4437,10 +4437,10 @@ body {
 }
 
 /* A masthead's club mark is the MONO knockout art — a flat, single-ink white
-   silhouette (ADR-0025, lib/logoMono.js). On a light bar that disappears, so a
+   silhouette (ADR-0031, lib/logoMono.js). On a light bar that disappears, so a
    theme whose ink is dark re-inks the mark to match.
 
-   This is NOT the `filter: brightness(0) invert(1)` whitening ADR-0025 exists
+   This is NOT the `filter: brightness(0) invert(1)` whitening ADR-0031 exists
    to forbid. That failure mode is filtering FULL-COLOR art: a mark whose
    interior detail is drawn in a light fill flattens into an unreadable blob.
    The mono asset has already been through that reduction — it is one opaque
@@ -24351,7 +24351,7 @@ button.gamehigh-matchup:active {
    precomputed per club by scripts/gen-mono-logos.mjs. This used to be a
    `filter: brightness(0) invert(1)` on the full-color CDN mark, which crushed
    every logo whose interior detail is drawn in a light fill into an
-   unreadable solid blob — see ADR-0025 and src/lib/logoMono.js. */
+   unreadable solid blob — see ADR-0031 and src/lib/logoMono.js. */
 .metricbar__logo {
   flex: 0 0 auto;
 }
