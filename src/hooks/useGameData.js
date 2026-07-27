@@ -396,18 +396,26 @@ export function useGameData(game, spoilersOff = false) {
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
-  // Which logo treatment each side actually wore tonight, for the
-  // win-probability chart's tiled band (WinProbChart.jsx) — read from the
-  // same nightly precompute GameCard.jsx already reads to swap a slate
-  // card's logo (api/jerseys.js), not a second live fetch. Same deferred
-  // tier as the other same-origin static reads above; a game outside the
-  // file's coverage (MiLB, not posted yet) falls back to defaultTreatmentFor's
-  // predicted look rather than a flat 'main' for both sides.
+  // Which logo treatment each side actually wore tonight — read from the same
+  // nightly precompute GameCard.jsx already reads to swap a slate card's logo
+  // (api/jerseys.js), not a second live fetch. Same deferred tier as the other
+  // same-origin static reads above; a game outside the file's coverage (MiLB,
+  // not posted yet) falls back to defaultTreatmentFor's predicted look rather
+  // than a flat 'main' for both sides.
+  //
+  // Two consumers: the win-probability chart's tiled band (WinProbChart.jsx),
+  // and the lineup page's own header chrome (TeamInfo.jsx via
+  // lib/headerTheme.js — ADR-0030). Both want the same answer to "what is this
+  // club wearing", so it is resolved once here rather than twice.
+  //
+  // Spoiler-free by construction: jerseys.json maps `gamePk:teamId` to a
+  // treatment NAME and carries no result, and the same value already renders
+  // unsealed on the slate card.
   const jerseysQuery = useAsync(
     () => (enrichmentReady ? fetchJerseysData() : Promise.resolve(null)),
     [enrichmentReady],
   )
-  const winProbTreatment = useMemo(
+  const jerseyTreatments = useMemo(
     () => ({
       away:
         jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.away.id) ??
@@ -442,7 +450,7 @@ export function useGameData(game, spoilersOff = false) {
     runExpectancyData,
     workloadData,
     lineupValuesData,
-    winProbTreatment,
+    jerseyTreatments,
     started,
   }
 }

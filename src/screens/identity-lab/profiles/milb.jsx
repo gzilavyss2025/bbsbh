@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { CopyIconButton } from '../../../components/CopyBox.jsx'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
+import { contrastRatio } from '../../../lib/contrast.js'
 import {
   MILB_COLOR_LAB_LEVELS,
   MILB_TREATMENT_TUNING,
@@ -110,13 +111,14 @@ function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe
 }
 
 function buildHeaderCopyText(name, teamId, variant, variantLabel, colors) {
-  const { blue, gold, font } = colors
+  const { bar, accent, onBar } = colors
   return (
     `Team: ${name} (id ${teamId}, MiLB)\n` +
     `Variant: ${variantLabel}\n` +
     `Where: src/lib/data/milb-treatment-tuning.json — ${teamId}.treatments.${variant}.header ` +
-    `(design-lab preview only — no shipped component reads this yet)\n` +
-    `blue: ${blue}, gold: ${gold}, font: ${font}`
+    `(drives the lineup page's club bar + section mastheads — ADR-0030)\n` +
+    `bar: ${bar}, accent: ${accent}, onBar: ${onBar}\n` +
+    `onBar vs bar: ${contrastRatio(onBar, bar).toFixed(2)}:1 (scripts/check-contrast.mjs needs 4.5:1)`
   )
 }
 
@@ -221,6 +223,7 @@ function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
   const wpaPinstripe = milbWpaBandPinstripeColor(teamId, variant, drafts.wpa)
   const wpaBand = milbWpaBandColor(teamId, variant, drafts.wpa)
   const wpaLayout = milbWpaLogoLayout(teamId, variant, drafts.wpa)
+  const headerLanded = MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant] ?? null
   const headerColors = milbHeaderColorsFor(teamId, variant, drafts.header)
 
   return (
@@ -303,6 +306,8 @@ function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
         name,
         treatmentLabel: label,
         colors: headerColors,
+        landed: Boolean(headerLanded),
+        contrast: contrastRatio(headerColors.onBar, headerColors.bar),
         hasDraft: Boolean(drafts.header && Object.keys(drafts.header).length > 0),
         copyText: buildHeaderCopyText(name, teamId, variant, label, headerColors),
         onField: (field, value) => on.headerField(variant, field, value),

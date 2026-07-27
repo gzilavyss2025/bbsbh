@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildJerseysExport } from '../scripts/gen-jerseys.mjs'
-import { fetchJerseysData, jerseyTreatmentFor } from '../src/api/jerseys.js'
+import { fetchJerseysData, jerseyTreatmentFor, jerseyWearDates } from '../src/api/jerseys.js'
 
 const row = (gamePk, teamId, assets) => ({
   game_pk: gamePk,
@@ -94,4 +94,62 @@ test('fetchJerseysData shares one in-flight request across concurrent callers', 
   } finally {
     globalThis.fetch = originalFetch
   }
+})
+
+// --------------------------------------------------------------------------
+// jerseyWearDates — the gamePk-keyed assignments joined to a dated schedule,
+// behind the Team Identity Lab's per-tile "see a real photo" date links.
+// --------------------------------------------------------------------------
+
+const sched = (...rows) => rows.map(([gamePk, apiDate]) => ({ gamePk, apiDate, won: true }))
+
+test('jerseyWearDates returns only the games that club wore that treatment, newest first', () => {
+  const data = {
+    '1:158': 'city-connect',
+    '2:158': 'main',
+    '3:158': 'city-connect',
+    '3:120': 'alternate', // the OTHER club in the same game
+  }
+  const schedule = sched([1, '2026-04-10'], [2, '2026-05-01'], [3, '2026-07-25'])
+  assert.deepEqual(jerseyWearDates(data, schedule, 158, 'city-connect'), [
+    { gamePk: 3, apiDate: '2026-07-25' },
+    { gamePk: 1, apiDate: '2026-04-10' },
+  ])
+  // Same schedule, the other club's assignment — must not pick up 158's rows.
+  assert.deepEqual(jerseyWearDates(data, schedule, 120, 'alternate'), [
+    { gamePk: 3, apiDate: '2026-07-25' },
+  ])
+})
+
+test('jerseyWearDates caps at the limit, keeping the most recent', () => {
+  const data = Object.fromEntries(
+    Array.from({ length: 15 }, (_, i) => [`${i + 1}:158`, 'alternate']),
+  )
+  const schedule = sched(...Array.from({ length: 15 }, (_, i) => [i + 1, `2026-06-${String(i + 1).padStart(2, '0')}`]))
+  const out = jerseyWearDates(data, schedule, 158, 'alternate')
+  assert.equal(out.length, 10)
+  assert.equal(out[0].apiDate, '2026-06-15')
+  assert.equal(out.at(-1).apiDate, '2026-06-06')
+  assert.equal(jerseyWearDates(data, schedule, 158, 'alternate', 3).length, 3)
+})
+
+test('jerseyWearDates degrades to [] rather than throwing on missing halves', () => {
+  const schedule = sched([1, '2026-04-10'])
+  assert.deepEqual(jerseyWearDates(null, schedule, 158, 'main'), [])
+  assert.deepEqual(jerseyWearDates({ '1:158': 'main' }, null, 158, 'main'), [])
+  assert.deepEqual(jerseyWearDates({ '1:158': 'main' }, schedule, null, 'main'), [])
+  assert.deepEqual(jerseyWearDates({ '1:158': 'main' }, schedule, 158, null), [])
+  // A game the club played but whose assignment never posted is simply absent.
+  assert.deepEqual(jerseyWearDates({}, schedule, 158, 'main'), [])
+})
+
+// A doubleheader puts two gamePks on one date; both are real, distinct looks,
+// so neither is collapsed away and the ordering between them stays stable.
+test('jerseyWearDates keeps both halves of a doubleheader', () => {
+  const data = { '10:158': 'main', '11:158': 'main' }
+  const schedule = sched([10, '2026-07-04'], [11, '2026-07-04'])
+  assert.deepEqual(jerseyWearDates(data, schedule, 158, 'main'), [
+    { gamePk: 11, apiDate: '2026-07-04' },
+    { gamePk: 10, apiDate: '2026-07-04' },
+  ])
 })

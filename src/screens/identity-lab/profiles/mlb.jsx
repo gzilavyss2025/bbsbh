@@ -35,6 +35,11 @@ import {
   treatmentHeaderColorOverride,
 } from '../../../lib/teams.js'
 import { logoUploadTarget } from '../../../lib/logoArt.js'
+import { contrastRatio } from '../../../lib/contrast.js'
+import { fetchJerseysData, jerseyWearDates } from '../../../api/jerseys.js'
+import { fetchTeamSchedule } from '../../../api/schedule.js'
+import { gamePhotosPath } from '../../../lib/route.js'
+import { useNav } from '../../../lib/nav.js'
 import {
   fetchTeamUniformCatalog,
   classifyUniformAsset,
@@ -207,24 +212,27 @@ function resolvedWpaLayout(teamId, treatment, draft) {
   }
 }
 
-// Seeds for the header mockup when neither a draft nor this tile's own lead
+// Seeds for the header editor when neither a draft nor this tile's own lead
 // swatches supply one — the app's current navy/kraft-amber brand pair (--navy /
 // --seal, tokens/colors.css) and its light on-ink text color (--paper-2),
 // copied as literals since a JS default can't reach into CSS custom properties.
-const DEFAULT_HEADER_BLUE = '#1B2A3A'
-const DEFAULT_HEADER_GOLD = '#B5824A'
-const DEFAULT_HEADER_FONT = '#FBF6E9'
+// These are the same three DEFAULT_CHROME (lib/headerTheme.js) falls back to
+// for an unlanded tile, so the editor's starting point and the app's fallback
+// can't drift.
+const DEFAULT_HEADER_BAR = '#1B2A3A'
+const DEFAULT_HEADER_ACCENT = '#B5824A'
+const DEFAULT_HEADER_ON_BAR = '#FBF6E9'
 
 // Shared by the header editor AND the WPA scenario mockups above it, so the
-// mockups' own header bars use the EXACT same resolved Blue/Gold/Font the
+// mockups' own header bars use the EXACT same resolved Bar/Accent/On-bar the
 // Header colors panel shows. Priority: a live draft edit, then a landed
 // TREATMENT_HEADER_COLOR_OVERRIDES entry, then this tile's own lead swatches,
 // then the app's brand pair.
 function headerColorsFor(colors, draft, override) {
   return {
-    blue: draft?.blue ?? override?.blue ?? colors[0]?.hex ?? DEFAULT_HEADER_BLUE,
-    gold: draft?.gold ?? override?.gold ?? colors[1]?.hex ?? DEFAULT_HEADER_GOLD,
-    font: draft?.font ?? override?.font ?? DEFAULT_HEADER_FONT,
+    bar: draft?.bar ?? override?.bar ?? colors[0]?.hex ?? DEFAULT_HEADER_BAR,
+    accent: draft?.accent ?? override?.accent ?? colors[1]?.hex ?? DEFAULT_HEADER_ACCENT,
+    onBar: draft?.onBar ?? override?.onBar ?? DEFAULT_HEADER_ON_BAR,
   }
 }
 
@@ -283,13 +291,14 @@ function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinst
 }
 
 function buildHeaderCopyText(name, teamId, treatment, treatmentLabel, colors) {
-  const { blue, gold, font } = colors
+  const { bar, accent, onBar } = colors
   return (
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
     `Where: src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.${treatment}.header ` +
-    `(design-lab preview only — no shipped component reads this yet)\n` +
-    `blue: ${blue}, gold: ${gold}, font: ${font}`
+    `(drives the lineup page's club bar + section mastheads — ADR-0030)\n` +
+    `bar: ${bar}, accent: ${accent}, onBar: ${onBar}\n` +
+    `onBar vs bar: ${contrastRatio(onBar, bar).toFixed(2)}:1 (scripts/check-contrast.mjs needs 4.5:1)`
   )
 }
 
@@ -389,6 +398,35 @@ function uploadCaveat(teamId, treatment, override, target) {
   )
 }
 
+// The two halves of "when did this club wear this", fetched once per EXPANDED
+// row: the nightly gamePk -> treatment export (module-cached in api/jerseys.js,
+// so 30 clubs share one request) and this club's dated schedule. Neither
+// carries what the other has — jerseys.json has no dates, the schedule has no
+// jerseys — and jerseyWearDates is the join.
+//
+// Lazy by construction rather than by a flag: TeamLabRow only renders its
+// children while the row is EXPANDED, so this hook — called from MlbTiles —
+// simply never runs for a collapsed club. Same reasoning as that row's own
+// `lastOpponent` fetch: a fresh visit starts every row collapsed, and firing 30
+// season-schedule requests on page load to populate links nobody has scrolled
+// to would be a poor trade. `null` means "still loading".
+function useWearDates(teamId) {
+  const [state, setState] = useState({ jerseys: null, schedule: null })
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([
+      fetchJerseysData(),
+      fetchTeamSchedule(teamId, new Date().getFullYear(), 1),
+    ]).then(([jerseys, schedule]) => {
+      if (!cancelled) setState({ jerseys, schedule })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [teamId])
+  return state
+}
+
 // One club's tiles. A treatment sometimes covers more than one catalog jersey —
 // most often Main, when a club has no Away-jersey override and wears both Home
 // White and Road Grey under the same plain mark. Rather than cramming N name
@@ -399,6 +437,8 @@ function uploadCaveat(teamId, treatment, override, target) {
 function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
   const teamId = team.id
   const name = team.name
+  const wear = useWearDates(teamId)
+  const navigate = useNav()
   return treatmentsForTeam(teamId).flatMap((t) => {
     const matches = jerseyMatchesFor(extras.catalog, teamId, t.key)
     const jerseyItems = matches?.length ? matches : [null]
@@ -412,6 +452,12 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
         jerseyMatch={jerseyMatch}
         extras={extras}
         lastOpponent={lastOpponent}
+        wearDates={{
+          dates: wear.jerseys && wear.schedule
+            ? jerseyWearDates(wear.jerseys, wear.schedule, teamId, t.key)
+            : null,
+          onOpen: (gamePk) => navigate(gamePhotosPath(gamePk)),
+        }}
         drafts={{
           pos: drafts.pos?.[t.key],
           wpa: drafts.wpa?.[t.key],
@@ -423,7 +469,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
   })
 }
 
-function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, drafts, on }) {
+function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, wearDates, drafts, on }) {
   const colors = colorsFor(teamId, treatment)
   const [artVersion, setArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
@@ -467,7 +513,8 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
 
   const { pinstripe: wpaPinstripe, band: wpaBand } = resolveWpaBandState(teamId, treatment, drafts.wpa)
   const wpaLayout = resolvedWpaLayout(teamId, treatment, drafts.wpa)
-  const headerColors = headerColorsFor(colors, drafts.header, treatmentHeaderColorOverride(teamId, treatment))
+  const headerLanded = treatmentHeaderColorOverride(teamId, treatment)
+  const headerColors = headerColorsFor(colors, drafts.header, headerLanded)
 
   return (
     <TreatmentBox
@@ -492,6 +539,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         caveat: uploadCaveat(teamId, treatment, override, logoUploadTarget(teamId, treatment)),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
+      wearDates={wearDates}
       swatches={slots.map((s, i) => ({
         swatch: s,
         active: i === activeBgIndex,
@@ -552,6 +600,8 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         name,
         treatmentLabel: displayLabel,
         colors: headerColors,
+        landed: Boolean(headerLanded),
+        contrast: contrastRatio(headerColors.onBar, headerColors.bar),
         hasDraft: Boolean(drafts.header && Object.keys(drafts.header).length > 0),
         copyText: buildHeaderCopyText(name, teamId, treatment, displayLabel, headerColors),
         onField: (field, value) => on.headerField(treatment, field, value),
@@ -642,8 +692,8 @@ function buildSaves(drafts, extras) {
     mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
     drafts.header,
     (record, fields) => {
-      const { blue, gold, font } = { ...record.header, ...fields }
-      return { ...record, header: { blue, gold, font } }
+      const { bar, accent, onBar } = { ...record.header, ...fields }
+      return { ...record, header: { bar, accent, onBar } }
     },
     { name },
   )

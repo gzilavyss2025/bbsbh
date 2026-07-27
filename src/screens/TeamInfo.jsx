@@ -51,7 +51,8 @@ import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
+import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../lib/headerTheme.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -62,11 +63,34 @@ import { SPORT_LABEL } from '../lib/teams.js'
 // opposing-starter / opposing-defense section headers below also carry a
 // small club mark of their own, forced to solid white for the navy bar (see
 // index.css's .metricbar__logo).
+//
+// THEMING (ADR-0030). This page dresses its club-name bar and its section
+// mastheads in the header colors of the jersey that club is actually wearing
+// tonight, so paging away -> home reads as two different clubs' sheets rather
+// than the same navy twice. The whole mechanism is three CSS custom properties
+// scoped to this subtree, which is also the containment: nothing outside a
+// `.teaminfo` / `.teampanel` sees them, so the innings viewer and the box score
+// — where navy-and-kraft IS the seal metaphor — are untouched.
+//
+// The theme's only inputs are (teamId, treatment): identity, never state. See
+// lib/headerTheme.js for the full invariant and why "tint the page by whoever's
+// leading" is the version of this that would break the spoiler rule.
+
+// Which key this club's chrome is filed under. MLB clubs are keyed by
+// treatment ('city-connect'); MiLB affiliates have no uniform catalog to name a
+// treatment from, so their two-variation table is keyed by game side instead —
+// the same split src/lib/CLAUDE.md keeps everywhere else, resolved here rather
+// than merged into one fake vocabulary.
+function themeKeyFor(teamId, side, treatment) {
+  return isMlbTeamId(teamId) ? treatment : side
+}
+
 export function TeamInfo({
   feed,
   side,
   manager,
   uniform,
+  treatment,
   broadcast,
   scorebookWeather,
   scorebookWeatherLoading,
@@ -90,9 +114,15 @@ export function TeamInfo({
   const oppMeta = useMemo(() => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'), [feed, side])
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
+  // Null for a club with no curated triad, which leaves every bar below on the
+  // app's default navy chrome — coverage is partial by design (ADR-0030).
+  const theme = useMemo(
+    () => headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment)),
+    [meta.id, side, treatment],
+  )
 
   return (
-    <div className="teaminfo">
+    <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <div className="teaminfo__head">
         <h2 className="teaminfo__name">
           <TeamLink id={meta.id} className="teaminfo__namelink">
@@ -176,6 +206,7 @@ export function LineupSpread({
   feed,
   managers,
   uniforms,
+  treatments,
   broadcast,
   scorebookWeather,
   scorebookWeatherLoading,
@@ -248,6 +279,7 @@ export function LineupSpread({
             side={side}
             manager={managers?.[side]}
             uniform={uniforms?.[side]}
+            treatment={treatments?.[side]}
             // Each side FACES the other side's starter.
             oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
             prospectsData={prospectsData}
@@ -296,11 +328,17 @@ export function LineupSpread({
 // lineup / opposing-pitcher / opposing-defense sections as the phone page.
 // Former teammates is deliberately NOT part of this column — see LineupSpread,
 // which renders one shared, full-width card grid below both columns instead.
+//
+// The club theme is scoped to the COLUMN here rather than to the page the way
+// the phone layout scopes it: this layout puts both clubs on one sheet, and the
+// game-level sections it shares between them (umpires, season series, former
+// teammates, career matchups) belong to neither, so they stay on default navy.
 function TeamPanel({
   feed,
   side,
   manager,
   uniform,
+  treatment,
   oppPitcherLine,
   prospectsData,
   rookiesData,
@@ -311,8 +349,12 @@ function TeamPanel({
   callouts,
 }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
+  const theme = useMemo(
+    () => headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment)),
+    [meta.id, side, treatment],
+  )
   return (
-    <section className="teampanel">
+    <section className={`teampanel ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <div className="teaminfo__head">
         <h2 className="teaminfo__name">
           <TeamLink id={meta.id} className="teaminfo__namelink">

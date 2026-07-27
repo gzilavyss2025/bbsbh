@@ -40,9 +40,9 @@
         },
         "band": "#d10c47",
         "header": {
-          "blue": "#231f20",
-          "gold": "#d10c47",
-          "font": "#FBF6E9"
+          "bar": "#231f20",
+          "accent": "#d10c47",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -88,9 +88,9 @@
         },
         "band": "#B15C12",
         "header": {
-          "blue": "#0054A4",
-          "gold": "#B15C12",
-          "font": "#FBF6E9"
+          "bar": "#0054A4",
+          "accent": "#B15C12",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -282,9 +282,9 @@
         },
         "band": "#0072CE",
         "header": {
-          "blue": "#0072CE",
-          "gold": "#010101",
-          "font": "#FBF6E9"
+          "bar": "#0072CE",
+          "accent": "#010101",
+          "onBar": "#FBF6E9"
         }
       },
       "away": {
@@ -349,9 +349,9 @@
         },
         "band": "#010101",
         "header": {
-          "blue": "#010101",
-          "gold": "#FC4C02",
-          "font": "#FBF6E9"
+          "bar": "#010101",
+          "accent": "#FC4C02",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -378,9 +378,9 @@
         },
         "band": "#febe28",
         "header": {
-          "blue": "#0b2b76",
-          "gold": "#febe28",
-          "font": "#FBF6E9"
+          "bar": "#0b2b76",
+          "accent": "#febe28",
+          "onBar": "#FBF6E9"
         }
       },
       "away": {
@@ -426,9 +426,9 @@
         },
         "band": "#0054A4",
         "header": {
-          "blue": "#0054A4",
-          "gold": "#CE1141",
-          "font": "#FBF6E9"
+          "bar": "#0054A4",
+          "accent": "#CE1141",
+          "onBar": "#FBF6E9"
         }
       },
       "away": {
@@ -522,9 +522,9 @@
         },
         "band": "#68ACDB",
         "header": {
-          "blue": "#002A5C",
-          "gold": "#68ACDB",
-          "font": "#FBF6E9"
+          "bar": "#002A5C",
+          "accent": "#68ACDB",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -623,9 +623,9 @@
         },
         "band": "#FFFFFF",
         "header": {
-          "blue": "#012b5d",
-          "gold": "#4f91ca",
-          "font": "#FBF6E9"
+          "bar": "#012b5d",
+          "accent": "#4f91ca",
+          "onBar": "#FBF6E9"
         }
       },
       "away": {
@@ -647,9 +647,9 @@
         },
         "band": "#D0D0D0",
         "header": {
-          "blue": "#012b5d",
-          "gold": "#4f91ca",
-          "font": "#FBF6E9"
+          "bar": "#012b5d",
+          "accent": "#4f91ca",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -969,9 +969,9 @@
         },
         "band": "#e03a3e",
         "header": {
-          "blue": "#e03a3e",
-          "gold": "#000000",
-          "font": "#FBF6E9"
+          "bar": "#e03a3e",
+          "accent": "#000000",
+          "onBar": "#000000"
         }
       },
       "away": {
@@ -993,9 +993,9 @@
         },
         "band": "#cbccce",
         "header": {
-          "blue": "#e03a3e",
-          "gold": "#000000",
-          "font": "#FBF6E9"
+          "bar": "#e03a3e",
+          "accent": "#000000",
+          "onBar": "#000000"
         }
       }
     }
@@ -1388,9 +1388,9 @@
         },
         "band": "#e2b880",
         "header": {
-          "blue": "#0f69b1",
-          "gold": "#e2b880",
-          "font": "#FBF6E9"
+          "bar": "#0f69b1",
+          "accent": "#e2b880",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -1429,9 +1429,9 @@
         },
         "band": "#00A9E0",
         "header": {
-          "blue": "#003A70",
-          "gold": "#00A9E0",
-          "font": "#FBF6E9"
+          "bar": "#003A70",
+          "accent": "#00A9E0",
+          "onBar": "#FBF6E9"
         }
       }
     }
@@ -1458,9 +1458,9 @@
         },
         "band": "#f58b6d",
         "header": {
-          "blue": "#000000",
-          "gold": "#f58b6d",
-          "font": "#FBF6E9"
+          "bar": "#000000",
+          "accent": "#f58b6d",
+          "onBar": "#FBF6E9"
         }
       },
       "away": {
@@ -1482,9 +1482,9 @@
         },
         "band": "#000000",
         "header": {
-          "blue": "#000000",
-          "gold": "#f58b6d",
-          "font": "#FBF6E9"
+          "bar": "#000000",
+          "accent": "#f58b6d",
+          "onBar": "#FBF6E9"
         }
       }
     }

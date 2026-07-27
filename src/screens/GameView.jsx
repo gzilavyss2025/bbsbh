@@ -65,7 +65,7 @@ export function GameView({ game, section, onSection }) {
     runExpectancyData,
     workloadData,
     lineupValuesData,
-    winProbTreatment,
+    jerseyTreatments,
     started,
   } = useGameData(game, passActive)
 
@@ -177,7 +177,7 @@ export function GameView({ game, section, onSection }) {
         isLive={isLive}
         keepAwake={keepAwake}
         onSetKeepAwake={setKeepAwake}
-        treatment={winProbTreatment}
+        treatment={jerseyTreatments}
       />
 
       {/* The spoilers-off strip, on EVERY section of the game (both lineups,
@@ -238,6 +238,7 @@ export function GameView({ game, section, onSection }) {
           feed={feed}
           managers={managers.data}
           uniforms={uniformBrief}
+          treatments={jerseyTreatments}
           broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
@@ -263,6 +264,7 @@ export function GameView({ game, section, onSection }) {
           side="away"
           manager={managers.data?.away}
           uniform={uniformBrief.away}
+          treatment={jerseyTreatments.away}
           broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
@@ -290,6 +292,7 @@ export function GameView({ game, section, onSection }) {
           side="home"
           manager={managers.data?.home}
           uniform={uniformBrief.home}
+          treatment={jerseyTreatments.home}
           broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
@@ -324,7 +327,7 @@ export function GameView({ game, section, onSection }) {
           lastUpdated={feedState.lastUpdated}
           pitcherRoles={pitcherRoles.data}
           winProbability={winProb.data}
-          winProbTreatment={winProbTreatment}
+          winProbTreatment={jerseyTreatments}
           prospectsData={prospectsData}
           rookiesData={rookiesData}
           callouts={gameCallouts}
@@ -343,7 +346,7 @@ export function GameView({ game, section, onSection }) {
           uniforms={uniformBrief}
           scorebookWeather={weather.data}
           winProbability={winProb.data}
-          winProbTreatment={winProbTreatment}
+          winProbTreatment={jerseyTreatments}
           callouts={gameCallouts}
           vsTeam={vsTeamSplitsData}
           onReload={feedState.reload}

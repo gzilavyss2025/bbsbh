@@ -15,8 +15,8 @@ earlier sections — append.
 | 2 | Jersey audit view + hex copy/paste | **merged** | `claude/jersey-audit-hex-copy` | #418 |
 | 3 | Logo upload pipeline (MLB) | **merged** | `claude/logo-upload-pipeline` | #419 |
 | 4 | MiLB home/away logo art | **merged** | `claude/milb-logo-art` | #420 |
-| 5 | MiLB colour reconciliation | **open** | `claude/milb-color-reconciliation` | #421 |
-| 6 | Theming + uniform display | not started | — | — |
+| 5 | MiLB colour reconciliation | **merged** | `claude/milb-color-reconciliation` | #421 |
+| 6 | Theming + uniform display | **open** | `claude/team-theming-uniforms` | #422 |
 | 7 | Docs + cleanup | not started | — | — |
 
 Update the row **and** append a section below when a PR opens or merges.
@@ -690,3 +690,195 @@ preserved without a second chain. `teamTintColor`, `resolveTeamColorPair`
   that the two are mutually exclusive.
 - `brandColors.js` is where a third fallback rung would go if one is ever
   wanted. Don't add one to a caller.
+
+---
+
+## PR 6 — Theming, uniform display, the contrast guard, and ADR-0030
+
+Branch: `claude/team-theming-uniforms` · PR: #422 · Merged: open
+
+Based on `origin/main` @ `ff9ce29` (PRs 1-5 had all merged, as #416, #418, #419,
+#420, #421).
+
+### The header tables ship
+
+`TREATMENT_HEADER_COLOR_OVERRIDES` / `MILB_HEADER_COLOR_OVERRIDES` had carried
+"design-lab preview only — no real component reads this table yet" since they
+were created. They now dress the **lineup page**: `.teaminfo__head` becomes a
+real club-coloured bar, and that side's `SectionMasthead`s take the same fill,
+tape edge, and ink. Paging away → home now reads as two different clubs' sheets.
+
+**One resolver, `src/lib/headerTheme.js`**, between the two tables and the one
+surface that reads them. `headerThemeFor(teamId, treatment)` returns
+`{ bar, accent, onBar, onBarTone }` or **null**, plus `headerThemeStyle` /
+`headerThemeClass` so a caller spreads one value instead of rebuilding the same
+three-property object. The mechanism is three CSS custom properties scoped to
+`.teaminfo` (phone) or `.teampanel` (one column of the wide spread), every rule
+reading them *with the default as its fallback* — so an unthemed page renders
+byte-identically to before.
+
+**The triad was renamed `{ blue, gold, font }` → `{ bar, accent, onBar }`** in
+both stores (67 records) and everywhere that reads them. The old names described
+the *default navy chrome's* own colours and stopped meaning anything once a
+club's bar was red. PR 2's palette clipboard had already guessed these names, so
+`TreatmentBox`'s paste boundary lost its mapping layer entirely.
+
+### The guard is the point, and it found 15 real failures
+
+`scripts/check-contrast.mjs` now asserts, for **every** entry in both stores,
+that `onBar` clears WCAG AA (4.5:1) against `bar`. On first run **15 of the 67
+landed triads failed** — nearly all of them cream `#FBF6E9` on a bar too light
+or too warm to hold it (four greys at 2.39:1, Braves City Connect at 2.33,
+Orioles Main at 3.88, Astros Alternate at 2.87…). All 15 were fixed by changing
+`onBar` only; **no `bar` or `accent` hex moved**, so the tuning the owner did by
+eye survives intact:
+
+| Club | Treatment | onBar → | ratio |
+| --- | --- | --- | --- |
+| 110 Orioles | main | `#000000` | 5.01 |
+| 112 Cubs | alternate-2 | `#000000` | 7.15 |
+| 114 Guardians | alternate-2, alternate-3 | `#FFFFFF` | 4.71 |
+| 115 Rockies | alternate-2 | `#33006F` (their purple) | 5.94 |
+| 116 Tigers | alternate | `#000000` | 5.95 |
+| 116 Tigers | alternate-3 | `#0C2340` (their navy) | 6.12 |
+| 117 Astros | alternate | `#000000` | 6.78 |
+| 142 Twins | alternate-3 | `#002B5C` (their navy) | 5.43 |
+| 144 Braves | city-connect, alternate-3 | `#13274F` (their navy) | 5.84 / 6.21 |
+| 145 White Sox | alternate-3 | `#000000` | 8.14 |
+| 146 Marlins | alternate-3 | `#000000` | 6.31 |
+| 546 Portland | home, away | `#000000` | 4.84 |
+
+Where a club's own dark colour cleared the bar it was preferred over black
+(Rockies, Tigers alt-3, Twins, Braves); where it did not (Astros navy at 4.37,
+Tigers navy at 4.48 — both near-misses) black was used rather than inventing a
+brand hex. **The guard was proved to fail**, not assumed: planting an unreadable
+pair on the Brewers made `npm run lint` exit non-zero naming that exact entry.
+
+`accent` is deliberately NOT asserted — it is the bar's 3px tape edge, a rule
+against the page rather than text against the bar, and holding it to a ratio
+would forbid the tone-on-tone edges several clubs' liveries actually use. The
+guard now shares `src/lib/contrast.js`'s ratio math instead of keeping a second
+copy, so the lab's live readout and lint cannot disagree.
+
+### The invariant
+
+**Theming's only inputs are `(teamId, treatment)`.** Written into **ADR-0030**
+and `src/lib/CLAUDE.md`, and — this is the part worth knowing —
+`test/header-theme.test.js` asserts it *structurally*: it reads
+`headerTheme.js`'s own source and pins its import list to exactly
+`['./contrast.js', './milbColors.js', './teams.js']`. Wiring a feed, linescore,
+or reveal module in fails a test rather than a review.
+
+### Deviations from the PR prompt, and one thing it did not anticipate
+
+- **The mono club mark needed its own answer, which the prompt did not cover.**
+  A themed masthead carries the `mono` knockout mark — a flat white silhouette
+  (ADR-0025). On a light bar (several clubs' greys and creams) it vanishes, and
+  no text-contrast rule catches that. The fix is `filter: brightness(0)` on the
+  mark when `onBarTone` is dark. **This is not the filter-whitening ADR-0025
+  forbids**: that failure mode is filtering *full-colour* art, whose light-fill
+  interior detail flattens into a blob. The mono asset has already been through
+  that reduction — one opaque shape plus transparency — so darkening it is
+  exact. The alternative considered and rejected was asserting white-vs-`bar` in
+  the guard, which would have forced ~11 deliberately light bars (Royals CC
+  white, Braves alt-2 cream, Orioles CC beige) dark to satisfy a mark problem.
+- **`useGameData`'s `winProbTreatment` was renamed `jerseyTreatments`.** It now
+  has two consumers, not one; the prop name going into `InningViewer`/`BoxScore`
+  is unchanged, so the diff is three lines in `GameView`.
+- **The `.teaminfo__head` bar changes SHAPE when themed** (plain heading →
+  padded bar with a radius and a tape edge). Unavoidable: a colour needs
+  something to sit in. Unthemed pages are untouched.
+- **The wide spread scopes the theme per COLUMN**, not per page: it puts both
+  clubs on one sheet, and the sections it shares between them (umpires, season
+  series, former teammates, career matchups) belong to neither, so they stay
+  navy. The phone page, which is one club's sheet, themes throughout.
+- **`sportId` is not in scope at TeamPage's render site** (it is local to the
+  loader); the existing `isMilb` on the line above the destructure is what the
+  strip branches on.
+
+### The owner's extra ask — wear dates → game photos (prompt item 5)
+
+Every MLB tile in the lab now carries a **WORN** row of up to 10 small date
+buttons (`6/28/26`, most-recent-first) that open that game's photo gallery
+(`/photos/{gamePk}`) — so a curated tile can be checked against a photograph of
+the real uniform instead of trusting the swatch.
+
+The join is a new pure `jerseyWearDates` in `src/api/jerseys.js`:
+`jerseys.json` is keyed by gamePk and carries **no date**, a team schedule
+carries **no jersey**, and nothing else in the app knows both halves. It reads
+only `gamePk`/`apiDate` — the schedule's `won` is deliberately untouched.
+Fetched lazily per EXPANDED row (the same shape `TeamLabRow`'s `lastOpponent`
+already uses), so a page load still fires nothing; `fetchJerseysData`'s
+module-level cache means 30 clubs share one request for that half.
+
+No MiLB equivalent: there is no MiLB uniform feed, so there is nothing to join.
+
+### Uniform sets on `TeamPage`
+
+`JerseyCombos` grew a `variant="static"` mode and a `MilbUniformStrip` wrapper:
+a MiLB club's hub now shows a two-card Home/Away strip from `milbTreatmentTile`,
+**with no W-L** (PRD §1.9 — no per-game MiLB jersey feed exists to attribute a
+game to, and inventing one is out of bounds). `TeamTreatmentMark` already
+accepted `side`, so it needed no change. MLB's strip is untouched, and
+**`buildJerseyCombos`'s cutoff-gated per-jersey W-L was not touched**.
+
+### The lab states its own coverage
+
+Each tile's Header colors panel now shows **Themed** vs **Default chrome** (is
+this triad what the app actually renders, or a proposal it is still answering
+with navy?) and a live `On bar vs bar: 13.60:1 — clears WCAG AA` readout — the
+same ratio lint computes, so a bad pair is visible while it is being typed
+rather than at commit time.
+
+### Verification
+
+- `npm run lint` clean (including the 67-triad header check); `npm test` **813
+  pass** (was 802 — 11 new across `test/header-theme.test.js` and
+  `test/jerseys.test.js`); `npm run build` + `npm run check:dist-dev` clean.
+- **Read off the real DOM**, not from screenshots — a throwaway Playwright spec
+  run across all three viewport projects (mobile/ipad/desktop), 18/18:
+  - **Braves (`alternate-3`) at Orioles (`main`), 2026-07-26.** Away bar painted
+    `rgb(162,170,173)` = `#A2AAAD` with a `#CE1141` tape edge and `#13274F` ink
+    on both `.teaminfo__name` and `.metricbar__title`; the class carried
+    `is-themed--dark` and the mono mark's computed filter was `brightness(0)`.
+    Home bar painted `rgb(223,70,1)` = `#DF4601` with `#000000` ink — a
+    genuinely different bar, which is the whole feature.
+  - **The bar guesses then corrects.** It first paints `defaultTreatmentFor`'s
+    predicted jersey and swaps once `jerseys.json` resolves — the same behaviour
+    the slate card and WPA band already have. The spec waits for the settled
+    value; worth knowing before someone reports the flash as a bug.
+  - **Yankees (no header entry): zero `.is-themed` elements on the page**, head
+    background `rgba(0,0,0,0)`, masthead `rgb(27,42,58)` + `rgb(181,130,74)`
+    tape + `rgb(251,246,233)` ink — default navy chrome, untouched.
+  - **Innings viewer and box score**: zero themed elements, zero non-navy
+    mastheads, `--bar-fill` unresolvable on `body`. The properties never reach
+    them.
+  - **A MiLB lineup page** (`/07262026/durmem/lineup1`, Durham away): bar
+    `rgb(0,84,164)` = `#0054A4`, accent `#B15C12` — resolved through the
+    Home/Away table, confirming the two vocabularies stay separate. No console
+    errors.
+  - **The lab**: 4 of 5 Braves tiles "Themed", 0 failing contrast readouts, date
+    groups capped at 10 (`[9,7,10,10,9]`), format `6/28/26`, and clicking one
+    navigated to `/photos/823204`.
+  - **MiLB TeamPage strip**: exactly 2 cards, `Home`/`Away`, both `rec: null`,
+    with different tints (`#0054A4` / `#B15C12` — the pair swapped). **MLB
+    TeamPage strip**: 5 cards, 5 records — unchanged.
+- Dev server: <http://localhost:5164/07262026/atlbal/lineup1?nointro> — **port
+  5164, off-band.** All five reserved ports (5169-5173) were held by other
+  active worktrees this session, as were 5165 and 5174-5190.
+
+### Notes for the next PR
+
+- **PR 7's cleanup list gained nothing from this PR** — the stale "no real
+  component reads this table yet" comments in `teams.js`, `milbColors.js`,
+  `HeaderPreview.jsx` and `index.css` were all corrected here rather than left.
+- **Coverage is 67 (club, treatment) pairs out of several hundred possible.**
+  Extending it is pure data work in `/identity-lab` + Save; the guard refuses an
+  unreadable pair, so it is safe to hand to anyone. The lab's own row list is
+  the worklist.
+- `headerThemeFor` returning **null** rather than a synthesised triad is
+  deliberate (ADR-0030) — a synthesised bar is an unreviewed colour pair the
+  guard cannot vouch for. Do not "improve" it into always answering.
+- If a future surface wants theming, it sets the same three properties and adds
+  a fallback; it does not get a second resolver. If it wants a colour that
+  depends on anything but `(teamId, treatment)`, that is a new ADR.

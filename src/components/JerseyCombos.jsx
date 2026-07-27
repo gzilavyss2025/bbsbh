@@ -11,6 +11,17 @@ import { SectionTitle } from './SectionTitle.jsx'
 // Road Grey are both the Main mark), so a logo repeats down the strip once per
 // jersey assigned to it — see buildJerseyCombos (src/api/uniforms.js).
 //
+// TWO MODES, because the two leagues genuinely carry different data:
+//
+//   variant="record" (default, MLB) — the strip above, one card per catalog
+//     jersey with its W-L.
+//   variant="static" (MiLB) — a two-card Home/Away strip and NO record. There
+//     is no MiLB uniform feed at all (docs/uniforms-and-logos.md), so there is
+//     no per-game jersey assignment to attribute a win to; a MiLB affiliate has
+//     exactly two variations, keyed by game side (src/lib/CLAUDE.md). Inventing
+//     a record here would mean inventing the data under it, so the cards simply
+//     don't carry one.
+//
 // Touch drag is native (overflow-x + momentum scrolling); useDragScroll adds
 // click-and-drag panning for a mouse so the strip works the same on desktop.
 // Spoiler-free: uniform choices plus a record the standings already show.
@@ -76,24 +87,41 @@ function useDragScroll() {
   }
 }
 
-export function JerseyCombos({ combos, teamId, teamName }) {
+// The two cards a MiLB affiliate's strip shows. `side` (not `treatment`) is
+// what TeamTreatmentMark needs to reach milbTreatmentTile — the MLB treatment
+// path would answer with the club's plain paper tile instead.
+const MILB_COMBOS = [
+  { side: 'home', name: 'Home' },
+  { side: 'away', name: 'Away' },
+]
+
+export function MilbUniformStrip({ teamId, teamName }) {
+  return <JerseyCombos combos={MILB_COMBOS} teamId={teamId} teamName={teamName} variant="static" />
+}
+
+export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
   const { ref, handlers } = useDragScroll()
   if (!combos?.length) return null
+  const showRecord = variant !== 'static'
   return (
     <>
-      <SectionTitle title="Logos & jerseys" note="record by jersey" />
+      <SectionTitle
+        title="Logos & jerseys"
+        note={showRecord ? 'record by jersey' : 'home and away'}
+      />
       <div className="jerseystrip" ref={ref} {...handlers}>
         {combos.map((c) => (
-          <div key={c.code ?? c.name} className="jerseycombo">
+          <div key={c.code ?? c.side ?? c.name} className="jerseycombo">
             <TeamTreatmentMark
               teamId={teamId}
               name={teamName}
               treatment={c.treatment}
+              side={c.side}
               size={56}
               block="jerseycombo__logobox"
             />
             <span className="jerseycombo__name">{c.name}</span>
-            <span className="jerseycombo__rec mono">{recordLabel(c)}</span>
+            {showRecord && <span className="jerseycombo__rec mono">{recordLabel(c)}</span>}
           </div>
         ))}
       </div>
