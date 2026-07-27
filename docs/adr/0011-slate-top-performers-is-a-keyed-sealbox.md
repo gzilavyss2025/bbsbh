@@ -1,5 +1,13 @@
 # The slate's Top Performers box is a non-per-inning SealBox, keyed on date+level
 
+> **REMOVED (2026-07-27).** `TopPerformersBox`, `src/api/topPerformers.js`,
+> `src/api/dayRecap.js`, and the `gen-day-recap.mjs` precompute + its cron
+> workflow were deleted outright — not superseded by another mechanism, the
+> feature itself went away. `SealBox`'s `compact` cover variant, which existed
+> solely for this box, was removed with it. Kept for historical record of why
+> the keyed-reseal approach was shaped this way, in case a similar
+> non-per-inning `SealBox` is built again.
+
 `TopPerformersBox` (`src/components/TopPerformersBox.jsx`) shows the day's top
 5 batters and top 5 pitchers by win-probability added, across every
 in-progress/final game at the current level — one box per (date, level) on

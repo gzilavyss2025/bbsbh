@@ -24,7 +24,6 @@ import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
-import { TopPerformersBox } from '../components/TopPerformersBox.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
@@ -242,14 +241,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const showBreakBanner = isBreakWindow && !!resumeDate
   const showOffDayBanner = needsResumeLookup && !isBreakWindow && !!resumeDate
 
-  // Games with a Top Performers box to reveal — any that have started, on
-  // today or a past date. A future date, or today before first pitch, has
-  // nothing yet, so the box doesn't render at all (see below).
-  const eligibleGames = useMemo(
-    () => sorted.filter((g) => g.abstractState !== 'Preview'),
-    [sorted],
-  )
-
   // A day you've paged BACK to (any date before today) gets the past-day
   // treatment: each Final game's card flips over to a result summary, and the Day Recap panel
   // (Top Performers + Day Highlights) replaces the plain Top Performers box.
@@ -344,12 +335,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
       )
     })
   }, [gamesForDisplay, activeFilters, cardMetaByGamePk])
-
-  // Whether the live Top Performers box has anything to show — mutually
-  // exclusive with a past day's finals (finals.length > 0): a day either
-  // hasn't gone final yet (this) or already has (that), never both.
-  const showTopPerformers =
-    finals.length === 0 && dateStr <= todayStr && eligibleGames.length > 0
 
   // "N prospects on this roster" badge — MiLB games only (the slate's level
   // toggle is single-select, so gating this fetch on sportId covers every
@@ -553,80 +538,65 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         />
       )}
 
-      <div className={showTopPerformers ? 'slate-body' : undefined}>
-        {/* The live day's sealed Top Performers box — full width above the game
-            grid (.slate-body stacks it first at every width; see index.css).
-            Renders BEFORE .slate-main so plain block flow already puts it on
-            top. A past day's finals get no digest box above them — each
-            game's own pills (GameResultFace.jsx) carry that now. */}
-        {showTopPerformers && (
-          <TopPerformersBox
-            dateStr={dateStr}
-            sportId={sportId}
-            games={eligibleGames}
-            prospectsData={prospects.data}
+      {/* role="region" (not a bare div) so the aria-label is actually
+          honored and ResultFilterBar's aria-controls has a real target —
+          an aria-label on a role-less generic element is discarded. */}
+      <div className="slate-main" id="slate-games" role="region" aria-label="Games">
+        <ul className="gamelist">
+          {sorted.length === 0 && isDerbyDay && (
+            <li>
+              <DerbyCard />
+            </li>
+          )}
+          {visibleGames.map((g) => {
+            const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+              ? favoriteTeamId
+              : null
+            const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+            const isPastFinal =
+              showPastDayTreatment &&
+              g.abstractState === 'Final' &&
+              !selectGameStatus(g).isPostponed
+            return (
+              <li key={`${g.sportId}-${g.gamePk}`}>
+                {isPastFinal ? (
+                  <PastGameFlipCard
+                    game={g}
+                    dateStr={dateStr}
+                    revealed={slateRevealAll}
+                    pinnedTeamId={pinnedTeamId}
+                    prospectCount={pCount}
+                    gameScore={scoreFor(g.gamePk)}
+                    cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
+                    onSelect={() => onPick(g, dateStr)}
+                    onBoxScore={() => onPick(g, dateStr, 'boxscore')}
+                  />
+                ) : (
+                  <GameCard
+                    game={g}
+                    pinnedTeamId={pinnedTeamId}
+                    prospectCount={pCount}
+                    gameScore={scoreFor(g.gamePk)}
+                    liveLine={liveLineFor(g)}
+                    onSelect={() => onPick(g, dateStr)}
+                    onBoxScore={null}
+                  />
+                )}
+              </li>
+            )
+          })}
+        </ul>
+
+        {/* Any idle club — including the whole-league case on an All-Star
+            break or (MLB) All-Star Game day, where there are no club games
+            and the full grid is the point (something to browse). */}
+        {offDayTeams.length > 0 && (
+          <OffDaySection
+            teams={offDayTeams}
+            favoriteTeamId={favoriteTeamId}
+            favoriteAffiliateIds={favoriteAffiliateIds}
           />
         )}
-        {/* role="region" (not a bare div) so the aria-label is actually
-            honored and ResultFilterBar's aria-controls has a real target —
-            an aria-label on a role-less generic element is discarded. */}
-        <div className="slate-main" id="slate-games" role="region" aria-label="Games">
-          <ul className="gamelist">
-            {sorted.length === 0 && isDerbyDay && (
-              <li>
-                <DerbyCard />
-              </li>
-            )}
-            {visibleGames.map((g) => {
-              const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
-                ? favoriteTeamId
-                : null
-              const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
-              const isPastFinal =
-                showPastDayTreatment &&
-                g.abstractState === 'Final' &&
-                !selectGameStatus(g).isPostponed
-              return (
-                <li key={`${g.sportId}-${g.gamePk}`}>
-                  {isPastFinal ? (
-                    <PastGameFlipCard
-                      game={g}
-                      dateStr={dateStr}
-                      revealed={slateRevealAll}
-                      pinnedTeamId={pinnedTeamId}
-                      prospectCount={pCount}
-                      gameScore={scoreFor(g.gamePk)}
-                      cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
-                      onSelect={() => onPick(g, dateStr)}
-                      onBoxScore={() => onPick(g, dateStr, 'boxscore')}
-                    />
-                  ) : (
-                    <GameCard
-                      game={g}
-                      pinnedTeamId={pinnedTeamId}
-                      prospectCount={pCount}
-                      gameScore={scoreFor(g.gamePk)}
-                      liveLine={liveLineFor(g)}
-                      onSelect={() => onPick(g, dateStr)}
-                      onBoxScore={null}
-                    />
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-
-          {/* Any idle club — including the whole-league case on an All-Star
-              break or (MLB) All-Star Game day, where there are no club games
-              and the full grid is the point (something to browse). */}
-          {offDayTeams.length > 0 && (
-            <OffDaySection
-              teams={offDayTeams}
-              favoriteTeamId={favoriteTeamId}
-              favoriteAffiliateIds={favoriteAffiliateIds}
-            />
-          )}
-        </div>
       </div>
 
       <SiteFooter
