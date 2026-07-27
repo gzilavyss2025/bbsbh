@@ -21,6 +21,7 @@ import {
   LOGO_ART_DIRS,
   LOGO_ART_ROOT,
   LOGO_MAX_BYTES,
+  MILB_LOGO_DIRS,
   describeLogoRejection,
   logoUploadTarget,
   readPngHeader,
@@ -58,9 +59,11 @@ export function resolveLogoFile(target) {
   const rel = path.relative(REPO_ROOT, abs).split(path.sep).join('/')
   // Not "starts with the art root" but "is exactly this file": the resolved path
   // has to come out equal to the one the allowlist's own literals spell, so a
-  // '..' anywhere in target.file lands somewhere else and fails here.
+  // '..' anywhere in target.file lands somewhere else and fails here. A name is
+  // either an MLB abbreviation or (MILB_LOGO_DIRS) a bare positive team id.
   const expected = `${LOGO_ART_ROOT}/${target.dir}/${target.name}`
-  if (!LOGO_ART_DIRS.includes(target.dir) || !/^[A-Z]{2,3}\.png$/.test(target.name) || rel !== expected) {
+  const validName = /^([A-Z]{2,3}|[1-9]\d*)\.png$/.test(target.name)
+  if (!LOGO_ART_DIRS.includes(target.dir) || !validName || rel !== expected) {
     throw new Error(`logo upload escapes the art directories: ${target.file}`)
   }
   return abs
@@ -120,7 +123,11 @@ export async function buildLogoManifest() {
       const ext = path.extname(name).slice(1).toLowerCase()
       if (ext !== 'png' && ext !== 'svg') continue
       const bytes = await readFile(path.join(abs, name))
-      const entry = { teamId: teamIdForAbbr(path.basename(name, path.extname(name))), bytes: bytes.length }
+      const base = path.basename(name, path.extname(name))
+      // milb-home/milb-away are keyed by team id already (logoArt.js), so the
+      // filename itself is the id; every other directory keys by abbreviation.
+      const teamId = MILB_LOGO_DIRS.includes(dir) ? Number(base) : teamIdForAbbr(base)
+      const entry = { teamId, bytes: bytes.length }
       if (ext === 'png') {
         const header = readPngHeader(bytes)
         entry.width = header?.width ?? null

@@ -13,8 +13,8 @@ earlier sections — append.
 | 0 | Plan + handoff docs | **merged?** | `claude/team-identity-lab-plan` | — |
 | 1 | Lab framework + JSON stores + write-back | **merged** | `claude/identity-lab-framework` | #416 |
 | 2 | Jersey audit view + hex copy/paste | **merged** | `claude/jersey-audit-hex-copy` | #418 |
-| 3 | Logo upload pipeline (MLB) | **open** | `claude/logo-upload-pipeline` | #419 |
-| 4 | MiLB home/away logo art | not started | — | — |
+| 3 | Logo upload pipeline (MLB) | **merged** | `claude/logo-upload-pipeline` | #419 |
+| 4 | MiLB home/away logo art | **open** | `claude/milb-logo-art` | #420 |
 | 5 | MiLB colour reconciliation | not started | — | — |
 | 6 | Theming + uniform display | not started | — | — |
 | 7 | Docs + cleanup | not started | — | — |
@@ -163,7 +163,7 @@ in the lab's own hint text and in `src/lib/CLAUDE.md`.
 
 ## PR 2 — Jersey audit view, season-staleness banner, hex copy/paste
 
-Branch: `claude/jersey-audit-hex-copy` · PR: #TBD · Merged: open
+Branch: `claude/jersey-audit-hex-copy` · PR: #420 · Merged: open
 
 Based on `origin/main` @ `4388da1` (PR 1 had already merged as #416).
 
@@ -433,3 +433,117 @@ uploads, as PR 2 flagged; this PR ships the pipeline, not the art.
 - The manifest is keyed by directory then filename, which already accommodates
   `{teamId}.png` names without a schema change.
 - `docs/uniforms-and-logos.md`'s §2 recommendation is now marked as built.
+
+---
+
+## PR 4 — MiLB home/away logo art
+
+Branch: `claude/milb-logo-art` · PR: #420 · Merged: open
+
+Based on `origin/main` @ `4b9b940` (PR 3 had already merged as #419).
+
+### What landed
+
+**Two new id-keyed directories**, `public/team-logos/milb-home/` and
+`milb-away/` — empty today, per PRD 4.3's "ships with zero art." Added to
+`LOGO_TREATMENT_DIRS` (`src/lib/logoArt.js`) as `'milb-home'`/`'milb-away'`,
+alongside a new `MILB_LOGO_DIRS` export (`['milb-home', 'milb-away']`) both
+`logoUploadTarget` and the manifest builder branch on, so the one thing PR 3's
+notes-for-next-PR flagged — "`logoUploadTarget()` is the one function PR 4 has
+to change" — is exactly what changed: a request for one of these two
+directories is filed by team id (`{teamId}.png`, `teamId` a bare positive
+integer, no `teamAbbr` involved) instead of by MLB abbreviation. Everything
+downstream (the endpoint, the stream guard, the validator) is untouched, as
+predicted.
+
+**`milbTreatmentTile` extended, not rewritten.** A new `milbHasLogoArt(teamId,
+variant)` in `milbColors.js` reads coverage straight from the same
+`logo-art.json` manifest MLB's upload rebuilds — never a per-tile `onError`,
+which with 120 affiliates × 2 sides would fire hundreds of 404s per slate
+(PRD 4.3). `milbTreatmentTile`'s only change is its `logoVariant` line: curated
+art when the manifest has it, `'base'` (today's tinted CDN mark) otherwise —
+`tint`/`offsetX`/`offsetY`/`scale` are computed exactly as before, so a
+transparent curated PNG still sits on the researched fill rather than a bare
+white box. `teamLogoUrl` (`teams.js`) grew a matching `'milb-home'`/
+`'milb-away'` branch — `/team-logos/{variant}/{teamId}.png` — so `TeamLogo`,
+the one component every logo consumer in the app already goes through, needs
+no changes at all to render it.
+
+**Wired into the lab.** Both MiLB tiles now pass `upload` to `TreatmentBox`
+(treatment `milb-home`/`milb-away`), reusing PR 3's `LogoDropZone` completely
+unchanged. Unlike MLB, there is no `uploadCaveat` — MiLB's manifest *is* the
+switch that decides what a real tile wears (no separate `teams.js` override
+table to fall out of step with), so an upload can never land somewhere the
+shipped tile won't pick up. A new `MilbTreatmentLogo` local component (mirrors
+`profiles/mlb.jsx`'s `TreatmentLogo`) renders the curated mark with a `?v=`
+cache-buster after a same-session upload, falling back to the plain `TeamLogo`
+on a 404 or before any art exists.
+
+**Coverage is scannable per level (PRD 4.3).** Extended the existing
+`rowBadge` (already flagging "no researched color") to also flag `no home
+art` / `no away art` / `no logo art` — reuses the row header every team
+already renders, collapsed or not, rather than adding new UI. Scanning a
+level's full list (up to 30 rows) now answers "which affiliates still need
+art" without expanding a single tile.
+
+### Deviations from the PRD
+
+- **No MLB-club-style team-id whitelist for the MiLB directories.** MLB's path
+  checks `teamId` against the 30 real clubs (via `teamAbbr`); MiLB has no
+  equivalent closed catalog in this repo (affiliates come from a live
+  `/data/affiliates.json` fetch, not a static table), so `logoUploadTarget`
+  only enforces "positive integer" for these two directories. Not a
+  regression: the security boundary was always "no path from the request,"
+  never "team id must be real," and a bogus id just creates a file nothing
+  ever reads (same shape as `alternate-4`'s directory-created-on-first-upload
+  behavior PR 3 already established for a treatment with no clubs on it yet).
+- **`logoUploadTarget` accepts an MLB club's own id under `milb-home`/
+  `milb-away`** (e.g. `logoUploadTarget(140, 'milb-home')` resolves), since
+  there's nothing MiLB-specific to check an id against. Harmless in practice —
+  nothing in the app ever calls `milbTreatmentTile` for an MLB team id
+  (`TeamTreatmentMark`'s `isMlbTeamId` branch routes those through
+  `treatmentTile` instead) — but worth knowing if a future PR wants to
+  tighten it.
+
+### Verification
+
+- `npm run lint && npm test` clean; `npm test` 788 pass (was 783 — 5 new,
+  split across `test/logo-upload.test.js` (the id-keyed destination/manifest
+  cases) and `test/milb-team-wiring.test.js` (`milbHasLogoArt` and the
+  `logoVariant` switch, pinned against the committed manifest — empty today,
+  so both assert the zero-art baseline rather than faking a manifest entry, a
+  static JSON import can't do mid-test)).
+- `npm run build` + `npm run check:dist-dev` clean — 94 curated marks still
+  ship (unchanged; the two new directories are empty), no dev-endpoint string
+  in `dist/`.
+- **A real upload, through the real endpoint, against a live dev server.**
+  POSTed a hand-built 512×512 PNG to `/__dev/team-logo?teamId=556&treatment=milb-home`
+  (Nashville Sounds): `{"file":"public/team-logos/milb-home/556.png", ...}`
+  came back, the manifest gained a `milb-home` section keyed `"556.png"`, and
+  a Playwright screenshot of `/identity-lab` (Triple-A dimension) showed the
+  Nashville Sounds row badge flip from nothing to **"no away art"** (home now
+  covered) while every other row still read "no logo art" — confirming both
+  the upload path and the coverage badge move independently per side.
+  Reverted (`rm` the file + `node scripts/gen-logo-art.mjs`); tree back to the
+  committed 94-file baseline.
+- **No 404 storm, confirmed rather than assumed.** With zero art on disk,
+  `milbHasLogoArt` is false for every team, so `logoVariant` stays `'base'`
+  everywhere and `teamLogoUrl` never even builds a `milb-home`/`milb-away`
+  URL — a Playwright pass over the home slate (MLB level) recorded zero
+  console errors and zero failed `team-logos` requests. Today's AAA slate is
+  an off day league-wide, so a live tinted MiLB masthead wasn't available to
+  screenshot this session; the "zero art → zero behavior change" argument
+  above is why that gap doesn't block this PR — `milbTreatmentTile`'s
+  pre-existing unit tests (`test/milb-team-wiring.test.js`, unchanged
+  assertions) already pin every existing team's tile at `logoVariant: 'base'`.
+- Dev server: <http://localhost:5174/identity-lab?nointro> — ports 5169-5173
+  were all held by other active worktrees this session.
+
+### Notes for the next PR
+
+- `MILB_LOGO_DIRS` (`src/lib/logoArt.js`) is the one export a future PR needs
+  to extend if a third id-keyed directory shows up; `logoUploadTarget` and the
+  manifest builder both already branch on it rather than hard-coding
+  `'milb-home'`/`'milb-away'`.
+- PR 5's colour reconciliation is unrelated to this PR's manifest — `tint`
+  still comes from `milbLogoPosition`'s `bg`, untouched here.

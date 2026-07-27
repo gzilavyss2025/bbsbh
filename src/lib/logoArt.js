@@ -49,6 +49,11 @@ export const LOGO_ART_URL_ROOT = '/team-logos'
 // clubs with that treatment all reuse their base mark (ALT4_USES_BASE_LOGO) —
 // but it is a real treatment the lab renders a tile for, so an upload creates
 // the directory rather than being turned away.
+// 'milb-home'/'milb-away' are MiLB's own two directories (PRD 4.3) — kept out
+// of the MLB treatment vocabulary above on purpose, since MiLB has no
+// treatment catalog (src/lib/CLAUDE.md's "two vocabularies"). They map to
+// themselves because there's only ever one MiLB profile per side, unlike the
+// MLB keys, which rename into their real directory.
 export const LOGO_TREATMENT_DIRS = {
   main: 'main-overrides',
   alternate: 'alternate',
@@ -56,11 +61,19 @@ export const LOGO_TREATMENT_DIRS = {
   'alternate-3': 'alternate-3',
   'alternate-4': 'alternate-4',
   'city-connect': 'city-connect',
+  'milb-home': 'milb-home',
+  'milb-away': 'milb-away',
 }
 
 // Every directory an upload may land in — the same set as above, as a list, for
 // the manifest builder and the on-disk sweep.
 export const LOGO_ART_DIRS = Object.values(LOGO_TREATMENT_DIRS)
+
+// The subset of LOGO_ART_DIRS keyed by team id instead of club abbreviation
+// (PRD 1.7 — TEAM_ABBR is MLB-only and teamAbbr()'s 3-letter fallback collides
+// across MiLB). logoUploadTarget and the manifest builder both branch on this
+// list rather than duplicating it.
+export const MILB_LOGO_DIRS = ['milb-home', 'milb-away']
 
 // ---------------------------------------------------------------------------
 // PNG headers, without an image library
@@ -150,19 +163,34 @@ export function teamIdForAbbr(abbr) {
 // Where an uploaded mark for (teamId, treatment) belongs — or null if that pair
 // has no destination, which is the only answer a caller may act on. Both halves
 // are resolved, never accepted: the directory comes from LOGO_TREATMENT_DIRS'
-// own literal, and the filename from teamAbbr, the same source of truth that
-// spells a club's short code everywhere else in the app. A request supplies a
-// numeric team id and a treatment key and nothing else, so there is no string
-// it can hand over that reaches the filesystem.
+// own literal, and the filename from teamAbbr (MLB) or the team id itself
+// (MiLB, MILB_LOGO_DIRS) — never from anything in the request. A request
+// supplies a numeric team id and a treatment key and nothing else, so there is
+// no string it can hand over that reaches the filesystem.
 export function logoUploadTarget(teamId, treatment) {
   if (!Number.isInteger(teamId)) return null
   if (typeof treatment !== 'string' || !Object.hasOwn(LOGO_TREATMENT_DIRS, treatment)) return null
   const dir = LOGO_TREATMENT_DIRS[treatment]
+  if (!/^[a-z0-9-]+$/.test(dir)) return null
+
+  if (MILB_LOGO_DIRS.includes(dir)) {
+    if (teamId <= 0) return null
+    const name = `${teamId}.png`
+    return {
+      teamId,
+      treatment,
+      abbr: null,
+      dir,
+      name,
+      file: `${LOGO_ART_ROOT}/${dir}/${name}`,
+      url: `${LOGO_ART_URL_ROOT}/${dir}/${name}`,
+    }
+  }
+
   const abbr = teamAbbr({ id: teamId })
   // Belt and braces on both components, so a future edit that widens either
   // source can't quietly widen the destination too.
   if (!/^[A-Z]{2,3}$/.test(abbr)) return null
-  if (!/^[a-z0-9-]+$/.test(dir)) return null
   return {
     teamId,
     treatment,

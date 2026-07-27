@@ -3,6 +3,7 @@ import { DEFAULT_PINSTRIPE_COLOR } from './wpaBandColors.js'
 import { byTeam, byTreatment } from './tuningStore.js'
 import MILB_COLORS from './data/milb-colors.json' with { type: 'json' }
 import MILB_TREATMENT_TUNING from './data/milb-treatment-tuning.json' with { type: 'json' }
+import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
 // Per-affiliate MiLB brand colors + the Home/Away tuning tables behind the
 // Team Identity Lab's MiLB dimensions (screens/identity-lab/profiles/milb.jsx,
@@ -186,6 +187,26 @@ export function milbHeaderColorsFor(teamId, variant, draft) {
   }
 }
 
+// Coverage for the curated Home/Away marks (PRD 4.3), read from the same
+// upload-rebuilt manifest logoArt.js's MLB path uses — never from a per-tile
+// 404, which with 120 affiliates × 2 sides would fire hundreds of them per
+// page (see the /__dev/team-logo upload's manifest note, src/lib/CLAUDE.md).
+// A team/side with no entry here just keeps wearing today's tinted CDN base
+// mark — the design that lets this ship with zero art procured yet.
+const MILB_ART_COVERAGE = {
+  home: new Set(Object.values(LOGO_ART['milb-home'] ?? {}).map((e) => e.teamId)),
+  away: new Set(Object.values(LOGO_ART['milb-away'] ?? {}).map((e) => e.teamId)),
+}
+
+// Whether `teamId` has a curated mark for `variant` ('home'/'away') — surfaced
+// in the lab so an affiliate still missing art is visibly flagged (PRD 4.3's
+// "make coverage scannable"), and read by milbTreatmentTile below to decide
+// which mark a real tile wears.
+export function milbHasLogoArt(teamId, variant) {
+  const side = variant === 'home' ? 'home' : 'away'
+  return MILB_ART_COVERAGE[side].has(teamId)
+}
+
 // The real game-card/masthead tile's shape (see teams.js's treatmentTile,
 // which TeamTreatmentMark reads for every MLB club) computed from this
 // module's Home/Away tables instead — the live wiring this lab was staged
@@ -198,7 +219,7 @@ export function milbTreatmentTile(teamId, variant) {
   const side = variant === 'home' ? 'home' : 'away'
   const pos = milbLogoPosition(teamId, side)
   return {
-    logoVariant: 'base',
+    logoVariant: milbHasLogoArt(teamId, side) ? `milb-${side}` : 'base',
     tint: pos.pinstripe ? null : pos.bg,
     offsetX: pos.offsetX,
     offsetY: pos.offsetY,

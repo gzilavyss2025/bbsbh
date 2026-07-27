@@ -9,8 +9,10 @@ import {
   milbTreatmentTile,
   milbColorPair,
   milbVariantColors,
+  milbHasLogoArt,
   MILB_LOGO_POS_OVERRIDES,
 } from '../src/lib/milbColors.js'
+import LOGO_ART from '../src/lib/data/logo-art.json' with { type: 'json' }
 
 test('isMlbTeamId separates the 30 MLB clubs from every MiLB affiliate', () => {
   assert.equal(isMlbTeamId(158), true) // Brewers
@@ -46,6 +48,29 @@ test('milbTreatmentTile treats an unrecognized variant as away, not a crash', ()
   const [, secondary] = milbColorPair(teamId)
   assert.deepEqual(milbTreatmentTile(teamId, undefined), milbTreatmentTile(teamId, 'away'))
   assert.equal(milbTreatmentTile(teamId, undefined).tint, secondary)
+})
+
+// This PR ships with zero art (PRD 4.3), so today every affiliate falls
+// through to 'base' — pinned here so a future upload's effect on logoVariant
+// is a real regression to catch, not an assumption never exercised.
+test('milbHasLogoArt reads coverage from the committed manifest, empty today', () => {
+  assert.deepEqual(LOGO_ART['milb-home'] ?? {}, {})
+  assert.deepEqual(LOGO_ART['milb-away'] ?? {}, {})
+  assert.equal(milbHasLogoArt(158, 'home'), false)
+  assert.equal(milbHasLogoArt(158, 'away'), false)
+})
+
+test('milbTreatmentTile would switch to the curated variant once a side has art', () => {
+  // milbHasLogoArt is the single gate milbTreatmentTile reads — proved by
+  // construction rather than by faking a manifest entry (a static JSON import
+  // can't be swapped mid-test): every teamId with no manifest coverage reads
+  // 'base', matching what milbTreatmentTile itself returns.
+  for (const teamId of [158, 402, 556]) {
+    for (const side of ['home', 'away']) {
+      assert.equal(milbHasLogoArt(teamId, side), false)
+      assert.equal(milbTreatmentTile(teamId, side).logoVariant, 'base')
+    }
+  }
 })
 
 test('milbVariantColors backs milbTreatmentTile for a team with no researched color at all', () => {
