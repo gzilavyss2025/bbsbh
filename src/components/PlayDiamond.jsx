@@ -46,12 +46,14 @@ const OUT_LABELS = {
   4: { x: 50, y: 96, anchor: 'middle' },
 }
 
-// Where a red "PR" sits when a pinch runner took over at a base — pinned just
-// above and outside that base, clear of the advance notations in LABELS.
+// Where a red "PR" (and the incoming runner's jersey number, stacked on the
+// line below it) sits when a pinch runner took over at a base — hugging that
+// base the same way the advance notations in LABELS do, offset just enough
+// to clear them rather than drifting toward the next base.
 const PR_LABELS = {
-  1: { x: 84, y: 38, anchor: 'start' },
-  2: { x: 66, y: 16, anchor: 'start' },
-  3: { x: 16, y: 38, anchor: 'end' },
+  1: { x: 84, y: 40, anchor: 'start' },
+  2: { x: 58, y: 15, anchor: 'start' },
+  3: { x: 16, y: 40, anchor: 'end' },
 }
 
 const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
@@ -77,11 +79,11 @@ function perpStroke(a, b, p, len = 6) {
 // needs no second prop). On a run the polygon still fills solid — a filled
 // diamond means "he scored" everywhere else in the app and that has to hold —
 // with the ghost legs overdrawn on top in paper colour so the given bases stay
-// legible through the fill. His run is unearned by rule, so the red circle is
+// legible through the fill. His run is unearned by rule, so the red outline is
 // already there reinforcing it.
 const GHOST_DASH = '3 3'
 
-export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, placedAt = null, size = 108 }) {
+export function PlayDiamond({ reached = 0, scored = false, earned = true, legNotations = {}, outAt = null, outCode = '', prBase = null, prJersey = null, placedAt = null, size = 108 }) {
   const { traveled: outTraveled, legA, legB } = outLegBases(reached, outAt)
   const traveled = scored ? 4 : outTraveled
   // Legs [0, ghostLegs) were given, not run: dotted, never inked solid.
@@ -115,17 +117,16 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
       viewBox="0 0 100 100"
       aria-hidden="true"
     >
-      {unearned && (
-        // The circled-run mark for an unearned run, drawn under the diamond.
-        <circle cx={50} cy={50} r={40} fill="none" stroke="var(--clay)" strokeWidth={2.5} />
-      )}
       {scored ? (
-        // A run: the whole diamond penciled solid.
+        // A run: the whole diamond penciled solid. An UNEARNED run keeps the
+        // scorer's red mark, but as the diamond's own outline (same weight as
+        // the ring this replaced) rather than a circle drawn around it — the
+        // solid shape stays legible as one mark instead of two concentric ones.
         <polygon
           points={`${HOME} ${FIRST} ${SECOND} ${THIRD}`}
           fill="var(--graphite)"
-          stroke="var(--graphite)"
-          strokeWidth={2}
+          stroke={unearned ? 'var(--clay)' : 'var(--graphite)'}
+          strokeWidth={unearned ? 2.5 : 2}
           strokeLinejoin="round"
         />
       ) : (
@@ -223,7 +224,12 @@ export function PlayDiamond({ reached = 0, scored = false, earned = true, legNot
           y={PR_LABELS[prBase].y}
           textAnchor={PR_LABELS[prBase].anchor}
         >
-          PR
+          <tspan x={PR_LABELS[prBase].x}>PR</tspan>
+          {prJersey && (
+            <tspan className="pbp__prnum" x={PR_LABELS[prBase].x} dy={9}>
+              {prJersey}
+            </tspan>
+          )}
         </text>
       )}
     </svg>

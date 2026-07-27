@@ -240,6 +240,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <PinchRunNotice
               runner={runner}
               replaced={replaced}
+              base={entry.base}
               teamId={battingTeamId}
               teamName={battingName}
               className="pitchernotice--pbp"
@@ -480,6 +481,7 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
   // took over at (the last swap's base if a runner was himself pinch-run for).
   const replaced = pinchRunners && pinchRunners.length > 0
   const prBase = replaced ? pinchRunners[pinchRunners.length - 1].base : null
+  const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
     <div className="pbp__atbat">
     <div className="pbp__card">
@@ -567,6 +569,7 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
             outAt={outAt}
             outCode={outCode}
             prBase={prBase}
+            prJersey={prJersey}
           />
           {codeKind === 'out' &&
             (calledLooking ? (

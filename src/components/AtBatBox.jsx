@@ -82,6 +82,7 @@ export function AtBatBox({ atbat = null }) {
   // took over at.
   const pinchRunners = atbat?.pinchRunners
   const prBase = pinchRunners?.length ? pinchRunners[pinchRunners.length - 1].base : null
+  const prJersey = pinchRunners?.length ? pinchRunners[pinchRunners.length - 1].jersey : null
 
   return (
     <div className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''}`}>
@@ -105,6 +106,7 @@ export function AtBatBox({ atbat = null }) {
             outAt={atbat?.outAt ?? null}
             outCode={atbat?.outCode ?? ''}
             prBase={prBase}
+            prJersey={prJersey}
             placedAt={isPlaced ? atbat.base : null}
             size={52}
           />
