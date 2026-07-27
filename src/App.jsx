@@ -87,8 +87,9 @@ const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
   'GameNotesDebugPage',
 )
-// Unlisted animation QA page — no score/reveal content, safe to ship, reachable
-// only by direct URL (see lib/route.js), same footing as Team Color Lab above.
+// Unlisted animation QA page — no score/reveal content and nothing to save, so
+// unlike the two DEV-gated curation surfaces below it ships, reachable only by
+// direct URL (see lib/route.js).
 const AnimationLab = lazyNamed(() => import('./screens/AnimationLab.jsx'), 'AnimationLab')
 const WordmarkLab = lazyNamed(() => import('./screens/WordmarkLab.jsx'), 'WordmarkLab')
 const FirstScorebookPage = lazyNamed(
@@ -104,43 +105,21 @@ const GamePhotosPage = lazyNamed(
 const ScorecardLab = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/ScorecardLab.jsx'), 'ScorecardLab')
   : null
-// Team Color Lab is a pick-a-background design harness — unlike Scorecard Lab
-// above, it carries no score/reveal content, so it's safe to ship to
-// production. Reachable at /team-color-lab but linked from no menu (see
-// lib/route.js) — unlisted, not gated.
-const TeamColorLab = lazyNamed(() => import('./screens/TeamColorLab.jsx'), 'TeamColorLab')
-// Uniform Names is a curation tool whose Save button only works against the
-// dev-only vite.config.js middleware — pointless (and confusing) in a
-// production build where that endpoint doesn't exist, so it's gated to DEV
-// like ScorecardLab above rather than shipped unlisted like Team Color Lab.
+// The two curation surfaces are DEV-only, and for the same reason: their Save
+// buttons post to vite.config.js's devDataSave() middleware, which exists only
+// under `vite dev`. In a production build that endpoint is gone, so shipping
+// them would ship buttons that can only fail — and, more to the point, the
+// whole reason they exist (editing this repo's committed data files) is
+// meaningless on a deployed copy. Gating them here is one of the four
+// independent isolation layers in ADR-0029; lib/route.js still PARSES both
+// names so a stray production URL falls through to the slate instead of the
+// generic 3-segment game route.
+const IdentityLab = import.meta.env.DEV
+  ? lazyNamed(() => import('./screens/identity-lab/index.jsx'), 'IdentityLab')
+  : null
 const UniformNamesPage = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/UniformNamesPage.jsx'), 'UniformNamesPage')
   : null
-// Win-probability band pattern review harness — same footing as Team Color
-// Lab above (no score/reveal content, safe to ship, reachable only by direct
-// URL — see lib/route.js).
-const TeamPatternLab = lazyNamed(() => import('./screens/TeamPatternLab.jsx'), 'TeamPatternLab')
-// Simplified MiLB counterparts of Team Color Lab above — one route per
-// full-season level, Home/Away only, never cross-linked to the MLB page
-// (see lib/milbColors.js's MILB_COLOR_LAB_LEVELS and
-// screens/MilbTeamColorLab.jsx). Same "no score/reveal content, safe to
-// ship, unlisted" footing.
-const MilbTeamColorLabAAA = lazyNamed(
-  () => import('./screens/MilbTeamColorLab.jsx'),
-  'MilbTeamColorLabAAA',
-)
-const MilbTeamColorLabAA = lazyNamed(
-  () => import('./screens/MilbTeamColorLab.jsx'),
-  'MilbTeamColorLabAA',
-)
-const MilbTeamColorLabHighA = lazyNamed(
-  () => import('./screens/MilbTeamColorLab.jsx'),
-  'MilbTeamColorLabHighA',
-)
-const MilbTeamColorLabA = lazyNamed(
-  () => import('./screens/MilbTeamColorLab.jsx'),
-  'MilbTeamColorLabA',
-)
 
 // The current URL, path + query — player/team links carry a `?d=&s=` spoiler
 // cutoff, so the query is part of route identity, not just the path.
@@ -248,20 +227,10 @@ export default function App() {
     content = <GamePhotosPage key={route.gamePk ?? 'browse'} initialGamePk={route.gamePk ?? null} />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
-  } else if (route.name === 'team-color-lab') {
-    content = <TeamColorLab />
+  } else if (route.name === 'identity-lab' && IdentityLab) {
+    content = <IdentityLab />
   } else if (route.name === 'uniform-names' && UniformNamesPage) {
     content = <UniformNamesPage />
-  } else if (route.name === 'team-pattern-lab') {
-    content = <TeamPatternLab />
-  } else if (route.name === 'team-color-lab-aaa') {
-    content = <MilbTeamColorLabAAA />
-  } else if (route.name === 'team-color-lab-aa') {
-    content = <MilbTeamColorLabAA />
-  } else if (route.name === 'team-color-lab-higha') {
-    content = <MilbTeamColorLabHighA />
-  } else if (route.name === 'team-color-lab-a') {
-    content = <MilbTeamColorLabA />
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {

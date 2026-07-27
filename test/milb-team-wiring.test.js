@@ -1,7 +1,7 @@
 // Coverage for the MiLB Home/Away wiring — milbColors.js's milbTreatmentTile
 // (GameCard/masthead logo tile) plus the isMlbTeamId split it and
 // WinProbChart.jsx branch on, so a regression here would silently strand the
-// MiLB Team Color Lab's tables back at "lab-only, nothing real reads them."
+// MiLB Team Identity Lab's tables back at "lab-only, nothing real reads them."
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { isMlbTeamId } from '../src/lib/teams.js'

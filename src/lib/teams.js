@@ -2,6 +2,29 @@
 
 import { readableTextColor } from './contrast.js'
 import { isFriday } from './dates.js'
+import { byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
+import MLB_TREATMENT_TUNING from './data/mlb-treatment-tuning.json' with { type: 'json' }
+
+// The per-team, per-treatment tile tuning the Team Identity Lab writes back to
+// (src/lib/data/mlb-treatment-tuning.json, ADR-0029) — re-exported raw so that
+// lab has one thing to read, edit, and POST as a whole file. Everything else in
+// this module reads it through the derived tables below, which keep the exact
+// shapes (and the exact resolver semantics) the app had when these were JS
+// literals. See src/lib/CLAUDE.md for the store's schema.
+export { MLB_TREATMENT_TUNING }
+
+// Every field of a (team, treatment) tuning record, or null. `treatment` uses
+// the jerseys.json vocabulary ('main' / 'alternate' / 'alternate-2…4' /
+// 'city-connect').
+function treatmentTuning(teamId, treatment) {
+  return treatmentRecord(MLB_TREATMENT_TUNING, teamId, treatment)
+}
+
+// tuningStore's byTreatment, bound to this store and defaulting to the
+// Main-excluding behaviour these MLB tables need (see its own doc comment).
+function byTreatment(pick, { includeMain = false } = {}) {
+  return byTreatmentIn(MLB_TREATMENT_TUNING, pick, { includeMain })
+}
 
 // The user scores Brewers games most often, so we pin them to the top of the
 // slate. teamId 158 is the Milwaukee Brewers in the MLB Stats API.
@@ -188,7 +211,7 @@ const ALT_USES_BASE_LOGO = new Set([
 ])
 
 // Teams with no real City Connect uniform at all (as opposed to one whose art
-// just hasn't been procured yet) — Team Color Lab skips the tile entirely
+// just hasn't been procured yet) — Team Identity Lab skips the tile entirely
 // rather than showing an empty placeholder that implies one is coming.
 const NO_CITY_CONNECT = new Set([
   147, // Yankees — opted out of the program
@@ -263,7 +286,7 @@ const ALT4_USES_BASE_LOGO = new Set([
 // source of truth for spelling a club's short code everywhere else in this
 // app. Deliberately has NO team-id whitelist: coverage grows purely by
 // dropping a new file into public/team-logos/{treatment}/ — a missing file
-// 404s and callers (TeamLogo's fallback chain, Team Color Lab's
+// 404s and callers (TeamLogo's fallback chain, Team Identity Lab's
 // TreatmentLogo) degrade gracefully, so there's no manifest to hand-maintain.
 // Never called for 'main' — that treatment renders the CDN base logo instead.
 export function localLogoUrl(teamId, treatment) {
@@ -309,13 +332,13 @@ export function leagueLogoUrl() {
 // Alternate/City Connect tile-background colors — hand-curated together with
 // each team's curated logo file (localLogoUrl above), since these marks don't
 // carry an official three-color set the way Main does (teamColorSwatches
-// below). Single source of truth for Team Color Lab's swatch tiles AND the
+// below). Single source of truth for Team Identity Lab's swatch tiles AND the
 // home-page game card's jersey-variant background (treatmentBgColor below) —
 // moved here so both read the same curated set rather than drifting. Each
 // entry is a small swatch list; the one flagged `bg: true` is the color
 // actually used as a fill. A team with no entry here has no known background
 // yet — callers should leave their surface plain rather than render nothing.
-// Rockies' hex mirrors TeamColorLab's own proposed Primary override (that
+// Rockies' hex mirrors the Team Identity Lab's own proposed Primary override (that
 // page's PRIMARY_OVERRIDE) — kept as a literal here since this is a narrow,
 // opt-in background only shown when the Alternate treatment itself is shown,
 // not a promotion of that proposal into the app's real teamPrimaryColor.
@@ -470,7 +493,7 @@ export const CITY_CONNECT_COLORS = {
 // (public/team-logos/alternate-2/BOS.png, no longer a copy of ALT_COLORS'
 // Alternate art) for the Alt 2 Yellow jersey — Primary blue tile, Secondary
 // gold for the mark's own outline.
-// Team Color Lab prototype only, same footing as ALT_COLORS/CITY_CONNECT_COLORS.
+// Team Identity Lab prototype only, same footing as ALT_COLORS/CITY_CONNECT_COLORS.
 export const ALT2_COLORS = {
   108: [{ label: 'Red', hex: '#BA0021', bg: true }], // Angels — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Red jersey
   109: [
@@ -577,7 +600,7 @@ export const ALT4_COLORS = {
 // colors (ALT2_COLORS/ALT3_COLORS/ALT4_COLORS) or an explicit plain-CDN-mark
 // opt-in (ALT2_USES_BASE_LOGO/ALT3_USES_BASE_LOGO/ALT4_USES_BASE_LOGO). All
 // are opt-in per team (unlike Main/Alternate/City Connect, which every club
-// eventually gets), so Team Color Lab skips rendering the tile entirely for
+// eventually gets), so Team Identity Lab skips rendering the tile entirely for
 // a team with neither, rather than showing an empty placeholder.
 export function hasAlternate2(teamId) {
   return !!(ALT2_COLORS[teamId] || ALT2_USES_BASE_LOGO.has(teamId))
@@ -595,7 +618,7 @@ export function hasAlternate4(teamId) {
 // City Connect treatment, or null if that team has no curated background yet
 // (callers should fall back to their own neutral fill, same as a missing
 // logo file). 'main'/'base' have no entry here — a standard jersey always
-// renders on the plain paper fill everywhere outside Team Color Lab.
+// renders on the plain paper fill everywhere outside Team Identity Lab.
 export function treatmentBgColor(teamId, treatment) {
   const colors =
     treatment === 'alternate'
@@ -619,36 +642,7 @@ export function treatmentBgColor(teamId, treatment) {
 // solid-tile-color issue for the general version of this problem on Main;
 // these per-team fixes are the narrower version already solved for Alternate/
 // City Connect specifically).
-export const TREATMENT_SCALE = {
-  139: { alternate: 1.6 }, // Rays — mark reads small against the tint at 1.32 alone
-  116: { alternate: 1.03 }, // Tigers — Old English "D" mark, barely bumped up off the default 1.32 edge-bleed
-  114: { 'city-connect': 0.76 }, // Guardians — "CLE" wordmark, barely shrunk off the default 1.32 edge-bleed
-  113: { 'city-connect': 0.84 }, // Reds — the "C" mark already touches all four
-  // edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink
-  // down so the whole mark stays inside the tile.
-  117: { 'city-connect': 0.72 }, // Astros — same edge-to-edge canvas issue as the Reds mark
-  118: { alternate: 0.85, 'alternate-2': 0.85, 'city-connect': 0.81 }, // Royals — same KC mark + scale as Main's own override
-  109: { alternate: 1.1, 'alternate-2': 0.77 }, // Diamondbacks — Alternate bumped up so the top-anchored bleed just barely clips the teal border; Alternate 2 (Away Grey) shrunk off the default
-  115: { 'city-connect': 1.15 }, // Rockies — mark reads small against the tint at 1.32 alone
-  136: { alternate: 0.95 }, // Mariners — shrunk 5% off the default 1.32 edge-bleed
-  120: { alternate: 0.9, 'alternate-3': 0.9 }, // Nationals — same script "W" mark as Alternate, matched to its 10%-shrunk size
-  140: {
-    // T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was
-    // chroma-keyed to transparent, and its own bbox already fills most of the
-    // canvas, so shrink slightly off the default 1.32 edge-bleed to avoid
-    // clipping the crossbar tips.
-    alternate: 0.85,
-    'city-connect': 0.855, // shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless
-    'alternate-2': 0.85, // same badge/canvas as Alternate, just recolored — same edge-bleed fix applies
-  },
-  141: { 'city-connect': 0.75 }, // Blue Jays — the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile
-  158: { alternate: 0.86, 'alternate-2': 0.99 }, // Brewers — Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed; Alt 2 Navy Blue nearly full size
-  144: { 'city-connect': 1.04, alternate: 1.04 }, // Braves — City Connect 2.0 and Alt 1 Red marks both nudged up 4% off the default 1.32 edge-bleed
-  145: { 'city-connect': 1.07 }, // White Sox — City Connect 2.0 mark reads small against the tint at 1.32 alone
-  119: { alternate: 0.94, 'alternate-4': 0.81 }, // Dodgers
-  146: { 'alternate-2': 1.03, 'alternate-3': 1.04, 'city-connect': 0.8 }, // Marlins
-  142: { alternate: 0.85, 'alternate-2': 0.85, 'alternate-3': 0.85 }, // Twins
-}
+export const TREATMENT_SCALE = byTreatment((f) => f.scale)
 
 // Per-team, per-treatment pinstripe background for a non-Main tile — same
 // hand-styled line-on-a-fill pattern as MAIN_OVERRIDES' `pinstripe`
@@ -657,13 +651,13 @@ export const TREATMENT_SCALE = {
 // color, white fill implied (the common case — the shared black default
 // every other pinstriped tile uses); `{ color, bg }` swaps in a colored fill
 // under the stripes instead of white (White Sox City Connect's red).
-export const TREATMENT_PINSTRIPE_COLOR = {
-  158: { alternate: 'rgba(0, 0, 0, 0.16)' }, // Brewers Alternate — same plain black pinstripe as Rockies/every other pinstriped tile
-  145: {
-    alternate: 'rgba(0, 0, 0, 0.16)', // White Sox Alternate — same plain black-on-white pinstripe, Home Pinstripe jersey
-    'city-connect': { color: 'rgba(0, 0, 0, 0.16)', bg: '#C8102E' }, // White Sox City Connect — black pinstripe over the mark's own red
-  },
-}
+export const TREATMENT_PINSTRIPE_COLOR = byTreatment((f) =>
+  f.pinstripeColor === undefined
+    ? undefined
+    : f.pinstripeBg
+      ? { color: f.pinstripeColor, bg: f.pinstripeBg }
+      : f.pinstripeColor,
+)
 
 export function treatmentPinstripeColor(teamId, treatment) {
   const v = TREATMENT_PINSTRIPE_COLOR[teamId]?.[treatment]
@@ -680,103 +674,16 @@ export function treatmentPinstripeBg(teamId, treatment) {
 }
 
 // Per-team, per-treatment header-chrome recolor (blue/gold/font) — promoted
-// out of TeamColorLab's Header colors mockup (TreatmentHeaderPreview) once a
+// out of the Team Identity Lab's Header colors mockup (TreatmentHeaderPreview) once a
 // proposal is settled, same "propose in the page, land in this table" path
 // TREATMENT_SCALE/TREATMENT_PINSTRIPE_COLOR above already follow. The
 // site-wide theming feature this would drive (neutral pages matching a
 // favorite team, game pages matching the home/batting team) is still
 // undecided — this table only backs the design-lab preview so far, no real
 // component reads it yet.
-export const TREATMENT_HEADER_COLOR_OVERRIDES = {
-  109: {
-    main: { blue: '#A71930', gold: '#30CED8', font: '#FBF6E9' }, // Diamondbacks Home Cream
-    alternate: { blue: '#A71930', gold: '#30CED8', font: '#FBF6E9' }, // Diamondbacks Alt 2 Red
-    'alternate-2': { blue: '#A29E9F', gold: '#A71930', font: '#000000' }, // Diamondbacks Away Grey
-    'alternate-3': { blue: '#000000', gold: '#30CED8', font: '#FBF6E9' }, // Diamondbacks Alt 1 Black
-    'city-connect': { blue: '#523178', gold: '#0097A9', font: '#FBF6E9' }, // Diamondbacks City Connect 2.0
-  },
-  133: {
-    'alternate-2': { blue: '#003831', gold: '#9EA2A2', font: '#FBF6E9' }, // Athletics Road Grey
-  },
-  116: {
-    alternate: { blue: '#FA4616', gold: '#0C2340', font: '#FBF6E9' }, // Tigers Alt 1 Orange
-    'alternate-3': { blue: '#9EA2A2', gold: '#0C2340', font: '#FBF6E9' }, // Tigers Away Grey
-  },
-  117: {
-    alternate: { blue: '#EB6E1F', gold: '#002D62', font: '#FBF6E9' }, // Astros Alt Orange
-    'alternate-2': { blue: '#002D62', gold: '#EB6E1F', font: '#FBF6E9' }, // Astros Alt Blue
-    'alternate-3': { blue: '#002D62', gold: '#EB6E1F', font: '#FBF6E9' }, // Astros Road Grey
-  },
-  118: {
-    'city-connect': { blue: '#FFFFFF', gold: '#B5824A', font: '#004687' }, // Royals City Connect 2.0
-  },
-  108: {
-    alternate: { blue: '#003263', gold: '#BA0021', font: '#FBF6E9' }, // Angels Away Grey
-    'alternate-3': { blue: '#BA0021', gold: '#B5824A', font: '#FBF6E9' }, // Angels Alt 2 White (Blue Trim) Pullover
-  },
-  119: {
-    main: { blue: '#005A9C', gold: '#EF3E42', font: '#FBF6E9' }, // Dodgers Home White
-    alternate: { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers Alt 1 Road Grey "Dodgers"
-    'alternate-3': { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers "Gold Series"
-    'alternate-4': { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers Road Grey "Los Angeles"
-    'city-connect': { blue: '#005A9C', gold: '#B5824A', font: '#FBF6E9' }, // Dodgers City Connect
-  },
-  146: {
-    'alternate-3': { blue: '#009CA7', gold: '#000000', font: '#FBF6E9' }, // Marlins Alt 2 Teal
-  },
-  158: {
-    'city-connect': { blue: '#0C436A', gold: '#ff6c58', font: '#FBF6E9' }, // Brewers City Connect 2.0
-  },
-  142: {
-    alternate: { blue: '#002B5C', gold: '#D31145', font: '#FBF6E9' }, // Twins Alt 2 Navy
-    'alternate-2': { blue: '#002B5C', gold: '#D31145', font: '#FBF6E9' }, // Twins Alt 1 Cream "Twin Cities"
-    'alternate-3': { blue: '#9EA2A2', gold: '#D31145', font: '#FBF6E9' }, // Twins Away Grey
-  },
-  115: {
-    main: { blue: '#33006F', gold: '#C4CED4', font: '#FBF6E9' }, // Rockies Home Pinstripe
-    alternate: { blue: '#33006F', gold: '#C4CED4', font: '#FBF6E9' }, // Rockies Alt 1 Purple
-    'alternate-2': { blue: '#9EA2A2', gold: '#33006F', font: '#FBF6E9' }, // Rockies Away Grey
-  },
-  114: {
-    main: { blue: '#00385D', gold: '#E50022', font: '#FBF6E9' }, // Guardians Home White
-    alternate: { blue: '#00385D', gold: '#E31937', font: '#FBF6E9' }, // Guardians Alt 2 Blue
-    'alternate-2': { blue: '#E31937', gold: '#00385D', font: '#FBF6E9' }, // Guardians Alt 1 Red
-    'alternate-3': { blue: '#E31937', gold: '#00385D', font: '#FBF6E9' }, // Guardians Away Grey
-    'city-connect': { blue: '#00385D', gold: '#E31937', font: '#FBF6E9' }, // Guardians City Connect
-  },
-  144: {
-    main: { blue: '#13274F', gold: '#CE1141', font: '#FBF6E9' }, // Braves Alt 2 Navy
-    'alternate-2': { blue: '#F5F0E1', gold: '#CE1141', font: '#13274F' }, // Braves Home White
-    'alternate-3': { blue: '#A2AAAD', gold: '#CE1141', font: '#FBF6E9' }, // Braves Road Grey
-    'city-connect': { blue: '#7BA7D8', gold: '#D32826', font: '#FBF6E9' }, // Braves City Connect 2.0
-  },
-  111: {
-    'alternate-3': { blue: '#BD3039', gold: '#0C2340', font: '#FBF6E9' }, // Red Sox Alt White Marathon "Boston"
-    'alternate-4': { blue: '#0C2340', gold: '#BD3039', font: '#FBF6E9' }, // Red Sox Away Grey
-  },
-  112: {
-    'alternate-2': { blue: '#7698CE', gold: '#CC3433', font: '#FBF6E9' }, // Cubs Alt 2 Baby Blue
-    'alternate-3': { blue: '#0E3386', gold: '#CC3433', font: '#FBF6E9' }, // Cubs Away Grey
-  },
-  113: {
-    'alternate-3': { blue: '#C6011F', gold: '#000000', font: '#FBF6E9' }, // Reds Away Grey
-    'city-connect': { blue: '#000000', gold: '#C6011F', font: '#FBF6E9' }, // Reds City Connect 2.0
-  },
-  110: {
-    main: { blue: '#DF4601', gold: '#000000', font: '#FBF6E9' }, // Orioles Alt 2 Orange
-    alternate: { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Alt 1 Black
-    'alternate-2': { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Home White
-    'alternate-3': { blue: '#000000', gold: '#DF4601', font: '#FBF6E9' }, // Orioles Away Grey
-    'city-connect': { blue: '#E1D2BE', gold: '#ff7a29', font: '#000000' }, // Orioles City Connect 2.0
-  },
-  145: {
-    main: { blue: '#27251F', gold: '#C4CED4', font: '#FBF6E9' }, // White Sox Away Grey
-    alternate: { blue: '#27251F', gold: '#C4CED4', font: '#FBF6E9' }, // White Sox Home Pinstripe
-    'alternate-2': { blue: '#000000', gold: '#C4CED4', font: '#FBF6E9' }, // White Sox Alt 1 Black "Sox"
-    'alternate-3': { blue: '#9EA2A2', gold: '#000000', font: '#FBF6E9' }, // White Sox Alt 2 "Southside"
-    'city-connect': { blue: '#C8102E', gold: '#000000', font: '#FBF6E9' }, // White Sox City Connect 2.0
-  },
-}
+export const TREATMENT_HEADER_COLOR_OVERRIDES = byTreatment((f) => f.header, {
+  includeMain: true,
+})
 
 export function treatmentHeaderColorOverride(teamId, treatment) {
   return TREATMENT_HEADER_COLOR_OVERRIDES[teamId]?.[treatment] ?? null
@@ -784,6 +691,37 @@ export function treatmentHeaderColorOverride(teamId, treatment) {
 
 export function treatmentScale(teamId, treatment) {
   return TREATMENT_SCALE[teamId]?.[treatment] ?? 1
+}
+
+// Horizontal nudge (percent of the tile's own width, negative = left) for a
+// mark whose visual weight sits off-center once scaled up — CSS translateX,
+// applied before scale. Lab-only so far: no shipped surface renders these
+// tiles large enough for the off-center weight to matter, so the game card and
+// masthead never ask for it. Kept here rather than in the lab (where it lived
+// as a page-local literal) so the whole per-treatment record has one home.
+export function treatmentOffsetX(teamId, treatment) {
+  return treatmentTuning(teamId, treatment)?.offsetX ?? 0
+}
+
+// The vertical counterpart to treatmentOffsetX, same units and same lab-only
+// footing.
+export function treatmentOffsetY(teamId, treatment) {
+  return treatmentTuning(teamId, treatment)?.offsetY ?? 0
+}
+
+// Vertical anchor for the edge-bleed scale-up — CSS transform-origin-y. The
+// 'center' default bleeds evenly off all four edges; 'top' (or a percentage)
+// anchors the mark higher so the overscale only bleeds off the bottom, keeping
+// the mark's full size without clipping its top/sides.
+export function treatmentOriginY(teamId, treatment) {
+  return treatmentTuning(teamId, treatment)?.originY ?? 'center'
+}
+
+// The whole tuning record for a (team, treatment), for the Team Identity Lab's
+// own "what's landed right now" reads — every other caller should go through
+// the named resolvers above.
+export function treatmentTuningRecord(teamId, treatment) {
+  return treatmentTuning(teamId, treatment)
 }
 
 // Per-team tuning for the Main/default logo tile — first designed on Team
@@ -801,57 +739,25 @@ export function treatmentScale(teamId, treatment) {
 // is a literal fill color that isn't any of the club's three brand
 // swatches — takes priority over `bg` in mainTreatmentTint. A team with no
 // entry here gets no tint, same as a missing Alternate/City Connect logo.
-export const MAIN_OVERRIDES = {
-  109: { bg: 'secondary' }, // Diamondbacks
-  108: { bg: 'secondary', scale: 0.9 }, // Angels
-  110: { bg: 'secondary' }, // Orioles
-  111: { bgHex: '#FFFFFF' }, // Red Sox — white, not any of the three brand swatches
-  // Cubs — white with the shared black pinstripe (mainTreatmentPinstripe) to
-  // match their Home Pinstripe jersey, instead of a flat Secondary tile.
-  112: { pinstripe: true, scale: 0.89 },
-  // Reds — the "Reds" script mark (main-overrides/CIN.png, moved over from
-  // the former Alt 1 Red Script jersey's Alternate art)
-  113: { bg: 'primary', recolor: true },
-  114: { bg: 'primary', recolor: true }, // Guardians — navy border -> white
-  // Rockies — white with a subtle black pinstripe (mainTreatmentPinstripe
-  // below) to match their home pinstripe jersey, instead of a flat
-  // brand-color tint like every other override here. No `recolor` — the
-  // plain mlbstatic mark (its black rim included) reads fine against white,
-  // so this wears the stock CDN svg unmodified.
-  115: { pinstripe: true },
-  116: { bg: 'primary', recolor: true }, // Tigers — navy -> white
-  117: { bg: 'secondary', scale: 0.9 }, // Astros
-  118: { bg: 'primary', recolor: true, scale: 0.85 }, // Royals — navy -> white
-  119: { bg: 'primary', recolor: true, scale: 0.85 }, // Dodgers — blue -> white
-  // Nationals — the script "W" mark (main-overrides/WSH.png), white background
-  120: { bgHex: '#FFFFFF', recolor: true },
-  121: { bg: 'primary', scale: 0.9 }, // Mets
-  133: { bg: 'primary', recolor: true }, // Athletics — green -> white
-  134: { bg: 'primary', scale: 0.95 }, // Pirates
-  135: { bg: 'primary', recolor: true, scale: 0.85 }, // Padres — dark -> secondary gold
-  136: { bg: 'secondary', recolor: true }, // Mariners — compass-rose mark
-  137: { bg: 'secondary', scale: 0.9 }, // Giants
-  138: { bg: 'primary', recolor: true, scale: 0.85 }, // Cardinals — red -> white
-  139: { bg: 'primary', recolor: true, scale: 0.95 }, // Rays — navy letters -> white, kept the baby-blue undertone shadow
-  // Rangers — the circular "Texas Rangers" crest badge (main-overrides/TEX.png,
-  // swapped in from Alternate) rather than the mlbstatic mark; it's already
-  // edge-to-edge in its own canvas like the Reds/Astros marks below, so scale
-  // down off the default 1.32 edge-bleed instead of up.
-  140: { bg: 'primary', recolor: true, scale: 0.75 },
-  141: { bgHex: '#F5F0E1' }, // Blue Jays — subtle off-white, not any of the three brand swatches
-  142: { bg: 'primary', recolor: true, scale: 0.85 }, // Twins — navy T -> white
-  143: { bg: 'primary', recolor: true }, // Phillies — red/white swapped
-  144: { bg: 'secondary', recolor: true }, // Braves — red -> white (bg matches the navy border)
-  145: { bg: 'secondary' }, // White Sox
-  146: { bg: 'primary' }, // Marlins — matches the club's own Primary blue (#00A3E0)
-  // Yankees — white with the shared black pinstripe (mainTreatmentPinstripe)
-  // to match their home pinstripe jersey, instead of a flat navy tile. No
-  // `recolor` — the plain mlbstatic mark is already navy, so this wears the
-  // stock CDN svg unmodified. No `pinstripeColor` override — the navy read
-  // too strong against white, plain black matches every other pinstriped tile.
-  147: { pinstripe: true },
-  158: { bgHex: '#FFF5EA' }, // Brewers — cream, not any of the three brand swatches
+// Main's own slice of a team's `main` tuning record. The record also carries
+// the fields every other treatment has (offsetX/offsetY/originY/header/note),
+// which were never part of MAIN_OVERRIDES and must not leak into it — a team
+// whose only Main tuning is a header-color proposal has no Main tile override
+// at all, and gets no entry.
+const MAIN_OVERRIDE_FIELDS = ['bg', 'bgHex', 'recolor', 'pinstripe', 'pinstripeColor', 'scale']
+
+function mainOverrideFields(main) {
+  if (!main) return null
+  const out = {}
+  for (const key of MAIN_OVERRIDE_FIELDS) if (main[key] !== undefined) out[key] = main[key]
+  return Object.keys(out).length ? out : null
 }
+
+export const MAIN_OVERRIDES = Object.fromEntries(
+  Object.entries(MLB_TREATMENT_TUNING)
+    .map(([teamId, entry]) => [teamId, mainOverrideFields(entry.treatments?.main)])
+    .filter(([, fields]) => fields),
+)
 
 const MAIN_BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
 
@@ -918,7 +824,7 @@ export function mainTreatmentRecolor(teamId) {
 //
 // One resolver because the same tile now appears in three places — the slate
 // card (components/GameCard.jsx), the in-game masthead (screens/GameView.jsx),
-// and Team Color Lab's curation grid — and a club whose mark needs a
+// and Team Identity Lab's curation grid — and a club whose mark needs a
 // scale-down or a recolor to read against its own fill needs it in all of
 // them. Treatment vocabulary is the jerseys.json one (api/jerseys.js), with
 // null / 'main' / 'base' all meaning "the club's Main look" since the slate
@@ -1468,7 +1374,7 @@ const TEAM_COLOR_EXTRAS = {
 // (TEAM_COLOR_EXTRAS) — deduped by hex so a club whose accent or extra just
 // restates an earlier swatch doesn't repeat it. MLB-only, empty array for a
 // MiLB id. Built for the team-color-lab dev page
-// (src/screens/TeamColorLab.jsx) — not used by any spoiler-facing surface.
+// (src/screens/identity-lab/) — not used by any spoiler-facing surface.
 export function teamColorSwatches(teamId) {
   const [primary, secondary] = TEAM_COLOR_PAIRS[teamId] ?? []
   const candidates = [

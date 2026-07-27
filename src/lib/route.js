@@ -27,10 +27,8 @@
 //   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
-//   '/team-color-lab'                   -> { name: 'team-color-lab' }  (unlisted QA page)
-//   '/team-color-lab-aaa|aa|higha|a'    -> { name: 'team-color-lab-{level}' }  (unlisted QA pages, MiLB)
+//   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
-//   '/team-pattern-lab'                 -> { name: 'team-pattern-lab' }  (unlisted QA page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
@@ -102,31 +100,20 @@ export function parseRoute(url) {
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
     return { name: 'scorecard-lab' }
-  // Dev-only team-color swatch harness — parsed and rendered, but linked from nowhere.
-  if (parts.length === 1 && parts[0] === 'team-color-lab')
-    return { name: 'team-color-lab' }
-  // Simplified MiLB counterparts of team-color-lab above — one per full-
-  // season level (Triple-A/Double-A/High-A/Single-A), Home/Away only, no
-  // MLB treatment catalog. Cross-linked to each other, never to the MLB
-  // page — see lib/milbColors.js's MILB_COLOR_LAB_LEVELS and
-  // screens/MilbTeamColorLab.jsx.
-  if (parts.length === 1 && parts[0] === 'team-color-lab-aaa')
-    return { name: 'team-color-lab-aaa' }
-  if (parts.length === 1 && parts[0] === 'team-color-lab-aa')
-    return { name: 'team-color-lab-aa' }
-  if (parts.length === 1 && parts[0] === 'team-color-lab-higha')
-    return { name: 'team-color-lab-higha' }
-  if (parts.length === 1 && parts[0] === 'team-color-lab-a')
-    return { name: 'team-color-lab-a' }
+  // Dev-only Team Identity Lab — every dimension of a club's visual identity
+  // (MLB treatments, each MiLB level's Home/Away, the WPA band pattern) behind
+  // one in-page dimension switcher. Replaced /team-color-lab,
+  // /team-color-lab-{aaa,aa,higha,a} and /team-pattern-lab, which were unlisted
+  // and linked from nowhere, so there's nothing to redirect.
+  if (parts.length === 1 && parts[0] === 'identity-lab')
+    return { name: 'identity-lab' }
   // Dev-only uniform-name curation page (App.jsx gates the actual component
-  // to import.meta.env.DEV, same as scorecard-lab below) — parsed here
+  // to import.meta.env.DEV, same as scorecard-lab above) — parsed here
   // regardless so a stray production visit falls through to 'home' instead of
-  // matching the generic 3-segment game route.
+  // matching the generic 3-segment game route. Same reason the lab above is
+  // still parsed: see ADR-0029's isolation layers.
   if (parts.length === 1 && parts[0] === 'uniform-names')
     return { name: 'uniform-names' }
-  // Win-probability band pattern review harness — parsed and rendered, but linked from nowhere.
-  if (parts.length === 1 && parts[0] === 'team-pattern-lab')
-    return { name: 'team-pattern-lab' }
   // Unlisted QA page (every club's Game Notes calibration status + a shortcut
   // to open its modal) — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'game-notes-debug')

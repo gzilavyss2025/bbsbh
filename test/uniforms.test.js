@@ -1,6 +1,6 @@
 // Coverage for src/api/uniforms.js's pure text helpers — classifyUniformAsset
 // in particular, since PR #343 gave it a JERSEY_TREATMENT_OVERRIDES table
-// (moved out of TeamColorLab.jsx) that both this module's own callers and the
+// (moved out of the Team Identity Lab) that both this module's own callers and the
 // nightly gen-jerseys.mjs precompute now share, so a game whose jersey naming
 // doesn't match its actual on-field logo (e.g. a club's "Away Grey" paired
 // with the Alternate mark, not Main) classifies the same way everywhere.

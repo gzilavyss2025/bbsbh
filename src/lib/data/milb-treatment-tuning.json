@@ -1,0 +1,1492 @@
+{
+  "106": {
+    "name": "Erie SeaWolves",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.91,
+          "offsetX": 0,
+          "offsetY": 5,
+          "bg": "#231f20",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 13,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#231f20"
+      },
+      "away": {
+        "position": {
+          "scale": 0.91,
+          "offsetX": 0,
+          "offsetY": 5,
+          "bg": "#d10c47",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 13,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#d10c47",
+        "header": {
+          "blue": "#231f20",
+          "gold": "#d10c47",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "234": {
+    "name": "Durham Bulls",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": -12,
+          "offsetY": 11,
+          "bg": "#0054A4",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0054A4"
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": -12,
+          "offsetY": 11,
+          "bg": "#B15C12",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#B15C12",
+        "header": {
+          "blue": "#0054A4",
+          "gold": "#B15C12",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "237": {
+    "name": "Midland RockHounds",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 13,
+          "offsetY": 0,
+          "bg": "#0069aa",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0069aa"
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 13,
+          "offsetY": 0,
+          "bg": "#fbb034",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#fbb034"
+      }
+    }
+  },
+  "247": {
+    "name": "Birmingham Barons",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.89,
+          "offsetX": 0,
+          "offsetY": 5,
+          "bg": "#231f20",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#231f20"
+      },
+      "away": {
+        "position": {
+          "scale": 0.89,
+          "offsetX": 0,
+          "offsetY": 5,
+          "bg": "#9EA2A2",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 2,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": "#be0940"
+      }
+    }
+  },
+  "260": {
+    "name": "Tulsa Drillers",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.06,
+          "offsetX": -10,
+          "offsetY": 22,
+          "bg": "#005294",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#005294"
+      },
+      "away": {
+        "position": {
+          "scale": 1.06,
+          "offsetX": -10,
+          "offsetY": 22,
+          "bg": "#221e1f",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#221e1f"
+      }
+    }
+  },
+  "342": {
+    "name": "Albuquerque Isotopes",
+    "treatments": {
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D0D0D0"
+      },
+      "home": {
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      }
+    }
+  },
+  "402": {
+    "name": "Akron RubberDucks",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#0072CE",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 62,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -8,
+          "rowShift": 0
+        },
+        "band": "#0072CE",
+        "header": {
+          "blue": "#0072CE",
+          "gold": "#010101",
+          "font": "#FBF6E9"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 62,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -8,
+          "rowShift": 0
+        },
+        "band": "#010101"
+      }
+    }
+  },
+  "418": {
+    "name": "Chesapeake Baysox",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.79,
+          "offsetX": -3,
+          "offsetY": 5,
+          "bg": "#010101",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#010101"
+      },
+      "away": {
+        "position": {
+          "scale": 0.79,
+          "offsetX": -3,
+          "offsetY": 5,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 6,
+          "rowShift": 0
+        },
+        "band": "#010101",
+        "header": {
+          "blue": "#010101",
+          "gold": "#FC4C02",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "421": {
+    "name": "Montgomery Biscuits",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.9,
+          "offsetX": 8,
+          "offsetY": 5,
+          "bg": "#febe28",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#febe28",
+        "header": {
+          "blue": "#0b2b76",
+          "gold": "#febe28",
+          "font": "#FBF6E9"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 0.9,
+          "offsetX": 8,
+          "offsetY": 5,
+          "bg": "#0b2b76",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0b2b76"
+      }
+    }
+  },
+  "422": {
+    "name": "Buffalo Bisons",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.12,
+          "offsetX": 7,
+          "offsetY": 7,
+          "bg": "#CE1141",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0054A4",
+        "header": {
+          "blue": "#0054A4",
+          "gold": "#CE1141",
+          "font": "#FBF6E9"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.12,
+          "offsetX": 7,
+          "offsetY": 7,
+          "bg": "#0054A4",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0054A4"
+      }
+    }
+  },
+  "440": {
+    "name": "Springfield Cardinals",
+    "treatments": {
+      "home": {
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#d30e45"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002c5d"
+      }
+    }
+  },
+  "445": {
+    "name": "Columbus Clippers",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.13,
+          "offsetX": -7,
+          "offsetY": 0,
+          "bg": "#002A5C",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": -1,
+          "rowShift": 0
+        },
+        "band": "#002A5C"
+      },
+      "away": {
+        "position": {
+          "scale": 1.13,
+          "offsetX": -7,
+          "offsetY": 0,
+          "bg": "#68ACDB",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": -1,
+          "rowShift": 0
+        },
+        "band": "#68ACDB",
+        "header": {
+          "blue": "#002A5C",
+          "gold": "#68ACDB",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "452": {
+    "name": "Altoona Curve",
+    "treatments": {
+      "home": {
+        "wpaLayout": {
+          "size": 44,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#b21921"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 44,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#231f20"
+      }
+    }
+  },
+  "463": {
+    "name": "New Hampshire Fisher Cats",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.77,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#c6021e",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#c6021e"
+      },
+      "away": {
+        "position": {
+          "scale": 0.77,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#0f254b",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0f254b"
+      }
+    }
+  },
+  "482": {
+    "name": "Corpus Christi Hooks",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#FFFFFF",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 46,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF",
+        "header": {
+          "blue": "#012b5d",
+          "gold": "#4f91ca",
+          "font": "#FBF6E9"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 46,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D0D0D0",
+        "header": {
+          "blue": "#012b5d",
+          "gold": "#4f91ca",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "494": {
+    "name": "Charlotte Knights",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.85,
+          "offsetX": -7,
+          "offsetY": 0,
+          "bg": "#000000",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      },
+      "away": {
+        "position": {
+          "scale": 0.85,
+          "offsetX": -7,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 50,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      }
+    }
+  },
+  "498": {
+    "name": "Chattanooga Lookouts",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.87,
+          "offsetX": -7,
+          "offsetY": 7,
+          "bg": "#ec3b46",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 46,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": "#ec3b46"
+      },
+      "away": {
+        "position": {
+          "scale": 0.85,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#9EA2A2",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 3,
+          "rowShift": 0
+        },
+        "band": "#9EA2A2"
+      }
+    }
+  },
+  "505": {
+    "name": "Binghamton Rumble Ponies",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": -15,
+          "offsetY": 0,
+          "bg": "#bc0b35",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 51,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#bc0b35"
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": -15,
+          "offsetY": 0,
+          "bg": "#0f213e",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#0f213e"
+      }
+    }
+  },
+  "510": {
+    "name": "San Antonio Missions",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.99,
+          "offsetX": 3,
+          "offsetY": 0,
+          "bg": "#081f3f",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        }
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#ceaa78"
+      }
+    }
+  },
+  "522": {
+    "name": "Reading Fightin Phils",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.96,
+          "offsetX": -13,
+          "offsetY": 6,
+          "bg": "#d10c47",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#d10c47"
+      },
+      "away": {
+        "position": {
+          "scale": 0.96,
+          "offsetX": -13,
+          "offsetY": 6,
+          "bg": "#042d60",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#042d60"
+      }
+    }
+  },
+  "538": {
+    "name": "Hartford Yard Goats",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.96,
+          "offsetX": 8,
+          "offsetY": 0,
+          "bg": "#002c76",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002c76"
+      },
+      "away": {
+        "position": {
+          "scale": 0.96,
+          "offsetX": 8,
+          "offsetY": 0,
+          "bg": "#009a49",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#009a49"
+      }
+    }
+  },
+  "540": {
+    "name": "Frisco RoughRiders",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#326295",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#326295"
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#F3ECD8",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#F3ECD8"
+      }
+    }
+  },
+  "546": {
+    "name": "Portland Sea Dogs",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.82,
+          "offsetX": -5,
+          "offsetY": 6,
+          "bg": "#e03a3e",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 8,
+          "rowShift": 0
+        },
+        "band": "#e03a3e",
+        "header": {
+          "blue": "#e03a3e",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 0.82,
+          "offsetX": -5,
+          "offsetY": 6,
+          "bg": "#cbccce",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 6,
+          "rowShift": 0
+        },
+        "band": "#cbccce",
+        "header": {
+          "blue": "#e03a3e",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "547": {
+    "name": "Harrisburg Senators",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.87,
+          "offsetX": -6,
+          "offsetY": 7,
+          "bg": "#d10c47",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#d10c47"
+      },
+      "away": {
+        "position": {
+          "scale": 0.87,
+          "offsetX": -6,
+          "offsetY": 7,
+          "bg": "#042e61",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#042e61"
+      }
+    }
+  },
+  "553": {
+    "name": "Knoxville Smokies",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.86,
+          "offsetX": -8,
+          "offsetY": 7,
+          "bg": "#FFFFFF",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      },
+      "away": {
+        "position": {
+          "scale": 0.86,
+          "offsetX": -8,
+          "offsetY": 7,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D0D0D0"
+      }
+    }
+  },
+  "559": {
+    "name": "Rocket City Trash Pandas",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.09,
+          "offsetX": 20,
+          "offsetY": 13,
+          "bg": "#e93c49",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#e93c49"
+      },
+      "away": {
+        "position": {
+          "scale": 1.09,
+          "offsetX": 20,
+          "offsetY": 13,
+          "bg": "#3378c2",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#3378c2"
+      }
+    }
+  },
+  "574": {
+    "name": "Arkansas Travelers",
+    "treatments": {
+      "home": {
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#ba0c2f"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 54,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": 1,
+          "rowShift": 0
+        },
+        "band": "#000000"
+      }
+    }
+  },
+  "1350": {
+    "name": "Northwest Arkansas Naturals",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.86,
+          "offsetX": -9,
+          "offsetY": 6,
+          "bg": "#002d6a",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#002d6a"
+      },
+      "away": {
+        "position": {
+          "scale": 0.86,
+          "offsetX": -9,
+          "offsetY": 6,
+          "bg": "#a20534",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#a20534"
+      }
+    }
+  },
+  "1956": {
+    "name": "Somerset Patriots",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#FFFFFF",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#FFFFFF"
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D0D0D0"
+      }
+    }
+  },
+  "3410": {
+    "name": "Richmond Flying Squirrels",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.6,
+          "offsetX": 0,
+          "offsetY": 3,
+          "bg": "#d41041",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 82,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -37,
+          "rowShift": 0
+        },
+        "band": "#d41041"
+      },
+      "away": {
+        "position": {
+          "scale": 1.6,
+          "offsetX": 0,
+          "offsetY": 3,
+          "bg": "#231f20",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 82,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -37,
+          "rowShift": 0
+        },
+        "band": "#231f20"
+      }
+    }
+  },
+  "3898": {
+    "name": "Wichita Wind Surge",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": -15,
+          "offsetY": 0,
+          "bg": "#032c5b",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -2,
+          "rowShift": 0
+        },
+        "band": "#032c5b"
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": -15,
+          "offsetY": 0,
+          "bg": "#e1143b",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 60,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -5,
+          "rowShift": 0
+        },
+        "band": "#e1143b"
+      }
+    }
+  },
+  "4124": {
+    "name": "Pensacola Blue Wahoos",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.97,
+          "offsetX": -8,
+          "offsetY": 5,
+          "bg": "#003087",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#003087"
+      },
+      "away": {
+        "position": {
+          "scale": 0.97,
+          "offsetX": -8,
+          "offsetY": 5,
+          "bg": "#e20177",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#e20177"
+      }
+    }
+  },
+  "5015": {
+    "name": "Biloxi Shuckers",
+    "treatments": {
+      "away": {
+        "wpaLayout": {
+          "size": 35,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 3,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#e2b880",
+        "header": {
+          "blue": "#0f69b1",
+          "gold": "#e2b880",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "5368": {
+    "name": "Amarillo Sod Poodles",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#003A70",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 53,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": -6,
+          "rowShift": 0
+        },
+        "band": "#00A9E0"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 53,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": -6,
+          "rowShift": 0
+        },
+        "band": "#00A9E0",
+        "header": {
+          "blue": "#003A70",
+          "gold": "#00A9E0",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  },
+  "6325": {
+    "name": "Columbus Clingstones",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#f58b6d",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 46,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#f58b6d",
+        "header": {
+          "blue": "#000000",
+          "gold": "#f58b6d",
+          "font": "#FBF6E9"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#000000",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 46,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 5,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#000000",
+        "header": {
+          "blue": "#000000",
+          "gold": "#f58b6d",
+          "font": "#FBF6E9"
+        }
+      }
+    }
+  }
+}

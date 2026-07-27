@@ -7,7 +7,7 @@
 // tile that GAME's real uniform treatment, every non-Main band started
 // inheriting its club's base-mark override too — so the Nationals' hand-
 // procured Alternate/Alternate 3 roundel PNGs got feFlood'd to solid white
-// blobs in Team Color Lab's WPA preview and in the real chart. These pin the
+// blobs in Team Identity Lab's WPA preview and in the real chart. These pin the
 // rule that an override only reaches the art it was verified against.
 import assert from 'node:assert/strict'
 import test from 'node:test'
@@ -143,7 +143,7 @@ test('a negative padding still leaves a positive tile to repeat', () => {
   // other. The tile itself must never collapse to zero/negative size — an
   // SVG pattern with width or height ≤ 0 is silently not rendered, and the
   // whole band loses its marks. Both axes matter: H-Pad is just as tunable
-  // in Team Color Lab (and pasteable into an override) as V-Pad.
+  // in Team Identity Lab (and pasteable into an override) as V-Pad.
   const { tileH } = wpaTilePlacements({ size: 20, paddingX: 4, paddingY: -40, rowShift: 0 })
   assert.ok(tileH >= 1, `tile height stayed positive, got ${tileH}`)
 

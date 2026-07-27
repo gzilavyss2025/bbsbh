@@ -16,7 +16,7 @@ export default [
   {
     files: ['src/**/*.{js,jsx}'],
     languageOptions: {
-      ecmaVersion: 2023,
+      ecmaVersion: 2025,
       sourceType: 'module',
       globals: { ...globals.browser, ...globals.serviceworker },
       parserOptions: {
@@ -56,7 +56,7 @@ export default [
   {
     files: ['scripts/**/*.{js,mjs}', '*.config.js'],
     languageOptions: {
-      ecmaVersion: 2023,
+      ecmaVersion: 2025,
       sourceType: 'module',
       globals: { ...globals.node },
     },

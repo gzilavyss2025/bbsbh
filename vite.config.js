@@ -2,36 +2,48 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { writeFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import {
+  DEV_DATA_MAX_BODY_BYTES,
+  devDataStore,
+  resolveStoreFile,
+  serializeStore,
+} from './scripts/lib/dev-data-stores.mjs'
 
-// Curated overrides are a few hundred bytes per club at most (see
-// public/data/uniform-names.json) — this is a generous ceiling against a
-// runaway/malformed POST, not a real-world size.
-const UNIFORM_NAMES_MAX_BODY_BYTES = 256 * 1024
-
-// Dev-only save endpoint for the /uniform-names curation page (see
-// src/screens/UniformNamesPage.jsx + src/api/uniforms.js's
-// fetchUniformNameOverrides). This app has no backend anywhere else — every
-// other page is a static PWA reading statsapi.mlb.com or a committed
-// public/data/*.json file directly — so this is the one deliberate exception,
-// and it's scoped as narrowly as possible: `configureServer` only runs under
-// `vite dev` (never `vite build`/`vite preview`, and never bundled into the
-// client), so it's absent from the deployed app entirely. It POSTs the WHOLE
-// curated overrides object (the page always sends its full up-to-date map,
-// not a single-row patch) straight to public/data/uniform-names.json, the
-// same file the page and src/api/uniforms.js's fetchUniformNameOverrides read
-// back at runtime — a save takes effect immediately, no restart needed.
-// Route lives under `/__dev/…` rather than `/api/…` — this repo's `api/`
-// directory is reserved for the two real backend exceptions (OG previews,
-// reveal sync, see root CLAUDE.md), which are Vercel edge functions, not Vite
-// dev middleware; a shared `/api/` prefix would misleadingly suggest this is
-// a third one.
-function uniformNamesDevSave() {
-  const filePath = fileURLToPath(new URL('./public/data/uniform-names.json', import.meta.url))
+// Dev-only save endpoint for the curation surfaces — the Team Identity Lab
+// (/identity-lab) and the Uniform Names page — writing straight back to the
+// committed store each one edits. This app has no backend anywhere else: every
+// other page is a static PWA reading statsapi.mlb.com or a committed JSON file
+// directly, so this is the one deliberate exception, and it's scoped as
+// narrowly as possible. `configureServer` only runs under `vite dev` (never
+// `vite build`/`vite preview`, and never bundled into the client), so it is
+// absent from the deployed app entirely — one of the four independent isolation
+// layers ADR-0029 records.
+//
+// A request POSTs the WHOLE store (every page sends its full up-to-date object,
+// not a single-row patch) to /__dev/{key}, where `key` must be an own property
+// of the DEV_DATA_STORES allowlist — the security boundary. The request never
+// supplies a path, only a key; the destination comes from the allowlist's own
+// literal. The file it writes is the same one the app imports/fetches back, so
+// a save takes effect immediately, no restart needed.
+//
+// The route lives under `/__dev/…` rather than `/api/…` because this repo's
+// `api/` directory is reserved for the real backend exceptions (OG previews,
+// reveal sync, copy — see root CLAUDE.md), which are Vercel edge functions, not
+// Vite dev middleware; a shared `/api/` prefix would misleadingly suggest this
+// is another one.
+function devDataSave() {
   return {
-    name: 'uniform-names-dev-save',
+    name: 'dev-data-save',
     configureServer(server) {
-      server.middlewares.use('/__dev/uniform-names', (req, res) => {
+      server.middlewares.use('/__dev', (req, res) => {
+        // `req.url` is the remainder after the mount point, e.g. '/wpa-tuning'.
+        const key = (req.url || '').split('?')[0].replace(/^\/+|\/+$/g, '')
+        const store = devDataStore(key)
+        if (!store) {
+          res.statusCode = 404
+          res.end('unknown store')
+          return
+        }
         if (req.method !== 'POST') {
           res.statusCode = 405
           res.end('POST only')
@@ -42,7 +54,7 @@ function uniformNamesDevSave() {
         req.on('data', (chunk) => {
           if (tooLarge) return
           body += chunk
-          if (Buffer.byteLength(body) > UNIFORM_NAMES_MAX_BODY_BYTES) {
+          if (Buffer.byteLength(body) > DEV_DATA_MAX_BODY_BYTES) {
             tooLarge = true
             res.statusCode = 413
             res.end('body too large')
@@ -59,22 +71,14 @@ function uniformNamesDevSave() {
             res.end(`invalid JSON: ${err.message}`)
             return
           }
-          // The saved shape is always a flat uniformAssetCode -> display-name
-          // string map (see uniforms.js's fetchUniformNameOverrides) — reject
-          // anything else (an array, nested objects, non-string values)
-          // rather than writing a shape the app's readers don't expect.
-          const isValidOverridesMap =
-            parsed !== null &&
-            typeof parsed === 'object' &&
-            !Array.isArray(parsed) &&
-            Object.values(parsed).every((v) => typeof v === 'string')
-          if (!isValidOverridesMap) {
+          const problem = store.validate(parsed)
+          if (problem) {
             res.statusCode = 400
-            res.end('expected a flat { uniformAssetCode: string } map')
+            res.end(problem)
             return
           }
           try {
-            await writeFile(filePath, `${JSON.stringify(parsed, null, 2)}\n`)
+            await writeFile(resolveStoreFile(store), serializeStore(parsed))
             res.statusCode = 200
             res.end('ok')
           } catch (err) {
@@ -107,7 +111,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    uniformNamesDevSave(),
+    devDataSave(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/tally-baseball-mark-180.png'],

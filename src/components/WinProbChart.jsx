@@ -220,7 +220,7 @@ export function WinProbChart({
   const awayMilb = !isMlbTeamId(awayId)
   const homeMilb = !isMlbTeamId(homeId)
   const awayLayout = awayMilb ? milbWpaLogoLayout(awayId, 'away') : wpaLogoLayout(awayId, awayTreat)
-  // `homeLayoutOverride` — Team Color Lab's TreatmentWpaPreview draft
+  // `homeLayoutOverride` — Team Identity Lab's TreatmentWpaPreview draft
   // (merged over the shipped WPA_LOGO_LAYOUT_OVERRIDES default, same shape
   // wpaLogoLayout returns) — lets that page's scenario mockups show an
   // in-progress edit live, without a second, drift-prone tile-rendering
@@ -238,11 +238,11 @@ export function WinProbChart({
   // isn't the right pick here, else the same chip color used everywhere
   // else on this card (header swatches, splitbar). Pinstripe (a scorebook
   // white-with-line pattern instead of a flat fill) wins outright when set —
-  // same tables Team Color Lab's logo box reads, so a pinstriped tile there
+  // same tables Team Identity Lab's logo box reads, so a pinstriped tile there
   // renders pinstriped here too.
   const awayPinstripe = awayMilb ? milbWpaBandPinstripeColor(awayId, 'away') : wpaBandPinstripeColor(awayId, awayTreat)
   // `homeBandOverride` — `{ pinstripe, color }`, the SAME live draft state
-  // as homeLayoutOverride above (Team Color Lab's TreatmentWpaPreview +
+  // as homeLayoutOverride above (Team Identity Lab's TreatmentWpaPreview +
   // ColorSwatch pick), standing in for the wpaBandPinstripeColor/wpaBandColor
   // table lookup below it. pinstripeBg isn't part of the draft (not
   // editable there), so it still always reads the real table.

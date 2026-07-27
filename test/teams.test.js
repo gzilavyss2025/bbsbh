@@ -1,7 +1,7 @@
 // Coverage for the jersey-logo-variant lookups in src/lib/teams.js:
 // localLogoUrl, teamLogoUrl's alternate/city-connect routing, and the
 // treatmentBgColor/treatmentScale readers PR #339 pulled out of
-// TeamColorLab.jsx so the home-page game cards could share them. PR #343
+// the Team Identity Lab so the home-page game cards could share them. PR #343
 // added hasAlternate2/hasAlternate3/hasCityConnect, the Main-tile
 // mainTreatment* readers, and treatmentPinstripeColor — covered below.
 import assert from 'node:assert/strict'
@@ -212,7 +212,7 @@ test('mainTreatmentRecolor is true only for teams whose Main mark swaps to the h
 })
 
 // treatmentTile — the one resolver the slate card, the in-game masthead, and
-// Team Color Lab all read so a club's tile looks the same in every one.
+// Team Identity Lab all read so a club's tile looks the same in every one.
 // Added when the masthead adopted the tile (previously GameCard.jsx assembled
 // these four values inline).
 

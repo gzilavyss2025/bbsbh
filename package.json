@@ -25,6 +25,7 @@
     "check:claude-md": "node scripts/check-claude-md.mjs",
     "check:report-pages": "node scripts/check-report-pages.mjs",
     "check:skeleton-ball-frames": "node scripts/check-skeleton-ball-frames.mjs",
+    "check:dist-dev": "node scripts/check-dist-dev-routes.mjs",
     "lint:fix": "eslint . --fix",
     "prepare": "git config core.hooksPath .githooks || true",
     "test": "node --test \"test/**/*.test.js\"",

@@ -1,0 +1,791 @@
+{
+  "108": {
+    "name": "Los Angeles Angels",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "scale": 0.9
+      },
+      "alternate": {
+        "header": {
+          "blue": "#003263",
+          "gold": "#BA0021",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#BA0021",
+          "gold": "#B5824A",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 White (Blue Trim) Pullover"
+      }
+    }
+  },
+  "109": {
+    "name": "Arizona Diamondbacks",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "header": {
+          "blue": "#A71930",
+          "gold": "#30CED8",
+          "font": "#FBF6E9"
+        },
+        "note": "Home Cream"
+      },
+      "alternate": {
+        "scale": 1.1,
+        "originY": "10%",
+        "header": {
+          "blue": "#A71930",
+          "gold": "#30CED8",
+          "font": "#FBF6E9"
+        },
+        "note": "Alternate bumped up so the top-anchored bleed just barely clips the teal border, most of the bleed still going to the bottom"
+      },
+      "alternate-2": {
+        "scale": 0.77,
+        "header": {
+          "blue": "#A29E9F",
+          "gold": "#A71930",
+          "font": "#000000"
+        },
+        "note": "Away Grey shrunk off the default edge-bleed"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#000000",
+          "gold": "#30CED8",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Black"
+      },
+      "city-connect": {
+        "header": {
+          "blue": "#523178",
+          "gold": "#0097A9",
+          "font": "#FBF6E9"
+        },
+        "note": "City Connect 2.0"
+      }
+    }
+  },
+  "110": {
+    "name": "Baltimore Orioles",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "header": {
+          "blue": "#DF4601",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 Orange"
+      },
+      "alternate": {
+        "header": {
+          "blue": "#000000",
+          "gold": "#DF4601",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Black"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#000000",
+          "gold": "#DF4601",
+          "font": "#FBF6E9"
+        },
+        "note": "Home White"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#000000",
+          "gold": "#DF4601",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      },
+      "city-connect": {
+        "header": {
+          "blue": "#E1D2BE",
+          "gold": "#ff7a29",
+          "font": "#000000"
+        },
+        "note": "City Connect 2.0"
+      }
+    }
+  },
+  "111": {
+    "name": "Boston Red Sox",
+    "treatments": {
+      "main": {
+        "bgHex": "#FFFFFF",
+        "note": "white, not any of the three brand swatches"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#BD3039",
+          "gold": "#0C2340",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt White Marathon \"Boston\""
+      },
+      "alternate-4": {
+        "header": {
+          "blue": "#0C2340",
+          "gold": "#BD3039",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "112": {
+    "name": "Chicago Cubs",
+    "treatments": {
+      "main": {
+        "pinstripe": true,
+        "scale": 0.89,
+        "offsetX": 4,
+        "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their Home Pinstripe jersey, instead of a flat Secondary tile; the Home Pinstripe mark reads better nudged right"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#7698CE",
+          "gold": "#CC3433",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 Baby Blue"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#0E3386",
+          "gold": "#CC3433",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "113": {
+    "name": "Cincinnati Reds",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "note": "the \"Reds\" script mark (main-overrides/CIN.png, moved over from the former Alt 1 Red Script jersey's Alternate art)"
+      },
+      "city-connect": {
+        "scale": 0.84,
+        "header": {
+          "blue": "#000000",
+          "gold": "#C6011F",
+          "font": "#FBF6E9"
+        },
+        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#C6011F",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "114": {
+    "name": "Cleveland Guardians",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "header": {
+          "blue": "#00385D",
+          "gold": "#E50022",
+          "font": "#FBF6E9"
+        },
+        "note": "navy border recolored to white; Home White"
+      },
+      "city-connect": {
+        "scale": 0.76,
+        "header": {
+          "blue": "#00385D",
+          "gold": "#E31937",
+          "font": "#FBF6E9"
+        },
+        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed"
+      },
+      "alternate": {
+        "header": {
+          "blue": "#00385D",
+          "gold": "#E31937",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 Blue"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#E31937",
+          "gold": "#00385D",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Red"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#E31937",
+          "gold": "#00385D",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "115": {
+    "name": "Colorado Rockies",
+    "treatments": {
+      "main": {
+        "pinstripe": true,
+        "header": {
+          "blue": "#33006F",
+          "gold": "#C4CED4",
+          "font": "#FBF6E9"
+        },
+        "note": "white with a subtle black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat brand-color tint. No recolor — the plain mlbstatic mark (its black rim included) reads fine against white, so this wears the stock CDN svg unmodified. Home Pinstripe"
+      },
+      "city-connect": {
+        "scale": 1.15,
+        "note": "mark reads small against the tint at 1.32 alone"
+      },
+      "alternate": {
+        "header": {
+          "blue": "#33006F",
+          "gold": "#C4CED4",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Purple"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#9EA2A2",
+          "gold": "#33006F",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "116": {
+    "name": "Detroit Tigers",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "note": "navy recolored to white"
+      },
+      "alternate": {
+        "scale": 1.03,
+        "header": {
+          "blue": "#FA4616",
+          "gold": "#0C2340",
+          "font": "#FBF6E9"
+        },
+        "note": "the Old English \"D\" mark, barely bumped up off the default 1.32 edge-bleed; Alt 1 Orange"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#9EA2A2",
+          "gold": "#0C2340",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "117": {
+    "name": "Houston Astros",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "scale": 0.9
+      },
+      "city-connect": {
+        "scale": 0.72,
+        "note": "same edge-to-edge canvas issue as the Reds mark"
+      },
+      "alternate": {
+        "header": {
+          "blue": "#EB6E1F",
+          "gold": "#002D62",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt Orange"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#002D62",
+          "gold": "#EB6E1F",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt Blue"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#002D62",
+          "gold": "#EB6E1F",
+          "font": "#FBF6E9"
+        },
+        "note": "Road Grey"
+      }
+    }
+  },
+  "118": {
+    "name": "Kansas City Royals",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.85,
+        "note": "navy recolored to white"
+      },
+      "alternate": {
+        "scale": 0.85,
+        "note": "same KC mark + scale as Main's own override"
+      },
+      "alternate-2": {
+        "scale": 0.85,
+        "note": "same KC mark + scale as Main's own override"
+      },
+      "city-connect": {
+        "scale": 0.81,
+        "header": {
+          "blue": "#FFFFFF",
+          "gold": "#B5824A",
+          "font": "#004687"
+        },
+        "note": "same KC mark + scale as Main's own override; City Connect 2.0"
+      }
+    }
+  },
+  "119": {
+    "name": "Los Angeles Dodgers",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.85,
+        "header": {
+          "blue": "#005A9C",
+          "gold": "#EF3E42",
+          "font": "#FBF6E9"
+        },
+        "note": "blue recolored to white; Home White"
+      },
+      "alternate": {
+        "scale": 0.94,
+        "offsetX": -2,
+        "offsetY": 6,
+        "header": {
+          "blue": "#005A9C",
+          "gold": "#B5824A",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Road Grey \"Dodgers\" — nudged left and down"
+      },
+      "alternate-4": {
+        "scale": 0.81,
+        "offsetX": -1,
+        "offsetY": 4,
+        "header": {
+          "blue": "#005A9C",
+          "gold": "#B5824A",
+          "font": "#FBF6E9"
+        },
+        "note": "Road Grey \"Los Angeles\" — nudged left and down"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#005A9C",
+          "gold": "#B5824A",
+          "font": "#FBF6E9"
+        },
+        "note": "\"Gold Series\""
+      },
+      "city-connect": {
+        "header": {
+          "blue": "#005A9C",
+          "gold": "#B5824A",
+          "font": "#FBF6E9"
+        },
+        "note": "City Connect"
+      }
+    }
+  },
+  "120": {
+    "name": "Washington Nationals",
+    "treatments": {
+      "main": {
+        "bgHex": "#FFFFFF",
+        "recolor": true,
+        "note": "the script \"W\" mark (main-overrides/WSH.png), white background"
+      },
+      "alternate": {
+        "scale": 0.9,
+        "note": "shrunk 5% off the default 1.32 edge-bleed"
+      },
+      "alternate-3": {
+        "scale": 0.9,
+        "note": "same script \"W\" mark as Alternate, matched to its 10%-shrunk size"
+      }
+    }
+  },
+  "121": {
+    "name": "New York Mets",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "scale": 0.9
+      }
+    }
+  },
+  "133": {
+    "name": "Athletics",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#003831",
+          "gold": "#9EA2A2",
+          "font": "#FBF6E9"
+        },
+        "note": "Road Grey"
+      }
+    }
+  },
+  "134": {
+    "name": "Pittsburgh Pirates",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "scale": 0.95
+      }
+    }
+  },
+  "135": {
+    "name": "San Diego Padres",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.85,
+        "note": "dark recolored to secondary gold"
+      }
+    }
+  },
+  "136": {
+    "name": "Seattle Mariners",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "recolor": true,
+        "note": "compass-rose mark"
+      },
+      "alternate": {
+        "scale": 0.95,
+        "note": "shrunk 5% off the default 1.32 edge-bleed"
+      }
+    }
+  },
+  "137": {
+    "name": "San Francisco Giants",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "scale": 0.9
+      }
+    }
+  },
+  "138": {
+    "name": "St. Louis Cardinals",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.85,
+        "note": "red recolored to white"
+      }
+    }
+  },
+  "139": {
+    "name": "Tampa Bay Rays",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.95,
+        "note": "navy letters recolored to white, kept the baby-blue undertone shadow"
+      },
+      "alternate": {
+        "scale": 1.6,
+        "offsetX": -12,
+        "note": "the enlarged mark reads small against the tint at 1.32 alone, and reads better shifted left"
+      }
+    }
+  },
+  "140": {
+    "name": "Texas Rangers",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.75,
+        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up"
+      },
+      "alternate": {
+        "scale": 0.85,
+        "note": "T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was chroma-keyed to transparent, and its own bbox already fills most of the canvas, so shrink slightly off the default 1.32 edge-bleed to avoid clipping the crossbar tips"
+      },
+      "city-connect": {
+        "scale": 0.855,
+        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless"
+      },
+      "alternate-2": {
+        "scale": 0.85,
+        "note": "same badge/canvas as Alternate, just recolored — same edge-bleed fix applies"
+      }
+    }
+  },
+  "141": {
+    "name": "Toronto Blue Jays",
+    "treatments": {
+      "main": {
+        "bgHex": "#F5F0E1",
+        "note": "subtle off-white, not any of the three brand swatches"
+      },
+      "city-connect": {
+        "scale": 0.75,
+        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
+      }
+    }
+  },
+  "142": {
+    "name": "Minnesota Twins",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "scale": 0.85,
+        "note": "navy T recolored to white"
+      },
+      "alternate": {
+        "scale": 0.85,
+        "header": {
+          "blue": "#002B5C",
+          "gold": "#D31145",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 Navy"
+      },
+      "alternate-2": {
+        "scale": 0.85,
+        "header": {
+          "blue": "#002B5C",
+          "gold": "#D31145",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Cream \"Twin Cities\""
+      },
+      "alternate-3": {
+        "scale": 0.85,
+        "header": {
+          "blue": "#9EA2A2",
+          "gold": "#D31145",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      }
+    }
+  },
+  "143": {
+    "name": "Philadelphia Phillies",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "recolor": true,
+        "note": "red/white swapped"
+      }
+    }
+  },
+  "144": {
+    "name": "Atlanta Braves",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "recolor": true,
+        "header": {
+          "blue": "#13274F",
+          "gold": "#CE1141",
+          "font": "#FBF6E9"
+        },
+        "note": "red recolored to white (bg matches the navy border); Alt 2 Navy"
+      },
+      "city-connect": {
+        "scale": 1.04,
+        "offsetX": 4,
+        "offsetY": 4,
+        "header": {
+          "blue": "#7BA7D8",
+          "gold": "#D32826",
+          "font": "#FBF6E9"
+        },
+        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down"
+      },
+      "alternate": {
+        "scale": 1.04,
+        "offsetX": 6,
+        "offsetY": 1,
+        "note": "Alt 1 Red mark nudged up 4% off the default edge-bleed, nudged right and down slightly"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#F5F0E1",
+          "gold": "#CE1141",
+          "font": "#13274F"
+        },
+        "note": "Home White"
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#A2AAAD",
+          "gold": "#CE1141",
+          "font": "#FBF6E9"
+        },
+        "note": "Road Grey"
+      }
+    }
+  },
+  "145": {
+    "name": "Chicago White Sox",
+    "treatments": {
+      "main": {
+        "bg": "secondary",
+        "header": {
+          "blue": "#27251F",
+          "gold": "#C4CED4",
+          "font": "#FBF6E9"
+        },
+        "note": "Away Grey"
+      },
+      "city-connect": {
+        "scale": 1.07,
+        "pinstripeColor": "rgba(0, 0, 0, 0.16)",
+        "pinstripeBg": "#C8102E",
+        "offsetX": 3,
+        "header": {
+          "blue": "#C8102E",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        },
+        "note": "black pinstripe over the mark's own red; the mark reads small against the tint at 1.32 alone, nudged right"
+      },
+      "alternate": {
+        "pinstripeColor": "rgba(0, 0, 0, 0.16)",
+        "header": {
+          "blue": "#27251F",
+          "gold": "#C4CED4",
+          "font": "#FBF6E9"
+        },
+        "note": "same plain black-on-white pinstripe as every other pinstriped tile; Home Pinstripe jersey"
+      },
+      "alternate-2": {
+        "header": {
+          "blue": "#000000",
+          "gold": "#C4CED4",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 1 Black \"Sox\""
+      },
+      "alternate-3": {
+        "header": {
+          "blue": "#9EA2A2",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 \"Southside\""
+      }
+    }
+  },
+  "146": {
+    "name": "Miami Marlins",
+    "treatments": {
+      "main": {
+        "bg": "primary",
+        "note": "matches the club's own Primary blue (#00A3E0)"
+      },
+      "alternate-2": {
+        "scale": 1.03,
+        "offsetY": 4,
+        "note": "Alt 1 Black nudged down"
+      },
+      "alternate-3": {
+        "scale": 1.04,
+        "header": {
+          "blue": "#009CA7",
+          "gold": "#000000",
+          "font": "#FBF6E9"
+        },
+        "note": "Alt 2 Teal"
+      },
+      "city-connect": {
+        "scale": 0.8,
+        "offsetX": -1,
+        "note": "City Connect 2.0 nudged left"
+      }
+    }
+  },
+  "147": {
+    "name": "New York Yankees",
+    "treatments": {
+      "main": {
+        "pinstripe": true,
+        "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat navy tile. No recolor — the plain mlbstatic mark is already navy, so this wears the stock CDN svg unmodified. No pinstripeColor override — the navy read too strong against white, plain black matches every other pinstriped tile"
+      }
+    }
+  },
+  "158": {
+    "name": "Milwaukee Brewers",
+    "treatments": {
+      "main": {
+        "bgHex": "#FFF5EA",
+        "note": "cream, not any of the three brand swatches"
+      },
+      "alternate": {
+        "scale": 0.86,
+        "pinstripeColor": "rgba(0, 0, 0, 0.16)",
+        "offsetX": 4,
+        "note": "Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed and nudged right; same plain black pinstripe as every other pinstriped tile"
+      },
+      "alternate-2": {
+        "scale": 0.99,
+        "offsetX": 9,
+        "note": "Alt 2 Navy Blue nearly full size, nudged right"
+      },
+      "city-connect": {
+        "header": {
+          "blue": "#0C436A",
+          "gold": "#ff6c58",
+          "font": "#FBF6E9"
+        },
+        "note": "City Connect 2.0"
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { teamAnchorId } from './identity-lab/teamAnchorId.js'
 import { ALL_MLB_TEAM_IDS, teamFullName, teamClubName } from '../lib/teams.js'
 import {
   fetchTeamUniformCatalog,
@@ -11,19 +12,16 @@ import {
   jerseyLabel,
 } from '../api/uniforms.js'
 
-// Anchor id for a team's section — shared by the row itself and the pinned
-// sidebar's jump links, same convention as TeamColorLab.jsx's teamAnchorId
-// (kept as its own local copy rather than a shared export — a one-line pure
-// function isn't worth a cross-screen import).
-function teamAnchorId(teamId) {
-  return `uniformnames-team-${teamId}`
-}
-
 const SAVE_URL = '/__dev/uniform-names'
+
+// This page's own anchor scope. The lab and this page both list all 30 clubs,
+// so they must not mint the same DOM ids — hence the scope argument rather than
+// the three near-identical local copies this used to be one of.
+const ANCHOR_SCOPE = 'uniformnames'
 
 // Dev-only curation page (App.jsx gates the import to import.meta.env.DEV —
 // see there for why) for authoring the exact wording a scorer sees for every
-// current MLB club's jersey (Team Color Lab, eventually a record-by-jersey
+// current MLB club's jersey (Team Identity Lab, eventually a record-by-jersey
 // breakdown). Every jersey in the live uniforms-CATALOG
 // (fetchTeamUniformCatalog, current season only — this is a naming tool, not
 // a historical browser) gets ONE text box, pre-filled with
@@ -126,7 +124,7 @@ export function UniformNamesPage() {
       <div className="colorlab__layout">
         <nav className="colorlab__nav" aria-label="Jump to team">
           {teams.map((id) => (
-            <a key={id} className="colorlab__navlink" href={`#${teamAnchorId(id)}`} title={teamFullName(id)}>
+            <a key={id} className="colorlab__navlink" href={`#${teamAnchorId(id, ANCHOR_SCOPE)}`} title={teamFullName(id)}>
               <TeamLogo teamId={id} name={teamFullName(id)} size={28} />
             </a>
           ))}
@@ -155,7 +153,7 @@ function TeamUniforms({ teamId, assets, savedOverrides, edits, onChange }) {
   if (!jerseys.length) return null
 
   return (
-    <section className="colorlab__row" id={teamAnchorId(teamId)}>
+    <section className="colorlab__row" id={teamAnchorId(teamId, ANCHOR_SCOPE)}>
       <h2 className="colorlab__teamname">{teamFullName(teamId)}</h2>
       {jerseys.map((asset) => {
         const defaultName = uniformDisplayName(asset.text, clubName, asset.code, savedOverrides)
