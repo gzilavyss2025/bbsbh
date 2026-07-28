@@ -35,19 +35,53 @@ export function LabShell({ title, hint, profiles, activeKey, onPick, children })
   )
 }
 
-// The pinned jump-link sidebar plus the team list beside it. One layout for
-// both colour dimensions — MLB's 30 clubs and a MiLB level's ~30 affiliates
-// render the same way.
-export function TeamLabList({ teams, children }) {
+// The pinned jump-link sidebar of team logos, `#${teamAnchorId(id)}` each —
+// shared by every dimension that lists all 30-ish clubs down a long page
+// (the two colour dimensions' `TeamLabList` below, and the Jersey Audit
+// table). Fixed-position via `.colorlab__nav` (LabShell.jsx doc above), so it
+// needs no layout wrapper of its own; a caller just renders it anywhere.
+//
+// `save`, when given (the two colour dimensions only — the audit table is
+// read-only), pins the Save button to the top of this same fixed card rather
+// than the page's scrolling top-of-page flow, so it's reachable next to the
+// logos without scrolling back up: `{ onSave, status, extra }`, `status` one
+// of `'saving' | 'saved' | 'error' | null`, `extra` an optional extra status
+// node (e.g. ColorLabBody's "jersey names not saved" caveat).
+export function TeamJumpNav({ teams, save }) {
   return (
-    <div className="colorlab__layout">
-      <nav className="colorlab__nav" aria-label="Jump to team">
+    <nav className="colorlab__nav" aria-label="Jump to team">
+      {save && (
+        <div className="colorlab__navsave">
+          <button className="btn colorlab__navsavebtn" onClick={save.onSave} disabled={save.status === 'saving'}>
+            Save
+          </button>
+          {save.status === 'saved' && <span className="hint colorlab__navsavemsg">Saved.</span>}
+          {save.status === 'error' && (
+            <span className="hint hint--error colorlab__navsavemsg">
+              Save failed — is `npm run dev` running?
+            </span>
+          )}
+          {save.extra}
+        </div>
+      )}
+      <div className="colorlab__navlogos">
         {teams.map((t) => (
           <a key={t.id} className="colorlab__navlink" href={`#${teamAnchorId(t.id)}`} title={t.name}>
             <TeamLogo teamId={t.id} name={t.name} size={28} />
           </a>
         ))}
-      </nav>
+      </div>
+    </nav>
+  )
+}
+
+// The pinned jump-link sidebar plus the team list beside it. One layout for
+// both colour dimensions — MLB's 30 clubs and a MiLB level's ~30 affiliates
+// render the same way.
+export function TeamLabList({ teams, save, children }) {
+  return (
+    <div className="colorlab__layout">
+      <TeamJumpNav teams={teams} save={save} />
       <div className="colorlab">{teams.map(children)}</div>
     </div>
   )

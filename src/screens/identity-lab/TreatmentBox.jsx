@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { LogoPositionControls } from './editors/LogoPositionControls.jsx'
+import { TreatmentColorControls } from './editors/TreatmentColorControls.jsx'
 import { WpaPreview } from './editors/WpaPreview.jsx'
 import { WpaScenarios } from './editors/WpaScenarios.jsx'
 import { HeaderPreview } from './editors/HeaderPreview.jsx'
@@ -29,6 +30,7 @@ export function TreatmentBox({
   wearDates,
   swatches,
   colorsPanel,
+  treatmentColors,
   position,
   wpa,
   scenarios,
@@ -93,6 +95,7 @@ export function TreatmentBox({
             <ColorSwatch key={i} {...swatch} />
           ))}
         </div>
+        {treatmentColors && <TreatmentColorControls {...treatmentColors} />}
         <LogoPositionControls {...position} />
         {wearDates && <WearDates {...wearDates} label={label} name={position.name} />}
       </div>

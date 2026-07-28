@@ -9384,16 +9384,23 @@ body {
    app-width column (tokens/layout.css) — there's no room for a second column
    at phone width, and this page is a desktop-only design harness anyway
    (unlisted, never linked — see the function doc above). Hidden below the
-   width where it'd overlap the page's own centered content. */
+   width where it'd overlap the page's own centered content.
+
+   The two colour dimensions also tuck their Save button in here
+   (`.colorlab__navsave`, TeamJumpNav's `save` prop) — reachable next to the
+   logos rather than back at the top of a long scrolled page. A fixed-position
+   box with `width: auto` (no explicit width set below) sizes to its widest
+   child, so a save/error message wider than the two-logo-column grid just
+   grows the whole card rather than overflowing it. */
 .colorlab__nav {
   display: none;
 }
 
 @media (min-width: 900px) {
   .colorlab__nav {
-    display: grid;
-    grid-template-columns: repeat(2, 32px);
-    gap: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
     position: fixed;
     left: var(--space-4);
     top: 96px;
@@ -9403,6 +9410,30 @@ body {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
     z-index: 5;
+    max-width: 220px;
+  }
+
+  .colorlab__navsave {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--bw-hair) solid var(--border-rule);
+  }
+
+  .colorlab__navsavebtn {
+    width: 100%;
+  }
+
+  .colorlab__navsavemsg {
+    padding: 0;
+    font-size: var(--fs-caption);
+  }
+
+  .colorlab__navlogos {
+    display: grid;
+    grid-template-columns: repeat(2, 32px);
+    gap: var(--space-1);
   }
 
   .colorlab__navlink {
@@ -9806,6 +9837,53 @@ body {
 .colorlab__swatchrow {
   display: flex;
   gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* TreatmentColorControls — every treatment's own independent Primary/
+   Secondary/Accent 1/Accent 2 (Main included), a separate panel from the
+   swatch row above rather than a 4th swatch, since that row's chip/copy/
+   WPA-band-picker behavior is specific to Main's club-wide triad. */
+.colorlab__tcolors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.colorlab__tcolorshead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.colorlab__tcolorslabel {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  margin-right: auto;
+}
+
+.colorlab__tcolorsrow {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.colorlab__tcolorfield {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.colorlab__tcolorfieldlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
 }
 
 /* LogoPositionControls (the Team Identity Lab) — a third column INSIDE
@@ -10414,6 +10492,13 @@ body {
 .audittable__via--heuristic {
   background: var(--accent-primary);
   color: var(--text-on-ink);
+}
+
+/* Zebra stripe by CLUB rather than by row — every jersey belonging to the
+   same team shares a background, so a club's whole run of rows reads as one
+   group at a glance instead of alternating mid-team. */
+.audittable__row--alt {
+  background: var(--surface-inset);
 }
 
 .audittile {

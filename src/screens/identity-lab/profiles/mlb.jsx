@@ -5,6 +5,7 @@
    copy text, and tiles in one readable file. */
 import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
 import {
   DEFAULT_PINSTRIPE_COLOR,
   wpaBandColor,
@@ -39,6 +40,7 @@ import {
   hasAlternate4,
   hasCityConnect,
   treatmentHeaderColorOverride,
+  treatmentTuningRecord,
 } from '../../../lib/teams.js'
 import { logoUploadTarget } from '../../../lib/logoArt.js'
 import { contrastRatio } from '../../../lib/contrast.js'
@@ -64,6 +66,9 @@ import {
   COLOR_ROLE_LABELS,
   applyColorsDraft,
   colorsDraftMatchesLanded,
+  TREATMENT_COLOR_ROLES,
+  TREATMENT_COLOR_ROLE_LABELS,
+  applyTreatmentColorsDraft,
 } from './mlbColorRoles.js'
 
 // The MLB dimension: each club's logo treatments side by side with their brand
@@ -114,6 +119,19 @@ function resolveColorTriad(teamId, draft) {
   return COLOR_ROLES.map((role) => ({
     role,
     label: COLOR_ROLE_LABELS[role],
+    hex: draft?.[role] ?? landed[role] ?? '',
+  }))
+}
+
+// A (team, treatment)'s four editable color slots, landed value with any live
+// draft layered on top — mlb-treatment-tuning.json's `colors` field, one
+// independent set per treatment (Main included — see mlbColorRoles.js's
+// comment on why this is a separate thing from Main's club-wide triad).
+function resolveTreatmentColorSlots(teamId, treatment, draft) {
+  const landed = treatmentTuningRecord(teamId, treatment)?.colors ?? {}
+  return TREATMENT_COLOR_ROLES.map((role) => ({
+    role,
+    label: TREATMENT_COLOR_ROLE_LABELS[role],
     hex: draft?.[role] ?? landed[role] ?? '',
   }))
 }
@@ -358,6 +376,17 @@ function buildColorsCopyText(name, teamId, triad) {
   )
 }
 
+function buildTreatmentColorsCopyText(name, teamId, treatment, treatmentLabel, slots) {
+  const byRole = Object.fromEntries(slots.map((s) => [s.role, s.hex]))
+  return (
+    `Team: ${name} (id ${teamId})\n` +
+    `Treatment: ${treatmentLabel}\n` +
+    `Where: src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.${treatment}.colors\n` +
+    `primary: ${byRole.primary || '(none)'}, secondary: ${byRole.secondary || '(none)'}, ` +
+    `accent1: ${byRole.accent1 || '(none)'}, accent2: ${byRole.accent2 || '(none)'}`
+  )
+}
+
 // Scans every team's four draft stores and concatenates the same copy-text
 // snippet each individual field's own copy icon would produce, in team-list
 // order — answers "what all did I change" without re-opening every row.
@@ -392,6 +421,11 @@ function buildAllChangesText(teams, drafts, extras) {
       if (hd && Object.keys(hd).length > 0) {
         const resolvedColors = headerColorsFor(colors, hd, treatmentHeaderColorOverride(teamId, t.key))
         sections.push(buildHeaderCopyText(name, teamId, t.key, treatmentLabel, resolvedColors))
+      }
+      const tcd = drafts.tcolors[teamId]?.[t.key]
+      if (tcd && Object.keys(tcd).length > 0) {
+        const slots = resolveTreatmentColorSlots(teamId, t.key, tcd)
+        sections.push(buildTreatmentColorsCopyText(name, teamId, t.key, treatmentLabel, slots))
       }
     }
   }
@@ -525,6 +559,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
           wpa: drafts.wpa?.[t.key],
           header: drafts.header?.[t.key],
           colors: drafts.colors,
+          tcolors: drafts.tcolors?.[t.key],
         }}
         on={on}
       />
@@ -536,6 +571,8 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const isMain = treatment === 'main'
   const colors = isMain ? mainSwatches(teamId, drafts.colors) : colorsFor(teamId, treatment)
   const hasColorsDraft = isMain && drafts.colors && Object.keys(drafts.colors).length > 0
+  const treatmentColorSlots = resolveTreatmentColorSlots(teamId, treatment, drafts.tcolors)
+  const hasTcolorsDraft = drafts.tcolors && Object.keys(drafts.tcolors).length > 0
   const [artVersion, setArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
   // The same curated full name the Uniform Names page edits for this jersey. No
@@ -630,6 +667,13 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
             : undefined,
       }))}
       colorsPanel={isMain ? { hasDraft: hasColorsDraft, onReset: on.colorReset } : undefined}
+      treatmentColors={{
+        slots: treatmentColorSlots,
+        hasDraft: hasTcolorsDraft,
+        onReset: () => on.tcolorReset(treatment),
+        onField: (role, hex) => on.tcolorField(treatment, role, hex),
+        copyText: buildTreatmentColorsCopyText(name, teamId, treatment, displayLabel, treatmentColorSlots),
+      }}
       position={{
         name,
         treatmentLabel: displayLabel,
@@ -785,11 +829,22 @@ function buildSaves(drafts, extras) {
 
   const name = (teamId) => teamFullName(teamId)
   const tuning = mergeDraftIntoStore(
-    mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
-    drafts.header,
+    mergeDraftIntoStore(
+      mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
+      drafts.header,
+      (record, fields) => {
+        const { bar, accent, onBar } = { ...record.header, ...fields }
+        return { ...record, header: { bar, accent, onBar } }
+      },
+      { name },
+    ),
+    drafts.tcolors,
     (record, fields) => {
-      const { bar, accent, onBar } = { ...record.header, ...fields }
-      return { ...record, header: { bar, accent, onBar } }
+      const next = applyTreatmentColorsDraft(record.colors ?? {}, fields)
+      const result = { ...record }
+      if (Object.keys(next).length) result.colors = next
+      else delete result.colors
+      return result
     },
     { name },
   )
@@ -843,7 +898,10 @@ export const mlbProfile = {
       to change it, or clear it to say the club has no such color. Accent is the
       “tells two clubs apart” pick, so for most clubs it restates the Primary or
       Secondary on purpose; any researched extra colors follow it, read-only.
-      Click a swatch to try it as that tile’s WPA band color.
+      Every treatment — Main included — also has its own independent Colors
+      panel (Primary/Secondary/Accent 1/Accent 2), a separate per-jersey
+      reference distinct from Main’s club-wide swatch above. Click a swatch to
+      try it as that tile’s WPA band color.
       Missing logos or colors show as a placeholder until supplied. Save
       writes every pending change straight to{' '}
       <code>src/lib/data/*.json</code> and{' '}
@@ -861,6 +919,7 @@ export const mlbProfile = {
       .map((id) => ({ id, name: teamFullName(id) })),
   useExtras: useMlbExtras,
   Tiles: MlbTiles,
+  sidebar: <NeutralSwatchesSidebar />,
   matchesLanded: {
     pos: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(
@@ -875,6 +934,8 @@ export const mlbProfile = {
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
     colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
+    treatmentColors: (teamId, treatment, fields) =>
+      colorsDraftMatchesLanded(fields, treatmentTuningRecord(teamId, treatment)?.colors),
   },
   buildAllChangesText,
   buildSaves,

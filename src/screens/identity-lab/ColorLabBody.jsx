@@ -7,10 +7,12 @@ import { useAutoClearLandedDrafts } from './useAutoClearLandedDrafts.js'
 import { saveStores } from './saveStores.js'
 
 // MiLB's profile has no team-level colors dimension (only MLB's Main triad
-// does) — a no-op matcher so the auto-clear sweep never crashes reaching for a
-// `matchesLanded.colors` a profile doesn't define; it's never called for real
-// since nothing writes into the colors draft for a profile that doesn't wire
-// `on.colorField` in the first place.
+// does) and no per-treatment Colors panel either (only MLB has one) — a no-op
+// matcher so the auto-clear sweep never crashes reaching for a
+// `matchesLanded.colors`/`matchesLanded.treatmentColors` a profile doesn't
+// define; it's never called for real since nothing writes into either draft
+// for a profile that doesn't wire `on.colorField`/`on.tcolorField` in the
+// first place.
 const NEVER_LANDED = () => false
 
 // The body both colour dimensions share — MLB's treatment catalog and a MiLB
@@ -37,6 +39,7 @@ export function ColorLabBody({ profile }) {
   const [wpaDraft, setWpaField, resetWpaDraft] = useDraftStore(profile.storeKey('wpa'))
   const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(profile.storeKey('headercolors'))
   const [colorsDraft, setColorField, resetColorsDraft] = useTeamDraftStore(profile.storeKey('colors'))
+  const [tcolorsDraft, setTcolorField, resetTcolorsDraft] = useDraftStore(profile.storeKey('treatmentcolors'))
   const [saveStatus, setSaveStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
 
   useAutoClearLandedDrafts([
@@ -49,6 +52,11 @@ export function ColorLabBody({ profile }) {
       matchesLanded: profile.matchesLanded.colors ?? NEVER_LANDED,
       teamScoped: true,
     },
+    {
+      draft: tcolorsDraft,
+      reset: resetTcolorsDraft,
+      matchesLanded: profile.matchesLanded.treatmentColors ?? NEVER_LANDED,
+    },
   ])
 
   const collapsedKey = profile.storeKey('collapsed')
@@ -59,7 +67,7 @@ export function ColorLabBody({ profile }) {
   const toggleCollapsed = (teamId) =>
     setCollapsed((was) => ({ ...was, [teamId]: was[teamId] === false ? true : false }))
 
-  const drafts = { pos: posDraft, wpa: wpaDraft, header: headerDraft, colors: colorsDraft }
+  const drafts = { pos: posDraft, wpa: wpaDraft, header: headerDraft, colors: colorsDraft, tcolors: tcolorsDraft }
 
   // Save lands every pending draft in the JSON stores on disk (ADR-0029) —
   // the same files this module's resolvers read, so the tiles re-render off the
@@ -78,33 +86,27 @@ export function ColorLabBody({ profile }) {
 
   if (teams === null) return <p className="hint">Loading affiliate list…</p>
 
+  // The colour/tuning stores landed, but the jersey-name edits didn't: the
+  // current names never loaded, so writing them would erase every other name
+  // on file (src/api/uniforms.js's uniformNamesSaveBody). Said out loud,
+  // because a flat "Saved." next to a name edit that silently vanished is the
+  // same lie in a smaller costume.
+  const blockedNameEditsNotice = saveStatus === 'saved' && extras.blockedNameEdits && (
+    <span className="hint hint--error colorlab__navsavemsg">
+      Jersey names not saved — the current names never loaded. Reload the page.
+    </span>
+  )
+
   return (
     <>
-      <div className="uniformnames__actions">
-        <button className="btn" onClick={handleSave} disabled={saveStatus === 'saving'}>
-          Save
-        </button>
-        {saveStatus === 'saved' && <span className="hint">Saved.</span>}
-        {/* The colour/tuning stores landed, but the jersey-name edits didn't:
-            the current names never loaded, so writing them would erase every
-            other name on file (src/api/uniforms.js's uniformNamesSaveBody).
-            Said out loud, because a flat "Saved." next to a name edit that
-            silently vanished is the same lie in a smaller costume. */}
-        {saveStatus === 'saved' && extras.blockedNameEdits && (
-          <span className="hint hint--error">
-            Jersey names not saved — the current names never loaded. Reload the page.
-          </span>
-        )}
-        {saveStatus === 'error' && (
-          <span className="hint hint--error">Save failed — is `npm run dev` running?</span>
-        )}
-      </div>
-
       {profile.sidebar}
 
       <AllChangesButton text={profile.buildAllChangesText(teams, drafts, extras)} />
 
-      <TeamLabList teams={teams}>
+      <TeamLabList
+        teams={teams}
+        save={{ onSave: handleSave, status: saveStatus, extra: blockedNameEditsNotice }}
+      >
         {(team) => (
           <TeamLabRow
             key={team.id}
@@ -125,6 +127,7 @@ export function ColorLabBody({ profile }) {
                   wpa: wpaDraft[team.id],
                   header: headerDraft[team.id],
                   colors: colorsDraft[team.id],
+                  tcolors: tcolorsDraft[team.id],
                 }}
                 on={{
                   posField: (treatment, field, value) => setPosField(team.id, treatment, field, value),
@@ -135,6 +138,8 @@ export function ColorLabBody({ profile }) {
                   headerReset: (treatment) => resetHeaderDraft(team.id, treatment),
                   colorField: (field, value) => setColorField(team.id, field, value),
                   colorReset: () => resetColorsDraft(team.id),
+                  tcolorField: (treatment, role, value) => setTcolorField(team.id, treatment, role, value),
+                  tcolorReset: (treatment) => resetTcolorsDraft(team.id, treatment),
                 }}
               />
             )}
