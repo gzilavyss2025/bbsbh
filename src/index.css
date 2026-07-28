@@ -3540,6 +3540,9 @@ body {
 .btn--reveal {
   width: 100%;
   margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--seal-texture);
   border-color: var(--seal-hatch);
   color: var(--seal-ink);
