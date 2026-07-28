@@ -9,10 +9,24 @@
 // headshot tints and favoriteAccentColor. For 27 of 30 clubs it deliberately
 // restates the club's own Primary or Secondary. A club's real third-or-later
 // brand colours are the separate `extras` list (teams.js's teamColorExtras).
+//
+// `accent2` is a DIFFERENT kind of thing from `accent` — no distinctiveness
+// meaning, no consumer beyond this swatch — it's just an editable 4th slot
+// for the one club-level extra that used to only ever show up read-only in
+// the `extras` list. Seeded once (see the migration this landed with) from
+// whichever of a club's researched extras came first; any additional extra
+// beyond that stays in `extras`, still read-only, since a single role can't
+// hold more than one of them. A club with no extra at all simply has no
+// `accent2`, same as any other absent role.
 
-export const COLOR_ROLES = ['primary', 'secondary', 'accent']
+export const COLOR_ROLES = ['primary', 'secondary', 'accent', 'accent2']
 
-export const COLOR_ROLE_LABELS = { primary: 'Primary', secondary: 'Secondary', accent: 'Accent' }
+export const COLOR_ROLE_LABELS = {
+  primary: 'Primary',
+  secondary: 'Secondary',
+  accent: 'Accent',
+  accent2: 'Accent 2',
+}
 
 // Merge one club's touched role fields into its mlb-team-colors.json entry.
 //

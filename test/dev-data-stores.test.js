@@ -186,6 +186,7 @@ test('a real mlb-team-colors entry is accepted, extras and all', () => {
         primary: '#12284B',
         secondary: '#FFC52F',
         accent: '#FFC52F',
+        accent2: '#6CACE4',
         extras: [{ label: 'Powder Blue', hex: '#6CACE4' }],
         note: 'why this club is odd',
       },

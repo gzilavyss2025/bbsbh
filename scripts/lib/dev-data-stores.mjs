@@ -139,8 +139,10 @@ function isMilbColorStore(parsed) {
   return null
 }
 
-// mlb-team-colors.json: one club's Primary/Secondary/Accent brand colors plus
-// any researched `extras` — the Team Identity Lab's editable counterpart to
+// mlb-team-colors.json: one club's Primary/Secondary/Accent brand colors,
+// an optional 4th `accent2` (a promoted single extra — see
+// mlbColorRoles.js), plus any REMAINING researched `extras` — the Team
+// Identity Lab's editable counterpart to
 // teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras resolvers, which
 // read this store (src/lib/CLAUDE.md). Team-level, no `treatments` — same
 // footing as milb-colors.json, since a club's triad doesn't vary by treatment
@@ -156,7 +158,7 @@ function isMlbTeamColorStore(parsed) {
     if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
     if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
     if (typeof entry.name !== 'string' || !entry.name) return `team ${teamId} has no name`
-    for (const field of ['primary', 'secondary', 'accent']) {
+    for (const field of ['primary', 'secondary', 'accent', 'accent2']) {
       const v = entry[field]
       if (v !== undefined && !isColorish(v)) return `team ${teamId}'s ${field} is not a color`
     }

@@ -158,7 +158,7 @@ function mainSwatches(teamId, draft) {
   return [...triad, ...extras]
 }
 
-const BG_ROLE_INDEX = { primary: 0, secondary: 1, accent: 2, third: 2 }
+const BG_ROLE_INDEX = { primary: 0, secondary: 1, accent: 2, third: 2, accent2: 3 }
 
 // A plain "Background" swatch (the common case — just describes the tile fill,
 // no color identity of its own) gets relabeled to Primary/Secondary/Accent (or
