@@ -5426,6 +5426,7 @@ INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at)
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (822999, 5.1, 1, 139, 112, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823000, 3.6, 1, 139, 112, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823002, 6.8, 1, 139, 112, '2026-07-14T01:54:04.482Z');
+INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823025, 6.2, 1, 138, 112, '2026-07-28T06:15:14.507Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823027, 4.4, 1, 138, 113, '2026-07-26T03:47:05.778Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823028, 6.1, 1, 138, 113, '2026-07-26T22:09:24.781Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823029, 5.3, 1, 138, 144, '2026-07-14T01:54:04.482Z');
@@ -5536,6 +5537,7 @@ INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at)
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823162, 5, 1, 136, 114, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823163, 9.1, 1, 136, 114, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823194, 4.6, 1, 137, 108, '2026-07-26T23:11:05.716Z');
+INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823195, 2.6, 1, 137, 158, '2026-07-28T06:15:14.567Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823196, 8.3, 1, 137, 108, '2026-07-25T06:38:55.500Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823197, 2.6, 1, 137, 108, '2026-07-25T22:54:40.678Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823198, 4.6, 1, 137, 115, '2026-07-14T01:54:04.482Z');
@@ -6063,6 +6065,7 @@ INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at)
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823972, 4.6, 1, 119, 114, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823973, 6.7, 1, 119, 109, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (823974, 4.6, 1, 119, 109, '2026-07-14T01:54:04.482Z');
+INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824001, 7.9, 1, 108, 117, '2026-07-28T06:15:14.530Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824004, 4.8, 1, 108, 138, '2026-07-22T23:32:54.239Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824005, 2.7, 1, 108, 138, '2026-07-22T06:14:44.247Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824006, 6.8, 1, 108, 138, '2026-07-21T07:12:53.045Z');
@@ -6698,6 +6701,7 @@ INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at)
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824944, 3.3, 1, 144, 118, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824945, 7.5, 1, 144, 118, '2026-07-14T01:54:04.482Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824946, 2.6, 1, 144, 118, '2026-07-14T01:54:04.482Z');
+INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824977, 6.4, 1, 133, 111, '2026-07-28T06:15:14.548Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824978, 3.8, 1, 133, 120, '2026-07-19T23:35:50.698Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824979, 5.9, 1, 133, 120, '2026-07-19T07:11:31.474Z');
 INSERT INTO game_scores (game_pk, score, sport_id, home_id, away_id, updated_at) VALUES (824980, 9.6, 1, 133, 146, '2026-07-14T01:54:04.482Z');
