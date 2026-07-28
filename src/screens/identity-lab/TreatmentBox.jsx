@@ -103,11 +103,13 @@ export function TreatmentBox({
   )
 }
 
-// The dates this club actually wore this jersey, as small buttons into that
-// game's photo gallery (`/photos/{gamePk}` — GamePhotosPage, deep-linked). The
-// swatches above say what a tile is SUPPOSED to look like; this is how you
-// check that against a photograph of the real uniform, which is the only source
-// that settles an argument about a hex.
+// The dates this club actually wore this jersey, as small links into that
+// game's photo gallery (`/photos/{gamePk}` — GamePhotosPage, deep-linked),
+// each opening its own new tab — checking a hex against a real photo is a
+// side-by-side task, and a same-tab navigation would lose the tile you're
+// comparing it against. The swatches above say what a tile is SUPPOSED to
+// look like; this is how you check that against a photograph of the real
+// uniform, which is the only source that settles an argument about a hex.
 //
 // Most-recent first and capped (see jerseyWearDates) — a club wears one jersey
 // far too often for a full list to be a glance. `dates` is null while the
@@ -118,7 +120,7 @@ export function TreatmentBox({
 // own page: a celebration photo narrates the result. That's an existing,
 // consented property of that page, and this is a dev-only lab, so the link goes
 // straight there rather than growing a second warning.
-function WearDates({ dates, onOpen, name, label }) {
+function WearDates({ dates, hrefFor, name, label }) {
   if (dates == null) return <p className="colorlab__weardates-hint">Loading worn dates…</p>
   if (dates.length === 0) {
     return <p className="colorlab__weardates-hint">No posted wear this season.</p>
@@ -128,15 +130,16 @@ function WearDates({ dates, onOpen, name, label }) {
       <span className="colorlab__weardates-label">Worn</span>
       <div className="colorlab__weardates-list">
         {dates.map((d) => (
-          <button
+          <a
             key={d.gamePk}
-            type="button"
             className="colorlab__weardate"
-            onClick={() => onOpen(d.gamePk)}
-            title={`Open the game photos for ${name} — ${label}, ${monthDayYear(d.apiDate)}`}
+            href={hrefFor(d.gamePk)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Open the game photos for ${name} — ${label}, ${monthDayYear(d.apiDate)} in a new tab`}
           >
             {monthDayYear(d.apiDate)}
-          </button>
+          </a>
         ))}
       </div>
     </div>

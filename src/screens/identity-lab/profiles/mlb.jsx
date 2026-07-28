@@ -47,7 +47,6 @@ import { contrastRatio } from '../../../lib/contrast.js'
 import { fetchJerseysData, jerseyWearDates } from '../../../api/jerseys.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { gamePhotosPath } from '../../../lib/route.js'
-import { useNav } from '../../../lib/nav.js'
 import {
   fetchTeamUniformCatalog,
   classifyUniformAsset,
@@ -607,7 +606,6 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
   const teamId = team.id
   const name = team.name
   const wear = useWearDates(teamId)
-  const navigate = useNav()
   return treatmentsForTeam(teamId).flatMap((t) => {
     const matches = jerseyMatchesFor(extras.catalog, teamId, t.key)
     const jerseyItems = matches?.length ? matches : [null]
@@ -625,7 +623,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
           dates: wear.jerseys && wear.schedule
             ? jerseyWearDates(wear.jerseys, wear.schedule, teamId, t.key)
             : null,
-          onOpen: (gamePk) => navigate(gamePhotosPath(gamePk)),
+          hrefFor: gamePhotosPath,
         }}
         drafts={{
           pos: drafts.pos?.[t.key],
