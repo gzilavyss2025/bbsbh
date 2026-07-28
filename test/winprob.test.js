@@ -18,7 +18,12 @@ import { selectWinProbPath, winProbSplit, selectWinProbBigPlays } from '../src/a
 // one entry per completed play, carrying the cumulative home win % and `about`.
 // atBatIndex counts up play-by-play, same field play-by-play.js's own entries
 // carry off `play.about.atBatIndex` — the join key the at-bat-stepping clamp
-// (stepHalfIndex/throughAtBatIndex) matches against.
+// (stepHalfIndex/throughAtBatIndex) matches against. Bottom 1 deliberately
+// carries TWO rows (not one) so a step-clamp test can tell "only the first
+// at-bat of this half" apart from "the whole half" — a single-row-per-half
+// fixture can't distinguish those, which is exactly how an earlier draft of
+// the step clamp shipped a whole-half leak undetected (see the adjacency
+// tests below).
 function buildWinProb() {
   const row = (home, inning, isTopInning, isScoringPlay, description, atBatIndex) => ({
     homeTeamWinProbability: home,
@@ -26,10 +31,11 @@ function buildWinProb() {
     result: { description },
   })
   return [
-    row(52, 1, true, false, 'Flyout', 0),
-    row(58, 1, false, true, 'RBI single', 1), // home takes the lead, bottom 1
-    row(46, 2, true, true, 'Two-run double', 2), // away answers, top 2
-    row(70, 2, false, true, 'Three-run homer', 3), // home pulls away, bottom 2
+    row(52, 1, true, false, 'Flyout', 0), // top 1
+    row(55, 1, false, false, 'Groundout', 1), // bottom 1, first at-bat
+    row(58, 1, false, true, 'RBI single', 2), // bottom 1, second at-bat — home takes the lead
+    row(46, 2, true, true, 'Two-run double', 3), // away answers, top 2
+    row(70, 2, false, true, 'Three-run homer', 4), // home pulls away, bottom 2
   ]
 }
 
@@ -61,12 +67,13 @@ test('WIN_PROB_FIELDS covers every field selectWinProbPath reads', () => {
 // --------------------------------------------------------------------------
 test('selectWinProbPath shapes ordered points carrying a numeric home win %', () => {
   const points = selectWinProbPath(buildWinProb())
-  assert.equal(points.length, 4)
+  assert.equal(points.length, 5)
   for (const p of points) assert.equal(typeof p.home, 'number')
   assert.deepEqual(
     points.map((p) => [p.home, p.inning, p.half, p.isScoring]),
     [
       [52, 1, 'top', false],
+      [55, 1, 'bottom', false],
       [58, 1, 'bottom', true],
       [46, 2, 'top', true],
       [70, 2, 'bottom', true],
@@ -75,31 +82,49 @@ test('selectWinProbPath shapes ordered points carrying a numeric home win %', ()
 })
 
 test('selectWinProbPath clamps to the revealed half (throughHalf)', () => {
-  // halfIndex(1,'bottom') === 1, so throughHalf=1 keeps only top1 + bottom1.
+  // halfIndex(1,'bottom') === 1, so throughHalf=1 keeps only top1 + bottom1
+  // (both of bottom 1's rows — throughHalf is a committed-half clamp, not a
+  // per-play one).
   const points = selectWinProbPath(buildWinProb(), { throughHalf: 1 })
-  assert.equal(points.length, 2)
-  assert.deepEqual(points.map((p) => p.home), [52, 58])
+  assert.equal(points.length, 3)
+  assert.deepEqual(points.map((p) => p.home), [52, 55, 58])
 })
 
 // --------------------------------------------------------------------------
 // At-bat stepping (ADR-0016): stepHalfIndex/throughAtBatIndex grow the line
 // one point at a time within the ONE half being stepped through, without
-// ever reaching past what PlayByPlay has actually rendered for it.
+// ever reaching past what PlayByPlay has actually rendered for it — and
+// ONLY for the half immediately after the reveal mark (throughHalf + 1),
+// never a half further out (see the adjacency guard's own doc in
+// winprob.js — win probability is cumulative, so leaking a point from a
+// non-adjacent half spoils the whole game up to that moment, not just that
+// half's own events).
 // --------------------------------------------------------------------------
-test('selectWinProbPath plots the in-progress step within the stepped half', () => {
+test('selectWinProbPath plots only the first stepped at-bat, not the whole half', () => {
   // throughHalf=0 (only top 1 committed); bottom 1 is being stepped through
-  // and its one at-bat (atBatIndex 1) has been revealed.
+  // and only its FIRST at-bat (atBatIndex 1) has been revealed — its second
+  // (atBatIndex 2, home win % 58) must NOT appear yet. A fixture with one row
+  // per half can't catch a "whole half leaked" bug; this one can.
   const points = selectWinProbPath(buildWinProb(), {
     throughHalf: 0,
     stepHalfIndex: 1,
     throughAtBatIndex: 1,
   })
-  assert.deepEqual(points.map((p) => p.home), [52, 58])
+  assert.deepEqual(points.map((p) => p.home), [52, 55])
+})
+
+test('selectWinProbPath grows to the second stepped at-bat once its boundary is reported', () => {
+  const points = selectWinProbPath(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 1,
+    throughAtBatIndex: 2,
+  })
+  assert.deepEqual(points.map((p) => p.home), [52, 55, 58])
 })
 
 test('selectWinProbPath never plots past the reported step boundary', () => {
-  // Bottom 1 is halfIndex 1; even though top 2 (idx 2) and bottom 2 (idx 3)
-  // exist in the data, throughAtBatIndex=1 must not surface them.
+  // Even though top 2 (atBatIndex 3) and bottom 2 (atBatIndex 4) exist in the
+  // data, throughAtBatIndex=1 must not surface them.
   const points = selectWinProbPath(buildWinProb(), {
     throughHalf: 0,
     stepHalfIndex: 1,
@@ -116,20 +141,36 @@ test('selectWinProbPath ignores stepHalfIndex without a throughAtBatIndex', () =
 })
 
 test('selectWinProbPath applies the step clamp only to the named half', () => {
-  // stepHalfIndex targets bottom 1 (idx 1); a boundary that happens to match
-  // an atBatIndex in a DIFFERENT, not-yet-reached half (top 2, idx 2) must not
-  // leak that half's point in.
+  // stepHalfIndex targets bottom 1 (idx 1); a boundary that happens to reach
+  // an atBatIndex belonging to a DIFFERENT, not-yet-reached half (bottom 2's
+  // atBatIndex 4) must not leak that half's points in — only bottom 1's own
+  // two rows show, never top 2's or bottom 2's.
   const points = selectWinProbPath(buildWinProb(), {
     throughHalf: 0,
     stepHalfIndex: 1,
-    throughAtBatIndex: 2,
+    throughAtBatIndex: 4,
   })
-  assert.deepEqual(points.map((p) => p.home), [52, 58])
+  assert.deepEqual(points.map((p) => p.home), [52, 55, 58])
+})
+
+test('selectWinProbPath rejects a non-adjacent stepHalfIndex (spoiler guard)', () => {
+  // The exact bug this guards against: a user can navigate straight to a
+  // half further out than the reveal frontier (RollingLine's navigator isn't
+  // gated by revealedThrough) and start stepping it there. stepHalfIndex=2
+  // (top 2) is NOT throughHalf+1 (=1, bottom 1) — even with a generous
+  // throughAtBatIndex, top 2's cumulative win-probability point (which alone
+  // would spoil the whole game through that moment) must not appear.
+  const points = selectWinProbPath(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 2,
+    throughAtBatIndex: 3,
+  })
+  assert.deepEqual(points.map((p) => p.home), [52])
 })
 
 test('selectWinProbBigPlays grows with the in-progress step too', () => {
-  // Both plotted points clear minSwing=1 (deltas from even: +2 top 1, +6
-  // bottom 1) — newest (the in-progress step's own point) first.
+  // Both plotted points clear minSwing=1 (deltas from even: +2 top 1, +3 the
+  // first bottom-1 at-bat) — newest (the in-progress step's own point) first.
   const plays = selectWinProbBigPlays(buildWinProb(), {
     throughHalf: 0,
     stepHalfIndex: 1,
@@ -139,9 +180,22 @@ test('selectWinProbBigPlays grows with the in-progress step too', () => {
   assert.deepEqual(
     plays.map((p) => [p.inning, p.half, p.delta]),
     [
-      [1, 'bottom', 6],
+      [1, 'bottom', 3],
       [1, 'top', 2],
     ],
+  )
+})
+
+test('selectWinProbBigPlays rejects a non-adjacent stepHalfIndex too', () => {
+  const plays = selectWinProbBigPlays(buildWinProb(), {
+    throughHalf: 0,
+    stepHalfIndex: 2,
+    throughAtBatIndex: 3,
+    minSwing: 1,
+  })
+  assert.deepEqual(
+    plays.map((p) => [p.inning, p.half]),
+    [[1, 'top']],
   )
 })
 
