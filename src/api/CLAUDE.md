@@ -57,7 +57,12 @@ spoiler-free only when restricted to the half the user has reached
   for per-play WPA — the sole source of the box score's three stars (the feed
   carries no WPA). It's score-revealing, so `GameView` fetches it lazily and
   the DOM only gets it inside the box-score seal; it's null-guarded (absent at
-  most MiLB parks).
+  most MiLB parks). Also exports `fetchGameFeedDiff`/`mergeFeedDiff`, the
+  undocumented diffPatch polling path `useGameData` uses ONLY during the
+  tight Follow Live/Scores Unlocked cadence (ADR-0032) — `mergeFeedDiff`
+  never mutates its `base` argument (see `../lib/jsonPatch.js`) and never
+  throws, falling back to `null` (→ a normal `fetchGameFeed` call) on any
+  apply failure or gamePk mismatch.
 - `highlights.js` — video highlight clips (`/api/v1/game/{gamePk}/content`),
   joined to a specific play by matching a clip's `guid` to the terminal pitch
   event's `playId` in `feed/live` (the only reliable join key; verified live
