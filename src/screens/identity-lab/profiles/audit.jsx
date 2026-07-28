@@ -157,9 +157,11 @@ function AuditRow({ row }) {
   return (
     <tr className="audittable__row">
       <td className="audittable__team">{row.teamName}</td>
-      <td className="audittable__raw">
-        <span className="audittable__rawtext">{row.text}</span>
-        <span className="audittable__rawcode">{row.code ?? '—'}</span>
+      <td>
+        <div className="audittable__raw">
+          <span className="audittable__rawtext">{row.text}</span>
+          <span className="audittable__rawcode">{row.code ?? '—'}</span>
+        </div>
       </td>
       <td>{row.label}</td>
       <td>{TREATMENT_LABEL[row.treatment] ?? row.treatment}</td>
