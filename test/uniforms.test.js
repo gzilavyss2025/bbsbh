@@ -15,6 +15,8 @@ import {
   uniformDisplayName,
   fetchUniformNameOverrides,
   primeUniformNameOverridesCache,
+  uniformNamesSaveBody,
+  uniformNameOverridesLoaded,
   buildJerseyCombos,
 } from '../src/api/uniforms.js'
 
@@ -177,6 +179,81 @@ test('primeUniformNameOverridesCache makes fetchUniformNameOverrides return the 
   const primed = { '158_jersey_1_2026': 'Home Creams' }
   primeUniformNameOverridesCache(primed)
   assert.deepEqual(await fetchUniformNameOverrides(), primed)
+})
+
+// --------------------------------------------------------------------------
+// uniformNamesSaveBody — the guard between an editor's in-progress state and a
+// whole-file overwrite of public/data/uniform-names.json.
+//
+// Both writers (UniformNamesPage.jsx and the Team Identity Lab) POST the WHOLE
+// map, so anything they don't send is deleted. Both seed their saved-map state
+// to `{}` and fill it from a Promise.all that ALSO fetches the live uniforms
+// catalog off statsapi — so when that catalog fetch fails (offline, statsapi
+// down, a sandbox with no egress), the names never load, the state stays `{}`,
+// and Save writes `{}` over every curated name on disk.
+//
+// `{}` is itself a legitimate map (everything cleared), so the dev-save
+// validator can't tell the two apart. The distinction only exists here: an
+// editor that never read the file has nothing to say about its contents.
+// --------------------------------------------------------------------------
+test('a save body is refused outright when the saved map never loaded', () => {
+  // The exact shape of the bug: the catalog fetch rejected, so nothing loaded
+  // and the editor is sitting on its initial empty state.
+  assert.equal(uniformNamesSaveBody({}, {}, { loaded: false }), null)
+  // Even with edits in hand — writing them would delete every name never read.
+  assert.equal(uniformNamesSaveBody({}, { '158_jersey_1_2026': 'Home Creams' }, { loaded: false }), null)
+})
+
+test('a save body is refused when nothing was actually edited', () => {
+  const saved = { '158_jersey_1_2026': 'Home Whites' }
+  assert.equal(uniformNamesSaveBody(saved, {}, { loaded: true }), null)
+  // Whitespace-only text is an empty box, not an edit.
+  assert.equal(uniformNamesSaveBody(saved, { '158_jersey_2_2026': '   ' }, { loaded: true }), null)
+})
+
+test("a loaded map merges this session's edits over every untouched name", () => {
+  const saved = { '158_jersey_1_2026': 'Home Whites', '158_jersey_2_2026': 'Away Greys' }
+  assert.deepEqual(uniformNamesSaveBody(saved, { '158_jersey_1_2026': '  Home Creams  ' }, { loaded: true }), {
+    '158_jersey_1_2026': 'Home Creams',
+    '158_jersey_2_2026': 'Away Greys',
+  })
+  assert.deepEqual(
+    saved,
+    { '158_jersey_1_2026': 'Home Whites', '158_jersey_2_2026': 'Away Greys' },
+    'the caller\'s saved map is not mutated',
+  )
+})
+
+// Clearing one box is a real edit that must land — the one case where the body
+// legitimately drops an entry. It stays distinguishable from the never-loaded
+// case because the rest of the map is still there.
+test('clearing one name drops just that entry and keeps the rest', () => {
+  const saved = { '158_jersey_1_2026': 'Home Whites', '158_jersey_2_2026': 'Away Greys' }
+  assert.deepEqual(uniformNamesSaveBody(saved, { '158_jersey_1_2026': '' }, { loaded: true }), {
+    '158_jersey_2_2026': 'Away Greys',
+  })
+})
+
+test('clearing the only curated name yields an empty map, not a refusal', () => {
+  // `{}` from a LOADED editor is a legitimate write — the guard is about
+  // provenance, not about the value happening to be empty.
+  assert.deepEqual(
+    uniformNamesSaveBody({ '158_jersey_1_2026': 'X' }, { '158_jersey_1_2026': '' }, { loaded: true }),
+    {},
+  )
+})
+
+// --------------------------------------------------------------------------
+// uniformNameOverridesLoaded — what feeds the `loaded` flag above.
+//
+// fetchUniformNameOverrides degrades to `{}` on ANY failure and caches it,
+// which is right for render consumers (fall back to the derived default) and
+// useless for a writer: it can't tell "no curation yet" from "the fetch blew
+// up". This reports which one happened.
+// --------------------------------------------------------------------------
+test('a primed cache counts as loaded, so a save right after one can proceed', () => {
+  primeUniformNameOverridesCache({ '158_jersey_1_2026': 'Home Creams' })
+  assert.equal(uniformNameOverridesLoaded(), true)
 })
 
 // --------------------------------------------------------------------------

@@ -8,6 +8,8 @@ import {
   fetchTeamUniformCatalog,
   fetchUniformNameOverrides,
   primeUniformNameOverridesCache,
+  uniformNameOverridesLoaded,
+  uniformNamesSaveBody,
   uniformDisplayName,
   jerseyLabel,
 } from '../api/uniforms.js'
@@ -43,18 +45,25 @@ export function UniformNamesPage() {
   )
   const [catalog, setCatalog] = useState({})
   const [savedOverrides, setSavedOverrides] = useState({})
+  const [namesLoaded, setNamesLoaded] = useState(false)
   const [edits, setEdits] = useState({}) // code -> in-progress full name text
-  const [status, setStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
+  const [status, setStatus] = useState(null) // 'saving' | 'saved' | 'error' | 'nothing' | null
 
+  // Deliberately NOT one Promise.all over both fetches. The catalog comes from
+  // statsapi and the names from a same-origin static file, so a statsapi outage
+  // used to reject the combined promise and leave `savedOverrides` at its
+  // initial `{}` for the whole session — which Save then wrote straight over
+  // the real file. They're independent facts; they load independently, and a
+  // failure in either degrades only its own half.
   useEffect(() => {
     let cancelled = false
-    Promise.all([
-      fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear()),
-      fetchUniformNameOverrides(),
-    ]).then(([catalogData, overrides]) => {
+    fetchTeamUniformCatalog(ALL_MLB_TEAM_IDS, new Date().getFullYear())
+      .then((catalogData) => !cancelled && setCatalog(catalogData))
+      .catch(() => {}) // no catalog means no rows to edit, not a broken page
+    fetchUniformNameOverrides().then((overrides) => {
       if (cancelled) return
-      setCatalog(catalogData)
       setSavedOverrides(overrides)
+      setNamesLoaded(uniformNameOverridesLoaded())
     })
     return () => {
       cancelled = true
@@ -67,17 +76,19 @@ export function UniformNamesPage() {
   }
 
   async function handleSave() {
-    setStatus('saving')
-    // Merge this session's edits over the last-saved map so an untouched
-    // row's already-curated name (from an earlier save) survives — the
-    // middleware always overwrites the whole file, so a partial `edits`
-    // object here would silently drop every other row's name.
-    const merged = { ...savedOverrides }
-    for (const [code, name] of Object.entries(edits)) {
-      const trimmed = name.trim()
-      if (trimmed) merged[code] = trimmed
-      else delete merged[code]
+    // Merge this session's edits over the last-saved map so an untouched row's
+    // already-curated name (from an earlier save) survives — the middleware
+    // always overwrites the whole file, so a partial `edits` object here would
+    // silently drop every other row's name. `null` means there is nothing safe
+    // or useful to write: either this page never managed to READ the file (in
+    // which case its empty state is ignorance, not content) or nothing was
+    // edited. See uniformNamesSaveBody.
+    const merged = uniformNamesSaveBody(savedOverrides, edits, { loaded: namesLoaded })
+    if (!merged) {
+      setStatus('nothing')
+      return
     }
+    setStatus('saving')
     try {
       const res = await fetch(SAVE_URL, {
         method: 'POST',
@@ -117,6 +128,17 @@ export function UniformNamesPage() {
           Save
         </button>
         {status === 'saved' && <span className="hint">Saved.</span>}
+        {/* Nothing was written, on purpose — either no row changed, or this
+            page never read uniform-names.json and would have overwritten it
+            with its own empty state. Saying so beats a silent no-op or, worse,
+            a cheerful "Saved." over a file that just lost every name. */}
+        {status === 'nothing' && (
+          <span className="hint">
+            {namesLoaded
+              ? 'Nothing to save — no name changed.'
+              : 'Not saved — the current names never loaded, so saving would erase them. Reload the page.'}
+          </span>
+        )}
         {status === 'error' && (
           <span className="hint hint--error">Save failed — is `npm run dev` running?</span>
         )}

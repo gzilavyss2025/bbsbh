@@ -70,6 +70,7 @@ test('the body cap is a real ceiling, not a per-request setting', () => {
 const tuning = DEV_DATA_STORES['mlb-treatment-tuning'].validate
 const colors = DEV_DATA_STORES['milb-colors'].validate
 const names = DEV_DATA_STORES['uniform-names'].validate
+const mlbColors = DEV_DATA_STORES['mlb-team-colors'].validate
 
 test('a real tuning store shape is accepted', () => {
   assert.equal(
@@ -174,6 +175,56 @@ test('a milb-colors entry may not be found:false AND carry a pair', () => {
   assert.match(
     colors({ 482: { name: 'Corpus Christi Hooks', found: false, pair: ['#002D62', '#EB6E1F'] } }),
     /found:false but carries a pair/,
+  )
+})
+
+test('a real mlb-team-colors entry is accepted, extras and all', () => {
+  assert.equal(
+    mlbColors({
+      158: {
+        name: 'Milwaukee Brewers',
+        primary: '#12284B',
+        secondary: '#FFC52F',
+        accent: '#FFC52F',
+        extras: [{ label: 'Powder Blue', hex: '#6CACE4' }],
+        note: 'why this club is odd',
+      },
+    }),
+    null,
+  )
+  // Every colour field is optional — a club may legitimately have only a pair,
+  // and clearing a role in the lab writes an ABSENT field, never an empty one.
+  assert.equal(mlbColors({ 108: { name: 'Los Angeles Angels' } }), null)
+  assert.equal(mlbColors({}), null)
+})
+
+test('an mlb-team-colors store rejects a non-object, a bad key, and a blank colour', () => {
+  assert.match(mlbColors(['not', 'a', 'map']), /object keyed by team id/)
+  assert.match(mlbColors({ notATeam: { name: 'X' } }), /is not a team id/)
+  assert.match(mlbColors({ 158: 'navy' }), /is not an object/)
+  assert.match(mlbColors({ 158: {} }), /has no name/)
+  // '' is the shape a naive "clear this swatch" write would produce; it must
+  // bounce here so the delete-on-empty rule in the lab stays the only path.
+  assert.match(mlbColors({ 158: { name: 'Brewers', primary: '' } }), /primary is not a color/)
+  assert.match(mlbColors({ 158: { name: 'Brewers', accent: 42 } }), /accent is not a color/)
+  assert.match(mlbColors({ 158: { name: 'Brewers', note: 7 } }), /note is not a string/)
+})
+
+test('an mlb-team-colors store rejects a malformed extras list', () => {
+  const named = (extras) => ({ 158: { name: 'Brewers', extras } })
+  assert.match(mlbColors(named({ label: 'Gold', hex: '#FEC52E' })), /extras is not a list/)
+  assert.match(mlbColors(named(['#FEC52E'])), /malformed extra/)
+  assert.match(mlbColors(named([{ hex: '#FEC52E' }])), /unlabeled extra/)
+  assert.match(mlbColors(named([{ label: 'Gold' }])), /"Gold" extra is not a color/)
+  assert.match(mlbColors(named([{ label: 'Gold', hex: '' }])), /"Gold" extra is not a color/)
+})
+
+test('an mlb-team-colors store rejects prototype-poisoning keys at every level', () => {
+  assert.match(mlbColors(JSON.parse('{"__proto__": {"name": "x"}}')), /object keyed by team id/)
+  assert.match(mlbColors(JSON.parse('{"158": {"name": "B", "__proto__": {"x": 1}}}')), /is not an object/)
+  assert.match(
+    mlbColors(JSON.parse('{"158": {"name": "B", "extras": [{"label": "G", "hex": "#fff", "__proto__": {"x": 1}}]}}')),
+    /malformed extra/,
   )
 })
 
