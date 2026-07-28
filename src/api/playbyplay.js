@@ -1002,6 +1002,23 @@ export function nextStepBoundary(entries, fromCount) {
   return entries.length
 }
 
+// The `atBatIndex` (matches `play.about.atBatIndex`, same field the
+// /winProbability array's own entries carry — see api/winprob.js's
+// `stepHalfIndex`/`throughAtBatIndex`) of the last COMPLETED at-bat entry
+// within the first `cap` entries — null before any at-bat card is visible.
+// Walks backward from the cap rather than forward from 0 since a step can end
+// on a trailing 'event'/'placed' entry (a sub notice, the extra-innings
+// placed runner) that carries no atBatIndex of its own; this is what lets the
+// win-probability chart grow one point per at-bat step (ADR-0016) instead of
+// jumping a whole half at once.
+export function lastVisibleAtBatIndex(entries, cap) {
+  const limit = cap == null ? entries.length : Math.min(cap, entries.length)
+  for (let i = limit - 1; i >= 0; i--) {
+    if (entries[i].kind === 'atbat' && entries[i].atBatIndex != null) return entries[i].atBatIndex
+  }
+  return null
+}
+
 // Ordered feed for one half-inning: plate-appearance cards interleaved with
 // mound-visit / pitching-change notes, first-at-bat first. `battingSide` is
 // 'away' | 'home' (top bats away, bottom bats home — same convention as the

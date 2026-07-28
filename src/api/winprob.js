@@ -23,21 +23,60 @@ import { halfIndex } from './select.js'
 // half at or below it are included, so the innings view can draw the line as it
 // stands "so far" without ever plotting a sealed half. Default Infinity = whole
 // game (the box score, already behind its own seal).
-export function selectWinProbPath(winProb, { throughHalf = Infinity } = {}) {
+//
+// `stepHalfIndex`/`throughAtBatIndex` extend that clamp one notch finer, for
+// the ONE half currently being STEPPED through one at-bat at a time (ADR-0016)
+// rather than committed whole. `throughAtBatIndex` is the atBatIndex (matches
+// `about.atBatIndex`, present on both this array's entries and the play-by-
+// play's own) of the last entry PlayByPlay has actually rendered for that
+// half — reported back via its onStepInfo, never guessed here, since this
+// module can't see the reveal-only play-by-play entries itself (ADR-0001).
+// Leaving both at their null default reproduces the old whole-halves-only
+// behavior exactly.
+//
+// `stepHalfIndex` is honored ONLY when it's exactly `throughHalf + 1` — the
+// single half immediately after the reveal mark — never any half further out.
+// ADR-0016's stepping cursor is keyed to whatever half the user is VIEWING,
+// which (per RollingLine's own half-inning navigator) can be any unlocked
+// regulation half regardless of revealedThrough: a user can jump straight to,
+// say, bottom 8 and start stepping it with nothing else revealed. Every other
+// reveal-only surface tolerates that navigation because each half's own data
+// is self-contained, but win probability is CUMULATIVE — a single plotted
+// point from bottom 8 encodes the whole game's trajectory up to that moment,
+// not just that half's own events. Without this adjacency check, stepping a
+// non-adjacent half would plot a full-game spoiler through nothing but a bare
+// "Next at-bat" tap. This guard lives here, not just in the caller, so it
+// holds regardless of what any future caller passes in.
+export function selectWinProbPath(
+  winProb,
+  { throughHalf = Infinity, stepHalfIndex = null, throughAtBatIndex = null } = {},
+) {
   if (!Array.isArray(winProb) || winProb.length === 0) return []
+  const steppingHalfIdx = stepHalfIndex === throughHalf + 1 ? stepHalfIndex : null
   const points = []
   for (const e of winProb) {
     const home = e.homeTeamWinProbability
     const inning = e.about?.inning
     if (typeof home !== 'number' || inning == null) continue
     const half = e.about?.isTopInning ? 'top' : 'bottom'
-    if (halfIndex(inning, half) > throughHalf) continue
+    const atBatIndex = e.about?.atBatIndex ?? null
+    const hIdx = halfIndex(inning, half)
+    if (hIdx > throughHalf) {
+      const withinStep =
+        steppingHalfIdx != null &&
+        hIdx === steppingHalfIdx &&
+        throughAtBatIndex != null &&
+        atBatIndex != null &&
+        atBatIndex <= throughAtBatIndex
+      if (!withinStep) continue
+    }
     points.push({
       home, // home team's win probability at this play, 0–100
       inning,
       half,
       isScoring: !!e.about?.isScoringPlay,
       desc: e.result?.description ?? '',
+      atBatIndex,
     })
   }
   return points
@@ -63,9 +102,9 @@ const EVEN = 50
 // display. REVEAL-ONLY (same `throughHalf` clamp); [] when there's no data.
 export function selectWinProbBigPlays(
   winProb,
-  { throughHalf = Infinity, limit = 4, minSwing = 8 } = {},
+  { throughHalf = Infinity, stepHalfIndex = null, throughAtBatIndex = null, limit = 4, minSwing = 8 } = {},
 ) {
-  const points = selectWinProbPath(winProb, { throughHalf })
+  const points = selectWinProbPath(winProb, { throughHalf, stepHalfIndex, throughAtBatIndex })
   if (points.length === 0) return []
   let prev = EVEN
   const plays = []

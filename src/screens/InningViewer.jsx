@@ -428,21 +428,54 @@ export function InningViewer({
     [feed, renderRevealedThrough, callouts, rosters, workload, workloadGameDate],
   )
 
-  // The win-probability line "so far" — only the plays through the revealed
-  // half. Same reveal gate as the running line and Pitchers table (a
-  // reveal-only selector clamped to revealedThrough; see api/winprob.js), so
-  // nothing sealed is plotted. Empty until at least one half is revealed, and at
-  // MiLB parks with no win-prob feed — the chart then renders nothing.
+  // The win-probability line "so far" — the plays through the revealed half,
+  // PLUS (when the half on screen is being stepped through one at-bat at a
+  // time rather than committed whole, ADR-0016) the plays of that one half up
+  // to whichever at-bat PlayByPlay has actually rendered. `curStepInfo` is
+  // reported back up from inside PlayByPlay's own SealBox reveal function (see
+  // its onStepInfo doc) — this component never computes that boundary itself,
+  // only relays it, so the reveal-only rule (ADR-0001) still holds.
+  //
+  // `stepFrontierIdx` gates the step clamp to ONLY the half immediately after
+  // the real reveal mark (`curIdx === renderRevealedThrough + 1`) — NOT just
+  // whichever half happens to be on screen. ADR-0016's stepping cursor is keyed
+  // to whatever half the user is VIEWING, which — per RollingLine's own
+  // half-inning navigator — can be any unlocked regulation half regardless of
+  // revealedThrough (a user can jump straight to, say, bottom 8 and start
+  // stepping it with nothing else revealed). Every other reveal-only surface is
+  // fine with that because each half's own data is self-contained, but win
+  // probability is CUMULATIVE — a single plotted point from bottom 8 encodes
+  // the whole game's trajectory up to that moment, not just that half's own
+  // events. api/winprob.js's own `stepHalfIndex === throughHalf + 1` check
+  // enforces this same adjacency independently (an earlier draft of this
+  // feature relied on the caller alone getting it right and would have
+  // plotted a full-game spoiler off a bare "Next at-bat" tap on a non-
+  // adjacent half — caught in review before it shipped), so both layers stay
+  // in place rather than trusting either one alone. Empty until at least one
+  // half is revealed/stepped into in order, and at MiLB parks with no
+  // win-prob feed — the chart then renders nothing.
+  const stepFrontierIdx = curIdx === renderRevealedThrough + 1 ? curIdx : null
   const winProbPoints = useMemo(
-    () => selectWinProbPath(winProbability, { throughHalf: renderRevealedThrough }),
-    [winProbability, renderRevealedThrough],
+    () =>
+      selectWinProbPath(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
-  // The biggest-swing ledger — same reveal-only selector, same
-  // revealedThrough clamp, so it only ever covers revealed halves and grows
-  // one entry per reveal (never hinting what's ahead).
+  // The biggest-swing ledger — same reveal-only selector, same clamp
+  // (committed halves plus the in-progress step), so it only ever covers
+  // plays already on screen and grows one entry at a time right along with
+  // the chart above (never hinting what's ahead).
   const winProbBigPlays = useMemo(
-    () => selectWinProbBigPlays(winProbability, { throughHalf: renderRevealedThrough }),
-    [winProbability, renderRevealedThrough],
+    () =>
+      selectWinProbBigPlays(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
 
   if (!started) {
