@@ -152,6 +152,7 @@ export function WinProbChart({
   homeTreatment,
   homeLayoutOverride,
   homeBandOverride,
+  homeMarkOverride,
   partial = false,
 }) {
   // Linked highlighting: `pinnedIdx` survives until the same marker/row is
@@ -203,7 +204,18 @@ export function WinProbChart({
   const awayTreat = awayTreatment ?? 'main'
   const homeTreat = homeTreatment ?? 'main'
   const { src: awayLogo, recolor: awayLogoOverride } = useWpaLogo(awayId, awayTreat)
-  const { src: homeLogo, recolor: homeLogoOverride } = useWpaLogo(homeId, homeTreat)
+  const homeLogoResolved = useWpaLogo(homeId, homeTreat)
+  // `homeMarkOverride` — Team Identity Lab's own live "Use Logo Art" DRAFT
+  // state (an in-progress uncheck, or a just-uploaded file, cache-busted by
+  // the caller's own artVersion counter — WpaArtBox/WpaScenarios,
+  // profiles/mlb.jsx). Without this, the mockups would keep showing whatever
+  // mark is already SAVED until Save actually lands the `ownArt` flag —
+  // every other WPA field (layout, band color) already previews its own
+  // in-progress edit live via homeLayoutOverride/homeBandOverride; this is
+  // the same idea for which MARK tiles the band. `undefined` for every real
+  // game chart, so this is inert there.
+  const homeLogo = homeMarkOverride ? homeMarkOverride.src : homeLogoResolved.src
+  const homeLogoOverride = homeMarkOverride ? (homeMarkOverride.recolor ?? null) : homeLogoResolved.recolor
 
   if (!points || points.length === 0) return null
 

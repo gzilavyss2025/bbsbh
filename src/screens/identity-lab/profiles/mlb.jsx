@@ -12,7 +12,7 @@ import {
   wpaBandPinstripeColor,
   wpaBandPinstripeBg,
 } from '../../../lib/wpaBandColors.js'
-import { WPA_TUNING, wpaLogoLayout } from '../../../lib/wpaLogo.js'
+import { WPA_TUNING, WPA_OWN_ART, wpaLogoLayout } from '../../../lib/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import {
   ALL_MLB_TEAM_IDS,
@@ -42,7 +42,7 @@ import {
   treatmentHeaderColorOverride,
   treatmentTuningRecord,
 } from '../../../lib/teams.js'
-import { logoUploadTarget } from '../../../lib/logoArt.js'
+import { logoUploadTarget, wpaArtTreatmentKey, wpaArtUrl } from '../../../lib/logoArt.js'
 import { contrastRatio } from '../../../lib/contrast.js'
 import { fetchJerseysData, jerseyWearDates } from '../../../api/jerseys.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
@@ -59,6 +59,7 @@ import {
   uniformDisplayName,
 } from '../../../api/uniforms.js'
 import { TreatmentBox } from '../TreatmentBox.jsx'
+import { LogoDropZone } from '../LogoDropZone.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore, mergeTeamDraftIntoStore } from '../saveStores.js'
 import {
@@ -256,6 +257,14 @@ function resolveWpaBandState(teamId, treatment, wpaDraft) {
   return { pinstripe, band, bandBg }
 }
 
+// Whether this (team, treatment)'s WPA band has opted OUT of the shared mark
+// in favor of a separately uploaded WPA-only PNG — resolved in ONE place
+// (same rule resolveWpaBandState above already follows) so the tile, the
+// copy text, and the auto-clear matcher below can never disagree.
+function resolveWpaOwnArt(teamId, treatment, wpaDraft) {
+  return wpaDraft?.ownArt ?? Boolean(WPA_OWN_ART[teamId]?.[treatment])
+}
+
 // The merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% for a (team, treatment) — a
 // draft field wins outright over the landed layout, same "draft overrides
 // curated default" pattern as the position controls. Shared by the WPA editor's
@@ -341,7 +350,7 @@ function buildPosCopyText(name, teamId, treatment, treatmentLabel, scale, offset
   )
 }
 
-function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinstripe, bandColor) {
+function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinstripe, bandColor, ownArt) {
   const { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } = layout
   const band = pinstripe ? `{ "pinstripe": true, "color": "${bandColor}" }` : `"${bandColor}"`
   return (
@@ -350,7 +359,9 @@ function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinst
     `Where: src/lib/data/wpa-tuning.json — ${teamId}.treatments.${treatment}\n` +
     `"layout": { "size": ${size}, "rotate": ${rotate}, "offsetX": ${offsetX}, "offsetY": ${offsetY}, ` +
     `"paddingX": ${paddingX}, "paddingY": ${paddingY}, "rowShift": ${rowShift} }\n` +
-    `"band": ${band}`
+    `"band": ${band}\n` +
+    `"ownArt": ${ownArt}` +
+    (ownArt ? ` (uploaded WPA-only mark: ${wpaArtUrl(teamId, treatment) ?? '(none uploaded yet)'})` : '')
   )
 }
 
@@ -415,7 +426,8 @@ function buildAllChangesText(teams, drafts, extras) {
       if (wd && Object.keys(wd).length > 0) {
         const layout = resolvedWpaLayout(teamId, t.key, wd)
         const { pinstripe, band } = resolveWpaBandState(teamId, t.key, wd)
-        sections.push(buildWpaCopyText(name, teamId, t.key, treatmentLabel, layout, pinstripe, band))
+        const ownArt = resolveWpaOwnArt(teamId, t.key, wd)
+        sections.push(buildWpaCopyText(name, teamId, t.key, treatmentLabel, layout, pinstripe, band, ownArt))
       }
       const hd = drafts.header[teamId]?.[t.key]
       if (hd && Object.keys(hd).length > 0) {
@@ -470,6 +482,37 @@ function TreatmentLogo({ teamId, name, treatment, override, version = 0 }) {
       key={url}
       src={url}
       alt={`${name} — ${treatment}`}
+      className="colorlab__logoimg"
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+// The drop target for a treatment's WPA-only mark (WpaPreview's "Use Logo
+// Art" checkbox, unchecked) — same load/error/cache-bust shape as
+// TreatmentLogo above, but with no tile-art fallback to render: there's
+// nothing here until the owner uploads something.
+function WpaArtBox({ teamId, treatment, name, version = 0 }) {
+  const base = wpaArtUrl(teamId, treatment)
+  const url = base && version > 0 ? `${base}?v=${version}` : base
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [url])
+
+  if (!url || failed) {
+    return (
+      <div className="colorlab__logoplaceholder" aria-hidden="true">
+        <span>No WPA art yet</span>
+      </div>
+    )
+  }
+
+  return (
+    <img
+      key={url}
+      src={url}
+      alt={`${name} — ${treatment} WPA`}
       className="colorlab__logoimg"
       loading="lazy"
       decoding="async"
@@ -574,6 +617,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const treatmentColorSlots = resolveTreatmentColorSlots(teamId, treatment, drafts.tcolors)
   const hasTcolorsDraft = drafts.tcolors && Object.keys(drafts.tcolors).length > 0
   const [artVersion, setArtVersion] = useState(0)
+  const [wpaArtVersion, setWpaArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
   // The same curated full name the Uniform Names page edits for this jersey. No
   // code (no art procured for a future-season jersey yet) means nothing to edit
@@ -621,6 +665,34 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const wpaLayout = resolvedWpaLayout(teamId, treatment, drafts.wpa)
   const headerLanded = treatmentHeaderColorOverride(teamId, treatment)
   const headerColors = headerColorsFor(colors, drafts.header, headerLanded)
+  const wpaOwnArt = resolveWpaOwnArt(teamId, treatment, drafts.wpa)
+  const wpaArtKey = wpaArtTreatmentKey(treatment)
+  // Absent (no `-wpa` destination — can't happen for a real MLB treatment,
+  // but mirrors upload's own `caveat: null` shape) rather than special-cased
+  // in WpaPreview, same "absent rather than special-cased" convention
+  // TreatmentBox already follows for nameField/upload.
+  const artUpload = wpaArtKey ? (
+    <LogoDropZone
+      teamId={teamId}
+      treatment={wpaArtKey}
+      label={`${name} ${displayLabel} WPA`}
+      onUploaded={() => setWpaArtVersion((v) => v + 1)}
+    >
+      <div className="colorlab__logobox colorlab__logobox--gloss">
+        <WpaArtBox teamId={teamId} treatment={treatment} name={name} version={wpaArtVersion} />
+      </div>
+    </LogoDropZone>
+  ) : null
+  // The WpaScenarios mockups' own live preview of "Use Logo Art" — unchecked
+  // (a draft in progress, or already landed) means those three chart
+  // mockups should tile whatever the owner uploaded, not the tile's normal
+  // mark, and reflect a same-session upload immediately (?v= cache-bust,
+  // same idea as artVersion above) rather than only after Save. `null` when
+  // checked, so WinProbChart falls through to its own normal resolution.
+  const wpaMarkOverride =
+    wpaOwnArt && wpaArtKey
+      ? { src: wpaArtVersion > 0 ? `${wpaArtUrl(teamId, treatment)}?v=${wpaArtVersion}` : wpaArtUrl(teamId, treatment), recolor: null }
+      : null
 
   return (
     <TreatmentBox
@@ -705,8 +777,10 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         pinstripe: wpaPinstripe,
         bandColor: wpaBand,
         bandBg: wpaBandBg,
+        ownArt: wpaOwnArt,
+        artUpload,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
-        copyText: buildWpaCopyText(name, teamId, treatment, displayLabel, wpaLayout, wpaPinstripe, wpaBand),
+        copyText: buildWpaCopyText(name, teamId, treatment, displayLabel, wpaLayout, wpaPinstripe, wpaBand, wpaOwnArt),
         onField: (field, value) => on.wpaField(treatment, field, value),
         onReset: () => on.wpaReset(treatment),
       }}
@@ -718,6 +792,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         headerColors,
         wpaLayout,
         wpaBandOverride: { pinstripe: wpaPinstripe, color: wpaBand, bg: wpaBandBg },
+        wpaMarkOverride,
       }}
       header={{
         name,
@@ -865,6 +940,12 @@ function buildSaves(drafts, extras) {
         const bg = fields.bandBg ?? (typeof next.band === 'object' ? next.band?.bg : undefined)
         next.band = pinstripe ? (bg ? { pinstripe: true, color, bg } : { pinstripe: true, color }) : color
       }
+      // Set-or-delete, same rule as every other cleared field here — absent
+      // means "Use Logo Art" (checked, the default), never a stray `false`.
+      if (fields.ownArt !== undefined) {
+        if (fields.ownArt) next.ownArt = true
+        else delete next.ownArt
+      }
       return next
     },
     { name },
@@ -901,7 +982,10 @@ export const mlbProfile = {
       Every treatment — Main included — also has its own independent Colors
       panel (Primary/Secondary/Accent 1/Accent 2), a separate per-jersey
       reference distinct from Main’s club-wide swatch above. Click a swatch to
-      try it as that tile’s WPA band color.
+      try it as that tile’s WPA band color. Each WPA panel’s “Use Logo Art”
+      checkbox is on by default (the band tiles the same mark as the tile
+      above it, unchanged); uncheck it to upload a separate 512×512 PNG that
+      band alone tiles instead.
       Missing logos or colors show as a placeholder until supplied. Save
       writes every pending change straight to{' '}
       <code>src/lib/data/*.json</code> and{' '}
@@ -929,7 +1013,8 @@ export const mlbProfile = {
     wpa: (teamId, treatment, fields) => {
       const layout = resolvedWpaLayout(teamId, treatment, null)
       const { pinstripe, band, bandBg } = resolveWpaBandState(teamId, treatment, null)
-      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg })
+      const ownArt = resolveWpaOwnArt(teamId, treatment, null)
+      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg, ownArt })
     },
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),

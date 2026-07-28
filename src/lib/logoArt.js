@@ -54,6 +54,12 @@ export const LOGO_ART_URL_ROOT = '/team-logos'
 // treatment catalog (src/lib/CLAUDE.md's "two vocabularies"). They map to
 // themselves because there's only ever one MiLB profile per side, unlike the
 // MLB keys, which rename into their real directory.
+// The `-wpa` family below are a SECOND, independent destination per real MLB
+// treatment — a club's WPA band can tile a wholly separate uploaded mark from
+// whatever its tile box shows (see src/lib/wpaLogo.js's `WPA_OWN_ART`/
+// `wpaArtUrl`), keyed by a synthetic `'<treatment>-wpa'` string that is never
+// a real treatment on its own (it never appears in mlb-treatment-tuning.json,
+// jerseys.json, or any teams.js resolver — only here and in wpaLogo.js).
 export const LOGO_TREATMENT_DIRS = {
   main: 'main-overrides',
   alternate: 'alternate',
@@ -63,6 +69,12 @@ export const LOGO_TREATMENT_DIRS = {
   'city-connect': 'city-connect',
   'milb-home': 'milb-home',
   'milb-away': 'milb-away',
+  'main-wpa': 'wpa-main',
+  'alternate-wpa': 'wpa-alternate',
+  'alternate-2-wpa': 'wpa-alternate-2',
+  'alternate-3-wpa': 'wpa-alternate-3',
+  'alternate-4-wpa': 'wpa-alternate-4',
+  'city-connect-wpa': 'wpa-city-connect',
 }
 
 // Every directory an upload may land in — the same set as above, as a list, for
@@ -200,4 +212,24 @@ export function logoUploadTarget(teamId, treatment) {
     file: `${LOGO_ART_ROOT}/${dir}/${abbr}.png`,
     url: `${LOGO_ART_URL_ROOT}/${dir}/${abbr}.png`,
   }
+}
+
+// The synthetic upload-destination key for a real treatment's WPA-only art
+// (`'main'` -> `'main-wpa'`), or null for a treatment with no such
+// destination (MiLB's `milb-home`/`milb-away`, or anything else not in
+// LOGO_TREATMENT_DIRS) — never guessed, always checked against the same
+// allowlist logoUploadTarget itself gates on.
+export function wpaArtTreatmentKey(treatment) {
+  const key = `${treatment}-wpa`
+  return Object.hasOwn(LOGO_TREATMENT_DIRS, key) ? key : null
+}
+
+// The URL a club's uploaded WPA-only mark would be served at, or null if this
+// (team, treatment) has no such destination (MiLB) — derived from the exact
+// same logoUploadTarget the upload itself resolves against, so the WPA band's
+// reader and the lab's writer can never point at two different paths for the
+// same upload.
+export function wpaArtUrl(teamId, treatment) {
+  const key = wpaArtTreatmentKey(treatment)
+  return key ? (logoUploadTarget(teamId, key)?.url ?? null) : null
 }

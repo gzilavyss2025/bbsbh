@@ -13,6 +13,8 @@ import {
   logoUploadTarget,
   readPngHeader,
   teamIdForAbbr,
+  wpaArtTreatmentKey,
+  wpaArtUrl,
 } from '../src/lib/logoArt.js'
 import {
   DEV_LOGO_MAX_BODY_BYTES,
@@ -159,6 +161,35 @@ test('a real club and treatment resolve to the one file they may write', () => {
   // Main art is the hand-recolored override, in its own directory.
   assert.equal(logoUploadTarget(158, 'main').file, 'public/team-logos/main-overrides/MIL.png')
   assert.equal(logoUploadTarget(147, 'city-connect').file, 'public/team-logos/city-connect/NYY.png')
+})
+
+test('every real MLB treatment has its own WPA-only upload destination', () => {
+  assert.deepEqual(logoUploadTarget(140, 'main-wpa'), {
+    teamId: 140,
+    treatment: 'main-wpa',
+    abbr: 'TEX',
+    dir: 'wpa-main',
+    name: 'TEX.png',
+    file: 'public/team-logos/wpa-main/TEX.png',
+    url: '/team-logos/wpa-main/TEX.png',
+  })
+  assert.equal(logoUploadTarget(140, 'alternate-wpa').file, 'public/team-logos/wpa-alternate/TEX.png')
+  assert.equal(logoUploadTarget(140, 'alternate-2-wpa').file, 'public/team-logos/wpa-alternate-2/TEX.png')
+  assert.equal(logoUploadTarget(140, 'alternate-3-wpa').file, 'public/team-logos/wpa-alternate-3/TEX.png')
+  assert.equal(logoUploadTarget(140, 'alternate-4-wpa').file, 'public/team-logos/wpa-alternate-4/TEX.png')
+  assert.equal(logoUploadTarget(140, 'city-connect-wpa').file, 'public/team-logos/wpa-city-connect/TEX.png')
+  // MiLB has no WPA-only destination — its two directories aren't real
+  // treatments and don't grow a `-wpa` sibling.
+  assert.equal(logoUploadTarget(234, 'milb-home-wpa'), null)
+  assert.equal(logoUploadTarget(234, 'milb-away-wpa'), null)
+})
+
+test('wpaArtTreatmentKey/wpaArtUrl derive the same destination the upload itself resolves', () => {
+  assert.equal(wpaArtTreatmentKey('alternate'), 'alternate-wpa')
+  assert.equal(wpaArtTreatmentKey('milb-home'), null) // no such destination
+  assert.equal(wpaArtTreatmentKey('bogus'), null)
+  assert.equal(wpaArtUrl(140, 'main'), logoUploadTarget(140, 'main-wpa').url)
+  assert.equal(wpaArtUrl(234, 'main'), null) // MiLB id, no MLB abbreviation
 })
 
 test('a MiLB affiliate resolves to its id-keyed file under milb-home/milb-away', () => {

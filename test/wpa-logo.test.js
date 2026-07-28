@@ -14,12 +14,15 @@ import test from 'node:test'
 import {
   LOGO_COLOR_OVERRIDES,
   WPA_LOGO_DEFAULTS,
+  WPA_OWN_ART,
   wpaLogoFor,
   wpaLogoLayout,
   wpaLogoWithFallback,
   wpaTilePlacements,
 } from '../src/lib/wpaLogo.js'
 import { teamLogoUrl } from '../src/lib/teams.js'
+import { wpaArtUrl } from '../src/lib/logoArt.js'
+import WPA_TUNING from '../src/lib/data/wpa-tuning.json' with { type: 'json' }
 
 // Nationals (120) — a 'flood' club with procured PNGs for three treatments.
 const NATIONALS = 120
@@ -102,6 +105,56 @@ test('a club with no recolor curation falls back to a plain base mark', () => {
   const fellBack = wpaLogoWithFallback(158, 'alternate-4', true)
   assert.equal(fellBack.src, teamLogoUrl(158, 'base'))
   assert.equal(fellBack.recolor, null)
+})
+
+// --- WPA-only uploaded art ("Use Logo Art", unchecked) ---------------------
+//
+// No club carries `ownArt: true` in the committed store yet (a real upload
+// hasn't happened) — that absence is itself the proof the default path is
+// byte-for-byte unchanged (every test above still passes). These exercise
+// the branch by toggling the SAME shared table wpaLogoFor reads, the way the
+// Team Identity Lab's own save would once a real upload lands, then restore
+// it so this file leaves no trace for tests that run after it.
+test('ownArt tiles the uploaded WPA-only mark, never the recolor gate', () => {
+  assert.equal(WPA_TUNING[140]?.treatments?.main?.ownArt, undefined, 'fixture assumption: 140/main starts clean')
+  WPA_OWN_ART[140] = { main: true }
+  try {
+    const { src, recolor } = wpaLogoFor(140, 'main')
+    assert.equal(src, wpaArtUrl(140, 'main'))
+    assert.equal(recolor, null)
+  } finally {
+    delete WPA_OWN_ART[140]
+  }
+})
+
+test('a missing ownArt file falls back to Main WITHOUT looping back onto itself', () => {
+  WPA_OWN_ART[140] = { main: true }
+  try {
+    // The band's own probe learned this exact (team, treatment) is missing —
+    // simulating the 404 case for the treatment that's ALSO the fallback
+    // target, the case that would loop if the fallback didn't bypass ownArt.
+    const fellBack = wpaLogoWithFallback(140, 'main', true)
+    assert.notEqual(fellBack.src, wpaArtUrl(140, 'main'))
+    assert.equal(fellBack.src, teamLogoUrl(140, 'base'))
+  } finally {
+    delete WPA_OWN_ART[140]
+  }
+})
+
+test('ownArt on a non-main treatment still falls back to Main on a miss', () => {
+  WPA_OWN_ART[140] = { alternate: true }
+  try {
+    assert.equal(wpaLogoFor(140, 'alternate').src, wpaArtUrl(140, 'alternate'))
+    const fellBack = wpaLogoWithFallback(140, 'alternate', true)
+    assert.equal(fellBack.src, teamLogoUrl(140, 'base'))
+  } finally {
+    delete WPA_OWN_ART[140]
+  }
+})
+
+test('a club with no ownArt flag is completely unaffected by the feature', () => {
+  assert.equal(WPA_OWN_ART[158], undefined)
+  assert.equal(wpaLogoFor(158, 'main').src, teamLogoUrl(158, 'base'))
 })
 
 // --- tile geometry ---------------------------------------------------------

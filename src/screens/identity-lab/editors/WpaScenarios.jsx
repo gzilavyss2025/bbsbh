@@ -18,10 +18,12 @@ const WPA_MOCK_SCENARIOS = [
 // (WinProbChart.jsx itself, not a hand-rolled stand-in — no drift risk) at the
 // three score states above. This tile's own team is always the HOME band —
 // "home" is a rendering slot, not a claim about which treatment is being
-// previewed; only the color/layout override fed in via homeBandOverride/
-// homeLayoutOverride changes between tiles. `wpaLayout`/`wpaBandOverride` are
-// the SAME resolved values WpaPreview's fields show, so an in-progress edit
-// shows up here live rather than only once landed.
+// previewed; only the color/layout/mark override fed in via
+// homeBandOverride/homeLayoutOverride/homeMarkOverride changes between
+// tiles. `wpaLayout`/`wpaBandOverride`/`wpaMarkOverride` are the SAME
+// resolved values WpaPreview's fields show (`wpaMarkOverride` only when
+// "Use Logo Art" is unchecked — see profiles/mlb.jsx), so an in-progress
+// edit shows up here live rather than only once landed.
 //
 // `lastOpponent` (this team's most recent completed game's rival, TeamLabRow's
 // own lazy fetch) plays the AWAY band on their own Main look — unaffected by
@@ -45,6 +47,7 @@ export function WpaScenarios({
   headerColors,
   wpaLayout,
   wpaBandOverride,
+  wpaMarkOverride,
 }) {
   if (!lastOpponent) return null
   const homeAbbr = teamAbbr({ id: teamId, name })
@@ -66,6 +69,7 @@ export function WpaScenarios({
             homeLayoutOverride={wpaLayout}
             homeBandOverride={wpaBandOverride}
             homeTreatment={treatment}
+            homeMarkOverride={wpaMarkOverride}
           />
         </div>
       ))}
