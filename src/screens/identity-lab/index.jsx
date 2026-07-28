@@ -6,6 +6,7 @@ import { mlbProfile } from './profiles/mlb.jsx'
 import { auditProfile } from './profiles/audit.jsx'
 import { milbProfiles } from './profiles/milb.jsx'
 import { patternProfile } from './profiles/pattern.jsx'
+import { logoFramesProfile } from './profiles/logoFrames.jsx'
 
 // The Team Identity Lab (/identity-lab) — one screen covering every dimension
 // of a club's visual identity: colour and logo tuning for MLB, the same for
@@ -18,7 +19,7 @@ import { patternProfile } from './profiles/pattern.jsx'
 // src/lib/data/*.json through a Vite dev middleware that doesn't exist in a
 // production build (ADR-0029), so shipping it would ship a button that can only
 // fail. Carries no score or reveal content either way.
-const PROFILES = [mlbProfile, auditProfile, ...milbProfiles, patternProfile]
+const PROFILES = [mlbProfile, logoFramesProfile, auditProfile, ...milbProfiles, patternProfile]
 
 // Which dimension was last open, so returning to the lab lands where the last
 // session left off rather than always on MLB — the small thing the five
