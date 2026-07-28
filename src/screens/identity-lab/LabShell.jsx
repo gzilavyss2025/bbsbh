@@ -9,7 +9,7 @@ import { teamAnchorId } from './teamAnchorId.js'
 // already used for exactly this job.
 export function LabShell({ title, hint, profiles, activeKey, onPick, children }) {
   return (
-    <div className="screen">
+    <div className="screen screen--identitylab">
       <SiteHeader />
       <header className="topbar">
         <h1 className="topbar__title">{title}</h1>
