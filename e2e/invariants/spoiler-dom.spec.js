@@ -16,14 +16,17 @@ test('half-inning stat line is absent from the DOM, not just hidden, until revea
   await page.goto(`${GAME}/top1`)
 
   await expect(page.locator('.statgrid')).toHaveCount(0)
-  await expect(page.locator('.rhe')).toHaveCount(0)
-  await expect(page.locator('.pitchgrid')).toHaveCount(0)
+  await expect(page.locator('.statline')).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Tap to reveal inning totals' }).click()
+  await page.getByRole('button', { name: /Reveal the rest of half/i }).click()
 
-  await expect(page.locator('.statgrid')).toHaveCount(1)
-  await expect(page.locator('.rhe')).toHaveCount(1)
-  await expect(page.locator('.pitchgrid')).toHaveCount(1)
+  // Each coverless SealBox for this half (the play-by-play feed, the Insights
+  // stat card, and — only on a game with ABS challenges — the AbsCard) wraps
+  // its revealed content in its own `.statgrid` proxy, so the count here can
+  // legitimately be 2 or 3 depending on the fixture game; the invariant is
+  // "at least one", not an exact number tied to how many cards this half has.
+  expect(await page.locator('.statgrid').count()).toBeGreaterThan(0)
+  await expect(page.locator('.statline')).toHaveCount(1)
 })
 
 test('box score is absent from the DOM until its own seal is tapped', async ({ page }) => {
