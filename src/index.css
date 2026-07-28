@@ -9840,52 +9840,6 @@ body {
   flex-wrap: wrap;
 }
 
-/* TreatmentColorControls — every treatment's own independent Primary/
-   Secondary/Accent 1/Accent 2 (Main included), a separate panel from the
-   swatch row above rather than a 4th swatch, since that row's chip/copy/
-   WPA-band-picker behavior is specific to Main's club-wide triad. */
-.colorlab__tcolors {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-
-.colorlab__tcolorshead {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.colorlab__tcolorslabel {
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-  margin-right: auto;
-}
-
-.colorlab__tcolorsrow {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.colorlab__tcolorfield {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.colorlab__tcolorfieldlabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
-}
-
 /* LogoPositionControls (the Team Identity Lab) — a third column INSIDE
    .colorlab__treatmentbox, beside the logo tile + swatches it's
    positioning, rather than its own boxed card like the WPA/header previews

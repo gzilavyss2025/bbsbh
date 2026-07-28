@@ -751,14 +751,11 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
             }
           : undefined,
       }))}
-      colorsPanel={isMain ? { hasDraft: hasColorsDraft, onReset: on.colorReset } : undefined}
-      treatmentColors={{
-        slots: treatmentColorSlots,
-        hasDraft: hasTcolorsDraft,
-        onReset: () => on.tcolorReset(treatment),
-        onField: (role, hex) => on.tcolorField(treatment, role, hex),
-        copyText: buildTreatmentColorsCopyText(name, teamId, treatment, displayLabel, treatmentColorSlots),
-      }}
+      colorsPanel={
+        isMain
+          ? { hasDraft: hasColorsDraft, onReset: on.colorReset }
+          : { hasDraft: hasTcolorsDraft, onReset: () => on.tcolorReset(treatment) }
+      }
       position={{
         name,
         treatmentLabel: displayLabel,
@@ -987,15 +984,16 @@ export const mlbProfile = {
       treatment tiled in the win-probability chart (the real chart picks a
       game’s treatment from that night’s actual uniform — see{' '}
       <code>api/jerseys.js</code> — so any tile here could be the one that shows
-      up), and which catalog jersey(s) map to each treatment. A Main tile’s
-      Primary/Secondary/Accent are editable directly on the swatch — type a hex
-      to change it, or clear it to say the club has no such color. Accent is the
-      “tells two clubs apart” pick, so for most clubs it restates the Primary or
-      Secondary on purpose; any researched extra colors follow it, read-only.
-      Every treatment — Main included — also has its own independent Colors
-      panel (Primary/Secondary/Accent 1/Accent 2), a separate per-jersey
-      reference distinct from Main’s club-wide swatch above. Click a swatch to
-      try it as that tile’s WPA band color. Each WPA panel’s “Use Logo Art”
+      up), and which catalog jersey(s) map to each treatment. Every swatch is
+      editable directly on the chip — type a hex to change it, or clear it to
+      say the club has no such color. A Main tile edits its club-wide
+      Primary/Secondary/Accent (Accent is the “tells two clubs apart” pick, so
+      for most clubs it restates the Primary or Secondary on purpose; any
+      researched extra colors follow it, read-only); every other treatment
+      edits its own independent Primary/Secondary/Accent 1/Accent 2, a
+      separate per-jersey reference distinct from Main’s club-wide swatch.
+      Click a swatch to try it as that tile’s WPA band color. Each WPA panel’s
+      “Use Logo Art”
       checkbox is on by default (the band tiles the same mark as the tile
       above it, unchanged); uncheck it to upload a separate 512×512 PNG that
       band alone tiles instead.

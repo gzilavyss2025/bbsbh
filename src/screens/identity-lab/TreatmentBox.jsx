@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { LogoPositionControls } from './editors/LogoPositionControls.jsx'
-import { TreatmentColorControls } from './editors/TreatmentColorControls.jsx'
 import { WpaPreview } from './editors/WpaPreview.jsx'
 import { WpaScenarios } from './editors/WpaScenarios.jsx'
 import { HeaderPreview } from './editors/HeaderPreview.jsx'
@@ -30,7 +29,6 @@ export function TreatmentBox({
   wearDates,
   swatches,
   colorsPanel,
-  treatmentColors,
   position,
   wpa,
   scenarios,
@@ -95,7 +93,6 @@ export function TreatmentBox({
             <ColorSwatch key={i} {...swatch} />
           ))}
         </div>
-        {treatmentColors && <TreatmentColorControls {...treatmentColors} />}
         <LogoPositionControls {...position} />
         {wearDates && <WearDates {...wearDates} label={label} name={position.name} />}
       </div>
@@ -157,10 +154,12 @@ function WearDates({ dates, onOpen, name, label }) {
 // Every chip is ALSO a "copy this hex" button (the owner's hex copy/paste
 // request) — for MLB, that's on top of its existing "use as WPA band" click
 // rather than instead of it, so nothing already wired to this button stops
-// working. `editable`, when supplied (the Main tile's Primary/Secondary/Accent
-// only — see profiles/mlb.jsx), turns the hex text from a read-only label into
-// a text input the owner can retype directly; the click-to-copy chip button
-// is untouched, a separate element with no conflict.
+// working. `editable`, when supplied (a role slot — Main's club-wide triad or
+// any other treatment's own Primary/Secondary/Accent 1/Accent 2, see
+// profiles/mlb.jsx; an extra beyond the triad has no role and stays read-only),
+// turns the hex text from a read-only label into a text input the owner can
+// retype directly; the click-to-copy chip button is untouched, a separate
+// element with no conflict.
 //
 // A `swatch` with an empty `hex` is an editable role the owner has CLEARED —
 // distinct from a null `swatch`, which is a slot the club has no colour for at
