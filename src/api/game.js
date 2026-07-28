@@ -3,9 +3,49 @@
 
 import { getJson } from './statsapi.js'
 import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
+import { applyJsonPatch } from '../lib/jsonPatch.js'
 
 export async function fetchGameFeed(gamePk, options) {
   return getJson(`/api/v1.1/game/${gamePk}/feed/live`, options)
+}
+
+// The undocumented diffPatch mode: returns an array of RFC 6902 patch
+// entries (`{ diff: [...] }`) covering everything that changed since
+// `startTimecode`, OR — once the gap since `startTimecode` grows too large
+// (observed ~200-300s; MLB sets no documented contract on the exact window)
+// — silently degrades to returning a plain full-feed object instead, same
+// shape as fetchGameFeed's response. Callers MUST branch on
+// `Array.isArray(...)`; mergeFeedDiff below does this. See ADR-0032 and
+// `.scratch/live-feed-diffpatch/findings.md` for how this was verified.
+export async function fetchGameFeedDiff(gamePk, startTimecode, options) {
+  return getJson(`/api/v1.1/game/${gamePk}/feed/live/diffPatch?startTimecode=${startTimecode}`, options)
+}
+
+// Merges a diffPatch response onto the last-known feed, or passes through a
+// full-feed fallback response as-is. Returns null — never throws — on any
+// apply failure or on a sanity-check mismatch (wrong gamePk), so callers can
+// treat "no merge" as a plain signal to fall back to fetchGameFeed rather
+// than needing their own try/catch. ALWAYS returns a fresh object distinct
+// from `base` (never mutates it) — see jsonPatch.js's header for why that's
+// load-bearing (ADR-0007).
+export function mergeFeedDiff(base, diffResponse, gamePk) {
+  try {
+    let merged = diffResponse
+    if (Array.isArray(diffResponse)) {
+      // Seed with an empty-ops apply so an ZERO-entry response (nothing
+      // changed since the last poll) still returns a NEW clone rather than
+      // `base` itself by reference — a same-reference "merge" is exactly the
+      // case ADR-0007's identity-keyed reveal cache can't tell apart from
+      // "nothing to invalidate for."
+      merged = applyJsonPatch(base, [])
+      for (const entry of diffResponse) {
+        merged = applyJsonPatch(merged, entry.diff)
+      }
+    }
+    return merged && String(merged.gamePk ?? '') === String(gamePk) ? merged : null
+  } catch {
+    return null
+  }
 }
 
 // Per-play win probability — the ONLY source of WPA, which is absent from the
