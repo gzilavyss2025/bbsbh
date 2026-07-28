@@ -9628,8 +9628,8 @@ body {
 }
 
 .colorlab__rowlogo {
-  width: 36px;
-  height: 36px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   border-radius: var(--radius-sm);
   background: var(--paper-1);
