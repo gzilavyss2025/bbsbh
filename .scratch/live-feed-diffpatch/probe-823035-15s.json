@@ -1,0 +1,24 @@
+{
+  "gamePk": "823035",
+  "interval": 15,
+  "polls": 310,
+  "patchResponses": 299,
+  "fullFeedFallbacks": 11,
+  "applyErrors": 0,
+  "divergences": 11,
+  "keyOrderOnlyDiffs": 0,
+  "bytesFullTotal": 160255167,
+  "bytesDiffTotal": 11967418,
+  "gzipFullTotal": 23706118,
+  "gzipDiffTotal": 1668759,
+  "reductionRatioGzip": 14.205836792490707,
+  "p50GzipDiffBytes": 1736,
+  "p95GzipDiffBytes": 6041,
+  "opsSeen": [
+    "add",
+    "copy",
+    "move",
+    "remove",
+    "replace"
+  ]
+}
