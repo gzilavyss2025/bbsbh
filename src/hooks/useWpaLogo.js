@@ -19,9 +19,15 @@ import { wpaLogoFor, wpaLogoWithFallback } from '../lib/wpaLogo.js'
 export function useWpaLogo(teamId, treatment) {
   const { src } = wpaLogoFor(teamId, treatment)
   const [missing, setMissing] = useState(false)
+  // Reset computed during render (not as the first line of the effect below)
+  // on a src change — see Headshot.jsx for the pattern.
+  const [prevSrc, setPrevSrc] = useState(src)
+  if (src !== prevSrc) {
+    setPrevSrc(src)
+    setMissing(false)
+  }
 
   useEffect(() => {
-    setMissing(false)
     if (!src) return undefined
     // `live` guards the late-arriving error of a probe whose (team,
     // treatment) has already been swapped out from under it — without it, a

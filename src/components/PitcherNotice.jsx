@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../lib/teams.js'
 import { PlayerLink } from './PlayerLink.jsx'
 
@@ -65,10 +65,15 @@ export function PitcherPhoto({ personId, name, teamId = null }) {
   const sources = headshotSources(personId, { mlb })
   const [rung, setRung] = useState(0)
   const [logoFailed, setLogoFailed] = useState(false)
-  useEffect(() => {
+  // Reset fallback progress on identity change, computed during render (not
+  // in an effect) — see Headshot.jsx for the same pattern and rationale.
+  const identityKey = `${personId}|${teamId}|${mlb}`
+  const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
+  if (identityKey !== prevIdentityKey) {
+    setPrevIdentityKey(identityKey)
     setRung(0)
     setLogoFailed(false)
-  }, [personId, teamId, mlb])
+  }
   const url = sources[rung] ?? null
   const logoUrl = !url && teamId && !logoFailed ? teamLogoUrl(teamId) : null
   const bg = teamTintColor(teamId)

@@ -597,7 +597,7 @@ function scorebookCode(play, batterRunner) {
       // credit. When none is present, don't fabricate a catcher error — leave
       // it a bare "K" reach (the diamond still shows him aboard), since an
       // uncaught third strike can be scored with no error charged at all.
-      let how = ''
+      let how
       if (/wild pitch/i.test(desc)) how = 'WP'
       else if (/passed ball/i.test(desc)) how = 'PB'
       else how = errorCodeFor(batterRunner)

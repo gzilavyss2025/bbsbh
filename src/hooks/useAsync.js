@@ -50,7 +50,10 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
         if (runId.current === id)
           setState((s) => ({ loading: false, error, data: s.data, lastUpdated: s.lastUpdated }))
       })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // `deps` is a caller-supplied array forwarded straight through — inherent
+    // to a generic data-fetching hook wrapping useCallback, and can never be
+    // an array literal at this call site (see the file header for why).
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
   }, deps)
 
   useEffect(() => {
@@ -59,6 +62,10 @@ export function useAsync(fn, deps = [], { refetchOnForeground = false } = {}) {
     // under the new deps' header while the new request is in flight. `reload`
     // (the same `run`, same deps) deliberately skips this reset, keeping the
     // stale-while-revalidate behavior for in-place refreshes.
+    // Same shape as React's own "Fetching data" example (see PastGameFlipCard.jsx) —
+    // the loading state is reset as this effect starts synchronizing to a new
+    // `run` identity, not as a derived-from-props value.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState((s) =>
       s.data === null && s.error === null
         ? s

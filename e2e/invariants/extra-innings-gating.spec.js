@@ -19,15 +19,18 @@ test('the 10th inning stays hidden until the 9th’s bottom is revealed', async 
   expect(await page.locator('.rolling__grid thead th').allTextContents()).not.toContain('10')
 
   // Bottom of the 9th is directly reachable (it's the last regulation half)
-  // — navigating there must not by itself unlock the 10th.
+  // — navigating there must not by itself unlock the 10th. Sealed, the
+  // floating bar offers the reveal-split pair (ADR-0016), not a "Top 10th ›"
+  // / "Box score ›" advance — those only appear once this half is revealed.
   await page.goto(`${GAME}/bottom9`)
   expect(await page.locator('.rolling__grid thead th').allTextContents()).not.toContain('10')
-  await expect(page.getByRole('button', { name: /view box score/i })).toBeVisible()
-  await expect(page.getByRole('button', { name: /next: top 10th/i })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Reveal the rest of half/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /top 10th/i })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /box score/i })).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Tap to reveal inning totals' }).click()
+  await page.getByRole('button', { name: /Reveal the rest of half/i }).click()
 
   // Only now does the 10th unlock.
   expect(await page.locator('.rolling__grid thead th').allTextContents()).toContain('10')
-  await expect(page.getByRole('button', { name: /next: top 10th/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /top 10th/i })).toBeVisible()
 })

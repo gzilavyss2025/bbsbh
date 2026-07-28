@@ -214,7 +214,13 @@ export function InningViewer({
   // instead), but there's no reason to hold onto it a moment longer than
   // the half it describes stays current.
   const [runsInProgress, setRunsInProgress] = useState(null)
-  useEffect(() => setRunsInProgress(null), [curIdx])
+  // Reset computed during render (not in an effect) on a half change — see
+  // Headshot.jsx for the same pattern.
+  const [prevCurIdxForRuns, setPrevCurIdxForRuns] = useState(curIdx)
+  if (curIdx !== prevCurIdxForRuns) {
+    setPrevCurIdxForRuns(curIdx)
+    setRunsInProgress(null)
+  }
 
   // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
   // turning over for real — the game moving forward while you're actually
@@ -404,6 +410,14 @@ export function InningViewer({
   // a slate-current game (same freshness window TeamInfo's bullpen board
   // uses). Null on an archival game, which silently disables the
   // bullpen-thin pre-half note.
+  // preserve-manual-memoization below is a React-Compiler dry-run diagnostic:
+  // this project has no babel-plugin-react-compiler in its build (checked —
+  // vite.config.js has no such plugin), so "could not preserve memoization"
+  // has no runtime effect here; it only means a FUTURE compiler adoption
+  // wouldn't optimize this useMemo away. Not restructuring this file's
+  // memoization to chase compiler-readiness alone — see the spoiler-rule
+  // warnings throughout this component before touching any of it.
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const workloadGameDate = useMemo(() => {
     const d = feed?.gameData?.datetime?.officialDate ?? null
     const asOf = workload?.asOf ?? null
@@ -419,12 +433,16 @@ export function InningViewer({
   // pitcherHealth.js, ADR-0009 footing, same reveal clamp as pitcherLines).
   // Recomputed as the reveal mark advances, same dependency shape as
   // pitcherLines itself.
+  // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
+  // babel-plugin-react-compiler in this build — see that comment).
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const marginNotes = useMemo(
     () =>
       buildMarginNotes(feed, renderRevealedThrough, callouts, { away: rosters.away.name, home: rosters.home.name }, {
         workload,
         gameDate: workloadGameDate,
       }),
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     [feed, renderRevealedThrough, callouts, rosters, workload, workloadGameDate],
   )
 
@@ -455,6 +473,9 @@ export function InningViewer({
   // half is revealed/stepped into in order, and at MiLB parks with no
   // win-prob feed — the chart then renders nothing.
   const stepFrontierIdx = curIdx === renderRevealedThrough + 1 ? curIdx : null
+  // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
+  // babel-plugin-react-compiler in this build — see that comment).
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbPoints = useMemo(
     () =>
       selectWinProbPath(winProbability, {
@@ -468,6 +489,9 @@ export function InningViewer({
   // (committed halves plus the in-progress step), so it only ever covers
   // plays already on screen and grows one entry at a time right along with
   // the chart above (never hinting what's ahead).
+  // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
+  // babel-plugin-react-compiler in this build — see that comment).
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbBigPlays = useMemo(
     () =>
       selectWinProbBigPlays(winProbability, {

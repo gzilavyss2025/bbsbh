@@ -17,16 +17,16 @@ test('reveal mark advances forward, gates the Pitchers/RollingLine tables, and s
   // mark, not its own SealBox) shouldn't render at all.
   await expect(page.locator('.pitchers')).toHaveCount(0)
   await expect(
-    page.getByRole('button', { name: 'Bottom of inning 1, sealed' }),
+    page.getByRole('button', { name: 'Bottom of the 1st, sealed' }),
   ).toBeVisible()
 
-  await page.getByRole('button', { name: 'Tap to reveal inning totals' }).click()
+  await page.getByRole('button', { name: /Reveal the rest of half/i }).click()
 
   // Top of the 1st is in; bottom of the 1st must still read as sealed in the
   // running line — revealing one half must not leak its sibling.
-  await expect(page.getByRole('button', { name: /Top of inning 1, \d+ runs?/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Top of the 1st, \d+ runs?/ })).toBeVisible()
   await expect(
-    page.getByRole('button', { name: 'Bottom of inning 1, sealed' }),
+    page.getByRole('button', { name: 'Bottom of the 1st, sealed' }),
   ).toBeVisible()
 
   // The Pitchers table now reflects the one revealed half.
@@ -36,12 +36,12 @@ test('reveal mark advances forward, gates the Pitchers/RollingLine tables, and s
   // Reload: top of the 1st should come back pre-revealed from localStorage —
   // no re-tap needed...
   await page.reload()
-  await expect(page.locator('.rhe')).toHaveCount(1)
+  await expect(page.locator('.statline')).toHaveCount(1)
   await expect(page.locator('.pitchers')).toHaveCount(1)
 
   // ...but the persisted mark must not have crept past what was actually
   // revealed: bottom of the 1st is still sealed after the reload.
   await page.goto(`${GAME}/bottom1`)
-  await expect(page.getByRole('button', { name: 'Tap to reveal inning totals' })).toBeVisible()
-  await expect(page.locator('.rhe')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Reveal the rest of half/i })).toBeVisible()
+  await expect(page.locator('.statline')).toHaveCount(0)
 })

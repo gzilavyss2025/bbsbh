@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../lib/teams.js'
 
 // A person's headshot, keyed by the person id we already carry. Walks a
@@ -55,10 +55,17 @@ export function Headshot({
   const sources = headshotSources(personId, { coach, mlb })
   const [rung, setRung] = useState(0)
   const [logoFailed, setLogoFailed] = useState(false)
-  useEffect(() => {
+  // Reset the fallback progress when the identity this shot describes changes
+  // — computed during render (React's documented "adjust state while
+  // rendering" escape hatch), not in an effect, so there's no extra
+  // stale-photo render before the reset takes effect.
+  const identityKey = `${personId}|${teamId}|${coach}|${mlb}`
+  const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
+  if (identityKey !== prevIdentityKey) {
+    setPrevIdentityKey(identityKey)
     setRung(0)
     setLogoFailed(false)
-  }, [personId, teamId, coach, mlb])
+  }
 
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt
@@ -71,7 +78,9 @@ export function Headshot({
   // once we're down to the logo/monogram. Read via a ref so a fresh inline
   // arrow function passed every parent render doesn't retrigger the effect.
   const onFallbackRef = useRef(onFallback)
-  onFallbackRef.current = onFallback
+  useLayoutEffect(() => {
+    onFallbackRef.current = onFallback
+  })
   useEffect(() => {
     onFallbackRef.current?.(photoUrl ? null : logoUrl ? 'logo' : 'monogram')
   }, [photoUrl, logoUrl])

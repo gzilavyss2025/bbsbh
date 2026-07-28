@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 // The core spoiler mechanism (see brief §7b — this behavior must not drift).
 //
@@ -33,7 +33,12 @@ export function SealBox({
   const shown = revealed || forceRevealed
 
   const onRevealRef = useRef(onReveal)
-  onRevealRef.current = onReveal
+  // Keep the latest callback without re-running the reveal effect below on
+  // every render a fresh `onReveal` identity arrives — assigned in a layout
+  // effect (not during render) so it's current before that effect reads it.
+  useLayoutEffect(() => {
+    onRevealRef.current = onReveal
+  })
   const fired = useRef(false)
   useEffect(() => {
     if (shown && !fired.current) {

@@ -23,15 +23,15 @@ import { usePastGameSignals } from './usePastGameSignals.js'
 // re-derives it from that level's own schedule fetch, so switching levels
 // hands this a new array identity) and into `dateStr`. Taking it as a third
 // dep would just be a redundant trigger.
+const EMPTY_MAP = new Map()
+
 export function useDayCardMeta(finals, dateStr, revealed) {
   const getSignals = usePastGameSignals()
-  const [byGamePk, setByGamePk] = useState(new Map())
+  const [byGamePk, setByGamePk] = useState(EMPTY_MAP)
+  const active = revealed && !!finals?.length
 
   useEffect(() => {
-    if (!revealed || !finals?.length) {
-      setByGamePk(new Map())
-      return
-    }
+    if (!active) return undefined
     let cancelled = false
     ;(async () => {
       const [entries, calloutsData] = await Promise.all([
@@ -53,7 +53,12 @@ export function useDayCardMeta(finals, dateStr, revealed) {
     return () => {
       cancelled = true
     }
-  }, [finals, dateStr, revealed, getSignals])
+  }, [active, finals, dateStr, getSignals])
 
-  return byGamePk
+  // Not derived-state-in-render for the "off" case (no setState call at all,
+  // just a constant): while inactive there is nothing in flight to reset —
+  // the effect above simply doesn't run — so a fresh reveal only ever sees
+  // whatever this same render already returns, never a stale batch from
+  // before `revealed` last flipped false.
+  return active ? byGamePk : EMPTY_MAP
 }
