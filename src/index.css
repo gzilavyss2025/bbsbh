@@ -1471,6 +1471,15 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
+  /* `overflow: hidden` cancels this flex item's automatic min-width, so
+     without flex-shrink: 0 a wide `.masthead__side` (a long date plus the
+     keep-awake toggle and the MLB.TV pill) can squeeze this row narrower
+     than its own two logo tiles — clipping the second (home) team's mark
+     with a hard rectangular cut instead of its own rounded corners. Team
+     marks are art, never a filter (see src/CLAUDE.md): this row must never
+     compress. `.masthead__side` is the side designed to give way — its own
+     children already wrap to a second line under the same pressure. */
+  flex-shrink: 0;
 }
 
 /* The date + keep-awake toggle + MLB.TV pill. Allowed to wrap (right-aligned)
