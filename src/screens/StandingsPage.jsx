@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
 import { fetchTeamScores, leagueSeasonGradesFor, gradeTiersByTeamId } from '../api/teamScore.js'
 import { fetchSeasonScores } from '../api/seasonScore.js'
@@ -182,10 +182,11 @@ export function StandingsPage() {
 
   // useAsync nulls `data` on a deps (date) change; keep the last-good standings
   // on screen (dimmed) while the new date loads so the page doesn't collapse to
-  // a spinner on every jump.
-  const lastGood = useRef([])
-  if (data) lastGood.current = data
-  const shown = data ?? lastGood.current
+  // a spinner on every jump. State (not a ref) since it's read during render —
+  // a ref must never be read outside an event handler/effect.
+  const [lastGood, setLastGood] = useState([])
+  if (data && data !== lastGood) setLastGood(data)
+  const shown = data ?? lastGood
 
   // Season Grade column: a SEPARATE, independent fetch of two already-nightly
   // static files (never statsapi) — a slow/failed grade file must never block

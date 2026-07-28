@@ -30,6 +30,11 @@ export function PastGameFlipCard({
   useEffect(() => {
     if (!revealed) return
     let cancelled = false
+    // Kicking off the loading state before starting the fetch is the standard
+    // data-fetching-effect shape (see React's own "Fetching data" example in
+    // "You Might Not Need an Effect") — not the "adjusting state when a prop
+    // changes" anti-pattern this rule is chiefly aimed at.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState({ loading: true, error: false, data: null })
     getSignals(game.gamePk).then(
       (data) => {
