@@ -20,6 +20,7 @@ export function LogoPositionControls({
   offsetY,
   bg,
   pinstripe,
+  pinstripeBg,
   hasDraft,
   copyText,
   onField,
@@ -62,6 +63,21 @@ export function LogoPositionControls({
           <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
           <span>Pinstripe</span>
         </label>
+        {/* The colored fill under the stripes (White Sox City Connect's red) —
+            `pinstripeBg` is undefined for Main, which has no fill-color concept
+            in the data model (MAIN_OVERRIDES' pinstripe is line-color only), so
+            this never renders there. White is the shared default when unset. */}
+        {pinstripe && pinstripeBg !== undefined && (
+          <label className="colorlab__posbgfield">
+            <span>Fill</span>
+            <input
+              type="text"
+              value={pinstripeBg}
+              placeholder="#hex (white)"
+              onChange={(e) => onField('pinstripeBg', e.target.value)}
+            />
+          </label>
+        )}
       </div>
     </div>
   )

@@ -241,11 +241,11 @@ export function WinProbChart({
   // same tables Team Identity Lab's logo box reads, so a pinstriped tile there
   // renders pinstriped here too.
   const awayPinstripe = awayMilb ? milbWpaBandPinstripeColor(awayId, 'away') : wpaBandPinstripeColor(awayId, awayTreat)
-  // `homeBandOverride` — `{ pinstripe, color }`, the SAME live draft state
+  // `homeBandOverride` — `{ pinstripe, color, bg }`, the SAME live draft state
   // as homeLayoutOverride above (Team Identity Lab's TreatmentWpaPreview +
-  // ColorSwatch pick), standing in for the wpaBandPinstripeColor/wpaBandColor
-  // table lookup below it. pinstripeBg isn't part of the draft (not
-  // editable there), so it still always reads the real table.
+  // ColorSwatch pick), standing in for the wpaBandPinstripeColor/wpaBandColor/
+  // wpaBandPinstripeBg table lookups below it — so an in-progress Fill edit
+  // shows up in this same live mockup, not just the tile's own preview.
   const homePinstripe = homeBandOverride
     ? (homeBandOverride.pinstripe ? homeBandOverride.color : null)
     : homeMilb
@@ -255,7 +255,11 @@ export function WinProbChart({
   // system, unlike the MLB one, never pairs a pinstripe with anything but a
   // plain white fill) — only the MLB lookup can return one.
   const awayPinstripeBg = awayMilb ? null : wpaBandPinstripeBg(awayId, awayTreat)
-  const homePinstripeBg = homeMilb ? null : wpaBandPinstripeBg(homeId, homeTreat)
+  const homePinstripeBg = homeBandOverride
+    ? (homeBandOverride.pinstripe ? homeBandOverride.bg || undefined : null)
+    : homeMilb
+      ? null
+      : wpaBandPinstripeBg(homeId, homeTreat)
   const awayPinstripeId = `winprob-pinstripe-away-${patternUid}`
   const homePinstripeId = `winprob-pinstripe-home-${patternUid}`
   const awayBandFill = awayPinstripe

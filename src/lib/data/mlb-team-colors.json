@@ -1,0 +1,182 @@
+{
+  "108": {
+    "name": "Los Angeles Angels",
+    "primary": "#003263",
+    "secondary": "#BA0021",
+    "third": "#BA0021"
+  },
+  "109": {
+    "name": "Arizona Diamondbacks",
+    "primary": "#A71930",
+    "secondary": "#E3D4AD",
+    "third": "#A71930"
+  },
+  "110": {
+    "name": "Baltimore Orioles",
+    "primary": "#DF4601",
+    "secondary": "#000000",
+    "third": "#DF4601"
+  },
+  "111": {
+    "name": "Boston Red Sox",
+    "primary": "#BD3039",
+    "secondary": "#0C2340",
+    "third": "#BD3039"
+  },
+  "112": {
+    "name": "Chicago Cubs",
+    "primary": "#0E3386",
+    "secondary": "#CC3433",
+    "third": "#0E3386"
+  },
+  "113": {
+    "name": "Cincinnati Reds",
+    "primary": "#C6011F",
+    "secondary": "#000000",
+    "third": "#C6011F"
+  },
+  "114": {
+    "name": "Cleveland Guardians",
+    "primary": "#00385D",
+    "secondary": "#E50022",
+    "third": "#E31937"
+  },
+  "115": {
+    "name": "Colorado Rockies",
+    "primary": "#333366",
+    "secondary": "#C4CED4",
+    "third": "#333366"
+  },
+  "116": {
+    "name": "Detroit Tigers",
+    "primary": "#0C2340",
+    "secondary": "#FA4616",
+    "third": "#0C2340"
+  },
+  "117": {
+    "name": "Houston Astros",
+    "primary": "#002D62",
+    "secondary": "#EB6E1F",
+    "third": "#EB6E1F"
+  },
+  "118": {
+    "name": "Kansas City Royals",
+    "primary": "#004687",
+    "secondary": "#BD9B60",
+    "third": "#BD9B60"
+  },
+  "119": {
+    "name": "Los Angeles Dodgers",
+    "primary": "#005A9C",
+    "secondary": "#EF3E42",
+    "third": "#005A9C"
+  },
+  "120": {
+    "name": "Washington Nationals",
+    "primary": "#AB0003",
+    "secondary": "#14225A",
+    "third": "#AB0003"
+  },
+  "121": {
+    "name": "New York Mets",
+    "primary": "#002D72",
+    "secondary": "#FF5910",
+    "third": "#002D72"
+  },
+  "133": {
+    "name": "Athletics",
+    "primary": "#003831",
+    "secondary": "#EFB21E",
+    "third": "#EFB21E"
+  },
+  "134": {
+    "name": "Pittsburgh Pirates",
+    "primary": "#27251F",
+    "secondary": "#FDB827",
+    "third": "#FDB827"
+  },
+  "135": {
+    "name": "San Diego Padres",
+    "primary": "#2F241D",
+    "secondary": "#FFC425",
+    "third": "#2F241D"
+  },
+  "136": {
+    "name": "Seattle Mariners",
+    "primary": "#0C2C56",
+    "secondary": "#005C5C",
+    "third": "#005C5C"
+  },
+  "137": {
+    "name": "San Francisco Giants",
+    "primary": "#FD5A1E",
+    "secondary": "#27251F",
+    "third": "#FD5A1E"
+  },
+  "138": {
+    "name": "St. Louis Cardinals",
+    "primary": "#C41E3A",
+    "secondary": "#0C2340",
+    "third": "#C41E3A"
+  },
+  "139": {
+    "name": "Tampa Bay Rays",
+    "primary": "#092C5C",
+    "secondary": "#8FBCE6",
+    "third": "#F5D130"
+  },
+  "140": {
+    "name": "Texas Rangers",
+    "primary": "#003278",
+    "secondary": "#C0111F",
+    "third": "#C0111F"
+  },
+  "141": {
+    "name": "Toronto Blue Jays",
+    "primary": "#134A8E",
+    "secondary": "#1D2D5C",
+    "third": "#E8291C"
+  },
+  "142": {
+    "name": "Minnesota Twins",
+    "primary": "#002B5C",
+    "secondary": "#D31145",
+    "third": "#D31145"
+  },
+  "143": {
+    "name": "Philadelphia Phillies",
+    "primary": "#E81828",
+    "secondary": "#002D72",
+    "third": "#E81828"
+  },
+  "144": {
+    "name": "Atlanta Braves",
+    "primary": "#CE1141",
+    "secondary": "#13274F",
+    "third": "#CE1141"
+  },
+  "145": {
+    "name": "Chicago White Sox",
+    "primary": "#27251F",
+    "secondary": "#C4CED4",
+    "third": "#27251F"
+  },
+  "146": {
+    "name": "Miami Marlins",
+    "primary": "#00A3E0",
+    "secondary": "#EF3340",
+    "third": "#00A3E0"
+  },
+  "147": {
+    "name": "New York Yankees",
+    "primary": "#003087",
+    "secondary": "#E4002C",
+    "third": "#003087"
+  },
+  "158": {
+    "name": "Milwaukee Brewers",
+    "primary": "#12284B",
+    "secondary": "#FFC52F",
+    "third": "#FFC52F"
+  }
+}

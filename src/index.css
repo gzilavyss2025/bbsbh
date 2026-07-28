@@ -9816,7 +9816,7 @@ body {
 }
 
 .colorlab__posinlinefields input {
-  width: 44px;
+  width: 60px;
   font-family: inherit;
   font-size: var(--fs-compact);
   color: var(--text-body);
@@ -9833,7 +9833,7 @@ body {
 
 /* The Background/Stripe hex field needs room for a full "#rrggbb" (or an
    rgba(...) pinstripe line color) — wider than the Scale/X/Y number boxes
-   next to it, which only ever hold a couple digits. */
+   next to it. */
 .colorlab__posinlinefields .colorlab__posbgfield input {
   width: 84px;
 }
@@ -9928,6 +9928,27 @@ body {
   font-family: var(--font-mono);
   font-size: var(--fs-compact);
   color: var(--text-muted);
+}
+
+/* The Main tile's editable Primary/Secondary/Third (ColorSwatch's `editable`)
+   swaps the read-only hex label above for this — same font/size as the label
+   it replaces, sized to the 76px swatch cell it sits in. */
+.colorlab__swatchhexinput {
+  width: 62px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 1px var(--space-1);
+  text-align: center;
+}
+
+.colorlab__colorsresetrow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-1);
 }
 
 /* The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs

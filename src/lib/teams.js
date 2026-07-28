@@ -2,8 +2,8 @@
 
 import { readableTextColor } from './contrast.js'
 import { isFriday } from './dates.js'
-import { TEAM_COLOR_PAIRS, milbBrandPair } from './brandColors.js'
-import { byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
+import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
+import { byTeam, byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
 import MLB_TREATMENT_TUNING from './data/mlb-treatment-tuning.json' with { type: 'json' }
 
 // The per-team, per-treatment tile tuning the Team Identity Lab writes back to
@@ -335,8 +335,9 @@ export function leagueLogoUrl() {
 
 // Alternate/City Connect tile-background colors — hand-curated together with
 // each team's curated logo file (localLogoUrl above), since these marks don't
-// carry an official three-color set the way Main does (teamColorSwatches
-// below). Single source of truth for Team Identity Lab's swatch tiles AND the
+// carry an official three-color set the way Main's Primary/Secondary/Third
+// triad does (mlb-team-colors.json). Single source of truth for Team Identity
+// Lab's swatch tiles AND the
 // home-page game card's jersey-variant background (treatmentBgColor below) —
 // moved here so both read the same curated set rather than drifting. Each
 // entry is a small swatch list; the one flagged `bg: true` is the color
@@ -740,9 +741,10 @@ export function treatmentTuningRecord(teamId, treatment) {
 // Per-team tuning for the Main/default logo tile — first designed on Team
 // Color Lab as a prototype-only "what if every club's default tile had a
 // colored background" pass (see that page's own history), now promoted here
-// so the real home-page game card can share it: `bg` names which of
-// teamColorSwatches' first three entries (Primary/Secondary/Third, in that
-// order) fills the tile; `recolor` swaps the mlbstatic base mark for a
+// so the real home-page game card can share it: `bg` names which of the
+// team's Primary/Secondary/Third triad (mlb-team-colors.json,
+// mainColorForRole below) fills the tile; `recolor` swaps the mlbstatic base
+// mark for a
 // locally hand-edited one (mainOverrideLogoUrl below) when the CDN mark's own
 // colors don't read against the new fill (e.g. a navy-outlined mark on a navy
 // tile); `scale` overrides the tile's default 1.32 edge-bleed for a mark
@@ -772,7 +774,17 @@ export const MAIN_OVERRIDES = Object.fromEntries(
     .filter(([, fields]) => fields),
 )
 
-const MAIN_BG_ROLE_INDEX = { primary: 0, secondary: 1, third: 2 }
+// A team's triad color by role name — 'primary'/'secondary' from
+// TEAM_COLOR_PAIRS, 'third' from TEAM_COLORS — the named-field counterpart to
+// the old array-indexed teamColorSwatches() lookup, so a Main tile's `bg` role
+// override (MAIN_OVERRIDES) always reads the exact same value the Team
+// Identity Lab's editable triad shows and saves, never a differently-deduped one.
+function mainColorForRole(teamId, role) {
+  if (role === 'primary') return TEAM_COLOR_PAIRS[teamId]?.[0] ?? null
+  if (role === 'secondary') return TEAM_COLOR_PAIRS[teamId]?.[1] ?? null
+  if (role === 'third') return TEAM_COLORS[teamId] ?? null
+  return null
+}
 
 // Every other override here is a hand-edited copy of the vector mlbstatic
 // mark (.svg); the Rangers' and Mariners' are procured raster art.
@@ -797,8 +809,7 @@ export function mainTreatmentTint(teamId) {
   const override = MAIN_OVERRIDES[teamId]
   if (override?.bgHex) return override.bgHex
   if (!override?.bg) return null
-  const idx = MAIN_BG_ROLE_INDEX[override.bg]
-  return teamColorSwatches(teamId)[idx]?.hex ?? null
+  return mainColorForRole(teamId, override.bg)
 }
 
 // The Main tile's edge-bleed scale override for `teamId`, or 1 (the shared
@@ -966,39 +977,11 @@ export function headshotSources(personId, { coach = false, mlb = false } = {}) {
 // Team A face, that one's Team B" — a rough visual grouping, not a guarantee
 // every possible matchup gets two clearly distinct hues (a run of same-
 // division rivals can still share a color family). MLB clubs only — MiLB team
-// ids have no entry and callers must degrade (see teamTintColor).
-const TEAM_COLORS = {
-  108: '#BA0021', // Angels
-  109: '#A71930', // Diamondbacks
-  110: '#DF4601', // Orioles
-  111: '#BD3039', // Red Sox
-  112: '#0E3386', // Cubs
-  113: '#C6011F', // Reds
-  114: '#E31937', // Guardians (red accent, not their navy)
-  115: '#333366', // Rockies
-  116: '#0C2340', // Tigers
-  117: '#EB6E1F', // Astros (orange accent, not their navy)
-  118: '#BD9B60', // Royals (gold accent, not their blue)
-  119: '#005A9C', // Dodgers
-  120: '#AB0003', // Nationals
-  121: '#002D72', // Mets
-  133: '#EFB21E', // Athletics (gold accent, not their dark green)
-  134: '#FDB827', // Pirates
-  135: '#2F241D', // Padres
-  136: '#005C5C', // Mariners (Northwest green accent, not their navy)
-  137: '#FD5A1E', // Giants
-  138: '#C41E3A', // Cardinals
-  139: '#F5D130', // Rays (yellow accent, not their navy)
-  140: '#C0111F', // Rangers (red accent, not their navy)
-  141: '#E8291C', // Blue Jays (red accent, not their blue)
-  142: '#D31145', // Twins (red accent, not their navy)
-  143: '#E81828', // Phillies
-  144: '#CE1141', // Braves
-  145: '#27251F', // White Sox
-  146: '#00A3E0', // Marlins
-  147: '#003087', // Yankees
-  158: '#FFC52F', // Brewers (gold accent, not their navy)
-}
+// ids have no entry and callers must degrade (see teamTintColor). Sourced from
+// mlb-team-colors.json's `third` field (ADR-0029) — the same store the Team
+// Identity Lab's editable Third swatch reads and writes, so this table and
+// that swatch can never disagree.
+const TEAM_COLORS = byTeam(MLB_TEAM_COLORS, (e) => e.third)
 
 // `hex` -> `rgba(r, g, b, alpha)` so a team color can sit as a soft tint
 // behind a headshot rather than a solid brand-colored block. `teamId` may be
@@ -1172,66 +1155,3 @@ export function favoriteAccentColor(teamId) {
   return FAVORITE_ACCENT_OVERRIDES[teamId] || TEAM_COLORS[teamId] || null
 }
 
-// Extra current-era brand colors beyond a club's primary/secondary/accent —
-// only for clubs with a well-documented third-or-later color in their CURRENT
-// identity (no retro/throwback-only palettes: e.g. the White Sox's navy/red
-// "Southside" alternate and the Brewers'/Marlins'/Blue Jays' pre-rebrand
-// palettes are deliberately excluded). Cross-checked against Wikipedia team
-// infoboxes and teamcolorcodes.com (2026-07-17); skipped rather than guessed
-// wherever sources disagreed on the hex (e.g. Orioles' gray, Royals' powder
-// blue). Absent teams simply have no documented color beyond the pair + accent.
-const TEAM_COLOR_EXTRAS = {
-  108: [{ label: 'Silver', hex: '#C4CED4' }], // Angels
-  109: [{ label: 'Teal', hex: '#30CED8' }], // Diamondbacks
-  115: [{ label: 'Black', hex: '#000000' }], // Rockies
-  117: [{ label: 'Metallic Orange', hex: '#F4911E' }], // Astros
-  119: [{ label: 'Silver', hex: '#A5ACAF' }], // Dodgers
-  133: [{ label: 'Gray', hex: '#A2AAAD' }], // Athletics
-  136: [
-    { label: 'Silver', hex: '#C4CED4' },
-    { label: 'Red', hex: '#D50032' },
-  ], // Mariners
-  137: [
-    { label: 'Cream', hex: '#EFD19F' },
-    { label: 'Metallic Gold', hex: '#AE8F6F' },
-  ], // Giants
-  138: [{ label: 'Yellow', hex: '#FEDB00' }], // Cardinals
-  142: [{ label: 'Kasota Gold', hex: '#B9975B' }], // Twins
-  144: [{ label: 'Yellow', hex: '#EAAA00' }], // Braves
-  146: [
-    { label: 'Slate Gray', hex: '#41748D' },
-    { label: 'Black', hex: '#000000' },
-  ], // Marlins
-  147: [
-    { label: 'Navy', hex: '#0C2340' },
-    { label: 'Gray', hex: '#C4CED3' },
-  ], // Yankees
-  158: [
-    { label: 'Powder Blue', hex: '#6CACE4' }, // Brewers (2026 alt road jersey)
-    { label: 'Gold', hex: '#FEC52E' }, // Brewers (Road Powder Blue jersey's secondary)
-  ],
-}
-
-// A club's known brand colors as labeled swatches — the real primary +
-// secondary pair (TEAM_COLOR_PAIRS), the separately hand-picked
-// distinctiveness accent (TEAM_COLORS), and any researched extras
-// (TEAM_COLOR_EXTRAS) — deduped by hex so a club whose accent or extra just
-// restates an earlier swatch doesn't repeat it. MLB-only, empty array for a
-// MiLB id. Built for the Team Identity Lab dev page
-// (src/screens/identity-lab/) — not used by any spoiler-facing surface.
-export function teamColorSwatches(teamId) {
-  const [primary, secondary] = TEAM_COLOR_PAIRS[teamId] ?? []
-  const candidates = [
-    { label: 'Primary', hex: primary },
-    { label: 'Secondary', hex: secondary },
-    { label: 'Accent', hex: TEAM_COLORS[teamId] },
-    ...(TEAM_COLOR_EXTRAS[teamId] ?? []),
-  ].filter((c) => c.hex)
-  const seen = new Set()
-  return candidates.filter((c) => {
-    const key = c.hex.toLowerCase()
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
-}

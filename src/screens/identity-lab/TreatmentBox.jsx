@@ -28,6 +28,7 @@ export function TreatmentBox({
   upload,
   wearDates,
   swatches,
+  colorsPanel,
   position,
   wpa,
   scenarios,
@@ -78,6 +79,13 @@ export function TreatmentBox({
         ) : (
           <div className={logoBox.className} style={logoBox.style}>
             {logoBox.children}
+          </div>
+        )}
+        {colorsPanel?.hasDraft && (
+          <div className="colorlab__colorsresetrow">
+            <button type="button" className="colorlab__wparesetbtn" onClick={colorsPanel.onReset}>
+              Reset colors
+            </button>
           </div>
         )}
         <div className="colorlab__swatchrow">
@@ -146,8 +154,11 @@ function WearDates({ dates, onOpen, name, label }) {
 // Every chip is ALSO a "copy this hex" button (the owner's hex copy/paste
 // request) — for MLB, that's on top of its existing "use as WPA band" click
 // rather than instead of it, so nothing already wired to this button stops
-// working.
-function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand }) {
+// working. `editable`, when supplied (the Main tile's Primary/Secondary/Third
+// only — see profiles/mlb.jsx), turns the hex text from a read-only label into
+// a text input the owner can retype directly; the click-to-copy chip button
+// is untouched, a separate element with no conflict.
+function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand, editable }) {
   const [copied, setCopied] = useState(false)
   if (!swatch) {
     return (
@@ -175,7 +186,17 @@ function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand }) {
         title={onPickWpaBand ? 'Copy hex / use as WPA band color' : 'Copy hex'}
       />
       <span className="colorlab__swatchlabel">{copied ? 'Copied!' : swatch.label}</span>
-      <span className="colorlab__swatchhex">{swatch.hex}</span>
+      {editable ? (
+        <input
+          type="text"
+          className="colorlab__swatchhexinput"
+          value={editable.value}
+          placeholder="#hex"
+          onChange={(e) => editable.onChange(e.target.value)}
+        />
+      ) : (
+        <span className="colorlab__swatchhex">{swatch.hex}</span>
+      )}
     </div>
   )
 }

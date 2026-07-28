@@ -139,6 +139,28 @@ function isMilbColorStore(parsed) {
   return null
 }
 
+// mlb-team-colors.json: one club's Primary/Secondary/Third brand colors — the
+// Team Identity Lab's editable counterpart to teams.js's real TEAM_COLOR_PAIRS/
+// TEAM_COLORS resolvers, which read this store (src/lib/CLAUDE.md). Team-level,
+// no `treatments` — same footing as milb-colors.json, since a club's triad
+// doesn't vary by treatment the way a logo tile's tuning does.
+function isMlbTeamColorStore(parsed) {
+  if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
+  for (const [teamId, entry] of Object.entries(parsed)) {
+    if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
+    if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
+    if (typeof entry.name !== 'string' || !entry.name) return `team ${teamId} has no name`
+    for (const field of ['primary', 'secondary', 'third']) {
+      const v = entry[field]
+      if (v !== undefined && !isColorish(v)) return `team ${teamId}'s ${field} is not a color`
+    }
+    if (entry.note !== undefined && typeof entry.note !== 'string') {
+      return `team ${teamId}'s note is not a string`
+    }
+  }
+  return null
+}
+
 // A flat uniformAssetCode -> display-name string map (src/api/uniforms.js's
 // fetchUniformNameOverrides). Rejects an array, nested objects, or non-string
 // values rather than writing a shape the app's readers don't expect.
@@ -174,6 +196,10 @@ export const DEV_DATA_STORES = {
   'milb-colors': {
     file: 'src/lib/data/milb-colors.json',
     validate: isMilbColorStore,
+  },
+  'mlb-team-colors': {
+    file: 'src/lib/data/mlb-team-colors.json',
+    validate: isMlbTeamColorStore,
   },
 }
 
