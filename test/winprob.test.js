@@ -134,10 +134,25 @@ test('selectWinProbPath never plots past the reported step boundary', () => {
 })
 
 test('selectWinProbPath ignores stepHalfIndex without a throughAtBatIndex', () => {
-  // Passing curIdx unconditionally (InningViewer's own usage) must be a no-op
-  // until a real boundary is reported — not stepHalfIndex alone.
+  // InningViewer passes null for throughAtBatIndex until PlayByPlay's own
+  // onStepInfo has actually fired (the render immediately after a fresh
+  // "Next at-bat" tap, before the reveal-only effect reports back) — that
+  // must be a no-op, not stepHalfIndex alone.
   const points = selectWinProbPath(buildWinProb(), { throughHalf: 0, stepHalfIndex: 1 })
   assert.deepEqual(points.map((p) => p.home), [52])
+})
+
+test('selectWinProbPath does not coerce a missing throughAtBatIndex to 0', () => {
+  // Regression for a narrow variant of the same class of bug: `atBatIndex <=
+  // throughAtBatIndex` with throughAtBatIndex left at its JS-null default
+  // would coerce to `atBatIndex <= 0`, which is true for atBatIndex 0 — the
+  // very first play of the ENTIRE game (atBatIndex is a global counter, not
+  // per-half). That's exactly top 1's own opening play, so this only bites
+  // the frontier's very first step (stepHalfIndex === throughHalf + 1 === 0),
+  // before onStepInfo has reported anything real. Pins the explicit `!= null`
+  // check that guards against it.
+  const points = selectWinProbPath(buildWinProb(), { throughHalf: -1, stepHalfIndex: 0 })
+  assert.deepEqual(points, [])
 })
 
 test('selectWinProbPath applies the step clamp only to the named half', () => {
