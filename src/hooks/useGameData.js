@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchGameFeed,
   fetchGameFeedDiff,
@@ -76,7 +76,9 @@ export function useGameData(game, spoilersOff = false) {
   // the LAST time gamePk changed, not live toggles of Follow Live/Scores
   // Unlocked (ADR-0026/ADR-0027) mid-game.
   const spoilersOffRef = useRef(spoilersOff)
-  spoilersOffRef.current = spoilersOff
+  useLayoutEffect(() => {
+    spoilersOffRef.current = spoilersOff
+  })
 
   // The uniform assignment rides the SAME fetch/reload as the feed: it's empty
   // until around first pitch, so each live Refresh must re-pull it, and
