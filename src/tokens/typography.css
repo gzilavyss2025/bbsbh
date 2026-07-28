@@ -82,11 +82,6 @@
   --ls-display:0.18em;
   --ls-num:    0.01em;
   --ls-fixed:  1px;
-
-  /* ---- Semantic text roles ---- */
-  --text-display-font: var(--font-display);
-  --text-num-font:     var(--font-mono);
-  --text-body-font:    var(--font-body);
 }
 
 /* Reusable semantic roles. Most component rules also carry layout/color, so
