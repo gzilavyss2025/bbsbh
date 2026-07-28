@@ -9857,6 +9857,32 @@ body {
   color: var(--accent-positive);
 }
 
+/* The "copy another treatment's art here" pair, under Replace art — same
+   22px-tall row as .colorlab__wparesetbtn so the two actions read as one
+   group instead of the copy control looking bolted on. */
+.colorlab__logocopyrow {
+  display: flex;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+
+.colorlab__logocopyselect {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: 0 var(--space-1);
+}
+
+.colorlab__logocopyselect:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .colorlab__swatchrow {
   display: flex;
   gap: var(--space-3);

@@ -5,6 +5,7 @@ import { isFriday } from './dates.js'
 import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
 import { byTeam, byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
 import MLB_TREATMENT_TUNING from './data/mlb-treatment-tuning.json' with { type: 'json' }
+import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
 // The per-team, per-treatment tile tuning the Team Identity Lab writes back to
 // (src/lib/data/mlb-treatment-tuning.json, ADR-0029) — re-exported raw so that
@@ -748,11 +749,11 @@ export function treatmentTuningRecord(teamId, treatment) {
 // colored background" pass (see that page's own history), now promoted here
 // so the real home-page game card can share it: `bg` names which of the
 // team's Primary/Secondary/Accent triad (mlb-team-colors.json,
-// mainColorForRole below) fills the tile; `recolor` swaps the mlbstatic base
-// mark for a
-// locally hand-edited one (mainOverrideLogoUrl below) when the CDN mark's own
-// colors don't read against the new fill (e.g. a navy-outlined mark on a navy
-// tile); `scale` overrides the tile's default 1.32 edge-bleed for a mark
+// mainColorForRole below) fills the tile; whether the mlbstatic base mark
+// swaps for a locally hand-edited one is decided separately, by file
+// presence (mainOverrideLogoUrl below), for a club whose CDN mark doesn't
+// read against the new fill (e.g. a navy-outlined mark on a navy tile);
+// `scale` overrides the tile's default 1.32 edge-bleed for a mark
 // that's especially dense/large at that fill. `pinstripe` (Rockies, Yankees)
 // is a hand-styled background instead of a flat swatch — see
 // mainTreatmentPinstripe/mainTreatmentPinstripeColor. `bgHex` (Brewers only)
@@ -764,7 +765,7 @@ export function treatmentTuningRecord(teamId, treatment) {
 // which were never part of MAIN_OVERRIDES and must not leak into it — a team
 // whose only Main tuning is a header-color proposal has no Main tile override
 // at all, and gets no entry.
-const MAIN_OVERRIDE_FIELDS = ['bg', 'bgHex', 'recolor', 'pinstripe', 'pinstripeColor', 'scale']
+const MAIN_OVERRIDE_FIELDS = ['bg', 'bgHex', 'pinstripe', 'pinstripeColor', 'scale']
 
 function mainOverrideFields(main) {
   if (!main) return null
@@ -795,20 +796,31 @@ function mainColorForRole(teamId, role) {
   return null
 }
 
-// Every other override here is a hand-edited copy of the vector mlbstatic
-// mark (.svg); the Rangers' and Mariners' are procured raster art.
-const MAIN_OVERRIDE_PNG = new Set([140, 136, 120, 113])
+// Two clubs' pinstripe tile keeps the plain mlbstatic mark on purpose even
+// though a main-overrides file for them exists on disk (COL.svg, NYY.svg —
+// each an earlier exploration the team's own tuning note says explicitly not
+// to use: "the plain mlbstatic mark reads fine against white"). Everything
+// else follows disk presence alone, same as localLogoUrl's alternates — this
+// is the one hand-maintained exception to that, not a whitelist of what's
+// allowed to render.
+const MAIN_USES_BASE_LOGO = new Set([115, 147])
 
-// The locally hand-edited Main-treatment mark for `teamId`, for a team whose
-// MAIN_OVERRIDES entry sets `recolor: true` — served same-origin out of
-// public/ like localLogoUrl above. Callers should fall back to the normal CDN
-// base logo (teamLogoUrl(teamId, 'base')) when this team has no override or
-// the file 404s.
+// The locally hand-edited Main-treatment mark for `teamId`, straight off
+// whatever the upload endpoint (or a hand-procured file) actually left in
+// public/team-logos/main-overrides/ — read from the manifest that upload
+// rewrites on every save (logo-art.json, ADR-0029), so a new upload needs no
+// companion code or data change to take effect. PNG wins when a team
+// somehow has both (WSH: a hand-authored .svg predates its procured .png).
+// Null for a team with no file there, or one of the two MAIN_USES_BASE_LOGO
+// exceptions above; callers fall back to the normal CDN base logo
+// (teamLogoUrl(teamId, 'base')).
 export function mainOverrideLogoUrl(teamId) {
+  if (MAIN_USES_BASE_LOGO.has(teamId)) return null
   const abbr = teamAbbr({ id: teamId })
   if (!abbr) return null
-  const ext = MAIN_OVERRIDE_PNG.has(teamId) ? 'png' : 'svg'
-  return `/team-logos/main-overrides/${abbr}.${ext}`
+  const entries = LOGO_ART['main-overrides'] ?? {}
+  const ext = entries[`${abbr}.png`] ? 'png' : entries[`${abbr}.svg`] ? 'svg' : null
+  return ext ? `/team-logos/main-overrides/${abbr}.${ext}` : null
 }
 
 // The Main tile's background hex for `teamId`, or null for a team with no
@@ -841,9 +853,10 @@ export function mainTreatmentPinstripeColor(teamId) {
 }
 
 // Whether `teamId`'s Main mark should swap to the locally hand-edited file
-// (mainOverrideLogoUrl) rather than the plain mlbstatic CDN base logo.
+// (mainOverrideLogoUrl) rather than the plain mlbstatic CDN base logo — true
+// exactly when that file exists, per mainOverrideLogoUrl above.
 export function mainTreatmentRecolor(teamId) {
-  return !!MAIN_OVERRIDES[teamId]?.recolor
+  return !!mainOverrideLogoUrl(teamId)
 }
 
 // Everything one "logo tile" needs to render for a (team, treatment): the

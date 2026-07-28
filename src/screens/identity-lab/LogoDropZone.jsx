@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { describeLogoRejection, LOGO_MAX_BYTES, LOGO_SIZE } from '../../lib/logoArt.js'
-import { uploadLogo } from './saveStores.js'
+import { copyLogo, uploadLogo } from './saveStores.js'
 
 // Drag a PNG onto a tile and it becomes that club's art. Wraps the tile's own
 // logo box (TreatmentBox passes it as `children`) so the drop target is the
@@ -16,11 +16,38 @@ import { uploadLogo } from './saveStores.js'
 // Dev-only, like everything else in this lab: outside `npm run dev` the
 // endpoint doesn't exist, and the screen itself is DEV-gated in App.jsx
 // (ADR-0029).
-export function LogoDropZone({ teamId, treatment, label, caveat, onUploaded, children }) {
+//
+// `copyTargets`, when supplied (this team's other real treatments), adds a
+// second way in: pick one and reuse whatever's already uploaded there instead
+// of procuring/uploading the same mark again. Absent for any tile with
+// nothing else to copy from — mirrors `upload` itself being absent when a
+// treatment has no destination at all (TreatmentBox.jsx).
+export function LogoDropZone({ teamId, treatment, label, caveat, copyTargets, onUploaded, children }) {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
+  const [copyFrom, setCopyFrom] = useState(copyTargets?.[0]?.key ?? '')
   const inputRef = useRef(null)
+
+  // The shared tail of both a fresh upload and a copy — same success/failure
+  // shape from the same middleware, so the same message logic answers "did it
+  // land, and is anything worth flagging about it" either way.
+  function applyResult(result) {
+    if (result.error) {
+      setMessage({ kind: 'error', text: result.error })
+      return
+    }
+    // The write is live the moment it lands — Vite serves public/ straight
+    // off disk — but the browser still holds the old bytes for this URL, so
+    // the tile has to re-request with a new cache-buster before it shows.
+    onUploaded?.()
+    const notes = [result.caveat, caveat].filter(Boolean)
+    setMessage(
+      notes.length
+        ? { kind: 'note', text: `${result.file} — ${notes.join(' · ')}` }
+        : { kind: 'ok', text: `saved to ${result.file}` },
+    )
+  }
 
   async function handleFile(file) {
     if (!file) return
@@ -33,26 +60,23 @@ export function LogoDropZone({ teamId, treatment, label, caveat, onUploaded, chi
         setMessage({ kind: 'error', text: `${file.name}: ${rejection}` })
         return
       }
-      const result = await uploadLogo({ teamId, treatment, bytes })
-      if (result.error) {
-        setMessage({ kind: 'error', text: result.error })
-        return
-      }
-      // The write is live the moment it lands — Vite serves public/ straight
-      // off disk — but the browser still holds the old bytes for this URL, so
-      // the tile has to re-request with a new cache-buster before it shows.
-      onUploaded?.()
-      const notes = [result.caveat, caveat].filter(Boolean)
-      setMessage(
-        notes.length
-          ? { kind: 'note', text: `${result.file} — ${notes.join(' · ')}` }
-          : { kind: 'ok', text: `saved to ${result.file}` },
-      )
+      applyResult(await uploadLogo({ teamId, treatment, bytes }))
     } finally {
       setBusy(false)
       // Let the same file be picked twice in a row (after a failed attempt and
       // a re-export, say) — a file input fires no change event otherwise.
       if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  async function handleCopy() {
+    if (!copyFrom) return
+    setMessage(null)
+    setBusy(true)
+    try {
+      applyResult(await copyLogo({ teamId, from: copyFrom, to: treatment }))
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -96,6 +120,32 @@ export function LogoDropZone({ teamId, treatment, label, caveat, onUploaded, chi
       >
         Replace art
       </button>
+      {copyTargets?.length > 0 && (
+        <div className="colorlab__logocopyrow">
+          <select
+            className="colorlab__logocopyselect"
+            aria-label={`Copy which treatment's art onto ${label}`}
+            value={copyFrom}
+            onChange={(e) => setCopyFrom(e.target.value)}
+            disabled={busy}
+          >
+            {copyTargets.map((t) => (
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="colorlab__wparesetbtn"
+            onClick={handleCopy}
+            disabled={busy || !copyFrom}
+            title={`Copy that treatment's uploaded art onto ${label}, no re-upload needed`}
+          >
+            Copy here
+          </button>
+        </div>
+      )}
       {message && (
         <p className={`colorlab__logodropmsg colorlab__logodropmsg--${message.kind}`}>{message.text}</p>
       )}

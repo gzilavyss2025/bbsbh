@@ -211,7 +211,7 @@ test('a Main record with no tile fields yields no MAIN_OVERRIDES entry', () => {
     const main = entry.treatments?.main
     const hasTileField =
       main &&
-      ['bg', 'bgHex', 'recolor', 'pinstripe', 'pinstripeColor', 'scale'].some((k) => main[k] !== undefined)
+      ['bg', 'bgHex', 'pinstripe', 'pinstripeColor', 'scale'].some((k) => main[k] !== undefined)
     assert.equal(
       Boolean(MAIN_OVERRIDES[teamId]),
       Boolean(hasTileField),

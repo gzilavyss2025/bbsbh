@@ -22,6 +22,7 @@ import {
   LOGO_ART_ROOT,
   LOGO_MAX_BYTES,
   MILB_LOGO_DIRS,
+  describeLogoCaveat,
   describeLogoRejection,
   logoUploadTarget,
   readPngHeader,
@@ -36,6 +37,13 @@ const REPO_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)))
 // bytes — and a single allowlist whose entries mean two different things is the
 // kind of shortcut that ends with a validator being skipped.
 export const DEV_LOGO_ROUTE = 'team-logo'
+
+// The sibling route that reuses an already-uploaded mark on another of this
+// team's treatments, rather than making the owner procure/upload the same
+// file a second time — the same move a few existing marks (Royals' Main into
+// Alternate, Tigers' Main into Alternate 2) were done by hand for, now wired
+// into the lab.
+export const DEV_LOGO_COPY_ROUTE = 'team-logo-copy'
 
 // The upload's own body cap. Deliberately the art standard's own cap plus a
 // small allowance rather than the JSON stores' 256 KB: the stream guard exists
@@ -92,6 +100,37 @@ export async function saveLogoUpload({ teamId, treatment, bytes }) {
   await writeFile(prepared.file, bytes)
   await writeLogoManifest()
   return prepared
+}
+
+// Resolves both ends of a copy, or a `problem` to return as a 400 — pure like
+// prepareLogoUpload above, so the unit suite can exercise every branch
+// without a temp directory. `from`/`to` are each re-resolved against the same
+// allowlist a real upload uses; neither is ever a path.
+export function prepareLogoCopy({ teamId, from, to }) {
+  const source = logoUploadTarget(teamId, from)
+  if (!source) return { problem: `no destination for team ${teamId} / treatment "${from}"`, status: 400 }
+  const target = logoUploadTarget(teamId, to)
+  if (!target) return { problem: `no destination for team ${teamId} / treatment "${to}"`, status: 400 }
+  if (from === to) return { problem: `"${from}" and "${to}" are the same treatment`, status: 400 }
+  return { source, target }
+}
+
+// Read whatever is already on disk at `from` and write it to `to` through the
+// exact same saveLogoUpload path a real upload takes — the copy is validated,
+// written, and rebuilds the manifest identically, it just skips the
+// request-body bytes and reads them off disk instead.
+export async function copyLogoUpload({ teamId, from, to }) {
+  const prepared = prepareLogoCopy({ teamId, from, to })
+  if (prepared.problem) return prepared
+  let bytes
+  try {
+    bytes = await readFile(resolveLogoFile(prepared.source))
+  } catch {
+    return { problem: `no art uploaded for "${from}" yet`, status: 404 }
+  }
+  const result = await saveLogoUpload({ teamId, treatment: to, bytes })
+  if (result.problem) return result
+  return { ...result, caveat: describeLogoCaveat(bytes) }
 }
 
 // ---------------------------------------------------------------------------

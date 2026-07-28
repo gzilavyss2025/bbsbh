@@ -449,8 +449,8 @@ function buildAllChangesText(teams, drafts, extras) {
 // plain Main, a hand-recolored override, a procured local file, or (for a club
 // in one of teams.js's *_USES_BASE_LOGO sets) the CDN mark again. `null` means
 // Main's plain TeamLogo, which builds its own URL.
-function treatmentLogoUrl(teamId, treatment, override) {
-  if (treatment === 'main') return override?.recolor ? mainOverrideLogoUrl(teamId) : null
+function treatmentLogoUrl(teamId, treatment) {
+  if (treatment === 'main') return mainOverrideLogoUrl(teamId)
   return teamLogoUrl(teamId, treatment)
 }
 
@@ -465,17 +465,14 @@ function treatmentLogoUrl(teamId, treatment, override) {
 // uploaded, even though it never appears as a tile's own logo box.
 function rowLogos(teamId) {
   const treatments = treatmentsForTeam(teamId)
-  const marks = treatments.map((t) => {
-    const override = t.key === 'main' ? MAIN_OVERRIDES[teamId] : null
-    return {
-      key: t.key,
-      label: t.label,
-      // treatmentLogoUrl returns null for a plain Main (the real tile falls
-      // back to <TeamLogo>, which resolves its own CDN url) — spell that
-      // fallback out explicitly here since this strip has no such component.
-      url: treatmentLogoUrl(teamId, t.key, override) ?? teamLogoUrl(teamId, 'base'),
-    }
-  })
+  const marks = treatments.map((t) => ({
+    key: t.key,
+    label: t.label,
+    // treatmentLogoUrl returns null for a plain Main (the real tile falls
+    // back to <TeamLogo>, which resolves its own CDN url) — spell that
+    // fallback out explicitly here since this strip has no such component.
+    url: treatmentLogoUrl(teamId, t.key) ?? teamLogoUrl(teamId, 'base'),
+  }))
   for (const t of treatments) {
     if (!WPA_OWN_ART[teamId]?.[t.key]) continue
     const url = wpaArtUrl(teamId, t.key)
@@ -488,13 +485,13 @@ function rowLogos(teamId) {
 // dropped file is live immediately — but the browser has the old bytes cached
 // under the same URL, so without a changing query the tile would keep showing
 // the mark that was just replaced.
-function TreatmentLogo({ teamId, name, treatment, override, version = 0 }) {
-  const base = treatmentLogoUrl(teamId, treatment, override)
+function TreatmentLogo({ teamId, name, treatment, version = 0 }) {
+  const base = treatmentLogoUrl(teamId, treatment)
   const url = base && version > 0 ? `${base}?v=${version}` : base
   const [failed, setFailed] = useState(false)
   useEffect(() => setFailed(false), [url])
 
-  if (treatment === 'main' && !override?.recolor) {
+  if (treatment === 'main' && !base) {
     return <TeamLogo teamId={teamId} name={name} size={64} />
   }
 
@@ -551,18 +548,18 @@ function WpaArtBox({ teamId, treatment, name, version = 0 }) {
 }
 
 // A tile whose art file is NOT what the app resolves for it — a club in one of
-// teams.js's *_USES_BASE_LOGO sets (the plain CDN mark), one whose art is
-// filed as .svg (ALT_LOGO_SVG / the main-overrides default), or a Main tile
-// with no `recolor` override. The upload still lands in the right place, but
-// the tile keeps rendering what teams.js says, so say so rather than leaving
-// the owner staring at an unchanged mark wondering whether the save worked.
-function uploadCaveat(teamId, treatment, override, target) {
+// teams.js's *_USES_BASE_LOGO sets (the plain CDN mark), including the two
+// Main-treatment exceptions in MAIN_USES_BASE_LOGO. Every other upload just
+// works the moment it lands, but these opt-outs mean the file can still sit
+// there unused, so say so rather than leaving the owner staring at an
+// unchanged mark wondering whether the save worked.
+function uploadCaveat(teamId, treatment, target) {
   if (!target) return null
-  const resolved = treatmentLogoUrl(teamId, treatment, override)
+  const resolved = treatmentLogoUrl(teamId, treatment)
   if (resolved === target.url) return null
   return (
     `teams.js still renders ${resolved ?? 'the plain CDN mark'} for this tile — ` +
-    'see MAIN_OVERRIDES / ALT_LOGO_SVG / the *_USES_BASE_LOGO sets'
+    'see MAIN_USES_BASE_LOGO / ALT_LOGO_SVG / the *_USES_BASE_LOGO sets'
   )
 }
 
@@ -734,7 +731,6 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
             teamId={teamId}
             name={name}
             treatment={treatment}
-            override={override}
             version={artVersion}
           />
         ),
@@ -742,7 +738,8 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       upload={{
         teamId,
         treatment,
-        caveat: uploadCaveat(teamId, treatment, override, logoUploadTarget(teamId, treatment)),
+        caveat: uploadCaveat(teamId, treatment, logoUploadTarget(teamId, treatment)),
+        copyTargets: treatmentsForTeam(teamId).filter((t) => t.key !== treatment),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
       wearDates={wearDates}
