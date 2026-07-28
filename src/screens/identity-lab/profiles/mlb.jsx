@@ -492,7 +492,12 @@ function TreatmentLogo({ teamId, name, treatment, override, version = 0 }) {
   const base = treatmentLogoUrl(teamId, treatment, override)
   const url = base && version > 0 ? `${base}?v=${version}` : base
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [url])
+  // Reset computed during render, not in an effect — see Headshot.jsx.
+  const [prevUrl, setPrevUrl] = useState(url)
+  if (url !== prevUrl) {
+    setPrevUrl(url)
+    setFailed(false)
+  }
 
   if (treatment === 'main' && !override?.recolor) {
     return <TeamLogo teamId={teamId} name={name} size={64} />
@@ -527,7 +532,12 @@ function WpaArtBox({ teamId, treatment, name, version = 0 }) {
   const base = wpaArtUrl(teamId, treatment)
   const url = base && version > 0 ? `${base}?v=${version}` : base
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [url])
+  // Reset computed during render, not in an effect — see Headshot.jsx.
+  const [prevUrl, setPrevUrl] = useState(url)
+  if (url !== prevUrl) {
+    setPrevUrl(url)
+    setFailed(false)
+  }
 
   if (!url || failed) {
     return (

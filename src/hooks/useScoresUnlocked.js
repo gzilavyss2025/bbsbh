@@ -147,7 +147,11 @@ export function useScoresUnlocked() {
   }, [])
 
   // Clean up an expired value on mount (state may have initialized to a stale one).
+  // This is synchronizing with an external system (localStorage) on mount —
+  // the textbook case an Effect exists for — not adjusting state from props;
+  // the rule can't see through `refresh`'s indirection to tell the two apart.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh()
   }, [refresh])
 

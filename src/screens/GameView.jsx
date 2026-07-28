@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
@@ -93,10 +93,19 @@ export function GameView({ game, section, onSection }) {
   // Where "Innings" returns to: the last half-inning page the user was on, so
   // hopping out to a lineup or the box score and back doesn't lose your place
   // mid-game. Structural only (a section name), never a score.
-  const lastInningSection = useRef('top1')
-  useEffect(() => {
-    if (step === 2) lastInningSection.current = stepToSection(2, inning, half)
-  }, [step, inning, half])
+  // State, not a ref: the value is read during render (to build the nav's
+  // "Innings" tab target), and a ref must never be read outside an event
+  // handler/effect — reading one during render isn't reactive and can tear
+  // under concurrent rendering. The update itself is computed during render
+  // (React's documented "adjust state while rendering" escape hatch) rather
+  // than an effect, since it only depends on this render's own props.
+  const [lastInningSection, setLastInningSection] = useState('top1')
+  if (step === 2) {
+    const currentInningsSection = stepToSection(2, inning, half)
+    if (currentInningsSection !== lastInningSection) {
+      setLastInningSection(currentInningsSection)
+    }
+  }
 
   const sketchTeam = sketching ? game[sketching] : null
 
@@ -120,7 +129,7 @@ export function GameView({ game, section, onSection }) {
               key: 'innings',
               label: 'Innings',
               active: step === 2,
-              section: lastInningSection.current,
+              section: lastInningSection,
             },
             { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
           ]
@@ -141,7 +150,7 @@ export function GameView({ game, section, onSection }) {
               key: 'innings',
               label: 'Innings',
               active: step === 2,
-              section: lastInningSection.current,
+              section: lastInningSection,
             },
             { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
           ]

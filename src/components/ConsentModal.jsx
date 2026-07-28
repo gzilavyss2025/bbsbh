@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { useCopy } from '../copy/copyContext.js'
 
 // The spoiler-consent modal — the one place the app's single opt-in departure
@@ -17,7 +17,6 @@ import { useCopy } from '../copy/copyContext.js'
 // `resolveText` is an optional escape hatch: the admin copy panel passes its own
 // resolver (built from unsaved edits) to preview the REAL modal with in-progress
 // wording. Left undefined, the modal reads the live published copy.
-let consentTitleSeq = 0
 
 export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText }) {
   const { t } = useCopy()
@@ -26,7 +25,9 @@ export function ConsentModal({ group, time, onConfirm, onDismiss, resolveText })
   const sheetRef = useRef(null)
   const dismissRef = useRef(null)
   // Stable unique id for aria-labelledby (avoids a duplicate aria-label + <h2>).
-  const titleId = useRef(`consent-title-${(consentTitleSeq += 1)}`).current
+  // useId (not a module-level counter in a ref) is React's own stable-unique-id
+  // primitive — SSR-safe and doesn't mutate shared state during render.
+  const titleId = useId()
 
   useEffect(() => {
     const trigger = document.activeElement

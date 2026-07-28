@@ -136,7 +136,13 @@ function wpaLandedFlat(teamId, variant) {
 // shows the curated mark immediately, no upload required this session.
 function MilbTreatmentLogo({ teamId, name, variant, hasArt, version }) {
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [teamId, variant, hasArt])
+  // Reset computed during render, not in an effect — see Headshot.jsx.
+  const identityKey = `${teamId}|${variant}|${hasArt}`
+  const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
+  if (identityKey !== prevIdentityKey) {
+    setPrevIdentityKey(identityKey)
+    setFailed(false)
+  }
   if (!hasArt || failed) return <TeamLogo teamId={teamId} name={name} size={64} />
   const base = teamLogoUrl(teamId, `milb-${variant}`)
   const url = version > 0 ? `${base}?v=${version}` : base

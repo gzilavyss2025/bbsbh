@@ -145,11 +145,15 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
   // chronological order, matching the remainings list one-for-one.
+  // A lookup keyed by entry identity (not a mutation of the entry objects
+  // themselves — `entries` may be a reveal-only derivation's own return
+  // value, and mutating it in place risks corrupting a cached result).
   const mvRemaining = moundVisitRemainings(feed, inning, half, battingSide)
   let mvSeen = 0
+  const mvRemainingByEntry = new Map()
   for (const e of entries) {
     if (e.kind === 'event' && e.eventType === 'mound_visit') {
-      e.mvRemaining = mvRemaining[mvSeen] ?? null
+      mvRemainingByEntry.set(e, mvRemaining[mvSeen] ?? null)
       mvSeen += 1
     }
   }
@@ -212,7 +216,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <MoundVisitBar
               team={pitchingName}
               teamId={pitchingTeamId}
-              remaining={entry.mvRemaining}
+              remaining={mvRemainingByEntry.get(entry) ?? null}
               allowed={moundVisitsAllowed(inning)}
             />
           )

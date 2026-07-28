@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   fetchGameFeed,
   fetchGameFeedDiff,
@@ -76,7 +76,9 @@ export function useGameData(game, spoilersOff = false) {
   // the LAST time gamePk changed, not live toggles of Follow Live/Scores
   // Unlocked (ADR-0026/ADR-0027) mid-game.
   const spoilersOffRef = useRef(spoilersOff)
-  spoilersOffRef.current = spoilersOff
+  useLayoutEffect(() => {
+    spoilersOffRef.current = spoilersOff
+  })
 
   // The uniform assignment rides the SAME fetch/reload as the feed: it's empty
   // until around first pitch, so each live Refresh must re-pull it, and
@@ -131,8 +133,15 @@ export function useGameData(game, spoilersOff = false) {
   // an idle window after the first feed resolves, with a timeout fallback for
   // browsers that do not expose requestIdleCallback.
   const [enrichmentReady, setEnrichmentReady] = useState(false)
-  useEffect(() => {
+  // Reset computed during render (not as the first line of the effect below)
+  // on a game/feed-availability change — see Headshot.jsx for the pattern.
+  const enrichmentKey = `${game.gamePk}|${hasActiveFeed}`
+  const [prevEnrichmentKey, setPrevEnrichmentKey] = useState(enrichmentKey)
+  if (enrichmentKey !== prevEnrichmentKey) {
+    setPrevEnrichmentKey(enrichmentKey)
     setEnrichmentReady(false)
+  }
+  useEffect(() => {
     if (!hasActiveFeed) return undefined
     let cancelled = false
     const start = () => {
