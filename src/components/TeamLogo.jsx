@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { teamLogoUrl } from '../lib/teams.js'
 
 // Decorative team logo, keyed by the team id we already carry throughout the
@@ -31,7 +31,14 @@ export function TeamLogo({
   // (teamId, variant). Reset whenever either changes so a re-picked mark starts
   // fresh instead of inheriting a prior failure.
   const [stage, setStage] = useState('variant')
-  useEffect(() => setStage('variant'), [teamId, variant])
+  // Reset computed during render (React's "adjust state while rendering"
+  // pattern) rather than in an effect — see Headshot.jsx for the same shape.
+  const identityKey = `${teamId}|${variant}`
+  const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
+  if (identityKey !== prevIdentityKey) {
+    setPrevIdentityKey(identityKey)
+    setStage('variant')
+  }
 
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
   const monogram = (name ?? '').trim().charAt(0).toUpperCase() || '?' // caps-js-exempt

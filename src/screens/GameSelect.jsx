@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
 import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
@@ -269,7 +269,15 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
     [sorted, showPastDayTreatment],
   )
   const [revealedAll, setRevealedAll] = useState(false)
-  useEffect(() => setRevealedAll(false), [dateStr, sportId])
+  // Reset computed during render (not in an effect) on a day/level change —
+  // see Headshot.jsx for the same pattern. Shares `dayKey` with the filter
+  // reset below since both key off the same (dateStr, sportId) change.
+  const dayKey = `${dateStr}|${sportId}`
+  const [prevDayKeyForReveal, setPrevDayKeyForReveal] = useState(dayKey)
+  if (dayKey !== prevDayKeyForReveal) {
+    setPrevDayKeyForReveal(dayKey)
+    setRevealedAll(false)
+  }
   // Spoilers-off counts as "reveal all" for this day's flip cards too: the user
   // has consented to every score on this date (ADR-0026), so the amber banner
   // must never sit over a still-sealed slate once the day has gone all-final —
@@ -301,7 +309,11 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // revealedAll above, so a stale filter never silently hides next slate's
   // cards.
   const [activeFilters, setActiveFilters] = useState(new Set())
-  useEffect(() => setActiveFilters(new Set()), [dateStr, sportId])
+  const [prevDayKeyForFilters, setPrevDayKeyForFilters] = useState(dayKey)
+  if (dayKey !== prevDayKeyForFilters) {
+    setPrevDayKeyForFilters(dayKey)
+    setActiveFilters(new Set())
+  }
   const toggleFilter = (key) =>
     setActiveFilters((prev) => {
       const next = new Set(prev)

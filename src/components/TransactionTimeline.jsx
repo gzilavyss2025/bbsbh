@@ -52,14 +52,17 @@ export function TransactionTimeline({ rows }) {
   if (!rows?.length) return null
   const dense = rows.length > VISIBLE_LIMIT
   const visible = dense && !expanded ? rows.slice(0, VISIBLE_LIMIT) : rows
-  let lastYear = null
+  // Precompute the year-divider flag per row (rather than mutating a `let`
+  // while mapping) so this stays a pure render pass.
+  const withYearFlag = visible.map((r, i) => ({
+    row: r,
+    showYear: i === 0 || r.year !== visible[i - 1].year,
+  }))
   return (
     <section className="txntl">
       <h3 className="section__title"><span>Transactions</span></h3>
       <ol className="txntl__track">
-        {visible.map((r, i) => {
-          const showYear = r.year !== lastYear
-          lastYear = r.year
+        {withYearFlag.map(({ row: r, showYear }, i) => {
           return (
             <Fragment key={`${r.date}-${r.code}-${i}`}>
               {showYear && (

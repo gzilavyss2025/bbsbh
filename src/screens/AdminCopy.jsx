@@ -158,7 +158,7 @@ function HistoryPanel({ history, onRestore, onClose }) {
 // always have a provider (main.jsx only mounts one when Clerk is enabled).
 function Editor({ onDirty }) {
   const { getToken } = useAuth()
-  const defaults = useMemo(defaultCopy, [])
+  const defaults = useMemo(() => defaultCopy(), [])
   // values[id] is the current text in each box: an override, or the default.
   const [values, setValues] = useState(defaults)
   // The last-persisted override map — what's actually in the store. Used to

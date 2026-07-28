@@ -107,7 +107,12 @@ function AuditTile({ teamId, treatment }) {
   const baseUrl = teamLogoUrl(teamId, 'base')
   const sharesMainArt = treatment !== 'main' && url === baseUrl
   const [failed, setFailed] = useState(false)
-  useEffect(() => setFailed(false), [url])
+  // Reset computed during render, not in an effect — see Headshot.jsx.
+  const [prevUrl, setPrevUrl] = useState(url)
+  if (url !== prevUrl) {
+    setPrevUrl(url)
+    setFailed(false)
+  }
 
   const style = {
     '--tint': tile.pinstripeColor ? undefined : tile.tint,

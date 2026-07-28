@@ -31,7 +31,7 @@ function esc(s) {
 // clean of the ?route=… internals (and of any spoiler-cutoff ?d/?s hints).
 function canonicalUrl(params, origin) {
   const route = params.get('route')
-  let path = '/'
+  let path
   switch (route) {
     case 'player':
       path = `/player/${params.get('id')}`
@@ -94,7 +94,7 @@ export default async function handler(req) {
   const url = new URL(req.url)
   const origin = url.origin
 
-  let card = null
+  let card
   try {
     card = await buildCard(url.searchParams, origin)
   } catch {
