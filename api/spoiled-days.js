@@ -98,7 +98,7 @@ export default async function handler(req, res) {
   const key = `spoiled:${userId}`
 
   if (req.method === 'GET') {
-    let stored = {}
+    let stored
     try {
       stored = sanitizeStored(await redis.hgetall(key))
     } catch {
@@ -119,7 +119,7 @@ export default async function handler(req, res) {
   }
 
   await redis.hset(key, { [day]: state })
-  let stored = {}
+  let stored
   try {
     stored = sanitizeStored(await redis.hgetall(key))
     await trim(redis, key, stored)
