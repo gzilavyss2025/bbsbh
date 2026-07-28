@@ -16,7 +16,7 @@ import { test, expect } from '../fixtures.js'
 //
 // Selectors are structure, not copy (the consent wording is admin-editable):
 // the data-testid on the slate toggle, ConsentModal's own class names, and
-// the same `.rhe`/sealed-cell proxies the other invariants specs use.
+// the same `.statline`/sealed-cell proxies the other invariants specs use.
 //
 // Note: the innings-content checks need the live MLB feed. Where a run
 // environment can't reach statsapi, those assertions are guarded so the spec
@@ -111,8 +111,8 @@ test('with the pass on, a game unseals without a tap — and NEVER writes the re
   // invariant above rather than flaking.
   const runningLine = page.locator('.rolling__pick').first()
   if (await runningLine.count()) {
-    await expect(page.getByRole('button', { name: 'Tap to reveal inning totals' })).toHaveCount(0)
-    await expect(page.locator('.rhe')).toHaveCount(1)
+    await expect(page.getByRole('button', { name: /Reveal the rest of half/i })).toHaveCount(0)
+    await expect(page.locator('.statline')).toHaveCount(1)
   }
 
   // Turn the pass off and reload: the game re-seals, and the mark is STILL
@@ -122,8 +122,8 @@ test('with the pass on, a game unseals without a tap — and NEVER writes the re
   const markAfterOff = await page.evaluate((k) => window.localStorage.getItem(k), KEY)
   expect(markAfterOff).toBeNull()
   if (await page.locator('.innings').count()) {
-    await expect(page.getByRole('button', { name: 'Tap to reveal inning totals' })).toBeVisible()
-    await expect(page.locator('.rhe')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Reveal the rest of half/i })).toBeVisible()
+    await expect(page.locator('.statline')).toHaveCount(0)
   }
 })
 
