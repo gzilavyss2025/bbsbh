@@ -455,6 +455,36 @@ function treatmentLogoUrl(teamId, treatment, override) {
   return teamLogoUrl(teamId, treatment)
 }
 
+// Every mark this club is actually rendered with somewhere on the site —
+// the collapsed row's own quick "what have we got" strip (TeamLabRow's
+// `logos` prop), so a reviewer can eyeball coverage without expanding every
+// tile. One entry per real treatment (the CDN base mark, a hand-recolored
+// Main override, or a procured local PNG — whichever `treatmentLogoUrl`
+// resolves for that tile, same as the expanded tile itself renders), PLUS a
+// trailing entry for any treatment that's opted into its own separately
+// uploaded WPA-only mark (WPA_OWN_ART) — a real, distinct file the owner
+// uploaded, even though it never appears as a tile's own logo box.
+function rowLogos(teamId) {
+  const treatments = treatmentsForTeam(teamId)
+  const marks = treatments.map((t) => {
+    const override = t.key === 'main' ? MAIN_OVERRIDES[teamId] : null
+    return {
+      key: t.key,
+      label: t.label,
+      // treatmentLogoUrl returns null for a plain Main (the real tile falls
+      // back to <TeamLogo>, which resolves its own CDN url) — spell that
+      // fallback out explicitly here since this strip has no such component.
+      url: treatmentLogoUrl(teamId, t.key, override) ?? teamLogoUrl(teamId, 'base'),
+    }
+  })
+  for (const t of treatments) {
+    if (!WPA_OWN_ART[teamId]?.[t.key]) continue
+    const url = wpaArtUrl(teamId, t.key)
+    if (url) marks.push({ key: `${t.key}-wpa`, label: `${t.label} — WPA`, url })
+  }
+  return marks
+}
+
 // `version` counts uploads onto this tile. Vite serves public/ off disk, so a
 // dropped file is live immediately — but the browser has the old bytes cached
 // under the same URL, so without a changing query the tile would keep showing
@@ -1015,6 +1045,7 @@ export const mlbProfile = {
   useExtras: useMlbExtras,
   Tiles: MlbTiles,
   sidebar: <NeutralSwatchesSidebar />,
+  rowLogos,
   matchesLanded: {
     pos: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(

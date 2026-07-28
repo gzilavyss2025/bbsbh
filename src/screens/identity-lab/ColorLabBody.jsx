@@ -114,6 +114,7 @@ export function ColorLabBody({ profile }) {
             name={team.name}
             sportId={profile.sportId}
             badge={profile.rowBadge?.(team.id)}
+            logos={profile.rowLogos?.(team.id)}
             collapsed={collapsed[team.id] !== false}
             onToggleCollapsed={() => toggleCollapsed(team.id)}
           >
