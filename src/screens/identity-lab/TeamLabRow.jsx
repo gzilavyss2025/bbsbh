@@ -12,7 +12,7 @@ import { teamAnchorId } from './teamAnchorId.js'
 // unlike the one batched uniform-catalog fetch, there's no multi-team schedule
 // endpoint to spread this over. It stays cached in this row's state once it
 // resolves, so re-collapsing and re-expanding never re-fetches.
-export function TeamLabRow({ teamId, name, sportId, badge, collapsed, onToggleCollapsed, children }) {
+export function TeamLabRow({ teamId, name, sportId, badge, logos, collapsed, onToggleCollapsed, children }) {
   const [lastOpponent, setLastOpponent] = useState(undefined)
   useEffect(() => {
     if (collapsed || lastOpponent !== undefined) return
@@ -39,7 +39,47 @@ export function TeamLabRow({ teamId, name, sportId, badge, collapsed, onToggleCo
           {collapsed ? '▸' : '▾'}
         </span>
       </button>
+      {/* Every mark this club actually renders somewhere on the site, at a
+          glance without expanding the row — the CDN SVG for a plain
+          treatment, a procured/hand-recolored PNG for the rest, or a
+          separately uploaded WPA-only mark (`profile.rowLogos`, MLB only —
+          absent for MiLB, same "absent rather than special-cased" pattern
+          `upload`/`nameField` already follow). Collapsed-only: once expanded,
+          every one of these already appears as its own tile's logo box. */}
+      {collapsed && logos?.length > 0 && <RowLogoStrip name={name} logos={logos} />}
       {!collapsed && <div className="colorlab__treatments">{children(lastOpponent)}</div>}
     </section>
+  )
+}
+
+// A mark that 404s (art not actually procured for a treatment the club
+// otherwise qualifies for, e.g. an unset Alternate 4) just drops out of the
+// strip rather than showing a broken image — the row itself already gates
+// on `hasAlternate2/3/4`/`hasCityConnect`, so a real miss here means the
+// file genuinely isn't on disk yet, not a bad url.
+function RowLogo({ name, label, url }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+  return (
+    <img
+      key={url}
+      src={url}
+      alt={`${name} — ${label}`}
+      title={label}
+      className="colorlab__rowlogo"
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+function RowLogoStrip({ name, logos }) {
+  return (
+    <div className="colorlab__rowlogos">
+      {logos.map((l) => (
+        <RowLogo key={l.key} name={name} label={l.label} url={l.url} />
+      ))}
+    </div>
   )
 }

@@ -7,6 +7,7 @@
 // (test/wpa-logo.test.js).
 import { teamLogoUrl } from './teams.js'
 import { byTreatment } from './tuningStore.js'
+import { wpaArtUrl } from './logoArt.js'
 import WPA_TUNING from './data/wpa-tuning.json' with { type: 'json' }
 
 // The WPA band's own hand-tuned store (src/lib/data/wpa-tuning.json), shared
@@ -91,7 +92,14 @@ export const LOGO_COLOR_OVERRIDES = {
 // one that treatment normally wears everywhere else on the site — the mark
 // itself (teams.js's real per-treatment art) and this tile's own band color
 // (WPA_TREATMENT_BAND_COLOR_OVERRIDES) are untouched; only which logo file
-// gets tiled changes. Value is the `teamLogoUrl` variant to substitute in.
+// gets tiled changes. Value is the `teamLogoUrl` variant to substitute in —
+// always an EXISTING variant a club already wears somewhere. This is
+// deliberately a separate, lower-priority mechanism from WPA_OWN_ART/
+// `ownArt` below (an uploaded WPA-ONLY file with no other home): the two
+// answer different questions — "point at another variant that already
+// exists" vs. "tile a file procured for this purpose only" — and merging
+// them would mean copying these two clubs' art into a second directory to
+// express what the redirect already says.
 export const WPA_MARK_SOURCE_OVERRIDES = {
   // Braves Alt 2 Navy (treatment 'main') — the plain "A" cap mark stays the
   // club's Main mark everywhere else (card tile, header, etc.); the WPA band
@@ -106,7 +114,29 @@ export const WPA_MARK_SOURCE_OVERRIDES = {
   113: { main: 'main-recolor' },
 }
 
-export function wpaLogoFor(teamId, treatment = 'main') {
+// Which (team, treatment)s have opted OUT of tiling the same mark the
+// resolution chain below would otherwise pick, in favor of a separately
+// uploaded WPA-only PNG (Team Identity Lab's "Use Logo Art" checkbox,
+// WpaPreview.jsx) — `wpa-tuning.json`'s own per-treatment `ownArt` field,
+// same store as this file's other per-treatment reads (one dimension, one
+// file — see the WPA_TUNING doc above). Absent/false is the default: tile
+// whatever wpaLogoFor already resolved before this feature existed.
+export const WPA_OWN_ART = byTreatment(WPA_TUNING, (f) => f.ownArt)
+
+// The shared body of wpaLogoFor/wpaLogoWithFallback below. `allowOwnArt` is
+// false only on the fallback's OWN retry after a miss — if it stayed true, a
+// club whose uploaded WPA art 404s would "fall back" to re-resolving the
+// exact same missing URL and loop, the precise silent-blank-band failure this
+// whole chain exists to prevent (see wpaLogoWithFallback's doc below).
+function resolveMark(teamId, treatment, allowOwnArt) {
+  if (allowOwnArt && WPA_OWN_ART[teamId]?.[treatment]) {
+    const src = wpaArtUrl(teamId, treatment)
+    // Uploaded WPA art is procured art with its own colors, same footing as
+    // every other curated treatment PNG (Alternate, City Connect, …) — never
+    // gated through LOGO_COLOR_OVERRIDES, which is scoped to the stock CDN
+    // base mark specifically (see that table's own doc comment above).
+    if (src) return { src, recolor: null }
+  }
   const markVariant = WPA_MARK_SOURCE_OVERRIDES[teamId]?.[treatment] ?? (treatment === 'main' ? 'base' : treatment)
   const src = teamLogoUrl(teamId, markVariant)
   const override = LOGO_COLOR_OVERRIDES[teamId]
@@ -114,12 +144,19 @@ export function wpaLogoFor(teamId, treatment = 'main') {
   return { src: override.mode === 'swap' ? override.src : src, recolor: override }
 }
 
+export function wpaLogoFor(teamId, treatment = 'main') {
+  return resolveMark(teamId, treatment, true)
+}
+
 // Same, but for a caller that has since learned this treatment's art isn't
 // actually there (`artMissing` — a 404, or no URL to try in the first place).
 // Falls all the way back to the club's Main mark, which is the stock CDN
 // logo and therefore always exists — and, being the base mark again, gets its
 // LOGO_COLOR_OVERRIDES recolor back too, exactly as if the club were wearing
-// its Main uniform.
+// its Main uniform. The retry bypasses `ownArt` (`allowOwnArt: false`) even
+// when the miss WAS the uploaded WPA-only file 404ing on `main` itself —
+// otherwise this would re-resolve to that same missing URL and the band
+// would still paint nothing.
 //
 // This matters because an SVG <image> inside a <pattern> has no error
 // handling of its own: a 404'd href paints NOTHING and the band renders as a
@@ -129,7 +166,7 @@ export function wpaLogoFor(teamId, treatment = 'main') {
 // the treatment's own curated color, since that's a separate table that
 // doesn't depend on art being on file.
 export function wpaLogoWithFallback(teamId, treatment, artMissing) {
-  return wpaLogoFor(teamId, artMissing ? 'main' : treatment)
+  return resolveMark(teamId, artMissing ? 'main' : treatment, !artMissing)
 }
 
 // ---------------------------------------------------------------------------

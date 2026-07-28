@@ -319,21 +319,34 @@ test('the accent is the distinctiveness pick, deliberately restating the pair fo
 // The counterpart of the MiLB guard above: these hexes were researched against
 // Wikipedia infoboxes and teamcolorcodes.com and skipped rather than guessed
 // where sources disagreed, so a refactor must not be able to drop them silently
-// (an earlier pass deleted the table outright).
-test('every researched MLB extra colour survives, and stays distinct from the accent', () => {
+// (an earlier pass deleted the table outright). Each club's FIRST extra was
+// later promoted to the editable `accent2` role (see the ACCENT2 test below);
+// only a club with a SECOND extra still has anything left here.
+test('every researched MLB extra colour beyond accent2 survives, and stays distinct from the accent', () => {
   const withExtras = ALL_MLB_TEAM_IDS.filter((id) => teamColorExtras(id).length > 0)
-  assert.equal(withExtras.length, 14)
-  assert.deepEqual(teamColorExtras(108), [{ label: 'Silver', hex: '#C4CED4' }]) // Angels
-  assert.deepEqual(teamColorExtras(137), [
-    { label: 'Cream', hex: '#EFD19F' },
-    { label: 'Metallic Gold', hex: '#AE8F6F' },
-  ]) // Giants
+  assert.equal(withExtras.length, 5)
+  assert.deepEqual(teamColorExtras(137), [{ label: 'Metallic Gold', hex: '#AE8F6F' }]) // Giants, Cream promoted
+  assert.deepEqual(teamColorExtras(146), [{ label: 'Black', hex: '#000000' }]) // Marlins
   assert.deepEqual(teamColorExtras(999999), [])
   for (const teamId of withExtras) {
     for (const extra of teamColorExtras(teamId)) {
       assert.match(extra.hex, /^#[0-9a-fA-F]{6}$/, `${teamId}: ${extra.hex}`) // caps-js-exempt
       assert.ok(extra.label, `${teamId} has an unlabeled extra`)
     }
+  }
+})
+
+// The promotion itself: a club's first researched extra becomes a real,
+// editable `accent2` field — not a copy sitting alongside the still-read-only
+// `extras` entry, which would let the two drift.
+test('a club with a researched extra has it promoted to accent2, not duplicated', () => {
+  const withAccent2 = ALL_MLB_TEAM_IDS.filter((id) => MLB_TEAM_COLORS[id].accent2 !== undefined)
+  assert.equal(withAccent2.length, 14)
+  assert.equal(MLB_TEAM_COLORS[108].accent2, '#C4CED4') // Angels — Silver
+  assert.equal(MLB_TEAM_COLORS[109].accent2, '#30CED8') // Diamondbacks — Teal
+  assert.equal(MLB_TEAM_COLORS[137].accent2, '#EFD19F') // Giants — Cream (first of its two extras)
+  for (const teamId of withAccent2) {
+    assert.match(MLB_TEAM_COLORS[teamId].accent2, /^#[0-9a-fA-F]{6}$/, `${teamId} accent2`) // caps-js-exempt
   }
 })
 

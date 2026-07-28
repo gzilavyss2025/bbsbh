@@ -17,6 +17,8 @@ export function WpaPreview({
   pinstripe,
   bandColor,
   bandBg,
+  ownArt,
+  artUpload,
   hasDraft,
   copyText,
   onField,
@@ -36,6 +38,21 @@ export function WpaPreview({
         <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} WPA context`} />
       </div>
       <div className="colorlab__wpapreviewfields">
+        {/* Checked (the default — `ownArt` absent/false) tiles the exact same
+            mark this treatment's own logo box shows, unchanged from before
+            this checkbox existed. Unchecked switches to a separately
+            uploaded WPA-only mark (artUpload below) — absent for MiLB, which
+            has no WPA-only upload destination (src/lib/logoArt.js). */}
+        {artUpload && (
+          <label className="colorlab__wpapreviewcolor colorlab__wpapreviewcheck">
+            <input
+              type="checkbox"
+              checked={!ownArt}
+              onChange={(e) => onField('ownArt', !e.target.checked)}
+            />
+            <span>Use Logo Art</span>
+          </label>
+        )}
         <label>
           <span>Size</span>
           <input type="number" value={size} onChange={(e) => onField('size', Number(e.target.value))} />
@@ -93,6 +110,7 @@ export function WpaPreview({
           </label>
         )}
       </div>
+      {ownArt && artUpload}
     </div>
   )
 }

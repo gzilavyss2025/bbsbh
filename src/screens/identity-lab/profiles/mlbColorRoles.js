@@ -9,10 +9,24 @@
 // headshot tints and favoriteAccentColor. For 27 of 30 clubs it deliberately
 // restates the club's own Primary or Secondary. A club's real third-or-later
 // brand colours are the separate `extras` list (teams.js's teamColorExtras).
+//
+// `accent2` is a DIFFERENT kind of thing from `accent` — no distinctiveness
+// meaning, no consumer beyond this swatch — it's just an editable 4th slot
+// for the one club-level extra that used to only ever show up read-only in
+// the `extras` list. Seeded once (see the migration this landed with) from
+// whichever of a club's researched extras came first; any additional extra
+// beyond that stays in `extras`, still read-only, since a single role can't
+// hold more than one of them. A club with no extra at all simply has no
+// `accent2`, same as any other absent role.
 
-export const COLOR_ROLES = ['primary', 'secondary', 'accent']
+export const COLOR_ROLES = ['primary', 'secondary', 'accent', 'accent2']
 
-export const COLOR_ROLE_LABELS = { primary: 'Primary', secondary: 'Secondary', accent: 'Accent' }
+export const COLOR_ROLE_LABELS = {
+  primary: 'Primary',
+  secondary: 'Secondary',
+  accent: 'Accent',
+  accent2: 'Accent 2',
+}
 
 // Merge one club's touched role fields into its mlb-team-colors.json entry.
 //
@@ -43,4 +57,35 @@ export function applyColorsDraft(record, fields) {
 export function colorsDraftMatchesLanded(fields, landed) {
   if (!landed) return false
   return Object.entries(fields).every(([role, value]) => (landed[role] ?? '') === value)
+}
+
+// The per-TREATMENT color panel (every tile — Main included — gets its own
+// four slots: mlb-treatment-tuning.json's `treatments.<key>.colors`) is a
+// separate, independent thing from the Main-only triad above: that triad is
+// the club's single brand identity (feeds real headshot tints via
+// TEAM_COLORS/TEAM_COLOR_PAIRS in teams.js, one value per club regardless of
+// which jersey it's wearing); this is per-jersey research/reference color
+// notes, edited the same way position/WPA/header tuning already is. Same
+// role count for every treatment — editing needs a stable slot-to-role
+// mapping, same reasoning as COLOR_ROLES above.
+export const TREATMENT_COLOR_ROLES = ['primary', 'secondary', 'accent1', 'accent2']
+
+export const TREATMENT_COLOR_ROLE_LABELS = {
+  primary: 'Primary',
+  secondary: 'Secondary',
+  accent1: 'Accent 1',
+  accent2: 'Accent 2',
+}
+
+// Merge one (team, treatment)'s touched color fields into its
+// mlb-treatment-tuning.json `colors` record — same delete-on-empty rule as
+// applyColorsDraft above, for the same reason (isColorish rejects `''`).
+export function applyTreatmentColorsDraft(record, fields) {
+  const next = { ...record }
+  for (const role of TREATMENT_COLOR_ROLES) {
+    if (fields[role] === undefined) continue
+    if (fields[role]) next[role] = fields[role]
+    else delete next[role]
+  }
+  return next
 }

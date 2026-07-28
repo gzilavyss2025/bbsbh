@@ -11,6 +11,8 @@ import {
   fetchTeamUniformCatalog,
   jerseyLabel,
 } from '../../../api/uniforms.js'
+import { TeamJumpNav } from '../LabShell.jsx'
+import { teamAnchorId } from '../teamAnchorId.js'
 
 // The jersey audit: one row per (club, catalog jersey) — see PRD §"PR 2" —
 // answering "which mark does this jersey actually resolve to, and did that
@@ -153,13 +155,18 @@ function AuditTile({ teamId, treatment }) {
   )
 }
 
-function AuditRow({ row }) {
+function AuditRow({ row, isFirstForTeam, striped }) {
   return (
-    <tr className="audittable__row">
+    <tr
+      className={`audittable__row${striped ? ' audittable__row--alt' : ''}`}
+      id={isFirstForTeam ? teamAnchorId(row.teamId) : undefined}
+    >
       <td className="audittable__team">{row.teamName}</td>
-      <td className="audittable__raw">
-        <span className="audittable__rawtext">{row.text}</span>
-        <span className="audittable__rawcode">{row.code ?? '—'}</span>
+      <td>
+        <div className="audittable__raw">
+          <span className="audittable__rawtext">{row.text}</span>
+          <span className="audittable__rawcode">{row.code ?? '—'}</span>
+        </div>
       </td>
       <td>{row.label}</td>
       <td>{TREATMENT_LABEL[row.treatment] ?? row.treatment}</td>
@@ -175,6 +182,38 @@ function AuditRow({ row }) {
   )
 }
 
+// Every club in row order, deduped — the jump nav's target list. Built from
+// the FULL row set (not the heuristic-only filtered view) so the sidebar
+// never reshuffles or drops a logo when the checkbox is toggled; a club
+// filtered down to zero visible rows just has no matching anchor to land on.
+function navTeamsFromRows(rows) {
+  const seen = new Set()
+  const teams = []
+  for (const row of rows) {
+    if (seen.has(row.teamId)) continue
+    seen.add(row.teamId)
+    teams.push({ id: row.teamId, name: row.teamName })
+  }
+  return teams
+}
+
+// Tags each row with whether it's the first for its club (carries the anchor
+// id the jump nav targets) and which side of the zebra stripe it falls on —
+// computed over whatever's actually rendering, so a club's stripe/anchor
+// follow it correctly whether the heuristic-only filter is on or off.
+function withTeamMeta(rows) {
+  const seen = new Set()
+  let alt = false
+  return rows.map((row) => {
+    const isFirstForTeam = !seen.has(row.teamId)
+    if (isFirstForTeam) {
+      seen.add(row.teamId)
+      alt = !alt
+    }
+    return { row, isFirstForTeam, striped: alt }
+  })
+}
+
 function AuditLabBody() {
   const catalog = useMlbUniformCatalog()
   const [heuristicOnly, setHeuristicOnly] = useState(false)
@@ -186,9 +225,13 @@ function AuditLabBody() {
   const overrideCount = rows.filter((r) => r.via === 'override').length
   const heuristicCount = rows.length - overrideCount
   const visible = heuristicOnly ? rows.filter((r) => r.via === 'heuristic') : rows
+  const navTeams = navTeamsFromRows(rows)
+  const visibleWithMeta = withTeamMeta(visible)
 
   return (
     <>
+      <TeamJumpNav teams={navTeams} />
+
       <div className={`audit__banner${staleness.stale > 0 ? ' audit__banner--warn' : ''}`}>
         <strong>{staleness.current}</strong> of <strong>{staleness.total}</strong>{' '}
         <code>JERSEY_TREATMENT_OVERRIDES</code> keys match season {staleness.season}
@@ -231,8 +274,13 @@ function AuditLabBody() {
             </tr>
           </thead>
           <tbody>
-            {visible.map((row) => (
-              <AuditRow key={`${row.teamId}:${row.code ?? row.text}`} row={row} />
+            {visibleWithMeta.map(({ row, isFirstForTeam, striped }) => (
+              <AuditRow
+                key={`${row.teamId}:${row.code ?? row.text}`}
+                row={row}
+                isFirstForTeam={isFirstForTeam}
+                striped={striped}
+              />
             ))}
           </tbody>
         </table>

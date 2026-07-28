@@ -4,7 +4,12 @@
     "treatments": {
       "main": {
         "bg": "secondary",
-        "scale": 0.9
+        "scale": 0.9,
+        "colors": {
+          "primary": "#003263",
+          "secondary": "#BA0021",
+          "accent1": "#BA0021"
+        }
       },
       "alternate": {
         "header": {
@@ -12,7 +17,10 @@
           "accent": "#BA0021",
           "onBar": "#FBF6E9"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#C4CED4"
+        }
       },
       "alternate-3": {
         "header": {
@@ -20,7 +28,15 @@
           "accent": "#B5824A",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 2 White (Blue Trim) Pullover"
+        "note": "Alt 2 White (Blue Trim) Pullover",
+        "colors": {
+          "primary": "#FFFFFF"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#BA0021"
+        }
       }
     }
   },
@@ -34,6 +50,12 @@
           "accent": "#30CED8",
           "onBar": "#FBF6E9"
         },
+        "colors": {
+          "primary": "#A71930",
+          "secondary": "#E3D4AD",
+          "accent1": "#A71930",
+          "accent2": "#30CED8"
+        },
         "note": "Home Cream"
       },
       "alternate": {
@@ -44,6 +66,12 @@
           "accent": "#30CED8",
           "onBar": "#FBF6E9"
         },
+        "colors": {
+          "primary": "#A71930",
+          "secondary": "#E3D4AD",
+          "accent1": "#30CED8",
+          "accent2": "#D0D0D0"
+        },
         "note": "Alternate bumped up so the top-anchored bleed just barely clips the teal border, most of the bleed still going to the bottom"
       },
       "alternate-2": {
@@ -53,7 +81,12 @@
           "accent": "#A71930",
           "onBar": "#000000"
         },
-        "note": "Away Grey shrunk off the default edge-bleed"
+        "note": "Away Grey shrunk off the default edge-bleed",
+        "colors": {
+          "primary": "#A71930",
+          "secondary": "#000000",
+          "accent1": "#A29E9F"
+        }
       },
       "alternate-3": {
         "header": {
@@ -61,7 +94,10 @@
           "accent": "#30CED8",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 1 Black"
+        "note": "Alt 1 Black",
+        "colors": {
+          "primary": "#000000"
+        }
       },
       "city-connect": {
         "header": {
@@ -69,7 +105,11 @@
           "accent": "#0097A9",
           "onBar": "#FBF6E9"
         },
-        "note": "City Connect 2.0"
+        "note": "City Connect 2.0",
+        "colors": {
+          "primary": "#0097A9",
+          "secondary": "#523178"
+        }
       }
     }
   },
@@ -83,7 +123,12 @@
           "accent": "#000000",
           "onBar": "#000000"
         },
-        "note": "Alt 2 Orange"
+        "note": "Alt 2 Orange",
+        "colors": {
+          "primary": "#DF4601",
+          "secondary": "#000000",
+          "accent1": "#DF4601"
+        }
       },
       "alternate": {
         "header": {
@@ -91,7 +136,11 @@
           "accent": "#DF4601",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 1 Black"
+        "note": "Alt 1 Black",
+        "colors": {
+          "primary": "#DF4601",
+          "secondary": "#000000"
+        }
       },
       "alternate-2": {
         "header": {
@@ -99,7 +148,10 @@
           "accent": "#DF4601",
           "onBar": "#FBF6E9"
         },
-        "note": "Home White"
+        "note": "Home White",
+        "colors": {
+          "primary": "#FFFFFF"
+        }
       },
       "alternate-3": {
         "header": {
@@ -107,7 +159,10 @@
           "accent": "#DF4601",
           "onBar": "#FBF6E9"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       },
       "city-connect": {
         "header": {
@@ -115,7 +170,10 @@
           "accent": "#ff7a29",
           "onBar": "#000000"
         },
-        "note": "City Connect 2.0"
+        "note": "City Connect 2.0",
+        "colors": {
+          "primary": "#E1D2BE"
+        }
       }
     }
   },
@@ -124,7 +182,12 @@
     "treatments": {
       "main": {
         "bgHex": "#FFFFFF",
-        "note": "white, not any of the three brand swatches"
+        "note": "white, not any of the three brand swatches",
+        "colors": {
+          "primary": "#BD3039",
+          "secondary": "#0C2340",
+          "accent1": "#BD3039"
+        }
       },
       "alternate-3": {
         "header": {
@@ -132,7 +195,12 @@
           "accent": "#0C2340",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt White Marathon \"Boston\""
+        "note": "Alt White Marathon \"Boston\"",
+        "colors": {
+          "primary": "#FFFFFF",
+          "secondary": "#BD3039",
+          "accent1": "#0C2340"
+        }
       },
       "alternate-4": {
         "header": {
@@ -140,7 +208,27 @@
           "accent": "#BD3039",
           "onBar": "#FBF6E9"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#BD3039",
+          "secondary": "#0C2340"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#307FE2",
+          "secondary": "#FFD100"
+        }
+      },
+      "city-connect": {
+        "colors": {
+          "primary": "#5A8D84"
+        }
       }
     }
   },
@@ -151,7 +239,12 @@
         "pinstripe": true,
         "scale": 0.89,
         "offsetX": 4,
-        "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their Home Pinstripe jersey, instead of a flat Secondary tile; the Home Pinstripe mark reads better nudged right"
+        "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their Home Pinstripe jersey, instead of a flat Secondary tile; the Home Pinstripe mark reads better nudged right",
+        "colors": {
+          "primary": "#0E3386",
+          "secondary": "#CC3433",
+          "accent1": "#0E3386"
+        }
       },
       "alternate-2": {
         "header": {
@@ -159,7 +252,10 @@
           "accent": "#CC3433",
           "onBar": "#000000"
         },
-        "note": "Alt 2 Baby Blue"
+        "note": "Alt 2 Baby Blue",
+        "colors": {
+          "primary": "#7698CE"
+        }
       },
       "alternate-3": {
         "header": {
@@ -167,7 +263,16 @@
           "accent": "#CC3433",
           "onBar": "#FBF6E9"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#0E3386"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#0E3386",
+          "secondary": "#CC3433"
+        }
       }
     }
   },
@@ -177,7 +282,12 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "note": "the \"Reds\" script mark (main-overrides/CIN.png, moved over from the former Alt 1 Red Script jersey's Alternate art)"
+        "note": "the \"Reds\" script mark (main-overrides/CIN.png, moved over from the former Alt 1 Red Script jersey's Alternate art)",
+        "colors": {
+          "primary": "#C6011F",
+          "secondary": "#000000",
+          "accent1": "#C6011F"
+        }
       },
       "city-connect": {
         "scale": 0.84,
@@ -186,7 +296,11 @@
           "accent": "#C6011F",
           "onBar": "#FBF6E9"
         },
-        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
+        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile",
+        "colors": {
+          "primary": "#C6011F",
+          "secondary": "#000000"
+        }
       },
       "alternate-3": {
         "header": {
@@ -194,7 +308,21 @@
           "accent": "#000000",
           "onBar": "#FBF6E9"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#C6011F",
+          "secondary": "#000000"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#000000"
+        }
       }
     }
   },
@@ -209,7 +337,12 @@
           "accent": "#E50022",
           "onBar": "#FBF6E9"
         },
-        "note": "navy border recolored to white; Home White"
+        "note": "navy border recolored to white; Home White",
+        "colors": {
+          "primary": "#00385D",
+          "secondary": "#E50022",
+          "accent1": "#E31937"
+        }
       },
       "city-connect": {
         "scale": 0.76,
@@ -218,7 +351,10 @@
           "accent": "#E31937",
           "onBar": "#FBF6E9"
         },
-        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed"
+        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed",
+        "colors": {
+          "primary": "#00385D"
+        }
       },
       "alternate": {
         "header": {
@@ -226,7 +362,10 @@
           "accent": "#E31937",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 2 Blue"
+        "note": "Alt 2 Blue",
+        "colors": {
+          "primary": "#00385D"
+        }
       },
       "alternate-2": {
         "header": {
@@ -234,7 +373,10 @@
           "accent": "#00385D",
           "onBar": "#FFFFFF"
         },
-        "note": "Alt 1 Red"
+        "note": "Alt 1 Red",
+        "colors": {
+          "primary": "#E31937"
+        }
       },
       "alternate-3": {
         "header": {
@@ -242,7 +384,10 @@
           "accent": "#00385D",
           "onBar": "#FFFFFF"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -256,11 +401,20 @@
           "accent": "#C4CED4",
           "onBar": "#FBF6E9"
         },
-        "note": "white with a subtle black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat brand-color tint. No recolor — the plain mlbstatic mark (its black rim included) reads fine against white, so this wears the stock CDN svg unmodified. Home Pinstripe"
+        "note": "white with a subtle black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat brand-color tint. No recolor — the plain mlbstatic mark (its black rim included) reads fine against white, so this wears the stock CDN svg unmodified. Home Pinstripe",
+        "colors": {
+          "primary": "#333366",
+          "secondary": "#C4CED4",
+          "accent1": "#333366"
+        }
       },
       "city-connect": {
         "scale": 1.15,
-        "note": "mark reads small against the tint at 1.32 alone"
+        "note": "mark reads small against the tint at 1.32 alone",
+        "colors": {
+          "primary": "#8ABFEB",
+          "secondary": "#4F4FC9"
+        }
       },
       "alternate": {
         "header": {
@@ -268,7 +422,10 @@
           "accent": "#C4CED4",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 1 Purple"
+        "note": "Alt 1 Purple",
+        "colors": {
+          "primary": "#33006F"
+        }
       },
       "alternate-2": {
         "header": {
@@ -276,7 +433,10 @@
           "accent": "#33006F",
           "onBar": "#33006F"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -286,7 +446,12 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "note": "navy recolored to white"
+        "note": "navy recolored to white",
+        "colors": {
+          "primary": "#0C2340",
+          "secondary": "#FA4616",
+          "accent1": "#0C2340"
+        }
       },
       "alternate": {
         "scale": 1.03,
@@ -295,7 +460,10 @@
           "accent": "#0C2340",
           "onBar": "#000000"
         },
-        "note": "the Old English \"D\" mark, barely bumped up off the default 1.32 edge-bleed; Alt 1 Orange"
+        "note": "the Old English \"D\" mark, barely bumped up off the default 1.32 edge-bleed; Alt 1 Orange",
+        "colors": {
+          "primary": "#FA4616"
+        }
       },
       "alternate-3": {
         "header": {
@@ -303,7 +471,15 @@
           "accent": "#0C2340",
           "onBar": "#0C2340"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#0C2340"
+        }
       }
     }
   },
@@ -312,11 +488,21 @@
     "treatments": {
       "main": {
         "bg": "secondary",
-        "scale": 0.9
+        "scale": 0.9,
+        "colors": {
+          "primary": "#002D62",
+          "secondary": "#EB6E1F",
+          "accent1": "#EB6E1F"
+        }
       },
       "city-connect": {
         "scale": 0.72,
-        "note": "same edge-to-edge canvas issue as the Reds mark"
+        "note": "same edge-to-edge canvas issue as the Reds mark",
+        "colors": {
+          "primary": "#0F2948",
+          "secondary": "#CEC8B2",
+          "accent1": "#FC7A1E"
+        }
       },
       "alternate": {
         "header": {
@@ -324,7 +510,10 @@
           "accent": "#002D62",
           "onBar": "#000000"
         },
-        "note": "Alt Orange"
+        "note": "Alt Orange",
+        "colors": {
+          "primary": "#EB6E1F"
+        }
       },
       "alternate-2": {
         "header": {
@@ -332,7 +521,10 @@
           "accent": "#EB6E1F",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt Blue"
+        "note": "Alt Blue",
+        "colors": {
+          "primary": "#002D62"
+        }
       },
       "alternate-3": {
         "header": {
@@ -340,7 +532,10 @@
           "accent": "#EB6E1F",
           "onBar": "#FBF6E9"
         },
-        "note": "Road Grey"
+        "note": "Road Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -351,15 +546,26 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.85,
-        "note": "navy recolored to white"
+        "note": "navy recolored to white",
+        "colors": {
+          "primary": "#004687",
+          "secondary": "#BD9B60",
+          "accent1": "#BD9B60"
+        }
       },
       "alternate": {
         "scale": 0.85,
-        "note": "same KC mark + scale as Main's own override"
+        "note": "same KC mark + scale as Main's own override",
+        "colors": {
+          "primary": "#6DADF4"
+        }
       },
       "alternate-2": {
         "scale": 0.85,
-        "note": "same KC mark + scale as Main's own override"
+        "note": "same KC mark + scale as Main's own override",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       },
       "city-connect": {
         "scale": 0.81,
@@ -368,7 +574,10 @@
           "accent": "#B5824A",
           "onBar": "#004687"
         },
-        "note": "same KC mark + scale as Main's own override; City Connect 2.0"
+        "note": "same KC mark + scale as Main's own override; City Connect 2.0",
+        "colors": {
+          "primary": "#FFFFFF"
+        }
       }
     }
   },
@@ -384,7 +593,12 @@
           "accent": "#EF3E42",
           "onBar": "#FBF6E9"
         },
-        "note": "blue recolored to white; Home White"
+        "note": "blue recolored to white; Home White",
+        "colors": {
+          "primary": "#005A9C",
+          "secondary": "#EF3E42",
+          "accent1": "#005A9C"
+        }
       },
       "alternate": {
         "scale": 0.94,
@@ -395,7 +609,10 @@
           "accent": "#B5824A",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 1 Road Grey \"Dodgers\" — nudged left and down"
+        "note": "Alt 1 Road Grey \"Dodgers\" — nudged left and down",
+        "colors": {
+          "primary": "#FFFFFF"
+        }
       },
       "alternate-4": {
         "scale": 0.81,
@@ -406,7 +623,10 @@
           "accent": "#B5824A",
           "onBar": "#FBF6E9"
         },
-        "note": "Road Grey \"Los Angeles\" — nudged left and down"
+        "note": "Road Grey \"Los Angeles\" — nudged left and down",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       },
       "alternate-3": {
         "header": {
@@ -414,7 +634,11 @@
           "accent": "#B5824A",
           "onBar": "#FBF6E9"
         },
-        "note": "\"Gold Series\""
+        "note": "\"Gold Series\"",
+        "colors": {
+          "primary": "#FFD100",
+          "secondary": "#F6EFDC"
+        }
       },
       "city-connect": {
         "header": {
@@ -423,6 +647,12 @@
           "onBar": "#FBF6E9"
         },
         "note": "City Connect"
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#005A9C",
+          "secondary": "#FFFDF6"
+        }
       }
     }
   },
@@ -432,15 +662,31 @@
       "main": {
         "bgHex": "#FFFFFF",
         "recolor": true,
-        "note": "the script \"W\" mark (main-overrides/WSH.png), white background"
+        "note": "the script \"W\" mark (main-overrides/WSH.png), white background",
+        "colors": {
+          "primary": "#AB0003",
+          "secondary": "#14225A",
+          "accent1": "#AB0003"
+        }
       },
       "alternate": {
         "scale": 0.9,
-        "note": "shrunk 5% off the default 1.32 edge-bleed"
+        "note": "shrunk 5% off the default 1.32 edge-bleed",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       },
       "alternate-3": {
         "scale": 0.9,
-        "note": "same script \"W\" mark as Alternate, matched to its 10%-shrunk size"
+        "note": "same script \"W\" mark as Alternate, matched to its 10%-shrunk size",
+        "colors": {
+          "primary": "#14225A"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#BD032B"
+        }
       }
     }
   },
@@ -449,7 +695,27 @@
     "treatments": {
       "main": {
         "bg": "primary",
-        "scale": 0.9
+        "scale": 0.9,
+        "colors": {
+          "primary": "#002D72",
+          "secondary": "#FF5910",
+          "accent1": "#002D72"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#000000"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#002D72"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -458,7 +724,12 @@
     "treatments": {
       "main": {
         "bg": "primary",
-        "recolor": true
+        "recolor": true,
+        "colors": {
+          "primary": "#003831",
+          "secondary": "#EFB21E",
+          "accent1": "#EFB21E"
+        }
       },
       "alternate-2": {
         "header": {
@@ -466,7 +737,23 @@
           "accent": "#9EA2A2",
           "onBar": "#FBF6E9"
         },
-        "note": "Road Grey"
+        "note": "Road Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#003831",
+          "secondary": "#EFB21E",
+          "accent1": "#A2AAAD"
+        }
+      },
+      "city-connect": {
+        "colors": {
+          "primary": "#003831",
+          "secondary": "#EFB21E"
+        }
       }
     }
   },
@@ -475,7 +762,27 @@
     "treatments": {
       "main": {
         "bg": "primary",
-        "scale": 0.95
+        "scale": 0.95,
+        "colors": {
+          "primary": "#27251F",
+          "secondary": "#FDB827",
+          "accent1": "#FDB827"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#27251F"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#FDB827"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -486,7 +793,32 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.85,
-        "note": "dark recolored to secondary gold"
+        "note": "dark recolored to secondary gold",
+        "colors": {
+          "primary": "#2F241D",
+          "secondary": "#FFC425",
+          "accent1": "#2F241D"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#2F241D"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#4B5320"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#C2B280"
+        }
+      },
+      "alternate-4": {
+        "colors": {
+          "primary": "#2F241D"
+        }
       }
     }
   },
@@ -496,11 +828,34 @@
       "main": {
         "bg": "secondary",
         "recolor": true,
-        "note": "compass-rose mark"
+        "note": "compass-rose mark",
+        "colors": {
+          "primary": "#0C2C56",
+          "secondary": "#005C5C",
+          "accent1": "#005C5C"
+        }
       },
       "alternate": {
         "scale": 0.95,
-        "note": "shrunk 5% off the default 1.32 edge-bleed"
+        "note": "shrunk 5% off the default 1.32 edge-bleed",
+        "colors": {
+          "primary": "#F5F0E1"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#0C2C56"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#000000"
+        }
+      },
+      "city-connect": {
+        "colors": {
+          "primary": "#203F79"
+        }
       }
     }
   },
@@ -509,7 +864,28 @@
     "treatments": {
       "main": {
         "bg": "secondary",
-        "scale": 0.9
+        "scale": 0.9,
+        "colors": {
+          "primary": "#FD5A1E",
+          "secondary": "#27251F",
+          "accent1": "#FD5A1E"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#27251F",
+          "secondary": "#EFD19F"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#000000"
+        }
+      },
+      "city-connect": {
+        "colors": {
+          "primary": "#27251F"
+        }
       }
     }
   },
@@ -520,7 +896,32 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.85,
-        "note": "red recolored to white"
+        "note": "red recolored to white",
+        "colors": {
+          "primary": "#C41E3A",
+          "secondary": "#0C2340",
+          "accent1": "#C41E3A"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#9DDFFF"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#FCEDD6"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#9EA2A2"
+        }
+      },
+      "city-connect": {
+        "colors": {
+          "primary": "#C41E3A"
+        }
       }
     }
   },
@@ -531,12 +932,37 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.95,
-        "note": "navy letters recolored to white, kept the baby-blue undertone shadow"
+        "note": "navy letters recolored to white, kept the baby-blue undertone shadow",
+        "colors": {
+          "primary": "#092C5C",
+          "secondary": "#8FBCE6",
+          "accent1": "#F5D130"
+        }
       },
       "alternate": {
         "scale": 1.6,
         "offsetX": -12,
-        "note": "the enlarged mark reads small against the tint at 1.32 alone, and reads better shifted left"
+        "note": "the enlarged mark reads small against the tint at 1.32 alone, and reads better shifted left",
+        "colors": {
+          "primary": "#092C5C",
+          "secondary": "#8FBCE6",
+          "accent1": "#F5D130"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#FFFFFF"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#092C5C"
+        }
+      },
+      "city-connect": {
+        "colors": {
+          "primary": "#000000"
+        }
       }
     }
   },
@@ -547,19 +973,46 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.75,
-        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up"
+        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up",
+        "colors": {
+          "primary": "#003278",
+          "secondary": "#C0111F",
+          "accent1": "#C0111F"
+        }
       },
       "alternate": {
         "scale": 0.85,
-        "note": "T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was chroma-keyed to transparent, and its own bbox already fills most of the canvas, so shrink slightly off the default 1.32 edge-bleed to avoid clipping the crossbar tips"
+        "note": "T-badge (alternate/TEX.png, swapped in from Main) — the navy fill was chroma-keyed to transparent, and its own bbox already fills most of the canvas, so shrink slightly off the default 1.32 edge-bleed to avoid clipping the crossbar tips",
+        "colors": {
+          "primary": "#003278",
+          "secondary": "#C0111F"
+        }
       },
       "city-connect": {
         "scale": 0.855,
-        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless"
+        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless",
+        "colors": {
+          "primary": "#892535",
+          "secondary": "#EBDFCB"
+        }
       },
       "alternate-2": {
         "scale": 0.85,
-        "note": "same badge/canvas as Alternate, just recolored — same edge-bleed fix applies"
+        "note": "same badge/canvas as Alternate, just recolored — same edge-bleed fix applies",
+        "colors": {
+          "primary": "#C0111F",
+          "secondary": "#003278"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#8ECAE6"
+        }
+      },
+      "alternate-4": {
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -568,11 +1021,39 @@
     "treatments": {
       "main": {
         "bgHex": "#F5F0E1",
-        "note": "subtle off-white, not any of the three brand swatches"
+        "note": "subtle off-white, not any of the three brand swatches",
+        "colors": {
+          "primary": "#134A8E",
+          "secondary": "#1D2D5C",
+          "accent1": "#E8291C"
+        }
       },
       "city-connect": {
         "scale": 0.75,
-        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
+        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile",
+        "colors": {
+          "primary": "#161827"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#041E42"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#84BEE4"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#C22028"
+        }
+      },
+      "alternate-4": {
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -583,7 +1064,12 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.85,
-        "note": "navy T recolored to white"
+        "note": "navy T recolored to white",
+        "colors": {
+          "primary": "#002B5C",
+          "secondary": "#D31145",
+          "accent1": "#D31145"
+        }
       },
       "alternate": {
         "scale": 0.85,
@@ -592,7 +1078,11 @@
           "accent": "#D31145",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 2 Navy"
+        "note": "Alt 2 Navy",
+        "colors": {
+          "primary": "#002B5C",
+          "secondary": "#E8DCC0"
+        }
       },
       "alternate-2": {
         "scale": 0.85,
@@ -601,7 +1091,10 @@
           "accent": "#D31145",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 1 Cream \"Twin Cities\""
+        "note": "Alt 1 Cream \"Twin Cities\"",
+        "colors": {
+          "primary": "#E8DCC0"
+        }
       },
       "alternate-3": {
         "scale": 0.85,
@@ -610,7 +1103,10 @@
           "accent": "#D31145",
           "onBar": "#002B5C"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -620,7 +1116,27 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "note": "red/white swapped"
+        "note": "red/white swapped",
+        "colors": {
+          "primary": "#E81828",
+          "secondary": "#002D72",
+          "accent1": "#E81828"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#F5F0E1"
+        }
+      },
+      "alternate-2": {
+        "colors": {
+          "primary": "#8ECAE6"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -635,7 +1151,12 @@
           "accent": "#CE1141",
           "onBar": "#FBF6E9"
         },
-        "note": "red recolored to white (bg matches the navy border); Alt 2 Navy"
+        "note": "red recolored to white (bg matches the navy border); Alt 2 Navy",
+        "colors": {
+          "primary": "#CE1141",
+          "secondary": "#13274F",
+          "accent1": "#CE1141"
+        }
       },
       "city-connect": {
         "scale": 1.04,
@@ -646,13 +1167,22 @@
           "accent": "#D32826",
           "onBar": "#13274F"
         },
-        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down"
+        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down",
+        "colors": {
+          "primary": "#D32826",
+          "secondary": "#374EA1",
+          "accent1": "#7BA7D8"
+        }
       },
       "alternate": {
         "scale": 1.04,
         "offsetX": 6,
         "offsetY": 1,
-        "note": "Alt 1 Red mark nudged up 4% off the default edge-bleed, nudged right and down slightly"
+        "note": "Alt 1 Red mark nudged up 4% off the default edge-bleed, nudged right and down slightly",
+        "colors": {
+          "primary": "#CE1141",
+          "secondary": "#13274F"
+        }
       },
       "alternate-2": {
         "header": {
@@ -660,7 +1190,10 @@
           "accent": "#CE1141",
           "onBar": "#13274F"
         },
-        "note": "Home White"
+        "note": "Home White",
+        "colors": {
+          "primary": "#F5F0E1"
+        }
       },
       "alternate-3": {
         "header": {
@@ -668,7 +1201,10 @@
           "accent": "#CE1141",
           "onBar": "#13274F"
         },
-        "note": "Road Grey"
+        "note": "Road Grey",
+        "colors": {
+          "primary": "#A2AAAD"
+        }
       }
     }
   },
@@ -682,7 +1218,12 @@
           "accent": "#C4CED4",
           "onBar": "#FBF6E9"
         },
-        "note": "Away Grey"
+        "note": "Away Grey",
+        "colors": {
+          "primary": "#27251F",
+          "secondary": "#C4CED4",
+          "accent1": "#27251F"
+        }
       },
       "city-connect": {
         "scale": 1.07,
@@ -694,7 +1235,10 @@
           "accent": "#000000",
           "onBar": "#FBF6E9"
         },
-        "note": "black pinstripe over the mark's own red; the mark reads small against the tint at 1.32 alone, nudged right"
+        "note": "black pinstripe over the mark's own red; the mark reads small against the tint at 1.32 alone, nudged right",
+        "colors": {
+          "primary": "#C8102E"
+        }
       },
       "alternate": {
         "pinstripeColor": "rgba(0, 0, 0, 0.16)",
@@ -703,7 +1247,11 @@
           "accent": "#C4CED4",
           "onBar": "#FBF6E9"
         },
-        "note": "same plain black-on-white pinstripe as every other pinstriped tile; Home Pinstripe jersey"
+        "note": "same plain black-on-white pinstripe as every other pinstriped tile; Home Pinstripe jersey",
+        "colors": {
+          "primary": "#27251F",
+          "secondary": "#C4CED4"
+        }
       },
       "alternate-2": {
         "header": {
@@ -711,7 +1259,10 @@
           "accent": "#C4CED4",
           "onBar": "#FBF6E9"
         },
-        "note": "Alt 1 Black \"Sox\""
+        "note": "Alt 1 Black \"Sox\"",
+        "colors": {
+          "primary": "#000000"
+        }
       },
       "alternate-3": {
         "header": {
@@ -719,7 +1270,10 @@
           "accent": "#000000",
           "onBar": "#000000"
         },
-        "note": "Alt 2 \"Southside\""
+        "note": "Alt 2 \"Southside\"",
+        "colors": {
+          "primary": "#9EA2A2"
+        }
       }
     }
   },
@@ -728,12 +1282,23 @@
     "treatments": {
       "main": {
         "bg": "primary",
-        "note": "matches the club's own Primary blue (#00A3E0)"
+        "note": "matches the club's own Primary blue (#00A3E0)",
+        "colors": {
+          "primary": "#00A3E0",
+          "secondary": "#EF3340",
+          "accent1": "#00A3E0"
+        }
       },
       "alternate-2": {
         "scale": 1.03,
         "offsetY": 4,
-        "note": "Alt 1 Black nudged down"
+        "note": "Alt 1 Black nudged down",
+        "colors": {
+          "primary": "#00A3E0",
+          "secondary": "#EF3340",
+          "accent1": "#41748D",
+          "accent2": "#000000"
+        }
       },
       "alternate-3": {
         "scale": 1.04,
@@ -742,12 +1307,23 @@
           "accent": "#000000",
           "onBar": "#000000"
         },
-        "note": "Alt 2 Teal"
+        "note": "Alt 2 Teal",
+        "colors": {
+          "primary": "#009CA7"
+        }
       },
       "city-connect": {
         "scale": 0.8,
         "offsetX": -1,
-        "note": "City Connect 2.0 nudged left"
+        "note": "City Connect 2.0 nudged left",
+        "colors": {
+          "primary": "#000000"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#FFFFFF"
+        }
       }
     }
   },
@@ -756,7 +1332,17 @@
     "treatments": {
       "main": {
         "pinstripe": true,
-        "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat navy tile. No recolor — the plain mlbstatic mark is already navy, so this wears the stock CDN svg unmodified. No pinstripeColor override — the navy read too strong against white, plain black matches every other pinstriped tile"
+        "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat navy tile. No recolor — the plain mlbstatic mark is already navy, so this wears the stock CDN svg unmodified. No pinstripeColor override — the navy read too strong against white, plain black matches every other pinstriped tile",
+        "colors": {
+          "primary": "#003087",
+          "secondary": "#E4002C",
+          "accent1": "#003087"
+        }
+      },
+      "alternate": {
+        "colors": {
+          "primary": "#C4CED3"
+        }
       }
     }
   },
@@ -765,18 +1351,31 @@
     "treatments": {
       "main": {
         "bgHex": "#FFF5EA",
-        "note": "cream, not any of the three brand swatches"
+        "note": "cream, not any of the three brand swatches",
+        "colors": {
+          "primary": "#12284B",
+          "secondary": "#FFC52F",
+          "accent1": "#FFC52F"
+        }
       },
       "alternate": {
         "scale": 0.86,
         "pinstripeColor": "rgba(0, 0, 0, 0.16)",
         "offsetX": 4,
-        "note": "Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed and nudged right; same plain black pinstripe as every other pinstriped tile"
+        "note": "Alt 1 Pinstripe wheat/laurel-and-ball mark shrunk off the default 1.32 edge-bleed and nudged right; same plain black pinstripe as every other pinstriped tile",
+        "colors": {
+          "primary": "#12284B",
+          "secondary": "#FEC52E"
+        }
       },
       "alternate-2": {
         "scale": 0.99,
         "offsetX": 9,
-        "note": "Alt 2 Navy Blue nearly full size, nudged right"
+        "note": "Alt 2 Navy Blue nearly full size, nudged right",
+        "colors": {
+          "primary": "#12284B",
+          "secondary": "#FEC52E"
+        }
       },
       "city-connect": {
         "header": {
@@ -784,7 +1383,16 @@
           "accent": "#ff6c58",
           "onBar": "#FBF6E9"
         },
-        "note": "City Connect 2.0"
+        "note": "City Connect 2.0",
+        "colors": {
+          "primary": "#0C436A",
+          "secondary": "#ff6c58"
+        }
+      },
+      "alternate-3": {
+        "colors": {
+          "primary": "#6CACE4"
+        }
       }
     }
   }

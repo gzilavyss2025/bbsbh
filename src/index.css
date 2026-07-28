@@ -2108,6 +2108,13 @@ body {
   letter-spacing: var(--ls-text);
 }
 
+/* The Team Identity Lab's per-dimension descriptions (LabShell's shared hint
+   plus the Jersey Audit tab's own summary paragraph) are several sentences of
+   explanatory copy, not app chrome — shouted caps make them harder to scan. */
+.screen--identitylab .hint {
+  text-transform: none; /* caps-exempt: identity lab hint paragraphs read as natural sentences */
+}
+
 /* An inline text-link riding inside a .hint paragraph (e.g. "How's this
    calculated?" on the Top Games page) — underlined, no button chrome, so it
    reads as part of the sentence. */
@@ -9377,16 +9384,23 @@ body {
    app-width column (tokens/layout.css) — there's no room for a second column
    at phone width, and this page is a desktop-only design harness anyway
    (unlisted, never linked — see the function doc above). Hidden below the
-   width where it'd overlap the page's own centered content. */
+   width where it'd overlap the page's own centered content.
+
+   The two colour dimensions also tuck their Save button in here
+   (`.colorlab__navsave`, TeamJumpNav's `save` prop) — reachable next to the
+   logos rather than back at the top of a long scrolled page. A fixed-position
+   box with `width: auto` (no explicit width set below) sizes to its widest
+   child, so a save/error message wider than the two-logo-column grid just
+   grows the whole card rather than overflowing it. */
 .colorlab__nav {
   display: none;
 }
 
 @media (min-width: 900px) {
   .colorlab__nav {
-    display: grid;
-    grid-template-columns: repeat(2, 32px);
-    gap: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
     position: fixed;
     left: var(--space-4);
     top: 96px;
@@ -9396,6 +9410,30 @@ body {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
     z-index: 5;
+    max-width: 220px;
+  }
+
+  .colorlab__navsave {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--bw-hair) solid var(--border-rule);
+  }
+
+  .colorlab__navsavebtn {
+    width: 100%;
+  }
+
+  .colorlab__navsavemsg {
+    padding: 0;
+    font-size: var(--fs-caption);
+  }
+
+  .colorlab__navlogos {
+    display: grid;
+    grid-template-columns: repeat(2, 32px);
+    gap: var(--space-1);
   }
 
   .colorlab__navlink {
@@ -9572,6 +9610,29 @@ body {
 .colorlab__teamchevron {
   color: var(--text-caption);
   font-size: var(--fs-title-sm);
+}
+
+/* The collapsed row's "what have we got" strip (TeamLabRow's RowLogoStrip) —
+   every mark this club actually renders somewhere on the site, at a glance
+   without expanding the row. Sits directly under the toggle bar, same card
+   footing (surface-card/shadow-card) as the tile it stands in for. */
+.colorlab__rowlogos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.colorlab__rowlogo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
 }
 
 .colorlab__treatments {
@@ -9799,6 +9860,7 @@ body {
 .colorlab__swatchrow {
   display: flex;
   gap: var(--space-3);
+  flex-wrap: wrap;
 }
 
 /* LogoPositionControls (the Team Identity Lab) — a third column INSIDE
@@ -10354,7 +10416,7 @@ body {
   padding: var(--space-2);
   border-bottom: var(--bw-hair) solid var(--border-rule);
   text-align: left;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .audittable th {
@@ -10407,6 +10469,13 @@ body {
 .audittable__via--heuristic {
   background: var(--accent-primary);
   color: var(--text-on-ink);
+}
+
+/* Zebra stripe by CLUB rather than by row — every jersey belonging to the
+   same team shares a background, so a club's whole run of rows reads as one
+   group at a glance instead of alternating mid-team. */
+.audittable__row--alt {
+  background: var(--surface-inset);
 }
 
 .audittile {

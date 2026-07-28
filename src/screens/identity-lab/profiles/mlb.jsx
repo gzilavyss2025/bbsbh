@@ -5,13 +5,14 @@
    copy text, and tiles in one readable file. */
 import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
 import {
   DEFAULT_PINSTRIPE_COLOR,
   wpaBandColor,
   wpaBandPinstripeColor,
   wpaBandPinstripeBg,
 } from '../../../lib/wpaBandColors.js'
-import { WPA_TUNING, wpaLogoLayout } from '../../../lib/wpaLogo.js'
+import { WPA_TUNING, WPA_OWN_ART, wpaLogoLayout } from '../../../lib/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import {
   ALL_MLB_TEAM_IDS,
@@ -39,8 +40,9 @@ import {
   hasAlternate4,
   hasCityConnect,
   treatmentHeaderColorOverride,
+  treatmentTuningRecord,
 } from '../../../lib/teams.js'
-import { logoUploadTarget } from '../../../lib/logoArt.js'
+import { logoUploadTarget, wpaArtTreatmentKey, wpaArtUrl } from '../../../lib/logoArt.js'
 import { contrastRatio } from '../../../lib/contrast.js'
 import { fetchJerseysData, jerseyWearDates } from '../../../api/jerseys.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
@@ -57,6 +59,7 @@ import {
   uniformDisplayName,
 } from '../../../api/uniforms.js'
 import { TreatmentBox } from '../TreatmentBox.jsx'
+import { LogoDropZone } from '../LogoDropZone.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore, mergeTeamDraftIntoStore } from '../saveStores.js'
 import {
@@ -64,6 +67,9 @@ import {
   COLOR_ROLE_LABELS,
   applyColorsDraft,
   colorsDraftMatchesLanded,
+  TREATMENT_COLOR_ROLES,
+  TREATMENT_COLOR_ROLE_LABELS,
+  applyTreatmentColorsDraft,
 } from './mlbColorRoles.js'
 
 // The MLB dimension: each club's logo treatments side by side with their brand
@@ -118,6 +124,19 @@ function resolveColorTriad(teamId, draft) {
   }))
 }
 
+// A (team, treatment)'s four editable color slots, landed value with any live
+// draft layered on top — mlb-treatment-tuning.json's `colors` field, one
+// independent set per treatment (Main included — see mlbColorRoles.js's
+// comment on why this is a separate thing from Main's club-wide triad).
+function resolveTreatmentColorSlots(teamId, treatment, draft) {
+  const landed = treatmentTuningRecord(teamId, treatment)?.colors ?? {}
+  return TREATMENT_COLOR_ROLES.map((role) => ({
+    role,
+    label: TREATMENT_COLOR_ROLE_LABELS[role],
+    hex: draft?.[role] ?? landed[role] ?? '',
+  }))
+}
+
 // The Main tile's full swatch row: the three editable role slots, then the
 // club's researched extras (teamColorExtras — Angels Silver, Giants Cream…).
 // Extras are read-only and deduped against the triad, since an extra whose hex
@@ -139,7 +158,7 @@ function mainSwatches(teamId, draft) {
   return [...triad, ...extras]
 }
 
-const BG_ROLE_INDEX = { primary: 0, secondary: 1, accent: 2, third: 2 }
+const BG_ROLE_INDEX = { primary: 0, secondary: 1, accent: 2, third: 2, accent2: 3 }
 
 // A plain "Background" swatch (the common case — just describes the tile fill,
 // no color identity of its own) gets relabeled to Primary/Secondary/Accent (or
@@ -238,6 +257,14 @@ function resolveWpaBandState(teamId, treatment, wpaDraft) {
   return { pinstripe, band, bandBg }
 }
 
+// Whether this (team, treatment)'s WPA band has opted OUT of the shared mark
+// in favor of a separately uploaded WPA-only PNG — resolved in ONE place
+// (same rule resolveWpaBandState above already follows) so the tile, the
+// copy text, and the auto-clear matcher below can never disagree.
+function resolveWpaOwnArt(teamId, treatment, wpaDraft) {
+  return wpaDraft?.ownArt ?? Boolean(WPA_OWN_ART[teamId]?.[treatment])
+}
+
 // The merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% for a (team, treatment) — a
 // draft field wins outright over the landed layout, same "draft overrides
 // curated default" pattern as the position controls. Shared by the WPA editor's
@@ -323,7 +350,7 @@ function buildPosCopyText(name, teamId, treatment, treatmentLabel, scale, offset
   )
 }
 
-function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinstripe, bandColor) {
+function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinstripe, bandColor, ownArt) {
   const { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } = layout
   const band = pinstripe ? `{ "pinstripe": true, "color": "${bandColor}" }` : `"${bandColor}"`
   return (
@@ -332,7 +359,9 @@ function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinst
     `Where: src/lib/data/wpa-tuning.json — ${teamId}.treatments.${treatment}\n` +
     `"layout": { "size": ${size}, "rotate": ${rotate}, "offsetX": ${offsetX}, "offsetY": ${offsetY}, ` +
     `"paddingX": ${paddingX}, "paddingY": ${paddingY}, "rowShift": ${rowShift} }\n` +
-    `"band": ${band}`
+    `"band": ${band}\n` +
+    `"ownArt": ${ownArt}` +
+    (ownArt ? ` (uploaded WPA-only mark: ${wpaArtUrl(teamId, treatment) ?? '(none uploaded yet)'})` : '')
   )
 }
 
@@ -355,6 +384,17 @@ function buildColorsCopyText(name, teamId, triad) {
     `Where: src/lib/data/mlb-team-colors.json — ${teamId}\n` +
     `primary: ${byRole.primary || '(none)'}, secondary: ${byRole.secondary || '(none)'}, ` +
     `accent: ${byRole.accent || '(none)'}`
+  )
+}
+
+function buildTreatmentColorsCopyText(name, teamId, treatment, treatmentLabel, slots) {
+  const byRole = Object.fromEntries(slots.map((s) => [s.role, s.hex]))
+  return (
+    `Team: ${name} (id ${teamId})\n` +
+    `Treatment: ${treatmentLabel}\n` +
+    `Where: src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.${treatment}.colors\n` +
+    `primary: ${byRole.primary || '(none)'}, secondary: ${byRole.secondary || '(none)'}, ` +
+    `accent1: ${byRole.accent1 || '(none)'}, accent2: ${byRole.accent2 || '(none)'}`
   )
 }
 
@@ -386,12 +426,18 @@ function buildAllChangesText(teams, drafts, extras) {
       if (wd && Object.keys(wd).length > 0) {
         const layout = resolvedWpaLayout(teamId, t.key, wd)
         const { pinstripe, band } = resolveWpaBandState(teamId, t.key, wd)
-        sections.push(buildWpaCopyText(name, teamId, t.key, treatmentLabel, layout, pinstripe, band))
+        const ownArt = resolveWpaOwnArt(teamId, t.key, wd)
+        sections.push(buildWpaCopyText(name, teamId, t.key, treatmentLabel, layout, pinstripe, band, ownArt))
       }
       const hd = drafts.header[teamId]?.[t.key]
       if (hd && Object.keys(hd).length > 0) {
         const resolvedColors = headerColorsFor(colors, hd, treatmentHeaderColorOverride(teamId, t.key))
         sections.push(buildHeaderCopyText(name, teamId, t.key, treatmentLabel, resolvedColors))
+      }
+      const tcd = drafts.tcolors[teamId]?.[t.key]
+      if (tcd && Object.keys(tcd).length > 0) {
+        const slots = resolveTreatmentColorSlots(teamId, t.key, tcd)
+        sections.push(buildTreatmentColorsCopyText(name, teamId, t.key, treatmentLabel, slots))
       }
     }
   }
@@ -407,6 +453,36 @@ function buildAllChangesText(teams, drafts, extras) {
 function treatmentLogoUrl(teamId, treatment, override) {
   if (treatment === 'main') return override?.recolor ? mainOverrideLogoUrl(teamId) : null
   return teamLogoUrl(teamId, treatment)
+}
+
+// Every mark this club is actually rendered with somewhere on the site —
+// the collapsed row's own quick "what have we got" strip (TeamLabRow's
+// `logos` prop), so a reviewer can eyeball coverage without expanding every
+// tile. One entry per real treatment (the CDN base mark, a hand-recolored
+// Main override, or a procured local PNG — whichever `treatmentLogoUrl`
+// resolves for that tile, same as the expanded tile itself renders), PLUS a
+// trailing entry for any treatment that's opted into its own separately
+// uploaded WPA-only mark (WPA_OWN_ART) — a real, distinct file the owner
+// uploaded, even though it never appears as a tile's own logo box.
+function rowLogos(teamId) {
+  const treatments = treatmentsForTeam(teamId)
+  const marks = treatments.map((t) => {
+    const override = t.key === 'main' ? MAIN_OVERRIDES[teamId] : null
+    return {
+      key: t.key,
+      label: t.label,
+      // treatmentLogoUrl returns null for a plain Main (the real tile falls
+      // back to <TeamLogo>, which resolves its own CDN url) — spell that
+      // fallback out explicitly here since this strip has no such component.
+      url: treatmentLogoUrl(teamId, t.key, override) ?? teamLogoUrl(teamId, 'base'),
+    }
+  })
+  for (const t of treatments) {
+    if (!WPA_OWN_ART[teamId]?.[t.key]) continue
+    const url = wpaArtUrl(teamId, t.key)
+    if (url) marks.push({ key: `${t.key}-wpa`, label: `${t.label} — WPA`, url })
+  }
+  return marks
 }
 
 // `version` counts uploads onto this tile. Vite serves public/ off disk, so a
@@ -436,6 +512,37 @@ function TreatmentLogo({ teamId, name, treatment, override, version = 0 }) {
       key={url}
       src={url}
       alt={`${name} — ${treatment}`}
+      className="colorlab__logoimg"
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
+// The drop target for a treatment's WPA-only mark (WpaPreview's "Use Logo
+// Art" checkbox, unchecked) — same load/error/cache-bust shape as
+// TreatmentLogo above, but with no tile-art fallback to render: there's
+// nothing here until the owner uploads something.
+function WpaArtBox({ teamId, treatment, name, version = 0 }) {
+  const base = wpaArtUrl(teamId, treatment)
+  const url = base && version > 0 ? `${base}?v=${version}` : base
+  const [failed, setFailed] = useState(false)
+  useEffect(() => setFailed(false), [url])
+
+  if (!url || failed) {
+    return (
+      <div className="colorlab__logoplaceholder" aria-hidden="true">
+        <span>No WPA art yet</span>
+      </div>
+    )
+  }
+
+  return (
+    <img
+      key={url}
+      src={url}
+      alt={`${name} — ${treatment} WPA`}
       className="colorlab__logoimg"
       loading="lazy"
       decoding="async"
@@ -525,6 +632,7 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
           wpa: drafts.wpa?.[t.key],
           header: drafts.header?.[t.key],
           colors: drafts.colors,
+          tcolors: drafts.tcolors?.[t.key],
         }}
         on={on}
       />
@@ -536,7 +644,10 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const isMain = treatment === 'main'
   const colors = isMain ? mainSwatches(teamId, drafts.colors) : colorsFor(teamId, treatment)
   const hasColorsDraft = isMain && drafts.colors && Object.keys(drafts.colors).length > 0
+  const treatmentColorSlots = resolveTreatmentColorSlots(teamId, treatment, drafts.tcolors)
+  const hasTcolorsDraft = drafts.tcolors && Object.keys(drafts.tcolors).length > 0
   const [artVersion, setArtVersion] = useState(0)
+  const [wpaArtVersion, setWpaArtVersion] = useState(0)
   const displayLabel = jerseyMatch?.label ?? label
   // The same curated full name the Uniform Names page edits for this jersey. No
   // code (no art procured for a future-season jersey yet) means nothing to edit
@@ -550,15 +661,15 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       }
     : null
   // Main already comes back as three role slots plus however many extras the
-  // club has researched, so it needs no padding; every other treatment is a
-  // curated list of up to three, padded so an absent one renders as an explicit
-  // empty slot rather than collapsing the row.
-  const slots = isMain ? colors : [0, 1, 2].map((i) => colors[i] ?? null)
+  // club has researched. Every other treatment shows its four Colors-panel
+  // slots here too — the SAME treatmentColorSlots the panel below edits, so
+  // typing a hex in either place updates both at once (one shared draft, two
+  // views onto it), and a filled-in Accent 2 gets its own chip for free.
+  const slots = isMain ? colors : treatmentColorSlots
 
   const {
     override,
     pinstripeBg,
-    activeBgIndex,
     scale: treatmentScale,
     offsetX: treatmentOffsetXValue,
     offsetY: treatmentOffsetYValue,
@@ -584,6 +695,34 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const wpaLayout = resolvedWpaLayout(teamId, treatment, drafts.wpa)
   const headerLanded = treatmentHeaderColorOverride(teamId, treatment)
   const headerColors = headerColorsFor(colors, drafts.header, headerLanded)
+  const wpaOwnArt = resolveWpaOwnArt(teamId, treatment, drafts.wpa)
+  const wpaArtKey = wpaArtTreatmentKey(treatment)
+  // Absent (no `-wpa` destination — can't happen for a real MLB treatment,
+  // but mirrors upload's own `caveat: null` shape) rather than special-cased
+  // in WpaPreview, same "absent rather than special-cased" convention
+  // TreatmentBox already follows for nameField/upload.
+  const artUpload = wpaArtKey ? (
+    <LogoDropZone
+      teamId={teamId}
+      treatment={wpaArtKey}
+      label={`${name} ${displayLabel} WPA`}
+      onUploaded={() => setWpaArtVersion((v) => v + 1)}
+    >
+      <div className="colorlab__logobox colorlab__logobox--gloss">
+        <WpaArtBox teamId={teamId} treatment={treatment} name={name} version={wpaArtVersion} />
+      </div>
+    </LogoDropZone>
+  ) : null
+  // The WpaScenarios mockups' own live preview of "Use Logo Art" — unchecked
+  // (a draft in progress, or already landed) means those three chart
+  // mockups should tile whatever the owner uploaded, not the tile's normal
+  // mark, and reflect a same-session upload immediately (?v= cache-bust,
+  // same idea as artVersion above) rather than only after Save. `null` when
+  // checked, so WinProbChart falls through to its own normal resolution.
+  const wpaMarkOverride =
+    wpaOwnArt && wpaArtKey
+      ? { src: wpaArtVersion > 0 ? `${wpaArtUrl(teamId, treatment)}?v=${wpaArtVersion}` : wpaArtUrl(teamId, treatment), recolor: null }
+      : null
 
   return (
     <TreatmentBox
@@ -609,9 +748,16 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
       wearDates={wearDates}
-      swatches={slots.map((s, i) => ({
+      swatches={slots.map((s) => ({
         swatch: s,
-        active: i === activeBgIndex,
+        // Compared by hex value, not array position: for Main this still
+        // rings whichever of the triad the tile's tint chain actually picked
+        // (resolvePositionState's own colors array), and for every other
+        // treatment `treatmentBg` no longer shares an array with `slots`
+        // (its default comes from the club's own curated fill, not this
+        // panel), so index equality can't answer this at all — a Colors edit
+        // that happens not to match the current fill correctly rings nothing.
+        active: Boolean(s?.hex && treatmentBg && s.hex.toLowerCase() === treatmentBg.toLowerCase()), // caps-js-exempt
         wpaSelected: Boolean(!wpaPinstripe && s?.hex && wpaBand.toLowerCase() === s.hex.toLowerCase()), // caps-js-exempt
         onPickWpaBand: s?.hex
           ? () => {
@@ -621,15 +767,25 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
               on.wpaField(treatment, 'bandColor', s.hex)
             }
           : undefined,
-        // Only the three role slots are editable — an extra is research, shown
-        // and copyable but not retyped here, and `i` past the triad has no role
-        // to write to.
-        editable:
-          isMain && i < COLOR_ROLES.length
-            ? { value: s?.hex ?? '', onChange: (hex) => on.colorField(COLOR_ROLES[i], hex) }
-            : undefined,
+        // Only a role slot is editable — an extra (Main's researched colors
+        // beyond its triad) is research, shown and copyable but not retyped
+        // here, and carries no role to write to. Main writes its club-wide
+        // triad (mlb-team-colors.json); every other treatment writes its own
+        // Colors-panel slot (mlb-treatment-tuning.json) — the identical field
+        // the panel below edits, so the two can never show two different
+        // values for the same role.
+        editable: s?.role
+          ? {
+              value: s.hex ?? '',
+              onChange: (hex) => (isMain ? on.colorField(s.role, hex) : on.tcolorField(treatment, s.role, hex)),
+            }
+          : undefined,
       }))}
-      colorsPanel={isMain ? { hasDraft: hasColorsDraft, onReset: on.colorReset } : undefined}
+      colorsPanel={
+        isMain
+          ? { hasDraft: hasColorsDraft, onReset: on.colorReset }
+          : { hasDraft: hasTcolorsDraft, onReset: () => on.tcolorReset(treatment) }
+      }
       position={{
         name,
         treatmentLabel: displayLabel,
@@ -661,8 +817,10 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         pinstripe: wpaPinstripe,
         bandColor: wpaBand,
         bandBg: wpaBandBg,
+        ownArt: wpaOwnArt,
+        artUpload,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
-        copyText: buildWpaCopyText(name, teamId, treatment, displayLabel, wpaLayout, wpaPinstripe, wpaBand),
+        copyText: buildWpaCopyText(name, teamId, treatment, displayLabel, wpaLayout, wpaPinstripe, wpaBand, wpaOwnArt),
         onField: (field, value) => on.wpaField(treatment, field, value),
         onReset: () => on.wpaReset(treatment),
       }}
@@ -674,6 +832,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         headerColors,
         wpaLayout,
         wpaBandOverride: { pinstripe: wpaPinstripe, color: wpaBand, bg: wpaBandBg },
+        wpaMarkOverride,
       }}
       header={{
         name,
@@ -785,11 +944,22 @@ function buildSaves(drafts, extras) {
 
   const name = (teamId) => teamFullName(teamId)
   const tuning = mergeDraftIntoStore(
-    mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
-    drafts.header,
+    mergeDraftIntoStore(
+      mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
+      drafts.header,
+      (record, fields) => {
+        const { bar, accent, onBar } = { ...record.header, ...fields }
+        return { ...record, header: { bar, accent, onBar } }
+      },
+      { name },
+    ),
+    drafts.tcolors,
     (record, fields) => {
-      const { bar, accent, onBar } = { ...record.header, ...fields }
-      return { ...record, header: { bar, accent, onBar } }
+      const next = applyTreatmentColorsDraft(record.colors ?? {}, fields)
+      const result = { ...record }
+      if (Object.keys(next).length) result.colors = next
+      else delete result.colors
+      return result
     },
     { name },
   )
@@ -809,6 +979,12 @@ function buildSaves(drafts, extras) {
         const color = fields.bandColor ?? (typeof next.band === 'object' ? next.band?.color : next.band)
         const bg = fields.bandBg ?? (typeof next.band === 'object' ? next.band?.bg : undefined)
         next.band = pinstripe ? (bg ? { pinstripe: true, color, bg } : { pinstripe: true, color }) : color
+      }
+      // Set-or-delete, same rule as every other cleared field here — absent
+      // means "Use Logo Art" (checked, the default), never a stray `false`.
+      if (fields.ownArt !== undefined) {
+        if (fields.ownArt) next.ownArt = true
+        else delete next.ownArt
       }
       return next
     },
@@ -838,12 +1014,19 @@ export const mlbProfile = {
       treatment tiled in the win-probability chart (the real chart picks a
       game’s treatment from that night’s actual uniform — see{' '}
       <code>api/jerseys.js</code> — so any tile here could be the one that shows
-      up), and which catalog jersey(s) map to each treatment. A Main tile’s
-      Primary/Secondary/Accent are editable directly on the swatch — type a hex
-      to change it, or clear it to say the club has no such color. Accent is the
-      “tells two clubs apart” pick, so for most clubs it restates the Primary or
-      Secondary on purpose; any researched extra colors follow it, read-only.
-      Click a swatch to try it as that tile’s WPA band color.
+      up), and which catalog jersey(s) map to each treatment. Every swatch is
+      editable directly on the chip — type a hex to change it, or clear it to
+      say the club has no such color. A Main tile edits its club-wide
+      Primary/Secondary/Accent (Accent is the “tells two clubs apart” pick, so
+      for most clubs it restates the Primary or Secondary on purpose; any
+      researched extra colors follow it, read-only); every other treatment
+      edits its own independent Primary/Secondary/Accent 1/Accent 2, a
+      separate per-jersey reference distinct from Main’s club-wide swatch.
+      Click a swatch to try it as that tile’s WPA band color. Each WPA panel’s
+      “Use Logo Art”
+      checkbox is on by default (the band tiles the same mark as the tile
+      above it, unchanged); uncheck it to upload a separate 512×512 PNG that
+      band alone tiles instead.
       Missing logos or colors show as a placeholder until supplied. Save
       writes every pending change straight to{' '}
       <code>src/lib/data/*.json</code> and{' '}
@@ -861,6 +1044,8 @@ export const mlbProfile = {
       .map((id) => ({ id, name: teamFullName(id) })),
   useExtras: useMlbExtras,
   Tiles: MlbTiles,
+  sidebar: <NeutralSwatchesSidebar />,
+  rowLogos,
   matchesLanded: {
     pos: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(
@@ -870,11 +1055,14 @@ export const mlbProfile = {
     wpa: (teamId, treatment, fields) => {
       const layout = resolvedWpaLayout(teamId, treatment, null)
       const { pinstripe, band, bandBg } = resolveWpaBandState(teamId, treatment, null)
-      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg })
+      const ownArt = resolveWpaOwnArt(teamId, treatment, null)
+      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg, ownArt })
     },
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
     colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
+    treatmentColors: (teamId, treatment, fields) =>
+      colorsDraftMatchesLanded(fields, treatmentTuningRecord(teamId, treatment)?.colors),
   },
   buildAllChangesText,
   buildSaves,

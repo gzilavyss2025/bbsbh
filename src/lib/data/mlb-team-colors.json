@@ -4,24 +4,14 @@
     "primary": "#003263",
     "secondary": "#BA0021",
     "accent": "#BA0021",
-    "extras": [
-      {
-        "label": "Silver",
-        "hex": "#C4CED4"
-      }
-    ]
+    "accent2": "#C4CED4"
   },
   "109": {
     "name": "Arizona Diamondbacks",
     "primary": "#A71930",
     "secondary": "#E3D4AD",
     "accent": "#A71930",
-    "extras": [
-      {
-        "label": "Teal",
-        "hex": "#30CED8"
-      }
-    ]
+    "accent2": "#30CED8"
   },
   "110": {
     "name": "Baltimore Orioles",
@@ -58,12 +48,7 @@
     "primary": "#333366",
     "secondary": "#C4CED4",
     "accent": "#333366",
-    "extras": [
-      {
-        "label": "Black",
-        "hex": "#000000"
-      }
-    ]
+    "accent2": "#000000"
   },
   "116": {
     "name": "Detroit Tigers",
@@ -76,12 +61,7 @@
     "primary": "#002D62",
     "secondary": "#EB6E1F",
     "accent": "#EB6E1F",
-    "extras": [
-      {
-        "label": "Metallic Orange",
-        "hex": "#F4911E"
-      }
-    ]
+    "accent2": "#F4911E"
   },
   "118": {
     "name": "Kansas City Royals",
@@ -94,12 +74,7 @@
     "primary": "#005A9C",
     "secondary": "#EF3E42",
     "accent": "#005A9C",
-    "extras": [
-      {
-        "label": "Silver",
-        "hex": "#A5ACAF"
-      }
-    ]
+    "accent2": "#A5ACAF"
   },
   "120": {
     "name": "Washington Nationals",
@@ -118,12 +93,7 @@
     "primary": "#003831",
     "secondary": "#EFB21E",
     "accent": "#EFB21E",
-    "extras": [
-      {
-        "label": "Gray",
-        "hex": "#A2AAAD"
-      }
-    ]
+    "accent2": "#A2AAAD"
   },
   "134": {
     "name": "Pittsburgh Pirates",
@@ -144,14 +114,11 @@
     "accent": "#005C5C",
     "extras": [
       {
-        "label": "Silver",
-        "hex": "#C4CED4"
-      },
-      {
         "label": "Red",
         "hex": "#D50032"
       }
-    ]
+    ],
+    "accent2": "#C4CED4"
   },
   "137": {
     "name": "San Francisco Giants",
@@ -160,26 +127,18 @@
     "accent": "#FD5A1E",
     "extras": [
       {
-        "label": "Cream",
-        "hex": "#EFD19F"
-      },
-      {
         "label": "Metallic Gold",
         "hex": "#AE8F6F"
       }
-    ]
+    ],
+    "accent2": "#EFD19F"
   },
   "138": {
     "name": "St. Louis Cardinals",
     "primary": "#C41E3A",
     "secondary": "#0C2340",
     "accent": "#C41E3A",
-    "extras": [
-      {
-        "label": "Yellow",
-        "hex": "#FEDB00"
-      }
-    ]
+    "accent2": "#FEDB00"
   },
   "139": {
     "name": "Tampa Bay Rays",
@@ -204,12 +163,7 @@
     "primary": "#002B5C",
     "secondary": "#D31145",
     "accent": "#D31145",
-    "extras": [
-      {
-        "label": "Kasota Gold",
-        "hex": "#B9975B"
-      }
-    ]
+    "accent2": "#B9975B"
   },
   "143": {
     "name": "Philadelphia Phillies",
@@ -222,12 +176,7 @@
     "primary": "#CE1141",
     "secondary": "#13274F",
     "accent": "#CE1141",
-    "extras": [
-      {
-        "label": "Yellow",
-        "hex": "#EAAA00"
-      }
-    ]
+    "accent2": "#EAAA00"
   },
   "145": {
     "name": "Chicago White Sox",
@@ -242,14 +191,11 @@
     "accent": "#00A3E0",
     "extras": [
       {
-        "label": "Slate Gray",
-        "hex": "#41748D"
-      },
-      {
         "label": "Black",
         "hex": "#000000"
       }
-    ]
+    ],
+    "accent2": "#41748D"
   },
   "147": {
     "name": "New York Yankees",
@@ -258,14 +204,11 @@
     "accent": "#003087",
     "extras": [
       {
-        "label": "Navy",
-        "hex": "#0C2340"
-      },
-      {
         "label": "Gray",
         "hex": "#C4CED3"
       }
-    ]
+    ],
+    "accent2": "#0C2340"
   },
   "158": {
     "name": "Milwaukee Brewers",
@@ -274,14 +217,11 @@
     "accent": "#FFC52F",
     "extras": [
       {
-        "label": "Powder Blue",
-        "hex": "#6CACE4"
-      },
-      {
         "label": "Gold",
         "hex": "#FEC52E"
       }
     ],
-    "note": "Powder Blue is the 2026 alternate road jersey; Gold is that jersey’s secondary."
+    "note": "Powder Blue is the 2026 alternate road jersey; Gold is that jersey’s secondary.",
+    "accent2": "#6CACE4"
   }
 }
