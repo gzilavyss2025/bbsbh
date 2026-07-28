@@ -115,7 +115,7 @@ export default async function handler(req, res) {
       if (!redis) return reply(res, { error: 'copy store not configured' }, 501)
       const userId = await authenticateAdmin(req)
       if (!userId) return reply(res, { error: 'forbidden' }, 403)
-      let entries = []
+      let entries
       try {
         const raw = (await redis.lrange(COPY_HISTORY_KEY, 0, COPY_HISTORY_MAX - 1)) || []
         entries = raw
