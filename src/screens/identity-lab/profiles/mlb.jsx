@@ -631,15 +631,15 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       }
     : null
   // Main already comes back as three role slots plus however many extras the
-  // club has researched, so it needs no padding; every other treatment is a
-  // curated list of up to three, padded so an absent one renders as an explicit
-  // empty slot rather than collapsing the row.
-  const slots = isMain ? colors : [0, 1, 2].map((i) => colors[i] ?? null)
+  // club has researched. Every other treatment shows its four Colors-panel
+  // slots here too — the SAME treatmentColorSlots the panel below edits, so
+  // typing a hex in either place updates both at once (one shared draft, two
+  // views onto it), and a filled-in Accent 2 gets its own chip for free.
+  const slots = isMain ? colors : treatmentColorSlots
 
   const {
     override,
     pinstripeBg,
-    activeBgIndex,
     scale: treatmentScale,
     offsetX: treatmentOffsetXValue,
     offsetY: treatmentOffsetYValue,
@@ -718,9 +718,16 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
       wearDates={wearDates}
-      swatches={slots.map((s, i) => ({
+      swatches={slots.map((s) => ({
         swatch: s,
-        active: i === activeBgIndex,
+        // Compared by hex value, not array position: for Main this still
+        // rings whichever of the triad the tile's tint chain actually picked
+        // (resolvePositionState's own colors array), and for every other
+        // treatment `treatmentBg` no longer shares an array with `slots`
+        // (its default comes from the club's own curated fill, not this
+        // panel), so index equality can't answer this at all — a Colors edit
+        // that happens not to match the current fill correctly rings nothing.
+        active: Boolean(s?.hex && treatmentBg && s.hex.toLowerCase() === treatmentBg.toLowerCase()), // caps-js-exempt
         wpaSelected: Boolean(!wpaPinstripe && s?.hex && wpaBand.toLowerCase() === s.hex.toLowerCase()), // caps-js-exempt
         onPickWpaBand: s?.hex
           ? () => {
@@ -730,13 +737,19 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
               on.wpaField(treatment, 'bandColor', s.hex)
             }
           : undefined,
-        // Only the three role slots are editable — an extra is research, shown
-        // and copyable but not retyped here, and `i` past the triad has no role
-        // to write to.
-        editable:
-          isMain && i < COLOR_ROLES.length
-            ? { value: s?.hex ?? '', onChange: (hex) => on.colorField(COLOR_ROLES[i], hex) }
-            : undefined,
+        // Only a role slot is editable — an extra (Main's researched colors
+        // beyond its triad) is research, shown and copyable but not retyped
+        // here, and carries no role to write to. Main writes its club-wide
+        // triad (mlb-team-colors.json); every other treatment writes its own
+        // Colors-panel slot (mlb-treatment-tuning.json) — the identical field
+        // the panel below edits, so the two can never show two different
+        // values for the same role.
+        editable: s?.role
+          ? {
+              value: s.hex ?? '',
+              onChange: (hex) => (isMain ? on.colorField(s.role, hex) : on.tcolorField(treatment, s.role, hex)),
+            }
+          : undefined,
       }))}
       colorsPanel={isMain ? { hasDraft: hasColorsDraft, onReset: on.colorReset } : undefined}
       treatmentColors={{

@@ -50,12 +50,13 @@
           "accent": "#30CED8",
           "onBar": "#FBF6E9"
         },
-        "note": "Home Cream",
         "colors": {
           "primary": "#A71930",
           "secondary": "#E3D4AD",
-          "accent1": "#A71930"
-        }
+          "accent1": "#A71930",
+          "accent2": "#30CED8"
+        },
+        "note": "Home Cream"
       },
       "alternate": {
         "scale": 1.1,
@@ -68,7 +69,8 @@
         "colors": {
           "primary": "#A71930",
           "secondary": "#E3D4AD",
-          "accent1": "#30CED8"
+          "accent1": "#30CED8",
+          "accent2": "#D0D0D0"
         },
         "note": "Alternate bumped up so the top-anchored bleed just barely clips the teal border, most of the bleed still going to the bottom"
       },
