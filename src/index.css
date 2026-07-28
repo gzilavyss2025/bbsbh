@@ -10275,6 +10275,7 @@ body {
 }
 
 .colorlab__weardate {
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   padding: 2px 6px;
@@ -10282,6 +10283,7 @@ body {
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
+  text-decoration: none;
   cursor: pointer;
 }
 .colorlab__weardate:hover {
