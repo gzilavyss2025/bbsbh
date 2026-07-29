@@ -17,9 +17,11 @@ import {
   wpaArtUrl,
 } from '../src/lib/logoArt.js'
 import {
+  DEV_LOGO_COPY_ROUTE,
   DEV_LOGO_MAX_BODY_BYTES,
   DEV_LOGO_ROUTE,
   buildLogoManifest,
+  prepareLogoCopy,
   prepareLogoUpload,
   resolveLogoFile,
 } from '../scripts/lib/dev-logo-upload.mjs'
@@ -307,6 +309,33 @@ test('the logo route is its own thing, not a JSON store', () => {
   // resolved to both would mean one of the two validators got skipped.
   assert.equal(devDataStore(DEV_LOGO_ROUTE), null)
   assert.ok(DEV_LOGO_MAX_BODY_BYTES > LOGO_MAX_BYTES, 'the stream guard must not undercut the art cap')
+})
+
+// --------------------------------------------------------------------------
+// The copy route — reuse an already-uploaded mark on another of this team's
+// treatments instead of procuring/uploading the same file again.
+// --------------------------------------------------------------------------
+
+test('a real club and two distinct real treatments resolve to a source and a target', () => {
+  const copy = prepareLogoCopy({ teamId: 140, from: 'main', to: 'alternate' })
+  assert.equal(copy.problem, undefined)
+  assert.equal(copy.source.file, 'public/team-logos/main-overrides/TEX.png')
+  assert.equal(copy.target.file, 'public/team-logos/alternate/TEX.png')
+})
+
+test('a copy refuses a bad source or target destination, same as upload does', () => {
+  assert.match(prepareLogoCopy({ teamId: 140, from: 'nope', to: 'alternate' }).problem, /no destination/)
+  assert.match(prepareLogoCopy({ teamId: 140, from: 'main', to: 'nope' }).problem, /no destination/)
+  assert.match(prepareLogoCopy({ teamId: 234, from: 'main', to: 'alternate' }).problem, /no destination/)
+})
+
+test('a copy onto the same treatment it came from is refused rather than a silent no-op', () => {
+  assert.match(prepareLogoCopy({ teamId: 140, from: 'main', to: 'main' }).problem, /same treatment/)
+})
+
+test('the copy route is its own thing too, not a JSON store or the upload route', () => {
+  assert.equal(devDataStore(DEV_LOGO_COPY_ROUTE), null)
+  assert.notEqual(DEV_LOGO_COPY_ROUTE, DEV_LOGO_ROUTE)
 })
 
 // --------------------------------------------------------------------------

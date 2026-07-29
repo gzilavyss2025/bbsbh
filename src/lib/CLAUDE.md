@@ -187,6 +187,15 @@ contract**, in one place because PR 4's MiLB art builds directly on it:
 | Response | `{ file, url, caveat }` |
 | Side effect | `src/lib/data/logo-art.json` is rebuilt from disk |
 
+A sibling endpoint reuses one already-uploaded mark on another of the same
+club's treatments instead of procuring/uploading it again — the lab's "Copy
+here" control next to Replace art on every tile: `POST
+/__dev/team-logo-copy?teamId={id}&from={key}&to={key}`, no body — the bytes
+travel server-side, read off whatever `from` already has on disk, and land
+through the exact same validate/write/rebuild-the-manifest path as a real
+upload. Same response shape, plus a 404 (`no art uploaded for "{from}" yet`)
+when the source tile is itself empty.
+
 Validation reads the PNG header by hand — width and height are big-endian
 uint32s at bytes 16 and 20 of the IHDR chunk — so there is **no image library
 and no new dependency**. The same functions run in the browser (instant, specific
@@ -194,15 +203,23 @@ rejection) and in Node (the authoritative check), so the two can't disagree.
 
 Two things that surprise people:
 
-- **`logo-art.json` is a record, not a source.** No resolver reads it;
-  `localLogoUrl` still has no whitelist, and a missing file still just 404s and
-  degrades. The manifest exists so `test/logo-upload.test.js` can catch a file
+- **`logo-art.json` is a source for Main, a record for everything else.**
+  `localLogoUrl` (alternates/City Connect) still has no whitelist and reads
+  nothing from the manifest — a missing file just 404s and degrades, same as
+  always. Main is the one exception: `mainOverrideLogoUrl`/
+  `mainTreatmentRecolor` (teams.js) read the manifest directly, so an upload to
+  `main-overrides/` takes effect immediately, with no companion `recolor` flag
+  or code change needed — see below. For every other treatment the manifest
+  stays a record only, kept so `test/logo-upload.test.js` can catch a file
   added or deleted by hand — regenerate with `node scripts/gen-logo-art.mjs`.
 - **Uploading art doesn't always change the tile.** `teams.js` decides what a
   tile wears, and for a club in one of the `*_USES_BASE_LOGO` sets (plain CDN
-  mark), one filed under `ALT_LOGO_SVG`, or a Main tile with no `recolor`
-  override, that isn't the uploaded `.png`. The lab says so on the tile after a
-  successful upload rather than leaving you staring at an unchanged mark.
+  mark, including the two Main-only exceptions in `MAIN_USES_BASE_LOGO` —
+  Rockies/Yankees, whose pinstripe tile keeps the stock CDN mark even though a
+  legacy `main-overrides` file for them sits unused on disk) or one filed under
+  `ALT_LOGO_SVG`, that isn't the uploaded `.png`. The lab says so on the tile
+  after a successful upload rather than leaving you staring at an unchanged
+  mark.
 
 Existing `.svg` art stays as it is — the standard governs new uploads.
 

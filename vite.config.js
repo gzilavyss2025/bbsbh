@@ -9,8 +9,10 @@ import {
   serializeStore,
 } from './scripts/lib/dev-data-stores.mjs'
 import {
+  DEV_LOGO_COPY_ROUTE,
   DEV_LOGO_MAX_BODY_BYTES,
   DEV_LOGO_ROUTE,
+  copyLogoUpload,
   saveLogoUpload,
 } from './scripts/lib/dev-logo-upload.mjs'
 import { describeLogoCaveat } from './src/lib/logoArt.js'
@@ -36,7 +38,11 @@ import { describeLogoCaveat } from './src/lib/logoArt.js'
 // which writes a curated club mark into public/team-logos/{treatment}/. Its
 // destination is resolved the same way — from a numeric team id and a treatment
 // KEY, never a path (scripts/lib/dev-logo-upload.mjs). Vite serves public/
-// directly in dev, so an uploaded mark is live on the next request.
+// directly in dev, so an uploaded mark is live on the next request. Its sibling
+// /__dev/team-logo-copy takes no body at all — `from`/`to` treatment keys ride
+// the query string, and the bytes it writes come off whatever `from` already
+// has on disk, so reusing one mark across a club's treatments needs no second
+// upload.
 //
 // The route lives under `/__dev/…` rather than `/api/…` because this repo's
 // `api/` directory is reserved for the real backend exceptions (OG previews,
@@ -131,6 +137,29 @@ async function handleLogoUpload(req, res, query) {
   }
 }
 
+// No body to read — `from`/`to` are both query params, and the bytes come off
+// disk server-side, not the request.
+async function handleLogoCopy(req, res, query) {
+  const params = new URLSearchParams(query)
+  const teamId = Number(params.get('teamId'))
+  const from = params.get('from') ?? ''
+  const to = params.get('to') ?? ''
+  try {
+    const { problem, status, target, caveat } = await copyLogoUpload({ teamId, from, to })
+    if (problem) {
+      res.statusCode = status ?? 400
+      res.end(problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({ file: target.file, url: target.url, caveat }))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
 function devDataSave() {
   return {
     name: 'dev-data-save',
@@ -141,8 +170,9 @@ function devDataSave() {
         const [routePath, query = ''] = (req.url || '').split('?')
         const key = routePath.replace(/^\/+|\/+$/g, '')
         const isLogo = key === DEV_LOGO_ROUTE
-        const store = isLogo ? null : devDataStore(key)
-        if (!isLogo && !store) {
+        const isLogoCopy = key === DEV_LOGO_COPY_ROUTE
+        const store = isLogo || isLogoCopy ? null : devDataStore(key)
+        if (!isLogo && !isLogoCopy && !store) {
           res.statusCode = 404
           res.end('unknown store')
           return
@@ -153,6 +183,7 @@ function devDataSave() {
           return
         }
         if (isLogo) handleLogoUpload(req, res, query)
+        else if (isLogoCopy) handleLogoCopy(req, res, query)
         else handleStoreSave(req, res, store)
       })
     },

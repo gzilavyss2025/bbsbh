@@ -49,6 +49,21 @@ export async function uploadLogo({ teamId, treatment, bytes }) {
   }
 }
 
+// The same middleware's third route: reuse whatever's already uploaded at
+// `from` on this team's `to` treatment instead of procuring/uploading the
+// same file again. No body — the bytes travel server-side, off disk.
+export async function copyLogo({ teamId, from, to }) {
+  const query = `teamId=${encodeURIComponent(teamId)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/team-logo-copy?${query}`, { method: 'POST' })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `copy failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the copy endpoint — is `npm run dev` running?' }
+  }
+}
+
 // Merge a draft's touched fields into a team-keyed store, returning a NEW store
 // object — the lab always posts the whole file, so an untouched team/treatment
 // has to survive the merge rather than being dropped.

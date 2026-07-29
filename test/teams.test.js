@@ -23,6 +23,7 @@ import {
   mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
+  MAIN_OVERRIDES,
   isMlbTeamId,
   headshotSources,
   realHeadshotUrl,
@@ -209,6 +210,27 @@ test('mainTreatmentPinstripeColor defaults to black unless a team overrides it',
 test('mainTreatmentRecolor is true only for teams whose Main mark swaps to the hand-edited asset', () => {
   assert.equal(mainTreatmentRecolor(114), true) // Guardians
   assert.equal(mainTreatmentRecolor(115), false) // Rockies — pinstriped but not recolored
+})
+
+// A club's Main override used to need a hand-authored `recolor: true` flag in
+// mlb-treatment-tuning.json on top of the uploaded file — the exact trap that
+// left an uploaded Giants Away Grey mark invisible with no error anywhere.
+// mainTreatmentRecolor/mainOverrideLogoUrl now derive straight from what
+// upload's own manifest (logo-art.json) says is on disk, so a new upload
+// needs no companion data or code change to take effect.
+test('mainOverrideLogoUrl and mainTreatmentRecolor resolve from disk presence alone, not a MAIN_OVERRIDES flag', () => {
+  assert.equal(MAIN_OVERRIDES[113].recolor, undefined) // recolor is no longer even a field this store carries
+  assert.equal(mainTreatmentRecolor(113), true) // Reds — CIN.png is on disk regardless
+  assert.equal(mainOverrideLogoUrl(113), '/team-logos/main-overrides/CIN.png')
+})
+
+test('mainOverrideLogoUrl prefers a procured .png over a stale .svg of the same team', () => {
+  assert.equal(mainOverrideLogoUrl(120), '/team-logos/main-overrides/WSH.png') // Nationals — both files exist
+})
+
+test('mainOverrideLogoUrl is null for the two MAIN_USES_BASE_LOGO exceptions even though a file exists on disk', () => {
+  assert.equal(mainOverrideLogoUrl(115), null) // Rockies — COL.svg exists but is intentionally unused
+  assert.equal(mainOverrideLogoUrl(147), null) // Yankees — NYY.svg exists but is intentionally unused
 })
 
 // treatmentTile — the one resolver the slate card, the in-game masthead, and
