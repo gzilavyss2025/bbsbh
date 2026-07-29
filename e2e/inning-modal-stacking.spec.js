@@ -74,22 +74,32 @@ test('the highlight sheet sits above the floating bar, not under it', async ({ p
   }
 })
 
-test('the pitch-zone modal sits above the floating bar too', async ({ page }) => {
-  await page.goto(`${GAME}/top1`)
+// .pbp__zonebtn only exists below the app's shared 740px breakpoint — from
+// 740px up, the card and its strike-zone pane sit side by side inline instead
+// (index.css's min-width:740px block sets `.pbp__zonebtn { display: none }`),
+// so there's no modal to open there. Pin a phone-sized viewport rather than
+// inheriting the project's, same reasoning as "pitch-color key" below (which
+// pins the opposite way, since ITS trigger is hidden below 740px).
+test.describe('pitch-zone modal', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
 
-  await page.getByRole('button', { name: /Reveal the rest of half/ }).click()
-  const zone = page.locator('.pbp__zonebtn').first()
-  await expect(zone).toBeVisible()
-  await zone.click()
+  test('sits above the floating bar too', async ({ page }) => {
+    await page.goto(`${GAME}/top1`)
 
-  const modal = page.locator('.szmodal')
-  await expect(modal).toBeVisible()
-  await expect(page.locator('.turnscene .scrim')).toHaveCount(0)
-  await expect(page.locator('body > .scrim')).toHaveCount(1)
+    await page.getByRole('button', { name: /Reveal the rest of half/ }).click()
+    const zone = page.locator('.pbp__zonebtn').first()
+    await expect(zone).toBeVisible()
+    await zone.click()
 
-  const box = await modal.boundingBox()
-  const path = await hitPathAt(page, box.x + box.width / 2, box.y + box.height - 4)
-  expect(path, `the pitch-zone modal is covered by page chrome: ${path}`).toContain('scrim')
+    const modal = page.locator('.szmodal')
+    await expect(modal).toBeVisible()
+    await expect(page.locator('.turnscene .scrim')).toHaveCount(0)
+    await expect(page.locator('body > .scrim')).toHaveCount(1)
+
+    const box = await modal.boundingBox()
+    const path = await hitPathAt(page, box.x + box.width / 2, box.y + box.height - 4)
+    expect(path, `the pitch-zone modal is covered by page chrome: ${path}`).toContain('scrim')
+  })
 })
 
 // The third dialog declared inside a half-inning page. Its trigger — the

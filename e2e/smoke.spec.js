@@ -27,5 +27,6 @@ test('pinned game (2026-07-07 MIL@STL g2, gamePk 823035) box score stays sealed 
 
 test('pinned game lineup1 renders the defense diamond', async ({ page }) => {
   await page.goto('/07072026/milstl-2/lineup1')
-  await expect(page.getByText('Scorebook').first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Defense' }).first()).toBeVisible()
+  await expect(page.locator('.defdiamond').first()).toBeVisible()
 })
