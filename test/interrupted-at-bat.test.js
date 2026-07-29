@@ -347,6 +347,26 @@ test('a mid-count stolen base transiently surfacing as its own play is NOT carde
   assert.match(note.segments.map((s) => s.text).join(''), /steals 2nd base/)
 })
 
+test('a caught stealing for only the 1st or 2nd out is NOT carded as interrupted', () => {
+  // Same top-level-play shape as the genuine inning-ending caught stealing
+  // (csPlay above), but count.outs is 2, not 3 — this out did NOT end the
+  // half, so the batter is still up and the "at-bat not completed, the
+  // inning ended on the bases" card would be a lie. Must fall through to the
+  // plain caught-stealing event note instead, same as the SB case.
+  const play = csPlay()
+  play.count = { balls: 1, strikes: 2, outs: 2 }
+  play.runners[0].movement.outNumber = 2
+  const feed = buildFeed(play)
+  feed.gameData.status = { abstractGameState: 'Live' }
+  const entries = computeHalfInningFeed(feed, 7, 'bottom', 'home')
+  assert.deepEqual(
+    entries.map((e) => (e.kind === 'atbat' ? `atbat:${e.batter.last}` : `event:${e.eventType}`)),
+    ['atbat:Sánchez', 'event:pinch_running', 'event:caught_stealing_2b'],
+  )
+  const note = entries.at(-1)
+  assert.notEqual(note.kind, 'atbat')
+})
+
 test('a walk-off steal (game Final) still gets the interrupted at-bat card', () => {
   // The one legitimate case a plain steal DOES end the half: it also ends the
   // GAME (a walk-off steal of home). Distinguished from the transient case
