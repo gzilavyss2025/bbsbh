@@ -30,6 +30,7 @@ export async function fetchGameUniforms(gamePk, options) {
         .map((a) => ({
           text: a.uniformAssetText ?? '',
           piece: a.uniformAssetType?.uniformAssetTypeCode ?? '',
+          code: a.uniformAssetCode ?? null,
         }))
         .filter((a) => a.text)
         .sort(
@@ -257,6 +258,21 @@ export function classifyUniformAsset(text, clubName, code) {
   if (/^city connect\b/i.test(rest)) return 'city-connect'
   if (/^(home|away|road)\b/i.test(rest)) return 'main'
   return 'alternate'
+}
+
+// The logo TREATMENT a fetchGameUniforms side is actually wearing tonight,
+// classified the moment the assignment posts (around first pitch) rather than
+// waiting for the next run of the nightly gen-jerseys.mjs precompute —
+// classifyUniformAsset is the exact same function that precompute calls, so
+// the two can never disagree on a jersey they both see. Reads the JERSEY
+// ('J') piece only (pants/cap follow the jersey's own treatment); returns
+// null before this side has posted or if it somehow carries no jersey-piece
+// asset, so a caller falls through to jerseys.json / defaultTreatmentFor
+// exactly as it did before this existed.
+export function liveJerseyTreatment(assets, clubName) {
+  const jersey = (assets ?? []).find((a) => a.piece === 'J')
+  if (!jersey?.text) return null
+  return classifyUniformAsset(jersey.text, clubName, jersey.code)
 }
 
 // A catalog asset's label with the club name and the redundant "Jersey" noun

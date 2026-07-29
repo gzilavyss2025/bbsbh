@@ -8,6 +8,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   classifyUniformAsset,
+  liveJerseyTreatment,
   uniformSummary,
   jerseyLabel,
   uniformFriendlyName,
@@ -47,6 +48,36 @@ test('classifyUniformAsset defers to JERSEY_TREATMENT_OVERRIDES when the code ma
 
 test('classifyUniformAsset falls back to the naming convention for an unrecognized code', () => {
   assert.equal(classifyUniformAsset('Marlins Alt 2 Teal', 'Marlins', 'not_a_real_code'), 'alternate')
+})
+
+// --------------------------------------------------------------------------
+// liveJerseyTreatment — classifies a fetchGameUniforms side the moment
+// statsapi posts it, same-day, instead of waiting for the next nightly
+// gen-jerseys.mjs run.
+// --------------------------------------------------------------------------
+test('liveJerseyTreatment classifies the jersey-piece asset by the naming convention', () => {
+  const assets = [
+    { text: 'Brewers Alt 2 Navy Blue Jersey', piece: 'J', code: null },
+    { text: 'Brewers Road Grey Pants', piece: 'P', code: null },
+  ]
+  assert.equal(liveJerseyTreatment(assets, 'Brewers'), 'alternate')
+})
+
+test('liveJerseyTreatment defers to JERSEY_TREATMENT_OVERRIDES via the jersey asset\'s own code', () => {
+  const assets = [
+    { text: 'Mariners Home White Jersey', piece: 'J', code: '136_jersey_1_2026' },
+    { text: 'Mariners Home Grey Pants', piece: 'P', code: null },
+  ]
+  assert.equal(liveJerseyTreatment(assets, 'Mariners'), 'alternate')
+})
+
+test('liveJerseyTreatment returns null before the side has posted or with no jersey-piece asset', () => {
+  assert.equal(liveJerseyTreatment(null, 'Brewers'), null)
+  assert.equal(liveJerseyTreatment([], 'Brewers'), null)
+  assert.equal(
+    liveJerseyTreatment([{ text: 'Brewers Road Grey Pants', piece: 'P', code: null }], 'Brewers'),
+    null,
+  )
 })
 
 // --------------------------------------------------------------------------

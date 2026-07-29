@@ -9,7 +9,7 @@ import {
   fetchWinProbability,
 } from '../api/game.js'
 import { fetchHighlights } from '../api/highlights.js'
-import { fetchGameUniforms, uniformSummary } from '../api/uniforms.js'
+import { fetchGameUniforms, uniformSummary, liveJerseyTreatment } from '../api/uniforms.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { fetchGameBroadcast } from '../api/broadcast.js'
 import { fetchTeamRoster } from '../api/team.js'
@@ -450,36 +450,51 @@ export function useGameData(game, spoilersOff = false) {
 
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
-  // Which logo treatment each side actually wore tonight — read from the same
-  // nightly precompute GameCard.jsx already reads to swap a slate card's logo
-  // (api/jerseys.js), not a second live fetch. Same deferred tier as the other
-  // same-origin static reads above; a game outside the file's coverage (MiLB,
-  // not posted yet) falls back to defaultTreatmentFor's predicted look rather
-  // than a flat 'main' for both sides.
+  // Which logo treatment each side actually wore tonight. Preferred order:
+  // (1) THIS game's own live uniform fetch (feedState.data.uniforms, already
+  // pulled above for uniformBrief — no second network call), classified via
+  // liveJerseyTreatment the moment statsapi posts the assignment (around
+  // first pitch); (2) the nightly precompute GameCard.jsx also reads
+  // (api/jerseys.js), for a game whose live fetch hasn't posted yet on this
+  // load; (3) defaultTreatmentFor's predicted look, for a game outside both
+  // sources' coverage (MiLB, or before either has posted). (1) can only ever
+  // improve on (2) — the live fetch and the nightly file feed the exact same
+  // classifyUniformAsset — so a live posting shows the real treatment same-day
+  // instead of waiting for tomorrow night's cron.
   //
   // Two consumers: the win-probability chart's tiled band (WinProbChart.jsx),
   // and the lineup page's own header chrome (TeamInfo.jsx via
   // lib/headerTheme.js — ADR-0030). Both want the same answer to "what is this
   // club wearing", so it is resolved once here rather than twice.
   //
-  // Spoiler-free by construction: jerseys.json maps `gamePk:teamId` to a
-  // treatment NAME and carries no result, and the same value already renders
-  // unsealed on the slate card.
+  // Spoiler-free by construction: a uniform choice, not a game state — same
+  // footing as uniformBrief/jerseys.json above.
   const jerseysQuery = useAsync(
     () => (enrichmentReady ? fetchJerseysData() : Promise.resolve(null)),
     [enrichmentReady],
   )
-  const jerseyTreatments = useMemo(
-    () => ({
+  const jerseyTreatments = useMemo(() => {
+    const uniforms = feedState.data?.uniforms
+    return {
       away:
+        liveJerseyTreatment(uniforms?.away, game.away.teamName) ??
         jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.away.id) ??
         defaultTreatmentFor(game.away.id, 'away', officialDate),
       home:
+        liveJerseyTreatment(uniforms?.home, game.home.teamName) ??
         jerseyTreatmentFor(jerseysQuery.data, game.gamePk, game.home.id) ??
         defaultTreatmentFor(game.home.id, 'home', officialDate),
-    }),
-    [jerseysQuery.data, game.gamePk, game.away.id, game.home.id, officialDate],
-  )
+    }
+  }, [
+    feedState.data,
+    jerseysQuery.data,
+    game.gamePk,
+    game.away.id,
+    game.away.teamName,
+    game.home.id,
+    game.home.teamName,
+    officialDate,
+  ])
 
   return {
     feedState,
