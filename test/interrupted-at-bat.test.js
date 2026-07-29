@@ -304,6 +304,100 @@ test('a game advisory still produces no card and no note', () => {
   assert.deepEqual(entries.map((e) => e.kind), ['atbat'])
 })
 
+// ---- a plain stolen base can never end a half on its own -------------------
+
+test('a mid-count stolen base transiently surfacing as its own play is NOT carded as interrupted', () => {
+  // The live feed's own transient artifact (same class already documented for
+  // mound visits/pitching changes at the top of playbyplay.js): mid-poll, a
+  // stolen base mid-count shows up as its own top-level play — carrying the
+  // pitches thrown SO FAR to the batter still up — before the feed folds it
+  // into that still-in-progress plate appearance. No runner is out and the
+  // game is still Live, so this play can never be the one that ends the half;
+  // it must fall through to a plain "stole 2nd base" event note, not the
+  // "at-bat not completed" interrupted card (which incorrectly implied the
+  // inning had ended on the bases while Lara was still batting).
+  const sbPlay = {
+    about: { inning: 7, halfInning: 'bottom', atBatIndex: 51 },
+    matchup: { batter: { id: 3, fullName: 'Luis Lara' }, pitcher: { id: 4 }, batSide: { code: 'L' } },
+    result: {
+      type: 'atBat',
+      eventType: 'stolen_base_2b',
+      description: 'Cooper Pratt steals 2nd base.',
+      rbi: 0,
+    },
+    count: { balls: 1, strikes: 2, outs: 2 },
+    playEvents: [pitch('C', 1), pitch('S', 2), pitch('F', 3), pitch('B', 4)],
+    runners: [
+      {
+        details: { runner: { id: 2, fullName: 'Cooper Pratt' }, eventType: 'stolen_base_2b' },
+        movement: { start: '1B', end: '2B', isOut: false },
+      },
+    ],
+  }
+  const feed = buildFeed(sbPlay)
+  feed.gameData.status = { abstractGameState: 'Live' }
+  const entries = computeHalfInningFeed(feed, 7, 'bottom', 'home')
+  assert.deepEqual(
+    entries.map((e) => (e.kind === 'atbat' ? `atbat:${e.batter.last}` : `event:${e.eventType}`)),
+    ['atbat:Sánchez', 'event:stolen_base_2b'],
+  )
+  const note = entries[1]
+  assert.notEqual(note.kind, 'atbat')
+  assert.equal(note.playerId, 2) // the runner who stole, not the batter
+  assert.match(note.segments.map((s) => s.text).join(''), /steals 2nd base/)
+})
+
+test('a caught stealing for only the 1st or 2nd out is NOT carded as interrupted', () => {
+  // Same top-level-play shape as the genuine inning-ending caught stealing
+  // (csPlay above), but count.outs is 2, not 3 — this out did NOT end the
+  // half, so the batter is still up and the "at-bat not completed, the
+  // inning ended on the bases" card would be a lie. Must fall through to the
+  // plain caught-stealing event note instead, same as the SB case.
+  const play = csPlay()
+  play.count = { balls: 1, strikes: 2, outs: 2 }
+  play.runners[0].movement.outNumber = 2
+  const feed = buildFeed(play)
+  feed.gameData.status = { abstractGameState: 'Live' }
+  const entries = computeHalfInningFeed(feed, 7, 'bottom', 'home')
+  assert.deepEqual(
+    entries.map((e) => (e.kind === 'atbat' ? `atbat:${e.batter.last}` : `event:${e.eventType}`)),
+    ['atbat:Sánchez', 'event:pinch_running', 'event:caught_stealing_2b'],
+  )
+  const note = entries.at(-1)
+  assert.notEqual(note.kind, 'atbat')
+})
+
+test('a walk-off steal (game Final) still gets the interrupted at-bat card', () => {
+  // The one legitimate case a plain steal DOES end the half: it also ends the
+  // GAME (a walk-off steal of home). Distinguished from the transient case
+  // above by the game's own status, not by the eventType.
+  const sbPlay = {
+    about: { inning: 9, halfInning: 'bottom', atBatIndex: 51 },
+    matchup: { batter: { id: 3, fullName: 'Luis Lara' }, pitcher: { id: 4 }, batSide: { code: 'L' } },
+    result: {
+      type: 'atBat',
+      eventType: 'stolen_base_home',
+      description: 'Cooper Pratt steals home.',
+      rbi: 0,
+    },
+    count: { balls: 1, strikes: 2, outs: 1 },
+    playEvents: [pitch('C', 1), pitch('S', 2), pitch('F', 3), pitch('B', 4)],
+    runners: [
+      {
+        details: { runner: { id: 2, fullName: 'Cooper Pratt' }, eventType: 'stolen_base_home' },
+        movement: { start: '3B', end: 'score', isOut: false },
+      },
+    ],
+  }
+  const feed = buildFeed(sbPlay)
+  feed.gameData.status = { abstractGameState: 'Final' }
+  const entries = computeHalfInningFeed(feed, 9, 'bottom', 'home')
+  const lara = entries.at(-1)
+  assert.equal(lara.kind, 'atbat')
+  assert.equal(lara.interrupted, true)
+  assert.equal(lara.code, 'SB →')
+})
+
 // ---- Scorecard Lab: the cell shows, the tallies don't move ------------------
 
 test('the scorecard grid shows the interrupted cell but charges no at-bat', () => {

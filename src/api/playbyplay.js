@@ -1492,7 +1492,31 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       }
       const { pitchEvents, pitches, pitchDetails } =
         isBaserunningPlay && batterId != null ? pitchCardInfo(feed, play) : { pitchEvents: [] }
-      if (pitchEvents.length > 0) {
+      // A half can only truly end on THIS play if it recorded the half's 3rd
+      // out, or the game itself is over (a walk-off steal/wild pitch/passed
+      // ball/balk with the bases loaded — none of those carry an out of their
+      // own, but ending the GAME necessarily ends the half too). Checked
+      // against `play.count.outs` (outs AFTER this play), not merely whether
+      // SOME runner was put out here — a caught stealing/pickoff for the
+      // half's 1st or 2nd out doesn't end anything either, and the card's own
+      // text flatly claims "the inning ended on the bases," which would be
+      // false for those. Without this guard at all, a plain stolen base —
+      // which never records an out and so can never by itself end a half —
+      // was misread as inning-ending the moment it showed up as its own
+      // top-level play, which the live feed does transiently mid-poll (before
+      // folding the steal into the still-in-progress batter's own plate-
+      // appearance update) — the same transient-top-level-play artifact
+      // already documented for mound visits/pitching changes at the top of
+      // this file. That produced a bogus "SB →" interrupted at-bat card while
+      // the batter was still up, which vanished again once the batter's real,
+      // completed PA arrived on a later poll (observed live, Brewers @
+      // Giants). With this guard a play that isn't genuinely the 3rd out (or
+      // game-ending) always falls through to the plain event-note branch
+      // below instead — the runner's own "stole 2nd base"/"caught stealing"
+      // card, with no claim the at-bat or the half ended.
+      const halfCouldEndHere =
+        play.count?.outs === 3 || feed?.gameData?.status?.abstractGameState === 'Final'
+      if (pitchEvents.length > 0 && halfCouldEndHere) {
         // The interruption sentence is the card's own description (there is no
         // batting result to describe); the count at the stoppage is a real
         // scorer's note — on an inning-ending play it does NOT carry over
