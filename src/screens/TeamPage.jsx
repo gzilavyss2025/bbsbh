@@ -20,7 +20,7 @@ import {
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
-import { fetchRecentFormGames, buildRecentForm } from '../api/recentForm.js'
+import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../api/recentForm.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../api/teamScore.js'
@@ -725,15 +725,17 @@ async function loadTeam(id, asOf) {
   // "Last 10 Games" roster view — same four subsections as the Preferred
   // Lineup card above, but built from actual starts/appearances in the
   // club's last 10 COMPLETED games rather than season-cumulative stats (see
-  // src/api/recentForm.js). Restricted to players NOT currently on the IL —
-  // a player who started half the window before landing there this week
-  // doesn't belong in a "who's available right now" projection, even though
-  // he still counts toward it in his own game logs. A shared badge-info
-  // lookup keyed by id lets both views reuse the same RosterList/
-  // DefenseDiamond rendering without recomputing name/jersey/WAR/prospect/
-  // rookie per view.
+  // src/api/recentForm.js). Restricted to the ACTIVE roster, minus anyone on
+  // the IL — this view answers "who's available right now," so an optioned
+  // 40-man prospect or a player who landed on the IL this week doesn't belong
+  // in it even if he started half the window (see recentFormEligibleRoster).
+  // A shared badge-info lookup keyed by id lets both views reuse the same
+  // RosterList/DefenseDiamond rendering without recomputing name/jersey/WAR/
+  // prospect/rookie per view; it's keyed off both roster views (the 40-man is
+  // normally a superset, but a thin MiLB feed can list a player on one and not
+  // the other) so no eligible player renders without his badges.
   const rosterMetaById = new Map(
-    fullRoster
+    [...fullRoster, ...roster]
       .filter((r) => r.person?.id)
       .map((r) => {
         const isPitcher = r.position?.type === 'Pitcher' || isTwoWay(r.person)
@@ -752,9 +754,9 @@ async function loadTeam(id, asOf) {
         ]
       }),
   )
-  const eligibleFullRoster = fullRoster.filter((r) => r.person?.id && !currentInjuredIds.has(r.person.id))
+  const eligibleRoster = recentFormEligibleRoster(roster, fullRoster, currentInjuredIds)
   const recentFormGames = await fetchRecentFormGames(schedule)
-  const recentForm = buildRecentForm(recentFormGames, eligibleFullRoster)
+  const recentForm = buildRecentForm(recentFormGames, eligibleRoster)
   const recentPreferredLineup = recentForm.preferredLineupIds
     .map(({ position, id }) => {
       const meta = rosterMetaById.get(id)
@@ -775,7 +777,7 @@ async function loadTeam(id, asOf) {
   // fills a slot if the corresponding list hasn't already hit its cap.
   const pitcherStatById = new Map(fullPitchers.map((p) => [p.id, p]))
   const appearedPitcherIds = new Set(recentForm.pitcherAppearanceIds)
-  const silentPitchers = eligibleFullRoster.filter(
+  const silentPitchers = eligibleRoster.filter(
     (r) =>
       r.person?.id &&
       (r.position?.type === 'Pitcher' || isTwoWay(r.person)) &&

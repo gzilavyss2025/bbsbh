@@ -31,25 +31,44 @@ export async function fetchRecentFormGames(schedule, windowSize = 10) {
     .filter((g) => g.box)
 }
 
+// Who counts as "on the roster right now" for this view — the club's ACTIVE
+// (26-man) roster, NOT the 40Man `fullRoster` the season cards are built from.
+// The two views ask different questions: the season Preferred Lineup card
+// deliberately keeps the 40-man (an injured or rehabbing regular is still the
+// season's preferred answer at his spot), while this one projects who is
+// available right now. A player optioned to Triple-A is on the 40 but hasn't
+// been available for a single game in the window — and since buildRecentForm
+// keeps idle roster hitters (the zero-game tail in Top Substitutes, so a bench
+// bat who happened to sit the stretch doesn't vanish), a 40-man-only player
+// would land in Top Substitutes with no window data behind him at all. Anyone
+// on the IL is dropped for the same "available right now" reason. Falls back
+// to the 40-man list when a club has no active roster posted (a thin MiLB
+// feed), same graceful-degradation convention as the rest of the data layer.
+export function recentFormEligibleRoster(activeRoster, fullRoster, injuredIds = new Set()) {
+  const pool = activeRoster?.length ? activeRoster : fullRoster ?? []
+  return pool.filter((r) => r.person?.id && !injuredIds.has(r.person.id))
+}
+
 // Same nine-spot order the season Preferred Lineup card uses (see
 // TeamPage.jsx's PREFERRED_LINEUP_POSITIONS) — kept in sync manually since
 // this module has no other reason to import from the screen.
 const LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
 // Pure aggregation over the fetched boxscore window, restricted to players
-// still on the CURRENT roster (a player who's since been traded/released
-// doesn't belong in a "current lineup" projection, even if he started half
-// the window) — mirrors fullRoster eligibility the season cards already use.
+// still on the CURRENT roster (a player who's since been traded, released, or
+// optioned doesn't belong in a "current lineup" projection, even if he started
+// half the window) — the caller passes `recentFormEligibleRoster`'s output
+// above, so eligibility here is the active roster, not the 40-man.
 // Returns id lists only; the caller (TeamPage.jsx) already has a roster
 // metadata lookup (name/jersey/WAR/badges) built for the season cards and
 // maps these ids through the same one, so this module carries no rendering
 // shape of its own.
-export function buildRecentForm(games, fullRoster) {
+export function buildRecentForm(games, roster) {
   const hitterIds = new Set(
-    fullRoster.filter((r) => r.person?.id && r.position?.type !== 'Pitcher').map((r) => r.person.id),
+    roster.filter((r) => r.person?.id && r.position?.type !== 'Pitcher').map((r) => r.person.id),
   )
   const pitcherIds = new Set(
-    fullRoster
+    roster
       .filter((r) => r.person?.id && (r.position?.type === 'Pitcher' || isTwoWay(r.person)))
       .map((r) => r.person.id),
   )
