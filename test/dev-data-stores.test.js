@@ -187,6 +187,7 @@ test('a real mlb-team-colors entry is accepted, extras and all', () => {
         secondary: '#FFC52F',
         accent: '#FFC52F',
         accent2: '#6CACE4',
+        offDayTreatment: 'alternate',
         extras: [{ label: 'Powder Blue', hex: '#6CACE4' }],
         note: 'why this club is odd',
       },
@@ -209,6 +210,10 @@ test('an mlb-team-colors store rejects a non-object, a bad key, and a blank colo
   assert.match(mlbColors({ 158: { name: 'Brewers', primary: '' } }), /primary is not a color/)
   assert.match(mlbColors({ 158: { name: 'Brewers', accent: 42 } }), /accent is not a color/)
   assert.match(mlbColors({ 158: { name: 'Brewers', note: 7 } }), /note is not a string/)
+  assert.match(
+    mlbColors({ 158: { name: 'Brewers', offDayTreatment: 'throwback' } }),
+    /offDayTreatment "throwback" is not a known treatment/,
+  )
 })
 
 test('an mlb-team-colors store rejects a malformed extras list', () => {

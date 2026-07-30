@@ -3,15 +3,7 @@ import { BreakableLocation } from './BreakableLocation.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
 import { splitName } from '../lib/teamSplits.js'
-import {
-  teamClubNameShort,
-  favoriteAccentColor,
-  mainTreatmentTint,
-  mainTreatmentScale,
-  mainTreatmentPinstripe,
-  mainTreatmentPinstripeColor,
-  mainTreatmentRecolor,
-} from '../lib/teams.js'
+import { teamClubNameShort, favoriteAccentColor, offDayTreatmentFor, treatmentTile } from '../lib/teams.js'
 
 // The clubs NOT playing on the slate's date, shown below the games as small
 // gameday-styled cards — same framed, overscaled logo tile the slate matchup
@@ -65,18 +57,18 @@ function OffDayCard({ team, pinned, onOpen }) {
   const shortMascot = teamClubNameShort(id) || mascot
   const accent = pinned ? favoriteAccentColor(id) : null
   const cardStyle = accent ? { '--pin-accent': accent } : undefined
-  // Always the Main mark here — an off-day team isn't wearing any jersey
-  // today — so the same MAIN_OVERRIDES data GameCard's TeamMark reads
-  // (teams.js) applies directly, no jersey-variant lookup needed.
-  const pinstripe = mainTreatmentPinstripe(id)
-  const tint = mainTreatmentTint(id)
-  const scale = mainTreatmentScale(id)
-  const logoVariant = mainTreatmentRecolor(id) ? 'main-recolor' : 'base'
+  // Main by default — an off-day team isn't wearing any jersey today — but a
+  // club can curate a different one for its off-day tile (offDayTreatmentFor,
+  // teams.js), through the same resolver GameCard's TeamMark and GameView's
+  // masthead read (treatmentTile), so a club whose mark needs a scale-down or
+  // a recolor to read against its own fill gets it here too.
+  const treatment = offDayTreatmentFor(id)
+  const { logoVariant, tint, pinstripeColor, pinstripeBg, scale } = treatmentTile(id, treatment)
   const logoboxStyle =
-    tint || pinstripe
-      ? { '--tint': tint, '--scale': 1.32 * scale, '--pinstripe-color': pinstripe ? mainTreatmentPinstripeColor(id) : undefined }
+    tint || pinstripeColor
+      ? { '--tint': tint, '--scale': 1.32 * scale, '--pinstripe-color': pinstripeColor, '--pinstripe-bg': pinstripeBg || undefined }
       : undefined
-  const logoboxClass = `offdaycard__logobox${pinstripe ? ' offdaycard__logobox--pinstripe' : ''}`
+  const logoboxClass = `offdaycard__logobox${pinstripeColor ? ' offdaycard__logobox--pinstripe' : ''}`
   return (
     <button
       type="button"

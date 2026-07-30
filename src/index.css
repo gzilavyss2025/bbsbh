@@ -10634,6 +10634,34 @@ body {
   color: var(--text-caption);
 }
 
+.idlab__offday {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.idlab__offdaylabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.idlab__offdayselect {
+  height: 22px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: 0 var(--space-1);
+}
+
+.idlab__offdayselect:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* ---- the two header bars ---- */
 .idlab__bars {
   display: flex;

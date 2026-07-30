@@ -46,6 +46,7 @@ export function ColorLabBody({ profile }) {
   const [headerDraft, setHeaderField, resetHeaderDraft] = useDraftStore(profile.storeKey('headercolors'))
   const [colorsDraft, setColorField, resetColorsDraft] = useTeamDraftStore(profile.storeKey('colors'))
   const [tcolorsDraft, setTcolorField, resetTcolorsDraft] = useDraftStore(profile.storeKey('treatmentcolors'))
+  const [offDayDraft, setOffDayField, resetOffDayDraft] = useTeamDraftStore(profile.storeKey('offday'))
   const [saveStatus, setSaveStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
   const [selectedId, setSelectedId] = useState(() => loadSelectedClub(profile.storeKey('club')))
   const [opponents, setOpponents] = useState({}) // teamId -> opponent | null
@@ -64,6 +65,12 @@ export function ColorLabBody({ profile }) {
       draft: tcolorsDraft,
       reset: resetTcolorsDraft,
       matchesLanded: profile.matchesLanded.treatmentColors ?? NEVER_LANDED,
+    },
+    {
+      draft: offDayDraft,
+      reset: resetOffDayDraft,
+      matchesLanded: profile.matchesLanded.offDay ?? NEVER_LANDED,
+      teamScoped: true,
     },
   ])
 
@@ -112,7 +119,14 @@ export function ColorLabBody({ profile }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [teams, teamId])
 
-  const drafts = { pos: posDraft, wpa: wpaDraft, header: headerDraft, colors: colorsDraft, tcolors: tcolorsDraft }
+  const drafts = {
+    pos: posDraft,
+    wpa: wpaDraft,
+    header: headerDraft,
+    colors: colorsDraft,
+    tcolors: tcolorsDraft,
+    offday: offDayDraft,
+  }
 
   // Save lands every pending draft in the JSON stores on disk (ADR-0029) —
   // the same files this module's resolvers read, so the bench re-renders off the
@@ -173,6 +187,7 @@ export function ColorLabBody({ profile }) {
           header: headerDraft[team.id],
           colors: colorsDraft[team.id],
           tcolors: tcolorsDraft[team.id],
+          offday: offDayDraft[team.id],
         }}
         on={{
           posField: (treatment, field, value) => setPosField(team.id, treatment, field, value),
@@ -185,6 +200,8 @@ export function ColorLabBody({ profile }) {
           colorReset: () => resetColorsDraft(team.id),
           tcolorField: (treatment, role, value) => setTcolorField(team.id, treatment, role, value),
           tcolorReset: (treatment) => resetTcolorsDraft(team.id, treatment),
+          offDayField: (value) => setOffDayField(team.id, 'treatment', value),
+          offDayReset: () => resetOffDayDraft(team.id),
         }}
       />
 
@@ -216,7 +233,12 @@ function pendingClubIds(teams, drafts) {
     const perTreatment = ['pos', 'wpa', 'header', 'tcolors'].some((store) =>
       Object.values(drafts[store][team.id] ?? {}).some((fields) => Object.keys(fields ?? {}).length > 0),
     )
-    if (perTreatment || Object.keys(drafts.colors[team.id] ?? {}).length > 0) ids.add(team.id)
+    if (
+      perTreatment ||
+      Object.keys(drafts.colors[team.id] ?? {}).length > 0 ||
+      Object.keys(drafts.offday[team.id] ?? {}).length > 0
+    )
+      ids.add(team.id)
   }
   return ids
 }

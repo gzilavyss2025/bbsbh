@@ -4,12 +4,13 @@ import { TeamLogo } from '../../../components/TeamLogo.jsx'
 // thirty" rather than "find one" — who's on deck. The arrows step the rail's
 // own order, so a review pass is a loop you can hold a key through instead of
 // thirty separate hunts down a sidebar.
-export function CrestStrip({ team, badge, prev, next, onStep }) {
+export function CrestStrip({ team, badge, extra, prev, next, onStep }) {
   return (
     <header className="idlab__crest">
       <TeamLogo teamId={team.id} name={team.name} size={44} />
       <h2 className="idlab__crestname">{team.name}</h2>
       {badge}
+      {extra}
       <div className="idlab__crestnav">
         <button
           type="button"
