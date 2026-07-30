@@ -1,4 +1,5 @@
 import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { HexField } from '../HexField.jsx'
 import { shiftStepKeys } from './numberSteps.js'
 
 // The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs for THIS
@@ -66,7 +67,7 @@ export function WpaPreview({
         <LayoutField label="Shift %" field="rowShift" value={rowShift} onField={onField} />
         <label className="colorlab__wpapreviewcolor">
           <span>{pinstripe ? 'Stripe' : 'Band'}</span>
-          <input type="text" value={bandColor} onChange={(e) => onField('bandColor', e.target.value)} />
+          <HexField value={bandColor} onChange={(v) => onField('bandColor', v)} />
         </label>
         <label className="colorlab__wpapreviewcolor colorlab__wpapreviewcheck">
           <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
@@ -81,12 +82,7 @@ export function WpaPreview({
         {pinstripe && bandBg !== undefined && (
           <label className="colorlab__wpapreviewcolor">
             <span>Fill</span>
-            <input
-              type="text"
-              value={bandBg}
-              placeholder="#hex (white)"
-              onChange={(e) => onField('bandBg', e.target.value)}
-            />
+            <HexField value={bandBg} placeholder="#hex (white)" onChange={(v) => onField('bandBg', v)} />
           </label>
         )}
       </div>

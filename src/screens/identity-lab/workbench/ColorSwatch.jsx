@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { copyHex } from '../styleClipboard.js'
+import { HexField } from '../HexField.jsx'
 
 // `onPickWpaBand`, when supplied, turns the chip into a button that sets this
 // swatch's hex as the WPA preview's band color — a quick "try this one" instead
@@ -64,12 +65,11 @@ export function ColorSwatch({ swatch, active, wpaSelected, onPickWpaBand, editab
         {copied && <span className="idlab__tapeflash">✓ copied</span>}
       </span>
       {editable ? (
-        <input
-          type="text"
+        <HexField
           className="colorlab__swatchhexinput"
           value={editable.value}
           placeholder="#hex"
-          onChange={(e) => editable.onChange(e.target.value)}
+          onChange={editable.onChange}
         />
       ) : (
         <span className="colorlab__swatchhex">{swatch.hex}</span>

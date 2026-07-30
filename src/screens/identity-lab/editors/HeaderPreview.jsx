@@ -1,3 +1,5 @@
+import { HexField } from '../HexField.jsx'
+
 // The header chrome a lineup page wears when this club is in this jersey —
 // Bar / Accent / On bar. Split into three pieces because the redesign puts them
 // in two different places: the fields and the umpire's call live in the club's
@@ -43,29 +45,26 @@ export function HeaderFields({ rawColors, onField }) {
     <div className="colorlab__headerfields">
       <label>
         <span>Bar</span>
-        <input
-          type="text"
+        <HexField
           placeholder="not set"
           value={rawColors.bar ?? ''}
-          onChange={(e) => onField('bar', e.target.value)}
+          onChange={(v) => onField('bar', v)}
         />
       </label>
       <label>
         <span>Accent</span>
-        <input
-          type="text"
+        <HexField
           placeholder="not set"
           value={rawColors.accent ?? ''}
-          onChange={(e) => onField('accent', e.target.value)}
+          onChange={(v) => onField('accent', v)}
         />
       </label>
       <label>
         <span>On bar</span>
-        <input
-          type="text"
+        <HexField
           placeholder="not set"
           value={rawColors.onBar ?? ''}
-          onChange={(e) => onField('onBar', e.target.value)}
+          onChange={(v) => onField('onBar', v)}
         />
       </label>
     </div>
