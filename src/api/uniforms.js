@@ -92,6 +92,18 @@ export async function fetchGameJerseys(gamePks, options) {
   return out
 }
 
+// The logo TREATMENT a side actually wore, from a `fetchGameJerseys` batch —
+// same classification `liveJerseyTreatment` gives a single game's
+// `fetchGameUniforms` result, just keyed for the slate's one batched call
+// instead of a per-card fetch. Null covers an unposted assignment (or a game
+// missing from the batch) so a caller falls through to jerseys.json /
+// defaultTreatmentFor exactly as before.
+export function liveTreatmentFor(gameJerseys, gamePk, teamId, clubName) {
+  const jersey = gameJerseys?.[gamePk]?.[teamId]
+  if (!jersey?.text) return null
+  return classifyUniformAsset(jersey.text, clubName, jersey.code)
+}
+
 // One printable uniform line — "Alt 2 Navy Blue jersey · Road Grey pants ·
 // Alt Yellow Front hat". Asset labels arrive as "<Club> <desc> <Piece>"
 // ("Brewers Alt 2 Navy Blue Jersey"); the club name is redundant next to a

@@ -9,6 +9,7 @@ import test from 'node:test'
 import {
   classifyUniformAsset,
   liveJerseyTreatment,
+  liveTreatmentFor,
   uniformSummary,
   jerseyLabel,
   uniformFriendlyName,
@@ -76,6 +77,34 @@ test('liveJerseyTreatment returns null before the side has posted or with no jer
   assert.equal(liveJerseyTreatment([], 'Brewers'), null)
   assert.equal(
     liveJerseyTreatment([{ text: 'Brewers Road Grey Pants', piece: 'P', code: null }], 'Brewers'),
+    null,
+  )
+})
+
+// --------------------------------------------------------------------------
+// liveTreatmentFor — same classification as liveJerseyTreatment, keyed for a
+// fetchGameJerseys batch (GameCard's slate-wide live lookup) instead of a
+// single fetchGameUniforms side.
+// --------------------------------------------------------------------------
+test('liveTreatmentFor classifies the batched jersey by the naming convention', () => {
+  const gameJerseys = {
+    662001: { 109: { code: null, text: 'Diamondbacks Alt 2 Sedona Red Jersey' } },
+  }
+  assert.equal(liveTreatmentFor(gameJerseys, 662001, 109, 'Diamondbacks'), 'alternate')
+})
+
+test('liveTreatmentFor defers to JERSEY_TREATMENT_OVERRIDES via the jersey asset\'s own code', () => {
+  const gameJerseys = {
+    662002: { 136: { code: '136_jersey_1_2026', text: 'Mariners Home White Jersey' } },
+  }
+  assert.equal(liveTreatmentFor(gameJerseys, 662002, 136, 'Mariners'), 'alternate')
+})
+
+test('liveTreatmentFor returns null for a missing game, missing team, or unposted assignment', () => {
+  assert.equal(liveTreatmentFor(null, 662001, 109, 'Diamondbacks'), null)
+  assert.equal(liveTreatmentFor({}, 662001, 109, 'Diamondbacks'), null)
+  assert.equal(
+    liveTreatmentFor({ 662001: { 158: { code: null, text: 'Brewers Home White Jersey' } } }, 662001, 109, 'Diamondbacks'),
     null,
   )
 })
