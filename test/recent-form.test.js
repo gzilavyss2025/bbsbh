@@ -4,7 +4,7 @@
 // wrapper (schedule slice + boxscore fetch), not covered here.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRecentForm } from '../src/api/recentForm.js'
+import { buildRecentForm, recentFormEligibleRoster } from '../src/api/recentForm.js'
 
 const hitter = (id, pos) => ({ person: { id }, position: { type: 'Hitter', abbreviation: pos } })
 const pitcher = (id) => ({ person: { id }, position: { type: 'Pitcher', abbreviation: 'P' } })
@@ -154,4 +154,37 @@ test('empty window degrades to every roster hitter as a substitute and every oth
     bullpenIds: [],
     pitcherAppearanceIds: [],
   })
+})
+
+// recentFormEligibleRoster — who this view considers "on the roster right
+// now." The bug this pins: the Last 10 Games card was built from the 40-man,
+// so an optioned prospect (Jeferson Quero) or a depth bat in Triple-A (Akil
+// Baddoo) — neither on the 26-man, neither in a single window game — landed in
+// Top Substitutes via buildRecentForm's idle-hitter tail.
+const ACTIVE = [hitter(1, 'C'), hitter(2, 'SS')]
+const FORTY_MAN = [...ACTIVE, hitter(3, 'SS'), hitter(4, 'LF')] // 3, 4 optioned to AAA
+
+test('eligibility is the active roster — a 40-man player not on it is excluded', () => {
+  const eligible = recentFormEligibleRoster(ACTIVE, FORTY_MAN)
+  assert.deepEqual(eligible.map((r) => r.person.id), [1, 2])
+})
+
+test('an optioned 40-man hitter never reaches Top Substitutes as an idle player', () => {
+  const games = [{ apiDate: '2026-07-20', side: 'home', box: box('home', [starter(2, 6, 'SS')]) }]
+  const eligible = recentFormEligibleRoster(ACTIVE, FORTY_MAN)
+  const { substituteIds } = buildRecentForm(games, eligible)
+  assert.deepEqual(substituteIds, [1]) // 3 and 4 are off the active roster
+})
+
+test('an injured active-roster player is dropped too', () => {
+  const eligible = recentFormEligibleRoster(ACTIVE, FORTY_MAN, new Set([2]))
+  assert.deepEqual(eligible.map((r) => r.person.id), [1])
+})
+
+test('no active roster posted (thin MiLB feed) falls back to the 40-man list', () => {
+  assert.deepEqual(
+    recentFormEligibleRoster([], FORTY_MAN).map((r) => r.person.id),
+    [1, 2, 3, 4],
+  )
+  assert.deepEqual(recentFormEligibleRoster(undefined, undefined), [])
 })
