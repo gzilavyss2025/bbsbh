@@ -97,7 +97,7 @@
     },
     "NYM.png": {
       "teamId": 121,
-      "bytes": 82203,
+      "bytes": 38590,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -480,6 +480,13 @@
       "height": 512,
       "alpha": true
     },
+    "NYM.png": {
+      "teamId": 121,
+      "bytes": 52345,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "SEA.png": {
       "teamId": 136,
       "bytes": 13948,
@@ -569,6 +576,13 @@
     "MIN.svg": {
       "teamId": 142,
       "bytes": 1124
+    },
+    "NYM.png": {
+      "teamId": 121,
+      "bytes": 40036,
+      "width": 512,
+      "height": 512,
+      "alpha": true
     },
     "NYY.svg": {
       "teamId": 147,
