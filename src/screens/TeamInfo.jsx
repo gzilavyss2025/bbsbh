@@ -47,6 +47,8 @@ import { RadarPill } from '../components/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
+import { pitchArsenalFor } from '../api/pitchArsenal.js'
+import { PitchArsenalMix } from '../components/PitchArsenalMix.jsx'
 import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
@@ -69,8 +71,8 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../lib/heade
 // tonight, so paging away -> home reads as two different clubs' sheets rather
 // than the same navy twice. The whole mechanism is three CSS custom properties
 // scoped to this subtree, which is also the containment: nothing outside a
-// `.teaminfo` / `.teampanel` sees them, so the innings viewer and the box score
-// — where navy-and-kraft IS the seal metaphor — are untouched.
+// `.teaminfo` sees them, so the innings viewer and the box score — where
+// navy-and-kraft IS the seal metaphor — are untouched.
 //
 // The theme's only inputs are (teamId, treatment): identity, never state. See
 // lib/headerTheme.js for the full invariant and why "tint the page by whoever's
@@ -99,6 +101,7 @@ export function TeamInfo({
   rookiesData,
   feverRadarData,
   savantPercentilesData,
+  pitchArsenalData,
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
@@ -172,6 +175,7 @@ export function TeamInfo({
         rookiesData={rookiesData}
         feverRadarData={feverRadarData}
         savantPercentilesData={savantPercentilesData}
+        pitchArsenalData={pitchArsenalData}
         formerTeammatesData={formerTeammatesData}
         careerMatchupsData={careerMatchupsData}
         workloadData={workloadData}
@@ -197,201 +201,10 @@ export function TeamInfo({
   )
 }
 
-// Both lineup pages condensed onto one sheet — the wide-screen (tablet /
-// desktop) replacement for the two TeamInfo pages, swapped in by GameView at
-// the WIDE_QUERY breakpoint. The game-level facts and umpires render once up
-// top; each club then gets its own column of the team-specific sections
-// (manager/uniform, batting order, opposing pitcher, opposing defense).
-export function LineupSpread({
-  feed,
-  managers,
-  uniforms,
-  treatments,
-  broadcast,
-  scorebookWeather,
-  scorebookWeatherLoading,
-  starterLines,
-  prospectsData,
-  rookiesData,
-  feverRadarData,
-  savantPercentilesData,
-  formerTeammatesData,
-  careerMatchupsData,
-  workloadData,
-  lineupValuesData,
-  callouts,
-  onNext,
-  onReload,
-  loading,
-  lastUpdated,
-}) {
-  const officials = useMemo(() => selectOfficials(feed), [feed])
-  const info = useMemo(() => selectGameInfo(feed), [feed])
-  const awayMeta = useMemo(() => selectTeamMeta(feed, 'away'), [feed])
-  const homeMeta = useMemo(() => selectTeamMeta(feed, 'home'), [feed])
-  // One shared, order-independent list for the whole matchup — each side's
-  // column would otherwise show the same ties twice, once from each club's
-  // point of view (see formerTeammatePairs).
-  const teammatePairs = useMemo(
-    () => formerTeammatePairs(formerTeammatesData, awayMeta.id, homeMeta.id),
-    [formerTeammatesData, awayMeta.id, homeMeta.id],
-  )
-  // The ORG TIES fallback — only ever populated when teammatePairs above came
-  // up empty for this matchup (see orgTiesFor / scripts/gen-former-teammates.mjs).
-  const orgTies = useMemo(
-    () => orgTiesFor(formerTeammatesData, awayMeta.id, homeMeta.id),
-    [formerTeammatesData, awayMeta.id, homeMeta.id],
-  )
-  // Same order-independent, once-per-matchup shape as teammatePairs above —
-  // see careerMatchupsFor.
-  const matchupPairs = useMemo(
-    () => careerMatchupsFor(careerMatchupsData, awayMeta.id, homeMeta.id),
-    [careerMatchupsData, awayMeta.id, homeMeta.id],
-  )
-  const startingIds = useMemo(() => startingIdsFor(feed), [feed])
-
-  return (
-    <div className="teaminfo teaminfo--spread">
-      <dl className="factgrid factgrid--game">
-        <GameFacts
-          info={info}
-          scorebookWeather={scorebookWeather}
-          scorebookWeatherLoading={scorebookWeatherLoading}
-          broadcast={broadcast}
-        />
-      </dl>
-
-      <Umpires officials={officials} />
-
-      <SeasonSeriesStrip
-        viewingTeamId={awayMeta.id}
-        opponentId={homeMeta.id}
-        officialDate={info.officialDate}
-        sportId={awayMeta.sportId}
-        currentGamePk={feed?.gamePk}
-      />
-
-      <div className="teaminfo__duo">
-        {['away', 'home'].map((side) => (
-          <TeamPanel
-            key={side}
-            feed={feed}
-            side={side}
-            manager={managers?.[side]}
-            uniform={uniforms?.[side]}
-            treatment={treatments?.[side]}
-            // Each side FACES the other side's starter.
-            oppPitcherLine={starterLines?.[side === 'away' ? 'home' : 'away']}
-            prospectsData={prospectsData}
-            rookiesData={rookiesData}
-            feverRadarData={feverRadarData}
-            savantPercentilesData={savantPercentilesData}
-            workloadData={workloadData}
-            lineupValuesData={lineupValuesData}
-            callouts={callouts}
-          />
-        ))}
-      </div>
-
-      <FormerTeammates
-        pairs={teammatePairs}
-        startingIds={startingIds}
-        dayNight={info.dayNight}
-        awayTeamId={awayMeta.id}
-        homeTeamId={homeMeta.id}
-      />
-      <OrgTies ties={orgTies} />
-      <CareerMatchups
-        pairs={matchupPairs}
-        startingIds={startingIds}
-        teamA={{ id: awayMeta.id, name: awayMeta.teamName }}
-        teamB={{ id: homeMeta.id, name: homeMeta.teamName }}
-        levelLabel={SPORT_LABEL[awayMeta.sportId] ?? 'MLB'}
-      />
-
-      <div className="pagenav pagenav--innings">
-        <RefreshButton
-          onReload={onReload}
-          loading={loading}
-          lastUpdated={lastUpdated}
-          className="refreshbtn--float"
-        />
-        <button className="btn btn--next" onClick={onNext}>
-          Innings ›
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// One club's column of the spread: name, its two team facts, then the same
-// lineup / opposing-pitcher / opposing-defense sections as the phone page.
-// Former teammates is deliberately NOT part of this column — see LineupSpread,
-// which renders one shared, full-width card grid below both columns instead.
-//
-// The club theme is scoped to the COLUMN here rather than to the page the way
-// the phone layout scopes it: this layout puts both clubs on one sheet, and the
-// game-level sections it shares between them (umpires, season series, former
-// teammates, career matchups) belong to neither, so they stay on default navy.
-function TeamPanel({
-  feed,
-  side,
-  manager,
-  uniform,
-  treatment,
-  oppPitcherLine,
-  prospectsData,
-  rookiesData,
-  feverRadarData,
-  savantPercentilesData,
-  workloadData,
-  lineupValuesData,
-  callouts,
-}) {
-  const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
-  const theme = useMemo(
-    () => headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment)),
-    [meta.id, side, treatment],
-  )
-  return (
-    <section className={`teampanel ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
-      <div className="teaminfo__head">
-        <h2 className="teaminfo__name">
-          <TeamLink id={meta.id} className="teaminfo__namelink">
-            {meta.name || 'Team'}
-          </TeamLink>
-        </h2>
-        <div className="teaminfo__headright">
-          <GameNotesButton feed={feed} side={side} />
-          <span className="teaminfo__side">{side === 'away' ? 'Away' : 'Home'}</span>
-        </div>
-      </div>
-      <dl className="factgrid">
-        <Fact label="Manager" value={managerFact(manager)} />
-        <Fact label="Uniform" value={uniform} />
-      </dl>
-      <TeamSections
-        feed={feed}
-        side={side}
-        oppPitcherLine={oppPitcherLine}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
-        feverRadarData={feverRadarData}
-        savantPercentilesData={savantPercentilesData}
-        workloadData={workloadData}
-        lineupValuesData={lineupValuesData}
-        callouts={callouts}
-        showTeammates={false}
-      />
-    </section>
-  )
-}
-
 // The game-level fill-ins shared by both clubs, in the sheet's order.
-// `broadcast` is only passed by the wide spread layout (see LineupSpread) —
-// on the phone page it rides in its own spot next to Uniform instead (see
-// TeamInfo), so it's left out of this shared list there.
-function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast }) {
+// Broadcast rides in its own spot next to Uniform on this page (see TeamInfo)
+// rather than in this shared list.
+function GameFacts({ info, scorebookWeather, scorebookWeatherLoading }) {
   return (
     <>
       <Fact label="Date" value={scorebookDate(info.officialDate)} />
@@ -413,11 +226,6 @@ function GameFacts({ info, scorebookWeather, scorebookWeatherLoading, broadcast 
         <Fact label="Box weather" value={info.weather} />
       )}
       <AttendanceFact venue={info.venue} attendance={info.attendance} />
-      {/* TV/streaming network (see api/broadcast.js, ESPN-sourced). Its
-          presence right after Attendance also keeps the fact count a multiple
-          of three in the common case, so Attendance no longer stretches
-          across two grid cells the way it did as the list's odd one out. */}
-      {broadcast !== undefined && <Fact label="Broadcast" value={broadcast} />}
     </>
   )
 }
@@ -428,10 +236,8 @@ function Umpires({ officials }) {
   // his name (UmpireTierGlyph) that unfolds the tier tag + rank in place
   // before the full accuracy modal (zone map, accuracy %, tendency, last
   // five plate games) one tap further. Rides its own async load (keyed to
-  // his id) so it works for both this card and the wide LineupSpread that
-  // also renders <Umpires>. It's a season aggregate of Final games only, so
-  // it can't leak tonight's (unplayed) result; hidden for MiLB / umps with
-  // no data.
+  // his id). It's a season aggregate of Final games only, so it can't leak
+  // tonight's (unplayed) result; hidden for MiLB / umps with no data.
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)
@@ -549,12 +355,12 @@ function TeamSections({
   rookiesData,
   feverRadarData,
   savantPercentilesData,
+  pitchArsenalData,
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
   lineupValuesData,
   callouts,
-  showTeammates = true,
 }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
   const birthdayIds = useMemo(() => selectBirthdayIds(feed), [feed])
@@ -569,6 +375,13 @@ function TeamSections({
   )
   const season = feed?.gameData?.game?.season
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
+  // The opposing starter's season pitch-type mix (see api/pitchArsenal.js) —
+  // MLB + AAA only; a lower-level starter's lookup just resolves to null,
+  // same graceful degradation as everywhere else.
+  const oppArsenal = useMemo(
+    () => pitchArsenalFor(pitchArsenalData, oppPitcher?.id, isMlb),
+    [pitchArsenalData, oppPitcher?.id, isMlb],
+  )
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
   const bullpenArms = useMemo(() => selectBullpen(feed, side), [feed, side])
   // The availability board describes "now" (the nightly workload file's
@@ -593,29 +406,23 @@ function TeamSections({
     return diff <= 3 * 86400000 ? lineupValuesData : null
   }, [feed, lineupValuesData])
 
-  // Ties between this matchup's two clubs — see formerTeammatePairs. Skipped
-  // entirely on the spread layout, which renders one shared copy itself
-  // (`showTeammates={false}`); order-independent, so this and that shared copy
-  // always agree. Empty for MiLB games / matchups outside the nightly build,
-  // which hides the card.
+  // Ties between this matchup's two clubs — see formerTeammatePairs. Empty
+  // for MiLB games / matchups outside the nightly build, which hides the card.
   const teammatePairs = useMemo(
-    () => (showTeammates ? formerTeammatePairs(formerTeammatesData, meta.id, oppMeta.id) : []),
-    [showTeammates, formerTeammatesData, meta.id, oppMeta.id],
+    () => formerTeammatePairs(formerTeammatesData, meta.id, oppMeta.id),
+    [formerTeammatesData, meta.id, oppMeta.id],
   )
-  // See LineupSpread's orgTies — same fallback, only populated when
-  // teammatePairs comes up empty for this matchup.
+  // orgTies — same fallback, only populated when teammatePairs comes up empty
+  // for this matchup.
   const orgTies = useMemo(
-    () => (showTeammates ? orgTiesFor(formerTeammatesData, meta.id, oppMeta.id) : []),
-    [showTeammates, formerTeammatesData, meta.id, oppMeta.id],
+    () => orgTiesFor(formerTeammatesData, meta.id, oppMeta.id),
+    [formerTeammatesData, meta.id, oppMeta.id],
   )
-  const startingIds = useMemo(() => (showTeammates ? startingIdsFor(feed) : null), [
-    showTeammates,
-    feed,
-  ])
+  const startingIds = useMemo(() => startingIdsFor(feed), [feed])
   // Same once-per-matchup skip as teammatePairs above — see careerMatchupsFor.
   const matchupPairs = useMemo(
-    () => (showTeammates ? careerMatchupsFor(careerMatchupsData, meta.id, oppMeta.id) : []),
-    [showTeammates, careerMatchupsData, meta.id, oppMeta.id],
+    () => careerMatchupsFor(careerMatchupsData, meta.id, oppMeta.id),
+    [careerMatchupsData, meta.id, oppMeta.id],
   )
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const dayNight = info.dayNight
@@ -646,155 +453,161 @@ function TeamSections({
         rookiesData={rookiesData}
         callouts={callouts}
         isMlb={isMlb}
+        arsenal={oppArsenal}
       />
 
-      <section className="lineup">
-        <SectionMasthead
-          as="h3"
-          title="Batting order"
-          logo={
-            <TeamLogo
-              teamId={meta.id}
-              name={meta.teamName}
-              size={20}
-              variant="mono"
-              className="metricbar__logo"
-            />
-          }
-        />
-        {lineup.length > 0 ? (
-          <ol className="lineup__list">
-            {lineup.map((p) => (
-              <li key={p.id} className="lineup__row">
-                <span className="lineup__order">{p.order}</span>
-                <span className="lineup__namewrap">
-                  <PlayerLink id={p.id} className="lineup__name">
-                    {p.nameLastFirst}
-                  </PlayerLink>
-                  <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                  <MilestonePill text={milestoneTextFor(callouts, p.id)} />
-                  <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                  <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                  <RadarPill
-                    entry={radarEntryFor(feverRadarData, p.id)}
-                    teamId={meta.id}
-                    evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
-                    evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
-                  />
-                  <BirthdayCake show={birthdayIds.has(p.id)} />
-                </span>
-                <span className="lineup__jersey">{p.jersey || ''}</span>
-                <span className="lineup__pos">{p.position}</span>
-              </li>
-            ))}
-          </ol>
-        ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
-          <>
-            <p className="roster__notice">
-              Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
-            </p>
-            <div className="roster">
-              {roster.batters.length > 0 && (
-                <>
-                  <h4 className="roster__group">Batters</h4>
-                  <ul className="roster__list">
-                    {roster.batters.map((p) => (
-                      <li key={p.id} className="roster__row">
-                        <span className="roster__namewrap">
-                          <PlayerLink id={p.id} className="roster__name">
-                            {p.name}
-                          </PlayerLink>
-                          <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                          <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                          <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                          <RadarPill
-                            entry={radarEntryFor(feverRadarData, p.id)}
-                            teamId={meta.id}
-                            evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
-                            evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
-                          />
-                          <BirthdayCake show={birthdayIds.has(p.id)} />
-                        </span>
-                        <span className="roster__jersey">{p.jersey}</span>
-                        <span className="roster__pos">{p.pos}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {roster.bullpen.length > 0 && (
-                <>
-                  <h4 className="roster__group">Bullpen</h4>
-                  <ul className="roster__list">
-                    {roster.bullpen.map((p) => (
-                      <li key={p.id} className="roster__row">
-                        <span className="roster__namewrap">
-                          <PlayerLink id={p.id} className="roster__name">
-                            {p.name}
-                          </PlayerLink>
-                          <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                          <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                          <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                          <BirthdayCake show={birthdayIds.has(p.id)} />
-                        </span>
-                        <span className="roster__jersey">{p.jersey}</span>
-                        <span className="roster__pos">{p.pos}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {roster.starters.length > 0 && (
-                <>
-                  <h4 className="roster__group">Starters</h4>
-                  <ul className="roster__list">
-                    {roster.starters.map((p) => (
-                      <li key={p.id} className="roster__row">
-                        <span className="roster__namewrap">
-                          <PlayerLink id={p.id} className="roster__name">
-                            {p.name}
-                          </PlayerLink>
-                          <ProspectPill {...prospectBadge(prospectsData, p.id)} />
-                          <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                          <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                          <BirthdayCake show={birthdayIds.has(p.id)} />
-                        </span>
-                        <span className="roster__jersey">{p.jersey}</span>
-                        <span className="roster__pos">{p.pos}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          </>
-        ) : (
-          <p className="roster__notice">
-            Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
-          </p>
-        )}
-      </section>
-
-      {oppDefense.length > 0 && (
-        <section className="opp">
+      {/* Wide screens run the batting order and defense diamond side by side
+          rather than 50/50 — the order's the meat of the page, the diamond is
+          a small square (see .teaminfo__lineupdefense's 3fr/2fr split). */}
+      <div className="teaminfo__lineupdefense">
+        <section className="lineup">
           <SectionMasthead
             as="h3"
-            title="Defense"
+            title="Batting order"
             logo={
               <TeamLogo
-                teamId={oppMeta.id}
-                name={oppMeta.teamName}
+                teamId={meta.id}
+                name={meta.teamName}
                 size={20}
                 variant="mono"
                 className="metricbar__logo"
               />
             }
           />
-          {/* Drawn like the sheet's bottom-left diamond: surnames on writing
-              lines at their positions. The defense belongs to the OTHER side. */}
-          <DefenseDiamond defense={oppDefense} />
+          {lineup.length > 0 ? (
+            <ol className="lineup__list">
+              {lineup.map((p) => (
+                <li key={p.id} className="lineup__row">
+                  <span className="lineup__order">{p.order}</span>
+                  <span className="lineup__namewrap">
+                    <PlayerLink id={p.id} className="lineup__name">
+                      {p.nameLastFirst}
+                    </PlayerLink>
+                    <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                    <MilestonePill text={milestoneTextFor(callouts, p.id)} />
+                    <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
+                    <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
+                    <RadarPill
+                      entry={radarEntryFor(feverRadarData, p.id)}
+                      teamId={meta.id}
+                      evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
+                      evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
+                    />
+                    <BirthdayCake show={birthdayIds.has(p.id)} />
+                  </span>
+                  <span className="lineup__jersey">{p.jersey || ''}</span>
+                  <span className="lineup__pos">{p.position}</span>
+                </li>
+              ))}
+            </ol>
+          ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
+            <>
+              <p className="roster__notice">
+                Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
+              </p>
+              <div className="roster">
+                {roster.batters.length > 0 && (
+                  <>
+                    <h4 className="roster__group">Batters</h4>
+                    <ul className="roster__list">
+                      {roster.batters.map((p) => (
+                        <li key={p.id} className="roster__row">
+                          <span className="roster__namewrap">
+                            <PlayerLink id={p.id} className="roster__name">
+                              {p.name}
+                            </PlayerLink>
+                            <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                            <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
+                            <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
+                            <RadarPill
+                              entry={radarEntryFor(feverRadarData, p.id)}
+                              teamId={meta.id}
+                              evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
+                              evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
+                            />
+                            <BirthdayCake show={birthdayIds.has(p.id)} />
+                          </span>
+                          <span className="roster__jersey">{p.jersey}</span>
+                          <span className="roster__pos">{p.pos}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {roster.bullpen.length > 0 && (
+                  <>
+                    <h4 className="roster__group">Bullpen</h4>
+                    <ul className="roster__list">
+                      {roster.bullpen.map((p) => (
+                        <li key={p.id} className="roster__row">
+                          <span className="roster__namewrap">
+                            <PlayerLink id={p.id} className="roster__name">
+                              {p.name}
+                            </PlayerLink>
+                            <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                            <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
+                            <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
+                            <BirthdayCake show={birthdayIds.has(p.id)} />
+                          </span>
+                          <span className="roster__jersey">{p.jersey}</span>
+                          <span className="roster__pos">{p.pos}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {roster.starters.length > 0 && (
+                  <>
+                    <h4 className="roster__group">Starters</h4>
+                    <ul className="roster__list">
+                      {roster.starters.map((p) => (
+                        <li key={p.id} className="roster__row">
+                          <span className="roster__namewrap">
+                            <PlayerLink id={p.id} className="roster__name">
+                              {p.name}
+                            </PlayerLink>
+                            <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                            <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
+                            <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
+                            <BirthdayCake show={birthdayIds.has(p.id)} />
+                          </span>
+                          <span className="roster__jersey">{p.jersey}</span>
+                          <span className="roster__pos">{p.pos}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            </>
+          ) : (
+            <p className="roster__notice">
+              Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
+            </p>
+          )}
         </section>
-      )}
+
+        {oppDefense.length > 0 && (
+          <section className="opp">
+            <SectionMasthead
+              as="h3"
+              title="Defense"
+              logo={
+                <TeamLogo
+                  teamId={oppMeta.id}
+                  name={oppMeta.teamName}
+                  size={20}
+                  variant="mono"
+                  className="metricbar__logo"
+                />
+              }
+            />
+            {/* Drawn like the sheet's bottom-left diamond: surnames on writing
+                lines at their positions. The defense belongs to the OTHER side. */}
+            <DefenseDiamond defense={oppDefense} />
+          </section>
+        )}
+      </div>
 
       <LineupStrengthCard data={freshLineupValues} teamId={meta.id} lineup={lineup} />
 
@@ -804,25 +617,21 @@ function TeamSections({
         gameDate={boardGameDate}
       />
 
-      {showTeammates && (
-        <FormerTeammates
-          pairs={teammatePairs}
-          startingIds={startingIds}
-          dayNight={dayNight}
-          awayTeamId={side === 'away' ? meta.id : oppMeta.id}
-          homeTeamId={side === 'away' ? oppMeta.id : meta.id}
-        />
-      )}
-      {showTeammates && <OrgTies ties={orgTies} />}
-      {showTeammates && (
-        <CareerMatchups
-          pairs={matchupPairs}
-          startingIds={startingIds}
-          teamA={{ id: meta.id, name: meta.teamName }}
-          teamB={{ id: oppMeta.id, name: oppMeta.teamName }}
-          levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
-        />
-      )}
+      <FormerTeammates
+        pairs={teammatePairs}
+        startingIds={startingIds}
+        dayNight={dayNight}
+        awayTeamId={side === 'away' ? meta.id : oppMeta.id}
+        homeTeamId={side === 'away' ? oppMeta.id : meta.id}
+      />
+      <OrgTies ties={orgTies} />
+      <CareerMatchups
+        pairs={matchupPairs}
+        startingIds={startingIds}
+        teamA={{ id: meta.id, name: meta.teamName }}
+        teamB={{ id: oppMeta.id, name: oppMeta.teamName }}
+        levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
+      />
     </>
   )
 }
@@ -842,6 +651,7 @@ function OpposingStarterCard({
   rookiesData,
   callouts,
   isMlb,
+  arsenal,
 }) {
   return (
     <section className="startercard">
@@ -902,6 +712,10 @@ function OpposingStarterCard({
               <span className="startercard__last">{lastGameLine(pitcherLine.lastGame)}</span>
             )}
           </div>
+          {/* Fills the wide layout's open right half (see .startercard__arsenal
+              in index.css) — hidden below the wide breakpoint, where there's
+              no room for it next to the headshot + info column. */}
+          {arsenal && <PitchArsenalMix arsenal={arsenal} className="startercard__arsenal" />}
         </div>
       ) : (
         <p className="hint">Not posted yet.</p>

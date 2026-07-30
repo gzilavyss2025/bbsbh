@@ -1,0 +1,281 @@
+// Regenerates public/data/pitch-arsenal.json — each pitcher's season pitch-type
+// mix (share of pitches thrown + average velocity per type), split MLB vs AAA.
+//
+// WHY MLB + AAA, NOT JUST MLB. Every AAA park (like MLB's) feeds Hawk-Eye pitch
+// tracking — confirmed live against a real AAA gamePk's feed, same
+// `playEvents[].details.type.code` + `.pitchData.startSpeed` fields MLB carries
+// (see scripts/CLAUDE.md's gen-umpire-accuracy.mjs entry for the same fact,
+// established there first). AA and below carry no pitch-type data at all, so
+// this script never sweeps them — same two-level split as gen-umpire-accuracy.mjs
+// (`level: 'mlb' | 'aaa'`, kept SEPARATE rather than blended, since they're
+// different peer pools).
+//
+// WHY A SWEEP (not a one-call rebuild). Pitch-type mix isn't pre-totaled
+// anywhere in the API — the only source is each game's per-pitch play-by-play.
+// A Final game's pitch mix is immutable, so this is an APPEND-ONLY/incremental
+// sweep in the mould of gen-fouls.mjs: each run scans a trailing window of
+// schedule Finals per level, fetches the live feed for every gamePk not yet
+// ingested (at that level), folds the per-pitcher/pitch-type deltas into the
+// shared SQLite layer (scripts/lib/schema.sql's pitch_arsenal_* tables,
+// docs/adr/0021) via incrementing upserts, and marks it in
+// pitch_arsenal_ingested_games so a resumed/re-run sweep never double-counts.
+// NEVER stores a feed on disk.
+//
+// Runs on the nightly cron; also by hand:
+//   node scripts/gen-pitch-arsenal.mjs                       # trailing 3 days, both levels
+//   node scripts/gen-pitch-arsenal.mjs --days=7
+//   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 [--until=2026-07-19]
+//   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
+// The --since form is the one-time / full-season backfill; nightly runs use the
+// default trailing window. Checkpoints (dump + JSON export) every 100 games so a
+// long backfill resumes cleanly.
+import { writeFile, mkdir } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { openDb, dumpGroup } from './lib/db.js'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const out = join(here, '..', 'public', 'data', 'pitch-arsenal.json')
+const BASE = 'https://statsapi.mlb.com'
+
+const DEFAULT_DAYS = 3
+const CHECKPOINT_EVERY = 100
+const CONCURRENCY = 8
+
+async function getJson(path) {
+  const res = await fetch(BASE + path)
+  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
+  return res.json()
+}
+
+// --- pure per-game aggregation (exported for tests) --------------------------
+//
+// Walks one game's live feed and returns each pitcher's pitch-type deltas.
+// No network, no DB — a pure function of the feed, so a synthetic fixture can
+// drive the exact counting rules. Shape: Map personId -> { name, teamId,
+// types: Map code -> { description, pitches, velocitySum, velocityN } }
+export function aggregateGamePitchTypes(feed) {
+  const plays = feed?.liveData?.plays?.allPlays ?? []
+  const awayId = feed?.gameData?.teams?.away?.id ?? null
+  const homeId = feed?.gameData?.teams?.home?.id ?? null
+
+  const pitchers = new Map()
+  const getPitcher = (id, name, teamId) => {
+    let p = pitchers.get(id)
+    if (!p) {
+      p = { name, teamId, types: new Map() }
+      pitchers.set(id, p)
+    } else {
+      if (name) p.name = name
+      if (teamId != null) p.teamId = teamId
+    }
+    return p
+  }
+  const getType = (p, code, desc) => {
+    let t = p.types.get(code)
+    if (!t) {
+      t = { description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0 }
+      p.types.set(code, t)
+    } else if (desc && !t.description) {
+      t.description = desc
+    }
+    return t
+  }
+
+  for (const play of plays) {
+    const half = play?.about?.halfInning
+    if (!half) continue
+    const fieldingTeamId = half === 'top' ? homeId : awayId
+    const pitcherId = play.matchup?.pitcher?.id ?? null
+    if (pitcherId == null) continue
+    const p = getPitcher(pitcherId, play.matchup?.pitcher?.fullName ?? '', fieldingTeamId)
+
+    for (const e of play.playEvents ?? []) {
+      if (!e.isPitch) continue
+      const code = e.details?.type?.code
+      if (!code) continue
+      const t = getType(p, code, e.details?.type?.description)
+      t.pitches += 1
+      const speed = e.pitchData?.startSpeed
+      if (typeof speed === 'number' && Number.isFinite(speed)) {
+        t.velocitySum += speed
+        t.velocityN += 1
+      }
+    }
+  }
+
+  return pitchers
+}
+
+// --- SQLite upserts ----------------------------------------------------------
+const upsertPitchType = (db) =>
+  db.prepare(
+    `INSERT INTO pitch_arsenal_totals
+       (person_id, level, code, season, name, team_id, description, pitches, velocity_sum, velocity_n)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(person_id, level, code) DO UPDATE SET
+       season = excluded.season,
+       name = excluded.name,
+       team_id = excluded.team_id,
+       description = excluded.description,
+       pitches = pitch_arsenal_totals.pitches + excluded.pitches,
+       velocity_sum = pitch_arsenal_totals.velocity_sum + excluded.velocity_sum,
+       velocity_n = pitch_arsenal_totals.velocity_n + excluded.velocity_n`,
+  )
+
+const markIngested = (db) =>
+  db.prepare('INSERT OR IGNORE INTO pitch_arsenal_ingested_games (game_pk, level, date) VALUES (?, ?, ?)')
+
+// Fetch the feed (the only await), then fold the whole game in as one atomic
+// synchronous transaction — same pattern as gen-fouls.mjs's ingestGame.
+async function ingestGame(db, stmts, gamePk, level, date, season) {
+  const feed = await getJson(`/api/v1.1/game/${gamePk}/feed/live`)
+  const pitchers = aggregateGamePitchTypes(feed)
+  db.exec('BEGIN')
+  try {
+    for (const [id, p] of pitchers) {
+      for (const [code, t] of p.types) {
+        stmts.pitchType.run(id, level, code, season, p.name, p.teamId, t.description, t.pitches, t.velocitySum, t.velocityN)
+      }
+    }
+    stmts.mark.run(gamePk, level, date)
+    db.exec('COMMIT')
+  } catch (err) {
+    db.exec('ROLLBACK')
+    throw err
+  }
+}
+
+// --- JSON export from the accumulated table ----------------------------------
+export function exportPitchArsenal(db) {
+  const ingested = db.prepare('SELECT game_pk, level, date FROM pitch_arsenal_ingested_games').all()
+  const coverageSince = ingested.reduce((min, r) => (min == null || r.date < min ? r.date : min), null)
+  const seasonRow = db.prepare('SELECT season FROM pitch_arsenal_totals LIMIT 1').get()
+  const season = seasonRow?.season ?? (Number((coverageSince ?? '').slice(0, 4)) || null)
+
+  const pit = {}
+  for (const r of db.prepare('SELECT * FROM pitch_arsenal_totals ORDER BY person_id, level, pitches DESC').all()) {
+    const entry = pit[r.person_id] ?? (pit[r.person_id] = { name: r.name, teamId: r.team_id, mlb: [], aaa: [] })
+    entry.name = r.name
+    entry.teamId = r.team_id
+    entry[r.level].push({
+      code: r.code,
+      description: r.description,
+      pitches: r.pitches,
+      avgVelo: r.velocity_n > 0 ? Math.round((r.velocity_sum / r.velocity_n) * 10) / 10 : null,
+    })
+  }
+
+  return {
+    season,
+    asOf: new Date().toISOString(),
+    coverageSince,
+    gamesIngested: ingested.length,
+    pit,
+  }
+}
+
+// --- CLI ---------------------------------------------------------------------
+function parseArgs(argv) {
+  const args = {}
+  for (const a of argv) {
+    const m = /^--([^=]+)=(.*)$/.exec(a)
+    if (m) args[m[1]] = m[2]
+    else if (a.startsWith('--')) args[a.slice(2)] = true
+  }
+  return args
+}
+
+const isoDay = (d) => d.toISOString().slice(0, 10)
+
+function dateRange(args) {
+  const today = new Date()
+  if (args.since) return { startDate: args.since, endDate: args.until || isoDay(today) }
+  const days = Number(args.days) || DEFAULT_DAYS
+  const start = new Date(today)
+  start.setUTCDate(start.getUTCDate() - (days - 1))
+  return { startDate: isoDay(start), endDate: isoDay(today) }
+}
+
+// The levels swept, most-senior first — see header for why AAA rides along
+// and AA/below don't.
+const ALL_LEVELS = [
+  { sportId: 1, level: 'mlb' },
+  { sportId: 11, level: 'aaa' },
+]
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2))
+  const { startDate, endDate } = dateRange(args)
+  const sportsFilter = args.sports
+    ? new Set(String(args.sports).split(',').map((s) => Number(s.trim())))
+    : null
+  const LEVELS = sportsFilter ? ALL_LEVELS.filter((l) => sportsFilter.has(l.sportId)) : ALL_LEVELS
+
+  const db = await openDb()
+  const stmts = {
+    pitchType: upsertPitchType(db),
+    mark: markIngested(db),
+  }
+
+  const existing = new Set(
+    db.prepare('SELECT game_pk, level FROM pitch_arsenal_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
+  )
+
+  // Regular season only, both levels. Same postponed-replay dedup as the other
+  // sweeps: a replayed game is listed under both dates; keep only the
+  // officialDate bucket.
+  const pending = []
+  for (const { sportId, level } of LEVELS) {
+    const schedule = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&startDate=${startDate}&endDate=${endDate}&gameType=R`,
+    )
+    for (const d of schedule.dates ?? []) {
+      for (const g of d.games ?? []) {
+        if (g.status?.abstractGameState !== 'Final') continue
+        if (d.date !== g.officialDate) continue
+        if (existing.has(`${g.gamePk}:${level}`)) continue
+        pending.push({ gamePk: g.gamePk, level, date: g.officialDate, season: g.season ?? Number(g.officialDate.slice(0, 4)) })
+      }
+    }
+  }
+  console.log(`${startDate}..${endDate}: ${pending.length} un-ingested Final regular-season games across ${LEVELS.length} level(s)`)
+
+  const writeOut = async () => {
+    await dumpGroup(db, 'pitch-arsenal')
+    await mkdir(dirname(out), { recursive: true })
+    await writeFile(out, JSON.stringify(exportPitchArsenal(db)))
+  }
+
+  let done = 0
+  const queue = [...pending]
+  async function worker() {
+    while (queue.length) {
+      const g = queue.shift()
+      if (!g) return
+      try {
+        await ingestGame(db, stmts, g.gamePk, g.level, g.date, g.season)
+      } catch (err) {
+        console.error(`gamePk ${g.gamePk} (${g.level}): ${err.message}`)
+      }
+      done += 1
+      if (done % CHECKPOINT_EVERY === 0) {
+        console.log(`${done}/${pending.length} ingested, checkpointing...`)
+        await writeOut()
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker))
+  await writeOut()
+
+  const total = db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_ingested_games').get().n
+  console.log(`wrote ${out} — ${total} games on file (+${done} swept this run)`)
+  db.close()
+}
+
+// Only sweep when run as a script — keeps aggregateGamePitchTypes /
+// exportPitchArsenal importable for tests without triggering a live fetch +
+// file write.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main()
+}

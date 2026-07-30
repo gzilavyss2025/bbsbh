@@ -4402,12 +4402,11 @@ body {
 }
 
 /* ------------------------------------------------------------- club theming
-   ADR-0030. `.is-themed` on a .teaminfo (phone page) or a .teampanel (one
-   column of the wide spread) carries three custom properties resolved from the
-   jersey that club is wearing tonight — lib/headerTheme.js. Every themed rule
-   below reads them WITH the default as its fallback, so an unthemed page (most
-   of them — coverage is partial) renders byte-identically to how it did before
-   this feature existed.
+   ADR-0030. `.is-themed` on a .teaminfo carries three custom properties
+   resolved from the jersey that club is wearing tonight — lib/headerTheme.js.
+   Every themed rule below reads them WITH the default as its fallback, so an
+   unthemed page (most of them — coverage is partial) renders byte-identically
+   to how it did before this feature existed.
 
    Deliberately scoped to this subtree. The innings viewer and the box score
    carry the seal metaphor — kraft amber on manila, navy chrome around it — and
@@ -4417,29 +4416,24 @@ body {
    The club-name bar is the one surface that CHANGES shape when themed: unthemed
    it's a plain heading on the page canvas, themed it becomes a real bar so the
    colour has something to sit in. */
-.teaminfo.is-themed > .teaminfo__head,
-.teampanel.is-themed > .teaminfo__head {
+.teaminfo.is-themed > .teaminfo__head {
   padding: 10px var(--space-4);
   background: var(--bar-fill, transparent);
   border-bottom: 3px solid var(--bar-accent, transparent);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .teaminfo.is-themed > .teaminfo__head .teaminfo__name,
-.teampanel.is-themed > .teaminfo__head .teaminfo__name,
-.teaminfo.is-themed > .teaminfo__head .teaminfo__namelink,
-.teampanel.is-themed > .teaminfo__head .teaminfo__namelink {
+.teaminfo.is-themed > .teaminfo__head .teaminfo__namelink {
   color: var(--bar-text, var(--text-heading));
 }
 /* Away/Home and the Game Notes button ride the same bar, so they take its ink
    too — at the muted weight they already read at, via a partial alpha over the
    bar rather than a second hand-picked hex the contrast guard couldn't see. */
-.teaminfo.is-themed > .teaminfo__head .teaminfo__side,
-.teampanel.is-themed > .teaminfo__head .teaminfo__side {
+.teaminfo.is-themed > .teaminfo__head .teaminfo__side {
   color: var(--bar-text, var(--text-caption));
   opacity: 0.78;
 }
-.teaminfo.is-themed > .teaminfo__head .notesbtn,
-.teampanel.is-themed > .teaminfo__head .notesbtn {
+.teaminfo.is-themed > .teaminfo__head .notesbtn {
   color: var(--bar-text, var(--text-body));
   border-color: color-mix(in srgb, var(--bar-text, currentColor) 45%, transparent);
 }
@@ -5052,12 +5046,19 @@ body {
 }
 
 .startercard__name {
-  font-weight: var(--w-bold);
+  font-weight: var(--w-semibold);
   font-size: var(--fs-title-sm);
   color: var(--text-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* Rendered as a PlayerLink → .plink button, and .plink (declared later, same
+   specificity) resets weight/color to `inherit` via its `font`/`color`
+   shorthand — same fix as .plink.lineup__name/.plink.roster__name above. */
+.plink.startercard__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
 }
 
 .startercard__badges {
@@ -5088,6 +5089,81 @@ body {
   color: var(--text-caption);
   padding-top: 4px;
   border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+
+/* The pitch-mix bar (PitchArsenalMix.jsx) — hidden below the wide breakpoint
+   (see the WIDE LAYOUT section), where the card has no spare width for it
+   next to the headshot + info column. */
+.startercard__arsenal {
+  display: none;
+}
+
+.arsenal__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin: 0 0 6px;
+}
+
+.arsenal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rows read as ledger lines — same dashed divider the card uses between its
+   season-stats/last-outing rows above (.startercard__stats/__last) — rather
+   than a gap, so the mix reads as one continuous stack of dated facts. */
+/* Two flexible spacer tracks (2 and 4, left empty — .arsenal__pct/__velo are
+   placed explicitly into 3 and 5) soak up the row's leftover width instead of
+   leaving it stranded past the last column: % lands further from the name,
+   MPH lands flush against the card's right edge, and both grow apart as the
+   card gets wider rather than staying bunched at a fixed offset. */
+.arsenal__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr 5ch 1fr 74px;
+  align-items: center;
+  column-gap: var(--space-2);
+  padding: 5px 0;
+  font-size: var(--fs-compact);
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+.arsenal__row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.arsenal__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arsenal__pct {
+  grid-column: 3;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+  font-weight: var(--w-bold);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.arsenal__velo {
+  grid-column: 5;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: left;
+  white-space: nowrap;
 }
 
 .opp__defense {
@@ -5138,9 +5214,7 @@ body {
    exactly the messy-empty-space problem a reunion card causes. Multi-column
    instead lets each card flow into whichever column has room next, like a
    Pinterest/Twitter card wall, so one tall card never drags its row-mates'
-   height with it. On the wide spread layout this renders once, full width,
-   below both clubs' columns rather than once per column (see LineupSpread)
-   — otherwise the same tie would show twice, mirrored from each side. */
+   height with it. */
 .teammates__grid {
   list-style: none;
   margin: 0;
@@ -13816,9 +13890,9 @@ body {
    Phone-first stays the default: below the breakpoint nothing
    here applies and every screen is the single 440px column.
    From iPad portrait up, screens widen to ~960px and split into
-   two columns. Keep the breakpoint in sync with WIDE_QUERY in
-   src/hooks/useMediaQuery.js — the JS gate that swaps the two
-   lineup pages for the combined LineupSpread.
+   two columns for the pages that use them (box score, innings).
+   Keep the breakpoint in sync with WIDE_QUERY in
+   src/hooks/useMediaQuery.js.
    ============================================================ */
 
 /* The box score's pairing wrappers are transparent by default — display:
@@ -13974,58 +14048,34 @@ body {
     margin-inline: auto;
   }
 
-  /* ---- lineups spread (both staging pages on one sheet — LineupSpread).
-     Shared game facts run three-up; the umpire boxes flow to fit; the two
-     team panels sit side by side. */
-  .factgrid--game {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  /* A fact count that doesn't divide by three leaves a hole in the last row;
-     stretch the final fact across the remainder so the rule backing never
-     shows through an empty cell. (3n+2 → it starts in column 2; 3n+1 → it has
-     the row to itself.) */
-  .factgrid--game > .fact:nth-child(3n + 2):last-child {
-    grid-column: 2 / -1;
-  }
-  .factgrid--game > .fact:nth-child(3n + 1):last-child {
-    grid-column: 1 / -1;
-  }
-
-  .teaminfo--spread .umps__list {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-
-  /* The narrow-layout odd-crew stretch (below) is tuned for a fixed 2-column
-     grid; undo it here so the wide auto-fit/six-man layouts keep their own
-     natural flow instead of a lone item spanning the full row. */
-  .teaminfo--spread .umps__list li:last-child {
-    grid-column: auto;
-  }
-
-  /* Six-man crew (LF + RF added) — two rows of three instead of the
-     auto-fit grid's flow. */
-  .teaminfo--spread .umps__list--six {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .teaminfo__duo {
+  /* ---- lineup page, wide layout: the batting order and the opposing defense
+     diamond run side by side rather than stacking — a 3fr/2fr split rather
+     than 50/50, since the order (nine rows of names) needs more room than the
+     diamond (a compact fielding chart). Falls back to a single column when
+     there's no defense card to show (oppDefense empty pregame). */
+  .teaminfo__lineupdefense {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 var(--space-6);
+    grid-template-columns: 3fr 2fr;
     align-items: start;
-    margin-top: var(--space-2);
+    gap: 0 var(--space-6);
+  }
+  .teaminfo__lineupdefense:has(> :only-child) {
+    grid-template-columns: 1fr;
   }
 
-  .teampanel {
+  /* ---- opposing-starter card, wide layout: the pitch-mix bar (see
+     .startercard__arsenal above) fills the open space next to the
+     name/badges/stats column, which otherwise stretches full width for no
+     reason — cap it so the mix has real room rather than a sliver. */
+  .startercard__info {
+    flex: 0 1 320px;
+  }
+  .startercard__arsenal {
+    display: block;
+    flex: 1;
     min-width: 0;
-  }
-
-  /* Each panel head now carries the Game Notes pill right-aligned beside the
-     Away/Home label, so the club name drops a step (fs-h1 → fs-h2) to keep name
-     + pill + label on one line in the narrower two-up column. */
-  .teampanel .teaminfo__name {
-    font-size: var(--fs-h2);
+    padding-left: var(--space-4);
+    border-left: var(--bw-hair) solid var(--border-hairline);
   }
 
   /* ---- innings, wide layout. Refresh rides in the floating bottom bar above

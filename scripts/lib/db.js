@@ -81,6 +81,12 @@ export const GROUPS = {
     file: join(dataDir, 'jerseys.sql'),
     tables: ['jerseys'],
   },
+  // Both tables are written by the one nightly gen-pitch-arsenal.mjs — its
+  // own group, same as jerseys above.
+  'pitch-arsenal': {
+    file: join(dataDir, 'pitch-arsenal.sql'),
+    tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games'],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay
