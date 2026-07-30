@@ -652,12 +652,17 @@
       "main": {
         "bgHex": "#FFFFFF",
         "recolor": true,
-        "note": "the script \"W\" mark (main-overrides/WSH.png), white background",
         "colors": {
           "primary": "#AB0003",
           "secondary": "#14225A",
           "accent1": "#AB0003"
-        }
+        },
+        "header": {
+          "bar": "#AB0003",
+          "accent": "#14225A",
+          "onBar": "#F8F8F5"
+        },
+        "note": "the script \"W\" mark (main-overrides/WSH.png), white background"
       },
       "alternate": {
         "scale": 0.9,
@@ -676,6 +681,17 @@
       "alternate-2": {
         "colors": {
           "primary": "#BD032B"
+        }
+      },
+      "city-connect": {
+        "header": {
+          "bar": "#131e29",
+          "accent": "#5c82a5",
+          "onBar": "#F8F8F5"
+        },
+        "colors": {
+          "primary": "#5c82a5",
+          "secondary": "#131e29"
         }
       }
     }
@@ -811,14 +827,17 @@
       },
       "alternate": {
         "colors": {
-          "primary": "#27251F"
+          "primary": "#27251F",
+          "secondary": "#FDB827"
         },
         "scale": 0.89
       },
       "alternate-2": {
         "colors": {
-          "primary": "#FDB827"
-        }
+          "primary": "#27251F",
+          "secondary": "#FDB827"
+        },
+        "scale": 1.16
       },
       "alternate-3": {
         "colors": {
@@ -848,32 +867,60 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "scale": 0.85,
-        "note": "dark recolored to secondary gold",
+        "scale": 0.86,
         "colors": {
           "primary": "#2F241D",
           "secondary": "#FFC425",
           "accent1": "#2F241D"
-        }
+        },
+        "header": {
+          "bar": "#2F241D",
+          "accent": "#FFC425",
+          "onBar": "#F8F8F5"
+        },
+        "note": "dark recolored to secondary gold"
       },
       "alternate": {
         "colors": {
-          "primary": "#2F241D"
-        }
+          "primary": "#2F241D",
+          "secondary": "#FFC425"
+        },
+        "scale": 0.86
       },
       "alternate-2": {
         "colors": {
           "primary": "#4B5320"
-        }
+        },
+        "scale": 0.87,
+        "offsetX": 0,
+        "offsetY": 3
       },
       "alternate-3": {
         "colors": {
           "primary": "#C2B280"
-        }
+        },
+        "scale": 0.84,
+        "offsetX": 0,
+        "offsetY": 1
       },
       "alternate-4": {
         "colors": {
-          "primary": "#2F241D"
+          "primary": "#2F241D",
+          "secondary": "#FFC425"
+        },
+        "scale": 0.79
+      },
+      "city-connect": {
+        "header": {
+          "bar": "#111113",
+          "accent": "#e72977",
+          "onBar": "#F8F8F5"
+        },
+        "scale": 0.96,
+        "colors": {
+          "primary": "#111113",
+          "secondary": "#e72977",
+          "accent1": "#84ebea"
         }
       }
     }
@@ -884,19 +931,26 @@
       "main": {
         "bg": "secondary",
         "recolor": true,
-        "note": "compass-rose mark",
         "colors": {
           "primary": "#0C2C56",
           "secondary": "#005C5C",
           "accent1": "#005C5C"
-        }
+        },
+        "header": {
+          "bar": "#005C5C",
+          "accent": "#0C2C56",
+          "onBar": "#F8F8F5"
+        },
+        "note": "compass-rose mark"
       },
       "alternate": {
         "scale": 0.95,
-        "note": "shrunk 5% off the default 1.32 edge-bleed",
         "colors": {
-          "primary": "#F5F0E1"
-        }
+          "primary": "#F5F0E1",
+          "secondary": "#005C5C",
+          "accent1": "#0C2C56"
+        },
+        "note": "shrunk 5% off the default 1.32 edge-bleed"
       },
       "alternate-2": {
         "colors": {
@@ -910,7 +964,15 @@
       },
       "city-connect": {
         "colors": {
-          "primary": "#203F79"
+          "primary": "#203F79",
+          "secondary": "#fcc730"
+        },
+        "scale": 0.97,
+        "offsetY": -2,
+        "header": {
+          "bar": "#203F79",
+          "accent": "#fcc730",
+          "onBar": "#F8F8F5"
         }
       }
     }
@@ -926,18 +988,20 @@
           "secondary": "#27251F",
           "accent1": "#FD5A1E"
         },
-        "bgHex": "#e8e7d2",
+        "bgHex": "#27251F",
         "header": {
-          "bar": "#FD5A1E",
+          "bar": "#27251F",
           "accent": "#FD5A1E",
-          "onBar": "#27251F"
+          "onBar": "#F8F8F5"
         }
       },
       "alternate": {
         "colors": {
           "primary": "#27251F",
           "secondary": "#EFD19F"
-        }
+        },
+        "scale": 0.9,
+        "offsetX": 3
       },
       "alternate-2": {
         "colors": {
@@ -946,12 +1010,14 @@
       },
       "city-connect": {
         "header": {
-          "bar": "#27251F",
-          "accent": "#FD5A1E",
-          "onBar": "#FFFFFF"
+          "bar": "#f0653b",
+          "accent": "#704195",
+          "onBar": "#27251F"
         },
         "colors": {
-          "primary": "#27251F"
+          "primary": "#27251F",
+          "secondary": "#f0653b",
+          "accent1": "#704195"
         }
       }
     }
@@ -963,12 +1029,17 @@
         "bg": "primary",
         "recolor": true,
         "scale": 0.85,
-        "note": "red recolored to white",
         "colors": {
           "primary": "#C41E3A",
           "secondary": "#0C2340",
           "accent1": "#C41E3A"
-        }
+        },
+        "header": {
+          "bar": "#C41E3A",
+          "accent": "#0C2340",
+          "onBar": "#FFFDF6"
+        },
+        "note": "red recolored to white"
       },
       "alternate": {
         "colors": {
@@ -982,13 +1053,22 @@
       },
       "alternate-3": {
         "colors": {
-          "primary": "#9EA2A2"
-        }
+          "primary": "#9EA2A2",
+          "secondary": "#0C2340"
+        },
+        "scale": 0.93
       },
       "city-connect": {
         "colors": {
           "primary": "#C41E3A"
-        }
+        },
+        "header": {
+          "bar": "#C41E3A",
+          "accent": "#FEDB00",
+          "onBar": "#F8F8F5"
+        },
+        "scale": 1.1,
+        "offsetX": -4
       }
     }
   },
@@ -998,13 +1078,19 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "scale": 0.95,
-        "note": "navy letters recolored to white, kept the baby-blue undertone shadow",
+        "scale": 0.82,
         "colors": {
           "primary": "#092C5C",
           "secondary": "#8FBCE6",
           "accent1": "#F5D130"
-        }
+        },
+        "bgHex": "#092C5C",
+        "header": {
+          "bar": "#092C5C",
+          "accent": "#8FBCE6",
+          "onBar": "#FFFDF6"
+        },
+        "note": "navy letters recolored to white, kept the baby-blue undertone shadow"
       },
       "alternate": {
         "scale": 1.6,
@@ -1018,17 +1104,28 @@
       },
       "alternate-2": {
         "colors": {
-          "primary": "#FFFFFF"
-        }
+          "primary": "#092C5C",
+          "secondary": "#64a70b",
+          "accent1": "#ffd427",
+          "accent2": "#8FBCE6"
+        },
+        "scale": 1.13
       },
       "alternate-3": {
         "colors": {
           "primary": "#092C5C"
-        }
+        },
+        "scale": 0.85,
+        "offsetX": 1
       },
       "city-connect": {
         "colors": {
           "primary": "#000000"
+        },
+        "header": {
+          "bar": "#000000",
+          "accent": "#7bc35e",
+          "onBar": "#FFFDF6"
         }
       }
     }
@@ -1039,13 +1136,18 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "scale": 0.75,
-        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up",
+        "scale": 0.85,
         "colors": {
           "primary": "#003278",
           "secondary": "#C0111F",
           "accent1": "#C0111F"
-        }
+        },
+        "header": {
+          "bar": "#003278",
+          "accent": "#C0111F",
+          "onBar": "#F8F8F5"
+        },
+        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up"
       },
       "alternate": {
         "scale": 0.85,
@@ -1056,12 +1158,17 @@
         }
       },
       "city-connect": {
-        "scale": 0.855,
-        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless",
+        "scale": 0.765,
         "colors": {
           "primary": "#892535",
           "secondary": "#EBDFCB"
-        }
+        },
+        "header": {
+          "bar": "#892535",
+          "accent": "#EBDFCB",
+          "onBar": "#F8F8F5"
+        },
+        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless"
       },
       "alternate-2": {
         "scale": 0.85,
@@ -1078,8 +1185,9 @@
       },
       "alternate-4": {
         "colors": {
-          "primary": "#9EA2A2"
-        }
+          "primary": "#003278"
+        },
+        "scale": 0.85
       }
     }
   },
@@ -1088,19 +1196,29 @@
     "treatments": {
       "main": {
         "bgHex": "#F5F0E1",
-        "note": "subtle off-white, not any of the three brand swatches",
         "colors": {
           "primary": "#134A8E",
           "secondary": "#1D2D5C",
           "accent1": "#E8291C"
-        }
+        },
+        "header": {
+          "bar": "#134A8E",
+          "accent": "#1D2D5C",
+          "onBar": "#F8F8F5"
+        },
+        "note": "subtle off-white, not any of the three brand swatches"
       },
       "city-connect": {
         "scale": 0.75,
-        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile",
         "colors": {
           "primary": "#161827"
-        }
+        },
+        "header": {
+          "bar": "#161827",
+          "accent": "#C22028",
+          "onBar": "#F8F8F5"
+        },
+        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
       },
       "alternate": {
         "colors": {

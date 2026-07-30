@@ -136,14 +136,14 @@
     },
     "PIT.png": {
       "teamId": 134,
-      "bytes": 11637,
+      "bytes": 3771,
       "width": 512,
       "height": 512,
       "alpha": false
     },
     "SD.png": {
       "teamId": 135,
-      "bytes": 53721,
+      "bytes": 22241,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -157,10 +157,10 @@
     },
     "SF.png": {
       "teamId": 137,
-      "bytes": 103303,
+      "bytes": 6360,
       "width": 512,
       "height": 512,
-      "alpha": true
+      "alpha": false
     },
     "STL.png": {
       "teamId": 138,
@@ -296,17 +296,17 @@
     },
     "PIT.png": {
       "teamId": 134,
-      "bytes": 11637,
-      "width": 512,
-      "height": 512,
-      "alpha": false
-    },
-    "SD.png": {
-      "teamId": 135,
-      "bytes": 53721,
+      "bytes": 81112,
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "SD.png": {
+      "teamId": 135,
+      "bytes": 174109,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     },
     "SEA.png": {
       "teamId": 136,
@@ -331,7 +331,7 @@
     },
     "TB.png": {
       "teamId": 139,
-      "bytes": 31473,
+      "bytes": 43797,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -410,14 +410,28 @@
     },
     "SD.png": {
       "teamId": 135,
-      "bytes": 53721,
+      "bytes": 315394,
       "width": 512,
       "height": 512,
-      "alpha": true
+      "alpha": false
     },
     "SEA.png": {
       "teamId": 136,
       "bytes": 24045,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "STL.png": {
+      "teamId": 138,
+      "bytes": 22505,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "TB.png": {
+      "teamId": 139,
+      "bytes": 23851,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -442,6 +456,22 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    }
+  },
+  "alternate-4": {
+    "SD.png": {
+      "teamId": 135,
+      "bytes": 22241,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "TEX.png": {
+      "teamId": 140,
+      "bytes": 11417,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     }
   },
   "city-connect": {
@@ -585,6 +615,13 @@
       "height": 512,
       "alpha": true
     },
+    "SD.png": {
+      "teamId": 135,
+      "bytes": 86907,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
     "SEA.png": {
       "teamId": 136,
       "bytes": 13948,
@@ -615,7 +652,7 @@
     },
     "TEX.png": {
       "teamId": 140,
-      "bytes": 6953,
+      "bytes": 3423,
       "width": 512,
       "height": 512,
       "alpha": false
@@ -720,10 +757,17 @@
     },
     "PIT.png": {
       "teamId": 134,
-      "bytes": 11637,
+      "bytes": 3771,
       "width": 512,
       "height": 512,
       "alpha": false
+    },
+    "SD.png": {
+      "teamId": 135,
+      "bytes": 22241,
+      "width": 512,
+      "height": 512,
+      "alpha": true
     },
     "SD.svg": {
       "teamId": 135,
@@ -738,7 +782,14 @@
     },
     "SF.png": {
       "teamId": 137,
-      "bytes": 103303,
+      "bytes": 6360,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "STL.png": {
+      "teamId": 138,
+      "bytes": 24052,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -747,13 +798,20 @@
       "teamId": 138,
       "bytes": 2539
     },
+    "TB.png": {
+      "teamId": 139,
+      "bytes": 23851,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "TB.svg": {
       "teamId": 139,
       "bytes": 2639
     },
     "TEX.png": {
       "teamId": 140,
-      "bytes": 94786,
+      "bytes": 19058,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -777,6 +835,55 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "PIT.png": {
+      "teamId": 134,
+      "bytes": 3771,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "SD.png": {
+      "teamId": 135,
+      "bytes": 22241,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "SF.png": {
+      "teamId": 137,
+      "bytes": 6360,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "STL.png": {
+      "teamId": 138,
+      "bytes": 24052,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "TB.png": {
+      "teamId": 139,
+      "bytes": 23851,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "TEX.png": {
+      "teamId": 140,
+      "bytes": 11417,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "WSH.png": {
+      "teamId": 120,
+      "bytes": 19242,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     }
   }
 }

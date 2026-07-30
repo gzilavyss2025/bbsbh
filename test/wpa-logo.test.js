@@ -28,9 +28,12 @@ import WPA_TUNING from '../src/lib/data/wpa-tuning.json' with { type: 'json' }
 const NATIONALS = 120
 
 test('main tiles the CDN base mark and keeps its recolor override', () => {
-  const { src, recolor } = wpaLogoFor(NATIONALS, 'main')
-  assert.equal(src, teamLogoUrl(NATIONALS, 'base'))
-  assert.deepEqual(recolor, LOGO_COLOR_OVERRIDES[NATIONALS])
+  // Royals (118) — a flood override with no WPA-only ownArt upload, unlike
+  // the Nationals used below (whose Main picked up a real ownArt entry via
+  // Team Identity Lab, so it no longer demonstrates the plain fallback path).
+  const { src, recolor } = wpaLogoFor(118, 'main')
+  assert.equal(src, teamLogoUrl(118, 'base'))
+  assert.deepEqual(recolor, LOGO_COLOR_OVERRIDES[118])
 })
 
 test('a procured treatment PNG renders as-is, never flooded to a flat color', () => {
@@ -115,40 +118,43 @@ test('a club with no recolor curation falls back to a plain base mark', () => {
 // the branch by toggling the SAME shared table wpaLogoFor reads, the way the
 // Team Identity Lab's own save would once a real upload lands, then restore
 // it so this file leaves no trace for tests that run after it.
+// White Sox (145) is the scratch team for these — pick a club with no
+// `ownArt` in the committed store yet whenever a real upload claims the
+// previous one (Rangers/140 landed real Main art via Team Identity Lab).
 test('ownArt tiles the uploaded WPA-only mark, never the recolor gate', () => {
-  assert.equal(WPA_TUNING[140]?.treatments?.main?.ownArt, undefined, 'fixture assumption: 140/main starts clean')
-  WPA_OWN_ART[140] = { main: true }
+  assert.equal(WPA_TUNING[145]?.treatments?.main?.ownArt, undefined, 'fixture assumption: 145/main starts clean')
+  WPA_OWN_ART[145] = { main: true }
   try {
-    const { src, recolor } = wpaLogoFor(140, 'main')
-    assert.equal(src, wpaArtUrl(140, 'main'))
+    const { src, recolor } = wpaLogoFor(145, 'main')
+    assert.equal(src, wpaArtUrl(145, 'main'))
     assert.equal(recolor, null)
   } finally {
-    delete WPA_OWN_ART[140]
+    delete WPA_OWN_ART[145]
   }
 })
 
 test('a missing ownArt file falls back to Main WITHOUT looping back onto itself', () => {
-  WPA_OWN_ART[140] = { main: true }
+  WPA_OWN_ART[145] = { main: true }
   try {
     // The band's own probe learned this exact (team, treatment) is missing —
     // simulating the 404 case for the treatment that's ALSO the fallback
     // target, the case that would loop if the fallback didn't bypass ownArt.
-    const fellBack = wpaLogoWithFallback(140, 'main', true)
-    assert.notEqual(fellBack.src, wpaArtUrl(140, 'main'))
-    assert.equal(fellBack.src, teamLogoUrl(140, 'base'))
+    const fellBack = wpaLogoWithFallback(145, 'main', true)
+    assert.notEqual(fellBack.src, wpaArtUrl(145, 'main'))
+    assert.equal(fellBack.src, teamLogoUrl(145, 'base'))
   } finally {
-    delete WPA_OWN_ART[140]
+    delete WPA_OWN_ART[145]
   }
 })
 
 test('ownArt on a non-main treatment still falls back to Main on a miss', () => {
-  WPA_OWN_ART[140] = { alternate: true }
+  WPA_OWN_ART[145] = { alternate: true }
   try {
-    assert.equal(wpaLogoFor(140, 'alternate').src, wpaArtUrl(140, 'alternate'))
-    const fellBack = wpaLogoWithFallback(140, 'alternate', true)
-    assert.equal(fellBack.src, teamLogoUrl(140, 'base'))
+    assert.equal(wpaLogoFor(145, 'alternate').src, wpaArtUrl(145, 'alternate'))
+    const fellBack = wpaLogoWithFallback(145, 'alternate', true)
+    assert.equal(fellBack.src, teamLogoUrl(145, 'base'))
   } finally {
-    delete WPA_OWN_ART[140]
+    delete WPA_OWN_ART[145]
   }
 })
 
@@ -205,7 +211,10 @@ test('a negative padding still leaves a positive tile to repeat', () => {
 })
 
 test('layout falls back to the shared defaults, row shift off', () => {
-  const layout = wpaLogoLayout(NATIONALS, 'main')
+  // Yankees (147) — as of this test, the one MLB club with no Main WPA layout
+  // override at all; pick a fresh untouched club here if Team Identity Lab
+  // ever lands one for them too.
+  const layout = wpaLogoLayout(147, 'main')
   assert.deepEqual(layout, WPA_LOGO_DEFAULTS)
   assert.equal(layout.rowShift, 0, 'bands ship as a plain grid until a team opts in')
   assert.equal(wpaTilePlacements(layout).images.length, 1, 'one logo per tile by default')

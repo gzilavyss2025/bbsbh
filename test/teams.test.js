@@ -194,7 +194,7 @@ test('mainTreatmentTint returns null for a pinstriped team and for an uncurated 
 })
 
 test('mainTreatmentScale returns a curated override or defaults to 1', () => {
-  assert.equal(mainTreatmentScale(140), 0.75) // Rangers
+  assert.equal(mainTreatmentScale(140), 0.85) // Rangers
   assert.equal(mainTreatmentScale(999999), 1)
 })
 

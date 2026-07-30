@@ -244,7 +244,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#D0D0D0"
+        "band": "#D0D0D0",
+        "header": {
+          "bar": "#000000",
+          "accent": "#F61D30",
+          "onBar": "#F8F8F5"
+        }
       },
       "home": {
         "wpaLayout": {
@@ -256,7 +261,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#000000"
+        "band": "#000000",
+        "header": {
+          "bar": "#000000",
+          "accent": "#F61D30",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },

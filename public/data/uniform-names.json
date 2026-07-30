@@ -60,7 +60,7 @@
   "141_jersey_6_2026": "Home Alternate \"Canada Day\" Reds",
   "141_jersey_2_2026": "Away Greys",
   "141_jersey_1_2026": "Home Whites",
-  "120_jersey_4_2026": "Road Alternate Blues",
+  "120_jersey_4_2026": "AWAY Alternate Blues",
   "120_jersey_3_2026": "Home Alternate Reds",
   "120_jersey_1_2026": "Home Whites",
   "120_jersey_2_2026": "Away Greys",
@@ -77,5 +77,16 @@
   "110_jersey_4_2026": "Alternate ORANGES",
   "110_jersey_3_2026": "ALTERNATE BLACKS",
   "142_jersey_4_2026": "Away Alternate Navys",
-  "142_jersey_3_2026": "home \"Twin Cities\" alternates"
+  "142_jersey_3_2026": "home \"Twin Cities\" alternates",
+  "135_jersey_4_2026": "Green Camo Alternates",
+  "137_jersey_4_2026": "Alternate \"Gigantes\" BLACKS",
+  "137_jersey_3_2026": "HOME Alternate OrangeS",
+  "137_jersey_1_2026": "Home WHITES",
+  "137_jersey_2_2026": "Away GREYS",
+  "136_jersey_1_2026": "HOME WhiteS",
+  "136_jersey_3_2026": "AWAY ALTERNATE TEALS",
+  "136_jersey_2_2026": "AWAY NAVY AlternateS",
+  "136_jersey_4_2026": "HOME \"Steelheads\" AlternateS",
+  "141_jersey_3_2026": "Alternate All BlueS",
+  "141_jersey_4_2026": "Alternate Baby BlueS"
 }

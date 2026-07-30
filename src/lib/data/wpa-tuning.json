@@ -714,6 +714,41 @@
       }
     }
   },
+  "120": {
+    "name": "Washington Nationals",
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 42,
+          "paddingX": 0,
+          "paddingY": 0
+        },
+        "band": "#5c82a5"
+      },
+      "alternate": {
+        "layout": {
+          "size": 28
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 30
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 36
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#FFFFFF",
+        "ownArt": true
+      }
+    }
+  },
   "121": {
     "name": "New York Mets",
     "treatments": {
@@ -818,7 +853,8 @@
           "paddingY": 5,
           "rowShift": 0
         },
-        "band": "#27251F"
+        "band": "#27251F",
+        "ownArt": true
       },
       "alternate-3": {
         "layout": {
@@ -828,8 +864,11 @@
       },
       "alternate-2": {
         "layout": {
-          "size": 35
-        }
+          "size": 40,
+          "paddingX": 8,
+          "paddingY": -2
+        },
+        "band": "#27251F"
       },
       "alternate": {
         "layout": {
@@ -839,6 +878,43 @@
       "city-connect": {
         "layout": {
           "size": 35
+        }
+      }
+    }
+  },
+  "135": {
+    "name": "San Diego Padres",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 30
+        },
+        "ownArt": true
+      },
+      "alternate": {
+        "layout": {
+          "size": 30
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "paddingX": 0,
+          "paddingY": 0
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 61,
+          "paddingX": 0,
+          "paddingY": 0
+        }
+      },
+      "city-connect": {
+        "layout": {
+          "size": 58,
+          "paddingX": -2,
+          "paddingY": 2
         }
       }
     }
@@ -877,6 +953,16 @@
           "paddingY": 0
         },
         "band": "#0C2C56"
+      },
+      "main": {
+        "layout": {
+          "size": 31
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 36
+        }
       }
     }
   },
@@ -886,7 +972,9 @@
       "main": {
         "layout": {
           "size": 40
-        }
+        },
+        "band": "#27251F",
+        "ownArt": true
       },
       "city-connect": {
         "layout": {
@@ -900,6 +988,29 @@
           "paddingY": 4
         },
         "band": "#EFD19F"
+      },
+      "alternate": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#27251F"
+      }
+    }
+  },
+  "138": {
+    "name": "St. Louis Cardinals",
+    "treatments": {
+      "main": {
+        "ownArt": true,
+        "layout": {
+          "size": 40
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 44
+        },
+        "band": "#0C2340"
       }
     }
   },
@@ -927,6 +1038,21 @@
           "paddingY": -68
         },
         "band": "#8FBCE6"
+      },
+      "main": {
+        "layout": {
+          "size": 34
+        },
+        "band": "#092C5C",
+        "ownArt": true
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 53,
+          "paddingX": 6,
+          "paddingY": -17
+        },
+        "band": "#F8F8F5"
       }
     }
   },
@@ -934,7 +1060,36 @@
     "name": "Texas Rangers",
     "bandColor": "#EBDFCB",
     "note": "their real cream tone, sampled off their own alt mark (ALT_COLORS)",
-    "treatments": {}
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 31
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 36
+        },
+        "band": "#003278",
+        "ownArt": true
+      },
+      "alternate": {
+        "layout": {
+          "size": 29
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 33
+        }
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#003278"
+      }
+    }
   },
   "141": {
     "name": "Toronto Blue Jays",
@@ -948,6 +1103,31 @@
           "paddingY": 7
         },
         "band": "#161827"
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 39
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 49
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 37
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 33
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 35
+        }
       }
     }
   },

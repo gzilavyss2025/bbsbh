@@ -260,9 +260,7 @@ const ALT3_USES_BASE_LOGO = new Set([
   116, // Tigers — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
   117, // Astros — same plain CDN mark as Main, re-paired with a grey tile for their Road Grey jersey
   121, // Mets — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
-  139, // Rays — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with their navy tile for their Away Blue jersey
   143, // Phillies — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
-  138, // Cardinals — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Road Grey jersey
 ])
 
 // Same idea as ALT_USES_BASE_LOGO, but for the Alternate 4 treatment.
@@ -270,7 +268,6 @@ const ALT4_USES_BASE_LOGO = new Set([
   141, // Blue Jays — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
   119, // Dodgers — same plain CDN mark as Main, re-paired with a grey tile for their Road Grey "Los Angeles" jersey
   135, // Padres — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a brown tile for their Away Brown jersey
-  140, // Rangers — same plain CDN mark as Main (Main's own is a locally recolored, procured badge), re-paired with a grey tile for their Away Grey jersey
   111, // Red Sox — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
 ])
 
@@ -397,9 +394,9 @@ export const ALT_COLORS = {
   135: [{ label: 'Background', hex: '#2F241D', bg: true }], // Padres — Alt 1 Brown Pinstripe jersey
   136: [{ label: 'Background', hex: '#F5F0E1', bg: true }], // Mariners — offwhite, for their Home White jersey
   137: [
-    { label: 'Secondary', hex: '#27251F' },
-    { label: 'Third', hex: '#EFD19F', bg: true },
-  ], // Giants — Main's Secondary plus its researched Cream extra; background is the Cream
+    { label: 'Secondary', hex: '#27251F', bg: true },
+    { label: 'Third', hex: '#EFD19F' },
+  ], // Giants — Main's Secondary plus its researched Cream extra; background is Secondary
   139: [
     { label: 'Primary', hex: '#092C5C' },
     { label: 'Secondary', hex: '#8FBCE6', bg: true },
@@ -431,6 +428,7 @@ export const CITY_CONNECT_COLORS = {
   121: [{ label: 'Background', hex: '#383a35', bg: true }], // Mets
   134: [{ label: 'Background', hex: '#201a1c', bg: true }], // Pirates — City Connect 2.0
   143: [{ label: 'Background', hex: '#00163b', bg: true }], // Phillies
+  135: [{ label: 'Background', hex: '#111113', bg: true }], // Padres — City Connect 2.0
   109: [
     { label: 'Primary', hex: '#0097A9' },
     { label: 'Secondary', hex: '#523178', bg: true },
@@ -521,7 +519,7 @@ export const ALT2_COLORS = {
     { label: 'White', hex: '#FFFDF6' },
   ], // Dodgers — same mark as Alternate (alternate-2/LAD.png, copied), Alt 2 All Blue jersey
   121: [{ label: 'Blue', hex: '#002D72', bg: true }], // Mets — same mark as Alternate (alternate-2/NYM.png, copied), Alt 2 Blue Pullover jersey
-  134: [{ label: 'Gold', hex: '#FDB827', bg: true }], // Pirates — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 2 Black "Pittsburgh" jersey
+  134: [{ label: 'Black', hex: '#27251F', bg: true }], // Pirates — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 2 Black "Pittsburgh" jersey
   135: [{ label: 'Green', hex: '#4B5320', bg: true }], // Padres — same mark as Alternate (alternate-2/SD.png, copied), Alt 2 Green Camouflage jersey
   139: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Rays — same mark as Alternate (alternate-2/TB.png, copied), Alt 2 White "Devil Rays" jersey
   142: [{ label: 'Navy', hex: '#002B5C', bg: true }], // Twins — Alt 1 Cream "Twin Cities" jersey
@@ -598,7 +596,7 @@ export const ALT3_COLORS = {
 export const ALT4_COLORS = {
   141: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Blue Jays
   119: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Dodgers — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Road Grey "Los Angeles" jersey
-  135: [{ label: 'Brown', hex: '#2F241D', bg: true }], // Padres — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Brown jersey — their own brand brown, not grey
+  135: [{ label: 'Gold', hex: '#FFC425', bg: true }], // Padres — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Brown jersey
   140: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Rangers — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Grey jersey
   111: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Red Sox — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Grey jersey
 }
