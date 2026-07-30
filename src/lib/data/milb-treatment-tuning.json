@@ -19,7 +19,12 @@
           "paddingY": 1,
           "rowShift": 0
         },
-        "band": "#231f20"
+        "band": "#231f20",
+        "header": {
+          "bar": "#231f20",
+          "accent": "#d10c47",
+          "onBar": "#FBF6E9"
+        }
       },
       "away": {
         "position": {
@@ -38,12 +43,7 @@
           "paddingY": 1,
           "rowShift": 0
         },
-        "band": "#d10c47",
-        "header": {
-          "bar": "#231f20",
-          "accent": "#d10c47",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#d10c47"
       }
     }
   },
@@ -67,7 +67,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#0054A4"
+        "band": "#0054A4",
+        "header": {
+          "bar": "#0054A4",
+          "accent": "#B15C12",
+          "onBar": "#FBF6E9"
+        }
       },
       "away": {
         "position": {
@@ -86,12 +91,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#B15C12",
-        "header": {
-          "bar": "#0054A4",
-          "accent": "#B15C12",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#B15C12"
       }
     }
   },
@@ -244,12 +244,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#D0D0D0",
-        "header": {
-          "bar": "#000000",
-          "accent": "#F61D30",
-          "onBar": "#F8F8F5"
-        }
+        "band": "#D0D0D0"
       },
       "home": {
         "wpaLayout": {
@@ -338,7 +333,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#010101"
+        "band": "#010101",
+        "header": {
+          "bar": "#010101",
+          "accent": "#FC4C02",
+          "onBar": "#FBF6E9"
+        }
       },
       "away": {
         "position": {
@@ -357,12 +357,7 @@
           "paddingY": 6,
           "rowShift": 0
         },
-        "band": "#010101",
-        "header": {
-          "bar": "#010101",
-          "accent": "#FC4C02",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#010101"
       }
     }
   },
@@ -511,7 +506,12 @@
           "paddingY": -1,
           "rowShift": 0
         },
-        "band": "#002A5C"
+        "band": "#002A5C",
+        "header": {
+          "bar": "#002A5C",
+          "accent": "#68ACDB",
+          "onBar": "#FBF6E9"
+        }
       },
       "away": {
         "position": {
@@ -530,12 +530,7 @@
           "paddingY": -1,
           "rowShift": 0
         },
-        "band": "#68ACDB",
-        "header": {
-          "bar": "#002A5C",
-          "accent": "#68ACDB",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#68ACDB"
       }
     }
   },
@@ -655,12 +650,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#D0D0D0",
-        "header": {
-          "bar": "#012b5d",
-          "accent": "#4f91ca",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#D0D0D0"
       }
     }
   },
@@ -1001,12 +991,7 @@
           "paddingY": 6,
           "rowShift": 0
         },
-        "band": "#cbccce",
-        "header": {
-          "bar": "#e03a3e",
-          "accent": "#000000",
-          "onBar": "#000000"
-        }
+        "band": "#cbccce"
       }
     }
   },
@@ -1468,7 +1453,9 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#e2b880",
+        "band": "#e2b880"
+      },
+      "home": {
         "header": {
           "bar": "#0f69b1",
           "accent": "#e2b880",
@@ -1497,7 +1484,12 @@
           "paddingY": -6,
           "rowShift": 0
         },
-        "band": "#00A9E0"
+        "band": "#00A9E0",
+        "header": {
+          "bar": "#003A70",
+          "accent": "#00A9E0",
+          "onBar": "#FBF6E9"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -1509,12 +1501,7 @@
           "paddingY": -6,
           "rowShift": 0
         },
-        "band": "#00A9E0",
-        "header": {
-          "bar": "#003A70",
-          "accent": "#00A9E0",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#00A9E0"
       }
     }
   },
@@ -1562,12 +1549,7 @@
           "paddingY": 2,
           "rowShift": 0
         },
-        "band": "#000000",
-        "header": {
-          "bar": "#000000",
-          "accent": "#f58b6d",
-          "onBar": "#FBF6E9"
-        }
+        "band": "#000000"
       }
     }
   }

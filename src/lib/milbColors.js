@@ -160,16 +160,29 @@ export function milbWpaBandColor(teamId, variant, draft) {
   return milbVariantColors(teamId, variant).bg
 }
 
+// Every affiliate's Home and Away jerseys share ONE header bar rather than
+// each owning its own — same idea as teams.js's treatmentHeaderColorOverride
+// collapsing MLB's five jerseys down to two (PR #453), except MiLB never had
+// a Main/City-Connect-style asymmetry to justify keeping two in the first
+// place. Always resolves off the 'home' slot regardless of which side is
+// asked, falling back to 'away' for any club whose header landed before this
+// collapse and still only lives there.
+export function milbHeaderColorOverride(teamId, side) {
+  if (side !== 'home' && side !== 'away') return null
+  const overrides = MILB_HEADER_COLOR_OVERRIDES[teamId]
+  return overrides?.home ?? overrides?.away ?? null
+}
+
 // Seeds for the lab's header editor when neither a draft nor a landed
-// MILB_HEADER_COLOR_OVERRIDES entry supplies one — this variant's own
-// resolved bg/accent, so the mockup starts from a real color instead of the
-// app's generic navy/gold pair (unlike TreatmentHeaderPreview's MLB
-// equivalent, which falls back to the app's brand pair only when a team has
-// no swatches of its own at all — every MiLB team always has at least the
-// neutral fallback pair, so that last-resort branch never applies here).
+// override supplies one — this variant's own resolved bg/accent, so the
+// mockup starts from a real color instead of the app's generic navy/gold pair
+// (unlike TreatmentHeaderPreview's MLB equivalent, which falls back to the
+// app's brand pair only when a team has no swatches of its own at all — every
+// MiLB team always has at least the neutral fallback pair, so that
+// last-resort branch never applies here).
 const DEFAULT_HEADER_ON_BAR = '#FBF6E9' // --paper-2, same literal teams.js's MLB mockup uses
 export function milbHeaderColorsFor(teamId, variant, draft) {
-  const override = MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant]
+  const override = milbHeaderColorOverride(teamId, variant)
   const { bg, accent } = milbVariantColors(teamId, variant)
   return {
     bar: draft?.bar ?? override?.bar ?? bg,

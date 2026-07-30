@@ -243,9 +243,16 @@ that game — **ADR-0030**. `headerThemeFor(teamId, treatment)` is the one
 resolver between the two header tables and that one surface; it answers `null`
 for an uncovered pair, and the CSS fallbacks (`var(--bar-fill, var(--navy))`)
 keep an unthemed page byte-identical to how it rendered before the feature
-existed. Coverage is partial on purpose (67 pairs today) — the resolver never
+existed. Coverage is partial on purpose (71 pairs today) — the resolver never
 synthesises a triad, because an unreviewed colour pair on a real page is exactly
 what the guard below can't vouch for.
+
+Both vocabularies collapse several jerseys onto fewer bars, for different
+reasons: MLB's `treatmentHeaderColorOverride` (`teams.js`) sends every
+treatment but City Connect to the club's shared Main bar — a real Main/City-
+Connect asymmetry. MiLB's `milbHeaderColorOverride` (`milbColors.js`) sends
+*both* Home and Away to the same slot — there's no such asymmetry to justify
+two, unlike Position/WPA, which still tune independently per side.
 
 The triad is `{ bar, accent, onBar }`: the bar's fill, its kraft-tape bottom
 edge, the ink on it. It was `{ blue, gold, font }` until ADR-0030 — names that

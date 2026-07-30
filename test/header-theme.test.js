@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../src/lib/headerTheme.js'
+import { milbHeaderColorOverride, MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/milbColors.js'
 import { contrastRatio } from '../src/lib/contrast.js'
 import MLB_TREATMENT_TUNING from '../src/lib/data/mlb-treatment-tuning.json' with { type: 'json' }
 import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' with { type: 'json' }
@@ -30,6 +31,34 @@ test('a MiLB affiliate resolves through the Home/Away table, not the MLB one', (
   // The MLB vocabulary must not resolve for a MiLB id, and vice versa.
   assert.equal(headerThemeFor(234, 'city-connect'), null)
   assert.equal(headerThemeFor(158, 'away'), null)
+})
+
+test("a MiLB club's Home and Away share the exact same bar", () => {
+  // 234 Durham Bulls — landed under the 'home' slot (milbHeaderColorOverride,
+  // src/lib/milbColors.js); Away must resolve to the identical triad rather
+  // than owning a second bar of its own.
+  assert.deepEqual(headerThemeFor(234, 'home'), headerThemeFor(234, 'away'))
+})
+
+test('milbHeaderColorOverride rejects anything but home/away', () => {
+  assert.equal(milbHeaderColorOverride(999999, 'home'), null)
+  assert.equal(milbHeaderColorOverride(234, 'sideways'), null)
+})
+
+test('milbHeaderColorOverride falls back to a legacy away-only entry', () => {
+  // Every real club was migrated onto the 'home' slot (see
+  // milb-treatment-tuning.json), so this scratches a fake away-only entry —
+  // same toggle-the-shared-table trick wpa-logo.test.js uses for WPA_OWN_ART —
+  // to exercise the fallback a hand-edited store could still land.
+  const SCRATCH = 999999
+  assert.equal(MILB_HEADER_COLOR_OVERRIDES[SCRATCH], undefined, 'fixture assumption: scratch id starts clean')
+  MILB_HEADER_COLOR_OVERRIDES[SCRATCH] = { away: { bar: '#111111', accent: '#222222', onBar: '#FFFFFF' } }
+  try {
+    assert.deepEqual(milbHeaderColorOverride(SCRATCH, 'home'), MILB_HEADER_COLOR_OVERRIDES[SCRATCH].away)
+    assert.deepEqual(milbHeaderColorOverride(SCRATCH, 'away'), MILB_HEADER_COLOR_OVERRIDES[SCRATCH].away)
+  } finally {
+    delete MILB_HEADER_COLOR_OVERRIDES[SCRATCH]
+  }
 })
 
 test('an uncovered (club, treatment) answers null so the caller keeps default chrome', () => {
@@ -119,8 +148,10 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // 67 before the Main/City-Connect collapse (this file's earlier tests):
   // dropping every alternate-treatment's own header entry in favor of the
   // club's shared Main bar took MLB from 56 down to 19, then further Identity
-  // Lab sessions landed more Main/City-Connect pairs (now 60, all 30 clubs'
-  // Main headers landed); MiLB's 15 home/away entries are untouched by that
-  // change.
-  assert.equal(checked, 75, 'expected the 75 landed triads — update this count deliberately')
+  // Lab sessions landed more Main/City-Connect pairs (58 MLB records today,
+  // all 30 clubs' Main headers landed). MiLB's own Home/Away collapse
+  // (milbHeaderColorOverride) folded every already-tuned club's header onto
+  // the shared Home slot and dropped the redundant Away copy — 13 MiLB
+  // records today, one per club with a landed bar.
+  assert.equal(checked, 71, 'expected the 71 landed triads — update this count deliberately')
 })
