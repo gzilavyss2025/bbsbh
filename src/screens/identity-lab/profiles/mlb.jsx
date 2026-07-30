@@ -635,7 +635,11 @@ function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
         drafts={{
           pos: drafts.pos?.[t.key],
           wpa: drafts.wpa?.[t.key],
-          header: drafts.header?.[t.key],
+          // Normalized to the two header slots (see treatmentHeaderColorOverride,
+          // src/lib/teams.js) — every non-City-Connect tile reads/writes the SAME
+          // 'main' draft entry, so editing any one of them stays in sync with the
+          // others instead of drifting into a third, unused color.
+          header: drafts.header?.[t.key === 'city-connect' ? 'city-connect' : 'main'],
           colors: drafts.colors,
           tcolors: drafts.tcolors?.[t.key],
         }}
@@ -700,6 +704,12 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const wpaLayout = resolvedWpaLayout(teamId, treatment, drafts.wpa)
   const headerLanded = treatmentHeaderColorOverride(teamId, treatment)
   const headerColors = headerColorsFor(colors, drafts.header, headerLanded)
+  // Only a Main-treatment tile and the City Connect tile own a header editor —
+  // every other jersey wears Main's bar (treatmentHeaderColorOverride,
+  // src/lib/teams.js), so showing the same editor again on their tiles would
+  // just be a second control writing to the tile it already syncs with.
+  const headerSlot = treatment === 'city-connect' ? 'city-connect' : 'main'
+  const isHeaderOwner = treatment === headerSlot
   const wpaOwnArt = resolveWpaOwnArt(teamId, treatment, drafts.wpa)
   const wpaArtKey = wpaArtTreatmentKey(treatment)
   // Absent (no `-wpa` destination — can't happen for a real MLB treatment,
@@ -839,17 +849,31 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         wpaBandOverride: { pinstripe: wpaPinstripe, color: wpaBand, bg: wpaBandBg },
         wpaMarkOverride,
       }}
-      header={{
-        name,
-        treatmentLabel: displayLabel,
-        colors: headerColors,
-        landed: Boolean(headerLanded),
-        contrast: contrastRatio(headerColors.onBar, headerColors.bar),
-        hasDraft: Boolean(drafts.header && Object.keys(drafts.header).length > 0),
-        copyText: buildHeaderCopyText(name, teamId, treatment, displayLabel, headerColors),
-        onField: (field, value) => on.headerField(treatment, field, value),
-        onReset: () => on.headerReset(treatment),
-      }}
+      header={
+        isHeaderOwner
+          ? {
+              name,
+              treatmentLabel: displayLabel,
+              colors: headerColors,
+              // Per-field: unlike `colors`, which fills every slot with a fallback
+              // so the preview bar and WPA mockups always have something to render,
+              // this stays undefined per-field when neither a draft nor the landed
+              // store actually has it — so the editor's own text inputs can show
+              // blank rather than a resolved color that looks saved but isn't.
+              rawColors: {
+                bar: drafts.header?.bar ?? headerLanded?.bar,
+                accent: drafts.header?.accent ?? headerLanded?.accent,
+                onBar: drafts.header?.onBar ?? headerLanded?.onBar,
+              },
+              landed: Boolean(headerLanded),
+              contrast: contrastRatio(headerColors.onBar, headerColors.bar),
+              hasDraft: Boolean(drafts.header && Object.keys(drafts.header).length > 0),
+              copyText: buildHeaderCopyText(name, teamId, headerSlot, displayLabel, headerColors),
+              onField: (field, value) => on.headerField(headerSlot, field, value),
+              onReset: () => on.headerReset(headerSlot),
+            }
+          : undefined
+      }
     />
   )
 }

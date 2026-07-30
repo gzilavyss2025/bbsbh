@@ -480,6 +480,13 @@
       "height": 512,
       "alpha": true
     },
+    "MIN.png": {
+      "teamId": 142,
+      "bytes": 86509,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "NYM.png": {
       "teamId": 121,
       "bytes": 52345,

@@ -24,6 +24,7 @@ export function HeaderPreview({
   name,
   treatmentLabel,
   colors,
+  rawColors,
   landed,
   contrast,
   hasDraft,
@@ -58,15 +59,30 @@ export function HeaderPreview({
         <div className="colorlab__headerfields">
           <label>
             <span>Bar</span>
-            <input type="text" value={bar} onChange={(e) => onField('bar', e.target.value)} />
+            <input
+              type="text"
+              placeholder="not set"
+              value={rawColors.bar ?? ''}
+              onChange={(e) => onField('bar', e.target.value)}
+            />
           </label>
           <label>
             <span>Accent</span>
-            <input type="text" value={accent} onChange={(e) => onField('accent', e.target.value)} />
+            <input
+              type="text"
+              placeholder="not set"
+              value={rawColors.accent ?? ''}
+              onChange={(e) => onField('accent', e.target.value)}
+            />
           </label>
           <label>
             <span>On bar</span>
-            <input type="text" value={onBar} onChange={(e) => onField('onBar', e.target.value)} />
+            <input
+              type="text"
+              placeholder="not set"
+              value={rawColors.onBar ?? ''}
+              onChange={(e) => onField('onBar', e.target.value)}
+            />
           </label>
         </div>
         <div

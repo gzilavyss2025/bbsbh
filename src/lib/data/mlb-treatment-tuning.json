@@ -12,22 +12,12 @@
         }
       },
       "alternate": {
-        "header": {
-          "bar": "#003263",
-          "accent": "#BA0021",
-          "onBar": "#FBF6E9"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#C4CED4"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#BA0021",
-          "accent": "#B5824A",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 2 White (Blue Trim) Pullover",
         "colors": {
           "primary": "#FFFFFF"
@@ -56,16 +46,12 @@
           "accent1": "#A71930",
           "accent2": "#30CED8"
         },
+        "scale": 0.88,
         "note": "Home Cream"
       },
       "alternate": {
-        "scale": 1.1,
+        "scale": 0.76,
         "originY": "10%",
-        "header": {
-          "bar": "#A71930",
-          "accent": "#30CED8",
-          "onBar": "#FBF6E9"
-        },
         "colors": {
           "primary": "#A71930",
           "secondary": "#E3D4AD",
@@ -76,11 +62,6 @@
       },
       "alternate-2": {
         "scale": 0.77,
-        "header": {
-          "bar": "#A29E9F",
-          "accent": "#A71930",
-          "onBar": "#000000"
-        },
         "note": "Away Grey shrunk off the default edge-bleed",
         "colors": {
           "primary": "#A71930",
@@ -89,11 +70,6 @@
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#000000",
-          "accent": "#30CED8",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 1 Black",
         "colors": {
           "primary": "#000000"
@@ -131,11 +107,6 @@
         }
       },
       "alternate": {
-        "header": {
-          "bar": "#000000",
-          "accent": "#DF4601",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 1 Black",
         "colors": {
           "primary": "#DF4601",
@@ -143,22 +114,12 @@
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#000000",
-          "accent": "#DF4601",
-          "onBar": "#FBF6E9"
-        },
         "note": "Home White",
         "colors": {
           "primary": "#FFFFFF"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#000000",
-          "accent": "#DF4601",
-          "onBar": "#FBF6E9"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -190,11 +151,6 @@
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#BD3039",
-          "accent": "#0C2340",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt White Marathon \"Boston\"",
         "colors": {
           "primary": "#FFFFFF",
@@ -203,11 +159,6 @@
         }
       },
       "alternate-4": {
-        "header": {
-          "bar": "#0C2340",
-          "accent": "#BD3039",
-          "onBar": "#FBF6E9"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -247,22 +198,12 @@
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#7698CE",
-          "accent": "#CC3433",
-          "onBar": "#000000"
-        },
         "note": "Alt 2 Baby Blue",
         "colors": {
           "primary": "#7698CE"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#0E3386",
-          "accent": "#CC3433",
-          "onBar": "#FBF6E9"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#0E3386"
@@ -303,11 +244,6 @@
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#C6011F",
-          "accent": "#000000",
-          "onBar": "#FBF6E9"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -357,33 +293,18 @@
         }
       },
       "alternate": {
-        "header": {
-          "bar": "#00385D",
-          "accent": "#E31937",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 2 Blue",
         "colors": {
           "primary": "#00385D"
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#E31937",
-          "accent": "#00385D",
-          "onBar": "#FFFFFF"
-        },
         "note": "Alt 1 Red",
         "colors": {
           "primary": "#E31937"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#E31937",
-          "accent": "#00385D",
-          "onBar": "#FFFFFF"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -417,22 +338,12 @@
         }
       },
       "alternate": {
-        "header": {
-          "bar": "#33006F",
-          "accent": "#C4CED4",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 1 Purple",
         "colors": {
           "primary": "#33006F"
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#9EA2A2",
-          "accent": "#33006F",
-          "onBar": "#33006F"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -455,22 +366,12 @@
       },
       "alternate": {
         "scale": 1.03,
-        "header": {
-          "bar": "#FA4616",
-          "accent": "#0C2340",
-          "onBar": "#000000"
-        },
         "note": "the Old English \"D\" mark, barely bumped up off the default 1.32 edge-bleed; Alt 1 Orange",
         "colors": {
           "primary": "#FA4616"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#9EA2A2",
-          "accent": "#0C2340",
-          "onBar": "#0C2340"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -505,33 +406,18 @@
         }
       },
       "alternate": {
-        "header": {
-          "bar": "#EB6E1F",
-          "accent": "#002D62",
-          "onBar": "#000000"
-        },
         "note": "Alt Orange",
         "colors": {
           "primary": "#EB6E1F"
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#002D62",
-          "accent": "#EB6E1F",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt Blue",
         "colors": {
           "primary": "#002D62"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#002D62",
-          "accent": "#EB6E1F",
-          "onBar": "#FBF6E9"
-        },
         "note": "Road Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -604,11 +490,6 @@
         "scale": 0.94,
         "offsetX": -2,
         "offsetY": 6,
-        "header": {
-          "bar": "#005A9C",
-          "accent": "#B5824A",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 1 Road Grey \"Dodgers\" — nudged left and down",
         "colors": {
           "primary": "#FFFFFF"
@@ -618,22 +499,12 @@
         "scale": 0.81,
         "offsetX": -1,
         "offsetY": 4,
-        "header": {
-          "bar": "#005A9C",
-          "accent": "#B5824A",
-          "onBar": "#FBF6E9"
-        },
         "note": "Road Grey \"Los Angeles\" — nudged left and down",
         "colors": {
           "primary": "#9EA2A2"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#005A9C",
-          "accent": "#B5824A",
-          "onBar": "#FBF6E9"
-        },
         "note": "\"Gold Series\"",
         "colors": {
           "primary": "#FFD100",
@@ -756,11 +627,6 @@
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#003831",
-          "accent": "#9EA2A2",
-          "onBar": "#FBF6E9"
-        },
         "note": "Road Grey",
         "colors": {
           "primary": "#9EA2A2"
@@ -894,7 +760,12 @@
           "secondary": "#27251F",
           "accent1": "#FD5A1E"
         },
-        "bgHex": "#e8e7d2"
+        "bgHex": "#e8e7d2",
+        "header": {
+          "bar": "#FD5A1E",
+          "accent": "#FD5A1E",
+          "onBar": "#27251F"
+        }
       },
       "alternate": {
         "colors": {
@@ -908,6 +779,11 @@
         }
       },
       "city-connect": {
+        "header": {
+          "bar": "#27251F",
+          "accent": "#FD5A1E",
+          "onBar": "#FFFFFF"
+        },
         "colors": {
           "primary": "#27251F"
         }
@@ -1098,11 +974,6 @@
       },
       "alternate": {
         "scale": 0.85,
-        "header": {
-          "bar": "#002B5C",
-          "accent": "#D31145",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 2 Navy",
         "colors": {
           "primary": "#002B5C",
@@ -1111,11 +982,6 @@
       },
       "alternate-2": {
         "scale": 0.85,
-        "header": {
-          "bar": "#002B5C",
-          "accent": "#D31145",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 1 Cream \"Twin Cities\"",
         "colors": {
           "primary": "#E8DCC0"
@@ -1123,14 +989,19 @@
       },
       "alternate-3": {
         "scale": 0.85,
-        "header": {
-          "bar": "#9EA2A2",
-          "accent": "#D31145",
-          "onBar": "#002B5C"
-        },
         "note": "Away Grey",
         "colors": {
           "primary": "#9EA2A2"
+        }
+      },
+      "city-connect": {
+        "scale": 0.87,
+        "offsetX": -1,
+        "offsetY": -1,
+        "header": {
+          "bar": "#00549f",
+          "accent": "#ffde00",
+          "onBar": "#FFFFFF"
         }
       }
     }
@@ -1210,22 +1081,12 @@
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#F5F0E1",
-          "accent": "#CE1141",
-          "onBar": "#13274F"
-        },
         "note": "Home White",
         "colors": {
           "primary": "#F5F0E1"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#A2AAAD",
-          "accent": "#CE1141",
-          "onBar": "#13274F"
-        },
         "note": "Road Grey",
         "colors": {
           "primary": "#A2AAAD"
@@ -1267,11 +1128,6 @@
       },
       "alternate": {
         "pinstripeColor": "rgba(0, 0, 0, 0.16)",
-        "header": {
-          "bar": "#27251F",
-          "accent": "#C4CED4",
-          "onBar": "#FBF6E9"
-        },
         "note": "same plain black-on-white pinstripe as every other pinstriped tile; Home Pinstripe jersey",
         "colors": {
           "primary": "#27251F",
@@ -1279,22 +1135,12 @@
         }
       },
       "alternate-2": {
-        "header": {
-          "bar": "#000000",
-          "accent": "#C4CED4",
-          "onBar": "#FBF6E9"
-        },
         "note": "Alt 1 Black \"Sox\"",
         "colors": {
           "primary": "#000000"
         }
       },
       "alternate-3": {
-        "header": {
-          "bar": "#9EA2A2",
-          "accent": "#000000",
-          "onBar": "#000000"
-        },
         "note": "Alt 2 \"Southside\"",
         "colors": {
           "primary": "#9EA2A2"
@@ -1327,11 +1173,6 @@
       },
       "alternate-3": {
         "scale": 1.04,
-        "header": {
-          "bar": "#009CA7",
-          "accent": "#000000",
-          "onBar": "#000000"
-        },
         "note": "Alt 2 Teal",
         "colors": {
           "primary": "#009CA7"

@@ -705,8 +705,14 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = byTreatment((f) => f.header, {
   includeMain: true,
 })
 
+// Two bars per club, not one per treatment: every jersey wears the club's
+// Main header EXCEPT City Connect, which gets its own. A caller passes
+// whichever treatment the club is actually in ('alternate', 'alternate-3', …)
+// and this collapses it to the one of two stores that answers it, so an
+// alternate jersey was never a third color to hand-tune in the first place.
 export function treatmentHeaderColorOverride(teamId, treatment) {
-  return TREATMENT_HEADER_COLOR_OVERRIDES[teamId]?.[treatment] ?? null
+  const slot = treatment === 'city-connect' ? 'city-connect' : 'main'
+  return TREATMENT_HEADER_COLOR_OVERRIDES[teamId]?.[slot] ?? null
 }
 
 export function treatmentScale(teamId, treatment) {

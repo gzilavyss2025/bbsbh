@@ -35,18 +35,32 @@ test('a MiLB affiliate resolves through the Home/Away table, not the MLB one', (
 test('an uncovered (club, treatment) answers null so the caller keeps default chrome', () => {
   // 147 Yankees have no header entry at all — coverage is partial by design.
   assert.equal(headerThemeFor(147, 'main'), null)
+  // 158 Brewers have no Main header landed either — every non-City-Connect
+  // treatment collapses to Main (treatmentHeaderColorOverride, src/lib/teams.js),
+  // so an alternate jersey answers null right along with 'main' itself.
   assert.equal(headerThemeFor(158, 'alternate-4'), null)
   assert.equal(headerThemeFor(null, 'main'), null)
   assert.equal(headerThemeFor(158, null), null)
   assert.equal(headerThemeFor(999999, 'main'), null)
 })
 
+test('every non-City-Connect treatment collapses onto the club Main header', () => {
+  // Two bars per club, not one per treatment (src/lib/teams.js): 'alternate',
+  // 'alternate-2', 'alternate-3'… all resolve identically to 'main', and only
+  // 'city-connect' gets its own separate answer.
+  const main = headerThemeFor(144, 'main')
+  for (const treatment of ['alternate', 'alternate-2', 'alternate-3', 'alternate-4']) {
+    assert.deepEqual(headerThemeFor(144, treatment), main)
+  }
+  assert.notDeepEqual(headerThemeFor(144, 'city-connect'), main)
+})
+
 test('onBarTone flags a dark ink so a themed masthead can re-ink its mono mark', () => {
-  // Braves Alternate 3 — a pale grey bar carrying their navy.
-  assert.equal(headerThemeFor(144, 'alternate-3').onBarTone, 'dark')
-  // Braves City Connect — same club, also retuned to navy ink on a light bar.
+  // Braves Main — cream ink, via the 'alternate-3' jersey collapsing onto it.
+  assert.equal(headerThemeFor(144, 'alternate-3').onBarTone, 'light')
+  // Braves City Connect — same club, its own navy-ink bar.
   assert.equal(headerThemeFor(144, 'city-connect').onBarTone, 'dark')
-  // Guardians Alternate 2 — white ink on their red.
+  // Guardians Main — cream ink, via the 'alternate-2' jersey collapsing onto it.
   assert.equal(headerThemeFor(114, 'alternate-2').onBarTone, 'light')
 })
 
@@ -60,7 +74,7 @@ test('headerThemeStyle/headerThemeClass are inert without a theme', () => {
     '--bar-text': theme.onBar,
   })
   assert.equal(headerThemeClass(theme), 'is-themed')
-  assert.equal(headerThemeClass(headerThemeFor(144, 'alternate-3')), 'is-themed is-themed--dark')
+  assert.equal(headerThemeClass(headerThemeFor(144, 'city-connect')), 'is-themed is-themed--dark')
 })
 
 // The spoiler invariant, asserted rather than merely written down: the resolver
@@ -103,5 +117,9 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
       }
     }
   }
-  assert.equal(checked, 67, 'expected the 67 landed triads — update this count deliberately')
+  // 67 before the Main/City-Connect collapse (this file's earlier tests):
+  // dropping every alternate-treatment's own header entry in favor of the
+  // club's shared Main bar took MLB from 56 down to 19 (8 Main + 11 City
+  // Connect); MiLB's 15 home/away entries are untouched by that change.
+  assert.equal(checked, 34, 'expected the 34 landed triads — update this count deliberately')
 })

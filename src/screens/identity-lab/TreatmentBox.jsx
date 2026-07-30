@@ -39,10 +39,15 @@ export function TreatmentBox({
   // named the fields bar/accent/onBar before the store did; now that the store
   // carries the same names (ADR-0030), the two sides pass straight through
   // with no mapping between them.
+  //
+  // `header` is undefined for a tile that shares its chrome with the club's
+  // Main bar rather than owning one — only a Main-treatment tile and the
+  // City Connect tile carry their own header editor now, since every other
+  // jersey wears Main's (src/lib/teams.js's treatmentHeaderColorOverride).
   const palette = {
-    bar: header.colors.bar,
-    accent: header.colors.accent,
-    onBar: header.colors.onBar,
+    bar: header?.colors.bar,
+    accent: header?.colors.accent,
+    onBar: header?.colors.onBar,
     bg: position.bg,
     pinstripe: position.pinstripe,
   }
@@ -50,9 +55,11 @@ export function TreatmentBox({
     if (!clip) return
     if (clip.bg !== undefined) position.onField('bg', clip.bg)
     if (clip.pinstripe !== undefined) position.onField('pinstripe', clip.pinstripe)
-    if (clip.bar !== undefined) header.onField('bar', clip.bar)
-    if (clip.accent !== undefined) header.onField('accent', clip.accent)
-    if (clip.onBar !== undefined) header.onField('onBar', clip.onBar)
+    if (header) {
+      if (clip.bar !== undefined) header.onField('bar', clip.bar)
+      if (clip.accent !== undefined) header.onField('accent', clip.accent)
+      if (clip.onBar !== undefined) header.onField('onBar', clip.onBar)
+    }
   }
 
   return (
@@ -98,7 +105,7 @@ export function TreatmentBox({
       </div>
       <WpaPreview {...wpa} />
       <WpaScenarios {...scenarios} />
-      <HeaderPreview {...header} />
+      {header && <HeaderPreview {...header} />}
     </div>
   )
 }

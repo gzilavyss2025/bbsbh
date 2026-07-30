@@ -829,6 +829,29 @@
       }
     }
   },
+  "137": {
+    "name": "San Francisco Giants",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 40
+        }
+      },
+      "city-connect": {
+        "layout": {
+          "size": 37
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 50,
+          "paddingX": 11,
+          "paddingY": 4
+        },
+        "band": "#EFD19F"
+      }
+    }
+  },
   "139": {
     "name": "Tampa Bay Rays",
     "bandColor": "#8FBCE6",
@@ -938,7 +961,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#002B5C"
+        "band": "#00549f"
       }
     }
   },
