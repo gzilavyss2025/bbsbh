@@ -1037,8 +1037,10 @@
       },
       "alternate-3": {
         "colors": {
-          "primary": "#9EA2A2"
-        }
+          "primary": "#9EA2A2",
+          "secondary": "#0C2340"
+        },
+        "scale": 0.93
       },
       "city-connect": {
         "colors": {
@@ -1060,13 +1062,19 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "scale": 0.95,
-        "note": "navy letters recolored to white, kept the baby-blue undertone shadow",
+        "scale": 0.82,
         "colors": {
           "primary": "#092C5C",
           "secondary": "#8FBCE6",
           "accent1": "#F5D130"
-        }
+        },
+        "bgHex": "#092C5C",
+        "header": {
+          "bar": "#092C5C",
+          "accent": "#8FBCE6",
+          "onBar": "#FFFDF6"
+        },
+        "note": "navy letters recolored to white, kept the baby-blue undertone shadow"
       },
       "alternate": {
         "scale": 1.6,
@@ -1080,8 +1088,12 @@
       },
       "alternate-2": {
         "colors": {
-          "primary": "#FFFFFF"
-        }
+          "primary": "#092C5C",
+          "secondary": "#64a70b",
+          "accent1": "#ffd427",
+          "accent2": "#8FBCE6"
+        },
+        "scale": 1.13
       },
       "alternate-3": {
         "colors": {
@@ -1091,6 +1103,11 @@
       "city-connect": {
         "colors": {
           "primary": "#000000"
+        },
+        "header": {
+          "bar": "#000000",
+          "accent": "#7bc35e",
+          "onBar": "#FFFDF6"
         }
       }
     }

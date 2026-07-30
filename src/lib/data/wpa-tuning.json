@@ -970,6 +970,12 @@
         "layout": {
           "size": 40
         }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 44
+        },
+        "band": "#0C2340"
       }
     }
   },
@@ -997,6 +1003,21 @@
           "paddingY": -68
         },
         "band": "#8FBCE6"
+      },
+      "main": {
+        "layout": {
+          "size": 34
+        },
+        "band": "#092C5C",
+        "ownArt": true
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 53,
+          "paddingX": 6,
+          "paddingY": -17
+        },
+        "band": "#F8F8F5"
       }
     }
   },

@@ -260,7 +260,6 @@ const ALT3_USES_BASE_LOGO = new Set([
   116, // Tigers — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
   117, // Astros — same plain CDN mark as Main, re-paired with a grey tile for their Road Grey jersey
   121, // Mets — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
-  139, // Rays — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with their navy tile for their Away Blue jersey
   143, // Phillies — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
 ])
 

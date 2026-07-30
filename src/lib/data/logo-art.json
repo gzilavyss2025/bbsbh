@@ -331,7 +331,7 @@
     },
     "TB.png": {
       "teamId": 139,
-      "bytes": 31473,
+      "bytes": 43797,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -425,6 +425,13 @@
     "STL.png": {
       "teamId": 138,
       "bytes": 22505,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "TB.png": {
+      "teamId": 139,
+      "bytes": 23851,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -784,6 +791,13 @@
       "teamId": 138,
       "bytes": 2539
     },
+    "TB.png": {
+      "teamId": 139,
+      "bytes": 23851,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "TB.svg": {
       "teamId": 139,
       "bytes": 2639
@@ -839,6 +853,13 @@
     "STL.png": {
       "teamId": 138,
       "bytes": 24052,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "TB.png": {
+      "teamId": 139,
+      "bytes": 23851,
       "width": 512,
       "height": 512,
       "alpha": true
