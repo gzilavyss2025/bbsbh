@@ -818,7 +818,8 @@
           "paddingY": 5,
           "rowShift": 0
         },
-        "band": "#27251F"
+        "band": "#27251F",
+        "ownArt": true
       },
       "alternate-3": {
         "layout": {
@@ -828,8 +829,11 @@
       },
       "alternate-2": {
         "layout": {
-          "size": 35
-        }
+          "size": 40,
+          "paddingX": 8,
+          "paddingY": -2
+        },
+        "band": "#27251F"
       },
       "alternate": {
         "layout": {
@@ -839,6 +843,43 @@
       "city-connect": {
         "layout": {
           "size": 35
+        }
+      }
+    }
+  },
+  "135": {
+    "name": "San Diego Padres",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 30
+        },
+        "ownArt": true
+      },
+      "alternate": {
+        "layout": {
+          "size": 30
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "paddingX": 0,
+          "paddingY": 0
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 61,
+          "paddingX": 0,
+          "paddingY": 0
+        }
+      },
+      "city-connect": {
+        "layout": {
+          "size": 58,
+          "paddingX": -2,
+          "paddingY": 2
         }
       }
     }
@@ -877,6 +918,16 @@
           "paddingY": 0
         },
         "band": "#0C2C56"
+      },
+      "main": {
+        "layout": {
+          "size": 31
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 36
+        }
       }
     }
   },
@@ -886,7 +937,9 @@
       "main": {
         "layout": {
           "size": 40
-        }
+        },
+        "band": "#27251F",
+        "ownArt": true
       },
       "city-connect": {
         "layout": {
@@ -900,6 +953,23 @@
           "paddingY": 4
         },
         "band": "#EFD19F"
+      },
+      "alternate": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#27251F"
+      }
+    }
+  },
+  "138": {
+    "name": "St. Louis Cardinals",
+    "treatments": {
+      "main": {
+        "ownArt": true,
+        "layout": {
+          "size": 40
+        }
       }
     }
   },

@@ -120,7 +120,7 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // 67 before the Main/City-Connect collapse (this file's earlier tests):
   // dropping every alternate-treatment's own header entry in favor of the
   // club's shared Main bar took MLB from 56 down to 19, then further Identity
-  // Lab sessions landed more Main/City-Connect pairs (now 44); MiLB's 15
+  // Lab sessions landed more Main/City-Connect pairs (now 50); MiLB's 15
   // home/away entries are untouched by that change.
-  assert.equal(checked, 59, 'expected the 59 landed triads — update this count deliberately')
+  assert.equal(checked, 65, 'expected the 65 landed triads — update this count deliberately')
 })
