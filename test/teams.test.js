@@ -207,8 +207,12 @@ test('offDayTreatmentFor reads a club\'s curated off-day treatment', () => {
 })
 
 test('offDayTreatmentFor defaults to main for a club with no override', () => {
-  assert.equal(offDayTreatmentFor(158), 'main') // Brewers — no offDayTreatment set
+  assert.equal(offDayTreatmentFor(112), 'main') // Cubs — no offDayTreatment set
   assert.equal(offDayTreatmentFor(999999), 'main') // no mlb-team-colors.json entry at all
+})
+
+test('offDayTreatmentFor reads the Brewers\' curated off-day treatment', () => {
+  assert.equal(offDayTreatmentFor(158), 'alternate') // Brewers — pinned team, curated in this tuning session
 })
 
 test('mainTreatmentPinstripe is true only for the pinstriped Main-tile teams', () => {

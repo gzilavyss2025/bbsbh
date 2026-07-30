@@ -11,7 +11,8 @@
     "primary": "#A71930",
     "secondary": "#E3D4AD",
     "accent": "#000000",
-    "accent2": "#30CED8"
+    "accent2": "#30CED8",
+    "offDayTreatment": "alternate-3"
   },
   "110": {
     "name": "Baltimore Orioles",
@@ -41,7 +42,8 @@
     "name": "Cleveland Guardians",
     "primary": "#00385D",
     "secondary": "#E50022",
-    "accent": "#E31937"
+    "accent": "#E31937",
+    "offDayTreatment": "alternate"
   },
   "115": {
     "name": "Colorado Rockies",
@@ -80,7 +82,8 @@
     "name": "Washington Nationals",
     "primary": "#AB0003",
     "secondary": "#14225A",
-    "accent": "#AB0003"
+    "accent": "#AB0003",
+    "offDayTreatment": "alternate-2"
   },
   "121": {
     "name": "New York Mets",
@@ -119,7 +122,8 @@
         "hex": "#D50032"
       }
     ],
-    "accent2": "#C4CED4"
+    "accent2": "#C4CED4",
+    "offDayTreatment": "alternate"
   },
   "137": {
     "name": "San Francisco Giants",
@@ -157,7 +161,8 @@
     "name": "Toronto Blue Jays",
     "primary": "#134A8E",
     "secondary": "#1D2D5C",
-    "accent": "#E8291C"
+    "accent": "#E8291C",
+    "offDayTreatment": "alternate-2"
   },
   "142": {
     "name": "Minnesota Twins",
@@ -183,7 +188,8 @@
     "name": "Chicago White Sox",
     "primary": "#27251F",
     "secondary": "#C4CED4",
-    "accent": "#27251F"
+    "accent": "#27251F",
+    "offDayTreatment": "alternate"
   },
   "146": {
     "name": "Miami Marlins",
@@ -223,6 +229,7 @@
       }
     ],
     "note": "Powder Blue is the 2026 alternate road jersey; Gold is that jersey’s secondary.",
-    "accent2": "#6CACE4"
+    "accent2": "#6CACE4",
+    "offDayTreatment": "alternate"
   }
 }
