@@ -199,7 +199,7 @@
   },
   "147": {
     "name": "New York Yankees",
-    "primary": "#003087",
+    "primary": "#0C2340",
     "secondary": "#E4002C",
     "accent": "#003087",
     "extras": [
@@ -208,7 +208,7 @@
         "hex": "#C4CED3"
       }
     ],
-    "accent2": "#0C2340"
+    "accent2": "#F8F8F5"
   },
   "158": {
     "name": "Milwaukee Brewers",

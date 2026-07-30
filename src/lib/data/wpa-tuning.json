@@ -49,6 +49,12 @@
           "rowShift": 0
         },
         "band": "#FFFFFF"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#faf6eb"
       }
     }
   },
@@ -691,6 +697,20 @@
           "rowShift": 0
         },
         "band": "#FFFFFF"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 45,
+          "paddingX": 6,
+          "paddingY": 2
+        },
+        "band": "#fff7df"
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#005A9C"
       }
     }
   },
@@ -726,8 +746,11 @@
       },
       "main": {
         "layout": {
-          "size": 45
-        }
+          "size": 74,
+          "paddingX": 22,
+          "paddingY": -29
+        },
+        "ownArt": true
       }
     }
   },
@@ -956,7 +979,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#002B5C"
       },
       "city-connect": {
         "layout": {
@@ -1201,7 +1224,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#C4CED3"
+        "band": "#0C2340"
       }
     }
   },
@@ -1218,7 +1241,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#FCEDD6"
+        "band": "#F3ECD8"
       },
       "alternate": {
         "layout": {
@@ -1261,11 +1284,11 @@
       },
       "city-connect": {
         "layout": {
-          "size": 69,
+          "size": 64,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingY": -8
+          "paddingY": -5
         },
         "band": "#ff6c58"
       }

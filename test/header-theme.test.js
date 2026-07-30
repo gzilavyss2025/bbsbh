@@ -33,12 +33,12 @@ test('a MiLB affiliate resolves through the Home/Away table, not the MLB one', (
 })
 
 test('an uncovered (club, treatment) answers null so the caller keeps default chrome', () => {
-  // 147 Yankees have no header entry at all — coverage is partial by design.
-  assert.equal(headerThemeFor(147, 'main'), null)
-  // 158 Brewers have no Main header landed either — every non-City-Connect
+  // 120 Nationals have no header entry at all — coverage is partial by design.
+  assert.equal(headerThemeFor(120, 'main'), null)
+  // Nationals have no Main header landed either — every non-City-Connect
   // treatment collapses to Main (treatmentHeaderColorOverride, src/lib/teams.js),
   // so an alternate jersey answers null right along with 'main' itself.
-  assert.equal(headerThemeFor(158, 'alternate-4'), null)
+  assert.equal(headerThemeFor(120, 'alternate-4'), null)
   assert.equal(headerThemeFor(null, 'main'), null)
   assert.equal(headerThemeFor(158, null), null)
   assert.equal(headerThemeFor(999999, 'main'), null)
@@ -120,7 +120,7 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // 67 before the Main/City-Connect collapse (this file's earlier tests):
   // dropping every alternate-treatment's own header entry in favor of the
   // club's shared Main bar took MLB from 56 down to 19, then further Identity
-  // Lab sessions landed more Main/City-Connect pairs (now 28); MiLB's 15
+  // Lab sessions landed more Main/City-Connect pairs (now 40); MiLB's 15
   // home/away entries are untouched by that change.
-  assert.equal(checked, 43, 'expected the 43 landed triads — update this count deliberately')
+  assert.equal(checked, 55, 'expected the 55 landed triads — update this count deliberately')
 })

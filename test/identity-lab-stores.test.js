@@ -10,6 +10,7 @@ import MLB_TEAM_COLORS from '../src/lib/data/mlb-team-colors.json' with { type: 
 import { byTeam, byTreatment, treatmentRecord } from '../src/lib/tuningStore.js'
 import {
   ALL_MLB_TEAM_IDS,
+  MLB_TREATMENT_KEYS,
   TREATMENT_SCALE,
   MAIN_OVERRIDES,
   mainTreatmentScale,
@@ -52,15 +53,6 @@ const TEAM_LEVEL_STORES = {
 }
 
 const ALL_STORES = { ...STORES, ...TEAM_LEVEL_STORES }
-
-const MLB_TREATMENT_KEYS = new Set([
-  'main',
-  'alternate',
-  'alternate-2',
-  'alternate-3',
-  'alternate-4',
-  'city-connect',
-])
 
 // --------------------------------------------------------------------------
 // Shape

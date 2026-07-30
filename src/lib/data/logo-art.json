@@ -70,6 +70,13 @@
       "height": 512,
       "alpha": true
     },
+    "HOU.png": {
+      "teamId": 117,
+      "bytes": 58072,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "KC.svg": {
       "teamId": 118,
       "bytes": 1211
@@ -83,14 +90,21 @@
     },
     "MIA.png": {
       "teamId": 146,
-      "bytes": 48580,
+      "bytes": 34772,
       "width": 512,
       "height": 512,
       "alpha": true
     },
     "MIL.png": {
       "teamId": 158,
-      "bytes": 75849,
+      "bytes": 16678,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "MIN.png": {
+      "teamId": 142,
+      "bytes": 12834,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -101,6 +115,13 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "NYY.png": {
+      "teamId": 147,
+      "bytes": 14455,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     },
     "NYY.svg": {
       "teamId": 147,
@@ -226,7 +247,7 @@
     },
     "LAD.png": {
       "teamId": 119,
-      "bytes": 41491,
+      "bytes": 44266,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -240,7 +261,14 @@
     },
     "MIL.png": {
       "teamId": 158,
-      "bytes": 57467,
+      "bytes": 16678,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "MIN.png": {
+      "teamId": 142,
+      "bytes": 15811,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -254,10 +282,10 @@
     },
     "PHI.png": {
       "teamId": 143,
-      "bytes": 57889,
+      "bytes": 8143,
       "width": 512,
       "height": 512,
-      "alpha": true
+      "alpha": false
     },
     "SD.png": {
       "teamId": 135,
@@ -348,6 +376,13 @@
     "MIA.png": {
       "teamId": 146,
       "bytes": 84578,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "MIN.png": {
+      "teamId": 142,
+      "bytes": 12834,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -473,6 +508,20 @@
       "height": 512,
       "alpha": true
     },
+    "LAA.png": {
+      "teamId": 108,
+      "bytes": 32377,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "LAD.png": {
+      "teamId": 119,
+      "bytes": 62320,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "MIA.png": {
       "teamId": 146,
       "bytes": 45799,
@@ -497,6 +546,13 @@
     "NYM.png": {
       "teamId": 121,
       "bytes": 52345,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
+    "PHI.png": {
+      "teamId": 143,
+      "bytes": 27757,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -579,6 +635,13 @@
       "teamId": 116,
       "bytes": 1961
     },
+    "HOU.png": {
+      "teamId": 117,
+      "bytes": 21642,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "KC.svg": {
       "teamId": 118,
       "bytes": 1211
@@ -586,6 +649,20 @@
     "LAD.svg": {
       "teamId": 119,
       "bytes": 1188
+    },
+    "MIL.png": {
+      "teamId": 158,
+      "bytes": 16678,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "MIN.png": {
+      "teamId": 142,
+      "bytes": 15291,
+      "width": 512,
+      "height": 512,
+      "alpha": true
     },
     "MIN.svg": {
       "teamId": 142,
@@ -597,6 +674,13 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "NYY.png": {
+      "teamId": 147,
+      "bytes": 8736,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     },
     "NYY.svg": {
       "teamId": 147,
@@ -649,6 +733,15 @@
     "WSH.svg": {
       "teamId": 120,
       "bytes": 1867
+    }
+  },
+  "wpa-main": {
+    "NYM.png": {
+      "teamId": 121,
+      "bytes": 40036,
+      "width": 512,
+      "height": 512,
+      "alpha": true
     }
   }
 }
