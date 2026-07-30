@@ -105,6 +105,9 @@ const GamePhotosPage = lazyNamed(
 const ScorecardLab = import.meta.env.DEV
   ? lazyNamed(() => import('./screens/ScorecardLab.jsx'), 'ScorecardLab')
   : null
+const GameCardLab = import.meta.env.DEV
+  ? lazyNamed(() => import('./screens/GameCardLab.jsx'), 'GameCardLab')
+  : null
 // The two curation surfaces are DEV-only, and for the same reason: their Save
 // buttons post to vite.config.js's devDataSave() middleware, which exists only
 // under `vite dev`. In a production build that endpoint is gone, so shipping
@@ -227,6 +230,8 @@ export default function App() {
     content = <GamePhotosPage key={route.gamePk ?? 'browse'} initialGamePk={route.gamePk ?? null} />
   } else if (route.name === 'scorecard-lab' && ScorecardLab) {
     content = <ScorecardLab />
+  } else if (route.name === 'game-card-lab' && GameCardLab) {
+    content = <GameCardLab />
   } else if (route.name === 'identity-lab' && IdentityLab) {
     content = <IdentityLab />
   } else if (route.name === 'uniform-names' && UniformNamesPage) {

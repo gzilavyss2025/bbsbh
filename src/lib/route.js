@@ -27,6 +27,7 @@
 //   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
+//   '/game-card-lab'                    -> { name: 'game-card-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
@@ -100,6 +101,10 @@ export function parseRoute(url) {
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
     return { name: 'scorecard-lab' }
+  // Dev-only Scores Unlocked slate-card design study. Parsed in production so
+  // a stray URL falls safely through to the slate when App's DEV gate is absent.
+  if (parts.length === 1 && parts[0] === 'game-card-lab')
+    return { name: 'game-card-lab' }
   // Dev-only Team Identity Lab — every dimension of a club's visual identity
   // (MLB treatments, each MiLB level's Home/Away, the WPA band pattern) behind
   // one in-page dimension switcher. Replaced /team-color-lab,
