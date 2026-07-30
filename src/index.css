@@ -26362,11 +26362,11 @@ button.gamehigh-matchup:active {
 }
 
 /* ------------------------------------------------ Scores Unlocked card lab
-   Dev-only comparison at /game-card-lab. The two columns deliberately reuse
-   the live slate card's .gamecard/.gamecard__teams/.gamecard__logobox frame;
-   only the score treatment below the team names changes. */
+   Dev-only selected concept at /game-card-lab. It deliberately reuses the
+   live slate card's .gamecard/.gamecard__teams/.gamecard__logobox frame; only
+   the score treatment below the team names changes. */
 .screen.screen--gamecardlab {
-  max-width: 920px;
+  max-width: 620px;
   padding-bottom: var(--space-12);
 }
 
@@ -26415,19 +26415,12 @@ button.gamehigh-matchup:active {
   color: var(--text-caption) !important;
 }
 
-.gamecardlab__compare {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(320px, 380px));
-  justify-content: center;
-  gap: var(--space-5);
-}
-
 .gamecardlab__variant {
-  min-width: 0;
+  width: min(100%, 380px);
+  margin-inline: auto;
 }
 
 .gamecardlab__varianthead {
-  min-height: 70px;
   margin-bottom: var(--space-3);
   padding: 0 var(--space-1);
 }
@@ -26485,33 +26478,47 @@ button.gamehigh-matchup:active {
   color: var(--accent-primary);
 }
 
-/* Variant A: two ruled entries and a narrow margin column. The score reads
-   top-to-bottom like a hand-kept ledger; the game state and inning share the
-   outside edge, where a scorekeeper expects summary notation. */
+/* The selected ledger: a compact R/H/E table and a narrow margin column. The
+   game state and inning share the outside edge, where a scorekeeper expects
+   summary notation. ▲/▼ replaces TOP/BOT without losing the half at a glance. */
 .scoreledger {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 94px;
-  min-height: 78px;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  min-height: 86px;
   margin-top: var(--space-1);
   border-block: var(--bw-rule) solid var(--border-rule);
   background: var(--surface-inset);
 }
 
-.scoreledger__rows {
+.scoreledger__table {
   display: grid;
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: 20px repeat(2, 1fr);
+}
+
+.scoreledger__header,
+.scoreledger__row {
+  display: grid;
+  grid-template-columns: minmax(54px, 1fr) repeat(3, 32px);
+  align-items: center;
+  column-gap: var(--space-1);
+  padding-inline: var(--space-3);
+}
+
+.scoreledger__header {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-align: right;
+  color: var(--text-caption);
 }
 
 .scoreledger__row {
-  display: grid;
-  grid-template-columns: 42px minmax(18px, 1fr) 30px;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 .scoreledger__row + .scoreledger__row {
-  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-top-color: var(--border-rule);
 }
 
 .scoreledger__abbr,
@@ -26527,17 +26534,19 @@ button.gamehigh-matchup:active {
   font-size: var(--fs-small);
 }
 
-.scoreledger__rule {
-  border-bottom: var(--bw-hair) dotted var(--border-rule);
-}
-
 .scoreledger__number {
   font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-semibold);
   font-variant-numeric: tabular-nums;
   line-height: var(--lh-solid);
   text-align: right;
+  color: var(--text-muted);
+}
+
+.scoreledger__number--runs {
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
   color: var(--text-heading);
 }
 
@@ -26553,110 +26562,24 @@ button.gamehigh-matchup:active {
 
 .scoreledger__inning {
   font-family: var(--font-mono);
-  font-size: var(--fs-ui);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Variant B: a clipped paper docket carries state/inning while a single
-   horizontal score locks the two clubs to one baseline. It borrows the
-   pressed-stamp language from postponed cards without turning every state
-   into another rounded UI pill. */
-.scorestamp {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  min-height: 78px;
-  margin-top: var(--space-1);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-inset);
-  box-shadow: var(--inset-cell);
-}
-
-.scorestamp__docket {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: var(--space-3) var(--space-2);
-  background: color-mix(in srgb, var(--seal-cover) 20%, var(--surface-card));
-  border-right: var(--bw-rule) dashed var(--seal-hatch);
-  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 8px, calc(100% - 5px) 16px, 100% 24px, calc(100% - 5px) 32px, 100% 40px, calc(100% - 5px) 48px, 100% 56px, calc(100% - 5px) 64px, 100% 72px, calc(100% - 5px) 100%, 0 100%);
-}
-
-.scorestamp__inning {
-  font-family: var(--font-mono);
-  font-size: var(--fs-ui);
-  font-weight: var(--w-bold);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  text-transform: uppercase;
-  color: var(--text-heading);
-}
-
-.scorestamp__score {
-  display: grid;
-  grid-template-columns: 1fr var(--bw-heavy) 1fr;
-  align-items: stretch;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-}
-
-.scorestamp__team {
-  display: flex;
+  display: inline-flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-  min-width: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
-}
-
-.scorestamp__team strong {
-  font-family: var(--font-mono);
-  font-size: var(--fs-title-lg);
+  gap: var(--space-1);
+  font-size: var(--fs-num-md);
   font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
-  line-height: var(--lh-solid);
 }
 
-.scorestamp__divider {
-  width: var(--bw-heavy);
-  background: var(--border-rule);
-  transform: rotate(5deg);
-  transform-origin: center;
-}
-
-.gamecardlab__card--delay .scorestamp__docket,
 .gamecardlab__card--delay .scoreledger__edge {
   background: color-mix(in srgb, var(--seal-cover) 38%, var(--surface-card));
 }
 
-.gamecardlab__card--extras .scorestamp__docket,
 .gamecardlab__card--extras .scoreledger__edge {
   border-color: var(--accent-primary);
 }
 
-@media (max-width: 720px) {
-  .screen.screen--gamecardlab {
-    max-width: none;
-    overflow-x: hidden;
-  }
-
-  .gamecardlab__compare {
-    grid-template-columns: repeat(2, minmax(300px, 84vw));
-    justify-content: start;
-    gap: var(--space-3);
-    margin-inline: calc(var(--space-4) * -1);
-    padding-inline: var(--space-4);
-    padding-bottom: var(--space-2);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
-  }
-
-  .gamecardlab__variant {
-    scroll-snap-align: center;
-  }
+.scoreledger__arrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  color: var(--accent-negative);
 }

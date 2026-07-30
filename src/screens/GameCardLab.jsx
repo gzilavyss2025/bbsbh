@@ -9,46 +9,33 @@ const LAB_GAMES = [
     id: 'live',
     state: 'live',
     status: 'Live',
-    inning: 'Bot 7',
-    away: { id: 158, abbreviation: 'MIL', location: 'Milwaukee', mascot: 'Brewers', score: 4 },
-    home: { id: 109, abbreviation: 'AZ', location: 'Arizona', mascot: 'D-backs', score: 2 },
+    inning: { number: 7, half: 'bottom' },
+    away: { id: 158, abbreviation: 'MIL', location: 'Milwaukee', mascot: 'Brewers', runs: 4, hits: 7, errors: 0 },
+    home: { id: 109, abbreviation: 'AZ', location: 'Arizona', mascot: 'D-backs', runs: 2, hits: 5, errors: 1 },
   },
   {
     id: 'delay',
     state: 'delay',
     status: 'Rain delay',
-    inning: 'Mid 5',
-    away: { id: 112, abbreviation: 'CHC', location: 'Chicago', mascot: 'Cubs', score: 1 },
-    home: { id: 138, abbreviation: 'STL', location: 'St. Louis', mascot: 'Cardinals', score: 1 },
+    inning: { number: 5, half: 'top' },
+    away: { id: 112, abbreviation: 'CHC', location: 'Chicago', mascot: 'Cubs', runs: 1, hits: 4, errors: 0 },
+    home: { id: 138, abbreviation: 'STL', location: 'St. Louis', mascot: 'Cardinals', runs: 1, hits: 3, errors: 0 },
   },
   {
     id: 'final',
     state: 'final',
     status: 'Game complete',
-    inning: 'Final',
-    away: { id: 136, abbreviation: 'SEA', location: 'Seattle', mascot: 'Mariners', score: 5 },
-    home: { id: 140, abbreviation: 'TEX', location: 'Texas', mascot: 'Rangers', score: 3 },
+    inning: { label: 'Final' },
+    away: { id: 136, abbreviation: 'SEA', location: 'Seattle', mascot: 'Mariners', runs: 5, hits: 9, errors: 1 },
+    home: { id: 140, abbreviation: 'TEX', location: 'Texas', mascot: 'Rangers', runs: 3, hits: 6, errors: 0 },
   },
   {
     id: 'extras',
     state: 'extras',
     status: 'Extra innings',
-    inning: 'Final 12',
-    away: { id: 121, abbreviation: 'NYM', location: 'New York', mascot: 'Mets', score: 6 },
-    home: { id: 144, abbreviation: 'ATL', location: 'Atlanta', mascot: 'Braves', score: 5 },
-  },
-]
-
-const VARIANTS = [
-  {
-    id: 'ledger',
-    label: 'A · Ledger rail',
-    note: 'Ruled rows make each club and score read like a compact scorebook entry.',
-  },
-  {
-    id: 'stamp',
-    label: 'B · Scorer stamp',
-    note: 'A clipped status docket separates game state from a bolder, horizontal score.',
+    inning: { label: 'Final 12' },
+    away: { id: 121, abbreviation: 'NYM', location: 'New York', mascot: 'Mets', runs: 6, hits: 11, errors: 0 },
+    home: { id: 144, abbreviation: 'ATL', location: 'Atlanta', mascot: 'Braves', runs: 5, hits: 10, errors: 1 },
   },
 ]
 
@@ -63,7 +50,7 @@ export function GameCardLab() {
         <span className="gamecardlab__kicker">Dev-only card study</span>
         <h1>Scores Unlocked</h1>
         <p>
-          Two restrained score treatments using the live slate card’s existing
+          The selected Ledger Rail treatment, using the live slate card’s existing
           proportions, uniform-linked logo tiles, and paper-scorebook language.
         </p>
         <button
@@ -86,35 +73,22 @@ export function GameCardLab() {
         </p>
       </header>
 
-      <div className="gamecardlab__compare" aria-label="Game card design variants">
-        {VARIANTS.map((variant) => (
-          <section
-            className={`gamecardlab__variant gamecardlab__variant--${variant.id}`}
-            key={variant.id}
-            data-testid={`game-card-variant-${variant.id}`}
-          >
-            <header className="gamecardlab__varianthead">
-              <h2>{variant.label}</h2>
-              <p>{variant.note}</p>
-            </header>
-            <div className="gamecardlab__stack">
-              {LAB_GAMES.map((game) => (
-                <LabGameCard
-                  key={game.id}
-                  game={game}
-                  variant={variant.id}
-                  scoresUnlocked={scoresUnlocked}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+      <section className="gamecardlab__variant" data-testid="game-card-variant-ledger">
+        <header className="gamecardlab__varianthead">
+          <h2>Ledger rail</h2>
+          <p>Runs, hits, and errors read across ruled scorebook rows; arrows mark the active half.</p>
+        </header>
+        <div className="gamecardlab__stack">
+          {LAB_GAMES.map((game) => (
+            <LabGameCard key={game.id} game={game} scoresUnlocked={scoresUnlocked} />
+          ))}
+        </div>
+      </section>
     </main>
   )
 }
 
-function LabGameCard({ game, variant, scoresUnlocked }) {
+function LabGameCard({ game, scoresUnlocked }) {
   return (
     <article className={`gamecard gamecardlab__card gamecardlab__card--${game.state}`}>
       <div className="gamecard__teams">
@@ -128,12 +102,7 @@ function LabGameCard({ game, variant, scoresUnlocked }) {
         <LabTeamName team={game.home} side="home" />
       </div>
 
-      {scoresUnlocked &&
-        (variant === 'ledger' ? (
-          <LedgerScore game={game} />
-        ) : (
-          <StampScore game={game} />
-        ))}
+      {scoresUnlocked && <LedgerScore game={game} />}
 
       <div className="gamecard__meta gamecardlab__meta">
         <span>MLB</span>
@@ -183,41 +152,42 @@ function StateMark({ game, className = '' }) {
 function LedgerScore({ game }) {
   return (
     <div className="scoreledger" data-testid="lab-score-treatment">
-      <div className="scoreledger__rows">
+      <div
+        className="scoreledger__table"
+        role="table"
+        aria-label={`${game.away.abbreviation} ${game.away.runs}, ${game.home.abbreviation} ${game.home.runs}`}
+      >
+        <div className="scoreledger__header" role="row" aria-hidden="true">
+          <span />
+          <span>R</span>
+          <span>H</span>
+          <span>E</span>
+        </div>
         {[game.away, game.home].map((team) => (
-          <div className="scoreledger__row" key={team.id}>
-            <span className="scoreledger__abbr">{team.abbreviation}</span>
-            <span className="scoreledger__rule" aria-hidden="true" />
-            <span className="scoreledger__number">{team.score}</span>
+          <div className="scoreledger__row" role="row" key={team.id}>
+            <span className="scoreledger__abbr" role="rowheader">{team.abbreviation}</span>
+            <span className="scoreledger__number scoreledger__number--runs" role="cell">{team.runs}</span>
+            <span className="scoreledger__number" role="cell">{team.hits}</span>
+            <span className="scoreledger__number" role="cell">{team.errors}</span>
           </div>
         ))}
       </div>
       <div className="scoreledger__edge">
         <StateMark game={game} />
-        <span className="scoreledger__inning">{game.inning}</span>
+        <InningMark inning={game.inning} />
       </div>
     </div>
   )
 }
 
-function StampScore({ game }) {
+function InningMark({ inning }) {
+  if (inning.label) return <span className="scoreledger__inning">{inning.label}</span>
+  const top = inning.half === 'top'
+  const label = `${top ? 'Top' : 'Bottom'} ${inning.number}`
   return (
-    <div className="scorestamp" data-testid="lab-score-treatment">
-      <div className="scorestamp__docket">
-        <StateMark game={game} />
-        <span className="scorestamp__inning">{game.inning}</span>
-      </div>
-      <div className="scorestamp__score" aria-label={`${game.away.abbreviation} ${game.away.score}, ${game.home.abbreviation} ${game.home.score}`}>
-        <span className="scorestamp__team">
-          <span>{game.away.abbreviation}</span>
-          <strong>{game.away.score}</strong>
-        </span>
-        <span className="scorestamp__divider" aria-hidden="true" />
-        <span className="scorestamp__team">
-          <span>{game.home.abbreviation}</span>
-          <strong>{game.home.score}</strong>
-        </span>
-      </div>
-    </div>
+    <span className="scoreledger__inning" aria-label={label}>
+      <span className="scoreledger__arrow" aria-hidden="true">{top ? '▲' : '▼'}</span>
+      {inning.number}
+    </span>
   )
 }
