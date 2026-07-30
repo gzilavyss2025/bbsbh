@@ -1047,6 +1047,14 @@ export function teamColorExtras(teamId) {
   return MLB_TEAM_COLORS[teamId]?.extras ?? []
 }
 
+// Which treatment a club's off-day tile (OffDaySection.jsx) wears on a day it
+// has no game — a curated per-club choice (mlb-team-colors.json's
+// `offDayTreatment`, edited from the Team Identity Lab), defaulting to Main
+// for every club that hasn't set one.
+export function offDayTreatmentFor(teamId) {
+  return MLB_TEAM_COLORS[teamId]?.offDayTreatment ?? 'main'
+}
+
 // `hex` -> `rgba(r, g, b, alpha)` so a team color can sit as a soft tint
 // behind a headshot rather than a solid brand-colored block. `teamId` may be
 // an MLB club — which uses the rival-distinguishing accent above — or a MiLB

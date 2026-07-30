@@ -429,7 +429,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#0054A4",
+        "band": "#CE1141",
         "header": {
           "bar": "#0054A4",
           "accent": "#CE1141",
@@ -674,7 +674,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#000000"
+        "band": "#000000",
+        "header": {
+          "bar": "#000000",
+          "accent": "#00AEDB",
+          "onBar": "#FFFDF6"
+        }
       },
       "away": {
         "position": {

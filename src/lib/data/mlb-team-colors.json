@@ -105,7 +105,8 @@
     "name": "San Diego Padres",
     "primary": "#2F241D",
     "secondary": "#FFC425",
-    "accent": "#2F241D"
+    "accent": "#2F241D",
+    "offDayTreatment": "alternate"
   },
   "136": {
     "name": "Seattle Mariners",

@@ -100,6 +100,32 @@ function treatmentsForTeam(teamId) {
   )
 }
 
+// Which treatment OffDaySection.jsx wears for this club on a day it has no
+// game — a club-level pick (mlb-team-colors.json's offDayTreatment), not a
+// per-jersey one, so it sits on the crest strip rather than inside any one
+// jersey's tile. Limited to treatmentsForTeam's list — the same "does this
+// club actually have this treatment set up" gate the jersey rack uses — so an
+// owner can never pick a treatment with no curated art behind it.
+function OffDaySelect({ teamId, value, onChange }) {
+  return (
+    <label className="idlab__offday">
+      <span className="idlab__offdaylabel">Off day:</span>
+      <select
+        className="idlab__offdayselect"
+        aria-label="Off-day tile treatment"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {treatmentsForTeam(teamId).map((t) => (
+          <option key={t.key} value={t.key}>
+            {t.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 // What a jersey is called on a rack tag, where the full "Alternate 2" doesn't
 // fit and doesn't need to — the shelf and the bench headline still say it in
 // full. Alternate is "Alt 1" here rather than a bare "Alt" so the four
@@ -407,6 +433,14 @@ function buildColorsCopyText(name, teamId, triad) {
   )
 }
 
+function buildOffDayCopyText(name, teamId, treatmentLabel) {
+  return (
+    `Team: ${name} (id ${teamId})\n` +
+    `Where: src/lib/data/mlb-team-colors.json — ${teamId}.offDayTreatment\n` +
+    `off-day treatment: ${treatmentLabel}`
+  )
+}
+
 function buildTreatmentColorsCopyText(name, teamId, treatment, treatmentLabel, slots) {
   const byRole = Object.fromEntries(slots.map((s) => [s.role, s.hex]))
   return (
@@ -431,6 +465,12 @@ function buildAllChangesText(teams, drafts, extras) {
     const cd = drafts.colors[teamId]
     if (cd && Object.keys(cd).length > 0) {
       sections.push(buildColorsCopyText(name, teamId, resolveColorTriad(teamId, cd)))
+    }
+    const od = drafts.offday[teamId]
+    if (od && Object.keys(od).length > 0) {
+      const value = od.treatment || 'main'
+      const label = TREATMENTS.find((t) => t.key === value)?.label ?? value
+      sections.push(buildOffDayCopyText(name, teamId, label))
     }
     for (const t of treatmentsForTeam(teamId)) {
       const matches = jerseyMatchesFor(extras.catalog, teamId, t.key)
@@ -1053,6 +1093,28 @@ function applyPositionDraft(record, fields, treatment) {
   return next
 }
 
+// Merge a club's off-day-tile treatment pick into its mlb-team-colors.json
+// entry. 'main' is the default every club already gets with no entry at all
+// (offDayTreatmentFor, teams.js), so picking it back — same as clearing any
+// other role in this store — DELETES the field rather than writing it out.
+function applyOffDayDraft(record, fields) {
+  const next = { ...record }
+  if (fields.treatment !== undefined) {
+    if (fields.treatment && fields.treatment !== 'main') next.offDayTreatment = fields.treatment
+    else delete next.offDayTreatment
+  }
+  return next
+}
+
+// The mirror of applyOffDayDraft, for useAutoClearLandedDrafts — a draft of
+// 'main' (or cleared to '') matches a landed entry with no offDayTreatment at
+// all, since that's exactly what saving it produced.
+function offDayDraftMatchesLanded(fields, landed) {
+  if (!landed) return false
+  const draftValue = fields.treatment || 'main'
+  return draftValue === (landed.offDayTreatment ?? 'main')
+}
+
 function buildSaves(drafts, extras) {
   // null when the names never loaded or nothing was edited — that payload is
   // then dropped entirely rather than posted, because a uniform-names write
@@ -1110,7 +1172,12 @@ function buildSaves(drafts, extras) {
     { name },
   )
 
-  const colors = mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, applyColorsDraft, { name })
+  const colors = mergeTeamDraftIntoStore(
+    mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, applyColorsDraft, { name }),
+    drafts.offday,
+    applyOffDayDraft,
+    { name },
+  )
 
   return [
     ...(merged ? [{ key: 'uniform-names', body: merged }] : []),
@@ -1169,6 +1236,9 @@ export const mlbProfile = {
   headerSlotFor,
   markVisual: logoBoxVisual,
   shelfMarks,
+  crestExtra: (teamId, drafts, on) => (
+    <OffDaySelect teamId={teamId} value={drafts.offday?.treatment ?? MLB_TEAM_COLORS[teamId]?.offDayTreatment ?? 'main'} onChange={on.offDayField} />
+  ),
   sidebar: <NeutralSwatchesSidebar />,
   matchesLanded: {
     pos: (teamId, treatment, fields) =>
@@ -1185,6 +1255,7 @@ export const mlbProfile = {
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
     colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
+    offDay: (teamId, fields) => offDayDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     treatmentColors: (teamId, treatment, fields) =>
       colorsDraftMatchesLanded(fields, treatmentTuningRecord(teamId, treatment)?.colors),
   },

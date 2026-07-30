@@ -1,4 +1,5 @@
 import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { HexField } from '../HexField.jsx'
 import { shiftStepKeys } from './numberSteps.js'
 
 // A compact numeric-precision editor for the same scale/offset knobs the main
@@ -66,7 +67,7 @@ export function LogoPositionControls({
         </label>
         <label className="colorlab__posbgfield">
           <span>{pinstripe ? 'Stripe' : 'Background'}</span>
-          <input type="text" value={bg} placeholder="#hex" onChange={(e) => onField('bg', e.target.value)} />
+          <HexField value={bg} placeholder="#hex" onChange={(v) => onField('bg', v)} />
         </label>
         <label className="colorlab__posbgfield colorlab__poscheck">
           <input type="checkbox" checked={pinstripe} onChange={(e) => onField('pinstripe', e.target.checked)} />
@@ -79,11 +80,10 @@ export function LogoPositionControls({
         {pinstripe && pinstripeBg !== undefined && (
           <label className="colorlab__posbgfield">
             <span>Fill</span>
-            <input
-              type="text"
+            <HexField
               value={pinstripeBg}
               placeholder="#hex (white)"
-              onChange={(e) => onField('pinstripeBg', e.target.value)}
+              onChange={(v) => onField('pinstripeBg', v)}
             />
           </label>
         )}

@@ -9810,7 +9810,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 76px;
+  /* Widened from 76px so the hex input (still its original 62px — a full
+     "#XXXXXX" needs every bit of that in --font-mono) has room for the
+     eyedropper button (HexField.jsx) beside it without truncating. */
+  width: 92px;
 }
 
 .colorlab__swatchcell--placeholder {
@@ -9884,7 +9887,8 @@ body {
 
 /* The Main tile's editable Primary/Secondary/Third (ColorSwatch's `editable`)
    swaps the read-only hex label above for this — same font/size as the label
-   it replaces, sized to the 76px swatch cell it sits in. */
+   it replaces, sized to fit a full "#XXXXXX" alongside the eyedropper button
+   in the 92px swatch cell it sits in. */
 .colorlab__swatchhexinput {
   width: 62px;
   font-family: var(--font-mono);
@@ -9895,6 +9899,41 @@ body {
   border-radius: var(--radius-xs);
   padding: 1px var(--space-1);
   text-align: center;
+}
+
+/* Wraps every hex `<input>` in the lab (HexField.jsx) with its eyedropper
+   button — an inline-flex span so the pair drops into whatever layout the
+   bare input used to sit in (a swatch cell's narrow column, a label's own
+   flex row) with no changes needed there. */
+.colorlab__hexfield {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.colorlab__eyedropperbtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--accent-primary);
+  padding: 0;
+  cursor: pointer;
+}
+
+.colorlab__eyedropperbtn:hover {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.colorlab__eyedropperbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* One section of a jersey bench's tuning stack — the WPA knobs here, plus
@@ -10593,6 +10632,34 @@ body {
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+
+.idlab__offday {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.idlab__offdaylabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.idlab__offdayselect {
+  height: 22px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: 0 var(--space-1);
+}
+
+.idlab__offdayselect:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* ---- the two header bars ---- */
