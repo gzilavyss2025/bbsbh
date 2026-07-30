@@ -41,6 +41,7 @@ export function IdentityLab() {
     <LabShell
       title={profile.title}
       hint={profile.hint}
+      chrome={profile.chrome ?? 'workbench'}
       profiles={PROFILES}
       activeKey={profile.key}
       onPick={setActiveKey}

@@ -1,13 +1,11 @@
 import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { shiftStepKeys } from './numberSteps.js'
 
 // A compact numeric-precision editor for the same scale/offset knobs the main
 // rectangle's own logo already renders with — the "move it around" counterpart
 // to WpaPreview's Size/X/Y fields, for the one non-tiled mark this lab shows
-// per treatment instead of a repeating WPA pattern. Rendered INSIDE
-// .colorlab__treatmentbox (unlike the WPA/header editors, which get their own
-// boxed card) — a dashed divider instead of its own border, so it reads as a
-// third column of the logo+swatches card it's positioning rather than a
-// separate proposal.
+// per treatment instead of a repeating WPA pattern. One section of the jersey
+// bench's tuning stack, judged against the logo stage pinned beside it.
 //
 // One copy for both the MLB and MiLB profiles: the fields, the markup, and the
 // draft-beats-landed-beats-default chain feeding them are identical, only the
@@ -27,7 +25,7 @@ export function LogoPositionControls({
   onReset,
 }) {
   return (
-    <div className="colorlab__posinline">
+    <div className="idlab__section">
       <div className="colorlab__wpapreviewhead">
         <span className="colorlab__wpapreviewlabel">Position</span>
         {hasDraft && (
@@ -45,15 +43,26 @@ export function LogoPositionControls({
             step="0.01"
             value={scale}
             onChange={(e) => onField('scale', Number(e.target.value))}
+            onKeyDown={shiftStepKeys(scale, 0.01, (v) => onField('scale', v))}
           />
         </label>
         <label>
           <span>X</span>
-          <input type="number" value={offsetX} onChange={(e) => onField('offsetX', Number(e.target.value))} />
+          <input
+            type="number"
+            value={offsetX}
+            onChange={(e) => onField('offsetX', Number(e.target.value))}
+            onKeyDown={shiftStepKeys(offsetX, 1, (v) => onField('offsetX', v))}
+          />
         </label>
         <label>
           <span>Y</span>
-          <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
+          <input
+            type="number"
+            value={offsetY}
+            onChange={(e) => onField('offsetY', Number(e.target.value))}
+            onKeyDown={shiftStepKeys(offsetY, 1, (v) => onField('offsetY', v))}
+          />
         </label>
         <label className="colorlab__posbgfield">
           <span>{pinstripe ? 'Stripe' : 'Background'}</span>

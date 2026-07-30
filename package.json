@@ -6,6 +6,7 @@
   "description": "Tally Baseball companion for scorekeeping, delayed watching, and baseball research.",
   "scripts": {
     "dev": "vite",
+    "dev:lab": "vite --open /identity-lab?nointro",
     "dev:2": "vite --port 5172",
     "dev:3": "vite --port 5171",
     "dev:4": "vite --port 5170",

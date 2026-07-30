@@ -113,7 +113,7 @@ test('treatmentScale returns a curated per-team/treatment override', () => {
 })
 
 test('treatmentScale defaults to 1 for an uncurated team or treatment', () => {
-  assert.equal(treatmentScale(158, 'city-connect'), 1) // Brewers has no city-connect override
+  assert.equal(treatmentScale(110, 'city-connect'), 1) // Orioles has no city-connect override
   assert.equal(treatmentScale(139, 'city-connect'), 1) // Rays has no city-connect override
 })
 
@@ -180,11 +180,12 @@ test('defaultTreatmentFor predicts Main for a missing/garbled date', () => {
 // mainTreatmentTint / mainTreatmentScale / mainTreatmentPinstripe(Color) / mainTreatmentRecolor
 // --------------------------------------------------------------------------
 test('mainTreatmentTint resolves a bg role to that team\'s swatch hex', () => {
-  assert.equal(mainTreatmentTint(109), '#E3D4AD') // Diamondbacks — bg: 'secondary'
+  assert.equal(mainTreatmentTint(108), '#BA0021') // Angels — bg: 'secondary'
 })
 
 test('mainTreatmentTint prefers a literal bgHex over any swatch role', () => {
-  assert.equal(mainTreatmentTint(158), '#FFF5EA') // Brewers — bgHex, not one of the three brand swatches
+  assert.equal(mainTreatmentTint(158), '#F3ECD8') // Brewers — bgHex, not one of the three brand swatches
+  assert.equal(mainTreatmentTint(109), '#FFFDF6') // Diamondbacks — bgHex, not the secondary swatch
 })
 
 test('mainTreatmentTint returns null for a pinstriped team and for an uncurated team', () => {
@@ -228,9 +229,12 @@ test('mainOverrideLogoUrl prefers a procured .png over a stale .svg of the same 
   assert.equal(mainOverrideLogoUrl(120), '/team-logos/main-overrides/WSH.png') // Nationals — both files exist
 })
 
-test('mainOverrideLogoUrl is null for the two MAIN_USES_BASE_LOGO exceptions even though a file exists on disk', () => {
+test('mainOverrideLogoUrl is null for the one MAIN_USES_BASE_LOGO exception even though a file exists on disk', () => {
   assert.equal(mainOverrideLogoUrl(115), null) // Rockies — COL.svg exists but is intentionally unused
-  assert.equal(mainOverrideLogoUrl(147), null) // Yankees — NYY.svg exists but is intentionally unused
+})
+
+test('mainOverrideLogoUrl resolves the Yankees\' procured main override, no longer a MAIN_USES_BASE_LOGO exception', () => {
+  assert.equal(mainOverrideLogoUrl(147), '/team-logos/main-overrides/NYY.png')
 })
 
 // treatmentTile — the one resolver the slate card, the in-game masthead, and

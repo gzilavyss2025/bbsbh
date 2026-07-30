@@ -196,7 +196,6 @@ const MONO_LOGO_BASE = '/data/logos/mono'
 // it's supplied in.
 const ALT_LOGO_SVG = new Set([
   '118:alternate', // Royals — same recolored-white KC mark as Main, reused here (main-overrides/KC.svg copied to alternate/KC.svg)
-  '147:alternate', // Yankees — the plain mlbstatic base mark (hat-and-bat crest), fill recolored from its default #132448 to #0C2340
   '116:alternate-2', // Tigers — same recolored-white Old English "D" as Main, reused here (main-overrides/DET.svg copied to alternate-2/DET.svg)
 ])
 
@@ -208,8 +207,6 @@ const ALT_USES_BASE_LOGO = new Set([
   108, // Angels — same plain CDN mark as Main, just re-paired with a grey tile for their Away Grey jersey
   145, // White Sox — same plain CDN mark as Main, re-paired with a pinstripe tile for their Home Pinstripe jersey
   117, // Astros — same plain CDN mark as Main, re-paired with an orange tile for their Alt Orange jersey
-  134, // Pirates — same plain CDN mark as Main, re-paired with a black tile for their Alt 1 Black "P" jersey
-  142, // Twins — same plain CDN mark as Main, re-paired with a navy tile for their Alt 2 Navy jersey
 ])
 
 // Teams with no real City Connect uniform at all (as opposed to one whose art
@@ -248,8 +245,6 @@ const ALT2_USES_BASE_LOGO = new Set([
   145, // White Sox — same plain CDN mark as Main, re-paired with a black tile for their Alt 1 Black "Sox" jersey
   108, // Angels — same plain CDN mark as Main, re-paired with a red tile for their Alt 1 Red jersey
   117, // Astros — same plain CDN mark as Main, re-paired with a navy tile for their Alt Blue jersey
-  134, // Pirates — same plain CDN mark as Main, re-paired with a gold tile for their Alt 2 Black "Pittsburgh" jersey
-  142, // Twins — same plain CDN mark as Main, re-paired with a cream tile for their Alt 1 Cream "Twin Cities" jersey
   133, // Athletics — same plain CDN mark as Main (Main's own is the curated ATH.png), re-paired with a grey tile for their Road Grey jersey
 ])
 
@@ -265,9 +260,7 @@ const ALT3_USES_BASE_LOGO = new Set([
   116, // Tigers — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
   117, // Astros — same plain CDN mark as Main, re-paired with a grey tile for their Road Grey jersey
   121, // Mets — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
-  134, // Pirates — same plain CDN mark as Main, re-paired with a grey tile for their Road Grey jersey
   139, // Rays — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with their navy tile for their Away Blue jersey
-  142, // Twins — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
   143, // Phillies — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Away Grey jersey
   138, // Cardinals — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a grey tile for their Road Grey jersey
 ])
@@ -394,11 +387,8 @@ export const ALT_COLORS = {
   119: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Dodgers — Alt 1 Road Grey "Dodgers" jersey
   121: [{ label: 'Black', hex: '#000000', bg: true }], // Mets — procured mark (alternate/NYM.png), Alt 1 Black jersey
   134: [{ label: 'Black', hex: '#27251F', bg: true }], // Pirates — same plain CDN mark as Main (ALT_USES_BASE_LOGO above), Alt 1 Black "P" jersey
-  142: [
-    { label: 'Navy', hex: '#002B5C' },
-    { label: 'Background', hex: '#E8DCC0', bg: true },
-  ], // Twins — same plain CDN mark as Main (ALT_USES_BASE_LOGO above), Alt 2 Navy jersey
-  143: [{ label: 'Cream', hex: '#F5F0E1', bg: true }], // Phillies — procured mark (alternate/PHI.png), Alt 1 Cream jersey
+  142: [{ label: 'Navy', hex: '#002B5C', bg: true }], // Twins — Alt 2 Navy jersey
+  143: [{ label: 'Navy', hex: '#002D72', bg: true }], // Phillies — procured mark (alternate/PHI.png), Alt 1 Cream jersey
   133: [
     { label: 'Primary', hex: '#003831' },
     { label: 'Secondary', hex: '#EFB21E', bg: true },
@@ -425,8 +415,8 @@ export const ALT_COLORS = {
     { label: 'Primary', hex: '#CE1141', bg: true },
     { label: 'Secondary', hex: '#13274F' },
   ], // Braves
-  146: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Marlins
-  147: [{ label: 'Gray', hex: '#C4CED3', bg: true }], // Yankees — grey behind the navy hat-and-bat mark
+  146: [{ label: 'Background', hex: '#141414', bg: true }], // Marlins
+  147: [{ label: 'Navy', hex: '#0C2340', bg: true }], // Yankees — Away Grey jersey
   // Brewers — white with the shared black pinstripe (TREATMENT_PINSTRIPE_COLOR
   // above) instead of a flat swatch fill; no `bg` flag since the tile isn't a
   // solid color.
@@ -437,6 +427,10 @@ export const ALT_COLORS = {
 }
 
 export const CITY_CONNECT_COLORS = {
+  108: [{ label: 'Background', hex: '#faf6eb', bg: true }], // Angels
+  121: [{ label: 'Background', hex: '#383a35', bg: true }], // Mets
+  134: [{ label: 'Background', hex: '#201a1c', bg: true }], // Pirates — City Connect 2.0
+  143: [{ label: 'Background', hex: '#00163b', bg: true }], // Phillies
   109: [
     { label: 'Primary', hex: '#0097A9' },
     { label: 'Secondary', hex: '#523178', bg: true },
@@ -485,6 +479,8 @@ export const CITY_CONNECT_COLORS = {
   ], // Brewers
   141: [{ label: 'Background', hex: '#161827', bg: true }], // Blue Jays
   137: [{ label: 'Background', hex: '#27251F', bg: true }], // Giants — script "SF" mark, near-black brand secondary (temporary, pending real City Connect background)
+  142: [{ label: 'Background', hex: '#00549f', bg: true }], // Twins
+  116: [{ label: 'Background', hex: '#2c3357', bg: true }], // Tigers
 }
 
 // A second Alternate treatment. Rangers: same badge as ALT_COLORS' Alternate,
@@ -521,15 +517,15 @@ export const ALT2_COLORS = {
   116: [{ label: 'Navy', hex: '#0C2340', bg: true }], // Tigers — same recolored-white Old English "D" as Main (alternate-2/DET.svg, ALT_LOGO_SVG above), Alt 2 Navy jersey
   117: [{ label: 'Navy', hex: '#002D62', bg: true }], // Astros — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt Blue jersey
   119: [
-    { label: 'Blue', hex: '#005A9C' },
-    { label: 'Background', hex: '#FFFDF6', bg: true },
+    { label: 'Background', hex: '#005A9C', bg: true },
+    { label: 'White', hex: '#FFFDF6' },
   ], // Dodgers — same mark as Alternate (alternate-2/LAD.png, copied), Alt 2 All Blue jersey
   121: [{ label: 'Blue', hex: '#002D72', bg: true }], // Mets — same mark as Alternate (alternate-2/NYM.png, copied), Alt 2 Blue Pullover jersey
   134: [{ label: 'Gold', hex: '#FDB827', bg: true }], // Pirates — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 2 Black "Pittsburgh" jersey
   135: [{ label: 'Green', hex: '#4B5320', bg: true }], // Padres — same mark as Alternate (alternate-2/SD.png, copied), Alt 2 Green Camouflage jersey
   139: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Rays — same mark as Alternate (alternate-2/TB.png, copied), Alt 2 White "Devil Rays" jersey
-  142: [{ label: 'Cream', hex: '#E8DCC0', bg: true }], // Twins — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Cream "Twin Cities" jersey
-  143: [{ label: 'Baby Blue', hex: '#8ECAE6', bg: true }], // Phillies — same mark as Alternate (alternate-2/PHI.png, copied), Alt 2 Baby Blue jersey
+  142: [{ label: 'Navy', hex: '#002B5C', bg: true }], // Twins — Alt 1 Cream "Twin Cities" jersey
+  143: [{ label: 'Maroon', hex: '#6f263d', bg: true }], // Phillies — same mark as Alternate (alternate-2/PHI.png, copied), Alt 2 Baby Blue jersey
   110: [{ label: 'Background', hex: '#FFFFFF', bg: true }], // Orioles — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Home White jersey
   112: [{ label: 'Background', hex: '#7698CE', bg: true }], // Cubs
   144: [{ label: 'Background', hex: '#F5F0E1', bg: true }], // Braves — procured mark (alternate-2/ATL.png), off-white for their Home White jersey
@@ -588,11 +584,11 @@ export const ALT3_COLORS = {
   114: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Guardians — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
   116: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Tigers — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
   117: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Astros — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Road Grey jersey
-  121: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Mets — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
-  134: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Pirates — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Road Grey jersey
+  121: [{ label: 'Blue', hex: '#002d72', bg: true }], // Mets — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
+  134: [{ label: 'Black', hex: '#27251F', bg: true }], // Pirates — Road Grey jersey
   139: [{ label: 'Navy', hex: '#092C5C', bg: true }], // Rays — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Blue jersey — their own Primary navy, not grey
-  142: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Twins — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
-  143: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Phillies — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Away Grey jersey
+  142: [{ label: 'Navy', hex: '#002B5C', bg: true }], // Twins — Away Grey jersey
+  143: [{ label: 'Navy', hex: '#002D72', bg: true }], // Phillies — Away Grey jersey
   138: [{ label: 'Grey', hex: '#9EA2A2', bg: true }], // Cardinals — same plain CDN mark as Main (ALT3_USES_BASE_LOGO above), Road Grey jersey
 }
 
@@ -705,8 +701,32 @@ export const TREATMENT_HEADER_COLOR_OVERRIDES = byTreatment((f) => f.header, {
   includeMain: true,
 })
 
+// The jerseys.json/mlb-treatment-tuning.json treatment vocabulary — the only
+// strings `treatmentHeaderColorOverride` may collapse onto a club's bar.
+// Exported so test/identity-lab-stores.test.js's own coverage check shares
+// this one list instead of keeping a second copy that could drift.
+export const MLB_TREATMENT_KEYS = new Set([
+  'main',
+  'alternate',
+  'alternate-2',
+  'alternate-3',
+  'alternate-4',
+  'city-connect',
+])
+
+// Two bars per club, not one per treatment: every jersey wears the club's
+// Main header EXCEPT City Connect, which gets its own. A caller passes
+// whichever treatment the club is actually in ('alternate', 'alternate-3', …)
+// and this collapses it to the one of two stores that answers it, so an
+// alternate jersey was never a third color to hand-tune in the first place.
+// A string outside MLB_TREATMENT_KEYS (a MiLB game SIDE, a typo) answers null
+// rather than collapsing to Main — otherwise a MiLB id's 'home'/'away' passed
+// here by mistake would silently wear an MLB club's bar the moment that club
+// landed one (see headerThemeFor's cross-vocabulary test).
 export function treatmentHeaderColorOverride(teamId, treatment) {
-  return TREATMENT_HEADER_COLOR_OVERRIDES[teamId]?.[treatment] ?? null
+  if (!MLB_TREATMENT_KEYS.has(treatment)) return null
+  const slot = treatment === 'city-connect' ? 'city-connect' : 'main'
+  return TREATMENT_HEADER_COLOR_OVERRIDES[teamId]?.[slot] ?? null
 }
 
 export function treatmentScale(teamId, treatment) {
@@ -796,14 +816,14 @@ function mainColorForRole(teamId, role) {
   return null
 }
 
-// Two clubs' pinstripe tile keeps the plain mlbstatic mark on purpose even
-// though a main-overrides file for them exists on disk (COL.svg, NYY.svg —
-// each an earlier exploration the team's own tuning note says explicitly not
-// to use: "the plain mlbstatic mark reads fine against white"). Everything
-// else follows disk presence alone, same as localLogoUrl's alternates — this
-// is the one hand-maintained exception to that, not a whitelist of what's
-// allowed to render.
-const MAIN_USES_BASE_LOGO = new Set([115, 147])
+// One club's pinstripe tile keeps the plain mlbstatic mark on purpose even
+// though a main-overrides file exists on disk (COL.svg — an earlier
+// exploration the team's own tuning note says explicitly not to use: "the
+// plain mlbstatic mark reads fine against white"). Everything else follows
+// disk presence alone, same as localLogoUrl's alternates — this is the one
+// hand-maintained exception to that, not a whitelist of what's allowed to
+// render.
+const MAIN_USES_BASE_LOGO = new Set([115])
 
 // The locally hand-edited Main-treatment mark for `teamId`, straight off
 // whatever the upload endpoint (or a hand-procured file) actually left in

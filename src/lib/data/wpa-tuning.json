@@ -49,6 +49,12 @@
           "rowShift": 0
         },
         "band": "#FFFFFF"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#faf6eb"
       }
     }
   },
@@ -71,24 +77,24 @@
       },
       "alternate": {
         "layout": {
-          "size": 38,
+          "size": 44,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
           "paddingX": 5,
-          "paddingY": 5,
+          "paddingY": -6,
           "rowShift": 0
         },
         "band": "#A71930"
       },
       "alternate-2": {
         "layout": {
-          "size": 73,
+          "size": 45,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 12,
-          "paddingY": -43,
+          "paddingX": 9,
+          "paddingY": -10,
           "rowShift": 0
         },
         "band": "#A29E9F"
@@ -237,7 +243,7 @@
       },
       "alternate-4": {
         "layout": {
-          "size": 52,
+          "size": 42,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
@@ -311,7 +317,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#0E3386"
       }
     }
   },
@@ -548,7 +554,14 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#0C2340"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 75,
+          "paddingX": 12,
+          "paddingY": -45
+        }
       }
     }
   },
@@ -684,6 +697,20 @@
           "rowShift": 0
         },
         "band": "#FFFFFF"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 45,
+          "paddingX": 6,
+          "paddingY": 2
+        },
+        "band": "#fff7df"
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#005A9C"
       }
     }
   },
@@ -719,8 +746,11 @@
       },
       "main": {
         "layout": {
-          "size": 45
-        }
+          "size": 74,
+          "paddingX": 22,
+          "paddingY": -29
+        },
+        "ownArt": true
       }
     }
   },
@@ -759,7 +789,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#003831"
       },
       "city-connect": {
         "layout": {
@@ -780,7 +810,7 @@
     "treatments": {
       "main": {
         "layout": {
-          "size": 25,
+          "size": 35,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
@@ -789,6 +819,27 @@
           "rowShift": 0
         },
         "band": "#27251F"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#27251F"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 35
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 45
+        }
+      },
+      "city-connect": {
+        "layout": {
+          "size": 35
+        }
       }
     }
   },
@@ -826,6 +877,29 @@
           "paddingY": 0
         },
         "band": "#0C2C56"
+      }
+    }
+  },
+  "137": {
+    "name": "San Francisco Giants",
+    "treatments": {
+      "main": {
+        "layout": {
+          "size": 40
+        }
+      },
+      "city-connect": {
+        "layout": {
+          "size": 37
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 50,
+          "paddingX": 11,
+          "paddingY": 4
+        },
+        "band": "#EFD19F"
       }
     }
   },
@@ -926,7 +1000,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#002B5C"
       },
       "city-connect": {
         "layout": {
@@ -938,7 +1012,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#002B5C"
+        "band": "#00549f"
       }
     }
   },
@@ -956,6 +1030,24 @@
           "rowShift": 0
         },
         "band": "#E81828"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 46
+        },
+        "band": "#00163b"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#6f263d"
+      },
+      "alternate": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#002D72"
       }
     }
   },
@@ -1078,7 +1170,16 @@
           "paddingY": -3,
           "rowShift": 0
         },
-        "band": "#C8102E"
+        "band": {
+          "pinstripe": true,
+          "color": "#C8102E",
+          "bg": "#C8102E"
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 49
+        }
       }
     }
   },
@@ -1162,7 +1263,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#C4CED3"
+        "band": "#0C2340"
       }
     }
   },
@@ -1179,7 +1280,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#FCEDD6"
+        "band": "#F3ECD8"
       },
       "alternate": {
         "layout": {
@@ -1222,11 +1323,11 @@
       },
       "city-connect": {
         "layout": {
-          "size": 69,
+          "size": 64,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingY": -8
+          "paddingY": -5
         },
         "band": "#ff6c58"
       }

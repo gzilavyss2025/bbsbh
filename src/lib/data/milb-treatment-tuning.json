@@ -1086,6 +1086,49 @@
       }
     }
   },
+  "554": {
+    "name": "Team 554",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 31,
+          "offsetY": 0,
+          "bg": "#010101",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 70,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 11,
+          "paddingY": -8,
+          "rowShift": 0
+        },
+        "band": "#010101"
+      },
+      "away": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 31,
+          "offsetY": 0,
+          "bg": "#00A3E0",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 70,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -10,
+          "rowShift": 0
+        },
+        "band": "#00A3E0"
+      }
+    }
+  },
   "559": {
     "name": "Rocket City Trash Pandas",
     "treatments": {
@@ -1126,6 +1169,35 @@
           "rowShift": 0
         },
         "band": "#3378c2"
+      }
+    }
+  },
+  "573": {
+    "name": "Team 573",
+    "treatments": {
+      "away": {
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#236192"
+      },
+      "home": {
+        "wpaLayout": {
+          "size": 45,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0C2340"
       }
     }
   },

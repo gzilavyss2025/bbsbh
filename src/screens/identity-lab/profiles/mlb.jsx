@@ -57,7 +57,7 @@ import {
   uniformNamesSaveBody,
   uniformDisplayName,
 } from '../../../api/uniforms.js'
-import { TreatmentBox } from '../TreatmentBox.jsx'
+import { JerseyBench } from '../workbench/JerseyBench.jsx'
 import { LogoDropZone } from '../LogoDropZone.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore, mergeTeamDraftIntoStore } from '../saveStores.js'
@@ -98,6 +98,27 @@ function treatmentsForTeam(teamId) {
       (t.key !== 'alternate-4' || hasAlternate4(teamId)) &&
       (t.key !== 'city-connect' || hasCityConnect(teamId)),
   )
+}
+
+// What a jersey is called on a rack tag, where the full "Alternate 2" doesn't
+// fit and doesn't need to — the shelf and the bench headline still say it in
+// full. Alternate is "Alt 1" here rather than a bare "Alt" so the four
+// alternates read as a numbered set.
+const SHORT_LABEL = {
+  main: 'Main',
+  alternate: 'Alt 1',
+  'alternate-2': 'Alt 2',
+  'alternate-3': 'Alt 3',
+  'alternate-4': 'Alt 4',
+  'city-connect': 'City Connect',
+}
+
+// Which of the club's two header bars a jersey wears. Every jersey but City
+// Connect wears Main's (src/lib/teams.js's treatmentHeaderColorOverride), which
+// is why exactly two header editors exist per club no matter how many jerseys
+// it has.
+function headerSlotFor(treatment) {
+  return treatment === 'city-connect' ? 'city-connect' : 'main'
 }
 
 // The Main triad's three role keys live in mlbColorRoles.js alongside the
@@ -454,29 +475,30 @@ function treatmentLogoUrl(teamId, treatment) {
   return teamLogoUrl(teamId, treatment)
 }
 
-// Every mark this club is actually rendered with somewhere on the site —
-// the collapsed row's own quick "what have we got" strip (TeamLabRow's
-// `logos` prop), so a reviewer can eyeball coverage without expanding every
-// tile. One entry per real treatment (the CDN base mark, a hand-recolored
-// Main override, or a procured local PNG — whichever `treatmentLogoUrl`
-// resolves for that tile, same as the expanded tile itself renders), PLUS a
-// trailing entry for any treatment that's opted into its own separately
-// uploaded WPA-only mark (WPA_OWN_ART) — a real, distinct file the owner
-// uploaded, even though it never appears as a tile's own logo box.
-function rowLogos(teamId) {
+// Every mark this club is actually rendered with somewhere on the site — the
+// logo shelf's "what have we got" band, in view the whole time a club is open.
+// One entry per real treatment (the CDN base mark, a hand-recolored Main
+// override, or a procured local PNG — whichever `treatmentLogoUrl` resolves,
+// same as the bench's own logo stage renders), PLUS a trailing entry for any
+// treatment that's opted into its own separately uploaded WPA-only mark
+// (WPA_OWN_ART) — a real, distinct file the owner uploaded, even though it
+// never appears as a jersey's own logo box. `treatment` is what a click on the
+// shelf selects on the rack.
+function shelfMarks(teamId) {
   const treatments = treatmentsForTeam(teamId)
   const marks = treatments.map((t) => ({
     key: t.key,
+    treatment: t.key,
     label: t.label,
-    // treatmentLogoUrl returns null for a plain Main (the real tile falls
-    // back to <TeamLogo>, which resolves its own CDN url) — spell that
-    // fallback out explicitly here since this strip has no such component.
+    // treatmentLogoUrl returns null for a plain Main (the bench falls back to
+    // <TeamLogo>, which resolves its own CDN url) — spell that fallback out
+    // explicitly here since the shelf has no such component.
     url: treatmentLogoUrl(teamId, t.key) ?? teamLogoUrl(teamId, 'base'),
   }))
   for (const t of treatments) {
     if (!WPA_OWN_ART[teamId]?.[t.key]) continue
     const url = wpaArtUrl(teamId, t.key)
-    if (url) marks.push({ key: `${t.key}-wpa`, label: `${t.label} — WPA`, url })
+    if (url) marks.push({ key: `${t.key}-wpa`, treatment: t.key, label: `WPA · ${t.label}`, url, wpaOnly: true })
   }
   return marks
 }
@@ -573,18 +595,17 @@ function uploadCaveat(teamId, treatment, target) {
   )
 }
 
-// The two halves of "when did this club wear this", fetched once per EXPANDED
-// row: the nightly gamePk -> treatment export (module-cached in api/jerseys.js,
-// so 30 clubs share one request) and this club's dated schedule. Neither
-// carries what the other has — jerseys.json has no dates, the schedule has no
-// jerseys — and jerseyWearDates is the join.
+// The two halves of "when did this club wear this", fetched once per club on
+// the bench: the nightly gamePk -> treatment export (module-cached in
+// api/jerseys.js, so 30 clubs share one request) and this club's dated
+// schedule. Neither carries what the other has — jerseys.json has no dates, the
+// schedule has no jerseys — and jerseyWearDates is the join.
 //
-// Lazy by construction rather than by a flag: TeamLabRow only renders its
-// children while the row is EXPANDED, so this hook — called from MlbTiles —
-// simply never runs for a collapsed club. Same reasoning as that row's own
-// `lastOpponent` fetch: a fresh visit starts every row collapsed, and firing 30
-// season-schedule requests on page load to populate links nobody has scrolled
-// to would be a poor trade. `null` means "still loading".
+// Lazy by construction rather than by a flag: only the selected club's bench is
+// mounted, so this hook simply never runs for the other 29. Same reasoning as
+// ColorLabBody's own `lastOpponent` fetch — firing 30 season-schedule requests
+// on page load to populate links for clubs nobody has opened would be a poor
+// trade. `null` means "still loading".
 function useWearDates(teamId) {
   const [state, setState] = useState({ jerseys: null, schedule: null })
   useEffect(() => {
@@ -602,50 +623,150 @@ function useWearDates(teamId) {
   return state
 }
 
-// One club's tiles. A treatment sometimes covers more than one catalog jersey —
-// most often Main, when a club has no Away-jersey override and wears both Home
-// White and Road Grey under the same plain mark. Rather than cramming N name
-// fields into one shared tile, the tile is duplicated once per jersey (same
-// colors/logo/drafts — they genuinely share the treatment), each headed by its
-// OWN jersey's name, so scrolling surfaces every jersey still needing review
-// instead of hiding a second one inside the first's box.
-function MlbTiles({ team, lastOpponent, extras, drafts, on }) {
-  const teamId = team.id
-  const name = team.name
-  const wear = useWearDates(teamId)
+// The club's jerseys, one rack tag each. A treatment sometimes covers more than
+// one catalog jersey — most often Main, when a club has no Away-jersey override
+// and wears both Home White and Road Grey under the same plain mark. Rather
+// than cramming N name fields into one bench, the treatment gets one tag per
+// jersey (same colors/logo/drafts — they genuinely share the treatment), each
+// headed by its OWN jersey's name, so every jersey still needing review is on
+// the rack instead of hidden inside another one's box.
+function benchItems(teamId, extras) {
   return treatmentsForTeam(teamId).flatMap((t) => {
     const matches = jerseyMatchesFor(extras.catalog, teamId, t.key)
     const jerseyItems = matches?.length ? matches : [null]
-    return jerseyItems.map((jerseyMatch) => (
-      <MlbTile
-        key={jerseyMatch ? `${t.key}:${jerseyMatch.code ?? jerseyMatch.label}` : t.key}
-        teamId={teamId}
-        name={name}
-        treatment={t.key}
-        label={t.label}
-        jerseyMatch={jerseyMatch}
-        extras={extras}
-        lastOpponent={lastOpponent}
-        wearDates={{
-          dates: wear.jerseys && wear.schedule
-            ? jerseyWearDates(wear.jerseys, wear.schedule, teamId, t.key)
-            : null,
-          hrefFor: gamePhotosPath,
-        }}
-        drafts={{
-          pos: drafts.pos?.[t.key],
-          wpa: drafts.wpa?.[t.key],
-          header: drafts.header?.[t.key],
-          colors: drafts.colors,
-          tcolors: drafts.tcolors?.[t.key],
-        }}
-        on={on}
-      />
-    ))
+    return jerseyItems.map((jerseyMatch) => ({
+      key: jerseyMatch ? `${t.key}:${jerseyMatch.code ?? jerseyMatch.label}` : t.key,
+      treatment: t.key,
+      label: jerseyMatch?.label ?? t.label,
+      shortLabel: SHORT_LABEL[t.key],
+      // Only worth spelling out when the treatment covers more than one jersey
+      // — otherwise the tag would just repeat the short label underneath itself.
+      subLabel: jerseyItems.length > 1 ? jerseyMatch?.label ?? null : null,
+      jerseyMatch,
+    }))
   })
 }
 
-function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, wearDates, drafts, on }) {
+// The tile fill/pinstripe/crop a mark is rendered on, resolved once for both
+// the bench's big logo stage and the small mark-on-fill thumbnails the rack
+// tags and header-bar wearer strings draw. Same resolution either way, just
+// scaled by the CSS around it — a chip that showed a different fill from the
+// stage would be a second answer to a question with one.
+function logoBoxVisual(teamId, treatment, drafts) {
+  const colors = treatment === 'main' ? mainSwatches(teamId, drafts?.colors) : colorsFor(teamId, treatment)
+  const pos = resolvePositionState(teamId, treatment, drafts?.pos?.[treatment], colors)
+  return {
+    className: `colorlab__logobox colorlab__logobox--gloss${pos.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`,
+    style: logoBoxStyle(pos, treatmentOriginY(teamId, treatment)),
+    url: treatmentLogoUrl(teamId, treatment) ?? teamLogoUrl(teamId, 'base'),
+  }
+}
+
+// Undefined when nothing about this tile departs from the plain default, so an
+// untuned mark renders off the stylesheet alone rather than through a full set
+// of inline custom properties restating it.
+function logoBoxStyle(pos, originY) {
+  const { override, pinstripe, pinstripeBg, bg, scale, offsetX, offsetY } = pos
+  if (!(bg || override || pinstripe || offsetX || offsetY || scale !== 1 || originY !== 'center')) return undefined
+  return {
+    '--tint': pinstripe ? undefined : bg,
+    '--scale': 1.32 * scale,
+    '--offset-x': `${offsetX}%`,
+    '--offset-y': `${offsetY}%`,
+    '--origin-y': originY,
+    '--pinstripe-color': pinstripe ? bg : undefined,
+    '--pinstripe-bg': pinstripeBg || undefined,
+  }
+}
+
+// A club's header bars: Main's, worn by every jersey but City Connect, and
+// City Connect's own when it has one.
+function headerUnits(teamId) {
+  const wearers = treatmentsForTeam(teamId)
+    .filter((t) => headerSlotFor(t.key) === 'main')
+    .map((t) => SHORT_LABEL[t.key])
+  const units = [{ slot: 'main', label: 'Main bar', wearerCaption: `Worn by ${wearers.join(', ')}` }]
+  if (hasCityConnect(teamId)) {
+    units.push({ slot: 'city-connect', label: 'City Connect bar', wearerCaption: 'Worn by City Connect only' })
+  }
+  return units
+}
+
+// One bar's editor state. `rawColors` stays undefined per-field when neither a
+// draft nor the landed store has it — unlike `colors`, which fills every slot
+// with a fallback so the mock always has something to paint — so a genuinely
+// unset field shows blank and an entirely unset bar draws as an outline saying
+// the app answers this club with default navy chrome.
+function headerProps(team, slot, drafts, extras, on) {
+  const teamId = team.id
+  const colors = slot === 'main' ? mainSwatches(teamId, drafts?.colors) : colorsFor(teamId, slot)
+  const draft = drafts?.header?.[slot]
+  const landed = treatmentHeaderColorOverride(teamId, slot)
+  const resolved = headerColorsFor(colors, draft, landed)
+  const rawColors = {
+    bar: draft?.bar ?? landed?.bar,
+    accent: draft?.accent ?? landed?.accent,
+    onBar: draft?.onBar ?? landed?.onBar,
+  }
+  const name = team.name
+  // The same label buildAllChangesText uses for this slot, so the copy icon
+  // here and the page-level copy-all can't word the same change two ways.
+  const matches = jerseyMatchesFor(extras.catalog, teamId, slot)
+  const treatmentLabel = matches?.[0]?.label ?? TREATMENTS.find((t) => t.key === slot)?.label ?? slot
+  return {
+    colors: resolved,
+    rawColors,
+    unset: !rawColors.bar && !rawColors.accent && !rawColors.onBar,
+    landed: Boolean(landed),
+    contrast: contrastRatio(resolved.onBar, resolved.bar),
+    hasDraft: Boolean(draft && Object.keys(draft).length > 0),
+    copyText: buildHeaderCopyText(name, teamId, slot, treatmentLabel, resolved),
+    onField: (field, value) => on.headerField(slot, field, value),
+    onReset: () => on.headerReset(slot),
+  }
+}
+
+// One jersey on the bench. `drafts` arrives club-scoped and is narrowed here,
+// the header slot included: every non-City-Connect jersey reads/writes the SAME
+// 'main' draft entry (see treatmentHeaderColorOverride, src/lib/teams.js), so
+// editing the club's Main bar stays in sync with every jersey wearing it
+// instead of drifting into a third, unused color.
+function MlbBench({ team, item, lastOpponent, extras, drafts, on }) {
+  const wear = useWearDates(team.id)
+  const slot = headerSlotFor(item.treatment)
+  return (
+    <MlbJersey
+      teamId={team.id}
+      name={team.name}
+      treatment={item.treatment}
+      label={item.label}
+      jerseyMatch={item.jerseyMatch}
+      extras={extras}
+      lastOpponent={lastOpponent}
+      headerUnit={{
+        slot,
+        props: headerProps(team, slot, drafts, extras, on),
+        label: headerUnits(team.id).find((u) => u.slot === slot)?.label ?? slot,
+      }}
+      wearDates={{
+        dates: wear.jerseys && wear.schedule
+          ? jerseyWearDates(wear.jerseys, wear.schedule, team.id, item.treatment)
+          : null,
+        hrefFor: gamePhotosPath,
+      }}
+      drafts={{
+        pos: drafts.pos?.[item.treatment],
+        wpa: drafts.wpa?.[item.treatment],
+        header: drafts.header?.[slot],
+        colors: drafts.colors,
+        tcolors: drafts.tcolors?.[item.treatment],
+      }}
+      on={on}
+    />
+  )
+}
+
+function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOpponent, headerUnit, wearDates, drafts, on }) {
   const isMain = treatment === 'main'
   const colors = isMain ? mainSwatches(teamId, drafts.colors) : colorsFor(teamId, treatment)
   const hasColorsDraft = isMain && drafts.colors && Object.keys(drafts.colors).length > 0
@@ -653,7 +774,6 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   const hasTcolorsDraft = drafts.tcolors && Object.keys(drafts.tcolors).length > 0
   const [artVersion, setArtVersion] = useState(0)
   const [wpaArtVersion, setWpaArtVersion] = useState(0)
-  const displayLabel = jerseyMatch?.label ?? label
   // The same curated full name the Uniform Names page edits for this jersey. No
   // code (no art procured for a future-season jersey yet) means nothing to edit
   // against.
@@ -672,45 +792,37 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
   // views onto it), and a filled-in Accent 2 gets its own chip for free.
   const slots = isMain ? colors : treatmentColorSlots
 
+  const positionState = resolvePositionState(teamId, treatment, drafts.pos, colors)
   const {
-    override,
     pinstripeBg,
     scale: treatmentScale,
     offsetX: treatmentOffsetXValue,
     offsetY: treatmentOffsetYValue,
     pinstripe: bgPinstripe,
     bg: treatmentBg,
-  } = resolvePositionState(teamId, treatment, drafts.pos, colors)
-  const originY = treatmentOriginY(teamId, treatment)
+  } = positionState
   const hasPosDraft = drafts.pos && Object.keys(drafts.pos).length > 0
-  const logoboxStyle =
-    treatmentBg || override || bgPinstripe || treatmentOffsetXValue || treatmentOffsetYValue || treatmentScale !== 1 || originY !== 'center'
-      ? {
-          '--tint': bgPinstripe ? undefined : treatmentBg,
-          '--scale': 1.32 * treatmentScale,
-          '--offset-x': `${treatmentOffsetXValue}%`,
-          '--offset-y': `${treatmentOffsetYValue}%`,
-          '--origin-y': originY,
-          '--pinstripe-color': bgPinstripe ? treatmentBg : undefined,
-          '--pinstripe-bg': pinstripeBg || undefined,
-        }
-      : undefined
+  const logoboxStyle = logoBoxStyle(positionState, treatmentOriginY(teamId, treatment))
 
   const { pinstripe: wpaPinstripe, band: wpaBand, bandBg: wpaBandBg } = resolveWpaBandState(teamId, treatment, drafts.wpa)
   const wpaLayout = resolvedWpaLayout(teamId, treatment, drafts.wpa)
-  const headerLanded = treatmentHeaderColorOverride(teamId, treatment)
-  const headerColors = headerColorsFor(colors, drafts.header, headerLanded)
+  // The bar this jersey wears, resolved by the Header bars panel above rather
+  // than a second time here — the WPA mockups recolor their own header with it,
+  // and a jersey that merely WEARS Main's bar must show the same one Main's
+  // editor is painting, not a fallback of its own.
+  const headerColors = headerUnit.props.colors
+  const isHeaderOwner = treatment === headerUnit.slot
   const wpaOwnArt = resolveWpaOwnArt(teamId, treatment, drafts.wpa)
   const wpaArtKey = wpaArtTreatmentKey(treatment)
   // Absent (no `-wpa` destination — can't happen for a real MLB treatment,
   // but mirrors upload's own `caveat: null` shape) rather than special-cased
   // in WpaPreview, same "absent rather than special-cased" convention
-  // TreatmentBox already follows for nameField/upload.
+  // JerseyBench already follows for nameField/upload.
   const artUpload = wpaArtKey ? (
     <LogoDropZone
       teamId={teamId}
       treatment={wpaArtKey}
-      label={`${name} ${displayLabel} WPA`}
+      label={`${name} ${label} WPA`}
       onUploaded={() => setWpaArtVersion((v) => v + 1)}
     >
       <div className="colorlab__logobox colorlab__logobox--gloss">
@@ -730,8 +842,9 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       : null
 
   return (
-    <TreatmentBox
-      label={displayLabel}
+    <JerseyBench
+      teamId={teamId}
+      label={label}
       nameField={nameField}
       logoBox={{
         className: `colorlab__logobox colorlab__logobox--gloss${bgPinstripe ? ' colorlab__logobox--pinstripe' : ''}`,
@@ -793,7 +906,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       }
       position={{
         name,
-        treatmentLabel: displayLabel,
+        treatmentLabel: label,
         scale: treatmentScale,
         offsetX: treatmentOffsetXValue,
         offsetY: treatmentOffsetYValue,
@@ -805,7 +918,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
           name,
           teamId,
           treatment,
-          displayLabel,
+          label,
           treatmentScale,
           treatmentOffsetXValue,
           treatmentOffsetYValue,
@@ -817,7 +930,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
       }}
       wpa={{
         name,
-        treatmentLabel: displayLabel,
+        treatmentLabel: label,
         layout: wpaLayout,
         pinstripe: wpaPinstripe,
         bandColor: wpaBand,
@@ -825,7 +938,7 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         ownArt: wpaOwnArt,
         artUpload,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
-        copyText: buildWpaCopyText(name, teamId, treatment, displayLabel, wpaLayout, wpaPinstripe, wpaBand, wpaOwnArt),
+        copyText: buildWpaCopyText(name, teamId, treatment, label, wpaLayout, wpaPinstripe, wpaBand, wpaOwnArt),
         onField: (field, value) => on.wpaField(treatment, field, value),
         onReset: () => on.wpaReset(treatment),
       }}
@@ -839,17 +952,18 @@ function MlbTile({ teamId, name, treatment, label, jerseyMatch, extras, lastOppo
         wpaBandOverride: { pinstripe: wpaPinstripe, color: wpaBand, bg: wpaBandBg },
         wpaMarkOverride,
       }}
-      header={{
+      headerPreview={{
         name,
-        treatmentLabel: displayLabel,
         colors: headerColors,
-        landed: Boolean(headerLanded),
-        contrast: contrastRatio(headerColors.onBar, headerColors.bar),
-        hasDraft: Boolean(drafts.header && Object.keys(drafts.header).length > 0),
-        copyText: buildHeaderCopyText(name, teamId, treatment, displayLabel, headerColors),
-        onField: (field, value) => on.headerField(treatment, field, value),
-        onReset: () => on.headerReset(treatment),
+        unset: headerUnit.props.unset,
+        lineage: {
+          anchorId: `idlab-bar-${teamId}-${headerUnit.slot}`,
+          caption: isHeaderOwner ? `This jersey owns the ${headerUnit.label}.` : `Wears the ${headerUnit.label}.`,
+        },
       }}
+      // Only the bar's owner can be written to from here, and only by a pressed
+      // style card — the fields themselves live in the Header bars panel alone.
+      headerWrite={isHeaderOwner ? (field, value) => on.headerField(headerUnit.slot, field, value) : undefined}
     />
   )
 }
@@ -1048,9 +1162,14 @@ export const mlbProfile = {
       .sort((a, b) => teamFullName(a).localeCompare(teamFullName(b)))
       .map((id) => ({ id, name: teamFullName(id) })),
   useExtras: useMlbExtras,
-  Tiles: MlbTiles,
+  benchItems,
+  Bench: MlbBench,
+  headerUnits,
+  headerProps,
+  headerSlotFor,
+  markVisual: logoBoxVisual,
+  shelfMarks,
   sidebar: <NeutralSwatchesSidebar />,
-  rowLogos,
   matchesLanded: {
     pos: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(

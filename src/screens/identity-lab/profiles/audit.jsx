@@ -11,7 +11,7 @@ import {
   fetchTeamUniformCatalog,
   jerseyLabel,
 } from '../../../api/uniforms.js'
-import { TeamJumpNav } from '../LabShell.jsx'
+import { ClubRail } from '../ClubRail.jsx'
 import { teamAnchorId } from '../teamAnchorId.js'
 
 // The jersey audit: one row per (club, catalog jersey) — see PRD §"PR 2" —
@@ -235,7 +235,10 @@ function AuditLabBody() {
 
   return (
     <>
-      <TeamJumpNav teams={navTeams} />
+      {/* No club selection to make here — the audit is a full-list table by
+          design — so the rail stays what this page's sidebar always was: a
+          list of anchors into the rows. */}
+      <ClubRail teams={navTeams} />
 
       <div className={`audit__banner${staleness.stale > 0 ? ' audit__banner--warn' : ''}`}>
         <strong>{staleness.current}</strong> of <strong>{staleness.total}</strong>{' '}
@@ -297,6 +300,7 @@ function AuditLabBody() {
 export const auditProfile = {
   key: 'audit',
   label: 'Jersey audit',
+  chrome: 'jump',
   title: 'Team Identity Lab — Jersey audit',
   hint: (
     <>

@@ -1,4 +1,5 @@
 import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { shiftStepKeys } from './numberSteps.js'
 
 // The editable Size/Rotate/X/Y/H-Pad/V-Pad/Shift%/Band/Pinstripe knobs for THIS
 // treatment's WPA band — one per tile, not one per team, since a real game can
@@ -53,37 +54,16 @@ export function WpaPreview({
             <span>Use Logo Art</span>
           </label>
         )}
-        <label>
-          <span>Size</span>
-          <input type="number" value={size} onChange={(e) => onField('size', Number(e.target.value))} />
-        </label>
-        <label>
-          <span>Rotate</span>
-          <input type="number" value={rotate} onChange={(e) => onField('rotate', Number(e.target.value))} />
-        </label>
-        <label>
-          <span>X</span>
-          <input type="number" value={offsetX} onChange={(e) => onField('offsetX', Number(e.target.value))} />
-        </label>
-        <label>
-          <span>Y</span>
-          <input type="number" value={offsetY} onChange={(e) => onField('offsetY', Number(e.target.value))} />
-        </label>
-        <label>
-          <span>H-Pad</span>
-          <input type="number" value={paddingX} onChange={(e) => onField('paddingX', Number(e.target.value))} />
-        </label>
-        <label>
-          <span>V-Pad</span>
-          <input type="number" value={paddingY} onChange={(e) => onField('paddingY', Number(e.target.value))} />
-        </label>
+        <LayoutField label="Size" field="size" value={size} onField={onField} />
+        <LayoutField label="Rotate" field="rotate" value={rotate} onField={onField} />
+        <LayoutField label="X" field="offsetX" value={offsetX} onField={onField} />
+        <LayoutField label="Y" field="offsetY" value={offsetY} onField={onField} />
+        <LayoutField label="H-Pad" field="paddingX" value={paddingX} onField={onField} />
+        <LayoutField label="V-Pad" field="paddingY" value={paddingY} onField={onField} />
         {/* Percent of a tile's width each row steps sideways from the one
             above it — 0 (the shipped default) is a plain grid, 50 the
             brickwork half-drop. */}
-        <label>
-          <span>Shift %</span>
-          <input type="number" value={rowShift} onChange={(e) => onField('rowShift', Number(e.target.value))} />
-        </label>
+        <LayoutField label="Shift %" field="rowShift" value={rowShift} onField={onField} />
         <label className="colorlab__wpapreviewcolor">
           <span>{pinstripe ? 'Stripe' : 'Band'}</span>
           <input type="text" value={bandColor} onChange={(e) => onField('bandColor', e.target.value)} />
@@ -112,5 +92,22 @@ export function WpaPreview({
       </div>
       {ownArt && artUpload}
     </div>
+  )
+}
+
+// The seven layout knobs are the same field seven times over — one whole-number
+// box that also takes Shift+Arrow for a coarse nudge against the scenario
+// mockups pinned beside it.
+function LayoutField({ label, field, value, onField }) {
+  return (
+    <label>
+      <span>{label}</span>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onField(field, Number(e.target.value))}
+        onKeyDown={shiftStepKeys(value, 1, (v) => onField(field, v))}
+      />
+    </label>
   )
 }
