@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useKeepAwakePreference } from '../hooks/useKeepAwakePreference.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
-import { TeamInfo, LineupSpread } from './TeamInfo.jsx'
+import { TeamInfo } from './TeamInfo.jsx'
 import { InningViewer } from './InningViewer.jsx'
 import { BoxScore } from './BoxScore.jsx'
 import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
@@ -28,11 +27,6 @@ export function GameView({ game, section, onSection }) {
   const { step, inning, half } = sectionToStep(section)
   useDocumentTitle(gameTitle(game, step, inning, half))
   const [sketching, setSketching] = useState(null) // 'away' | 'home' | null
-  // Tablet/desktop: the two lineup pages condense into one two-column spread
-  // (LineupSpread) at the same breakpoint the CSS starts laying columns. The
-  // lineup1/lineup2 URLs both show the spread, so links stay portable between
-  // a phone and a desk.
-  const wide = useMediaQuery(WIDE_QUERY)
 
   // All of this game's data fetching (feed, uniforms, managers, weather,
   // starter lines, win probability, pitcher roles, prospects, callouts,
@@ -56,6 +50,7 @@ export function GameView({ game, section, onSection }) {
     rookiesData,
     feverRadarData,
     savantPercentilesData,
+    pitchArsenalData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
@@ -115,46 +110,27 @@ export function GameView({ game, section, onSection }) {
   // the wide layout (one bar of chrome) and stacked on a phone.
   const sectionTabs = feed ? (
     <nav className="stepnav" aria-label="Game sections">
-      {(wide
-        ? // Wide screens show both lineups on one spread, so the two team
-          // tabs collapse into a single "Lineups" stop.
-          [
-            {
-              key: 'lineups',
-              label: 'Lineups',
-              active: step === 0 || step === 1,
-              section: 'lineup1',
-            },
-            {
-              key: 'innings',
-              label: 'Innings',
-              active: step === 2,
-              section: lastInningSection,
-            },
-            { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-          ]
-        : [
-            {
-              key: 'away',
-              label: game.away.abbreviation || 'Away',
-              active: step === 0,
-              section: 'lineup1',
-            },
-            {
-              key: 'home',
-              label: game.home.abbreviation || 'Home',
-              active: step === 1,
-              section: 'lineup2',
-            },
-            {
-              key: 'innings',
-              label: 'Innings',
-              active: step === 2,
-              section: lastInningSection,
-            },
-            { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-          ]
-      ).map((s) => (
+      {[
+        {
+          key: 'away',
+          label: game.away.abbreviation || 'Away',
+          active: step === 0,
+          section: 'lineup1',
+        },
+        {
+          key: 'home',
+          label: game.home.abbreviation || 'Home',
+          active: step === 1,
+          section: 'lineup2',
+        },
+        {
+          key: 'innings',
+          label: 'Innings',
+          active: step === 2,
+          section: lastInningSection,
+        },
+        { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+      ].map((s) => (
         <button
           key={s.key}
           type="button"
@@ -242,32 +218,7 @@ export function GameView({ game, section, onSection }) {
         staleErrorMessage="Couldn’t refresh — showing the last update."
       />
 
-      {feed && (step === 0 || step === 1) && wide && (
-        <LineupSpread
-          feed={feed}
-          managers={managers.data}
-          uniforms={uniformBrief}
-          treatments={jerseyTreatments}
-          broadcast={broadcast.data}
-          scorebookWeather={weather.data}
-          scorebookWeatherLoading={weather.loading}
-          starterLines={starterLines.data}
-          prospectsData={prospectsData}
-          rookiesData={rookiesData}
-          feverRadarData={feverRadarData}
-          savantPercentilesData={savantPercentilesData}
-          formerTeammatesData={formerTeammatesData}
-          careerMatchupsData={careerMatchupsData}
-          workloadData={workloadData}
-          lineupValuesData={lineupValuesData}
-          callouts={gameCallouts}
-          onNext={() => onSection('top1')}
-          onReload={feedState.reload}
-          loading={feedState.loading}
-          lastUpdated={feedState.lastUpdated}
-        />
-      )}
-      {feed && step === 0 && !wide && (
+      {feed && step === 0 && (
         <TeamInfo
           feed={feed}
           side="away"
@@ -283,6 +234,7 @@ export function GameView({ game, section, onSection }) {
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
+          pitchArsenalData={pitchArsenalData}
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
@@ -295,7 +247,7 @@ export function GameView({ game, section, onSection }) {
           lastUpdated={feedState.lastUpdated}
         />
       )}
-      {feed && step === 1 && !wide && (
+      {feed && step === 1 && (
         <TeamInfo
           feed={feed}
           side="home"
@@ -310,6 +262,7 @@ export function GameView({ game, section, onSection }) {
           rookiesData={rookiesData}
           feverRadarData={feverRadarData}
           savantPercentilesData={savantPercentilesData}
+          pitchArsenalData={pitchArsenalData}
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}

@@ -224,6 +224,19 @@ don't run these by hand.
   in a new logo file is the only step needed to light up a team, no code
   change. v2 idea, not built: guess a likely pre-posting treatment from
   accumulated history instead of always falling back to the base logo.
+- `gen-pitch-arsenal.mjs` → `public/data/pitch-arsenal.json` — each pitcher's
+  season pitch-type mix (share of pitches + average velocity per type), split
+  `mlb`/`aaa` — every AAA park (like MLB's) feeds Hawk-Eye pitch tracking,
+  confirmed live against a real AAA gamePk's feed; AA and below carry none, so
+  they're never swept (same two-level split as `gen-umpire-accuracy.mjs`).
+  APPEND-ONLY/incremental sweep of Final regular-season games' live feeds like
+  `gen-fouls.mjs` (`--days` trailing window; `--since`/`--until` backfill;
+  `--sports=1,11` restricts the sweep, its real use being `--since=…
+  --sports=11` to backfill AAA alone into a file that already has MLB).
+  SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
+  is the idempotency guard, keyed `(game_pk, level)`. App reads it via
+  `src/api/pitchArsenal.js` (the opposing-starter card's pitch-mix bar,
+  `PitchArsenalMix.jsx`).
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record

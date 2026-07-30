@@ -365,6 +365,19 @@ for each generator; the reader modules:
   SABR foul-accumulation hit-probability constants used in copy. The LIVE
   per-half foul counters (`fouls`/`twoStrikeFouls`) live in `derive.js`'s
   bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
+- `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
+  average velocity per type), from `public/data/pitch-arsenal.json`
+  (`gen-pitch-arsenal.mjs`). Completed-game aggregates → spoiler-free, no
+  SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
+  below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
+  to null there). `pitchArsenalFor(data, personId, isMlb)` picks the level
+  matching the game being staged, sorts most-thrown first, and gates on
+  `MIN_ARSENAL_PITCHES` so a two-pitch cameo doesn't render a misleadingly
+  confident-looking mix. `pitchFamily(code)` groups codes into
+  fastball/breaking/offspeed/other for `PitchArsenalMix.jsx`'s bar coloring
+  (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
+  wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling
+  the space the name/stats column leaves open on a wide screen.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
   (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`

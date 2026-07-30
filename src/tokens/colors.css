@@ -85,4 +85,13 @@
      navy) can land close enough in value that an ink line all but disappears
      at the seam — white holds up against any band color. */
   --winprob-line:     #FFFFFF;
+
+  /* ---- Pitch arsenal mix bar ---- four families, chart-only (no text ever
+     sits directly on these fills — see PitchArsenalMix.jsx), ordered
+     fastball -> breaking -> offspeed -> other so a pitcher's hardest stuff
+     always anchors the same end of the bar. */
+  --arsenal-fastball: #2F6E4F; /* outfield green — same ink as --field */
+  --arsenal-breaking: #1B2A3A; /* navy */
+  --arsenal-offspeed: #B4453A; /* clay */
+  --arsenal-other:    #938C7C; /* graphite-soft — knuckleball/eephus/etc */
 }

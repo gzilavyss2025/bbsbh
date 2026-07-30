@@ -65,9 +65,8 @@ derivation module — so wiring one in fails a test rather than a review.
 ## Scope, and why it stops where it does
 
 Themed: `.teaminfo__head` and the `.metricbar` mastheads *inside* a `.teaminfo`
-(phone page) or a `.teampanel` (one column of the wide spread). The mechanism is
-three CSS custom properties scoped to that subtree, which is also the
-containment.
+page. The mechanism is three CSS custom properties scoped to that subtree,
+which is also the containment.
 
 **Not themed: the innings viewer and the box score.** Those carry the seal
 metaphor — kraft amber on manila, navy around it — and a club's brand recoloring

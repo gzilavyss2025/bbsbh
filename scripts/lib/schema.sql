@@ -374,6 +374,37 @@ CREATE TABLE IF NOT EXISTS jerseys (
   PRIMARY KEY (game_pk, team_id)
 );
 
+-- Season pitch-type mix per pitcher (gen-pitch-arsenal.mjs), split MLB vs AAA
+-- like foul_pitch_types' league-wide counterpart but keyed per PITCHER — a
+-- pitcher's own arsenal, not a league rate. `level` separates 'mlb'/'aaa'
+-- (AA and below carry no Hawk-Eye pitch-type data — same regime split as
+-- gen-umpire-accuracy.mjs's season/seasonAAA). `velocity_sum`/`velocity_n`
+-- accumulate raw mph rather than a stored average, so the incremental upsert
+-- stays correct (a running mean can't be summed across games; a sum can).
+CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
+  person_id    INTEGER NOT NULL,
+  level        TEXT NOT NULL,
+  code         TEXT NOT NULL,
+  season       INTEGER NOT NULL,
+  name         TEXT NOT NULL,
+  team_id      INTEGER,
+  description  TEXT NOT NULL,
+  pitches      INTEGER NOT NULL DEFAULT 0,
+  velocity_sum REAL NOT NULL DEFAULT 0,
+  velocity_n   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (person_id, level, code)
+);
+
+-- Idempotency guard, one row per (gamePk, level) — a gamePk only ever belongs
+-- to one level, but level rides along so a coverage report can split by it
+-- without a join back to a schedule call.
+CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
+  game_pk INTEGER NOT NULL,
+  level   TEXT NOT NULL,
+  date    TEXT NOT NULL,
+  PRIMARY KEY (game_pk, level)
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,
