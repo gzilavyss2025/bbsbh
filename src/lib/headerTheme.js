@@ -27,7 +27,7 @@ import { contrastRatio } from './contrast.js'
 // no — take it up in ADR-0030 first.
 // ---------------------------------------------------------------------------
 //
-// Coverage is deliberately PARTIAL. 67 (club, treatment) pairs are tuned out of
+// Coverage is deliberately PARTIAL. 73 (club, treatment) pairs are tuned out of
 // several hundred possible; everything else answers null and the caller keeps
 // the app's default navy chrome, which is why this returns null rather than
 // synthesising a triad out of a club's brand colours. A synthesised bar would

@@ -714,6 +714,41 @@
       }
     }
   },
+  "120": {
+    "name": "Washington Nationals",
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 42,
+          "paddingX": 0,
+          "paddingY": 0
+        },
+        "band": "#5c82a5"
+      },
+      "alternate": {
+        "layout": {
+          "size": 28
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 30
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 36
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#FFFFFF",
+        "ownArt": true
+      }
+    }
+  },
   "121": {
     "name": "New York Mets",
     "treatments": {
@@ -1025,7 +1060,36 @@
     "name": "Texas Rangers",
     "bandColor": "#EBDFCB",
     "note": "their real cream tone, sampled off their own alt mark (ALT_COLORS)",
-    "treatments": {}
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 31
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 36
+        },
+        "band": "#003278",
+        "ownArt": true
+      },
+      "alternate": {
+        "layout": {
+          "size": 29
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 33
+        }
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#003278"
+      }
+    }
   },
   "141": {
     "name": "Toronto Blue Jays",
@@ -1039,6 +1103,31 @@
           "paddingY": 7
         },
         "band": "#161827"
+      },
+      "alternate-4": {
+        "layout": {
+          "size": 39
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 49
+        }
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 37
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 33
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 35
+        }
       }
     }
   },

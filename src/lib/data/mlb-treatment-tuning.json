@@ -652,12 +652,17 @@
       "main": {
         "bgHex": "#FFFFFF",
         "recolor": true,
-        "note": "the script \"W\" mark (main-overrides/WSH.png), white background",
         "colors": {
           "primary": "#AB0003",
           "secondary": "#14225A",
           "accent1": "#AB0003"
-        }
+        },
+        "header": {
+          "bar": "#AB0003",
+          "accent": "#14225A",
+          "onBar": "#F8F8F5"
+        },
+        "note": "the script \"W\" mark (main-overrides/WSH.png), white background"
       },
       "alternate": {
         "scale": 0.9,
@@ -676,6 +681,17 @@
       "alternate-2": {
         "colors": {
           "primary": "#BD032B"
+        }
+      },
+      "city-connect": {
+        "header": {
+          "bar": "#131e29",
+          "accent": "#5c82a5",
+          "onBar": "#F8F8F5"
+        },
+        "colors": {
+          "primary": "#5c82a5",
+          "secondary": "#131e29"
         }
       }
     }
@@ -1098,7 +1114,9 @@
       "alternate-3": {
         "colors": {
           "primary": "#092C5C"
-        }
+        },
+        "scale": 0.85,
+        "offsetX": 1
       },
       "city-connect": {
         "colors": {
@@ -1118,13 +1136,18 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "scale": 0.75,
-        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up",
+        "scale": 0.85,
         "colors": {
           "primary": "#003278",
           "secondary": "#C0111F",
           "accent1": "#C0111F"
-        }
+        },
+        "header": {
+          "bar": "#003278",
+          "accent": "#C0111F",
+          "onBar": "#F8F8F5"
+        },
+        "note": "the circular \"Texas Rangers\" crest badge (main-overrides/TEX.png, swapped in from Alternate) rather than the mlbstatic mark; it is already edge-to-edge in its own canvas like the Reds/Astros marks, so scale down off the default 1.32 edge-bleed instead of up"
       },
       "alternate": {
         "scale": 0.85,
@@ -1135,12 +1158,17 @@
         }
       },
       "city-connect": {
-        "scale": 0.855,
-        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless",
+        "scale": 0.765,
         "colors": {
           "primary": "#892535",
           "secondary": "#EBDFCB"
-        }
+        },
+        "header": {
+          "bar": "#892535",
+          "accent": "#EBDFCB",
+          "onBar": "#F8F8F5"
+        },
+        "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless"
       },
       "alternate-2": {
         "scale": 0.85,
@@ -1157,8 +1185,9 @@
       },
       "alternate-4": {
         "colors": {
-          "primary": "#9EA2A2"
-        }
+          "primary": "#003278"
+        },
+        "scale": 0.85
       }
     }
   },
@@ -1167,19 +1196,29 @@
     "treatments": {
       "main": {
         "bgHex": "#F5F0E1",
-        "note": "subtle off-white, not any of the three brand swatches",
         "colors": {
           "primary": "#134A8E",
           "secondary": "#1D2D5C",
           "accent1": "#E8291C"
-        }
+        },
+        "header": {
+          "bar": "#134A8E",
+          "accent": "#1D2D5C",
+          "onBar": "#F8F8F5"
+        },
+        "note": "subtle off-white, not any of the three brand swatches"
       },
       "city-connect": {
         "scale": 0.75,
-        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile",
         "colors": {
           "primary": "#161827"
-        }
+        },
+        "header": {
+          "bar": "#161827",
+          "accent": "#C22028",
+          "onBar": "#F8F8F5"
+        },
+        "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
       },
       "alternate": {
         "colors": {

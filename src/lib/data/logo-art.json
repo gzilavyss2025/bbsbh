@@ -465,6 +465,13 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "TEX.png": {
+      "teamId": 140,
+      "bytes": 11417,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     }
   },
   "city-connect": {
@@ -645,7 +652,7 @@
     },
     "TEX.png": {
       "teamId": 140,
-      "bytes": 6953,
+      "bytes": 3423,
       "width": 512,
       "height": 512,
       "alpha": false
@@ -804,7 +811,7 @@
     },
     "TEX.png": {
       "teamId": 140,
-      "bytes": 94786,
+      "bytes": 19058,
       "width": 512,
       "height": 512,
       "alpha": true
@@ -863,6 +870,20 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "TEX.png": {
+      "teamId": 140,
+      "bytes": 11417,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
+    "WSH.png": {
+      "teamId": 120,
+      "bytes": 19242,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     }
   }
 }

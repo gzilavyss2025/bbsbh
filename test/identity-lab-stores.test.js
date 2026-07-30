@@ -184,9 +184,9 @@ test('byTeam reads a team-level field, treatmentRecord a per-treatment one', () 
 // app would silently apply it twice.
 test('Main scale resolves through mainTreatmentScale only, never treatmentScale', () => {
   const rangers = 140
-  assert.equal(mainTreatmentScale(rangers), 0.75)
+  assert.equal(mainTreatmentScale(rangers), 0.85)
   assert.equal(treatmentScale(rangers, 'main'), 1)
-  assert.equal(MLB_TREATMENT_TUNING[rangers].treatments.main.scale, 0.75)
+  assert.equal(MLB_TREATMENT_TUNING[rangers].treatments.main.scale, 0.85)
   for (const teamId of Object.keys(TREATMENT_SCALE)) {
     assert.ok(!('main' in TREATMENT_SCALE[teamId]), `TREATMENT_SCALE[${teamId}] grew a main row`)
   }

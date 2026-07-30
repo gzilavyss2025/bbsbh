@@ -268,7 +268,6 @@ const ALT4_USES_BASE_LOGO = new Set([
   141, // Blue Jays — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
   119, // Dodgers — same plain CDN mark as Main, re-paired with a grey tile for their Road Grey "Los Angeles" jersey
   135, // Padres — same plain CDN mark as Main (Main's own is a locally recolored copy), re-paired with a brown tile for their Away Brown jersey
-  140, // Rangers — same plain CDN mark as Main (Main's own is a locally recolored, procured badge), re-paired with a grey tile for their Away Grey jersey
   111, // Red Sox — same plain CDN mark as Main, re-paired with a grey tile for their Away Grey jersey
 ])
 
