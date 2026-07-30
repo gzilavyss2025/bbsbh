@@ -180,11 +180,12 @@ test('defaultTreatmentFor predicts Main for a missing/garbled date', () => {
 // mainTreatmentTint / mainTreatmentScale / mainTreatmentPinstripe(Color) / mainTreatmentRecolor
 // --------------------------------------------------------------------------
 test('mainTreatmentTint resolves a bg role to that team\'s swatch hex', () => {
-  assert.equal(mainTreatmentTint(109), '#E3D4AD') // Diamondbacks — bg: 'secondary'
+  assert.equal(mainTreatmentTint(108), '#BA0021') // Angels — bg: 'secondary'
 })
 
 test('mainTreatmentTint prefers a literal bgHex over any swatch role', () => {
   assert.equal(mainTreatmentTint(158), '#FFF5EA') // Brewers — bgHex, not one of the three brand swatches
+  assert.equal(mainTreatmentTint(109), '#FFFDF6') // Diamondbacks — bgHex, not the secondary swatch
 })
 
 test('mainTreatmentTint returns null for a pinstriped team and for an uncurated team', () => {

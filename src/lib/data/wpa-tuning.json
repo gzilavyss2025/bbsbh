@@ -71,24 +71,24 @@
       },
       "alternate": {
         "layout": {
-          "size": 38,
+          "size": 44,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
           "paddingX": 5,
-          "paddingY": 5,
+          "paddingY": -6,
           "rowShift": 0
         },
         "band": "#A71930"
       },
       "alternate-2": {
         "layout": {
-          "size": 73,
+          "size": 45,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 12,
-          "paddingY": -43,
+          "paddingX": 9,
+          "paddingY": -10,
           "rowShift": 0
         },
         "band": "#A29E9F"
@@ -237,7 +237,7 @@
       },
       "alternate-4": {
         "layout": {
-          "size": 52,
+          "size": 42,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
@@ -311,7 +311,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#0E3386"
       }
     }
   },
@@ -759,7 +759,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#003831"
       },
       "city-connect": {
         "layout": {
@@ -1101,7 +1101,16 @@
           "paddingY": -3,
           "rowShift": 0
         },
-        "band": "#C8102E"
+        "band": {
+          "pinstripe": true,
+          "color": "#C8102E",
+          "bg": "#C8102E"
+        }
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 49
+        }
       }
     }
   },
