@@ -695,26 +695,50 @@
     "treatments": {
       "main": {
         "bg": "primary",
-        "scale": 0.9,
+        "scale": 0.89,
         "colors": {
           "primary": "#002D72",
           "secondary": "#FF5910",
           "accent1": "#002D72"
-        }
+        },
+        "offsetX": -2,
+        "offsetY": 3,
+        "pinstripe": true
       },
       "alternate": {
         "colors": {
-          "primary": "#000000"
-        }
+          "primary": "#000000",
+          "secondary": "#002D72",
+          "accent1": "#FF5910"
+        },
+        "scale": 0.96
       },
       "alternate-2": {
         "colors": {
-          "primary": "#002D72"
-        }
+          "primary": "#002D72",
+          "secondary": "#FF5910",
+          "accent1": "#FFFFFF"
+        },
+        "scale": 0.9
       },
       "alternate-3": {
         "colors": {
-          "primary": "#9EA2A2"
+          "primary": "#002d72",
+          "secondary": "#9EA2A2",
+          "accent1": "#ff5910"
+        },
+        "scale": 0.94,
+        "offsetX": 7,
+        "offsetY": 5
+      },
+      "city-connect": {
+        "scale": 0.99,
+        "offsetX": 0,
+        "offsetY": 6,
+        "colors": {
+          "primary": "#383a35",
+          "secondary": "#1f1a1c",
+          "accent1": "#FFFFFF"
         }
       }
     }
@@ -869,7 +893,8 @@
           "primary": "#FD5A1E",
           "secondary": "#27251F",
           "accent1": "#FD5A1E"
-        }
+        },
+        "bgHex": "#e8e7d2"
       },
       "alternate": {
         "colors": {

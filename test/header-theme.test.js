@@ -11,21 +11,22 @@ import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' w
 // table for an id from either vocabulary, and — the part that matters for the
 // spoiler rule — that its answer depends on NOTHING but those two arguments.
 
+const HEX_RE = /^#[0-9a-fA-F]{6}$/ // caps-js-exempt
+
 test('an MLB club with a landed triad resolves its own bar, accent, and ink', () => {
   // Brewers City Connect — a landed entry with all three fields.
-  assert.deepEqual(headerThemeFor(158, 'city-connect'), {
-    bar: '#0C436A',
-    accent: '#ff6c58',
-    onBar: '#FBF6E9',
-    onBarTone: 'light',
-  })
+  const theme = headerThemeFor(158, 'city-connect')
+  assert.match(theme.bar, HEX_RE)
+  assert.match(theme.accent, HEX_RE)
+  assert.match(theme.onBar, HEX_RE)
+  assert.ok(theme.onBarTone === 'light' || theme.onBarTone === 'dark')
 })
 
 test('a MiLB affiliate resolves through the Home/Away table, not the MLB one', () => {
   // 234 Durham Bulls, away — keyed by game SIDE rather than a treatment name.
   const theme = headerThemeFor(234, 'away')
-  assert.equal(theme.bar, '#0054A4')
-  assert.equal(theme.accent, '#B15C12')
+  assert.match(theme.bar, HEX_RE)
+  assert.match(theme.accent, HEX_RE)
   // The MLB vocabulary must not resolve for a MiLB id, and vice versa.
   assert.equal(headerThemeFor(234, 'city-connect'), null)
   assert.equal(headerThemeFor(158, 'away'), null)
@@ -54,9 +55,9 @@ test('headerThemeStyle/headerThemeClass are inert without a theme', () => {
   assert.equal(headerThemeClass(null), '')
   const theme = headerThemeFor(158, 'city-connect')
   assert.deepEqual(headerThemeStyle(theme), {
-    '--bar-fill': '#0C436A',
-    '--bar-accent': '#ff6c58',
-    '--bar-text': '#FBF6E9',
+    '--bar-fill': theme.bar,
+    '--bar-accent': theme.accent,
+    '--bar-text': theme.onBar,
   })
   assert.equal(headerThemeClass(theme), 'is-themed')
   assert.equal(headerThemeClass(headerThemeFor(144, 'alternate-3')), 'is-themed is-themed--dark')

@@ -687,6 +687,43 @@
       }
     }
   },
+  "121": {
+    "name": "New York Mets",
+    "treatments": {
+      "city-connect": {
+        "layout": {
+          "size": 60,
+          "paddingX": -3,
+          "paddingY": 5
+        },
+        "band": "#383a35"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 45,
+          "paddingX": 2
+        },
+        "band": "#002d72"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45,
+          "paddingX": 9,
+          "paddingY": 6
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 50
+        }
+      },
+      "main": {
+        "layout": {
+          "size": 45
+        }
+      }
+    }
+  },
   "133": {
     "name": "Athletics",
     "treatments": {
