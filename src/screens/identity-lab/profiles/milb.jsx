@@ -14,7 +14,6 @@ import {
   MILB_LOGO_POS_OVERRIDES,
   MILB_WPA_LOGO_LAYOUT_OVERRIDES,
   MILB_WPA_BAND_COLOR_OVERRIDES,
-  MILB_HEADER_COLOR_OVERRIDES,
   milbColorPair,
   milbHasLogoArt,
   milbHasResearchedColor,
@@ -22,6 +21,7 @@ import {
   milbWpaLogoLayout,
   milbWpaBandColor,
   milbWpaBandPinstripeColor,
+  milbHeaderColorOverride,
   milbHeaderColorsFor,
 } from '../../../lib/milbColors.js'
 import { JerseyBench } from '../workbench/JerseyBench.jsx'
@@ -161,31 +161,29 @@ function MilbTreatmentLogo({ teamId, name, variant, hasArt, version }) {
   )
 }
 
-// Exactly two jerseys per affiliate, and each owns its own header bar — so a
-// MiLB club's "two bars" panel is Home's and Away's, where MLB's is Main's and
-// City Connect's. Same structure, different reason for there being two.
+// Exactly two jerseys per affiliate, but ONE shared header bar — unlike MLB's
+// two-bar Main/City-Connect split (a real jersey-design asymmetry), MiLB's
+// Home and Away have no such asymmetry to justify separate bars, so both wear
+// the same one (milbHeaderColorOverride, src/lib/milbColors.js).
 function benchItems() {
   return VARIANTS.map((v) => ({ key: v.key, treatment: v.key, label: v.label, shortLabel: v.label, subLabel: null }))
 }
 
-function headerSlotFor(variant) {
-  return variant
+// Both variants collapse onto the same slot — see the comment above.
+function headerSlotFor() {
+  return 'home'
 }
 
 function headerUnits() {
-  return VARIANTS.map((v) => ({
-    slot: v.key,
-    label: `${v.label} bar`,
-    wearerCaption: `Worn by ${v.label} only`,
-  }))
+  return [{ slot: 'home', label: 'Header bar', wearerCaption: 'Worn by Home and Away' }]
 }
 
-function headerProps(team, variant, drafts, extras, on) {
+function headerProps(team, slot, drafts, extras, on) {
   const teamId = team.id
-  const draft = drafts?.header?.[variant]
-  const landed = MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant] ?? null
-  const colors = milbHeaderColorsFor(teamId, variant, draft)
-  const label = VARIANTS.find((v) => v.key === variant)?.label ?? variant
+  const draft = drafts?.header?.[slot]
+  const landed = milbHeaderColorOverride(teamId, slot)
+  const colors = milbHeaderColorsFor(teamId, slot, draft)
+  const label = headerUnits()[0].label
   return {
     colors,
     // milbHeaderColorsFor resolves every slot from the club's researched pair,
@@ -201,9 +199,9 @@ function headerProps(team, variant, drafts, extras, on) {
     landed: Boolean(landed),
     contrast: contrastRatio(colors.onBar, colors.bar),
     hasDraft: Boolean(draft && Object.keys(draft).length > 0),
-    copyText: buildHeaderCopyText(team.name, teamId, variant, label, colors),
-    onField: (field, value) => on.headerField(variant, field, value),
-    onReset: () => on.headerReset(variant),
+    copyText: buildHeaderCopyText(team.name, teamId, slot, label, colors),
+    onField: (field, value) => on.headerField(slot, field, value),
+    onReset: () => on.headerReset(slot),
   }
 }
 
@@ -242,6 +240,7 @@ function logoBoxStyle(pos) {
 }
 
 function MilbBench({ team, item, lastOpponent, extras, drafts, on }) {
+  const slot = headerSlotFor(item.treatment)
   return (
     <MilbJersey
       teamId={team.id}
@@ -250,14 +249,14 @@ function MilbBench({ team, item, lastOpponent, extras, drafts, on }) {
       label={item.label}
       lastOpponent={lastOpponent}
       headerUnit={{
-        slot: item.treatment,
-        label: `${item.label} bar`,
-        props: headerProps(team, item.treatment, drafts, extras, on),
+        slot,
+        label: headerUnits()[0].label,
+        props: headerProps(team, slot, drafts, extras, on),
       }}
       drafts={{
         pos: drafts.pos?.[item.treatment],
         wpa: drafts.wpa?.[item.treatment],
-        header: drafts.header?.[item.treatment],
+        header: drafts.header?.[slot],
       }}
       on={on}
     />
@@ -265,6 +264,7 @@ function MilbBench({ team, item, lastOpponent, extras, drafts, on }) {
 }
 
 function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, drafts, on }) {
+  const isHeaderOwner = variant === headerUnit.slot
   const [primary, secondary] = milbColorPair(teamId)
   const [artVersion, setArtVersion] = useState(0)
   const hasArt = artVersion > 0 || milbHasLogoArt(teamId, variant)
@@ -350,14 +350,15 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         colors: headerColors,
         unset: headerUnit.props.unset,
         lineage: {
-          anchorId: `idlab-bar-${teamId}-${variant}`,
-          caption: `This jersey owns the ${headerUnit.label}.`,
+          anchorId: `idlab-bar-${teamId}-${headerUnit.slot}`,
+          caption: isHeaderOwner
+            ? `This jersey owns the ${headerUnit.label}.`
+            : `Wears the ${headerUnit.label}.`,
         },
       }}
-      // Every MiLB variation owns its own bar, so a pressed style card can
-      // always carry a palette's triad here — unlike MLB, where four of five
-      // jerseys wear someone else's.
-      headerWrite={(field, value) => on.headerField(variant, field, value)}
+      // Only Home owns the shared bar (headerSlotFor above) — Away wears it
+      // read-only, same as MLB's non-Main jerseys relative to Main's bar.
+      headerWrite={isHeaderOwner ? (field, value) => on.headerField(headerUnit.slot, field, value) : undefined}
     />
   )
 }
@@ -432,7 +433,9 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
       confidently-researched color yet. Position nudges/rescales the logo tile
       and tries a new background; WPA previews the real win-probability band
       (against that team’s most recent opponent) at three score states; Header
-      colors is an unwired mockup. Save writes every pending change straight to{' '}
+      colors is one shared bar for both Home and Away (edited from Home; Away
+      wears it read-only), unlike Position/WPA which still tune independently
+      per side. Save writes every pending change straight to{' '}
       <code>src/lib/data/milb-treatment-tuning.json</code> while{' '}
       <code>npm run dev</code> is running. Drop a 512×512 PNG (under 400 KB) on
       either tile — or use Replace art — to give that side its own mark instead
@@ -467,7 +470,7 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
       draftFieldsMatchLanded(fields, MILB_LOGO_POS_OVERRIDES[teamId]?.[variant]),
     wpa: (teamId, variant, fields) => draftFieldsMatchLanded(fields, wpaLandedFlat(teamId, variant)),
     header: (teamId, variant, fields) =>
-      draftFieldsMatchLanded(fields, MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant]),
+      draftFieldsMatchLanded(fields, milbHeaderColorOverride(teamId, variant)),
   },
   buildAllChangesText,
   buildSaves,

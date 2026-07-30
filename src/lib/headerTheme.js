@@ -1,5 +1,5 @@
 import { treatmentHeaderColorOverride, isMlbTeamId } from './teams.js'
-import { MILB_HEADER_COLOR_OVERRIDES } from './milbColors.js'
+import { milbHeaderColorOverride } from './milbColors.js'
 import { contrastRatio } from './contrast.js'
 
 // Which chrome the lineup page wears for a club — the one resolver between the
@@ -47,12 +47,15 @@ const LIGHT_ON_BAR_MAX_CONTRAST_VS_WHITE = 2
 // ('main' | 'alternate' | 'alternate-2/3/4' | 'city-connect') for one of the 30
 // clubs, and a MiLB game SIDE ('home' | 'away') for an affiliate — the same two
 // vocabularies the rest of src/lib keeps separate (see src/lib/CLAUDE.md), so
-// this reads whichever table the id belongs to rather than merging them.
+// this reads whichever table the id belongs to rather than merging them. Both
+// resolvers collapse several jerseys onto fewer bars (MLB's treatment onto
+// Main/City-Connect, MiLB's Home/Away onto one shared bar) — see
+// treatmentHeaderColorOverride/milbHeaderColorOverride for the two collapses.
 export function headerThemeFor(teamId, treatment) {
   if (!teamId || !treatment) return null
   const landed = isMlbTeamId(teamId)
     ? treatmentHeaderColorOverride(teamId, treatment)
-    : (MILB_HEADER_COLOR_OVERRIDES[teamId]?.[treatment] ?? null)
+    : milbHeaderColorOverride(teamId, treatment)
   if (!landed?.bar || !landed?.onBar) return null
   return {
     bar: landed.bar,

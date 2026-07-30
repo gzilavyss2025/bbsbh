@@ -26,10 +26,11 @@ import { WearDates } from './WearDates.jsx'
 // `upload` is the same idea for the logo drop target.
 //
 // `headerWrite` is present only for the one jersey per bar that OWNS it (MLB's
-// Main and City Connect; a MiLB level's Home and Away) — and even then only so
-// a pressed style can carry a palette's bar triad. The header EDITOR itself
-// lives in exactly one place, the Header bars panel above; this column shows
-// the resulting bar read-only, captioned with which one this jersey wears.
+// Main or City Connect; a MiLB level's Home, the sole owner now that Home and
+// Away share one bar) — and even then only so a pressed style can carry a
+// palette's bar triad. The header EDITOR itself lives in exactly one place,
+// the Header bars panel above; this column shows the resulting bar read-only,
+// captioned with which one this jersey wears.
 export function JerseyBench({
   teamId,
   label,
