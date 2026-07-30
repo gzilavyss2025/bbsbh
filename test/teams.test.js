@@ -24,6 +24,7 @@ import {
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
   MAIN_OVERRIDES,
+  offDayTreatmentFor,
   isMlbTeamId,
   headshotSources,
   realHeadshotUrl,
@@ -196,6 +197,18 @@ test('mainTreatmentTint returns null for a pinstriped team and for an uncurated 
 test('mainTreatmentScale returns a curated override or defaults to 1', () => {
   assert.equal(mainTreatmentScale(140), 0.85) // Rangers
   assert.equal(mainTreatmentScale(999999), 1)
+})
+
+// --------------------------------------------------------------------------
+// offDayTreatmentFor
+// --------------------------------------------------------------------------
+test('offDayTreatmentFor reads a club\'s curated off-day treatment', () => {
+  assert.equal(offDayTreatmentFor(135), 'alternate') // Padres — Brown Pinstripe alternate
+})
+
+test('offDayTreatmentFor defaults to main for a club with no override', () => {
+  assert.equal(offDayTreatmentFor(158), 'main') // Brewers — no offDayTreatment set
+  assert.equal(offDayTreatmentFor(999999), 'main') // no mlb-team-colors.json entry at all
 })
 
 test('mainTreatmentPinstripe is true only for the pinstriped Main-tile teams', () => {

@@ -266,6 +266,19 @@ test('a club with a researched extra has it promoted to accent2, not duplicated'
   }
 })
 
+// offDayTreatment (the club-level pick OffDaySection.jsx's tile reads via
+// offDayTreatmentFor) stays in the same closed jerseys.json vocabulary every
+// other treatment key on file already answers to — never a free string a
+// resolver can't route.
+test('a curated offDayTreatment stays in the jerseys.json treatment vocabulary', () => {
+  for (const teamId of ALL_MLB_TEAM_IDS) {
+    const offDay = MLB_TEAM_COLORS[teamId].offDayTreatment
+    if (offDay !== undefined) {
+      assert.ok(MLB_TREATMENT_KEYS.has(offDay), `${teamId} has an unknown offDayTreatment "${offDay}"`)
+    }
+  }
+})
+
 // --------------------------------------------------------------------------
 // The lab's save merge (saveStores.js)
 // --------------------------------------------------------------------------

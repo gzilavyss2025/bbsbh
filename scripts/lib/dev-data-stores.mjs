@@ -30,6 +30,11 @@ const hasPoisonKey = (o) => Object.keys(o).some((k) => POISON_KEYS.has(k))
 
 const isTeamIdKey = (k) => /^\d+$/.test(k)
 const isTreatmentKey = (k) => /^[a-z0-9-]+$/.test(k)
+// The jerseys.json/teams.js treatment vocabulary (mainTreatmentTile's isMain
+// branch plus every treatmentsForTeam key) — 'main' is the default every
+// club already gets with no offDayTreatment field at all, so a hand-crafted
+// POST setting it explicitly would be a no-op write, not a rejection.
+const OFF_DAY_TREATMENTS = new Set(['main', 'alternate', 'alternate-2', 'alternate-3', 'alternate-4', 'city-connect'])
 // Hex, rgb(a), or a CSS color keyword — the pinstripe tables carry
 // 'rgba(0, 0, 0, 0.16)', so this can't be hex-only.
 const isColorish = (v) => typeof v === 'string' && v.length > 0 && v.length <= 64
@@ -141,12 +146,14 @@ function isMilbColorStore(parsed) {
 
 // mlb-team-colors.json: one club's Primary/Secondary/Accent brand colors,
 // an optional 4th `accent2` (a promoted single extra — see
-// mlbColorRoles.js), plus any REMAINING researched `extras` — the Team
-// Identity Lab's editable counterpart to
-// teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras resolvers, which
-// read this store (src/lib/CLAUDE.md). Team-level, no `treatments` — same
-// footing as milb-colors.json, since a club's triad doesn't vary by treatment
-// the way a logo tile's tuning does.
+// mlbColorRoles.js), any REMAINING researched `extras`, and an optional
+// `offDayTreatment` (which jersey OffDaySection.jsx's tile wears on a day the
+// club has no game, teams.js's offDayTreatmentFor — absent means Main) — the
+// Team Identity Lab's editable counterpart to teams.js's real
+// TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras/offDayTreatmentFor resolvers,
+// which read this store (src/lib/CLAUDE.md). Team-level, no `treatments` —
+// same footing as milb-colors.json, since none of these vary by treatment the
+// way a logo tile's tuning does.
 //
 // A role the club doesn't have is an ABSENT field, never `''` — isColorish
 // rejects the empty string on purpose, and the lab's applyColorsDraft deletes
@@ -172,6 +179,9 @@ function isMlbTeamColorStore(parsed) {
     }
     if (entry.note !== undefined && typeof entry.note !== 'string') {
       return `team ${teamId}'s note is not a string`
+    }
+    if (entry.offDayTreatment !== undefined && !OFF_DAY_TREATMENTS.has(entry.offDayTreatment)) {
+      return `team ${teamId}'s offDayTreatment "${entry.offDayTreatment}" is not a known treatment`
     }
   }
   return null

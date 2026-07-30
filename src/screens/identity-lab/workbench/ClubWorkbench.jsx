@@ -59,7 +59,14 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
 
   return (
     <div className="idlab__workbench">
-      <CrestStrip team={team} badge={profile.rowBadge?.(team.id)} prev={prev} next={next} onStep={onStepTeam} />
+      <CrestStrip
+        team={team}
+        badge={profile.rowBadge?.(team.id)}
+        extra={profile.crestExtra?.(team.id, drafts, on)}
+        prev={prev}
+        next={next}
+        onStep={onStepTeam}
+      />
 
       <TwoBarsPanel units={units} onHover={setHoveredSlot} onSelectWearer={setSelectedKey} />
 
