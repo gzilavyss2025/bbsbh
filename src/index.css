@@ -9467,20 +9467,27 @@ body {
   display: none;
 }
 
+/* Docked the same way the Club Rail is (fixed, full-height, edge-to-edge,
+   its own scrollbar) rather than a floating card — the two are meant to read
+   as a matched pair of scroll strips, one full of clubs on the left, one full
+   of colors on the right. Each row still needs its label + hex, unlike a
+   rail item's bare logo, so the swatch itself is the thing bolted to the
+   item's own right edge (`.milbneutrals__chip` below) instead of the row
+   being nothing but a swatch. */
 @media (min-width: 900px) {
   .milbneutrals {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 2px;
     position: fixed;
-    right: var(--space-4);
-    top: 96px;
-    width: 176px;
-    padding: var(--space-2);
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 184px;
+    padding: var(--space-2) 0;
+    overflow-y: auto;
     background: var(--surface-card);
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
+    border-left: var(--bw-hair) solid var(--border-rule);
     z-index: 5;
   }
 
@@ -9491,27 +9498,18 @@ body {
     text-transform: uppercase;
     letter-spacing: var(--ls-caps);
     color: var(--text-caption);
-    padding: 0 var(--space-1) var(--space-1);
+    padding: 0 var(--space-2) var(--space-1);
   }
 
   .milbneutrals__row {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-1);
-    border-radius: var(--radius-sm);
+    gap: var(--space-1);
+    padding: 4px var(--space-2);
   }
 
   .milbneutrals__row:hover {
     background: var(--paper-1);
-  }
-
-  .milbneutrals__chip {
-    flex: none;
-    width: 20px;
-    height: 20px;
-    border-radius: var(--radius-sm);
-    border: var(--bw-hair) solid var(--border-rule);
   }
 
   .milbneutrals__text {
@@ -9534,6 +9532,16 @@ body {
     font-family: var(--font-mono);
     font-size: var(--fs-compact);
     color: var(--text-muted);
+  }
+
+  /* The rail's own logo square, same 44px rail items wear on the left edge —
+     flush against this panel's right edge so the two strips visually rhyme. */
+  .milbneutrals__chip {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    border: var(--bw-hair) solid var(--border-rule);
   }
 }
 
@@ -10292,6 +10300,7 @@ body {
 @media (min-width: 900px) {
   .idlab__dugout {
     left: 72px;
+    right: 184px;
   }
 }
 

@@ -358,29 +358,39 @@
         "pinstripe": true,
         "header": {
           "bar": "#33006F",
-          "accent": "#C4CED4",
+          "accent": "#000000",
           "onBar": "#FBF6E9"
         },
-        "note": "white with a subtle black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat brand-color tint. No recolor — the plain mlbstatic mark (its black rim included) reads fine against white, so this wears the stock CDN svg unmodified. Home Pinstripe",
         "colors": {
           "primary": "#333366",
           "secondary": "#C4CED4",
           "accent1": "#333366"
-        }
+        },
+        "scale": 0.92,
+        "offsetX": 11,
+        "note": "white with a subtle black pinstripe (mainTreatmentPinstripe) to match their home pinstripe jersey, instead of a flat brand-color tint. No recolor — the plain mlbstatic mark (its black rim included) reads fine against white, so this wears the stock CDN svg unmodified. Home Pinstripe"
       },
       "city-connect": {
         "scale": 1.15,
-        "note": "mark reads small against the tint at 1.32 alone",
         "colors": {
           "primary": "#8ABFEB",
           "secondary": "#4F4FC9"
-        }
+        },
+        "header": {
+          "bar": "#4F4FC9",
+          "accent": "#8ABFEB",
+          "onBar": "#FFFDF6"
+        },
+        "offsetY": -2,
+        "note": "mark reads small against the tint at 1.32 alone"
       },
       "alternate": {
-        "note": "Alt 1 Purple",
         "colors": {
           "primary": "#33006F"
-        }
+        },
+        "scale": 0.95,
+        "offsetX": 7,
+        "note": "Alt 1 Purple"
       },
       "alternate-2": {
         "note": "Away Grey",

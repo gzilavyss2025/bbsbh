@@ -15,6 +15,9 @@ import { CopyIconButton } from '../../components/CopyBox.jsx'
 const NEUTRAL_SWATCHES = [
   { label: 'White', hex: '#FFFFFF' },
   { label: 'Off-white (light)', hex: '#FFFDF6' },
+  { label: 'Paper white', hex: '#F8F8F5' },
+  { label: 'Ivory', hex: '#FBF6ED' },
+  { label: 'Eggshell', hex: '#F5F3EE' },
   { label: 'Cream (light)', hex: '#F6EFDC' },
   { label: 'Off-white (dark)', hex: '#F3ECD8' },
   { label: 'Cream (dark)', hex: '#E8DCC0' },
@@ -22,6 +25,10 @@ const NEUTRAL_SWATCHES = [
   { label: 'Road grey', hex: '#9EA2A2' },
   { label: 'Grey (dark)', hex: '#4A4A4A' },
   { label: 'Common navy', hex: '#0C2340' },
+  { label: 'Off-black (warm)', hex: '#241F1B' },
+  { label: 'Off-black', hex: '#1C1C1C' },
+  { label: 'Off-black (cool)', hex: '#101820' },
+  { label: 'Off-black (deep)', hex: '#141414' },
   { label: 'Black', hex: '#000000' },
 ]
 
@@ -31,12 +38,12 @@ export function NeutralSwatchesSidebar() {
       <span className="milbneutrals__title">Neutrals</span>
       {NEUTRAL_SWATCHES.map((s) => (
         <div className="milbneutrals__row" key={s.hex}>
-          <div className="milbneutrals__chip" style={{ background: s.hex }} />
           <span className="milbneutrals__text">
             <span className="milbneutrals__label">{s.label}</span>
             <span className="milbneutrals__hex">{s.hex}</span>
           </span>
           <CopyIconButton text={s.hex} label={`Copy ${s.label} (${s.hex})`} />
+          <div className="milbneutrals__chip" style={{ background: s.hex }} />
         </div>
       ))}
     </aside>
