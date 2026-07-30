@@ -406,12 +406,17 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "note": "navy recolored to white",
         "colors": {
           "primary": "#0C2340",
           "secondary": "#FA4616",
           "accent1": "#0C2340"
-        }
+        },
+        "header": {
+          "bar": "#0C2340",
+          "accent": "#FA4616",
+          "onBar": "#F8F8F5"
+        },
+        "note": "navy recolored to white"
       },
       "alternate": {
         "scale": 1.03,
@@ -429,6 +434,18 @@
       "alternate-2": {
         "colors": {
           "primary": "#0C2340"
+        }
+      },
+      "city-connect": {
+        "scale": 0.86,
+        "header": {
+          "bar": "#2c3357",
+          "accent": "#FA4616",
+          "onBar": "#F8F8F5"
+        },
+        "colors": {
+          "primary": "#2c3357",
+          "secondary": "#FFFFFF"
         }
       }
     }
@@ -1181,7 +1198,7 @@
       },
       "city-connect": {
         "scale": 1.07,
-        "pinstripeColor": "rgba(0, 0, 0, 0.16)",
+        "pinstripeColor": "rgba(0, 0, 0, 0.60)",
         "pinstripeBg": "#C8102E",
         "offsetX": 3,
         "header": {

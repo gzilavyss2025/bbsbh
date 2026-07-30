@@ -486,6 +486,7 @@ export const CITY_CONNECT_COLORS = {
   141: [{ label: 'Background', hex: '#161827', bg: true }], // Blue Jays
   137: [{ label: 'Background', hex: '#27251F', bg: true }], // Giants — script "SF" mark, near-black brand secondary (temporary, pending real City Connect background)
   142: [{ label: 'Background', hex: '#00549f', bg: true }], // Twins
+  116: [{ label: 'Background', hex: '#2c3357', bg: true }], // Tigers
 }
 
 // A second Alternate treatment. Rangers: same badge as ALT_COLORS' Alternate,

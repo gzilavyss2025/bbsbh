@@ -548,7 +548,14 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#9EA2A2"
+        "band": "#0C2340"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 75,
+          "paddingX": 12,
+          "paddingY": -45
+        }
       }
     }
   },
