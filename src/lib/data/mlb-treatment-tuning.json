@@ -802,12 +802,18 @@
           "primary": "#27251F",
           "secondary": "#FDB827",
           "accent1": "#FDB827"
+        },
+        "header": {
+          "bar": "#27251F",
+          "accent": "#FDB827",
+          "onBar": "#F8F8F5"
         }
       },
       "alternate": {
         "colors": {
           "primary": "#27251F"
-        }
+        },
+        "scale": 0.89
       },
       "alternate-2": {
         "colors": {
@@ -816,7 +822,22 @@
       },
       "alternate-3": {
         "colors": {
-          "primary": "#9EA2A2"
+          "primary": "#27251F"
+        }
+      },
+      "city-connect": {
+        "scale": 1.14,
+        "offsetX": 1,
+        "offsetY": -6,
+        "header": {
+          "bar": "#201a1c",
+          "accent": "#a81f2f",
+          "onBar": "#F8F8F5"
+        },
+        "colors": {
+          "primary": "#201a1c",
+          "secondary": "#a81f2f",
+          "accent1": "#947f48"
         }
       }
     }
@@ -1170,26 +1191,46 @@
       "main": {
         "bg": "primary",
         "recolor": true,
-        "note": "red/white swapped",
         "colors": {
           "primary": "#E81828",
           "secondary": "#002D72",
           "accent1": "#E81828"
-        }
+        },
+        "header": {
+          "bar": "#002D72",
+          "accent": "#E81828",
+          "onBar": "#F8F8F5"
+        },
+        "note": "red/white swapped"
       },
       "alternate": {
         "colors": {
-          "primary": "#F5F0E1"
+          "primary": "#F5F0E1",
+          "secondary": "#002D72"
         }
       },
       "alternate-2": {
         "colors": {
-          "primary": "#8ECAE6"
+          "primary": "#8ECAE6",
+          "secondary": "#6f263d"
         }
       },
       "alternate-3": {
         "colors": {
-          "primary": "#9EA2A2"
+          "primary": "#9EA2A2",
+          "secondary": "#002D72"
+        }
+      },
+      "city-connect": {
+        "header": {
+          "bar": "#00163b",
+          "accent": "#169fda",
+          "onBar": "#F8F8F5"
+        },
+        "colors": {
+          "primary": "#00163b",
+          "secondary": "#169fda",
+          "accent1": "#ffde00"
         }
       }
     }

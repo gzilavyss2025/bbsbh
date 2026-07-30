@@ -129,10 +129,17 @@
     },
     "PHI.png": {
       "teamId": 143,
-      "bytes": 57889,
+      "bytes": 10548,
       "width": 512,
       "height": 512,
-      "alpha": true
+      "alpha": false
+    },
+    "PIT.png": {
+      "teamId": 134,
+      "bytes": 11637,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     },
     "SD.png": {
       "teamId": 135,
@@ -287,6 +294,13 @@
       "height": 512,
       "alpha": false
     },
+    "PIT.png": {
+      "teamId": 134,
+      "bytes": 11637,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
     "SD.png": {
       "teamId": 135,
       "bytes": 53721,
@@ -386,6 +400,13 @@
       "width": 512,
       "height": 512,
       "alpha": true
+    },
+    "PIT.png": {
+      "teamId": 134,
+      "bytes": 3771,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     },
     "SD.png": {
       "teamId": 135,
@@ -557,6 +578,13 @@
       "height": 512,
       "alpha": true
     },
+    "PIT.png": {
+      "teamId": 134,
+      "bytes": 239898,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    },
     "SEA.png": {
       "teamId": 136,
       "bytes": 13948,
@@ -689,6 +717,13 @@
     "PHI.svg": {
       "teamId": 143,
       "bytes": 2519
+    },
+    "PIT.png": {
+      "teamId": 134,
+      "bytes": 11637,
+      "width": 512,
+      "height": 512,
+      "alpha": false
     },
     "SD.svg": {
       "teamId": 135,

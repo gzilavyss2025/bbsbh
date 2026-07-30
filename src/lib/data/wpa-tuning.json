@@ -810,7 +810,7 @@
     "treatments": {
       "main": {
         "layout": {
-          "size": 25,
+          "size": 35,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
@@ -819,6 +819,27 @@
           "rowShift": 0
         },
         "band": "#27251F"
+      },
+      "alternate-3": {
+        "layout": {
+          "size": 35
+        },
+        "band": "#27251F"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 35
+        }
+      },
+      "alternate": {
+        "layout": {
+          "size": 45
+        }
+      },
+      "city-connect": {
+        "layout": {
+          "size": 35
+        }
       }
     }
   },
@@ -1009,6 +1030,24 @@
           "rowShift": 0
         },
         "band": "#E81828"
+      },
+      "city-connect": {
+        "layout": {
+          "size": 46
+        },
+        "band": "#00163b"
+      },
+      "alternate-2": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#6f263d"
+      },
+      "alternate": {
+        "layout": {
+          "size": 45
+        },
+        "band": "#002D72"
       }
     }
   },
