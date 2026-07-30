@@ -25,7 +25,7 @@ const WPA_MOCK_SCENARIOS = [
 // "Use Logo Art" is unchecked — see profiles/mlb.jsx), so an in-progress
 // edit shows up here live rather than only once landed.
 //
-// `lastOpponent` (this team's most recent completed game's rival, TeamLabRow's
+// `lastOpponent` (this team's most recent completed game's rival, ColorLabBody's
 // own lazy fetch) plays the AWAY band on their own Main look — unaffected by
 // this tile's draft — so the split reads as a real, recognizable matchup
 // instead of a placeholder club. Renders nothing until it resolves:
@@ -56,6 +56,9 @@ export function WpaScenarios({
       className="colorlab__wpascenarios"
       style={{ '--navy': headerColors.bar, '--seal': headerColors.accent, '--text-on-ink': headerColors.onBar }}
     >
+      {/* Says whose the away band is, so the mockup's realism is explained
+          rather than read as an arbitrary second club. */}
+      <p className="idlab__scenariocaption">vs {lastOpponent.abbreviation}, last opponent</p>
       {WPA_MOCK_SCENARIOS.map((s) => (
         <div className="colorlab__wpascenario" key={s.key}>
           <span className="colorlab__wpascenariolabel">{s.label}</span>

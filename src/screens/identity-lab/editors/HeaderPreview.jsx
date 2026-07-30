@@ -1,100 +1,90 @@
-import { CopyIconButton } from '../../../components/CopyBox.jsx'
-
 // The header chrome a lineup page wears when this club is in this jersey —
-// Bar / Accent / On bar as hex text fields, seeded from whatever the profile
-// resolves as landed (a TREATMENT_HEADER_COLOR_OVERRIDES /
-// MILB_HEADER_COLOR_OVERRIDES entry, else the tile's own lead swatches); edits
-// persist as a local draft, with a copy icon that hands over the three hexes
-// plus the store path to land them at.
+// Bar / Accent / On bar. Split into three pieces because the redesign puts them
+// in two different places: the fields and the umpire's call live in the club's
+// Header bars panel (the ONLY place a header is editable — TwoBarsPanel), while
+// the bar mock alone also rides in every jersey bench's preview column, where it
+// is read-only and captioned with which bar that jersey wears.
 //
 // No longer a sketch: since ADR-0030 these three drive the real
 // `.teaminfo__head` bar and that side's section mastheads (screens/TeamInfo.jsx
-// via lib/headerTheme.js). `coverage` says which side of that line this tile is
-// on — a landed entry is what the app renders, an unlanded one is a proposal
-// the app is still answering with default navy chrome. Coverage is partial by
-// design, so the lab states it rather than leaving a preview that looks
-// identical either way.
-//
-// `contrast` is the same WCAG ratio `scripts/check-contrast.mjs` computes over
-// the landed store, shown live while you type: a pair that fails here fails
-// `npm run lint` too, so the guard can't be discovered only at commit time.
+// via lib/headerTheme.js). Coverage is partial by design, so the panel states
+// which side of that line a club is on (the Themed / Default chrome chip)
+// rather than leaving a preview that looks identical either way.
 const AA_TEXT = 4.5
 
-export function HeaderPreview({
-  name,
-  treatmentLabel,
-  colors,
-  rawColors,
-  landed,
-  contrast,
-  hasDraft,
-  copyText,
-  onField,
-  onReset,
-}) {
-  const { bar, accent, onBar } = colors
+// `colors` is fully resolved (every slot filled with a fallback, so the bar
+// always has something to paint); `unset` is true when NOTHING is landed or
+// drafted for this bar, which the app answers with default navy chrome — drawn
+// as an empty outline rather than a painted bar, so "not set" can't be mistaken
+// for "set to navy".
+export function HeaderBarMock({ name, colors, unset }) {
+  if (unset) {
+    return (
+      <div className="idlab__barmock idlab__barmock--unset">
+        <span className="idlab__barmock__empty">Not set — default navy chrome</span>
+      </div>
+    )
+  }
+  return (
+    <div
+      className="idlab__barmock"
+      style={{ '--header-bar': colors.bar, '--header-accent': colors.accent, '--header-onbar': colors.onBar }}
+    >
+      <span className="idlab__barmock__title">{name}</span>
+    </div>
+  )
+}
+
+// `rawColors` stays undefined per-field when neither a draft nor the landed
+// store actually has it, so a genuinely unset field shows blank with its
+// placeholder rather than a resolved color that looks saved but isn't.
+export function HeaderFields({ rawColors, onField }) {
+  return (
+    <div className="colorlab__headerfields">
+      <label>
+        <span>Bar</span>
+        <input
+          type="text"
+          placeholder="not set"
+          value={rawColors.bar ?? ''}
+          onChange={(e) => onField('bar', e.target.value)}
+        />
+      </label>
+      <label>
+        <span>Accent</span>
+        <input
+          type="text"
+          placeholder="not set"
+          value={rawColors.accent ?? ''}
+          onChange={(e) => onField('accent', e.target.value)}
+        />
+      </label>
+      <label>
+        <span>On bar</span>
+        <input
+          type="text"
+          placeholder="not set"
+          value={rawColors.onBar ?? ''}
+          onChange={(e) => onField('onBar', e.target.value)}
+        />
+      </label>
+    </div>
+  )
+}
+
+// The same WCAG ratio `scripts/check-contrast.mjs` computes over the landed
+// store, live while you type: a pair that fails here fails `npm run lint` too,
+// so the guard can't be discovered only at commit time. Called like an umpire
+// because a bare decimal is a number to interpret and SAFE/OUT is a verdict —
+// the ratio itself stays on the chip so nothing is lost.
+export function UmpireCall({ contrast }) {
   const passes = contrast >= AA_TEXT
   return (
-    <div className="colorlab__wpapreview colorlab__headerpreview">
-      <div className="colorlab__wpapreviewhead">
-        <span className="colorlab__wpapreviewlabel">Header colors</span>
-        <span
-          className={`colorlab__headercoverage${landed ? ' colorlab__headercoverage--on' : ''}`}
-          title={
-            landed
-              ? 'This club wears these colors on its lineup page in this jersey.'
-              : 'No landed entry — the lineup page falls back to default navy chrome for this jersey.'
-          }
-        >
-          {landed ? 'Themed' : 'Default chrome'}
-        </span>
-        {hasDraft && (
-          <button type="button" className="colorlab__wparesetbtn" onClick={onReset}>
-            Reset
-          </button>
-        )}
-        <CopyIconButton text={copyText} label={`Copy ${name} ${treatmentLabel} header-color context`} />
-      </div>
-      <div className="colorlab__headerpreviewbody">
-        <div className="colorlab__headerfields">
-          <label>
-            <span>Bar</span>
-            <input
-              type="text"
-              placeholder="not set"
-              value={rawColors.bar ?? ''}
-              onChange={(e) => onField('bar', e.target.value)}
-            />
-          </label>
-          <label>
-            <span>Accent</span>
-            <input
-              type="text"
-              placeholder="not set"
-              value={rawColors.accent ?? ''}
-              onChange={(e) => onField('accent', e.target.value)}
-            />
-          </label>
-          <label>
-            <span>On bar</span>
-            <input
-              type="text"
-              placeholder="not set"
-              value={rawColors.onBar ?? ''}
-              onChange={(e) => onField('onBar', e.target.value)}
-            />
-          </label>
-        </div>
-        <div
-          className="colorlab__headerbar"
-          style={{ '--header-bar': bar, '--header-accent': accent, '--header-onbar': onBar }}
-        >
-          <span className="colorlab__headerbar__title">{name}</span>
-        </div>
-      </div>
-      <p className={`colorlab__headercontrast${passes ? '' : ' colorlab__headercontrast--fail'}`}>
-        {`On bar vs bar: ${contrast.toFixed(2)}:1 — ${passes ? 'clears' : 'FAILS'} WCAG AA (${AA_TEXT}:1)`}
-      </p>
+    <div className="idlab__umpire">
+      <span className={`idlab__umpirechip${passes ? '' : ' idlab__umpirechip--out'}`}>
+        {passes ? 'Safe' : 'Out'} · {contrast.toFixed(2)}:1
+      </span>
+      <span className="idlab__umpirenote">On bar vs bar — WCAG AA needs {AA_TEXT}:1</span>
     </div>
   )
 }

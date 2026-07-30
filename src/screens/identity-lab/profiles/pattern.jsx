@@ -211,6 +211,9 @@ function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
 export const patternProfile = {
   key: 'pattern',
   label: 'WPA patterns',
+  // A catalog with its own level filters and no club to select — no rail, no
+  // dugout, so the page reserves room for neither.
+  chrome: 'plain',
   title: 'Team Identity Lab — WPA patterns',
   hint: (
     <>

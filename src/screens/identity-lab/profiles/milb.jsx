@@ -24,7 +24,7 @@ import {
   milbWpaBandPinstripeColor,
   milbHeaderColorsFor,
 } from '../../../lib/milbColors.js'
-import { TreatmentBox } from '../TreatmentBox.jsx'
+import { JerseyBench } from '../workbench/JerseyBench.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore } from '../saveStores.js'
 
@@ -161,26 +161,110 @@ function MilbTreatmentLogo({ teamId, name, variant, hasArt, version }) {
   )
 }
 
-function MilbTiles({ team, lastOpponent, drafts, on }) {
-  return VARIANTS.map((v) => (
-    <MilbTile
-      key={v.key}
+// Exactly two jerseys per affiliate, and each owns its own header bar — so a
+// MiLB club's "two bars" panel is Home's and Away's, where MLB's is Main's and
+// City Connect's. Same structure, different reason for there being two.
+function benchItems() {
+  return VARIANTS.map((v) => ({ key: v.key, treatment: v.key, label: v.label, shortLabel: v.label, subLabel: null }))
+}
+
+function headerSlotFor(variant) {
+  return variant
+}
+
+function headerUnits() {
+  return VARIANTS.map((v) => ({
+    slot: v.key,
+    label: `${v.label} bar`,
+    wearerCaption: `Worn by ${v.label} only`,
+  }))
+}
+
+function headerProps(team, variant, drafts, extras, on) {
+  const teamId = team.id
+  const draft = drafts?.header?.[variant]
+  const landed = MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant] ?? null
+  const colors = milbHeaderColorsFor(teamId, variant, draft)
+  const label = VARIANTS.find((v) => v.key === variant)?.label ?? variant
+  return {
+    colors,
+    // milbHeaderColorsFor resolves every slot from the club's researched pair,
+    // so there is no "unset" state to draw as an outline here the way MLB has —
+    // the raw fields still show only what a draft or the landed store actually
+    // carries.
+    rawColors: {
+      bar: draft?.bar ?? landed?.bar,
+      accent: draft?.accent ?? landed?.accent,
+      onBar: draft?.onBar ?? landed?.onBar,
+    },
+    unset: false,
+    landed: Boolean(landed),
+    contrast: contrastRatio(colors.onBar, colors.bar),
+    hasDraft: Boolean(draft && Object.keys(draft).length > 0),
+    copyText: buildHeaderCopyText(team.name, teamId, variant, label, colors),
+    onField: (field, value) => on.headerField(variant, field, value),
+    onReset: () => on.headerReset(variant),
+  }
+}
+
+// The affiliate's two marks on file — the curated Home/Away art when the
+// manifest says it exists, the plain CDN mark standing in where it doesn't.
+// Coverage is thin at this level by design, so a shelf slot standing empty is
+// the useful answer rather than a missing row.
+function shelfMarks(teamId) {
+  return VARIANTS.map((v) => ({
+    key: v.key,
+    treatment: v.key,
+    label: v.label,
+    url: milbHasLogoArt(teamId, v.key) ? teamLogoUrl(teamId, `milb-${v.key}`) : teamLogoUrl(teamId, 'base'),
+  }))
+}
+
+function markVisual(teamId, variant, drafts) {
+  const pos = milbLogoPosition(teamId, variant, drafts?.pos?.[variant])
+  return {
+    className: `colorlab__logobox colorlab__logobox--gloss${pos.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`,
+    style: logoBoxStyle(pos),
+    url: milbHasLogoArt(teamId, variant) ? teamLogoUrl(teamId, `milb-${variant}`) : teamLogoUrl(teamId, 'base'),
+  }
+}
+
+function logoBoxStyle(pos) {
+  return {
+    '--tint': pos.pinstripe ? undefined : pos.bg,
+    '--scale': 1.32 * pos.scale,
+    '--offset-x': `${pos.offsetX}%`,
+    '--offset-y': `${pos.offsetY}%`,
+    '--origin-y': 'center',
+    '--pinstripe-color': pos.pinstripe ? pos.bg : undefined,
+    '--pinstripe-bg': undefined,
+  }
+}
+
+function MilbBench({ team, item, lastOpponent, extras, drafts, on }) {
+  return (
+    <MilbJersey
       teamId={team.id}
       name={team.name}
-      variant={v.key}
-      label={v.label}
+      variant={item.treatment}
+      label={item.label}
       lastOpponent={lastOpponent}
+      headerUnit={{
+        slot: item.treatment,
+        label: `${item.label} bar`,
+        props: headerProps(team, item.treatment, drafts, extras, on),
+      }}
       drafts={{
-        pos: drafts.pos?.[v.key],
-        wpa: drafts.wpa?.[v.key],
-        header: drafts.header?.[v.key],
+        pos: drafts.pos?.[item.treatment],
+        wpa: drafts.wpa?.[item.treatment],
+        header: drafts.header?.[item.treatment],
       }}
       on={on}
     />
-  ))
+  )
 }
 
-function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
+function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, drafts, on }) {
   const [primary, secondary] = milbColorPair(teamId)
   const [artVersion, setArtVersion] = useState(0)
   const hasArt = artVersion > 0 || milbHasLogoArt(teamId, variant)
@@ -188,24 +272,18 @@ function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
   const wpaPinstripe = milbWpaBandPinstripeColor(teamId, variant, drafts.wpa)
   const wpaBand = milbWpaBandColor(teamId, variant, drafts.wpa)
   const wpaLayout = milbWpaLogoLayout(teamId, variant, drafts.wpa)
-  const headerLanded = MILB_HEADER_COLOR_OVERRIDES[teamId]?.[variant] ?? null
-  const headerColors = milbHeaderColorsFor(teamId, variant, drafts.header)
+  // Resolved by the Header bars panel above rather than a second time here, so
+  // the WPA mockups' own recolored chrome and the panel's bar can't disagree.
+  const headerColors = headerUnit.props.colors
 
   return (
-    <TreatmentBox
+    <JerseyBench
+      teamId={teamId}
       label={label}
       nameField={null}
       logoBox={{
         className: `colorlab__logobox colorlab__logobox--gloss${pos.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`,
-        style: {
-          '--tint': pos.pinstripe ? undefined : pos.bg,
-          '--scale': 1.32 * pos.scale,
-          '--offset-x': `${pos.offsetX}%`,
-          '--offset-y': `${pos.offsetY}%`,
-          '--origin-y': 'center',
-          '--pinstripe-color': pos.pinstripe ? pos.bg : undefined,
-          '--pinstripe-bg': undefined,
-        },
+        style: logoBoxStyle(pos),
         children: (
           <MilbTreatmentLogo
             teamId={teamId}
@@ -267,17 +345,19 @@ function MilbTile({ teamId, name, variant, label, lastOpponent, drafts, on }) {
         wpaLayout,
         wpaBandOverride: { pinstripe: Boolean(wpaPinstripe), color: wpaPinstripe ?? wpaBand },
       }}
-      header={{
+      headerPreview={{
         name,
-        treatmentLabel: label,
         colors: headerColors,
-        landed: Boolean(headerLanded),
-        contrast: contrastRatio(headerColors.onBar, headerColors.bar),
-        hasDraft: Boolean(drafts.header && Object.keys(drafts.header).length > 0),
-        copyText: buildHeaderCopyText(name, teamId, variant, label, headerColors),
-        onField: (field, value) => on.headerField(variant, field, value),
-        onReset: () => on.headerReset(variant),
+        unset: headerUnit.props.unset,
+        lineage: {
+          anchorId: `idlab-bar-${teamId}-${variant}`,
+          caption: `This jersey owns the ${headerUnit.label}.`,
+        },
       }}
+      // Every MiLB variation owns its own bar, so a pressed style card can
+      // always carry a palette's triad here — unlike MLB, where four of five
+      // jerseys wear someone else's.
+      headerWrite={(field, value) => on.headerField(variant, field, value)}
     />
   )
 }
@@ -364,7 +444,13 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
   ),
   useTeams: () => useAffiliates(level.sportId),
   useExtras: () => ({ afterSave: () => {} }),
-  Tiles: MilbTiles,
+  benchItems,
+  Bench: MilbBench,
+  headerUnits,
+  headerProps,
+  headerSlotFor,
+  markVisual,
+  shelfMarks,
   sidebar: <NeutralSwatchesSidebar />,
   rowBadge: (teamId) => {
     const gaps = []

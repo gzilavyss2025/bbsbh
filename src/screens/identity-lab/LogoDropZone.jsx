@@ -3,7 +3,7 @@ import { describeLogoRejection, LOGO_MAX_BYTES, LOGO_SIZE } from '../../lib/logo
 import { copyLogo, uploadLogo } from './saveStores.js'
 
 // Drag a PNG onto a tile and it becomes that club's art. Wraps the tile's own
-// logo box (TreatmentBox passes it as `children`) so the drop target is the
+// logo box (JerseyBench passes it as `children`) so the drop target is the
 // thing you are looking at, rather than a separate upload panel you have to
 // aim at while comparing marks.
 //
@@ -21,7 +21,7 @@ import { copyLogo, uploadLogo } from './saveStores.js'
 // second way in: pick one and reuse whatever's already uploaded there instead
 // of procuring/uploading the same mark again. Absent for any tile with
 // nothing else to copy from — mirrors `upload` itself being absent when a
-// treatment has no destination at all (TreatmentBox.jsx).
+// treatment has no destination at all (JerseyBench.jsx).
 export function LogoDropZone({ teamId, treatment, label, caveat, copyTargets, onUploaded, children }) {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
